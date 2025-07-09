@@ -133,10 +133,17 @@ const Toolbar: React.FC = () => {
       <label className="flex items-center gap-1">
         <input
           type="checkbox"
-          checked={state.showGrid}
-          onChange={(e) => dispatch({ type: 'TOGGLE_WINDOW', payload: { windowName: 'showGrid' } })}
+          checked={state.snapToGrid}
+          onChange={(e) => dispatch({ 
+            type: 'SET_DRAG_STATE', 
+            payload: { 
+              isDragging: state.isDragging,
+              controlType: state.draggedControlType,
+              position: state.dragPosition
+            }
+          })}
         />
-        <span className="text-xs">Grid</span>
+        <span className="text-xs">Snap</span>
       </label>
       
       <label className="flex items-center gap-1 ml-2">

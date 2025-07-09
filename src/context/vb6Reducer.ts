@@ -99,6 +99,7 @@ export const initialState: VB6State = {
   draggedControlType: null,
   isDragging: false,
   dragPosition: { x: 0, y: 0 },
+  snapToGrid: true,
 
   // Selection
   isSelecting: false,
@@ -248,7 +249,7 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
       return {
         ...state,
         isDragging,
-        draggedControlType: controlType || null,
+        draggedControlType: controlType !== undefined ? controlType : state.draggedControlType,
         dragPosition: position || state.dragPosition
       };
     }

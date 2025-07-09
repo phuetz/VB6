@@ -17,6 +17,11 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
   const handleControlClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     
+    // Prevent interference with drag and drop
+    if (state.isDragging) {
+      return;
+    }
+    
     if (state.executionMode === 'design') {
       if (!e.ctrlKey && !isSelected) {
         dispatch({ type: 'SELECT_CONTROLS', payload: { controlIds: [control.id] } });
@@ -30,7 +35,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
     } else {
       executeEvent(control, 'Click');
     }
-  }, [state.executionMode, state.selectedControls, isSelected, control, dispatch, executeEvent]);
+  }, [state.executionMode, state.selectedControls, isSelected, control, dispatch, executeEvent, state.isDragging]);
 
   const handleControlDoubleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();

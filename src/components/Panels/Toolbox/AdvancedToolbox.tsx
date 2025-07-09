@@ -83,16 +83,31 @@ const AdvancedToolbox: React.FC = () => {
   const handleToolboxDragStart = (e: React.DragEvent, controlDef: ControlDefinition) => {
     if (state.executionMode === 'run') return;
     
+    e.preventDefault = () => {}; // Prevent default behavior
     setSelectedTool(controlDef.type);
     
     dispatch({
       type: 'SET_DRAG_STATE',
-      payload: { isDragging: true, controlType: controlDef.type }
+      payload: { 
+        isDragging: true, 
+        controlType: controlDef.type,
+        position: { x: 0, y: 0 }
+      }
     });
     
-    e.dataTransfer.effectAllowed = 'copy';
-    e.dataTransfer.setData('controlType', controlDef.type);
-    e.dataTransfer.setData('controlData', JSON.stringify(controlDef));
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'copy';
+      e.dataTransfer.setData('application/vb6-control', controlDef.type);
+      e.dataTransfer.setData('text/plain', controlDef.type);
+      e.dataTransfer.setData('application/json', JSON.stringify(controlDef));
+    }
+  };
+
+  const handleDragEnd = () => {
+    dispatch({
+      type: 'SET_DRAG_STATE',
+      payload: { isDragging: false, controlType: null, position: { x: 0, y: 0 } }
+    });
   };
 
   const handleToolClick = (controlDef: ControlDefinition) => {
@@ -157,10 +172,7 @@ const AdvancedToolbox: React.FC = () => {
               }`}
               draggable={state.executionMode === 'design' && controlDef.type !== 'Pointer'}
               onDragStart={(e) => handleToolboxDragStart(e, controlDef)}
-              onDragEnd={() => dispatch({ 
-                type: 'SET_DRAG_STATE', 
-                payload: { isDragging: false } 
-              })}
+              onDragEnd={handleDragEnd}
               onClick={() => handleToolClick(controlDef)}
               title={`${controlDef.name}\n${controlDef.description}\nSize: ${controlDef.defaultSize.width}×${controlDef.defaultSize.height}`}
             >

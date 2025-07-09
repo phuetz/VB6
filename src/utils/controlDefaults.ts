@@ -1,4 +1,6 @@
 export const getDefaultProperties = (type: string, id: number) => {
+  console.log('Getting default properties for:', type, id);
+  
   const baseProps = {
     id,
     type,

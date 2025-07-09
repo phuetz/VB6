@@ -119,6 +119,7 @@ export interface VB6State {
   draggedControlType: string | null;
   isDragging: boolean;
   dragPosition: { x: number; y: number };
+  snapToGrid: boolean;
 
   // Selection
   isSelecting: boolean;

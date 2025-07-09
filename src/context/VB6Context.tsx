@@ -33,6 +33,7 @@ export const VB6Provider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [state, dispatch] = useReducer(vb6Reducer, initialState);
 
   const createControl = useCallback((type: string, x?: number, y?: number) => {
+    console.log('Creating control in context:', type, x, y);
     dispatch({
       type: 'CREATE_CONTROL',
       payload: { type, x: x || 50, y: y || 50 }
