@@ -1,3 +1,180 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Animations pour le drag and drop */
+@keyframes dropZoneValid {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.02); opacity: 0.5; }
+}
+
+@keyframes dropZoneInvalid {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+@keyframes dropZonePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+  50% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+}
+
+@keyframes ripple {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0.3;
+  }
+  100% {
+    width: 100px;
+    height: 100px;
+    margin-left: -50px;
+    margin-top: -50px;
+    opacity: 0;
+  }
+}
+
+@keyframes animate-drop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes animate-drop-out {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9) translateY(-10px);
+  }
+}
+
+/* États de drag */
+.dragging {
+  transform: rotate(2deg) scale(1.02);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  transition: all 0.2s ease;
+}
+
+/* Zones de drop */
+.drop-zone-valid {
+  background-color: rgba(34, 197, 94, 0.1);
+  border: 2px dashed #22c55e;
+  animation: dropZoneValid 1s ease-in-out infinite;
+}
+
+.drop-zone-invalid {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 2px dashed #ef4444;
+  animation: dropZoneInvalid 0.5s ease-in-out infinite;
+}
+
+.drop-zone-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Effets de hover pour les contrôles */
+.control-hover {
+  transition: all 0.2s ease;
+}
+
+.control-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Guides d'alignement */
+.alignment-guide {
+  background: linear-gradient(90deg, transparent 0%, #ff0000 50%, transparent 100%);
+  animation: guidePulse 1s ease-in-out infinite;
+}
+
+@keyframes guidePulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* Sélection multiple */
+.selection-box {
+  border: 2px dashed #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  animation: selectionPulse 1s ease-in-out infinite;
+}
+
+@keyframes selectionPulse {
+  0%, 100% { border-color: #3b82f6; }
+  50% { border-color: #1d4ed8; }
+}
+
+/* Styles pour la grille */
+.grid-pattern {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: var(--grid-size, 8px) var(--grid-size, 8px);
+}
+
+/* Animation de snap magnétique */
+.magnetic-snap {
+  transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Feedback tactile visuel */
+.touch-feedback {
+  position: relative;
+  overflow: hidden;
+}
+
+.touch-feedback::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.touch-feedback.active::after {
+  width: 200px;
+  height: 200px;
+}
+
+/* Utilities pour les lignes coupées */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Amélioration des transitions */
+.smooth-transform {
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Style pour les handles de redimensionnement */
+.resize-handle {
+  background: #3b82f6;
+  border: 2px solid #ffffff;
+  border-radius: 2px;
+  cursor: nw-resize;
+  transition: all 0.2s ease;
+}
+
+.resize-handle:hover {
+  background: #1d4ed8;
+  transform: scale(1.2);
+}
