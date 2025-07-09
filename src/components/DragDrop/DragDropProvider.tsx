@@ -15,6 +15,7 @@ import {
   MouseSensor,
 } from '@dnd-kit/core';
 import { useVB6Store } from '../../stores/vb6Store';
+import { useUndoRedo } from '../../hooks/useUndoRedo';
 
 interface DragDropContextType {
   isDragging: boolean;
@@ -60,7 +61,8 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isCtrlPressed, setIsCtrlPressed] = useState(false);
   
   const audioContextRef = useRef<AudioContext | null>(null);
-  const { snapToGrid, gridSize, addToHistory } = useVB6Store();
+  const { snapToGrid, gridSize } = useVB6Store();
+  const { saveState } = useUndoRedo();
 
   // Sensors avec support tactile amélioré
   const sensors = useSensors(
@@ -183,8 +185,8 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     playDragSound();
     vibrate(50);
 
-    // Ajouter état à l'historique pour undo/redo
-    addToHistory();
+    // Sauvegarder l'état pour undo/redo
+    saveState();
   }, [playDragSound, vibrate, addToHistory]);
 
   const handleDragOver = useCallback((event: DragOverEvent) => {
