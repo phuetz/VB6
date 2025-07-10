@@ -18,16 +18,6 @@ export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(
   ({ id, data, disabled = false, children, className = '', style = {}, onDragStart, onDragEnd }, ref) => {
     const addLog = useVB6Store(state => state.addLog);
 
-    // Log component initialization
-    React.useEffect(() => {
-      addLog('debug', 'DraggableItem', `DraggableItem ${id} initialized`, { data, disabled });
-      
-      return () => {
-        addLog('debug', 'DraggableItem', `DraggableItem ${id} unmounted`);
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [id, data, disabled]);
-
     const {
       attributes,
       listeners,
