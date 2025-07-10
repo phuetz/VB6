@@ -150,7 +150,10 @@ interface EnhancedToolboxProps {
 }
 
 export const EnhancedToolbox: React.FC<EnhancedToolboxProps> = ({ className = '' }) => {
-  const { executionMode, toggleWindow } = useVB6Store();
+  const { executionMode, toggleWindow } = useVB6Store(state => ({
+    executionMode: state.executionMode,
+    toggleWindow: state.toggleWindow
+  }));
   const [selectedCategory, setSelectedCategory] = useState('General');
   const [selectedTool, setSelectedTool] = useState('Pointer');
   const [searchTerm, setSearchTerm] = useState('');
