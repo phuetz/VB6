@@ -108,12 +108,14 @@ describe('VB6Store', () => {
 
   it('should manage form properties', () => {
     const { updateFormProperty } = useVB6Store.getState();
-    
+
     updateFormProperty('Caption', 'My Form');
     updateFormProperty('Width', 800);
-    
+    updateFormProperty('StartUpPosition', '1 - CenterOwner');
+
     const state = useVB6Store.getState();
     expect(state.formProperties.Caption).toBe('My Form');
     expect(state.formProperties.Width).toBe(800);
+    expect(state.formProperties.StartUpPosition).toBe('1 - CenterOwner');
   });
 });
