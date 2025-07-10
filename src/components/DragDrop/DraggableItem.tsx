@@ -1,6 +1,7 @@
 import React, { forwardRef } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import { useVB6Store } from '../../stores/vb6Store';
 
 interface DraggableItemProps {
   id: string;
@@ -16,6 +17,19 @@ interface DraggableItemProps {
 export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(
   ({ id, data, disabled = false, children, className = '', style = {}, onDragStart, onDragEnd }, ref) => {
     const {
+      addLog
+    } = useVB6Store();
+
+    // Log component initialization
+    React.useEffect(() => {
+      addLog('debug', 'DraggableItem', `DraggableItem ${id} initialized`, { data, disabled });
+      
+      return () => {
+        addLog('debug', 'DraggableItem', `DraggableItem ${id} unmounted`);
+      };
+    }, [id, data, disabled, addLog]);
+
+    const {
       attributes,
       listeners,
       setNodeRef,
@@ -27,6 +41,15 @@ export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(
       data,
       disabled,
     } : { id, data, disabled });
+
+    // Log dragging state changes
+    React.useEffect(() => {
+      if (isDragging) {
+        addLog('debug', 'DraggableItem', `DraggableItem ${id} is being dragged`, { 
+          transform, data 
+        });
+      }
+    }, [isDragging, transform, id, data, addLog]);
 
     const dragStyle = {
       transform: CSS.Translate.toString(transform),
@@ -40,10 +63,16 @@ export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(
     React.useEffect(() => {
       if (isDragging && onDragStart) {
         onDragStart();
+        addLog('info', 'DraggableItem', `Drag started for ${id}`, { data });
       } else if (!isDragging && onDragEnd) {
         onDragEnd();
+        if (transform) {
+          addLog('info', 'DraggableItem', `Drag ended for ${id}`, { 
+            transform: { x: transform.x, y: transform.y } 
+          });
+        }
       }
-    }, [isDragging, onDragStart, onDragEnd]);
+    }, [isDragging, onDragStart, onDragEnd, id, data, transform, addLog]);
 
     return (
       <div
@@ -65,9 +94,9 @@ export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(
         {children}
         
         {/* Indicateur de drag */}
-        {isDragging && (
-          <div className="absolute top-0 right-0 bg-blue-500 text-white text-xs px-1 rounded-bl">
-            DRAG
+        {(isDragging || data?.type === 'new-control') && (
+          <div className="absolute bottom-0 right-0 bg-blue-600 text-white text-xs px-1 py-0.5 rounded-tl">
+            {data?.type || 'DRAG'} {id.substring(id.indexOf('-') + 1)}
           </div>
         )}
       </div>

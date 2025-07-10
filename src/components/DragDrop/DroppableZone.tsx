@@ -30,10 +30,16 @@ export const DroppableZone: React.FC<DroppableZoneProps> = ({
   disabled = false,
 }) => {
   const elementRef = useRef<HTMLDivElement>(null);
-  const { registerDropZone, unregisterDropZone } = useDragDrop();
+  const { registerDropZone, unregisterDropZone, isDragging } = useDragDrop();
+  const { addLog } = useVB6Store.getState();
 
-  // Use only the required properties in useDroppable hook arguments
-  const {
+  // Log initialization
+  useEffect(() => {
+    addLog('debug', 'DroppableZone', `${id} initialized with accepts: ${accepts.join(', ')}`);
+  }, [id, accepts, addLog]);
+
+  // useDroppable config
+  const { 
     isOver,
     setNodeRef,
     active,
@@ -43,12 +49,31 @@ export const DroppableZone: React.FC<DroppableZoneProps> = ({
   });
 
   // Calculate drop validity after active is initialized
-  const canDrop = active && accepts.includes(active.data.current?.type);
+  const activeType = active?.data?.current?.type;
+  const canDrop = active && activeType && accepts.includes(activeType);
   const isValidDrop = isOver && canDrop;
   const isInvalidDrop = isOver && !canDrop;
 
+  // Log drop validity changes
+  useEffect(() => {
+    if (isOver) {
+      addLog('debug', 'DroppableZone', `${id} is being hovered with ${activeType}`, { 
+        canDrop, 
+        accepts 
+      });
+    }
+  }, [isOver, canDrop, id, activeType, addLog, accepts]);
+
   // Enregistrer la zone de dépôt
   useEffect(() => {
+    // Track element reference changes
+    if (elementRef.current) {
+      addLog('debug', 'DroppableZone', `${id} ref element available, registering`, { 
+        elementBounds: elementRef.current.getBoundingClientRect() 
+      });
+    }
+
+    // Register the drop zone with the provider
     if (elementRef.current && !disabled) {
       const zone = {
         id,
@@ -64,15 +89,23 @@ export const DroppableZone: React.FC<DroppableZoneProps> = ({
     return () => {
       if (!disabled) {
         unregisterDropZone(id);
+        addLog('debug', 'DroppableZone', `${id} unregistered`);
       }
     };
-  }, [id, accepts, onDrop, constraints, isOver, disabled, registerDropZone, unregisterDropZone]);
+  }, [id, accepts, onDrop, constraints, isOver, disabled, registerDropZone, unregisterDropZone, addLog]);
 
-  const dropStyle = {
+  const dropStyle: React.CSSProperties = {
     transition: 'all 200ms ease',
     position: 'relative' as const,
     ...style,
   };
+
+  // Log state changes
+  useEffect(() => {
+    if (isOver) {
+      addLog('debug', 'DroppableZone', `${id} drop zone is over`, { canDrop, isValidDrop });
+    }
+  }, [isOver, canDrop, isValidDrop, id, addLog]);
 
   return (
     <div
@@ -94,9 +127,20 @@ export const DroppableZone: React.FC<DroppableZoneProps> = ({
       data-is-over={isOver}
       data-can-drop={canDrop}
     >
+      {isDragging && (
+        <div className="absolute top-0 right-0 bg-blue-900 text-white text-xs px-2 py-1 m-1 rounded z-50 pointer-events-none">
+          {id} {isOver ? 'isOver' : ''} {canDrop ? 'canDrop' : ''}
+        </div>
+      )}
+
       {children}
       
       {/* Grille visible si activée */}
+      {showGrid && constraints?.snapToGrid && constraints.gridSize && (
+        <div className="absolute bottom-0 left-0 bg-blue-900 text-white text-xs px-2 py-1 m-1 rounded z-50 pointer-events-none">
+          Grid: {constraints.gridSize}px
+        </div>
+      )}
       {showGrid && constraints?.snapToGrid && constraints.gridSize && (
         <GridBackground gridSize={constraints.gridSize} />
       )}

@@ -24,6 +24,7 @@ import { ProjectSetupWizard } from './components/ProjectWizard/ProjectSetupWizar
 import { EnhancedErrorList } from './components/ErrorList/EnhancedErrorList';
 import { CommandPalette } from './components/CommandPalette/CommandPalette'; 
 import { ExportDialog } from './components/Export/ExportDialog';
+import { LogPanel } from './components/Debug/LogPanel';
 import { CodeFormatter } from './components/Formatting/CodeFormatter';
 import { CodeConverter } from './components/Converter/CodeConverter';
 import './index.css';
@@ -98,6 +99,9 @@ function App() {
           <MainContent />
           <StatusBar />
           <DialogManager />
+          
+          {/* Debug Log Panel */}
+          <LogPanel />
           
           {/* Template Manager */}
           <ProjectTemplateManager

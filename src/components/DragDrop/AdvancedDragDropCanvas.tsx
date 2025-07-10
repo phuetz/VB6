@@ -6,6 +6,7 @@ import { useVB6Store } from '../../stores/vb6Store';
 import ControlRenderer from '../Designer/ControlRenderer';
 import Grid from '../Designer/Grid';
 
+// Add more descriptive logging to help debug issues
 interface AdvancedDragDropCanvasProps {
   width?: number;
   height?: number;
@@ -19,7 +20,7 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [rippleTriggered, setRippleTriggered] = useState(false);
-  const [snapGuides, setSnapGuides] = useState<Array<{ x?: number; y?: number }>>([]);
+  const [snapGuides, setSnapGuides] = useState<Array<{ x?: number; y?: number; controlId?: number }>>([]);
   const [selectionBox, setSelectionBox] = useState<{
     start: { x: number; y: number };
     end: { x: number; y: number };
@@ -37,12 +38,17 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
     selectControls,
     showGrid,
   } = useVB6Store();
+  const { addLog } = useVB6Store();
 
   const { isDragging, vibrate, playDropSound } = useDragDrop();
 
   // Gestion du drop de nouveaux contrôles
   const handleControlDrop = useCallback((data: any, position: { x: number; y: number }) => {
+    addLog('debug', 'CanvasDrop', `Drop event received`, { data, position });
+    
     if (data.type === 'new-control') {
+      addLog('info', 'CanvasDrop', `Creating new ${data.controlType} control`, { position });
+      
       // Créer un nouveau contrôle
       let finalX = position.x;
       let finalY = position.y;
@@ -60,6 +66,8 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
       if (data.copy && data.originalId) {
         // Copie d'un contrôle existant
         const originalControl = controls.find(c => c.id === data.originalId);
+        addLog('debug', 'CanvasDrop', `Copying existing control #${data.originalId}`, originalControl);
+        
         if (originalControl) {
           createControl(originalControl.type, finalX, finalY);
         }
@@ -72,6 +80,14 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
       vibrate([50, 20, 50]);
     } else if (data.type === 'existing-control') {
       // Déplacer un contrôle existant
+      addLog('info', 'CanvasDrop', `Moving existing control #${data.controlId}`, { 
+        from: { 
+          x: controls.find(c => c.id === data.controlId)?.x, 
+          y: controls.find(c => c.id === data.controlId)?.y 
+        }, 
+        to: position 
+      });
+      
       let finalX = position.x;
       let finalY = position.y;
 
@@ -84,12 +100,16 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
       if (data.controlId !== undefined) {
         updateControl(data.controlId, 'x', finalX);
         updateControl(data.controlId, 'y', finalY);
+      } else {
+        addLog('error', 'CanvasDrop', `Cannot update control: missing controlId`, { data });
       }
 
       playDropSound();
       vibrate(30);
+    } else {
+      addLog('warn', 'CanvasDrop', `Unhandled drop data type: ${data?.type}`, data);
     }
-  }, [snapToGrid, gridSize, width, height, controls, createControl, updateControl, playDropSound, vibrate]);
+  }, [snapToGrid, gridSize, width, height, controls, createControl, updateControl, playDropSound, vibrate, addLog]);
 
   // Gestion de la sélection multiple
   const handleCanvasMouseDown = useCallback((e: React.MouseEvent) => {
@@ -180,13 +200,13 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
   return (
     <div className="relative w-full h-full overflow-hidden">
       <DroppableZone
-        id="main-canvas"
+        id="form-canvas"
         accepts={['new-control', 'existing-control']}
         onDrop={handleControlDrop}
         constraints={{
           snapToGrid,
           gridSize,
-          allowedAreas: [{ x: 0, y: 0, width, height }]
+          allowedAreas: [{ x: 0, y: 0, width: width || 800, height: height || 600 }]
         }}
         showGrid={showGrid}
         className="w-full h-full relative"
@@ -212,7 +232,7 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
           {snapGuides.map((guide, index) => (
             <div
               key={index}
-              className="absolute pointer-events-none"
+              className="absolute pointer-events-none z-50"
               style={{
                 ...(guide.x !== undefined && {
                   left: guide.x,
@@ -233,7 +253,13 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
                   zIndex: 1000
                 })
               }}
-            />
+            >
+              {guide.controlId && (
+                <div className="absolute text-xs bg-red-600 text-white px-1 rounded">
+                  {guide.x !== undefined ? 'x' : 'y'}: {guide.x ?? guide.y}
+                </div>
+              )}
+            </div>
           ))}
           
           {/* Contrôles */}
@@ -260,6 +286,16 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
                 zIndex: 1001
               }}
             />
+          )}
+          
+          {/* Debug overlay */}
+          {isDragging && (
+            <div className="absolute top-2 right-2 bg-white bg-opacity-90 text-xs p-2 rounded border border-gray-400 z-50 pointer-events-none">
+              <div><strong>Dragging:</strong> {draggedControlType}</div>
+              <div><strong>Position:</strong> x: {Math.round(dragPosition?.x || 0)}, y: {Math.round(dragPosition?.y || 0)}</div>
+              <div><strong>Grid:</strong> {gridSize}px{snapToGrid ? ' (snap on)' : ' (snap off)'}</div>
+              <div><strong>Guides:</strong> {snapGuides.length}</div>
+            </div>
           )}
           
           {/* Effet de ripple pour les drops */}

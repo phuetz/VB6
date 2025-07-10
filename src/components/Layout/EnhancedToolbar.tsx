@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   FileText, Folder, Save, Play, Square, 
   Copy, Clipboard, Grid, Crosshair, Activity, Zap, Scissors,
-  FileCode as FileCodeIcon, ArrowLeftRight
+  FileCode as FileCodeIcon, ArrowLeftRight, Bug
 } from 'lucide-react';
 import { useVB6Store } from '../../stores/vb6Store';
 import { UndoRedoToolbar } from './UndoRedoToolbar';
@@ -14,6 +14,7 @@ export const EnhancedToolbar: React.FC = () => {
     showGrid,
     showSnippetManager,
     snapToGrid,
+    showLogPanel,
     selectedControls,
     clipboard,
     showCodeFormatter,
@@ -225,6 +226,16 @@ export const EnhancedToolbar: React.FC = () => {
             </div>
           </button>
         </div>
+        <button
+          onClick={() => toggleWindow('showLogPanel')}
+          className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors relative group"
+          title="Debug Logs"
+        >
+          <Bug size={16} className={showLogPanel ? "text-green-600" : "text-gray-600"} />
+          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity mb-1">
+            Debug Logs
+          </div>
+        </button>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useVB6Store } from '../../stores/vb6Store';
 
 interface AnimatedDropProps {
   children: React.ReactNode;
@@ -13,8 +14,10 @@ export const AnimatedDrop: React.FC<AnimatedDropProps> = ({
 }) => {
   const [shouldRender, setShouldRender] = React.useState(isVisible);
   const [animationClass, setAnimationClass] = React.useState('');
+  const { addLog } = useVB6Store();
 
   React.useEffect(() => {
+    addLog('debug', 'AnimatedDrop', `Animation state change: isVisible=${isVisible}`);
     if (isVisible) {
       setShouldRender(true);
       setTimeout(() => {
@@ -26,7 +29,7 @@ export const AnimatedDrop: React.FC<AnimatedDropProps> = ({
         setShouldRender(false);
       }, 300);
     }
-  }, [isVisible, delay]);
+  }, [isVisible, delay, addLog]);
 
   if (!shouldRender) return null;
 
@@ -49,6 +52,7 @@ export const MagneticSnap: React.FC<MagneticSnapProps> = ({
   snapPosition 
 }) => {
   const [currentPosition, setCurrentPosition] = React.useState(snapPosition);
+  const { addLog } = useVB6Store();
 
   React.useEffect(() => {
     if (isSnapping) {
@@ -80,9 +84,10 @@ export const MagneticSnap: React.FC<MagneticSnapProps> = ({
         }
       };
 
+      addLog('debug', 'MagneticSnap', `Snapping to position: ${snapPosition.x}, ${snapPosition.y}`);
       requestAnimationFrame(animate);
     }
-  }, [isSnapping, snapPosition, currentPosition]);
+  }, [isSnapping, snapPosition, currentPosition, addLog]);
 
   return (
     <div
@@ -107,6 +112,14 @@ export const PulseHighlight: React.FC<PulseHighlightProps> = ({
   isActive, 
   color = 'rgb(59, 130, 246)' 
 }) => {
+  const { addLog } = useVB6Store();
+  
+  React.useEffect(() => {
+    if (isActive) {
+      addLog('debug', 'PulseHighlight', 'Element highlight activated');
+    }
+  }, [isActive, addLog]);
+
   return (
     <div className="relative">
       {children}
@@ -133,6 +146,7 @@ export const RippleEffect: React.FC<RippleEffectProps> = ({
   onComplete 
 }) => {
   const [ripples, setRipples] = React.useState<Array<{ id: number; x: number; y: number }>>([]);
+  const { addLog } = useVB6Store();
 
   React.useEffect(() => {
     if (isTriggered) {
@@ -142,6 +156,7 @@ export const RippleEffect: React.FC<RippleEffectProps> = ({
         y: Math.random() * 100,
       };
 
+      addLog('debug', 'RippleEffect', `Ripple effect triggered at ${newRipple.x}%, ${newRipple.y}%`);
       setRipples(prev => [...prev, newRipple]);
 
       setTimeout(() => {
@@ -149,7 +164,7 @@ export const RippleEffect: React.FC<RippleEffectProps> = ({
         onComplete?.();
       }, 600);
     }
-  }, [isTriggered, onComplete]);
+  }, [isTriggered, onComplete, addLog]);
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">

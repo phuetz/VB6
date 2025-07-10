@@ -261,9 +261,15 @@ End Function`,
     // Toolbox
     selectedToolboxTab: 'General',
 
+    // Logging
+    logs: [],
+    showLogPanel: false,
+
     // Actions
     createControl: (type: string, x = 50, y = 50) => {
       const state = get();
+      const log = state.addLog('debug', 'ControlCreation', `Creating control: ${type} at (${x}, ${y})`);
+      
       const newControl = {
         ...getDefaultProperties(type, state.nextId),
         x,
@@ -275,10 +281,17 @@ End Function`,
         selectedControls: [newControl],
         nextId: state.nextId + 1
       });
+      
+      state.addLog('info', 'ControlCreation', `Created control: ${newControl.name} (${type})`, newControl);
     },
 
     updateControl: (controlId: number, property: string, value: any) => {
       const state = get();
+      
+      if (property !== 'x' && property !== 'y') {
+        state.addLog('debug', 'ControlUpdate', `Updating control #${controlId}: ${property} = ${value}`);
+      }
+      
       const updatedControls = state.controls.map(control =>
         control.id === controlId ? { ...control, [property]: value } : control
       );
@@ -295,6 +308,8 @@ End Function`,
 
     deleteControls: (controlIds: number[]) => {
       const state = get();
+      state.addLog('info', 'ControlDeletion', `Deleting controls: ${controlIds.join(', ')}`);
+      
       set({
         controls: state.controls.filter(control => !controlIds.includes(control.id)),
         selectedControls: []
@@ -303,12 +318,16 @@ End Function`,
 
     selectControls: (controlIds: number[]) => {
       const state = get();
+      state.addLog('debug', 'ControlSelection', `Selecting controls: ${controlIds.join(', ')}`);
+      
       const selectedControls = state.controls.filter(control => controlIds.includes(control.id));
       set({ selectedControls });
     },
 
     copyControls: () => {
       const state = get();
+      state.addLog('info', 'Clipboard', `Copying ${state.selectedControls.length} controls to clipboard`);
+      
       set({ clipboard: [...state.selectedControls] });
     },
 
@@ -316,6 +335,8 @@ End Function`,
       const state = get();
       if (state.clipboard.length === 0) return;
 
+      state.addLog('info', 'Clipboard', `Pasting ${state.clipboard.length} controls from clipboard`);
+      
       const newControls = state.clipboard.map((control, index) => ({
         ...control,
         id: state.nextId + index,
@@ -332,11 +353,19 @@ End Function`,
     },
 
     setExecutionMode: (mode: 'design' | 'run' | 'break') => {
+      const state = get();
+      state.addLog('info', 'Execution', `Mode changed: ${mode}`);
+      
       set({ executionMode: mode });
     },
 
     toggleWindow: (windowName: string) => {
       const state = get();
+      
+      if (windowName !== 'showLogPanel') {
+        state.addLog('debug', 'UI', `Toggling window: ${windowName} (current: ${!state[windowName as keyof VB6State]})`);
+      }
+      
       set({ [windowName]: !state[windowName as keyof VB6State] });
     },
 
@@ -362,7 +391,16 @@ End Function`,
     },
 
     setDragState: (payload) => {
-      const state = get();
+      const state = get();      
+      if (payload.isDragging && payload.controlType) {
+        state.addLog('debug', 'DragDrop', `Drag started: ${payload.controlType}`, payload);
+      } else if (!payload.isDragging && state.isDragging) {
+        state.addLog('debug', 'DragDrop', `Drag ended`, { 
+          controlType: state.draggedControlType,
+          position: payload.position || state.dragPosition 
+        });
+      }
+      
       set({
         isDragging: payload.isDragging,
         draggedControlType: payload.controlType !== undefined ? payload.controlType : state.draggedControlType,
@@ -565,6 +603,33 @@ End Function`,
     convertCode: (targetLanguage: string, options = {}) => {
       console.log(`Converting code to ${targetLanguage} with options:`, options);
       // Implementation would convert the current code to the target language
-    }
+    },
+    
+    // Logging system
+    addLog: (level: 'info' | 'warn' | 'error' | 'debug', source: string, message: string, data?: any) => {
+      const state = get();
+      
+      const log = {
+        id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
+        timestamp: new Date(),
+        level,
+        source,
+        message,
+        data
+      };
+      
+      // Log to console as well for development
+      console[level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'log'](
+        `[${log.source}] ${log.message}`, data || ''
+      );
+      
+      set({
+        logs: [...state.logs.slice(-999), log] // Keep last 1000 logs
+      });
+      
+      return log;
+    },
+    
+    clearLogs: () => set({ logs: [] })
   }))
 );
