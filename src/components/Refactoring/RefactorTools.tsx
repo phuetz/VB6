@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { WandSparkles, Pencil, ArrowRightLeft, ArrowBigUp, FileText, FolderPlus, ArrowDown, AlertTriangle } from 'lucide-react';
+import { Sparkles as WandSparkles, Pencil, ArrowRightLeft, ArrowBigUp, FileText, FolderPlus, ArrowDown, AlertTriangle } from 'lucide-react';
 
 interface RefactorToolsProps {
   visible: boolean;
