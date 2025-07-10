@@ -49,16 +49,24 @@ export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(
       ...style,
     };
 
+    const hasStartedRef = React.useRef(false);
+
     React.useEffect(() => {
-      if (isDragging && onDragStart) {
-        onDragStart();
-        addLog('info', 'DraggableItem', `Drag started for ${id}`, { data });
-      } else if (!isDragging && onDragEnd) {
-        onDragEnd();
-        if (transform) {
-          addLog('info', 'DraggableItem', `Drag ended for ${id}`, { 
-            transform: { x: transform.x, y: transform.y } 
-          });
+      if (isDragging && !hasStartedRef.current) {
+        hasStartedRef.current = true;
+        if (onDragStart) {
+          onDragStart();
+          addLog('info', 'DraggableItem', `Drag started for ${id}`, { data });
+        }
+      } else if (!isDragging && hasStartedRef.current) {
+        hasStartedRef.current = false;
+        if (onDragEnd) {
+          onDragEnd();
+          if (transform) {
+            addLog('info', 'DraggableItem', `Drag ended for ${id}`, {
+              transform: { x: transform.x, y: transform.y }
+            });
+          }
         }
       }
     }, [isDragging, onDragStart, onDragEnd, id, data, transform, addLog]);
