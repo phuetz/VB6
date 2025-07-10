@@ -1,7 +1,8 @@
 import React from 'react';
 import { 
   FileText, Folder, Save, Play, Square, 
-  Copy, Clipboard, Grid, Crosshair, Activity, Zap
+  Copy, Clipboard, Grid, Crosshair, Activity, Zap,
+  FileCode, ArrowLeftRight
 } from 'lucide-react';
 import { useVB6Store } from '../../stores/vb6Store';
 import { UndoRedoToolbar } from './UndoRedoToolbar';
