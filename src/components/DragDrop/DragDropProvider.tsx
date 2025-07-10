@@ -318,7 +318,6 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   return (
     <DragDropContext.Provider value={contextValue}>
-      {addLog('debug', 'DragDrop', `Rendering DragDropProvider with ${dropZones.length} zones`)}
       <DndContext
         sensors={sensors}
         collisionDetection={customCollisionDetection}
