@@ -130,4 +130,16 @@ describe('VB6Store', () => {
     expect(state.controls[0].x).toBe(10);
     expect(state.controls[0].y).toBe(20);
   });
+
+  it('should create an OptionButton control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('OptionButton', 30, 40);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('OptionButton');
+    expect(state.controls[0].x).toBe(30);
+    expect(state.controls[0].y).toBe(40);
+  });
 });

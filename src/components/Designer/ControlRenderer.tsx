@@ -219,6 +219,39 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           </div>
         );
 
+      case 'OptionButton':
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            <input
+              type="radio"
+              checked={!!control.value}
+              onChange={e => handleControlChange(e.target.checked, 'value')}
+              disabled={!control.enabled}
+              name={control.groupName || control.name}
+            />
+            <span
+              style={{
+                color: control.foreColor,
+                fontSize: `${control.font?.size || 8}pt`,
+                fontFamily: control.font?.name || 'MS Sans Serif',
+              }}
+            >
+              {control.caption}
+            </span>
+          </div>
+        );
+
       case 'Frame':
         return (
           <fieldset
