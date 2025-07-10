@@ -10,7 +10,7 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [x] **Sélection du formulaire actif** dans `ProjectExplorer.tsx`
 - [x] **Ajout de nouveaux formulaires** via `ProjectExplorer.tsx`
 - [x] **Refactorisation des `GoTo`** lors de la conversion de code (`codeConverter.ts`)
-- [ ] Améliorer l'export/import de projets (.vb6)
+- [x] Améliorer l'export/import de projets (.vb6)
 - [ ] Ajouter un suivi des performances et des journaux d'exécution avancé
 - [ ] Renforcer l'analyse de code et le refactoring automatique
 - [ ] Compléter l'éditeur de propriétés pour couvrir l'ensemble des propriétés VB6

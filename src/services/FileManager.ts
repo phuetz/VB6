@@ -12,19 +12,19 @@ export class FileManager {
                 description: 'VB6 Projects',
                 accept: {
                   'application/json': ['.vbp', '.vb6'],
-                  'application/zip': ['.vb6z']
-                }
-              }
-            ]
+                  'application/zip': ['.vb6z'],
+                },
+              },
+            ],
           });
           return fileHandle.getFile();
         }
 
-        return new Promise<File | null>((resolve) => {
+        return new Promise<File | null>(resolve => {
           const input = document.createElement('input');
           input.type = 'file';
           input.accept = '.vbp,.vb6,.vb6z,.json,.zip';
-          input.onchange = async (e) => {
+          input.onchange = async e => {
             const file = (e.target as HTMLInputElement).files?.[0] || null;
             resolve(file);
           };
@@ -74,11 +74,9 @@ export class FileManager {
           types: [
             {
               description: 'VB6 Projects',
-              accept: zip
-                ? { 'application/zip': ['.vb6z'] }
-                : { 'application/json': ['.vb6'] }
-            }
-          ]
+              accept: zip ? { 'application/zip': ['.vb6z'] } : { 'application/json': ['.vb6'] },
+            },
+          ],
         });
 
         const writable = await fileHandle.createWritable();
@@ -100,12 +98,85 @@ export class FileManager {
     }
   }
 
+  /**
+   * Export the project in a detailed archive where forms and modules are
+   * stored as individual JSON files. This allows easier inspection or manual
+   * editing outside of the IDE.
+   */
+  static async exportProjectArchive(project: Project): Promise<boolean> {
+    try {
+      const zip = new JSZip();
+      zip.file('project.json', JSON.stringify(project, null, 2));
+
+      project.forms.forEach(form => {
+        zip.file(`forms/${form.name}.json`, JSON.stringify(form, null, 2));
+      });
+      project.modules.forEach(module => {
+        zip.file(`modules/${module.name}.json`, JSON.stringify(module, null, 2));
+      });
+      project.classModules.forEach(cls => {
+        zip.file(`classes/${cls.name}.json`, JSON.stringify(cls, null, 2));
+      });
+
+      const content = await zip.generateAsync({ type: 'blob' });
+
+      const fileName = `${project.name}.vb6z`;
+
+      if ('showSaveFilePicker' in window) {
+        const fileHandle = await (window as any).showSaveFilePicker({
+          suggestedName: fileName,
+          types: [
+            {
+              description: 'VB6 Project Archive',
+              accept: { 'application/zip': ['.vb6z'] },
+            },
+          ],
+        });
+
+        const writable = await fileHandle.createWritable();
+        await writable.write(content);
+        await writable.close();
+      } else {
+        const url = URL.createObjectURL(content);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error exporting project archive:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Import a project previously exported with exportProjectArchive.
+   */
+  static async importProjectArchive(file: File): Promise<Project | null> {
+    try {
+      const buffer = await file.arrayBuffer();
+      const zip = await JSZip.loadAsync(buffer);
+      const projectText = await zip.file('project.json')?.async('string');
+      if (!projectText) throw new Error('Invalid project archive');
+
+      const project: Project = JSON.parse(projectText);
+
+      return project;
+    } catch (error) {
+      console.error('Error importing project archive:', error);
+      return null;
+    }
+  }
+
   static async importFile(type: 'form' | 'module' | 'class'): Promise<string | null> {
     try {
       const extensions = {
         form: ['.frm'],
         module: ['.bas'],
-        class: ['.cls']
+        class: ['.cls'],
       };
 
       if ('showOpenFilePicker' in window) {
@@ -123,11 +194,11 @@ export class FileManager {
         const file = await fileHandle.getFile();
         return await file.text();
       } else {
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
           const input = document.createElement('input');
           input.type = 'file';
           input.accept = extensions[type].join(',');
-          input.onchange = async (e) => {
+          input.onchange = async e => {
             const file = (e.target as HTMLInputElement).files?.[0];
             if (file) {
               const content = await file.text();
