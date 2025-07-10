@@ -56,12 +56,13 @@ export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(
       } else if (!isDragging && onDragEnd) {
         onDragEnd();
         if (transform) {
-          addLog('info', 'DraggableItem', `Drag ended for ${id}`, { 
-            transform: { x: transform.x, y: transform.y } 
+          addLog('info', 'DraggableItem', `Drag ended for ${id}`, {
+            transform: { x: transform.x, y: transform.y }
           });
         }
       }
-    }, [isDragging, onDragStart, onDragEnd, id, data, transform, addLog]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isDragging, onDragStart, onDragEnd, id, data, addLog]);
 
     return (
       <div
