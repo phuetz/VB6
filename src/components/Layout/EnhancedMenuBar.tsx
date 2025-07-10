@@ -327,10 +327,10 @@ const EnhancedMenuBar: React.FC = () => {
       },
       { separator: true },
       {
-        label: 'Error List', 
-        icon: <AlertCircle size={14} />, 
+        label: 'Error List',
+        icon: <AlertCircle size={14} />,
         action: () => setShowErrorList(true)
-      }
+      },
       {
         label: 'Debug Logs',
         icon: <Bug size={14} />,
