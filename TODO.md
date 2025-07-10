@@ -13,3 +13,4 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [ ] Améliorer l'export/import de projets (.vb6)
 - [ ] Ajouter un suivi des performances et des journaux d'exécution avancé
 - [ ] Renforcer l'analyse de code et le refactoring automatique
+- [ ] Compléter l'éditeur de propriétés pour couvrir l'ensemble des propriétés VB6
