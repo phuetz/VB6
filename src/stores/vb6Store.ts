@@ -83,7 +83,6 @@ export const useVB6Store = create<VB6Store>()(
     showReferences: false,
     showComponents: false,
     showTabOrder: false,
-    showObjectBrowser: false,
     showUserControlDesigner: false,
 
     // Code Editor

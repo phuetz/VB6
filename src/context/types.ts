@@ -77,7 +77,6 @@ export interface VB6State {
   showReferences: boolean;
   showComponents: boolean;
   showTabOrder: boolean;
-  showObjectBrowser: boolean;
   showUserControlDesigner: boolean;
 
   // Code Editor
