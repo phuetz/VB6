@@ -187,6 +187,23 @@ export const EnhancedToolbar: React.FC = () => {
         >
           <Activity size={16} />
         </button>
+        
+        <div className="flex items-center ml-2 gap-2">
+          <button
+            onClick={() => setShowCodeFormatter(true)}
+            className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors"
+            title="Format Code"
+          >
+            <FileCode size={16} />
+          </button>
+          <button
+            onClick={() => setShowCodeConverter(true)}
+            className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors"
+            title="Code Converter"
+          >
+            <ArrowLeftRight size={16} />
+          </button>
+        </div>
       </div>
     </div>
   );

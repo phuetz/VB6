@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DragDropProvider } from './components/DragDrop/DragDropProvider';
 import { VB6Provider } from './context/VB6Context';
 import TitleBar from './components/Layout/TitleBar';
@@ -20,6 +20,12 @@ import { BreakpointManager } from './components/Debugging/BreakpointManager';
 import { ProjectTemplateManager } from './components/Templates/ProjectTemplateManager';
 import { PerformanceMonitor } from './components/Performance/PerformanceMonitor';
 import { ProjectSetupWizard } from './components/ProjectWizard/ProjectSetupWizard';
+import { EnhancedErrorList } from './components/ErrorList/EnhancedErrorList';
+import { CommandPalette } from './components/CommandPalette/CommandPalette'; 
+import { ExportDialog } from './components/Export/ExportDialog'; 
+import { SnippetManager } from './components/Snippets/SnippetManager'; 
+import { CodeFormatter } from './components/Formatting/CodeFormatter';
+import { CodeConverter } from './components/Converter/CodeConverter';
 import './index.css';
 
 const MainContent: React.FC = () => {
@@ -29,16 +35,8 @@ const MainContent: React.FC = () => {
     showProjectExplorer, 
     showPropertiesWindow, 
     showImmediateWindow,
-    formProperties,
-    showDialog
+    formProperties
   } = useVB6Store();
-
-  const [showTemplateManager, setShowTemplateManager] = React.useState(false);
-  const [showPerformanceMonitor, setShowPerformanceMonitor] = React.useState(false);
-  const [showProjectWizard, setShowProjectWizard] = React.useState(false);
-  const [showCodeAnalyzer, setShowCodeAnalyzer] = React.useState(false);
-  const [showRefactorTools, setShowRefactorTools] = React.useState(false);
-  const [showBreakpointManager, setShowBreakpointManager] = React.useState(false);
 
   return (
     <div className="flex-1 flex overflow-hidden">
@@ -75,6 +73,20 @@ const MainContent: React.FC = () => {
 };
 
 function App() {
+  // State for all dialog components
+  const [showTemplateManager, setShowTemplateManager] = useState(false);
+  const [showPerformanceMonitor, setShowPerformanceMonitor] = useState(false);
+  const [showProjectWizard, setShowProjectWizard] = useState(false);
+  const [showCodeAnalyzer, setShowCodeAnalyzer] = useState(false);
+  const [showRefactorTools, setShowRefactorTools] = useState(false);
+  const [showBreakpointManager, setShowBreakpointManager] = useState(false);
+  const [showErrorList, setShowErrorList] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [showSnippetManager, setShowSnippetManager] = useState(false);
+  const [showCodeFormatter, setShowCodeFormatter] = useState(false);
+  const [showCodeConverter, setShowCodeConverter] = useState(false);
+
   return (
     <VB6Provider>
       <DragDropProvider>
@@ -97,11 +109,12 @@ function App() {
           />
           
           {/* Performance Monitor */}
-           <PerformanceMonitor
+          <PerformanceMonitor
             visible={showPerformanceMonitor}
             onClose={() => setShowPerformanceMonitor(false)}
           />
           
+          {/* Project Setup Wizard */}
           <ProjectSetupWizard
             visible={showProjectWizard}
             onClose={() => setShowProjectWizard(false)}
@@ -120,7 +133,6 @@ function App() {
             }}
             onNavigateToIssue={(file, line, column) => {
               console.log('Navigating to issue:', file, line, column);
-              // In a real implementation, this would open the file and position the cursor
             }}
           />
           
@@ -145,11 +157,68 @@ function App() {
             onUpdateBreakpoint={(id, updates) => {
               console.log('Updating breakpoint:', id, updates);
             }}
-            onNavigateToBreakpoint={(file, line, column) => {
-              console.log('Project configuration:', config);
-              setShowProjectWizard(false);
+            onNavigateToBreakpoint={(file, line) => {
+              console.log('Navigating to breakpoint:', file, line);
             }}
           />
+
+          {/* Error List */}
+          <EnhancedErrorList
+            visible={showErrorList}
+            onClose={() => setShowErrorList(false)}
+            onNavigateToError={(file, line, column) => {
+              console.log('Navigating to error:', file, line, column);
+            }}
+            onFixError={(errorId) => {
+              console.log('Fix error:', errorId);
+            }}
+            onClearErrors={() => {
+              console.log('Clear all errors');
+            }}
+          />
+
+          {/* Command Palette */}
+          <CommandPalette
+            visible={showCommandPalette}
+            onClose={() => setShowCommandPalette(false)}
+          />
+
+          {/* Export Dialog */}
+          <ExportDialog
+            visible={showExportDialog}
+            onClose={() => setShowExportDialog(false)}
+            onExport={(format, options) => {
+              console.log('Exporting to', format, 'with options', options);
+            }}
+          />
+
+          {/* Snippet Manager */}
+          <SnippetManager
+            visible={showSnippetManager}
+            onClose={() => setShowSnippetManager(false)}
+            onInsertSnippet={(snippet) => {
+              console.log('Insert snippet:', snippet);
+            }}
+          />
+
+          {/* Code Formatter */}
+          <CodeFormatter
+            visible={showCodeFormatter}
+            onClose={() => setShowCodeFormatter(false)}
+            onApplyFormatting={(formattedCode) => {
+              console.log('Apply formatting:', formattedCode);
+            }}
+          />
+
+          {/* Code Converter */}
+          <CodeConverter
+            visible={showCodeConverter}
+            onClose={() => setShowCodeConverter(false)}
+            onConvertCode={(code, targetLanguage, options) => {
+              console.log('Convert code to', targetLanguage, 'with options', options);
+            }}
+          />
+
         </div>
       </DragDropProvider>
     </VB6Provider>
