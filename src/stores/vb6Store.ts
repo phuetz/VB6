@@ -386,7 +386,6 @@ export const useVB6Store = create<VB6Store>()(
       set({
         snippets: state.snippets.filter(s => s.id !== id)
       });
-    }
     },
 
     // Code Formatting
