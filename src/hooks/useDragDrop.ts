@@ -227,7 +227,7 @@ export const useControlResize = (onResize: (id: string, newBounds: { x: number; 
     const deltaX = e.clientX - resizeState.startMouse.x;
     const deltaY = e.clientY - resizeState.startMouse.y;
     
-    let newBounds = { ...resizeState.startBounds };
+    const newBounds = { ...resizeState.startBounds };
     
     switch (resizeState.handle) {
       case 'nw':

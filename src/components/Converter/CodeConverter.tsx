@@ -411,7 +411,7 @@ export const CodeConverter: React.FC<CodeConverterProps> = ({
   
   const convertToPython = (code: string): string => {
     let result = code;
-    let indentLevel = 0;
+    const indentLevel = 0;
     
     // Convert VB6 Sub/Function to Python
     result = result.replace(/Sub\s+(\w+)\s*\((.*)\)/g, 'def $1($2):');

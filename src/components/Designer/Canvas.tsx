@@ -5,7 +5,8 @@ import Grid from './Grid';
 import AlignmentGuides from './AlignmentGuides';
 import SelectionBox from './SelectionBox';
 
-interface CanvasProps {}
+// Canvas currently has no props.
+type CanvasProps = Record<string, never>;
 
 const Canvas = forwardRef<HTMLDivElement, CanvasProps>((props, ref) => {
   const { state, dispatch, createControl } = useVB6();
