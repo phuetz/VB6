@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useVB6Store } from '../../stores/vb6Store';
-import { FileText, FolderOpen, Save, Nut as Cut, Copy, Clipboard, Undo, Redo, Search, Play, Square, Settings, HelpCircle, Eye, Code, Package, Database, AlertOctagon, Sparkles as WandSparkles, ActivitySquare, BarChart } from 'lucide-react';
+import { FileText, FolderOpen, Save, Nut as Cut, Copy, Clipboard, Undo, Redo, Search, Play, Square, Settings, HelpCircle, Eye, Code, Package, Database, AlertOctagon, Sparkles as WandSparkles, ActivitySquare, BarChart, AlertCircle, Command, Download, Scissors } from 'lucide-react';
 
 const EnhancedMenuBar: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
@@ -14,6 +14,11 @@ const EnhancedMenuBar: React.FC = () => {
     setExecutionMode,
     showDialog
   } = useVB6Store();
+  
+  const setShowErrorList = () => console.log('Show error list');
+  const setShowCommandPalette = () => console.log('Show command palette');
+  const setShowExportDialog = () => console.log('Show export dialog');
+  const setShowSnippetManager = () => console.log('Show snippet manager');
 
   const handleMenuHover = (menuName: string) => {
     if (activeMenu) {
@@ -43,6 +48,11 @@ const EnhancedMenuBar: React.FC = () => {
         shortcut: 'Ctrl+O',
         action: () => console.log('Open project')
       },
+      { 
+        label: 'Import...', 
+        icon: <FileText size={14} />, 
+        action: () => console.log('Import')
+      },
       { separator: true },
       { 
         label: 'Save Project', 
@@ -53,6 +63,17 @@ const EnhancedMenuBar: React.FC = () => {
       { 
         label: 'Save Project As...', 
         action: () => console.log('Save as')
+      },
+      { 
+        label: 'Export...', 
+        icon: <Download size={14} />, 
+        action: () => setShowExportDialog(true)
+      },
+      { separator: true },
+      {
+        label: 'Print...', 
+        shortcut: 'Ctrl+P',
+        action: () => console.log('Print')
       },
       { separator: true },
       { 
@@ -69,7 +90,14 @@ const EnhancedMenuBar: React.FC = () => {
         ]
       },
       { separator: true },
-      { label: 'Exit', action: () => window.close() }
+      { label: 'Exit', action: () => window.close() },
+      { separator: true },
+      { 
+        label: 'Command Palette...', 
+        icon: <Command size={14} />, 
+        shortcut: 'Ctrl+Shift+P',
+        action: () => setShowCommandPalette(true)
+      }
     ],
     Edit: [
       { 
@@ -294,6 +322,12 @@ const EnhancedMenuBar: React.FC = () => {
         label: 'Quick Watch...', 
         shortcut: 'Shift+F9',
         action: () => console.log('Quick watch')
+      },
+      { separator: true },
+      {
+        label: 'Error List', 
+        icon: <AlertCircle size={14} />, 
+        action: () => setShowErrorList(true)
       }
     ],
     Run: [
@@ -330,6 +364,11 @@ const EnhancedMenuBar: React.FC = () => {
       { 
         label: 'Menu Editor...', 
         action: () => showDialog('showMenuEditor', true)
+      },
+      { 
+        label: 'Snippets Manager...', 
+        icon: <Scissors size={14} />, 
+        action: () => setShowSnippetManager(true)
       },
       { separator: true },
       { 

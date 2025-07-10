@@ -67,6 +67,9 @@ export const useVB6Store = create<VB6Store>()(
     showLocalsWindow: false,
     showCallStack: false,
     showErrorList: false,
+    showCommandPalette: false,
+    showExportDialog: false,
+    showSnippetManager: false,
     showCodeAnalyzer: false,
     showRefactorTools: false,
     showBreakpointManager: false,
@@ -129,6 +132,8 @@ export const useVB6Store = create<VB6Store>()(
         qualityScore: 0
       }
     },
+    errorList: [],
+    snippets: [],
 
     // History
     history: [],
@@ -340,6 +345,44 @@ export const useVB6Store = create<VB6Store>()(
         intellisenseVisible: true,
         intellisensePosition: position,
         intellisenseItems: items
+      });
+    },
+    
+    // Error List Management
+    addError: (error: any) => {
+      const state = get();
+      set({
+        errorList: [...state.errorList, error]
+      });
+    },
+
+    clearErrors: () => {
+      set({
+        errorList: []
+      });
+    },
+    
+    // Snippet Management
+    addSnippet: (snippet: any) => {
+      const state = get();
+      set({
+        snippets: [...state.snippets, snippet]
+      });
+    },
+    
+    updateSnippet: (id: string, updates: any) => {
+      const state = get();
+      set({
+        snippets: state.snippets.map(s => 
+          s.id === id ? { ...s, ...updates } : s
+        )
+      });
+    },
+    
+    deleteSnippet: (id: string) => {
+      const state = get();
+      set({
+        snippets: state.snippets.filter(s => s.id !== id)
       });
     }
   }))
