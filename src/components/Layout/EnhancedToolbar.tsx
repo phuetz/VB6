@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   FileText, Folder, Save, Play, Square, 
-  Copy, Clipboard, Grid, Crosshair, Activity, Zap,
+  Copy, Clipboard, Grid, Crosshair, Activity, Zap, Scissors,
   FileCode as FileCodeIcon, ArrowLeftRight
 } from 'lucide-react';
 import { useVB6Store } from '../../stores/vb6Store';
@@ -12,6 +12,7 @@ export const EnhancedToolbar: React.FC = () => {
   const {
     executionMode,
     showGrid,
+    showSnippetManager,
     snapToGrid,
     selectedControls,
     clipboard,
@@ -195,17 +196,33 @@ export const EnhancedToolbar: React.FC = () => {
         <div className="flex items-center ml-2 gap-2">
           <button
             onClick={() => showDialog('showCodeFormatter', true)}
-            className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors"
+            className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors relative group"
             title="Format Code"
           >
             <FileCodeIcon size={16} className="text-blue-600" />
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity mb-1">
+              Format Code
+            </div>
           </button>
           <button
             onClick={() => showDialog('showCodeConverter', true)}
-            className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors"
+            className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors relative group"
             title="Code Converter"
           >
             <ArrowLeftRight size={16} className="text-blue-600" />
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity mb-1">
+              Convert Code
+            </div>
+          </button>
+          <button
+            onClick={() => showDialog('showSnippetManager', true)}
+            className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors relative group"
+            title="Snippets"
+          >
+            <Scissors size={16} className="text-blue-600" />
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity mb-1">
+              Code Snippets
+            </div>
           </button>
         </div>
       </div>

@@ -16,14 +16,14 @@ import { useVB6Store } from './stores/vb6Store';
 import { EnhancedIntelliSense } from './components/Editor/EnhancedIntelliSense';
 import { CodeAnalyzer } from './components/Analysis/CodeAnalyzer';
 import { RefactorTools } from './components/Refactoring/RefactorTools';
+import { SnippetManager } from './components/Snippets/SnippetManager';
 import { BreakpointManager } from './components/Debugging/BreakpointManager';
 import { ProjectTemplateManager } from './components/Templates/ProjectTemplateManager';
 import { PerformanceMonitor } from './components/Performance/PerformanceMonitor';
 import { ProjectSetupWizard } from './components/ProjectWizard/ProjectSetupWizard';
 import { EnhancedErrorList } from './components/ErrorList/EnhancedErrorList';
 import { CommandPalette } from './components/CommandPalette/CommandPalette'; 
-import { ExportDialog } from './components/Export/ExportDialog'; 
-import { SnippetManager } from './components/Snippets/SnippetManager'; 
+import { ExportDialog } from './components/Export/ExportDialog';
 import { CodeFormatter } from './components/Formatting/CodeFormatter';
 import { CodeConverter } from './components/Converter/CodeConverter';
 import './index.css';
@@ -83,9 +83,10 @@ function App() {
   const [showErrorList, setShowErrorList] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
-  const [showSnippetManager, setShowSnippetManager] = useState(false);
   const [showCodeFormatter, setShowCodeFormatter] = useState(false);
   const [showCodeConverter, setShowCodeConverter] = useState(false);
+
+  const { snippets, showSnippetManager, insertSnippet, showDialog } = useVB6Store();
 
   return (
     <VB6Provider>
@@ -195,10 +196,9 @@ function App() {
           {/* Snippet Manager */}
           <SnippetManager
             visible={showSnippetManager}
-            onClose={() => setShowSnippetManager(false)}
-            onInsertSnippet={(snippet) => {
-              console.log('Insert snippet:', snippet);
-            }}
+            onClose={() => showDialog('showSnippetManager', false)}
+            onInsertSnippet={insertSnippet}
+            snippets={snippets}
           />
 
           {/* Code Formatter */}

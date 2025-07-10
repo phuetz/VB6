@@ -92,6 +92,106 @@ export const useVB6Store = create<VB6Store>()(
     intellisensePosition: { x: 0, y: 0 },
     intellisenseSuggestions: [],
 
+    // Snippets
+    snippets: [
+      {
+        id: '1',
+        title: 'Error Handler',
+        description: 'Basic error handling template',
+        code: `On Error GoTo ErrorHandler
+
+'Your code here
+
+Exit Sub
+
+ErrorHandler:
+MsgBox "Error " & Err.Number & ": " & Err.Description
+Resume Next`,
+        language: 'vb',
+        category: 'Error Handling',
+        tags: ['error', 'handler', 'exception'],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        favorite: true,
+        usageCount: 0
+      },
+      {
+        id: '2',
+        title: 'Database Connection',
+        description: 'Create an ADO database connection',
+        code: `Dim conn As ADODB.Connection
+Set conn = New ADODB.Connection
+
+conn.ConnectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\\Path\\Database.mdb;"
+conn.Open
+
+'Use connection here
+
+conn.Close
+Set conn = Nothing`,
+        language: 'vb',
+        category: 'Database',
+        tags: ['ado', 'connection', 'database'],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        favorite: false,
+        usageCount: 0
+      },
+      {
+        id: '3',
+        title: 'File Open Dialog',
+        description: 'Show file open dialog and get selected file',
+        code: `Dim fileName As String
+
+With CommonDialog1
+  .Filter = "All Files (*.*)|*.*|Text Files (*.txt)|*.txt"
+  .FilterIndex = 1
+  .ShowOpen
+  
+  If Len(.FileName) > 0 Then
+    fileName = .FileName
+    'Process the file here
+  End If
+End With`,
+        language: 'vb',
+        category: 'Dialogs',
+        tags: ['file', 'open', 'dialog'],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        favorite: true,
+        usageCount: 0
+      },
+      {
+        id: '4',
+        title: 'Input Validation',
+        description: 'Common input validation functions',
+        code: `Function IsNumeric(text As String) As Boolean
+  On Error GoTo ErrorHandler
+  Dim n As Double
+  n = Val(text)
+  IsNumeric = True
+  Exit Function
+  
+ErrorHandler:
+  IsNumeric = False
+End Function
+
+Function IsValidEmail(email As String) As Boolean
+  Dim regex As Object
+  Set regex = CreateObject("VBScript.RegExp")
+  regex.Pattern = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$"
+  IsValidEmail = regex.Test(email)
+End Function`,
+        language: 'vb',
+        category: 'Validation',
+        tags: ['validate', 'input', 'check'],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        favorite: false,
+        usageCount: 0
+      }
+    ],
+
     // Form Properties
     formProperties: {
       Caption: 'Form1',
@@ -246,10 +346,17 @@ export const useVB6Store = create<VB6Store>()(
 
     updateEventCode: (eventKey: string, code: string) => {
       const state = get();
+      // Check if we're in a procedure or general declarations
+      let finalCode = code;
+      if (eventKey.includes('_') && !code.includes('Sub') && !code.includes('Function')) {
+        // We're in a procedure, remove any procedure wrapper from the editor
+        finalCode = code.replace(/Private Sub.*?\(\)\n/g, '').replace(/\nEnd Sub$/g, '');
+      }
+
       set({
         eventCode: {
           ...state.eventCode,
-          [eventKey]: code
+          [eventKey]: finalCode
         }
       });
     },
@@ -361,7 +468,31 @@ export const useVB6Store = create<VB6Store>()(
       });
     },
     
-    // Snippet Management
+    // Snippet Manager
+    insertSnippet: (snippet: any) => {
+      const state = get();
+      
+      if (state.showCodeEditor && state.selectedControls.length > 0 && state.selectedEvent) {
+        const control = state.selectedControls[0];
+        const eventKey = `${control.name}_${state.selectedEvent}`;
+        const currentCode = state.eventCode[eventKey] || '';
+        
+        // Update the snippet usage count
+        const updatedSnippets = state.snippets.map(s => 
+          s.id === snippet.id ? { ...s, usageCount: s.usageCount + 1 } : s
+        );
+        
+        // Insert the snippet code into the current code
+        set({
+          eventCode: {
+            ...state.eventCode,
+            [eventKey]: currentCode + (currentCode ? '\n\n' : '') + snippet.code
+          },
+          snippets: updatedSnippets
+        });
+      }
+    },
+    
     addSnippet: (snippet: any) => {
       const state = get();
       set({
@@ -388,7 +519,46 @@ export const useVB6Store = create<VB6Store>()(
     // Code Formatting
     formatCode: (options = {}) => {
       console.log('Formatting code with options:', options);
-      // Implementation would format the current code in the editor
+      const state = get();
+      if (state.selectedControls.length > 0 && state.selectedEvent) {
+        const control = state.selectedControls[0];
+        const eventKey = `${control.name}_${state.selectedEvent}`;
+        const currentCode = state.eventCode[eventKey] || '';
+        
+        // Simple formatting: add proper indentation
+        let formattedCode = '';
+        const lines = currentCode.split('\n');
+        let indentLevel = 0;
+        
+        for (const line of lines) {
+          const trimmedLine = line.trim();
+          
+          // Check if this line should reduce indent
+          if (/^End\s+(Sub|Function|If|Select|With|Type|Enum|Property)/i.test(trimmedLine) ||
+              /^Next\b/i.test(trimmedLine) ||
+              /^Loop\b/i.test(trimmedLine) ||
+              /^Wend\b/i.test(trimmedLine)) {
+            indentLevel = Math.max(0, indentLevel - 1);
+          }
+          
+          // Add indentation to the line
+          formattedCode += '    '.repeat(indentLevel) + trimmedLine + '\n';
+          
+          // Check if next line should be indented more
+          if (/^\s*(Sub|Function|If|For|Do|While|With|Select|Type|Enum|Property)/i.test(trimmedLine) &&
+              !/^If.*Then.*End If/i.test(trimmedLine)) {
+            indentLevel++;
+          }
+        }
+        
+        // Update the code
+        set({
+          eventCode: {
+            ...state.eventCode,
+            [eventKey]: formattedCode.trim()
+          }
+        });
+      }
     },
 
     // Code Conversion

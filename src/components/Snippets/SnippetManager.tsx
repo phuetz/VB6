@@ -19,14 +19,16 @@ interface SnippetManagerProps {
   visible: boolean;
   onClose: () => void;
   onInsertSnippet: (snippet: CodeSnippet) => void;
+  snippets?: CodeSnippet[];
 }
 
 export const SnippetManager: React.FC<SnippetManagerProps> = ({
   visible,
   onClose,
-  onInsertSnippet
+  onInsertSnippet,
+  snippets: initialSnippets
 }) => {
-  const [snippets, setSnippets] = useState<CodeSnippet[]>([]);
+  const [snippets, setSnippets] = useState<CodeSnippet[]>(initialSnippets || []);
   const [filteredSnippets, setFilteredSnippets] = useState<CodeSnippet[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -44,181 +46,12 @@ export const SnippetManager: React.FC<SnippetManagerProps> = ({
 
   // Sample data for demonstration
   useEffect(() => {
-    const sampleSnippets: CodeSnippet[] = [
-      {
-        id: '1',
-        title: 'File Open Dialog',
-        description: 'Display a file open dialog and get the selected file path',
-        code: `Dim fileName As String
-fileName = GetOpenFileName("All Files (*.*)|*.*")
-If fileName <> "" Then
-    MsgBox "Selected file: " & fileName
-End If
-
-' Function to show open file dialog
-Private Function GetOpenFileName(filter As String) As String
-    Dim dlg As CommonDialog
-    Set dlg = New CommonDialog
-    dlg.Filter = filter
-    dlg.ShowOpen
-    GetOpenFileName = dlg.FileName
-    Set dlg = Nothing
-End Function`,
-        language: 'vb',
-        category: 'Dialogs',
-        tags: ['file', 'dialog', 'open'],
-        createdAt: new Date(2023, 9, 15),
-        updatedAt: new Date(2023, 9, 15),
-        favorite: true,
-        usageCount: 12
-      },
-      {
-        id: '2',
-        title: 'Database Connection',
-        description: 'Create an ADO database connection to MS Access',
-        code: `Dim conn As ADODB.Connection
-Dim connString As String
-
-' Create connection string
-connString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\\Path\\To\\Database.mdb;"
-
-' Open connection
-Set conn = New ADODB.Connection
-conn.Open connString
-
-' Use connection for queries here
-
-' Close connection when done
-conn.Close
-Set conn = Nothing`,
-        language: 'vb',
-        category: 'Database',
-        tags: ['ado', 'connection', 'access'],
-        createdAt: new Date(2023, 8, 22),
-        updatedAt: new Date(2023, 9, 5),
-        favorite: true,
-        usageCount: 27
-      },
-      {
-        id: '3',
-        title: 'Error Handler',
-        description: 'Basic error handling template',
-        code: `Sub MyProcedure()
-    On Error GoTo ErrorHandler
-    
-    ' Your code here
-    
-    Exit Sub
-    
-ErrorHandler:
-    Select Case Err.Number
-        Case 13  ' Type mismatch
-            MsgBox "Type mismatch error occurred", vbExclamation, "Error"
-        Case 53  ' File not found
-            MsgBox "File not found: " & Err.Description, vbExclamation, "Error"
-        Case Else
-            MsgBox "Error " & Err.Number & ": " & Err.Description, vbCritical, "Error"
-    End Select
-    Resume Next  ' Or use Resume [label] to go to a specific point
-End Sub`,
-        language: 'vb',
-        category: 'Error Handling',
-        tags: ['error', 'handler', 'exception'],
-        createdAt: new Date(2023, 7, 10),
-        updatedAt: new Date(2023, 9, 18),
-        favorite: false,
-        usageCount: 19
-      },
-      {
-        id: '4',
-        title: 'SQL Select with Parameters',
-        description: 'Parameterized SQL query to prevent SQL injection',
-        code: `Dim conn As ADODB.Connection
-Dim cmd As ADODB.Command
-Dim rs As ADODB.Recordset
-
-' Create connection
-Set conn = New ADODB.Connection
-conn.Open "Your Connection String Here"
-
-' Create command
-Set cmd = New ADODB.Command
-cmd.ActiveConnection = conn
-cmd.CommandText = "SELECT * FROM Customers WHERE CustomerID = ? AND Country = ?"
-
-' Add parameters
-cmd.Parameters.Append cmd.CreateParameter("CustomerID", adInteger, adParamInput, , 12345)
-cmd.Parameters.Append cmd.CreateParameter("Country", adVarChar, adParamInput, 50, "USA")
-
-' Execute query
-Set rs = cmd.Execute()
-
-' Process results
-Do Until rs.EOF
-    Debug.Print rs!CustomerName
-    rs.MoveNext
-Loop
-
-' Clean up
-rs.Close
-conn.Close
-Set rs = Nothing
-Set cmd = Nothing
-Set conn = Nothing`,
-        language: 'vb',
-        category: 'Database',
-        tags: ['sql', 'parameters', 'query'],
-        createdAt: new Date(2023, 9, 1),
-        updatedAt: new Date(2023, 9, 20),
-        favorite: false,
-        usageCount: 8
-      },
-      {
-        id: '5',
-        title: 'Input Validation',
-        description: 'Common input validation functions',
-        code: `' Validate numeric input
-Function IsNumeric(text As String) As Boolean
-    On Error GoTo ErrorHandler
-    Dim n As Double
-    n = Val(text)
-    IsNumeric = True
-    Exit Function
-ErrorHandler:
-    IsNumeric = False
-End Function
-
-' Validate email format
-Function IsValidEmail(email As String) As Boolean
-    Dim regex As Object
-    Set regex = CreateObject("VBScript.RegExp")
-    regex.Pattern = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$"
-    IsValidEmail = regex.Test(email)
-End Function
-
-' Validate date format
-Function IsValidDate(dateStr As String) As Boolean
-    On Error GoTo ErrorHandler
-    Dim d As Date
-    d = CDate(dateStr)
-    IsValidDate = True
-    Exit Function
-ErrorHandler:
-    IsValidDate = False
-End Function`,
-        language: 'vb',
-        category: 'Validation',
-        tags: ['validate', 'input', 'check'],
-        createdAt: new Date(2023, 8, 5),
-        updatedAt: new Date(2023, 8, 5),
-        favorite: true,
-        usageCount: 31
-      }
-    ];
-
-    setSnippets(sampleSnippets);
-    setFilteredSnippets(sampleSnippets);
-  }, []);
+    // Use initial snippets if provided, otherwise use empty array
+    if (initialSnippets && initialSnippets.length > 0) {
+      setSnippets(initialSnippets);
+      setFilteredSnippets(initialSnippets);
+    }
+  }, [initialSnippets]);
 
   // Filter snippets when search term or category changes
   useEffect(() => {
