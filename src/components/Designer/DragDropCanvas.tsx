@@ -16,7 +16,8 @@ import Grid from './Grid';
 import AlignmentGuides from './AlignmentGuides';
 import SelectionBox from './SelectionBox';
 
-interface DragDropCanvasProps {}
+// DragDropCanvas currently has no props.
+type DragDropCanvasProps = Record<string, never>;
 
 interface DragData {
   type: 'toolbox-control' | 'canvas-control';

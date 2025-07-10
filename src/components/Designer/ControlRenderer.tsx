@@ -10,8 +10,6 @@ interface ControlRendererProps {
 const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
   const { state, dispatch, updateControl, executeEvent } = useVB6();
 
-  if (!control.visible) return null;
-  
   const isSelected = state.selectedControls.find(sc => sc.id === control.id);
 
   const handleControlClick = useCallback((e: React.MouseEvent) => {
@@ -254,6 +252,10 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
         );
     }
   };
+
+  if (!control.visible) {
+    return null;
+  }
 
   return (
     <div className="relative">

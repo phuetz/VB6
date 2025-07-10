@@ -114,10 +114,11 @@ export const EnhancedErrorList: React.FC<EnhancedErrorListProps> = ({
         case 'time':
           comparison = a.timestamp.getTime() - b.timestamp.getTime();
           break;
-        case 'severity':
+        case 'severity': {
           const severityRank = { error: 0, warning: 1, info: 2 };
           comparison = severityRank[a.type] - severityRank[b.type];
           break;
+        }
         case 'file':
           comparison = a.file.localeCompare(b.file);
           if (comparison === 0) {

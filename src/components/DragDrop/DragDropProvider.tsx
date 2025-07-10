@@ -217,7 +217,7 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (over) {
       const zone = dropZones.find(z => z.id === over.id);
       if (zone && zone.accepts.includes(dragData?.type)) {
-        let dropPosition = { x: delta.x, y: delta.y };
+        const dropPosition = { x: delta.x, y: delta.y };
         
         // Appliquer les contraintes de la zone
         if (zone.constraints) {

@@ -49,6 +49,7 @@ const VB6_LANGUAGE_TOKENS: monaco.languages.IMonarchLanguage = {
     '=', '>', '<', '<=', '>=', '<>', '+', '-', '*', '/', '\\', '^', '&',
   ],
 
+  // eslint-disable-next-line no-useless-escape
   symbols: /[=><!~?:&|+\-*\/\^%]+/,
 
   tokenizer: {
@@ -59,7 +60,7 @@ const VB6_LANGUAGE_TOKENS: monaco.languages.IMonarchLanguage = {
           '@default': 'identifier'
         }
       }],
-      [/\d*\.\d+([eE][\-+]?\d+)?/, 'number.float'],
+      [/\d*\.\d+([eE][-+]?\d+)?/, 'number.float'],
       [/\d+/, 'number'],
       [/"([^"\\]|\\.)*$/, 'string.invalid'],
       [/"/, 'string', '@string'],

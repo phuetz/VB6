@@ -236,8 +236,8 @@ export function convertToCSharp(vb6Code: string, options: Partial<ConversionOpti
   
   // Process each line
   for (let i = 0; i < lines.length; i++) {
-    let line = lines[i];
-    let indentation = '        '; // Default C# indentation
+    const line = lines[i];
+    const indentation = '        '; // Default C# indentation
     let convertedLine = '';
     
     // Process line by line
@@ -573,7 +573,7 @@ export function convertToPython(vb6Code: string, options: Partial<ConversionOpti
     .replace(/End\s+If/g, '')
     .replace(/For\s+(\w+)\s*=\s*(\d+)\s+To\s+(\d+)/g, 'for $1 in range($2, $3+1):')
     .replace(/Next(?:\s+\w+)?/g, '')
-    .replace(/\'/g, '#');
+    .replace(/'/g, '#');
     
   issues.push({
     line: 1,
