@@ -15,7 +15,11 @@ interface VB6Store extends VB6State {
   toggleWindow: (windowName: string) => void;
   setSelectedEvent: (eventName: string) => void;
   updateEventCode: (eventKey: string, code: string) => void;
-  setDragState: (payload: { isDragging: boolean; controlType?: string; position?: { x: number; y: number } }) => void;
+  setDragState: (payload: {
+    isDragging: boolean;
+    controlType?: string;
+    position?: { x: number; y: number };
+  }) => void;
   updateFormProperty: (property: string, value: any) => void;
   addConsoleOutput: (message: string) => void;
   clearConsole: () => void;
@@ -24,6 +28,8 @@ interface VB6Store extends VB6State {
   undo: () => void;
   redo: () => void;
   showTemplateManager: boolean;
+  recordPerformanceMetrics: (metric: any) => void;
+  clearPerformanceLogs: () => void;
 }
 
 export const useVB6Store = create<VB6Store>()(
@@ -37,9 +43,19 @@ export const useVB6Store = create<VB6Store>()(
     userControls: [],
     references: [
       { name: 'Visual Basic For Applications', location: 'VBA6.DLL', checked: true, builtin: true },
-      { name: 'Visual Basic runtime objects and procedures', location: 'MSVBVM60.DLL', checked: true, builtin: true },
-      { name: 'Visual Basic objects and procedures', location: 'VB6.OLB', checked: true, builtin: true },
-      { name: 'OLE Automation', location: 'stdole2.tlb', checked: true, builtin: true }
+      {
+        name: 'Visual Basic runtime objects and procedures',
+        location: 'MSVBVM60.DLL',
+        checked: true,
+        builtin: true,
+      },
+      {
+        name: 'Visual Basic objects and procedures',
+        location: 'VB6.OLB',
+        checked: true,
+        builtin: true,
+      },
+      { name: 'OLE Automation', location: 'stdole2.tlb', checked: true, builtin: true },
     ],
     components: [],
 
@@ -115,7 +131,7 @@ Resume Next`,
         createdAt: new Date(),
         updatedAt: new Date(),
         favorite: true,
-        usageCount: 0
+        usageCount: 0,
       },
       {
         id: '2',
@@ -137,7 +153,7 @@ Set conn = Nothing`,
         createdAt: new Date(),
         updatedAt: new Date(),
         favorite: false,
-        usageCount: 0
+        usageCount: 0,
       },
       {
         id: '3',
@@ -161,7 +177,7 @@ End With`,
         createdAt: new Date(),
         updatedAt: new Date(),
         favorite: true,
-        usageCount: 0
+        usageCount: 0,
       },
       {
         id: '4',
@@ -190,8 +206,8 @@ End Function`,
         createdAt: new Date(),
         updatedAt: new Date(),
         favorite: false,
-        usageCount: 0
-      }
+        usageCount: 0,
+      },
     ],
 
     // Form Properties
@@ -205,7 +221,7 @@ End Function`,
       MaxButton: true,
       MinButton: true,
       ControlBox: true,
-      ShowInTaskbar: true
+      ShowInTaskbar: true,
     },
 
     // Debug
@@ -215,7 +231,7 @@ End Function`,
       '================================',
       '',
       'Ready.',
-      ''
+      '',
     ],
     immediateCommand: '',
     watchExpressions: [],
@@ -231,8 +247,8 @@ End Function`,
         complexity: 0,
         maintainability: 0,
         unusedVariables: 0,
-        qualityScore: 0
-      }
+        qualityScore: 0,
+      },
     },
     snippets: [],
 
@@ -265,71 +281,89 @@ End Function`,
 
     // Logging
     logs: [],
+    performanceLogs: [],
     showLogPanel: false,
 
     // Actions
     createControl: (type: string, x = 50, y = 50) => {
       const state = get();
-      const log = state.addLog('debug', 'ControlCreation', `Creating control: ${type} at (${x}, ${y})`);
-      
+      const log = state.addLog(
+        'debug',
+        'ControlCreation',
+        `Creating control: ${type} at (${x}, ${y})`
+      );
+
       const newControl = {
         ...getDefaultProperties(type, state.nextId),
         x,
-        y
+        y,
       };
-      
+
       set({
         controls: [...state.controls, newControl],
         selectedControls: [newControl],
-        nextId: state.nextId + 1
+        nextId: state.nextId + 1,
       });
-      
-      state.addLog('info', 'ControlCreation', `Created control: ${newControl.name} (${type})`, newControl);
+
+      state.addLog(
+        'info',
+        'ControlCreation',
+        `Created control: ${newControl.name} (${type})`,
+        newControl
+      );
     },
 
     updateControl: (controlId: number, property: string, value: any) => {
       const state = get();
-      
+
       if (property !== 'x' && property !== 'y') {
-        state.addLog('debug', 'ControlUpdate', `Updating control #${controlId}: ${property} = ${value}`);
+        state.addLog(
+          'debug',
+          'ControlUpdate',
+          `Updating control #${controlId}: ${property} = ${value}`
+        );
       }
-      
+
       const updatedControls = state.controls.map(control =>
         control.id === controlId ? { ...control, [property]: value } : control
       );
-      
+
       const updatedSelectedControls = state.selectedControls.map(control =>
         control.id === controlId ? { ...control, [property]: value } : control
       );
 
       set({
         controls: updatedControls,
-        selectedControls: updatedSelectedControls
+        selectedControls: updatedSelectedControls,
       });
     },
 
     deleteControls: (controlIds: number[]) => {
       const state = get();
       state.addLog('info', 'ControlDeletion', `Deleting controls: ${controlIds.join(', ')}`);
-      
+
       set({
         controls: state.controls.filter(control => !controlIds.includes(control.id)),
-        selectedControls: []
+        selectedControls: [],
       });
     },
 
     selectControls: (controlIds: number[]) => {
       const state = get();
       state.addLog('debug', 'ControlSelection', `Selecting controls: ${controlIds.join(', ')}`);
-      
+
       const selectedControls = state.controls.filter(control => controlIds.includes(control.id));
       set({ selectedControls });
     },
 
     copyControls: () => {
       const state = get();
-      state.addLog('info', 'Clipboard', `Copying ${state.selectedControls.length} controls to clipboard`);
-      
+      state.addLog(
+        'info',
+        'Clipboard',
+        `Copying ${state.selectedControls.length} controls to clipboard`
+      );
+
       set({ clipboard: [...state.selectedControls] });
     },
 
@@ -337,37 +371,45 @@ End Function`,
       const state = get();
       if (state.clipboard.length === 0) return;
 
-      state.addLog('info', 'Clipboard', `Pasting ${state.clipboard.length} controls from clipboard`);
-      
+      state.addLog(
+        'info',
+        'Clipboard',
+        `Pasting ${state.clipboard.length} controls from clipboard`
+      );
+
       const newControls = state.clipboard.map((control, index) => ({
         ...control,
         id: state.nextId + index,
         name: `${control.type}${state.nextId + index}`,
         x: control.x + 20,
-        y: control.y + 20
+        y: control.y + 20,
       }));
 
       set({
         controls: [...state.controls, ...newControls],
         selectedControls: newControls,
-        nextId: state.nextId + state.clipboard.length
+        nextId: state.nextId + state.clipboard.length,
       });
     },
 
     setExecutionMode: (mode: 'design' | 'run' | 'break') => {
       const state = get();
       state.addLog('info', 'Execution', `Mode changed: ${mode}`);
-      
+
       set({ executionMode: mode });
     },
 
     toggleWindow: (windowName: string) => {
       const state = get();
-      
+
       if (windowName !== 'showLogPanel') {
-        state.addLog('debug', 'UI', `Toggling window: ${windowName} (current: ${!state[windowName as keyof VB6State]})`);
+        state.addLog(
+          'debug',
+          'UI',
+          `Toggling window: ${windowName} (current: ${!state[windowName as keyof VB6State]})`
+        );
       }
-      
+
       set({ [windowName]: !state[windowName as keyof VB6State] });
     },
 
@@ -387,26 +429,27 @@ End Function`,
       set({
         eventCode: {
           ...state.eventCode,
-          [eventKey]: finalCode
-        }
+          [eventKey]: finalCode,
+        },
       });
     },
 
-    setDragState: (payload) => {
-      const state = get();      
+    setDragState: payload => {
+      const state = get();
       if (payload.isDragging && payload.controlType) {
         state.addLog('debug', 'DragDrop', `Drag started: ${payload.controlType}`, payload);
       } else if (!payload.isDragging && state.isDragging) {
-        state.addLog('debug', 'DragDrop', `Drag ended`, { 
+        state.addLog('debug', 'DragDrop', `Drag ended`, {
           controlType: state.draggedControlType,
-          position: payload.position || state.dragPosition 
+          position: payload.position || state.dragPosition,
         });
       }
-      
+
       set({
         isDragging: payload.isDragging,
-        draggedControlType: payload.controlType !== undefined ? payload.controlType : state.draggedControlType,
-        dragPosition: payload.position || state.dragPosition
+        draggedControlType:
+          payload.controlType !== undefined ? payload.controlType : state.draggedControlType,
+        dragPosition: payload.position || state.dragPosition,
       });
     },
 
@@ -415,15 +458,15 @@ End Function`,
       set({
         formProperties: {
           ...state.formProperties,
-          [property]: value
-        }
+          [property]: value,
+        },
       });
     },
 
     addConsoleOutput: (message: string) => {
       const state = get();
       set({
-        consoleOutput: [...state.consoleOutput, message]
+        consoleOutput: [...state.consoleOutput, message],
       });
     },
 
@@ -465,23 +508,21 @@ End Function`,
     addBreakpoint: (breakpoint: any) => {
       const state = get();
       set({
-        breakpoints: [...state.breakpoints, breakpoint]
+        breakpoints: [...state.breakpoints, breakpoint],
       });
     },
 
     removeBreakpoint: (id: string) => {
       const state = get();
       set({
-        breakpoints: state.breakpoints.filter(bp => bp.id !== id)
+        breakpoints: state.breakpoints.filter(bp => bp.id !== id),
       });
     },
 
     updateBreakpoint: (id: string, updates: any) => {
       const state = get();
       set({
-        breakpoints: state.breakpoints.map(bp => 
-          bp.id === id ? { ...bp, ...updates } : bp
-        )
+        breakpoints: state.breakpoints.map(bp => (bp.id === id ? { ...bp, ...updates } : bp)),
       });
     },
 
@@ -490,69 +531,67 @@ End Function`,
       set({
         intellisenseVisible: true,
         intellisensePosition: position,
-        intellisenseItems: items
+        intellisenseItems: items,
       });
     },
-    
+
     // Error List Management
     addError: (error: any) => {
       const state = get();
       set({
-        errorList: [...state.errorList, error]
+        errorList: [...state.errorList, error],
       });
     },
 
     clearErrors: () => {
       set({
-        errorList: []
+        errorList: [],
       });
     },
-    
+
     // Snippet Manager
     insertSnippet: (snippet: any) => {
       const state = get();
-      
+
       if (state.showCodeEditor && state.selectedControls.length > 0 && state.selectedEvent) {
         const control = state.selectedControls[0];
         const eventKey = `${control.name}_${state.selectedEvent}`;
         const currentCode = state.eventCode[eventKey] || '';
-        
+
         // Update the snippet usage count
-        const updatedSnippets = state.snippets.map(s => 
+        const updatedSnippets = state.snippets.map(s =>
           s.id === snippet.id ? { ...s, usageCount: s.usageCount + 1 } : s
         );
-        
+
         // Insert the snippet code into the current code
         set({
           eventCode: {
             ...state.eventCode,
-            [eventKey]: currentCode + (currentCode ? '\n\n' : '') + snippet.code
+            [eventKey]: currentCode + (currentCode ? '\n\n' : '') + snippet.code,
           },
-          snippets: updatedSnippets
+          snippets: updatedSnippets,
         });
       }
     },
-    
+
     addSnippet: (snippet: any) => {
       const state = get();
       set({
-        snippets: [...state.snippets, snippet]
+        snippets: [...state.snippets, snippet],
       });
     },
-    
+
     updateSnippet: (id: string, updates: any) => {
       const state = get();
       set({
-        snippets: state.snippets.map(s => 
-          s.id === id ? { ...s, ...updates } : s
-        )
+        snippets: state.snippets.map(s => (s.id === id ? { ...s, ...updates } : s)),
       });
     },
-    
+
     deleteSnippet: (id: string) => {
       const state = get();
       set({
-        snippets: state.snippets.filter(s => s.id !== id)
+        snippets: state.snippets.filter(s => s.id !== id),
       });
     },
 
@@ -564,39 +603,45 @@ End Function`,
         const control = state.selectedControls[0];
         const eventKey = `${control.name}_${state.selectedEvent}`;
         const currentCode = state.eventCode[eventKey] || '';
-        
+
         // Simple formatting: add proper indentation
         let formattedCode = '';
         const lines = currentCode.split('\n');
         let indentLevel = 0;
-        
+
         for (const line of lines) {
           const trimmedLine = line.trim();
-          
+
           // Check if this line should reduce indent
-          if (/^End\s+(Sub|Function|If|Select|With|Type|Enum|Property)/i.test(trimmedLine) ||
-              /^Next\b/i.test(trimmedLine) ||
-              /^Loop\b/i.test(trimmedLine) ||
-              /^Wend\b/i.test(trimmedLine)) {
+          if (
+            /^End\s+(Sub|Function|If|Select|With|Type|Enum|Property)/i.test(trimmedLine) ||
+            /^Next\b/i.test(trimmedLine) ||
+            /^Loop\b/i.test(trimmedLine) ||
+            /^Wend\b/i.test(trimmedLine)
+          ) {
             indentLevel = Math.max(0, indentLevel - 1);
           }
-          
+
           // Add indentation to the line
           formattedCode += '    '.repeat(indentLevel) + trimmedLine + '\n';
-          
+
           // Check if next line should be indented more
-          if (/^\s*(Sub|Function|If|For|Do|While|With|Select|Type|Enum|Property)/i.test(trimmedLine) &&
-              !/^If.*Then.*End If/i.test(trimmedLine)) {
+          if (
+            /^\s*(Sub|Function|If|For|Do|While|With|Select|Type|Enum|Property)/i.test(
+              trimmedLine
+            ) &&
+            !/^If.*Then.*End If/i.test(trimmedLine)
+          ) {
             indentLevel++;
           }
         }
-        
+
         // Update the code
         set({
           eventCode: {
             ...state.eventCode,
-            [eventKey]: formattedCode.trim()
-          }
+            [eventKey]: formattedCode.trim(),
+          },
         });
       }
     },
@@ -606,32 +651,54 @@ End Function`,
       console.log(`Converting code to ${targetLanguage} with options:`, options);
       // Implementation would convert the current code to the target language
     },
-    
+
     // Logging system
-    addLog: (level: 'info' | 'warn' | 'error' | 'debug', source: string, message: string, data?: any) => {
+    addLog: (
+      level: 'info' | 'warn' | 'error' | 'debug',
+      source: string,
+      message: string,
+      data?: any
+    ) => {
       const state = get();
-      
+
       const log = {
         id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
         timestamp: new Date(),
         level,
         source,
         message,
-        data
+        data,
       };
-      
+
       // Log to console as well for development
       console[level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'log'](
-        `[${log.source}] ${log.message}`, data || ''
+        `[${log.source}] ${log.message}`,
+        data || ''
       );
-      
+
       set({
-        logs: [...state.logs.slice(-999), log] // Keep last 1000 logs
+        logs: [...state.logs.slice(-999), log], // Keep last 1000 logs
       });
-      
+
       return log;
     },
-    
-    clearLogs: () => set({ logs: [] })
+
+    recordPerformanceMetrics: (metric: any) => {
+      const state = get();
+      // Keep last 500 metrics
+      set({
+        performanceLogs: [...state.performanceLogs.slice(-499), metric],
+      });
+
+      state.addLog(
+        'debug',
+        'Performance',
+        `FPS ${metric.fps} | Memory ${metric.memoryUsage.toFixed(1)}MB | CPU ${metric.cpuUsage.toFixed(1)}%`
+      );
+    },
+
+    clearPerformanceLogs: () => set({ performanceLogs: [] }),
+
+    clearLogs: () => set({ logs: [] }),
   }))
 );

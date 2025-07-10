@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Activity, Clock, MemoryStick as Memory, Cpu, TrendingUp, TrendingDown, Pause, Play } from 'lucide-react';
+import { useVB6Store } from '../../stores/vb6Store';
+import {
+  Activity,
+  Clock,
+  MemoryStick as Memory,
+  Cpu,
+  TrendingUp,
+  TrendingDown,
+  Pause,
+  Play,
+} from 'lucide-react';
 
 interface PerformanceMetrics {
   fps: number;
@@ -13,7 +23,7 @@ interface PerformanceMetrics {
 
 export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => void }> = ({
   visible,
-  onClose
+  onClose,
 }) => {
   const [metrics, setMetrics] = useState<PerformanceMetrics[]>([]);
   const [isMonitoring, setIsMonitoring] = useState(true);
@@ -24,13 +34,14 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
     renderTime: 0,
     controlsCount: 0,
     eventsCount: 0,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
-  
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameCountRef = useRef(0);
   const lastFrameTimeRef = useRef(performance.now());
   const metricsIntervalRef = useRef<NodeJS.Timeout>();
+  const { recordPerformanceMetrics } = useVB6Store();
 
   useEffect(() => {
     if (!visible) return;
@@ -43,7 +54,7 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
       // Calculate FPS every second
       if (deltaTime >= 1000) {
         const fps = Math.round((frameCountRef.current * 1000) / deltaTime);
-        
+
         const newMetrics: PerformanceMetrics = {
           fps,
           memoryUsage: (performance as any).memory?.usedJSHeapSize / 1024 / 1024 || 0,
@@ -51,11 +62,12 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
           renderTime: Math.random() * 5 + 1, // Simulated render time
           controlsCount: document.querySelectorAll('[data-vb6-control]').length,
           eventsCount: Math.floor(Math.random() * 10),
-          timestamp: Date.now()
+          timestamp: Date.now(),
         };
 
         setCurrentMetrics(newMetrics);
-        
+        recordPerformanceMetrics(newMetrics);
+
         if (isMonitoring) {
           setMetrics(prev => [...prev.slice(-49), newMetrics]); // Keep last 50 points
         }
@@ -94,7 +106,7 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
     // Draw grid
     ctx.strokeStyle = '#e5e5e5';
     ctx.lineWidth = 1;
-    
+
     // Vertical lines
     for (let i = 0; i <= 10; i++) {
       const x = (width / 10) * i;
@@ -103,7 +115,7 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
       ctx.lineTo(x, height);
       ctx.stroke();
     }
-    
+
     // Horizontal lines
     for (let i = 0; i <= 5; i++) {
       const y = (height / 5) * i;
@@ -117,38 +129,38 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
     ctx.strokeStyle = '#3b82f6';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    
+
     metrics.forEach((metric, index) => {
       const x = (width / (metrics.length - 1)) * index;
       const y = height - (metric.fps / 120) * height; // Scale to 120 FPS max
-      
+
       if (index === 0) {
         ctx.moveTo(x, y);
       } else {
         ctx.lineTo(x, y);
       }
     });
-    
+
     ctx.stroke();
 
     // Draw memory usage line
     ctx.strokeStyle = '#10b981';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    
+
     const maxMemory = Math.max(...metrics.map(m => m.memoryUsage), 100);
-    
+
     metrics.forEach((metric, index) => {
       const x = (width / (metrics.length - 1)) * index;
       const y = height - (metric.memoryUsage / maxMemory) * height;
-      
+
       if (index === 0) {
         ctx.moveTo(x, y);
       } else {
         ctx.lineTo(x, y);
       }
     });
-    
+
     ctx.stroke();
   }, [metrics]);
 
@@ -178,7 +190,10 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-200 border-2 border-gray-400 shadow-lg" style={{ width: '800px', height: '600px' }}>
+      <div
+        className="bg-gray-200 border-2 border-gray-400 shadow-lg"
+        style={{ width: '800px', height: '600px' }}
+      >
         <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
           <span>Performance Monitor</span>
           <div className="flex items-center gap-2">
@@ -189,7 +204,9 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
               {isMonitoring ? <Pause size={12} /> : <Play size={12} />}
               {isMonitoring ? 'Pause' : 'Resume'}
             </button>
-            <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">×</button>
+            <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">
+              ×
+            </button>
           </div>
         </div>
 
@@ -201,11 +218,17 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
                 <Activity size={16} className="text-blue-600" />
                 <span className="text-xs font-semibold">FPS</span>
               </div>
-              <div className={`text-2xl font-bold ${getStatusColor(currentMetrics.fps, { good: 50, warning: 30 })}`}>
+              <div
+                className={`text-2xl font-bold ${getStatusColor(currentMetrics.fps, { good: 50, warning: 30 })}`}
+              >
                 {currentMetrics.fps}
               </div>
               <div className="text-xs text-gray-500">
-                {currentMetrics.fps >= 50 ? 'Excellent' : currentMetrics.fps >= 30 ? 'Good' : 'Poor'}
+                {currentMetrics.fps >= 50
+                  ? 'Excellent'
+                  : currentMetrics.fps >= 30
+                    ? 'Good'
+                    : 'Poor'}
               </div>
             </div>
 
@@ -214,11 +237,17 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
                 <Memory size={16} className="text-green-600" />
                 <span className="text-xs font-semibold">Memory</span>
               </div>
-              <div className={`text-2xl font-bold ${getMemoryStatusColor(currentMetrics.memoryUsage)}`}>
+              <div
+                className={`text-2xl font-bold ${getMemoryStatusColor(currentMetrics.memoryUsage)}`}
+              >
                 {formatBytes(currentMetrics.memoryUsage)}
               </div>
               <div className="text-xs text-gray-500">
-                {currentMetrics.memoryUsage < 50 ? 'Low' : currentMetrics.memoryUsage < 100 ? 'Medium' : 'High'}
+                {currentMetrics.memoryUsage < 50
+                  ? 'Low'
+                  : currentMetrics.memoryUsage < 100
+                    ? 'Medium'
+                    : 'High'}
               </div>
             </div>
 
@@ -231,7 +260,11 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
                 {currentMetrics.cpuUsage.toFixed(1)}%
               </div>
               <div className="text-xs text-gray-500">
-                {currentMetrics.cpuUsage < 30 ? 'Low' : currentMetrics.cpuUsage < 60 ? 'Medium' : 'High'}
+                {currentMetrics.cpuUsage < 30
+                  ? 'Low'
+                  : currentMetrics.cpuUsage < 60
+                    ? 'Medium'
+                    : 'High'}
               </div>
             </div>
 
@@ -244,7 +277,11 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
                 {currentMetrics.renderTime.toFixed(1)}ms
               </div>
               <div className="text-xs text-gray-500">
-                {currentMetrics.renderTime < 2 ? 'Fast' : currentMetrics.renderTime < 5 ? 'Good' : 'Slow'}
+                {currentMetrics.renderTime < 2
+                  ? 'Fast'
+                  : currentMetrics.renderTime < 5
+                    ? 'Good'
+                    : 'Slow'}
               </div>
             </div>
           </div>
