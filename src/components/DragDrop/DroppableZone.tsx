@@ -65,26 +65,23 @@ export const DroppableZone: React.FC<DroppableZoneProps> = ({
     }
   }, [isOver, canDrop, id, activeType, addLog, accepts]);
 
-  // Enregistrer la zone de dépôt
+  // Enregistrer la zone de dépôt (une seule fois ou lorsque ses propriétés changent)
   useEffect(() => {
-    // Track element reference changes
     if (elementRef.current) {
-      addLog('debug', 'DroppableZone', `${id} ref element available, registering`, { 
-        elementBounds: elementRef.current.getBoundingClientRect() 
+      addLog('debug', 'DroppableZone', `${id} ref element available, registering`, {
+        elementBounds: elementRef.current.getBoundingClientRect(),
       });
-    }
 
-    // Register the drop zone with the provider
-    if (elementRef.current && !disabled) {
-      const zone = {
-        id,
-        element: elementRef.current,
-        accepts,
-        onDrop,
-        highlight: isOver,
-        constraints,
-      };
-      registerDropZone(zone);
+      if (!disabled) {
+        registerDropZone({
+          id,
+          element: elementRef.current,
+          accepts,
+          onDrop,
+          highlight: isOver,
+          constraints,
+        });
+      }
     }
 
     return () => {
@@ -93,7 +90,8 @@ export const DroppableZone: React.FC<DroppableZoneProps> = ({
         addLog('debug', 'DroppableZone', `${id} unregistered`);
       }
     };
-  }, [id, accepts, onDrop, constraints, isOver, disabled, registerDropZone, unregisterDropZone, addLog]);
+    // intentionally omit isOver to avoid re-registration loops when drag state updates
+  }, [id, accepts, onDrop, constraints, disabled, registerDropZone, unregisterDropZone, addLog]);
 
   const dropStyle: React.CSSProperties = {
     transition: 'all 200ms ease',
