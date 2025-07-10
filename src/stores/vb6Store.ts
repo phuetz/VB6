@@ -70,6 +70,8 @@ export const useVB6Store = create<VB6Store>()(
     showCommandPalette: false,
     showExportDialog: false,
     showSnippetManager: false,
+    showCodeFormatter: false,
+    showCodeConverter: false, 
     showCodeAnalyzer: false,
     showRefactorTools: false,
     showBreakpointManager: false,
@@ -384,6 +386,19 @@ export const useVB6Store = create<VB6Store>()(
       set({
         snippets: state.snippets.filter(s => s.id !== id)
       });
+    }
+    },
+
+    // Code Formatting
+    formatCode: (options = {}) => {
+      console.log('Formatting code with options:', options);
+      // Implementation would format the current code in the editor
+    },
+
+    // Code Conversion
+    convertCode: (targetLanguage: string, options = {}) => {
+      console.log(`Converting code to ${targetLanguage} with options:`, options);
+      // Implementation would convert the current code to the target language
     }
   }))
 );

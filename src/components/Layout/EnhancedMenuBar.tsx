@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useVB6Store } from '../../stores/vb6Store';
-import { FileText, FolderOpen, Save, Nut as Cut, Copy, Clipboard, Undo, Redo, Search, Play, Square, Settings, HelpCircle, Eye, Code, Package, Database, AlertOctagon, Sparkles as WandSparkles, ActivitySquare, BarChart, AlertCircle, Command, Download, Scissors } from 'lucide-react';
+import { FileText, FolderOpen, Save, Nut as Cut, Copy, Clipboard, Undo, Redo, Search, Play, Square, Settings, HelpCircle, Eye, Code, Package, Database, AlertOctagon, Sparkles as WandSparkles, ActivitySquare, BarChart, AlertCircle, Command, Download, Scissors, FileCode, ArrowLeftRight } from 'lucide-react';
 
 const EnhancedMenuBar: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
@@ -19,6 +19,8 @@ const EnhancedMenuBar: React.FC = () => {
   const setShowCommandPalette = () => console.log('Show command palette');
   const setShowExportDialog = () => console.log('Show export dialog');
   const setShowSnippetManager = () => console.log('Show snippet manager');
+  const setShowCodeFormatter = () => console.log('Show code formatter');
+  const setShowCodeConverter = () => console.log('Show code converter');
 
   const handleMenuHover = (menuName: string) => {
     if (activeMenu) {
@@ -368,7 +370,18 @@ const EnhancedMenuBar: React.FC = () => {
       { 
         label: 'Snippets Manager...', 
         icon: <Scissors size={14} />, 
-        action: () => setShowSnippetManager(true)
+        action: () => setShowSnippetManager(true) 
+      },
+      { 
+        label: 'Format Code...', 
+        icon: <FileCode size={14} />, 
+        action: () => setShowCodeFormatter(true),
+        shortcut: 'Alt+Shift+F'
+      },
+      { 
+        label: 'Convert Code...', 
+        icon: <ArrowLeftRight size={14} />, 
+        action: () => setShowCodeConverter(true)
       },
       { separator: true },
       { 
