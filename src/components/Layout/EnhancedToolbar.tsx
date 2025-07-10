@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   FileText, Folder, Save, Play, Square, 
-  Copy, Clipboard, Grid, Crosshair 
+  Copy, Clipboard, Grid, Crosshair, Activity, Zap
 } from 'lucide-react';
 import { useVB6Store } from '../../stores/vb6Store';
 import { UndoRedoToolbar } from './UndoRedoToolbar';
@@ -163,6 +163,30 @@ export const EnhancedToolbar: React.FC = () => {
         <span className="text-gray-400 hidden lg:block">
           💡 Hold Ctrl while dragging to copy
         </span>
+        
+        <div className="w-px h-6 bg-gray-400 mx-1" />
+        
+        <button
+          onClick={() => {
+            // TODO: Open template manager
+            console.log('Open template manager');
+          }}
+          className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors"
+          title="Project Templates"
+        >
+          <Zap size={16} />
+        </button>
+        
+        <button
+          onClick={() => {
+            // TODO: Open performance monitor
+            console.log('Open performance monitor');
+          }}
+          className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors"
+          title="Performance Monitor"
+        >
+          <Activity size={16} />
+        </button>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import React from 'react';
 import { DragDropProvider } from './components/DragDrop/DragDropProvider';
 import { VB6Provider } from './context/VB6Context';
 import TitleBar from './components/Layout/TitleBar';
-import MenuBar from './components/Layout/MenuBar';
+import EnhancedMenuBar from './components/Layout/EnhancedMenuBar';
 import { EnhancedToolbar } from './components/Layout/EnhancedToolbar';
 import StatusBar from './components/Layout/StatusBar';
 import DialogManager from './components/Dialogs/DialogManager';
@@ -13,6 +13,9 @@ import ProjectExplorer from './components/Panels/ProjectExplorer/ProjectExplorer
 import PropertiesWindow from './components/Panels/PropertiesWindow/PropertiesWindow';
 import ImmediateWindow from './components/Panels/ImmediateWindow/ImmediateWindow';
 import { useVB6Store } from './stores/vb6Store';
+import { ProjectTemplateManager } from './components/Templates/ProjectTemplateManager';
+import { PerformanceMonitor } from './components/Performance/PerformanceMonitor';
+import { ProjectSetupWizard } from './components/ProjectWizard/ProjectSetupWizard';
 import './index.css';
 
 const MainContent: React.FC = () => {
@@ -22,8 +25,13 @@ const MainContent: React.FC = () => {
     showProjectExplorer, 
     showPropertiesWindow, 
     showImmediateWindow,
-    formProperties
+    formProperties,
+    showDialog
   } = useVB6Store();
+
+  const [showTemplateManager, setShowTemplateManager] = React.useState(false);
+  const [showPerformanceMonitor, setShowPerformanceMonitor] = React.useState(false);
+  const [showProjectWizard, setShowProjectWizard] = React.useState(false);
 
   return (
     <div className="flex-1 flex overflow-hidden">
@@ -65,11 +73,35 @@ function App() {
       <DragDropProvider>
         <div className="h-screen bg-gray-200 flex flex-col overflow-hidden" style={{ fontFamily: 'MS Sans Serif, sans-serif' }}>
           <TitleBar />
-          <MenuBar />
+          <EnhancedMenuBar />
           <EnhancedToolbar />
           <MainContent />
           <StatusBar />
           <DialogManager />
+          
+          {/* Additional Components */}
+          <ProjectTemplateManager
+            visible={showTemplateManager}
+            onClose={() => setShowTemplateManager(false)}
+            onCreateProject={(template) => {
+              console.log('Creating project from template:', template);
+              setShowTemplateManager(false);
+            }}
+          />
+          
+          <PerformanceMonitor
+            visible={showPerformanceMonitor}
+            onClose={() => setShowPerformanceMonitor(false)}
+          />
+          
+          <ProjectSetupWizard
+            visible={showProjectWizard}
+            onClose={() => setShowProjectWizard(false)}
+            onComplete={(config) => {
+              console.log('Project configuration:', config);
+              setShowProjectWizard(false);
+            }}
+          />
         </div>
       </DragDropProvider>
     </VB6Provider>
