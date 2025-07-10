@@ -40,15 +40,6 @@ export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(
       disabled,
     } : { id, data, disabled });
 
-    // Log dragging state changes
-    React.useEffect(() => {
-      if (isDragging) {
-        addLog('debug', 'DraggableItem', `DraggableItem ${id} is being dragged`, { 
-          transform, data 
-        });
-      }
-    }, [isDragging, transform, id, data, addLog]);
-
     const dragStyle = {
       transform: CSS.Translate.toString(transform),
       opacity: isDragging ? 0.5 : 1,
