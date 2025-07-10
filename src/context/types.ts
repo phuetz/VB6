@@ -160,6 +160,10 @@ export type VB6Action =
   | { type: 'SET_RESIZE_STATE'; payload: { isResizing: boolean; handle?: string; start?: any } }
   | { type: 'SET_MOVE_STATE'; payload: { isMoving: boolean; start?: any } }
   | { type: 'UPDATE_FORM_PROPERTY'; payload: { property: string; value: any } }
+  | { type: 'ADD_FORM'; payload: { name: string } }
+  | { type: 'SET_ACTIVE_FORM'; payload: { id: number } }
+  | { type: 'RENAME_FORM'; payload: { id: number; name: string } }
+  | { type: 'SET_PROJECT'; payload: { project: any } }
   | { type: 'ADD_CONSOLE_OUTPUT'; payload: { message: string } }
   | { type: 'CLEAR_CONSOLE' }
   | { type: 'SET_IMMEDIATE_COMMAND'; payload: { command: string } }

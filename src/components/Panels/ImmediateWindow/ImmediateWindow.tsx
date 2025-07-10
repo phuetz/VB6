@@ -8,8 +8,11 @@ const ImmediateWindow: React.FC = () => {
     if (!state.immediateCommand) return;
     
     try {
-      // TODO: Execute immediate command
+      const result = eval(state.immediateCommand);
       dispatch({ type: 'ADD_CONSOLE_OUTPUT', payload: { message: `> ${state.immediateCommand}` } });
+      if (result !== undefined) {
+        dispatch({ type: 'ADD_CONSOLE_OUTPUT', payload: { message: String(result) } });
+      }
       dispatch({ type: 'SET_IMMEDIATE_COMMAND', payload: { command: '' } });
     } catch (error) {
       dispatch({ type: 'ADD_CONSOLE_OUTPUT', payload: { message: `Error: ${(error as Error).message}` } });

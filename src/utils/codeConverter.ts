@@ -177,18 +177,16 @@ export function convertToVBNET(vb6Code: string, options: Partial<ConversionOptio
       }
     }
     
-    // Handle GoTo statements
-    if (opts.removeGoto && /\bGoTo\b/i.test(convertedLine)) {
+    // Handle GoTo statements with a basic refactor
+    if (/^\s*GoTo\s+(\w+)/i.test(convertedLine)) {
+      const label = convertedLine.match(/^\s*GoTo\s+(\w+)/i)![1];
       issues.push({
         line: i + 1,
-        message: 'GoTo statement should be refactored in modern code',
+        message: 'GoTo statement converted to goto label',
         severity: 'warning',
         code: 'CONV004'
       });
-      
-      if (opts.includeComments) {
-        convertedLine += ' ' + "' TODO: Refactor GoTo statement";
-      }
+      convertedLine = `goto ${label};`;
     }
     
     convertedLines.push(convertedLine);

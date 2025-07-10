@@ -37,7 +37,7 @@ const ProjectExplorer: React.FC = () => {
                   form.id === state.activeFormId ? 'bg-blue-100' : ''
                 }`}
                 onClick={() => {
-                  // TODO: Set active form
+                  dispatch({ type: 'SET_ACTIVE_FORM', payload: { id: form.id } });
                 }}
               >
                 <FileText size={12} />
@@ -73,7 +73,7 @@ const ProjectExplorer: React.FC = () => {
             onClick={() => {
               const formName = prompt('Form name:', `Form${state.forms.length + 1}`);
               if (formName) {
-                // TODO: Add form action
+                dispatch({ type: 'ADD_FORM', payload: { name: formName } });
               }
             }}
           >

@@ -321,6 +321,49 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
       };
     }
 
+    case 'ADD_FORM': {
+      const newId = state.forms.length > 0 ? Math.max(...state.forms.map(f => f.id)) + 1 : 1;
+      const name = action.payload.name;
+      const newForm = { id: newId, name, caption: name, controls: [] };
+      return {
+        ...state,
+        forms: [...state.forms, newForm],
+        activeFormId: newId,
+        formProperties: {
+          ...state.formProperties,
+          Caption: name
+        }
+      };
+    }
+
+    case 'SET_ACTIVE_FORM': {
+      return {
+        ...state,
+        activeFormId: action.payload.id
+      };
+    }
+
+    case 'RENAME_FORM': {
+      const { id, name } = action.payload;
+      return {
+        ...state,
+        forms: state.forms.map(f => f.id === id ? { ...f, name } : f),
+        formProperties: state.activeFormId === id ? { ...state.formProperties, Caption: name } : state.formProperties
+      };
+    }
+
+    case 'SET_PROJECT': {
+      const project = action.payload.project;
+      return {
+        ...state,
+        projectName: project.name,
+        forms: project.forms || [],
+        modules: project.modules || [],
+        classModules: project.classModules || [],
+        activeFormId: project.forms && project.forms.length > 0 ? project.forms[0].id : state.activeFormId
+      };
+    }
+
     case 'UNDO': {
       // Implementation for undo
       return state;

@@ -6,7 +6,7 @@ import {
 import { useVB6 } from '../../context/VB6Context';
 
 const Toolbar: React.FC = () => {
-  const { state, dispatch, saveProject, copyControls, pasteControls, undo, redo } = useVB6();
+  const { state, dispatch, saveProject, loadProject, copyControls, pasteControls, undo, redo } = useVB6();
 
   const handleExecutionToggle = () => {
     const newMode = state.executionMode === 'run' ? 'design' : 'run';
@@ -20,7 +20,7 @@ const Toolbar: React.FC = () => {
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        // TODO: Implement loadProject action
+        loadProject(file);
       }
     };
     input.click();

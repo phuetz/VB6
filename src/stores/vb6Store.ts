@@ -23,6 +23,7 @@ interface VB6Store extends VB6State {
   showDialog: (dialogName: string, show: boolean) => void;
   undo: () => void;
   redo: () => void;
+  showTemplateManager: boolean;
 }
 
 export const useVB6Store = create<VB6Store>()(
@@ -69,6 +70,7 @@ export const useVB6Store = create<VB6Store>()(
     showErrorList: false,
     showCommandPalette: false,
     showExportDialog: false,
+    showTemplateManager: false,
     showSnippetManager: false,
     showCodeFormatter: false,
     showCodeConverter: false,
