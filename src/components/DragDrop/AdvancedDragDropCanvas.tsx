@@ -57,7 +57,7 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
       finalX = Math.max(0, Math.min(finalX, width - 100));
       finalY = Math.max(0, Math.min(finalY, height - 30));
 
-      if (data.copy) {
+      if (data.copy && data.originalId) {
         // Copie d'un contrôle existant
         const originalControl = controls.find(c => c.id === data.originalId);
         if (originalControl) {
@@ -80,8 +80,11 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
         finalY = Math.round(finalY / gridSize) * gridSize;
       }
 
-      updateControl(data.controlId, 'x', finalX);
-      updateControl(data.controlId, 'y', finalY);
+      // Ensure controlId exists
+      if (data.controlId !== undefined) {
+        updateControl(data.controlId, 'x', finalX);
+        updateControl(data.controlId, 'y', finalY);
+      }
 
       playDropSound();
       vibrate(30);

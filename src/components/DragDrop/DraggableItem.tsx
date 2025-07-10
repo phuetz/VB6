@@ -22,11 +22,11 @@ export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(
       transform,
       isDragging,
       isOver,
-    } = useDraggable({
+    } = useDraggable(data?.type ? {
       id,
       data,
       disabled,
-    });
+    } : { id, data, disabled });
 
     const dragStyle = {
       transform: CSS.Translate.toString(transform),

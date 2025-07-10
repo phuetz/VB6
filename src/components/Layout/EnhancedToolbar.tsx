@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   FileText, Folder, Save, Play, Square, 
   Copy, Clipboard, Grid, Crosshair, Activity, Zap,
-  FileCode, ArrowLeftRight
+  FileCode as FileCodeIcon, ArrowLeftRight
 } from 'lucide-react';
 import { useVB6Store } from '../../stores/vb6Store';
 import { UndoRedoToolbar } from './UndoRedoToolbar';
@@ -198,7 +198,7 @@ export const EnhancedToolbar: React.FC = () => {
             className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors"
             title="Format Code"
           >
-            <FileCode size={16} className="text-blue-600" />
+            <FileCodeIcon size={16} className="text-blue-600" />
           </button>
           <button
             onClick={() => showDialog('showCodeConverter', true)}

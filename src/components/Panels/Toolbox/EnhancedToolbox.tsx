@@ -154,24 +154,11 @@ export const EnhancedToolbox: React.FC<EnhancedToolboxProps> = ({ className = ''
   const [selectedCategory, setSelectedCategory] = useState('General');
   const [selectedTool, setSelectedTool] = useState('Pointer');
   const [searchTerm, setSearchTerm] = useState('');
-  const [favoritesOnly, setFavoritesOnly] = useState(false);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set(['CommandButton', 'Label', 'TextBox']));
 
   const handleToolSelect = useCallback((controlDef: ControlDefinition) => {
     setSelectedTool(controlDef.type);
   }, []);
 
-  const handleFavoriteToggle = useCallback((controlType: string) => {
-    setFavorites(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(controlType)) {
-        newFavorites.delete(controlType);
-      } else {
-        newFavorites.add(controlType);
-      }
-      return newFavorites;
-    });
-  }, []);
 
   // Filtrage des contrôles
   const filteredControls = VB6_CONTROLS.filter(control => {
@@ -180,9 +167,8 @@ export const EnhancedToolbox: React.FC<EnhancedToolboxProps> = ({ className = ''
       control.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       control.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       control.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesFavorites = !favoritesOnly || favorites.has(control.type);
     
-    return matchesCategory && matchesSearch && matchesFavorites;
+    return matchesCategory && matchesSearch;
   });
 
   return (
@@ -191,13 +177,6 @@ export const EnhancedToolbox: React.FC<EnhancedToolboxProps> = ({ className = ''
       <div className="bg-blue-600 text-white text-xs font-bold p-2 flex items-center justify-between">
         <span>Enhanced Toolbox</span>
         <div className="flex items-center gap-1">
-          <button
-            onClick={() => setFavoritesOnly(!favoritesOnly)}
-            className={`px-2 py-1 text-xs rounded ${favoritesOnly ? 'bg-yellow-500' : 'hover:bg-blue-700'}`}
-            title="Show favorites only"
-          >
-            ⭐
-          </button>
           <button
             onClick={() => toggleWindow('showToolbox')}
             className="hover:bg-blue-700 px-1"
@@ -264,20 +243,6 @@ export const EnhancedToolbox: React.FC<EnhancedToolboxProps> = ({ className = ''
                   <div className="text-lg mb-1">{controlDef.icon}</div>
                   <div className="text-xs leading-tight font-medium">{controlDef.name}</div>
                   
-                  {/* Favorite star */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleFavoriteToggle(controlDef.type);
-                    }}
-                    className={`absolute top-0 right-0 text-xs ${
-                      favorites.has(controlDef.type) ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'
-                    }`}
-                    title="Toggle favorite"
-                  >
-                    ⭐
-                  </button>
-                  
                   {/* Drag indicator */}
                   <div className="absolute bottom-0 right-0 text-xs text-gray-500 opacity-50">
                     ⋮⋮
@@ -329,7 +294,6 @@ export const EnhancedToolbox: React.FC<EnhancedToolboxProps> = ({ className = ''
       <div className="border-t border-gray-300 p-2 bg-white text-xs">
         <div className="flex justify-between items-center">
           <span>{filteredControls.length} controls</span>
-          <span>{favorites.size} favorites</span>
         </div>
       </div>
     </div>
