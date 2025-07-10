@@ -13,6 +13,10 @@ import ProjectExplorer from './components/Panels/ProjectExplorer/ProjectExplorer
 import PropertiesWindow from './components/Panels/PropertiesWindow/PropertiesWindow';
 import ImmediateWindow from './components/Panels/ImmediateWindow/ImmediateWindow';
 import { useVB6Store } from './stores/vb6Store';
+import { EnhancedIntelliSense } from './components/Editor/EnhancedIntelliSense';
+import { CodeAnalyzer } from './components/Analysis/CodeAnalyzer';
+import { RefactorTools } from './components/Refactoring/RefactorTools';
+import { BreakpointManager } from './components/Debugging/BreakpointManager';
 import { ProjectTemplateManager } from './components/Templates/ProjectTemplateManager';
 import { PerformanceMonitor } from './components/Performance/PerformanceMonitor';
 import { ProjectSetupWizard } from './components/ProjectWizard/ProjectSetupWizard';
@@ -32,6 +36,9 @@ const MainContent: React.FC = () => {
   const [showTemplateManager, setShowTemplateManager] = React.useState(false);
   const [showPerformanceMonitor, setShowPerformanceMonitor] = React.useState(false);
   const [showProjectWizard, setShowProjectWizard] = React.useState(false);
+  const [showCodeAnalyzer, setShowCodeAnalyzer] = React.useState(false);
+  const [showRefactorTools, setShowRefactorTools] = React.useState(false);
+  const [showBreakpointManager, setShowBreakpointManager] = React.useState(false);
 
   return (
     <div className="flex-1 flex overflow-hidden">
@@ -79,7 +86,7 @@ function App() {
           <StatusBar />
           <DialogManager />
           
-          {/* Additional Components */}
+          {/* Template Manager */}
           <ProjectTemplateManager
             visible={showTemplateManager}
             onClose={() => setShowTemplateManager(false)}
@@ -89,7 +96,8 @@ function App() {
             }}
           />
           
-          <PerformanceMonitor
+          {/* Performance Monitor */}
+           <PerformanceMonitor
             visible={showPerformanceMonitor}
             onClose={() => setShowPerformanceMonitor(false)}
           />
@@ -98,6 +106,46 @@ function App() {
             visible={showProjectWizard}
             onClose={() => setShowProjectWizard(false)}
             onComplete={(config) => {
+              console.log('Project configuration:', config);
+              setShowProjectWizard(false);
+            }}
+          />
+          
+          {/* Code Analysis and Refactoring Tools */}
+          <CodeAnalyzer 
+            visible={showCodeAnalyzer}
+            onClose={() => setShowCodeAnalyzer(false)}
+            onFixIssue={(issue, fixIndex) => {
+              console.log('Applying fix for issue:', issue, 'fix index:', fixIndex);
+            }}
+            onNavigateToIssue={(file, line, column) => {
+              console.log('Navigating to issue:', file, line, column);
+              // In a real implementation, this would open the file and position the cursor
+            }}
+          />
+          
+          <RefactorTools
+            visible={showRefactorTools}
+            onClose={() => setShowRefactorTools(false)}
+            onApplyRefactoring={(type, options) => {
+              console.log('Applying refactoring:', type, options);
+            }}
+          />
+          
+          <BreakpointManager
+            visible={showBreakpointManager}
+            onClose={() => setShowBreakpointManager(false)}
+            breakpoints={[]}
+            onAddBreakpoint={(bp) => {
+              console.log('Adding breakpoint:', bp);
+            }}
+            onRemoveBreakpoint={(id) => {
+              console.log('Removing breakpoint:', id);
+            }}
+            onUpdateBreakpoint={(id, updates) => {
+              console.log('Updating breakpoint:', id, updates);
+            }}
+            onNavigateToBreakpoint={(file, line, column) => {
               console.log('Project configuration:', config);
               setShowProjectWizard(false);
             }}

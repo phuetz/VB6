@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useVB6Store } from '../../stores/vb6Store';
-import { FileText, FolderOpen, Save, Nut as Cut, Copy, Clipboard, Undo, Redo, Search, Play, Square, Settings, HelpCircle, Eye, Code, Package, Database } from 'lucide-react';
+import { FileText, FolderOpen, Save, Nut as Cut, Copy, Clipboard, Undo, Redo, Search, Play, Square, Settings, HelpCircle, Eye, Code, Package, Database, AlertOctagon, WandSparkles, ActivitySquare, BarChart } from 'lucide-react';
 
 const EnhancedMenuBar: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
@@ -234,6 +234,30 @@ const EnhancedMenuBar: React.FC = () => {
           { label: 'Send to Back', action: () => {} }
         ]
       }
+    ],
+    Analyze: [
+      { 
+        label: 'Code Analyzer...', 
+        icon: <BarChart size={14} />, 
+        action: () => console.log('Open code analyzer')
+      },
+      { 
+        label: 'Refactor...', 
+        icon: <WandSparkles size={14} />, 
+        action: () => console.log('Open refactoring tools')
+      },
+      { separator: true },
+      { 
+        label: 'Performance Monitor', 
+        icon: <ActivitySquare size={14} />, 
+        action: () => console.log('Open performance monitor')
+      },
+      { 
+        label: 'Breakpoint Manager...', 
+        icon: <AlertOctagon size={14} />, 
+        shortcut: 'Alt+F9',
+        action: () => console.log('Open breakpoint manager')
+      },
     ],
     Debug: [
       { 

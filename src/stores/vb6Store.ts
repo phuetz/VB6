@@ -67,6 +67,10 @@ export const useVB6Store = create<VB6Store>()(
     showLocalsWindow: false,
     showCallStack: false,
     showErrorList: false,
+    showCodeAnalyzer: false,
+    showRefactorTools: false,
+    showBreakpointManager: false,
+    showPerformanceMonitor: false,
 
     // Dialogs
     showMenuEditor: false,
@@ -113,6 +117,18 @@ export const useVB6Store = create<VB6Store>()(
     localVariables: {},
     callStack: [],
     errorList: [],
+    breakpoints: [],
+    intellisenseItems: [],
+    codeAnalysisResults: {
+      issues: [],
+      metrics: {
+        linesOfCode: 0,
+        complexity: 0,
+        maintainability: 0,
+        unusedVariables: 0,
+        qualityScore: 0
+      }
+    },
 
     // History
     history: [],
@@ -280,6 +296,51 @@ export const useVB6Store = create<VB6Store>()(
     redo: () => {
       // Implementation for redo
       console.log('Redo action');
+    },
+
+    // Code Analysis
+    analyzeCode: () => {
+      console.log('Analyzing code...');
+      // Implementation would analyze the code and update state
+    },
+
+    // Refactoring
+    applyRefactoring: (type: string, options: any) => {
+      console.log(`Applying refactoring ${type} with options:`, options);
+      // Implementation would apply the refactoring and update code
+    },
+
+    // Breakpoint Management
+    addBreakpoint: (breakpoint: any) => {
+      const state = get();
+      set({
+        breakpoints: [...state.breakpoints, breakpoint]
+      });
+    },
+
+    removeBreakpoint: (id: string) => {
+      const state = get();
+      set({
+        breakpoints: state.breakpoints.filter(bp => bp.id !== id)
+      });
+    },
+
+    updateBreakpoint: (id: string, updates: any) => {
+      const state = get();
+      set({
+        breakpoints: state.breakpoints.map(bp => 
+          bp.id === id ? { ...bp, ...updates } : bp
+        )
+      });
+    },
+
+    // Enhanced IntelliSense
+    showIntelliSense: (position: { x: number; y: number }, items: any[]) => {
+      set({
+        intellisenseVisible: true,
+        intellisensePosition: position,
+        intellisenseItems: items
+      });
     }
   }))
 );

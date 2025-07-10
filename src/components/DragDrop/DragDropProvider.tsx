@@ -187,7 +187,7 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     // Sauvegarder l'état pour undo/redo
     saveState();
-  }, [playDragSound, vibrate, addToHistory]);
+  }, [playDragSound, vibrate, saveState]);
 
   const handleDragOver = useCallback((event: DragOverEvent) => {
     const { over, delta } = event;
