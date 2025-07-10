@@ -79,11 +79,23 @@ export const VB6Provider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const executeEvent = useCallback((control: any, eventName: string, eventData?: any) => {
+    const eventKey = `${control.name}_${eventName}`;
+    const code = state.eventCode[eventKey];
+
+    if (code) {
+      try {
+        const func = new Function('control', 'eventData', code);
+        func(control, eventData);
+      } catch (err) {
+        console.error(`Error executing ${eventKey}:`, err);
+      }
+    }
+
     dispatch({
       type: 'EXECUTE_EVENT',
       payload: { control, eventName, eventData }
     });
-  }, []);
+  }, [state.eventCode, dispatch]);
 
   const saveProject = useCallback(async () => {
     const project = {
