@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useVB6Store } from '../../stores/vb6Store';
-import { FileText, FolderOpen, Save, Nut as Cut, Copy, Clipboard, Undo, Redo, Search, Play, Square, Settings, HelpCircle, Eye, Code, Package, Database, AlertOctagon, Sparkles as WandSparkles, ActivitySquare, BarChart, AlertCircle, Command, Download, Scissors, FileCode, ArrowLeftRight } from 'lucide-react';
+import { FileText, FolderOpen, Save, Nut as Cut, Copy, Clipboard, Undo, Redo, Search, Play, Square, Settings, HelpCircle, Eye, Code, Package, Database, AlertOctagon, Sparkles as WandSparkles, ActivitySquare, BarChart, AlertCircle, Command, Download, Scissors, FileCode, ArrowLeftRight, Bug } from 'lucide-react';
 
 const EnhancedMenuBar: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
@@ -331,6 +331,11 @@ const EnhancedMenuBar: React.FC = () => {
         icon: <AlertCircle size={14} />, 
         action: () => setShowErrorList(true)
       }
+      {
+        label: 'Debug Logs',
+        icon: <Bug size={14} />,
+        action: () => toggleWindow('showLogPanel')
+      },
     ],
     Run: [
       { 
