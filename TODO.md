@@ -43,12 +43,12 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 
 ## Contrôles à développer
 
-- [ ] PictureBox
-- [ ] Label
-- [ ] TextBox
-- [ ] Frame
-- [ ] CommandButton
-- [ ] CheckBox
+- [x] PictureBox
+- [x] Label
+- [x] TextBox
+- [x] Frame
+- [x] CommandButton
+- [x] CheckBox
 - [ ] OptionButton
 - [ ] ComboBox
 - [ ] ListBox
