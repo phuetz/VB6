@@ -36,10 +36,10 @@ export const DroppableZone: React.FC<DroppableZoneProps> = ({
     isOver,
     setNodeRef,
     active,
-  } = useDroppable(active?.data?.current ? {
+  } = useDroppable({
     id,
     disabled,
-  } : { id, disabled });
+  });
 
   const canDrop = active && accepts.includes(active.data.current?.type);
   const isValidDrop = isOver && canDrop;
