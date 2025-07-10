@@ -71,7 +71,7 @@ export const useVB6Store = create<VB6Store>()(
     showExportDialog: false,
     showSnippetManager: false,
     showCodeFormatter: false,
-    showCodeConverter: false, 
+    showCodeConverter: false,
     showCodeAnalyzer: false,
     showRefactorTools: false,
     showBreakpointManager: false,
