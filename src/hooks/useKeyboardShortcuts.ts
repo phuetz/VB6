@@ -45,6 +45,7 @@ export const useIDEShortcuts = (actions: {
   newProject: () => void;
   openProject: () => void;
   saveProject: () => void;
+  showSnippets: () => void;
   find: () => void;
   findReplace: () => void;
   run: () => void;
@@ -95,6 +96,10 @@ export const useIDEShortcuts = (actions: {
     { keys: ['v'], ctrlKey: true, action: actions.paste, description: 'Paste' },
     { keys: ['a'], ctrlKey: true, action: actions.selectAll, description: 'Select All' },
     { keys: ['delete'], action: actions.delete, description: 'Delete' },
+    
+    // Snippets
+    { keys: ['k'], ctrlKey: true, action: () => {}, description: 'Snippets (multi-part)', preventDefault: false },
+    { keys: ['s'], ctrlKey: true, action: actions.showSnippets, description: 'Show Snippets', preventDefault: false },
     
     // Search operations
     { keys: ['f'], ctrlKey: true, action: actions.find, description: 'Find' },

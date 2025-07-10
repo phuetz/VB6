@@ -363,6 +363,12 @@ const EnhancedMenuBar: React.FC = () => {
         label: 'Add Procedure...', 
         action: () => console.log('Add procedure')
       },
+      {
+        label: 'Snippets...',
+        icon: <Scissors size={14} />,
+        action: () => showDialog('showSnippetManager', true),
+        shortcut: 'Ctrl+K Ctrl+S'
+      },
       { 
         label: 'Menu Editor...', 
         action: () => showDialog('showMenuEditor', true)

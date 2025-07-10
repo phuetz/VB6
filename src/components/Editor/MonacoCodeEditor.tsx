@@ -208,12 +208,23 @@ const MonacoCodeEditor: React.FC = () => {
       formatOnPaste: true,
       formatOnType: true,
       autoIndent: 'full',
+      tabSize: 4,
+      insertSpaces: true,
       bracketPairColorization: { enabled: true },
       guides: {
         bracketPairs: true,
         indentation: true,
       },
     });
+
+    // Add keyboard shortcut for formatting
+    const keybindings = editor.addCommand(
+      monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.KeyF,
+      () => {
+        // Format code using the internal formatter
+        useVB6Store.getState().formatCode();
+      }
+    );
 
     editorRef.current = editor;
     setIsReady(true);
@@ -222,9 +233,17 @@ const MonacoCodeEditor: React.FC = () => {
     editor.onDidChangeModelContent(() => {
       const value = editor.getValue();
       if (selectedControls.length === 1 && selectedEvent) {
-        const control = selectedControls[0];
-        const eventKey = `${control.name}_${selectedEvent}`;
-        updateEventCode(eventKey, value);
+        // Extract the actual code from the editor (which contains procedure wrappers)
+        const procedureStart = `Private Sub ${selectedControls[0].name}_${selectedEvent}()\n`;
+        const procedureEnd = `\nEnd Sub`;
+        
+        let codeContent = value;
+        if (codeContent.startsWith(procedureStart) && codeContent.endsWith(procedureEnd)) {
+          codeContent = codeContent.substring(procedureStart.length, codeContent.length - procedureEnd.length);
+        }
+        
+        const eventKey = `${selectedControls[0].name}_${selectedEvent}`;
+        updateEventCode(eventKey, codeContent);
       }
     });
 
@@ -255,7 +274,9 @@ const MonacoCodeEditor: React.FC = () => {
       if (model) {
         const lines = model.getLineCount();
         if (lines > 2) {
-          editorRef.current.setPosition({ lineNumber: 2, column: 1 });
+          // Position cursor just after the procedure declaration
+          editorRef.current.setPosition({ lineNumber: 2, column: 5 });
+          editorRef.current.focus();
         }
       }
     } else {
