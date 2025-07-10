@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { useVB6Store } from '../../stores/vb6Store';
-import { 
-  FileText, FolderOpen, Save, Cut, Copy, Clipboard, 
-  Undo, Redo, Search, Play, Square, Settings, 
-  HelpCircle, Eye, Code, Package, Database
-} from 'lucide-react';
+import { FileText, FolderOpen, Save, Nut as Cut, Copy, Clipboard, Undo, Redo, Search, Play, Square, Settings, HelpCircle, Eye, Code, Package, Database } from 'lucide-react';
 
 const EnhancedMenuBar: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);

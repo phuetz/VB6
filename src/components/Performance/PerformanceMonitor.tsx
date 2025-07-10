@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Activity, Clock, Memory, Cpu, TrendingUp, TrendingDown, Pause, Play } from 'lucide-react';
+import { Activity, Clock, MemoryStick as Memory, Cpu, TrendingUp, TrendingDown, Pause, Play } from 'lucide-react';
 
 interface PerformanceMetrics {
   fps: number;
