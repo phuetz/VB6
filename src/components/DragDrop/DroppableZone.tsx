@@ -32,15 +32,17 @@ export const DroppableZone: React.FC<DroppableZoneProps> = ({
   const elementRef = useRef<HTMLDivElement>(null);
   const { registerDropZone, unregisterDropZone } = useDragDrop();
 
+  // Use only the required properties in useDroppable hook arguments
   const {
     isOver,
     setNodeRef,
     active,
-  } = useDroppable({
+  } = useDroppable({ 
     id,
     disabled,
   });
 
+  // Calculate drop validity after active is initialized
   const canDrop = active && accepts.includes(active.data.current?.type);
   const isValidDrop = isOver && canDrop;
   const isInvalidDrop = isOver && !canDrop;
