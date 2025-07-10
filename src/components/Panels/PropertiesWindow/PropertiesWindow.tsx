@@ -167,7 +167,7 @@ const PropertiesWindow: React.FC = () => {
                   label="(Name)"
                   value={activeForm.name}
                   onChange={(value) => {
-                    // TODO: Update form name
+                    dispatch({ type: 'RENAME_FORM', payload: { id: activeForm.id, name: value } });
                   }}
                   type="text"
                   bold

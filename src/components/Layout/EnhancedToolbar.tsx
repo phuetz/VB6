@@ -173,21 +173,15 @@ export const EnhancedToolbar: React.FC = () => {
         <div className="w-px h-6 bg-gray-400 mx-1" />
         
         <button
-          onClick={() => {
-            // TODO: Open template manager
-            console.log('Open template manager');
-          }}
+          onClick={() => showDialog('showTemplateManager', true)}
           className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors"
           title="Project Templates"
         >
           <Zap size={16} />
         </button>
-        
+
         <button
-          onClick={() => {
-            // TODO: Open performance monitor
-            console.log('Open performance monitor');
-          }}
+          onClick={() => toggleWindow('showPerformanceMonitor')}
           className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors"
           title="Performance Monitor"
         >

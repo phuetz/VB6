@@ -75,8 +75,7 @@ const MainContent: React.FC = () => {
 
 function App() {
   // State for all dialog components
-  const [showTemplateManager, setShowTemplateManager] = useState(false);
-  const [showPerformanceMonitor, setShowPerformanceMonitor] = useState(false);
+  const { showTemplateManager, showPerformanceMonitor, showDialog, toggleWindow, snippets, showSnippetManager, insertSnippet } = useVB6Store();
   const [showProjectWizard, setShowProjectWizard] = useState(false);
   const [showCodeAnalyzer, setShowCodeAnalyzer] = useState(false);
   const [showRefactorTools, setShowRefactorTools] = useState(false);
@@ -86,8 +85,6 @@ function App() {
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [showCodeFormatter, setShowCodeFormatter] = useState(false);
   const [showCodeConverter, setShowCodeConverter] = useState(false);
-
-  const { snippets, showSnippetManager, insertSnippet, showDialog } = useVB6Store();
 
   return (
     <VB6Provider>
@@ -106,17 +103,17 @@ function App() {
           {/* Template Manager */}
           <ProjectTemplateManager
             visible={showTemplateManager}
-            onClose={() => setShowTemplateManager(false)}
+            onClose={() => showDialog('showTemplateManager', false)}
             onCreateProject={(template) => {
               console.log('Creating project from template:', template);
-              setShowTemplateManager(false);
+              showDialog('showTemplateManager', false);
             }}
           />
           
           {/* Performance Monitor */}
           <PerformanceMonitor
             visible={showPerformanceMonitor}
-            onClose={() => setShowPerformanceMonitor(false)}
+            onClose={() => toggleWindow('showPerformanceMonitor')}
           />
           
           {/* Project Setup Wizard */}

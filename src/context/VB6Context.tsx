@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useCallback } from 'react';
 import { vb6Reducer, initialState } from './vb6Reducer';
 import { VB6State, VB6Action } from './types';
+import { FileManager } from '../services/FileManager';
 
 interface VB6ContextType {
   state: VB6State;
@@ -84,14 +85,24 @@ export const VB6Provider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   }, []);
 
-  const saveProject = useCallback(() => {
-    dispatch({ type: 'SAVE_PROJECT' });
-  }, []);
+  const saveProject = useCallback(async () => {
+    const project = {
+      name: state.projectName,
+      forms: state.forms,
+      modules: state.modules,
+      classModules: state.classModules
+    };
+    await FileManager.saveProject(project as any);
+  }, [state]);
 
   const loadProject = useCallback((file: File) => {
-    dispatch({
-      type: 'LOAD_PROJECT',
-      payload: { file }
+    file.text().then(text => {
+      try {
+        const project = JSON.parse(text);
+        dispatch({ type: 'SET_PROJECT', payload: { project } });
+      } catch (err) {
+        console.error('Failed to load project', err);
+      }
     });
   }, []);
 
