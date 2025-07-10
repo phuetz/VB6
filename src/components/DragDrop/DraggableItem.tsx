@@ -16,9 +16,7 @@ interface DraggableItemProps {
 
 export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(
   ({ id, data, disabled = false, children, className = '', style = {}, onDragStart, onDragEnd }, ref) => {
-    const {
-      addLog
-    } = useVB6Store();
+    const addLog = useVB6Store(state => state.addLog);
 
     // Log component initialization
     React.useEffect(() => {
