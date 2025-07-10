@@ -9,10 +9,12 @@ import { UndoRedoToolbar } from './UndoRedoToolbar';
 import { useUndoRedo } from '../../hooks/useUndoRedo';
 
 export const EnhancedToolbar: React.FC = () => {
-  const { 
+  const {
     executionMode,
     showGrid,
     snapToGrid,
+    selectedControls,
+    clipboard,
     showCodeFormatter,
     showCodeConverter,
     setExecutionMode,
