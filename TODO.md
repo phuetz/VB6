@@ -14,3 +14,80 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [ ] Ajouter un suivi des performances et des journaux d'exécution avancé
 - [ ] Renforcer l'analyse de code et le refactoring automatique
 - [ ] Compléter l'éditeur de propriétés pour couvrir l'ensemble des propriétés VB6
+
+## Implémentation complète du langage VB6
+
+- [ ] **Lexeur exhaustif** : prise en charge de tous les mots-clés, opérateurs et littéraux.
+- [ ] **Analyseur syntaxique** : génération d'un AST représentant modules, classes et formulaires.
+- [ ] **Analyse sémantique** : résolution des types, portée des variables et cohérence des appels.
+- [ ] **Gestion des modules et classes** : visibilité (`Private`, `Public`), propriétés, méthodes et événements.
+- [ ] **Transpilation JavaScript** : conversion fidèle de chaque instruction VB6 en JS moderne.
+- [ ] **Bibliothèque d'exécution** : implémentation de l'ensemble des fonctions natives (Date, MsgBox, etc.).
+- [ ] **Gestion des objets COM/ActiveX** : création, destruction et appels de méthodes externes.
+- [ ] **Compatibilité avec les projets VB6 existants** : import et conversion automatique du code.
+- [ ] **Suite de tests unitaires** couvrant instructions, erreurs et modules complexes.
+- [ ] **Documentation détaillée** du compilateur et du runtime.
+
+## Implémentation complète du concepteur de formulaires
+
+- [ ] **Surface de conception redimensionnable** avec grille, zoom et guides d'alignement.
+- [ ] **Glisser-déposer des contrôles** avec duplication et groupement par la souris ou le clavier.
+- [ ] **Sélection multiple avancée** : alignements, espacement et redimensionnement simultané.
+- [ ] **Property Grid en temps réel** : édition de toutes les propriétés (couleurs, polices, liaisons).
+- [ ] **Arborescence des contrôles** pour naviguer dans la hiérarchie du formulaire.
+- [ ] **Système d'annulation/rétablissement** (Undo/Redo) sur toutes les actions.
+- [ ] **Éditeur de menus et barres d'outils** intégré au designer.
+- [ ] **Export/Import au format .frm** totalement compatible avec VB6.
+- [ ] **Tests de bout en bout** validant création et manipulation des formulaires.
+- [ ] **Guide utilisateur complet** pour apprendre le designer.
+
+## Contrôles à développer
+
+- [ ] PictureBox
+- [ ] Label
+- [ ] TextBox
+- [ ] Frame
+- [ ] CommandButton
+- [ ] CheckBox
+- [ ] OptionButton
+- [ ] ComboBox
+- [ ] ListBox
+- [ ] HScrollBar
+- [ ] VScrollBar
+- [ ] Timer
+- [ ] DriveListBox
+- [ ] DirListBox
+- [ ] FileListBox
+- [ ] Shape
+- [ ] Line
+- [ ] Image
+- [ ] Data
+- [ ] OLE
+- [ ] TabStrip
+- [ ] Toolbar
+- [ ] StatusBar
+- [ ] ProgressBar
+- [ ] TreeView
+- [ ] ListView
+- [ ] ImageList
+- [ ] Slider
+- [ ] ImageCombo
+- [ ] MonthView
+- [ ] DateTimePicker
+- [ ] FlatScrollBar
+- [ ] UpDown
+- [ ] Animation
+- [ ] RichTextBox
+- [ ] MaskedEdit
+- [ ] WebBrowser
+- [ ] Inet
+- [ ] Winsock
+- [ ] DataGrid
+- [ ] DataList
+- [ ] DataCombo
+- [ ] DataRepeater
+- [ ] DataEnvironment
+- [ ] DataReport
+- [ ] CrystalReport
+- [ ] MediaPlayer
+- [ ] MMControl
