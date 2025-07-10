@@ -120,6 +120,34 @@ const PropertiesWindow: React.FC = () => {
                   type="number"
                 />
                 <PropertyRow
+                  label="TabIndex"
+                  value={state.selectedControls[0].tabIndex}
+                  onChange={(value) => updateControlProperty('tabIndex', parseInt(value) || 0)}
+                  type="number"
+                />
+                <PropertyRow
+                  label="TabStop"
+                  value={state.selectedControls[0].tabStop.toString()}
+                  onChange={(value) => updateControlProperty('tabStop', value === 'true')}
+                  type="select"
+                  options={[
+                    { value: 'true', label: 'True' },
+                    { value: 'false', label: 'False' }
+                  ]}
+                />
+                <PropertyRow
+                  label="Tag"
+                  value={state.selectedControls[0].tag}
+                  onChange={(value) => updateControlProperty('tag', value)}
+                  type="text"
+                />
+                <PropertyRow
+                  label="ToolTipText"
+                  value={state.selectedControls[0].toolTipText}
+                  onChange={(value) => updateControlProperty('toolTipText', value)}
+                  type="text"
+                />
+                <PropertyRow
                   label="Enabled"
                   value={state.selectedControls[0].enabled}
                   onChange={(value) => updateControlProperty('enabled', value === 'true')}
@@ -195,6 +223,56 @@ const PropertiesWindow: React.FC = () => {
                   value={state.formProperties.Height}
                   onChange={(value) => updateFormProperty('Height', parseInt(value) || 480)}
                   type="number"
+                />
+                <PropertyRow
+                  label="StartUpPosition"
+                  value={state.formProperties.StartUpPosition}
+                  onChange={(value) => updateFormProperty('StartUpPosition', value)}
+                  type="select"
+                  options={[
+                    { value: '0 - Manual', label: '0 - Manual' },
+                    { value: '1 - CenterOwner', label: '1 - CenterOwner' },
+                    { value: '2 - CenterScreen', label: '2 - CenterScreen' }
+                  ]}
+                />
+                <PropertyRow
+                  label="BorderStyle"
+                  value={state.formProperties.BorderStyle}
+                  onChange={(value) => updateFormProperty('BorderStyle', value)}
+                  type="select"
+                  options={[
+                    { value: '0 - None', label: '0 - None' },
+                    { value: '1 - Fixed Single', label: '1 - Fixed Single' },
+                    { value: '2 - Sizable', label: '2 - Sizable' }
+                  ]}
+                />
+                <PropertyRow
+                  label="MaxButton"
+                  value={state.formProperties.MaxButton.toString()}
+                  onChange={(value) => updateFormProperty('MaxButton', value === 'true')}
+                  type="select"
+                  options={[{ value: 'true', label: 'True' }, { value: 'false', label: 'False' }]}
+                />
+                <PropertyRow
+                  label="MinButton"
+                  value={state.formProperties.MinButton.toString()}
+                  onChange={(value) => updateFormProperty('MinButton', value === 'true')}
+                  type="select"
+                  options={[{ value: 'true', label: 'True' }, { value: 'false', label: 'False' }]}
+                />
+                <PropertyRow
+                  label="ControlBox"
+                  value={state.formProperties.ControlBox.toString()}
+                  onChange={(value) => updateFormProperty('ControlBox', value === 'true')}
+                  type="select"
+                  options={[{ value: 'true', label: 'True' }, { value: 'false', label: 'False' }]}
+                />
+                <PropertyRow
+                  label="ShowInTaskbar"
+                  value={state.formProperties.ShowInTaskbar.toString()}
+                  onChange={(value) => updateFormProperty('ShowInTaskbar', value === 'true')}
+                  type="select"
+                  options={[{ value: 'true', label: 'True' }, { value: 'false', label: 'False' }]}
                 />
               </>
             )}
