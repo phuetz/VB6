@@ -23,7 +23,6 @@ export const initialState: VB6State = {
   selectedControls: [],
   nextId: 1,
   clipboard: [],
-  clipboard: [],
 
   // UI State
   executionMode: 'design',
@@ -51,7 +50,6 @@ export const initialState: VB6State = {
   showReferences: false,
   showComponents: false,
   showTabOrder: false,
-  showObjectBrowser: false,
   showUserControlDesigner: false,
 
   // Code Editor

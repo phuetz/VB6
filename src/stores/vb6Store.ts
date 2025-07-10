@@ -117,12 +117,11 @@ export const useVB6Store = create<VB6Store>()(
       ''
     ],
     immediateCommand: '',
-    breakpoints: {},
     watchExpressions: [],
     localVariables: {},
     callStack: [],
-    errorList: [],
     breakpoints: [],
+    errorList: [],
     intellisenseItems: [],
     codeAnalysisResults: {
       issues: [],
@@ -134,7 +133,6 @@ export const useVB6Store = create<VB6Store>()(
         qualityScore: 0
       }
     },
-    errorList: [],
     snippets: [],
 
     // History
