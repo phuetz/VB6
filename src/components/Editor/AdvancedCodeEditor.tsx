@@ -59,6 +59,7 @@ const AdvancedCodeEditor: React.FC = () => {
       'TextBox': [...commonEvents, 'Change', 'GotFocus', 'LostFocus', 'Validate'],
       'Label': ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
       'CheckBox': [...commonEvents, 'Click', 'GotFocus', 'LostFocus'],
+      'OptionButton': [...commonEvents, 'Click', 'GotFocus', 'LostFocus'],
       'Timer': ['Timer']
     };
     
