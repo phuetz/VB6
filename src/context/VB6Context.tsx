@@ -38,28 +38,28 @@ export const VB6Provider: React.FC<{ children: React.ReactNode }> = ({ children 
     console.log('Creating control in context:', type, x, y);
     dispatch({
       type: 'CREATE_CONTROL',
-      payload: { type, x: x || 50, y: y || 50 }
+      payload: { type, x: x || 50, y: y || 50 },
     });
   }, []);
 
   const updateControl = useCallback((controlId: number, property: string, value: any) => {
     dispatch({
       type: 'UPDATE_CONTROL',
-      payload: { controlId, property, value }
+      payload: { controlId, property, value },
     });
   }, []);
 
   const deleteControls = useCallback((controlIds: number[]) => {
     dispatch({
       type: 'DELETE_CONTROLS',
-      payload: { controlIds }
+      payload: { controlIds },
     });
   }, []);
 
   const selectControls = useCallback((controlIds: number[]) => {
     dispatch({
       type: 'SELECT_CONTROLS',
-      payload: { controlIds }
+      payload: { controlIds },
     });
   }, []);
 
@@ -79,49 +79,51 @@ export const VB6Provider: React.FC<{ children: React.ReactNode }> = ({ children 
     dispatch({ type: 'REDO' });
   }, []);
 
-  const executeEvent = useCallback((control: any, eventName: string, eventData?: any) => {
-    const eventKey = `${control.name}_${eventName}`;
-    const code = state.eventCode[eventKey];
+  const executeEvent = useCallback(
+    (control: any, eventName: string, eventData?: any) => {
+      const eventKey = `${control.name}_${eventName}`;
+      const code = state.eventCode[eventKey];
 
-    if (code) {
-      try {
-        const func = new Function('control', 'eventData', code);
-        func(control, eventData);
-      } catch (err) {
-        console.error(`Error executing ${eventKey}:`, err);
+      if (code) {
+        try {
+          const func = new Function('control', 'eventData', code);
+          func(control, eventData);
+        } catch (err) {
+          console.error(`Error executing ${eventKey}:`, err);
+        }
       }
-    }
 
-    dispatch({
-      type: 'EXECUTE_EVENT',
-      payload: { control, eventName, eventData }
-    });
-  }, [state.eventCode, dispatch]);
+      dispatch({
+        type: 'EXECUTE_EVENT',
+        payload: { control, eventName, eventData },
+      });
+    },
+    [state.eventCode, dispatch]
+  );
 
   const saveProject = useCallback(async () => {
     const project = {
       name: state.projectName,
       forms: state.forms,
       modules: state.modules,
-      classModules: state.classModules
+      classModules: state.classModules,
     };
-    await FileManager.saveProject(project as any, true);
+    await FileManager.exportProjectArchive(project as any);
   }, [state]);
 
   const loadProject = useCallback(async (file: File) => {
     try {
       let projectText: string;
       if (file.name.endsWith('.vb6z') || file.name.endsWith('.zip')) {
-        const buffer = await file.arrayBuffer();
-        const zip = await JSZip.loadAsync(buffer);
-        const text = await zip.file('project.json')?.async('string');
-        if (!text) throw new Error('Invalid project archive');
-        projectText = text;
+        const project = await FileManager.importProjectArchive(file);
+        if (project) {
+          dispatch({ type: 'SET_PROJECT', payload: { project } });
+        }
       } else {
-        projectText = await file.text();
+        const projectText = await file.text();
+        const project = JSON.parse(projectText);
+        dispatch({ type: 'SET_PROJECT', payload: { project } });
       }
-      const project = JSON.parse(projectText);
-      dispatch({ type: 'SET_PROJECT', payload: { project } });
     } catch (err) {
       console.error('Failed to load project', err);
     }
@@ -140,12 +142,8 @@ export const VB6Provider: React.FC<{ children: React.ReactNode }> = ({ children 
     redo,
     executeEvent,
     saveProject,
-    loadProject
+    loadProject,
   };
 
-  return (
-    <VB6Context.Provider value={contextValue}>
-      {children}
-    </VB6Context.Provider>
-  );
+  return <VB6Context.Provider value={contextValue}>{children}</VB6Context.Provider>;
 };
