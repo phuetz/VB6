@@ -25,7 +25,8 @@ export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(
       return () => {
         addLog('debug', 'DraggableItem', `DraggableItem ${id} unmounted`);
       };
-    }, [id, data, disabled, addLog]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id, data, disabled]);
 
     const {
       attributes,
