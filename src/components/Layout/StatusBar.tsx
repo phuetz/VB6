@@ -9,6 +9,7 @@ const StatusBar: React.FC = () => {
     errorList, 
     logs,
     showLogPanel,
+    showCodeEditor,
     toggleWindow 
   } = useVB6Store();
   

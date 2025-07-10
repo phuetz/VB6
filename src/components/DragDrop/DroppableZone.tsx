@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { useDragDrop } from './DragDropProvider';
+import { useVB6Store } from '../../stores/vb6Store';
 
 interface DroppableZoneProps {
   id: string;
