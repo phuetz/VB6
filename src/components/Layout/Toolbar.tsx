@@ -16,7 +16,7 @@ const Toolbar: React.FC = () => {
   const handleLoadProject = () => {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.vb6';
+    input.accept = '.vb6,.vb6z,.vbp,.json,.zip';
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {

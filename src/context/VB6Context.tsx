@@ -2,6 +2,7 @@ import React, { createContext, useContext, useReducer, useCallback } from 'react
 import { vb6Reducer, initialState } from './vb6Reducer';
 import { VB6State, VB6Action } from './types';
 import { FileManager } from '../services/FileManager';
+import JSZip from 'jszip';
 
 interface VB6ContextType {
   state: VB6State;
@@ -104,18 +105,26 @@ export const VB6Provider: React.FC<{ children: React.ReactNode }> = ({ children 
       modules: state.modules,
       classModules: state.classModules
     };
-    await FileManager.saveProject(project as any);
+    await FileManager.saveProject(project as any, true);
   }, [state]);
 
-  const loadProject = useCallback((file: File) => {
-    file.text().then(text => {
-      try {
-        const project = JSON.parse(text);
-        dispatch({ type: 'SET_PROJECT', payload: { project } });
-      } catch (err) {
-        console.error('Failed to load project', err);
+  const loadProject = useCallback(async (file: File) => {
+    try {
+      let projectText: string;
+      if (file.name.endsWith('.vb6z') || file.name.endsWith('.zip')) {
+        const buffer = await file.arrayBuffer();
+        const zip = await JSZip.loadAsync(buffer);
+        const text = await zip.file('project.json')?.async('string');
+        if (!text) throw new Error('Invalid project archive');
+        projectText = text;
+      } else {
+        projectText = await file.text();
       }
-    });
+      const project = JSON.parse(projectText);
+      dispatch({ type: 'SET_PROJECT', payload: { project } });
+    } catch (err) {
+      console.error('Failed to load project', err);
+    }
   }, []);
 
   const contextValue: VB6ContextType = {

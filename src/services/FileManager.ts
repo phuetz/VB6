@@ -1,73 +1,95 @@
-import { Project, Module, Form } from '../types/extended';
+import { Project } from '../types/extended';
+import JSZip from 'jszip';
 
 export class FileManager {
   static async openProject(): Promise<Project | null> {
     try {
-      if ('showOpenFilePicker' in window) {
-        const fileHandle = await (window as any).showOpenFilePicker({
-          types: [
-            {
-              description: 'VB6 Projects',
-              accept: {
-                'application/json': ['.vbp', '.vb6'],
-              },
-            },
-          ],
-        });
+      const getFile = async () => {
+        if ('showOpenFilePicker' in window) {
+          const fileHandle = await (window as any).showOpenFilePicker({
+            types: [
+              {
+                description: 'VB6 Projects',
+                accept: {
+                  'application/json': ['.vbp', '.vb6'],
+                  'application/zip': ['.vb6z']
+                }
+              }
+            ]
+          });
+          return fileHandle.getFile();
+        }
 
-        const file = await fileHandle.getFile();
-        const content = await file.text();
-        return JSON.parse(content);
-      } else {
-        // Fallback pour navigateurs non supportés
-        return new Promise((resolve) => {
+        return new Promise<File | null>((resolve) => {
           const input = document.createElement('input');
           input.type = 'file';
-          input.accept = '.vbp,.vb6,.json';
+          input.accept = '.vbp,.vb6,.vb6z,.json,.zip';
           input.onchange = async (e) => {
-            const file = (e.target as HTMLInputElement).files?.[0];
-            if (file) {
-              const content = await file.text();
-              resolve(JSON.parse(content));
-            }
+            const file = (e.target as HTMLInputElement).files?.[0] || null;
+            resolve(file);
           };
           input.click();
         });
+      };
+
+      const file = await getFile();
+      if (!file) return null;
+
+      if (file.name.endsWith('.vb6z') || file.name.endsWith('.zip')) {
+        const buffer = await file.arrayBuffer();
+        const zip = await JSZip.loadAsync(buffer);
+        const projectText = await zip.file('project.json')?.async('string');
+        if (!projectText) throw new Error('Invalid project archive');
+        return JSON.parse(projectText);
       }
+
+      const content = await file.text();
+      return JSON.parse(content);
     } catch (error) {
       console.error('Error opening project:', error);
       return null;
     }
   }
 
-  static async saveProject(project: Project): Promise<boolean> {
+  static async saveProject(project: Project, zip = false): Promise<boolean> {
     try {
       const projectData = JSON.stringify(project, null, 2);
-      
+
+      let blob: Blob;
+      let extension = 'vb6';
+
+      if (zip) {
+        const zipFile = new JSZip();
+        zipFile.file('project.json', projectData);
+        const content = await zipFile.generateAsync({ type: 'blob' });
+        blob = content;
+        extension = 'vb6z';
+      } else {
+        blob = new Blob([projectData], { type: 'application/json' });
+      }
+
       if ('showSaveFilePicker' in window) {
         const fileHandle = await (window as any).showSaveFilePicker({
-          suggestedName: `${project.name}.vb6`,
+          suggestedName: `${project.name}.${extension}`,
           types: [
             {
               description: 'VB6 Projects',
-              accept: {
-                'application/json': ['.vb6'],
-              },
-            },
-          ],
+              accept: zip
+                ? { 'application/zip': ['.vb6z'] }
+                : { 'application/json': ['.vb6'] }
+            }
+          ]
         });
 
         const writable = await fileHandle.createWritable();
-        await writable.write(projectData);
+        await writable.write(blob);
         await writable.close();
         return true;
       } else {
-        // Fallback pour navigateurs non supportés
-        const blob = new Blob([projectData], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${project.name}.vb6`;
+        a.download = `${project.name}.${extension}`;
         a.click();
         URL.revokeObjectURL(url);
         return true;
