@@ -122,7 +122,8 @@ class ${form.name} {
       'TextBox': 'input',
       'Label': 'label',
       'CheckBox': 'input',
-      'ListBox': 'select'
+      'ListBox': 'select',
+      'ComboBox': 'select'
     };
     return mapping[vbType] || 'div';
   }
