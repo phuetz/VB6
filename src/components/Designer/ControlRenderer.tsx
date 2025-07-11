@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useVB6 } from '../../context/VB6Context';
 import { Control } from '../../context/types';
 import ResizeHandles from './ResizeHandles';
@@ -69,6 +69,21 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
     },
     [control.id, state.executionMode, updateControl, executeEvent]
   );
+
+  // Timer interval handling
+  useEffect(() => {
+    if (
+      control.type === 'Timer' &&
+      state.executionMode === 'run' &&
+      control.enabled &&
+      control.interval > 0
+    ) {
+      const handle = setInterval(() => {
+        executeEvent(control, 'Timer');
+      }, control.interval);
+      return () => clearInterval(handle);
+    }
+  }, [control, state.executionMode, executeEvent]);
 
   // Base style
   const baseStyle: React.CSSProperties = {
@@ -340,6 +355,27 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             </legend>
           </fieldset>
         );
+
+      case 'Timer':
+        return state.executionMode === 'design' ? (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              border: '1px dashed #666',
+              backgroundColor: '#f0f0f0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '12px'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            ⏱
+          </div>
+        ) : null;
 
       case 'PictureBox':
         return (

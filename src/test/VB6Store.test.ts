@@ -170,6 +170,18 @@ describe('VB6Store', () => {
     expect(state.controls[0].y).toBe(70);
   });
 
+  it('should create a Timer control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('Timer', 5, 5);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('Timer');
+    expect(state.controls[0].x).toBe(5);
+    expect(state.controls[0].y).toBe(5);
+  });
+
   it('should undo and redo control creation', () => {
     const { createControl, undo, redo } = useVB6Store.getState();
 
