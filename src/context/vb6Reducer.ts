@@ -31,6 +31,7 @@ export const initialState: VB6State = {
   gridSize: 8,
   showAlignmentGuides: true,
   alignmentGuides: { x: [], y: [] },
+  zoom: 100,
 
   // Windows visibility
   showProjectExplorer: true,
@@ -123,6 +124,13 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
       return {
         ...state,
         gridSize: action.payload.size
+      };
+    }
+
+    case 'SET_ZOOM': {
+      return {
+        ...state,
+        zoom: action.payload.zoom
       };
     }
 

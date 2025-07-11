@@ -19,6 +19,10 @@ interface VB6ContextType {
   executeEvent: (control: any, eventName: string, eventData?: any) => void;
   saveProject: () => void;
   loadProject: (file: File) => void;
+  setZoom: (zoom: number) => void;
+  zoomIn: () => void;
+  zoomOut: () => void;
+  resetZoom: () => void;
 }
 
 const VB6Context = createContext<VB6ContextType | null>(null);
@@ -129,6 +133,22 @@ export const VB6Provider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, []);
 
+  const setZoom = useCallback((zoom: number) => {
+    dispatch({ type: 'SET_ZOOM', payload: { zoom } });
+  }, []);
+
+  const zoomIn = useCallback(() => {
+    setZoom(Math.min(400, state.zoom + 10));
+  }, [state.zoom, setZoom]);
+
+  const zoomOut = useCallback(() => {
+    setZoom(Math.max(10, state.zoom - 10));
+  }, [state.zoom, setZoom]);
+
+  const resetZoom = useCallback(() => {
+    setZoom(100);
+  }, [setZoom]);
+
   const contextValue: VB6ContextType = {
     state,
     dispatch,
@@ -143,6 +163,10 @@ export const VB6Provider: React.FC<{ children: React.ReactNode }> = ({ children 
     executeEvent,
     saveProject,
     loadProject,
+    setZoom,
+    zoomIn,
+    zoomOut,
+    resetZoom,
   };
 
   return <VB6Context.Provider value={contextValue}>{children}</VB6Context.Provider>;

@@ -31,6 +31,10 @@ interface VB6Store extends VB6State {
   showTemplateManager: boolean;
   recordPerformanceMetrics: (metric: any) => void;
   clearPerformanceLogs: () => void;
+  setZoom: (zoom: number) => void;
+  zoomIn: () => void;
+  zoomOut: () => void;
+  resetZoom: () => void;
 }
 
 export const useVB6Store = create<VB6Store>()(
@@ -73,6 +77,7 @@ export const useVB6Store = create<VB6Store>()(
     gridSize: 8,
     showAlignmentGuides: true,
     alignmentGuides: { x: [], y: [] },
+    zoom: 100,
 
     // Windows visibility
     showProjectExplorer: true,
@@ -739,6 +744,17 @@ End Function`,
     },
 
     clearPerformanceLogs: () => set({ performanceLogs: [] }),
+
+    setZoom: (zoom: number) => set({ zoom }),
+    zoomIn: () => {
+      const { zoom } = get();
+      set({ zoom: Math.min(400, zoom + 10) });
+    },
+    zoomOut: () => {
+      const { zoom } = get();
+      set({ zoom: Math.max(10, zoom - 10) });
+    },
+    resetZoom: () => set({ zoom: 100 }),
 
     clearLogs: () => set({ logs: [] }),
   }))

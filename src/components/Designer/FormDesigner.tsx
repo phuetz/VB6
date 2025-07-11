@@ -5,11 +5,14 @@ import { DesignerCanvas } from './DesignerCanvas';
 const FormDesigner: React.FC = () => {
   const { state } = useVB6();
 
-  return <DesignerCanvas 
-    width={state.formProperties.Width} 
-    height={state.formProperties.Height} 
-    backgroundColor={state.formProperties.BackColor} 
-  />;
+  return (
+    <DesignerCanvas
+      width={state.formProperties.Width}
+      height={state.formProperties.Height}
+      backgroundColor={state.formProperties.BackColor}
+      zoom={state.zoom}
+    />
+  );
 };
 
 export default FormDesigner;

@@ -58,6 +58,7 @@ export interface VB6State {
   gridSize: number;
   showAlignmentGuides: boolean;
   alignmentGuides: { x: number[]; y: number[] };
+  zoom: number;
 
   // Windows visibility
   showProjectExplorer: boolean;
@@ -146,6 +147,7 @@ export type VB6Action =
   | { type: 'COPY_CONTROLS' }
   | { type: 'PASTE_CONTROLS' }
   | { type: 'SET_GRID_SIZE'; payload: { size: number } }
+  | { type: 'SET_ZOOM'; payload: { zoom: number } }
   | { type: 'UNDO' }
   | { type: 'REDO' }
   | { type: 'EXECUTE_EVENT'; payload: { control: any; eventName: string; eventData?: any } }

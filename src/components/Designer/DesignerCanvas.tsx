@@ -14,14 +14,17 @@ interface DesignerCanvasProps {
   width: number;
   height: number;
   backgroundColor: string;
+  zoom: number;
 }
 
 export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
   width,
   height,
-  backgroundColor
+  backgroundColor,
+  zoom
 }) => {
   const { state, dispatch, updateControl, copyControls, pasteControls } = useVB6();
+  const scale = zoom / 100;
   const canvasRef = useRef<HTMLDivElement>(null);
   
   const {
@@ -187,6 +190,8 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
           onToggleSnap={() => {}}
           gridSize={state.gridSize}
           onGridSizeChange={(size) => dispatch({ type: 'SET_GRID_SIZE', payload: { size } })}
+          zoom={state.zoom}
+          onZoomChange={(z) => dispatch({ type: 'SET_ZOOM', payload: { zoom: z } })}
         />
       )}
 
@@ -194,16 +199,19 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
       <div className="flex-1 flex overflow-hidden">
         {/* Main Canvas */}
         <div className="flex-1 p-4 overflow-auto bg-gray-300">
-          <div
-            ref={canvasRef}
-            className="relative shadow-lg mx-auto"
-            style={{
-              width,
-              height,
-              backgroundColor,
-              border: '1px solid #000'
-            }}
-          >
+          <div style={{ width: width * scale, height: height * scale }}>
+            <div
+              ref={canvasRef}
+              className="relative shadow-lg mx-auto"
+              style={{
+                width,
+                height,
+                backgroundColor,
+                border: '1px solid #000',
+                transform: `scale(${scale})`,
+                transformOrigin: 'top left'
+              }}
+            >
             {/* Grid */}
             <GridManager
               show={state.showGrid && state.executionMode === 'design'}

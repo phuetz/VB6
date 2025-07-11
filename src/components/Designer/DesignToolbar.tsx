@@ -23,6 +23,8 @@ interface DesignToolbarProps {
   onToggleSnap: () => void;
   gridSize: number;
   onGridSizeChange: (size: number) => void;
+  zoom: number;
+  onZoomChange: (zoom: number) => void;
 }
 
 export const DesignToolbar: React.FC<DesignToolbarProps> = ({
@@ -45,7 +47,9 @@ export const DesignToolbar: React.FC<DesignToolbarProps> = ({
   snapToGrid,
   onToggleSnap,
   gridSize,
-  onGridSizeChange
+  onGridSizeChange,
+  zoom,
+  onZoomChange
 }) => {
   const hasSelection = selectedControls.length > 0;
   const hasMultiSelection = selectedControls.length > 1;
@@ -313,6 +317,22 @@ export const DesignToolbar: React.FC<DesignToolbarProps> = ({
           className="w-12 text-xs border border-gray-400 px-1 py-0.5"
           title="Grid Size"
         />
+      </div>
+
+      {/* Zoom */}
+      <div className="flex items-center gap-1">
+        <span className="text-xs text-gray-600">Zoom:</span>
+        <select
+          value={zoom}
+          onChange={(e) => onZoomChange(parseInt(e.target.value))}
+          className="border border-gray-400 px-1 py-0.5 text-xs"
+        >
+          <option value={50}>50%</option>
+          <option value={75}>75%</option>
+          <option value={100}>100%</option>
+          <option value={150}>150%</option>
+          <option value={200}>200%</option>
+        </select>
       </div>
 
       {/* Informations */}
