@@ -302,6 +302,30 @@ describe('VB6Store', () => {
     expect(state.controls[0].y).toBe(20);
   });
 
+  it('should create a Toolbar control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('Toolbar', 5, 5);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('Toolbar');
+    expect(state.controls[0].x).toBe(5);
+    expect(state.controls[0].y).toBe(5);
+  });
+
+  it('should create a StatusBar control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('StatusBar', 0, 0);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('StatusBar');
+    expect(state.controls[0].x).toBe(0);
+    expect(state.controls[0].y).toBe(0);
+  });
+
   it('should undo and redo control creation', () => {
     const { createControl, undo, redo } = useVB6Store.getState();
 

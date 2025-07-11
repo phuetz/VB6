@@ -64,8 +64,8 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [x] Data
 - [x] OLE
 - [x] TabStrip
-- [ ] Toolbar
-- [ ] StatusBar
+- [x] Toolbar
+- [x] StatusBar
 - [x] ProgressBar
 - [ ] TreeView
 - [ ] ListView

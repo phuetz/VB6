@@ -221,6 +221,20 @@ export const getDefaultProperties = (type: string, id: number) => {
       backColor: '#C0C0C0',
       foreColor: '#000000',
       font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false }
+    },
+    Toolbar: {
+      width: 241,
+      height: 25,
+      buttons: ['New', 'Open', 'Save'],
+      backColor: '#C0C0C0',
+      foreColor: '#000000'
+    },
+    StatusBar: {
+      width: 241,
+      height: 21,
+      panels: ['Ready'],
+      backColor: '#C0C0C0',
+      foreColor: '#000000'
     }
   };
 

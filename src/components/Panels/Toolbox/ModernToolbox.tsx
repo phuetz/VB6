@@ -26,6 +26,8 @@ const VB6_CONTROLS: ControlDefinition[] = [
   
   // ActiveX Controls
   { type: 'TabStrip', icon: '📑', name: 'TabStrip', description: 'Tab container', category: 'ActiveX', defaultSize: { width: 241, height: 145 } },
+  { type: 'Toolbar', icon: '🔧', name: 'Toolbar', description: 'Toolbar control', category: 'ActiveX', defaultSize: { width: 241, height: 25 } },
+  { type: 'StatusBar', icon: '📊', name: 'StatusBar', description: 'Status bar', category: 'ActiveX', defaultSize: { width: 241, height: 21 } },
   { type: 'TreeView', icon: '🌳', name: 'TreeView', description: 'Tree view control', category: 'ActiveX', defaultSize: { width: 121, height: 97 } },
   { type: 'ListView', icon: '📋', name: 'ListView', description: 'List view control', category: 'ActiveX', defaultSize: { width: 121, height: 97 } },
   { type: 'ProgressBar', icon: '📶', name: 'ProgressBar', description: 'Progress indicator', category: 'ActiveX', defaultSize: { width: 121, height: 21 } },
