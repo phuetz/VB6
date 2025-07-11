@@ -27,6 +27,7 @@ interface VB6Store extends VB6State {
   showDialog: (dialogName: string, show: boolean) => void;
   undo: () => void;
   redo: () => void;
+  pushHistory: (controls: Control[], nextId: number) => void;
   showTemplateManager: boolean;
   recordPerformanceMetrics: (metric: any) => void;
   clearPerformanceLogs: () => void;
@@ -284,6 +285,20 @@ End Function`,
     performanceLogs: [],
     showLogPanel: false,
 
+    // History helper
+    pushHistory: (controls: Control[], nextId: number) => {
+      const state = get();
+      const snapshot = {
+        controls: controls.map(c => ({ ...c })),
+        nextId,
+      };
+      const newHistory = [
+        ...state.history.slice(0, state.historyIndex + 1),
+        snapshot,
+      ];
+      set({ history: newHistory, historyIndex: newHistory.length - 1 });
+    },
+
     // Actions
     createControl: (type: string, x = 50, y = 50) => {
       const state = get();
@@ -304,6 +319,7 @@ End Function`,
         selectedControls: [newControl],
         nextId: state.nextId + 1,
       });
+      state.pushHistory([...state.controls, newControl], state.nextId + 1);
 
       state.addLog(
         'info',
@@ -336,6 +352,7 @@ End Function`,
         controls: updatedControls,
         selectedControls: updatedSelectedControls,
       });
+      state.pushHistory(updatedControls, state.nextId);
     },
 
     deleteControls: (controlIds: number[]) => {
@@ -346,6 +363,10 @@ End Function`,
         controls: state.controls.filter(control => !controlIds.includes(control.id)),
         selectedControls: [],
       });
+      state.pushHistory(
+        state.controls.filter(control => !controlIds.includes(control.id)),
+        state.nextId
+      );
     },
 
     selectControls: (controlIds: number[]) => {
@@ -390,6 +411,10 @@ End Function`,
         selectedControls: newControls,
         nextId: state.nextId + state.clipboard.length,
       });
+      state.pushHistory(
+        [...state.controls, ...newControls],
+        state.nextId + state.clipboard.length
+      );
     },
 
     setExecutionMode: (mode: 'design' | 'run' | 'break') => {
@@ -483,13 +508,29 @@ End Function`,
     },
 
     undo: () => {
-      // Implementation for undo
-      console.log('Undo action');
+      const state = get();
+      if (state.historyIndex <= 0) return;
+      const prevIndex = state.historyIndex - 1;
+      const snapshot = state.history[prevIndex];
+      set({
+        controls: snapshot.controls.map((c: Control) => ({ ...c })),
+        selectedControls: [],
+        nextId: snapshot.nextId,
+        historyIndex: prevIndex,
+      });
     },
 
     redo: () => {
-      // Implementation for redo
-      console.log('Redo action');
+      const state = get();
+      if (state.historyIndex >= state.history.length - 1) return;
+      const nextIndex = state.historyIndex + 1;
+      const snapshot = state.history[nextIndex];
+      set({
+        controls: snapshot.controls.map((c: Control) => ({ ...c })),
+        selectedControls: [],
+        nextId: snapshot.nextId,
+        historyIndex: nextIndex,
+      });
     },
 
     // Code Analysis

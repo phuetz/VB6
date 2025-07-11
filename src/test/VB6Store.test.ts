@@ -9,7 +9,10 @@ describe('VB6Store', () => {
       selectedControls: [],
       nextId: 1,
       executionMode: 'design',
+      history: [],
+      historyIndex: -1,
     });
+    useVB6Store.getState().pushHistory([], 1);
   });
 
   it('should create a control', () => {
@@ -153,5 +156,31 @@ describe('VB6Store', () => {
     expect(state.controls[0].type).toBe('ComboBox');
     expect(state.controls[0].x).toBe(40);
     expect(state.controls[0].y).toBe(60);
+  });
+
+  it('should create a ListBox control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('ListBox', 50, 70);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('ListBox');
+    expect(state.controls[0].x).toBe(50);
+    expect(state.controls[0].y).toBe(70);
+  });
+
+  it('should undo and redo control creation', () => {
+    const { createControl, undo, redo } = useVB6Store.getState();
+
+    createControl('CommandButton', 10, 10);
+    expect(useVB6Store.getState().controls).toHaveLength(1);
+
+    undo();
+    expect(useVB6Store.getState().controls).toHaveLength(0);
+
+    redo();
+    expect(useVB6Store.getState().controls).toHaveLength(1);
+    expect(useVB6Store.getState().controls[0].type).toBe('CommandButton');
   });
 });

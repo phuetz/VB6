@@ -35,7 +35,7 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [ ] **Sélection multiple avancée** : alignements, espacement et redimensionnement simultané.
 - [ ] **Property Grid en temps réel** : édition de toutes les propriétés (couleurs, polices, liaisons).
 - [ ] **Arborescence des contrôles** pour naviguer dans la hiérarchie du formulaire.
-- [ ] **Système d'annulation/rétablissement** (Undo/Redo) sur toutes les actions.
+- [x] **Système d'annulation/rétablissement** (Undo/Redo) sur toutes les actions.
 - [ ] **Éditeur de menus et barres d'outils** intégré au designer.
 - [ ] **Export/Import au format .frm** totalement compatible avec VB6.
 - [ ] **Tests de bout en bout** validant création et manipulation des formulaires.
@@ -50,8 +50,8 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [x] CommandButton
 - [x] CheckBox
 - [x] OptionButton
-- [ ] ComboBox
-- [ ] ListBox
+- [x] ComboBox
+- [x] ListBox
 - [ ] HScrollBar
 - [ ] VScrollBar
 - [ ] Timer
