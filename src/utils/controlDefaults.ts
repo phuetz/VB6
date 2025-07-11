@@ -203,6 +203,15 @@ export const getDefaultProperties = (type: string, id: number) => {
       class: '',
       displayType: 0,
       autoActivate: true
+    },
+    ProgressBar: {
+      width: 121,
+      height: 21,
+      min: 0,
+      max: 100,
+      value: 0,
+      backColor: '#C0C0C0',
+      foreColor: '#0078D4'
     }
   };
 
