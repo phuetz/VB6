@@ -305,6 +305,8 @@ const MonacoCodeEditor: React.FC = () => {
       'FileListBox': [...commonEvents, 'Change'],
       'ProgressBar': [...commonEvents, 'Change'],
       'TabStrip': [...commonEvents, 'Change'],
+      'Toolbar': [...commonEvents, 'ButtonClick'],
+      'StatusBar': [...commonEvents],
       'Shape': ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
       'Line': ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
       'Image': [...commonEvents, 'GotFocus', 'LostFocus']

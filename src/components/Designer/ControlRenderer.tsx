@@ -610,6 +610,66 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           </div>
         );
 
+      case 'Toolbar':
+        const buttons = control.buttons || [];
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              backgroundColor: control.backColor,
+              border: '1px solid #000',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '2px'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            {buttons.map((btn: string, idx: number) => (
+              <button
+                key={idx}
+                style={{ marginRight: '2px', fontSize: '10px' }}
+                disabled={!control.enabled}
+              >
+                {btn}
+              </button>
+            ))}
+          </div>
+        );
+
+      case 'StatusBar':
+        const panels = control.panels || ['Ready'];
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              backgroundColor: control.backColor,
+              border: '1px solid #000',
+              display: 'flex',
+              fontSize: '10px'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            {panels.map((p: string, idx: number) => (
+              <div
+                key={idx}
+                style={{
+                  flex: 1,
+                  padding: '0 4px',
+                  borderLeft: idx > 0 ? '1px solid #808080' : undefined
+                }}
+              >
+                {p}
+              </div>
+            ))}
+          </div>
+        );
+
       case 'Shape':
         return (
           <div

@@ -22,6 +22,8 @@ export const controlCategories = {
     { type: 'ProgressBar', icon: '▓', name: 'ProgressBar', cursor: 'default' },
     { type: 'Slider', icon: '━', name: 'Slider', cursor: 'pointer' },
     { type: 'TabStrip', icon: '📑', name: 'TabStrip', cursor: 'pointer' },
+    { type: 'Toolbar', icon: '🔧', name: 'Toolbar', cursor: 'default' },
+    { type: 'StatusBar', icon: '📊', name: 'StatusBar', cursor: 'default' },
     { type: 'DateTimePicker', icon: '📅', name: 'DateTimePicker', cursor: 'pointer' },
     { type: 'MonthView', icon: '📆', name: 'MonthView', cursor: 'pointer' }
   ]
