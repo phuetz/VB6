@@ -182,6 +182,30 @@ describe('VB6Store', () => {
     expect(state.controls[0].y).toBe(5);
   });
 
+  it('should create a HScrollBar control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('HScrollBar', 15, 25);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('HScrollBar');
+    expect(state.controls[0].x).toBe(15);
+    expect(state.controls[0].y).toBe(25);
+  });
+
+  it('should create a VScrollBar control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('VScrollBar', 20, 30);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('VScrollBar');
+    expect(state.controls[0].x).toBe(20);
+    expect(state.controls[0].y).toBe(30);
+  });
+
   it('should undo and redo control creation', () => {
     const { createControl, undo, redo } = useVB6Store.getState();
 

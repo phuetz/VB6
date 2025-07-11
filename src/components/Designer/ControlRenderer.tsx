@@ -329,6 +329,49 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           </div>
         );
 
+      case 'HScrollBar':
+        return (
+          <input
+            type="range"
+            min={control.min}
+            max={control.max}
+            value={control.value}
+            onChange={e =>
+              handleControlChange(Number(e.target.value), 'value')
+            }
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+            disabled={!control.enabled}
+          />
+        );
+
+      case 'VScrollBar':
+        return (
+          <input
+            type="range"
+            min={control.min}
+            max={control.max}
+            value={control.value}
+            onChange={e =>
+              handleControlChange(Number(e.target.value), 'value')
+            }
+            style={{
+              ...baseStyle,
+              width: control.height,
+              height: control.width,
+              transform: 'rotate(-90deg)',
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+            disabled={!control.enabled}
+          />
+        );
+
       case 'Frame':
         return (
           <fieldset
