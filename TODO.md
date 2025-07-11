@@ -61,8 +61,8 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [x] Shape
 - [x] Line
 - [x] Image
-- [ ] Data
-- [ ] OLE
+- [x] Data
+- [x] OLE
 - [ ] TabStrip
 - [ ] Toolbar
 - [ ] StatusBar

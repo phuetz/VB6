@@ -278,6 +278,30 @@ describe('VB6Store', () => {
     expect(state.controls[0].y).toBe(40);
   });
 
+  it('should create a Data control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('Data', 10, 10);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('Data');
+    expect(state.controls[0].x).toBe(10);
+    expect(state.controls[0].y).toBe(10);
+  });
+
+  it('should create an OLE control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('OLE', 20, 20);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('OLE');
+    expect(state.controls[0].x).toBe(20);
+    expect(state.controls[0].y).toBe(20);
+  });
+
   it('should undo and redo control creation', () => {
     const { createControl, undo, redo } = useVB6Store.getState();
 
