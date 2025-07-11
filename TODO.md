@@ -54,7 +54,7 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [x] ListBox
 - [ ] HScrollBar
 - [ ] VScrollBar
-- [ ] Timer
+- [x] Timer
 - [ ] DriveListBox
 - [ ] DirListBox
 - [ ] FileListBox
