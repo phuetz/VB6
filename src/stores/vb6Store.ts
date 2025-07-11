@@ -31,6 +31,12 @@ interface VB6Store extends VB6State {
   showTemplateManager: boolean;
   recordPerformanceMetrics: (metric: any) => void;
   clearPerformanceLogs: () => void;
+  // Todo list
+  todoItems: { id: string; text: string; completed: boolean }[];
+  showTodoList: boolean;
+  addTodo: (text: string) => void;
+  toggleTodo: (id: string) => void;
+  deleteTodo: (id: string) => void;
 }
 
 export const useVB6Store = create<VB6Store>()(
@@ -284,6 +290,9 @@ End Function`,
     logs: [],
     performanceLogs: [],
     showLogPanel: false,
+    // Todo list
+    todoItems: [],
+    showTodoList: false,
 
     // History helper
     pushHistory: (controls: Control[], nextId: number) => {
@@ -292,10 +301,7 @@ End Function`,
         controls: controls.map(c => ({ ...c })),
         nextId,
       };
-      const newHistory = [
-        ...state.history.slice(0, state.historyIndex + 1),
-        snapshot,
-      ];
+      const newHistory = [...state.history.slice(0, state.historyIndex + 1), snapshot];
       set({ history: newHistory, historyIndex: newHistory.length - 1 });
     },
 
@@ -411,10 +417,7 @@ End Function`,
         selectedControls: newControls,
         nextId: state.nextId + state.clipboard.length,
       });
-      state.pushHistory(
-        [...state.controls, ...newControls],
-        state.nextId + state.clipboard.length
-      );
+      state.pushHistory([...state.controls, ...newControls], state.nextId + state.clipboard.length);
     },
 
     setExecutionMode: (mode: 'design' | 'run' | 'break') => {
@@ -741,5 +744,20 @@ End Function`,
     clearPerformanceLogs: () => set({ performanceLogs: [] }),
 
     clearLogs: () => set({ logs: [] }),
+
+    addTodo: (text: string) =>
+      set(state => ({
+        todoItems: [...state.todoItems, { id: Date.now().toString(), text, completed: false }],
+      })),
+
+    toggleTodo: (id: string) =>
+      set(state => ({
+        todoItems: state.todoItems.map(t => (t.id === id ? { ...t, completed: !t.completed } : t)),
+      })),
+
+    deleteTodo: (id: string) =>
+      set(state => ({
+        todoItems: state.todoItems.filter(t => t.id !== id),
+      })),
   }))
 );

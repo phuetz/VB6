@@ -291,4 +291,20 @@ describe('VB6Store', () => {
     expect(useVB6Store.getState().controls).toHaveLength(1);
     expect(useVB6Store.getState().controls[0].type).toBe('CommandButton');
   });
+
+  it('should manage todo items', () => {
+    const { addTodo, toggleTodo, deleteTodo } = useVB6Store.getState();
+
+    addTodo('Task 1');
+    let items = useVB6Store.getState().todoItems;
+    expect(items).toHaveLength(1);
+    expect(items[0].text).toBe('Task 1');
+    expect(items[0].completed).toBe(false);
+
+    toggleTodo(items[0].id);
+    expect(useVB6Store.getState().todoItems[0].completed).toBe(true);
+
+    deleteTodo(items[0].id);
+    expect(useVB6Store.getState().todoItems).toHaveLength(0);
+  });
 });

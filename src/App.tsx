@@ -17,12 +17,13 @@ import { EnhancedIntelliSense } from './components/Editor/EnhancedIntelliSense';
 import { CodeAnalyzer } from './components/Analysis/CodeAnalyzer';
 import { RefactorTools } from './components/Refactoring/RefactorTools';
 import { SnippetManager } from './components/Snippets/SnippetManager';
+import { TodoList } from './components/Todo/TodoList';
 import { BreakpointManager } from './components/Debugging/BreakpointManager';
 import { ProjectTemplateManager } from './components/Templates/ProjectTemplateManager';
 import { PerformanceMonitor } from './components/Performance/PerformanceMonitor';
 import { ProjectSetupWizard } from './components/ProjectWizard/ProjectSetupWizard';
 import { EnhancedErrorList } from './components/ErrorList/EnhancedErrorList';
-import { CommandPalette } from './components/CommandPalette/CommandPalette'; 
+import { CommandPalette } from './components/CommandPalette/CommandPalette';
 import { ExportDialog } from './components/Export/ExportDialog';
 import { LogPanel } from './components/Debug/LogPanel';
 import { CodeFormatter } from './components/Formatting/CodeFormatter';
@@ -30,13 +31,13 @@ import { CodeConverter } from './components/Converter/CodeConverter';
 import './index.css';
 
 const MainContent: React.FC = () => {
-  const { 
-    showToolbox, 
-    showCodeEditor, 
-    showProjectExplorer, 
-    showPropertiesWindow, 
+  const {
+    showToolbox,
+    showCodeEditor,
+    showProjectExplorer,
+    showPropertiesWindow,
     showImmediateWindow,
-    formProperties
+    formProperties,
   } = useVB6Store();
 
   return (
@@ -59,7 +60,7 @@ const MainContent: React.FC = () => {
             </div>
           </div>
         )}
-        
+
         {/* Bottom Panel - Immediate Window */}
         {showImmediateWindow && <ImmediateWindow />}
       </div>
@@ -75,7 +76,16 @@ const MainContent: React.FC = () => {
 
 function App() {
   // State for all dialog components
-  const { showTemplateManager, showPerformanceMonitor, showDialog, toggleWindow, snippets, showSnippetManager, insertSnippet } = useVB6Store();
+  const {
+    showTemplateManager,
+    showPerformanceMonitor,
+    showDialog,
+    toggleWindow,
+    snippets,
+    showSnippetManager,
+    insertSnippet,
+    showTodoList,
+  } = useVB6Store();
   const [showProjectWizard, setShowProjectWizard] = useState(false);
   const [showCodeAnalyzer, setShowCodeAnalyzer] = useState(false);
   const [showRefactorTools, setShowRefactorTools] = useState(false);
@@ -89,45 +99,48 @@ function App() {
   return (
     <VB6Provider>
       <DragDropProvider>
-        <div className="h-screen bg-gray-200 flex flex-col overflow-hidden" style={{ fontFamily: 'MS Sans Serif, sans-serif' }}>
+        <div
+          className="h-screen bg-gray-200 flex flex-col overflow-hidden"
+          style={{ fontFamily: 'MS Sans Serif, sans-serif' }}
+        >
           <TitleBar />
           <EnhancedMenuBar />
           <EnhancedToolbar />
           <MainContent />
           <StatusBar />
           <DialogManager />
-          
+
           {/* Debug Log Panel */}
           <LogPanel />
-          
+
           {/* Template Manager */}
           <ProjectTemplateManager
             visible={showTemplateManager}
             onClose={() => showDialog('showTemplateManager', false)}
-            onCreateProject={(template) => {
+            onCreateProject={template => {
               console.log('Creating project from template:', template);
               showDialog('showTemplateManager', false);
             }}
           />
-          
+
           {/* Performance Monitor */}
           <PerformanceMonitor
             visible={showPerformanceMonitor}
             onClose={() => toggleWindow('showPerformanceMonitor')}
           />
-          
+
           {/* Project Setup Wizard */}
           <ProjectSetupWizard
             visible={showProjectWizard}
             onClose={() => setShowProjectWizard(false)}
-            onComplete={(config) => {
+            onComplete={config => {
               console.log('Project configuration:', config);
               setShowProjectWizard(false);
             }}
           />
-          
+
           {/* Code Analysis and Refactoring Tools */}
-          <CodeAnalyzer 
+          <CodeAnalyzer
             visible={showCodeAnalyzer}
             onClose={() => setShowCodeAnalyzer(false)}
             onFixIssue={(issue, fixIndex) => {
@@ -137,7 +150,7 @@ function App() {
               console.log('Navigating to issue:', file, line, column);
             }}
           />
-          
+
           <RefactorTools
             visible={showRefactorTools}
             onClose={() => setShowRefactorTools(false)}
@@ -145,15 +158,15 @@ function App() {
               console.log('Applying refactoring:', type, options);
             }}
           />
-          
+
           <BreakpointManager
             visible={showBreakpointManager}
             onClose={() => setShowBreakpointManager(false)}
             breakpoints={[]}
-            onAddBreakpoint={(bp) => {
+            onAddBreakpoint={bp => {
               console.log('Adding breakpoint:', bp);
             }}
-            onRemoveBreakpoint={(id) => {
+            onRemoveBreakpoint={id => {
               console.log('Removing breakpoint:', id);
             }}
             onUpdateBreakpoint={(id, updates) => {
@@ -171,7 +184,7 @@ function App() {
             onNavigateToError={(file, line, column) => {
               console.log('Navigating to error:', file, line, column);
             }}
-            onFixError={(errorId) => {
+            onFixError={errorId => {
               console.log('Fix error:', errorId);
             }}
             onClearErrors={() => {
@@ -206,7 +219,7 @@ function App() {
           <CodeFormatter
             visible={showCodeFormatter}
             onClose={() => setShowCodeFormatter(false)}
-            onApplyFormatting={(formattedCode) => {
+            onApplyFormatting={formattedCode => {
               console.log('Apply formatting:', formattedCode);
             }}
           />
@@ -220,6 +233,8 @@ function App() {
             }}
           />
 
+          {/* Todo List */}
+          <TodoList visible={showTodoList} onClose={() => toggleWindow('showTodoList')} />
         </div>
       </DragDropProvider>
     </VB6Provider>

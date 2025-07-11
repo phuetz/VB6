@@ -1,8 +1,21 @@
 import React from 'react';
-import { 
-  FileText, Folder, Save, Play, Square, 
-  Copy, Clipboard, Grid, Crosshair, Activity, Zap, Scissors,
-  FileCode as FileCodeIcon, ArrowLeftRight, Bug
+import {
+  FileText,
+  Folder,
+  Save,
+  Play,
+  Square,
+  Copy,
+  Clipboard,
+  Grid,
+  Crosshair,
+  Activity,
+  Zap,
+  Scissors,
+  FileCode as FileCodeIcon,
+  ArrowLeftRight,
+  Bug,
+  ListTodo,
 } from 'lucide-react';
 import { useVB6Store } from '../../stores/vb6Store';
 import { UndoRedoToolbar } from './UndoRedoToolbar';
@@ -15,6 +28,7 @@ export const EnhancedToolbar: React.FC = () => {
     showSnippetManager,
     snapToGrid,
     showLogPanel,
+    showTodoList,
     selectedControls,
     clipboard,
     showCodeFormatter,
@@ -24,7 +38,7 @@ export const EnhancedToolbar: React.FC = () => {
     copyControls,
     pasteControls,
     setDragState,
-    showDialog
+    showDialog,
   } = useVB6Store();
 
   const { saveState } = useUndoRedo();
@@ -54,9 +68,9 @@ export const EnhancedToolbar: React.FC = () => {
   };
 
   const handleSnapToggle = () => {
-    setDragState({ 
+    setDragState({
       isDragging: false,
-      snapToGrid: !snapToGrid 
+      snapToGrid: !snapToGrid,
     });
   };
 
@@ -64,22 +78,22 @@ export const EnhancedToolbar: React.FC = () => {
     <div className="h-10 bg-gray-200 border-b border-gray-400 flex items-center px-2 gap-1">
       {/* File operations */}
       <div className="flex items-center gap-1 border-r border-gray-400 pr-2 mr-2">
-        <button 
-          className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors" 
+        <button
+          className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors"
           title="New Project"
         >
           <FileText size={16} />
         </button>
-        
-        <button 
-          className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors" 
+
+        <button
+          className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors"
           title="Open Project"
         >
           <Folder size={16} />
         </button>
-        
-        <button 
-          className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors" 
+
+        <button
+          className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors"
           title="Save Project"
         >
           <Save size={16} />
@@ -88,7 +102,7 @@ export const EnhancedToolbar: React.FC = () => {
 
       {/* Undo/Redo */}
       <UndoRedoToolbar />
-      
+
       {/* Edit operations */}
       <div className="flex items-center gap-1 border-r border-gray-400 pr-2 mr-2">
         <button
@@ -99,7 +113,7 @@ export const EnhancedToolbar: React.FC = () => {
         >
           <Copy size={16} />
         </button>
-        
+
         <button
           onClick={handlePaste}
           disabled={clipboard.length === 0}
@@ -109,14 +123,14 @@ export const EnhancedToolbar: React.FC = () => {
           <Clipboard size={16} />
         </button>
       </div>
-      
+
       {/* Execution */}
       <div className="flex items-center gap-1 border-r border-gray-400 pr-2 mr-2">
         <button
           onClick={handleExecutionToggle}
           className={`p-1 border border-gray-400 transition-all ${
-            executionMode === 'run' 
-              ? 'bg-green-200 text-green-800 hover:bg-green-300' 
+            executionMode === 'run'
+              ? 'bg-green-200 text-green-800 hover:bg-green-300'
               : 'bg-gray-100 hover:bg-gray-300'
           }`}
           title={executionMode === 'run' ? 'Stop (Esc)' : 'Run (F5)'}
@@ -124,26 +138,26 @@ export const EnhancedToolbar: React.FC = () => {
           {executionMode === 'run' ? <Square size={16} /> : <Play size={16} />}
         </button>
       </div>
-      
+
       {/* Grid and snap options */}
       <div className="flex items-center gap-1 border-r border-gray-400 pr-2 mr-2">
         <button
           onClick={handleGridToggle}
           className={`p-1 border border-gray-400 transition-all ${
-            showGrid 
-              ? 'bg-blue-200 text-blue-800 hover:bg-blue-300' 
+            showGrid
+              ? 'bg-blue-200 text-blue-800 hover:bg-blue-300'
               : 'bg-gray-100 hover:bg-gray-300'
           }`}
           title="Toggle Grid"
         >
           <Grid size={16} />
         </button>
-        
+
         <button
           onClick={handleSnapToggle}
           className={`p-1 border border-gray-400 transition-all ${
-            snapToGrid 
-              ? 'bg-blue-200 text-blue-800 hover:bg-blue-300' 
+            snapToGrid
+              ? 'bg-blue-200 text-blue-800 hover:bg-blue-300'
               : 'bg-gray-100 hover:bg-gray-300'
           }`}
           title="Snap to Grid"
@@ -151,7 +165,7 @@ export const EnhancedToolbar: React.FC = () => {
           <Crosshair size={16} />
         </button>
       </div>
-      
+
       {/* Status and tips */}
       <div className="ml-auto flex items-center gap-4 text-xs text-gray-600">
         {selectedControls.length > 0 && (
@@ -160,18 +174,19 @@ export const EnhancedToolbar: React.FC = () => {
             {selectedControls.length} selected
           </span>
         )}
-        
+
         <span className="text-gray-500">
-          {executionMode === 'run' ? '▶ Running' : 
-           executionMode === 'break' ? '⏸ Break' : '■ Design'}
+          {executionMode === 'run'
+            ? '▶ Running'
+            : executionMode === 'break'
+              ? '⏸ Break'
+              : '■ Design'}
         </span>
-        
-        <span className="text-gray-400 hidden lg:block">
-          💡 Hold Ctrl while dragging to copy
-        </span>
-        
+
+        <span className="text-gray-400 hidden lg:block">💡 Hold Ctrl while dragging to copy</span>
+
         <div className="w-px h-6 bg-gray-400 mx-1" />
-        
+
         <button
           onClick={() => showDialog('showTemplateManager', true)}
           className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors"
@@ -187,7 +202,7 @@ export const EnhancedToolbar: React.FC = () => {
         >
           <Activity size={16} />
         </button>
-        
+
         <div className="flex items-center ml-2 gap-2">
           <button
             onClick={() => showDialog('showCodeFormatter', true)}
@@ -219,13 +234,23 @@ export const EnhancedToolbar: React.FC = () => {
               Code Snippets
             </div>
           </button>
+          <button
+            onClick={() => toggleWindow('showTodoList')}
+            className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors relative group"
+            title="Todo List"
+          >
+            <ListTodo size={16} className={showTodoList ? 'text-green-600' : 'text-gray-600'} />
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity mb-1">
+              Todo List
+            </div>
+          </button>
         </div>
         <button
           onClick={() => toggleWindow('showLogPanel')}
           className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 transition-colors relative group"
           title="Debug Logs"
         >
-          <Bug size={16} className={showLogPanel ? "text-green-600" : "text-gray-600"} />
+          <Bug size={16} className={showLogPanel ? 'text-green-600' : 'text-gray-600'} />
           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity mb-1">
             Debug Logs
           </div>
