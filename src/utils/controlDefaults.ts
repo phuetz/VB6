@@ -189,6 +189,20 @@ export const getDefaultProperties = (type: string, id: number) => {
       font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false },
       items: ['File1.txt', 'File2.txt'],
       value: 'File1.txt'
+    },
+    Data: {
+      width: 121,
+      height: 21,
+      databaseName: '',
+      recordSource: '',
+      recordset: null
+    },
+    OLE: {
+      width: 121,
+      height: 97,
+      class: '',
+      displayType: 0,
+      autoActivate: true
     }
   };
 

@@ -469,6 +469,50 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           </div>
         );
 
+      case 'Data':
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              backgroundColor: '#f0f0f0',
+              border: '1px solid #000',
+              display: 'flex',
+              alignItems: 'center',
+              paddingLeft: '4px',
+              fontSize: '10px',
+              fontFamily: control.font?.name || 'MS Sans Serif'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            {control.name}
+          </div>
+        );
+
+      case 'OLE':
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              backgroundColor: '#ffffff',
+              border: '1px dashed #000',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '10px',
+              fontFamily: control.font?.name || 'MS Sans Serif'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            OLE
+          </div>
+        );
+
       case 'DriveListBox':
       case 'DirListBox':
       case 'FileListBox':
