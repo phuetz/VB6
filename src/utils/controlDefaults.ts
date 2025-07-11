@@ -162,6 +162,33 @@ export const getDefaultProperties = (type: string, id: number) => {
       value: 0,
       smallChange: 1,
       largeChange: 1
+    },
+    DriveListBox: {
+      width: 121,
+      height: 97,
+      backColor: '#FFFFFF',
+      foreColor: '#000000',
+      font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false },
+      items: ['C:', 'D:', 'E:'],
+      value: 'C:'
+    },
+    DirListBox: {
+      width: 121,
+      height: 97,
+      backColor: '#FFFFFF',
+      foreColor: '#000000',
+      font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false },
+      items: ['Folder1', 'Folder2'],
+      value: 'Folder1'
+    },
+    FileListBox: {
+      width: 121,
+      height: 97,
+      backColor: '#FFFFFF',
+      foreColor: '#000000',
+      font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false },
+      items: ['File1.txt', 'File2.txt'],
+      value: 'File1.txt'
     }
   };
 

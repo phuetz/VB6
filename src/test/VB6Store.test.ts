@@ -206,6 +206,78 @@ describe('VB6Store', () => {
     expect(state.controls[0].y).toBe(30);
   });
 
+  it('should create a DriveListBox control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('DriveListBox', 10, 10);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('DriveListBox');
+    expect(state.controls[0].x).toBe(10);
+    expect(state.controls[0].y).toBe(10);
+  });
+
+  it('should create a DirListBox control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('DirListBox', 15, 20);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('DirListBox');
+    expect(state.controls[0].x).toBe(15);
+    expect(state.controls[0].y).toBe(20);
+  });
+
+  it('should create a FileListBox control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('FileListBox', 5, 5);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('FileListBox');
+    expect(state.controls[0].x).toBe(5);
+    expect(state.controls[0].y).toBe(5);
+  });
+
+  it('should create a Shape control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('Shape', 20, 20);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('Shape');
+    expect(state.controls[0].x).toBe(20);
+    expect(state.controls[0].y).toBe(20);
+  });
+
+  it('should create a Line control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('Line', 0, 0);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('Line');
+    expect(state.controls[0].x).toBe(0);
+    expect(state.controls[0].y).toBe(0);
+  });
+
+  it('should create an Image control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('Image', 30, 40);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('Image');
+    expect(state.controls[0].x).toBe(30);
+    expect(state.controls[0].y).toBe(40);
+  });
+
   it('should undo and redo control creation', () => {
     const { createControl, undo, redo } = useVB6Store.getState();
 

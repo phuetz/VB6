@@ -16,7 +16,13 @@ const CodeEditor: React.FC = () => {
       'CheckBox': [...commonEvents, 'Click', 'GotFocus', 'LostFocus'],
       'OptionButton': [...commonEvents, 'Click', 'GotFocus', 'LostFocus'],
       'ComboBox': [...commonEvents, 'Change', 'DropDown', 'GotFocus', 'LostFocus', 'Validate'],
-      'Timer': ['Timer']
+      'Timer': ['Timer'],
+      'DriveListBox': [...commonEvents, 'Change'],
+      'DirListBox': [...commonEvents, 'Change'],
+      'FileListBox': [...commonEvents, 'Change'],
+      'Shape': ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
+      'Line': ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
+      'Image': [...commonEvents, 'GotFocus', 'LostFocus']
     };
     
     return specificEvents[controlType] || commonEvents;

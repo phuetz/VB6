@@ -55,12 +55,12 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [x] HScrollBar
 - [x] VScrollBar
 - [x] Timer
-- [ ] DriveListBox
-- [ ] DirListBox
-- [ ] FileListBox
-- [ ] Shape
-- [ ] Line
-- [ ] Image
+- [x] DriveListBox
+- [x] DirListBox
+- [x] FileListBox
+- [x] Shape
+- [x] Line
+- [x] Image
 - [ ] Data
 - [ ] OLE
 - [ ] TabStrip

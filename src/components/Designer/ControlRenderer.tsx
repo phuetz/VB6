@@ -448,6 +448,88 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           </div>
         );
 
+      case 'Image':
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.autoSize && control.picture ? 'auto' : control.width,
+              height: control.autoSize && control.picture ? 'auto' : control.height,
+              border: control.borderStyle === 1 ? '1px solid #000' : 'none',
+              overflow: 'hidden'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            {control.picture ? (
+              <img src={control.picture} style={{ width: '100%', height: '100%', objectFit: control.stretch ? 'fill' : 'contain' }} />
+            ) : (
+              <span style={{ fontSize: '10px', color: '#555' }}>Image</span>
+            )}
+          </div>
+        );
+
+      case 'DriveListBox':
+      case 'DirListBox':
+      case 'FileListBox':
+        return (
+          <div
+            style={{ ...baseStyle, width: control.width, height: control.height }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            <select
+              value={control.value}
+              onChange={e => handleControlChange(e.target.value, 'value')}
+              style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: control.backColor,
+                color: control.foreColor,
+                fontSize: `${control.font?.size || 8}pt`,
+                fontFamily: control.font?.name || 'MS Sans Serif'
+              }}
+              disabled={!control.enabled}
+            >
+              {(control.items || []).map((item: string, idx: number) => (
+                <option key={idx} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+
+      case 'Shape':
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              backgroundColor: control.backStyle === 1 ? control.backColor : 'transparent',
+              border: control.borderStyle === 1 ? `${control.borderWidth}px solid ${control.borderColor}` : 'none',
+              borderRadius: control.shape === 2 || control.shape === 3 ? '50%' : 0
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          />
+        );
+
+      case 'Line':
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.borderWidth,
+              backgroundColor: control.borderColor
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          />
+        );
+
       default:
         return (
           <div
