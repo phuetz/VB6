@@ -66,7 +66,7 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [ ] TabStrip
 - [ ] Toolbar
 - [ ] StatusBar
-- [ ] ProgressBar
+- [x] ProgressBar
 - [ ] TreeView
 - [ ] ListView
 - [ ] ImageList

@@ -544,6 +544,32 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           </div>
         );
 
+      case 'ProgressBar':
+        const percentage = ((control.value - control.min) / (control.max - control.min)) * 100;
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              backgroundColor: control.backColor,
+              border: '1px solid #000',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            <div
+              style={{
+                width: `${Math.max(0, Math.min(100, percentage))}%`,
+                height: '100%',
+                backgroundColor: control.foreColor || '#0078D4'
+              }}
+            />
+          </div>
+        );
+
       case 'Shape':
         return (
           <div
