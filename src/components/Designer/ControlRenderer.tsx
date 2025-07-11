@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useVB6 } from '../../context/VB6Context';
 import { Control } from '../../context/types';
 import ResizeHandles from './ResizeHandles';
@@ -69,6 +69,15 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
     },
     [control.id, state.executionMode, updateControl, executeEvent]
   );
+
+  useEffect(() => {
+    if (control.type !== 'Timer') return;
+    if (state.executionMode !== 'run' || !control.enabled) return;
+    const id = setInterval(() => {
+      executeEvent(control, 'Timer');
+    }, control.interval || 0);
+    return () => clearInterval(id);
+  }, [control, state.executionMode, control.interval, control.enabled, executeEvent]);
 
   // Base style
   const baseStyle: React.CSSProperties = {
@@ -368,6 +377,66 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             )}
           </div>
         );
+
+      case 'HScrollBar':
+        return (
+          <input
+            type="range"
+            min={control.min}
+            max={control.max}
+            value={control.value}
+            onChange={e => handleControlChange(parseInt(e.target.value))}
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+            disabled={!control.enabled}
+          />
+        );
+
+      case 'VScrollBar':
+        return (
+          <input
+            type="range"
+            min={control.min}
+            max={control.max}
+            value={control.value}
+            onChange={e => handleControlChange(parseInt(e.target.value))}
+            style={{
+              ...baseStyle,
+              width: control.height,
+              height: control.width,
+              transform: 'rotate(-90deg)',
+              transformOrigin: 'center',
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+            disabled={!control.enabled}
+          />
+        );
+
+      case 'Timer':
+        return state.executionMode === 'design' ? (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              border: '1px dashed #000',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '10px',
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            Timer
+          </div>
+        ) : null;
 
       default:
         return (

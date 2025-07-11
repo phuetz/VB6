@@ -52,9 +52,9 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [x] OptionButton
 - [x] ComboBox
 - [x] ListBox
-- [ ] HScrollBar
-- [ ] VScrollBar
-- [ ] Timer
+- [x] HScrollBar
+- [x] VScrollBar
+- [x] Timer
 - [ ] DriveListBox
 - [ ] DirListBox
 - [ ] FileListBox
