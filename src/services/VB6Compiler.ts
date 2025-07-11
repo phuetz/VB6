@@ -123,7 +123,9 @@ class ${form.name} {
       'Label': 'label',
       'CheckBox': 'input',
       'ListBox': 'select',
-      'ComboBox': 'select'
+      'ComboBox': 'select',
+      'HScrollBar': 'input',
+      'VScrollBar': 'input'
     };
     return mapping[vbType] || 'div';
   }
