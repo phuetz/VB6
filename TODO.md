@@ -63,7 +63,7 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [x] Image
 - [x] Data
 - [x] OLE
-- [ ] TabStrip
+- [x] TabStrip
 - [ ] Toolbar
 - [ ] StatusBar
 - [x] ProgressBar

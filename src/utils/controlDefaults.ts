@@ -212,6 +212,15 @@ export const getDefaultProperties = (type: string, id: number) => {
       value: 0,
       backColor: '#C0C0C0',
       foreColor: '#0078D4'
+    },
+    TabStrip: {
+      width: 241,
+      height: 145,
+      tabs: ['Tab1', 'Tab2'],
+      selectedIndex: 0,
+      backColor: '#C0C0C0',
+      foreColor: '#000000',
+      font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false }
     }
   };
 

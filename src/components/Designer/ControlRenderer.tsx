@@ -570,6 +570,46 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           </div>
         );
 
+      case 'TabStrip':
+        const tabs = control.tabs || ['Tab1'];
+        const selectedIndex = control.selectedIndex || 0;
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              backgroundColor: control.backColor,
+              border: '1px solid #000',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            <div style={{ display: 'flex', borderBottom: '1px solid #000' }}>
+              {tabs.map((tab: string, idx: number) => (
+                <div
+                  key={idx}
+                  onClick={() => handleControlChange(idx, 'selectedIndex')}
+                  style={{
+                    padding: '2px 8px',
+                    cursor: 'pointer',
+                    backgroundColor: selectedIndex === idx ? control.foreColor || '#0078D4' : control.backColor,
+                    color: selectedIndex === idx ? '#fff' : '#000',
+                    borderRight: '1px solid #000',
+                    fontSize: `${control.font?.size || 8}pt`,
+                    fontFamily: control.font?.name || 'MS Sans Serif'
+                  }}
+                >
+                  {tab}
+                </div>
+              ))}
+            </div>
+            <div style={{ flex: 1 }} />
+          </div>
+        );
+
       case 'Shape':
         return (
           <div
