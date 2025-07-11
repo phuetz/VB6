@@ -142,4 +142,16 @@ describe('VB6Store', () => {
     expect(state.controls[0].x).toBe(30);
     expect(state.controls[0].y).toBe(40);
   });
+
+  it('should create a ComboBox control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('ComboBox', 40, 60);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('ComboBox');
+    expect(state.controls[0].x).toBe(40);
+    expect(state.controls[0].y).toBe(60);
+  });
 });

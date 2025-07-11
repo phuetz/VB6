@@ -252,6 +252,35 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           </div>
         );
 
+      case 'ComboBox':
+        return (
+          <div
+            style={{ ...baseStyle, width: control.width, height: control.height }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            <select
+              value={control.text || ''}
+              onChange={e => handleControlChange(e.target.value, 'text')}
+              style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: control.backColor,
+                color: control.foreColor,
+                fontSize: `${control.font?.size || 8}pt`,
+                fontFamily: control.font?.name || 'MS Sans Serif',
+              }}
+              disabled={!control.enabled}
+            >
+              {(control.items || []).map((item: string, idx: number) => (
+                <option key={idx} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+
       case 'Frame':
         return (
           <fieldset
