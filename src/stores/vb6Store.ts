@@ -257,7 +257,6 @@ End Function`,
         qualityScore: 0,
       },
     },
-    snippets: [],
 
     // History
     history: [],
