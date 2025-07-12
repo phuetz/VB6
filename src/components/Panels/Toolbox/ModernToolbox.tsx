@@ -32,6 +32,7 @@ const VB6_CONTROLS: ControlDefinition[] = [
   { type: 'ListView', icon: '📋', name: 'ListView', description: 'List view control', category: 'ActiveX', defaultSize: { width: 121, height: 97 } },
   { type: 'ImageList', icon: '🖼️', name: 'ImageList', description: 'Image collection', category: 'ActiveX', defaultSize: { width: 32, height: 32 } },
   { type: 'ProgressBar', icon: '📶', name: 'ProgressBar', description: 'Progress indicator', category: 'ActiveX', defaultSize: { width: 121, height: 21 } },
+  { type: 'RichTextBox', icon: '📝', name: 'RichTextBox', description: 'Rich text editor', category: 'ActiveX', defaultSize: { width: 121, height: 97 } },
   { type: 'UpDown', icon: '🔼', name: 'UpDown', description: 'Spin button', category: 'ActiveX', defaultSize: { width: 17, height: 21 } },
 ];
 

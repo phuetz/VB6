@@ -301,6 +301,17 @@ export const getDefaultProperties = (type: string, id: number) => {
       foreColor: '#000000',
       font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false }
     },
+    RichTextBox: {
+      width: 121,
+      height: 97,
+      text: '',
+      scrollBars: 3,
+      backColor: '#FFFFFF',
+      foreColor: '#000000',
+      font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false },
+      locked: false,
+      borderStyle: 1
+    },
     ImageCombo: {
       width: 121,
       height: 21,

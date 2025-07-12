@@ -17,6 +17,7 @@ const CodeEditor: React.FC = () => {
       'OptionButton': [...commonEvents, 'Click', 'GotFocus', 'LostFocus'],
       'ComboBox': [...commonEvents, 'Change', 'DropDown', 'GotFocus', 'LostFocus', 'Validate'],
       'ImageCombo': [...commonEvents, 'Change', 'DropDown', 'GotFocus', 'LostFocus', 'Validate'],
+      'RichTextBox': [...commonEvents, 'Change', 'GotFocus', 'LostFocus', 'Validate'],
       'Timer': ['Timer'],
       'DriveListBox': [...commonEvents, 'Change'],
       'DirListBox': [...commonEvents, 'Change'],

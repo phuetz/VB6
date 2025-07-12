@@ -142,6 +142,15 @@ const VB6_CONTROLS: ControlDefinition[] = [
     keywords: ['progress', 'bar', 'indicator']
   },
   {
+    type: 'RichTextBox',
+    icon: '📝',
+    name: 'RichTextBox',
+    description: 'Rich text editor',
+    category: 'ActiveX',
+    defaultSize: { width: 121, height: 97 },
+    keywords: ['rich', 'text', 'editor']
+  },
+  {
     type: 'UpDown',
     icon: '🔼',
     name: 'UpDown',
