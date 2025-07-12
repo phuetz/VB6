@@ -738,6 +738,50 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           </div>
         );
 
+      case 'DateTimePicker':
+        return (
+          <input
+            type="datetime-local"
+            value={control.value || ''}
+            onChange={e => handleControlChange(e.target.value, 'value')}
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              backgroundColor: control.backColor,
+              color: control.foreColor,
+              fontSize: `${control.font?.size || 8}pt`,
+              fontFamily: control.font?.name || 'MS Sans Serif',
+              border: '1px solid #000'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+            disabled={!control.enabled}
+          />
+        );
+
+      case 'MonthView':
+        return (
+          <input
+            type="date"
+            value={control.value || ''}
+            onChange={e => handleControlChange(e.target.value, 'value')}
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              backgroundColor: control.backColor,
+              color: control.foreColor,
+              fontSize: `${control.font?.size || 8}pt`,
+              fontFamily: control.font?.name || 'MS Sans Serif',
+              border: '1px solid #000'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+            disabled={!control.enabled}
+          />
+        );
+
       case 'ImageList':
         const images = control.images || [];
         const imgW = control.imageWidth || 16;

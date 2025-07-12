@@ -362,6 +362,30 @@ describe('VB6Store', () => {
     expect(state.controls[0].y).toBe(0);
   });
 
+  it('should create a DateTimePicker control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('DateTimePicker', 2, 3);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('DateTimePicker');
+    expect(state.controls[0].x).toBe(2);
+    expect(state.controls[0].y).toBe(3);
+  });
+
+  it('should create a MonthView control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('MonthView', 5, 6);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('MonthView');
+    expect(state.controls[0].x).toBe(5);
+    expect(state.controls[0].y).toBe(6);
+  });
+
   it('should undo and redo control creation', () => {
     const { createControl, undo, redo } = useVB6Store.getState();
 
