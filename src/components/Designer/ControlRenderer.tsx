@@ -202,6 +202,36 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           );
         }
 
+      case 'RichTextBox':
+        return (
+          <div
+            style={{ ...baseStyle, width: control.width, height: control.height }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            <div
+              contentEditable
+              suppressContentEditableWarning
+              onInput={e =>
+                handleControlChange((e.target as HTMLElement).innerText, 'text')
+              }
+              style={{
+                width: '100%',
+                height: '100%',
+                border: '1px solid #000',
+                padding: '2px',
+                backgroundColor: control.backColor,
+                color: control.foreColor,
+                fontSize: `${control.font?.size || 8}pt`,
+                fontFamily: control.font?.name || 'MS Sans Serif',
+                overflow: 'auto',
+              }}
+            >
+              {control.text}
+            </div>
+          </div>
+        );
+
       case 'CheckBox':
         return (
           <div

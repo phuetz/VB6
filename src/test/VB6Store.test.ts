@@ -422,6 +422,18 @@ describe('VB6Store', () => {
     expect(state.controls[0].y).toBe(5);
   });
 
+  it('should create a RichTextBox control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('RichTextBox', 30, 40);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('RichTextBox');
+    expect(state.controls[0].x).toBe(30);
+    expect(state.controls[0].y).toBe(40);
+  });
+
   it('should undo and redo control creation', () => {
     const { createControl, undo, redo } = useVB6Store.getState();
 

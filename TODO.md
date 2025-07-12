@@ -77,7 +77,7 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [x] FlatScrollBar
 - [x] UpDown
 - [ ] Animation
-- [ ] RichTextBox
+- [x] RichTextBox
 - [ ] MaskedEdit
 - [ ] WebBrowser
 - [ ] Inet
