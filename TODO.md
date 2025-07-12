@@ -71,10 +71,10 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [x] ListView
 - [x] ImageList
 - [x] Slider
-- [ ] ImageCombo
+- [x] ImageCombo
 - [x] MonthView
 - [x] DateTimePicker
-- [ ] FlatScrollBar
+- [x] FlatScrollBar
 - [x] UpDown
 - [ ] Animation
 - [ ] RichTextBox

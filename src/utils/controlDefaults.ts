@@ -300,6 +300,32 @@ export const getDefaultProperties = (type: string, id: number) => {
       backColor: '#FFFFFF',
       foreColor: '#000000',
       font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false }
+    },
+    ImageCombo: {
+      width: 121,
+      height: 21,
+      text: '',
+      items: [],
+      images: [],
+      imageWidth: 16,
+      imageHeight: 16,
+      style: 0,
+      sorted: false,
+      backColor: '#FFFFFF',
+      foreColor: '#000000',
+      font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false }
+    },
+    FlatScrollBar: {
+      width: 121,
+      height: 17,
+      min: 0,
+      max: 32767,
+      value: 0,
+      smallChange: 1,
+      largeChange: 1,
+      orientation: 'horizontal',
+      backColor: '#C0C0C0',
+      foreColor: '#000000'
     }
   };
 

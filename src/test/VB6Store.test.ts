@@ -398,6 +398,30 @@ describe('VB6Store', () => {
     expect(state.controls[0].y).toBe(9);
   });
 
+  it('should create an ImageCombo control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('ImageCombo', 12, 12);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('ImageCombo');
+    expect(state.controls[0].x).toBe(12);
+    expect(state.controls[0].y).toBe(12);
+  });
+
+  it('should create a FlatScrollBar control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('FlatScrollBar', 20, 5);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('FlatScrollBar');
+    expect(state.controls[0].x).toBe(20);
+    expect(state.controls[0].y).toBe(5);
+  });
+
   it('should undo and redo control creation', () => {
     const { createControl, undo, redo } = useVB6Store.getState();
 
