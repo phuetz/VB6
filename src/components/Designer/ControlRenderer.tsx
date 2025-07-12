@@ -691,6 +691,32 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           </div>
         );
 
+      case 'TreeView':
+        const nodes = control.nodes || [];
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              backgroundColor: control.backColor,
+              color: control.foreColor,
+              fontSize: `${control.font?.size || 8}pt`,
+              fontFamily: control.font?.name || 'MS Sans Serif',
+              border: '1px solid #000',
+              overflow: 'auto'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            <ul style={{ paddingLeft: '20px', margin: 0 }}>
+              {nodes.map((n: string, idx: number) => (
+                <li key={idx}>{n}</li>
+              ))}
+            </ul>
+          </div>
+        );
+
       case 'Shape':
         return (
           <div

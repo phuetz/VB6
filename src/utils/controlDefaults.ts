@@ -245,6 +245,14 @@ export const getDefaultProperties = (type: string, id: number) => {
       panels: ['Ready'],
       backColor: '#C0C0C0',
       foreColor: '#000000'
+    },
+    TreeView: {
+      width: 121,
+      height: 97,
+      nodes: ['Node1', 'Node2'],
+      backColor: '#FFFFFF',
+      foreColor: '#000000',
+      font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false }
     }
   };
 

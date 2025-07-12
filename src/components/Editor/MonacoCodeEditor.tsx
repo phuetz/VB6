@@ -310,7 +310,8 @@ const MonacoCodeEditor: React.FC = () => {
       'StatusBar': [...commonEvents],
       'Shape': ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
       'Line': ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
-      'Image': [...commonEvents, 'GotFocus', 'LostFocus']
+      'Image': [...commonEvents, 'GotFocus', 'LostFocus'],
+      'TreeView': [...commonEvents, 'NodeClick', 'Expand', 'Collapse']
     };
     
     return specificEvents[controlType] || commonEvents;
