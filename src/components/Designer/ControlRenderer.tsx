@@ -570,6 +570,27 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           </div>
         );
 
+      case 'Slider':
+        const orientation = control.orientation || 'horizontal';
+        return (
+          <input
+            type="range"
+            min={control.min}
+            max={control.max}
+            value={control.value}
+            onChange={e => handleControlChange(Number(e.target.value), 'value')}
+            style={{
+              ...baseStyle,
+              ...(orientation === 'vertical'
+                ? { width: control.height, height: control.width, transform: 'rotate(-90deg)' }
+                : { width: control.width, height: control.height })
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+            disabled={!control.enabled}
+          />
+        );
+
       case 'TabStrip':
         const tabs = control.tabs || ['Tab1'];
         const selectedIndex = control.selectedIndex || 0;
