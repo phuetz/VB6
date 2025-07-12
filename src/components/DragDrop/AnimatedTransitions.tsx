@@ -87,7 +87,7 @@ export const MagneticSnap: React.FC<MagneticSnapProps> = ({
       addLog('debug', 'MagneticSnap', `Snapping to position: ${snapPosition.x}, ${snapPosition.y}`);
       requestAnimationFrame(animate);
     }
-  }, [isSnapping, snapPosition, currentPosition, addLog]);
+  }, [isSnapping, snapPosition, addLog]);
 
   return (
     <div
