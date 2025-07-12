@@ -691,6 +691,53 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           </div>
         );
 
+      case 'ListView':
+        const columns = control.columns || [];
+        const lvItems = control.items || [];
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              backgroundColor: control.backColor,
+              color: control.foreColor,
+              fontSize: `${control.font?.size || 8}pt`,
+              fontFamily: control.font?.name || 'MS Sans Serif',
+              border: '1px solid #000',
+              overflow: 'auto'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  {columns.map((c: string, idx: number) => (
+                    <th
+                      key={idx}
+                      style={{ border: '1px solid #000', padding: '2px', background: '#e0e0e0', textAlign: 'left' }}
+                    >
+                      {c}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {lvItems.map((item: any, idx: number) => (
+                  <tr key={idx}>
+                    {[item.text, ...(item.subItems || [])].slice(0, Math.max(columns.length, 1)).map((val: string, cidx: number) => (
+                      <td key={cidx} style={{ border: '1px solid #000', padding: '2px' }}>
+                        {val}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+
       case 'TreeView':
         const nodes = control.nodes || [];
         return (
