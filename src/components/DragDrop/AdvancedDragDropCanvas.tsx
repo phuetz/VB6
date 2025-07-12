@@ -197,17 +197,22 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
     }
   }, [isDragging, selectedControls, controls]);
 
+  const dropConstraints = React.useMemo(
+    () => ({
+      snapToGrid,
+      gridSize,
+      allowedAreas: [{ x: 0, y: 0, width: width || 800, height: height || 600 }],
+    }),
+    [snapToGrid, gridSize, width, height]
+  );
+
   return (
     <div className="relative w-full h-full overflow-hidden">
       <DroppableZone
         id="form-canvas"
         accepts={['new-control', 'existing-control']}
         onDrop={handleControlDrop}
-        constraints={{
-          snapToGrid,
-          gridSize,
-          allowedAreas: [{ x: 0, y: 0, width: width || 800, height: height || 600 }]
-        }}
+        constraints={dropConstraints}
         showGrid={showGrid}
         className="w-full h-full relative"
         style={{
