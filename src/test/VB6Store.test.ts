@@ -326,6 +326,18 @@ describe('VB6Store', () => {
     expect(state.controls[0].y).toBe(15);
   });
 
+  it('should create a ListView control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('ListView', 5, 5);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('ListView');
+    expect(state.controls[0].x).toBe(5);
+    expect(state.controls[0].y).toBe(5);
+  });
+
   it('should create a StatusBar control', () => {
     const { createControl } = useVB6Store.getState();
 
@@ -356,7 +368,7 @@ describe('VB6Store', () => {
     const { addTodo, toggleTodo, deleteTodo } = useVB6Store.getState();
 
     addTodo('Task 1');
-    let items = useVB6Store.getState().todoItems;
+    const items = useVB6Store.getState().todoItems;
     expect(items).toHaveLength(1);
     expect(items[0].text).toBe('Task 1');
     expect(items[0].completed).toBe(false);

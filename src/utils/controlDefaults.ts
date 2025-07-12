@@ -239,6 +239,19 @@ export const getDefaultProperties = (type: string, id: number) => {
       backColor: '#C0C0C0',
       foreColor: '#000000'
     },
+    ListView: {
+      width: 121,
+      height: 97,
+      columns: ['Column1', 'Column2'],
+      items: [
+        { text: 'Item1', subItems: ['Sub1', 'Sub2'] },
+        { text: 'Item2', subItems: ['Sub1', 'Sub2'] }
+      ],
+      view: 'report',
+      backColor: '#FFFFFF',
+      foreColor: '#000000',
+      font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false }
+    },
     StatusBar: {
       width: 241,
       height: 21,
