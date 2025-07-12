@@ -199,8 +199,36 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
                 readOnly={control.locked || !control.enabled}
               />
             </div>
-          );
-        }
+        );
+      }
+
+      case 'RichTextBox':
+        return (
+          <div style={{ ...baseStyle, width: control.width, height: control.height }}>
+            <div
+              contentEditable={!control.locked && control.enabled}
+              suppressContentEditableWarning
+              onInput={e =>
+                handleControlChange((e.target as HTMLDivElement).innerHTML, 'text')
+              }
+              style={{
+                width: '100%',
+                height: '100%',
+                border: '1px solid #000',
+                backgroundColor: control.backColor,
+                color: control.foreColor,
+                overflow: 'auto',
+                fontSize: `${control.font?.size || 8}pt`,
+                fontFamily: control.font?.name || 'MS Sans Serif',
+                outline: 'none',
+                padding: '2px'
+              }}
+              onClick={handleControlClick}
+              onDoubleClick={handleControlDoubleClick}
+              dangerouslySetInnerHTML={{ __html: control.text || '' }}
+            />
+          </div>
+        );
 
       case 'CheckBox':
         return (

@@ -326,6 +326,16 @@ export const getDefaultProperties = (type: string, id: number) => {
       orientation: 'horizontal',
       backColor: '#C0C0C0',
       foreColor: '#000000'
+    },
+    RichTextBox: {
+      width: 121,
+      height: 97,
+      text: '',
+      backColor: '#FFFFFF',
+      foreColor: '#000000',
+      font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false },
+      borderStyle: 1,
+      locked: false
     }
   };
 
