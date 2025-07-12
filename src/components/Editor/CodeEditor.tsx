@@ -22,6 +22,8 @@ const CodeEditor: React.FC = () => {
       'FileListBox': [...commonEvents, 'Change'],
       'ImageList': [...commonEvents],
       'ListView': [...commonEvents, 'ItemClick', 'ColumnClick', 'ItemCheck'],
+      'DateTimePicker': [...commonEvents, 'Change'],
+      'MonthView': [...commonEvents, 'DateClick'],
       'Shape': ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
       'Line': ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
       'Image': [...commonEvents, 'GotFocus', 'LostFocus'],

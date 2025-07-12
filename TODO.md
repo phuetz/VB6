@@ -68,12 +68,12 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [x] StatusBar
 - [x] ProgressBar
 - [x] TreeView
-- [ ] ListView
+- [x] ListView
 - [x] ImageList
  - [x] Slider
 - [ ] ImageCombo
-- [ ] MonthView
-- [ ] DateTimePicker
+- [x] MonthView
+- [x] DateTimePicker
 - [ ] FlatScrollBar
 - [ ] UpDown
 - [ ] Animation

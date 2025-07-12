@@ -275,6 +275,22 @@ export const getDefaultProperties = (type: string, id: number) => {
       backColor: '#FFFFFF',
       foreColor: '#000000',
       font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false }
+    },
+    DateTimePicker: {
+      width: 121,
+      height: 21,
+      value: new Date().toISOString(),
+      backColor: '#FFFFFF',
+      foreColor: '#000000',
+      font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false }
+    },
+    MonthView: {
+      width: 161,
+      height: 161,
+      value: new Date().toISOString().substring(0, 10),
+      backColor: '#FFFFFF',
+      foreColor: '#000000',
+      font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false }
     }
   };
 
