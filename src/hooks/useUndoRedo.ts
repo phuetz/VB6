@@ -13,7 +13,11 @@ export const useUndoRedo = () => {
   const currentIndexRef = useRef(-1);
   const isUndoRedoRef = useRef(false);
   
-  const { controls, selectedControls, setExecutionMode } = useVB6Store();
+  const { controls, selectedControls, setExecutionMode } = useVB6Store(state => ({
+    controls: state.controls,
+    selectedControls: state.selectedControls,
+    setExecutionMode: state.setExecutionMode,
+  }));
 
   const saveState = useCallback((action: string) => {
     if (isUndoRedoRef.current) return;

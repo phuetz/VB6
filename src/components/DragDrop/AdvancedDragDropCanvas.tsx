@@ -37,8 +37,18 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
     updateControl,
     selectControls,
     showGrid,
-  } = useVB6Store();
-  const { addLog } = useVB6Store();
+  } = useVB6Store(state => ({
+    controls: state.controls,
+    selectedControls: state.selectedControls,
+    executionMode: state.executionMode,
+    snapToGrid: state.snapToGrid,
+    gridSize: state.gridSize,
+    createControl: state.createControl,
+    updateControl: state.updateControl,
+    selectControls: state.selectControls,
+    showGrid: state.showGrid,
+  }));
+  const { addLog } = useVB6Store.getState();
 
   const { isDragging, vibrate, playDropSound } = useDragDrop();
 

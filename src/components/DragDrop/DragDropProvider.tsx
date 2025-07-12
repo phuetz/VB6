@@ -62,7 +62,10 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isCtrlPressed, setIsCtrlPressed] = useState(false);
   
   const audioContextRef = useRef<AudioContext | null>(null);
-  const { snapToGrid, gridSize } = useVB6Store();
+  const { snapToGrid, gridSize } = useVB6Store(state => ({
+    snapToGrid: state.snapToGrid,
+    gridSize: state.gridSize,
+  }));
   const { saveState } = useUndoRedo();
   const { addLog } = useVB6Store.getState();
 
