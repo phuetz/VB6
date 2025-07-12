@@ -213,6 +213,16 @@ export const getDefaultProperties = (type: string, id: number) => {
       backColor: '#C0C0C0',
       foreColor: '#0078D4'
     },
+    Slider: {
+      width: 121,
+      height: 21,
+      min: 0,
+      max: 100,
+      value: 0,
+      orientation: 'horizontal',
+      backColor: '#C0C0C0',
+      foreColor: '#000000'
+    },
     TabStrip: {
       width: 241,
       height: 145,
