@@ -69,7 +69,7 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [x] ProgressBar
 - [x] TreeView
 - [ ] ListView
-- [ ] ImageList
+- [x] ImageList
  - [x] Slider
 - [ ] ImageCombo
 - [ ] MonthView

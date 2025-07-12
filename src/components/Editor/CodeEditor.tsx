@@ -20,6 +20,7 @@ const CodeEditor: React.FC = () => {
       'DriveListBox': [...commonEvents, 'Change'],
       'DirListBox': [...commonEvents, 'Change'],
       'FileListBox': [...commonEvents, 'Change'],
+      'ImageList': [...commonEvents],
       'ListView': [...commonEvents, 'ItemClick', 'ColumnClick', 'ItemCheck'],
       'Shape': ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
       'Line': ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],

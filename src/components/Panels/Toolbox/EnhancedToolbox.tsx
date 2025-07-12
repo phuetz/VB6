@@ -124,6 +124,15 @@ const VB6_CONTROLS: ControlDefinition[] = [
     keywords: ['list', 'details', 'columns']
   },
   {
+    type: 'ImageList',
+    icon: '🖼️',
+    name: 'ImageList',
+    description: 'Image collection',
+    category: 'ActiveX',
+    defaultSize: { width: 32, height: 32 },
+    keywords: ['images', 'icons', 'collection']
+  },
+  {
     type: 'ProgressBar',
     icon: '📶',
     name: 'ProgressBar',

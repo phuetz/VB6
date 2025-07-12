@@ -338,6 +338,18 @@ describe('VB6Store', () => {
     expect(state.controls[0].y).toBe(5);
   });
 
+  it('should create an ImageList control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('ImageList', 3, 4);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('ImageList');
+    expect(state.controls[0].x).toBe(3);
+    expect(state.controls[0].y).toBe(4);
+  });
+
   it('should create a StatusBar control', () => {
     const { createControl } = useVB6Store.getState();
 
