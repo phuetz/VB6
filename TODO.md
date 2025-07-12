@@ -67,7 +67,7 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [x] Toolbar
 - [x] StatusBar
 - [x] ProgressBar
-- [ ] TreeView
+- [x] TreeView
 - [ ] ListView
 - [ ] ImageList
  - [x] Slider
