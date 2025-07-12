@@ -259,6 +259,15 @@ export const getDefaultProperties = (type: string, id: number) => {
       backColor: '#C0C0C0',
       foreColor: '#000000'
     },
+    ImageList: {
+      width: 32,
+      height: 32,
+      images: [],
+      imageWidth: 16,
+      imageHeight: 16,
+      backColor: '#FFFFFF',
+      foreColor: '#000000'
+    },
     TreeView: {
       width: 121,
       height: 97,

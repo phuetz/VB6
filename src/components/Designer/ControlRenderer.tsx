@@ -738,6 +738,32 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           </div>
         );
 
+      case 'ImageList':
+        const images = control.images || [];
+        const imgW = control.imageWidth || 16;
+        const imgH = control.imageHeight || 16;
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              backgroundColor: control.backColor,
+              border: '1px solid #000',
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignContent: 'flex-start',
+              overflow: 'auto'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            {images.map((src: string, idx: number) => (
+              <img key={idx} src={src} style={{ width: imgW, height: imgH }} />
+            ))}
+          </div>
+        );
+
       case 'TreeView':
         const nodes = control.nodes || [];
         return (

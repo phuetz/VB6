@@ -18,6 +18,7 @@ export const controlCategories = {
   ],
   ActiveX: [
     { type: 'ListView', icon: '📋', name: 'ListView', cursor: 'default' },
+    { type: 'ImageList', icon: '🖼️', name: 'ImageList', cursor: 'default' },
     { type: 'TreeView', icon: '🌳', name: 'TreeView', cursor: 'default' },
     { type: 'ProgressBar', icon: '▓', name: 'ProgressBar', cursor: 'default' },
     { type: 'Slider', icon: '━', name: 'Slider', cursor: 'pointer' },
