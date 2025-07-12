@@ -326,7 +326,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           </div>
         );
 
-      case 'ImageCombo':
+      case 'ImageCombo': {
         const icItems = control.items || [];
         const icImages = control.images || [];
         return (
@@ -357,6 +357,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             </select>
           </div>
         );
+      }
 
       case 'ListBox':
         return (
@@ -434,7 +435,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           />
         );
 
-      case 'FlatScrollBar':
+      case 'FlatScrollBar': {
         const fsOrientation = control.orientation || 'horizontal';
         return (
           <input
@@ -456,6 +457,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             disabled={!control.enabled}
           />
         );
+      }
 
       case 'Frame':
         return (
@@ -629,7 +631,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           </div>
         );
 
-      case 'ProgressBar':
+      case 'ProgressBar': {
         const percentage = ((control.value - control.min) / (control.max - control.min)) * 100;
         return (
           <div
@@ -654,8 +656,9 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             />
           </div>
         );
+      }
 
-      case 'Slider':
+      case 'Slider': {
         const orientation = control.orientation || 'horizontal';
         return (
           <input
@@ -675,6 +678,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             disabled={!control.enabled}
           />
         );
+      }
 
       case 'UpDown':
         return (
@@ -692,7 +696,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           />
         );
 
-      case 'TabStrip':
+      case 'TabStrip': {
         const tabs = control.tabs || ['Tab1'];
         const selectedIndex = control.selectedIndex || 0;
         return (
@@ -731,8 +735,9 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             <div style={{ flex: 1 }} />
           </div>
         );
+      }
 
-      case 'Toolbar':
+      case 'Toolbar': {
         const buttons = control.buttons || [];
         return (
           <div
@@ -760,8 +765,9 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             ))}
           </div>
         );
+      }
 
-      case 'StatusBar':
+      case 'StatusBar': {
         const panels = control.panels || ['Ready'];
         return (
           <div
@@ -791,8 +797,9 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             ))}
           </div>
         );
+      }
 
-      case 'ListView':
+      case 'ListView': {
         const columns = control.columns || [];
         const lvItems = control.items || [];
         return (
@@ -838,6 +845,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             </table>
           </div>
         );
+      }
 
       case 'DateTimePicker':
         return (
@@ -883,7 +891,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           />
         );
 
-      case 'ImageList':
+      case 'ImageList': {
         const images = control.images || [];
         const imgW = control.imageWidth || 16;
         const imgH = control.imageHeight || 16;
@@ -908,8 +916,9 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             ))}
           </div>
         );
+      }
 
-      case 'TreeView':
+      case 'TreeView': {
         const nodes = control.nodes || [];
         return (
           <div
@@ -934,6 +943,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             </ul>
           </div>
         );
+      }
 
       case 'Shape':
         return (
