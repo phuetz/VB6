@@ -22,6 +22,7 @@ export const controlCategories = {
     { type: 'TreeView', icon: '🌳', name: 'TreeView', cursor: 'default' },
     { type: 'ProgressBar', icon: '▓', name: 'ProgressBar', cursor: 'default' },
     { type: 'Slider', icon: '━', name: 'Slider', cursor: 'pointer' },
+    { type: 'UpDown', icon: '🔼', name: 'UpDown', cursor: 'pointer' },
     { type: 'TabStrip', icon: '📑', name: 'TabStrip', cursor: 'pointer' },
     { type: 'Toolbar', icon: '🔧', name: 'Toolbar', cursor: 'default' },
     { type: 'StatusBar', icon: '📊', name: 'StatusBar', cursor: 'default' },

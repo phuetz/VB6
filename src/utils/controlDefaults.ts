@@ -223,6 +223,15 @@ export const getDefaultProperties = (type: string, id: number) => {
       backColor: '#C0C0C0',
       foreColor: '#000000'
     },
+    UpDown: {
+      width: 17,
+      height: 21,
+      min: 0,
+      max: 100,
+      value: 0,
+      increment: 1,
+      orientation: 'vertical'
+    },
     TabStrip: {
       width: 241,
       height: 145,

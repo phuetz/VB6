@@ -70,12 +70,12 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [x] TreeView
 - [x] ListView
 - [x] ImageList
- - [x] Slider
+- [x] Slider
 - [ ] ImageCombo
 - [x] MonthView
 - [x] DateTimePicker
 - [ ] FlatScrollBar
-- [ ] UpDown
+- [x] UpDown
 - [ ] Animation
 - [ ] RichTextBox
 - [ ] MaskedEdit
