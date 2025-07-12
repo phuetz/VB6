@@ -55,6 +55,16 @@ export const getDefaultProperties = (type: string, id: number) => {
       locked: false,
       borderStyle: 1
     },
+    RichTextBox: {
+      width: 121,
+      height: 97,
+      text: '',
+      backColor: '#FFFFFF',
+      foreColor: '#000000',
+      font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false },
+      scrollBars: 3,
+      borderStyle: 1
+    },
     Frame: {
       width: 121,
       height: 97,

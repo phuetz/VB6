@@ -27,6 +27,7 @@ export const controlCategories = {
     { type: 'Toolbar', icon: '🔧', name: 'Toolbar', cursor: 'default' },
     { type: 'StatusBar', icon: '📊', name: 'StatusBar', cursor: 'default' },
     { type: 'DateTimePicker', icon: '📅', name: 'DateTimePicker', cursor: 'pointer' },
-    { type: 'MonthView', icon: '📆', name: 'MonthView', cursor: 'pointer' }
+    { type: 'MonthView', icon: '📆', name: 'MonthView', cursor: 'pointer' },
+    { type: 'RichTextBox', icon: '📝', name: 'RichTextBox', cursor: 'text' }
   ]
 };
