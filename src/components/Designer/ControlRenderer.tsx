@@ -296,6 +296,38 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           </div>
         );
 
+      case 'ImageCombo':
+        const icItems = control.items || [];
+        const icImages = control.images || [];
+        return (
+          <div
+            style={{ ...baseStyle, width: control.width, height: control.height }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            <select
+              value={control.text || ''}
+              onChange={e => handleControlChange(e.target.value, 'text')}
+              style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: control.backColor,
+                color: control.foreColor,
+                fontSize: `${control.font?.size || 8}pt`,
+                fontFamily: control.font?.name || 'MS Sans Serif',
+              }}
+              disabled={!control.enabled}
+            >
+              {icItems.map((item: string, idx: number) => (
+                <option key={idx} value={item}>
+                  {icImages[idx] ? '🖼 ' : ''}
+                  {item}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+
       case 'ListBox':
         return (
           <div
@@ -365,6 +397,29 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               width: control.height,
               height: control.width,
               transform: 'rotate(-90deg)',
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+            disabled={!control.enabled}
+          />
+        );
+
+      case 'FlatScrollBar':
+        const fsOrientation = control.orientation || 'horizontal';
+        return (
+          <input
+            type="range"
+            min={control.min}
+            max={control.max}
+            value={control.value}
+            onChange={e => handleControlChange(Number(e.target.value), 'value')}
+            style={{
+              ...baseStyle,
+              WebkitAppearance: 'none',
+              background: 'transparent',
+              ...(fsOrientation === 'vertical'
+                ? { width: control.height, height: control.width, transform: 'rotate(-90deg)' }
+                : { width: control.width, height: control.height })
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}

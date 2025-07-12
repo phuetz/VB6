@@ -61,6 +61,7 @@ const AdvancedCodeEditor: React.FC = () => {
       'CheckBox': [...commonEvents, 'Click', 'GotFocus', 'LostFocus'],
       'OptionButton': [...commonEvents, 'Click', 'GotFocus', 'LostFocus'],
       'ComboBox': [...commonEvents, 'Change', 'DropDown', 'GotFocus', 'LostFocus', 'Validate'],
+      'ImageCombo': [...commonEvents, 'Change', 'DropDown', 'GotFocus', 'LostFocus', 'Validate'],
       'Timer': ['Timer'],
       'DriveListBox': [...commonEvents, 'Change'],
       'DirListBox': [...commonEvents, 'Change'],
