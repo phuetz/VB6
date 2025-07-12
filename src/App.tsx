@@ -5,6 +5,7 @@ import TitleBar from './components/Layout/TitleBar';
 import EnhancedMenuBar from './components/Layout/EnhancedMenuBar';
 import { EnhancedToolbar } from './components/Layout/EnhancedToolbar';
 import StatusBar from './components/Layout/StatusBar';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import DialogManager from './components/Dialogs/DialogManager';
 import { EnhancedToolbox } from './components/Panels/Toolbox/EnhancedToolbox';
 import { AdvancedDragDropCanvas } from './components/DragDrop/AdvancedDragDropCanvas';
@@ -106,7 +107,9 @@ function App() {
           <TitleBar />
           <EnhancedMenuBar />
           <EnhancedToolbar />
-          <MainContent />
+          <ErrorBoundary>
+            <MainContent />
+          </ErrorBoundary>
           <StatusBar />
           <DialogManager />
 
