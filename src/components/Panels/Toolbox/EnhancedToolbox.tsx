@@ -142,6 +142,15 @@ const VB6_CONTROLS: ControlDefinition[] = [
     keywords: ['progress', 'bar', 'indicator']
   },
   {
+    type: 'UpDown',
+    icon: '🔼',
+    name: 'UpDown',
+    description: 'Spin button',
+    category: 'ActiveX',
+    defaultSize: { width: 17, height: 21 },
+    keywords: ['spin', 'increment']
+  },
+  {
     type: 'TabStrip',
     icon: '📑',
     name: 'TabStrip',

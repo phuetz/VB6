@@ -386,6 +386,18 @@ describe('VB6Store', () => {
     expect(state.controls[0].y).toBe(6);
   });
 
+  it('should create an UpDown control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('UpDown', 8, 9);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('UpDown');
+    expect(state.controls[0].x).toBe(8);
+    expect(state.controls[0].y).toBe(9);
+  });
+
   it('should undo and redo control creation', () => {
     const { createControl, undo, redo } = useVB6Store.getState();
 

@@ -591,6 +591,22 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           />
         );
 
+      case 'UpDown':
+        return (
+          <input
+            type="number"
+            min={control.min}
+            max={control.max}
+            step={control.increment || 1}
+            value={control.value}
+            onChange={e => handleControlChange(Number(e.target.value), 'value')}
+            style={{ ...baseStyle, width: control.width, height: control.height }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+            disabled={!control.enabled}
+          />
+        );
+
       case 'TabStrip':
         const tabs = control.tabs || ['Tab1'];
         const selectedIndex = control.selectedIndex || 0;

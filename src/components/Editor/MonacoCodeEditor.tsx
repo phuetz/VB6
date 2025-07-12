@@ -309,6 +309,7 @@ const MonacoCodeEditor: React.FC = () => {
       'MonthView': [...commonEvents, 'DateClick'],
       'ProgressBar': [...commonEvents, 'Change'],
       'Slider': [...commonEvents, 'Change'],
+      'UpDown': [...commonEvents, 'Change'],
       'TabStrip': [...commonEvents, 'Change'],
       'Toolbar': [...commonEvents, 'ButtonClick'],
       'StatusBar': [...commonEvents],
