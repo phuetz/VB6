@@ -314,6 +314,18 @@ describe('VB6Store', () => {
     expect(state.controls[0].y).toBe(5);
   });
 
+  it('should create a TreeView control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('TreeView', 10, 15);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('TreeView');
+    expect(state.controls[0].x).toBe(10);
+    expect(state.controls[0].y).toBe(15);
+  });
+
   it('should create a StatusBar control', () => {
     const { createControl } = useVB6Store.getState();
 
