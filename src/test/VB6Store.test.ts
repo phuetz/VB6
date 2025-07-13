@@ -463,4 +463,10 @@ describe('VB6Store', () => {
     deleteTodo(items[0].id);
     expect(useVB6Store.getState().todoItems).toHaveLength(0);
   });
+
+  it('should set designer zoom', () => {
+    const { setDesignerZoom } = useVB6Store.getState();
+    setDesignerZoom(150);
+    expect(useVB6Store.getState().designerZoom).toBe(150);
+  });
 });

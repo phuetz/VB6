@@ -33,6 +33,8 @@ export const EnhancedToolbar: React.FC = () => {
     clipboard,
     showCodeFormatter,
     showCodeConverter,
+    designerZoom,
+    setDesignerZoom,
     setExecutionMode,
     toggleWindow,
     copyControls,
@@ -164,6 +166,18 @@ export const EnhancedToolbar: React.FC = () => {
         >
           <Crosshair size={16} />
         </button>
+        <select
+          value={designerZoom}
+          onChange={e => setDesignerZoom(parseInt(e.target.value))}
+          className="border border-gray-400 text-xs px-1 py-0.5"
+          title="Zoom"
+        >
+          <option value={50}>50%</option>
+          <option value={75}>75%</option>
+          <option value={100}>100%</option>
+          <option value={150}>150%</option>
+          <option value={200}>200%</option>
+        </select>
       </div>
 
       {/* Status and tips */}
