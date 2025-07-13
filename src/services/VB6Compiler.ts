@@ -230,10 +230,25 @@ class ${cls.name} {
       [/\bFor\s+(\w+)\s*=\s*(\d+)\s+To\s+(\d+)/gi, 'for (let $1 = $2; $1 <= $3; $1++)'],
       [/\bNext\s+\w+/gi, '}'],
       [/\bNext\b/gi, '}'],
+      [/\bFor\s+Each\s+(\w+)\s+In\s+(\w+)/gi, 'for (const $1 of $2) {'],
       [/\bWhile\s+(.+)/gi, 'while ($1) {'],
       [/\bWend\b/gi, '}'],
       [/\bDo\s+While\s+(.+)/gi, 'do {'],
-      [/\bLoop\b/gi, '} while ($1);'],
+      [/\bDo\s+Until\s+(.+)/gi, 'do {'],
+      [/\bDo\b/gi, 'do {'],
+      [/\bLoop\s+Until\s+(.+)/gi, '} while (!$1);'],
+      [/\bLoop\s+While\s+(.+)/gi, '} while ($1);'],
+      [/\bLoop\b/gi, '}'],
+      [/\bExit\s+Do\b/gi, 'break;'],
+      [/\bExit\s+For\b/gi, 'break;'],
+
+      [/\bWith\s+(\w+)/gi, 'with ($1) {'],
+      [/\bEnd\s+With\b/gi, '}'],
+
+      [/\bSelect\s+Case\s+(.+)/gi, 'switch ($1) {'],
+      [/\bCase\s+Else\b/gi, 'default:'],
+      [/\bCase\s+(.+)/gi, 'case $1:'],
+      [/\bEnd\s+Select\b/gi, '}'],
       
       // String operations
       [/\b&\b/g, '+'],
