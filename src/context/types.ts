@@ -63,6 +63,7 @@ export interface VB6State {
   // Windows visibility
   showProjectExplorer: boolean;
   showPropertiesWindow: boolean;
+  showControlTree: boolean;
   showToolbox: boolean;
   showImmediateWindow: boolean;
   showFormLayout: boolean;

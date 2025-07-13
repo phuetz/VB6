@@ -12,6 +12,7 @@ import { AdvancedDragDropCanvas } from './components/DragDrop/AdvancedDragDropCa
 import MonacoCodeEditor from './components/Editor/MonacoCodeEditor';
 import ProjectExplorer from './components/Panels/ProjectExplorer/ProjectExplorer';
 import PropertiesWindow from './components/Panels/PropertiesWindow/PropertiesWindow';
+import ControlTree from './components/Panels/ControlTree/ControlTree';
 import ImmediateWindow from './components/Panels/ImmediateWindow/ImmediateWindow';
 import { useVB6Store } from './stores/vb6Store';
 import { EnhancedIntelliSense } from './components/Editor/EnhancedIntelliSense';
@@ -37,6 +38,7 @@ const MainContent: React.FC = () => {
     showCodeEditor,
     showProjectExplorer,
     showPropertiesWindow,
+    showControlTree,
     showImmediateWindow,
     formProperties,
   } = useVB6Store();
@@ -69,6 +71,7 @@ const MainContent: React.FC = () => {
       {/* Right Panel - Project Explorer and Properties */}
       <div className="w-80 bg-gray-100 border-l border-gray-400 flex flex-col">
         {showProjectExplorer && <ProjectExplorer />}
+        {showControlTree && <ControlTree />}
         {showPropertiesWindow && <PropertiesWindow />}
       </div>
     </div>

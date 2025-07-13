@@ -89,6 +89,7 @@ export const useVB6Store = create<VB6Store>()(
     // Windows visibility
     showProjectExplorer: true,
     showPropertiesWindow: true,
+    showControlTree: false,
     showToolbox: true,
     showImmediateWindow: false,
     showFormLayout: false,
