@@ -556,6 +556,36 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           </div>
         );
 
+      case 'Animation':
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              backgroundColor: control.backColor || 'black',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            {control.file ? (
+              <video
+                src={control.file}
+                style={{ width: '100%', height: '100%' }}
+                autoPlay={control.autoPlay}
+                loop={control.loop}
+                muted
+              />
+            ) : (
+              <span style={{ fontSize: '10px', color: '#fff' }}>Animation</span>
+            )}
+          </div>
+        );
+
       case 'Data':
         return (
           <div
