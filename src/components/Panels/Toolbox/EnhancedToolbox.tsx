@@ -168,6 +168,15 @@ const VB6_CONTROLS: ControlDefinition[] = [
     defaultSize: { width: 241, height: 145 },
     keywords: ['tab', 'pages', 'interface']
   },
+  {
+    type: 'Animation',
+    icon: '🎬',
+    name: 'Animation',
+    description: 'Animation control',
+    category: 'ActiveX',
+    defaultSize: { width: 121, height: 97 },
+    keywords: ['animation', 'video', 'gif']
+  },
 ];
 
 const CONTROL_CATEGORIES = ['General', 'ActiveX', 'Data', 'Internet', 'Multimedia'];

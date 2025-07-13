@@ -326,6 +326,14 @@ export const getDefaultProperties = (type: string, id: number) => {
       foreColor: '#000000',
       font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false }
     },
+    Animation: {
+      width: 121,
+      height: 97,
+      file: '',
+      autoPlay: true,
+      loop: true,
+      backColor: '#000000'
+    },
     FlatScrollBar: {
       width: 121,
       height: 17,

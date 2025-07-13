@@ -34,6 +34,7 @@ const VB6_CONTROLS: ControlDefinition[] = [
   { type: 'ProgressBar', icon: '📶', name: 'ProgressBar', description: 'Progress indicator', category: 'ActiveX', defaultSize: { width: 121, height: 21 } },
   { type: 'RichTextBox', icon: '📝', name: 'RichTextBox', description: 'Rich text editor', category: 'ActiveX', defaultSize: { width: 121, height: 97 } },
   { type: 'UpDown', icon: '🔼', name: 'UpDown', description: 'Spin button', category: 'ActiveX', defaultSize: { width: 17, height: 21 } },
+  { type: 'Animation', icon: '🎬', name: 'Animation', description: 'Animation control', category: 'ActiveX', defaultSize: { width: 121, height: 97 } },
 ];
 
 const CONTROL_CATEGORIES = ['General', 'ActiveX', 'Data', 'Internet'];
