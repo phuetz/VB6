@@ -31,7 +31,7 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 ## Implémentation complète du concepteur de formulaires
 
 - [x] **Surface de conception redimensionnable** avec grille, zoom et guides d'alignement.
-- [ ] **Glisser-déposer des contrôles** avec duplication et groupement par la souris ou le clavier.
+- [x] **Glisser-déposer des contrôles** avec duplication et groupement par la souris ou le clavier.
 - [ ] **Sélection multiple avancée** : alignements, espacement et redimensionnement simultané.
 - [ ] **Property Grid en temps réel** : édition de toutes les propriétés (couleurs, polices, liaisons).
 - [ ] **Arborescence des contrôles** pour naviguer dans la hiérarchie du formulaire.
