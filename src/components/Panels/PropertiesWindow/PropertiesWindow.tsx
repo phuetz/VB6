@@ -152,6 +152,93 @@ const PropertiesWindow: React.FC = () => {
                   onChange={value => updateControlProperty('toolTipText', value)}
                   type="text"
                 />
+                {state.selectedControls[0].backColor !== undefined && (
+                  <PropertyRow
+                    label="BackColor"
+                    value={state.selectedControls[0].backColor}
+                    onChange={value => updateControlProperty('backColor', value)}
+                    type="color"
+                  />
+                )}
+                {state.selectedControls[0].foreColor !== undefined && (
+                  <PropertyRow
+                    label="ForeColor"
+                    value={state.selectedControls[0].foreColor}
+                    onChange={value => updateControlProperty('foreColor', value)}
+                    type="color"
+                  />
+                )}
+                {state.selectedControls[0].font && (
+                  <>
+                    <PropertyRow
+                      label="FontName"
+                      value={state.selectedControls[0].font.name}
+                      onChange={value =>
+                        updateControlProperty('font', {
+                          ...state.selectedControls[0].font,
+                          name: value,
+                        })
+                      }
+                      type="text"
+                    />
+                    <PropertyRow
+                      label="FontSize"
+                      value={state.selectedControls[0].font.size}
+                      onChange={value =>
+                        updateControlProperty('font', {
+                          ...state.selectedControls[0].font,
+                          size: parseInt(value) || 8,
+                        })
+                      }
+                      type="number"
+                    />
+                    <PropertyRow
+                      label="FontBold"
+                      value={state.selectedControls[0].font.bold.toString()}
+                      onChange={value =>
+                        updateControlProperty('font', {
+                          ...state.selectedControls[0].font,
+                          bold: value === 'true',
+                        })
+                      }
+                      type="select"
+                      options={[
+                        { value: 'true', label: 'True' },
+                        { value: 'false', label: 'False' },
+                      ]}
+                    />
+                    <PropertyRow
+                      label="FontItalic"
+                      value={state.selectedControls[0].font.italic.toString()}
+                      onChange={value =>
+                        updateControlProperty('font', {
+                          ...state.selectedControls[0].font,
+                          italic: value === 'true',
+                        })
+                      }
+                      type="select"
+                      options={[
+                        { value: 'true', label: 'True' },
+                        { value: 'false', label: 'False' },
+                      ]}
+                    />
+                    <PropertyRow
+                      label="FontUnderline"
+                      value={state.selectedControls[0].font.underline.toString()}
+                      onChange={value =>
+                        updateControlProperty('font', {
+                          ...state.selectedControls[0].font,
+                          underline: value === 'true',
+                        })
+                      }
+                      type="select"
+                      options={[
+                        { value: 'true', label: 'True' },
+                        { value: 'false', label: 'False' },
+                      ]}
+                    />
+                  </>
+                )}
                 {state.selectedControls[0].picture !== undefined && (
                   <PropertyRow
                     label="Picture"
