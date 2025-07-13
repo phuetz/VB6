@@ -10,6 +10,16 @@ Startup="Form1"`;
 
 const frmSample = `VERSION 5.00
 Begin VB.Form Form1
+   Caption         =   "Form1"
+   ClientHeight    =   3000
+   ClientWidth     =   4800
+   Begin VB.CommandButton Command1
+      Caption         =   "OK"
+      Left            =   60
+      Top             =   60
+      Width           =   1200
+      Height          =   375
+   End
 End
 Attribute VB_Name = "Form1"`;
 
@@ -36,5 +46,14 @@ describe('parseFRM', () => {
   });
   it('keeps code', () => {
     expect(info.code).toContain('VERSION 5.00');
+  });
+  it('parses form properties', () => {
+    expect(info.properties.Caption).toBe('Form1');
+    expect(info.properties.ClientWidth).toBe('4800');
+  });
+  it('parses controls', () => {
+    expect(info.controls.length).toBe(1);
+    expect(info.controls[0].name).toBe('Command1');
+    expect(info.controls[0].properties.Left).toBe('60');
   });
 });

@@ -31,13 +31,70 @@ export function parseVBP(content: string): VBPInfo {
   return info;
 }
 
+export interface FRMControl {
+  type: string;
+  name: string;
+  properties: Record<string, string>;
+}
+
 export interface FRMInfo {
   name: string;
   code: string;
+  properties: Record<string, string>;
+  controls: FRMControl[];
 }
 
 export function parseFRM(content: string): FRMInfo {
-  const nameMatch = content.match(/Attribute\s+VB_Name\s*=\s*"(.+?)"/i);
-  const name = nameMatch ? nameMatch[1] : 'Form';
-  return { name, code: content };
+  let name = 'Form';
+  const properties: Record<string, string> = {};
+  const controls: FRMControl[] = [];
+
+  const lines = content.split(/\r?\n/);
+  let currentControl: FRMControl | null = null;
+  let inForm = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    const formBegin = trimmed.match(/^Begin\s+VB\.Form\s+(\w+)/i);
+    if (formBegin) {
+      inForm = true;
+      name = formBegin[1];
+      continue;
+    }
+
+    const controlBegin = trimmed.match(/^Begin\s+VB\.(\w+)\s+(\w+)/i);
+    if (controlBegin) {
+      currentControl = { type: controlBegin[1], name: controlBegin[2], properties: {} };
+      continue;
+    }
+
+    if (/^End$/i.test(trimmed)) {
+      if (currentControl) {
+        controls.push(currentControl);
+        currentControl = null;
+        continue;
+      }
+      if (inForm) {
+        inForm = false;
+      }
+      continue;
+    }
+
+    const propMatch = trimmed.match(/^(\w+)\s*=\s*(.+)$/);
+    if (propMatch) {
+      const key = propMatch[1];
+      const value = propMatch[2].replace(/^"|"$/g, '');
+      if (currentControl) {
+        currentControl.properties[key] = value;
+      } else if (inForm) {
+        properties[key] = value;
+      }
+    }
+  }
+
+  const nameAttr = content.match(/Attribute\s+VB_Name\s*=\s*"(.+?)"/i);
+  if (nameAttr) name = nameAttr[1];
+
+  return { name, code: content, properties, controls };
 }
