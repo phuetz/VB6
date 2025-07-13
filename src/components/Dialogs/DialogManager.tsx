@@ -9,7 +9,7 @@ import { FormLayout } from '../Forms/FormLayout';
 import { UserControlDesigner } from '../UserControls/UserControlDesigner';
 
 const DialogManager: React.FC = () => {
-  const { state } = useVB6();
+  const { state, dispatch } = useVB6();
 
   return (
     <>
@@ -19,7 +19,7 @@ const DialogManager: React.FC = () => {
       {state.showMenuEditor && (
         <MenuEditor
           visible={state.showMenuEditor}
-          onClose={() => state.dispatch({ type: 'SHOW_DIALOG', payload: { dialogName: 'showMenuEditor', show: false } })}
+          onClose={() => dispatch({ type: 'SHOW_DIALOG', payload: { dialogName: 'showMenuEditor', show: false } })}
           onSave={(menus) => {
             // Save menus to form
             console.log('Saving menus:', menus);

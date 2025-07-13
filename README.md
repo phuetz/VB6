@@ -25,6 +25,9 @@ Les tests unitaires utilisent **Vitest** :
 npm test
 ```
 
+Un guide d'utilisation du concepteur de formulaires est disponible dans
+[`docs/designer-guide.md`](docs/designer-guide.md).
+
 ## Construction pour la production
 ```bash
 npm run build

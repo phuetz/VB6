@@ -97,7 +97,7 @@ export const ControlManipulator: React.FC<ControlManipulatorProps> = ({
   };
 
   const renderResizeHandles = () => {
-    if (executionMode === 'run' || !isSelected || isMultiSelected) return null;
+    if (executionMode === 'run' || !isSelected) return null;
 
     const handleStyle: React.CSSProperties = {
       position: 'absolute',
