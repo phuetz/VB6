@@ -111,6 +111,34 @@ export const VB6Runtime: React.FC<VB6RuntimeProps> = ({
       }
       return newDate;
     },
+    DateDiff: (interval: string, date1: Date, date2: Date) => {
+      const diff = date2.getTime() - date1.getTime();
+      switch (interval.toLowerCase()) {
+        case 's': return Math.floor(diff / 1000);
+        case 'n': return Math.floor(diff / (1000 * 60));
+        case 'h': return Math.floor(diff / (1000 * 60 * 60));
+        case 'd': return Math.floor(diff / (1000 * 60 * 60 * 24));
+        case 'm':
+          return (date2.getFullYear() - date1.getFullYear()) * 12 +
+                 (date2.getMonth() - date1.getMonth());
+        case 'yyyy':
+          return date2.getFullYear() - date1.getFullYear();
+      }
+      return 0;
+    },
+    Weekday: (date: Date = new Date(), firstDay: number = 1) => {
+      const day = date.getDay() + 1; // VB6 days start at 1
+      const adjusted = day - firstDay + 1;
+      return adjusted <= 0 ? adjusted + 7 : adjusted;
+    },
+    MonthName: (month: number) => {
+      const names = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      return names[month - 1] || '';
+    },
+    WeekdayName: (weekday: number) => {
+      const names = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      return names[weekday - 1] || '';
+    },
 
     // Array functions
     UBound: (arr: any[]) => arr.length - 1,
