@@ -156,7 +156,13 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
   }, [state.selectedControls, dispatch]);
 
   const handlePropertyChange = useCallback((control: Control, property: string, value: any) => {
-    updateControl(control.id, property, value);
+    if (property.includes('.')) {
+      const [top, sub] = property.split('.');
+      const updated = { ...(control as any)[top], [sub]: value };
+      updateControl(control.id, top, updated);
+    } else {
+      updateControl(control.id, property, value);
+    }
   }, [updateControl]);
 
   return (
