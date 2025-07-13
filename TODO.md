@@ -23,10 +23,10 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [x] **Gestion des modules et classes** : visibilité (`Private`, `Public`), propriétés, méthodes et événements.
 - [x] **Transpilation JavaScript** : conversion fidèle de chaque instruction VB6 en JS moderne.
 - [x] **Bibliothèque d'exécution** : implémentation de l'ensemble des fonctions natives (Date, MsgBox, etc.).
-- [ ] **Gestion des objets COM/ActiveX** : création, destruction et appels de méthodes externes.
-- [ ] **Compatibilité avec les projets VB6 existants** : import et conversion automatique du code.
+- [x] **Gestion des objets COM/ActiveX** : création, destruction et appels de méthodes externes.
+- [x] **Compatibilité avec les projets VB6 existants** : import et conversion automatique du code.
 - [x] **Suite de tests unitaires** couvrant instructions, erreurs et modules complexes.
-- [ ] **Documentation détaillée** du compilateur et du runtime.
+- [x] **Documentation détaillée** du compilateur et du runtime.
 
 ## Implémentation complète du concepteur de formulaires
 

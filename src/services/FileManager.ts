@@ -1,5 +1,6 @@
 import { Project } from '../types/extended';
 import JSZip from 'jszip';
+import { parseVBP } from '../utils/vb6ProjectImporter';
 
 export class FileManager {
   static async openProject(): Promise<Project | null> {
@@ -44,6 +45,26 @@ export class FileManager {
       }
 
       const content = await file.text();
+
+      if (file.name.endsWith('.vbp')) {
+        const info = parseVBP(content);
+        return {
+          id: Date.now().toString(),
+          name: file.name.replace(/\.vbp$/i, ''),
+          version: '1.0',
+          created: new Date(),
+          modified: new Date(),
+          forms: info.forms.map(f => ({ id: f, name: f.replace(/\.frm$/i, ''), caption: f.replace(/\.frm$/i, ''), controls: [] })),
+          modules: info.modules.map(m => ({ id: m, name: m.replace(/\.bas$/i, ''), type: 'standard', code: '', procedures: [], variables: [], constants: [] })),
+          classModules: info.classes.map(c => ({ id: c, name: c.replace(/\.cls$/i, ''), type: 'class', code: '', procedures: [], variables: [], constants: [], events: [], properties: [], methods: [] })),
+          userControls: [],
+          resources: [],
+          settings: { title: '', description: '', version: '1.0', autoIncrementVersion: false, compilationType: 'exe', startupObject: info.startup || '', icon: '', helpFile: '', threadingModel: 'apartment' },
+          references: info.references.map(r => ({ id: r, name: r, description: '', version: '', location: '', guid: '', checked: false, builtin: false, major: 0, minor: 0 })),
+          components: []
+        } as unknown as Project;
+      }
+
       return JSON.parse(content);
     } catch (error) {
       console.error('Error opening project:', error);
