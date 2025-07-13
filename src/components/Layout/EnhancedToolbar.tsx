@@ -6,6 +6,7 @@ import {
   Play,
   Square,
   Copy,
+  CopyPlus,
   Clipboard,
   Grid,
   Crosshair,
@@ -39,6 +40,7 @@ export const EnhancedToolbar: React.FC = () => {
     toggleWindow,
     copyControls,
     pasteControls,
+    duplicateControls,
     setDragState,
     showDialog,
   } = useVB6Store();
@@ -62,6 +64,13 @@ export const EnhancedToolbar: React.FC = () => {
     if (clipboard.length > 0) {
       pasteControls();
       saveState(`Paste ${clipboard.length} control(s)`);
+    }
+  };
+
+  const handleDuplicate = () => {
+    if (selectedControls.length > 0) {
+      duplicateControls();
+      saveState(`Duplicate ${selectedControls.length} control(s)`);
     }
   };
 
@@ -114,6 +123,15 @@ export const EnhancedToolbar: React.FC = () => {
           title="Copy (Ctrl+C)"
         >
           <Copy size={16} />
+        </button>
+
+        <button
+          onClick={handleDuplicate}
+          disabled={selectedControls.length === 0}
+          className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          title="Duplicate (Ctrl+D)"
+        >
+          <CopyPlus size={16} />
         </button>
 
         <button

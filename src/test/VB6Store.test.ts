@@ -74,6 +74,22 @@ describe('VB6Store', () => {
     expect(state.controls[1].y).toBe(220); // Original + 20
   });
 
+  it('should duplicate selected controls', () => {
+    const { createControl, selectControls, duplicateControls } = useVB6Store.getState();
+
+    createControl('Label', 30, 40);
+    const controlId = useVB6Store.getState().controls[0].id;
+    selectControls([controlId]);
+
+    duplicateControls();
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(2);
+    expect(state.controls[1].type).toBe('Label');
+    expect(state.controls[1].x).toBe(50);
+    expect(state.controls[1].y).toBe(60);
+  });
+
   it('should delete controls', () => {
     const { createControl, deleteControls } = useVB6Store.getState();
 

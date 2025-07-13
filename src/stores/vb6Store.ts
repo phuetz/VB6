@@ -11,6 +11,7 @@ interface VB6Store extends VB6State {
   selectControls: (controlIds: number[]) => void;
   copyControls: () => void;
   pasteControls: () => void;
+  duplicateControls: () => void;
   setExecutionMode: (mode: 'design' | 'run' | 'break') => void;
   toggleWindow: (windowName: string) => void;
   setSelectedEvent: (eventName: string) => void;
@@ -422,6 +423,33 @@ End Function`,
         nextId: state.nextId + state.clipboard.length,
       });
       state.pushHistory([...state.controls, ...newControls], state.nextId + state.clipboard.length);
+    },
+
+    duplicateControls: () => {
+      const state = get();
+      if (state.selectedControls.length === 0) return;
+
+      state.addLog(
+        'info',
+        'Clipboard',
+        `Duplicating ${state.selectedControls.length} control(s)`
+      );
+
+      const newControls = state.selectedControls.map((control, index) => ({
+        ...control,
+        id: state.nextId + index,
+        name: `${control.type}${state.nextId + index}`,
+        x: control.x + 20,
+        y: control.y + 20,
+      }));
+
+      set({
+        controls: [...state.controls, ...newControls],
+        selectedControls: newControls,
+        nextId: state.nextId + newControls.length,
+      });
+
+      state.pushHistory([...state.controls, ...newControls], state.nextId + newControls.length);
     },
 
     setExecutionMode: (mode: 'design' | 'run' | 'break') => {
