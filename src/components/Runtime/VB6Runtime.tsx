@@ -1,20 +1,16 @@
 import React, { useCallback, useRef } from 'react';
 
-interface VB6RuntimeProps {
+export interface VB6RuntimeProps {
   code: string;
   onOutput: (message: string) => void;
   onError: (error: string) => void;
 }
 
-export const VB6Runtime: React.FC<VB6RuntimeProps> = ({
-  code,
-  onOutput,
-  onError
-}) => {
-  const runtimeRef = useRef<any>(null);
-
-  // VB6 Runtime Functions
-  const runtimeFunctions = {
+export function createRuntimeFunctions(
+  onOutput: (msg: string) => void,
+  onError: (msg: string) => void
+) {
+  return {
     MsgBox: (message: string, buttons: number = 0, title: string = 'VB6 App') => {
       if (buttons === 0) {
         alert(`${title}\n\n${message}`);
@@ -33,11 +29,23 @@ export const VB6Runtime: React.FC<VB6RuntimeProps> = ({
       onOutput(String(message));
     },
 
+    // Object handling (simplified COM/ActiveX)
+    CreateObject: (progId: string): any => {
+      if (typeof (window as any).ActiveXObject === 'function') {
+        return new (window as any).ActiveXObject(progId);
+      }
+      if ((window as any)[progId]) {
+        return new (window as any)[progId]();
+      }
+      throw new Error('ActiveX not supported');
+    },
+    ReleaseObject: (_obj: any) => {},
+
     // String functions
     Len: (str: string) => String(str).length,
     Left: (str: string, n: number) => String(str).substring(0, n),
     Right: (str: string, n: number) => String(str).substring(String(str).length - n),
-    Mid: (str: string, start: number, length?: number) => 
+    Mid: (str: string, start: number, length?: number) =>
       String(str).substring(start - 1, length ? start - 1 + length : undefined),
     UCase: (str: string) => String(str).toUpperCase(),
     LCase: (str: string) => String(str).toLowerCase(),
@@ -46,20 +54,18 @@ export const VB6Runtime: React.FC<VB6RuntimeProps> = ({
     RTrim: (str: string) => String(str).replace(/\s+$/, ''),
     InStr: (start: number | string, str1?: string, str2?: string) => {
       if (typeof start === 'string') {
-        // InStr(str1, str2)
         return String(start).indexOf(String(str1)) + 1;
       } else {
-        // InStr(start, str1, str2)
         return String(str1).indexOf(String(str2), start - 1) + 1;
       }
     },
-    Replace: (str: string, find: string, replace: string) => 
+    Replace: (str: string, find: string, replace: string) =>
       String(str).replace(new RegExp(find, 'g'), replace),
-    
+
     // Math functions
     Abs: Math.abs,
     Int: Math.floor,
-    Fix: (n: number) => n >= 0 ? Math.floor(n) : Math.ceil(n),
+    Fix: (n: number) => (n >= 0 ? Math.floor(n) : Math.ceil(n)),
     Round: (n: number, decimals: number = 0) => {
       const factor = Math.pow(10, decimals);
       return Math.round(n * factor) / factor;
@@ -72,7 +78,7 @@ export const VB6Runtime: React.FC<VB6RuntimeProps> = ({
     Exp: Math.exp,
     Log: Math.log,
     Rnd: Math.random,
-    Sgn: (n: number) => n > 0 ? 1 : n < 0 ? -1 : 0,
+    Sgn: (n: number) => (n > 0 ? 1 : n < 0 ? -1 : 0),
 
     // Conversion functions
     Val: (str: string) => {
@@ -91,7 +97,12 @@ export const VB6Runtime: React.FC<VB6RuntimeProps> = ({
     Time: () => new Date().toTimeString(),
     Timer: () => {
       const now = new Date();
-      return now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + now.getMilliseconds() / 1000;
+      return (
+        now.getHours() * 3600 +
+        now.getMinutes() * 60 +
+        now.getSeconds() +
+        now.getMilliseconds() / 1000
+      );
     },
     Year: (date: Date = new Date()) => date.getFullYear(),
     Month: (date: Date = new Date()) => date.getMonth() + 1,
@@ -102,47 +113,86 @@ export const VB6Runtime: React.FC<VB6RuntimeProps> = ({
     DateAdd: (interval: string, number: number, date: Date) => {
       const newDate = new Date(date);
       switch (interval.toLowerCase()) {
-        case 'yyyy': newDate.setFullYear(newDate.getFullYear() + number); break;
-        case 'm': newDate.setMonth(newDate.getMonth() + number); break;
-        case 'd': newDate.setDate(newDate.getDate() + number); break;
-        case 'h': newDate.setHours(newDate.getHours() + number); break;
-        case 'n': newDate.setMinutes(newDate.getMinutes() + number); break;
-        case 's': newDate.setSeconds(newDate.getSeconds() + number); break;
+        case 'yyyy':
+          newDate.setFullYear(newDate.getFullYear() + number);
+          break;
+        case 'm':
+          newDate.setMonth(newDate.getMonth() + number);
+          break;
+        case 'd':
+          newDate.setDate(newDate.getDate() + number);
+          break;
+        case 'h':
+          newDate.setHours(newDate.getHours() + number);
+          break;
+        case 'n':
+          newDate.setMinutes(newDate.getMinutes() + number);
+          break;
+        case 's':
+          newDate.setSeconds(newDate.getSeconds() + number);
+          break;
       }
       return newDate;
     },
     DateDiff: (interval: string, date1: Date, date2: Date) => {
       const diff = date2.getTime() - date1.getTime();
       switch (interval.toLowerCase()) {
-        case 's': return Math.floor(diff / 1000);
-        case 'n': return Math.floor(diff / (1000 * 60));
-        case 'h': return Math.floor(diff / (1000 * 60 * 60));
-        case 'd': return Math.floor(diff / (1000 * 60 * 60 * 24));
+        case 's':
+          return Math.floor(diff / 1000);
+        case 'n':
+          return Math.floor(diff / (1000 * 60));
+        case 'h':
+          return Math.floor(diff / (1000 * 60 * 60));
+        case 'd':
+          return Math.floor(diff / (1000 * 60 * 60 * 24));
         case 'm':
-          return (date2.getFullYear() - date1.getFullYear()) * 12 +
-                 (date2.getMonth() - date1.getMonth());
+          return (
+            (date2.getFullYear() - date1.getFullYear()) * 12 +
+            (date2.getMonth() - date1.getMonth())
+          );
         case 'yyyy':
           return date2.getFullYear() - date1.getFullYear();
       }
       return 0;
     },
     Weekday: (date: Date = new Date(), firstDay: number = 1) => {
-      const day = date.getDay() + 1; // VB6 days start at 1
+      const day = date.getDay() + 1;
       const adjusted = day - firstDay + 1;
       return adjusted <= 0 ? adjusted + 7 : adjusted;
     },
     MonthName: (month: number) => {
-      const names = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      const names = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December'
+      ];
       return names[month - 1] || '';
     },
     WeekdayName: (weekday: number) => {
-      const names = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      const names = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday'
+      ];
       return names[weekday - 1] || '';
     },
 
     // Array functions
     UBound: (arr: any[]) => arr.length - 1,
-    LBound: (arr: any[]) => 0,
+    LBound: (_arr: any[]) => 0,
 
     // Type checking functions
     IsNumeric: (value: any) => !isNaN(parseFloat(value)) && isFinite(value),
@@ -151,15 +201,14 @@ export const VB6Runtime: React.FC<VB6RuntimeProps> = ({
     IsNull: (value: any) => value === null,
 
     // File system functions (limited in browser)
-    Dir: (path: string = '') => {
+    Dir: (_path: string = '') => {
       onError('Dir function not supported in browser environment');
       return '';
     },
-    
+
     // Format functions
     Format: (expression: any, format?: string) => {
       if (format) {
-        // Basic format implementation
         if (typeof expression === 'number') {
           if (format.toLowerCase() === 'currency') {
             return '$' + expression.toFixed(2);
@@ -171,6 +220,17 @@ export const VB6Runtime: React.FC<VB6RuntimeProps> = ({
       return String(expression);
     }
   };
+}
+
+export const VB6Runtime: React.FC<VB6RuntimeProps> = ({
+  code,
+  onOutput,
+  onError
+}) => {
+  const runtimeRef = useRef<any>(null);
+
+  // VB6 Runtime Functions
+  const runtimeFunctions = createRuntimeFunctions(onOutput, onError);
 
   const executeVB6Code = useCallback((vbCode: string) => {
     try {
