@@ -450,6 +450,162 @@ describe('VB6Store', () => {
     expect(state.controls[0].y).toBe(40);
   });
 
+  it('should create a MaskedEdit control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('MaskedEdit', 1, 2);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('MaskedEdit');
+    expect(state.controls[0].x).toBe(1);
+    expect(state.controls[0].y).toBe(2);
+  });
+
+  it('should create a WebBrowser control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('WebBrowser', 5, 5);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('WebBrowser');
+    expect(state.controls[0].x).toBe(5);
+    expect(state.controls[0].y).toBe(5);
+  });
+
+  it('should create an Inet control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('Inet', 6, 7);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('Inet');
+    expect(state.controls[0].x).toBe(6);
+    expect(state.controls[0].y).toBe(7);
+  });
+
+  it('should create a Winsock control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('Winsock', 8, 9);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('Winsock');
+    expect(state.controls[0].x).toBe(8);
+    expect(state.controls[0].y).toBe(9);
+  });
+
+  it('should create a DataGrid control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('DataGrid', 2, 2);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('DataGrid');
+    expect(state.controls[0].x).toBe(2);
+    expect(state.controls[0].y).toBe(2);
+  });
+
+  it('should create a DataList control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('DataList', 3, 3);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('DataList');
+    expect(state.controls[0].x).toBe(3);
+    expect(state.controls[0].y).toBe(3);
+  });
+
+  it('should create a DataCombo control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('DataCombo', 4, 4);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('DataCombo');
+    expect(state.controls[0].x).toBe(4);
+    expect(state.controls[0].y).toBe(4);
+  });
+
+  it('should create a DataRepeater control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('DataRepeater', 7, 8);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('DataRepeater');
+    expect(state.controls[0].x).toBe(7);
+    expect(state.controls[0].y).toBe(8);
+  });
+
+  it('should create a DataEnvironment control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('DataEnvironment', 9, 1);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('DataEnvironment');
+    expect(state.controls[0].x).toBe(9);
+    expect(state.controls[0].y).toBe(1);
+  });
+
+  it('should create a DataReport control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('DataReport', 11, 12);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('DataReport');
+    expect(state.controls[0].x).toBe(11);
+    expect(state.controls[0].y).toBe(12);
+  });
+
+  it('should create a CrystalReport control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('CrystalReport', 13, 14);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('CrystalReport');
+    expect(state.controls[0].x).toBe(13);
+    expect(state.controls[0].y).toBe(14);
+  });
+
+  it('should create a MediaPlayer control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('MediaPlayer', 15, 16);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('MediaPlayer');
+    expect(state.controls[0].x).toBe(15);
+    expect(state.controls[0].y).toBe(16);
+  });
+
+  it('should create an MMControl control', () => {
+    const { createControl } = useVB6Store.getState();
+
+    createControl('MMControl', 17, 18);
+
+    const state = useVB6Store.getState();
+    expect(state.controls).toHaveLength(1);
+    expect(state.controls[0].type).toBe('MMControl');
+    expect(state.controls[0].x).toBe(17);
+    expect(state.controls[0].y).toBe(18);
+  });
+
   it('should undo and redo control creation', () => {
     const { createControl, undo, redo } = useVB6Store.getState();
 

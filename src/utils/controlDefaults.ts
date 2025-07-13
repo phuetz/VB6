@@ -345,6 +345,78 @@ export const getDefaultProperties = (type: string, id: number) => {
       orientation: 'horizontal',
       backColor: '#C0C0C0',
       foreColor: '#000000'
+    },
+    MaskedEdit: {
+      width: 121,
+      height: 21,
+      text: '',
+      mask: '',
+      backColor: '#FFFFFF',
+      foreColor: '#000000',
+      font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false }
+    },
+    WebBrowser: {
+      width: 241,
+      height: 181,
+      url: 'about:blank'
+    },
+    Inet: {
+      width: 32,
+      height: 32,
+      url: '',
+      method: 'GET'
+    },
+    Winsock: {
+      width: 32,
+      height: 32,
+      protocol: 'TCP',
+      remoteHost: '',
+      remotePort: 0
+    },
+    DataGrid: {
+      width: 241,
+      height: 145,
+      columns: [],
+      data: []
+    },
+    DataList: {
+      width: 121,
+      height: 97,
+      rows: []
+    },
+    DataCombo: {
+      width: 121,
+      height: 21,
+      text: '',
+      items: []
+    },
+    DataRepeater: {
+      width: 241,
+      height: 145,
+      dataSource: '',
+      repeatedControl: ''
+    },
+    DataEnvironment: {
+      width: 32,
+      height: 32
+    },
+    DataReport: {
+      width: 241,
+      height: 181
+    },
+    CrystalReport: {
+      width: 32,
+      height: 32
+    },
+    MediaPlayer: {
+      width: 241,
+      height: 181,
+      file: ''
+    },
+    MMControl: {
+      width: 241,
+      height: 25,
+      file: ''
     }
   };
 
