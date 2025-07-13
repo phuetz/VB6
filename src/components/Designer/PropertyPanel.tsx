@@ -34,6 +34,17 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
       );
     }
     if (typeof value === 'string') {
+      const lower = property.toLowerCase();
+      if (lower.includes('color') && /^#?[0-9a-f]{3,8}$/i.test(value)) {
+        return (
+          <input
+            type="color"
+            value={value}
+            onChange={e => onPropertyChange(property, e.target.value)}
+            className="w-full h-5 border border-gray-300 rounded"
+          />
+        );
+      }
       return (
         <input
           type="text"
