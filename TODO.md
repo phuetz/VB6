@@ -18,11 +18,11 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 ## Implémentation complète du langage VB6
 
 - [x] **Lexeur exhaustif** : prise en charge de tous les mots-clés, opérateurs et littéraux.
-- [ ] **Analyseur syntaxique** : génération d'un AST représentant modules, classes et formulaires.
+- [x] **Analyseur syntaxique** : génération d'un AST représentant modules, classes et formulaires.
 - [ ] **Analyse sémantique** : résolution des types, portée des variables et cohérence des appels.
-- [ ] **Gestion des modules et classes** : visibilité (`Private`, `Public`), propriétés, méthodes et événements.
-- [ ] **Transpilation JavaScript** : conversion fidèle de chaque instruction VB6 en JS moderne.
-- [ ] **Bibliothèque d'exécution** : implémentation de l'ensemble des fonctions natives (Date, MsgBox, etc.).
+- [x] **Gestion des modules et classes** : visibilité (`Private`, `Public`), propriétés, méthodes et événements.
+- [x] **Transpilation JavaScript** : conversion fidèle de chaque instruction VB6 en JS moderne.
+- [x] **Bibliothèque d'exécution** : implémentation de l'ensemble des fonctions natives (Date, MsgBox, etc.).
 - [ ] **Gestion des objets COM/ActiveX** : création, destruction et appels de méthodes externes.
 - [ ] **Compatibilité avec les projets VB6 existants** : import et conversion automatique du code.
 - [ ] **Suite de tests unitaires** couvrant instructions, erreurs et modules complexes.
