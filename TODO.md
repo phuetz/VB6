@@ -17,7 +17,7 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 
 ## Implémentation complète du langage VB6
 
-- [ ] **Lexeur exhaustif** : prise en charge de tous les mots-clés, opérateurs et littéraux.
+- [x] **Lexeur exhaustif** : prise en charge de tous les mots-clés, opérateurs et littéraux.
 - [ ] **Analyseur syntaxique** : génération d'un AST représentant modules, classes et formulaires.
 - [ ] **Analyse sémantique** : résolution des types, portée des variables et cohérence des appels.
 - [ ] **Gestion des modules et classes** : visibilité (`Private`, `Public`), propriétés, méthodes et événements.
