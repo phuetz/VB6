@@ -37,6 +37,10 @@ interface VB6Store extends VB6State {
   addTodo: (text: string) => void;
   toggleTodo: (id: string) => void;
   deleteTodo: (id: string) => void;
+  setDesignerZoom: (zoom: number) => void;
+  zoomIn: () => void;
+  zoomOut: () => void;
+  resetZoom: () => void;
 }
 
 export const useVB6Store = create<VB6Store>()(
@@ -79,6 +83,7 @@ export const useVB6Store = create<VB6Store>()(
     gridSize: 8,
     showAlignmentGuides: true,
     alignmentGuides: { x: [], y: [] },
+    designerZoom: 100,
 
     // Windows visibility
     showProjectExplorer: true,
@@ -743,6 +748,25 @@ End Function`,
     clearPerformanceLogs: () => set({ performanceLogs: [] }),
 
     clearLogs: () => set({ logs: [] }),
+
+    setDesignerZoom: (zoom: number) => {
+      const clamped = Math.max(25, Math.min(400, zoom));
+      set({ designerZoom: clamped });
+    },
+
+    zoomIn: () => {
+      const state = get();
+      const next = Math.min(state.designerZoom + 25, 400);
+      set({ designerZoom: next });
+    },
+
+    zoomOut: () => {
+      const state = get();
+      const next = Math.max(state.designerZoom - 25, 25);
+      set({ designerZoom: next });
+    },
+
+    resetZoom: () => set({ designerZoom: 100 }),
 
     addTodo: (text: string) =>
       set(state => ({

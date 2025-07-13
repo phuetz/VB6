@@ -58,6 +58,7 @@ export interface VB6State {
   gridSize: number;
   showAlignmentGuides: boolean;
   alignmentGuides: { x: number[]; y: number[] };
+  designerZoom: number;
 
   // Windows visibility
   showProjectExplorer: boolean;
@@ -167,4 +168,5 @@ export type VB6Action =
   | { type: 'ADD_CONSOLE_OUTPUT'; payload: { message: string } }
   | { type: 'CLEAR_CONSOLE' }
   | { type: 'SET_IMMEDIATE_COMMAND'; payload: { command: string } }
-  | { type: 'SHOW_DIALOG'; payload: { dialogName: string; show: boolean } };
+  | { type: 'SHOW_DIALOG'; payload: { dialogName: string; show: boolean } }
+  | { type: 'SET_DESIGNER_ZOOM'; payload: { zoom: number } };

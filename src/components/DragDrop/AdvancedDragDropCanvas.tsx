@@ -37,6 +37,7 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
     updateControl,
     selectControls,
     showGrid,
+    designerZoom,
   } = useVB6Store(state => ({
     controls: state.controls,
     selectedControls: state.selectedControls,
@@ -47,21 +48,24 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
     updateControl: state.updateControl,
     selectControls: state.selectControls,
     showGrid: state.showGrid,
+    designerZoom: state.designerZoom,
   }));
   const { addLog } = useVB6Store.getState();
 
   const { isDragging, vibrate, playDropSound } = useDragDrop();
 
+  const zoomFactor = designerZoom / 100;
+
   // Gestion du drop de nouveaux contrôles
   const handleControlDrop = useCallback((data: any, position: { x: number; y: number }) => {
     addLog('debug', 'CanvasDrop', `Drop event received`, { data, position });
-    
+
     if (data.type === 'new-control') {
       addLog('info', 'CanvasDrop', `Creating new ${data.controlType} control`, { position });
-      
+
       // Créer un nouveau contrôle
-      let finalX = position.x;
-      let finalY = position.y;
+      let finalX = position.x / zoomFactor;
+      let finalY = position.y / zoomFactor;
 
       // Snap to grid
       if (snapToGrid) {
@@ -98,8 +102,8 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
         to: position 
       });
       
-      let finalX = position.x;
-      let finalY = position.y;
+      let finalX = position.x / zoomFactor;
+      let finalY = position.y / zoomFactor;
 
       if (snapToGrid) {
         finalX = Math.round(finalX / gridSize) * gridSize;
@@ -128,8 +132,8 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
 
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = (e.clientX - rect.left) / zoomFactor;
+    const y = (e.clientY - rect.top) / zoomFactor;
 
     // Commencer la sélection
     setSelectionBox({
@@ -150,8 +154,8 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
 
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = (e.clientX - rect.left) / zoomFactor;
+    const y = (e.clientY - rect.top) / zoomFactor;
 
     setSelectionBox(prev => ({
       ...prev,
@@ -211,9 +215,9 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
     () => ({
       snapToGrid,
       gridSize,
-      allowedAreas: [{ x: 0, y: 0, width: width || 800, height: height || 600 }],
+      allowedAreas: [{ x: 0, y: 0, width: (width || 800) * zoomFactor, height: (height || 600) * zoomFactor }],
     }),
-    [snapToGrid, gridSize, width, height]
+    [snapToGrid, gridSize, width, height, zoomFactor]
   );
 
   return (
@@ -226,8 +230,8 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
         showGrid={showGrid}
         className="w-full h-full relative"
         style={{
-          width,
-          height,
+          width: width * zoomFactor,
+          height: height * zoomFactor,
           backgroundColor,
           border: '1px solid #000',
           cursor: selectionBox.active ? 'crosshair' : 'default'
@@ -239,6 +243,7 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
           onMouseDown={handleCanvasMouseDown}
           onMouseMove={handleCanvasMouseMove}
           onMouseUp={handleCanvasMouseUp}
+          style={{ width, height, transform: `scale(${zoomFactor})`, transformOrigin: 'top left' }}
         >
           {/* Grille */}
           {showGrid && <Grid />}
