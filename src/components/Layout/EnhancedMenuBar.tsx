@@ -9,6 +9,7 @@ const EnhancedMenuBar: React.FC = () => {
     showCodeEditor,
     showProjectExplorer,
     showPropertiesWindow,
+    showControlTree,
     showToolbox,
     toggleWindow,
     setExecutionMode,
@@ -159,14 +160,19 @@ const EnhancedMenuBar: React.FC = () => {
         checked: showProjectExplorer,
         action: () => toggleWindow('showProjectExplorer')
       },
-      { 
-        label: 'Properties Window', 
+      {
+        label: 'Properties Window',
         checked: showPropertiesWindow,
         shortcut: 'F4',
         action: () => toggleWindow('showPropertiesWindow')
       },
-      { 
-        label: 'Toolbox', 
+      {
+        label: 'Controls Tree',
+        checked: showControlTree,
+        action: () => toggleWindow('showControlTree')
+      },
+      {
+        label: 'Toolbox',
         checked: showToolbox,
         action: () => toggleWindow('showToolbox')
       },

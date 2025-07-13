@@ -5,6 +5,7 @@ import FormDesigner from '../Designer/FormDesigner';
 import AdvancedCodeEditor from '../Editor/AdvancedCodeEditor';
 import ProjectExplorer from '../Panels/ProjectExplorer/ProjectExplorer';
 import PropertiesWindow from '../Panels/PropertiesWindow/PropertiesWindow';
+import ControlTree from '../Panels/ControlTree/ControlTree';
 import ImmediateWindow from '../Panels/ImmediateWindow/ImmediateWindow';
 import { WatchWindow, LocalsWindow, CallStackWindow, DebugToolbar } from '../Debug/DebugWindows';
 
@@ -12,8 +13,9 @@ const MainContent: React.FC = () => {
   const { 
     showToolbox, 
     showCodeEditor, 
-    showProjectExplorer, 
-    showPropertiesWindow, 
+    showProjectExplorer,
+    showPropertiesWindow,
+    showControlTree,
     showImmediateWindow,
     showWatchWindow,
     showLocalsWindow,
@@ -41,6 +43,7 @@ const MainContent: React.FC = () => {
       {/* Right Panel - Project Explorer and Properties */}
       <div className="w-80 bg-gray-100 border-l border-gray-400 flex flex-col">
         {showProjectExplorer && <ProjectExplorer />}
+        {showControlTree && <ControlTree />}
         {showPropertiesWindow && <PropertiesWindow />}
         
         {/* Debug Windows */}

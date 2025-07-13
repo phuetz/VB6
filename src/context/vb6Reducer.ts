@@ -35,6 +35,7 @@ export const initialState: VB6State = {
   // Windows visibility
   showProjectExplorer: true,
   showPropertiesWindow: true,
+  showControlTree: false,
   showToolbox: true,
   showImmediateWindow: false,
   showFormLayout: false,
