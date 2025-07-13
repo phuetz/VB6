@@ -35,6 +35,7 @@ export const useControlManipulation = (
 
   const [alignmentGuides, setAlignmentGuides] = useState<{ x: number[]; y: number[] }>({ x: [], y: [] });
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
+  const resizeStartRef = useRef<Record<number, { x: number; y: number; width: number; height: number }>>({});
 
   // Fonction pour aligner sur la grille
   const snapToGrid = useCallback((value: number) => {
@@ -113,6 +114,11 @@ export const useControlManipulation = (
     e.preventDefault();
     e.stopPropagation();
 
+    resizeStartRef.current = {};
+    selectedControls.forEach(c => {
+      resizeStartRef.current[c.id] = { x: c.x, y: c.y, width: c.width, height: c.height };
+    });
+
     setDragState({
       isDragging: false,
       isResizing: true,
@@ -149,57 +155,55 @@ export const useControlManipulation = (
       });
 
       updateControls(updatedControls);
-    } else if (dragState.isResizing && selectedControls.length === 1) {
-      // Redimensionnement du contrôle
-      const control = selectedControls[0];
-      let newWidth = dragState.startSize.width;
-      let newHeight = dragState.startSize.height;
-      let newX = dragState.startPosition.x;
-      let newY = dragState.startPosition.y;
+    } else if (dragState.isResizing && selectedControls.length >= 1) {
+      const updatedControls = controls.map(c => {
+        const start = resizeStartRef.current[c.id];
+        if (!start) return c;
 
-      switch (dragState.currentHandle) {
-        case 'nw':
-          newWidth = snapToGrid(Math.max(20, dragState.startSize.width - dx));
-          newHeight = snapToGrid(Math.max(20, dragState.startSize.height - dy));
-          newX = snapToGrid(dragState.startPosition.x + dx);
-          newY = snapToGrid(dragState.startPosition.y + dy);
-          break;
-        case 'n':
-          newHeight = snapToGrid(Math.max(20, dragState.startSize.height - dy));
-          newY = snapToGrid(dragState.startPosition.y + dy);
-          break;
-        case 'ne':
-          newWidth = snapToGrid(Math.max(20, dragState.startSize.width + dx));
-          newHeight = snapToGrid(Math.max(20, dragState.startSize.height - dy));
-          newY = snapToGrid(dragState.startPosition.y + dy);
-          break;
-        case 'e':
-          newWidth = snapToGrid(Math.max(20, dragState.startSize.width + dx));
-          break;
-        case 'se':
-          newWidth = snapToGrid(Math.max(20, dragState.startSize.width + dx));
-          newHeight = snapToGrid(Math.max(20, dragState.startSize.height + dy));
-          break;
-        case 's':
-          newHeight = snapToGrid(Math.max(20, dragState.startSize.height + dy));
-          break;
-        case 'sw':
-          newWidth = snapToGrid(Math.max(20, dragState.startSize.width - dx));
-          newHeight = snapToGrid(Math.max(20, dragState.startSize.height + dy));
-          newX = snapToGrid(dragState.startPosition.x + dx);
-          break;
-        case 'w':
-          newWidth = snapToGrid(Math.max(20, dragState.startSize.width - dx));
-          newX = snapToGrid(dragState.startPosition.x + dx);
-          break;
-      }
+        let newWidth = start.width;
+        let newHeight = start.height;
+        let newX = start.x;
+        let newY = start.y;
 
-      const updatedControls = controls.map(c => 
-        c.id === control.id 
-          ? { ...c, x: newX, y: newY, width: newWidth, height: newHeight }
-          : c
-      );
+        switch (dragState.currentHandle) {
+          case 'nw':
+            newWidth = snapToGrid(Math.max(20, start.width - dx));
+            newHeight = snapToGrid(Math.max(20, start.height - dy));
+            newX = snapToGrid(start.x + dx);
+            newY = snapToGrid(start.y + dy);
+            break;
+          case 'n':
+            newHeight = snapToGrid(Math.max(20, start.height - dy));
+            newY = snapToGrid(start.y + dy);
+            break;
+          case 'ne':
+            newWidth = snapToGrid(Math.max(20, start.width + dx));
+            newHeight = snapToGrid(Math.max(20, start.height - dy));
+            newY = snapToGrid(start.y + dy);
+            break;
+          case 'e':
+            newWidth = snapToGrid(Math.max(20, start.width + dx));
+            break;
+          case 'se':
+            newWidth = snapToGrid(Math.max(20, start.width + dx));
+            newHeight = snapToGrid(Math.max(20, start.height + dy));
+            break;
+          case 's':
+            newHeight = snapToGrid(Math.max(20, start.height + dy));
+            break;
+          case 'sw':
+            newWidth = snapToGrid(Math.max(20, start.width - dx));
+            newHeight = snapToGrid(Math.max(20, start.height + dy));
+            newX = snapToGrid(start.x + dx);
+            break;
+          case 'w':
+            newWidth = snapToGrid(Math.max(20, start.width - dx));
+            newX = snapToGrid(start.x + dx);
+            break;
+        }
 
+        return { ...c, x: newX, y: newY, width: newWidth, height: newHeight };
+      });
       updateControls(updatedControls);
     }
   }, [dragState, selectedControls, controls, updateControls, snapToGrid, calculateAlignmentGuides]);
@@ -262,27 +266,26 @@ export const useControlManipulation = (
 
   // Redimensionnement au clavier
   const handleKeyboardResize = useCallback((e: KeyboardEvent) => {
-    if (!options.enableKeyboardMovement || selectedControls.length !== 1) return;
+    if (!options.enableKeyboardMovement || selectedControls.length === 0) return;
 
     const step = e.shiftKey ? options.gridSize : 1;
-    const control = selectedControls[0];
-
-    let newWidth = control.width;
-    let newHeight = control.height;
 
     if (e.ctrlKey) {
+      let dx = 0;
+      let dy = 0;
+
       switch (e.key) {
         case 'ArrowLeft':
-          newWidth = Math.max(20, control.width - step);
+          dx = -step;
           break;
         case 'ArrowRight':
-          newWidth = control.width + step;
+          dx = step;
           break;
         case 'ArrowUp':
-          newHeight = Math.max(20, control.height - step);
+          dy = -step;
           break;
         case 'ArrowDown':
-          newHeight = control.height + step;
+          dy = step;
           break;
         default:
           return;
@@ -290,11 +293,17 @@ export const useControlManipulation = (
 
       e.preventDefault();
 
-      const updatedControls = controls.map(c => 
-        c.id === control.id 
-          ? { ...c, width: snapToGrid(newWidth), height: snapToGrid(newHeight) }
-          : c
-      );
+      const updatedControls = controls.map(c => {
+        const selected = selectedControls.find(sc => sc.id === c.id);
+        if (selected) {
+          return {
+            ...c,
+            width: snapToGrid(Math.max(20, c.width + dx)),
+            height: snapToGrid(Math.max(20, c.height + dy))
+          };
+        }
+        return c;
+      });
 
       updateControls(updatedControls);
     }
