@@ -215,16 +215,28 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
     () => ({
       snapToGrid,
       gridSize,
-      allowedAreas: [{ x: 0, y: 0, width: (width || 800) * zoomFactor, height: (height || 600) * zoomFactor }],
+      allowedAreas: [
+        {
+          x: 0,
+          y: 0,
+          width: (width || 800) * zoomFactor,
+          height: (height || 600) * zoomFactor,
+        },
+      ],
     }),
     [snapToGrid, gridSize, width, height, zoomFactor]
+  );
+
+  const acceptedTypes = React.useMemo(
+    () => ['new-control', 'existing-control'],
+    []
   );
 
   return (
     <div className="relative w-full h-full overflow-hidden">
       <DroppableZone
         id="form-canvas"
-        accepts={['new-control', 'existing-control']}
+        accepts={acceptedTypes}
         onDrop={handleControlDrop}
         constraints={dropConstraints}
         showGrid={showGrid}
@@ -234,7 +246,7 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
           height: height * zoomFactor,
           backgroundColor,
           border: '1px solid #000',
-          cursor: selectionBox.active ? 'crosshair' : 'default'
+          cursor: selectionBox.active ? 'crosshair' : 'default',
         }}
       >
         <div
