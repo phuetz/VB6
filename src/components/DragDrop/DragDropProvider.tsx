@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useCallback, useState, useRef, useEffect } from 'react';
+import { shallow } from 'zustand/shallow';
 import {
   DndContext,
   DragEndEvent,
@@ -62,10 +63,13 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isCtrlPressed, setIsCtrlPressed] = useState(false);
   
   const audioContextRef = useRef<AudioContext | null>(null);
-  const { snapToGrid, gridSize } = useVB6Store(state => ({
-    snapToGrid: state.snapToGrid,
-    gridSize: state.gridSize,
-  }));
+  const { snapToGrid, gridSize } = useVB6Store(
+    state => ({
+      snapToGrid: state.snapToGrid,
+      gridSize: state.gridSize,
+    }),
+    shallow
+  );
   const { saveState } = useUndoRedo();
   const { addLog } = useVB6Store.getState();
 

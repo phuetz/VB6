@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { DraggableItem } from '../../DragDrop/DraggableItem';
 import { PulseHighlight } from '../../DragDrop/AnimatedTransitions';
 import { useVB6Store } from '../../../stores/vb6Store';
+import { shallow } from 'zustand/shallow';
 
 interface ControlDefinition {
   type: string;
@@ -186,10 +187,13 @@ interface EnhancedToolboxProps {
 }
 
 export const EnhancedToolbox: React.FC<EnhancedToolboxProps> = ({ className = '' }) => {
-  const { executionMode, toggleWindow } = useVB6Store(state => ({
-    executionMode: state.executionMode,
-    toggleWindow: state.toggleWindow
-  }));
+  const { executionMode, toggleWindow } = useVB6Store(
+    state => ({
+      executionMode: state.executionMode,
+      toggleWindow: state.toggleWindow,
+    }),
+    shallow
+  );
   const [selectedCategory, setSelectedCategory] = useState('General');
   const [selectedTool, setSelectedTool] = useState('Pointer');
   const [searchTerm, setSearchTerm] = useState('');
