@@ -30,6 +30,7 @@ interface VB6Store extends VB6State {
   redo: () => void;
   pushHistory: (controls: Control[], nextId: number) => void;
   showTemplateManager: boolean;
+  showOptionsDialog: boolean;
   recordPerformanceMetrics: (metric: any) => void;
   clearPerformanceLogs: () => void;
   // Todo list
@@ -116,6 +117,7 @@ export const useVB6Store = create<VB6Store>()(
     showComponents: false,
     showTabOrder: false,
     showUserControlDesigner: false,
+    showOptionsDialog: false,
 
     // Code Editor
     selectedEvent: 'Click',

@@ -401,10 +401,10 @@ const EnhancedMenuBar: React.FC = () => {
         action: () => setShowCodeConverter(true)
       },
       { separator: true },
-      { 
-        label: 'Options...', 
+      {
+        label: 'Options...',
         icon: <Settings size={14} />,
-        action: () => console.log('Options')
+        action: () => showDialog('showOptionsDialog', true)
       }
     ],
     Help: [

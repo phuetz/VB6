@@ -30,6 +30,7 @@ import { ExportDialog } from './components/Export/ExportDialog';
 import { LogPanel } from './components/Debug/LogPanel';
 import { CodeFormatter } from './components/Formatting/CodeFormatter';
 import { CodeConverter } from './components/Converter/CodeConverter';
+import OptionsDialog from './components/Dialogs/OptionsDialog';
 import './index.css';
 
 const MainContent: React.FC = () => {
@@ -83,6 +84,7 @@ function App() {
   const {
     showTemplateManager,
     showPerformanceMonitor,
+    showOptionsDialog,
     showDialog,
     toggleWindow,
     snippets,
@@ -237,6 +239,12 @@ function App() {
             onConvertCode={(code, targetLanguage, options) => {
               console.log('Convert code to', targetLanguage, 'with options', options);
             }}
+          />
+
+          {/* Options Dialog */}
+          <OptionsDialog
+            visible={showOptionsDialog}
+            onClose={() => showDialog('showOptionsDialog', false)}
           />
 
           {/* Todo List */}

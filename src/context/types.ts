@@ -80,6 +80,7 @@ export interface VB6State {
   showComponents: boolean;
   showTabOrder: boolean;
   showUserControlDesigner: boolean;
+  showOptionsDialog: boolean;
 
   // Code Editor
   selectedEvent: string;
