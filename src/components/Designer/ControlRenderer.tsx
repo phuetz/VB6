@@ -11,6 +11,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
   const { state, dispatch, updateControl, executeEvent } = useVB6();
 
   const isSelected = state.selectedControls.find(sc => sc.id === control.id);
+  const testId = `${control.type}-${control.id}`;
 
   const handleControlClick = useCallback(
     (e: React.MouseEvent) => {
@@ -102,7 +103,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
     switch (control.type) {
       case 'CommandButton':
         return (
-          <button
+          <button data-testid={testId}
             style={{
               ...baseStyle,
               width: control.width,
@@ -126,7 +127,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
 
       case 'Label':
         return (
-          <div
+          <div data-testid={testId}
             style={{
               ...baseStyle,
               width: control.autoSize ? 'auto' : control.width,
@@ -154,7 +155,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
       case 'TextBox':
         if (control.multiLine) {
           return (
-            <div style={{ ...baseStyle, width: control.width, height: control.height }}>
+            <div data-testid={testId} style={{ ...baseStyle, width: control.width, height: control.height }}>
               <textarea
                 value={control.text || ''}
                 onChange={e => handleControlChange(e.target.value, 'text')}
@@ -177,7 +178,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           );
         } else {
           return (
-            <div style={{ ...baseStyle, width: control.width, height: control.height }}>
+            <div data-testid={testId} style={{ ...baseStyle, width: control.width, height: control.height }}>
               <input
                 type={control.passwordChar ? 'password' : 'text'}
                 value={control.text || ''}
