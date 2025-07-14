@@ -32,14 +32,14 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 
 - [x] **Surface de conception redimensionnable** avec grille, zoom et guides d'alignement.
 - [x] **Glisser-déposer des contrôles** avec duplication et groupement par la souris ou le clavier.
-- [ ] **Sélection multiple avancée** : alignements, espacement et redimensionnement simultané.
+- [x] **Sélection multiple avancée** : alignements, espacement et redimensionnement simultané.
 - [x] **Property Grid en temps réel** : édition de toutes les propriétés (couleurs, polices, liaisions).
 - [x] **Arborescence des contrôles** pour naviguer dans la hiérarchie du formulaire.
 - [x] **Système d'annulation/rétablissement** (Undo/Redo) sur toutes les actions.
-- [ ] **Éditeur de menus et barres d'outils** intégré au designer.
+- [x] **Éditeur de menus et barres d'outils** intégré au designer.
 - [x] **Export/Import au format .frm** totalement compatible avec VB6.
 - [ ] **Tests de bout en bout** validant création et manipulation des formulaires.
-- [ ] **Guide utilisateur complet** pour apprendre le designer.
+- [x] **Guide utilisateur complet** pour apprendre le designer.
 
 ## Contrôles à développer
 
