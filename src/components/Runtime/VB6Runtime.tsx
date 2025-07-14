@@ -222,6 +222,41 @@ export function createRuntimeFunctions(
   };
 }
 
+export function basicTranspile(vbCode: string): string {
+  let jsCode = vbCode;
+  const conversions: Array<[RegExp, string]> = [
+    [/'/g, '//'],
+    [/\bDim\s+(\w+)\s+As\s+(\w+)/gi, 'let $1'],
+    [/\bPrivate\s+(\w+)\s+As\s+(\w+)/gi, 'let $1'],
+    [/\bPublic\s+(\w+)\s+As\s+(\w+)/gi, 'let $1'],
+    [/\bCase\s+Else\b/gi, 'default:'],
+    [/\bCase\s+(.+)/gi, 'case $1:'],
+    [/^\s*Else\b/gi, '} else {'],
+    [/\bElseIf\b/gi, '} else if'],
+    [/\bFor\s+(\w+)\s*=\s*(\d+)\s+To\s+(\d+)/gi, 'for (let $1 = $2; $1 <= $3; $1++)'],
+    [/\bNext\s+\w+/gi, '}'],
+    [/\bNext\b/gi, '}'],
+    [/\bDo\s+While\s+(.+)/gi, 'while ($1) {'],
+    [/\bDo\s+Until\s+(.+)/gi, 'while (!($1)) {'],
+    [/^\s*While\s+(.+)/gm, 'while ($1) {'],
+    [/\bWend\b/gi, '}'],
+    [/\bLoop\b/gi, '}'],
+    [/\bSelect\s+Case\s+([^\n\r]+)/gi, 'switch ($1) {'],
+    [/\bEnd\s+Select\b/gi, '}'],
+    [/\b&\b/g, '+'],
+    [/\bTrue\b/gi, 'true'],
+    [/\bFalse\b/gi, 'false'],
+    [/\bAnd\b/gi, '&&'],
+    [/\bOr\b/gi, '||'],
+    [/\bNot\b/gi, '!'],
+    [/\bPrint\s+(.+)/gi, 'Print($1);'],
+  ];
+  conversions.forEach(([p, r]) => {
+    jsCode = jsCode.replace(p, r);
+  });
+  return jsCode;
+}
+
 export const VB6Runtime: React.FC<VB6RuntimeProps> = ({
   code,
   onOutput,
@@ -234,52 +269,7 @@ export const VB6Runtime: React.FC<VB6RuntimeProps> = ({
 
   const executeVB6Code = useCallback((vbCode: string) => {
     try {
-      // Simple VB6 to JavaScript transpilation
-      let jsCode = vbCode;
-
-      // Basic conversions
-      const conversions = [
-        // Comments
-        [/'/g, '//'],
-        
-        // Variable declarations
-        [/\bDim\s+(\w+)\s+As\s+(\w+)/gi, 'let $1'],
-        [/\bPrivate\s+(\w+)\s+As\s+(\w+)/gi, 'let $1'],
-        [/\bPublic\s+(\w+)\s+As\s+(\w+)/gi, 'let $1'],
-        
-        // Control structures
-        [/\bIf\b/gi, 'if'],
-        [/\bThen\b/gi, '{'],
-        [/\bEnd\s+If\b/gi, '}'],
-        [/\bElse\b/gi, '} else {'],
-        [/\bElseIf\b/gi, '} else if'],
-        
-        // Loops
-        [/\bFor\s+(\w+)\s*=\s*(\d+)\s+To\s+(\d+)/gi, 'for (let $1 = $2; $1 <= $3; $1++)'],
-        [/\bNext\s+\w+/gi, '}'],
-        [/\bNext\b/gi, '}'],
-        [/\bWhile\s+(.+)/gi, 'while ($1) {'],
-        [/\bWend\b/gi, '}'],
-        
-        // String operations
-        [/\b&\b/g, '+'],
-        
-        // Boolean values
-        [/\bTrue\b/gi, 'true'],
-        [/\bFalse\b/gi, 'false'],
-        
-        // Comparison operators
-        [/\bAnd\b/gi, '&&'],
-        [/\bOr\b/gi, '||'],
-        [/\bNot\b/gi, '!'],
-        
-        // Print statement
-        [/\bPrint\s+(.+)/gi, 'Print($1);']
-      ];
-
-      conversions.forEach(([pattern, replacement]) => {
-        jsCode = jsCode.replace(pattern as RegExp, replacement as string);
-      });
+      const jsCode = basicTranspile(vbCode);
 
       // Create execution context with runtime functions
       const context = {
