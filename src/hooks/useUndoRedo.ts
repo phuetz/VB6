@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react';
 import { useVB6Store } from '../stores/vb6Store';
+import { shallow } from 'zustand/shallow';
 
 interface HistoryState {
   controls: any[];
@@ -13,11 +14,14 @@ export const useUndoRedo = () => {
   const currentIndexRef = useRef(-1);
   const isUndoRedoRef = useRef(false);
   
-  const { controls, selectedControls, setExecutionMode } = useVB6Store(state => ({
-    controls: state.controls,
-    selectedControls: state.selectedControls,
-    setExecutionMode: state.setExecutionMode,
-  }));
+  const { controls, selectedControls, setExecutionMode } = useVB6Store(
+    state => ({
+      controls: state.controls,
+      selectedControls: state.selectedControls,
+      setExecutionMode: state.setExecutionMode,
+    }),
+    shallow
+  );
 
   const saveState = useCallback((action: string) => {
     if (isUndoRedoRef.current) return;

@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
+import { shallow } from 'zustand/shallow';
 import { DragDropProvider, useDragDrop } from './DragDropProvider';
 import { DroppableZone } from './DroppableZone';
 import { AnimatedDrop, MagneticSnap, PulseHighlight, RippleEffect } from './AnimatedTransitions';
@@ -38,18 +39,21 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
     selectControls,
     showGrid,
     designerZoom,
-  } = useVB6Store(state => ({
-    controls: state.controls,
-    selectedControls: state.selectedControls,
-    executionMode: state.executionMode,
-    snapToGrid: state.snapToGrid,
-    gridSize: state.gridSize,
-    createControl: state.createControl,
-    updateControl: state.updateControl,
-    selectControls: state.selectControls,
-    showGrid: state.showGrid,
-    designerZoom: state.designerZoom,
-  }));
+  } = useVB6Store(
+    state => ({
+      controls: state.controls,
+      selectedControls: state.selectedControls,
+      executionMode: state.executionMode,
+      snapToGrid: state.snapToGrid,
+      gridSize: state.gridSize,
+      createControl: state.createControl,
+      updateControl: state.updateControl,
+      selectControls: state.selectControls,
+      showGrid: state.showGrid,
+      designerZoom: state.designerZoom,
+    }),
+    shallow
+  );
   const { addLog } = useVB6Store.getState();
 
   const { isDragging, vibrate, playDropSound } = useDragDrop();
