@@ -88,7 +88,7 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
   };
 
   for (const line of lines) {
-    let trimmed = line.trim();
+    const trimmed = line.trim();
 
     const attrMatch = trimmed.match(/^Attribute\s+VB_Name\s*=\s*"(.+)"/i);
     if (attrMatch) {

@@ -52,6 +52,7 @@ export const initialState: VB6State = {
   showComponents: false,
   showTabOrder: false,
   showUserControlDesigner: false,
+  showOptionsDialog: false,
 
   // Code Editor
   selectedEvent: 'Click',

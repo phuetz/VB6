@@ -7,6 +7,7 @@ import { MenuEditor } from '../Designer/MenuEditor';
 import { ObjectBrowser } from '../ObjectBrowser/ObjectBrowser';
 import { FormLayout } from '../Forms/FormLayout';
 import { UserControlDesigner } from '../UserControls/UserControlDesigner';
+import OptionsDialog from './OptionsDialog';
 
 const DialogManager: React.FC = () => {
   const { state, dispatch } = useVB6();
@@ -43,6 +44,9 @@ const DialogManager: React.FC = () => {
           visible={state.showUserControlDesigner}
           onClose={() => dispatch({ type: 'SHOW_DIALOG', payload: { dialogName: 'showUserControlDesigner', show: false } })}
         />
+      )}
+      {state.showOptionsDialog && (
+        <OptionsDialog />
       )}
     </>
   );
