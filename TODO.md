@@ -38,7 +38,7 @@ Cette liste récapitule les fonctionnalités à implémenter ou finaliser afin d
 - [x] **Système d'annulation/rétablissement** (Undo/Redo) sur toutes les actions.
 - [x] **Éditeur de menus et barres d'outils** intégré au designer.
 - [x] **Export/Import au format .frm** totalement compatible avec VB6.
-- [ ] **Tests de bout en bout** validant création et manipulation des formulaires.
+- [x] **Tests de bout en bout** validant création et manipulation des formulaires.
 - [x] **Guide utilisateur complet** pour apprendre le designer.
 
 ## Contrôles à développer
