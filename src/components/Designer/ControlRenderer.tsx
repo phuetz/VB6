@@ -1006,6 +1006,177 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           />
         );
 
+      case 'WebBrowser':
+        return (
+          <iframe
+            data-testid={testId}
+            src={control.url || 'about:blank'}
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              border: '1px solid #000'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          />
+        );
+
+      case 'Inet':
+      case 'Winsock':
+        return (
+          <div
+            data-testid={testId}
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              backgroundColor: '#f0f0f0',
+              border: '1px dashed #000',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '10px',
+              fontFamily: control.font?.name || 'MS Sans Serif'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            {control.type}
+          </div>
+        );
+
+      case 'DataGrid': {
+        const columns = control.columns || [];
+        const rows = control.data || [];
+        return (
+          <div
+            data-testid={testId}
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              border: '1px solid #000',
+              overflow: 'auto',
+              backgroundColor: '#fff'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  {columns.map((c: string, idx: number) => (
+                    <th key={idx} style={{ border: '1px solid #000', padding: '2px', background: '#e0e0e0', textAlign: 'left' }}>
+                      {c}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row: any, idx: number) => (
+                  <tr key={idx}>
+                    {columns.map((col: string, cidx: number) => (
+                      <td key={cidx} style={{ border: '1px solid #000', padding: '2px' }}>
+                        {row[col]}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      }
+
+      case 'DataList': {
+        const rows = control.rows || [];
+        return (
+          <ul
+            data-testid={testId}
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              border: '1px solid #000',
+              overflow: 'auto',
+              backgroundColor: '#fff',
+              fontSize: `${control.font?.size || 8}pt`,
+              fontFamily: control.font?.name || 'MS Sans Serif'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            {rows.map((r: string, idx: number) => (
+              <li key={idx}>{r}</li>
+            ))}
+          </ul>
+        );
+      }
+
+      case 'DataCombo': {
+        const items = control.items || [];
+        return (
+          <select
+            data-testid={testId}
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              border: '1px solid #000',
+              backgroundColor: '#fff',
+              fontSize: `${control.font?.size || 8}pt`,
+              fontFamily: control.font?.name || 'MS Sans Serif'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            {items.map((it: string, idx: number) => (
+              <option key={idx}>{it}</option>
+            ))}
+          </select>
+        );
+      }
+
+      case 'DataRepeater':
+      case 'DataEnvironment':
+      case 'DataReport':
+      case 'CrystalReport':
+      case 'MMControl':
+        return (
+          <div
+            data-testid={testId}
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+              backgroundColor: '#f0f0f0',
+              border: '1px dashed #000',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '10px',
+              fontFamily: control.font?.name || 'MS Sans Serif'
+            }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            {control.type}
+          </div>
+        );
+
+      case 'MediaPlayer':
+        return (
+          <video
+            data-testid={testId}
+            src={control.file || ''}
+            controls
+            style={{ ...baseStyle, width: control.width, height: control.height }}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          />
+        );
+
       default:
         return (
           <div
