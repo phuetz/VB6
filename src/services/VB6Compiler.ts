@@ -15,29 +15,29 @@ export class VB6Compiler {
     try {
       // Compile modules first
       const moduleCode = this.compileModules(project.modules);
-      
+
       // Compile forms
       const formCode = this.compileForms(project.forms);
-      
+
       // Compile class modules
       const classCode = this.compileClassModules(project.classModules);
-      
+
       // Generate main application code
       const mainCode = this.generateMainCode(project);
-      
+
       const javascript = [
         this.generateHeader(project),
         moduleCode,
         formCode,
         classCode,
-        mainCode
+        mainCode,
       ].join('\n\n');
 
       return {
         javascript,
         sourceMap: this.generateSourceMap(),
         errors: [...this.errors, ...this.warnings],
-        dependencies: this.extractDependencies(project)
+        dependencies: this.extractDependencies(project),
       };
     } catch (error) {
       this.errors.push({
@@ -46,21 +46,22 @@ export class VB6Compiler {
         file: 'compiler',
         line: 0,
         column: 0,
-        code: 'COMP001'
+        code: 'COMP001',
       });
 
       return {
         javascript: '',
         sourceMap: '',
         errors: this.errors,
-        dependencies: []
+        dependencies: [],
       };
     }
   }
 
   private compileModules(modules: Module[]): string {
-    return modules.map(module => {
-      return `
+    return modules
+      .map(module => {
+        return `
 // Module: ${module.name}
 class ${module.name} {
   constructor() {
@@ -75,12 +76,14 @@ class ${module.name} {
   ${this.compileProcedures(module.procedures)}
 }
 `;
-    }).join('\n');
+      })
+      .join('\n');
   }
 
   private compileForms(forms: any[]): string {
-    return forms.map(form => {
-      return `
+    return forms
+      .map(form => {
+        return `
 // Form: ${form.name}
 class ${form.name} {
   constructor() {
@@ -95,13 +98,19 @@ class ${form.name} {
   }
 
   createControls() {
-    ${form.controls?.map((control: any) => `
+    ${
+      form.controls
+        ?.map(
+          (control: any) => `
     this.controls['${control.name}'] = {
       type: '${control.type}',
       properties: ${JSON.stringify(control)},
       element: this.createElement('${control.type}', ${JSON.stringify(control)})
     };
-    `).join('') || ''}
+    `
+        )
+        .join('') || ''
+    }
   }
 
   createElement(type, props) {
@@ -156,12 +165,14 @@ class ${form.name} {
   }
 }
 `;
-    }).join('\n');
+      })
+      .join('\n');
   }
 
   private compileClassModules(classModules: any[]): string {
-    return classModules.map(cls => {
-      return `
+    return classModules
+      .map(cls => {
+        return `
 // Class Module: ${cls.name}
 class ${cls.name} {
   constructor() {
@@ -177,55 +188,62 @@ class ${cls.name} {
   }
 }
 `;
-    }).join('\n');
+      })
+      .join('\n');
   }
 
   private compileVariables(variables: any[]): string {
-    return variables.map(variable => {
-      const defaultValue = this.getDefaultValue(variable.type);
-      return `this.${variable.name} = ${JSON.stringify(defaultValue)};`;
-    }).join('\n    ');
+    return variables
+      .map(variable => {
+        const defaultValue = this.getDefaultValue(variable.type);
+        return `this.${variable.name} = ${JSON.stringify(defaultValue)};`;
+      })
+      .join('\n    ');
   }
 
   private compileConstants(constants: any[]): string {
-    return constants.map(constant => {
-      return `this.${constant.name} = ${JSON.stringify(constant.value)};`;
-    }).join('\n    ');
+    return constants
+      .map(constant => {
+        return `this.${constant.name} = ${JSON.stringify(constant.value)};`;
+      })
+      .join('\n    ');
   }
 
   private compileProcedures(procedures: Procedure[]): string {
-    return procedures.map(proc => {
-      const params = proc.parameters.map(p => p.name).join(', ');
-      const jsCode = this.convertVBToJS(proc.code);
-      
-      return `
+    return procedures
+      .map(proc => {
+        const params = proc.parameters.map(p => p.name).join(', ');
+        const jsCode = this.convertVBToJS(proc.code);
+
+        return `
   ${proc.name}(${params}) {
     ${jsCode}
   }
 `;
-    }).join('\n');
+      })
+      .join('\n');
   }
 
   private convertVBToJS(vbCode: string): string {
     let jsCode = vbCode;
-    
+
     // Basic VB6 to JavaScript conversions
     const conversions = [
       // Comments
       [/'/g, '//'],
-      
+
       // Variable declarations
       [/\bDim\s+(\w+)\s+As\s+(\w+)/gi, 'let $1 = this.getDefaultValue("$2");'],
       [/\bPrivate\s+(\w+)\s+As\s+(\w+)/gi, 'this.$1 = this.getDefaultValue("$2");'],
       [/\bPublic\s+(\w+)\s+As\s+(\w+)/gi, 'this.$1 = this.getDefaultValue("$2");'],
-      
+
       // Control structures
       [/\bIf\b/gi, 'if'],
       [/\bThen\b/gi, '{'],
       [/\bEnd\s+If\b/gi, '}'],
       [/\bElse\b/gi, '} else {'],
       [/\bElseIf\b/gi, '} else if'],
-      
+
       // Loops
       [/\bFor\s+(\w+)\s*=\s*(\d+)\s+To\s+(\d+)/gi, 'for (let $1 = $2; $1 <= $3; $1++)'],
       [/\bNext\s+\w+/gi, '}'],
@@ -249,77 +267,77 @@ class ${cls.name} {
       [/\bCase\s+Else\b/gi, 'default:'],
       [/\bCase\s+(.+)/gi, 'case $1:'],
       [/\bEnd\s+Select\b/gi, '}'],
-      
+
       // String operations
       [/\b&\b/g, '+'],
       [/\bLen\(/gi, 'this.Len('],
       [/\bLeft\(/gi, 'this.Left('],
       [/\bRight\(/gi, 'this.Right('],
       [/\bMid\(/gi, 'this.Mid('],
-      
+
       // Object references
       [/\bMe\./g, 'this.'],
       [/\.Caption\b/g, '.textContent'],
       [/\.Text\b/g, '.value'],
       [/\.Value\b/g, '.value'],
-      
+
       // Functions
       [/\bMsgBox\s*\(/gi, 'this.MsgBox('],
       [/\bInputBox\s*\(/gi, 'this.InputBox('],
       [/\bPrint\s+(.+)/gi, 'console.log($1);'],
-      
+
       // Sub/Function definitions
       [/\bSub\s+(\w+)\s*\(/gi, '$1('],
       [/\bFunction\s+(\w+)\s*\(/gi, '$1('],
       [/\bEnd\s+Sub\b/gi, '}'],
       [/\bEnd\s+Function\b/gi, '}'],
-      
+
       // Exit statements
       [/\bExit\s+Sub\b/gi, 'return;'],
       [/\bExit\s+Function\b/gi, 'return;'],
-      
+
       // Boolean values
       [/\bTrue\b/gi, 'true'],
       [/\bFalse\b/gi, 'false'],
-      
+
       // Null values
       [/\bNothing\b/gi, 'null'],
       [/\bEmpty\b/gi, '""'],
-      
+
       // Comparison operators
       [/\bAnd\b/gi, '&&'],
       [/\bOr\b/gi, '||'],
       [/\bNot\b/gi, '!'],
-      
+
       // Assignment
       [/\bSet\s+(\w+)\s*=/gi, '$1 ='],
-      
+
       // Line continuation
       [/\s+_\s*\n/g, ' '],
     ];
-    
+
     conversions.forEach(([pattern, replacement]) => {
       jsCode = jsCode.replace(pattern, replacement);
     });
-    
+
     return jsCode;
   }
 
   private getDefaultValue(type: string): any {
     const defaults: { [key: string]: any } = {
-      'String': '',
-      'Integer': 0,
-      'Long': 0,
-      'Single': 0.0,
-      'Double': 0.0,
-      'Boolean': false,
-      'Date': new Date(),
-      'Currency': 0,
-      'Byte': 0,
-      'Object': null,
-      'Variant': null
+      String: '',
+      Integer: 0,
+      Long: 0,
+      Single: 0.0,
+      Double: 0.0,
+      Boolean: false,
+      Date: new Date(),
+      Currency: 0,
+      Byte: 0,
+      Object: null,
+      Variant: null,
     };
-    
+
     return defaults[type] || null;
   }
 
@@ -435,32 +453,32 @@ document.addEventListener('DOMContentLoaded', function() {
       version: 3,
       sources: ['generated.js'],
       mappings: '',
-      names: []
+      names: [],
     });
   }
 
   private extractDependencies(project: Project): string[] {
     const dependencies: string[] = [];
-    
+
     // Add references as dependencies
     project.references.forEach(ref => {
       if (ref.checked) {
         dependencies.push(ref.name);
       }
     });
-    
+
     return dependencies;
   }
 
   validateCode(code: string): CompilerError[] {
     const errors: CompilerError[] = [];
     const lines = code.split('\n');
-    
+
     lines.forEach((line, index) => {
       const trimmed = line.trim();
       if (trimmed && !trimmed.startsWith("'")) {
         // Check for common syntax errors
-        
+
         // If without Then
         if (/\bif\b/i.test(trimmed) && !/\bthen\b/i.test(trimmed)) {
           errors.push({
@@ -469,10 +487,10 @@ document.addEventListener('DOMContentLoaded', function() {
             file: 'current',
             line: index + 1,
             column: 0,
-            code: 'VB001'
+            code: 'VB001',
           });
         }
-        
+
         // For without To
         if (/\bfor\b/i.test(trimmed) && !/\bto\b/i.test(trimmed) && !/\beach\b/i.test(trimmed)) {
           errors.push({
@@ -481,10 +499,10 @@ document.addEventListener('DOMContentLoaded', function() {
             file: 'current',
             line: index + 1,
             column: 0,
-            code: 'VB002'
+            code: 'VB002',
           });
         }
-        
+
         // Unmatched parentheses
         const openParens = (trimmed.match(/\(/g) || []).length;
         const closeParens = (trimmed.match(/\)/g) || []).length;
@@ -495,10 +513,10 @@ document.addEventListener('DOMContentLoaded', function() {
             file: 'current',
             line: index + 1,
             column: 0,
-            code: 'VB003'
+            code: 'VB003',
           });
         }
-        
+
         // Undeclared variables (basic check)
         const variablePattern = /\b[a-zA-Z_][a-zA-Z0-9_]*\b/g;
         const variables = trimmed.match(variablePattern) || [];
@@ -510,25 +528,55 @@ document.addEventListener('DOMContentLoaded', function() {
               file: 'current',
               line: index + 1,
               column: trimmed.indexOf(variable),
-              code: 'VB004'
+              code: 'VB004',
             });
           }
         });
       }
     });
-    
+
     return errors;
   }
 
   private isBuiltinFunction(name: string): boolean {
     const builtins = [
-      'MsgBox', 'InputBox', 'Print', 'Len', 'Left', 'Right', 'Mid',
-      'UCase', 'LCase', 'Trim', 'Val', 'Str', 'Now', 'Timer',
-      'If', 'Then', 'Else', 'End', 'For', 'To', 'Next', 'While',
-      'Wend', 'Do', 'Loop', 'Sub', 'Function', 'Dim', 'Private',
-      'Public', 'Static', 'Const', 'True', 'False', 'Nothing'
+      'MsgBox',
+      'InputBox',
+      'Print',
+      'Len',
+      'Left',
+      'Right',
+      'Mid',
+      'UCase',
+      'LCase',
+      'Trim',
+      'Val',
+      'Str',
+      'Now',
+      'Timer',
+      'If',
+      'Then',
+      'Else',
+      'End',
+      'For',
+      'To',
+      'Next',
+      'While',
+      'Wend',
+      'Do',
+      'Loop',
+      'Sub',
+      'Function',
+      'Dim',
+      'Private',
+      'Public',
+      'Static',
+      'Const',
+      'True',
+      'False',
+      'Nothing',
     ];
-    
+
     return builtins.includes(name);
   }
 }

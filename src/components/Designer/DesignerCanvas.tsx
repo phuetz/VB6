@@ -19,19 +19,15 @@ interface DesignerCanvasProps {
 export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
   width,
   height,
-  backgroundColor
+  backgroundColor,
 }) => {
   const { state, dispatch, updateControl, copyControls, pasteControls } = useVB6();
   const canvasRef = useRef<HTMLDivElement>(null);
-  
-  const {
-    alignmentGuides,
-    alignControls,
-    makeSameSize
-  } = useControlManipulation(
+
+  const { alignmentGuides, alignControls, makeSameSize } = useControlManipulation(
     state.controls,
     state.selectedControls,
-    (controls) => {
+    controls => {
       controls.forEach(control => {
         updateControl(control.id, 'x', control.x);
         updateControl(control.id, 'y', control.y);
@@ -44,74 +40,91 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
       gridSize: state.gridSize,
       showAlignmentGuides: state.showAlignmentGuides,
       enableKeyboardMovement: true,
-      multiSelectEnabled: true
+      multiSelectEnabled: true,
     }
   );
 
-  const handleControlSelect = useCallback((control: Control, addToSelection: boolean) => {
-    if (addToSelection) {
-      const isSelected = state.selectedControls.find(c => c.id === control.id);
-      if (isSelected) {
-        dispatch({ 
-          type: 'SELECT_CONTROLS', 
-          payload: { controlIds: state.selectedControls.filter(c => c.id !== control.id).map(c => c.id) }
-        });
+  const handleControlSelect = useCallback(
+    (control: Control, addToSelection: boolean) => {
+      if (addToSelection) {
+        const isSelected = state.selectedControls.find(c => c.id === control.id);
+        if (isSelected) {
+          dispatch({
+            type: 'SELECT_CONTROLS',
+            payload: {
+              controlIds: state.selectedControls.filter(c => c.id !== control.id).map(c => c.id),
+            },
+          });
+        } else {
+          dispatch({
+            type: 'SELECT_CONTROLS',
+            payload: { controlIds: [...state.selectedControls.map(c => c.id), control.id] },
+          });
+        }
       } else {
-        dispatch({ 
-          type: 'SELECT_CONTROLS', 
-          payload: { controlIds: [...state.selectedControls.map(c => c.id), control.id] }
-        });
+        dispatch({ type: 'SELECT_CONTROLS', payload: { controlIds: [control.id] } });
       }
-    } else {
-      dispatch({ type: 'SELECT_CONTROLS', payload: { controlIds: [control.id] } });
-    }
-  }, [state.selectedControls, dispatch]);
+    },
+    [state.selectedControls, dispatch]
+  );
 
-  const handleSelectionChange = useCallback((controls: Control[]) => {
-    dispatch({ type: 'SELECT_CONTROLS', payload: { controlIds: controls.map(c => c.id) } });
-  }, [dispatch]);
+  const handleSelectionChange = useCallback(
+    (controls: Control[]) => {
+      dispatch({ type: 'SELECT_CONTROLS', payload: { controlIds: controls.map(c => c.id) } });
+    },
+    [dispatch]
+  );
 
-  const handleUpdateControls = useCallback((controls: Control[]) => {
-    controls.forEach(control => {
-      updateControl(control.id, 'x', control.x);
-      updateControl(control.id, 'y', control.y);
-      updateControl(control.id, 'width', control.width);
-      updateControl(control.id, 'height', control.height);
-    });
-  }, [updateControl]);
+  const handleUpdateControls = useCallback(
+    (controls: Control[]) => {
+      controls.forEach(control => {
+        updateControl(control.id, 'x', control.x);
+        updateControl(control.id, 'y', control.y);
+        updateControl(control.id, 'width', control.width);
+        updateControl(control.id, 'height', control.height);
+      });
+    },
+    [updateControl]
+  );
 
-  const handleMove = useCallback((direction: 'up' | 'down' | 'left' | 'right', amount: number) => {
-    const step = amount * state.gridSize;
-    
-    state.selectedControls.forEach(control => {
-      switch (direction) {
-        case 'up':
-          updateControl(control.id, 'y', Math.max(0, control.y - step));
-          break;
-        case 'down':
-          updateControl(control.id, 'y', control.y + step);
-          break;
-        case 'left':
-          updateControl(control.id, 'x', Math.max(0, control.x - step));
-          break;
-        case 'right':
-          updateControl(control.id, 'x', control.x + step);
-          break;
-      }
-    });
-  }, [state.selectedControls, state.gridSize, updateControl]);
+  const handleMove = useCallback(
+    (direction: 'up' | 'down' | 'left' | 'right', amount: number) => {
+      const step = amount * state.gridSize;
 
-  const handleResize = useCallback((direction: 'width' | 'height', amount: number) => {
-    const step = amount * state.gridSize;
-    
-    state.selectedControls.forEach(control => {
-      if (direction === 'width') {
-        updateControl(control.id, 'width', Math.max(20, control.width + step));
-      } else {
-        updateControl(control.id, 'height', Math.max(20, control.height + step));
-      }
-    });
-  }, [state.selectedControls, state.gridSize, updateControl]);
+      state.selectedControls.forEach(control => {
+        switch (direction) {
+          case 'up':
+            updateControl(control.id, 'y', Math.max(0, control.y - step));
+            break;
+          case 'down':
+            updateControl(control.id, 'y', control.y + step);
+            break;
+          case 'left':
+            updateControl(control.id, 'x', Math.max(0, control.x - step));
+            break;
+          case 'right':
+            updateControl(control.id, 'x', control.x + step);
+            break;
+        }
+      });
+    },
+    [state.selectedControls, state.gridSize, updateControl]
+  );
+
+  const handleResize = useCallback(
+    (direction: 'width' | 'height', amount: number) => {
+      const step = amount * state.gridSize;
+
+      state.selectedControls.forEach(control => {
+        if (direction === 'width') {
+          updateControl(control.id, 'width', Math.max(20, control.width + step));
+        } else {
+          updateControl(control.id, 'height', Math.max(20, control.height + step));
+        }
+      });
+    },
+    [state.selectedControls, state.gridSize, updateControl]
+  );
 
   const handleBringToFront = useCallback(() => {
     const maxZIndex = Math.max(...state.controls.map(c => c.tabIndex || 0));
@@ -148,22 +161,25 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
 
   const handleDelete = useCallback(() => {
     if (state.selectedControls.length > 0) {
-      dispatch({ 
-        type: 'DELETE_CONTROLS', 
-        payload: { controlIds: state.selectedControls.map(c => c.id) }
+      dispatch({
+        type: 'DELETE_CONTROLS',
+        payload: { controlIds: state.selectedControls.map(c => c.id) },
       });
     }
   }, [state.selectedControls, dispatch]);
 
-  const handlePropertyChange = useCallback((control: Control, property: string, value: any) => {
-    if (property.includes('.')) {
-      const [top, sub] = property.split('.');
-      const updated = { ...(control as any)[top], [sub]: value };
-      updateControl(control.id, top, updated);
-    } else {
-      updateControl(control.id, property, value);
-    }
-  }, [updateControl]);
+  const handlePropertyChange = useCallback(
+    (control: Control, property: string, value: any) => {
+      if (property.includes('.')) {
+        const [top, sub] = property.split('.');
+        const updated = { ...(control as any)[top], [sub]: value };
+        updateControl(control.id, top, updated);
+      } else {
+        updateControl(control.id, property, value);
+      }
+    },
+    [updateControl]
+  );
 
   return (
     <div className="flex flex-col h-full">
@@ -188,11 +204,13 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
           onUnlock={handleUnlock}
           onToggleVisibility={handleToggleVisibility}
           showGrid={state.showGrid}
-          onToggleGrid={() => dispatch({ type: 'TOGGLE_WINDOW', payload: { windowName: 'showGrid' } })}
+          onToggleGrid={() =>
+            dispatch({ type: 'TOGGLE_WINDOW', payload: { windowName: 'showGrid' } })
+          }
           snapToGrid={true}
           onToggleSnap={() => {}}
           gridSize={state.gridSize}
-          onGridSizeChange={(size) => dispatch({ type: 'SET_GRID_SIZE', payload: { size } })}
+          onGridSizeChange={size => dispatch({ type: 'SET_GRID_SIZE', payload: { size } })}
         />
       )}
 
@@ -207,7 +225,7 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
               width,
               height,
               backgroundColor,
-              border: '1px solid #000'
+              border: '1px solid #000',
             }}
           >
             {/* Grid */}
@@ -237,7 +255,7 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
                 isSelected={state.selectedControls.some(c => c.id === control.id)}
                 isMultiSelected={state.selectedControls.length > 1}
                 onSelect={handleControlSelect}
-                onUpdateControl={(updatedControl) => handleUpdateControls([updatedControl])}
+                onUpdateControl={updatedControl => handleUpdateControls([updatedControl])}
                 onUpdateControls={handleUpdateControls}
                 allControls={state.controls}
                 selectedControls={state.selectedControls}
@@ -251,15 +269,16 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
             ))}
 
             {/* Position Indicators */}
-            {state.executionMode === 'design' && state.selectedControls.map(control => (
-              <PositionIndicator
-                key={`indicator-${control.id}`}
-                control={control}
-                isVisible={true}
-                showSize={true}
-                showCoordinates={true}
-              />
-            ))}
+            {state.executionMode === 'design' &&
+              state.selectedControls.map(control => (
+                <PositionIndicator
+                  key={`indicator-${control.id}`}
+                  control={control}
+                  isVisible={true}
+                  showSize={true}
+                  showCoordinates={true}
+                />
+              ))}
           </div>
         </div>
 
@@ -268,7 +287,7 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
           <div className="w-64 p-4 bg-gray-100 border-l border-gray-400">
             <PropertyPanel
               control={state.selectedControls[0]}
-              onPropertyChange={(property, value) => 
+              onPropertyChange={(property, value) =>
                 handlePropertyChange(state.selectedControls[0], property, value)
               }
             />

@@ -20,8 +20,13 @@ const DialogManager: React.FC = () => {
       {state.showMenuEditor && (
         <MenuEditor
           visible={state.showMenuEditor}
-          onClose={() => dispatch({ type: 'SHOW_DIALOG', payload: { dialogName: 'showMenuEditor', show: false } })}
-          onSave={(menus) => {
+          onClose={() =>
+            dispatch({
+              type: 'SHOW_DIALOG',
+              payload: { dialogName: 'showMenuEditor', show: false },
+            })
+          }
+          onSave={menus => {
             // Save menus to form
             console.log('Saving menus:', menus);
           }}
@@ -30,24 +35,37 @@ const DialogManager: React.FC = () => {
       {state.showObjectBrowser && (
         <ObjectBrowser
           visible={state.showObjectBrowser}
-          onClose={() => dispatch({ type: 'SHOW_DIALOG', payload: { dialogName: 'showObjectBrowser', show: false } })}
+          onClose={() =>
+            dispatch({
+              type: 'SHOW_DIALOG',
+              payload: { dialogName: 'showObjectBrowser', show: false },
+            })
+          }
         />
       )}
       {state.showFormLayout && (
         <FormLayout
           visible={state.showFormLayout}
-          onClose={() => dispatch({ type: 'SHOW_DIALOG', payload: { dialogName: 'showFormLayout', show: false } })}
+          onClose={() =>
+            dispatch({
+              type: 'SHOW_DIALOG',
+              payload: { dialogName: 'showFormLayout', show: false },
+            })
+          }
         />
       )}
       {state.showUserControlDesigner && (
         <UserControlDesigner
           visible={state.showUserControlDesigner}
-          onClose={() => dispatch({ type: 'SHOW_DIALOG', payload: { dialogName: 'showUserControlDesigner', show: false } })}
+          onClose={() =>
+            dispatch({
+              type: 'SHOW_DIALOG',
+              payload: { dialogName: 'showUserControlDesigner', show: false },
+            })
+          }
         />
       )}
-      {state.showOptionsDialog && (
-        <OptionsDialog />
-      )}
+      {state.showOptionsDialog && <OptionsDialog />}
     </>
   );
 };

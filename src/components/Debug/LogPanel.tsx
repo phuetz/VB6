@@ -1,5 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { AlertCircle, AlertTriangle, Info, Bug, X, Download, Copy, Trash2, Filter, Eye, EyeOff } from 'lucide-react';
+import {
+  AlertCircle,
+  AlertTriangle,
+  Info,
+  Bug,
+  X,
+  Download,
+  Copy,
+  Trash2,
+  Filter,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 import { useVB6Store } from '../../stores/vb6Store';
 
 export interface LogEntry {
@@ -27,58 +39,74 @@ export const LogPanel: React.FC = () => {
   }, [logs, autoScroll]);
 
   const getFilteredLogs = () => {
-    return logs.filter(log => 
-      (filter === 'all' || log.level === filter) && 
-      (searchTerm === '' || 
-        log.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        log.source.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+    return logs.filter(
+      log =>
+        (filter === 'all' || log.level === filter) &&
+        (searchTerm === '' ||
+          log.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          log.source.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   };
 
   const getLevelIcon = (level: string) => {
     switch (level) {
-      case 'info': return <Info size={14} className="text-blue-500" />;
-      case 'warn': return <AlertTriangle size={14} className="text-yellow-500" />;
-      case 'error': return <AlertCircle size={14} className="text-red-500" />;
-      case 'debug': return <Bug size={14} className="text-purple-500" />;
-      default: return <Info size={14} className="text-blue-500" />;
+      case 'info':
+        return <Info size={14} className="text-blue-500" />;
+      case 'warn':
+        return <AlertTriangle size={14} className="text-yellow-500" />;
+      case 'error':
+        return <AlertCircle size={14} className="text-red-500" />;
+      case 'debug':
+        return <Bug size={14} className="text-purple-500" />;
+      default:
+        return <Info size={14} className="text-blue-500" />;
     }
   };
 
   const getBackgroundColor = (level: string) => {
     switch (level) {
-      case 'info': return 'hover:bg-blue-50';
-      case 'warn': return 'hover:bg-yellow-50';
-      case 'error': return 'hover:bg-red-50';
-      case 'debug': return 'hover:bg-purple-50';
-      default: return 'hover:bg-gray-50';
+      case 'info':
+        return 'hover:bg-blue-50';
+      case 'warn':
+        return 'hover:bg-yellow-50';
+      case 'error':
+        return 'hover:bg-red-50';
+      case 'debug':
+        return 'hover:bg-purple-50';
+      default:
+        return 'hover:bg-gray-50';
     }
   };
 
   const formatTimestamp = (date: Date) => {
-    return date.toLocaleTimeString('en-US', { 
+    return date.toLocaleTimeString('en-US', {
       hour12: false,
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      fractionalSecondDigits: 3
+      fractionalSecondDigits: 3,
     });
   };
 
   const copyLogs = () => {
-    const logText = getFilteredLogs().map(log => 
-      `[${formatTimestamp(log.timestamp)}] [${log.level.toUpperCase()}] [${log.source}] ${log.message}`
-    ).join('\n');
-    
+    const logText = getFilteredLogs()
+      .map(
+        log =>
+          `[${formatTimestamp(log.timestamp)}] [${log.level.toUpperCase()}] [${log.source}] ${log.message}`
+      )
+      .join('\n');
+
     navigator.clipboard.writeText(logText);
   };
 
   const downloadLogs = () => {
-    const logText = getFilteredLogs().map(log => 
-      `[${log.timestamp.toISOString()}] [${log.level.toUpperCase()}] [${log.source}] ${log.message}${log.data ? '\n' + JSON.stringify(log.data, null, 2) : ''}`
-    ).join('\n');
-    
+    const logText = getFilteredLogs()
+      .map(
+        log =>
+          `[${log.timestamp.toISOString()}] [${log.level.toUpperCase()}] [${log.source}] ${log.message}${log.data ? '\n' + JSON.stringify(log.data, null, 2) : ''}`
+      )
+      .join('\n');
+
     const blob = new Blob([logText], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -93,7 +121,10 @@ export const LogPanel: React.FC = () => {
   if (!showLogPanel) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-200 border-t border-gray-400 z-20" style={{ height: '250px' }}>
+    <div
+      className="fixed bottom-0 left-0 right-0 bg-gray-200 border-t border-gray-400 z-20"
+      style={{ height: '250px' }}
+    >
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="bg-blue-600 text-white text-xs font-bold p-2 flex items-center justify-between">
@@ -105,36 +136,32 @@ export const LogPanel: React.FC = () => {
             </span>
           </div>
           <div className="flex items-center gap-1">
-            <button 
-              className="p-1 hover:bg-blue-700 rounded" 
+            <button
+              className="p-1 hover:bg-blue-700 rounded"
               title="Clear logs"
               onClick={clearLogs}
             >
               <Trash2 size={14} />
             </button>
-            <button 
-              className="p-1 hover:bg-blue-700 rounded" 
-              title="Copy logs"
-              onClick={copyLogs}
-            >
+            <button className="p-1 hover:bg-blue-700 rounded" title="Copy logs" onClick={copyLogs}>
               <Copy size={14} />
             </button>
-            <button 
-              className="p-1 hover:bg-blue-700 rounded" 
+            <button
+              className="p-1 hover:bg-blue-700 rounded"
               title="Download logs"
               onClick={downloadLogs}
             >
               <Download size={14} />
             </button>
-            <button 
-              className={`p-1 hover:bg-blue-700 rounded ${autoScroll ? 'bg-blue-700' : ''}`} 
-              title={autoScroll ? "Auto-scroll enabled" : "Auto-scroll disabled"}
+            <button
+              className={`p-1 hover:bg-blue-700 rounded ${autoScroll ? 'bg-blue-700' : ''}`}
+              title={autoScroll ? 'Auto-scroll enabled' : 'Auto-scroll disabled'}
               onClick={() => setAutoScroll(!autoScroll)}
             >
               {autoScroll ? <Eye size={14} /> : <EyeOff size={14} />}
             </button>
-            <button 
-              className="p-1 hover:bg-blue-700 rounded" 
+            <button
+              className="p-1 hover:bg-blue-700 rounded"
               title="Close"
               onClick={() => toggleWindow('showLogPanel')}
             >
@@ -142,14 +169,14 @@ export const LogPanel: React.FC = () => {
             </button>
           </div>
         </div>
-        
+
         {/* Toolbar */}
         <div className="flex items-center gap-2 p-2 bg-gray-100 border-b border-gray-300">
           <div className="flex items-center gap-1">
             <Filter size={14} className="text-gray-500" />
-            <select 
-              value={filter} 
-              onChange={(e) => setFilter(e.target.value as any)}
+            <select
+              value={filter}
+              onChange={e => setFilter(e.target.value as any)}
               className="text-xs border border-gray-300 rounded px-2 py-1"
             >
               <option value="all">All Logs</option>
@@ -159,20 +186,20 @@ export const LogPanel: React.FC = () => {
               <option value="debug">Debug</option>
             </select>
           </div>
-          
-          <input 
-            type="text" 
-            placeholder="Search logs..." 
-            value={searchTerm} 
-            onChange={(e) => setSearchTerm(e.target.value)}
+
+          <input
+            type="text"
+            placeholder="Search logs..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
             className="text-xs border border-gray-300 rounded px-2 py-1 flex-1"
           />
-          
+
           <div className="text-xs text-gray-500">
             Showing {getFilteredLogs().length} of {logs.length} logs
           </div>
         </div>
-        
+
         {/* Log content */}
         <div className="flex-1 overflow-y-auto bg-white">
           {getFilteredLogs().length > 0 ? (
@@ -187,9 +214,9 @@ export const LogPanel: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {getFilteredLogs().map((log) => (
-                  <tr 
-                    key={log.id} 
+                {getFilteredLogs().map(log => (
+                  <tr
+                    key={log.id}
                     className={`border-b border-gray-200 ${getBackgroundColor(log.level)}`}
                   >
                     <td className="p-1 font-mono">{formatTimestamp(log.timestamp)}</td>
@@ -203,8 +230,8 @@ export const LogPanel: React.FC = () => {
                     <td className="p-1 whitespace-pre-wrap">{log.message}</td>
                     <td className="p-1 text-center">
                       {log.data && (
-                        <button 
-                          onClick={() => setShowData(showData === log.id ? null : log.id)} 
+                        <button
+                          onClick={() => setShowData(showData === log.id ? null : log.id)}
                           className="p-1 hover:bg-gray-200 rounded"
                         >
                           {showData === log.id ? <EyeOff size={12} /> : <Eye size={12} />}
@@ -223,7 +250,7 @@ export const LogPanel: React.FC = () => {
           <div ref={logsEndRef} />
         </div>
       </div>
-      
+
       {/* Data inspector modal */}
       {showData && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

@@ -7,11 +7,7 @@ interface AnimatedDropProps {
   delay?: number;
 }
 
-export const AnimatedDrop: React.FC<AnimatedDropProps> = ({ 
-  children, 
-  isVisible, 
-  delay = 0 
-}) => {
+export const AnimatedDrop: React.FC<AnimatedDropProps> = ({ children, isVisible, delay = 0 }) => {
   const [shouldRender, setShouldRender] = React.useState(isVisible);
   const [animationClass, setAnimationClass] = React.useState('');
   const { addLog } = useVB6Store.getState();
@@ -33,11 +29,7 @@ export const AnimatedDrop: React.FC<AnimatedDropProps> = ({
 
   if (!shouldRender) return null;
 
-  return (
-    <div className={`transition-all duration-300 ${animationClass}`}>
-      {children}
-    </div>
-  );
+  return <div className={`transition-all duration-300 ${animationClass}`}>{children}</div>;
 };
 
 interface MagneticSnapProps {
@@ -46,10 +38,10 @@ interface MagneticSnapProps {
   snapPosition: { x: number; y: number };
 }
 
-export const MagneticSnap: React.FC<MagneticSnapProps> = ({ 
-  children, 
-  isSnapping, 
-  snapPosition 
+export const MagneticSnap: React.FC<MagneticSnapProps> = ({
+  children,
+  isSnapping,
+  snapPosition,
 }) => {
   const [currentPosition, setCurrentPosition] = React.useState(snapPosition);
   const { addLog } = useVB6Store.getState();
@@ -64,7 +56,7 @@ export const MagneticSnap: React.FC<MagneticSnapProps> = ({
       const animate = () => {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        
+
         // Easing function pour un effet de rebond
         const easeOutBack = (t: number) => {
           const c1 = 1.70158;
@@ -73,7 +65,7 @@ export const MagneticSnap: React.FC<MagneticSnapProps> = ({
         };
 
         const easedProgress = easeOutBack(progress);
-        
+
         setCurrentPosition({
           x: startPos.x + (snapPosition.x - startPos.x) * easedProgress,
           y: startPos.y + (snapPosition.y - startPos.y) * easedProgress,
@@ -110,10 +102,10 @@ interface PulseHighlightProps {
 export const PulseHighlight: React.FC<PulseHighlightProps> = ({
   children,
   isActive,
-  color = 'rgb(59, 130, 246)'
+  color = 'rgb(59, 130, 246)',
 }) => {
   const { addLog } = useVB6Store.getState();
-  
+
   React.useEffect(() => {
     if (isActive) {
       addLog('debug', 'PulseHighlight', 'Element highlight activated');
@@ -141,10 +133,7 @@ interface RippleEffectProps {
   onComplete?: () => void;
 }
 
-export const RippleEffect: React.FC<RippleEffectProps> = ({
-  isTriggered,
-  onComplete
-}) => {
+export const RippleEffect: React.FC<RippleEffectProps> = ({ isTriggered, onComplete }) => {
   const [ripples, setRipples] = React.useState<Array<{ id: number; x: number; y: number }>>([]);
   const { addLog } = useVB6Store.getState();
 
@@ -156,7 +145,11 @@ export const RippleEffect: React.FC<RippleEffectProps> = ({
         y: Math.random() * 100,
       };
 
-      addLog('debug', 'RippleEffect', `Ripple effect triggered at ${newRipple.x}%, ${newRipple.y}%`);
+      addLog(
+        'debug',
+        'RippleEffect',
+        `Ripple effect triggered at ${newRipple.x}%, ${newRipple.y}%`
+      );
       setRipples(prev => [...prev, newRipple]);
 
       setTimeout(() => {

@@ -13,28 +13,168 @@ interface ControlDefinition {
 
 const VB6_CONTROLS: ControlDefinition[] = [
   // Standard Controls
-  { type: 'Pointer', icon: '🖱️', name: 'Pointer', description: 'Selection tool', category: 'General', defaultSize: { width: 20, height: 20 } },
-  { type: 'CommandButton', icon: '🔘', name: 'CommandButton', description: 'Button control', category: 'General', defaultSize: { width: 89, height: 25 } },
-  { type: 'Label', icon: '🏷️', name: 'Label', description: 'Display text', category: 'General', defaultSize: { width: 65, height: 17 } },
-  { type: 'TextBox', icon: '📝', name: 'TextBox', description: 'Text input', category: 'General', defaultSize: { width: 121, height: 21 } },
-  { type: 'Frame', icon: '📦', name: 'Frame', description: 'Group controls', category: 'General', defaultSize: { width: 121, height: 97 } },
-  { type: 'CheckBox', icon: '☑️', name: 'CheckBox', description: 'Checkbox control', category: 'General', defaultSize: { width: 121, height: 17 } },
-  { type: 'OptionButton', icon: '⚪', name: 'OptionButton', description: 'Radio button', category: 'General', defaultSize: { width: 121, height: 17 } },
-  { type: 'ComboBox', icon: '📋', name: 'ComboBox', description: 'Dropdown list', category: 'General', defaultSize: { width: 121, height: 21 } },
-  { type: 'ListBox', icon: '📜', name: 'ListBox', description: 'List of items', category: 'General', defaultSize: { width: 121, height: 97 } },
-  { type: 'Timer', icon: '⏱️', name: 'Timer', description: 'Timer control', category: 'General', defaultSize: { width: 32, height: 32 } },
-  
+  {
+    type: 'Pointer',
+    icon: '🖱️',
+    name: 'Pointer',
+    description: 'Selection tool',
+    category: 'General',
+    defaultSize: { width: 20, height: 20 },
+  },
+  {
+    type: 'CommandButton',
+    icon: '🔘',
+    name: 'CommandButton',
+    description: 'Button control',
+    category: 'General',
+    defaultSize: { width: 89, height: 25 },
+  },
+  {
+    type: 'Label',
+    icon: '🏷️',
+    name: 'Label',
+    description: 'Display text',
+    category: 'General',
+    defaultSize: { width: 65, height: 17 },
+  },
+  {
+    type: 'TextBox',
+    icon: '📝',
+    name: 'TextBox',
+    description: 'Text input',
+    category: 'General',
+    defaultSize: { width: 121, height: 21 },
+  },
+  {
+    type: 'Frame',
+    icon: '📦',
+    name: 'Frame',
+    description: 'Group controls',
+    category: 'General',
+    defaultSize: { width: 121, height: 97 },
+  },
+  {
+    type: 'CheckBox',
+    icon: '☑️',
+    name: 'CheckBox',
+    description: 'Checkbox control',
+    category: 'General',
+    defaultSize: { width: 121, height: 17 },
+  },
+  {
+    type: 'OptionButton',
+    icon: '⚪',
+    name: 'OptionButton',
+    description: 'Radio button',
+    category: 'General',
+    defaultSize: { width: 121, height: 17 },
+  },
+  {
+    type: 'ComboBox',
+    icon: '📋',
+    name: 'ComboBox',
+    description: 'Dropdown list',
+    category: 'General',
+    defaultSize: { width: 121, height: 21 },
+  },
+  {
+    type: 'ListBox',
+    icon: '📜',
+    name: 'ListBox',
+    description: 'List of items',
+    category: 'General',
+    defaultSize: { width: 121, height: 97 },
+  },
+  {
+    type: 'Timer',
+    icon: '⏱️',
+    name: 'Timer',
+    description: 'Timer control',
+    category: 'General',
+    defaultSize: { width: 32, height: 32 },
+  },
+
   // ActiveX Controls
-  { type: 'TabStrip', icon: '📑', name: 'TabStrip', description: 'Tab container', category: 'ActiveX', defaultSize: { width: 241, height: 145 } },
-  { type: 'Toolbar', icon: '🔧', name: 'Toolbar', description: 'Toolbar control', category: 'ActiveX', defaultSize: { width: 241, height: 25 } },
-  { type: 'StatusBar', icon: '📊', name: 'StatusBar', description: 'Status bar', category: 'ActiveX', defaultSize: { width: 241, height: 21 } },
-  { type: 'TreeView', icon: '🌳', name: 'TreeView', description: 'Tree view control', category: 'ActiveX', defaultSize: { width: 121, height: 97 } },
-  { type: 'ListView', icon: '📋', name: 'ListView', description: 'List view control', category: 'ActiveX', defaultSize: { width: 121, height: 97 } },
-  { type: 'ImageList', icon: '🖼️', name: 'ImageList', description: 'Image collection', category: 'ActiveX', defaultSize: { width: 32, height: 32 } },
-  { type: 'ProgressBar', icon: '📶', name: 'ProgressBar', description: 'Progress indicator', category: 'ActiveX', defaultSize: { width: 121, height: 21 } },
-  { type: 'RichTextBox', icon: '📝', name: 'RichTextBox', description: 'Rich text editor', category: 'ActiveX', defaultSize: { width: 121, height: 97 } },
-  { type: 'UpDown', icon: '🔼', name: 'UpDown', description: 'Spin button', category: 'ActiveX', defaultSize: { width: 17, height: 21 } },
-  { type: 'Animation', icon: '🎬', name: 'Animation', description: 'Animation control', category: 'ActiveX', defaultSize: { width: 121, height: 97 } },
+  {
+    type: 'TabStrip',
+    icon: '📑',
+    name: 'TabStrip',
+    description: 'Tab container',
+    category: 'ActiveX',
+    defaultSize: { width: 241, height: 145 },
+  },
+  {
+    type: 'Toolbar',
+    icon: '🔧',
+    name: 'Toolbar',
+    description: 'Toolbar control',
+    category: 'ActiveX',
+    defaultSize: { width: 241, height: 25 },
+  },
+  {
+    type: 'StatusBar',
+    icon: '📊',
+    name: 'StatusBar',
+    description: 'Status bar',
+    category: 'ActiveX',
+    defaultSize: { width: 241, height: 21 },
+  },
+  {
+    type: 'TreeView',
+    icon: '🌳',
+    name: 'TreeView',
+    description: 'Tree view control',
+    category: 'ActiveX',
+    defaultSize: { width: 121, height: 97 },
+  },
+  {
+    type: 'ListView',
+    icon: '📋',
+    name: 'ListView',
+    description: 'List view control',
+    category: 'ActiveX',
+    defaultSize: { width: 121, height: 97 },
+  },
+  {
+    type: 'ImageList',
+    icon: '🖼️',
+    name: 'ImageList',
+    description: 'Image collection',
+    category: 'ActiveX',
+    defaultSize: { width: 32, height: 32 },
+  },
+  {
+    type: 'ProgressBar',
+    icon: '📶',
+    name: 'ProgressBar',
+    description: 'Progress indicator',
+    category: 'ActiveX',
+    defaultSize: { width: 121, height: 21 },
+  },
+  {
+    type: 'RichTextBox',
+    icon: '📝',
+    name: 'RichTextBox',
+    description: 'Rich text editor',
+    category: 'ActiveX',
+    defaultSize: { width: 121, height: 97 },
+  },
+  {
+    type: 'UpDown',
+    icon: '🔼',
+    name: 'UpDown',
+    description: 'Spin button',
+    category: 'ActiveX',
+    defaultSize: { width: 17, height: 21 },
+  },
+  {
+    type: 'Animation',
+    icon: '🎬',
+    name: 'Animation',
+    description: 'Animation control',
+    category: 'ActiveX',
+    defaultSize: { width: 121, height: 97 },
+  },
 ];
 
 const CONTROL_CATEGORIES = ['General', 'ActiveX', 'Data', 'Internet'];
@@ -47,14 +187,8 @@ interface DraggableControlProps {
 
 const DraggableControl: React.FC<DraggableControlProps> = ({ control, isSelected, onSelect }) => {
   const { executionMode } = useVB6Store();
-  
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    isDragging,
-  } = useDraggable({
+
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: `toolbox-${control.type}`,
     data: {
       type: 'toolbox-control',
@@ -63,11 +197,13 @@ const DraggableControl: React.FC<DraggableControlProps> = ({ control, isSelected
     disabled: executionMode === 'run' || control.type === 'Pointer',
   });
 
-  const style = transform ? {
-    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-    zIndex: isDragging ? 1000 : 'auto',
-    opacity: isDragging ? 0.8 : 1,
-  } : undefined;
+  const style = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        zIndex: isDragging ? 1000 : 'auto',
+        opacity: isDragging ? 0.8 : 1,
+      }
+    : undefined;
 
   return (
     <div
@@ -83,12 +219,12 @@ const DraggableControl: React.FC<DraggableControlProps> = ({ control, isSelected
     >
       <div className="text-lg mb-1">{control.icon}</div>
       <div className="text-xs leading-tight">{control.name}</div>
-      
+
       {/* Selection indicator */}
       {isSelected && (
         <div className="absolute inset-0 border-2 border-blue-500 pointer-events-none" />
       )}
-      
+
       {/* Drag indicator */}
       {isDragging && (
         <div className="absolute inset-0 bg-blue-500 bg-opacity-20 pointer-events-none" />
@@ -106,32 +242,27 @@ const ModernToolbox: React.FC = () => {
     setSelectedTool(controlDef.type);
   };
 
-  const filteredControls = VB6_CONTROLS.filter(control => 
-    control.category === selectedCategory
-  );
+  const filteredControls = VB6_CONTROLS.filter(control => control.category === selectedCategory);
 
   return (
     <div className="w-64 bg-gray-100 border-r border-gray-400 flex flex-col">
       {/* Header */}
       <div className="bg-blue-600 text-white text-xs font-bold p-2 flex items-center justify-between">
         <span>Toolbox</span>
-        <button
-          onClick={() => toggleWindow('showToolbox')}
-          className="hover:bg-blue-700 px-1"
-        >
+        <button onClick={() => toggleWindow('showToolbox')} className="hover:bg-blue-700 px-1">
           ×
         </button>
       </div>
-      
+
       {/* Category Tabs */}
       <div className="border-b border-gray-300">
         <div className="flex flex-wrap">
-          {CONTROL_CATEGORIES.map((category) => (
+          {CONTROL_CATEGORIES.map(category => (
             <button
               key={category}
               className={`text-xs p-1 border-r border-gray-300 ${
-                selectedCategory === category 
-                  ? 'bg-white border-b-2 border-blue-600 font-semibold' 
+                selectedCategory === category
+                  ? 'bg-white border-b-2 border-blue-600 font-semibold'
                   : 'bg-gray-200 hover:bg-gray-300'
               }`}
               onClick={() => setSelectedCategory(category)}
@@ -142,11 +273,11 @@ const ModernToolbox: React.FC = () => {
           ))}
         </div>
       </div>
-      
+
       {/* Tools Grid */}
       <div className="flex-1 overflow-y-auto p-2">
         <div className="grid grid-cols-2 gap-1">
-          {filteredControls.map((controlDef) => (
+          {filteredControls.map(controlDef => (
             <DraggableControl
               key={controlDef.type}
               control={controlDef}
@@ -156,7 +287,7 @@ const ModernToolbox: React.FC = () => {
           ))}
         </div>
       </div>
-      
+
       {/* Info Panel */}
       <div className="border-t border-gray-300 p-2 bg-gray-50">
         <div className="text-xs">

@@ -18,10 +18,7 @@ interface CommandPaletteProps {
   onClose: () => void;
 }
 
-export const CommandPalette: React.FC<CommandPaletteProps> = ({
-  visible,
-  onClose
-}) => {
+export const CommandPalette: React.FC<CommandPaletteProps> = ({ visible, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [commands, setCommands] = useState<CommandItem[]>([]);
@@ -42,7 +39,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         shortcut: 'Ctrl+N',
         icon: <FileText size={16} />,
         tags: ['create', 'project', 'new', 'file'],
-        description: 'Create a new VB6 project'
+        description: 'Create a new VB6 project',
       },
       {
         id: 'open-project',
@@ -52,7 +49,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         shortcut: 'Ctrl+O',
         icon: <FileText size={16} />,
         tags: ['open', 'project', 'file'],
-        description: 'Open an existing VB6 project'
+        description: 'Open an existing VB6 project',
       },
       {
         id: 'save-project',
@@ -63,7 +60,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         icon: <FileText size={16} />,
         favorite: true,
         tags: ['save', 'project', 'file'],
-        description: 'Save the current project'
+        description: 'Save the current project',
       },
       {
         id: 'run-project',
@@ -74,7 +71,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         icon: <Play size={16} />,
         favorite: true,
         tags: ['run', 'execute', 'debug'],
-        description: 'Run the current project'
+        description: 'Run the current project',
       },
       {
         id: 'settings',
@@ -83,7 +80,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         action: () => console.log('Open Settings'),
         icon: <Settings size={16} />,
         tags: ['settings', 'options', 'preferences'],
-        description: 'Open the IDE settings'
+        description: 'Open the IDE settings',
       },
       {
         id: 'code-analyzer',
@@ -92,7 +89,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         action: () => console.log('Analyze Code'),
         icon: <ArrowRight size={16} />,
         tags: ['analyze', 'lint', 'check'],
-        description: 'Run code analysis on the current project'
+        description: 'Run code analysis on the current project',
       },
       {
         id: 'format-code',
@@ -101,7 +98,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         action: () => console.log('Format Code'),
         shortcut: 'Shift+Alt+F',
         tags: ['format', 'beautify', 'indent'],
-        description: 'Format the current document'
+        description: 'Format the current document',
       },
       {
         id: 'toggle-breakpoint',
@@ -110,8 +107,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         action: () => console.log('Toggle Breakpoint'),
         shortcut: 'F9',
         tags: ['debug', 'breakpoint'],
-        description: 'Toggle a breakpoint on the current line'
-      }
+        description: 'Toggle a breakpoint on the current line',
+      },
     ];
 
     setCommands(sampleCommands);
@@ -128,6 +125,35 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   useEffect(() => {
     setSelectedIndex(0);
   }, [searchTerm, activeView]);
+
+  // Define executeCommand before using it in useEffect
+  const executeCommand = useCallback((command: CommandItem) => {
+    command.action();
+
+    // Add to recent commands
+    setRecentCommands(prev => {
+      const newRecent = prev.filter(id => id !== command.id);
+      return [command.id, ...newRecent].slice(0, 5);
+    });
+
+    onClose();
+  }, [onClose]);
+
+  // Filter commands based on search and active view
+  const filteredCommands = commands.filter(cmd => {
+    const matchesSearch =
+      searchTerm === '' ||
+      cmd.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cmd.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cmd.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const matchesView =
+      activeView === 'all' ||
+      (activeView === 'favorites' && cmd.favorite) ||
+      (activeView === 'recent' && recentCommands.includes(cmd.id));
+
+    return matchesSearch && matchesView;
+  });
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -176,71 +202,47 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [visible, selectedIndex, activeView, commands]);
+  }, [visible, selectedIndex, activeView, filteredCommands, executeCommand, onClose]);
 
   // Scroll to selected item
   useEffect(() => {
     if (commandListRef.current) {
-      const selectedElement = commandListRef.current.querySelector(`[data-index="${selectedIndex}"]`);
+      const selectedElement = commandListRef.current.querySelector(
+        `[data-index="${selectedIndex}"]`
+      );
       if (selectedElement) {
         selectedElement.scrollIntoView({ block: 'nearest' });
       }
     }
   }, [selectedIndex]);
 
-  const executeCommand = (command: CommandItem) => {
-    command.action();
-    
-    // Add to recent commands
-    setRecentCommands(prev => {
-      const newRecent = prev.filter(id => id !== command.id);
-      return [command.id, ...newRecent].slice(0, 5);
-    });
-    
-    onClose();
-  };
-
   const toggleFavorite = (commandId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setCommands(prev => 
-      prev.map(cmd => 
-        cmd.id === commandId 
-          ? { ...cmd, favorite: !cmd.favorite } 
-          : cmd
-      )
+    setCommands(prev =>
+      prev.map(cmd => (cmd.id === commandId ? { ...cmd, favorite: !cmd.favorite } : cmd))
     );
   };
 
-  // Filter commands based on search and active view
-  const filteredCommands = commands.filter(cmd => {
-    const matchesSearch = 
-      searchTerm === '' ||
-      cmd.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cmd.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cmd.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-      
-    const matchesView = 
-      activeView === 'all' ||
-      (activeView === 'favorites' && cmd.favorite) ||
-      (activeView === 'recent' && recentCommands.includes(cmd.id));
-      
-    return matchesSearch && matchesView;
-  });
-
   // Group commands by category
-  const groupedCommands = filteredCommands.reduce((acc, cmd) => {
-    if (!acc[cmd.category]) {
-      acc[cmd.category] = [];
-    }
-    acc[cmd.category].push(cmd);
-    return acc;
-  }, {} as Record<string, CommandItem[]>);
+  const groupedCommands = filteredCommands.reduce(
+    (acc, cmd) => {
+      if (!acc[cmd.category]) {
+        acc[cmd.category] = [];
+      }
+      acc[cmd.category].push(cmd);
+      return acc;
+    },
+    {} as Record<string, CommandItem[]>
+  );
 
   if (!visible) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-25 flex items-start justify-center pt-32 z-50">
-      <div className="bg-white rounded-lg shadow-2xl border border-gray-300" style={{ width: '600px' }}>
+      <div
+        className="bg-white rounded-lg shadow-2xl border border-gray-300"
+        style={{ width: '600px' }}
+      >
         {/* Search input */}
         <div className="flex items-center p-3 border-b border-gray-300">
           <Command size={18} className="text-gray-400 mr-2" />
@@ -248,7 +250,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
             ref={inputRef}
             type="text"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={e => setSearchTerm(e.target.value)}
             placeholder="Type a command or search..."
             className="flex-1 outline-none text-sm"
           />
@@ -256,19 +258,19 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
         {/* Views switcher */}
         <div className="flex border-b border-gray-300">
-          <button 
+          <button
             className={`flex-1 py-1.5 text-xs font-medium ${activeView === 'all' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}
             onClick={() => setActiveView('all')}
           >
             All Commands
           </button>
-          <button 
+          <button
             className={`flex-1 py-1.5 text-xs font-medium ${activeView === 'favorites' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}
             onClick={() => setActiveView('favorites')}
           >
             Favorites
           </button>
-          <button 
+          <button
             className={`flex-1 py-1.5 text-xs font-medium ${activeView === 'recent' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}
             onClick={() => setActiveView('recent')}
           >
@@ -277,8 +279,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         </div>
 
         {/* Commands list */}
-        <div 
-          ref={commandListRef} 
+        <div
+          ref={commandListRef}
           className="max-h-80 overflow-y-auto"
           style={{ scrollbarWidth: 'thin' }}
         >
@@ -300,9 +302,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       onClick={() => executeCommand(command)}
                     >
                       <div className="flex items-center">
-                        {command.icon && (
-                          <span className="mr-2 text-gray-500">{command.icon}</span>
-                        )}
+                        {command.icon && <span className="mr-2 text-gray-500">{command.icon}</span>}
                         <div>
                           <div className="text-sm">{command.title}</div>
                           {command.description && (
@@ -313,10 +313,10 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       <div className="flex items-center">
                         <button
                           className={`mr-2 p-1 rounded hover:bg-gray-200 ${command.favorite ? 'text-yellow-500' : 'text-gray-400'}`}
-                          onClick={(e) => toggleFavorite(command.id, e)}
-                          title={command.favorite ? "Remove from favorites" : "Add to favorites"}
+                          onClick={e => toggleFavorite(command.id, e)}
+                          title={command.favorite ? 'Remove from favorites' : 'Add to favorites'}
                         >
-                          <Star size={14} fill={command.favorite ? "currentColor" : "none"} />
+                          <Star size={14} fill={command.favorite ? 'currentColor' : 'none'} />
                         </button>
                         {command.shortcut && (
                           <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">
@@ -330,9 +330,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
               </div>
             ))
           ) : (
-            <div className="p-4 text-center text-gray-500">
-              No commands match your search.
-            </div>
+            <div className="p-4 text-center text-gray-500">No commands match your search.</div>
           )}
         </div>
 

@@ -19,7 +19,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
   onAddTestSuite,
   onRemoveTestSuite,
   onUpdateTestSuite,
-  onRunTests
+  onRunTests,
 }) => {
   const [selectedSuite, setSelectedSuite] = useState<TestSuite | null>(null);
   const [selectedTest, setSelectedTest] = useState<TestCase | null>(null);
@@ -33,20 +33,23 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
   };
 
   const getPassedTests = () => {
-    return testSuites.reduce((total, suite) => 
-      total + suite.tests.filter(test => test.status === 'passed').length, 0
+    return testSuites.reduce(
+      (total, suite) => total + suite.tests.filter(test => test.status === 'passed').length,
+      0
     );
   };
 
   const getFailedTests = () => {
-    return testSuites.reduce((total, suite) => 
-      total + suite.tests.filter(test => test.status === 'failed').length, 0
+    return testSuites.reduce(
+      (total, suite) => total + suite.tests.filter(test => test.status === 'failed').length,
+      0
     );
   };
 
   const getPendingTests = () => {
-    return testSuites.reduce((total, suite) => 
-      total + suite.tests.filter(test => test.status === 'pending').length, 0
+    return testSuites.reduce(
+      (total, suite) => total + suite.tests.filter(test => test.status === 'pending').length,
+      0
     );
   };
 
@@ -77,12 +80,12 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
       description: '',
       code: newTestCode,
       expected: null,
-      status: 'pending'
+      status: 'pending',
     };
 
     const updatedSuite = {
       ...selectedSuite,
-      tests: [...selectedSuite.tests, newTest]
+      tests: [...selectedSuite.tests, newTest],
     };
 
     onUpdateTestSuite(selectedSuite.id, updatedSuite);
@@ -97,12 +100,12 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
 
     const updatedSuite = {
       ...selectedSuite,
-      tests: selectedSuite.tests.filter(test => test.id !== testId)
+      tests: selectedSuite.tests.filter(test => test.id !== testId),
     };
 
     onUpdateTestSuite(selectedSuite.id, updatedSuite);
     setSelectedSuite(updatedSuite);
-    
+
     if (selectedTest?.id === testId) {
       setSelectedTest(null);
     }
@@ -116,7 +119,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
       id: Date.now().toString(),
       name,
       description: '',
-      tests: []
+      tests: [],
     };
 
     onAddTestSuite(newSuite);
@@ -138,11 +141,11 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
   const getSuiteStatus = (suite: TestSuite) => {
     const tests = suite.tests;
     if (tests.length === 0) return 'empty';
-    
+
     const passed = tests.filter(t => t.status === 'passed').length;
     const failed = tests.filter(t => t.status === 'failed').length;
     const pending = tests.filter(t => t.status === 'pending').length;
-    
+
     if (failed > 0) return 'failed';
     if (pending > 0) return 'pending';
     if (passed === tests.length) return 'passed';
@@ -158,13 +161,13 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-200 border-2 border-gray-400 shadow-lg" style={{ width: '900px', height: '700px' }}>
+      <div
+        className="bg-gray-200 border-2 border-gray-400 shadow-lg"
+        style={{ width: '900px', height: '700px' }}
+      >
         <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
           <span>Test Runner</span>
-          <button
-            onClick={onClose}
-            className="text-white hover:bg-blue-700 px-2"
-          >
+          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">
             ×
           </button>
         </div>
@@ -186,9 +189,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
                   <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
                   <span>{getPendingTests()} Pending</span>
                 </div>
-                <div className="text-gray-600">
-                  Total: {getTotalTests()} tests
-                </div>
+                <div className="text-gray-600">Total: {getTotalTests()} tests</div>
               </div>
               <div className="flex gap-2">
                 <button
@@ -218,7 +219,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
                 Test Suites
               </div>
               <div className="flex-1 overflow-auto">
-                {testSuites.map((suite) => (
+                {testSuites.map(suite => (
                   <div
                     key={suite.id}
                     className={`p-2 border-b border-gray-200 cursor-pointer hover:bg-gray-50 ${
@@ -233,7 +234,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
                       </div>
                       <div className="flex items-center gap-1">
                         <button
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             handleRunSuite(suite.id);
                           }}
@@ -244,7 +245,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
                           <Play size={12} />
                         </button>
                         <button
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             onRemoveTestSuite(suite.id);
                           }}
@@ -279,7 +280,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
               </div>
               <div className="flex-1 overflow-auto">
                 {selectedSuite ? (
-                  selectedSuite.tests.map((test) => (
+                  selectedSuite.tests.map(test => (
                     <div
                       key={test.id}
                       className={`p-2 border-b border-gray-200 cursor-pointer hover:bg-gray-50 ${
@@ -299,7 +300,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
                             </span>
                           )}
                           <button
-                            onClick={(e) => {
+                            onClick={e => {
                               e.stopPropagation();
                               handleRemoveTest(test.id);
                             }}
@@ -311,9 +312,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
                         </div>
                       </div>
                       {test.description && (
-                        <div className="text-xs text-gray-600 mt-1">
-                          {test.description}
-                        </div>
+                        <div className="text-xs text-gray-600 mt-1">{test.description}</div>
                       )}
                     </div>
                   ))
@@ -394,7 +393,10 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
       {/* New test dialog */}
       {showNewTestDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
-          <div className="bg-gray-200 border-2 border-gray-400 shadow-lg" style={{ width: '500px' }}>
+          <div
+            className="bg-gray-200 border-2 border-gray-400 shadow-lg"
+            style={{ width: '500px' }}
+          >
             <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
               <span>Add New Test</span>
               <button
@@ -410,7 +412,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
                 <input
                   type="text"
                   value={newTestName}
-                  onChange={(e) => setNewTestName(e.target.value)}
+                  onChange={e => setNewTestName(e.target.value)}
                   className="w-full px-2 py-1 border border-gray-400 text-sm"
                   placeholder="Enter test name"
                 />
@@ -419,7 +421,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
                 <label className="block text-xs font-bold mb-1">Test Code:</label>
                 <textarea
                   value={newTestCode}
-                  onChange={(e) => setNewTestCode(e.target.value)}
+                  onChange={e => setNewTestCode(e.target.value)}
                   className="w-full px-2 py-1 border border-gray-400 text-sm font-mono"
                   rows={8}
                   placeholder="// Write your test code here"

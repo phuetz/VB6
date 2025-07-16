@@ -5,7 +5,7 @@ const AlignmentGuides: React.FC = () => {
   const { state } = useVB6();
 
   if (!state.showAlignmentGuides || state.executionMode === 'run') return null;
-  
+
   return (
     <>
       {state.alignmentGuides.x.map((x, index) => (
@@ -18,7 +18,7 @@ const AlignmentGuides: React.FC = () => {
             width: 1,
             height: '100%',
             backgroundColor: '#ff0000',
-            zIndex: 9999
+            zIndex: 9999,
           }}
         />
       ))}
@@ -32,7 +32,7 @@ const AlignmentGuides: React.FC = () => {
             width: '100%',
             height: 1,
             backgroundColor: '#ff0000',
-            zIndex: 9999
+            zIndex: 9999,
           }}
         />
       ))}

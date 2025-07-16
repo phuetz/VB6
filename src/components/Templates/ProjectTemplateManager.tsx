@@ -1,7 +1,16 @@
 import React, { useState, useCallback } from 'react';
-import { 
-  FileText, Folder, Database, Globe, Package, 
-  Plus, Download, Upload, Star, Search, Filter
+import {
+  FileText,
+  Folder,
+  Database,
+  Globe,
+  Package,
+  Plus,
+  Download,
+  Upload,
+  Star,
+  Search,
+  Filter,
 } from 'lucide-react';
 
 interface ProjectTemplate {
@@ -40,7 +49,7 @@ const projectTemplates: ProjectTemplate[] = [
     featured: true,
     downloads: 1250,
     rating: 4.8,
-    author: 'VB6 Team'
+    author: 'VB6 Team',
   },
   {
     id: 'text-editor',
@@ -55,7 +64,7 @@ const projectTemplates: ProjectTemplate[] = [
     featured: true,
     downloads: 890,
     rating: 4.6,
-    author: 'CodeMaster'
+    author: 'CodeMaster',
   },
   {
     id: 'database-manager',
@@ -70,7 +79,7 @@ const projectTemplates: ProjectTemplate[] = [
     featured: false,
     downloads: 567,
     rating: 4.4,
-    author: 'DataPro'
+    author: 'DataPro',
   },
   {
     id: 'game-framework',
@@ -85,7 +94,7 @@ const projectTemplates: ProjectTemplate[] = [
     featured: true,
     downloads: 1456,
     rating: 4.9,
-    author: 'GameDev Studio'
+    author: 'GameDev Studio',
   },
   {
     id: 'web-scraper',
@@ -100,7 +109,7 @@ const projectTemplates: ProjectTemplate[] = [
     featured: false,
     downloads: 334,
     rating: 4.2,
-    author: 'WebTools'
+    author: 'WebTools',
   },
   {
     id: 'media-player',
@@ -115,8 +124,8 @@ const projectTemplates: ProjectTemplate[] = [
     featured: false,
     downloads: 723,
     rating: 4.3,
-    author: 'MediaTech'
-  }
+    author: 'MediaTech',
+  },
 ];
 
 const categories = ['All', 'Utilities', 'Productivity', 'Database', 'Games', 'Web', 'Multimedia'];
@@ -131,7 +140,7 @@ interface ProjectTemplateManagerProps {
 export const ProjectTemplateManager: React.FC<ProjectTemplateManagerProps> = ({
   visible,
   onClose,
-  onCreateProject
+  onCreateProject,
 }) => {
   const [selectedTemplate, setSelectedTemplate] = useState<ProjectTemplate | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -142,13 +151,15 @@ export const ProjectTemplateManager: React.FC<ProjectTemplateManagerProps> = ({
 
   const filteredTemplates = projectTemplates
     .filter(template => {
-      const matchesSearch = template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           template.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           template.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesSearch =
+        template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        template.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        template.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchesCategory = selectedCategory === 'All' || template.category === selectedCategory;
-      const matchesDifficulty = selectedDifficulty === 'All' || template.difficulty === selectedDifficulty;
+      const matchesDifficulty =
+        selectedDifficulty === 'All' || template.difficulty === selectedDifficulty;
       const matchesFeatured = !showFeaturedOnly || template.featured;
-      
+
       return matchesSearch && matchesCategory && matchesDifficulty && matchesFeatured;
     })
     .sort((a, b) => {
@@ -173,31 +184,35 @@ export const ProjectTemplateManager: React.FC<ProjectTemplateManagerProps> = ({
 
   const getCategoryIcon = (category: string) => {
     const icons: { [key: string]: React.ReactNode } = {
-      'Utilities': <Package size={16} />,
-      'Productivity': <FileText size={16} />,
-      'Database': <Database size={16} />,
-      'Games': <span className="text-purple-600">🎮</span>,
-      'Web': <Globe size={16} />,
-      'Multimedia': <span className="text-pink-600">🎵</span>
+      Utilities: <Package size={16} />,
+      Productivity: <FileText size={16} />,
+      Database: <Database size={16} />,
+      Games: <span className="text-purple-600">🎮</span>,
+      Web: <Globe size={16} />,
+      Multimedia: <span className="text-pink-600">🎵</span>,
     };
     return icons[category] || <Folder size={16} />;
   };
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'Beginner': return 'text-green-600 bg-green-100';
-      case 'Intermediate': return 'text-yellow-600 bg-yellow-100';
-      case 'Advanced': return 'text-red-600 bg-red-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'Beginner':
+        return 'text-green-600 bg-green-100';
+      case 'Intermediate':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'Advanced':
+        return 'text-red-600 bg-red-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
     }
   };
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
-      <Star 
-        key={i} 
-        size={12} 
-        className={i < Math.floor(rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'} 
+      <Star
+        key={i}
+        size={12}
+        className={i < Math.floor(rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}
       />
     ));
   };
@@ -206,10 +221,15 @@ export const ProjectTemplateManager: React.FC<ProjectTemplateManagerProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-200 border-2 border-gray-400 shadow-lg" style={{ width: '1000px', height: '700px' }}>
+      <div
+        className="bg-gray-200 border-2 border-gray-400 shadow-lg"
+        style={{ width: '1000px', height: '700px' }}
+      >
         <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
           <span>Project Templates</span>
-          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">×</button>
+          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">
+            ×
+          </button>
         </div>
 
         <div className="p-4 h-full flex flex-col">
@@ -217,56 +237,63 @@ export const ProjectTemplateManager: React.FC<ProjectTemplateManagerProps> = ({
           <div className="mb-4 space-y-3">
             <div className="flex gap-4 items-center">
               <div className="flex-1 relative">
-                <Search size={16} className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                <Search
+                  size={16}
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+                />
                 <input
                   type="text"
                   placeholder="Search templates..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={e => setSearchTerm(e.target.value)}
                   className="w-full pl-8 pr-3 py-2 border border-gray-400 text-sm rounded"
                 />
               </div>
-              
+
               <label className="flex items-center text-xs">
                 <input
                   type="checkbox"
                   checked={showFeaturedOnly}
-                  onChange={(e) => setShowFeaturedOnly(e.target.checked)}
+                  onChange={e => setShowFeaturedOnly(e.target.checked)}
                   className="mr-1"
                 />
                 Featured only
               </label>
             </div>
-            
+
             <div className="flex gap-4 items-center text-xs">
               <div className="flex items-center gap-2">
                 <Filter size={14} />
                 <select
                   value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  onChange={e => setSelectedCategory(e.target.value)}
                   className="border border-gray-400 px-2 py-1"
                 >
                   {categories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
                   ))}
                 </select>
               </div>
-              
+
               <select
                 value={selectedDifficulty}
-                onChange={(e) => setSelectedDifficulty(e.target.value)}
+                onChange={e => setSelectedDifficulty(e.target.value)}
                 className="border border-gray-400 px-2 py-1"
               >
                 {difficulties.map(diff => (
-                  <option key={diff} value={diff}>{diff}</option>
+                  <option key={diff} value={diff}>
+                    {diff}
+                  </option>
                 ))}
               </select>
-              
+
               <div className="flex items-center gap-2">
                 <span>Sort by:</span>
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
+                  onChange={e => setSortBy(e.target.value as any)}
                   className="border border-gray-400 px-2 py-1"
                 >
                   <option value="downloads">Downloads</option>
@@ -299,25 +326,29 @@ export const ProjectTemplateManager: React.FC<ProjectTemplateManagerProps> = ({
                             <Star size={12} className="text-yellow-500 fill-current" />
                           )}
                         </div>
-                        <p className="text-xs text-gray-600 mb-2 line-clamp-2">{template.description}</p>
-                        
+                        <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+                          {template.description}
+                        </p>
+
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             {getCategoryIcon(template.category)}
                             <span className="text-xs text-gray-500">{template.category}</span>
                           </div>
-                          
-                          <div className={`px-2 py-1 rounded text-xs ${getDifficultyColor(template.difficulty)}`}>
+
+                          <div
+                            className={`px-2 py-1 rounded text-xs ${getDifficultyColor(template.difficulty)}`}
+                          >
                             {template.difficulty}
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center justify-between mt-2">
                           <div className="flex items-center gap-1">
                             {renderStars(template.rating)}
                             <span className="text-xs text-gray-500 ml-1">({template.rating})</span>
                           </div>
-                          
+
                           <div className="flex items-center gap-1 text-xs text-gray-500">
                             <Download size={12} />
                             <span>{template.downloads}</span>
@@ -345,38 +376,43 @@ export const ProjectTemplateManager: React.FC<ProjectTemplateManagerProps> = ({
                           )}
                         </div>
                         <p className="text-sm text-gray-600 mb-2">{selectedTemplate.description}</p>
-                        
+
                         <div className="flex items-center gap-4 text-xs">
                           <div className="flex items-center gap-1">
                             {getCategoryIcon(selectedTemplate.category)}
                             <span>{selectedTemplate.category}</span>
                           </div>
-                          <div className={`px-2 py-1 rounded ${getDifficultyColor(selectedTemplate.difficulty)}`}>
+                          <div
+                            className={`px-2 py-1 rounded ${getDifficultyColor(selectedTemplate.difficulty)}`}
+                          >
                             {selectedTemplate.difficulty}
                           </div>
                           <span className="text-gray-500">by {selectedTemplate.author}</span>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="bg-gray-50 p-3 rounded text-sm">
                       <div className="font-semibold mb-1">Preview:</div>
                       <p>{selectedTemplate.preview}</p>
                     </div>
                   </div>
-                  
+
                   <div className="p-4 flex-1">
                     <div className="mb-3">
                       <div className="text-sm font-semibold mb-2">Tags:</div>
                       <div className="flex flex-wrap gap-1">
                         {selectedTemplate.tags.map(tag => (
-                          <span key={tag} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                          <span
+                            key={tag}
+                            className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded"
+                          >
                             {tag}
                           </span>
                         ))}
                       </div>
                     </div>
-                    
+
                     <div className="mb-3">
                       <div className="text-sm font-semibold mb-2">Statistics:</div>
                       <div className="grid grid-cols-2 gap-2 text-xs">
@@ -390,7 +426,7 @@ export const ProjectTemplateManager: React.FC<ProjectTemplateManagerProps> = ({
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="text-sm">
                       <div className="font-semibold mb-2">What's included:</div>
                       <ul className="list-disc list-inside text-xs space-y-1 text-gray-600">
@@ -402,7 +438,7 @@ export const ProjectTemplateManager: React.FC<ProjectTemplateManagerProps> = ({
                       </ul>
                     </div>
                   </div>
-                  
+
                   <div className="p-4 border-t border-gray-300">
                     <button
                       onClick={handleCreateProject}
@@ -429,7 +465,7 @@ export const ProjectTemplateManager: React.FC<ProjectTemplateManagerProps> = ({
             <div className="text-gray-600">
               {filteredTemplates.length} template{filteredTemplates.length !== 1 ? 's' : ''} found
             </div>
-            
+
             <div className="flex gap-2">
               <button className="px-3 py-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 flex items-center gap-1">
                 <Upload size={12} />

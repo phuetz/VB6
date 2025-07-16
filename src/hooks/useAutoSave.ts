@@ -15,7 +15,7 @@ export const useAutoSave = (data: any, options: AutoSaveOptions) => {
   const save = useCallback(async () => {
     try {
       const currentData = JSON.stringify(data);
-      
+
       // Only save if data has changed
       if (currentData !== lastSavedDataRef.current) {
         await onSave();
@@ -60,7 +60,7 @@ export const useAutoSave = (data: any, options: AutoSaveOptions) => {
 
   return {
     forceSave,
-    hasUnsavedChanges
+    hasUnsavedChanges,
   };
 };
 
@@ -76,15 +76,18 @@ export const useLocalStorage = <T>(key: string, defaultValue: T) => {
     }
   });
 
-  const setStoredValue = useCallback((newValue: T | ((val: T) => T)) => {
-    try {
-      const valueToStore = newValue instanceof Function ? newValue(value) : newValue;
-      setValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(`Error setting localStorage key "${key}":`, error);
-    }
-  }, [key, value]);
+  const setStoredValue = useCallback(
+    (newValue: T | ((val: T) => T)) => {
+      try {
+        const valueToStore = newValue instanceof Function ? newValue(value) : newValue;
+        setValue(valueToStore);
+        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+      } catch (error) {
+        console.error(`Error setting localStorage key "${key}":`, error);
+      }
+    },
+    [key, value]
+  );
 
   const removeValue = useCallback(() => {
     try {
@@ -100,55 +103,66 @@ export const useLocalStorage = <T>(key: string, defaultValue: T) => {
 
 // Hook pour la gestion des versions
 export const useVersioning = <T>(data: T) => {
-  const [versions, setVersions] = useState<Array<{ 
-    id: string; 
-    timestamp: Date; 
-    data: T; 
-    description?: string;
-  }>>([]);
+  const [versions, setVersions] = useState<
+    Array<{
+      id: string;
+      timestamp: Date;
+      data: T;
+      description?: string;
+    }>
+  >([]);
 
-  const saveVersion = useCallback((description?: string) => {
-    const newVersion = {
-      id: Date.now().toString(),
-      timestamp: new Date(),
-      data: JSON.parse(JSON.stringify(data)), // Deep clone
-      description
-    };
+  const saveVersion = useCallback(
+    (description?: string) => {
+      const newVersion = {
+        id: Date.now().toString(),
+        timestamp: new Date(),
+        data: JSON.parse(JSON.stringify(data)), // Deep clone
+        description,
+      };
 
-    setVersions(prev => [newVersion, ...prev.slice(0, 99)]); // Keep last 100 versions
-  }, [data]);
+      setVersions(prev => [newVersion, ...prev.slice(0, 99)]); // Keep last 100 versions
+    },
+    [data]
+  );
 
-  const restoreVersion = useCallback((versionId: string) => {
-    const version = versions.find(v => v.id === versionId);
-    return version ? version.data : null;
-  }, [versions]);
+  const restoreVersion = useCallback(
+    (versionId: string) => {
+      const version = versions.find(v => v.id === versionId);
+      return version ? version.data : null;
+    },
+    [versions]
+  );
 
   const deleteVersion = useCallback((versionId: string) => {
     setVersions(prev => prev.filter(v => v.id !== versionId));
   }, []);
 
-  const getVersionDiff = useCallback((versionId: string) => {
-    const version = versions.find(v => v.id === versionId);
-    if (!version) return null;
+  const getVersionDiff = useCallback(
+    (versionId: string) => {
+      const version = versions.find(v => v.id === versionId);
+      if (!version) return null;
 
-    // Simple diff implementation
-    const currentStr = JSON.stringify(data, null, 2);
-    const versionStr = JSON.stringify(version.data, null, 2);
-    
-    return {
-      current: currentStr,
-      version: versionStr,
-      timestamp: version.timestamp,
-      description: version.description
-    };
-  }, [data, versions]);
+      // Simple diff implementation
+      const currentStr = JSON.stringify(data, null, 2);
+      const versionStr = JSON.stringify(version.data, null, 2);
+
+      return {
+        current: currentStr,
+        version: versionStr,
+        timestamp: version.timestamp,
+        description: version.description,
+      };
+    },
+    [data, versions]
+  );
 
   return {
     versions,
     saveVersion,
     restoreVersion,
     deleteVersion,
-    getVersionDiff
+    getVersionDiff,
   };
 };
 

@@ -10,9 +10,9 @@ import ImmediateWindow from '../Panels/ImmediateWindow/ImmediateWindow';
 import { WatchWindow, LocalsWindow, CallStackWindow, DebugToolbar } from '../Debug/DebugWindows';
 
 const MainContent: React.FC = () => {
-  const { 
-    showToolbox, 
-    showCodeEditor, 
+  const {
+    showToolbox,
+    showCodeEditor,
     showProjectExplorer,
     showPropertiesWindow,
     showControlTree,
@@ -21,7 +21,7 @@ const MainContent: React.FC = () => {
     showLocalsWindow,
     showCallStack,
     executionMode,
-    toggleWindow
+    toggleWindow,
   } = useVB6Store();
 
   return (
@@ -33,9 +33,9 @@ const MainContent: React.FC = () => {
       <div className="flex-1 flex flex-col bg-gray-300 overflow-hidden">
         {/* Debug Toolbar */}
         {(executionMode === 'break' || executionMode === 'run') && <DebugToolbar />}
-        
+
         {showCodeEditor ? <AdvancedCodeEditor /> : <FormDesigner />}
-        
+
         {/* Bottom Panel - Immediate Window */}
         {showImmediateWindow && <ImmediateWindow />}
       </div>
@@ -45,13 +45,10 @@ const MainContent: React.FC = () => {
         {showProjectExplorer && <ProjectExplorer />}
         {showControlTree && <ControlTree />}
         {showPropertiesWindow && <PropertiesWindow />}
-        
+
         {/* Debug Windows */}
         {showWatchWindow && (
-          <WatchWindow
-            visible={showWatchWindow}
-            onClose={() => toggleWindow('showWatchWindow')}
-          />
+          <WatchWindow visible={showWatchWindow} onClose={() => toggleWindow('showWatchWindow')} />
         )}
         {showLocalsWindow && (
           <LocalsWindow
@@ -60,10 +57,7 @@ const MainContent: React.FC = () => {
           />
         )}
         {showCallStack && (
-          <CallStackWindow
-            visible={showCallStack}
-            onClose={() => toggleWindow('showCallStack')}
-          />
+          <CallStackWindow visible={showCallStack} onClose={() => toggleWindow('showCallStack')} />
         )}
       </div>
     </div>

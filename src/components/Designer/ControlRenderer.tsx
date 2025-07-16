@@ -103,7 +103,8 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
     switch (control.type) {
       case 'CommandButton':
         return (
-          <button data-testid={testId}
+          <button
+            data-testid={testId}
             style={{
               ...baseStyle,
               width: control.width,
@@ -127,7 +128,8 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
 
       case 'Label':
         return (
-          <div data-testid={testId}
+          <div
+            data-testid={testId}
             style={{
               ...baseStyle,
               width: control.autoSize ? 'auto' : control.width,
@@ -155,7 +157,10 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
       case 'TextBox':
         if (control.multiLine) {
           return (
-            <div data-testid={testId} style={{ ...baseStyle, width: control.width, height: control.height }}>
+            <div
+              data-testid={testId}
+              style={{ ...baseStyle, width: control.width, height: control.height }}
+            >
               <textarea
                 value={control.text || ''}
                 onChange={e => handleControlChange(e.target.value, 'text')}
@@ -178,7 +183,10 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           );
         } else {
           return (
-            <div data-testid={testId} style={{ ...baseStyle, width: control.width, height: control.height }}>
+            <div
+              data-testid={testId}
+              style={{ ...baseStyle, width: control.width, height: control.height }}
+            >
               <input
                 type={control.passwordChar ? 'password' : 'text'}
                 value={control.text || ''}
@@ -213,9 +221,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             <div
               contentEditable
               suppressContentEditableWarning
-              onInput={e =>
-                handleControlChange((e.target as HTMLElement).innerText, 'text')
-              }
+              onInput={e => handleControlChange((e.target as HTMLElement).innerText, 'text')}
               style={{
                 width: '100%',
                 height: '100%',
@@ -400,9 +406,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             min={control.min}
             max={control.max}
             value={control.value}
-            onChange={e =>
-              handleControlChange(Number(e.target.value), 'value')
-            }
+            onChange={e => handleControlChange(Number(e.target.value), 'value')}
             style={{
               ...baseStyle,
               width: control.width,
@@ -421,9 +425,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             min={control.min}
             max={control.max}
             value={control.value}
-            onChange={e =>
-              handleControlChange(Number(e.target.value), 'value')
-            }
+            onChange={e => handleControlChange(Number(e.target.value), 'value')}
             style={{
               ...baseStyle,
               width: control.height,
@@ -451,7 +453,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               background: 'transparent',
               ...(fsOrientation === 'vertical'
                 ? { width: control.height, height: control.width, transform: 'rotate(-90deg)' }
-                : { width: control.width, height: control.height })
+                : { width: control.width, height: control.height }),
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -499,7 +501,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '12px'
+              fontSize: '12px',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -544,13 +546,20 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               width: control.autoSize && control.picture ? 'auto' : control.width,
               height: control.autoSize && control.picture ? 'auto' : control.height,
               border: control.borderStyle === 1 ? '1px solid #000' : 'none',
-              overflow: 'hidden'
+              overflow: 'hidden',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
           >
             {control.picture ? (
-              <img src={control.picture} style={{ width: '100%', height: '100%', objectFit: control.stretch ? 'fill' : 'contain' }} />
+              <img
+                src={control.picture}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: control.stretch ? 'fill' : 'contain',
+                }}
+              />
             ) : (
               <span style={{ fontSize: '10px', color: '#555' }}>Image</span>
             )}
@@ -568,7 +577,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              overflow: 'hidden'
+              overflow: 'hidden',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -600,7 +609,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               alignItems: 'center',
               paddingLeft: '4px',
               fontSize: '10px',
-              fontFamily: control.font?.name || 'MS Sans Serif'
+              fontFamily: control.font?.name || 'MS Sans Serif',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -622,7 +631,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '10px',
-              fontFamily: control.font?.name || 'MS Sans Serif'
+              fontFamily: control.font?.name || 'MS Sans Serif',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -649,7 +658,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
                 backgroundColor: control.backColor,
                 color: control.foreColor,
                 fontSize: `${control.font?.size || 8}pt`,
-                fontFamily: control.font?.name || 'MS Sans Serif'
+                fontFamily: control.font?.name || 'MS Sans Serif',
               }}
               disabled={!control.enabled}
             >
@@ -673,7 +682,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               backgroundColor: control.backColor,
               border: '1px solid #000',
               display: 'flex',
-              alignItems: 'center'
+              alignItems: 'center',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -682,7 +691,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               style={{
                 width: `${Math.max(0, Math.min(100, percentage))}%`,
                 height: '100%',
-                backgroundColor: control.foreColor || '#0078D4'
+                backgroundColor: control.foreColor || '#0078D4',
               }}
             />
           </div>
@@ -702,7 +711,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               ...baseStyle,
               ...(orientation === 'vertical'
                 ? { width: control.height, height: control.width, transform: 'rotate(-90deg)' }
-                : { width: control.width, height: control.height })
+                : { width: control.width, height: control.height }),
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -739,7 +748,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               backgroundColor: control.backColor,
               border: '1px solid #000',
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -752,11 +761,12 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
                   style={{
                     padding: '2px 8px',
                     cursor: 'pointer',
-                    backgroundColor: selectedIndex === idx ? control.foreColor || '#0078D4' : control.backColor,
+                    backgroundColor:
+                      selectedIndex === idx ? control.foreColor || '#0078D4' : control.backColor,
                     color: selectedIndex === idx ? '#fff' : '#000',
                     borderRight: '1px solid #000',
                     fontSize: `${control.font?.size || 8}pt`,
-                    fontFamily: control.font?.name || 'MS Sans Serif'
+                    fontFamily: control.font?.name || 'MS Sans Serif',
                   }}
                 >
                   {tab}
@@ -780,7 +790,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               border: '1px solid #000',
               display: 'flex',
               alignItems: 'center',
-              padding: '2px'
+              padding: '2px',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -809,7 +819,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               backgroundColor: control.backColor,
               border: '1px solid #000',
               display: 'flex',
-              fontSize: '10px'
+              fontSize: '10px',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -820,7 +830,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
                 style={{
                   flex: 1,
                   padding: '0 4px',
-                  borderLeft: idx > 0 ? '1px solid #808080' : undefined
+                  borderLeft: idx > 0 ? '1px solid #808080' : undefined,
                 }}
               >
                 {p}
@@ -844,7 +854,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               fontSize: `${control.font?.size || 8}pt`,
               fontFamily: control.font?.name || 'MS Sans Serif',
               border: '1px solid #000',
-              overflow: 'auto'
+              overflow: 'auto',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -855,7 +865,12 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
                   {columns.map((c: string, idx: number) => (
                     <th
                       key={idx}
-                      style={{ border: '1px solid #000', padding: '2px', background: '#e0e0e0', textAlign: 'left' }}
+                      style={{
+                        border: '1px solid #000',
+                        padding: '2px',
+                        background: '#e0e0e0',
+                        textAlign: 'left',
+                      }}
                     >
                       {c}
                     </th>
@@ -865,11 +880,13 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               <tbody>
                 {lvItems.map((item: any, idx: number) => (
                   <tr key={idx}>
-                    {[item.text, ...(item.subItems || [])].slice(0, Math.max(columns.length, 1)).map((val: string, cidx: number) => (
-                      <td key={cidx} style={{ border: '1px solid #000', padding: '2px' }}>
-                        {val}
-                      </td>
-                    ))}
+                    {[item.text, ...(item.subItems || [])]
+                      .slice(0, Math.max(columns.length, 1))
+                      .map((val: string, cidx: number) => (
+                        <td key={cidx} style={{ border: '1px solid #000', padding: '2px' }}>
+                          {val}
+                        </td>
+                      ))}
                   </tr>
                 ))}
               </tbody>
@@ -892,7 +909,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               color: control.foreColor,
               fontSize: `${control.font?.size || 8}pt`,
               fontFamily: control.font?.name || 'MS Sans Serif',
-              border: '1px solid #000'
+              border: '1px solid #000',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -914,7 +931,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               color: control.foreColor,
               fontSize: `${control.font?.size || 8}pt`,
               fontFamily: control.font?.name || 'MS Sans Serif',
-              border: '1px solid #000'
+              border: '1px solid #000',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -937,7 +954,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               display: 'flex',
               flexWrap: 'wrap',
               alignContent: 'flex-start',
-              overflow: 'auto'
+              overflow: 'auto',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -962,7 +979,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               fontSize: `${control.font?.size || 8}pt`,
               fontFamily: control.font?.name || 'MS Sans Serif',
               border: '1px solid #000',
-              overflow: 'auto'
+              overflow: 'auto',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -984,8 +1001,11 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               width: control.width,
               height: control.height,
               backgroundColor: control.backStyle === 1 ? control.backColor : 'transparent',
-              border: control.borderStyle === 1 ? `${control.borderWidth}px solid ${control.borderColor}` : 'none',
-              borderRadius: control.shape === 2 || control.shape === 3 ? '50%' : 0
+              border:
+                control.borderStyle === 1
+                  ? `${control.borderWidth}px solid ${control.borderColor}`
+                  : 'none',
+              borderRadius: control.shape === 2 || control.shape === 3 ? '50%' : 0,
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -999,7 +1019,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               ...baseStyle,
               width: control.width,
               height: control.borderWidth,
-              backgroundColor: control.borderColor
+              backgroundColor: control.borderColor,
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -1015,7 +1035,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               ...baseStyle,
               width: control.width,
               height: control.height,
-              border: '1px solid #000'
+              border: '1px solid #000',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -1037,7 +1057,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '10px',
-              fontFamily: control.font?.name || 'MS Sans Serif'
+              fontFamily: control.font?.name || 'MS Sans Serif',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -1058,7 +1078,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               height: control.height,
               border: '1px solid #000',
               overflow: 'auto',
-              backgroundColor: '#fff'
+              backgroundColor: '#fff',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -1067,7 +1087,15 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               <thead>
                 <tr>
                   {columns.map((c: string, idx: number) => (
-                    <th key={idx} style={{ border: '1px solid #000', padding: '2px', background: '#e0e0e0', textAlign: 'left' }}>
+                    <th
+                      key={idx}
+                      style={{
+                        border: '1px solid #000',
+                        padding: '2px',
+                        background: '#e0e0e0',
+                        textAlign: 'left',
+                      }}
+                    >
                       {c}
                     </th>
                   ))}
@@ -1102,7 +1130,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               overflow: 'auto',
               backgroundColor: '#fff',
               fontSize: `${control.font?.size || 8}pt`,
-              fontFamily: control.font?.name || 'MS Sans Serif'
+              fontFamily: control.font?.name || 'MS Sans Serif',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -1126,7 +1154,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               border: '1px solid #000',
               backgroundColor: '#fff',
               fontSize: `${control.font?.size || 8}pt`,
-              fontFamily: control.font?.name || 'MS Sans Serif'
+              fontFamily: control.font?.name || 'MS Sans Serif',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
@@ -1156,7 +1184,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '10px',
-              fontFamily: control.font?.name || 'MS Sans Serif'
+              fontFamily: control.font?.name || 'MS Sans Serif',
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}

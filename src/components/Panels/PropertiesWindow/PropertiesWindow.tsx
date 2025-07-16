@@ -359,18 +359,19 @@ const PropertiesWindow: React.FC = () => {
                     </>
                   ) : null;
 
-                const allRows = viewMode === 'categorized'
-                  ? [
-                      categoryBlock('Appearance', appearance),
-                      categoryBlock('Layout', layout),
-                      categoryBlock('Behavior', behavior),
-                      categoryBlock('Misc', misc),
-                    ]
-                  : [...appearance, ...layout, ...behavior, ...misc].sort((a, b) => {
-                      const la = (a?.props?.label || '').toLowerCase();
-                      const lb = (b?.props?.label || '').toLowerCase();
-                      return la.localeCompare(lb);
-                    });
+                const allRows =
+                  viewMode === 'categorized'
+                    ? [
+                        categoryBlock('Appearance', appearance),
+                        categoryBlock('Layout', layout),
+                        categoryBlock('Behavior', behavior),
+                        categoryBlock('Misc', misc),
+                      ]
+                    : [...appearance, ...layout, ...behavior, ...misc].sort((a, b) => {
+                        const la = (a?.props?.label || '').toLowerCase();
+                        const lb = (b?.props?.label || '').toLowerCase();
+                        return la.localeCompare(lb);
+                      });
 
                 return <>{allRows}</>;
               })()

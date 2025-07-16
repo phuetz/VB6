@@ -1,0 +1,501 @@
+/**
+ * Propriétés complètes VB6 pour tous les contrôles
+ * Base de données exhaustive de toutes les propriétés VB6 avec types et valeurs par défaut
+ */
+
+export interface VB6PropertyDefinition {
+  name: string;
+  type: 'string' | 'number' | 'boolean' | 'color' | 'font' | 'picture' | 'enum' | 'object' | 'array';
+  defaultValue: any;
+  enumValues?: string[];
+  description?: string;
+  category?: string;
+  readOnly?: boolean;
+  designTime?: boolean;
+  runtime?: boolean;
+}
+
+export interface VB6ControlProperties {
+  [controlType: string]: VB6PropertyDefinition[];
+}
+
+export const VB6_PROPERTIES: VB6ControlProperties = {
+  // Propriétés communes à tous les contrôles
+  Common: [
+    { name: 'Name', type: 'string', defaultValue: '', description: 'Nom du contrôle', category: 'Misc', designTime: true },
+    { name: 'Index', type: 'number', defaultValue: null, description: 'Index dans un tableau de contrôles', category: 'Misc', designTime: true },
+    { name: 'Left', type: 'number', defaultValue: 0, description: 'Position horizontale', category: 'Position' },
+    { name: 'Top', type: 'number', defaultValue: 0, description: 'Position verticale', category: 'Position' },
+    { name: 'Width', type: 'number', defaultValue: 100, description: 'Largeur', category: 'Position' },
+    { name: 'Height', type: 'number', defaultValue: 100, description: 'Hauteur', category: 'Position' },
+    { name: 'Visible', type: 'boolean', defaultValue: true, description: 'Visibilité', category: 'Behavior' },
+    { name: 'Enabled', type: 'boolean', defaultValue: true, description: 'Activé', category: 'Behavior' },
+    { name: 'TabStop', type: 'boolean', defaultValue: true, description: 'Arrêt de tabulation', category: 'Behavior' },
+    { name: 'TabIndex', type: 'number', defaultValue: 0, description: 'Index de tabulation', category: 'Behavior' },
+    { name: 'Tag', type: 'string', defaultValue: '', description: 'Données utilisateur', category: 'Misc' },
+    { name: 'ToolTipText', type: 'string', defaultValue: '', description: 'Texte d\'info-bulle', category: 'Misc' },
+    { name: 'HelpContextID', type: 'number', defaultValue: 0, description: 'ID du contexte d\'aide', category: 'Misc' },
+    { name: 'WhatsThisHelpID', type: 'number', defaultValue: 0, description: 'ID de l\'aide contextuelle', category: 'Misc' },
+    { name: 'CausesValidation', type: 'boolean', defaultValue: true, description: 'Cause la validation', category: 'Behavior' },
+    { name: 'DragMode', type: 'enum', defaultValue: 'Manual', enumValues: ['Manual', 'Automatic'], description: 'Mode de glissement', category: 'Behavior' },
+    { name: 'DragIcon', type: 'picture', defaultValue: null, description: 'Icône de glissement', category: 'Appearance' },
+    { name: 'RightToLeft', type: 'boolean', defaultValue: false, description: 'Lecture de droite à gauche', category: 'Behavior' },
+  ],
+
+  // CommandButton
+  CommandButton: [
+    { name: 'Caption', type: 'string', defaultValue: 'Command1', description: 'Texte du bouton', category: 'Appearance' },
+    { name: 'Default', type: 'boolean', defaultValue: false, description: 'Bouton par défaut', category: 'Behavior' },
+    { name: 'Cancel', type: 'boolean', defaultValue: false, description: 'Bouton d\'annulation', category: 'Behavior' },
+    { name: 'Style', type: 'enum', defaultValue: 'Standard', enumValues: ['Standard', 'Graphical'], description: 'Style du bouton', category: 'Appearance' },
+    { name: 'Picture', type: 'picture', defaultValue: null, description: 'Image du bouton', category: 'Appearance' },
+    { name: 'DisabledPicture', type: 'picture', defaultValue: null, description: 'Image désactivée', category: 'Appearance' },
+    { name: 'DownPicture', type: 'picture', defaultValue: null, description: 'Image enfoncée', category: 'Appearance' },
+    { name: 'MaskColor', type: 'color', defaultValue: '#C0C0C0', description: 'Couleur de masque', category: 'Appearance' },
+    { name: 'UseMaskColor', type: 'boolean', defaultValue: false, description: 'Utiliser la couleur de masque', category: 'Appearance' },
+    { name: 'BackColor', type: 'color', defaultValue: '#C0C0C0', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'Font', type: 'font', defaultValue: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false }, description: 'Police', category: 'Font' },
+    { name: 'Value', type: 'boolean', defaultValue: false, description: 'État du bouton', category: 'Misc' },
+  ],
+
+  // TextBox
+  TextBox: [
+    { name: 'Text', type: 'string', defaultValue: '', description: 'Contenu du texte', category: 'Appearance' },
+    { name: 'MaxLength', type: 'number', defaultValue: 0, description: 'Longueur maximale', category: 'Behavior' },
+    { name: 'MultiLine', type: 'boolean', defaultValue: false, description: 'Multiligne', category: 'Behavior' },
+    { name: 'ScrollBars', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Horizontal', 'Vertical', 'Both'], description: 'Barres de défilement', category: 'Appearance' },
+    { name: 'PasswordChar', type: 'string', defaultValue: '', description: 'Caractère de mot de passe', category: 'Behavior' },
+    { name: 'Locked', type: 'boolean', defaultValue: false, description: 'Verrouillé', category: 'Behavior' },
+    { name: 'ReadOnly', type: 'boolean', defaultValue: false, description: 'Lecture seule', category: 'Behavior' },
+    { name: 'BackColor', type: 'color', defaultValue: '#FFFFFF', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'Font', type: 'font', defaultValue: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false }, description: 'Police', category: 'Font' },
+    { name: 'Alignment', type: 'enum', defaultValue: 'Left', enumValues: ['Left', 'Center', 'Right'], description: 'Alignement', category: 'Appearance' },
+    { name: 'BorderStyle', type: 'enum', defaultValue: 'Fixed Single', enumValues: ['None', 'Fixed Single'], description: 'Style de bordure', category: 'Appearance' },
+    { name: 'HideSelection', type: 'boolean', defaultValue: true, description: 'Masquer la sélection', category: 'Behavior' },
+    { name: 'SelStart', type: 'number', defaultValue: 0, description: 'Début de sélection', category: 'Misc', runtime: true },
+    { name: 'SelLength', type: 'number', defaultValue: 0, description: 'Longueur de sélection', category: 'Misc', runtime: true },
+    { name: 'SelText', type: 'string', defaultValue: '', description: 'Texte sélectionné', category: 'Misc', runtime: true },
+  ],
+
+  // Label
+  Label: [
+    { name: 'Caption', type: 'string', defaultValue: 'Label1', description: 'Texte de l\'étiquette', category: 'Appearance' },
+    { name: 'AutoSize', type: 'boolean', defaultValue: false, description: 'Taille automatique', category: 'Behavior' },
+    { name: 'WordWrap', type: 'boolean', defaultValue: false, description: 'Retour à la ligne', category: 'Behavior' },
+    { name: 'BackStyle', type: 'enum', defaultValue: 'Opaque', enumValues: ['Transparent', 'Opaque'], description: 'Style de fond', category: 'Appearance' },
+    { name: 'BackColor', type: 'color', defaultValue: '#C0C0C0', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'Font', type: 'font', defaultValue: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false }, description: 'Police', category: 'Font' },
+    { name: 'Alignment', type: 'enum', defaultValue: 'Left', enumValues: ['Left', 'Center', 'Right'], description: 'Alignement', category: 'Appearance' },
+    { name: 'BorderStyle', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Fixed Single'], description: 'Style de bordure', category: 'Appearance' },
+    { name: 'UseMnemonic', type: 'boolean', defaultValue: true, description: 'Utiliser les mnémoniques', category: 'Behavior' },
+  ],
+
+  // CheckBox
+  CheckBox: [
+    { name: 'Caption', type: 'string', defaultValue: 'Check1', description: 'Texte de la case', category: 'Appearance' },
+    { name: 'Value', type: 'enum', defaultValue: 'Unchecked', enumValues: ['Unchecked', 'Checked', 'Grayed'], description: 'État de la case', category: 'Misc' },
+    { name: 'Style', type: 'enum', defaultValue: 'Standard', enumValues: ['Standard', 'Graphical'], description: 'Style de la case', category: 'Appearance' },
+    { name: 'Picture', type: 'picture', defaultValue: null, description: 'Image de la case', category: 'Appearance' },
+    { name: 'DisabledPicture', type: 'picture', defaultValue: null, description: 'Image désactivée', category: 'Appearance' },
+    { name: 'DownPicture', type: 'picture', defaultValue: null, description: 'Image enfoncée', category: 'Appearance' },
+    { name: 'MaskColor', type: 'color', defaultValue: '#C0C0C0', description: 'Couleur de masque', category: 'Appearance' },
+    { name: 'UseMaskColor', type: 'boolean', defaultValue: false, description: 'Utiliser la couleur de masque', category: 'Appearance' },
+    { name: 'BackColor', type: 'color', defaultValue: '#C0C0C0', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'Font', type: 'font', defaultValue: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false }, description: 'Police', category: 'Font' },
+    { name: 'Alignment', type: 'enum', defaultValue: 'Left', enumValues: ['Left', 'Right'], description: 'Alignement', category: 'Appearance' },
+  ],
+
+  // OptionButton
+  OptionButton: [
+    { name: 'Caption', type: 'string', defaultValue: 'Option1', description: 'Texte du bouton radio', category: 'Appearance' },
+    { name: 'Value', type: 'boolean', defaultValue: false, description: 'État du bouton', category: 'Misc' },
+    { name: 'Style', type: 'enum', defaultValue: 'Standard', enumValues: ['Standard', 'Graphical'], description: 'Style du bouton', category: 'Appearance' },
+    { name: 'Picture', type: 'picture', defaultValue: null, description: 'Image du bouton', category: 'Appearance' },
+    { name: 'DisabledPicture', type: 'picture', defaultValue: null, description: 'Image désactivée', category: 'Appearance' },
+    { name: 'DownPicture', type: 'picture', defaultValue: null, description: 'Image enfoncée', category: 'Appearance' },
+    { name: 'MaskColor', type: 'color', defaultValue: '#C0C0C0', description: 'Couleur de masque', category: 'Appearance' },
+    { name: 'UseMaskColor', type: 'boolean', defaultValue: false, description: 'Utiliser la couleur de masque', category: 'Appearance' },
+    { name: 'BackColor', type: 'color', defaultValue: '#C0C0C0', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'Font', type: 'font', defaultValue: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false }, description: 'Police', category: 'Font' },
+    { name: 'Alignment', type: 'enum', defaultValue: 'Left', enumValues: ['Left', 'Right'], description: 'Alignement', category: 'Appearance' },
+  ],
+
+  // ListBox
+  ListBox: [
+    { name: 'List', type: 'array', defaultValue: [], description: 'Liste des éléments', category: 'Data' },
+    { name: 'ListIndex', type: 'number', defaultValue: -1, description: 'Index sélectionné', category: 'Data' },
+    { name: 'ListCount', type: 'number', defaultValue: 0, description: 'Nombre d\'éléments', category: 'Data', readOnly: true },
+    { name: 'Selected', type: 'array', defaultValue: [], description: 'Éléments sélectionnés', category: 'Data' },
+    { name: 'MultiSelect', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Simple', 'Extended'], description: 'Multi-sélection', category: 'Behavior' },
+    { name: 'Sorted', type: 'boolean', defaultValue: false, description: 'Trié', category: 'Behavior' },
+    { name: 'Style', type: 'enum', defaultValue: 'Standard', enumValues: ['Standard', 'Checkbox'], description: 'Style de la liste', category: 'Appearance' },
+    { name: 'BackColor', type: 'color', defaultValue: '#FFFFFF', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'Font', type: 'font', defaultValue: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false }, description: 'Police', category: 'Font' },
+    { name: 'IntegralHeight', type: 'boolean', defaultValue: true, description: 'Hauteur intégrale', category: 'Behavior' },
+    { name: 'ItemData', type: 'array', defaultValue: [], description: 'Données des éléments', category: 'Data' },
+    { name: 'Columns', type: 'number', defaultValue: 0, description: 'Nombre de colonnes', category: 'Appearance' },
+    { name: 'TopIndex', type: 'number', defaultValue: 0, description: 'Index du premier élément visible', category: 'Misc' },
+    { name: 'NewIndex', type: 'number', defaultValue: -1, description: 'Index du nouvel élément', category: 'Misc', readOnly: true },
+    { name: 'Text', type: 'string', defaultValue: '', description: 'Texte de l\'élément sélectionné', category: 'Misc', readOnly: true },
+  ],
+
+  // ComboBox
+  ComboBox: [
+    { name: 'List', type: 'array', defaultValue: [], description: 'Liste des éléments', category: 'Data' },
+    { name: 'ListIndex', type: 'number', defaultValue: -1, description: 'Index sélectionné', category: 'Data' },
+    { name: 'ListCount', type: 'number', defaultValue: 0, description: 'Nombre d\'éléments', category: 'Data', readOnly: true },
+    { name: 'Text', type: 'string', defaultValue: '', description: 'Texte de la zone', category: 'Data' },
+    { name: 'Style', type: 'enum', defaultValue: 'Dropdown Combo', enumValues: ['Dropdown Combo', 'Simple Combo', 'Dropdown List'], description: 'Style de la combo', category: 'Appearance' },
+    { name: 'Sorted', type: 'boolean', defaultValue: false, description: 'Trié', category: 'Behavior' },
+    { name: 'BackColor', type: 'color', defaultValue: '#FFFFFF', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'Font', type: 'font', defaultValue: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false }, description: 'Police', category: 'Font' },
+    { name: 'IntegralHeight', type: 'boolean', defaultValue: true, description: 'Hauteur intégrale', category: 'Behavior' },
+    { name: 'ItemData', type: 'array', defaultValue: [], description: 'Données des éléments', category: 'Data' },
+    { name: 'Locked', type: 'boolean', defaultValue: false, description: 'Verrouillé', category: 'Behavior' },
+    { name: 'MaxLength', type: 'number', defaultValue: 0, description: 'Longueur maximale', category: 'Behavior' },
+    { name: 'SelStart', type: 'number', defaultValue: 0, description: 'Début de sélection', category: 'Misc', runtime: true },
+    { name: 'SelLength', type: 'number', defaultValue: 0, description: 'Longueur de sélection', category: 'Misc', runtime: true },
+    { name: 'SelText', type: 'string', defaultValue: '', description: 'Texte sélectionné', category: 'Misc', runtime: true },
+    { name: 'TopIndex', type: 'number', defaultValue: 0, description: 'Index du premier élément visible', category: 'Misc' },
+    { name: 'NewIndex', type: 'number', defaultValue: -1, description: 'Index du nouvel élément', category: 'Misc', readOnly: true },
+  ],
+
+  // Frame
+  Frame: [
+    { name: 'Caption', type: 'string', defaultValue: 'Frame1', description: 'Titre du cadre', category: 'Appearance' },
+    { name: 'BackColor', type: 'color', defaultValue: '#C0C0C0', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'Font', type: 'font', defaultValue: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false }, description: 'Police', category: 'Font' },
+    { name: 'BorderStyle', type: 'enum', defaultValue: 'Fixed Single', enumValues: ['None', 'Fixed Single'], description: 'Style de bordure', category: 'Appearance' },
+    { name: 'ClipControls', type: 'boolean', defaultValue: true, description: 'Découper les contrôles', category: 'Behavior' },
+    { name: 'Appearance', type: 'enum', defaultValue: '3D', enumValues: ['Flat', '3D'], description: 'Apparence', category: 'Appearance' },
+  ],
+
+  // PictureBox
+  PictureBox: [
+    { name: 'Picture', type: 'picture', defaultValue: null, description: 'Image affichée', category: 'Appearance' },
+    { name: 'BackColor', type: 'color', defaultValue: '#C0C0C0', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'Font', type: 'font', defaultValue: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false }, description: 'Police', category: 'Font' },
+    { name: 'BorderStyle', type: 'enum', defaultValue: 'Fixed Single', enumValues: ['None', 'Fixed Single'], description: 'Style de bordure', category: 'Appearance' },
+    { name: 'AutoRedraw', type: 'boolean', defaultValue: false, description: 'Redessiner automatiquement', category: 'Behavior' },
+    { name: 'AutoSize', type: 'boolean', defaultValue: false, description: 'Taille automatique', category: 'Behavior' },
+    { name: 'Align', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Top', 'Bottom', 'Left', 'Right'], description: 'Alignement', category: 'Appearance' },
+    { name: 'Appearance', type: 'enum', defaultValue: '3D', enumValues: ['Flat', '3D'], description: 'Apparence', category: 'Appearance' },
+    { name: 'ClipControls', type: 'boolean', defaultValue: true, description: 'Découper les contrôles', category: 'Behavior' },
+    { name: 'ScaleMode', type: 'enum', defaultValue: 'Twips', enumValues: ['User', 'Twips', 'Points', 'Pixels', 'Characters', 'Inches', 'Millimeters', 'Centimeters'], description: 'Mode d\'échelle', category: 'Misc' },
+    { name: 'ScaleLeft', type: 'number', defaultValue: 0, description: 'Échelle gauche', category: 'Misc' },
+    { name: 'ScaleTop', type: 'number', defaultValue: 0, description: 'Échelle haut', category: 'Misc' },
+    { name: 'ScaleWidth', type: 'number', defaultValue: 0, description: 'Largeur d\'échelle', category: 'Misc' },
+    { name: 'ScaleHeight', type: 'number', defaultValue: 0, description: 'Hauteur d\'échelle', category: 'Misc' },
+    { name: 'CurrentX', type: 'number', defaultValue: 0, description: 'Position X courante', category: 'Misc' },
+    { name: 'CurrentY', type: 'number', defaultValue: 0, description: 'Position Y courante', category: 'Misc' },
+    { name: 'DrawMode', type: 'enum', defaultValue: 'Copy Pen', enumValues: ['Blackness', 'Not Merge Pen', 'Mask Not Pen', 'Not Copy Pen', 'Mask Pen Not', 'Invert', 'Xor Pen', 'Not Mask Pen', 'Mask Pen', 'Not Xor Pen', 'Nop', 'Merge Not Pen', 'Copy Pen', 'Merge Pen Not', 'Merge Pen', 'Whiteness'], description: 'Mode de dessin', category: 'Misc' },
+    { name: 'DrawStyle', type: 'enum', defaultValue: 'Solid', enumValues: ['Solid', 'Dash', 'Dot', 'Dash-Dot', 'Dash-Dot-Dot', 'Inside Solid', 'Transparent'], description: 'Style de dessin', category: 'Misc' },
+    { name: 'DrawWidth', type: 'number', defaultValue: 1, description: 'Largeur de dessin', category: 'Misc' },
+    { name: 'FillColor', type: 'color', defaultValue: '#000000', description: 'Couleur de remplissage', category: 'Misc' },
+    { name: 'FillStyle', type: 'enum', defaultValue: 'Solid', enumValues: ['Solid', 'Transparent', 'Horizontal Line', 'Vertical Line', 'Upward Diagonal', 'Downward Diagonal', 'Cross', 'Diagonal Cross'], description: 'Style de remplissage', category: 'Misc' },
+    { name: 'hDC', type: 'number', defaultValue: 0, description: 'Handle du contexte de périphérique', category: 'Misc', readOnly: true },
+    { name: 'Image', type: 'picture', defaultValue: null, description: 'Image persistante', category: 'Misc', readOnly: true },
+    { name: 'LinkMode', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Automatic', 'Manual', 'Notify'], description: 'Mode de liaison', category: 'DDE' },
+    { name: 'LinkTopic', type: 'string', defaultValue: '', description: 'Sujet de liaison', category: 'DDE' },
+    { name: 'LinkItem', type: 'string', defaultValue: '', description: 'Élément de liaison', category: 'DDE' },
+    { name: 'LinkTimeout', type: 'number', defaultValue: 50, description: 'Timeout de liaison', category: 'DDE' },
+  ],
+
+  // Timer
+  Timer: [
+    { name: 'Interval', type: 'number', defaultValue: 0, description: 'Intervalle en millisecondes', category: 'Behavior' },
+    { name: 'Enabled', type: 'boolean', defaultValue: true, description: 'Activé', category: 'Behavior' },
+  ],
+
+  // TreeView
+  TreeView: [
+    { name: 'Nodes', type: 'object', defaultValue: null, description: 'Collection de noeuds', category: 'Data' },
+    { name: 'SelectedItem', type: 'object', defaultValue: null, description: 'Élément sélectionné', category: 'Data' },
+    { name: 'Style', type: 'enum', defaultValue: 'TreeLines', enumValues: ['TreeLines', 'PlusMinusText', 'PlusMinusPictureText', 'TreelinesPlusMinusText', 'TreelinesPlusMinusPictureText', 'TreelinesText', 'TreelinesPictureText'], description: 'Style de l\'arbre', category: 'Appearance' },
+    { name: 'LineStyle', type: 'enum', defaultValue: 'TreeLines', enumValues: ['TreeLines', 'RootLines'], description: 'Style des lignes', category: 'Appearance' },
+    { name: 'Appearance', type: 'enum', defaultValue: '3D', enumValues: ['Flat', '3D'], description: 'Apparence', category: 'Appearance' },
+    { name: 'BackColor', type: 'color', defaultValue: '#FFFFFF', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'Font', type: 'font', defaultValue: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false }, description: 'Police', category: 'Font' },
+    { name: 'BorderStyle', type: 'enum', defaultValue: 'Fixed Single', enumValues: ['None', 'Fixed Single'], description: 'Style de bordure', category: 'Appearance' },
+    { name: 'ImageList', type: 'object', defaultValue: null, description: 'Liste d\'images', category: 'Misc' },
+    { name: 'Indentation', type: 'number', defaultValue: 19, description: 'Indentation', category: 'Appearance' },
+    { name: 'LabelEdit', type: 'enum', defaultValue: 'Manual', enumValues: ['Manual', 'Automatic'], description: 'Édition des étiquettes', category: 'Behavior' },
+    { name: 'PathSeparator', type: 'string', defaultValue: '\\', description: 'Séparateur de chemin', category: 'Misc' },
+    { name: 'Sorted', type: 'boolean', defaultValue: false, description: 'Trié', category: 'Behavior' },
+    { name: 'SingleSel', type: 'boolean', defaultValue: true, description: 'Sélection unique', category: 'Behavior' },
+    { name: 'HideSelection', type: 'boolean', defaultValue: true, description: 'Masquer la sélection', category: 'Behavior' },
+    { name: 'HotTracking', type: 'boolean', defaultValue: false, description: 'Suivi à chaud', category: 'Behavior' },
+    { name: 'FullRowSelect', type: 'boolean', defaultValue: false, description: 'Sélection de ligne complète', category: 'Behavior' },
+    { name: 'Checkboxes', type: 'boolean', defaultValue: false, description: 'Cases à cocher', category: 'Behavior' },
+    { name: 'OLEDropMode', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Manual'], description: 'Mode de déplacement OLE', category: 'OLE' },
+    { name: 'OLEDragMode', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Manual', 'Automatic'], description: 'Mode de glissement OLE', category: 'OLE' },
+    { name: 'DropHighlight', type: 'object', defaultValue: null, description: 'Surbrillance de dépose', category: 'OLE' },
+  ],
+
+  // ListView
+  ListView: [
+    { name: 'ListItems', type: 'object', defaultValue: null, description: 'Collection d\'éléments', category: 'Data' },
+    { name: 'ColumnHeaders', type: 'object', defaultValue: null, description: 'En-têtes de colonnes', category: 'Data' },
+    { name: 'SelectedItem', type: 'object', defaultValue: null, description: 'Élément sélectionné', category: 'Data' },
+    { name: 'View', type: 'enum', defaultValue: 'Icon', enumValues: ['Icon', 'SmallIcon', 'List', 'Report'], description: 'Vue', category: 'Appearance' },
+    { name: 'Arrange', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Auto', 'Left', 'Top'], description: 'Disposition', category: 'Appearance' },
+    { name: 'LabelEdit', type: 'enum', defaultValue: 'Manual', enumValues: ['Manual', 'Automatic'], description: 'Édition des étiquettes', category: 'Behavior' },
+    { name: 'Sorted', type: 'boolean', defaultValue: false, description: 'Trié', category: 'Behavior' },
+    { name: 'SortOrder', type: 'enum', defaultValue: 'Ascending', enumValues: ['Ascending', 'Descending'], description: 'Ordre de tri', category: 'Behavior' },
+    { name: 'SortKey', type: 'number', defaultValue: 0, description: 'Clé de tri', category: 'Behavior' },
+    { name: 'MultiSelect', type: 'boolean', defaultValue: false, description: 'Multi-sélection', category: 'Behavior' },
+    { name: 'GridLines', type: 'boolean', defaultValue: false, description: 'Lignes de grille', category: 'Appearance' },
+    { name: 'FullRowSelect', type: 'boolean', defaultValue: false, description: 'Sélection de ligne complète', category: 'Behavior' },
+    { name: 'HideSelection', type: 'boolean', defaultValue: true, description: 'Masquer la sélection', category: 'Behavior' },
+    { name: 'HotTracking', type: 'boolean', defaultValue: false, description: 'Suivi à chaud', category: 'Behavior' },
+    { name: 'HoverSelection', type: 'boolean', defaultValue: false, description: 'Sélection au survol', category: 'Behavior' },
+    { name: 'FlatScrollBar', type: 'boolean', defaultValue: false, description: 'Barre de défilement plate', category: 'Appearance' },
+    { name: 'Checkboxes', type: 'boolean', defaultValue: false, description: 'Cases à cocher', category: 'Behavior' },
+    { name: 'Appearance', type: 'enum', defaultValue: '3D', enumValues: ['Flat', '3D'], description: 'Apparence', category: 'Appearance' },
+    { name: 'BackColor', type: 'color', defaultValue: '#FFFFFF', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'Font', type: 'font', defaultValue: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false }, description: 'Police', category: 'Font' },
+    { name: 'BorderStyle', type: 'enum', defaultValue: 'Fixed Single', enumValues: ['None', 'Fixed Single'], description: 'Style de bordure', category: 'Appearance' },
+    { name: 'Icons', type: 'object', defaultValue: null, description: 'Icônes', category: 'Appearance' },
+    { name: 'SmallIcons', type: 'object', defaultValue: null, description: 'Petites icônes', category: 'Appearance' },
+    { name: 'OLEDropMode', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Manual'], description: 'Mode de déplacement OLE', category: 'OLE' },
+    { name: 'OLEDragMode', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Manual', 'Automatic'], description: 'Mode de glissement OLE', category: 'OLE' },
+    { name: 'DropHighlight', type: 'object', defaultValue: null, description: 'Surbrillance de dépose', category: 'OLE' },
+  ],
+
+  // ImageList
+  ImageList: [
+    { name: 'ImageWidth', type: 'number', defaultValue: 16, description: 'Largeur des images', category: 'Appearance' },
+    { name: 'ImageHeight', type: 'number', defaultValue: 16, description: 'Hauteur des images', category: 'Appearance' },
+    { name: 'MaskColor', type: 'color', defaultValue: '#FF00FF', description: 'Couleur de masque', category: 'Appearance' },
+    { name: 'UseMaskColor', type: 'boolean', defaultValue: true, description: 'Utiliser la couleur de masque', category: 'Appearance' },
+    { name: 'ListImages', type: 'object', defaultValue: null, description: 'Collection d\'images', category: 'Data' },
+  ],
+
+  // TabStrip
+  TabStrip: [
+    { name: 'Tabs', type: 'object', defaultValue: null, description: 'Collection d\'onglets', category: 'Data' },
+    { name: 'SelectedItem', type: 'object', defaultValue: null, description: 'Onglet sélectionné', category: 'Data' },
+    { name: 'Style', type: 'enum', defaultValue: 'Tabs', enumValues: ['Tabs', 'Buttons', 'FlatButtons'], description: 'Style', category: 'Appearance' },
+    { name: 'TabOrientation', type: 'enum', defaultValue: 'Top', enumValues: ['Top', 'Bottom', 'Left', 'Right'], description: 'Orientation des onglets', category: 'Appearance' },
+    { name: 'MultiRow', type: 'boolean', defaultValue: false, description: 'Multi-rangées', category: 'Appearance' },
+    { name: 'TabFixedWidth', type: 'number', defaultValue: 0, description: 'Largeur fixe des onglets', category: 'Appearance' },
+    { name: 'TabFixedHeight', type: 'number', defaultValue: 0, description: 'Hauteur fixe des onglets', category: 'Appearance' },
+    { name: 'TabWidthStyle', type: 'enum', defaultValue: 'Justified', enumValues: ['Justified', 'NonJustified', 'Fixed'], description: 'Style de largeur', category: 'Appearance' },
+    { name: 'ShowTips', type: 'boolean', defaultValue: true, description: 'Afficher les conseils', category: 'Behavior' },
+    { name: 'HotTracking', type: 'boolean', defaultValue: false, description: 'Suivi à chaud', category: 'Behavior' },
+    { name: 'Separators', type: 'boolean', defaultValue: false, description: 'Séparateurs', category: 'Appearance' },
+    { name: 'Appearance', type: 'enum', defaultValue: '3D', enumValues: ['Flat', '3D'], description: 'Apparence', category: 'Appearance' },
+    { name: 'BackColor', type: 'color', defaultValue: '#C0C0C0', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'Font', type: 'font', defaultValue: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false }, description: 'Police', category: 'Font' },
+    { name: 'ImageList', type: 'object', defaultValue: null, description: 'Liste d\'images', category: 'Misc' },
+    { name: 'Placement', type: 'enum', defaultValue: 'Top', enumValues: ['Top', 'Bottom', 'Left', 'Right'], description: 'Placement', category: 'Appearance' },
+    { name: 'OLEDropMode', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Manual'], description: 'Mode de déplacement OLE', category: 'OLE' },
+    { name: 'OLEDragMode', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Manual', 'Automatic'], description: 'Mode de glissement OLE', category: 'OLE' },
+  ],
+
+  // Toolbar
+  Toolbar: [
+    { name: 'Buttons', type: 'object', defaultValue: null, description: 'Collection de boutons', category: 'Data' },
+    { name: 'Style', type: 'enum', defaultValue: 'Standard', enumValues: ['Standard', 'Flat'], description: 'Style', category: 'Appearance' },
+    { name: 'Appearance', type: 'enum', defaultValue: '3D', enumValues: ['Flat', '3D'], description: 'Apparence', category: 'Appearance' },
+    { name: 'BorderStyle', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Fixed Single'], description: 'Style de bordure', category: 'Appearance' },
+    { name: 'Wrappable', type: 'boolean', defaultValue: false, description: 'Retour à la ligne', category: 'Behavior' },
+    { name: 'AllowCustomize', type: 'boolean', defaultValue: false, description: 'Permettre la personnalisation', category: 'Behavior' },
+    { name: 'ShowTips', type: 'boolean', defaultValue: true, description: 'Afficher les conseils', category: 'Behavior' },
+    { name: 'BackColor', type: 'color', defaultValue: '#C0C0C0', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'Font', type: 'font', defaultValue: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false }, description: 'Police', category: 'Font' },
+    { name: 'ImageList', type: 'object', defaultValue: null, description: 'Liste d\'images', category: 'Misc' },
+    { name: 'DisabledImageList', type: 'object', defaultValue: null, description: 'Images désactivées', category: 'Misc' },
+    { name: 'HotImageList', type: 'object', defaultValue: null, description: 'Images de survol', category: 'Misc' },
+    { name: 'ButtonHeight', type: 'number', defaultValue: 0, description: 'Hauteur des boutons', category: 'Appearance' },
+    { name: 'ButtonWidth', type: 'number', defaultValue: 0, description: 'Largeur des boutons', category: 'Appearance' },
+    { name: 'TextAlign', type: 'enum', defaultValue: 'Right', enumValues: ['Right', 'Bottom'], description: 'Alignement du texte', category: 'Appearance' },
+    { name: 'OLEDropMode', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Manual'], description: 'Mode de déplacement OLE', category: 'OLE' },
+  ],
+
+  // StatusBar
+  StatusBar: [
+    { name: 'Panels', type: 'object', defaultValue: null, description: 'Collection de panneaux', category: 'Data' },
+    { name: 'Style', type: 'enum', defaultValue: 'Panels', enumValues: ['Simple', 'Panels'], description: 'Style', category: 'Appearance' },
+    { name: 'SimpleText', type: 'string', defaultValue: '', description: 'Texte simple', category: 'Appearance' },
+    { name: 'ShowTips', type: 'boolean', defaultValue: true, description: 'Afficher les conseils', category: 'Behavior' },
+    { name: 'Appearance', type: 'enum', defaultValue: '3D', enumValues: ['Flat', '3D'], description: 'Apparence', category: 'Appearance' },
+    { name: 'BackColor', type: 'color', defaultValue: '#C0C0C0', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'Font', type: 'font', defaultValue: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false }, description: 'Police', category: 'Font' },
+    { name: 'OLEDropMode', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Manual'], description: 'Mode de déplacement OLE', category: 'OLE' },
+  ],
+
+  // MSChart
+  MSChart: [
+    { name: 'ChartType', type: 'enum', defaultValue: 'Bar', enumValues: ['Bar', 'Line', 'Pie', 'Area', 'HiLo', 'Scatter', 'Combination'], description: 'Type de graphique', category: 'Appearance' },
+    { name: 'Chart3D', type: 'boolean', defaultValue: false, description: 'Graphique 3D', category: 'Appearance' },
+    { name: 'ShowLegend', type: 'boolean', defaultValue: true, description: 'Afficher la légende', category: 'Appearance' },
+    { name: 'AllowSelections', type: 'boolean', defaultValue: true, description: 'Permettre les sélections', category: 'Behavior' },
+    { name: 'AllowSeriesSelection', type: 'boolean', defaultValue: true, description: 'Sélection de séries', category: 'Behavior' },
+    { name: 'BackColor', type: 'color', defaultValue: '#FFFFFF', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'Font', type: 'font', defaultValue: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false }, description: 'Police', category: 'Font' },
+    { name: 'BorderStyle', type: 'enum', defaultValue: 'Fixed Single', enumValues: ['None', 'Fixed Single'], description: 'Style de bordure', category: 'Appearance' },
+    { name: 'TitleText', type: 'string', defaultValue: '', description: 'Titre du graphique', category: 'Appearance' },
+    { name: 'FootnoteText', type: 'string', defaultValue: '', description: 'Note de bas de page', category: 'Appearance' },
+    { name: 'RandomFill', type: 'boolean', defaultValue: false, description: 'Remplissage aléatoire', category: 'Data' },
+    { name: 'RowCount', type: 'number', defaultValue: 0, description: 'Nombre de lignes', category: 'Data' },
+    { name: 'ColumnCount', type: 'number', defaultValue: 0, description: 'Nombre de colonnes', category: 'Data' },
+    { name: 'ColumnLabelCount', type: 'number', defaultValue: 0, description: 'Nombre d\'étiquettes de colonnes', category: 'Data' },
+    { name: 'RowLabelCount', type: 'number', defaultValue: 0, description: 'Nombre d\'étiquettes de lignes', category: 'Data' },
+    { name: 'ChartData', type: 'object', defaultValue: null, description: 'Données du graphique', category: 'Data' },
+    { name: 'AutoIncrement', type: 'boolean', defaultValue: true, description: 'Incrément automatique', category: 'Data' },
+    { name: 'ShowDataLabels', type: 'boolean', defaultValue: false, description: 'Afficher les étiquettes de données', category: 'Appearance' },
+    { name: 'Stacking', type: 'boolean', defaultValue: false, description: 'Empilage', category: 'Appearance' },
+    { name: 'Repaint', type: 'boolean', defaultValue: true, description: 'Repeindre', category: 'Behavior' },
+    { name: 'DrawMode', type: 'enum', defaultValue: 'Draw', enumValues: ['Draw', 'Blit', 'BlitBlt'], description: 'Mode de dessin', category: 'Misc' },
+  ],
+
+  // ProgressBar
+  ProgressBar: [
+    { name: 'Value', type: 'number', defaultValue: 0, description: 'Valeur actuelle', category: 'Data' },
+    { name: 'Min', type: 'number', defaultValue: 0, description: 'Valeur minimale', category: 'Data' },
+    { name: 'Max', type: 'number', defaultValue: 100, description: 'Valeur maximale', category: 'Data' },
+    { name: 'Orientation', type: 'enum', defaultValue: 'Horizontal', enumValues: ['Horizontal', 'Vertical'], description: 'Orientation', category: 'Appearance' },
+    { name: 'Scrolling', type: 'enum', defaultValue: 'Standard', enumValues: ['Standard', 'Smooth'], description: 'Défilement', category: 'Behavior' },
+    { name: 'Appearance', type: 'enum', defaultValue: '3D', enumValues: ['Flat', '3D'], description: 'Apparence', category: 'Appearance' },
+    { name: 'BorderStyle', type: 'enum', defaultValue: 'Fixed Single', enumValues: ['None', 'Fixed Single'], description: 'Style de bordure', category: 'Appearance' },
+    { name: 'BackColor', type: 'color', defaultValue: '#C0C0C0', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#0000FF', description: 'Couleur de la barre', category: 'Appearance' },
+    { name: 'OLEDropMode', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Manual'], description: 'Mode de déplacement OLE', category: 'OLE' },
+  ],
+
+  // Slider
+  Slider: [
+    { name: 'Value', type: 'number', defaultValue: 0, description: 'Valeur actuelle', category: 'Data' },
+    { name: 'Min', type: 'number', defaultValue: 0, description: 'Valeur minimale', category: 'Data' },
+    { name: 'Max', type: 'number', defaultValue: 100, description: 'Valeur maximale', category: 'Data' },
+    { name: 'Orientation', type: 'enum', defaultValue: 'Horizontal', enumValues: ['Horizontal', 'Vertical'], description: 'Orientation', category: 'Appearance' },
+    { name: 'TickStyle', type: 'enum', defaultValue: 'Bottom', enumValues: ['None', 'Top', 'Bottom', 'Both'], description: 'Style des graduations', category: 'Appearance' },
+    { name: 'TickFrequency', type: 'number', defaultValue: 1, description: 'Fréquence des graduations', category: 'Appearance' },
+    { name: 'LargeChange', type: 'number', defaultValue: 5, description: 'Grand changement', category: 'Behavior' },
+    { name: 'SmallChange', type: 'number', defaultValue: 1, description: 'Petit changement', category: 'Behavior' },
+    { name: 'SelectRange', type: 'boolean', defaultValue: false, description: 'Sélectionner la plage', category: 'Behavior' },
+    { name: 'SelStart', type: 'number', defaultValue: 0, description: 'Début de sélection', category: 'Data' },
+    { name: 'SelLength', type: 'number', defaultValue: 0, description: 'Longueur de sélection', category: 'Data' },
+    { name: 'ClearSel', type: 'boolean', defaultValue: false, description: 'Effacer la sélection', category: 'Behavior' },
+    { name: 'BorderStyle', type: 'enum', defaultValue: 'Fixed Single', enumValues: ['None', 'Fixed Single'], description: 'Style de bordure', category: 'Appearance' },
+    { name: 'BackColor', type: 'color', defaultValue: '#C0C0C0', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'MousePointer', type: 'enum', defaultValue: 'Default', enumValues: ['Default', 'Arrow', 'Cross', 'IBeam', 'Icon', 'Size', 'SizeNESW', 'SizeNS', 'SizeNWSE', 'SizeWE', 'UpArrow', 'Hourglass', 'NoDrop', 'ArrowHourglass', 'ArrowQuestion', 'SizeAll', 'Custom'], description: 'Pointeur de souris', category: 'Misc' },
+    { name: 'MouseIcon', type: 'picture', defaultValue: null, description: 'Icône de souris', category: 'Misc' },
+    { name: 'OLEDropMode', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Manual'], description: 'Mode de déplacement OLE', category: 'OLE' },
+  ],
+
+  // MonthView
+  MonthView: [
+    { name: 'Value', type: 'object', defaultValue: null, description: 'Date sélectionnée', category: 'Data' },
+    { name: 'MinDate', type: 'object', defaultValue: null, description: 'Date minimale', category: 'Data' },
+    { name: 'MaxDate', type: 'object', defaultValue: null, description: 'Date maximale', category: 'Data' },
+    { name: 'MaxSelCount', type: 'number', defaultValue: 7, description: 'Nombre maximum de sélections', category: 'Behavior' },
+    { name: 'MonthRows', type: 'number', defaultValue: 1, description: 'Lignes de mois', category: 'Appearance' },
+    { name: 'MonthColumns', type: 'number', defaultValue: 1, description: 'Colonnes de mois', category: 'Appearance' },
+    { name: 'ScrollRate', type: 'number', defaultValue: 1, description: 'Taux de défilement', category: 'Behavior' },
+    { name: 'ShowToday', type: 'boolean', defaultValue: true, description: 'Afficher aujourd\'hui', category: 'Behavior' },
+    { name: 'ShowWeekNumbers', type: 'boolean', defaultValue: false, description: 'Afficher les numéros de semaine', category: 'Behavior' },
+    { name: 'StartOfWeek', type: 'enum', defaultValue: 'Sunday', enumValues: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], description: 'Début de semaine', category: 'Behavior' },
+    { name: 'MultiSelect', type: 'boolean', defaultValue: false, description: 'Multi-sélection', category: 'Behavior' },
+    { name: 'TitleBackColor', type: 'color', defaultValue: '#C0C0C0', description: 'Couleur de fond du titre', category: 'Appearance' },
+    { name: 'TitleForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du titre', category: 'Appearance' },
+    { name: 'MonthBackColor', type: 'color', defaultValue: '#FFFFFF', description: 'Couleur de fond du mois', category: 'Appearance' },
+    { name: 'TrailingForeColor', type: 'color', defaultValue: '#808080', description: 'Couleur des jours précédents/suivants', category: 'Appearance' },
+    { name: 'BackColor', type: 'color', defaultValue: '#FFFFFF', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'Font', type: 'font', defaultValue: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false }, description: 'Police', category: 'Font' },
+    { name: 'BorderStyle', type: 'enum', defaultValue: 'Fixed Single', enumValues: ['None', 'Fixed Single'], description: 'Style de bordure', category: 'Appearance' },
+    { name: 'OLEDropMode', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Manual'], description: 'Mode de déplacement OLE', category: 'OLE' },
+  ],
+
+  // UpDown
+  UpDown: [
+    { name: 'Value', type: 'number', defaultValue: 0, description: 'Valeur actuelle', category: 'Data' },
+    { name: 'Min', type: 'number', defaultValue: 0, description: 'Valeur minimale', category: 'Data' },
+    { name: 'Max', type: 'number', defaultValue: 100, description: 'Valeur maximale', category: 'Data' },
+    { name: 'Increment', type: 'number', defaultValue: 1, description: 'Incrément', category: 'Behavior' },
+    { name: 'Wrap', type: 'boolean', defaultValue: false, description: 'Retour à la ligne', category: 'Behavior' },
+    { name: 'Orientation', type: 'enum', defaultValue: 'Vertical', enumValues: ['Vertical', 'Horizontal'], description: 'Orientation', category: 'Appearance' },
+    { name: 'SyncBuddy', type: 'boolean', defaultValue: false, description: 'Synchroniser avec le copain', category: 'Behavior' },
+    { name: 'BuddyControl', type: 'string', defaultValue: '', description: 'Contrôle copain', category: 'Behavior' },
+    { name: 'BuddyProperty', type: 'string', defaultValue: '', description: 'Propriété du copain', category: 'Behavior' },
+    { name: 'AutoBuddy', type: 'boolean', defaultValue: false, description: 'Copain automatique', category: 'Behavior' },
+    { name: 'BorderStyle', type: 'enum', defaultValue: 'Fixed Single', enumValues: ['None', 'Fixed Single'], description: 'Style de bordure', category: 'Appearance' },
+    { name: 'BackColor', type: 'color', defaultValue: '#C0C0C0', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'Font', type: 'font', defaultValue: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false }, description: 'Police', category: 'Font' },
+    { name: 'OLEDropMode', type: 'enum', defaultValue: 'None', enumValues: ['None', 'Manual'], description: 'Mode de déplacement OLE', category: 'OLE' },
+  ],
+};
+
+/**
+ * Obtient les propriétés d'un contrôle VB6
+ */
+export function getVB6Properties(controlType: string): VB6PropertyDefinition[] {
+  const commonProps = VB6_PROPERTIES.Common || [];
+  const specificProps = VB6_PROPERTIES[controlType] || [];
+  
+  return [...commonProps, ...specificProps];
+}
+
+/**
+ * Obtient la valeur par défaut d'une propriété
+ */
+export function getDefaultValue(controlType: string, propertyName: string): any {
+  const properties = getVB6Properties(controlType);
+  const property = properties.find(p => p.name === propertyName);
+  return property?.defaultValue;
+}
+
+/**
+ * Vérifie si une propriété est en lecture seule
+ */
+export function isReadOnlyProperty(controlType: string, propertyName: string): boolean {
+  const properties = getVB6Properties(controlType);
+  const property = properties.find(p => p.name === propertyName);
+  return property?.readOnly === true;
+}
+
+/**
+ * Obtient les valeurs d'énumération d'une propriété
+ */
+export function getEnumValues(controlType: string, propertyName: string): string[] {
+  const properties = getVB6Properties(controlType);
+  const property = properties.find(p => p.name === propertyName);
+  return property?.enumValues || [];
+}
+
+/**
+ * Filtre les propriétés par catégorie
+ */
+export function getPropertiesByCategory(controlType: string, category: string): VB6PropertyDefinition[] {
+  const properties = getVB6Properties(controlType);
+  return properties.filter(p => p.category === category);
+}
+
+/**
+ * Obtient toutes les catégories de propriétés
+ */
+export function getPropertyCategories(controlType: string): string[] {
+  const properties = getVB6Properties(controlType);
+  const categories = new Set(properties.map(p => p.category || 'Misc'));
+  return Array.from(categories).sort();
+}
+
+export default VB6_PROPERTIES;

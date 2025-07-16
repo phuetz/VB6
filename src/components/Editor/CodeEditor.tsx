@@ -5,59 +5,77 @@ const CodeEditor: React.FC = () => {
   const { state, dispatch } = useVB6();
 
   const getAvailableEvents = (controlType: string) => {
-    const commonEvents = ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove', 'KeyDown', 'KeyUp', 'KeyPress'];
-    const formEvents = ['Load', 'Unload', 'Activate', 'Deactivate', 'Initialize', 'Paint', 'QueryUnload', 'Resize'];
-    
+    const commonEvents = [
+      'Click',
+      'DblClick',
+      'MouseDown',
+      'MouseUp',
+      'MouseMove',
+      'KeyDown',
+      'KeyUp',
+      'KeyPress',
+    ];
+    const formEvents = [
+      'Load',
+      'Unload',
+      'Activate',
+      'Deactivate',
+      'Initialize',
+      'Paint',
+      'QueryUnload',
+      'Resize',
+    ];
+
     const specificEvents: { [key: string]: string[] } = {
-      'Form': [...formEvents, ...commonEvents],
-      'CommandButton': [...commonEvents, 'GotFocus', 'LostFocus'],
-      'TextBox': [...commonEvents, 'Change', 'GotFocus', 'LostFocus', 'Validate'],
-      'Label': ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
-      'CheckBox': [...commonEvents, 'Click', 'GotFocus', 'LostFocus'],
-      'OptionButton': [...commonEvents, 'Click', 'GotFocus', 'LostFocus'],
-      'ComboBox': [...commonEvents, 'Change', 'DropDown', 'GotFocus', 'LostFocus', 'Validate'],
-      'ImageCombo': [...commonEvents, 'Change', 'DropDown', 'GotFocus', 'LostFocus', 'Validate'],
-      'RichTextBox': [...commonEvents, 'Change', 'GotFocus', 'LostFocus', 'Validate'],
-      'Timer': ['Timer'],
-      'DriveListBox': [...commonEvents, 'Change'],
-      'DirListBox': [...commonEvents, 'Change'],
-      'FileListBox': [...commonEvents, 'Change'],
-      'ImageList': [...commonEvents],
-      'ListView': [...commonEvents, 'ItemClick', 'ColumnClick', 'ItemCheck'],
-      'DateTimePicker': [...commonEvents, 'Change'],
-      'MonthView': [...commonEvents, 'DateClick'],
-      'Shape': ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
-      'Line': ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
-      'Image': [...commonEvents, 'GotFocus', 'LostFocus'],
-      'TreeView': [...commonEvents, 'NodeClick', 'Expand', 'Collapse']
+      Form: [...formEvents, ...commonEvents],
+      CommandButton: [...commonEvents, 'GotFocus', 'LostFocus'],
+      TextBox: [...commonEvents, 'Change', 'GotFocus', 'LostFocus', 'Validate'],
+      Label: ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
+      CheckBox: [...commonEvents, 'Click', 'GotFocus', 'LostFocus'],
+      OptionButton: [...commonEvents, 'Click', 'GotFocus', 'LostFocus'],
+      ComboBox: [...commonEvents, 'Change', 'DropDown', 'GotFocus', 'LostFocus', 'Validate'],
+      ImageCombo: [...commonEvents, 'Change', 'DropDown', 'GotFocus', 'LostFocus', 'Validate'],
+      RichTextBox: [...commonEvents, 'Change', 'GotFocus', 'LostFocus', 'Validate'],
+      Timer: ['Timer'],
+      DriveListBox: [...commonEvents, 'Change'],
+      DirListBox: [...commonEvents, 'Change'],
+      FileListBox: [...commonEvents, 'Change'],
+      ImageList: [...commonEvents],
+      ListView: [...commonEvents, 'ItemClick', 'ColumnClick', 'ItemCheck'],
+      DateTimePicker: [...commonEvents, 'Change'],
+      MonthView: [...commonEvents, 'DateClick'],
+      Shape: ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
+      Line: ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
+      Image: [...commonEvents, 'GotFocus', 'LostFocus'],
+      TreeView: [...commonEvents, 'NodeClick', 'Expand', 'Collapse'],
     };
-    
+
     return specificEvents[controlType] || commonEvents;
   };
 
   const saveEventCode = useCallback(() => {
     if (state.selectedControls.length !== 1 || !state.selectedEvent) return;
-    
+
     const control = state.selectedControls[0];
     const eventKey = `${control.name}_${state.selectedEvent}`;
     const codeEditor = document.getElementById('codeEditor') as HTMLTextAreaElement;
-    
+
     if (codeEditor) {
       dispatch({
         type: 'UPDATE_EVENT_CODE',
-        payload: { eventKey, code: codeEditor.value }
+        payload: { eventKey, code: codeEditor.value },
       });
     }
   }, [state.selectedControls, state.selectedEvent, dispatch]);
 
   const loadEventCode = useCallback(() => {
     if (state.selectedControls.length !== 1 || !state.selectedEvent) return;
-    
+
     const control = state.selectedControls[0];
     const eventKey = `${control.name}_${state.selectedEvent}`;
     const code = state.eventCode[eventKey] || '';
     const codeEditor = document.getElementById('codeEditor') as HTMLTextAreaElement;
-    
+
     if (codeEditor) {
       codeEditor.value = code;
     }
@@ -73,7 +91,7 @@ const CodeEditor: React.FC = () => {
         <select
           className="text-xs border border-gray-300 px-2 py-1"
           value={state.selectedControls.length === 1 ? state.selectedControls[0].name : '(General)'}
-          onChange={(e) => {
+          onChange={e => {
             if (e.target.value === '(General)') {
               dispatch({ type: 'SELECT_CONTROLS', payload: { controlIds: [] } });
             } else {
@@ -87,26 +105,32 @@ const CodeEditor: React.FC = () => {
           <option value="(General)">(General)</option>
           <option value="Form">Form</option>
           {state.controls.map(control => (
-            <option key={control.id} value={control.name}>{control.name}</option>
+            <option key={control.id} value={control.name}>
+              {control.name}
+            </option>
           ))}
         </select>
-        
+
         <select
           className="text-xs border border-gray-300 px-2 py-1"
           value={state.selectedEvent}
-          onChange={(e) => dispatch({ type: 'SET_SELECTED_EVENT', payload: { eventName: e.target.value } })}
+          onChange={e =>
+            dispatch({ type: 'SET_SELECTED_EVENT', payload: { eventName: e.target.value } })
+          }
           disabled={state.selectedControls.length !== 1}
         >
-          {state.selectedControls.length === 1 ? 
+          {state.selectedControls.length === 1 ? (
             getAvailableEvents(state.selectedControls[0].type).map(event => (
-              <option key={event} value={event}>{event}</option>
-            )) : (
-              <option value="">(Declarations)</option>
-            )
-          }
+              <option key={event} value={event}>
+                {event}
+              </option>
+            ))
+          ) : (
+            <option value="">(Declarations)</option>
+          )}
         </select>
       </div>
-      
+
       <div className="flex-1 p-2 font-mono text-xs overflow-auto bg-white">
         {state.selectedControls.length === 1 ? (
           <div className="relative">
@@ -121,10 +145,10 @@ const CodeEditor: React.FC = () => {
 ' Press Ctrl+Space for IntelliSense"
               onChange={saveEventCode}
               spellCheck={false}
-              style={{ 
+              style={{
                 resize: 'none',
                 fontFamily: 'Consolas, monospace',
-                lineHeight: '1.4'
+                lineHeight: '1.4',
               }}
             />
             <div className="text-blue-600 mt-1">End Sub</div>

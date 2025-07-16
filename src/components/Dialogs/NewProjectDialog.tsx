@@ -6,8 +6,12 @@ const projectTemplates = [
   { name: 'ActiveX DLL', description: 'An ActiveX dynamic-link library', icon: '📚' },
   { name: 'ActiveX Control', description: 'An ActiveX control project', icon: '🎛️' },
   { name: 'Data Project', description: 'A database application', icon: '🗄️' },
-  { name: 'IIS Application', description: 'An Internet Information Server application', icon: '🌐' },
-  { name: 'Add-In', description: 'A Visual Basic Add-In', icon: '🔌' }
+  {
+    name: 'IIS Application',
+    description: 'An Internet Information Server application',
+    icon: '🌐',
+  },
+  { name: 'Add-In', description: 'A Visual Basic Add-In', icon: '🔌' },
 ];
 
 const NewProjectDialog: React.FC = () => {
@@ -22,15 +26,17 @@ const NewProjectDialog: React.FC = () => {
       <div className="bg-gray-200 border-2 border-gray-400 shadow-lg" style={{ width: '500px' }}>
         <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
           <span>New Project</span>
-          <button onClick={handleClose} className="text-white hover:bg-blue-700 px-2">×</button>
+          <button onClick={handleClose} className="text-white hover:bg-blue-700 px-2">
+            ×
+          </button>
         </div>
-        
+
         <div className="p-4">
           <div className="bg-white border border-gray-400 p-4 mb-4 h-64 overflow-y-auto">
             <div className="grid grid-cols-3 gap-4">
               {projectTemplates.map((template, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className="flex flex-col items-center cursor-pointer hover:bg-blue-100 p-2 rounded"
                   onDoubleClick={handleClose}
                 >
@@ -40,19 +46,19 @@ const NewProjectDialog: React.FC = () => {
               ))}
             </div>
           </div>
-          
+
           <div className="bg-gray-100 border border-gray-400 p-2 text-xs mb-4">
             Select a project template
           </div>
-          
+
           <div className="flex gap-2 justify-end">
-            <button 
+            <button
               className="px-4 py-1 bg-gray-300 border border-gray-400 text-xs hover:bg-gray-400"
               onClick={handleClose}
             >
               OK
             </button>
-            <button 
+            <button
               className="px-4 py-1 bg-gray-300 border border-gray-400 text-xs hover:bg-gray-400"
               onClick={handleClose}
             >

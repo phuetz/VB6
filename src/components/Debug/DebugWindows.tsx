@@ -1,6 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import { useVB6 } from '../../context/VB6Context';
-import { Play, Square, StepBack as StepInto, StepBack as StepOver, StepBack as StepOut } from 'lucide-react';
+import {
+  Play,
+  Square,
+  StepBack as StepInto,
+  StepBack as StepOver,
+  StepBack as StepOut,
+} from 'lucide-react';
 
 interface BreakpointInfo {
   file: string;
@@ -25,13 +31,13 @@ interface CallStackFrame {
 
 export const WatchWindow: React.FC<{ visible: boolean; onClose: () => void }> = ({
   visible,
-  onClose
+  onClose,
 }) => {
   const { state } = useVB6();
   const [watchVariables, setWatchVariables] = useState<WatchVariable[]>([
     { id: '1', expression: 'Text1.Text', value: '""', type: 'String' },
     { id: '2', expression: 'i', value: '0', type: 'Integer' },
-    { id: '3', expression: 'Now()', value: new Date().toLocaleString(), type: 'Date' }
+    { id: '3', expression: 'Now()', value: new Date().toLocaleString(), type: 'Date' },
   ]);
   const [newExpression, setNewExpression] = useState('');
 
@@ -41,16 +47,19 @@ export const WatchWindow: React.FC<{ visible: boolean; onClose: () => void }> = 
         id: Date.now().toString(),
         expression: newExpression.trim(),
         value: '<Not evaluated>',
-        type: 'Variant'
+        type: 'Variant',
       };
       setWatchVariables([...watchVariables, newWatch]);
       setNewExpression('');
     }
   }, [newExpression, watchVariables]);
 
-  const removeWatch = useCallback((id: string) => {
-    setWatchVariables(watchVariables.filter(w => w.id !== id));
-  }, [watchVariables]);
+  const removeWatch = useCallback(
+    (id: string) => {
+      setWatchVariables(watchVariables.filter(w => w.id !== id));
+    },
+    [watchVariables]
+  );
 
   if (!visible) return null;
 
@@ -58,9 +67,11 @@ export const WatchWindow: React.FC<{ visible: boolean; onClose: () => void }> = 
     <div className="w-80 bg-white border border-gray-400 flex flex-col">
       <div className="bg-blue-600 text-white text-xs font-bold p-1 flex items-center justify-between">
         <span>Watch</span>
-        <button onClick={onClose} className="hover:bg-blue-700 px-1">×</button>
+        <button onClick={onClose} className="hover:bg-blue-700 px-1">
+          ×
+        </button>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto">
         <table className="w-full text-xs">
           <thead className="bg-gray-100">
@@ -72,7 +83,7 @@ export const WatchWindow: React.FC<{ visible: boolean; onClose: () => void }> = 
             </tr>
           </thead>
           <tbody>
-            {watchVariables.map((watch) => (
+            {watchVariables.map(watch => (
               <tr key={watch.id} className="hover:bg-gray-50">
                 <td className="p-1 border-b font-mono">{watch.expression}</td>
                 <td className="p-1 border-b font-mono">{String(watch.value)}</td>
@@ -91,14 +102,14 @@ export const WatchWindow: React.FC<{ visible: boolean; onClose: () => void }> = 
           </tbody>
         </table>
       </div>
-      
+
       <div className="border-t p-2">
         <div className="flex gap-1">
           <input
             type="text"
             value={newExpression}
-            onChange={(e) => setNewExpression(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && addWatch()}
+            onChange={e => setNewExpression(e.target.value)}
+            onKeyPress={e => e.key === 'Enter' && addWatch()}
             placeholder="Enter expression to watch"
             className="flex-1 px-1 text-xs border border-gray-300"
           />
@@ -116,13 +127,13 @@ export const WatchWindow: React.FC<{ visible: boolean; onClose: () => void }> = 
 
 export const LocalsWindow: React.FC<{ visible: boolean; onClose: () => void }> = ({
   visible,
-  onClose
+  onClose,
 }) => {
   const localVariables = [
     { name: 'Me', value: 'Form1', type: 'Form' },
     { name: 'i', value: '5', type: 'Integer' },
     { name: 'strName', value: '"John Doe"', type: 'String' },
-    { name: 'blnFlag', value: 'True', type: 'Boolean' }
+    { name: 'blnFlag', value: 'True', type: 'Boolean' },
   ];
 
   if (!visible) return null;
@@ -131,9 +142,11 @@ export const LocalsWindow: React.FC<{ visible: boolean; onClose: () => void }> =
     <div className="w-80 bg-white border border-gray-400 flex flex-col">
       <div className="bg-blue-600 text-white text-xs font-bold p-1 flex items-center justify-between">
         <span>Locals</span>
-        <button onClick={onClose} className="hover:bg-blue-700 px-1">×</button>
+        <button onClick={onClose} className="hover:bg-blue-700 px-1">
+          ×
+        </button>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto">
         <table className="w-full text-xs">
           <thead className="bg-gray-100">
@@ -160,12 +173,12 @@ export const LocalsWindow: React.FC<{ visible: boolean; onClose: () => void }> =
 
 export const CallStackWindow: React.FC<{ visible: boolean; onClose: () => void }> = ({
   visible,
-  onClose
+  onClose,
 }) => {
   const callStack: CallStackFrame[] = [
     { procedure: 'Command1_Click', module: 'Form1', line: 15, arguments: {} },
     { procedure: 'ProcessData', module: 'Module1', line: 42, arguments: { strInput: '"test"' } },
-    { procedure: 'ValidateInput', module: 'Module1', line: 78, arguments: { value: '123' } }
+    { procedure: 'ValidateInput', module: 'Module1', line: 78, arguments: { value: '123' } },
   ];
 
   if (!visible) return null;
@@ -174,21 +187,24 @@ export const CallStackWindow: React.FC<{ visible: boolean; onClose: () => void }
     <div className="w-80 bg-white border border-gray-400 flex flex-col">
       <div className="bg-blue-600 text-white text-xs font-bold p-1 flex items-center justify-between">
         <span>Call Stack</span>
-        <button onClick={onClose} className="hover:bg-blue-700 px-1">×</button>
+        <button onClick={onClose} className="hover:bg-blue-700 px-1">
+          ×
+        </button>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto">
         {callStack.map((frame, index) => (
-          <div
-            key={index}
-            className="p-2 border-b hover:bg-gray-50 cursor-pointer text-xs"
-          >
+          <div key={index} className="p-2 border-b hover:bg-gray-50 cursor-pointer text-xs">
             <div className="font-mono font-semibold">{frame.procedure}</div>
-            <div className="text-gray-600">{frame.module}, line {frame.line}</div>
+            <div className="text-gray-600">
+              {frame.module}, line {frame.line}
+            </div>
             {Object.keys(frame.arguments).length > 0 && (
               <div className="text-gray-500 text-xs">
                 {Object.entries(frame.arguments).map(([key, value]) => (
-                  <span key={key}>{key}={String(value)} </span>
+                  <span key={key}>
+                    {key}={String(value)}{' '}
+                  </span>
                 ))}
               </div>
             )}
@@ -233,7 +249,7 @@ export const DebugToolbar: React.FC = () => {
         <Play size={16} />
         <span className="text-xs">Start</span>
       </button>
-      
+
       <button
         onClick={handleStop}
         disabled={debugMode === 'design'}
@@ -243,7 +259,7 @@ export const DebugToolbar: React.FC = () => {
         <Square size={16} />
         <span className="text-xs">End</span>
       </button>
-      
+
       <button
         onClick={handleBreak}
         disabled={debugMode !== 'run'}
@@ -253,9 +269,9 @@ export const DebugToolbar: React.FC = () => {
         <Square size={16} />
         <span className="text-xs">Break</span>
       </button>
-      
+
       <div className="w-px h-6 bg-gray-400 mx-1" />
-      
+
       <button
         onClick={() => handleStep('into')}
         disabled={debugMode !== 'break'}
@@ -264,7 +280,7 @@ export const DebugToolbar: React.FC = () => {
       >
         <StepInto size={16} />
       </button>
-      
+
       <button
         onClick={() => handleStep('over')}
         disabled={debugMode !== 'break'}
@@ -273,7 +289,7 @@ export const DebugToolbar: React.FC = () => {
       >
         <StepOver size={16} />
       </button>
-      
+
       <button
         onClick={() => handleStep('out')}
         disabled={debugMode !== 'break'}
@@ -282,7 +298,7 @@ export const DebugToolbar: React.FC = () => {
       >
         <StepOut size={16} />
       </button>
-      
+
       <div className="ml-auto text-xs text-gray-600">
         Mode: {debugMode === 'design' ? 'Design' : debugMode === 'run' ? 'Run' : 'Break'}
       </div>

@@ -3,7 +3,8 @@ import { Undo, Redo, History } from 'lucide-react';
 import { useUndoRedo } from '../../hooks/useUndoRedo';
 
 export const UndoRedoToolbar: React.FC = () => {
-  const { undo, redo, canUndo, canRedo, getLastAction, historyLength, clearHistory } = useUndoRedo();
+  const { undo, redo, canUndo, canRedo, getLastAction, historyLength, clearHistory } =
+    useUndoRedo();
 
   const handleUndo = () => {
     if (undo()) {
@@ -40,7 +41,7 @@ export const UndoRedoToolbar: React.FC = () => {
       >
         <Undo size={16} />
       </button>
-      
+
       <button
         data-redo-button
         onClick={handleRedo}
@@ -50,7 +51,7 @@ export const UndoRedoToolbar: React.FC = () => {
       >
         <Redo size={16} />
       </button>
-      
+
       <div className="relative group">
         <button
           className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 text-xs"
@@ -58,7 +59,7 @@ export const UndoRedoToolbar: React.FC = () => {
         >
           <History size={16} />
         </button>
-        
+
         {/* History dropdown */}
         <div className="absolute top-full left-0 mt-1 bg-white border border-gray-400 shadow-lg hidden group-hover:block z-50 min-w-48">
           <div className="p-2 border-b border-gray-300 text-xs font-bold">

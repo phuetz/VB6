@@ -32,11 +32,17 @@ export function analyzeVB6Code(code: string): { issues: CodeIssue[]; metrics: Co
         line: index + 1,
         message: 'Avoid GoTo statements',
         severity: 'warning',
-        code: 'VB005'
+        code: 'VB005',
       });
     }
 
-    const complexityKeywords = [/\bIf\b/i, /\bFor\b/i, /\bWhile\b/i, /\bDo\b/i, /\bSelect\s+Case\b/i];
+    const complexityKeywords = [
+      /\bIf\b/i,
+      /\bFor\b/i,
+      /\bWhile\b/i,
+      /\bDo\b/i,
+      /\bSelect\s+Case\b/i,
+    ];
     if (complexityKeywords.some(re => re.test(trimmed))) {
       complexity++;
     }
@@ -47,7 +53,7 @@ export function analyzeVB6Code(code: string): { issues: CodeIssue[]; metrics: Co
       line: 1,
       message: 'Option Explicit is recommended',
       severity: 'info',
-      code: 'VB006'
+      code: 'VB006',
     });
   }
 
@@ -56,7 +62,7 @@ export function analyzeVB6Code(code: string): { issues: CodeIssue[]; metrics: Co
     metrics: {
       linesOfCode: lines.length,
       commentLines,
-      complexity
-    }
+      complexity,
+    },
   };
 }

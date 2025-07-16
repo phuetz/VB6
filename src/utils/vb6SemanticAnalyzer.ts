@@ -7,10 +7,41 @@ export interface SemanticIssue {
 import { parseVB6Module } from './vb6Parser';
 
 const BUILTINS = new Set([
-  'msgbox','inputbox','print','len','left','right','mid','ucase','lcase','trim',
-  'val','str','now','timer','if','then','else','end','for','to','next','while',
-  'wend','do','loop','sub','function','dim','private','public','static','const',
-  'true','false','nothing'
+  'msgbox',
+  'inputbox',
+  'print',
+  'len',
+  'left',
+  'right',
+  'mid',
+  'ucase',
+  'lcase',
+  'trim',
+  'val',
+  'str',
+  'now',
+  'timer',
+  'if',
+  'then',
+  'else',
+  'end',
+  'for',
+  'to',
+  'next',
+  'while',
+  'wend',
+  'do',
+  'loop',
+  'sub',
+  'function',
+  'dim',
+  'private',
+  'public',
+  'static',
+  'const',
+  'true',
+  'false',
+  'nothing',
 ]);
 
 /**
@@ -40,7 +71,7 @@ export function analyzeVBSemantics(code: string): SemanticIssue[] {
           issues.push({
             line: proc.line + idx + 1,
             message: `Variable '${tok}' is not declared`,
-            code: 'SEM001'
+            code: 'SEM001',
           });
         }
       });

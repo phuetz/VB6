@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { Sparkles as WandSparkles, Pencil, ArrowRightLeft, ArrowBigUp, FileText, FolderPlus, ArrowDown, AlertTriangle } from 'lucide-react';
+import {
+  Sparkles as WandSparkles,
+  Pencil,
+  ArrowRightLeft,
+  ArrowBigUp,
+  FileText,
+  FolderPlus,
+  ArrowDown,
+  AlertTriangle,
+} from 'lucide-react';
 
 interface RefactorToolsProps {
   visible: boolean;
@@ -10,23 +19,23 @@ interface RefactorToolsProps {
 export const RefactorTools: React.FC<RefactorToolsProps> = ({
   visible,
   onClose,
-  onApplyRefactoring
+  onApplyRefactoring,
 }) => {
   const [activeRefactoring, setActiveRefactoring] = useState<string | null>(null);
   const [renameOptions, setRenameOptions] = useState({
     oldName: '',
     newName: '',
-    scope: 'current'
+    scope: 'current',
   });
   const [extractOptions, setExtractOptions] = useState({
     methodName: '',
     selectedCode: '',
-    parameters: [] as string[]
+    parameters: [] as string[],
   });
-  
+
   const handleApplyRefactoring = () => {
     if (!activeRefactoring) return;
-    
+
     switch (activeRefactoring) {
       case 'rename':
         onApplyRefactoring('rename', renameOptions);
@@ -37,10 +46,10 @@ export const RefactorTools: React.FC<RefactorToolsProps> = ({
       default:
         console.warn('Unknown refactoring type:', activeRefactoring);
     }
-    
+
     onClose();
   };
-  
+
   const refactoringOptions = [
     {
       id: 'rename',
@@ -54,7 +63,7 @@ export const RefactorTools: React.FC<RefactorToolsProps> = ({
             <input
               type="text"
               value={renameOptions.oldName}
-              onChange={(e) => setRenameOptions({...renameOptions, oldName: e.target.value})}
+              onChange={e => setRenameOptions({ ...renameOptions, oldName: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
               placeholder="e.g. intCounter"
             />
@@ -64,7 +73,7 @@ export const RefactorTools: React.FC<RefactorToolsProps> = ({
             <input
               type="text"
               value={renameOptions.newName}
-              onChange={(e) => setRenameOptions({...renameOptions, newName: e.target.value})}
+              onChange={e => setRenameOptions({ ...renameOptions, newName: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
               placeholder="e.g. itemCounter"
             />
@@ -73,7 +82,7 @@ export const RefactorTools: React.FC<RefactorToolsProps> = ({
             <label className="block text-xs font-semibold mb-1">Scope</label>
             <select
               value={renameOptions.scope}
-              onChange={(e) => setRenameOptions({...renameOptions, scope: e.target.value})}
+              onChange={e => setRenameOptions({ ...renameOptions, scope: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
             >
               <option value="current">Current File</option>
@@ -85,7 +94,7 @@ export const RefactorTools: React.FC<RefactorToolsProps> = ({
             Rename will update all references to this symbol
           </div>
         </div>
-      )
+      ),
     },
     {
       id: 'extract',
@@ -99,7 +108,7 @@ export const RefactorTools: React.FC<RefactorToolsProps> = ({
             <input
               type="text"
               value={extractOptions.methodName}
-              onChange={(e) => setExtractOptions({...extractOptions, methodName: e.target.value})}
+              onChange={e => setExtractOptions({ ...extractOptions, methodName: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
               placeholder="e.g. ProcessData"
             />
@@ -108,7 +117,7 @@ export const RefactorTools: React.FC<RefactorToolsProps> = ({
             <label className="block text-xs font-semibold mb-1">Selected Code</label>
             <textarea
               value={extractOptions.selectedCode}
-              onChange={(e) => setExtractOptions({...extractOptions, selectedCode: e.target.value})}
+              onChange={e => setExtractOptions({ ...extractOptions, selectedCode: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded text-sm h-24 font-mono"
               placeholder="Code to extract..."
             />
@@ -118,7 +127,7 @@ export const RefactorTools: React.FC<RefactorToolsProps> = ({
             Parameters will be automatically detected
           </div>
         </div>
-      )
+      ),
     },
     {
       id: 'convert',
@@ -143,20 +152,25 @@ export const RefactorTools: React.FC<RefactorToolsProps> = ({
       title: 'Encapsulate Field',
       description: 'Create getters and setters for variables',
       icon: <FolderPlus size={18} />,
-    }
+    },
   ];
-  
+
   if (!visible) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-200 border-2 border-gray-400 shadow-lg" style={{ width: '700px', height: '500px' }}>
+      <div
+        className="bg-gray-200 border-2 border-gray-400 shadow-lg"
+        style={{ width: '700px', height: '500px' }}
+      >
         <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <WandSparkles size={16} />
             <span>Refactoring Tools</span>
           </div>
-          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">×</button>
+          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">
+            ×
+          </button>
         </div>
 
         <div className="p-4 h-full flex flex-col">
@@ -168,20 +182,24 @@ export const RefactorTools: React.FC<RefactorToolsProps> = ({
             {/* Options */}
             <div className="w-1/3">
               <div className="bg-white border border-gray-400 rounded overflow-hidden">
-                {refactoringOptions.map((option) => (
+                {refactoringOptions.map(option => (
                   <div
                     key={option.id}
                     className={`p-3 border-b border-gray-200 cursor-pointer ${
-                      activeRefactoring === option.id 
-                        ? 'bg-blue-50 border-l-4 border-blue-500' 
+                      activeRefactoring === option.id
+                        ? 'bg-blue-50 border-l-4 border-blue-500'
                         : 'hover:bg-gray-50 border-l-4 border-transparent'
                     }`}
                     onClick={() => setActiveRefactoring(option.id)}
                   >
                     <div className="flex items-center gap-2">
-                      <div className={`p-1 rounded ${
-                        activeRefactoring === option.id ? 'bg-blue-100 text-blue-600' : 'text-gray-600'
-                      }`}>
+                      <div
+                        className={`p-1 rounded ${
+                          activeRefactoring === option.id
+                            ? 'bg-blue-100 text-blue-600'
+                            : 'text-gray-600'
+                        }`}
+                      >
                         {option.icon}
                       </div>
                       <div className="flex-1">
@@ -202,12 +220,12 @@ export const RefactorTools: React.FC<RefactorToolsProps> = ({
                     <h3 className="text-lg font-bold mb-4">
                       {refactoringOptions.find(o => o.id === activeRefactoring)?.title}
                     </h3>
-                    
+
                     <div className="mb-4">
                       <p className="text-sm text-gray-600 mb-4">
                         {refactoringOptions.find(o => o.id === activeRefactoring)?.description}
                       </p>
-                      
+
                       {refactoringOptions.find(o => o.id === activeRefactoring)?.form || (
                         <div className="p-4 text-center text-gray-500">
                           This refactoring option is not available yet.

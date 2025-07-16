@@ -33,11 +33,13 @@ export const BreakpointManager: React.FC<BreakpointManagerProps> = ({
   onAddBreakpoint,
   onRemoveBreakpoint,
   onUpdateBreakpoint,
-  onNavigateToBreakpoint
+  onNavigateToBreakpoint,
 }) => {
   const [editingBreakpoint, setEditingBreakpoint] = useState<string | null>(null);
   const [conditionText, setConditionText] = useState('');
-  const [hitConditionType, setHitConditionType] = useState<'equals' | 'greaterThan' | 'multiplier'>('equals');
+  const [hitConditionType, setHitConditionType] = useState<'equals' | 'greaterThan' | 'multiplier'>(
+    'equals'
+  );
   const [hitConditionValue, setHitConditionValue] = useState(0);
   const [logMessage, setLogMessage] = useState('');
 
@@ -51,35 +53,35 @@ export const BreakpointManager: React.FC<BreakpointManagerProps> = ({
 
   const handleSaveEditing = (id: string) => {
     const updates: Partial<Breakpoint> = {};
-    
+
     if (conditionText.trim()) {
       updates.condition = conditionText.trim();
     } else {
       updates.condition = undefined;
     }
-    
+
     if (hitConditionValue > 0) {
       updates.hitCountCondition = {
         type: hitConditionType,
-        value: hitConditionValue
+        value: hitConditionValue,
       };
     } else {
       updates.hitCountCondition = undefined;
     }
-    
+
     if (logMessage.trim()) {
       updates.logMessage = logMessage.trim();
     } else {
       updates.logMessage = undefined;
     }
-    
+
     onUpdateBreakpoint(id, updates);
     setEditingBreakpoint(null);
   };
 
   const formatHitCondition = (bp: Breakpoint) => {
     if (!bp.hitCountCondition) return 'None';
-    
+
     switch (bp.hitCountCondition.type) {
       case 'equals':
         return `Equals ${bp.hitCountCondition.value}`;
@@ -96,13 +98,18 @@ export const BreakpointManager: React.FC<BreakpointManagerProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-200 border-2 border-gray-400 shadow-lg" style={{ width: '800px', height: '600px' }}>
+      <div
+        className="bg-gray-200 border-2 border-gray-400 shadow-lg"
+        style={{ width: '800px', height: '600px' }}
+      >
         <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AlertOctagon size={16} />
             <span>Breakpoint Manager</span>
           </div>
-          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">×</button>
+          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">
+            ×
+          </button>
         </div>
 
         <div className="p-4 h-full flex flex-col">
@@ -111,7 +118,7 @@ export const BreakpointManager: React.FC<BreakpointManagerProps> = ({
               {breakpoints.length} breakpoint{breakpoints.length !== 1 ? 's' : ''} set
             </div>
             <div className="space-x-2">
-              <button 
+              <button
                 className="px-3 py-1 text-xs bg-green-600 text-white hover:bg-green-700 rounded flex items-center gap-1"
                 onClick={() => {
                   // Open add breakpoint dialog - would normally use a form
@@ -120,7 +127,7 @@ export const BreakpointManager: React.FC<BreakpointManagerProps> = ({
                     file: 'Form1.frm',
                     line: 1,
                     column: 1,
-                    enabled: true
+                    enabled: true,
                   };
                   onAddBreakpoint(newBp);
                 }}
@@ -128,8 +135,8 @@ export const BreakpointManager: React.FC<BreakpointManagerProps> = ({
                 <Plus size={12} />
                 Add
               </button>
-              
-              <button 
+
+              <button
                 className="px-3 py-1 text-xs bg-red-600 text-white hover:bg-red-700 rounded disabled:opacity-50"
                 disabled={breakpoints.length === 0}
                 onClick={() => {
@@ -169,8 +176,10 @@ export const BreakpointManager: React.FC<BreakpointManagerProps> = ({
                             />
                           </td>
                           <td className="p-2 font-mono">
-                            <div className="flex items-center gap-1 cursor-pointer hover:text-blue-600"
-                                 onClick={() => onNavigateToBreakpoint(bp.file, bp.line, bp.column)}>
+                            <div
+                              className="flex items-center gap-1 cursor-pointer hover:text-blue-600"
+                              onClick={() => onNavigateToBreakpoint(bp.file, bp.line, bp.column)}
+                            >
                               <FileText size={12} />
                               {bp.file}:{bp.line}
                             </div>
@@ -205,16 +214,18 @@ export const BreakpointManager: React.FC<BreakpointManagerProps> = ({
                             </div>
                           </td>
                         </tr>
-                        
+
                         {editingBreakpoint === bp.id && (
                           <tr className="bg-blue-50">
                             <td colSpan={5} className="p-3 space-y-2">
                               <div>
-                                <label className="block text-xs font-semibold mb-1">Condition (optional)</label>
+                                <label className="block text-xs font-semibold mb-1">
+                                  Condition (optional)
+                                </label>
                                 <input
                                   type="text"
                                   value={conditionText}
-                                  onChange={(e) => setConditionText(e.target.value)}
+                                  onChange={e => setConditionText(e.target.value)}
                                   placeholder="e.g. x > 5 && y < 10"
                                   className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                                 />
@@ -222,54 +233,67 @@ export const BreakpointManager: React.FC<BreakpointManagerProps> = ({
                                   Enter an expression that must be true for the breakpoint to be hit
                                 </div>
                               </div>
-                              
+
                               <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                  <label className="block text-xs font-semibold mb-1">Hit Condition Type</label>
+                                  <label className="block text-xs font-semibold mb-1">
+                                    Hit Condition Type
+                                  </label>
                                   <select
                                     value={hitConditionType}
-                                    onChange={(e) => setHitConditionType(e.target.value as any)}
+                                    onChange={e => setHitConditionType(e.target.value as any)}
                                     className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                                   >
                                     <option value="equals">Break when hits equals</option>
-                                    <option value="greaterThan">Break when hits greater than</option>
-                                    <option value="multiplier">Break when hits is multiple of</option>
+                                    <option value="greaterThan">
+                                      Break when hits greater than
+                                    </option>
+                                    <option value="multiplier">
+                                      Break when hits is multiple of
+                                    </option>
                                   </select>
                                 </div>
                                 <div>
-                                  <label className="block text-xs font-semibold mb-1">Hit Count Value</label>
+                                  <label className="block text-xs font-semibold mb-1">
+                                    Hit Count Value
+                                  </label>
                                   <input
                                     type="number"
                                     value={hitConditionValue}
-                                    onChange={(e) => setHitConditionValue(parseInt(e.target.value) || 0)}
+                                    onChange={e =>
+                                      setHitConditionValue(parseInt(e.target.value) || 0)
+                                    }
                                     min={0}
                                     className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                                   />
                                 </div>
                               </div>
-                              
+
                               <div>
-                                <label className="block text-xs font-semibold mb-1">Log Message (optional)</label>
+                                <label className="block text-xs font-semibold mb-1">
+                                  Log Message (optional)
+                                </label>
                                 <input
                                   type="text"
                                   value={logMessage}
-                                  onChange={(e) => setLogMessage(e.target.value)}
+                                  onChange={e => setLogMessage(e.target.value)}
                                   placeholder="Message to log when breakpoint is hit"
                                   className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                                 />
                                 <div className="text-xs text-gray-500 mt-1">
-                                  Log without breaking execution. Use {'{varName}'} to include variable values.
+                                  Log without breaking execution. Use {'{varName}'} to include
+                                  variable values.
                                 </div>
                               </div>
-                              
+
                               <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-gray-300">
-                                <button 
+                                <button
                                   className="px-3 py-1 bg-gray-300 text-gray-800 text-xs rounded hover:bg-gray-400"
                                   onClick={() => setEditingBreakpoint(null)}
                                 >
                                   Cancel
                                 </button>
-                                <button 
+                                <button
                                   className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
                                   onClick={() => handleSaveEditing(bp.id)}
                                 >
@@ -292,13 +316,16 @@ export const BreakpointManager: React.FC<BreakpointManagerProps> = ({
               </table>
             </div>
           </div>
-          
+
           <div className="mt-4 pt-3 border-t border-gray-300 flex flex-col">
             <div className="mb-2 text-sm font-semibold">Breakpoint Tips</div>
             <div className="text-xs text-gray-600 space-y-1">
               <div className="flex items-center gap-1">
                 <CheckCircle size={12} className="text-green-600" />
-                <span>Use conditional breakpoints to pause execution only when specific conditions are met.</span>
+                <span>
+                  Use conditional breakpoints to pause execution only when specific conditions are
+                  met.
+                </span>
               </div>
               <div className="flex items-center gap-1">
                 <Play size={12} className="text-blue-600" />

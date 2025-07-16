@@ -15,21 +15,21 @@ interface DraggableItemProps {
 }
 
 export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(
-  ({ id, data, disabled = false, children, className = '', style = {}, onDragStart, onDragEnd }, ref) => {
+  (
+    { id, data, disabled = false, children, className = '', style = {}, onDragStart, onDragEnd },
+    ref
+  ) => {
     const addLog = useVB6Store(state => state.addLog);
 
-    const {
-      attributes,
-      listeners,
-      setNodeRef,
-      transform,
-      isDragging,
-      isOver,
-    } = useDraggable(data?.type ? {
-      id,
-      data,
-      disabled,
-    } : { id, data, disabled });
+    const { attributes, listeners, setNodeRef, transform, isDragging, isOver } = useDraggable(
+      data?.type
+        ? {
+            id,
+            data,
+            disabled,
+          }
+        : { id, data, disabled }
+    );
 
     const dragStyle = {
       transform: CSS.Translate.toString(transform),
@@ -48,7 +48,7 @@ export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(
         onDragEnd();
         if (transform) {
           addLog('info', 'DraggableItem', `Drag ended for ${id}`, {
-            transform: { x: transform.x, y: transform.y }
+            transform: { x: transform.x, y: transform.y },
           });
         }
       }
@@ -57,7 +57,7 @@ export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(
 
     return (
       <div
-        ref={(node) => {
+        ref={node => {
           setNodeRef(node);
           if (typeof ref === 'function') {
             ref(node);
@@ -73,7 +73,7 @@ export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(
         data-draggable-id={id}
       >
         {children}
-        
+
         {/* Indicateur de drag */}
         {(isDragging || data?.type === 'new-control') && (
           <div className="absolute bottom-0 right-0 bg-blue-600 text-white text-xs px-1 py-0.5 rounded-tl">

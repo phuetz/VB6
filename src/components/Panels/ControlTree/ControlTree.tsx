@@ -23,7 +23,9 @@ const ControlTree: React.FC = () => {
       <div className="bg-blue-600 text-white text-xs font-bold p-1 flex items-center justify-between">
         <span>Controls</span>
         <button
-          onClick={() => dispatch({ type: 'TOGGLE_WINDOW', payload: { windowName: 'showControlTree' } })}
+          onClick={() =>
+            dispatch({ type: 'TOGGLE_WINDOW', payload: { windowName: 'showControlTree' } })
+          }
           className="hover:bg-blue-700 px-1"
         >
           ×

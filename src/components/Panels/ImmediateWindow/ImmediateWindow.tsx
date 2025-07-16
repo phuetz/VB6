@@ -1,21 +1,31 @@
 import React from 'react';
 import { useVB6 } from '../../../context/VB6Context';
+import { safeEvaluator } from '../../../utils/safeExpressionEvaluator';
 
 const ImmediateWindow: React.FC = () => {
   const { state, dispatch } = useVB6();
 
   const executeImmediateCommand = () => {
     if (!state.immediateCommand) return;
-    
+
     try {
-      const result = eval(state.immediateCommand);
+      // Build context from current state (you can extend this with actual variables)
+      const context = {
+        // Add any project variables or form controls here
+        // For now, we'll use an empty context
+      };
+
+      const result = safeEvaluator.evaluate(state.immediateCommand, context);
       dispatch({ type: 'ADD_CONSOLE_OUTPUT', payload: { message: `> ${state.immediateCommand}` } });
       if (result !== undefined) {
         dispatch({ type: 'ADD_CONSOLE_OUTPUT', payload: { message: String(result) } });
       }
       dispatch({ type: 'SET_IMMEDIATE_COMMAND', payload: { command: '' } });
     } catch (error) {
-      dispatch({ type: 'ADD_CONSOLE_OUTPUT', payload: { message: `Error: ${(error as Error).message}` } });
+      dispatch({
+        type: 'ADD_CONSOLE_OUTPUT',
+        payload: { message: `Error: ${(error as Error).message}` },
+      });
     }
   };
 
@@ -32,26 +42,32 @@ const ImmediateWindow: React.FC = () => {
             Clear
           </button>
           <button
-            onClick={() => dispatch({ type: 'TOGGLE_WINDOW', payload: { windowName: 'showImmediateWindow' } })}
+            onClick={() =>
+              dispatch({ type: 'TOGGLE_WINDOW', payload: { windowName: 'showImmediateWindow' } })
+            }
             className="hover:bg-gray-300 px-1"
           >
             ×
           </button>
         </div>
       </div>
-      
+
       <div className="flex-1 p-1 font-mono text-xs overflow-y-auto bg-white">
         {state.consoleOutput.map((line, index) => (
-          <div key={index} className="hover:bg-gray-100">{line}</div>
+          <div key={index} className="hover:bg-gray-100">
+            {line}
+          </div>
         ))}
       </div>
-      
+
       <div className="border-t border-gray-300 p-1">
         <input
           type="text"
           value={state.immediateCommand}
-          onChange={(e) => dispatch({ type: 'SET_IMMEDIATE_COMMAND', payload: { command: e.target.value } })}
-          onKeyPress={(e) => {
+          onChange={e =>
+            dispatch({ type: 'SET_IMMEDIATE_COMMAND', payload: { command: e.target.value } })
+          }
+          onKeyPress={e => {
             if (e.key === 'Enter') {
               executeImmediateCommand();
             }

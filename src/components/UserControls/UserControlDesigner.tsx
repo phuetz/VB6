@@ -35,10 +35,7 @@ interface UserControlDesignerProps {
   onClose: () => void;
 }
 
-export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
-  visible,
-  onClose
-}) => {
+export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({ visible, onClose }) => {
   const { state } = useVB6();
   const [userControls, setUserControls] = useState<UserControl[]>([
     {
@@ -49,15 +46,38 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
       controls: [],
       events: ['Click', 'MouseEnter', 'MouseLeave'],
       properties: [
-        { name: 'GradientStart', type: 'Color', defaultValue: '#0066CC', readOnly: false, description: 'Starting color for gradient' },
-        { name: 'GradientEnd', type: 'Color', defaultValue: '#004499', readOnly: false, description: 'Ending color for gradient' },
-        { name: 'BorderRadius', type: 'Integer', defaultValue: 5, readOnly: false, description: 'Corner radius in pixels' }
+        {
+          name: 'GradientStart',
+          type: 'Color',
+          defaultValue: '#0066CC',
+          readOnly: false,
+          description: 'Starting color for gradient',
+        },
+        {
+          name: 'GradientEnd',
+          type: 'Color',
+          defaultValue: '#004499',
+          readOnly: false,
+          description: 'Ending color for gradient',
+        },
+        {
+          name: 'BorderRadius',
+          type: 'Integer',
+          defaultValue: 5,
+          readOnly: false,
+          description: 'Corner radius in pixels',
+        },
       ],
       methods: [
-        { name: 'Animate', parameters: [{ name: 'duration', type: 'Integer', optional: false }], returnType: 'void', description: 'Animates the button' }
+        {
+          name: 'Animate',
+          parameters: [{ name: 'duration', type: 'Integer', optional: false }],
+          returnType: 'void',
+          description: 'Animates the button',
+        },
       ],
       created: new Date('2024-01-15'),
-      modified: new Date('2024-01-20')
+      modified: new Date('2024-01-20'),
     },
     {
       id: '2',
@@ -67,17 +87,48 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
       controls: [],
       events: ['CellClick', 'CellEdit', 'ColumnSort'],
       properties: [
-        { name: 'DataSource', type: 'Object', defaultValue: null, readOnly: false, description: 'Data source for the grid' },
-        { name: 'AllowSorting', type: 'Boolean', defaultValue: true, readOnly: false, description: 'Enable column sorting' },
-        { name: 'AllowFiltering', type: 'Boolean', defaultValue: true, readOnly: false, description: 'Enable row filtering' }
+        {
+          name: 'DataSource',
+          type: 'Object',
+          defaultValue: null,
+          readOnly: false,
+          description: 'Data source for the grid',
+        },
+        {
+          name: 'AllowSorting',
+          type: 'Boolean',
+          defaultValue: true,
+          readOnly: false,
+          description: 'Enable column sorting',
+        },
+        {
+          name: 'AllowFiltering',
+          type: 'Boolean',
+          defaultValue: true,
+          readOnly: false,
+          description: 'Enable row filtering',
+        },
       ],
       methods: [
-        { name: 'Refresh', parameters: [], returnType: 'void', description: 'Refreshes the grid data' },
-        { name: 'Sort', parameters: [{ name: 'column', type: 'String', optional: false }, { name: 'ascending', type: 'Boolean', optional: true }], returnType: 'void', description: 'Sorts by column' }
+        {
+          name: 'Refresh',
+          parameters: [],
+          returnType: 'void',
+          description: 'Refreshes the grid data',
+        },
+        {
+          name: 'Sort',
+          parameters: [
+            { name: 'column', type: 'String', optional: false },
+            { name: 'ascending', type: 'Boolean', optional: true },
+          ],
+          returnType: 'void',
+          description: 'Sorts by column',
+        },
       ],
       created: new Date('2024-01-10'),
-      modified: new Date('2024-01-25')
-    }
+      modified: new Date('2024-01-25'),
+    },
   ]);
 
   const [selectedControl, setSelectedControl] = useState<string | null>(null);
@@ -95,13 +146,31 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
         controls: [],
         events: ['Click'],
         properties: [
-          { name: 'Name', type: 'String', defaultValue: newControlName.trim(), readOnly: true, description: 'Control name' },
-          { name: 'Enabled', type: 'Boolean', defaultValue: true, readOnly: false, description: 'Enable/disable control' },
-          { name: 'Visible', type: 'Boolean', defaultValue: true, readOnly: false, description: 'Show/hide control' }
+          {
+            name: 'Name',
+            type: 'String',
+            defaultValue: newControlName.trim(),
+            readOnly: true,
+            description: 'Control name',
+          },
+          {
+            name: 'Enabled',
+            type: 'Boolean',
+            defaultValue: true,
+            readOnly: false,
+            description: 'Enable/disable control',
+          },
+          {
+            name: 'Visible',
+            type: 'Boolean',
+            defaultValue: true,
+            readOnly: false,
+            description: 'Show/hide control',
+          },
         ],
         methods: [],
         created: new Date(),
-        modified: new Date()
+        modified: new Date(),
       };
 
       setUserControls([...userControls, newControl]);
@@ -112,39 +181,52 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
     }
   }, [newControlName, newControlDescription, userControls]);
 
-  const handleDeleteControl = useCallback((id: string) => {
-    if (confirm('Are you sure you want to delete this user control?')) {
-      setUserControls(userControls.filter(c => c.id !== id));
-      if (selectedControl === id) {
-        setSelectedControl(null);
+  const handleDeleteControl = useCallback(
+    (id: string) => {
+      if (confirm('Are you sure you want to delete this user control?')) {
+        setUserControls(userControls.filter(c => c.id !== id));
+        if (selectedControl === id) {
+          setSelectedControl(null);
+        }
       }
-    }
-  }, [userControls, selectedControl]);
+    },
+    [userControls, selectedControl]
+  );
 
-  const handleDuplicateControl = useCallback((id: string) => {
-    const original = userControls.find(c => c.id === id);
-    if (original) {
-      const duplicate: UserControl = {
-        ...original,
-        id: Date.now().toString(),
-        name: original.name + '_Copy',
-        created: new Date(),
-        modified: new Date()
-      };
-      setUserControls([...userControls, duplicate]);
-    }
-  }, [userControls]);
+  const handleDuplicateControl = useCallback(
+    (id: string) => {
+      const original = userControls.find(c => c.id === id);
+      if (original) {
+        const duplicate: UserControl = {
+          ...original,
+          id: Date.now().toString(),
+          name: original.name + '_Copy',
+          created: new Date(),
+          modified: new Date(),
+        };
+        setUserControls([...userControls, duplicate]);
+      }
+    },
+    [userControls]
+  );
 
-  const selectedControlData = selectedControl ? userControls.find(c => c.id === selectedControl) : null;
+  const selectedControlData = selectedControl
+    ? userControls.find(c => c.id === selectedControl)
+    : null;
 
   if (!visible) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-200 border-2 border-gray-400 shadow-lg" style={{ width: '900px', height: '700px' }}>
+      <div
+        className="bg-gray-200 border-2 border-gray-400 shadow-lg"
+        style={{ width: '900px', height: '700px' }}
+      >
         <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
           <span>User Control Designer</span>
-          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">×</button>
+          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">
+            ×
+          </button>
         </div>
 
         <div className="p-4 h-full flex gap-4">
@@ -174,14 +256,16 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
                     <span className="text-lg">{control.icon}</span>
                     <div className="flex-1 min-w-0">
                       <div className="font-bold text-sm truncate">{control.name}</div>
-                      <div className="text-xs text-gray-600 line-clamp-2">{control.description}</div>
+                      <div className="text-xs text-gray-600 line-clamp-2">
+                        {control.description}
+                      </div>
                       <div className="text-xs text-gray-500 mt-1">
                         Modified: {control.modified.toLocaleDateString()}
                       </div>
                     </div>
                     <div className="flex flex-col gap-1">
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           handleDuplicateControl(control.id);
                         }}
@@ -191,7 +275,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
                         <Copy size={12} />
                       </button>
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           handleDeleteControl(control.id);
                         }}
@@ -287,7 +371,10 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
         {/* New Control Dialog */}
         {showNewControlDialog && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
-            <div className="bg-gray-200 border-2 border-gray-400 shadow-lg" style={{ width: '400px' }}>
+            <div
+              className="bg-gray-200 border-2 border-gray-400 shadow-lg"
+              style={{ width: '400px' }}
+            >
               <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
                 <span>New User Control</span>
                 <button
@@ -303,7 +390,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
                   <input
                     type="text"
                     value={newControlName}
-                    onChange={(e) => setNewControlName(e.target.value)}
+                    onChange={e => setNewControlName(e.target.value)}
                     className="w-full px-2 py-1 border border-gray-400 text-sm"
                     placeholder="MyCustomControl"
                   />
@@ -312,7 +399,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
                   <label className="block text-xs font-bold mb-1">Description:</label>
                   <textarea
                     value={newControlDescription}
-                    onChange={(e) => setNewControlDescription(e.target.value)}
+                    onChange={e => setNewControlDescription(e.target.value)}
                     className="w-full px-2 py-1 border border-gray-400 text-sm"
                     rows={3}
                     placeholder="Description of your custom control..."

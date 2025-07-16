@@ -9,13 +9,7 @@ interface ContextMenuProps {
   visible: boolean;
 }
 
-export const ContextMenu: React.FC<ContextMenuProps> = ({
-  x,
-  y,
-  items,
-  onClose,
-  visible
-}) => {
+export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose, visible }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [submenuOpen, setSubmenuOpen] = useState<string | null>(null);
   const [submenuPosition, setSubmenuPosition] = useState({ x: 0, y: 0 });
@@ -69,7 +63,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
 
   const handleItemClick = (item: ContextMenuItem) => {
     if (item.disabled) return;
-    
+
     if (item.submenu) {
       setSubmenuOpen(item.label);
       // Calculate submenu position
@@ -77,7 +71,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
       if (rect) {
         setSubmenuPosition({
           x: rect.right,
-          y: rect.top
+          y: rect.top,
         });
       }
     } else {
@@ -103,7 +97,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           left: x,
           top: y,
           fontFamily: 'MS Sans Serif, sans-serif',
-          fontSize: '11px'
+          fontSize: '11px',
         }}
         onMouseLeave={handleSubmenuMouseLeave}
       >
@@ -124,18 +118,12 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                 }}
               >
                 <div className="flex items-center">
-                  {item.icon && (
-                    <span className="mr-2 w-4 text-center">{item.icon}</span>
-                  )}
+                  {item.icon && <span className="mr-2 w-4 text-center">{item.icon}</span>}
                   <span>{item.label}</span>
                 </div>
                 <div className="flex items-center ml-4">
-                  {item.shortcut && (
-                    <span className="text-gray-500 text-xs">{item.shortcut}</span>
-                  )}
-                  {item.submenu && (
-                    <span className="ml-2">▶</span>
-                  )}
+                  {item.shortcut && <span className="text-gray-500 text-xs">{item.shortcut}</span>}
+                  {item.submenu && <span className="ml-2">▶</span>}
                 </div>
               </div>
             )}

@@ -36,47 +36,105 @@ const VB6_LANGUAGE_TOKENS: monaco.languages.IMonarchLanguage = {
   ignoreCase: true,
 
   keywords: [
-    'And', 'As', 'Boolean', 'ByRef', 'Byte', 'ByVal', 'Call', 'Case', 'Const',
-    'Currency', 'Dim', 'Do', 'Double', 'Each', 'Else', 'ElseIf', 'End', 'Enum',
-    'Exit', 'False', 'For', 'Function', 'Get', 'GoTo', 'If', 'In', 'Integer',
-    'Is', 'Let', 'Long', 'Loop', 'Mod', 'New', 'Next', 'Not', 'Nothing', 'Object',
-    'On', 'Option', 'Optional', 'Or', 'Private', 'Property', 'Public', 'Resume',
-    'Select', 'Set', 'Single', 'Static', 'String', 'Sub', 'Then', 'To', 'True',
-    'Type', 'Until', 'Variant', 'Wend', 'While', 'With', 'Xor',
+    'And',
+    'As',
+    'Boolean',
+    'ByRef',
+    'Byte',
+    'ByVal',
+    'Call',
+    'Case',
+    'Const',
+    'Currency',
+    'Dim',
+    'Do',
+    'Double',
+    'Each',
+    'Else',
+    'ElseIf',
+    'End',
+    'Enum',
+    'Exit',
+    'False',
+    'For',
+    'Function',
+    'Get',
+    'GoTo',
+    'If',
+    'In',
+    'Integer',
+    'Is',
+    'Let',
+    'Long',
+    'Loop',
+    'Mod',
+    'New',
+    'Next',
+    'Not',
+    'Nothing',
+    'Object',
+    'On',
+    'Option',
+    'Optional',
+    'Or',
+    'Private',
+    'Property',
+    'Public',
+    'Resume',
+    'Select',
+    'Set',
+    'Single',
+    'Static',
+    'String',
+    'Sub',
+    'Then',
+    'To',
+    'True',
+    'Type',
+    'Until',
+    'Variant',
+    'Wend',
+    'While',
+    'With',
+    'Xor',
   ],
 
-  operators: [
-    '=', '>', '<', '<=', '>=', '<>', '+', '-', '*', '/', '\\', '^', '&',
-  ],
+  operators: ['=', '>', '<', '<=', '>=', '<>', '+', '-', '*', '/', '\\', '^', '&'],
 
   // eslint-disable-next-line no-useless-escape
   symbols: /[=><!~?:&|+\-*\/\^%]+/,
 
   tokenizer: {
     root: [
-      [/[a-zA-Z_$][\w$]*/, {
-        cases: {
-          '@keywords': 'keyword',
-          '@default': 'identifier'
-        }
-      }],
+      [
+        /[a-zA-Z_$][\w$]*/,
+        {
+          cases: {
+            '@keywords': 'keyword',
+            '@default': 'identifier',
+          },
+        },
+      ],
       [/\d*\.\d+([eE][-+]?\d+)?/, 'number.float'],
       [/\d+/, 'number'],
       [/"([^"\\]|\\.)*$/, 'string.invalid'],
       [/"/, 'string', '@string'],
       [/'.*$/, 'comment'],
-      [/@symbols/, {
-        cases: {
-          '@operators': 'operator',
-          '@default': ''
-        }
-      }],
+      [
+        /@symbols/,
+        {
+          cases: {
+            '@operators': 'operator',
+            '@default': '',
+          },
+        },
+      ],
       [/\s+/, 'white'],
     ],
 
     string: [
       [/[^\\"]+/, 'string'],
-      [/"/, 'string', '@pop']
+      [/"/, 'string', '@pop'],
     ],
   },
 };
@@ -86,13 +144,13 @@ const VB6_COMPLETION_PROVIDER: monaco.languages.CompletionItemProvider = {
   provideCompletionItems: (model, position) => {
     const suggestions: monaco.languages.CompletionItem[] = [
       // Keywords
-      ...VB6_LANGUAGE_TOKENS.keywords!.map((keyword) => ({
+      ...VB6_LANGUAGE_TOKENS.keywords!.map(keyword => ({
         label: keyword,
         kind: monaco.languages.CompletionItemKind.Keyword,
         insertText: keyword,
         detail: `VB6 keyword: ${keyword}`,
       })),
-      
+
       // Functions
       {
         label: 'MsgBox',
@@ -117,38 +175,28 @@ const VB6_COMPLETION_PROVIDER: monaco.languages.CompletionItemProvider = {
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'Returns the length of a string',
       },
-      
+
       // Control structures
       {
         label: 'If Then',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: [
-          'If ${1:condition} Then',
-          '    ${2:// code}',
-          'End If'
-        ].join('\n'),
+        insertText: ['If ${1:condition} Then', '    ${2:// code}', 'End If'].join('\n'),
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'If-Then statement',
       },
       {
         label: 'For Loop',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: [
-          'For ${1:i} = ${2:1} To ${3:10}',
-          '    ${4:// code}',
-          'Next ${1:i}'
-        ].join('\n'),
+        insertText: ['For ${1:i} = ${2:1} To ${3:10}', '    ${4:// code}', 'Next ${1:i}'].join(
+          '\n'
+        ),
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'For-Next loop',
       },
       {
         label: 'Sub Procedure',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: [
-          'Private Sub ${1:SubName}()',
-          '    ${2:// code}',
-          'End Sub'
-        ].join('\n'),
+        insertText: ['Private Sub ${1:SubName}()', '    ${2:// code}', 'End Sub'].join('\n'),
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'Sub procedure',
       },
@@ -162,7 +210,7 @@ const MonacoCodeEditor: React.FC = () => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = useState(false);
-  
+
   const {
     selectedControls,
     selectedEvent,
@@ -170,7 +218,7 @@ const MonacoCodeEditor: React.FC = () => {
     controls,
     updateEventCode,
     setSelectedEvent,
-    selectControls
+    selectControls,
   } = useVB6Store();
 
   // Initialize Monaco Editor
@@ -236,12 +284,15 @@ const MonacoCodeEditor: React.FC = () => {
         // Extract the actual code from the editor (which contains procedure wrappers)
         const procedureStart = `Private Sub ${selectedControls[0].name}_${selectedEvent}()\n`;
         const procedureEnd = `\nEnd Sub`;
-        
+
         let codeContent = value;
         if (codeContent.startsWith(procedureStart) && codeContent.endsWith(procedureEnd)) {
-          codeContent = codeContent.substring(procedureStart.length, codeContent.length - procedureEnd.length);
+          codeContent = codeContent.substring(
+            procedureStart.length,
+            codeContent.length - procedureEnd.length
+          );
         }
-        
+
         const eventKey = `${selectedControls[0].name}_${selectedEvent}`;
         updateEventCode(eventKey, codeContent);
       }
@@ -261,14 +312,14 @@ const MonacoCodeEditor: React.FC = () => {
       const control = selectedControls[0];
       const eventKey = `${control.name}_${selectedEvent}`;
       content = eventCode[eventKey] || '';
-      
+
       // Add procedure wrapper
       const procedureStart = `Private Sub ${control.name}_${selectedEvent}()\n`;
       const procedureEnd = `\nEnd Sub`;
       const fullContent = procedureStart + content + procedureEnd;
-      
+
       editorRef.current.setValue(fullContent);
-      
+
       // Position cursor inside the procedure
       const model = editorRef.current.getModel();
       if (model) {
@@ -285,42 +336,60 @@ const MonacoCodeEditor: React.FC = () => {
       const generalContent = `' General Declarations\n' Add global variables and constants here\n\n${content}`;
       editorRef.current.setValue(generalContent);
     }
-  }, [selectedControls, selectedEvent, eventCode, isReady]);
+  }, [selectedControls, selectedEvent, eventCode, isReady, updateEventCode]);
 
   const getAvailableEvents = (controlType: string) => {
-    const commonEvents = ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove', 'KeyDown', 'KeyUp', 'KeyPress'];
-    const formEvents = ['Load', 'Unload', 'Activate', 'Deactivate', 'Initialize', 'Paint', 'QueryUnload', 'Resize'];
-    
+    const commonEvents = [
+      'Click',
+      'DblClick',
+      'MouseDown',
+      'MouseUp',
+      'MouseMove',
+      'KeyDown',
+      'KeyUp',
+      'KeyPress',
+    ];
+    const formEvents = [
+      'Load',
+      'Unload',
+      'Activate',
+      'Deactivate',
+      'Initialize',
+      'Paint',
+      'QueryUnload',
+      'Resize',
+    ];
+
     const specificEvents: { [key: string]: string[] } = {
-      'Form': [...formEvents, ...commonEvents],
-      'CommandButton': [...commonEvents, 'GotFocus', 'LostFocus'],
-      'TextBox': [...commonEvents, 'Change', 'GotFocus', 'LostFocus', 'Validate'],
-      'Label': ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
-      'CheckBox': [...commonEvents, 'Click', 'GotFocus', 'LostFocus'],
-      'OptionButton': [...commonEvents, 'Click', 'GotFocus', 'LostFocus'],
-      'ComboBox': [...commonEvents, 'Change', 'DropDown', 'GotFocus', 'LostFocus', 'Validate'],
-      'ImageCombo': [...commonEvents, 'Change', 'DropDown', 'GotFocus', 'LostFocus', 'Validate'],
-      'RichTextBox': [...commonEvents, 'Change', 'GotFocus', 'LostFocus', 'Validate'],
-      'Timer': ['Timer'],
-      'DriveListBox': [...commonEvents, 'Change'],
-      'DirListBox': [...commonEvents, 'Change'],
-      'FileListBox': [...commonEvents, 'Change'],
-      'ImageList': [...commonEvents],
-      'ListView': [...commonEvents, 'ItemClick', 'ColumnClick', 'ItemCheck'],
-      'DateTimePicker': [...commonEvents, 'Change'],
-      'MonthView': [...commonEvents, 'DateClick'],
-      'ProgressBar': [...commonEvents, 'Change'],
-      'Slider': [...commonEvents, 'Change'],
-      'UpDown': [...commonEvents, 'Change'],
-      'TabStrip': [...commonEvents, 'Change'],
-      'Toolbar': [...commonEvents, 'ButtonClick'],
-      'StatusBar': [...commonEvents],
-      'Shape': ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
-      'Line': ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
-      'Image': [...commonEvents, 'GotFocus', 'LostFocus'],
-      'TreeView': [...commonEvents, 'NodeClick', 'Expand', 'Collapse']
+      Form: [...formEvents, ...commonEvents],
+      CommandButton: [...commonEvents, 'GotFocus', 'LostFocus'],
+      TextBox: [...commonEvents, 'Change', 'GotFocus', 'LostFocus', 'Validate'],
+      Label: ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
+      CheckBox: [...commonEvents, 'Click', 'GotFocus', 'LostFocus'],
+      OptionButton: [...commonEvents, 'Click', 'GotFocus', 'LostFocus'],
+      ComboBox: [...commonEvents, 'Change', 'DropDown', 'GotFocus', 'LostFocus', 'Validate'],
+      ImageCombo: [...commonEvents, 'Change', 'DropDown', 'GotFocus', 'LostFocus', 'Validate'],
+      RichTextBox: [...commonEvents, 'Change', 'GotFocus', 'LostFocus', 'Validate'],
+      Timer: ['Timer'],
+      DriveListBox: [...commonEvents, 'Change'],
+      DirListBox: [...commonEvents, 'Change'],
+      FileListBox: [...commonEvents, 'Change'],
+      ImageList: [...commonEvents],
+      ListView: [...commonEvents, 'ItemClick', 'ColumnClick', 'ItemCheck'],
+      DateTimePicker: [...commonEvents, 'Change'],
+      MonthView: [...commonEvents, 'DateClick'],
+      ProgressBar: [...commonEvents, 'Change'],
+      Slider: [...commonEvents, 'Change'],
+      UpDown: [...commonEvents, 'Change'],
+      TabStrip: [...commonEvents, 'Change'],
+      Toolbar: [...commonEvents, 'ButtonClick'],
+      StatusBar: [...commonEvents],
+      Shape: ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
+      Line: ['Click', 'DblClick', 'MouseDown', 'MouseUp', 'MouseMove'],
+      Image: [...commonEvents, 'GotFocus', 'LostFocus'],
+      TreeView: [...commonEvents, 'NodeClick', 'Expand', 'Collapse'],
     };
-    
+
     return specificEvents[controlType] || commonEvents;
   };
 
@@ -331,7 +400,7 @@ const MonacoCodeEditor: React.FC = () => {
         <select
           className="border border-gray-300 px-2 py-1"
           value={selectedControls.length === 1 ? selectedControls[0].name : '(General)'}
-          onChange={(e) => {
+          onChange={e => {
             if (e.target.value === '(General)') {
               selectControls([]);
             } else {
@@ -345,36 +414,34 @@ const MonacoCodeEditor: React.FC = () => {
           <option value="(General)">(General)</option>
           <option value="Form">Form</option>
           {controls.map(control => (
-            <option key={control.id} value={control.name}>{control.name}</option>
+            <option key={control.id} value={control.name}>
+              {control.name}
+            </option>
           ))}
         </select>
-        
+
         <select
           className="border border-gray-300 px-2 py-1"
           value={selectedEvent}
-          onChange={(e) => setSelectedEvent(e.target.value)}
+          onChange={e => setSelectedEvent(e.target.value)}
           disabled={selectedControls.length !== 1}
         >
-          {selectedControls.length === 1 ? 
+          {selectedControls.length === 1 ? (
             getAvailableEvents(selectedControls[0].type).map(event => (
-              <option key={event} value={event}>{event}</option>
-            )) : (
-              <option value="(Declarations)">(Declarations)</option>
-            )
-          }
+              <option key={event} value={event}>
+                {event}
+              </option>
+            ))
+          ) : (
+            <option value="(Declarations)">(Declarations)</option>
+          )}
         </select>
 
-        <div className="ml-auto text-gray-600">
-          Monaco Editor • VB6 Syntax
-        </div>
+        <div className="ml-auto text-gray-600">Monaco Editor • VB6 Syntax</div>
       </div>
-      
+
       {/* Editor */}
-      <div 
-        ref={containerRef} 
-        className="flex-1"
-        style={{ minHeight: 0 }}
-      />
+      <div ref={containerRef} className="flex-1" style={{ minHeight: 0 }} />
     </div>
   );
 };

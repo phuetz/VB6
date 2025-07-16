@@ -24,6 +24,10 @@ export interface Control {
   tabStop: boolean;
   tag: string;
   toolTipText: string;
+  // Control Array properties
+  index?: number; // Index in control array (undefined for non-array controls)
+  arrayName?: string; // Base name for control array (e.g., "Command1" for Command1(0), Command1(1))
+  isArray?: boolean; // Whether this control is part of an array
   [key: string]: any;
 }
 
@@ -158,7 +162,10 @@ export type VB6Action =
   | { type: 'TOGGLE_WINDOW'; payload: { windowName: string } }
   | { type: 'SET_SELECTED_EVENT'; payload: { eventName: string } }
   | { type: 'UPDATE_EVENT_CODE'; payload: { eventKey: string; code: string } }
-  | { type: 'SET_DRAG_STATE'; payload: { isDragging: boolean; controlType?: string; position?: { x: number; y: number } } }
+  | {
+      type: 'SET_DRAG_STATE';
+      payload: { isDragging: boolean; controlType?: string; position?: { x: number; y: number } };
+    }
   | { type: 'SET_SELECTION_STATE'; payload: { isSelecting: boolean; box?: any; start?: any } }
   | { type: 'SET_RESIZE_STATE'; payload: { isResizing: boolean; handle?: string; start?: any } }
   | { type: 'SET_MOVE_STATE'; payload: { isMoving: boolean; start?: any } }

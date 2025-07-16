@@ -16,7 +16,7 @@ export class ThemeManager {
         accent: '#FF6600',
         error: '#FF0000',
         warning: '#FFB300',
-        success: '#00CC00'
+        success: '#00CC00',
       },
       fonts: {
         primary: 'MS Sans Serif',
@@ -24,9 +24,9 @@ export class ThemeManager {
         size: {
           small: '8pt',
           medium: '9pt',
-          large: '12pt'
-        }
-      }
+          large: '12pt',
+        },
+      },
     },
     modern: {
       name: 'Modern Dark',
@@ -39,7 +39,7 @@ export class ThemeManager {
         accent: '#FF6600',
         error: '#F44747',
         warning: '#FFB300',
-        success: '#4EC9B0'
+        success: '#4EC9B0',
       },
       fonts: {
         primary: 'Segoe UI',
@@ -47,9 +47,9 @@ export class ThemeManager {
         size: {
           small: '12px',
           medium: '14px',
-          large: '16px'
-        }
-      }
+          large: '16px',
+        },
+      },
     },
     light: {
       name: 'Light Modern',
@@ -62,7 +62,7 @@ export class ThemeManager {
         accent: '#FF6600',
         error: '#D13438',
         warning: '#FFB900',
-        success: '#107C10'
+        success: '#107C10',
       },
       fonts: {
         primary: 'Segoe UI',
@@ -70,9 +70,9 @@ export class ThemeManager {
         size: {
           small: '12px',
           medium: '14px',
-          large: '16px'
-        }
-      }
+          large: '16px',
+        },
+      },
     },
     highContrast: {
       name: 'High Contrast',
@@ -85,7 +85,7 @@ export class ThemeManager {
         accent: '#00FFFF',
         error: '#FF0000',
         warning: '#FFFF00',
-        success: '#00FF00'
+        success: '#00FF00',
       },
       fonts: {
         primary: 'MS Sans Serif',
@@ -93,10 +93,10 @@ export class ThemeManager {
         size: {
           small: '12px',
           medium: '14px',
-          large: '18px'
-        }
-      }
-    }
+          large: '18px',
+        },
+      },
+    },
   };
 
   static getCurrentTheme(): Theme {
@@ -139,16 +139,16 @@ export class ThemeManager {
       name,
       colors: {
         ...baseTheme.colors,
-        ...overrides.colors
+        ...overrides.colors,
       },
       fonts: {
         ...baseTheme.fonts,
         ...overrides.fonts,
         size: {
           ...baseTheme.fonts.size,
-          ...overrides.fonts?.size
-        }
-      }
+          ...overrides.fonts?.size,
+        },
+      },
     };
 
     return customTheme;
@@ -183,7 +183,7 @@ export class ThemeManager {
 
   private static applyTheme(theme: Theme): void {
     const root = document.documentElement;
-    
+
     // Apply CSS custom properties
     Object.entries(theme.colors).forEach(([key, value]) => {
       root.style.setProperty(`--color-${key}`, value);
@@ -237,7 +237,7 @@ export class ThemeManager {
   // Utility methods for theme-aware styling
   static getColorWithOpacity(colorName: keyof Theme['colors'], opacity: number): string {
     const color = this.getCurrentTheme().colors[colorName];
-    
+
     // Convert hex to rgba
     if (color.startsWith('#')) {
       const hex = color.slice(1);
@@ -246,7 +246,7 @@ export class ThemeManager {
       const b = parseInt(hex.slice(4, 6), 16);
       return `rgba(${r}, ${g}, ${b}, ${opacity})`;
     }
-    
+
     return color;
   }
 
@@ -286,7 +286,7 @@ export class ThemeManager {
     // Listen for system theme changes
     if (window.matchMedia) {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      mediaQuery.addEventListener('change', (e) => {
+      mediaQuery.addEventListener('change', e => {
         // Auto-switch theme based on system preference
         const autoTheme = localStorage.getItem('vb6-auto-theme');
         if (autoTheme === 'true') {

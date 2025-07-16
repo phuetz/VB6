@@ -29,7 +29,7 @@ export const SearchReplace: React.FC<SearchReplaceProps> = ({
   onClose,
   onSearch,
   onReplace,
-  onReplaceAll
+  onReplaceAll,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [replaceQuery, setReplaceQuery] = useState('');
@@ -40,7 +40,7 @@ export const SearchReplace: React.FC<SearchReplaceProps> = ({
     caseSensitive: false,
     wholeWord: false,
     useRegex: false,
-    searchScope: 'current'
+    searchScope: 'current',
   });
 
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -48,7 +48,7 @@ export const SearchReplace: React.FC<SearchReplaceProps> = ({
 
   const handleSearch = useCallback(() => {
     if (!searchQuery.trim()) return;
-    
+
     const searchResults = onSearch(searchQuery, options);
     setResults(searchResults);
     setCurrentResultIndex(0);
@@ -56,7 +56,7 @@ export const SearchReplace: React.FC<SearchReplaceProps> = ({
 
   const handleReplace = useCallback(() => {
     if (!searchQuery.trim()) return;
-    
+
     const replacedCount = onReplace(searchQuery, replaceQuery, options);
     if (replacedCount > 0) {
       handleSearch(); // Refresh results
@@ -65,37 +65,43 @@ export const SearchReplace: React.FC<SearchReplaceProps> = ({
 
   const handleReplaceAll = useCallback(() => {
     if (!searchQuery.trim()) return;
-    
+
     const replacedCount = onReplaceAll(searchQuery, replaceQuery, options);
     if (replacedCount > 0) {
       handleSearch(); // Refresh results
     }
   }, [searchQuery, replaceQuery, options, onReplaceAll, handleSearch]);
 
-  const navigateToResult = useCallback((index: number) => {
-    if (index >= 0 && index < results.length) {
-      setCurrentResultIndex(index);
-      // Here you would typically navigate to the result in the editor
-    }
-  }, [results]);
-
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-    if (event.key === 'Enter') {
-      if (event.shiftKey) {
-        // Previous result
-        navigateToResult(currentResultIndex - 1);
-      } else {
-        // Next result or search
-        if (results.length > 0) {
-          navigateToResult(currentResultIndex + 1);
-        } else {
-          handleSearch();
-        }
+  const navigateToResult = useCallback(
+    (index: number) => {
+      if (index >= 0 && index < results.length) {
+        setCurrentResultIndex(index);
+        // Here you would typically navigate to the result in the editor
       }
-    } else if (event.key === 'Escape') {
-      onClose();
-    }
-  }, [currentResultIndex, results.length, navigateToResult, handleSearch, onClose]);
+    },
+    [results]
+  );
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (event.key === 'Enter') {
+        if (event.shiftKey) {
+          // Previous result
+          navigateToResult(currentResultIndex - 1);
+        } else {
+          // Next result or search
+          if (results.length > 0) {
+            navigateToResult(currentResultIndex + 1);
+          } else {
+            handleSearch();
+          }
+        }
+      } else if (event.key === 'Escape') {
+        onClose();
+      }
+    },
+    [currentResultIndex, results.length, navigateToResult, handleSearch, onClose]
+  );
 
   React.useEffect(() => {
     if (visible && searchInputRef.current) {
@@ -110,10 +116,7 @@ export const SearchReplace: React.FC<SearchReplaceProps> = ({
       <div className="bg-gray-200 border-2 border-gray-400 shadow-lg" style={{ width: '500px' }}>
         <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
           <span>{showReplace ? 'Replace' : 'Find'}</span>
-          <button
-            onClick={onClose}
-            className="text-white hover:bg-blue-700 px-2"
-          >
+          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">
             <X size={14} />
           </button>
         </div>
@@ -126,7 +129,7 @@ export const SearchReplace: React.FC<SearchReplaceProps> = ({
               ref={searchInputRef}
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               className="w-full px-2 py-1 border border-gray-400 text-sm"
               placeholder="Enter search text"
@@ -141,7 +144,7 @@ export const SearchReplace: React.FC<SearchReplaceProps> = ({
                 ref={replaceInputRef}
                 type="text"
                 value={replaceQuery}
-                onChange={(e) => setReplaceQuery(e.target.value)}
+                onChange={e => setReplaceQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
                 className="w-full px-2 py-1 border border-gray-400 text-sm"
                 placeholder="Enter replacement text"
@@ -156,29 +159,29 @@ export const SearchReplace: React.FC<SearchReplaceProps> = ({
                 <input
                   type="checkbox"
                   checked={options.caseSensitive}
-                  onChange={(e) => setOptions(prev => ({ ...prev, caseSensitive: e.target.checked }))}
+                  onChange={e => setOptions(prev => ({ ...prev, caseSensitive: e.target.checked }))}
                   className="mr-1"
                 />
                 <MatchCase size={12} className="mr-1" />
                 Match case
               </label>
-              
+
               <label className="flex items-center">
                 <input
                   type="checkbox"
                   checked={options.wholeWord}
-                  onChange={(e) => setOptions(prev => ({ ...prev, wholeWord: e.target.checked }))}
+                  onChange={e => setOptions(prev => ({ ...prev, wholeWord: e.target.checked }))}
                   className="mr-1"
                 />
                 <WholeWord size={12} className="mr-1" />
                 Whole word
               </label>
-              
+
               <label className="flex items-center">
                 <input
                   type="checkbox"
                   checked={options.useRegex}
-                  onChange={(e) => setOptions(prev => ({ ...prev, useRegex: e.target.checked }))}
+                  onChange={e => setOptions(prev => ({ ...prev, useRegex: e.target.checked }))}
                   className="mr-1"
                 />
                 <Regex size={12} className="mr-1" />
@@ -190,7 +193,9 @@ export const SearchReplace: React.FC<SearchReplaceProps> = ({
               <label className="block text-xs mb-1">Search scope:</label>
               <select
                 value={options.searchScope}
-                onChange={(e) => setOptions(prev => ({ ...prev, searchScope: e.target.value as any }))}
+                onChange={e =>
+                  setOptions(prev => ({ ...prev, searchScope: e.target.value as any }))
+                }
                 className="px-2 py-1 border border-gray-400 text-xs"
               >
                 <option value="current">Current document</option>
@@ -218,9 +223,7 @@ export const SearchReplace: React.FC<SearchReplaceProps> = ({
                     <div className="font-mono">
                       {result.file}:{result.line}:{result.column}
                     </div>
-                    <div className="text-gray-600 ml-2">
-                      {result.text}
-                    </div>
+                    <div className="text-gray-600 ml-2">{result.text}</div>
                   </div>
                 ))}
               </div>
@@ -236,7 +239,7 @@ export const SearchReplace: React.FC<SearchReplaceProps> = ({
               <Search size={12} />
               Find Next
             </button>
-            
+
             <button
               onClick={() => setShowReplace(!showReplace)}
               className="px-4 py-1 bg-gray-300 border border-gray-400 text-xs hover:bg-gray-400"
@@ -253,7 +256,7 @@ export const SearchReplace: React.FC<SearchReplaceProps> = ({
                   <Replace size={12} />
                   Replace
                 </button>
-                
+
                 <button
                   onClick={handleReplaceAll}
                   className="px-4 py-1 bg-gray-300 border border-gray-400 text-xs hover:bg-gray-400"

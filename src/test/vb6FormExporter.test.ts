@@ -4,7 +4,22 @@ import { Form, Control } from '../context/types';
 
 const form: Form = { id: 1, name: 'Form1', caption: 'Form1', controls: [] };
 const controls: Control[] = [
-  { id: 1, type: 'CommandButton', name: 'Command1', x: 10, y: 20, width: 80, height: 24, visible: true, enabled: true, caption: 'OK', tabIndex: 0, tabStop: true, tag: '', toolTipText: '' },
+  {
+    id: 1,
+    type: 'CommandButton',
+    name: 'Command1',
+    x: 10,
+    y: 20,
+    width: 80,
+    height: 24,
+    visible: true,
+    enabled: true,
+    caption: 'OK',
+    tabIndex: 0,
+    tabStop: true,
+    tag: '',
+    toolTipText: '',
+  },
 ];
 
 const formProps = { Width: 320, Height: 240, BackColor: '#8080FF' };

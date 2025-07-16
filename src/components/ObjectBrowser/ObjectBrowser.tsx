@@ -30,44 +30,44 @@ const VB6_LIBRARIES: LibraryItem[] = [
             name: 'MsgBox',
             type: 'method',
             description: 'Displays a message box',
-            syntax: 'MsgBox(Prompt [, Buttons] [, Title])'
+            syntax: 'MsgBox(Prompt [, Buttons] [, Title])',
           },
           {
             id: 'inputbox',
             name: 'InputBox',
             type: 'method',
             description: 'Displays an input dialog box',
-            syntax: 'InputBox(Prompt [, Title] [, Default])'
+            syntax: 'InputBox(Prompt [, Title] [, Default])',
           },
           {
             id: 'len',
             name: 'Len',
             type: 'method',
             description: 'Returns the length of a string',
-            syntax: 'Len(String)'
+            syntax: 'Len(String)',
           },
           {
             id: 'left',
             name: 'Left',
             type: 'method',
             description: 'Returns leftmost characters from a string',
-            syntax: 'Left(String, Length)'
+            syntax: 'Left(String, Length)',
           },
           {
             id: 'right',
             name: 'Right',
             type: 'method',
             description: 'Returns rightmost characters from a string',
-            syntax: 'Right(String, Length)'
+            syntax: 'Right(String, Length)',
           },
           {
             id: 'mid',
             name: 'Mid',
             type: 'method',
             description: 'Returns a substring',
-            syntax: 'Mid(String, Start [, Length])'
-          }
-        ]
+            syntax: 'Mid(String, Start [, Length])',
+          },
+        ],
       },
       {
         id: 'vb-constants',
@@ -80,25 +80,25 @@ const VB6_LIBRARIES: LibraryItem[] = [
             name: 'vbOK',
             type: 'constant',
             description: 'OK button return value (1)',
-            syntax: 'vbOK = 1'
+            syntax: 'vbOK = 1',
           },
           {
             id: 'vbcancel',
             name: 'vbCancel',
             type: 'constant',
             description: 'Cancel button return value (2)',
-            syntax: 'vbCancel = 2'
+            syntax: 'vbCancel = 2',
           },
           {
             id: 'vbcrlf',
             name: 'vbCrLf',
             type: 'constant',
             description: 'Carriage return and line feed',
-            syntax: 'vbCrLf = Chr(13) + Chr(10)'
-          }
-        ]
-      }
-    ]
+            syntax: 'vbCrLf = Chr(13) + Chr(10)',
+          },
+        ],
+      },
+    ],
   },
   {
     id: 'msforms',
@@ -117,16 +117,16 @@ const VB6_LIBRARIES: LibraryItem[] = [
             name: 'Name',
             type: 'property',
             description: 'Returns or sets the name of the control',
-            syntax: 'String Name'
+            syntax: 'String Name',
           },
           {
             id: 'control-visible',
             name: 'Visible',
             type: 'property',
             description: 'Returns or sets whether the control is visible',
-            syntax: 'Boolean Visible'
-          }
-        ]
+            syntax: 'Boolean Visible',
+          },
+        ],
       },
       {
         id: 'textbox',
@@ -139,18 +139,18 @@ const VB6_LIBRARIES: LibraryItem[] = [
             name: 'Text',
             type: 'property',
             description: 'Returns or sets the text in the control',
-            syntax: 'String Text'
+            syntax: 'String Text',
           },
           {
             id: 'textbox-maxlength',
             name: 'MaxLength',
             type: 'property',
             description: 'Maximum number of characters allowed',
-            syntax: 'Integer MaxLength'
-          }
-        ]
-      }
-    ]
+            syntax: 'Integer MaxLength',
+          },
+        ],
+      },
+    ],
   },
   {
     id: 'scripting',
@@ -169,19 +169,19 @@ const VB6_LIBRARIES: LibraryItem[] = [
             name: 'FileExists',
             type: 'method',
             description: 'Returns True if a file exists',
-            syntax: 'FileExists(FileSpec)'
+            syntax: 'FileExists(FileSpec)',
           },
           {
             id: 'fso-createtextfile',
             name: 'CreateTextFile',
             type: 'method',
             description: 'Creates a text file',
-            syntax: 'CreateTextFile(FileName [, Overwrite] [, Unicode])'
-          }
-        ]
-      }
-    ]
-  }
+            syntax: 'CreateTextFile(FileName [, Overwrite] [, Unicode])',
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 interface ObjectBrowserProps {
@@ -189,89 +189,99 @@ interface ObjectBrowserProps {
   onClose: () => void;
 }
 
-export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
-  visible,
-  onClose
-}) => {
+export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({ visible, onClose }) => {
   const [libraries, setLibraries] = useState<LibraryItem[]>(VB6_LIBRARIES);
   const [selectedItem, setSelectedItem] = useState<LibraryItem | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAllLibraries, setShowAllLibraries] = useState(false);
 
-  const toggleExpanded = useCallback((id: string) => {
-    const updateItems = (items: LibraryItem[]): LibraryItem[] => {
-      return items.map(item => {
-        if (item.id === id) {
-          return { ...item, expanded: !item.expanded };
+  const toggleExpanded = useCallback(
+    (id: string) => {
+      const updateItems = (items: LibraryItem[]): LibraryItem[] => {
+        return items.map(item => {
+          if (item.id === id) {
+            return { ...item, expanded: !item.expanded };
+          }
+          if (item.children) {
+            return { ...item, children: updateItems(item.children) };
+          }
+          return item;
+        });
+      };
+
+      setLibraries(updateItems(libraries));
+    },
+    [libraries]
+  );
+
+  const renderTreeItem = useCallback(
+    (item: LibraryItem, level: number = 0) => {
+      const hasChildren = item.children && item.children.length > 0;
+      const isExpanded = item.expanded;
+      const matchesSearch =
+        !searchTerm ||
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+      if (!matchesSearch && level > 0) return null;
+
+      const getIcon = (type: string) => {
+        switch (type) {
+          case 'library':
+            return <Book size={14} className="text-blue-600" />;
+          case 'class':
+            return <Package size={14} className="text-green-600" />;
+          case 'module':
+            return <FileText size={14} className="text-orange-600" />;
+          case 'method':
+            return <span className="text-purple-600 font-bold text-xs">M</span>;
+          case 'property':
+            return <span className="text-blue-600 font-bold text-xs">P</span>;
+          case 'constant':
+            return <span className="text-red-600 font-bold text-xs">C</span>;
+          case 'enum':
+            return <span className="text-green-600 font-bold text-xs">E</span>;
+          default:
+            return null;
         }
-        if (item.children) {
-          return { ...item, children: updateItems(item.children) };
-        }
-        return item;
-      });
-    };
+      };
 
-    setLibraries(updateItems(libraries));
-  }, [libraries]);
+      return (
+        <div key={item.id}>
+          <div
+            className={`flex items-center gap-1 py-1 px-2 cursor-pointer text-xs hover:bg-gray-100 ${
+              selectedItem?.id === item.id ? 'bg-blue-200' : ''
+            }`}
+            style={{ paddingLeft: `${8 + level * 16}px` }}
+            onClick={() => setSelectedItem(item)}
+          >
+            {hasChildren ? (
+              <button
+                onClick={e => {
+                  e.stopPropagation();
+                  toggleExpanded(item.id);
+                }}
+                className="w-4 h-4 flex items-center justify-center"
+              >
+                {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+              </button>
+            ) : (
+              <div className="w-4" />
+            )}
 
-  const renderTreeItem = useCallback((item: LibraryItem, level: number = 0) => {
-    const hasChildren = item.children && item.children.length > 0;
-    const isExpanded = item.expanded;
-    const matchesSearch = !searchTerm || 
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchTerm.toLowerCase());
+            <span className="w-4 h-4 flex items-center justify-center">{getIcon(item.type)}</span>
 
-    if (!matchesSearch && level > 0) return null;
+            <span className="flex-1 font-mono">{item.name}</span>
+          </div>
 
-    const getIcon = (type: string) => {
-      switch (type) {
-        case 'library': return <Book size={14} className="text-blue-600" />;
-        case 'class': return <Package size={14} className="text-green-600" />;
-        case 'module': return <FileText size={14} className="text-orange-600" />;
-        case 'method': return <span className="text-purple-600 font-bold text-xs">M</span>;
-        case 'property': return <span className="text-blue-600 font-bold text-xs">P</span>;
-        case 'constant': return <span className="text-red-600 font-bold text-xs">C</span>;
-        case 'enum': return <span className="text-green-600 font-bold text-xs">E</span>;
-        default: return null;
-      }
-    };
-
-    return (
-      <div key={item.id}>
-        <div
-          className={`flex items-center gap-1 py-1 px-2 cursor-pointer text-xs hover:bg-gray-100 ${
-            selectedItem?.id === item.id ? 'bg-blue-200' : ''
-          }`}
-          style={{ paddingLeft: `${8 + level * 16}px` }}
-          onClick={() => setSelectedItem(item)}
-        >
-          {hasChildren ? (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleExpanded(item.id);
-              }}
-              className="w-4 h-4 flex items-center justify-center"
-            >
-              {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-            </button>
-          ) : (
-            <div className="w-4" />
-          )}
-          
-          <span className="w-4 h-4 flex items-center justify-center">
-            {getIcon(item.type)}
-          </span>
-          
-          <span className="flex-1 font-mono">{item.name}</span>
+          {hasChildren &&
+            isExpanded &&
+            item.children?.map(child => renderTreeItem(child, level + 1))}
         </div>
-        
-        {hasChildren && isExpanded && item.children?.map(child => 
-          renderTreeItem(child, level + 1)
-        )}
-      </div>
-    );
-  }, [selectedItem, searchTerm, toggleExpanded]);
+      );
+    },
+    [selectedItem, searchTerm, toggleExpanded]
+  );
 
   const filteredLibraries = showAllLibraries ? libraries : libraries.slice(0, 2);
 
@@ -279,21 +289,29 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-200 border-2 border-gray-400 shadow-lg" style={{ width: '900px', height: '700px' }}>
+      <div
+        className="bg-gray-200 border-2 border-gray-400 shadow-lg"
+        style={{ width: '900px', height: '700px' }}
+      >
         <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
           <span>Object Browser</span>
-          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">×</button>
+          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">
+            ×
+          </button>
         </div>
 
         <div className="p-4 h-full flex flex-col">
           {/* Search and filters */}
           <div className="mb-4 flex gap-2 items-center">
             <div className="flex-1 relative">
-              <Search size={16} className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
+              <Search
+                size={16}
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+              />
               <input
                 type="text"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
                 placeholder="Search for classes, methods, properties..."
                 className="w-full pl-8 pr-2 py-1 border border-gray-400 text-sm"
               />
@@ -302,7 +320,7 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
               <input
                 type="checkbox"
                 checked={showAllLibraries}
-                onChange={(e) => setShowAllLibraries(e.target.checked)}
+                onChange={e => setShowAllLibraries(e.target.checked)}
                 className="mr-1"
               />
               Show all libraries
@@ -316,9 +334,7 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
               <div className="bg-gray-100 border-b border-gray-300 p-2 text-xs font-bold">
                 Libraries
               </div>
-              <div className="p-1">
-                {filteredLibraries.map(library => renderTreeItem(library))}
-              </div>
+              <div className="p-1">{filteredLibraries.map(library => renderTreeItem(library))}</div>
             </div>
 
             {/* Details panel */}
@@ -326,27 +342,32 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
               <div className="bg-gray-100 border-b border-gray-300 p-2 text-xs font-bold">
                 Details
               </div>
-              
+
               {selectedItem ? (
                 <div className="flex-1 p-3 overflow-auto">
                   <div className="mb-4">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-lg">
-                        {selectedItem.type === 'library' ? <Book size={20} className="text-blue-600" /> :
-                         selectedItem.type === 'class' ? <Package size={20} className="text-green-600" /> :
-                         selectedItem.type === 'module' ? <FileText size={20} className="text-orange-600" /> :
-                         <span className="w-5 h-5 bg-gray-300 rounded text-xs flex items-center justify-center">
-                           {selectedItem.type.charAt(0).toUpperCase()}
-                         </span>}
+                        {selectedItem.type === 'library' ? (
+                          <Book size={20} className="text-blue-600" />
+                        ) : selectedItem.type === 'class' ? (
+                          <Package size={20} className="text-green-600" />
+                        ) : selectedItem.type === 'module' ? (
+                          <FileText size={20} className="text-orange-600" />
+                        ) : (
+                          <span className="w-5 h-5 bg-gray-300 rounded text-xs flex items-center justify-center">
+                            {selectedItem.type.charAt(0).toUpperCase()}
+                          </span>
+                        )}
                       </span>
                       <div>
                         <div className="font-mono font-bold">{selectedItem.name}</div>
                         <div className="text-xs text-gray-600 capitalize">{selectedItem.type}</div>
                       </div>
                     </div>
-                    
+
                     <div className="text-sm mb-3">{selectedItem.description}</div>
-                    
+
                     {selectedItem.syntax && (
                       <div>
                         <div className="text-xs font-bold mb-1">Syntax:</div>
@@ -368,10 +389,15 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
                             onClick={() => setSelectedItem(child)}
                           >
                             <span className="w-4 h-4 flex items-center justify-center">
-                              {child.type === 'method' ? <span className="text-purple-600 font-bold">M</span> :
-                               child.type === 'property' ? <span className="text-blue-600 font-bold">P</span> :
-                               child.type === 'constant' ? <span className="text-red-600 font-bold">C</span> :
-                               <span className="text-gray-600">•</span>}
+                              {child.type === 'method' ? (
+                                <span className="text-purple-600 font-bold">M</span>
+                              ) : child.type === 'property' ? (
+                                <span className="text-blue-600 font-bold">P</span>
+                              ) : child.type === 'constant' ? (
+                                <span className="text-red-600 font-bold">C</span>
+                              ) : (
+                                <span className="text-gray-600">•</span>
+                              )}
                             </span>
                             <span className="font-mono">{child.name}</span>
                             <span className="text-gray-500 flex-1">{child.description}</span>
@@ -395,7 +421,9 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
           {/* Status bar */}
           <div className="mt-4 pt-2 border-t border-gray-300 text-xs text-gray-600">
             {selectedItem ? (
-              <span>Selected: {selectedItem.name} ({selectedItem.type})</span>
+              <span>
+                Selected: {selectedItem.name} ({selectedItem.type})
+              </span>
             ) : (
               <span>Ready - {filteredLibraries.length} libraries loaded</span>
             )}

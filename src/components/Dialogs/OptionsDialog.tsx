@@ -10,9 +10,7 @@ interface OptionsDialogProps {
 
 const OptionsDialog: React.FC<OptionsDialogProps> = ({ visible, onClose }) => {
   const { showDialog } = useVB6Store();
-  const [selectedTheme, setSelectedTheme] = useState<string>(
-    ThemeManager.getCurrentTheme().name
-  );
+  const [selectedTheme, setSelectedTheme] = useState<string>(ThemeManager.getCurrentTheme().name);
 
   const themes = Object.keys(ThemeManager.defaultThemes);
 

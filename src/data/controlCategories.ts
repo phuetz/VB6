@@ -14,7 +14,7 @@ export const controlCategories = {
     { type: 'Shape', icon: '●', name: 'Shape', cursor: 'crosshair' },
     { type: 'Line', icon: '／', name: 'Line', cursor: 'crosshair' },
     { type: 'Image', icon: '📷', name: 'Image', cursor: 'default' },
-    { type: 'PictureBox', icon: '🖼', name: 'PictureBox', cursor: 'default' }
+    { type: 'PictureBox', icon: '🖼', name: 'PictureBox', cursor: 'default' },
   ],
   ActiveX: [
     { type: 'ListView', icon: '📋', name: 'ListView', cursor: 'default' },
@@ -29,6 +29,6 @@ export const controlCategories = {
     { type: 'DateTimePicker', icon: '📅', name: 'DateTimePicker', cursor: 'pointer' },
     { type: 'RichTextBox', icon: '📝', name: 'RichTextBox', cursor: 'text' },
     { type: 'MonthView', icon: '📆', name: 'MonthView', cursor: 'pointer' },
-    { type: 'Animation', icon: '🎬', name: 'Animation', cursor: 'default' }
-  ]
+    { type: 'Animation', icon: '🎬', name: 'Animation', cursor: 'default' },
+  ],
 };

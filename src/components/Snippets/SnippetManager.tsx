@@ -1,5 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Code, Plus, Save, Trash2, Copy, CopyCheck, Edit, Search, FolderPlus, Tag, FileCode, ArrowBigRight } from 'lucide-react';
+import {
+  Code,
+  Plus,
+  Save,
+  Trash2,
+  Copy,
+  CopyCheck,
+  Edit,
+  Search,
+  FolderPlus,
+  Tag,
+  FileCode,
+  ArrowBigRight,
+} from 'lucide-react';
 
 interface CodeSnippet {
   id: string;
@@ -26,7 +39,7 @@ export const SnippetManager: React.FC<SnippetManagerProps> = ({
   visible,
   onClose,
   onInsertSnippet,
-  snippets: initialSnippets
+  snippets: initialSnippets,
 }) => {
   const [snippets, setSnippets] = useState<CodeSnippet[]>(initialSnippets || []);
   const [filteredSnippets, setFilteredSnippets] = useState<CodeSnippet[]>([]);
@@ -56,20 +69,21 @@ export const SnippetManager: React.FC<SnippetManagerProps> = ({
   // Filter snippets when search term or category changes
   useEffect(() => {
     let filtered = snippets;
-    
+
     if (searchTerm) {
-      filtered = filtered.filter(snippet => 
-        snippet.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        snippet.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        snippet.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        snippet.code.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        snippet =>
+          snippet.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          snippet.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          snippet.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          snippet.code.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     if (selectedCategory !== 'All') {
       filtered = filtered.filter(snippet => snippet.category === selectedCategory);
     }
-    
+
     setFilteredSnippets(filtered);
   }, [searchTerm, selectedCategory, snippets]);
 
@@ -90,9 +104,9 @@ export const SnippetManager: React.FC<SnippetManagerProps> = ({
       createdAt: new Date(),
       updatedAt: new Date(),
       favorite: false,
-      usageCount: 0
+      usageCount: 0,
     };
-    
+
     setSelectedSnippet(newSnippet);
     setEditTitle('');
     setEditDescription('');
@@ -116,7 +130,7 @@ export const SnippetManager: React.FC<SnippetManagerProps> = ({
 
   const handleSaveSnippet = () => {
     if (!selectedSnippet) return;
-    
+
     const updatedSnippet: CodeSnippet = {
       ...selectedSnippet,
       title: editTitle,
@@ -124,19 +138,20 @@ export const SnippetManager: React.FC<SnippetManagerProps> = ({
       code: editCode,
       language: editLanguage,
       category: editCategory,
-      tags: editTags.split(',').map(tag => tag.trim()).filter(tag => tag),
-      updatedAt: new Date()
+      tags: editTags
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag),
+      updatedAt: new Date(),
     };
-    
+
     // Update or add the snippet
     if (snippets.find(s => s.id === selectedSnippet.id)) {
-      setSnippets(snippets.map(s => 
-        s.id === selectedSnippet.id ? updatedSnippet : s
-      ));
+      setSnippets(snippets.map(s => (s.id === selectedSnippet.id ? updatedSnippet : s)));
     } else {
       setSnippets([...snippets, updatedSnippet]);
     }
-    
+
     setSelectedSnippet(updatedSnippet);
     setIsEditing(false);
   };
@@ -151,17 +166,16 @@ export const SnippetManager: React.FC<SnippetManagerProps> = ({
   };
 
   const toggleFavorite = (id: string) => {
-    setSnippets(snippets.map(s => 
-      s.id === id ? { ...s, favorite: !s.favorite } : s
-    ));
-    
+    setSnippets(snippets.map(s => (s.id === id ? { ...s, favorite: !s.favorite } : s)));
+
     if (selectedSnippet?.id === id) {
       setSelectedSnippet({ ...selectedSnippet, favorite: !selectedSnippet.favorite });
     }
   };
 
   const copyToClipboard = (text: string, id: string) => {
-    navigator.clipboard.writeText(text)
+    navigator.clipboard
+      .writeText(text)
       .then(() => {
         setShowCopied(id);
         setTimeout(() => setShowCopied(null), 1500);
@@ -172,16 +186,14 @@ export const SnippetManager: React.FC<SnippetManagerProps> = ({
   };
 
   const incrementUsageCount = (id: string) => {
-    setSnippets(snippets.map(s => 
-      s.id === id ? { ...s, usageCount: s.usageCount + 1 } : s
-    ));
+    setSnippets(snippets.map(s => (s.id === id ? { ...s, usageCount: s.usageCount + 1 } : s)));
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString(undefined, { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
   };
 
@@ -189,13 +201,18 @@ export const SnippetManager: React.FC<SnippetManagerProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-200 border-2 border-gray-400 shadow-lg" style={{ width: '900px', height: '600px' }}>
+      <div
+        className="bg-gray-200 border-2 border-gray-400 shadow-lg"
+        style={{ width: '900px', height: '600px' }}
+      >
         <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Code size={16} />
             <span>Snippet Manager</span>
           </div>
-          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">×</button>
+          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">
+            ×
+          </button>
         </div>
 
         <div className="p-4 h-full flex flex-col">
@@ -207,10 +224,10 @@ export const SnippetManager: React.FC<SnippetManagerProps> = ({
                 placeholder="Search snippets..."
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full text-sm"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
               />
             </div>
-            
+
             <button
               onClick={handleCreateNewSnippet}
               className="px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 flex items-center gap-2"
@@ -229,8 +246,8 @@ export const SnippetManager: React.FC<SnippetManagerProps> = ({
                   <div
                     key={category}
                     className={`px-3 py-2 cursor-pointer text-sm ${
-                      selectedCategory === category 
-                        ? 'bg-blue-100 border-l-4 border-blue-600' 
+                      selectedCategory === category
+                        ? 'bg-blue-100 border-l-4 border-blue-600'
                         : 'border-l-4 border-transparent hover:bg-gray-100'
                     }`}
                     onClick={() => setSelectedCategory(category)}
@@ -261,11 +278,11 @@ export const SnippetManager: React.FC<SnippetManagerProps> = ({
                       <div className="flex items-center gap-2 mb-1">
                         <FileCode size={16} className="text-blue-600" />
                         <div className="flex-1 font-medium text-sm truncate">{snippet.title}</div>
-                        {snippet.favorite && (
-                          <div className="text-yellow-500">★</div>
-                        )}
+                        {snippet.favorite && <div className="text-yellow-500">★</div>}
                       </div>
-                      <div className="text-xs text-gray-600 mb-1 line-clamp-2">{snippet.description}</div>
+                      <div className="text-xs text-gray-600 mb-1 line-clamp-2">
+                        {snippet.description}
+                      </div>
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-gray-500">{snippet.category}</span>
                         <span className="text-gray-500">{formatDate(snippet.updatedAt)}</span>
@@ -296,40 +313,40 @@ export const SnippetManager: React.FC<SnippetManagerProps> = ({
                           <input
                             type="text"
                             value={editTitle}
-                            onChange={(e) => setEditTitle(e.target.value)}
+                            onChange={e => setEditTitle(e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
                             placeholder="Snippet title"
                           />
                         </div>
-                        
+
                         <div>
                           <label className="block text-xs font-semibold mb-1">Description</label>
                           <textarea
                             value={editDescription}
-                            onChange={(e) => setEditDescription(e.target.value)}
+                            onChange={e => setEditDescription(e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
                             rows={2}
                             placeholder="Brief description of what this snippet does"
                           />
                         </div>
-                        
+
                         <div>
                           <label className="block text-xs font-semibold mb-1">Code</label>
                           <textarea
                             value={editCode}
-                            onChange={(e) => setEditCode(e.target.value)}
+                            onChange={e => setEditCode(e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded text-sm font-mono"
                             rows={8}
                             placeholder="Your code snippet here..."
                           />
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <label className="block text-xs font-semibold mb-1">Language</label>
                             <select
                               value={editLanguage}
-                              onChange={(e) => setEditLanguage(e.target.value as any)}
+                              onChange={e => setEditLanguage(e.target.value as any)}
                               className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
                             >
                               <option value="vb">VB</option>
@@ -338,31 +355,33 @@ export const SnippetManager: React.FC<SnippetManagerProps> = ({
                               <option value="javascript">JavaScript</option>
                             </select>
                           </div>
-                          
+
                           <div>
                             <label className="block text-xs font-semibold mb-1">Category</label>
                             <input
                               type="text"
                               value={editCategory}
-                              onChange={(e) => setEditCategory(e.target.value)}
+                              onChange={e => setEditCategory(e.target.value)}
                               className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
                               placeholder="e.g. Database, UI, Utility"
                             />
                           </div>
                         </div>
-                        
+
                         <div>
-                          <label className="block text-xs font-semibold mb-1">Tags (comma-separated)</label>
+                          <label className="block text-xs font-semibold mb-1">
+                            Tags (comma-separated)
+                          </label>
                           <input
                             type="text"
                             value={editTags}
-                            onChange={(e) => setEditTags(e.target.value)}
+                            onChange={e => setEditTags(e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
                             placeholder="e.g. dialog, file, open"
                           />
                         </div>
                       </div>
-                      
+
                       <div className="flex justify-end gap-2 pt-3 border-t border-gray-300 mt-3">
                         <button
                           onClick={() => setIsEditing(false)}
@@ -388,7 +407,11 @@ export const SnippetManager: React.FC<SnippetManagerProps> = ({
                           <button
                             onClick={() => toggleFavorite(selectedSnippet.id)}
                             className={`p-1 rounded hover:bg-gray-200 ${selectedSnippet.favorite ? 'text-yellow-500' : 'text-gray-400'}`}
-                            title={selectedSnippet.favorite ? "Remove from favorites" : "Add to favorites"}
+                            title={
+                              selectedSnippet.favorite
+                                ? 'Remove from favorites'
+                                : 'Add to favorites'
+                            }
                           >
                             ★
                           </button>
@@ -408,9 +431,9 @@ export const SnippetManager: React.FC<SnippetManagerProps> = ({
                           </button>
                         </div>
                       </div>
-                      
+
                       <p className="text-sm text-gray-600 mb-4">{selectedSnippet.description}</p>
-                      
+
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <span className="bg-gray-200 px-2 py-1 rounded text-xs uppercase">
@@ -424,28 +447,33 @@ export const SnippetManager: React.FC<SnippetManagerProps> = ({
                           Used {selectedSnippet.usageCount} times
                         </div>
                       </div>
-                      
+
                       <div className="flex-1 overflow-auto">
                         <pre className="bg-gray-800 text-gray-200 p-4 rounded overflow-x-auto text-xs font-mono whitespace-pre">
                           {selectedSnippet.code}
                         </pre>
                       </div>
-                      
+
                       <div className="mt-3 pt-3 border-t border-gray-300 flex justify-between items-center">
                         <div className="flex flex-wrap gap-2">
                           <div className="flex items-center gap-1 text-xs text-gray-600">
                             <Tag size={14} />
                             {selectedSnippet.tags.map(tag => (
-                              <span key={tag} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                              <span
+                                key={tag}
+                                className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs"
+                              >
                                 {tag}
                               </span>
                             ))}
                           </div>
                         </div>
-                        
+
                         <div className="flex gap-2">
                           <button
-                            onClick={() => copyToClipboard(selectedSnippet.code, selectedSnippet.id)}
+                            onClick={() =>
+                              copyToClipboard(selectedSnippet.code, selectedSnippet.id)
+                            }
                             className="px-3 py-2 bg-gray-300 hover:bg-gray-400 rounded text-sm flex items-center gap-2"
                             title="Copy to clipboard"
                           >
@@ -482,7 +510,9 @@ export const SnippetManager: React.FC<SnippetManagerProps> = ({
                     <div className="text-center text-gray-500">
                       <Code size={48} className="mx-auto mb-3 opacity-50" />
                       <div className="text-lg mb-1">No Snippet Selected</div>
-                      <div className="text-sm">Select a snippet from the list or create a new one</div>
+                      <div className="text-sm">
+                        Select a snippet from the list or create a new one
+                      </div>
                     </div>
                   </div>
                 )}

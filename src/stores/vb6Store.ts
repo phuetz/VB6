@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { Control, VB6State } from '../context/types';
 import { getDefaultProperties } from '../utils/controlDefaults';
+import { ControlArrayManager } from '../utils/controlArrayManager';
 
 interface VB6Store extends VB6State {
   // Actions
@@ -43,6 +44,11 @@ interface VB6Store extends VB6State {
   zoomIn: () => void;
   zoomOut: () => void;
   resetZoom: () => void;
+  // Control Array actions
+  createControlArray: (controlId: number) => void;
+  addToControlArray: (arrayName: string) => void;
+  removeFromControlArray: (controlId: number) => void;
+  showControlArrayDialog: boolean;
 }
 
 export const useVB6Store = create<VB6Store>()(
@@ -301,6 +307,7 @@ End Function`,
     // Todo list
     todoItems: [],
     showTodoList: false,
+    showControlArrayDialog: false,
 
     // History helper
     pushHistory: (controls: Control[], nextId: number) => {
@@ -432,11 +439,7 @@ End Function`,
       const state = get();
       if (state.selectedControls.length === 0) return;
 
-      state.addLog(
-        'info',
-        'Clipboard',
-        `Duplicating ${state.selectedControls.length} control(s)`
-      );
+      state.addLog('info', 'Clipboard', `Duplicating ${state.selectedControls.length} control(s)`);
 
       const newControls = state.selectedControls.map((control, index) => ({
         ...control,
@@ -813,5 +816,84 @@ End Function`,
       set(state => ({
         todoItems: state.todoItems.filter(t => t.id !== id),
       })),
+
+    // Control Array actions
+    createControlArray: (controlId: number) => {
+      const state = get();
+      const control = state.controls.find(c => c.id === controlId);
+      if (!control || control.isArray) return;
+
+      const arrayControls = ControlArrayManager.createControlArray(control);
+      const [originalControl, newControl] = arrayControls;
+
+      set({
+        controls: state.controls
+          .map(c => (c.id === controlId ? originalControl : c))
+          .concat([newControl]),
+        selectedControls: [newControl],
+        nextId: state.nextId + 1,
+      });
+
+      state.pushHistory(
+        state.controls.map(c => (c.id === controlId ? originalControl : c)).concat([newControl]),
+        state.nextId + 1
+      );
+      state.addLog('info', 'ControlArray', `Created control array: ${control.name}`, {
+        originalControl,
+        newControl,
+      });
+    },
+
+    addToControlArray: (arrayName: string) => {
+      const state = get();
+      try {
+        const newControl = ControlArrayManager.addToControlArray(state.controls, arrayName);
+        newControl.id = state.nextId;
+
+        set({
+          controls: [...state.controls, newControl],
+          selectedControls: [newControl],
+          nextId: state.nextId + 1,
+        });
+
+        state.pushHistory([...state.controls, newControl], state.nextId + 1);
+        state.addLog('info', 'ControlArray', `Added element to array: ${arrayName}`, newControl);
+      } catch (error) {
+        state.addLog(
+          'error',
+          'ControlArray',
+          `Failed to add to array: ${(error as Error).message}`
+        );
+      }
+    },
+
+    removeFromControlArray: (controlId: number) => {
+      const state = get();
+      const control = state.controls.find(c => c.id === controlId);
+      if (!control) return;
+
+      try {
+        const updatedControls = ControlArrayManager.removeFromControlArray(state.controls, control);
+
+        set({
+          controls: updatedControls,
+          selectedControls: state.selectedControls.filter(c => c.id !== controlId),
+        });
+
+        state.pushHistory(updatedControls, state.nextId);
+        state.addLog(
+          'info',
+          'ControlArray',
+          `Removed element from array: ${control.name}`,
+          control
+        );
+      } catch (error) {
+        state.addLog(
+          'error',
+          'ControlArray',
+          `Failed to remove from array: ${(error as Error).message}`
+        );
+      }
+    },
   }))
 );

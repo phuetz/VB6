@@ -17,7 +17,7 @@ const ResizeHandles: React.FC<ResizeHandlesProps> = ({ control }) => {
     height: 6,
     backgroundColor: '#0066cc',
     border: '1px solid #fff',
-    zIndex: 10000
+    zIndex: 10000,
   };
 
   const handleResizeMouseDown = (e: React.MouseEvent, handle: string) => {
@@ -31,9 +31,9 @@ const ResizeHandles: React.FC<ResizeHandlesProps> = ({ control }) => {
           x: e.clientX,
           y: e.clientY,
           width: control.width,
-          height: control.height
-        }
-      }
+          height: control.height,
+        },
+      },
     });
   };
 
@@ -41,35 +41,35 @@ const ResizeHandles: React.FC<ResizeHandlesProps> = ({ control }) => {
     <>
       <div
         style={{ ...handleStyle, top: -4, left: -4, cursor: 'nw-resize' }}
-        onMouseDown={(e) => handleResizeMouseDown(e, 'nw')}
+        onMouseDown={e => handleResizeMouseDown(e, 'nw')}
       />
       <div
         style={{ ...handleStyle, top: -4, left: '50%', marginLeft: -3, cursor: 'n-resize' }}
-        onMouseDown={(e) => handleResizeMouseDown(e, 'n')}
+        onMouseDown={e => handleResizeMouseDown(e, 'n')}
       />
       <div
         style={{ ...handleStyle, top: -4, right: -4, cursor: 'ne-resize' }}
-        onMouseDown={(e) => handleResizeMouseDown(e, 'ne')}
+        onMouseDown={e => handleResizeMouseDown(e, 'ne')}
       />
       <div
         style={{ ...handleStyle, top: '50%', right: -4, marginTop: -3, cursor: 'e-resize' }}
-        onMouseDown={(e) => handleResizeMouseDown(e, 'e')}
+        onMouseDown={e => handleResizeMouseDown(e, 'e')}
       />
       <div
         style={{ ...handleStyle, bottom: -4, right: -4, cursor: 'se-resize' }}
-        onMouseDown={(e) => handleResizeMouseDown(e, 'se')}
+        onMouseDown={e => handleResizeMouseDown(e, 'se')}
       />
       <div
         style={{ ...handleStyle, bottom: -4, left: '50%', marginLeft: -3, cursor: 's-resize' }}
-        onMouseDown={(e) => handleResizeMouseDown(e, 's')}
+        onMouseDown={e => handleResizeMouseDown(e, 's')}
       />
       <div
         style={{ ...handleStyle, bottom: -4, left: -4, cursor: 'sw-resize' }}
-        onMouseDown={(e) => handleResizeMouseDown(e, 'sw')}
+        onMouseDown={e => handleResizeMouseDown(e, 'sw')}
       />
       <div
         style={{ ...handleStyle, top: '50%', left: -4, marginTop: -3, cursor: 'w-resize' }}
-        onMouseDown={(e) => handleResizeMouseDown(e, 'w')}
+        onMouseDown={e => handleResizeMouseDown(e, 'w')}
       />
     </>
   );

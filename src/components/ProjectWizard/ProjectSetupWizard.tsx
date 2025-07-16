@@ -1,7 +1,13 @@
 import React, { useState, useCallback } from 'react';
-import { 
-  ArrowRight, ArrowLeft, Check, Settings, 
-  Folder, FileText, Package, Database 
+import {
+  ArrowRight,
+  ArrowLeft,
+  Check,
+  Settings,
+  Folder,
+  FileText,
+  Package,
+  Database,
 } from 'lucide-react';
 
 interface ProjectSetupWizardProps {
@@ -30,22 +36,22 @@ const projectTypes = [
     name: 'Standard EXE',
     description: 'Create a standalone Windows executable application',
     icon: '🖥️',
-    features: ['Forms', 'Modules', 'Classes', 'Resources']
+    features: ['Forms', 'Modules', 'Classes', 'Resources'],
   },
   {
     id: 'dll',
     name: 'ActiveX DLL',
     description: 'Create a dynamic link library component',
     icon: '📚',
-    features: ['Classes', 'Modules', 'COM Interfaces']
+    features: ['Classes', 'Modules', 'COM Interfaces'],
   },
   {
     id: 'ocx',
     name: 'ActiveX Control',
     description: 'Create a reusable ActiveX control',
     icon: '🎛️',
-    features: ['User Controls', 'Property Pages', 'Events']
-  }
+    features: ['User Controls', 'Property Pages', 'Events'],
+  },
 ];
 
 const availableFeatures = [
@@ -54,7 +60,7 @@ const availableFeatures = [
   { id: 'multimedia', name: 'Multimedia', description: 'Audio/Video capabilities' },
   { id: 'graphics', name: 'Graphics', description: 'Enhanced drawing and imaging' },
   { id: 'encryption', name: 'Encryption', description: 'Data security features' },
-  { id: 'logging', name: 'Logging', description: 'Application logging framework' }
+  { id: 'logging', name: 'Logging', description: 'Application logging framework' },
 ];
 
 const availableReferences = [
@@ -64,13 +70,13 @@ const availableReferences = [
   { id: 'msxml', name: 'Microsoft XML Parser', checked: false, required: false },
   { id: 'adodb', name: 'Microsoft ActiveX Data Objects', checked: false, required: false },
   { id: 'scripting', name: 'Microsoft Scripting Runtime', checked: false, required: false },
-  { id: 'shell', name: 'Microsoft Shell Controls', checked: false, required: false }
+  { id: 'shell', name: 'Microsoft Shell Controls', checked: false, required: false },
 ];
 
 export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
   visible,
   onClose,
-  onComplete
+  onComplete,
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [config, setConfig] = useState<ProjectConfig>({
@@ -84,7 +90,7 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
     features: [],
     references: availableReferences.filter(r => r.checked).map(r => r.id),
     startupForm: 'Form1',
-    icon: ''
+    icon: '',
   });
 
   const totalSteps = 5;
@@ -131,9 +137,7 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
           <FileText size={20} />
           Project Information
         </h3>
-        <p className="text-sm text-gray-600 mb-4">
-          Enter basic information about your project.
-        </p>
+        <p className="text-sm text-gray-600 mb-4">Enter basic information about your project.</p>
       </div>
 
       <div className="space-y-3">
@@ -142,7 +146,7 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
           <input
             type="text"
             value={config.name}
-            onChange={(e) => updateConfig({ name: e.target.value })}
+            onChange={e => updateConfig({ name: e.target.value })}
             className="w-full px-3 py-2 border border-gray-400 rounded"
             placeholder="Enter project name"
           />
@@ -154,7 +158,7 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
             <input
               type="text"
               value={config.location}
-              onChange={(e) => updateConfig({ location: e.target.value })}
+              onChange={e => updateConfig({ location: e.target.value })}
               className="flex-1 px-3 py-2 border border-gray-400 rounded"
               placeholder="C:\\VB6Projects\\"
             />
@@ -168,7 +172,7 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
           <label className="block text-sm font-semibold mb-1">Description</label>
           <textarea
             value={config.description}
-            onChange={(e) => updateConfig({ description: e.target.value })}
+            onChange={e => updateConfig({ description: e.target.value })}
             className="w-full px-3 py-2 border border-gray-400 rounded"
             rows={3}
             placeholder="Brief description of your project"
@@ -181,7 +185,7 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
             <input
               type="text"
               value={config.version}
-              onChange={(e) => updateConfig({ version: e.target.value })}
+              onChange={e => updateConfig({ version: e.target.value })}
               className="w-full px-3 py-2 border border-gray-400 rounded"
               placeholder="1.0.0"
             />
@@ -191,7 +195,7 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
             <input
               type="text"
               value={config.author}
-              onChange={(e) => updateConfig({ author: e.target.value })}
+              onChange={e => updateConfig({ author: e.target.value })}
               className="w-full px-3 py-2 border border-gray-400 rounded"
               placeholder="Your name"
             />
@@ -208,9 +212,7 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
           <Package size={20} />
           Project Type
         </h3>
-        <p className="text-sm text-gray-600 mb-4">
-          Choose the type of project you want to create.
-        </p>
+        <p className="text-sm text-gray-600 mb-4">Choose the type of project you want to create.</p>
       </div>
 
       <div className="space-y-3">
@@ -218,7 +220,9 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
           <div
             key={type.id}
             className={`p-4 border-2 rounded cursor-pointer transition-colors ${
-              config.type === type.id ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
+              config.type === type.id
+                ? 'border-blue-500 bg-blue-50'
+                : 'border-gray-300 hover:border-gray-400'
             }`}
             onClick={() => updateConfig({ type: type.id as any })}
           >
@@ -235,9 +239,7 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
                   ))}
                 </div>
               </div>
-              {config.type === type.id && (
-                <Check size={20} className="text-blue-600" />
-              )}
+              {config.type === type.id && <Check size={20} className="text-blue-600" />}
             </div>
           </div>
         ))}
@@ -259,11 +261,14 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
 
       <div className="space-y-2">
         {availableFeatures.map(feature => (
-          <label key={feature.id} className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded cursor-pointer">
+          <label
+            key={feature.id}
+            className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded cursor-pointer"
+          >
             <input
               type="checkbox"
               checked={config.features.includes(feature.id)}
-              onChange={(e) => {
+              onChange={e => {
                 const features = e.target.checked
                   ? [...config.features, feature.id]
                   : config.features.filter(f => f !== feature.id);
@@ -295,13 +300,16 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
 
       <div className="space-y-2">
         {availableReferences.map(ref => (
-          <label key={ref.id} className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded cursor-pointer">
+          <label
+            key={ref.id}
+            className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded cursor-pointer"
+          >
             <input
               type="checkbox"
               checked={config.references.includes(ref.id)}
-              onChange={(e) => {
+              onChange={e => {
                 if (ref.required) return; // Can't uncheck required references
-                
+
                 const references = e.target.checked
                   ? [...config.references, ref.id]
                   : config.references.filter(r => r !== ref.id);
@@ -314,7 +322,9 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
               <div className="font-semibold text-sm flex items-center gap-2">
                 {ref.name}
                 {ref.required && (
-                  <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">Required</span>
+                  <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                    Required
+                  </span>
                 )}
               </div>
             </div>
@@ -341,19 +351,33 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
           <div>
             <div className="font-semibold mb-2">Project Details</div>
             <div className="space-y-1">
-              <div><strong>Name:</strong> {config.name}</div>
-              <div><strong>Type:</strong> {projectTypes.find(t => t.id === config.type)?.name}</div>
-              <div><strong>Version:</strong> {config.version}</div>
-              <div><strong>Location:</strong> {config.location}</div>
+              <div>
+                <strong>Name:</strong> {config.name}
+              </div>
+              <div>
+                <strong>Type:</strong> {projectTypes.find(t => t.id === config.type)?.name}
+              </div>
+              <div>
+                <strong>Version:</strong> {config.version}
+              </div>
+              <div>
+                <strong>Location:</strong> {config.location}
+              </div>
             </div>
           </div>
-          
+
           <div>
             <div className="font-semibold mb-2">Configuration</div>
             <div className="space-y-1">
-              <div><strong>Features:</strong> {config.features.length || 'None'}</div>
-              <div><strong>References:</strong> {config.references.length}</div>
-              <div><strong>Author:</strong> {config.author || 'Not specified'}</div>
+              <div>
+                <strong>Features:</strong> {config.features.length || 'None'}
+              </div>
+              <div>
+                <strong>References:</strong> {config.references.length}
+              </div>
+              <div>
+                <strong>Author:</strong> {config.author || 'Not specified'}
+              </div>
             </div>
           </div>
         </div>
@@ -372,7 +396,10 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
               {config.features.map(featureId => {
                 const feature = availableFeatures.find(f => f.id === featureId);
                 return feature ? (
-                  <span key={featureId} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                  <span
+                    key={featureId}
+                    className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded"
+                  >
                     {feature.name}
                   </span>
                 ) : null;
@@ -386,12 +413,18 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
 
   const renderCurrentStep = () => {
     switch (currentStep) {
-      case 1: return renderStep1();
-      case 2: return renderStep2();
-      case 3: return renderStep3();
-      case 4: return renderStep4();
-      case 5: return renderStep5();
-      default: return null;
+      case 1:
+        return renderStep1();
+      case 2:
+        return renderStep2();
+      case 3:
+        return renderStep3();
+      case 4:
+        return renderStep4();
+      case 5:
+        return renderStep5();
+      default:
+        return null;
     }
   };
 
@@ -399,21 +432,30 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-200 border-2 border-gray-400 shadow-lg" style={{ width: '700px', height: '600px' }}>
+      <div
+        className="bg-gray-200 border-2 border-gray-400 shadow-lg"
+        style={{ width: '700px', height: '600px' }}
+      >
         <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
           <span>New Project Wizard</span>
-          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">×</button>
+          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">
+            ×
+          </button>
         </div>
 
         <div className="p-6 h-full flex flex-col">
           {/* Progress Bar */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold">Step {currentStep} of {totalSteps}</span>
-              <span className="text-sm text-gray-600">{Math.round((currentStep / totalSteps) * 100)}% Complete</span>
+              <span className="text-sm font-semibold">
+                Step {currentStep} of {totalSteps}
+              </span>
+              <span className="text-sm text-gray-600">
+                {Math.round((currentStep / totalSteps) * 100)}% Complete
+              </span>
             </div>
             <div className="w-full bg-gray-300 rounded-full h-2">
-              <div 
+              <div
                 className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${(currentStep / totalSteps) * 100}%` }}
               />
@@ -421,9 +463,7 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
           </div>
 
           {/* Step Content */}
-          <div className="flex-1 overflow-auto">
-            {renderCurrentStep()}
-          </div>
+          <div className="flex-1 overflow-auto">{renderCurrentStep()}</div>
 
           {/* Navigation */}
           <div className="flex justify-between items-center pt-4 border-t border-gray-300">
@@ -437,7 +477,9 @@ export const ProjectSetupWizard: React.FC<ProjectSetupWizardProps> = ({
             </button>
 
             <div className="text-xs text-gray-500">
-              {currentStep === totalSteps ? 'Ready to create your project' : 'Complete all required fields to continue'}
+              {currentStep === totalSteps
+                ? 'Ready to create your project'
+                : 'Complete all required fields to continue'}
             </div>
 
             <button

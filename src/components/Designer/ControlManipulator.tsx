@@ -31,10 +31,10 @@ export const ControlManipulator: React.FC<ControlManipulatorProps> = ({
   snapToGrid,
   gridSize,
   showAlignmentGuides,
-  children
+  children,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   const {
     dragState,
     alignmentGuides,
@@ -43,26 +43,21 @@ export const ControlManipulator: React.FC<ControlManipulatorProps> = ({
     handleMouseMove,
     handleMouseUp,
     handleKeyboardMove,
-    handleKeyboardResize
-  } = useControlManipulation(
-    allControls,
-    selectedControls,
-    onUpdateControls,
-    {
-      snapToGrid,
-      gridSize,
-      showAlignmentGuides,
-      enableKeyboardMovement: true,
-      multiSelectEnabled: true
-    }
-  );
+    handleKeyboardResize,
+  } = useControlManipulation(allControls, selectedControls, onUpdateControls, {
+    snapToGrid,
+    gridSize,
+    showAlignmentGuides,
+    enableKeyboardMovement: true,
+    multiSelectEnabled: true,
+  });
 
   // Gestionnaires d'événements globaux
   useEffect(() => {
     if (dragState.isDragging || dragState.isResizing) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
-      
+
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
@@ -75,7 +70,7 @@ export const ControlManipulator: React.FC<ControlManipulatorProps> = ({
     if (isSelected && executionMode === 'design') {
       document.addEventListener('keydown', handleKeyboardMove);
       document.addEventListener('keydown', handleKeyboardResize);
-      
+
       return () => {
         document.removeEventListener('keydown', handleKeyboardMove);
         document.removeEventListener('keydown', handleKeyboardResize);
@@ -106,7 +101,7 @@ export const ControlManipulator: React.FC<ControlManipulatorProps> = ({
       backgroundColor: '#0066cc',
       border: '1px solid #fff',
       zIndex: 10000,
-      cursor: 'pointer'
+      cursor: 'pointer',
     };
 
     const handles = [
@@ -117,7 +112,7 @@ export const ControlManipulator: React.FC<ControlManipulatorProps> = ({
       { position: 'se', style: { bottom: -4, right: -4, cursor: 'se-resize' } },
       { position: 's', style: { bottom: -4, left: '50%', marginLeft: -3, cursor: 's-resize' } },
       { position: 'sw', style: { bottom: -4, left: -4, cursor: 'sw-resize' } },
-      { position: 'w', style: { top: '50%', left: -4, marginTop: -3, cursor: 'w-resize' } }
+      { position: 'w', style: { top: '50%', left: -4, marginTop: -3, cursor: 'w-resize' } },
     ];
 
     return (
@@ -126,7 +121,7 @@ export const ControlManipulator: React.FC<ControlManipulatorProps> = ({
           <div
             key={handle.position}
             style={{ ...handleStyle, ...handle.style }}
-            onMouseDown={(e) => startResize(e, control, handle.position)}
+            onMouseDown={e => startResize(e, control, handle.position)}
           />
         ))}
       </>
@@ -149,7 +144,7 @@ export const ControlManipulator: React.FC<ControlManipulatorProps> = ({
               height: '100vh',
               backgroundColor: '#ff0000',
               pointerEvents: 'none',
-              zIndex: 9999
+              zIndex: 9999,
             }}
           />
         ))}
@@ -164,7 +159,7 @@ export const ControlManipulator: React.FC<ControlManipulatorProps> = ({
               height: 1,
               backgroundColor: '#ff0000',
               pointerEvents: 'none',
-              zIndex: 9999
+              zIndex: 9999,
             }}
           />
         ))}
@@ -182,9 +177,10 @@ export const ControlManipulator: React.FC<ControlManipulatorProps> = ({
           top: control.y,
           width: control.width,
           height: control.height,
-          cursor: executionMode === 'design' ? (dragState.isDragging ? 'move' : 'pointer') : 'default',
+          cursor:
+            executionMode === 'design' ? (dragState.isDragging ? 'move' : 'pointer') : 'default',
           border: isSelected && executionMode === 'design' ? '1px dashed #0066cc' : 'none',
-          zIndex: isSelected ? 1000 : control.tabIndex || 1
+          zIndex: isSelected ? 1000 : control.tabIndex || 1,
         }}
         onClick={handleControlClick}
         onMouseDown={handleControlMouseDown}

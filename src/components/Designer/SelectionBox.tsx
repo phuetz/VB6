@@ -5,7 +5,7 @@ const SelectionBox: React.FC = () => {
   const { state } = useVB6();
 
   if (!state.isSelecting || state.executionMode === 'run') return null;
-  
+
   return (
     <div
       className="absolute pointer-events-none"
@@ -16,7 +16,7 @@ const SelectionBox: React.FC = () => {
         height: state.selectionBox.height,
         border: '1px dashed #0066cc',
         backgroundColor: 'rgba(0, 102, 204, 0.1)',
-        zIndex: 9998
+        zIndex: 9998,
       }}
     />
   );

@@ -40,7 +40,7 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameCountRef = useRef(0);
   const lastFrameTimeRef = useRef(performance.now());
-  const metricsIntervalRef = useRef<NodeJS.Timeout>();
+  const animationFrameRef = useRef<number>();
   const { recordPerformanceMetrics } = useVB6Store();
 
   useEffect(() => {
@@ -77,18 +77,18 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
       }
 
       if (isMonitoring) {
-        requestAnimationFrame(updateMetrics);
+        animationFrameRef.current = requestAnimationFrame(updateMetrics);
       }
     };
 
     updateMetrics();
 
     return () => {
-      if (metricsIntervalRef.current) {
-        clearInterval(metricsIntervalRef.current);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [visible, isMonitoring]);
+  }, [visible, isMonitoring, recordPerformanceMetrics]);
 
   useEffect(() => {
     if (!canvasRef.current || metrics.length === 0) return;

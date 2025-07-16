@@ -45,9 +45,9 @@ export class VB6Debugger {
       expression,
       value: '<Not evaluated>',
       type: 'Variant',
-      context: this.currentFile
+      context: this.currentFile,
     };
-    
+
     this.watchExpressions.set(expression, watch);
     this.evaluateWatch(watch);
     this.notifyStateChange();
@@ -62,7 +62,7 @@ export class VB6Debugger {
     this.isRunning = true;
     this.isPaused = false;
     this.notifyStateChange();
-    
+
     try {
       await this.executeCode();
     } catch (error) {
@@ -83,7 +83,7 @@ export class VB6Debugger {
 
   step(): void {
     if (!this.isPaused) return;
-    
+
     this.currentLine++;
     this.evaluateCurrentLine();
     this.notifyStateChange();
@@ -91,11 +91,11 @@ export class VB6Debugger {
 
   stepOver(): void {
     if (!this.isPaused) return;
-    
+
     // Step over function calls
     const currentDepth = this.callStack.length;
     this.step();
-    
+
     while (this.callStack.length > currentDepth && !this.shouldBreak()) {
       this.step();
     }
@@ -103,10 +103,10 @@ export class VB6Debugger {
 
   stepOut(): void {
     if (!this.isPaused) return;
-    
+
     // Step out of current function
     const currentDepth = this.callStack.length;
-    
+
     while (this.callStack.length >= currentDepth && !this.shouldBreak()) {
       this.step();
     }
@@ -156,7 +156,7 @@ export class VB6Debugger {
       variables: this.currentFrame?.variables || {},
       callStack: [...this.callStack],
       breakpoints: new Set(this.breakpoints),
-      watchExpressions: Array.from(this.watchExpressions.values())
+      watchExpressions: Array.from(this.watchExpressions.values()),
     };
   }
 
@@ -166,9 +166,9 @@ export class VB6Debugger {
         this.isPaused = true;
         break;
       }
-      
+
       await this.executeNextStatement();
-      
+
       // Allow UI updates
       await new Promise(resolve => setTimeout(resolve, 0));
     }
@@ -177,21 +177,21 @@ export class VB6Debugger {
   private async executeNextStatement(): Promise<void> {
     // Simulate code execution
     this.currentLine++;
-    
+
     // Check for procedure calls
     if (this.isFunction(this.currentLine)) {
       this.enterFunction();
     } else if (this.isReturn(this.currentLine)) {
       this.exitFunction();
     }
-    
+
     this.evaluateCurrentLine();
   }
 
   private evaluateCurrentLine(): void {
     // Update watches
     this.updateWatches();
-    
+
     // Update variables
     this.updateVariables();
   }
@@ -206,9 +206,9 @@ export class VB6Debugger {
       procedure: `Procedure${this.currentLine}`,
       module: this.currentFile,
       line: this.currentLine,
-      variables: {}
+      variables: {},
     };
-    
+
     this.callStack.push(frame);
     this.currentFrame = frame;
   }
@@ -254,28 +254,28 @@ export class VB6Debugger {
 
   private createEvaluationContext(): any {
     const context: any = {};
-    
+
     // Add current variables
     this.variables.forEach((value, key) => {
       context[key] = value;
     });
-    
+
     // Add current frame variables
     if (this.currentFrame) {
       Object.assign(context, this.currentFrame.variables);
     }
-    
+
     // Add built-in functions
     context.Len = (str: string) => str.length;
     context.Left = (str: string, n: number) => str.substring(0, n);
     context.Right = (str: string, n: number) => str.substring(str.length - n);
-    context.Mid = (str: string, start: number, length?: number) => 
+    context.Mid = (str: string, start: number, length?: number) =>
       str.substring(start - 1, length ? start - 1 + length : undefined);
     context.UCase = (str: string) => str.toUpperCase();
     context.LCase = (str: string) => str.toLowerCase();
     context.Val = (str: string) => parseFloat(str) || 0;
     context.Now = () => new Date();
-    
+
     return context;
   }
 
@@ -298,7 +298,7 @@ export class VB6Debugger {
     return {
       totalTime: 0,
       functionCalls: [],
-      memoryUsage: 0
+      memoryUsage: 0,
     };
   }
 
@@ -313,7 +313,7 @@ export class VB6Debugger {
       totalLines: 0,
       coveredLines: 0,
       coverage: 0,
-      uncoveredLines: []
+      uncoveredLines: [],
     };
   }
 }

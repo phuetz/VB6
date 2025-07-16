@@ -17,6 +17,10 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  server: {
+    port: 5183,
+    host: true,
+  },
   build: {
     // Enable source maps for production debugging (can be disabled for smaller builds)
     sourcemap: true,

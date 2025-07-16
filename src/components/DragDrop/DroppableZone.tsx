@@ -40,11 +40,7 @@ export const DroppableZone: React.FC<DroppableZoneProps> = ({
   }, [id, accepts, addLog]);
 
   // useDroppable config
-  const { 
-    isOver,
-    setNodeRef,
-    active,
-  } = useDroppable({ 
+  const { isOver, setNodeRef, active } = useDroppable({
     id,
     disabled,
   });
@@ -58,9 +54,9 @@ export const DroppableZone: React.FC<DroppableZoneProps> = ({
   // Log drop validity changes
   useEffect(() => {
     if (isOver) {
-      addLog('debug', 'DroppableZone', `${id} is being hovered with ${activeType}`, { 
-        canDrop, 
-        accepts 
+      addLog('debug', 'DroppableZone', `${id} is being hovered with ${activeType}`, {
+        canDrop,
+        accepts,
       });
     }
   }, [isOver, canDrop, id, activeType, addLog, accepts]);
@@ -108,7 +104,7 @@ export const DroppableZone: React.FC<DroppableZoneProps> = ({
 
   return (
     <div
-      ref={(node) => {
+      ref={node => {
         setNodeRef(node);
         if (elementRef.current !== node) {
           elementRef.current = node;
@@ -133,7 +129,7 @@ export const DroppableZone: React.FC<DroppableZoneProps> = ({
       )}
 
       {children}
-      
+
       {/* Grille visible si activée */}
       {showGrid && constraints?.snapToGrid && constraints.gridSize && (
         <div className="absolute bottom-0 left-0 bg-blue-900 text-white text-xs px-2 py-1 m-1 rounded z-50 pointer-events-none">
@@ -143,29 +139,33 @@ export const DroppableZone: React.FC<DroppableZoneProps> = ({
       {showGrid && constraints?.snapToGrid && constraints.gridSize && (
         <GridBackground gridSize={constraints.gridSize} />
       )}
-      
+
       {/* Overlay d'état */}
       {isOver && (
-        <div 
+        <div
           className={`absolute inset-0 pointer-events-none rounded transition-all duration-200 ${
-            canDrop 
-              ? 'bg-green-200 bg-opacity-30 border-2 border-green-500 border-dashed' 
+            canDrop
+              ? 'bg-green-200 bg-opacity-30 border-2 border-green-500 border-dashed'
               : 'bg-red-200 bg-opacity-30 border-2 border-red-500 border-dashed'
           }`}
           style={{
-            animation: canDrop ? 'dropZoneValid 1s ease-in-out infinite' : 'dropZoneInvalid 0.5s ease-in-out infinite',
+            animation: canDrop
+              ? 'dropZoneValid 1s ease-in-out infinite'
+              : 'dropZoneInvalid 0.5s ease-in-out infinite',
           }}
         />
       )}
-      
+
       {/* Message d'aide */}
       {isOver && (
         <div className="absolute top-2 left-2 z-10">
-          <div className={`text-xs px-2 py-1 rounded ${
-            canDrop 
-              ? 'bg-green-100 text-green-800 border border-green-300' 
-              : 'bg-red-100 text-red-800 border border-red-300'
-          }`}>
+          <div
+            className={`text-xs px-2 py-1 rounded ${
+              canDrop
+                ? 'bg-green-100 text-green-800 border border-green-300'
+                : 'bg-red-100 text-red-800 border border-red-300'
+            }`}
+          >
             {canDrop ? '✓ Drop here' : '✗ Invalid drop'}
           </div>
         </div>
@@ -177,7 +177,7 @@ export const DroppableZone: React.FC<DroppableZoneProps> = ({
 // Composant de grille de fond
 const GridBackground: React.FC<{ gridSize: number }> = ({ gridSize }) => {
   return (
-    <div 
+    <div
       className="absolute inset-0 pointer-events-none opacity-20"
       style={{
         backgroundImage: `

@@ -12,7 +12,7 @@ export const PositionIndicator: React.FC<PositionIndicatorProps> = ({
   control,
   isVisible,
   showSize = true,
-  showCoordinates = true
+  showCoordinates = true,
 }) => {
   if (!isVisible) return null;
 
@@ -32,7 +32,7 @@ export const PositionIndicator: React.FC<PositionIndicatorProps> = ({
         fontFamily: 'monospace',
         whiteSpace: 'nowrap',
         zIndex: 10001,
-        pointerEvents: 'none'
+        pointerEvents: 'none',
       }}
     >
       {showCoordinates && `X: ${formatValue(control.x)}, Y: ${formatValue(control.y)}`}

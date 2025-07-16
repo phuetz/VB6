@@ -147,8 +147,7 @@ export function createRuntimeFunctions(
           return Math.floor(diff / (1000 * 60 * 60 * 24));
         case 'm':
           return (
-            (date2.getFullYear() - date1.getFullYear()) * 12 +
-            (date2.getMonth() - date1.getMonth())
+            (date2.getFullYear() - date1.getFullYear()) * 12 + (date2.getMonth() - date1.getMonth())
           );
         case 'yyyy':
           return date2.getFullYear() - date1.getFullYear();
@@ -173,20 +172,12 @@ export function createRuntimeFunctions(
         'September',
         'October',
         'November',
-        'December'
+        'December',
       ];
       return names[month - 1] || '';
     },
     WeekdayName: (weekday: number) => {
-      const names = [
-        'Sunday',
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday'
-      ];
+      const names = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       return names[weekday - 1] || '';
     },
 
@@ -218,7 +209,7 @@ export function createRuntimeFunctions(
         }
       }
       return String(expression);
-    }
+    },
   };
 }
 
@@ -257,39 +248,37 @@ export function basicTranspile(vbCode: string): string {
   return jsCode;
 }
 
-export const VB6Runtime: React.FC<VB6RuntimeProps> = ({
-  code,
-  onOutput,
-  onError
-}) => {
+export const VB6Runtime: React.FC<VB6RuntimeProps> = ({ code, onOutput, onError }) => {
   const runtimeRef = useRef<any>(null);
 
   // VB6 Runtime Functions
   const runtimeFunctions = createRuntimeFunctions(onOutput, onError);
 
-  const executeVB6Code = useCallback((vbCode: string) => {
-    try {
-      const jsCode = basicTranspile(vbCode);
+  const executeVB6Code = useCallback(
+    (vbCode: string) => {
+      try {
+        const jsCode = basicTranspile(vbCode);
 
-      // Create execution context with runtime functions
-      const context = {
-        ...runtimeFunctions,
-        console: { log: onOutput },
-        alert: runtimeFunctions.MsgBox
-      };
+        // Create execution context with runtime functions
+        const context = {
+          ...runtimeFunctions,
+          console: { log: onOutput },
+          alert: runtimeFunctions.MsgBox,
+        };
 
-      // Execute the code
-      const func = new Function(...Object.keys(context), jsCode);
-      func(...Object.values(context));
-
-    } catch (error) {
-      onError(`Runtime Error: ${(error as Error).message}`);
-    }
-  }, [onOutput, onError]);
+        // Execute the code
+        const func = new Function(...Object.keys(context), jsCode);
+        func(...Object.values(context));
+      } catch (error) {
+        onError(`Runtime Error: ${(error as Error).message}`);
+      }
+    },
+    [onOutput, onError]
+  );
 
   // Expose execute function
   React.useImperativeHandle(runtimeRef, () => ({
-    execute: executeVB6Code
+    execute: executeVB6Code,
   }));
 
   return null; // This is a runtime component, no UI

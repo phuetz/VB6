@@ -13,7 +13,7 @@ export const useUndoRedo = () => {
   const historyRef = useRef<HistoryState[]>([]);
   const currentIndexRef = useRef(-1);
   const isUndoRedoRef = useRef(false);
-  
+
   const { controls, selectedControls, setExecutionMode } = useVB6Store(
     state => ({
       controls: state.controls,
@@ -23,42 +23,45 @@ export const useUndoRedo = () => {
     shallow
   );
 
-  const saveState = useCallback((action: string) => {
-    if (isUndoRedoRef.current) return;
+  const saveState = useCallback(
+    (action: string) => {
+      if (isUndoRedoRef.current) return;
 
-    const newState: HistoryState = {
-      controls: JSON.parse(JSON.stringify(controls)),
-      selectedControls: JSON.parse(JSON.stringify(selectedControls)),
-      timestamp: Date.now(),
-      action
-    };
+      const newState: HistoryState = {
+        controls: JSON.parse(JSON.stringify(controls)),
+        selectedControls: JSON.parse(JSON.stringify(selectedControls)),
+        timestamp: Date.now(),
+        action,
+      };
 
-    // Remove any states after current index (when new action after undo)
-    historyRef.current = historyRef.current.slice(0, currentIndexRef.current + 1);
-    
-    // Add new state
-    historyRef.current.push(newState);
-    currentIndexRef.current = historyRef.current.length - 1;
+      // Remove any states after current index (when new action after undo)
+      historyRef.current = historyRef.current.slice(0, currentIndexRef.current + 1);
 
-    // Limit history size
-    if (historyRef.current.length > 50) {
-      historyRef.current = historyRef.current.slice(-50);
+      // Add new state
+      historyRef.current.push(newState);
       currentIndexRef.current = historyRef.current.length - 1;
-    }
-  }, [controls, selectedControls]);
+
+      // Limit history size
+      if (historyRef.current.length > 50) {
+        historyRef.current = historyRef.current.slice(-50);
+        currentIndexRef.current = historyRef.current.length - 1;
+      }
+    },
+    [controls, selectedControls]
+  );
 
   const undo = useCallback(() => {
     if (currentIndexRef.current <= 0) return false;
 
     isUndoRedoRef.current = true;
     currentIndexRef.current--;
-    
+
     const previousState = historyRef.current[currentIndexRef.current];
     if (previousState) {
       // Restore state using Zustand actions
       useVB6Store.setState({
         controls: previousState.controls,
-        selectedControls: previousState.selectedControls
+        selectedControls: previousState.selectedControls,
       });
     }
 
@@ -71,12 +74,12 @@ export const useUndoRedo = () => {
 
     isUndoRedoRef.current = true;
     currentIndexRef.current++;
-    
+
     const nextState = historyRef.current[currentIndexRef.current];
     if (nextState) {
       useVB6Store.setState({
         controls: nextState.controls,
-        selectedControls: nextState.selectedControls
+        selectedControls: nextState.selectedControls,
       });
     }
 
@@ -105,6 +108,6 @@ export const useUndoRedo = () => {
     canRedo,
     getLastAction,
     clearHistory,
-    historyLength: historyRef.current.length
+    historyLength: historyRef.current.length,
   };
 };

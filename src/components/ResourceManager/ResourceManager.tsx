@@ -17,14 +17,16 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
   resources,
   onAddResource,
   onRemoveResource,
-  onUpdateResource
+  onUpdateResource,
 }) => {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
-  const [filter, setFilter] = useState<'all' | 'image' | 'icon' | 'cursor' | 'sound' | 'binary'>('all');
+  const [filter, setFilter] = useState<'all' | 'image' | 'icon' | 'cursor' | 'sound' | 'binary'>(
+    'all'
+  );
   const [previewVisible, setPreviewVisible] = useState(false);
 
-  const filteredResources = resources.filter(resource => 
-    filter === 'all' || resource.type === filter
+  const filteredResources = resources.filter(
+    resource => filter === 'all' || resource.type === filter
   );
 
   const handleAddResource = useCallback(() => {
@@ -32,10 +34,10 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
     input.type = 'file';
     input.accept = 'image/*,audio/*,*/*';
     input.multiple = true;
-    
-    input.onchange = async (e) => {
+
+    input.onchange = async e => {
       const files = Array.from((e.target as HTMLInputElement).files || []);
-      
+
       for (const file of files) {
         try {
           const resource: Resource = {
@@ -44,16 +46,16 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
             type: getResourceType(file.type),
             data: await fileToDataURL(file),
             size: file.size,
-            format: file.type
+            format: file.type,
           };
-          
+
           onAddResource(resource);
         } catch (error) {
           console.error('Error adding resource:', error);
         }
       }
     };
-    
+
     input.click();
   }, [onAddResource]);
 
@@ -115,8 +117,8 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
       case 'icon':
       case 'cursor':
         return (
-          <img 
-            src={selectedResource.data as string} 
+          <img
+            src={selectedResource.data as string}
             alt={selectedResource.name}
             className="max-w-full max-h-64 object-contain"
           />
@@ -142,13 +144,13 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-200 border-2 border-gray-400 shadow-lg" style={{ width: '800px', height: '600px' }}>
+      <div
+        className="bg-gray-200 border-2 border-gray-400 shadow-lg"
+        style={{ width: '800px', height: '600px' }}
+      >
         <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
           <span>Resource Manager</span>
-          <button
-            onClick={onClose}
-            className="text-white hover:bg-blue-700 px-2"
-          >
+          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">
             ×
           </button>
         </div>
@@ -163,10 +165,10 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
               <Plus size={12} />
               Add Resource
             </button>
-            
+
             <select
               value={filter}
-              onChange={(e) => setFilter(e.target.value as any)}
+              onChange={e => setFilter(e.target.value as any)}
               className="px-2 py-1 border border-gray-400 text-xs"
             >
               <option value="all">All Resources</option>
@@ -197,7 +199,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredResources.map((resource) => (
+                  {filteredResources.map(resource => (
                     <tr
                       key={resource.id}
                       className={`border-b border-gray-200 hover:bg-gray-50 cursor-pointer ${
@@ -215,7 +217,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
                       <td className="p-2">
                         <div className="flex gap-1">
                           <button
-                            onClick={(e) => {
+                            onClick={e => {
                               e.stopPropagation();
                               handlePreview(resource);
                             }}
@@ -225,7 +227,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
                             <Eye size={12} />
                           </button>
                           <button
-                            onClick={(e) => {
+                            onClick={e => {
                               e.stopPropagation();
                               handleExport(resource);
                             }}
@@ -235,7 +237,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
                             <Download size={12} />
                           </button>
                           <button
-                            onClick={(e) => {
+                            onClick={e => {
                               e.stopPropagation();
                               onRemoveResource(resource.id);
                             }}
@@ -276,9 +278,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
                       <div className="font-bold text-xs mb-1">Format:</div>
                       <div className="text-xs">{selectedResource.format}</div>
                     </div>
-                    <div className="border-t border-gray-300 pt-2">
-                      {renderPreview()}
-                    </div>
+                    <div className="border-t border-gray-300 pt-2">{renderPreview()}</div>
                   </div>
                 ) : (
                   <div className="text-center text-gray-500 p-4">
@@ -293,7 +293,9 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
           {/* Status bar */}
           <div className="mt-4 pt-2 border-t border-gray-300 text-xs text-gray-600">
             {selectedResource ? (
-              <span>Selected: {selectedResource.name} ({formatFileSize(selectedResource.size)})</span>
+              <span>
+                Selected: {selectedResource.name} ({formatFileSize(selectedResource.size)})
+              </span>
             ) : (
               <span>Ready</span>
             )}
@@ -314,9 +316,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
                 ×
               </button>
             </div>
-            <div className="p-4">
-              {renderPreview()}
-            </div>
+            <div className="p-4">{renderPreview()}</div>
           </div>
         </div>
       )}

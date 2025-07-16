@@ -27,166 +27,142 @@ export const MenuEditor: React.FC<MenuEditorProps> = ({
   visible,
   onClose,
   onSave,
-  initialMenus = []
+  initialMenus = [],
 }) => {
-  const [menus, setMenus] = useState<MenuItem[]>(initialMenus.length > 0 ? initialMenus : [
-    {
-      id: 'file',
-      caption: '&File',
-      name: 'mnuFile',
-      enabled: true,
-      visible: true,
-      checked: false,
-      shortcut: '',
-      helpContextId: 0,
-      tag: '',
-      separator: false,
-      submenu: [
-        {
-          id: 'new',
-          caption: '&New',
-          name: 'mnuNew',
-          enabled: true,
-          visible: true,
-          checked: false,
-          shortcut: 'Ctrl+N',
-          helpContextId: 0,
-          tag: '',
-          separator: false,
-          submenu: []
-        },
-        {
-          id: 'open',
-          caption: '&Open...',
-          name: 'mnuOpen',
-          enabled: true,
-          visible: true,
-          checked: false,
-          shortcut: 'Ctrl+O',
-          helpContextId: 0,
-          tag: '',
-          separator: false,
-          submenu: []
-        },
-        {
-          id: 'sep1',
-          caption: '-',
-          name: 'mnuSep1',
-          enabled: true,
-          visible: true,
-          checked: false,
-          shortcut: '',
-          helpContextId: 0,
-          tag: '',
-          separator: true,
-          submenu: []
-        },
-        {
-          id: 'exit',
-          caption: 'E&xit',
-          name: 'mnuExit',
-          enabled: true,
-          visible: true,
-          checked: false,
-          shortcut: '',
-          helpContextId: 0,
-          tag: '',
-          separator: false,
-          submenu: []
-        }
-      ]
-    },
-    {
-      id: 'edit',
-      caption: '&Edit',
-      name: 'mnuEdit',
-      enabled: true,
-      visible: true,
-      checked: false,
-      shortcut: '',
-      helpContextId: 0,
-      tag: '',
-      separator: false,
-      submenu: [
-        {
-          id: 'undo',
-          caption: '&Undo',
-          name: 'mnuUndo',
-          enabled: true,
-          visible: true,
-          checked: false,
-          shortcut: 'Ctrl+Z',
-          helpContextId: 0,
-          tag: '',
-          separator: false,
-          submenu: []
-        },
-        {
-          id: 'redo',
-          caption: '&Redo',
-          name: 'mnuRedo',
-          enabled: true,
-          visible: true,
-          checked: false,
-          shortcut: 'Ctrl+Y',
-          helpContextId: 0,
-          tag: '',
-          separator: false,
-          submenu: []
-        }
-      ]
-    }
-  ]);
+  const [menus, setMenus] = useState<MenuItem[]>(
+    initialMenus.length > 0
+      ? initialMenus
+      : [
+          {
+            id: 'file',
+            caption: '&File',
+            name: 'mnuFile',
+            enabled: true,
+            visible: true,
+            checked: false,
+            shortcut: '',
+            helpContextId: 0,
+            tag: '',
+            separator: false,
+            submenu: [
+              {
+                id: 'new',
+                caption: '&New',
+                name: 'mnuNew',
+                enabled: true,
+                visible: true,
+                checked: false,
+                shortcut: 'Ctrl+N',
+                helpContextId: 0,
+                tag: '',
+                separator: false,
+                submenu: [],
+              },
+              {
+                id: 'open',
+                caption: '&Open...',
+                name: 'mnuOpen',
+                enabled: true,
+                visible: true,
+                checked: false,
+                shortcut: 'Ctrl+O',
+                helpContextId: 0,
+                tag: '',
+                separator: false,
+                submenu: [],
+              },
+              {
+                id: 'sep1',
+                caption: '-',
+                name: 'mnuSep1',
+                enabled: true,
+                visible: true,
+                checked: false,
+                shortcut: '',
+                helpContextId: 0,
+                tag: '',
+                separator: true,
+                submenu: [],
+              },
+              {
+                id: 'exit',
+                caption: 'E&xit',
+                name: 'mnuExit',
+                enabled: true,
+                visible: true,
+                checked: false,
+                shortcut: '',
+                helpContextId: 0,
+                tag: '',
+                separator: false,
+                submenu: [],
+              },
+            ],
+          },
+          {
+            id: 'edit',
+            caption: '&Edit',
+            name: 'mnuEdit',
+            enabled: true,
+            visible: true,
+            checked: false,
+            shortcut: '',
+            helpContextId: 0,
+            tag: '',
+            separator: false,
+            submenu: [
+              {
+                id: 'undo',
+                caption: '&Undo',
+                name: 'mnuUndo',
+                enabled: true,
+                visible: true,
+                checked: false,
+                shortcut: 'Ctrl+Z',
+                helpContextId: 0,
+                tag: '',
+                separator: false,
+                submenu: [],
+              },
+              {
+                id: 'redo',
+                caption: '&Redo',
+                name: 'mnuRedo',
+                enabled: true,
+                visible: true,
+                checked: false,
+                shortcut: 'Ctrl+Y',
+                helpContextId: 0,
+                tag: '',
+                separator: false,
+                submenu: [],
+              },
+            ],
+          },
+        ]
+  );
 
   const [selectedMenu, setSelectedMenu] = useState<string | null>(null);
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set(['file', 'edit']));
 
-  const findMenuItem = useCallback((id: string, items: MenuItem[] = menus): MenuItem | null => {
-    for (const item of items) {
-      if (item.id === id) return item;
-      const found = findMenuItem(id, item.submenu);
-      if (found) return found;
-    }
-    return null;
-  }, [menus]);
+  const findMenuItem = useCallback(
+    (id: string, items: MenuItem[] = menus): MenuItem | null => {
+      for (const item of items) {
+        if (item.id === id) return item;
+        const found = findMenuItem(id, item.submenu);
+        if (found) return found;
+      }
+      return null;
+    },
+    [menus]
+  );
 
-  const updateMenuItem = useCallback((id: string, updates: Partial<MenuItem>) => {
-    const updateInArray = (items: MenuItem[]): MenuItem[] => {
-      return items.map(item => {
-        if (item.id === id) {
-          return { ...item, ...updates };
-        }
-        if (item.submenu.length > 0) {
-          return { ...item, submenu: updateInArray(item.submenu) };
-        }
-        return item;
-      });
-    };
-
-    setMenus(updateInArray(menus));
-  }, [menus]);
-
-  const addMenuItem = useCallback((parentId?: string) => {
-    const newItem: MenuItem = {
-      id: `menu_${Date.now()}`,
-      caption: 'New Item',
-      name: `mnuNew${Date.now()}`,
-      enabled: true,
-      visible: true,
-      checked: false,
-      shortcut: '',
-      helpContextId: 0,
-      tag: '',
-      separator: false,
-      submenu: [],
-      parent: parentId
-    };
-
-    if (parentId) {
+  const updateMenuItem = useCallback(
+    (id: string, updates: Partial<MenuItem>) => {
       const updateInArray = (items: MenuItem[]): MenuItem[] => {
         return items.map(item => {
-          if (item.id === parentId) {
-            return { ...item, submenu: [...item.submenu, newItem] };
+          if (item.id === id) {
+            return { ...item, ...updates };
           }
           if (item.submenu.length > 0) {
             return { ...item, submenu: updateInArray(item.submenu) };
@@ -194,54 +170,97 @@ export const MenuEditor: React.FC<MenuEditorProps> = ({
           return item;
         });
       };
+
       setMenus(updateInArray(menus));
-      setExpandedMenus(prev => new Set([...prev, parentId]));
-    } else {
-      setMenus([...menus, newItem]);
-    }
+    },
+    [menus]
+  );
 
-    setSelectedMenu(newItem.id);
-  }, [menus]);
+  const addMenuItem = useCallback(
+    (parentId?: string) => {
+      const newItem: MenuItem = {
+        id: `menu_${Date.now()}`,
+        caption: 'New Item',
+        name: `mnuNew${Date.now()}`,
+        enabled: true,
+        visible: true,
+        checked: false,
+        shortcut: '',
+        helpContextId: 0,
+        tag: '',
+        separator: false,
+        submenu: [],
+        parent: parentId,
+      };
 
-  const deleteMenuItem = useCallback((id: string) => {
-    const deleteFromArray = (items: MenuItem[]): MenuItem[] => {
-      return items.filter(item => {
-        if (item.id === id) return false;
-        if (item.submenu.length > 0) {
-          item.submenu = deleteFromArray(item.submenu);
+      if (parentId) {
+        const updateInArray = (items: MenuItem[]): MenuItem[] => {
+          return items.map(item => {
+            if (item.id === parentId) {
+              return { ...item, submenu: [...item.submenu, newItem] };
+            }
+            if (item.submenu.length > 0) {
+              return { ...item, submenu: updateInArray(item.submenu) };
+            }
+            return item;
+          });
+        };
+        setMenus(updateInArray(menus));
+        setExpandedMenus(prev => new Set([...prev, parentId]));
+      } else {
+        setMenus([...menus, newItem]);
+      }
+
+      setSelectedMenu(newItem.id);
+    },
+    [menus]
+  );
+
+  const deleteMenuItem = useCallback(
+    (id: string) => {
+      const deleteFromArray = (items: MenuItem[]): MenuItem[] => {
+        return items.filter(item => {
+          if (item.id === id) return false;
+          if (item.submenu.length > 0) {
+            item.submenu = deleteFromArray(item.submenu);
+          }
+          return true;
+        });
+      };
+
+      setMenus(deleteFromArray(menus));
+      if (selectedMenu === id) {
+        setSelectedMenu(null);
+      }
+    },
+    [menus, selectedMenu]
+  );
+
+  const moveMenuItem = useCallback(
+    (id: string, direction: 'up' | 'down') => {
+      const moveInArray = (items: MenuItem[]): MenuItem[] => {
+        const index = items.findIndex(item => item.id === id);
+        if (index === -1) {
+          // Item not in this array, check subarrays
+          return items.map(item => ({
+            ...item,
+            submenu: moveInArray(item.submenu),
+          }));
         }
-        return true;
-      });
-    };
 
-    setMenus(deleteFromArray(menus));
-    if (selectedMenu === id) {
-      setSelectedMenu(null);
-    }
-  }, [menus, selectedMenu]);
+        const newItems = [...items];
+        if (direction === 'up' && index > 0) {
+          [newItems[index - 1], newItems[index]] = [newItems[index], newItems[index - 1]];
+        } else if (direction === 'down' && index < items.length - 1) {
+          [newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]];
+        }
+        return newItems;
+      };
 
-  const moveMenuItem = useCallback((id: string, direction: 'up' | 'down') => {
-    const moveInArray = (items: MenuItem[]): MenuItem[] => {
-      const index = items.findIndex(item => item.id === id);
-      if (index === -1) {
-        // Item not in this array, check subarrays
-        return items.map(item => ({
-          ...item,
-          submenu: moveInArray(item.submenu)
-        }));
-      }
-
-      const newItems = [...items];
-      if (direction === 'up' && index > 0) {
-        [newItems[index - 1], newItems[index]] = [newItems[index], newItems[index - 1]];
-      } else if (direction === 'down' && index < items.length - 1) {
-        [newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]];
-      }
-      return newItems;
-    };
-
-    setMenus(moveInArray(menus));
-  }, [menus]);
+      setMenus(moveInArray(menus));
+    },
+    [menus]
+  );
 
   const toggleExpanded = useCallback((id: string) => {
     setExpandedMenus(prev => {
@@ -255,49 +274,50 @@ export const MenuEditor: React.FC<MenuEditorProps> = ({
     });
   }, []);
 
-  const renderMenuItem = useCallback((item: MenuItem, level: number = 0) => {
-    const isSelected = selectedMenu === item.id;
-    const isExpanded = expandedMenus.has(item.id);
-    const hasSubmenu = item.submenu.length > 0;
+  const renderMenuItem = useCallback(
+    (item: MenuItem, level: number = 0) => {
+      const isSelected = selectedMenu === item.id;
+      const isExpanded = expandedMenus.has(item.id);
+      const hasSubmenu = item.submenu.length > 0;
 
-    return (
-      <div key={item.id}>
-        <div
-          className={`flex items-center gap-1 py-1 px-2 cursor-pointer text-xs ${
-            isSelected ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'
-          }`}
-          style={{ paddingLeft: `${8 + level * 16}px` }}
-          onClick={() => setSelectedMenu(item.id)}
-        >
-          {hasSubmenu ? (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleExpanded(item.id);
-              }}
-              className="w-4 h-4 flex items-center justify-center"
-            >
-              {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-            </button>
-          ) : (
-            <div className="w-4" />
-          )}
-          
-          <span className="flex-1">
-            {item.separator ? '────────────' : item.caption.replace(/&/g, '')}
-          </span>
-          
-          {item.shortcut && (
-            <span className="text-gray-500 text-xs">{item.shortcut}</span>
-          )}
+      return (
+        <div key={item.id}>
+          <div
+            className={`flex items-center gap-1 py-1 px-2 cursor-pointer text-xs ${
+              isSelected ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'
+            }`}
+            style={{ paddingLeft: `${8 + level * 16}px` }}
+            onClick={() => setSelectedMenu(item.id)}
+          >
+            {hasSubmenu ? (
+              <button
+                onClick={e => {
+                  e.stopPropagation();
+                  toggleExpanded(item.id);
+                }}
+                className="w-4 h-4 flex items-center justify-center"
+              >
+                {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+              </button>
+            ) : (
+              <div className="w-4" />
+            )}
+
+            <span className="flex-1">
+              {item.separator ? '────────────' : item.caption.replace(/&/g, '')}
+            </span>
+
+            {item.shortcut && <span className="text-gray-500 text-xs">{item.shortcut}</span>}
+          </div>
+
+          {hasSubmenu &&
+            isExpanded &&
+            item.submenu.map(subItem => renderMenuItem(subItem, level + 1))}
         </div>
-        
-        {hasSubmenu && isExpanded && item.submenu.map(subItem => 
-          renderMenuItem(subItem, level + 1)
-        )}
-      </div>
-    );
-  }, [selectedMenu, expandedMenus, toggleExpanded]);
+      );
+    },
+    [selectedMenu, expandedMenus, toggleExpanded]
+  );
 
   const selectedMenuItem = selectedMenu ? findMenuItem(selectedMenu) : null;
 
@@ -310,10 +330,15 @@ export const MenuEditor: React.FC<MenuEditorProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-200 border-2 border-gray-400 shadow-lg" style={{ width: '800px', height: '600px' }}>
+      <div
+        className="bg-gray-200 border-2 border-gray-400 shadow-lg"
+        style={{ width: '800px', height: '600px' }}
+      >
         <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
           <span>Menu Editor</span>
-          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">×</button>
+          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">
+            ×
+          </button>
         </div>
 
         <div className="p-4 h-full flex gap-4">
@@ -322,7 +347,7 @@ export const MenuEditor: React.FC<MenuEditorProps> = ({
             <div className="bg-gray-100 border border-gray-400 p-2 text-xs font-bold mb-2">
               Menu Structure
             </div>
-            
+
             <div className="flex gap-1 mb-2">
               <button
                 onClick={() => addMenuItem()}
@@ -386,7 +411,9 @@ export const MenuEditor: React.FC<MenuEditorProps> = ({
                     <input
                       type="text"
                       value={selectedMenuItem.caption}
-                      onChange={(e) => updateMenuItem(selectedMenuItem.id, { caption: e.target.value })}
+                      onChange={e =>
+                        updateMenuItem(selectedMenuItem.id, { caption: e.target.value })
+                      }
                       className="w-full px-2 py-1 border border-gray-300"
                       placeholder="&Menu Item"
                     />
@@ -398,7 +425,7 @@ export const MenuEditor: React.FC<MenuEditorProps> = ({
                     <input
                       type="text"
                       value={selectedMenuItem.name}
-                      onChange={(e) => updateMenuItem(selectedMenuItem.id, { name: e.target.value })}
+                      onChange={e => updateMenuItem(selectedMenuItem.id, { name: e.target.value })}
                       className="w-full px-2 py-1 border border-gray-300"
                       placeholder="mnuMenuItem"
                     />
@@ -408,7 +435,9 @@ export const MenuEditor: React.FC<MenuEditorProps> = ({
                     <label className="block font-bold mb-1">Shortcut:</label>
                     <select
                       value={selectedMenuItem.shortcut}
-                      onChange={(e) => updateMenuItem(selectedMenuItem.id, { shortcut: e.target.value })}
+                      onChange={e =>
+                        updateMenuItem(selectedMenuItem.id, { shortcut: e.target.value })
+                      }
                       className="w-full px-2 py-1 border border-gray-300"
                     >
                       <option value="">(None)</option>
@@ -436,7 +465,9 @@ export const MenuEditor: React.FC<MenuEditorProps> = ({
                       <input
                         type="checkbox"
                         checked={selectedMenuItem.enabled}
-                        onChange={(e) => updateMenuItem(selectedMenuItem.id, { enabled: e.target.checked })}
+                        onChange={e =>
+                          updateMenuItem(selectedMenuItem.id, { enabled: e.target.checked })
+                        }
                         className="mr-1"
                       />
                       Enabled
@@ -445,7 +476,9 @@ export const MenuEditor: React.FC<MenuEditorProps> = ({
                       <input
                         type="checkbox"
                         checked={selectedMenuItem.visible}
-                        onChange={(e) => updateMenuItem(selectedMenuItem.id, { visible: e.target.checked })}
+                        onChange={e =>
+                          updateMenuItem(selectedMenuItem.id, { visible: e.target.checked })
+                        }
                         className="mr-1"
                       />
                       Visible
@@ -454,7 +487,9 @@ export const MenuEditor: React.FC<MenuEditorProps> = ({
                       <input
                         type="checkbox"
                         checked={selectedMenuItem.checked}
-                        onChange={(e) => updateMenuItem(selectedMenuItem.id, { checked: e.target.checked })}
+                        onChange={e =>
+                          updateMenuItem(selectedMenuItem.id, { checked: e.target.checked })
+                        }
                         className="mr-1"
                       />
                       Checked
@@ -466,10 +501,12 @@ export const MenuEditor: React.FC<MenuEditorProps> = ({
                       <input
                         type="checkbox"
                         checked={selectedMenuItem.separator}
-                        onChange={(e) => updateMenuItem(selectedMenuItem.id, { 
-                          separator: e.target.checked,
-                          caption: e.target.checked ? '-' : 'Menu Item'
-                        })}
+                        onChange={e =>
+                          updateMenuItem(selectedMenuItem.id, {
+                            separator: e.target.checked,
+                            caption: e.target.checked ? '-' : 'Menu Item',
+                          })
+                        }
                         className="mr-1"
                       />
                       Separator
@@ -481,7 +518,11 @@ export const MenuEditor: React.FC<MenuEditorProps> = ({
                     <input
                       type="number"
                       value={selectedMenuItem.helpContextId}
-                      onChange={(e) => updateMenuItem(selectedMenuItem.id, { helpContextId: parseInt(e.target.value) || 0 })}
+                      onChange={e =>
+                        updateMenuItem(selectedMenuItem.id, {
+                          helpContextId: parseInt(e.target.value) || 0,
+                        })
+                      }
                       className="w-full px-2 py-1 border border-gray-300"
                     />
                   </div>
@@ -491,7 +532,7 @@ export const MenuEditor: React.FC<MenuEditorProps> = ({
                     <input
                       type="text"
                       value={selectedMenuItem.tag}
-                      onChange={(e) => updateMenuItem(selectedMenuItem.id, { tag: e.target.value })}
+                      onChange={e => updateMenuItem(selectedMenuItem.id, { tag: e.target.value })}
                       className="w-full px-2 py-1 border border-gray-300"
                     />
                   </div>

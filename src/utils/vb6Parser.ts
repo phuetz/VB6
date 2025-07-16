@@ -70,13 +70,17 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
 
   const pushCurrent = () => {
     if (!current) return;
-    if (current.type === 'propertyGet' || current.type === 'propertyLet' || current.type === 'propertySet') {
+    if (
+      current.type === 'propertyGet' ||
+      current.type === 'propertyLet' ||
+      current.type === 'propertySet'
+    ) {
       const prop = properties[current.name] || {
         name: current.name,
         visibility: current.visibility,
         parameters: current.parameters,
         getter: undefined,
-        setter: undefined
+        setter: undefined,
       };
       if (current.type === 'propertyGet') prop.getter = current;
       else prop.setter = current;
@@ -109,7 +113,7 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
       events.push({
         name: eventMatch[2],
         parameters: parseParams(eventMatch[3]),
-        visibility: (eventMatch[1]?.toLowerCase() as VB6Visibility) || 'public'
+        visibility: (eventMatch[1]?.toLowerCase() as VB6Visibility) || 'public',
       });
       continue;
     }
@@ -123,11 +127,13 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
         type: 'sub',
         parameters: parseParams(subMatch[3]),
         visibility: (subMatch[1]?.toLowerCase() as VB6Visibility) || 'public',
-        body: ''
+        body: '',
       };
       continue;
     }
-    const funcMatch = trimmed.match(/^(Public|Private)?\s*Function\s+(\w+)\s*(\([^)]*\))?\s*(?:As\s+(\w+))?/i);
+    const funcMatch = trimmed.match(
+      /^(Public|Private)?\s*Function\s+(\w+)\s*(\([^)]*\))?\s*(?:As\s+(\w+))?/i
+    );
     if (funcMatch) {
       pushCurrent();
       current = {
@@ -136,11 +142,13 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
         parameters: parseParams(funcMatch[3]),
         returnType: funcMatch[4] || null,
         visibility: (funcMatch[1]?.toLowerCase() as VB6Visibility) || 'public',
-        body: ''
+        body: '',
       };
       continue;
     }
-    const propGetMatch = trimmed.match(/^(Public|Private)?\s*Property\s+Get\s+(\w+)\s*(\([^)]*\))?\s*(?:As\s+(\w+))?/i);
+    const propGetMatch = trimmed.match(
+      /^(Public|Private)?\s*Property\s+Get\s+(\w+)\s*(\([^)]*\))?\s*(?:As\s+(\w+))?/i
+    );
     if (propGetMatch) {
       pushCurrent();
       current = {
@@ -149,11 +157,13 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
         parameters: parseParams(propGetMatch[3]),
         returnType: propGetMatch[4] || null,
         visibility: (propGetMatch[1]?.toLowerCase() as VB6Visibility) || 'public',
-        body: ''
+        body: '',
       };
       continue;
     }
-    const propLetMatch = trimmed.match(/^(Public|Private)?\s*Property\s+(Let|Set)\s+(\w+)\s*(\([^)]*\))?/i);
+    const propLetMatch = trimmed.match(
+      /^(Public|Private)?\s*Property\s+(Let|Set)\s+(\w+)\s*(\([^)]*\))?/i
+    );
     if (propLetMatch) {
       pushCurrent();
       current = {
@@ -161,7 +171,7 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
         type: propLetMatch[2].toLowerCase() === 'let' ? 'propertyLet' : 'propertySet',
         parameters: parseParams(propLetMatch[4]),
         visibility: (propLetMatch[1]?.toLowerCase() as VB6Visibility) || 'public',
-        body: ''
+        body: '',
       };
       continue;
     }
@@ -183,6 +193,6 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
     variables,
     procedures,
     properties: Object.values(properties),
-    events
+    events,
   };
 }

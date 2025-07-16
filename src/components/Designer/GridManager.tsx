@@ -15,7 +15,7 @@ export const GridManager: React.FC<GridManagerProps> = ({
   color = '#e0e0e0',
   opacity = 0.5,
   containerWidth,
-  containerHeight
+  containerHeight,
 }) => {
   if (!show) return null;
 
@@ -33,7 +33,7 @@ export const GridManager: React.FC<GridManagerProps> = ({
         `,
         opacity,
         pointerEvents: 'none',
-        zIndex: 1
+        zIndex: 1,
       }}
     />
   );

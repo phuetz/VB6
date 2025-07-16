@@ -30,7 +30,7 @@ Begin VB.Form Form1
    ScaleWidth      =   4680
    StartUpPosition =   3  'Windows Default
 End`,
-        type: 'form'
+        type: 'form',
       },
       {
         path: 'Project1.vbp',
@@ -65,13 +65,13 @@ Retained=0
 ThreadPerObject=0
 MaxNumberOfThreads=1
 ThreadingModel=1`,
-        type: 'project'
-      }
+        type: 'project',
+      },
     ],
     placeholders: {
       projectName: 'Project1',
-      companyName: 'Your Company'
-    }
+      companyName: 'Your Company',
+    },
   },
   {
     id: 'activex-dll',
@@ -100,7 +100,7 @@ Option Explicit
 Public Function HelloWorld() As String
     HelloWorld = "Hello from ActiveX DLL!"
 End Function`,
-        type: 'class'
+        type: 'class',
       },
       {
         path: 'Project1.vbp',
@@ -135,14 +135,14 @@ Retained=0
 ThreadPerObject=0
 MaxNumberOfThreads=1
 ThreadingModel=1`,
-        type: 'project'
-      }
+        type: 'project',
+      },
     ],
     placeholders: {
       projectName: 'Project1',
       description: 'ActiveX DLL Project',
-      companyName: 'Your Company'
-    }
+      companyName: 'Your Company',
+    },
   },
   {
     id: 'data-project',
@@ -224,20 +224,20 @@ Begin VB.Form Form1
       EndProperty
    End
 End`,
-        type: 'form'
-      }
+        type: 'form',
+      },
     ],
     placeholders: {
       projectName: 'DataProject',
-      databaseName: 'Database1'
-    }
-  }
+      databaseName: 'Database1',
+    },
+  },
 ];
 
 export const TemplateWizard: React.FC<TemplateWizardProps> = ({
   visible,
   onClose,
-  onCreateProject
+  onCreateProject,
 }) => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [projectName, setProjectName] = useState('');
@@ -260,8 +260,8 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
       placeholders: {
         ...selectedTemplate.placeholders,
         projectName,
-        ...placeholderValues
-      }
+        ...placeholderValues,
+      },
     };
 
     onCreateProject(templateWithValues, projectName, projectLocation);
@@ -281,31 +281,34 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
       'activex-dll': <Package size={32} />,
       'data-project': <Database size={32} />,
       'web-app': <Globe size={32} />,
-      'add-in': <Puzzle size={32} />
+      'add-in': <Puzzle size={32} />,
     };
     return icons[template.id] || <FileText size={32} />;
   };
 
-  const groupedTemplates = predefinedTemplates.reduce((groups, template) => {
-    const category = template.category;
-    if (!groups[category]) {
-      groups[category] = [];
-    }
-    groups[category].push(template);
-    return groups;
-  }, {} as { [key: string]: Template[] });
+  const groupedTemplates = predefinedTemplates.reduce(
+    (groups, template) => {
+      const category = template.category;
+      if (!groups[category]) {
+        groups[category] = [];
+      }
+      groups[category].push(template);
+      return groups;
+    },
+    {} as { [key: string]: Template[] }
+  );
 
   if (!visible) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-200 border-2 border-gray-400 shadow-lg" style={{ width: '700px', height: '500px' }}>
+      <div
+        className="bg-gray-200 border-2 border-gray-400 shadow-lg"
+        style={{ width: '700px', height: '500px' }}
+      >
         <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
           <span>New Project</span>
-          <button
-            onClick={onClose}
-            className="text-white hover:bg-blue-700 px-2"
-          >
+          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">
             ×
           </button>
         </div>
@@ -320,11 +323,9 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
               <div className="flex-1 overflow-y-auto">
                 {Object.entries(groupedTemplates).map(([category, templates]) => (
                   <div key={category} className="mb-6">
-                    <h4 className="text-xs font-bold text-gray-600 mb-2 uppercase">
-                      {category}
-                    </h4>
+                    <h4 className="text-xs font-bold text-gray-600 mb-2 uppercase">{category}</h4>
                     <div className="grid grid-cols-3 gap-4">
-                      {templates.map((template) => (
+                      {templates.map(template => (
                         <div
                           key={template.id}
                           className="bg-white border border-gray-300 p-4 cursor-pointer hover:bg-gray-50 hover:border-blue-500 transition-colors"
@@ -356,7 +357,7 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
                   <input
                     type="text"
                     value={projectName}
-                    onChange={(e) => setProjectName(e.target.value)}
+                    onChange={e => setProjectName(e.target.value)}
                     className="w-full px-2 py-1 border border-gray-400 text-sm"
                     placeholder="Enter project name"
                   />
@@ -368,7 +369,7 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
                     <input
                       type="text"
                       value={projectLocation}
-                      onChange={(e) => setProjectLocation(e.target.value)}
+                      onChange={e => setProjectLocation(e.target.value)}
                       className="flex-1 px-2 py-1 border border-gray-400 text-sm"
                       placeholder="Project location"
                     />
@@ -380,7 +381,7 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
 
                 {Object.entries(selectedTemplate.placeholders).map(([key, defaultValue]) => {
                   if (key === 'projectName') return null;
-                  
+
                   return (
                     <div key={key} className="mb-4">
                       <label className="block text-xs font-bold mb-1">
@@ -389,10 +390,12 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
                       <input
                         type="text"
                         value={placeholderValues[key] || defaultValue}
-                        onChange={(e) => setPlaceholderValues(prev => ({
-                          ...prev,
-                          [key]: e.target.value
-                        }))}
+                        onChange={e =>
+                          setPlaceholderValues(prev => ({
+                            ...prev,
+                            [key]: e.target.value,
+                          }))
+                        }
                         className="w-full px-2 py-1 border border-gray-400 text-sm"
                         placeholder={`Enter ${key}`}
                       />

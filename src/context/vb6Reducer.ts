@@ -12,9 +12,19 @@ export const initialState: VB6State = {
   userControls: [],
   references: [
     { name: 'Visual Basic For Applications', location: 'VBA6.DLL', checked: true, builtin: true },
-    { name: 'Visual Basic runtime objects and procedures', location: 'MSVBVM60.DLL', checked: true, builtin: true },
-    { name: 'Visual Basic objects and procedures', location: 'VB6.OLB', checked: true, builtin: true },
-    { name: 'OLE Automation', location: 'stdole2.tlb', checked: true, builtin: true }
+    {
+      name: 'Visual Basic runtime objects and procedures',
+      location: 'MSVBVM60.DLL',
+      checked: true,
+      builtin: true,
+    },
+    {
+      name: 'Visual Basic objects and procedures',
+      location: 'VB6.OLB',
+      checked: true,
+      builtin: true,
+    },
+    { name: 'OLE Automation', location: 'stdole2.tlb', checked: true, builtin: true },
   ],
   components: [],
 
@@ -72,7 +82,7 @@ export const initialState: VB6State = {
     MaxButton: true,
     MinButton: true,
     ControlBox: true,
-    ShowInTaskbar: true
+    ShowInTaskbar: true,
   },
 
   // Debug
@@ -82,7 +92,7 @@ export const initialState: VB6State = {
     '================================',
     '',
     'Ready.',
-    ''
+    '',
   ],
   immediateCommand: '',
   breakpoints: {},
@@ -116,7 +126,7 @@ export const initialState: VB6State = {
   moveStart: { x: 0, y: 0 },
 
   // Toolbox
-  selectedToolboxTab: 'General'
+  selectedToolboxTab: 'General',
 };
 
 export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
@@ -124,14 +134,14 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
     case 'SET_GRID_SIZE': {
       return {
         ...state,
-        gridSize: action.payload.size
+        gridSize: action.payload.size,
       };
     }
 
     case 'COPY_CONTROLS': {
       return {
         ...state,
-        clipboard: [...state.selectedControls]
+        clipboard: [...state.selectedControls],
       };
     }
 
@@ -143,14 +153,14 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
         id: state.nextId + index,
         name: `${control.type}${state.nextId + index}`,
         x: control.x + 20,
-        y: control.y + 20
+        y: control.y + 20,
       }));
 
       return {
         ...state,
         controls: [...state.controls, ...newControls],
         selectedControls: newControls,
-        nextId: state.nextId + state.clipboard.length
+        nextId: state.nextId + state.clipboard.length,
       };
     }
 
@@ -158,14 +168,14 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
       const newControl = {
         ...getDefaultProperties(action.payload.type, state.nextId),
         x: action.payload.x,
-        y: action.payload.y
+        y: action.payload.y,
       };
-      
+
       return {
         ...state,
         controls: [...state.controls, newControl],
         selectedControls: [newControl],
-        nextId: state.nextId + 1
+        nextId: state.nextId + 1,
       };
     }
 
@@ -174,7 +184,7 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
       const updatedControls = state.controls.map(control =>
         control.id === controlId ? { ...control, [property]: value } : control
       );
-      
+
       const updatedSelectedControls = state.selectedControls.map(control =>
         control.id === controlId ? { ...control, [property]: value } : control
       );
@@ -182,39 +192,35 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
       return {
         ...state,
         controls: updatedControls,
-        selectedControls: updatedSelectedControls
+        selectedControls: updatedSelectedControls,
       };
     }
 
     case 'DELETE_CONTROLS': {
       const { controlIds } = action.payload;
-      const remainingControls = state.controls.filter(
-        control => !controlIds.includes(control.id)
-      );
+      const remainingControls = state.controls.filter(control => !controlIds.includes(control.id));
 
       return {
         ...state,
         controls: remainingControls,
-        selectedControls: []
+        selectedControls: [],
       };
     }
 
     case 'SELECT_CONTROLS': {
       const { controlIds } = action.payload;
-      const selectedControls = state.controls.filter(
-        control => controlIds.includes(control.id)
-      );
+      const selectedControls = state.controls.filter(control => controlIds.includes(control.id));
 
       return {
         ...state,
-        selectedControls
+        selectedControls,
       };
     }
 
     case 'SET_EXECUTION_MODE': {
       return {
         ...state,
-        executionMode: action.payload.mode
+        executionMode: action.payload.mode,
       };
     }
 
@@ -222,14 +228,14 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
       const { windowName } = action.payload;
       return {
         ...state,
-        [windowName]: !state[windowName as keyof VB6State]
+        [windowName]: !state[windowName as keyof VB6State],
       };
     }
 
     case 'SET_SELECTED_EVENT': {
       return {
         ...state,
-        selectedEvent: action.payload.eventName
+        selectedEvent: action.payload.eventName,
       };
     }
 
@@ -239,8 +245,8 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
         ...state,
         eventCode: {
           ...state.eventCode,
-          [eventKey]: code
-        }
+          [eventKey]: code,
+        },
       };
     }
 
@@ -250,7 +256,7 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
         ...state,
         isDragging,
         draggedControlType: controlType !== undefined ? controlType : state.draggedControlType,
-        dragPosition: position || state.dragPosition
+        dragPosition: position || state.dragPosition,
       };
     }
 
@@ -260,7 +266,7 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
         ...state,
         isSelecting,
         selectionBox: box || state.selectionBox,
-        selectionStart: start || state.selectionStart
+        selectionStart: start || state.selectionStart,
       };
     }
 
@@ -270,7 +276,7 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
         ...state,
         isResizing,
         resizeHandle: handle || null,
-        resizeStart: start || state.resizeStart
+        resizeStart: start || state.resizeStart,
       };
     }
 
@@ -279,7 +285,7 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
       return {
         ...state,
         isMoving,
-        moveStart: start || state.moveStart
+        moveStart: start || state.moveStart,
       };
     }
 
@@ -289,29 +295,29 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
         ...state,
         formProperties: {
           ...state.formProperties,
-          [property]: value
-        }
+          [property]: value,
+        },
       };
     }
 
     case 'ADD_CONSOLE_OUTPUT': {
       return {
         ...state,
-        consoleOutput: [...state.consoleOutput, action.payload.message]
+        consoleOutput: [...state.consoleOutput, action.payload.message],
       };
     }
 
     case 'CLEAR_CONSOLE': {
       return {
         ...state,
-        consoleOutput: []
+        consoleOutput: [],
       };
     }
 
     case 'SET_IMMEDIATE_COMMAND': {
       return {
         ...state,
-        immediateCommand: action.payload.command
+        immediateCommand: action.payload.command,
       };
     }
 
@@ -319,7 +325,7 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
       const { dialogName, show } = action.payload;
       return {
         ...state,
-        [dialogName]: show
+        [dialogName]: show,
       };
     }
 
@@ -333,15 +339,15 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
         activeFormId: newId,
         formProperties: {
           ...state.formProperties,
-          Caption: name
-        }
+          Caption: name,
+        },
       };
     }
 
     case 'SET_ACTIVE_FORM': {
       return {
         ...state,
-        activeFormId: action.payload.id
+        activeFormId: action.payload.id,
       };
     }
 
@@ -349,8 +355,11 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
       const { id, name } = action.payload;
       return {
         ...state,
-        forms: state.forms.map(f => f.id === id ? { ...f, name } : f),
-        formProperties: state.activeFormId === id ? { ...state.formProperties, Caption: name } : state.formProperties
+        forms: state.forms.map(f => (f.id === id ? { ...f, name } : f)),
+        formProperties:
+          state.activeFormId === id
+            ? { ...state.formProperties, Caption: name }
+            : state.formProperties,
       };
     }
 
@@ -362,7 +371,8 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
         forms: project.forms || [],
         modules: project.modules || [],
         classModules: project.classModules || [],
-        activeFormId: project.forms && project.forms.length > 0 ? project.forms[0].id : state.activeFormId
+        activeFormId:
+          project.forms && project.forms.length > 0 ? project.forms[0].id : state.activeFormId,
       };
     }
 

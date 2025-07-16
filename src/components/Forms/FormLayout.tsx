@@ -7,10 +7,7 @@ interface FormLayoutProps {
   onClose: () => void;
 }
 
-export const FormLayout: React.FC<FormLayoutProps> = ({
-  visible,
-  onClose
-}) => {
+export const FormLayout: React.FC<FormLayoutProps> = ({ visible, onClose }) => {
   const { state } = useVB6();
   const [selectedForm, setSelectedForm] = useState(state.forms[0]?.id || null);
   const [zoom, setZoom] = useState(100);
@@ -20,60 +17,73 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
     // Switch to form designer for this form
   }, []);
 
-  const getFormPreview = useCallback((form: any) => {
-    const scale = zoom / 100;
-    return (
-      <div
-        className="bg-gray-100 border border-gray-400 shadow-md cursor-pointer hover:border-blue-500 relative"
-        style={{
-          width: Math.max(50, form.Width * scale * 0.1),
-          height: Math.max(30, form.Height * scale * 0.1),
-          backgroundColor: form.BackColor || '#8080FF'
-        }}
-        onClick={() => handleFormClick(form.id)}
-        title={form.name}
-      >
-        <div className="absolute inset-0 p-1">
-          <div className="text-xs font-bold truncate" style={{ fontSize: `${8 * scale}px` }}>
-            {form.caption || form.name}
+  const getFormPreview = useCallback(
+    (form: any) => {
+      const scale = zoom / 100;
+      return (
+        <div
+          className="bg-gray-100 border border-gray-400 shadow-md cursor-pointer hover:border-blue-500 relative"
+          style={{
+            width: Math.max(50, form.Width * scale * 0.1),
+            height: Math.max(30, form.Height * scale * 0.1),
+            backgroundColor: form.BackColor || '#8080FF',
+          }}
+          onClick={() => handleFormClick(form.id)}
+          title={form.name}
+        >
+          <div className="absolute inset-0 p-1">
+            <div className="text-xs font-bold truncate" style={{ fontSize: `${8 * scale}px` }}>
+              {form.caption || form.name}
+            </div>
+
+            {/* Miniature controls */}
+            {state.controls
+              .filter(c => c.formId === form.id)
+              .slice(0, 10) // Limit to first 10 controls for performance
+              .map(control => (
+                <div
+                  key={control.id}
+                  className="absolute bg-white border border-gray-300"
+                  style={{
+                    left: control.x * scale * 0.1,
+                    top: (control.y + 20) * scale * 0.1, // Offset for title bar
+                    width: Math.max(2, control.width * scale * 0.1),
+                    height: Math.max(2, control.height * scale * 0.1),
+                    backgroundColor:
+                      control.type === 'CommandButton'
+                        ? '#C0C0C0'
+                        : control.type === 'TextBox'
+                          ? '#FFFFFF'
+                          : control.type === 'Label'
+                            ? 'transparent'
+                            : '#E0E0E0',
+                  }}
+                />
+              ))}
           </div>
-          
-          {/* Miniature controls */}
-          {state.controls
-            .filter(c => c.formId === form.id)
-            .slice(0, 10) // Limit to first 10 controls for performance
-            .map(control => (
-              <div
-                key={control.id}
-                className="absolute bg-white border border-gray-300"
-                style={{
-                  left: control.x * scale * 0.1,
-                  top: (control.y + 20) * scale * 0.1, // Offset for title bar
-                  width: Math.max(2, control.width * scale * 0.1),
-                  height: Math.max(2, control.height * scale * 0.1),
-                  backgroundColor: control.type === 'CommandButton' ? '#C0C0C0' :
-                                   control.type === 'TextBox' ? '#FFFFFF' :
-                                   control.type === 'Label' ? 'transparent' : '#E0E0E0'
-                }}
-              />
-            ))}
+
+          {selectedForm === form.id && (
+            <div className="absolute inset-0 border-2 border-blue-500 pointer-events-none" />
+          )}
         </div>
-        
-        {selectedForm === form.id && (
-          <div className="absolute inset-0 border-2 border-blue-500 pointer-events-none" />
-        )}
-      </div>
-    );
-  }, [zoom, selectedForm, state.controls, handleFormClick]);
+      );
+    },
+    [zoom, selectedForm, state.controls, handleFormClick]
+  );
 
   if (!visible) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-200 border-2 border-gray-400 shadow-lg" style={{ width: '700px', height: '500px' }}>
+      <div
+        className="bg-gray-200 border-2 border-gray-400 shadow-lg"
+        style={{ width: '700px', height: '500px' }}
+      >
         <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
           <span>Form Layout</span>
-          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">×</button>
+          <button onClick={onClose} className="text-white hover:bg-blue-700 px-2">
+            ×
+          </button>
         </div>
 
         <div className="p-4 h-full flex flex-col">
@@ -99,14 +109,14 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
                 <Square size={16} />
               </button>
             </div>
-            
+
             <div className="w-px h-6 bg-gray-400 mx-2" />
-            
+
             <div className="flex items-center gap-2">
               <span className="text-xs">Zoom:</span>
               <select
                 value={zoom}
-                onChange={(e) => setZoom(parseInt(e.target.value))}
+                onChange={e => setZoom(parseInt(e.target.value))}
                 className="border border-gray-400 px-1 py-0.5 text-xs"
               >
                 <option value={25}>25%</option>
@@ -117,7 +127,7 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
                 <option value={200}>200%</option>
               </select>
             </div>
-            
+
             <div className="ml-auto text-xs text-gray-600">
               {state.forms.length} form{state.forms.length !== 1 ? 's' : ''}
             </div>
@@ -137,7 +147,7 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
                   </div>
                 </div>
               ))}
-              
+
               {/* Add new form placeholder */}
               <div className="text-center">
                 <div
@@ -161,19 +171,23 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
               <div className="text-xs font-bold mb-2">Form Properties</div>
               <div className="grid grid-cols-4 gap-4 text-xs">
                 <div>
-                  <strong>Name:</strong><br />
+                  <strong>Name:</strong>
+                  <br />
                   {state.forms.find(f => f.id === selectedForm)?.name}
                 </div>
                 <div>
-                  <strong>Caption:</strong><br />
+                  <strong>Caption:</strong>
+                  <br />
                   {state.forms.find(f => f.id === selectedForm)?.caption}
                 </div>
                 <div>
-                  <strong>Size:</strong><br />
+                  <strong>Size:</strong>
+                  <br />
                   {state.formProperties.Width}×{state.formProperties.Height}
                 </div>
                 <div>
-                  <strong>Controls:</strong><br />
+                  <strong>Controls:</strong>
+                  <br />
                   {state.controls.filter(c => c.formId === selectedForm).length}
                 </div>
               </div>

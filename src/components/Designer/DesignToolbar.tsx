@@ -1,10 +1,44 @@
 import React from 'react';
-import { AlignLeft, AlignCenter, AlignRight, AlignJustify, Move, Square, Circle, RotateCw, Eclipse as Flip, Lock, Unlock, Eye, EyeOff, Copy, Scissors, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Maximize, Minimize, Grid, Crosshair } from 'lucide-react';
+import {
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+  Move,
+  Square,
+  Circle,
+  RotateCw,
+  Eclipse as Flip,
+  Lock,
+  Unlock,
+  Eye,
+  EyeOff,
+  Copy,
+  Scissors,
+  ArrowUp,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  Maximize,
+  Minimize,
+  Grid,
+  Crosshair,
+} from 'lucide-react';
 import { Control } from '../../context/types';
 
 interface DesignToolbarProps {
   selectedControls: Control[];
-  onAlign: (type: 'left' | 'right' | 'top' | 'bottom' | 'center-h' | 'center-v' | 'distribute-h' | 'distribute-v') => void;
+  onAlign: (
+    type:
+      | 'left'
+      | 'right'
+      | 'top'
+      | 'bottom'
+      | 'center-h'
+      | 'center-v'
+      | 'distribute-h'
+      | 'distribute-v'
+  ) => void;
   onMakeSameSize: (type: 'width' | 'height' | 'both') => void;
   onMove: (direction: 'up' | 'down' | 'left' | 'right', amount: number) => void;
   onResize: (direction: 'width' | 'height', amount: number) => void;
@@ -45,7 +79,7 @@ export const DesignToolbar: React.FC<DesignToolbarProps> = ({
   snapToGrid,
   onToggleSnap,
   gridSize,
-  onGridSizeChange
+  onGridSizeChange,
 }) => {
   const hasSelection = selectedControls.length > 0;
   const hasMultiSelection = selectedControls.length > 1;
@@ -273,7 +307,7 @@ export const DesignToolbar: React.FC<DesignToolbarProps> = ({
           onClick={allLocked ? onUnlock : onLock}
           disabled={!hasSelection}
           className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 disabled:opacity-50"
-          title={allLocked ? "Unlock" : "Lock"}
+          title={allLocked ? 'Unlock' : 'Lock'}
         >
           {allLocked ? <Unlock size={14} /> : <Lock size={14} />}
         </button>
@@ -281,7 +315,7 @@ export const DesignToolbar: React.FC<DesignToolbarProps> = ({
           onClick={onToggleVisibility}
           disabled={!hasSelection}
           className="p-1 border border-gray-400 bg-gray-100 hover:bg-gray-300 disabled:opacity-50"
-          title={allVisible ? "Hide" : "Show"}
+          title={allVisible ? 'Hide' : 'Show'}
         >
           {allVisible ? <Eye size={14} /> : <EyeOff size={14} />}
         </button>
@@ -309,7 +343,7 @@ export const DesignToolbar: React.FC<DesignToolbarProps> = ({
           min="4"
           max="32"
           value={gridSize}
-          onChange={(e) => onGridSizeChange(parseInt(e.target.value) || 8)}
+          onChange={e => onGridSizeChange(parseInt(e.target.value) || 8)}
           className="w-12 text-xs border border-gray-400 px-1 py-0.5"
           title="Grid Size"
         />
@@ -322,8 +356,8 @@ export const DesignToolbar: React.FC<DesignToolbarProps> = ({
             {selectedControls.length} selected
             {selectedControls.length === 1 && (
               <span className="ml-2">
-                {selectedControls[0].name}: {selectedControls[0].x}, {selectedControls[0].y} 
-                ({selectedControls[0].width}×{selectedControls[0].height})
+                {selectedControls[0].name}: {selectedControls[0].x}, {selectedControls[0].y}(
+                {selectedControls[0].width}×{selectedControls[0].height})
               </span>
             )}
           </span>
