@@ -3,6 +3,8 @@ import { Theme } from '../types/extended';
 export class ThemeManager {
   private static currentTheme: Theme;
   private static listeners: Array<(theme: Theme) => void> = [];
+  private static mediaQueryList: MediaQueryList | null = null;
+  private static mediaQueryHandler: ((e: MediaQueryListEvent) => void) | null = null;
 
   static readonly defaultThemes: { [key: string]: Theme } = {
     classic: {
@@ -25,6 +27,52 @@ export class ThemeManager {
           small: '8pt',
           medium: '9pt',
           large: '12pt',
+        },
+      },
+    },
+    light: {
+      name: 'Light Theme',
+      colors: {
+        primary: '#0078D4',
+        secondary: '#106EBE',
+        background: '#FFFFFF',
+        surface: '#F3F2F1',
+        text: '#323130',
+        accent: '#0078D4',
+        error: '#D13438',
+        warning: '#FFB900',
+        success: '#107C10',
+      },
+      fonts: {
+        primary: 'Segoe UI',
+        code: 'Consolas, Monaco, monospace',
+        size: {
+          small: '12px',
+          medium: '14px',
+          large: '16px',
+        },
+      },
+    },
+    dark: {
+      name: 'Dark Theme',
+      colors: {
+        primary: '#0078D4',
+        secondary: '#106EBE',
+        background: '#1F1F1F',
+        surface: '#2D2D30',
+        text: '#FFFFFF',
+        accent: '#0078D4',
+        error: '#F85149',
+        warning: '#FFA348',
+        success: '#3FB950',
+      },
+      fonts: {
+        primary: 'Segoe UI',
+        code: 'Consolas, Monaco, monospace',
+        size: {
+          small: '12px',
+          medium: '14px',
+          large: '16px',
         },
       },
     },
@@ -184,16 +232,88 @@ export class ThemeManager {
   private static applyTheme(theme: Theme): void {
     const root = document.documentElement;
 
-    // Apply CSS custom properties
+    // CSS INJECTION BUG FIX: Validate CSS values before applying
     Object.entries(theme.colors).forEach(([key, value]) => {
-      root.style.setProperty(`--color-${key}`, value);
+      if (this.isValidCSSColor(value)) {
+        root.style.setProperty(`--color-${key}`, value);
+      } else {
+        console.warn(`Invalid color value rejected: ${key}=${value}`);
+      }
     });
 
-    root.style.setProperty('--font-primary', theme.fonts.primary);
-    root.style.setProperty('--font-code', theme.fonts.code);
-    root.style.setProperty('--font-size-small', theme.fonts.size.small);
-    root.style.setProperty('--font-size-medium', theme.fonts.size.medium);
-    root.style.setProperty('--font-size-large', theme.fonts.size.large);
+    // CSS INJECTION BUG FIX: Validate font values
+    if (this.isValidCSSValue(theme.fonts.primary)) {
+      root.style.setProperty('--font-primary', theme.fonts.primary);
+    }
+    if (this.isValidCSSValue(theme.fonts.code)) {
+      root.style.setProperty('--font-code', theme.fonts.code);
+    }
+    if (this.isValidCSSValue(theme.fonts.size.small)) {
+      root.style.setProperty('--font-size-small', theme.fonts.size.small);
+    }
+    if (this.isValidCSSValue(theme.fonts.size.medium)) {
+      root.style.setProperty('--font-size-medium', theme.fonts.size.medium);
+    }
+    if (this.isValidCSSValue(theme.fonts.size.large)) {
+      root.style.setProperty('--font-size-large', theme.fonts.size.large);
+    }
+  }
+
+  /**
+   * CSS INJECTION BUG FIX: Validate CSS color values
+   */
+  private static isValidCSSColor(value: string): boolean {
+    if (typeof value !== 'string') return false;
+    
+    // CSS color patterns: hex, rgb, rgba, hsl, hsla, named colors
+    const colorPatterns = [
+      /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/, // hex colors
+      /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/, // rgb
+      /^rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*([01]?\.?\d*)\s*\)$/, // rgba
+      /^hsl\(\s*(\d{1,3})\s*,\s*(\d{1,3})%\s*,\s*(\d{1,3})%\s*\)$/, // hsl
+      /^hsla\(\s*(\d{1,3})\s*,\s*(\d{1,3})%\s*,\s*(\d{1,3})%\s*,\s*([01]?\.?\d*)\s*\)$/ // hsla
+    ];
+    
+    // Named CSS colors (basic set)
+    const namedColors = [
+      'black', 'white', 'red', 'green', 'blue', 'yellow', 'orange', 'purple', 
+      'pink', 'brown', 'gray', 'grey', 'transparent', 'currentColor'
+    ];
+    
+    return colorPatterns.some(pattern => pattern.test(value)) || 
+           namedColors.includes(value.toLowerCase());
+  }
+
+  /**
+   * CSS INJECTION BUG FIX: Validate general CSS values
+   */
+  static isValidCSSValue(value: string): boolean {
+    if (typeof value !== 'string') return false;
+    
+    // Reject dangerous CSS expressions and functions
+    const dangerousPatterns = [
+      /expression\s*\(/i,           // IE CSS expressions
+      /javascript\s*:/i,           // JavaScript URLs
+      /vbscript\s*:/i,            // VBScript URLs
+      /data\s*:/i,                // Data URLs
+      /import\s*['"@]/i,          // CSS imports
+      /<.*>/,                     // HTML tags
+      /&\w+;/,                    // HTML entities
+      /\/\*.*\*\//,               // CSS comments
+      /url\s*\(\s*['"]*javascript:/i, // JavaScript in URLs
+    ];
+    
+    // Check for dangerous patterns
+    if (dangerousPatterns.some(pattern => pattern.test(value))) {
+      return false;
+    }
+    
+    // Basic length limit to prevent CSS bombs
+    if (value.length > 200) {
+      return false;
+    }
+    
+    return true;
   }
 
   private static saveTheme(theme: Theme): void {
@@ -285,15 +405,142 @@ export class ThemeManager {
 
     // Listen for system theme changes
     if (window.matchMedia) {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      mediaQuery.addEventListener('change', e => {
+      this.mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
+      this.mediaQueryHandler = (e: MediaQueryListEvent) => {
         // Auto-switch theme based on system preference
         const autoTheme = localStorage.getItem('vb6-auto-theme');
         if (autoTheme === 'true') {
           this.setThemeByName(e.matches ? 'modern' : 'light');
         }
-      });
+      };
+      this.mediaQueryList.addEventListener('change', this.mediaQueryHandler);
     }
+  }
+
+  /**
+   * Clean up resources and event listeners to prevent memory leaks
+   */
+  static destroy(): void {
+    // Remove media query listener
+    if (this.mediaQueryList && this.mediaQueryHandler) {
+      this.mediaQueryList.removeEventListener('change', this.mediaQueryHandler);
+      this.mediaQueryList = null;
+      this.mediaQueryHandler = null;
+    }
+    
+    // Clear listeners
+    this.listeners = [];
+    
+    console.log('✅ ThemeManager destroyed and cleaned up');
+  }
+
+  // Instance methods for backward compatibility with tests
+  setTheme(themeNameOrTheme: string | Theme): boolean {
+    try {
+      if (typeof themeNameOrTheme === 'string') {
+        // Validate theme name exists
+        if (!ThemeManager.defaultThemes[themeNameOrTheme]) {
+          console.warn(`Theme "${themeNameOrTheme}" not found`);
+          return false;
+        }
+        ThemeManager.setThemeByName(themeNameOrTheme);
+      } else {
+        // Validate theme object structure
+        if (!ThemeManager.validateTheme(themeNameOrTheme)) {
+          console.warn('Invalid theme structure');
+          return false;
+        }
+        ThemeManager.setTheme(themeNameOrTheme);
+      }
+      return true;
+    } catch (error) {
+      console.warn('Failed to set theme:', error);
+      return false;
+    }
+  }
+
+  setCustomVariables(variables: Record<string, string>): boolean {
+    if (typeof document === 'undefined') {
+      return false;
+    }
+    
+    try {
+      const root = document.documentElement;
+      let hasValidVariables = false;
+      
+      Object.entries(variables).forEach(([key, value]) => {
+        // Validate CSS variable name format
+        if (!key.startsWith('--')) {
+          console.warn(`Invalid CSS variable name: ${key}. Must start with '--'`);
+          return;
+        }
+        
+        // Validate CSS variable value
+        if (!ThemeManager.isValidCSSValue(value)) {
+          console.warn(`Invalid CSS variable value for ${key}: ${value}`);
+          return;
+        }
+        
+        root.style.setProperty(key, value);
+        hasValidVariables = true;
+      });
+      
+      return hasValidVariables;
+    } catch (error) {
+      console.warn('DOM error during CSS variable setting:', error);
+      return false;
+    }
+  }
+
+  importTheme(themeJson: string): Theme | null {
+    return ThemeManager.importTheme(themeJson);
+  }
+
+  exportTheme(): string {
+    return ThemeManager.exportTheme(ThemeManager.getCurrentTheme());
+  }
+
+  setHighContrast(enabled: boolean): void {
+    if (typeof document !== 'undefined') {
+      if (enabled) {
+        document.body.classList.add('high-contrast');
+        localStorage.setItem('vb6-high-contrast', 'true');
+      } else {
+        document.body.classList.remove('high-contrast');
+        localStorage.removeItem('vb6-high-contrast');
+      }
+    }
+  }
+
+  setFontScale(scale: number): boolean {
+    // Strictly reject invalid values
+    if (typeof scale !== 'number' || isNaN(scale) || scale < 0.5 || scale > 3) {
+      return false;
+    }
+    
+    // Only accept values within the exact range, don't clamp
+    if (scale < 0.5 || scale > 3) {
+      return false;
+    }
+    
+    if (typeof document !== 'undefined') {
+      document.documentElement.style.setProperty('--font-scale', scale.toString());
+      localStorage.setItem('vb6-font-scale', scale.toString());
+    }
+    
+    return true;
+  }
+
+  getCurrentTheme(): Theme {
+    return ThemeManager.getCurrentTheme();
+  }
+
+  addListener(listener: (theme: Theme) => void): void {
+    ThemeManager.addListener(listener);
+  }
+
+  removeListener(listener: (theme: Theme) => void): void {
+    ThemeManager.removeListener(listener);
   }
 }
 

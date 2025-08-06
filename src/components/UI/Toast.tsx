@@ -27,6 +27,7 @@ const Toast: React.FC<ToastProps> = ({
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
+  const [closeTimeoutId, setCloseTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Enter animation
@@ -45,11 +46,26 @@ const Toast: React.FC<ToastProps> = ({
   }, [duration]);
 
   const handleClose = () => {
+    // Clear any existing close timeout
+    if (closeTimeoutId) {
+      clearTimeout(closeTimeoutId);
+    }
+    
     setIsExiting(true);
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       onClose(id);
     }, 300);
+    setCloseTimeoutId(timeoutId);
   };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutId) {
+        clearTimeout(closeTimeoutId);
+      }
+    };
+  }, [closeTimeoutId]);
 
   const getTypeStyles = () => {
     const styles = {
