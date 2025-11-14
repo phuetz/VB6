@@ -9,7 +9,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import DialogManager from './components/Dialogs/DialogManager';
 import { EnhancedToolbox } from './components/Panels/Toolbox/EnhancedToolbox';
 import { AdvancedDragDropCanvas } from './components/DragDrop/AdvancedDragDropCanvas';
-import MonacoCodeEditor from './components/Editor/MonacoCodeEditor';
+import LazyMonacoEditor from './components/Editor/LazyMonacoEditor';
 import ProjectExplorer from './components/Panels/ProjectExplorer/ProjectExplorer';
 import PropertiesWindow from './components/Panels/PropertiesWindow/PropertiesWindow';
 import ControlTree from './components/Panels/ControlTree/ControlTree';
@@ -52,7 +52,7 @@ const MainContent: React.FC = () => {
       {/* Center Panel - Advanced Canvas or Code Editor */}
       <div className="flex-1 flex flex-col bg-gray-300 overflow-hidden">
         {showCodeEditor ? (
-          <MonacoCodeEditor />
+          <LazyMonacoEditor />
         ) : (
           <div className="flex-1 p-4 overflow-auto">
             <div className="mx-auto shadow-2xl">
