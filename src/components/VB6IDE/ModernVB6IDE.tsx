@@ -7,19 +7,19 @@ import StatusBar from '../Layout/StatusBar';
 import DialogManager from '../Dialogs/DialogManager';
 import ModernToolbox from '../Panels/Toolbox/ModernToolbox';
 import DragDropCanvas from '../Designer/DragDropCanvas';
-import MonacoCodeEditor from '../Editor/MonacoCodeEditor';
+import LazyMonacoEditor from '../Editor/LazyMonacoEditor';
 import ProjectExplorer from '../Panels/ProjectExplorer/ProjectExplorer';
 import PropertiesWindow from '../Panels/PropertiesWindow/PropertiesWindow';
 import ImmediateWindow from '../Panels/ImmediateWindow/ImmediateWindow';
 import { useVB6Store } from '../../stores/vb6Store';
 
 const ModernMainContent: React.FC = () => {
-  const { 
-    showToolbox, 
-    showCodeEditor, 
-    showProjectExplorer, 
-    showPropertiesWindow, 
-    showImmediateWindow 
+  const {
+    showToolbox,
+    showCodeEditor,
+    showProjectExplorer,
+    showPropertiesWindow,
+    showImmediateWindow,
   } = useVB6Store();
 
   return (
@@ -29,8 +29,8 @@ const ModernMainContent: React.FC = () => {
 
       {/* Center Panel - Form Designer or Code Editor */}
       <div className="flex-1 flex flex-col bg-gray-300 overflow-hidden">
-        {showCodeEditor ? <MonacoCodeEditor /> : <DragDropCanvas />}
-        
+        {showCodeEditor ? <LazyMonacoEditor /> : <DragDropCanvas />}
+
         {/* Bottom Panel - Immediate Window */}
         {showImmediateWindow && <ImmediateWindow />}
       </div>
@@ -47,7 +47,10 @@ const ModernMainContent: React.FC = () => {
 const ModernVB6IDE: React.FC = () => {
   return (
     <VB6Provider>
-      <div className="h-screen bg-gray-200 flex flex-col overflow-hidden" style={{ fontFamily: 'MS Sans Serif, sans-serif' }}>
+      <div
+        className="h-screen bg-gray-200 flex flex-col overflow-hidden"
+        style={{ fontFamily: 'MS Sans Serif, sans-serif' }}
+      >
         <TitleBar />
         <MenuBar />
         <Toolbar />
