@@ -7,7 +7,7 @@ export enum TokenType {
   Punctuation = 'Punctuation',
   Comment = 'Comment',
   NewLine = 'NewLine',
-  Whitespace = 'Whitespace'
+  Whitespace = 'Whitespace',
 }
 
 export interface Token {
@@ -17,14 +17,167 @@ export interface Token {
   column: number;
 }
 
+/**
+ * Complete VB6 Keywords Set (100+ keywords)
+ * Includes all standard VB6 language keywords
+ */
 const KEYWORDS = new Set([
-  'and', 'as', 'boolean', 'byref', 'byte', 'byval', 'call', 'case', 'const',
-  'currency', 'dim', 'do', 'double', 'each', 'else', 'elseif', 'end', 'enum',
-  'exit', 'false', 'for', 'function', 'get', 'goto', 'if', 'in', 'integer',
-  'is', 'let', 'long', 'loop', 'mod', 'new', 'next', 'not', 'nothing', 'object',
-  'on', 'option', 'optional', 'or', 'private', 'property', 'public', 'resume',
-  'select', 'set', 'single', 'static', 'string', 'sub', 'then', 'to', 'true',
-  'type', 'until', 'variant', 'wend', 'while', 'with', 'xor'
+  // Flow Control
+  'if',
+  'then',
+  'else',
+  'elseif',
+  'end',
+  'select',
+  'case',
+  'for',
+  'to',
+  'step',
+  'next',
+  'while',
+  'wend',
+  'do',
+  'loop',
+  'until',
+  'exit',
+  'goto',
+  'gosub',
+  'return',
+  'stop',
+  'with',
+
+  // Declarations
+  'dim',
+  'redim',
+  'preserve',
+  'const',
+  'static',
+  'public',
+  'private',
+  'global',
+  'friend',
+  'type',
+  'enum',
+  'sub',
+  'function',
+  'property',
+  'get',
+  'set',
+  'let',
+  'declare',
+  'lib',
+  'alias',
+  'byval',
+  'byref',
+  'optional',
+  'paramarray',
+
+  // Data Types
+  'boolean',
+  'byte',
+  'integer',
+  'long',
+  'single',
+  'double',
+  'currency',
+  'decimal',
+  'date',
+  'string',
+  'object',
+  'variant',
+  'any',
+
+  // Operators & Logical
+  'and',
+  'or',
+  'not',
+  'xor',
+  'eqv',
+  'imp',
+  'is',
+  'like',
+  'mod',
+  'new',
+  'addressof',
+
+  // Error Handling
+  'on',
+  'error',
+  'resume',
+  'err',
+
+  // Object-Oriented
+  'class',
+  'implements',
+  'event',
+  'raiseevent',
+  'withevents',
+
+  // Special Keywords
+  'option',
+  'explicit',
+  'base',
+  'compare',
+  'binary',
+  'text',
+  'database',
+  'attribute',
+  'as',
+  'each',
+  'in',
+  'call',
+  'let',
+  'nothing',
+  'null',
+  'empty',
+  'true',
+  'false',
+  'me',
+  'mybase',
+  'myclass',
+
+  // File I/O
+  'open',
+  'close',
+  'input',
+  'output',
+  'random',
+  'append',
+  'binary',
+  'read',
+  'write',
+  'seek',
+  'lock',
+  'unlock',
+  'line',
+  'print',
+  'width',
+
+  // Array Operations
+  'erase',
+  'lbound',
+  'ubound',
+
+  // Compilation
+  'defbool',
+  'defbyte',
+  'defint',
+  'deflng',
+  'defsng',
+  'defdbl',
+  'defcur',
+  'defdec',
+  'defdate',
+  'defstr',
+  'defobj',
+  'defvar',
+
+  // Other
+  'rem',
+  'mid',
+  'name',
+  'rset',
+  'lset',
 ]);
 
 const OPERATORS = ['>=', '<=', '<>', '\\', '=', '>', '<', '+', '-', '*', '/', '^', '&'];
@@ -50,7 +203,9 @@ export function lexVB6(code: string): Token[] {
 
     if (ch === '\n') {
       addToken(TokenType.NewLine, '\n');
-      i++; line++; column = 1;
+      i++;
+      line++;
+      column = 1;
       continue;
     }
 
@@ -58,7 +213,8 @@ export function lexVB6(code: string): Token[] {
       const start = i;
       const startCol = column;
       while (i < code.length && /\s/.test(code[i]) && code[i] !== '\n') {
-        i++; column++;
+        i++;
+        column++;
       }
       addToken(TokenType.Whitespace, code.slice(start, i), line, startCol);
       continue;
@@ -68,7 +224,8 @@ export function lexVB6(code: string): Token[] {
       const start = i;
       const startCol = column;
       while (i < code.length && code[i] !== '\n') {
-        i++; column++;
+        i++;
+        column++;
       }
       addToken(TokenType.Comment, code.slice(start, i), line, startCol);
       continue;
@@ -76,21 +233,25 @@ export function lexVB6(code: string): Token[] {
 
     if (ch === '"') {
       const startCol = column;
-      i++; column++;
+      i++;
+      column++;
       let value = '';
       while (i < code.length) {
         if (code[i] === '"') {
           if (code[i + 1] === '"') {
             value += '"';
-            i += 2; column += 2;
+            i += 2;
+            column += 2;
             continue;
           }
           break;
         }
         value += code[i];
-        i++; column++;
+        i++;
+        column++;
       }
-      i++; column++; // consume closing quote
+      i++;
+      column++; // consume closing quote
       addToken(TokenType.StringLiteral, value, line, startCol);
       continue;
     }
@@ -99,7 +260,8 @@ export function lexVB6(code: string): Token[] {
       const start = i;
       const startCol = column;
       while (i < code.length && /[0-9A-Fa-fxX&.]/.test(code[i])) {
-        i++; column++;
+        i++;
+        column++;
       }
       addToken(TokenType.NumberLiteral, code.slice(start, i), line, startCol);
       continue;
@@ -109,35 +271,45 @@ export function lexVB6(code: string): Token[] {
       const start = i;
       const startCol = column;
       while (i < code.length && /[A-Za-z0-9_]/.test(code[i])) {
-        i++; column++;
+        i++;
+        column++;
       }
       const value = code.slice(start, i);
       const lower = value.toLowerCase();
-      addToken(KEYWORDS.has(lower) ? TokenType.Keyword : TokenType.Identifier, value, line, startCol);
+      addToken(
+        KEYWORDS.has(lower) ? TokenType.Keyword : TokenType.Identifier,
+        value,
+        line,
+        startCol
+      );
       continue;
     }
 
     const two = code.slice(i, i + 2);
     if (OPERATORS.includes(two)) {
       addToken(TokenType.Operator, two);
-      i += 2; column += 2;
+      i += 2;
+      column += 2;
       continue;
     }
     if (OPERATORS.includes(ch)) {
       addToken(TokenType.Operator, ch);
-      i++; column++;
+      i++;
+      column++;
       continue;
     }
 
     if (PUNCTUATIONS.includes(ch)) {
       addToken(TokenType.Punctuation, ch);
-      i++; column++;
+      i++;
+      column++;
       continue;
     }
 
     // Unknown character
     addToken(TokenType.Punctuation, ch);
-    i++; column++;
+    i++;
+    column++;
   }
 
   return tokens;
