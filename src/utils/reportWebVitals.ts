@@ -1,19 +1,20 @@
 /**
  * Web Vitals reporting utility
- * Tracks Core Web Vitals metrics: CLS, FID, FCP, LCP, TTFB, INP
+ * Tracks Core Web Vitals metrics: CLS, FCP, LCP, TTFB, INP
  *
+ * Note: FID (First Input Delay) has been deprecated in favor of INP (Interaction to Next Paint)
  * Learn more: https://web.dev/vitals/
  */
 
-import { onCLS, onFID, onFCP, onLCP, onTTFB, onINP, Metric } from 'web-vitals';
+import { onCLS, onFCP, onLCP, onTTFB, onINP, type Metric } from 'web-vitals';
 import { logger } from './logger';
 
 /**
  * Web Vitals thresholds for good user experience
+ * Based on Google's Core Web Vitals recommendations
  */
 const THRESHOLDS = {
   CLS: { good: 0.1, poor: 0.25 },
-  FID: { good: 100, poor: 300 },
   FCP: { good: 1800, poor: 3000 },
   LCP: { good: 2500, poor: 4000 },
   TTFB: { good: 800, poor: 1800 },
@@ -108,11 +109,17 @@ function sendToAnalytics(metric: Metric): void {
 /**
  * Initialize Web Vitals tracking
  * Call this function once in your app's entry point
+ *
+ * Tracks the following metrics:
+ * - CLS (Cumulative Layout Shift)
+ * - FCP (First Contentful Paint)
+ * - LCP (Largest Contentful Paint)
+ * - TTFB (Time to First Byte)
+ * - INP (Interaction to Next Paint) - replaces deprecated FID
  */
 export function reportWebVitals(): void {
   try {
     onCLS(sendToAnalytics);
-    onFID(sendToAnalytics);
     onFCP(sendToAnalytics);
     onLCP(sendToAnalytics);
     onTTFB(sendToAnalytics);
