@@ -61,9 +61,39 @@ export interface VB6WithBlock {
   body: string;
 }
 
+export interface VB6EnumMember {
+  name: string;
+  value?: number;
+}
+
+export interface VB6Enum {
+  name: string;
+  visibility: VB6Visibility;
+  members: VB6EnumMember[];
+}
+
+export interface VB6Constant {
+  name: string;
+  visibility: VB6Visibility;
+  type: string | null;
+  value: string;
+}
+
+export interface VB6ApiDeclaration {
+  name: string;
+  aliasName?: string;
+  library: string;
+  type: 'function' | 'sub';
+  parameters: VB6Parameter[];
+  returnType?: string | null;
+}
+
 export interface VB6ModuleAST {
   name: string;
   variables: VB6Variable[];
+  constants: VB6Constant[];
+  enums: VB6Enum[];
+  apiDeclarations: VB6ApiDeclaration[];
   procedures: VB6Procedure[];
   properties: VB6Property[];
   events: VB6Event[];
@@ -92,6 +122,9 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
   const lines = code.split(/\r?\n/);
   let moduleName = name;
   const variables: VB6Variable[] = [];
+  const constants: VB6Constant[] = [];
+  const enums: VB6Enum[] = [];
+  const apiDeclarations: VB6ApiDeclaration[] = [];
   const procedures: VB6Procedure[] = [];
   const events: VB6Event[] = [];
   const properties: Record<string, VB6Property> = {};
@@ -100,6 +133,7 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
   const withBlocks: VB6WithBlock[] = [];
   let current: VB6Procedure | null = null;
   let currentType: VB6UserDefinedType | null = null;
+  let currentEnum: VB6Enum | null = null;
   let currentWith: VB6WithBlock | null = null;
   let lineNumber = 0;
 
@@ -162,6 +196,65 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
           type: fieldMatch[2],
         });
       }
+      continue;
+    }
+
+    // Enum...End Enum
+    const enumStartMatch = trimmed.match(/^(Public|Private)?\s*Enum\s+(\w+)/i);
+    if (enumStartMatch && !current) {
+      currentEnum = {
+        name: enumStartMatch[2],
+        visibility: (enumStartMatch[1]?.toLowerCase() as VB6Visibility) || 'public',
+        members: [],
+      };
+      continue;
+    }
+
+    if (currentEnum) {
+      if (/^End\s+Enum/i.test(trimmed)) {
+        enums.push(currentEnum);
+        currentEnum = null;
+        continue;
+      }
+
+      // Parse enum member: Name or Name = Value
+      const memberMatch = trimmed.match(/^(\w+)(?:\s*=\s*(.+))?/i);
+      if (memberMatch) {
+        currentEnum.members.push({
+          name: memberMatch[1],
+          value: memberMatch[2] ? parseInt(memberMatch[2], 10) : undefined,
+        });
+      }
+      continue;
+    }
+
+    // Const declaration
+    const constMatch = trimmed.match(
+      /^(Public|Private)?\s*Const\s+(\w+)(?:\s+As\s+(\w+))?\s*=\s*(.+)/i
+    );
+    if (constMatch && !current) {
+      constants.push({
+        name: constMatch[2],
+        visibility: (constMatch[1]?.toLowerCase() as VB6Visibility) || 'public',
+        type: constMatch[3] || null,
+        value: constMatch[4],
+      });
+      continue;
+    }
+
+    // Declare Function/Sub (Windows API)
+    const declareMatch = trimmed.match(
+      /^(Public|Private)?\s*Declare\s+(Function|Sub)\s+(\w+)\s+Lib\s+"([^"]+)"(?:\s+Alias\s+"([^"]+)")?\s*(\([^)]*\))?(?:\s+As\s+(\w+))?/i
+    );
+    if (declareMatch && !current) {
+      apiDeclarations.push({
+        name: declareMatch[3],
+        aliasName: declareMatch[5],
+        library: declareMatch[4],
+        type: declareMatch[2].toLowerCase() as 'function' | 'sub',
+        parameters: parseParams(declareMatch[6]),
+        returnType: declareMatch[7] || null,
+      });
       continue;
     }
 
@@ -286,6 +379,9 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
   return {
     name: moduleName,
     variables,
+    constants,
+    enums,
+    apiDeclarations,
     procedures,
     properties: Object.values(properties),
     events,
