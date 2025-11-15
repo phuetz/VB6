@@ -1,5 +1,8 @@
 import React, { useCallback, useRef } from 'react';
 import VB6RuntimeExtended from './VB6RuntimeExtended';
+import { VB6ControlMethods, DoEvents } from './VB6ControlMethods';
+import { App, Screen, Printer, Printers, Forms, Debug, Err } from './VB6GlobalObjects';
+import { VB6SelectCaseEvaluator, VB6ReDimManager } from './VB6ControlFlow';
 
 export interface VB6RuntimeProps {
   code: string;
@@ -14,6 +17,23 @@ export function createRuntimeFunctions(
   return {
     // ===== EXTENDED VB6 RUNTIME (100+ additional functions) =====
     ...VB6RuntimeExtended,
+
+    // ===== GLOBAL OBJECTS (Phase 6) =====
+    App,
+    Screen,
+    Printer,
+    Printers,
+    Forms,
+    Debug,
+    Err,
+
+    // ===== CONTROL METHODS (Phase 6) =====
+    ...VB6ControlMethods,
+    DoEvents,
+
+    // ===== CONTROL FLOW (Phase 4) =====
+    VB6SelectCase: VB6SelectCaseEvaluator,
+    VB6ReDim: VB6ReDimManager,
 
     // ===== CORE RUNTIME FUNCTIONS =====
     MsgBox: (message: string, buttons: number = 0, title: string = 'VB6 App') => {
@@ -269,6 +289,14 @@ export const VB6Runtime: React.FC<VB6RuntimeProps> = ({ code, onOutput, onError 
           ...runtimeFunctions,
           console: { log: onOutput },
           alert: runtimeFunctions.MsgBox,
+          // Global objects available directly
+          App,
+          Screen,
+          Printer,
+          Printers,
+          Forms,
+          Debug,
+          Err,
         };
 
         // Execute the code
