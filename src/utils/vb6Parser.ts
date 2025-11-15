@@ -1,6 +1,11 @@
 export interface VB6Parameter {
   name: string;
   type: string | null;
+  optional?: boolean;
+  byRef?: boolean;
+  byVal?: boolean;
+  defaultValue?: string;
+  isParamArray?: boolean;
 }
 
 export type VB6Visibility = 'public' | 'private';
@@ -61,6 +66,42 @@ export interface VB6WithBlock {
   body: string;
 }
 
+export interface VB6SelectCase {
+  expression: string;
+  cases: VB6CaseClause[];
+  startLine: number;
+  endLine: number;
+}
+
+export interface VB6CaseClause {
+  conditions: string[];
+  isElse: boolean;
+  body: string;
+  startLine: number;
+}
+
+export interface VB6ReDimStatement {
+  variableName: string;
+  preserve: boolean;
+  dimensions: string[];
+  line: number;
+}
+
+export interface VB6ExitStatement {
+  exitType: 'for' | 'do' | 'sub' | 'function' | 'property';
+  line: number;
+}
+
+export interface VB6GoToLabel {
+  label: string;
+  line: number;
+}
+
+export interface VB6GoToStatement {
+  target: string;
+  line: number;
+}
+
 export interface VB6EnumMember {
   name: string;
   value?: number;
@@ -100,17 +141,41 @@ export interface VB6ModuleAST {
   userDefinedTypes: VB6UserDefinedType[];
   controlArrays: VB6ControlArray[];
   withBlocks: VB6WithBlock[];
+  selectCases: VB6SelectCase[];
+  redimStatements: VB6ReDimStatement[];
+  exitStatements: VB6ExitStatement[];
+  labels: VB6GoToLabel[];
+  gotoStatements: VB6GoToStatement[];
 }
 
 function parseParams(paramStr?: string): VB6Parameter[] {
   if (!paramStr) return [];
   const cleaned = paramStr.replace(/[()]/g, '').trim();
   if (!cleaned) return [];
+
   return cleaned.split(',').map(p => {
-    const m = p.trim().match(/^(\w+)(?:\s+As\s+(\w+))?/i);
+    const paramTrimmed = p.trim();
+
+    // Match: [Optional] [ByVal|ByRef] [ParamArray] name [()] [As type] [= defaultValue]
+    const paramMatch = paramTrimmed.match(
+      /^(Optional\s+)?(ByVal\s+|ByRef\s+)?(ParamArray\s+)?(\w+)(\(\))?(?:\s+As\s+(\w+))?(?:\s*=\s*(.+))?/i
+    );
+
+    if (!paramMatch) {
+      return {
+        name: paramTrimmed,
+        type: null,
+      };
+    }
+
     return {
-      name: m ? m[1] : p.trim(),
-      type: m && m[2] ? m[2] : null,
+      name: paramMatch[4],
+      type: paramMatch[6] || null,
+      optional: !!paramMatch[1],
+      byVal: !!paramMatch[2] && paramMatch[2].toLowerCase().includes('byval'),
+      byRef: !!paramMatch[2] && paramMatch[2].toLowerCase().includes('byref'),
+      isParamArray: !!paramMatch[3],
+      defaultValue: paramMatch[7] || undefined,
     };
   });
 }
@@ -119,6 +184,9 @@ function parseParams(paramStr?: string): VB6Parameter[] {
  * VB6 module parser extracting variable, procedure, type, and other information.
  */
 export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
+  // Handle line continuation first
+  code = code.replace(/\s+_\s*[\r\n]+/g, ' ');
+
   const lines = code.split(/\r?\n/);
   let moduleName = name;
   const variables: VB6Variable[] = [];
@@ -131,10 +199,18 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
   const userDefinedTypes: VB6UserDefinedType[] = [];
   const controlArrays: VB6ControlArray[] = [];
   const withBlocks: VB6WithBlock[] = [];
+  const selectCases: VB6SelectCase[] = [];
+  const redimStatements: VB6ReDimStatement[] = [];
+  const exitStatements: VB6ExitStatement[] = [];
+  const labels: VB6GoToLabel[] = [];
+  const gotoStatements: VB6GoToStatement[] = [];
+
   let current: VB6Procedure | null = null;
   let currentType: VB6UserDefinedType | null = null;
   let currentEnum: VB6Enum | null = null;
   let currentWith: VB6WithBlock | null = null;
+  let currentSelect: VB6SelectCase | null = null;
+  let currentCase: VB6CaseClause | null = null;
   let lineNumber = 0;
 
   const pushCurrent = () => {
@@ -281,6 +357,110 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
       continue;
     }
 
+    // Select Case...End Select
+    const selectMatch = trimmed.match(/^Select\s+Case\s+(.+)/i);
+    if (selectMatch && current) {
+      currentSelect = {
+        expression: selectMatch[1],
+        cases: [],
+        startLine: lineNumber,
+        endLine: 0,
+      };
+      continue;
+    }
+
+    if (currentSelect) {
+      if (/^End\s+Select/i.test(trimmed)) {
+        // Push last case if exists
+        if (currentCase) {
+          currentSelect.cases.push(currentCase);
+          currentCase = null;
+        }
+        currentSelect.endLine = lineNumber;
+        selectCases.push(currentSelect);
+        currentSelect = null;
+        continue;
+      }
+
+      // Case or Case Else
+      const caseMatch = trimmed.match(/^Case\s+(.+)/i);
+      if (caseMatch) {
+        // Push previous case
+        if (currentCase) {
+          currentSelect.cases.push(currentCase);
+        }
+
+        const caseCondition = caseMatch[1].trim();
+        const isElse = /^Else$/i.test(caseCondition);
+
+        currentCase = {
+          conditions: isElse ? [] : caseCondition.split(',').map(c => c.trim()),
+          isElse,
+          body: '',
+          startLine: lineNumber,
+        };
+        continue;
+      }
+
+      // Case body
+      if (currentCase) {
+        currentCase.body += line + '\n';
+      }
+      continue;
+    }
+
+    // ReDim [Preserve] varName(dimensions)
+    const redimMatch = trimmed.match(/^ReDim\s+(Preserve\s+)?(\w+)\(([^)]+)\)/i);
+    if (redimMatch && current) {
+      redimStatements.push({
+        variableName: redimMatch[2],
+        preserve: !!redimMatch[1],
+        dimensions: redimMatch[3].split(',').map(d => d.trim()),
+        line: lineNumber,
+      });
+      continue;
+    }
+
+    // Exit For/Do/Sub/Function/Property
+    const exitMatch = trimmed.match(/^Exit\s+(For|Do|Sub|Function|Property)/i);
+    if (exitMatch && current) {
+      exitStatements.push({
+        exitType: exitMatch[1].toLowerCase() as 'for' | 'do' | 'sub' | 'function' | 'property',
+        line: lineNumber,
+      });
+      continue;
+    }
+
+    // GoTo label or line number
+    const gotoMatch = trimmed.match(/^GoTo\s+(\w+|\d+)/i);
+    if (gotoMatch && current) {
+      gotoStatements.push({
+        target: gotoMatch[1],
+        line: lineNumber,
+      });
+      continue;
+    }
+
+    // Label: (at beginning of line)
+    const labelMatch = trimmed.match(/^(\w+):(?!=)/);
+    if (labelMatch && current) {
+      labels.push({
+        label: labelMatch[1],
+        line: lineNumber,
+      });
+      // Don't continue, process the rest of the line
+    }
+
+    // Line number (numeric label at start of line)
+    const lineNumMatch = trimmed.match(/^(\d+)\s+/);
+    if (lineNumMatch && current) {
+      labels.push({
+        label: lineNumMatch[1],
+        line: lineNumber,
+      });
+      // Don't continue, process the rest of the line
+    }
+
     // variable declaration (module level) - enhanced to detect arrays
     const varMatch = trimmed.match(
       /^(Public|Private)?\s*Dim\s+(\w+)(\([^)]*\))?(?:\s+As\s+(\w+))?/i
@@ -388,5 +568,10 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
     userDefinedTypes,
     controlArrays,
     withBlocks,
+    selectCases,
+    redimStatements,
+    exitStatements,
+    labels,
+    gotoStatements,
   };
 }
