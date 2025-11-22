@@ -180,7 +180,7 @@ export class VB6DataBindingService {
    */
   validateAll(recordset: DAORecordset): boolean {
     const bindings = this.getBindings(recordset);
-    let isValid = true;
+    const isValid = true;
 
     for (const binding of bindings) {
       const value = this.getControlValue(binding.controlName);

@@ -52,7 +52,6 @@ export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(
           });
         }
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isDragging, onDragStart, onDragEnd, id, data, addLog]);
 
     return (

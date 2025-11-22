@@ -679,7 +679,7 @@ export class WindowsAPIBridge {
     const icon = (uType >> 4) & 0x0F;
 
     // Build full message
-    let fullCaption = lpCaption || 'VB6 Application';
+    const fullCaption = lpCaption || 'VB6 Application';
     let iconEmoji = '';
 
     switch (icon) {
@@ -706,12 +706,12 @@ export class WindowsAPIBridge {
           console.log(`📢 MessageBox OK: ${fullCaption}`);
           return 1; // IDOK
 
-        case 1: // MB_OKCANCEL
+        case 1: { // MB_OKCANCEL
           const okCancel = window.confirm(fullCaption + '\n\n' + fullMessage);
           console.log(`📢 MessageBox OKCANCEL: ${fullCaption} - ${okCancel ? 'OK' : 'CANCEL'}`);
           return okCancel ? 1 : 2; // IDOK or IDCANCEL
-
-        case 2: // MB_ABORTRETRYIGNORE
+        }
+        case 2: { // MB_ABORTRETRYIGNORE
           const ariResult = window.prompt(
             fullCaption + '\n\n' + fullMessage + '\n\nEnter: A=Abort, R=Retry, I=Ignore',
             'R'
@@ -722,8 +722,8 @@ export class WindowsAPIBridge {
           if (ariUpper === 'A') return 3; // IDABORT
           if (ariUpper === 'R') return 4; // IDRETRY
           return 5; // IDIGNORE
-
-        case 3: // MB_YESNOCANCEL
+        }
+        case 3: { // MB_YESNOCANCEL
           const yncResult = window.prompt(
             fullCaption + '\n\n' + fullMessage + '\n\nEnter: Y=Yes, N=No, C=Cancel',
             'Y'
@@ -734,18 +734,19 @@ export class WindowsAPIBridge {
           if (yncUpper === 'Y') return 6; // IDYES
           if (yncUpper === 'N') return 7; // IDNO
           return 2; // IDCANCEL
-
-        case 4: // MB_YESNO
+        }
+        case 4: { // MB_YESNO
           const yesno = window.confirm(fullCaption + '\n\n' + fullMessage);
           console.log(`📢 MessageBox YESNO: ${fullCaption} - ${yesno ? 'YES' : 'NO'}`);
           return yesno ? 6 : 7; // IDYES or IDNO
-
-        case 5: // MB_RETRYCANCEL
+        }
+        case 5: { // MB_RETRYCANCEL
           const retryCancel = window.confirm(
             fullCaption + '\n\n' + fullMessage + '\n\nOK=Retry, Cancel=Cancel'
           );
           console.log(`📢 MessageBox RETRYCANCEL: ${fullCaption} - ${retryCancel ? 'RETRY' : 'CANCEL'}`);
           return retryCancel ? 4 : 2; // IDRETRY or IDCANCEL
+        }
 
         default:
           window.alert(fullCaption + '\n\n' + fullMessage);

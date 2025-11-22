@@ -284,7 +284,7 @@ export class VB6WindowsAPISimulator {
     const icon = (uType >> 4) & 0x0F;
     const buttons = uType & 0x0F;
 
-    let fullCaption = lpCaption || 'VB6 Application';
+    const fullCaption = lpCaption || 'VB6 Application';
     let iconEmoji = '';
 
     // Parse icon type
@@ -311,15 +311,16 @@ export class VB6WindowsAPISimulator {
         console.log(`📢 MessageBox OK: ${fullCaption}`);
         return 1; // IDOK
 
-      case WindowsAPI.MB_OKCANCEL:
+      case WindowsAPI.MB_OKCANCEL: {
         const okCancel = confirm(fullMessage);
         console.log(`📢 MessageBox OKCANCEL: ${fullCaption} - ${okCancel ? 'OK' : 'CANCEL'}`);
         return okCancel ? 1 : 2; // IDOK : IDCANCEL
-
-      case WindowsAPI.MB_YESNO:
+      }
+      case WindowsAPI.MB_YESNO: {
         const yesno = confirm(fullMessage);
         console.log(`📢 MessageBox YESNO: ${fullCaption} - ${yesno ? 'YES' : 'NO'}`);
         return yesno ? 6 : 7; // IDYES : IDNO
+      }
 
       case WindowsAPI.MB_YESNOCANCEL: {
         const result = prompt(`${fullMessage}\n\nEnter: Y=Yes, N=No, C=Cancel`, 'Y');
