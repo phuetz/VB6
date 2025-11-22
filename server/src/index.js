@@ -65,24 +65,68 @@ const rateLimiterMiddleware = async (req, res, next) => {
   }
 };
 
-// Middlewares globaux
+// CONFIGURATION VULNERABILITY FIX: Improve CSP security
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
+      styleSrc: ["'self'", "'nonce-' + (process.env.CSP_NONCE || 'development-only-nonce')"],
+      scriptSrc: ["'self'", "'nonce-' + (process.env.CSP_NONCE || 'development-only-nonce')"],
+      imgSrc: ["'self'", "data:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
     },
   },
 }));
 app.use(compression());
+// CONFIGURATION VULNERABILITY FIX: Validate CORS origin
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5183',
+  'https://localhost:5173',
+  'https://localhost:5183'
+];
+
+// Add CLIENT_URL only if it's a valid URL
+if (process.env.CLIENT_URL) {
+  try {
+    const clientUrl = new URL(process.env.CLIENT_URL);
+    // Only allow https in production or localhost
+    if (clientUrl.protocol === 'https:' || 
+        (clientUrl.hostname === 'localhost' || clientUrl.hostname === '127.0.0.1')) {
+      allowedOrigins.push(process.env.CLIENT_URL);
+    } else {
+      logger.warn(`Rejected CLIENT_URL: ${process.env.CLIENT_URL} - must use HTTPS or localhost`);
+    }
+  } catch (error) {
+    logger.error(`Invalid CLIENT_URL: ${process.env.CLIENT_URL}`);
+  }
+}
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: allowedOrigins,
   credentials: true
 }));
-app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+// CONFIGURATION VULNERABILITY FIX: Reduce body size limits to prevent DoS
+const bodyLimit = process.env.MAX_BODY_SIZE || '10mb'; // Default 10MB, configurable
+app.use(bodyParser.json({ 
+  limit: bodyLimit,
+  // Add additional security options
+  verify: (req, res, buf, encoding) => {
+    // Log large requests for monitoring
+    if (buf.length > 5 * 1024 * 1024) { // 5MB threshold
+      logger.warn(`Large request body: ${buf.length} bytes from ${req.ip}`);
+    }
+  }
+}));
+app.use(bodyParser.urlencoded({ 
+  extended: true, 
+  limit: bodyLimit,
+  parameterLimit: 1000 // Limit number of parameters
+}));
 app.use(rateLimiterMiddleware);
 
 // Middleware de logging

@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import {
   DndContext,
   DragEndEvent,
@@ -8,6 +8,7 @@ import {
   useSensor,
   useSensors,
   DragOverlay,
+  useDroppable,
   closestCenter,
 } from '@dnd-kit/core';
 import { useVB6Store } from '../../stores/vb6Store';
@@ -27,6 +28,16 @@ interface DragData {
 
 const DragDropCanvas: React.FC<DragDropCanvasProps> = () => {
   const canvasRef = useRef<HTMLDivElement>(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isTracking, setIsTracking] = useState(false);
+
+  // Make canvas a droppable zone
+  const { isOver, setNodeRef: setDroppableRef } = useDroppable({
+    id: 'canvas-drop-zone',
+    data: {
+      accepts: ['toolbox-control', 'existing-control'],
+    },
+  });
   const {
     controls,
     executionMode,
@@ -36,6 +47,7 @@ const DragDropCanvas: React.FC<DragDropCanvasProps> = () => {
     dragPosition,
     draggedControlType,
     createControl,
+    updateControl,
     setDragState,
     selectControls,
   } = useVB6Store();
@@ -48,12 +60,30 @@ const DragDropCanvas: React.FC<DragDropCanvasProps> = () => {
     })
   );
 
+  // Track mouse position during drag for accurate positioning
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isTracking && canvasRef.current) {
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        setMousePosition({ x, y });
+      }
+    };
+
+    if (isTracking) {
+      document.addEventListener('mousemove', handleMouseMove);
+      return () => document.removeEventListener('mousemove', handleMouseMove);
+    }
+  }, [isTracking]);
+
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {
       const { active } = event;
       const dragData = active.data.current as DragData;
 
       if (dragData?.type === 'toolbox-control') {
+        setIsTracking(true);
         setDragState({
           isDragging: true,
           controlType: dragData.controlType,
@@ -68,11 +98,9 @@ const DragDropCanvas: React.FC<DragDropCanvasProps> = () => {
     (event: DragOverEvent) => {
       if (executionMode === 'run') return;
 
-      const { delta } = event;
       if (canvasRef.current && isDragging) {
-        const rect = canvasRef.current.getBoundingClientRect();
-        let x = delta.x;
-        let y = delta.y;
+        let x = mousePosition.x;
+        let y = mousePosition.y;
 
         // Snap to grid if enabled
         if (snapToGrid) {
@@ -80,27 +108,29 @@ const DragDropCanvas: React.FC<DragDropCanvasProps> = () => {
           y = Math.round(y / gridSize) * gridSize;
         }
 
+        // Ensure position is within canvas bounds
+        x = Math.max(0, x);
+        y = Math.max(0, y);
+
         setDragState({
           isDragging: true,
-          position: {
-            x: Math.max(0, x),
-            y: Math.max(0, y),
-          },
+          position: { x, y },
         });
       }
     },
-    [executionMode, isDragging, snapToGrid, gridSize, setDragState]
+    [executionMode, isDragging, snapToGrid, gridSize, setDragState, mousePosition]
   );
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
-      const { active, over, delta } = event;
+      const { active, over } = event;
       const dragData = active.data.current as DragData;
 
+      setIsTracking(false);
+
       if (dragData?.type === 'toolbox-control' && dragData.controlType && canvasRef.current) {
-        const rect = canvasRef.current.getBoundingClientRect();
-        let x = delta.x;
-        let y = delta.y;
+        let x = mousePosition.x;
+        let y = mousePosition.y;
 
         // Snap to grid if enabled
         if (snapToGrid) {
@@ -108,11 +138,33 @@ const DragDropCanvas: React.FC<DragDropCanvasProps> = () => {
           y = Math.round(y / gridSize) * gridSize;
         }
 
-        // Ensure minimum position
+        // Ensure minimum position and stay within reasonable bounds
         x = Math.max(0, x);
         y = Math.max(0, y);
 
-        createControl(dragData.controlType, x, y);
+        // Only create control if position is valid (not negative after snapping)
+        if (x >= 0 && y >= 0) {
+          createControl(dragData.controlType, x, y);
+        }
+      } else if (dragData?.type === 'existing-control' && dragData.controlId && canvasRef.current) {
+        let x = mousePosition.x;
+        let y = mousePosition.y;
+
+        // Snap to grid if enabled
+        if (snapToGrid) {
+          x = Math.round(x / gridSize) * gridSize;
+          y = Math.round(y / gridSize) * gridSize;
+        }
+
+        // Ensure minimum position and stay within reasonable bounds
+        x = Math.max(0, x);
+        y = Math.max(0, y);
+
+        // Update existing control position
+        if (x >= 0 && y >= 0) {
+          updateControl(dragData.controlId, 'x', x);
+          updateControl(dragData.controlId, 'y', y);
+        }
       }
 
       // Reset drag state
@@ -121,8 +173,9 @@ const DragDropCanvas: React.FC<DragDropCanvasProps> = () => {
         controlType: null,
         position: { x: 0, y: 0 },
       });
+      setMousePosition({ x: 0, y: 0 });
     },
-    [createControl, snapToGrid, gridSize, setDragState]
+    [createControl, updateControl, snapToGrid, gridSize, setDragState, mousePosition]
   );
 
   const handleCanvasClick = useCallback(
@@ -167,10 +220,16 @@ const DragDropCanvas: React.FC<DragDropCanvasProps> = () => {
       onDragEnd={handleDragEnd}
     >
       <div
-        ref={canvasRef}
-        className="w-full h-full relative overflow-hidden"
+        ref={(node) => {
+          canvasRef.current = node;
+          setDroppableRef(node);
+        }}
+        className={`w-full h-full relative overflow-hidden ${isOver ? 'bg-blue-50' : ''}`}
         onClick={handleCanvasClick}
-        style={{ cursor: executionMode === 'design' ? 'default' : 'default' }}
+        style={{ 
+          cursor: executionMode === 'design' ? 'default' : 'default',
+          transition: 'background-color 200ms ease'
+        }}
       >
         <Grid />
         <AlignmentGuides />

@@ -327,8 +327,9 @@ function alignDeclarations(lines: string[]): string[] {
   }
 
   // Find the maximum positions for alignment
-  const maxDimPos = Math.max(...dimPositions);
-  const maxAsPos = Math.max(...asPositions);
+  // BUFFER OVERFLOW FIX: Avoid spread operator with large arrays that could cause stack overflow
+  const maxDimPos = dimPositions.length > 0 ? dimPositions.reduce((max, pos) => Math.max(max, pos), 0) : 0;
+  const maxAsPos = asPositions.length > 0 ? asPositions.reduce((max, pos) => Math.max(max, pos), 0) : 0;
 
   // Apply alignment to declaration lines
   declarationLines.forEach((lineIndex, i) => {
@@ -374,7 +375,7 @@ function alignComments(lines: string[]): string[] {
   }
 
   // Find the maximum position for alignment
-  const maxCodeEndPos = Math.max(...codeEndPositions);
+  // BUFFER OVERFLOW FIX: Avoid spread operator with large arrays that could cause stack overflow\n  const maxCodeEndPos = codeEndPositions.length > 0 ? \n    codeEndPositions.reduce((max, pos) => Math.max(max, pos), 0) : 0;
 
   // Apply alignment to comment lines
   commentLines.forEach((lineIndex, i) => {

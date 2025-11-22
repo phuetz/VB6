@@ -32,7 +32,9 @@ export const useVB6 = () => {
 };
 
 export const VB6Provider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  console.log('🔄 VB6Provider initializing...');
   const [state, dispatch] = useReducer(vb6Reducer, initialState);
+  console.log('✅ VB6Provider initialized with state:', state);
 
   const createControl = useCallback((type: string, x?: number, y?: number) => {
     console.log('Creating control in context:', type, x, y);
@@ -80,14 +82,16 @@ export const VB6Provider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const executeEvent = useCallback(
-    (control: any, eventName: string, eventData?: any) => {
+    async (control: any, eventName: string, eventData?: any) => {
       const eventKey = `${control.name}_${eventName}`;
       const code = state.eventCode[eventKey];
 
       if (code) {
         try {
-          const func = new Function('control', 'eventData', code);
-          func(control, eventData);
+          // ASYNC/AWAIT LOGIC BUG FIX: Function must be async to use await
+          const safeEvaluator = await import('../utils/safeExpressionEvaluator');
+          const context = { control, eventData };
+          await safeEvaluator.evaluateVB6Code(code, context);
         } catch (err) {
           console.error(`Error executing ${eventKey}:`, err);
         }
@@ -101,31 +105,54 @@ export const VB6Provider: React.FC<{ children: React.ReactNode }> = ({ children 
     [state.eventCode, dispatch]
   );
 
+  // ASYNC/AWAIT FIX: Add proper error handling for async saveProject
   const saveProject = useCallback(async () => {
-    const project = {
-      name: state.projectName,
-      forms: state.forms,
-      modules: state.modules,
-      classModules: state.classModules,
-    };
-    await FileManager.exportProjectArchive(project as any);
+    try {
+      const project = {
+        name: state.projectName,
+        forms: state.forms,
+        modules: state.modules,
+        classModules: state.classModules,
+      };
+      await FileManager.exportProjectArchive(project as any);
+      console.log('Project saved successfully');
+    } catch (error) {
+      console.error('Failed to save project:', error);
+      throw error; // Re-throw to let caller handle UI feedback
+    }
   }, [state]);
 
+  // ASYNC/AWAIT FIX: Fix variable shadowing and improve error handling
   const loadProject = useCallback(async (file: File) => {
     try {
-      let projectText: string;
       if (file.name.endsWith('.vb6z') || file.name.endsWith('.zip')) {
         const project = await FileManager.importProjectArchive(file);
         if (project) {
           dispatch({ type: 'SET_PROJECT', payload: { project } });
+          console.log('Archive project loaded successfully');
+        } else {
+          throw new Error('Failed to extract project from archive');
         }
       } else {
         const projectText = await file.text();
-        const project = JSON.parse(projectText);
+        if (!projectText.trim()) {
+          throw new Error('Project file is empty');
+        }
+        
+        let project;
+        try {
+          project = JSON.parse(projectText);
+        } catch (parseError) {
+          throw new Error(`Invalid JSON in project file: ${parseError.message}`);
+        }
+        
         dispatch({ type: 'SET_PROJECT', payload: { project } });
+        console.log('Text project loaded successfully');
       }
     } catch (err) {
-      console.error('Failed to load project', err);
+      console.error('Failed to load project:', err);
+      // Re-throw with more context for UI error handling
+      throw new Error(`Project loading failed: ${err.message}`);
     }
   }, []);
 

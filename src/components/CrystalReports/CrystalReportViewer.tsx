@@ -4,8 +4,26 @@
  */
 
 import React, { useState, useEffect, useRef, forwardRef, useCallback } from 'react';
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  ChevronsLeft, 
+  ChevronsRight,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Search,
+  Printer,
+  Download,
+  RefreshCw,
+  Settings,
+  BarChart3,
+  Play,
+  Square
+} from 'lucide-react';
 import { useVB6Store } from '../../stores/vb6Store';
 import { VB6ControlPropsEnhanced } from '../Controls/VB6ControlsEnhanced';
+import AnimatedButton from '../UI/AnimatedButton';
 
 interface ReportParameter {
   name: string;
@@ -411,12 +429,22 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
     <div style={toolbarStyle}>
       {windowShowNavigationControls && (
         <>
-          <button onClick={() => navigateToPage(1)} disabled={currentPage === 1} title="First Page">
-            |◀
-          </button>
-          <button onClick={() => navigateToPage(currentPage - 1)} disabled={currentPage === 1} title="Previous Page">
-            ◀
-          </button>
+          <AnimatedButton
+            onClick={() => navigateToPage(1)}
+            disabled={currentPage === 1}
+            variant="ghost"
+            size="sm"
+            icon={ChevronsLeft}
+            className="!p-2"
+          />
+          <AnimatedButton
+            onClick={() => navigateToPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            variant="ghost"
+            size="sm"
+            icon={ChevronLeft}
+            className="!p-2"
+          />
           <input
             type="number"
             value={currentPage}
@@ -426,12 +454,22 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
             max={totalPages}
           />
           <span style={{ margin: '0 8px' }}>of {totalPages}</span>
-          <button onClick={() => navigateToPage(currentPage + 1)} disabled={currentPage === totalPages} title="Next Page">
-            ▶
-          </button>
-          <button onClick={() => navigateToPage(totalPages)} disabled={currentPage === totalPages} title="Last Page">
-            ▶|
-          </button>
+          <AnimatedButton
+            onClick={() => navigateToPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            variant="ghost"
+            size="sm"
+            icon={ChevronRight}
+            className="!p-2"
+          />
+          <AnimatedButton
+            onClick={() => navigateToPage(totalPages)}
+            disabled={currentPage === totalPages}
+            variant="ghost"
+            size="sm"
+            icon={ChevronsRight}
+            className="!p-2"
+          />
         </>
       )}
       
@@ -447,8 +485,24 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
             <option value={200}>200%</option>
             <option value={400}>400%</option>
           </select>
-          <button onClick={() => handleZoom('FitWidth')} title="Fit Width">⬌</button>
-          <button onClick={() => handleZoom('FitPage')} title="Fit Page">⬍</button>
+          <AnimatedButton
+            onClick={() => handleZoom('FitWidth')}
+            variant="ghost"
+            size="sm"
+            icon={ZoomIn}
+            className="!p-2"
+          >
+            Fit Width
+          </AnimatedButton>
+          <AnimatedButton
+            onClick={() => handleZoom('FitPage')}
+            variant="ghost"
+            size="sm"
+            icon={Maximize2}
+            className="!p-2"
+          >
+            Fit Page
+          </AnimatedButton>
         </>
       )}
       
@@ -462,28 +516,66 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
             onKeyPress={(e) => e.key === 'Enter' && searchInReport(searchText)}
             style={searchInputStyle}
           />
-          <button onClick={() => searchInReport(searchText)} title="Search">🔍</button>
+          <AnimatedButton
+            onClick={() => searchInReport(searchText)}
+            variant="ghost"
+            size="sm"
+            icon={Search}
+            className="!p-2"
+          />
         </>
       )}
       
       {windowShowPrintButton && (
-        <button onClick={printReport} title="Print">🖨️</button>
+        <AnimatedButton
+          onClick={printReport}
+          variant="ghost"
+          size="sm"
+          icon={Printer}
+          className="!p-2"
+        />
       )}
       
       {windowShowExportButton && (
-        <button onClick={() => setExportOptions({ ...exportOptions })} title="Export">💾</button>
+        <AnimatedButton
+          onClick={() => setExportOptions({ ...exportOptions })}
+          variant="ghost"
+          size="sm"
+          icon={Download}
+          className="!p-2"
+        />
       )}
       
       {windowShowRefreshButton && (
-        <button onClick={refreshReport} title="Refresh">🔄</button>
+        <AnimatedButton
+          onClick={refreshReport}
+          variant="ghost"
+          size="sm"
+          icon={RefreshCw}
+          className="!p-2"
+        />
       )}
       
       {windowShowPrintSetupButton && (
-        <button onClick={() => fireEvent(name, 'PrintSetup', {})} title="Print Setup">⚙️</button>
+        <AnimatedButton
+          onClick={() => fireEvent(name, 'PrintSetup', {})}
+          variant="ghost"
+          size="sm"
+          icon={Settings}
+          className="!p-2"
+        />
       )}
       
       {parameterFields.length > 0 && (
-        <button onClick={() => setShowParameterDialog(true)} title="Parameters">📊</button>
+        <AnimatedButton
+          onClick={() => setShowParameterDialog(true)}
+          variant="ghost"
+          size="sm"
+          icon={BarChart3}
+          className="!p-2"
+        >
+          Parameters
+        </AnimatedButton>
       )}
     </div>
   );
@@ -524,8 +616,12 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
           </div>
         ))}
         <div style={dialogButtonsStyle}>
-          <button onClick={applyParameters}>OK</button>
-          <button onClick={() => setShowParameterDialog(false)}>Cancel</button>
+          <AnimatedButton onClick={applyParameters} variant="primary" size="sm">
+            Apply
+          </AnimatedButton>
+          <AnimatedButton onClick={() => setShowParameterDialog(false)} variant="secondary" size="sm">
+            Cancel
+          </AnimatedButton>
         </div>
       </div>
     </div>
@@ -664,7 +760,12 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
           {reportData && !isLoading && !error && (
             <div style={pageStyle}>
               {/* Render report content here */}
-              <div dangerouslySetInnerHTML={{ __html: reportData.pages?.[currentPage - 1] || '' }} />
+              <div dangerouslySetInnerHTML={{ 
+                __html: (reportData.pages?.[currentPage - 1] || '')
+                  .replace(/<script[^>]*>.*?<\/script>/gi, '') // Remove scripts
+                  .replace(/on\w+="[^"]*"/gi, '') // Remove event handlers
+                  .replace(/javascript:/gi, '') // Remove javascript: URLs
+              }} />
             </div>
           )}
         </div>
@@ -679,7 +780,14 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
             <p>Records Read: {recordsRead}</p>
             <p>Records Selected: {recordsSelected}</p>
             {windowShowCancelButton && (
-              <button onClick={() => updateControl(id, 'status', 1)}>Cancel</button>
+              <AnimatedButton 
+                onClick={() => updateControl(id, 'status', 1)} 
+                variant="danger" 
+                size="sm"
+                icon={Square}
+              >
+                Cancel
+              </AnimatedButton>
             )}
           </div>
         </div>

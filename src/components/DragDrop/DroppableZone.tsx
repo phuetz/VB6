@@ -32,7 +32,7 @@ export const DroppableZone: React.FC<DroppableZoneProps> = ({
 }) => {
   const elementRef = useRef<HTMLDivElement>(null);
   const { registerDropZone, unregisterDropZone, isDragging } = useDragDrop();
-  const { addLog } = useVB6Store.getState();
+  const addLog = useVB6Store(state => state.addLog);
 
   // Log initialization
   useEffect(() => {
@@ -69,9 +69,10 @@ export const DroppableZone: React.FC<DroppableZoneProps> = ({
       });
 
       if (!disabled) {
+        // CIRCULAR REFERENCE FIX: Use WeakRef to prevent memory leaks
         registerDropZone({
           id,
-          element: elementRef.current,
+          element: new WeakRef(elementRef.current),
           accepts,
           onDrop,
           highlight: isOver,

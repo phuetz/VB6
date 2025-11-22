@@ -1,227 +1,35 @@
 /**
- * Runtime VB6 Ultra-Avancé
- * Système de runtime révolutionnaire qui surpasse VB6 original
- * Avec compilateur JIT, optimisations IA, et performances 10x supérieures
+ * DESIGN PATTERN FIX: Refactored VB6 Ultra Runtime
+ * Uses composition pattern with specialized manager classes
+ * Single Responsibility: Orchestration of VB6 runtime components
  */
 
 import { EventEmitter } from 'events';
 
-// Types VB6 avancés
-export enum VB6DataType {
-  vbEmpty = 0,
-  vbNull = 1,
-  vbInteger = 2,
-  vbLong = 3,
-  vbSingle = 4,
-  vbDouble = 5,
-  vbCurrency = 6,
-  vbDate = 7,
-  vbString = 8,
-  vbObject = 9,
-  vbError = 10,
-  vbBoolean = 11,
-  vbVariant = 12,
-  vbDataObject = 13,
-  vbDecimal = 14,
-  vbByte = 17,
-  vbUserDefinedType = 36,
-  vbArray = 8192
-}
+// DESIGN PATTERN FIX: Import extracted types and managers
+import { 
+  VB6DataType, 
+  VB6Variable, 
+  VB6Procedure, 
+  VB6Module, 
+  VB6Parameter,
+  VB6Project,
+  VB6Reference,
+  VB6Component,
+  VB6VersionInfo,
+  VB6CompileOptions
+} from './types/VB6Types';
+import { VB6VariableManager } from './managers/VB6VariableManager';
+import { VB6ProcedureManager } from './managers/VB6ProcedureManager';
+import { VB6ErrorHandler } from './managers/VB6ErrorHandler';
+import { VB6EventSystem } from './managers/VB6EventSystem';
+import { VB6MemoryManager } from './managers/VB6MemoryManager';
 
-export interface VB6Variable {
-  name: string;
-  type: VB6DataType;
-  value: any;
-  isArray: boolean;
-  dimensions?: number[];
-  isPublic: boolean;
-  isPrivate: boolean;
-  isStatic: boolean;
-  isDim: boolean;
-  isConst: boolean;
-  scope: 'module' | 'procedure' | 'global';
-}
+// DESIGN PATTERN FIX: Types moved to separate file
 
-export interface VB6Procedure {
-  name: string;
-  type: 'sub' | 'function' | 'property';
-  parameters: VB6Parameter[];
-  returnType?: VB6DataType;
-  body: string;
-  isPublic: boolean;
-  isPrivate: boolean;
-  isStatic: boolean;
-  scope: 'module' | 'global';
-}
+// DESIGN PATTERN FIX: Module interface moved to types file
 
-export interface VB6Parameter {
-  name: string;
-  type: VB6DataType;
-  isOptional: boolean;
-  defaultValue?: any;
-  isByRef: boolean;
-  isByVal: boolean;
-  isParamArray: boolean;
-}
-
-export interface VB6Module {
-  name: string;
-  type: 'form' | 'module' | 'class';
-  variables: Map<string, VB6Variable>;
-  procedures: Map<string, VB6Procedure>;
-  controls: Map<string, VB6Control>;
-  events: Map<string, VB6Event>;
-  code: string;
-  compiled: boolean;
-  optimized: boolean;
-}
-
-export interface VB6Control {
-  name: string;
-  type: string;
-  properties: Map<string, any>;
-  events: Map<string, VB6Event>;
-  parent?: VB6Control;
-  children: VB6Control[];
-  index?: number;
-  isArray: boolean;
-  tag: any;
-  visible: boolean;
-  enabled: boolean;
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-  zOrder: number;
-  helpContextID: number;
-  whatsThisHelpID: number;
-  toolTipText: string;
-  dragMode: 'Manual' | 'Automatic';
-  dragIcon: any;
-  mousePointer: number;
-  mouseIcon: any;
-  tabStop: boolean;
-  tabIndex: number;
-  causesValidation: boolean;
-  rightToLeft: boolean;
-  appearance: 'Flat' | '3D';
-  borderStyle: 'None' | 'Fixed Single' | 'Sizable' | 'Fixed Dialog' | 'Fixed ToolWindow' | 'Sizable ToolWindow';
-  font: VB6Font;
-  foreColor: number;
-  backColor: number;
-  backStyle: 'Transparent' | 'Opaque';
-}
-
-export interface VB6Font {
-  name: string;
-  size: number;
-  bold: boolean;
-  italic: boolean;
-  underline: boolean;
-  strikethrough: boolean;
-  charset: number;
-  weight: number;
-}
-
-export interface VB6Event {
-  name: string;
-  procedure: string;
-  parameters: VB6Parameter[];
-  enabled: boolean;
-  compiled: boolean;
-}
-
-export interface VB6Project {
-  name: string;
-  type: 'Standard EXE' | 'ActiveX EXE' | 'ActiveX DLL' | 'ActiveX Control' | 'DHTML Application' | 'IIS Application';
-  modules: Map<string, VB6Module>;
-  references: VB6Reference[];
-  components: VB6Component[];
-  title: string;
-  description: string;
-  helpFile: string;
-  helpContextID: number;
-  versionInfo: VB6VersionInfo;
-  compileOptions: VB6CompileOptions;
-  startup: string;
-  iconFile: string;
-  compatibleMode: boolean;
-  threaded: boolean;
-  unattended: boolean;
-  retained: boolean;
-  apartment: boolean;
-  optimized: boolean;
-  compiled: boolean;
-}
-
-export interface VB6Reference {
-  name: string;
-  description: string;
-  guid: string;
-  major: number;
-  minor: number;
-  lcid: number;
-  file: string;
-  broken: boolean;
-  builtin: boolean;
-  isPrivate: boolean;
-}
-
-export interface VB6Component {
-  name: string;
-  description: string;
-  file: string;
-  guid: string;
-  selected: boolean;
-  insertable: boolean;
-  license: string;
-}
-
-export interface VB6VersionInfo {
-  major: number;
-  minor: number;
-  revision: number;
-  build: number;
-  companyName: string;
-  fileDescription: string;
-  productName: string;
-  legalCopyright: string;
-  legalTrademarks: string;
-  comments: string;
-  productVersion: string;
-  fileVersion: string;
-  internalName: string;
-  originalFilename: string;
-  privateBuild: string;
-  specialBuild: string;
-  autoIncrement: boolean;
-}
-
-export interface VB6CompileOptions {
-  optimizeCode: boolean;
-  favorPentiumPro: boolean;
-  createSymbolicDebugInfo: boolean;
-  aliasWarnings: boolean;
-  assumeNoAliasing: boolean;
-  removeIntegerOverflowChecks: boolean;
-  removeFloatingPointErrorChecks: boolean;
-  removeSafeArrayBoundsChecks: boolean;
-  removeArrayBoundsChecks: boolean;
-  compileToP32: boolean;
-  compileToNativeCode: boolean;
-  advancedOptimizations: boolean;
-  conditionalCompilation: string;
-  dllBaseAddress: string;
-  threading: 'Single' | 'Apartment' | 'Both';
-  unattendedExecution: boolean;
-  retainInMemory: boolean;
-  upgradeActiveXControls: boolean;
-  validateBounds: boolean;
-  validateParameters: boolean;
-  validateVariables: boolean;
-  jitOptimization: boolean;
-  aiOptimization: boolean;
-}
+// DESIGN PATTERN FIX: All interfaces moved to VB6Types.ts
 
 // Compilateur JIT ultra-avancé
 export class VB6JITCompiler extends EventEmitter {

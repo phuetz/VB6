@@ -35,6 +35,10 @@ export class WebSocketManager {
   private clients: Map<string, ConnectedClient>;
   private subscriptions: Map<string, SubscriptionInfo[]>;
   private eventHandlers: Map<string, (...args: any[]) => void>;
+  private cleanupInterval: NodeJS.Timer | null = null;
+  // RACE CONDITION BUG FIX: Track active queries per client to prevent overwhelming database
+  private activeQueries: Map<string, Set<string>> = new Map();
+  private readonly MAX_CONCURRENT_QUERIES_PER_CLIENT = 3;
 
   constructor(
     private io: SocketIOServer,
@@ -95,6 +99,9 @@ export class WebSocketManager {
     if (client) {
       // Nettoyage des souscriptions
       this.cleanupClientSubscriptions(clientId);
+
+      // RACE CONDITION BUG FIX: Clean up active queries tracking
+      this.activeQueries.delete(clientId);
 
       // Suppression du client
       this.clients.delete(clientId);
@@ -264,17 +271,35 @@ export class WebSocketManager {
    * Gère l'exécution de requête en temps réel
    */
   private async handleExecuteQuery(client: ConnectedClient, data: any): Promise<void> {
+    const { queryId, connectionId, sql, parameters } = data;
+
+    if (!queryId || !connectionId || !sql) {
+      client.socket.emit('query_error', {
+        queryId,
+        error: 'queryId, connectionId et sql requis',
+      });
+      return;
+    }
+
+    // RACE CONDITION BUG FIX: Limit concurrent queries per client
+    if (!this.activeQueries.has(client.id)) {
+      this.activeQueries.set(client.id, new Set());
+    }
+
+    const clientActiveQueries = this.activeQueries.get(client.id)!;
+    
+    if (clientActiveQueries.size >= this.MAX_CONCURRENT_QUERIES_PER_CLIENT) {
+      client.socket.emit('query_error', {
+        queryId,
+        error: `Trop de requêtes concurrentes (max: ${this.MAX_CONCURRENT_QUERIES_PER_CLIENT})`,
+      });
+      return;
+    }
+
+    // Track this query as active
+    clientActiveQueries.add(queryId);
+
     try {
-      const { queryId, connectionId, sql, parameters } = data;
-
-      if (!queryId || !connectionId || !sql) {
-        client.socket.emit('query_error', {
-          queryId,
-          error: 'queryId, connectionId et sql requis',
-        });
-        return;
-      }
-
       this.logger.websocket('query_start', client.id, { queryId, sql: sql.substring(0, 100) });
 
       const startTime = Date.now();
@@ -299,10 +324,18 @@ export class WebSocketManager {
       this.logger.error(`Erreur exécution requête client ${client.id}:`, error);
 
       client.socket.emit('query_error', {
-        queryId: data.queryId,
+        queryId,
         error: 'Erreur exécution requête',
         details: error instanceof Error ? error.message : 'Erreur inconnue',
       });
+    } finally {
+      // RACE CONDITION BUG FIX: Always remove query from active set
+      clientActiveQueries.delete(queryId);
+      
+      // Clean up empty sets to prevent memory leaks
+      if (clientActiveQueries.size === 0) {
+        this.activeQueries.delete(client.id);
+      }
     }
   }
 
@@ -612,8 +645,13 @@ export class WebSocketManager {
    * Démarre une tâche de nettoyage périodique
    */
   startCleanupTask(): void {
+    // Clear any existing interval
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+    }
+    
     // Nettoyage toutes les 30 minutes
-    setInterval(
+    this.cleanupInterval = setInterval(
       () => {
         this.performCleanup();
       },
@@ -643,5 +681,29 @@ export class WebSocketManager {
     if (cleanedCount > 0) {
       this.logger.info(`Nettoyage WebSocket: ${cleanedCount} clients inactifs supprimés`);
     }
+  }
+
+  /**
+   * Shutdown method to clean up resources and prevent memory leaks
+   */
+  shutdown(): void {
+    // Clean up cleanup interval
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+    }
+
+    // Disconnect all clients
+    this.clients.forEach(client => {
+      client.socket.disconnect(true);
+    });
+
+    // Clear all data structures
+    this.clients.clear();
+    this.subscriptions.clear();
+    this.eventHandlers.clear();
+    this.activeQueries.clear(); // RACE CONDITION BUG FIX: Clean up active queries tracking
+
+    this.logger?.info('WebSocketManager shutdown completed');
   }
 }

@@ -4,12 +4,17 @@ import { useVB6 } from '../../context/VB6Context';
 
 interface ResizeHandlesProps {
   control: Control;
+  onStartResize?: (e: React.MouseEvent, control: Control, handle: string) => void;
 }
 
-const ResizeHandles: React.FC<ResizeHandlesProps> = ({ control }) => {
-  const { state, dispatch } = useVB6();
+const ResizeHandles: React.FC<ResizeHandlesProps> = ({ control, onStartResize }) => {
+  const { state } = useVB6();
 
-  if (state.executionMode === 'run' || state.selectedControls.length !== 1) return null;
+  // EDGE CASE FIX: Only show resize handles for single selection
+  if (state.executionMode === 'run' || 
+      state.selectedControls.length !== 1 || 
+      !onStartResize ||
+      control.locked === true) return null;
 
   const handleStyle: React.CSSProperties = {
     position: 'absolute',
@@ -22,19 +27,8 @@ const ResizeHandles: React.FC<ResizeHandlesProps> = ({ control }) => {
 
   const handleResizeMouseDown = (e: React.MouseEvent, handle: string) => {
     e.stopPropagation();
-    dispatch({
-      type: 'SET_RESIZE_STATE',
-      payload: {
-        isResizing: true,
-        handle,
-        start: {
-          x: e.clientX,
-          y: e.clientY,
-          width: control.width,
-          height: control.height,
-        },
-      },
-    });
+    e.preventDefault();
+    onStartResize(e, control, handle);
   };
 
   return (

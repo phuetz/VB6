@@ -552,14 +552,119 @@ export const VB6_COMPLETE_PROPERTIES: { [key: string]: VB6PropertyDefinition[] }
     { name: 'BoundReportHeading', type: 'string', defaultValue: '', description: 'En-tête de rapport lié', category: 'Report' },
     { name: 'MaxLinesPerPage', type: 'number', defaultValue: 0, description: 'Lignes maximum par page', category: 'Report' },
   ],
+
+  // Script Control - Nouveaux contrôles ajoutés
+  ScriptControl: [
+    { name: 'Language', type: 'enum', defaultValue: 'VBScript', enumValues: ['VBScript', 'JScript', 'JavaScript'], description: 'Langage de script', category: 'Behavior' },
+    { name: 'State', type: 'number', defaultValue: 0, description: 'État du moteur de script', category: 'Misc', readOnly: true },
+    { name: 'Error', type: 'object', defaultValue: null, description: 'Objet erreur', category: 'Misc', readOnly: true },
+    { name: 'Timeout', type: 'number', defaultValue: 10000, description: 'Timeout d\'exécution (ms)', category: 'Behavior' },
+    { name: 'AllowUI', type: 'boolean', defaultValue: true, description: 'Autoriser les interfaces utilisateur', category: 'Behavior' },
+    { name: 'UseSafeSubset', type: 'boolean', defaultValue: false, description: 'Utiliser le sous-ensemble sûr', category: 'Behavior' },
+    { name: 'CodeObject', type: 'object', defaultValue: null, description: 'Objet code', category: 'Misc', readOnly: true },
+    { name: 'Modules', type: 'object', defaultValue: null, description: 'Collection de modules', category: 'Misc', readOnly: true },
+    { name: 'Procedures', type: 'object', defaultValue: null, description: 'Collection de procédures', category: 'Misc', readOnly: true },
+  ],
+
+  // Microsoft Remote Data Control
+  MSRDC: [
+    { name: 'Caption', type: 'string', defaultValue: 'Remote Data', description: 'Titre du contrôle', category: 'Appearance' },
+    { name: 'Connect', type: 'string', defaultValue: '', description: 'Chaîne de connexion', category: 'Data' },
+    { name: 'SQL', type: 'string', defaultValue: '', description: 'Requête SQL', category: 'Data' },
+    { name: 'CursorDriver', type: 'enum', defaultValue: 0, enumValues: ['0 - rdUseIfNeeded', '1 - rdUseODBC', '2 - rdUseServer', '3 - rdUseClientBatch', '4 - rdUseNone'], description: 'Type de curseur', category: 'Data' },
+    { name: 'Environment', type: 'object', defaultValue: null, description: 'Environnement RDO', category: 'Data', readOnly: true },
+    { name: 'Connection', type: 'object', defaultValue: null, description: 'Connexion RDO', category: 'Data', readOnly: true },
+    { name: 'Resultset', type: 'object', defaultValue: null, description: 'Jeu de résultats RDO', category: 'Data', readOnly: true },
+    { name: 'LoginTimeout', type: 'number', defaultValue: 15, description: 'Timeout de connexion', category: 'Data' },
+    { name: 'QueryTimeout', type: 'number', defaultValue: 30, description: 'Timeout de requête', category: 'Data' },
+    { name: 'ResultsetType', type: 'enum', defaultValue: 1, enumValues: ['0 - rdOpenForwardOnly', '1 - rdOpenKeyset', '2 - rdOpenDynamic', '3 - rdOpenStatic'], description: 'Type de jeu de résultats', category: 'Data' },
+    { name: 'LockType', type: 'enum', defaultValue: 3, enumValues: ['1 - rdConcurReadOnly', '2 - rdConcurLock', '3 - rdConcurRowVer', '4 - rdConcurValues', '5 - rdConcurBatch'], description: 'Type de verrouillage', category: 'Data' },
+    { name: 'BOFAction', type: 'enum', defaultValue: 0, enumValues: ['0 - rdMoveFirst', '1 - rdBOF'], description: 'Action en début de fichier', category: 'Data' },
+    { name: 'EOFAction', type: 'enum', defaultValue: 0, enumValues: ['0 - rdMoveLast', '1 - rdEOF', '2 - rdAddNew'], description: 'Action en fin de fichier', category: 'Data' },
+    { name: 'BackColor', type: 'color', defaultValue: '#C0C0C0', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'Font', type: 'font', defaultValue: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false }, description: 'Police', category: 'Font' },
+  ],
+
+  // Microsoft Equation Editor
+  MSEE: [
+    { name: 'Equation', type: 'object', defaultValue: null, description: 'Document équation', category: 'Data' },
+    { name: 'IsEditing', type: 'boolean', defaultValue: false, description: 'Mode édition', category: 'Behavior' },
+    { name: 'BackColor', type: 'color', defaultValue: '#FFFFFF', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'ForeColor', type: 'color', defaultValue: '#000000', description: 'Couleur du texte', category: 'Appearance' },
+    { name: 'BorderStyle', type: 'enum', defaultValue: 1, enumValues: ['0 - None', '1 - Fixed Single'], description: 'Style de bordure', category: 'Appearance' },
+    { name: 'BorderWidth', type: 'number', defaultValue: 1, description: 'Largeur de bordure', category: 'Appearance' },
+    { name: 'BorderColor', type: 'color', defaultValue: '#000000', description: 'Couleur de bordure', category: 'Appearance' },
+    { name: 'Appearance', type: 'enum', defaultValue: 1, enumValues: ['0 - Flat', '1 - 3D'], description: 'Apparence', category: 'Appearance' },
+    { name: 'ReadOnly', type: 'boolean', defaultValue: false, description: 'Lecture seule', category: 'Behavior' },
+    { name: 'ZoomFactor', type: 'number', defaultValue: 100, description: 'Facteur de zoom (%)', category: 'Appearance' },
+    { name: 'DisplayMode', type: 'enum', defaultValue: 0, enumValues: ['0 - Inline', '1 - Display', '2 - Numbered'], description: 'Mode d\'affichage', category: 'Appearance' },
+  ],
+
+  // MCI Multimedia Control
+  MCIMultimedia: [
+    { name: 'DeviceType', type: 'enum', defaultValue: 'WaveAudio', enumValues: ['AVIVideo', 'CDAudio', 'DAT', 'DigitalVideo', 'MMMovie', 'Other', 'Overlay', 'Scanner', 'Sequencer', 'VCR', 'VideoDisc', 'WaveAudio'], description: 'Type de périphérique', category: 'Behavior' },
+    { name: 'FileName', type: 'string', defaultValue: '', description: 'Nom du fichier', category: 'Data' },
+    { name: 'Command', type: 'string', defaultValue: '', description: 'Commande MCI', category: 'Behavior' },
+    { name: 'Mode', type: 'number', defaultValue: 524, description: 'Mode actuel', category: 'Misc', readOnly: true },
+    { name: 'Position', type: 'number', defaultValue: 0, description: 'Position actuelle', category: 'Misc' },
+    { name: 'Length', type: 'number', defaultValue: 0, description: 'Longueur totale', category: 'Misc', readOnly: true },
+    { name: 'Start', type: 'number', defaultValue: 0, description: 'Position de départ', category: 'Misc' },
+    { name: 'TimeFormat', type: 'enum', defaultValue: 0, enumValues: ['0 - Milliseconds', '1 - HMS', '2 - MSF', '3 - Frames'], description: 'Format de temps', category: 'Behavior' },
+    { name: 'UpdateInterval', type: 'number', defaultValue: 1000, description: 'Intervalle de mise à jour (ms)', category: 'Behavior' },
+    { name: 'AutoEnable', type: 'boolean', defaultValue: true, description: 'Activation automatique', category: 'Behavior' },
+    { name: 'Notify', type: 'boolean', defaultValue: true, description: 'Notifications', category: 'Behavior' },
+    { name: 'Wait', type: 'boolean', defaultValue: true, description: 'Attendre la fin', category: 'Behavior' },
+    { name: 'Silent', type: 'boolean', defaultValue: false, description: 'Silencieux', category: 'Behavior' },
+    { name: 'Orientation', type: 'enum', defaultValue: 0, enumValues: ['0 - Horizontal', '1 - Vertical'], description: 'Orientation', category: 'Appearance' },
+    { name: 'BorderStyle', type: 'enum', defaultValue: 1, enumValues: ['0 - None', '1 - Fixed Single'], description: 'Style de bordure', category: 'Appearance' },
+    { name: 'BackColor', type: 'color', defaultValue: '#C0C0C0', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'PlayEnabled', type: 'enum', defaultValue: 2, enumValues: ['0 - Invisible', '1 - Disabled', '2 - Enabled'], description: 'État du bouton Play', category: 'Behavior' },
+    { name: 'PauseEnabled', type: 'enum', defaultValue: 2, enumValues: ['0 - Invisible', '1 - Disabled', '2 - Enabled'], description: 'État du bouton Pause', category: 'Behavior' },
+    { name: 'StopEnabled', type: 'enum', defaultValue: 2, enumValues: ['0 - Invisible', '1 - Disabled', '2 - Enabled'], description: 'État du bouton Stop', category: 'Behavior' },
+    { name: 'CanPlay', type: 'boolean', defaultValue: false, description: 'Peut lire', category: 'Misc', readOnly: true },
+    { name: 'CanRecord', type: 'boolean', defaultValue: false, description: 'Peut enregistrer', category: 'Misc', readOnly: true },
+    { name: 'HasAudio', type: 'boolean', defaultValue: false, description: 'A de l\'audio', category: 'Misc', readOnly: true },
+    { name: 'HasVideo', type: 'boolean', defaultValue: false, description: 'A de la vidéo', category: 'Misc', readOnly: true },
+    { name: 'Error', type: 'object', defaultValue: null, description: 'Objet erreur', category: 'Misc', readOnly: true },
+  ],
+
+  // DHTML Page Designer
+  DHtmlPage: [
+    { name: 'DocumentHTML', type: 'string', defaultValue: '', description: 'Code HTML du document', category: 'Data' },
+    { name: 'BaseURL', type: 'string', defaultValue: '', description: 'URL de base', category: 'Data' },
+    { name: 'DesignMode', type: 'boolean', defaultValue: false, description: 'Mode conception', category: 'Behavior' },
+    { name: 'ShowDetails', type: 'boolean', defaultValue: false, description: 'Afficher les détails', category: 'Behavior' },
+    { name: 'ShowBorders', type: 'boolean', defaultValue: false, description: 'Afficher les bordures', category: 'Behavior' },
+    { name: 'SnapToGrid', type: 'boolean', defaultValue: true, description: 'Aligner sur la grille', category: 'Behavior' },
+    { name: 'ShowGrid', type: 'boolean', defaultValue: false, description: 'Afficher la grille', category: 'Behavior' },
+    { name: 'GridX', type: 'number', defaultValue: 10, description: 'Grille X', category: 'Appearance' },
+    { name: 'GridY', type: 'number', defaultValue: 10, description: 'Grille Y', category: 'Appearance' },
+    { name: 'ActiveElement', type: 'object', defaultValue: null, description: 'Élément actif', category: 'Misc', readOnly: true },
+    { name: 'Document', type: 'object', defaultValue: null, description: 'Objet document', category: 'Misc', readOnly: true },
+    { name: 'BorderStyle', type: 'enum', defaultValue: 1, enumValues: ['0 - None', '1 - Fixed Single'], description: 'Style de bordure', category: 'Appearance' },
+    { name: 'BackColor', type: 'color', defaultValue: '#FFFFFF', description: 'Couleur de fond', category: 'Appearance' },
+    { name: 'Appearance', type: 'enum', defaultValue: 1, enumValues: ['0 - Flat', '1 - 3D'], description: 'Apparence', category: 'Appearance' },
+  ],
 };
 
 /**
  * Obtient toutes les propriétés d'un contrôle (communes + spécifiques)
  */
 export function getCompleteVB6Properties(controlType: string): VB6PropertyDefinition[] {
+  const commonProps = VB6_COMMON_PROPERTIES;
   const specificProps = VB6_COMPLETE_PROPERTIES[controlType] || [];
-  return [...VB6_COMMON_PROPERTIES, ...specificProps];
+  
+  // Éviter les doublons - les propriétés spécifiques remplacent les communes
+  const propMap = new Map<string, VB6PropertyDefinition>();
+  
+  // Ajouter d'abord les propriétés communes
+  commonProps.forEach(prop => propMap.set(prop.name, prop));
+  
+  // Puis les propriétés spécifiques (écrasent les communes si même nom)
+  specificProps.forEach(prop => propMap.set(prop.name, prop));
+  
+  return Array.from(propMap.values());
 }
 
 /**
@@ -586,3 +691,54 @@ export function getCompatibilityPercentage(controlType: string, implementedPrope
   const implementedCount = allProperties.filter(p => implementedProperties.includes(p.name)).length;
   return Math.round((implementedCount / allProperties.length) * 100);
 }
+
+/**
+ * Fonction pour obtenir tous les noms de propriétés disponibles
+ */
+export const getAllPropertyNames = (): string[] => {
+  const propertyNames = new Set<string>();
+  
+  // Ajouter les propriétés communes
+  VB6_COMMON_PROPERTIES.forEach(prop => propertyNames.add(prop.name));
+  
+  // Ajouter toutes les propriétés spécifiques
+  Object.values(VB6_COMPLETE_PROPERTIES).forEach(properties => {
+    properties.forEach(prop => propertyNames.add(prop.name));
+  });
+  
+  return Array.from(propertyNames).sort();
+};
+
+/**
+ * Fonction pour obtenir tous les types de contrôles disponibles
+ */
+export const getAllControlTypes = (): string[] => {
+  return Object.keys(VB6_COMPLETE_PROPERTIES).sort();
+};
+
+/**
+ * Fonction pour vérifier si un contrôle est entièrement implémenté
+ */
+export const isControlFullyImplemented = (controlType: string, implementedProperties: string[]): boolean => {
+  const percentage = getCompatibilityPercentage(controlType, implementedProperties);
+  return percentage === 100;
+};
+
+/**
+ * Fonction pour obtenir un rapport de compatibilité détaillé
+ */
+export const getCompatibilityReport = (controlType: string, implementedProperties: string[]) => {
+  const allProperties = getCompleteVB6Properties(controlType);
+  const missingProperties = getMissingProperties(controlType, implementedProperties);
+  const percentage = getCompatibilityPercentage(controlType, implementedProperties);
+  
+  return {
+    controlType,
+    totalProperties: allProperties.length,
+    implementedCount: implementedProperties.length,
+    missingCount: missingProperties.length,
+    missingProperties: missingProperties.map(p => p.name),
+    percentage,
+    isFullyImplemented: percentage === 100
+  };
+};

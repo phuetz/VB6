@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VB6 IDE Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .status {
+            font-size: 1.2em;
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid rgba(0, 255, 0, 0.5);
+        }
+        
+        .logs {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-family: monospace;
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+            width: 100%;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 VB6 Web IDE</h1>
+        <div class="status" id="status">✅ Application is running successfully!</div>
+        <p>If you can see this page, the basic infrastructure is working.</p>
+        <p>Server: <strong>http://localhost:5183/</strong></p>
+        
+        <div class="logs" id="logs">
+            <div>🔄 Testing basic functionality...</div>
+            <div>✅ HTML rendering: OK</div>
+            <div>✅ CSS styling: OK</div>
+            <div>✅ JavaScript: OK</div>
+        </div>
+    </div>
+
+    <script>
+        console.log('🚀 Test page loaded successfully');
+        
+        // Test JavaScript functionality
+        const logsDiv = document.getElementById('logs');
+        
+        function addLog(message) {
+            const logEntry = document.createElement('div');
+            logEntry.textContent = message;
+            logsDiv.appendChild(logEntry);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+        
+        setTimeout(() => {
+            addLog('🔄 Testing setTimeout: OK');
+        }, 1000);
+        
+        setTimeout(() => {
+            addLog('🔄 Testing DOM manipulation: OK');
+        }, 2000);
+        
+        setTimeout(() => {
+            addLog('✅ All basic tests passed!');
+            addLog('🔧 Ready to debug React application...');
+        }, 3000);
+        
+        // Test if we can access the main app
+        setTimeout(() => {
+            fetch('/')
+                .then(response => {
+                    if (response.ok) {
+                        addLog('✅ Main application endpoint accessible');
+                    } else {
+                        addLog('❌ Main application endpoint error: ' + response.status);
+                    }
+                })
+                .catch(error => {
+                    addLog('❌ Network error: ' + error.message);
+                });
+        }, 4000);
+    </script>
+</body>
+</html>

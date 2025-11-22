@@ -1,6 +1,13 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as monaco from 'monaco-editor';
 import { useVB6Store } from '../../stores/vb6Store';
+import RefactoringPanel from '../Dialogs/RefactoringPanel';
+import { VB6RefactoringService } from '../../services/VB6RefactoringService';
+import { VB6IntelliSenseService } from '../../services/VB6IntelliSense';
+import { BreakpointGutter } from '../Debug/BreakpointGutter';
+import { AIIntelliSenseProvider } from './AIIntelliSenseProvider';
+import { AIIntelliSenseSettings } from '../Settings/AIIntelliSenseSettings';
+import { CompletionItem } from '../../services/AIIntelliSenseEngine';
 
 // VB6 Language Configuration
 const VB6_LANGUAGE_CONFIG: monaco.languages.ILanguageConfiguration = {
@@ -101,8 +108,7 @@ const VB6_LANGUAGE_TOKENS: monaco.languages.IMonarchLanguage = {
 
   operators: ['=', '>', '<', '<=', '>=', '<>', '+', '-', '*', '/', '\\', '^', '&'],
 
-  // eslint-disable-next-line no-useless-escape
-  symbols: /[=><!~?:&|+\-*\/\^%]+/,
+  symbols: /[=><!~?:&|+*/^%-]+/,
 
   tokenizer: {
     root: [
@@ -210,6 +216,11 @@ const MonacoCodeEditor: React.FC = () => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = useState(false);
+  const [showRefactoringPanel, setShowRefactoringPanel] = useState(false);
+  const [showAISettings, setShowAISettings] = useState(false);
+  const [aiEnabled, setAIEnabled] = useState(true);
+  const refactoringService = useRef(new VB6RefactoringService());
+  const vb6IntelliSense = useRef(new VB6IntelliSenseService());
 
   const {
     selectedControls,
@@ -229,7 +240,35 @@ const MonacoCodeEditor: React.FC = () => {
     monaco.languages.register({ id: 'vb6' });
     monaco.languages.setLanguageConfiguration('vb6', VB6_LANGUAGE_CONFIG);
     monaco.languages.setMonarchTokensProvider('vb6', VB6_LANGUAGE_TOKENS);
-    monaco.languages.registerCompletionItemProvider('vb6', VB6_COMPLETION_PROVIDER);
+    
+    // Register advanced IntelliSense providers
+    // Completion provider
+    monaco.languages.registerCompletionItemProvider('vb6', {
+      provideCompletionItems: (model, position) => {
+        const items = vb6IntelliSense.current.getCompletionItems(model, position);
+        return { suggestions: items };
+      },
+      triggerCharacters: ['.', ' ', '(', ',', '=', 'As']
+    });
+
+    // Hover provider
+    monaco.languages.registerHoverProvider('vb6', {
+      provideHover: (model, position) => {
+        return vb6IntelliSense.current.getHoverInfo(model, position);
+      }
+    });
+
+    // Signature help provider
+    monaco.languages.registerSignatureHelpProvider('vb6', {
+      signatureHelpTriggerCharacters: ['(', ','],
+      signatureHelpRetriggerCharacters: [','],
+      provideSignatureHelp: (model, position) => {
+        const result = vb6IntelliSense.current.getSignatureHelp(model, position);
+        return result ? result.value : null;
+      }
+    });
+
+    // Note: Parameter hints are provided through signature help
 
     // Create editor
     const editor = monaco.editor.create(containerRef.current, {
@@ -265,12 +304,60 @@ const MonacoCodeEditor: React.FC = () => {
       },
     });
 
-    // Add keyboard shortcut for formatting
-    const keybindings = editor.addCommand(
+    // Add keyboard shortcuts
+    // Format code
+    editor.addCommand(
       monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.KeyF,
       () => {
         // Format code using the internal formatter
         useVB6Store.getState().formatCode();
+      }
+    );
+    
+    // Refactor shortcut
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyR,
+      () => {
+        setShowRefactoringPanel(true);
+      }
+    );
+    
+    // Trigger suggestions manually
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space,
+      () => {
+        editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+      }
+    );
+    
+    // AI IntelliSense settings shortcut
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyI,
+      () => {
+        setShowAISettings(true);
+      }
+    );
+    
+    // Toggle AI IntelliSense
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyMod.Alt | monaco.KeyCode.KeyA,
+      () => {
+        setAIEnabled(prev => !prev);
+      }
+    );
+    
+    // Go to definition (simulated)
+    editor.addCommand(
+      monaco.KeyCode.F12,
+      () => {
+        const position = editor.getPosition();
+        if (position) {
+          const word = editor.getModel()?.getWordAtPosition(position);
+          if (word) {
+            // TODO: Implement go to definition
+            console.log('Go to definition:', word.word);
+          }
+        }
       }
     );
 
@@ -280,6 +367,10 @@ const MonacoCodeEditor: React.FC = () => {
     // Add content change listener
     editor.onDidChangeModelContent(() => {
       const value = editor.getValue();
+      
+      // Update IntelliSense with current code
+      vb6IntelliSense.current.parseCode(value);
+      
       if (selectedControls.length === 1 && selectedEvent) {
         // Extract the actual code from the editor (which contains procedure wrappers)
         const procedureStart = `Private Sub ${selectedControls[0].name}_${selectedEvent}()\n`;
@@ -297,15 +388,21 @@ const MonacoCodeEditor: React.FC = () => {
         updateEventCode(eventKey, codeContent);
       }
     });
+    
+    // Update IntelliSense with controls
+    vb6IntelliSense.current.updateControls(controls);
 
     return () => {
       editor.dispose();
     };
-  }, []);
+  }, [controls]);
 
   // Update editor content when selection changes
   useEffect(() => {
     if (!isReady || !editorRef.current) return;
+    
+    // Update IntelliSense with latest controls
+    vb6IntelliSense.current.updateControls(controls);
 
     let content = '';
     if (selectedControls.length === 1 && selectedEvent) {
@@ -437,11 +534,76 @@ const MonacoCodeEditor: React.FC = () => {
           )}
         </select>
 
-        <div className="ml-auto text-gray-600">Monaco Editor • VB6 Syntax</div>
+        <div className="flex items-center gap-2 ml-auto">
+          <div className="text-gray-600 text-xs">Monaco Editor • VB6 IntelliSense • Press Ctrl+Space for suggestions • Ctrl+Shift+R for refactoring</div>
+          
+          {/* AI IntelliSense Toggle */}
+          <button
+            onClick={() => setAIEnabled(!aiEnabled)}
+            className={`px-2 py-1 text-xs rounded transition-colors flex items-center gap-1 ${
+              aiEnabled 
+                ? 'bg-purple-600 text-white hover:bg-purple-700' 
+                : 'bg-gray-300 text-gray-600 hover:bg-gray-400'
+            }`}
+            title="Toggle AI IntelliSense"
+          >
+            <span className="text-xs">🧠</span>
+            AI
+          </button>
+          
+          {/* AI Settings Button */}
+          <button
+            onClick={() => setShowAISettings(true)}
+            className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+            title="AI IntelliSense Settings"
+          >
+            ⚙️
+          </button>
+        </div>
       </div>
 
       {/* Editor */}
       <div ref={containerRef} className="flex-1" style={{ minHeight: 0 }} />
+      
+      {/* Refactoring Panel */}
+      {showRefactoringPanel && (
+        <RefactoringPanel 
+          editor={editorRef.current || undefined}
+          onClose={() => setShowRefactoringPanel(false)}
+        />
+      )}
+
+      {/* AI IntelliSense Provider */}
+      {isReady && editorRef.current && aiEnabled && (
+        <AIIntelliSenseProvider
+          editor={editorRef.current}
+          controls={controls}
+          onCompletionAccepted={(item) => {
+            console.log('AI completion accepted:', item.label, 'source:', item.source);
+            // Track AI usage for learning
+            if (item.source === 'ai') {
+              // Could send analytics or update user preferences here
+            }
+          }}
+        />
+      )}
+
+      {/* AI Settings Panel */}
+      <AIIntelliSenseSettings
+        visible={showAISettings}
+        onClose={() => setShowAISettings(false)}
+      />
+
+      {/* Breakpoint Gutter Integration */}
+      {isReady && editorRef.current && (
+        <BreakpointGutter
+          editor={editorRef.current}
+          file="current.vb"
+          onBreakpointToggle={(line) => {
+            console.log('Breakpoint toggled at line:', line);
+          }}
+        />
+      )}
     </div>
   );
 };

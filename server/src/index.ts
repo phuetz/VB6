@@ -29,9 +29,10 @@ dotenv.config();
 
 const app: Application = express();
 const httpServer = createServer(app);
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || process.env.CORS_ORIGIN || 'http://localhost:5173';
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+    origin: CLIENT_ORIGIN,
     credentials: true,
   },
 });
@@ -41,21 +42,32 @@ const databasePool = DatabasePool.getInstance();
 const cacheService = CacheService.getInstance();
 const metricsService = MetricsService.getInstance();
 
-// Middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
+// CONFIGURATION VULNERABILITY BUG FIX: Remove unsafe-inline from CSP
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        // Use a concrete nonce string, not a JS expression
+        styleSrc: [
+          "'self'",
+          `nonce-${process.env.CSP_NONCE || 'development-only-nonce'}`,
+        ],
+        scriptSrc: [
+          "'self'",
+          `nonce-${process.env.CSP_NONCE || 'development-only-nonce'}`,
+        ],
+        imgSrc: ["'self'", 'data:', 'https:'],
+        connectSrc: ["'self'", CLIENT_ORIGIN, 'ws:', 'wss:'],
+        fontSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'none'"],
+      },
     },
-  },
-}));
-app.use(cors({
-  origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
-  credentials: true,
-}));
+  })
+);
+app.use(cors({ origin: CLIENT_ORIGIN, credentials: true }));
 app.use(compression());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));

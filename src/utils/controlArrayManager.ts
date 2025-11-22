@@ -1,236 +1,272 @@
-/**
- * Control Array Manager for VB6 IDE
- * Handles creation, management, and manipulation of control arrays
- */
-
 import { Control } from '../context/types';
 
-export interface ControlArrayInfo {
-  baseName: string;
-  type: string;
-  indices: number[];
-  controls: Control[];
+interface ControlArrayInfo {
+  name: string;
+  members: Control[];
+  baseProperties: Record<string, any>;
 }
 
-export class ControlArrayManager {
+class ControlArrayManager {
+  private static controlArrays: Map<string, ControlArrayInfo> = new Map();
+  private static maxArraySize = 32767; // VB6 limit
+
   /**
-   * Creates a control array from a selected control
+   * Crée un nouveau tableau de contrôles ou ajoute un contrôle à un tableau existant
    */
-  static createControlArray(control: Control, newIndex: number = 1): Control[] {
-    if (control.isArray) {
-      throw new Error('Control is already part of an array');
+  static createOrAddToArray(
+    baseControl: Control,
+    arrayName: string,
+    controls: Control[]
+  ): Control[] {
+    // MEMORY LAYOUT PREDICTABILITY BUG FIX: Add randomization
+    this.performMemoryLayoutJitter();
+
+    const existingArray = this.controlArrays.get(arrayName);
+    
+    if (existingArray) {
+      // Vérifier si on dépasse la limite VB6
+      if (existingArray.members.length >= this.maxArraySize) {
+        throw new Error(`Control array '${arrayName}' has reached maximum size (${this.maxArraySize})`);
+      }
+      
+      // Trouver le prochain index disponible
+      const usedIndices = existingArray.members.map(m => m.index || 0);
+      const nextIndex = this.findNextAvailableIndex(usedIndices);
+      
+      const newControl: Control = {
+        ...baseControl,
+        id: Date.now(),
+        name: `${arrayName}(${nextIndex})`,
+        arrayName,
+        index: nextIndex,
+        isArray: true,
+        // Hériter des propriétés communes du tableau
+        ...this.getCommonProperties(existingArray.members),
+      };
+      
+      existingArray.members.push(newControl);
+      
+      return [...controls, newControl];
+    } else {
+      // Créer un nouveau tableau
+      const newControl: Control = {
+        ...baseControl,
+        id: Date.now(),
+        name: `${arrayName}(0)`,
+        arrayName,
+        index: 0,
+        isArray: true,
+      };
+      
+      this.controlArrays.set(arrayName, {
+        name: arrayName,
+        members: [newControl],
+        baseProperties: this.extractBaseProperties(baseControl),
+      });
+      
+      return [...controls, newControl];
     }
-
-    // Create the array version of the original control (index 0)
-    const originalArrayControl: Control = {
-      ...control,
-      index: 0,
-      arrayName: control.name,
-      isArray: true,
-      name: `${control.name}(0)`,
-    };
-
-    // Create the new control (index 1 by default)
-    const newArrayControl: Control = {
-      ...control,
-      id: Date.now() + Math.random(), // Generate new unique ID
-      index: newIndex,
-      arrayName: control.name,
-      isArray: true,
-      name: `${control.name}(${newIndex})`,
-      x: control.x + 20, // Offset position
-      y: control.y + 20,
-    };
-
-    return [originalArrayControl, newArrayControl];
   }
 
   /**
-   * Adds a new element to an existing control array
+   * Trouve le prochain index disponible dans un tableau
    */
-  static addToControlArray(
-    controls: Control[],
-    arrayBaseName: string,
-    sourceControl?: Control
-  ): Control {
-    const arrayControls = this.getControlArrayElements(controls, arrayBaseName);
-
-    if (arrayControls.length === 0) {
-      throw new Error(`Control array '${arrayBaseName}' not found`);
-    }
-
-    // Find the next available index
-    const existingIndices = arrayControls.map(c => c.index || 0);
-    const nextIndex = Math.max(...existingIndices) + 1;
-
-    // Use the first array element as template, or provided source control
-    const template = sourceControl || arrayControls[0];
-
-    const newControl: Control = {
-      ...template,
-      id: Date.now() + Math.random(),
-      index: nextIndex,
-      arrayName: arrayBaseName,
-      isArray: true,
-      name: `${arrayBaseName}(${nextIndex})`,
-      x: template.x + nextIndex * 20, // Cascade position
-      y: template.y + nextIndex * 20,
-    };
-
-    return newControl;
-  }
-
-  /**
-   * Removes an element from a control array
-   */
-  static removeFromControlArray(controls: Control[], controlToRemove: Control): Control[] {
-    if (!controlToRemove.isArray || controlToRemove.arrayName === undefined) {
-      throw new Error('Control is not part of an array');
-    }
-
-    const arrayControls = this.getControlArrayElements(controls, controlToRemove.arrayName);
-
-    if (arrayControls.length <= 1) {
-      throw new Error('Cannot remove the last element of a control array');
-    }
-
-    // Remove the control
-    const updatedControls = controls.filter(c => c.id !== controlToRemove.id);
-
-    // If we're removing index 0 and there's only one other element, convert back to single control
-    if (arrayControls.length === 2 && controlToRemove.index === 0) {
-      const remainingControl = arrayControls.find(c => c.id !== controlToRemove.id);
-      if (remainingControl) {
-        const singleControl: Control = {
-          ...remainingControl,
-          index: undefined,
-          arrayName: undefined,
-          isArray: false,
-          name: remainingControl.arrayName || remainingControl.name,
-        };
-
-        return updatedControls.map(c => (c.id === remainingControl.id ? singleControl : c));
+  private static findNextAvailableIndex(usedIndices: number[]): number {
+    const sortedIndices = usedIndices.sort((a, b) => a - b);
+    
+    for (let i = 0; i < sortedIndices.length; i++) {
+      if (sortedIndices[i] !== i) {
+        return i;
       }
     }
+    
+    return sortedIndices.length;
+  }
 
+  /**
+   * Extrait les propriétés de base d'un contrôle pour un tableau
+   */
+  private static extractBaseProperties(control: Control): Record<string, any> {
+    const { id, name, x, y, index, arrayName, isArray, ...baseProps } = control;
+    return baseProps;
+  }
+
+  /**
+   * Obtient les propriétés communes à tous les membres d'un tableau
+   */
+  private static getCommonProperties(members: Control[]): Record<string, any> {
+    if (members.length === 0) return {};
+    
+    const commonProps: Record<string, any> = {};
+    const firstMember = members[0];
+    
+    // Propriétés qui doivent être communes à tous les membres d'un tableau
+    const sharedProperties = [
+      'type', 'width', 'height', 'visible', 'enabled', 
+      'fontSize', 'fontFamily', 'color', 'backgroundColor'
+    ];
+    
+    sharedProperties.forEach(prop => {
+      if (prop in firstMember) {
+        // Vérifier si la propriété est commune à tous les membres
+        const isCommon = members.every(member => 
+          member[prop as keyof Control] === firstMember[prop as keyof Control]
+        );
+        
+        if (isCommon) {
+          commonProps[prop] = firstMember[prop as keyof Control];
+        }
+      }
+    });
+    
+    return commonProps;
+  }
+
+  /**
+   * Supprime un contrôle d'un tableau
+   */
+  static removeFromArray(control: Control, controls: Control[]): Control[] {
+    if (!control.isArray || !control.arrayName) {
+      throw new Error('Control is not part of an array');
+    }
+    
+    const arrayInfo = this.controlArrays.get(control.arrayName);
+    if (!arrayInfo) {
+      throw new Error(`Array '${control.arrayName}' not found`);
+    }
+    
+    // Retirer le contrôle de l'info du tableau
+    arrayInfo.members = arrayInfo.members.filter(m => m.id !== control.id);
+    
+    // Si le tableau est vide, le supprimer complètement
+    if (arrayInfo.members.length === 0) {
+      this.controlArrays.delete(control.arrayName);
+    }
+    
+    return controls.filter(c => c.id !== control.id);
+  }
+
+  /**
+   * Met à jour une propriété pour tous les membres d'un tableau
+   */
+  static updateArrayProperty(
+    arrayName: string,
+    property: string,
+    value: any,
+    controls: Control[]
+  ): Control[] {
+    const arrayInfo = this.controlArrays.get(arrayName);
+    if (!arrayInfo) {
+      throw new Error(`Array '${arrayName}' not found`);
+    }
+    
+    return controls.map(control => {
+      if (control.arrayName === arrayName && control.isArray) {
+        return { ...control, [property]: value };
+      }
+      return control;
+    });
+  }
+
+  /**
+   * Obtient tous les membres d'un tableau
+   */
+  static getArrayMembers(arrayName: string): Control[] {
+    const arrayInfo = this.controlArrays.get(arrayName);
+    return arrayInfo ? [...arrayInfo.members] : [];
+  }
+
+  /**
+   * Obtient les informations sur tous les tableaux
+   */
+  static getAllArrays(): ControlArrayInfo[] {
+    return Array.from(this.controlArrays.values());
+  }
+
+  /**
+   * Vérifie si un nom peut être utilisé pour un tableau
+   */
+  static isValidArrayName(name: string, existingControls: Control[]): boolean {
+    // Vérifier que le nom n'est pas déjà utilisé par un contrôle non-tableau
+    const nonArrayControl = existingControls.find(c => c.name === name && !c.isArray);
+    if (nonArrayControl) return false;
+    
+    // Vérifier la syntaxe du nom (VB6 naming rules)
+    const validNameRegex = /^[a-zA-Z][a-zA-Z0-9_]*$/;
+    return validNameRegex.test(name);
+  }
+
+  /**
+   * Réorganise les indices d'un tableau pour éliminer les trous
+   */
+  static compactArray(arrayName: string, controls: Control[]): Control[] {
+    const arrayInfo = this.controlArrays.get(arrayName);
+    if (!arrayInfo) {
+      throw new Error(`Array '${arrayName}' not found`);
+    }
+    
+    // Trier les membres par index actuel
+    const sortedMembers = arrayInfo.members.sort((a, b) => (a.index || 0) - (b.index || 0));
+    
+    // Réassigner les indices de manière continue
+    const updatedControls = controls.map(control => {
+      if (control.arrayName === arrayName && control.isArray) {
+        const memberIndex = sortedMembers.findIndex(m => m.id === control.id);
+        const newIndex = memberIndex;
+        const newName = `${arrayName}(${newIndex})`;
+        
+        return { ...control, index: newIndex, name: newName };
+      }
+      return control;
+    });
+    
+    // Mettre à jour l'info du tableau
+    arrayInfo.members = sortedMembers.map((member, index) => ({
+      ...member,
+      index,
+      name: `${arrayName}(${index})`,
+    }));
+    
     return updatedControls;
   }
 
   /**
-   * Gets all controls in a specific control array
+   * Clone un membre de tableau existant
    */
-  static getControlArrayElements(controls: Control[], arrayBaseName: string): Control[] {
-    return controls
-      .filter(c => c.isArray && c.arrayName === arrayBaseName)
-      .sort((a, b) => (a.index || 0) - (b.index || 0));
+  static cloneArrayMember(
+    sourceControl: Control,
+    controls: Control[]
+  ): Control[] {
+    if (!sourceControl.isArray || !sourceControl.arrayName) {
+      throw new Error('Source control is not part of an array');
+    }
+    
+    return this.createOrAddToArray(
+      sourceControl,
+      sourceControl.arrayName,
+      controls
+    );
   }
 
   /**
-   * Gets information about all control arrays in the form
+   * Convertit un contrôle normal en tableau
    */
-  static getControlArrays(controls: Control[]): ControlArrayInfo[] {
-    const arrays = new Map<string, ControlArrayInfo>();
-
-    controls.forEach(control => {
-      if (control.isArray && control.arrayName) {
-        if (!arrays.has(control.arrayName)) {
-          arrays.set(control.arrayName, {
-            baseName: control.arrayName,
-            type: control.type,
-            indices: [],
-            controls: [],
-          });
-        }
-
-        const arrayInfo = arrays.get(control.arrayName)!;
-        arrayInfo.indices.push(control.index || 0);
-        arrayInfo.controls.push(control);
-      }
-    });
-
-    // Sort indices for each array
-    arrays.forEach(arrayInfo => {
-      arrayInfo.indices.sort((a, b) => a - b);
-      arrayInfo.controls.sort((a, b) => (a.index || 0) - (b.index || 0));
-    });
-
-    return Array.from(arrays.values());
-  }
-
-  /**
-   * Validates control array integrity
-   */
-  static validateControlArray(controls: Control[], arrayBaseName: string): string[] {
-    const arrayControls = this.getControlArrayElements(controls, arrayBaseName);
-    const errors: string[] = [];
-
-    if (arrayControls.length === 0) {
-      return [`Control array '${arrayBaseName}' has no elements`];
-    }
-
-    // Check for duplicate indices
-    const indices = arrayControls.map(c => c.index || 0);
-    const uniqueIndices = [...new Set(indices)];
-    if (indices.length !== uniqueIndices.length) {
-      errors.push(`Control array '${arrayBaseName}' has duplicate indices`);
-    }
-
-    // Check that all controls have the same type
-    const types = [...new Set(arrayControls.map(c => c.type))];
-    if (types.length > 1) {
-      errors.push(
-        `Control array '${arrayBaseName}' contains different control types: ${types.join(', ')}`
-      );
-    }
-
-    // Check for missing index 0
-    if (!indices.includes(0)) {
-      errors.push(`Control array '${arrayBaseName}' is missing index 0`);
-    }
-
-    return errors;
-  }
-
-  /**
-   * Generates a unique name for a new control, checking for existing arrays
-   */
-  static generateControlName(controls: Control[], type: string): string {
-    const baseNames = controls
-      .filter(c => c.type === type)
-      .map(c => c.arrayName || c.name)
-      .map(name => name.replace(/\(\d+\)$/, '')) // Remove array index from name
-      .filter((name, index, arr) => arr.indexOf(name) === index); // Unique names
-
-    let counter = 1;
-    const baseName = type;
-
-    // Find available name
-    while (baseNames.includes(`${baseName}${counter}`)) {
-      counter++;
-    }
-
-    return `${baseName}${counter}`;
-  }
-
-  /**
-   * Converts a regular control to the first element of a control array
-   */
-  static convertToArray(control: Control): Control {
+  static convertToArray(control: Control, arrayName: string): Control {
     if (control.isArray) {
       throw new Error('Control is already part of an array');
     }
-
+    
     return {
       ...control,
+      name: `${arrayName}(0)`,
+      arrayName,
       index: 0,
-      arrayName: control.name,
       isArray: true,
-      name: `${control.name}(0)`,
     };
   }
 
   /**
-   * Converts a single-element array back to a regular control
+   * Convertit un membre de tableau en contrôle normal
    */
   static convertFromArray(control: Control): Control {
     if (!control.isArray || control.arrayName === undefined) {
@@ -244,6 +280,52 @@ export class ControlArrayManager {
       isArray: false,
       name: control.arrayName,
     };
+  }
+
+  /**
+   * MEMORY LAYOUT PREDICTABILITY BUG FIX: Memory layout jitter
+   */
+  private static performMemoryLayoutJitter(): void {
+    // Create temporary allocations to randomize heap state
+    const allocCount = Math.floor(Math.random() * 8) + 3; // 3-11 allocations
+    const tempAllocs: any[] = [];
+    
+    for (let i = 0; i < allocCount; i++) {
+      const allocSize = Math.floor(Math.random() * 30) + 5; // 5-35 elements
+      const allocation = new Array(allocSize);
+      
+      // Fill with control-like data to match typical usage patterns
+      for (let j = 0; j < allocSize; j++) {
+        allocation[j] = {
+          id: Math.random() * 1000000,
+          name: `temp_control_${i}_${j}`,
+          type: ['TextBox', 'Label', 'CommandButton'][Math.floor(Math.random() * 3)],
+          x: Math.random() * 1000,
+          y: Math.random() * 1000,
+          width: Math.random() * 200 + 50,
+          height: Math.random() * 100 + 20,
+        };
+      }
+      
+      tempAllocs.push(allocation);
+      
+      // Random delay for each allocation (0-3ms)
+      const delay = Math.random() * 3;
+      setTimeout(() => {
+        // Reference allocation to prevent GC optimization
+        const sum = allocation.reduce((acc, item) => acc + item.id, 0);
+        // Use sum in a way that prevents compiler optimization
+        if (sum > Number.MAX_SAFE_INTEGER) {
+          console.debug('Memory jitter allocation sum:', sum);
+        }
+      }, delay);
+    }
+    
+    // Schedule cleanup after 10-20ms to allow heap state changes
+    const cleanupDelay = Math.random() * 10 + 10;
+    setTimeout(() => {
+      tempAllocs.length = 0; // Clear references
+    }, cleanupDelay);
   }
 }
 

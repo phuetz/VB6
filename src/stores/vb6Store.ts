@@ -2,17 +2,56 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { Control, VB6State } from '../context/types';
 import { getDefaultProperties } from '../utils/controlDefaults';
-import { ControlArrayManager } from '../utils/controlArrayManager';
+import ControlArrayManager from '../utils/controlArrayManager';
+import { DebugState } from '../types/extended';
+import { authService } from '../services/AuthService';
 
 interface VB6Store extends VB6State {
+  // Debug state
+  debugState: DebugState;
+  
+  // Performance metrics state
+  performanceMetrics?: {
+    renderTime: number;
+    memoryUsage: number;
+    cpuUsage?: number;
+    fps?: number;
+  };
+  
+  // Project state
+  isDirty?: boolean;
+  lastSaved?: Date | null;
+  currentCode?: string;
+  selectedControlId?: string;
+  history: any[];
+  historyIndex: number;
+  
   // Actions
   createControl: (type: string, x?: number, y?: number) => void;
-  updateControl: (controlId: number, property: string, value: any) => void;
+  addControl: (control: Control) => void; // For backward compatibility
+  updateControl: (controlId: number | string, propertyOrUpdates: string | object, value?: any) => void;
+  updateControls: (updatedControls: Control[]) => void;
+  updateCode: (code: string) => void;
+  insertCode: (code: string, position: number) => void;
+  setDebugState: (debugState: DebugState) => void;
   deleteControls: (controlIds: number[]) => void;
+  deleteControl: (controlId: number) => void; // Singular version for backward compatibility
   selectControls: (controlIds: number[]) => void;
+  selectControl: (controlId: number) => void; // Singular version for backward compatibility
+  updatePerformanceMetrics: (metrics: { renderTime: number; memoryUsage: number; cpuUsage?: number; fps?: number }) => void;
+  loadProject: (projectData: any) => void;
+  copyControl: (controlId: string) => void;
   copyControls: () => void;
   pasteControls: () => void;
+  pasteControl: () => void; // Backward compatibility
   duplicateControls: () => void;
+  duplicateControl: (controlId: string) => void; // Backward compatibility
+  saveProject: () => void;
+  newProject: () => void;
+  toggleDesignMode: () => void;
+  togglePanel: (panelName: string) => void;
+  setZoomLevel: (zoom: number) => void;
+  resetStore: () => void;
   setExecutionMode: (mode: 'design' | 'run' | 'break') => void;
   toggleWindow: (windowName: string) => void;
   setSelectedEvent: (eventName: string) => void;
@@ -49,12 +88,14 @@ interface VB6Store extends VB6State {
   addToControlArray: (arrayName: string) => void;
   removeFromControlArray: (controlId: number) => void;
   showControlArrayDialog: boolean;
+  showMemoryProfiler: boolean;
+  showTestRunner: boolean;
 }
 
 export const useVB6Store = create<VB6Store>()(
   subscribeWithSelector((set, get) => ({
     // Initial State
-    projectName: 'Project1',
+    projectName: 'VB6 Project',
     forms: [{ id: 1, name: 'Form1', caption: 'Form1', controls: [] }],
     activeFormId: 1,
     modules: [],
@@ -86,19 +127,50 @@ export const useVB6Store = create<VB6Store>()(
 
     // UI State
     executionMode: 'design',
+    isDesignMode: true,
+    showToolbox: true,
+    showProperties: true,
+    showProjectExplorer: true,
+    showImmediateWindow: false,
+    canvasSize: { width: 800, height: 600 },
+    zoomLevel: 1,
+    
+    // Debug state
+    debugState: {
+      mode: 'design',
+      currentLine: 0,
+      currentFile: '',
+      variables: {},
+      callStack: [],
+      breakpoints: new Set<string>(),
+      watchExpressions: []
+    } as DebugState,
+    
+    // Performance metrics
+    performanceMetrics: {
+      renderTime: 0,
+      memoryUsage: 0,
+      cpuUsage: 0,
+      fps: 60,
+    },
+    
+    // Project state
+    isDirty: false,
+    lastSaved: null,
+    currentCode: '',
+    selectedControlId: null,
     showCodeEditor: false,
     showGrid: true,
     gridSize: 8,
+    snapToGrid: true,
     showAlignmentGuides: true,
     alignmentGuides: { x: [], y: [] },
     designerZoom: 100,
+    clipboardData: null,
 
-    // Windows visibility
-    showProjectExplorer: true,
-    showPropertiesWindow: true,
+    // Windows visibility - OPTIMIZED STARTUP (reduced clutter)
+    showPropertiesWindow: false,
     showControlTree: false,
-    showToolbox: true,
-    showImmediateWindow: false,
     showFormLayout: false,
     showObjectBrowser: false,
     showWatchWindow: false,
@@ -254,6 +326,8 @@ End Function`,
       '',
       'Ready.',
       '',
+      '💡 Tip: Use View menu or F4 to show panels',
+      '',
     ],
     immediateCommand: '',
     watchExpressions: [],
@@ -281,7 +355,6 @@ End Function`,
     draggedControlType: null,
     isDragging: false,
     dragPosition: { x: 0, y: 0 },
-    snapToGrid: true,
 
     // Selection
     isSelecting: false,
@@ -308,21 +381,112 @@ End Function`,
     todoItems: [],
     showTodoList: false,
     showControlArrayDialog: false,
+    // Git integration
+    showGitPanel: false,
+    // Memory profiler
+    showMemoryProfiler: false,
+    // Test runner
+    showTestRunner: false,
 
     // History helper
     pushHistory: (controls: Control[], nextId: number) => {
       const state = get();
+      
+      // Limit history size to prevent memory issues
+      const MAX_HISTORY_SIZE = 50;
+      
+      // Only push to history if there are actual changes
+      const lastSnapshot = state.history[state.historyIndex];
+      if (lastSnapshot && 
+          lastSnapshot.controls.length === controls.length &&
+          lastSnapshot.nextId === nextId) {
+        // Quick check if anything changed
+        const hasChanges = controls.some((c, i) => {
+          const prev = lastSnapshot.controls[i];
+          return !prev || prev.id !== c.id || prev.x !== c.x || prev.y !== c.y;
+        });
+        if (!hasChanges) return;
+      }
+      
       const snapshot = {
         controls: controls.map(c => ({ ...c })),
         nextId,
       };
-      const newHistory = [...state.history.slice(0, state.historyIndex + 1), snapshot];
+      
+      let newHistory = state.history.slice(0, state.historyIndex + 1);
+      newHistory.push(snapshot);
+      
+      // Limit history size
+      if (newHistory.length > MAX_HISTORY_SIZE) {
+        newHistory = newHistory.slice(-MAX_HISTORY_SIZE);
+      }
+      
       set({ history: newHistory, historyIndex: newHistory.length - 1 });
     },
 
     // Actions
     createControl: (type: string, x = 50, y = 50) => {
       const state = get();
+      
+      // BUSINESS LOGIC BYPASS BUG FIX: Enforce control limits based on subscription
+      const MAX_CONTROLS_FREE = 50;
+      const MAX_CONTROLS_PRO = 500;
+      const MAX_CONTROLS_ENTERPRISE = 5000;
+      
+      // Get user's control limit based on subscription
+      let maxControls = MAX_CONTROLS_FREE;
+      if (authService.getState().user?.subscription?.plan === 'pro') {
+        maxControls = MAX_CONTROLS_PRO;
+      } else if (authService.getState().user?.subscription?.plan === 'enterprise') {
+        maxControls = MAX_CONTROLS_ENTERPRISE;
+      }
+      
+      // Check control limit
+      if (state.controls.length >= maxControls) {
+        state.addLog(
+          'error',
+          'ControlCreation',
+          `Control limit reached (${maxControls} controls). Upgrade your subscription for more controls.`
+        );
+        return;
+      }
+      
+      // BUSINESS LOGIC BYPASS BUG FIX: Validate control type to prevent privilege escalation
+      const allowedControlTypes = [
+        'TextBox', 'Label', 'CommandButton', 'CheckBox', 'RadioButton',
+        'ComboBox', 'ListBox', 'PictureBox', 'Frame', 'Timer',
+        'ScrollBar', 'Shape', 'Line', 'Image', 'FileListBox',
+        'DirListBox', 'DriveListBox', 'DataControl', 'OLE'
+      ];
+      
+      // Premium controls require subscription
+      const premiumControls = ['DataGrid', 'MSFlexGrid', 'MSChart', 'CrystalReportViewer'];
+      const enterpriseControls = ['WebBrowser', 'WinsockControl', 'RemoteDataControl'];
+      
+      if (!allowedControlTypes.includes(type) && 
+          !premiumControls.includes(type) && 
+          !enterpriseControls.includes(type)) {
+        state.addLog('error', 'ControlCreation', `Invalid control type: ${type}`);
+        return;
+      }
+      
+      // Check premium control access
+      if (premiumControls.includes(type)) {
+        const userPlan = authService.getState().user?.subscription?.plan || 'free';
+        if (userPlan === 'free') {
+          state.addLog('error', 'ControlCreation', `Premium control ${type} requires Pro subscription`);
+          return;
+        }
+      }
+      
+      if (enterpriseControls.includes(type)) {
+        const userPlan = authService.getState().user?.subscription?.plan || 'free';
+        if (userPlan !== 'enterprise') {
+          state.addLog('error', 'ControlCreation', `Enterprise control ${type} requires Enterprise subscription`);
+          return;
+        }
+      }
+      
       const log = state.addLog(
         'debug',
         'ControlCreation',
@@ -350,51 +514,109 @@ End Function`,
       );
     },
 
-    updateControl: (controlId: number, property: string, value: any) => {
+    updateControl: (controlId: number | string, propertyOrUpdates: string | object, value?: any) => {
       const state = get();
 
-      if (property !== 'x' && property !== 'y') {
-        state.addLog(
-          'debug',
-          'ControlUpdate',
-          `Updating control #${controlId}: ${property} = ${value}`
-        );
+      // Find control by ID (support both string and number IDs)
+      const controlIndex = state.controls.findIndex(c => 
+        c.id === controlId || c.id.toString() === controlId.toString() || c.name === controlId
+      );
+      if (controlIndex === -1) return;
+      
+      const control = state.controls[controlIndex];
+      const updatedControl = { ...control };
+
+      // Support both formats: updateControl(id, property, value) and updateControl(id, updates)
+      if (typeof propertyOrUpdates === 'string') {
+        // Format: updateControl(id, 'property', value)
+        updatedControl[propertyOrUpdates] = value;
+      } else if (typeof propertyOrUpdates === 'object' && propertyOrUpdates !== null) {
+        // Format: updateControl(id, { properties: {...}, left: 10, ... })
+        Object.assign(updatedControl, propertyOrUpdates);
       }
 
-      const updatedControls = state.controls.map(control =>
-        control.id === controlId ? { ...control, [property]: value } : control
-      );
+      const updatedControls = [...state.controls];
+      updatedControls[controlIndex] = updatedControl;
 
-      const updatedSelectedControls = state.selectedControls.map(control =>
-        control.id === controlId ? { ...control, [property]: value } : control
+      // Update selectedControls if the control is selected
+      let updatedSelectedControls = state.selectedControls;
+      const selectedIndex = state.selectedControls.findIndex(c => 
+        c.id === controlId || c.id.toString() === controlId.toString() || c.name === controlId
       );
+      if (selectedIndex !== -1) {
+        updatedSelectedControls = [...state.selectedControls];
+        updatedSelectedControls[selectedIndex] = updatedControl;
+      }
 
       set({
         controls: updatedControls,
         selectedControls: updatedSelectedControls,
+        isDirty: true,
       });
+      
+      // Push to history for significant changes
       state.pushHistory(updatedControls, state.nextId);
+    },
+
+    updateControls: (updatedControls: Control[]) => {
+      const state = get();
+      
+      // Update all controls in the main controls array
+      const updatedControlsMap = new Map(updatedControls.map(c => [c.id, c]));
+      const newControls = state.controls.map(control => 
+        updatedControlsMap.has(control.id) ? updatedControlsMap.get(control.id)! : control
+      );
+      
+      // Update selectedControls if any of them were updated
+      const newSelectedControls = state.selectedControls.map(control =>
+        updatedControlsMap.has(control.id) ? updatedControlsMap.get(control.id)! : control
+      );
+      
+      set({
+        controls: newControls,
+        selectedControls: newSelectedControls,
+      });
+      
+      // Add to history for undo/redo
+      state.pushHistory(newControls, state.nextId);
+      
+      state.addLog('info', 'LayoutTools', `Updated ${updatedControls.length} controls`);
     },
 
     deleteControls: (controlIds: number[]) => {
       const state = get();
+      if (controlIds.length === 0) return;
+      
       state.addLog('info', 'ControlDeletion', `Deleting controls: ${controlIds.join(', ')}`);
 
+      // Use Set for O(1) lookup
+      const idsToDelete = new Set(controlIds);
+      const filteredControls = state.controls.filter(control => !idsToDelete.has(control.id));
+      
+      // STATE CORRUPTION BUG FIX: Only remove deleted controls from selection, preserve others
+      const filteredSelectedControls = state.selectedControls.filter(control => !idsToDelete.has(control.id));
+      
       set({
-        controls: state.controls.filter(control => !controlIds.includes(control.id)),
-        selectedControls: [],
+        controls: filteredControls,
+        selectedControls: filteredSelectedControls,
       });
-      state.pushHistory(
-        state.controls.filter(control => !controlIds.includes(control.id)),
-        state.nextId
-      );
+      state.pushHistory(filteredControls, state.nextId);
     },
 
     selectControls: (controlIds: number[]) => {
       const state = get();
+      
+      // Skip if selection hasn't changed
+      if (controlIds.length === state.selectedControls.length &&
+          controlIds.every(id => state.selectedControls.some(c => c.id === id))) {
+        return;
+      }
+      
       state.addLog('debug', 'ControlSelection', `Selecting controls: ${controlIds.join(', ')}`);
 
-      const selectedControls = state.controls.filter(control => controlIds.includes(control.id));
+      // Use Set for O(1) lookup
+      const selectedIds = new Set(controlIds);
+      const selectedControls = state.controls.filter(control => selectedIds.has(control.id));
       set({ selectedControls });
     },
 
@@ -413,13 +635,46 @@ End Function`,
       const state = get();
       if (state.clipboard.length === 0) return;
 
+      // BUSINESS LOGIC BYPASS BUG FIX: Enforce control limits on paste operations
+      const MAX_CONTROLS_FREE = 50;
+      const MAX_CONTROLS_PRO = 500;
+      const MAX_CONTROLS_ENTERPRISE = 5000;
+      
+      let maxControls = MAX_CONTROLS_FREE;
+      const userPlan = authService.getState().user?.subscription?.plan || 'free';
+      if (userPlan === 'pro') {
+        maxControls = MAX_CONTROLS_PRO;
+      } else if (userPlan === 'enterprise') {
+        maxControls = MAX_CONTROLS_ENTERPRISE;
+      }
+      
+      const availableSlots = maxControls - state.controls.length;
+      if (availableSlots <= 0) {
+        state.addLog(
+          'error',
+          'Clipboard',
+          `Cannot paste: Control limit reached (${maxControls} controls)`
+        );
+        return;
+      }
+      
+      // Limit paste to available slots
+      const controlsToPaste = state.clipboard.slice(0, availableSlots);
+      if (controlsToPaste.length < state.clipboard.length) {
+        state.addLog(
+          'warning',
+          'Clipboard',
+          `Only pasting ${controlsToPaste.length} of ${state.clipboard.length} controls due to limit`
+        );
+      }
+
       state.addLog(
         'info',
         'Clipboard',
-        `Pasting ${state.clipboard.length} controls from clipboard`
+        `Pasting ${controlsToPaste.length} controls from clipboard`
       );
 
-      const newControls = state.clipboard.map((control, index) => ({
+      const newControls = controlsToPaste.map((control, index) => ({
         ...control,
         id: state.nextId + index,
         name: `${control.type}${state.nextId + index}`,
@@ -427,21 +682,90 @@ End Function`,
         y: control.y + 20,
       }));
 
+      const newNextId = state.nextId + controlsToPaste.length;
+      const updatedControls = [...state.controls, ...newControls];
+      
       set({
-        controls: [...state.controls, ...newControls],
+        controls: updatedControls,
         selectedControls: newControls,
-        nextId: state.nextId + state.clipboard.length,
+        nextId: newNextId,
       });
-      state.pushHistory([...state.controls, ...newControls], state.nextId + state.clipboard.length);
+      
+      // STATE CORRUPTION BUG FIX: Use consistent nextId value for history
+      state.pushHistory(updatedControls, newNextId);
+    },
+
+    pasteControl: () => {
+      // Backward compatibility - delegate to pasteControls
+      const state = get();
+      state.pasteControls();
+    },
+
+    saveProject: () => {
+      const state = get();
+      const projectData = {
+        projectName: state.projectName,
+        forms: state.forms,
+        modules: state.modules,
+        classModules: state.classModules,
+        userControls: state.userControls,
+        references: state.references,
+        components: state.components,
+        controls: state.controls,
+        eventCode: state.eventCode,
+        formProperties: state.formProperties
+      };
+      
+      // Save to localStorage for now
+      try {
+        localStorage.setItem('vb6-project', JSON.stringify(projectData));
+        set({ isDirty: false, lastSaved: new Date() });
+        state.addLog('info', 'Project', 'Project saved successfully');
+      } catch (error) {
+        state.addLog('error', 'Project', `Failed to save project: ${error}`);
+      }
     },
 
     duplicateControls: () => {
       const state = get();
       if (state.selectedControls.length === 0) return;
 
-      state.addLog('info', 'Clipboard', `Duplicating ${state.selectedControls.length} control(s)`);
+      // BUSINESS LOGIC BYPASS BUG FIX: Enforce control limits on duplicate operations
+      const MAX_CONTROLS_FREE = 50;
+      const MAX_CONTROLS_PRO = 500;
+      const MAX_CONTROLS_ENTERPRISE = 5000;
+      
+      let maxControls = MAX_CONTROLS_FREE;
+      const userPlan = authService.getState().user?.subscription?.plan || 'free';
+      if (userPlan === 'pro') {
+        maxControls = MAX_CONTROLS_PRO;
+      } else if (userPlan === 'enterprise') {
+        maxControls = MAX_CONTROLS_ENTERPRISE;
+      }
+      
+      const availableSlots = maxControls - state.controls.length;
+      if (availableSlots <= 0) {
+        state.addLog(
+          'error',
+          'Clipboard',
+          `Cannot duplicate: Control limit reached (${maxControls} controls)`
+        );
+        return;
+      }
+      
+      // Limit duplication to available slots
+      const controlsToDuplicate = state.selectedControls.slice(0, availableSlots);
+      if (controlsToDuplicate.length < state.selectedControls.length) {
+        state.addLog(
+          'warning',
+          'Clipboard',
+          `Only duplicating ${controlsToDuplicate.length} of ${state.selectedControls.length} controls due to limit`
+        );
+      }
 
-      const newControls = state.selectedControls.map((control, index) => ({
+      state.addLog('info', 'Clipboard', `Duplicating ${controlsToDuplicate.length} control(s)`);
+
+      const newControls = controlsToDuplicate.map((control, index) => ({
         ...control,
         id: state.nextId + index,
         name: `${control.type}${state.nextId + index}`,
@@ -449,20 +773,34 @@ End Function`,
         y: control.y + 20,
       }));
 
+      const newNextId = state.nextId + newControls.length;
+      const updatedControls = [...state.controls, ...newControls];
+      
       set({
-        controls: [...state.controls, ...newControls],
+        controls: updatedControls,
         selectedControls: newControls,
-        nextId: state.nextId + newControls.length,
+        nextId: newNextId,
       });
 
-      state.pushHistory([...state.controls, ...newControls], state.nextId + newControls.length);
+      // STATE CORRUPTION BUG FIX: Use consistent nextId value for history
+      state.pushHistory(updatedControls, newNextId);
     },
 
     setExecutionMode: (mode: 'design' | 'run' | 'break') => {
       const state = get();
       state.addLog('info', 'Execution', `Mode changed: ${mode}`);
 
-      set({ executionMode: mode });
+      set((draft) => {
+        draft.executionMode = mode;
+        draft.debugState.mode = mode;
+      });
+    },
+    
+    setDebugState: (debugState: DebugState) => {
+      set((draft) => {
+        draft.debugState = debugState;
+        draft.executionMode = debugState.mode;
+      });
     },
 
     toggleWindow: (windowName: string) => {
@@ -531,8 +869,18 @@ End Function`,
 
     addConsoleOutput: (message: string) => {
       const state = get();
+      
+      // PERFORMANCE ANTI-PATTERN BUG FIX: Limit console output size and batch updates
+      const maxConsoleLines = 1000;
+      let newConsoleOutput = [...state.consoleOutput, message];
+      
+      // Remove old entries if we exceed the limit
+      if (newConsoleOutput.length > maxConsoleLines) {
+        newConsoleOutput = newConsoleOutput.slice(-maxConsoleLines);
+      }
+      
       set({
-        consoleOutput: [...state.consoleOutput, message],
+        consoleOutput: newConsoleOutput,
       });
     },
 
@@ -553,11 +901,33 @@ End Function`,
       if (state.historyIndex <= 0) return;
       const prevIndex = state.historyIndex - 1;
       const snapshot = state.history[prevIndex];
+      
+      // STATE CORRUPTION BUG FIX: Validate selectedControls exist in restored state
+      const restoredControls = snapshot.controls.map((c: Control) => ({ ...c }));
+      const restoredControlIds = new Set(restoredControls.map(c => c.id));
+      const validSelectedControls = state.selectedControls.filter(control => 
+        restoredControlIds.has(control.id)
+      ).map(control => {
+        // Update with restored control data
+        const restoredControl = restoredControls.find(c => c.id === control.id);
+        return restoredControl || control;
+      });
+      
       set({
-        controls: snapshot.controls.map((c: Control) => ({ ...c })),
-        selectedControls: [],
+        controls: restoredControls,
+        selectedControls: validSelectedControls,
         nextId: snapshot.nextId,
         historyIndex: prevIndex,
+        currentCode: snapshot.currentCode || state.currentCode,
+        isDirty: true,
+        // STATE CONSISTENCY BUG FIX: Clear related UI state when undoing
+        alignmentGuides: { x: [], y: [] },
+        isSelecting: false,
+        selectionBox: { x: 0, y: 0, width: 0, height: 0 },
+        isResizing: false,
+        resizeHandle: null,
+        isMoving: false,
+        isDragging: false,
       });
     },
 
@@ -566,23 +936,43 @@ End Function`,
       if (state.historyIndex >= state.history.length - 1) return;
       const nextIndex = state.historyIndex + 1;
       const snapshot = state.history[nextIndex];
+      
+      // STATE CORRUPTION BUG FIX: Validate selectedControls exist in restored state
+      const restoredControls = snapshot.controls.map((c: Control) => ({ ...c }));
+      const restoredControlIds = new Set(restoredControls.map(c => c.id));
+      const validSelectedControls = state.selectedControls.filter(control => 
+        restoredControlIds.has(control.id)
+      ).map(control => {
+        // Update with restored control data
+        const restoredControl = restoredControls.find(c => c.id === control.id);
+        return restoredControl || control;
+      });
+      
       set({
-        controls: snapshot.controls.map((c: Control) => ({ ...c })),
-        selectedControls: [],
+        controls: restoredControls,
+        selectedControls: validSelectedControls,
         nextId: snapshot.nextId,
         historyIndex: nextIndex,
+        currentCode: snapshot.currentCode || state.currentCode,
+        isDirty: true,
+        // STATE CONSISTENCY BUG FIX: Clear related UI state when redoing
+        alignmentGuides: { x: [], y: [] },
+        isSelecting: false,
+        selectionBox: { x: 0, y: 0, width: 0, height: 0 },
+        isResizing: false,
+        resizeHandle: null,
+        isMoving: false,
+        isDragging: false,
       });
     },
 
     // Code Analysis
     analyzeCode: () => {
-      console.log('Analyzing code...');
       // Implementation would analyze the code and update state
     },
 
     // Refactoring
     applyRefactoring: (type: string, options: any) => {
-      console.log(`Applying refactoring ${type} with options:`, options);
       // Implementation would apply the refactoring and update code
     },
 
@@ -679,7 +1069,6 @@ End Function`,
 
     // Code Formatting
     formatCode: (options = {}) => {
-      console.log('Formatting code with options:', options);
       const state = get();
       if (state.selectedControls.length > 0 && state.selectedEvent) {
         const control = state.selectedControls[0];
@@ -730,7 +1119,6 @@ End Function`,
 
     // Code Conversion
     convertCode: (targetLanguage: string, options = {}) => {
-      console.log(`Converting code to ${targetLanguage} with options:`, options);
       // Implementation would convert the current code to the target language
     },
 
@@ -894,6 +1282,213 @@ End Function`,
           `Failed to remove from array: ${(error as Error).message}`
         );
       }
+    },
+
+    // Backward compatibility methods for tests
+    deleteControl: (controlId: number) => {
+      const state = get();
+      state.deleteControls([controlId]);
+      set({ isDirty: true });
+    },
+
+    selectControl: (controlId: number) => {
+      const state = get();
+      state.selectControls([controlId]);
+      set({ selectedControlId: controlId.toString() });
+    },
+
+    updatePerformanceMetrics: (metrics: { renderTime: number; memoryUsage: number; cpuUsage?: number; fps?: number }) => {
+      set(state => ({
+        performanceMetrics: {
+          ...state.performanceMetrics,
+          ...metrics,
+        },
+      }));
+    },
+
+    updateCode: (code: string) => {
+      const state = get();
+      
+      // Push current state to history before updating
+      if (state.currentCode !== code) {
+        // Store a snapshot that will allow restoring to the current state
+        const snapshot = {
+          controls: [...state.controls],
+          nextId: state.nextId,
+          currentCode: code, // Store the new code to restore to
+        };
+        
+        const newHistory = state.history.slice(0, state.historyIndex + 1);
+        newHistory.push(snapshot);
+        
+        set({ 
+          currentCode: code, 
+          isDirty: true,
+          history: newHistory,
+          historyIndex: newHistory.length - 1
+        });
+      }
+      
+      if (state.selectedControls.length > 0 && state.selectedEvent) {
+        const control = state.selectedControls[0];
+        const eventKey = `${control.name}_${state.selectedEvent}`;
+        state.updateEventCode(eventKey, code);
+      }
+    },
+
+    insertCode: (code: string, position: number) => {
+      const state = get();
+      const currentCode = state.currentCode || '';
+      const before = currentCode.substring(0, position);
+      const after = currentCode.substring(position);
+      const newCode = before + code + after;
+      set({ currentCode: newCode, isDirty: true });
+    },
+
+    addControl: (control: Control) => {
+      const state = get();
+      const newControl = {
+        ...control,
+        id: control.id || state.nextId,
+      };
+      set({
+        controls: [...state.controls, newControl],
+        nextId: state.nextId + 1,
+        isDirty: true,
+      });
+      state.pushHistory([...state.controls, newControl], state.nextId + 1);
+    },
+
+    loadProject: (projectData: any) => {
+      try {
+        set({
+          projectName: projectData.projectName || projectData.name || 'Project1',
+          currentCode: projectData.currentCode || '',
+          controls: projectData.controls || [],
+          forms: projectData.forms || [{ id: 1, name: 'Form1', caption: 'Form1', controls: [] }],
+          modules: projectData.modules || [],
+          classModules: projectData.classModules || [],
+          isDirty: false,
+          lastSaved: new Date(),
+        });
+      } catch (error) {
+        console.error('Failed to load project:', error);
+      }
+    },
+
+    copyControl: (controlId: string) => {
+      const state = get();
+      const control = state.controls.find(c => c.id.toString() === controlId || c.name === controlId);
+      if (control) {
+        set({ 
+          clipboard: [control],
+          clipboardData: {
+            type: 'control',
+            data: control
+          }
+        });
+      }
+    },
+
+    // Missing methods for backward compatibility
+    duplicateControl: (controlId: string) => {
+      const state = get();
+      const control = state.controls.find(c => c.id.toString() === controlId || c.name === controlId);
+      if (control) {
+        const newControl = {
+          ...control,
+          id: state.nextId,
+          name: `${control.type}${state.nextId}`,
+          left: control.left + 10,
+          top: control.top + 10,
+        };
+        set({
+          controls: [...state.controls, newControl],
+          nextId: state.nextId + 1,
+          isDirty: true,
+        });
+        state.pushHistory([...state.controls, newControl], state.nextId + 1);
+      }
+    },
+
+    newProject: () => {
+      set({
+        projectName: 'Project1',
+        controls: [],
+        forms: [{ id: 1, name: 'Form1', caption: 'Form1', controls: [] }],
+        activeFormId: 1,
+        modules: [],
+        classModules: [],
+        currentCode: '',
+        selectedControlId: null,
+        selectedControls: [],
+        clipboard: null,
+        isDirty: false,
+        lastSaved: null,
+        history: [],
+        historyIndex: -1,
+        nextId: 1,
+      });
+    },
+
+    toggleDesignMode: () => {
+      const state = get();
+      set({ isDesignMode: !state.isDesignMode });
+    },
+
+    togglePanel: (panelName: string) => {
+      const state = get();
+      switch (panelName) {
+        case 'toolbox':
+          set({ showToolbox: !state.showToolbox });
+          break;
+        case 'properties':
+          set({ showProperties: !state.showProperties });
+          break;
+        case 'projectExplorer':
+          set({ showProjectExplorer: !state.showProjectExplorer });
+          break;
+        case 'immediateWindow':
+          set({ showImmediateWindow: !state.showImmediateWindow });
+          break;
+        default:
+          break;
+      }
+    },
+
+    setZoomLevel: (zoom: number) => {
+      const clampedZoom = Math.max(0.25, Math.min(4, zoom));
+      set({ zoomLevel: clampedZoom });
+    },
+
+    resetStore: () => {
+      set({
+        projectName: 'VB6 Project',
+        controls: [],
+        selectedControls: [],
+        nextId: 1,
+        clipboard: [],
+        isDesignMode: true,
+        showToolbox: true,
+        showProperties: true,
+        showProjectExplorer: true,
+        showImmediateWindow: false,
+        canvasSize: { width: 800, height: 600 },
+        zoomLevel: 1,
+        isDirty: false,
+        lastSaved: null,
+        currentCode: '',
+        selectedControlId: null,
+        clipboardData: null,
+        history: [],
+        historyIndex: -1,
+        performanceMetrics: {
+          renderTime: 0,
+          memoryUsage: 0,
+          cpuUsage: 0,
+          fps: 60,
+        },
+      });
     },
   }))
 );

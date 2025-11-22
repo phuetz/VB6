@@ -99,7 +99,7 @@ export class ThemeManager {
         },
       },
     },
-    light: {
+    lightModern: {
       name: 'Light Modern',
       colors: {
         primary: '#0078D4',
@@ -232,6 +232,19 @@ export class ThemeManager {
   private static applyTheme(theme: Theme): void {
     const root = document.documentElement;
 
+    // Remove existing theme classes from body
+    if (document.body) {
+      // Handle cases where className might be undefined
+      const currentClassName = document.body.className || '';
+      document.body.className = currentClassName.replace(/theme-[\w-]+/g, '');
+      
+      // Add new theme class based on theme name
+      const themeClass = this.getThemeClassName(theme.name);
+      if (document.body.classList && document.body.classList.add) {
+        document.body.classList.add(themeClass);
+      }
+    }
+
     // CSS INJECTION BUG FIX: Validate CSS values before applying
     Object.entries(theme.colors).forEach(([key, value]) => {
       if (this.isValidCSSColor(value)) {
@@ -257,6 +270,20 @@ export class ThemeManager {
     if (this.isValidCSSValue(theme.fonts.size.large)) {
       root.style.setProperty('--font-size-large', theme.fonts.size.large);
     }
+  }
+
+  private static getThemeClassName(themeName: string): string {
+    // Map theme names to CSS class names expected by tests
+    const classMap: Record<string, string> = {
+      'Classic VB6': 'theme-vb6-classic',
+      'Dark Theme': 'theme-dark',
+      'Light Theme': 'theme-light',
+      'Light Modern': 'theme-light-modern',
+      'Modern Theme': 'theme-modern',
+      'High Contrast': 'theme-high-contrast'
+    };
+    
+    return classMap[themeName] || `theme-${themeName.toLowerCase().replace(/\s+/g, '-')}`;
   }
 
   /**
@@ -432,6 +459,12 @@ export class ThemeManager {
     this.listeners = [];
     
     console.log('✅ ThemeManager destroyed and cleaned up');
+  }
+
+  // Constructor for instance-based usage in tests
+  constructor() {
+    // Initialize the theme system when an instance is created
+    ThemeManager.initialize();
   }
 
   // Instance methods for backward compatibility with tests

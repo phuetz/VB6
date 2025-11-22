@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 
 interface AutoSaveOptions {
   enabled: boolean;
@@ -10,21 +10,35 @@ interface AutoSaveOptions {
 export const useAutoSave = (data: any, options: AutoSaveOptions) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedDataRef = useRef<string>('');
+  const isSavingRef = useRef<boolean>(false); // RACE CONDITION BUG FIX: Prevent concurrent saves
+  const isMountedRef = useRef<boolean>(true); // MEMORY CORRUPTION BUG FIX: Track component mount status
   const { enabled, interval, onSave, onError } = options;
 
   const save = useCallback(async () => {
+    // MEMORY CORRUPTION BUG FIX: Prevent operations on unmounted component
+    if (!isMountedRef.current || isSavingRef.current) {
+      return;
+    }
+
     try {
+      isSavingRef.current = true;
       const currentData = JSON.stringify(data);
 
-      // Only save if data has changed
-      if (currentData !== lastSavedDataRef.current) {
+      // Only save if data has changed and component is still mounted
+      if (currentData !== lastSavedDataRef.current && isMountedRef.current) {
         await onSave();
-        lastSavedDataRef.current = currentData;
+        // Check again after async operation completes
+        if (isMountedRef.current) {
+          lastSavedDataRef.current = currentData;
+        }
       }
     } catch (error) {
-      if (onError) {
+      // Only handle errors if component is still mounted
+      if (onError && isMountedRef.current) {
         onError(error as Error);
       }
+    } finally {
+      isSavingRef.current = false; // Always reset the flag
     }
   }, [data, onSave, onError]);
 
@@ -41,11 +55,21 @@ export const useAutoSave = (data: any, options: AutoSaveOptions) => {
     intervalRef.current = setInterval(save, interval);
 
     return () => {
+      // MEMORY CORRUPTION BUG FIX: Proper cleanup to prevent use-after-free
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
+      isMountedRef.current = false; // Mark component as unmounted
     };
   }, [enabled, interval, save]);
+
+  // MEMORY CORRUPTION BUG FIX: Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Manual save function
   const forceSave = useCallback(() => {
@@ -114,8 +138,18 @@ export const useVersioning = <T>(data: T) => {
 
   const saveVersion = useCallback(
     (description?: string) => {
+      // MEMORY CORRUPTION BUG FIX: Use cryptographically secure ID generation
+      const generateSecureId = () => {
+        if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+          const array = new Uint8Array(16);
+          crypto.getRandomValues(array);
+          return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+        }
+        return Math.random().toString(36).substring(2) + Date.now().toString(36);
+      };
+      
       const newVersion = {
-        id: Date.now().toString(),
+        id: generateSecureId(),
         timestamp: new Date(),
         data: JSON.parse(JSON.stringify(data)), // Deep clone
         description,
@@ -166,6 +200,4 @@ export const useVersioning = <T>(data: T) => {
   };
 };
 
-function useState<T>(arg0: () => T): [any, any] {
-  throw new Error('Function not implemented.');
-}
+// RUNTIME LOGIC BUG FIX: Removed incorrectly implemented useState - use React's useState instead

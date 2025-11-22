@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useEffect, useMemo, useState } from 'react';
 import { Control } from '../../context/types';
 import { useVB6 } from '../../context/VB6Context';
 import { ControlManipulator } from './ControlManipulator';
@@ -8,6 +8,10 @@ import { SelectionManager } from './SelectionManager';
 import { DesignToolbar } from './DesignToolbar';
 import { PropertyPanel } from './PropertyPanel';
 import { useControlManipulation } from '../../hooks/useControlManipulation';
+import { useVirtualizedGuides } from '../../hooks/useVirtualizedGuides';
+import { VirtualizedGuideRenderer } from './VirtualizedGuideRenderer';
+import { GuidePerformanceMonitor } from '../Performance/GuidePerformanceMonitor';
+import { ViewportBounds } from '../../services/ViewportGuideVirtualizer';
 import ControlRenderer from './ControlRenderer';
 
 interface DesignerCanvasProps {
@@ -23,16 +27,60 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
 }) => {
   const { state, dispatch, updateControl, copyControls, pasteControls } = useVB6();
   const canvasRef = useRef<HTMLDivElement>(null);
+  
+  // Ultra-Think: Performance monitoring and viewport state
+  const [showPerformanceMonitor, setShowPerformanceMonitor] = useState(false);
+  const [viewport, setViewport] = useState<ViewportBounds>({
+    left: 0,
+    top: 0,
+    right: width,
+    bottom: height,
+    width,
+    height,
+    zoom: 1
+  });
+  
+  // Update viewport when canvas dimensions change
+  useEffect(() => {
+    setViewport(prev => ({
+      ...prev,
+      right: prev.left + width,
+      bottom: prev.top + height,
+      width,
+      height
+    }));
+  }, [width, height]);
 
-  const { alignmentGuides, alignControls, makeSameSize } = useControlManipulation(
+  const {
+    dragState,
+    alignmentGuides,
+    startDrag,
+    startResize,
+    handleMouseMove,
+    handleMouseUp,
+    handleKeyboardMove,
+    handleKeyboardResize,
+    alignControls,
+    makeSameSize,
+  } = useControlManipulation(
     state.controls,
     state.selectedControls,
     controls => {
+      // PERFORMANCE ANTI-PATTERN BUG FIX: Batch control updates instead of individual calls
       controls.forEach(control => {
-        updateControl(control.id, 'x', control.x);
-        updateControl(control.id, 'y', control.y);
-        updateControl(control.id, 'width', control.width);
-        updateControl(control.id, 'height', control.height);
+        // Batch all property updates into a single call for better performance
+        dispatch({
+          type: 'BATCH_UPDATE_CONTROL',
+          payload: {
+            controlId: control.id,
+            updates: {
+              x: control.x,
+              y: control.y,
+              width: control.width,
+              height: control.height,
+            },
+          },
+        });
       });
     },
     {
@@ -44,10 +92,127 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
     }
   );
 
+  // Ultra-Think: Virtualized guides for maximum performance
+  const selectedControlNames = useMemo(() => 
+    state.selectedControls.map(c => c.name), 
+    [state.selectedControls]
+  );
+
+  const {
+    horizontalGuides: virtualizedHorizontalGuides,
+    verticalGuides: virtualizedVerticalGuides,
+    performanceMetrics,
+    updateViewport,
+    invalidateCache,
+    isCalculating,
+    isEnabled: guidesEnabled
+  } = useVirtualizedGuides(
+    state.controls,
+    selectedControlNames,
+    {
+      enabled: state.showAlignmentGuides && state.controls.length > 10, // Only for complex scenarios
+      debounceMs: 16,
+      maxGuides: 30,
+      minStrength: 0.15,
+      showPerformanceMetrics: showPerformanceMonitor
+    }
+  );
+
+  // Viewport update handler for scroll/zoom events
+  const handleViewportChange = useCallback((newViewport: Partial<ViewportBounds>) => {
+    setViewport(prev => {
+      const updated = { ...prev, ...newViewport };
+      updateViewport(updated);
+      return updated;
+    });
+  }, [updateViewport]);
+
+  // Performance: Update viewport on scroll/zoom
+  const handleCanvasScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    handleViewportChange({
+      left: target.scrollLeft,
+      top: target.scrollTop,
+      right: target.scrollLeft + target.clientWidth,
+      bottom: target.scrollTop + target.clientHeight
+    });
+  }, [handleViewportChange]);
+
+  // Global event listeners for drag and resize operations
+  useEffect(() => {
+    if (dragState.isDragging || dragState.isResizing) {
+      const handleGlobalMouseMove = (e: MouseEvent) => {
+        e.preventDefault();
+        handleMouseMove(e);
+      };
+
+      const handleGlobalMouseUp = (e: MouseEvent) => {
+        e.preventDefault();
+        handleMouseUp();
+      };
+
+      // Add global event listeners
+      document.addEventListener('mousemove', handleGlobalMouseMove);
+      document.addEventListener('mouseup', handleGlobalMouseUp);
+      
+      // Disable text selection during drag/resize
+      document.body.style.userSelect = 'none';
+      document.body.style.cursor = dragState.isResizing ? 'resize' : 'move';
+
+      return () => {
+        document.removeEventListener('mousemove', handleGlobalMouseMove);
+        document.removeEventListener('mouseup', handleGlobalMouseUp);
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+      };
+    }
+  }, [dragState.isDragging, dragState.isResizing, handleMouseMove, handleMouseUp]);
+
+  // Keyboard shortcuts for manipulation
+  useEffect(() => {
+    if (state.executionMode === 'design') {
+      const handleGlobalKeyDown = (e: KeyboardEvent) => {
+        // Ultra-Think: Performance monitor toggle (Ctrl+Shift+P)
+        if (e.key === 'P' && e.ctrlKey && e.shiftKey) {
+          e.preventDefault();
+          setShowPerformanceMonitor(prev => !prev);
+          return;
+        }
+
+        // Cache invalidation shortcut (Ctrl+Shift+R)
+        if (e.key === 'R' && e.ctrlKey && e.shiftKey) {
+          e.preventDefault();
+          invalidateCache();
+          return;
+        }
+
+        // Handle movement and resize shortcuts
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+          if (e.ctrlKey) {
+            handleKeyboardResize(e);
+          } else {
+            handleKeyboardMove(e);
+          }
+        }
+      };
+
+      document.addEventListener('keydown', handleGlobalKeyDown);
+      return () => {
+        document.removeEventListener('keydown', handleGlobalKeyDown);
+      };
+    }
+  }, [state.executionMode, handleKeyboardMove, handleKeyboardResize, invalidateCache]);
+
+  // PERFORMANCE FIX: Memoize selected control IDs for O(1) lookup
+  const selectedControlIds = useMemo(() => 
+    new Set(state.selectedControls.map(c => c.id)), 
+    [state.selectedControls]
+  );
+
   const handleControlSelect = useCallback(
     (control: Control, addToSelection: boolean) => {
       if (addToSelection) {
-        const isSelected = state.selectedControls.find(c => c.id === control.id);
+        const isSelected = selectedControlIds.has(control.id);
         if (isSelected) {
           dispatch({
             type: 'SELECT_CONTROLS',
@@ -217,7 +382,10 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
       {/* Canvas Container */}
       <div className="flex-1 flex overflow-hidden">
         {/* Main Canvas */}
-        <div className="flex-1 p-4 overflow-auto bg-gray-300">
+        <div 
+          className="flex-1 p-4 overflow-auto bg-gray-300"
+          onScroll={handleCanvasScroll}
+        >
           <div
             ref={canvasRef}
             className="relative shadow-lg mx-auto"
@@ -228,6 +396,35 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
               border: '1px solid #000',
             }}
           >
+            {/* Ultra-Think: Virtualized Guide Renderer */}
+            {guidesEnabled && state.showAlignmentGuides && (
+              <VirtualizedGuideRenderer
+                horizontalGuides={virtualizedHorizontalGuides}
+                verticalGuides={virtualizedVerticalGuides}
+                viewport={viewport}
+                width={width}
+                height={height}
+                showStrength={true}
+                style={{ zIndex: 5 }}
+              />
+            )}
+
+            {/* Legacy alignment guides (fallback for small control sets) */}
+            {!guidesEnabled && state.showAlignmentGuides && alignmentGuides.map((guide, index) => (
+              <div
+                key={index}
+                className="absolute pointer-events-none"
+                style={{
+                  left: guide.type === 'vertical' ? guide.position : 0,
+                  top: guide.type === 'horizontal' ? guide.position : 0,
+                  width: guide.type === 'vertical' ? '1px' : '100%',
+                  height: guide.type === 'horizontal' ? '1px' : '100%',
+                  backgroundColor: '#ff6b6b',
+                  borderStyle: 'dashed',
+                  zIndex: 5,
+                }}
+              />
+            ))}
             {/* Grid */}
             <GridManager
               show={state.showGrid && state.executionMode === 'design'}
@@ -252,7 +449,7 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
               <ControlManipulator
                 key={control.id}
                 control={control}
-                isSelected={state.selectedControls.some(c => c.id === control.id)}
+                isSelected={selectedControlIds.has(control.id)}
                 isMultiSelected={state.selectedControls.length > 1}
                 onSelect={handleControlSelect}
                 onUpdateControl={updatedControl => handleUpdateControls([updatedControl])}
@@ -264,7 +461,12 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
                 gridSize={state.gridSize}
                 showAlignmentGuides={state.showAlignmentGuides}
               >
-                <ControlRenderer control={control} />
+                <ControlRenderer 
+                  control={control} 
+                  onStartDrag={startDrag}
+                  onStartResize={startResize}
+                  dragState={dragState}
+                />
               </ControlManipulator>
             ))}
 
@@ -294,6 +496,34 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
           </div>
         )}
       </div>
+
+      {/* Ultra-Think: Performance Monitor */}
+      <GuidePerformanceMonitor
+        visible={showPerformanceMonitor}
+        onClose={() => setShowPerformanceMonitor(false)}
+        position="bottom-right"
+        compact={false}
+      />
+
+      {/* Performance monitoring indicator when guides are calculating */}
+      {isCalculating && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-purple-500 text-white px-3 py-1 rounded-full text-xs flex items-center gap-2">
+          <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+          Optimizing guides...
+        </div>
+      )}
+      
+      {/* Debug info overlay (Ctrl+Shift+P to toggle) */}
+      {showPerformanceMonitor && (
+        <div className="fixed top-20 left-4 z-40 bg-black bg-opacity-75 text-white p-2 rounded text-xs font-mono">
+          <div>Controls: {state.controls.length}</div>
+          <div>Visible: {performanceMetrics.visibleControls}</div>
+          <div>H-Guides: {virtualizedHorizontalGuides.length}</div>
+          <div>V-Guides: {virtualizedVerticalGuides.length}</div>
+          <div>Cache: {(performanceMetrics.cacheHitRate * 100).toFixed(0)}%</div>
+          <div>Calc: {performanceMetrics.calculationTimeMs.toFixed(1)}ms</div>
+        </div>
+      )}
     </div>
   );
 };

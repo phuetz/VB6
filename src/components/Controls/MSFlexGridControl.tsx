@@ -426,85 +426,359 @@ export const MSFlexGridControl = forwardRef<any, MSFlexGridProps>((props, ref) =
     fireEvent(name, 'AfterRowResize', { row: rowIndex });
   }, [allowUserResizing, rowHeightMin, rowHeightMax, rowHeights, id, name, fireEvent, updateControl]);
 
+  // VB6 Methods - Complete API
+  const vb6Methods = {
+    // Properties
+    get Text() { return gridData[selection.row]?.[selection.col]?.text || ''; },
+    set Text(value: string) {
+      const newData = [...gridData];
+      if (!newData[selection.row]) newData[selection.row] = [];
+      if (!newData[selection.row][selection.col]) newData[selection.row][selection.col] = { text: '' };
+      newData[selection.row][selection.col].text = value;
+      setGridData(newData);
+      updateControl(id, 'text', value);
+      fireEvent(name, 'AfterEdit', { row: selection.row, col: selection.col });
+    },
+    
+    get TextMatrix() { return gridData; },
+    TextMatrixGet(row: number, col: number) {
+      return gridData[row]?.[col]?.text || '';
+    },
+    TextMatrixSet(row: number, col: number, value: string) {
+      const newData = [...gridData];
+      if (!newData[row]) newData[row] = [];
+      if (!newData[row][col]) newData[row][col] = { text: '' };
+      newData[row][col].text = value;
+      setGridData(newData);
+      updateControl(id, 'textMatrix', newData);
+    },
+
+    // Cell formatting methods
+    get CellBackColor() { return gridData[selection.row]?.[selection.col]?.backColor || backColor; },
+    set CellBackColor(value: string) {
+      const newData = [...gridData];
+      if (!newData[selection.row]) newData[selection.row] = [];
+      if (!newData[selection.row][selection.col]) newData[selection.row][selection.col] = { text: '' };
+      newData[selection.row][selection.col].backColor = value;
+      setGridData(newData);
+    },
+
+    get CellForeColor() { return gridData[selection.row]?.[selection.col]?.foreColor || foreColor; },
+    set CellForeColor(value: string) {
+      const newData = [...gridData];
+      if (!newData[selection.row]) newData[selection.row] = [];
+      if (!newData[selection.row][selection.col]) newData[selection.row][selection.col] = { text: '' };
+      newData[selection.row][selection.col].foreColor = value;
+      setGridData(newData);
+    },
+
+    get CellFontBold() { return gridData[selection.row]?.[selection.col]?.fontBold || false; },
+    set CellFontBold(value: boolean) {
+      const newData = [...gridData];
+      if (!newData[selection.row]) newData[selection.row] = [];
+      if (!newData[selection.row][selection.col]) newData[selection.row][selection.col] = { text: '' };
+      newData[selection.row][selection.col].fontBold = value;
+      setGridData(newData);
+    },
+
+    get CellAlignment() { return gridData[selection.row]?.[selection.col]?.alignment || cellAlignment; },
+    set CellAlignment(value: number) {
+      const newData = [...gridData];
+      if (!newData[selection.row]) newData[selection.row] = [];
+      if (!newData[selection.row][selection.col]) newData[selection.row][selection.col] = { text: '' };
+      newData[selection.row][selection.col].alignment = value;
+      setGridData(newData);
+    },
+
+    // Grid structure methods
+    get Rows() { return rows; },
+    set Rows(value: number) {
+      updateControl(id, 'rows', value);
+      // Resize grid data
+      const newData = [...gridData];
+      while (newData.length < value) {
+        const newRow: CellData[] = [];
+        for (let c = 0; c < cols; c++) {
+          newRow[c] = { text: '' };
+        }
+        newData.push(newRow);
+      }
+      if (newData.length > value) {
+        newData.splice(value);
+      }
+      setGridData(newData);
+    },
+
+    get Cols() { return cols; },
+    set Cols(value: number) {
+      updateControl(id, 'cols', value);
+      // Resize grid data
+      const newData = gridData.map(row => {
+        const newRow = [...row];
+        while (newRow.length < value) {
+          newRow.push({ text: '' });
+        }
+        if (newRow.length > value) {
+          newRow.splice(value);
+        }
+        return newRow;
+      });
+      setGridData(newData);
+    },
+
+    get Row() { return selection.row; },
+    set Row(value: number) {
+      if (value >= fixedRows && value < rows) {
+        setSelection(prev => ({ ...prev, row: value, rowSel: value }));
+        updateControl(id, 'row', value);
+        fireEvent(name, 'RowColChange', {});
+      }
+    },
+
+    get Col() { return selection.col; },
+    set Col(value: number) {
+      if (value >= fixedCols && value < cols) {
+        setSelection(prev => ({ ...prev, col: value, colSel: value }));
+        updateControl(id, 'col', value);
+        fireEvent(name, 'RowColChange', {});
+      }
+    },
+
+    get RowSel() { return selection.rowSel; },
+    set RowSel(value: number) {
+      if (value >= 0 && value < rows) {
+        setSelection(prev => ({ ...prev, rowSel: value }));
+        updateControl(id, 'rowSel', value);
+        fireEvent(name, 'SelChange', {});
+      }
+    },
+
+    get ColSel() { return selection.colSel; },
+    set ColSel(value: number) {
+      if (value >= 0 && value < cols) {
+        setSelection(prev => ({ ...prev, colSel: value }));
+        updateControl(id, 'colSel', value);
+        fireEvent(name, 'SelChange', {});
+      }
+    },
+
+    // Column and row sizing
+    ColWidth(col: number, width?: number) {
+      if (width !== undefined) {
+        const newWidths = [...columnWidths];
+        newWidths[col] = width;
+        setColumnWidths(newWidths);
+        updateControl(id, 'colWidth', newWidths);
+        return width;
+      }
+      return columnWidths[col] || 75;
+    },
+
+    RowHeight(row: number, height?: number) {
+      if (height !== undefined) {
+        const newHeights = [...rowHeights];
+        newHeights[row] = height;
+        setRowHeights(newHeights);
+        updateControl(id, 'rowHeight', newHeights);
+        return height;
+      }
+      return rowHeights[row] || 20;
+    },
+
+    // Data manipulation methods
+    Clear() {
+      const newData = gridData.map(row => row.map(cell => ({ ...cell, text: '' })));
+      setGridData(newData);
+      fireEvent(name, 'AfterDataChange', {});
+    },
+    
+    ClearStructure() {
+      const newData: CellData[][] = [];
+      for (let r = 0; r < rows; r++) {
+        newData[r] = [];
+        for (let c = 0; c < cols; c++) {
+          newData[r][c] = { text: '' };
+        }
+      }
+      setGridData(newData);
+    },
+    
+    AddItem(item: string, index?: number) {
+      const targetRow = index ?? selection.row;
+      if (targetRow >= 0 && targetRow < rows) {
+        const newData = [...gridData];
+        newData[targetRow][selection.col].text = item;
+        setGridData(newData);
+        fireEvent(name, 'AfterDataChange', {});
+      }
+    },
+    
+    RemoveItem(index: number) {
+      if (index >= fixedRows && index < rows) {
+        const newData = gridData.filter((_, i) => i !== index);
+        // Add empty row to maintain row count
+        const emptyRow: CellData[] = [];
+        for (let c = 0; c < cols; c++) {
+          emptyRow[c] = { text: '' };
+        }
+        newData.push(emptyRow);
+        setGridData(newData);
+        fireEvent(name, 'AfterDataChange', {});
+      }
+    },
+
+    // Advanced methods
+    Sort(column?: number, order?: number) {
+      const sortCol = column ?? selection.col;
+      const ascending = order === undefined || order === 0;
+      const newData = [...gridData];
+      const dataToSort = newData.slice(fixedRows);
+      
+      dataToSort.sort((a, b) => {
+        const aVal = a[sortCol]?.text || '';
+        const bVal = b[sortCol]?.text || '';
+        const result = aVal.localeCompare(bVal, undefined, { numeric: true });
+        return ascending ? result : -result;
+      });
+      
+      newData.splice(fixedRows, dataToSort.length, ...dataToSort);
+      setGridData(newData);
+      fireEvent(name, 'AfterSort', { col: sortCol });
+    },
+
+    Refresh() {
+      // Force redraw
+      updateControl(id, 'redraw', false);
+      setTimeout(() => updateControl(id, 'redraw', true), 10);
+    },
+
+    // Clipboard operations
+    get Clip() {
+      const minRow = Math.min(selection.row, selection.rowSel);
+      const maxRow = Math.max(selection.row, selection.rowSel);
+      const minCol = Math.min(selection.col, selection.colSel);
+      const maxCol = Math.max(selection.col, selection.colSel);
+      
+      const clipData: string[] = [];
+      for (let r = minRow; r <= maxRow; r++) {
+        const rowData: string[] = [];
+        for (let c = minCol; c <= maxCol; c++) {
+          rowData.push(gridData[r]?.[c]?.text || '');
+        }
+        clipData.push(rowData.join('\t'));
+      }
+      return clipData.join('\n');
+    },
+
+    set Clip(value: string) {
+      const lines = value.split('\n');
+      const newData = [...gridData];
+      
+      for (let r = 0; r < lines.length; r++) {
+        const cells = lines[r].split('\t');
+        const targetRow = selection.row + r;
+        
+        if (targetRow < rows) {
+          for (let c = 0; c < cells.length; c++) {
+            const targetCol = selection.col + c;
+            if (targetCol < cols) {
+              if (!newData[targetRow]) newData[targetRow] = [];
+              if (!newData[targetRow][targetCol]) newData[targetRow][targetCol] = { text: '' };
+              newData[targetRow][targetCol].text = cells[c];
+            }
+          }
+        }
+      }
+      
+      setGridData(newData);
+      fireEvent(name, 'AfterDataChange', {});
+    },
+
+    // Selection methods
+    SelectAll() {
+      setSelection({
+        row: fixedRows,
+        col: fixedCols,
+        rowSel: rows - 1,
+        colSel: cols - 1
+      });
+      fireEvent(name, 'SelChange', {});
+    },
+
+    SelectRow(row: number) {
+      if (row >= 0 && row < rows) {
+        setSelection({
+          row,
+          col: fixedCols,
+          rowSel: row,
+          colSel: cols - 1
+        });
+        fireEvent(name, 'SelChange', {});
+      }
+    },
+
+    SelectCol(col: number) {
+      if (col >= 0 && col < cols) {
+        setSelection({
+          row: fixedRows,
+          col,
+          rowSel: rows - 1,
+          colSel: col
+        });
+        fireEvent(name, 'SelChange', {});
+      }
+    },
+
+    // Utility methods
+    CellLeft(col: number) {
+      return columnWidths.slice(0, col).reduce((sum, width) => sum + width, 0);
+    },
+
+    CellTop(row: number) {
+      return rowHeights.slice(0, row).reduce((sum, height) => sum + height, 0);
+    },
+
+    CellWidth(col: number) {
+      return columnWidths[col] || 75;
+    },
+
+    CellHeight(row: number) {
+      return rowHeights[row] || 20;
+    },
+
+    // Format functions
+    FormatString(fmt: string) {
+      updateControl(id, 'formatString', fmt);
+    },
+
+    // Data binding placeholder methods
+    ReBind() {
+      fireEvent(name, 'AfterDataChange', {});
+    },
+
+    DataRefresh() {
+      fireEvent(name, 'DataChange', {});
+    }
+  };
+
   // Expose methods through ref
   useEffect(() => {
     if (ref && typeof ref !== 'function') {
-      ref.current = {
-        // Properties
-        get Text() { return gridData[selection.row]?.[selection.col]?.text || ''; },
-        set Text(value: string) {
-          const newData = [...gridData];
-          if (!newData[selection.row]) newData[selection.row] = [];
-          if (!newData[selection.row][selection.col]) newData[selection.row][selection.col] = { text: '' };
-          newData[selection.row][selection.col].text = value;
-          setGridData(newData);
-        },
-        
-        get TextMatrix() { return gridData; },
-        TextMatrixGet(row: number, col: number) {
-          return gridData[row]?.[col]?.text || '';
-        },
-        TextMatrixSet(row: number, col: number, value: string) {
-          const newData = [...gridData];
-          if (!newData[row]) newData[row] = [];
-          if (!newData[row][col]) newData[row][col] = { text: '' };
-          newData[row][col].text = value;
-          setGridData(newData);
-        },
-        
-        // Methods
-        Clear() {
-          const newData = gridData.map(row => row.map(cell => ({ ...cell, text: '' })));
-          setGridData(newData);
-        },
-        
-        ClearStructure() {
-          const newData: CellData[][] = [];
-          for (let r = 0; r < rows; r++) {
-            newData[r] = [];
-            for (let c = 0; c < cols; c++) {
-              newData[r][c] = { text: '' };
-            }
-          }
-          setGridData(newData);
-        },
-        
-        AddItem(item: string, index?: number) {
-          // Add item to current cell or specified row
-          const targetRow = index ?? selection.row;
-          if (targetRow >= 0 && targetRow < rows) {
-            const newData = [...gridData];
-            newData[targetRow][selection.col].text = item;
-            setGridData(newData);
-          }
-        },
-        
-        RemoveItem(index: number) {
-          // Remove row
-          if (index >= fixedRows && index < rows) {
-            const newData = gridData.filter((_, i) => i !== index);
-            setGridData(newData);
-          }
-        },
-        
-        Sort(column?: number) {
-          // Implement sorting logic
-          const sortCol = column ?? selection.col;
-          const newData = [...gridData];
-          const dataToSort = newData.slice(fixedRows);
-          
-          dataToSort.sort((a, b) => {
-            const aVal = a[sortCol]?.text || '';
-            const bVal = b[sortCol]?.text || '';
-            return aVal.localeCompare(bVal);
-          });
-          
-          newData.splice(fixedRows, dataToSort.length, ...dataToSort);
-          setGridData(newData);
-        },
-      };
+      ref.current = vb6Methods;
     }
-  }, [ref, gridData, selection, rows, fixedRows]);
+  }, [ref, vb6Methods]);
+
+  // Register VB6 methods globally
+  useEffect(() => {
+    updateControl(id, 'vb6Methods', vb6Methods);
+    
+    // Make control globally accessible
+    if (typeof window !== 'undefined') {
+      const globalAny = window as any;
+      globalAny.VB6Controls = globalAny.VB6Controls || {};
+      globalAny.VB6Controls[name] = vb6Methods;
+    }
+  }, [id, name, updateControl, vb6Methods]);
 
   // Grid container
   const gridStyle: CSSProperties = {

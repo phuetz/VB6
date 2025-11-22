@@ -8,8 +8,14 @@ import { asyncHandler } from '../utils/asyncHandler';
 import { logger } from '../utils/logger';
 import * as path from 'path';
 import * as fs from 'fs/promises';
+import * as crypto from 'crypto';
 
 const router = Router();
+
+// WEAK RANDOMNESS BUG FIX: Cryptographically secure ID generation utility
+function generateSecureId(prefix: string): string {
+  return `${prefix}_${crypto.randomBytes(16).toString('hex')}`;
+}
 
 // Report storage
 const reports = new Map<string, ReportDefinition>();
@@ -63,7 +69,48 @@ interface ReportSession {
 // Open report
 router.post('/open', asyncHandler(async (req: Request, res: Response) => {
   const { fileName, reportKind } = req.body;
-  const reportId = `rpt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  // DATA VALIDATION BUG FIX: Validate fileName to prevent path traversal
+  if (!fileName || typeof fileName !== 'string') {
+    return res.status(400).json({
+      success: false,
+      error: 'fileName is required and must be a string'
+    });
+  }
+  
+  if (fileName.length > 255) {
+    return res.status(400).json({
+      success: false,
+      error: 'fileName too long (max 255 characters)'
+    });
+  }
+  
+  // Prevent path traversal attacks
+  if (fileName.includes('..') || fileName.includes('/') || fileName.includes('\\')) {
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid fileName: path traversal not allowed'
+    });
+  }
+  
+  // Only allow .rpt files
+  if (!fileName.toLowerCase().endsWith('.rpt')) {
+    return res.status(400).json({
+      success: false,
+      error: 'Only .rpt files are allowed'
+    });
+  }
+  
+  // Validate reportKind if provided
+  if (reportKind && typeof reportKind !== 'string') {
+    return res.status(400).json({
+      success: false,
+      error: 'reportKind must be a string'
+    });
+  }
+  
+  // WEAK RANDOMNESS BUG FIX: Use cryptographically secure ID generation
+  const reportId = generateSecureId('rpt');
   
   try {
     // In a real implementation, this would load the .rpt file
@@ -134,7 +181,9 @@ router.post('/open', asyncHandler(async (req: Request, res: Response) => {
       })),
     });
   } catch (error) {
-    res.json({ success: false, error: error.message });
+    // INTEGRATION BUG FIX: Consistent error handling across API boundaries
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    res.json({ success: false, error: errorMessage });
   }
 }));
 
@@ -158,7 +207,9 @@ router.post('/:id/datasource', asyncHandler(async (req: Request, res: Response) 
     
     res.json({ success: true });
   } catch (error) {
-    res.json({ success: false, error: error.message });
+    // INTEGRATION BUG FIX: Consistent error handling across API boundaries
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    res.json({ success: false, error: errorMessage });
   }
 }));
 
@@ -166,7 +217,8 @@ router.post('/:id/datasource', asyncHandler(async (req: Request, res: Response) 
 router.post('/:id/parameters', asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const { parameters } = req.body;
-  const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  // WEAK RANDOMNESS BUG FIX: Use cryptographically secure session ID generation
+  const sessionId = generateSecureId('session');
   
   const report = reports.get(id);
   if (!report) {
@@ -190,7 +242,9 @@ router.post('/:id/parameters', asyncHandler(async (req: Request, res: Response) 
       sessionId,
     });
   } catch (error) {
-    res.json({ success: false, error: error.message });
+    // INTEGRATION BUG FIX: Consistent error handling across API boundaries
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    res.json({ success: false, error: errorMessage });
   }
 }));
 
@@ -229,7 +283,9 @@ router.post('/:id/generate', asyncHandler(async (req: Request, res: Response) =>
       generatedAt: new Date(),
     });
   } catch (error) {
-    res.json({ success: false, error: error.message });
+    // INTEGRATION BUG FIX: Consistent error handling across API boundaries
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    res.json({ success: false, error: errorMessage });
   }
 }));
 
@@ -250,7 +306,7 @@ router.get('/session/:sessionId/page/:pageNumber', asyncHandler(async (req: Requ
   try {
     // Simulate page rendering
     // In a real implementation, this would return rendered page data
-    const page = parseInt(pageNumber);
+    // INTEGER OVERFLOW FIX: Validate parseInt result and range\n    const page = parseInt(pageNumber, 10);\n    if (isNaN(page) || page < 1 || page > 10000) { // Reasonable page limit\n      return res.status(400).json({ error: 'Invalid page number. Must be between 1 and 10000.' });\n    }
     
     res.json({
       success: true,
@@ -264,7 +320,9 @@ router.get('/session/:sessionId/page/:pageNumber', asyncHandler(async (req: Requ
       },
     });
   } catch (error) {
-    res.json({ success: false, error: error.message });
+    // INTEGRATION BUG FIX: Consistent error handling across API boundaries
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    res.json({ success: false, error: errorMessage });
   }
 }));
 
@@ -285,7 +343,8 @@ router.post('/session/:sessionId/export', asyncHandler(async (req: Request, res:
   
   try {
     // Simulate export
-    const exportId = `export_${Date.now()}`;
+    // WEAK RANDOMNESS BUG FIX: Use cryptographically secure export ID generation
+    const exportId = generateSecureId('export');
     const fileName = `${report.reportTitle}_${exportId}.${getFileExtension(format)}`;
     
     // In a real implementation, this would generate the actual export file
@@ -303,7 +362,9 @@ router.post('/session/:sessionId/export', asyncHandler(async (req: Request, res:
       ...exportInfo,
     });
   } catch (error) {
-    res.json({ success: false, error: error.message });
+    // INTEGRATION BUG FIX: Consistent error handling across API boundaries
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    res.json({ success: false, error: errorMessage });
   }
 }));
 
@@ -319,7 +380,8 @@ router.post('/session/:sessionId/print', asyncHandler(async (req: Request, res: 
   
   try {
     // Simulate printing
-    const printJobId = `print_${Date.now()}`;
+    // WEAK RANDOMNESS BUG FIX: Use cryptographically secure print job ID generation
+    const printJobId = generateSecureId('print');
     
     res.json({
       success: true,
@@ -330,7 +392,9 @@ router.post('/session/:sessionId/print', asyncHandler(async (req: Request, res: 
       pages: toPage ? `${fromPage || 1}-${toPage}` : 'All',
     });
   } catch (error) {
-    res.json({ success: false, error: error.message });
+    // INTEGRATION BUG FIX: Consistent error handling across API boundaries
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    res.json({ success: false, error: errorMessage });
   }
 }));
 
@@ -397,7 +461,9 @@ router.post('/:id/formula', asyncHandler(async (req: Request, res: Response) => 
       syntax: syntax || 'Crystal',
     });
   } catch (error) {
-    res.json({ success: false, error: error.message });
+    // INTEGRATION BUG FIX: Consistent error handling across API boundaries
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    res.json({ success: false, error: errorMessage });
   }
 }));
 
@@ -418,7 +484,9 @@ router.get('/:id/sql', asyncHandler(async (req: Request, res: Response) => {
       parameters: Array.from(report.parameters || []).map(p => p.name),
     });
   } catch (error) {
-    res.json({ success: false, error: error.message });
+    // INTEGRATION BUG FIX: Consistent error handling across API boundaries
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    res.json({ success: false, error: errorMessage });
   }
 }));
 

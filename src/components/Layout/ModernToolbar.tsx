@@ -307,12 +307,21 @@ const ModernToolbar: React.FC = () => {
             tooltip="Layer Management"
             onClick={() => {
               if (hasSelection) {
+                // Create dropdown safely without innerHTML
                 const dropdown = document.createElement('div');
                 dropdown.className = 'absolute bg-white border rounded-lg shadow-lg p-2 z-50';
-                dropdown.innerHTML = `
-                  <button class="w-full text-left px-3 py-2 hover:bg-gray-100 rounded">Bring to Front</button>
-                  <button class="w-full text-left px-3 py-2 hover:bg-gray-100 rounded">Send to Back</button>
-                `;
+                
+                // Create buttons safely
+                const frontButton = document.createElement('button');
+                frontButton.className = 'w-full text-left px-3 py-2 hover:bg-gray-100 rounded';
+                frontButton.textContent = 'Bring to Front';
+                
+                const backButton = document.createElement('button');
+                backButton.className = 'w-full text-left px-3 py-2 hover:bg-gray-100 rounded';
+                backButton.textContent = 'Send to Back';
+                
+                dropdown.appendChild(frontButton);
+                dropdown.appendChild(backButton);
                 document.body.appendChild(dropdown);
               }
             }}

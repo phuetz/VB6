@@ -330,7 +330,9 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
     }
 
     case 'ADD_FORM': {
-      const newId = state.forms.length > 0 ? Math.max(...state.forms.map(f => f.id)) + 1 : 1;
+      // BUFFER OVERFLOW FIX: Avoid spread operator with large arrays that could cause stack overflow
+      const newId = state.forms.length > 0 ? 
+        state.forms.reduce((maxId, form) => Math.max(maxId, form.id), 0) + 1 : 1;
       const name = action.payload.name;
       const newForm = { id: newId, name, caption: name, controls: [] };
       return {
@@ -377,13 +379,47 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
     }
 
     case 'UNDO': {
-      // Implementation for undo
-      return state;
+      // LOGIC BUG FIX: Implement actual undo functionality
+      if (state.historyIndex <= 0) return state;
+      
+      const prevIndex = state.historyIndex - 1;
+      const snapshot = state.history[prevIndex];
+      
+      return {
+        ...state,
+        controls: snapshot.controls.map(c => ({ ...c })),
+        selectedControls: [], // Clear selection to prevent stale references
+        nextId: snapshot.nextId,
+        historyIndex: prevIndex,
+        // STATE CONSISTENCY BUG FIX: Clear related UI state when undoing
+        alignmentGuides: { x: [], y: [] },
+        isSelecting: false,
+        selectionBox: { x: 0, y: 0, width: 0, height: 0 },
+        isResizing: false,
+        isMoving: false,
+      };
     }
 
     case 'REDO': {
-      // Implementation for redo
-      return state;
+      // LOGIC BUG FIX: Implement actual redo functionality
+      if (state.historyIndex >= state.history.length - 1) return state;
+      
+      const nextIndex = state.historyIndex + 1;
+      const snapshot = state.history[nextIndex];
+      
+      return {
+        ...state,
+        controls: snapshot.controls.map(c => ({ ...c })),
+        selectedControls: [], // Clear selection to prevent stale references
+        nextId: snapshot.nextId,
+        historyIndex: nextIndex,
+        // STATE CONSISTENCY BUG FIX: Clear related UI state when redoing
+        alignmentGuides: { x: [], y: [] },
+        isSelecting: false,
+        selectionBox: { x: 0, y: 0, width: 0, height: 0 },
+        isResizing: false,
+        isMoving: false,
+      };
     }
 
     default:

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VB6 Web IDE - Simple Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover { background: #0056b3; }
+    #console {
+      background: #1e1e1e;
+      color: #ffffff;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔧 VB6 Web IDE - Diagnostic Test</h1>
+    
+    <div id="status">
+      <div class="status warning">Initializing...</div>
+    </div>
+    
+    <div>
+      <button onclick="testBasicFeatures()">Test Basic Features</button>
+      <button onclick="testViteServer()">Test Vite Server</button>
+      <button onclick="clearConsole()">Clear Console</button>
+    </div>
+    
+    <div id="console"></div>
+  </div>
+
+  <script>
+    let consoleDiv = document.getElementById('console');
+    let statusDiv = document.getElementById('status');
+    
+    function log(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const prefix = type === 'error' ? '❌' : type === 'warn' ? '⚠️' : '✅';
+      consoleDiv.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+      consoleDiv.scrollTop = consoleDiv.scrollHeight;
+      
+      console[type === 'info' ? 'log' : type](message);
+    }
+    
+    function setStatus(message, type = 'success') {
+      statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+    }
+    
+    function clearConsole() {
+      consoleDiv.textContent = '';
+    }
+    
+    function testBasicFeatures() {
+      log('Testing basic browser features...');
+      
+      // Test localStorage
+      try {
+        localStorage.setItem('test', 'value');
+        localStorage.removeItem('test');
+        log('✓ localStorage works');
+      } catch (e) {
+        log('✗ localStorage failed: ' + e.message, 'error');
+      }
+      
+      // Test modules
+      try {
+        if (typeof globalThis !== 'undefined') {
+          log('✓ globalThis available');
+        }
+        
+        // Test basic JS features needed by the app
+        const testObj = { x: 1 };
+        const testArray = [1, 2, 3];
+        if (testArray.length === 3 && testObj.x === 1) {
+          log('✓ Basic JS operations work');
+        }
+      } catch (e) {
+        log('✗ Basic test failed: ' + e.message, 'error');
+      }
+    }
+    
+    function testViteServer() {
+      log('Testing Vite development server...');
+      
+      // Test if the main app is accessible
+      fetch('/')
+        .then(response => {
+          if (response.ok) {
+            log('✓ Vite server is responding');
+            return response.text();
+          } else {
+            log('✗ Vite server responded with error: ' + response.status, 'error');
+          }
+        })
+        .then(html => {
+          if (html && html.includes('root')) {
+            log('✓ Main HTML contains root element');
+          } else {
+            log('⚠️ Main HTML may be incomplete', 'warn');
+          }
+        })
+        .catch(e => {
+          log('✗ Cannot reach Vite server: ' + e.message, 'error');
+        });
+    }
+    
+    // Initialize
+    window.addEventListener('load', () => {
+      log('Diagnostic page loaded');
+      setStatus('Diagnostic ready', 'success');
+      testBasicFeatures();
+    });
+    
+    // Error handlers
+    window.addEventListener('error', (e) => {
+      log('Global error: ' + e.message, 'error');
+      setStatus('Error detected', 'error');
+    });
+    
+    window.addEventListener('unhandledrejection', (e) => {
+      log('Promise rejection: ' + e.reason, 'error');
+      setStatus('Promise error detected', 'error');
+    });
+  </script>
+</body>
+</html>

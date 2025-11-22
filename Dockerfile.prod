@@ -1,0 +1,60 @@
+# Dockerfile optimisé pour production avec multi-stage build
+FROM node:18-alpine AS deps
+# Installation des dépendances uniquement
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+FROM node:18-alpine AS builder
+# Build de l'application
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine AS runtime
+# Image finale minimaliste
+
+# Installer uniquement les outils nécessaires
+RUN apk add --no-cache \
+    curl \
+    tzdata \
+    && cp /usr/share/zoneinfo/UTC /etc/localtime \
+    && echo "UTC" > /etc/timezone
+
+# Créer un utilisateur non-root
+RUN addgroup -g 1001 -S nodejs \
+    && adduser -S nodejs -u 1001
+
+# Configuration nginx optimisée pour production
+COPY config/nginx-prod.conf /etc/nginx/nginx.conf
+
+# Copier les fichiers statiques
+COPY --from=builder --chown=nodejs:nodejs /app/dist /usr/share/nginx/html
+
+# Créer les répertoires avec les bonnes permissions
+RUN mkdir -p /var/cache/nginx /var/log/nginx /app/data \
+    && chown -R nodejs:nodejs /var/cache/nginx /var/log/nginx /app/data \
+    && chmod 755 /usr/share/nginx/html
+
+# Script de healthcheck
+COPY scripts/healthcheck.sh /usr/local/bin/healthcheck
+RUN chmod +x /usr/local/bin/healthcheck
+
+# Sécurité: enlever les headers nginx
+RUN sed -i '/server_tokens/d' /etc/nginx/nginx.conf \
+    && echo "server_tokens off;" >> /etc/nginx/nginx.conf
+
+# Exposer uniquement le port nécessaire
+EXPOSE 80
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD /usr/local/bin/healthcheck || exit 1
+
+# Démarrer avec l'utilisateur non-root
+USER nodejs
+
+# Commande de démarrage
+CMD ["nginx", "-g", "daemon off;"]

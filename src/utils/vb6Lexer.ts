@@ -85,12 +85,23 @@ const OPERATORS = ['>=', '<=', '<>', '\\', '=', '>', '<', '+', '-', '*', '/', '^
 const PUNCTUATIONS = ['(', ')', ',', '.', ':'];
 
 export function lexVB6(code: string): Token[] {
+  // LEXER BUG FIX: Add input validation and size limits
+  if (typeof code !== 'string') {
+    throw new Error('Invalid code input');
+  }
+  if (code.length > 1000000) { // 1MB limit
+    throw new Error('Code too large to lex');
+  }
   const tokens: Token[] = [];
   let i = 0;
   let line = 1;
   let column = 1;
 
   const addToken = (type: TokenType, value: string, l = line, c = column) => {
+    // LEXER BUG FIX: Limit token array size to prevent memory exhaustion
+    if (tokens.length >= 1000000) {
+      throw new Error('Too many tokens');
+    }
     tokens.push({ type, value, line: l, column: c });
   };
 
@@ -113,7 +124,9 @@ export function lexVB6(code: string): Token[] {
     if (/\s/.test(ch)) {
       const start = i;
       const startCol = column;
-      while (i < code.length && /\s/.test(code[i]) && code[i] !== '\n') {
+      // LEXER BUG FIX: Add bounds checking to prevent infinite loops
+      const maxWhitespace = Math.min(i + 10000, code.length);
+      while (i < maxWhitespace && /\s/.test(code[i]) && code[i] !== '\n') {
         i++;
         column++;
       }
@@ -124,7 +137,9 @@ export function lexVB6(code: string): Token[] {
     if (ch === "'") {
       const start = i;
       const startCol = column;
-      while (i < code.length && code[i] !== '\n') {
+      // LEXER BUG FIX: Limit comment length
+      const maxComment = Math.min(i + 10000, code.length);
+      while (i < maxComment && code[i] !== '\n') {
         i++;
         column++;
       }
@@ -137,7 +152,9 @@ export function lexVB6(code: string): Token[] {
       i++;
       column++;
       let value = '';
-      while (i < code.length) {
+      // LEXER BUG FIX: Limit string literal length
+      const maxString = Math.min(i + 100000, code.length);
+      while (i < maxString) {
         if (code[i] === '"') {
           if (code[i + 1] === '"') {
             value += '"';
@@ -151,6 +168,10 @@ export function lexVB6(code: string): Token[] {
         i++;
         column++;
       }
+      // LEXER BUG FIX: Check if we hit the limit without finding closing quote
+      if (i >= maxString) {
+        throw new Error('Unterminated string literal');
+      }
       i++;
       column++; // consume closing quote
       addToken(TokenType.StringLiteral, value, line, startCol);
@@ -160,7 +181,9 @@ export function lexVB6(code: string): Token[] {
     if (/[0-9]/.test(ch)) {
       const start = i;
       const startCol = column;
-      while (i < code.length && /[0-9A-Fa-fxX&.]/.test(code[i])) {
+      // LEXER BUG FIX: Limit number literal length
+      const maxNumber = Math.min(i + 100, code.length);
+      while (i < maxNumber && /[0-9A-Fa-fxX&.]/.test(code[i])) {
         i++;
         column++;
       }
@@ -171,7 +194,9 @@ export function lexVB6(code: string): Token[] {
     if (/[A-Za-z_]/.test(ch)) {
       const start = i;
       const startCol = column;
-      while (i < code.length && /[A-Za-z0-9_]/.test(code[i])) {
+      // LEXER BUG FIX: Limit identifier length
+      const maxIdentifier = Math.min(i + 256, code.length);
+      while (i < maxIdentifier && /[A-Za-z0-9_]/.test(code[i])) {
         i++;
         column++;
       }

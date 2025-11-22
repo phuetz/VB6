@@ -1,0 +1,165 @@
+version: '3.8'
+
+services:
+  # Service principal VB6 Web IDE
+  vb6-ide:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NODE_VERSION=18
+        - BUILD_ENV=production
+    container_name: vb6-web-ide
+    image: vb6-web-ide:latest
+    ports:
+      - "8080:80"
+      - "8443:443"
+    environment:
+      # Configuration de l'application
+      - NODE_ENV=production
+      - VITE_APP_ENV=production
+      - VITE_APP_VERSION=${APP_VERSION:-1.0.0}
+      
+      # Fonctionnalités
+      - VITE_ENABLE_ACTIVEX=true
+      - VITE_ENABLE_COMPILER=true
+      - VITE_ENABLE_DEBUGGER=true
+      - VITE_ENABLE_PERFORMANCE_MONITORING=true
+      - VITE_ENABLE_SERVICE_WORKER=true
+      
+      # Sécurité
+      - VITE_CSP_NONCE=${CSP_NONCE:-random-nonce}
+      - VITE_CORS_ORIGIN=${CORS_ORIGIN:-https://localhost:8443}
+      
+      # Performance
+      - VITE_MAX_WORKERS=4
+      - VITE_MEMORY_LIMIT=2048
+      
+    volumes:
+      # Volumes pour la persistance des données
+      - vb6_projects:/app/data/projects
+      - vb6_temp:/app/data/temp
+      - vb6_cache:/app/data/cache
+      - vb6_logs:/app/logs
+      
+      # Configuration personnalisée (optionnel)
+      - ./config/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./config/ssl:/etc/nginx/ssl:ro
+      
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+      
+    restart: unless-stopped
+    
+    networks:
+      - vb6-network
+      
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  # Service Nginx pour reverse proxy et SSL (optionnel)
+  nginx-proxy:
+    image: nginx:alpine
+    container_name: vb6-nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/nginx-proxy.conf:/etc/nginx/nginx.conf:ro
+      - ./config/ssl:/etc/nginx/ssl:ro
+      - nginx_cache:/var/cache/nginx
+    depends_on:
+      - vb6-ide
+    networks:
+      - vb6-network
+    restart: unless-stopped
+
+  # Service de monitoring (optionnel)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: vb6-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - vb6-network
+    restart: unless-stopped
+
+  # Service Grafana pour visualisation (optionnel)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: vb6-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./config/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    networks:
+      - vb6-network
+    restart: unless-stopped
+
+  # Service de backup (optionnel)
+  backup:
+    image: offen/docker-volume-backup:latest
+    container_name: vb6-backup
+    environment:
+      - BACKUP_CRON_EXPRESSION=0 2 * * *
+      - BACKUP_FILENAME=vb6-backup-%Y-%m-%d.tar.gz
+      - BACKUP_LATEST_SYMLINK=vb6-backup-latest.tar.gz
+      - BACKUP_RETENTION_DAYS=7
+    volumes:
+      - vb6_projects:/backup/projects:ro
+      - vb6_cache:/backup/cache:ro
+      - ./backups:/archive
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - vb6-network
+    restart: unless-stopped
+
+# Réseaux
+networks:
+  vb6-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# Volumes
+volumes:
+  vb6_projects:
+    driver: local
+  vb6_temp:
+    driver: local
+  vb6_cache:
+    driver: local
+  vb6_logs:
+    driver: local
+  nginx_cache:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local

@@ -8,6 +8,10 @@ import PropertiesWindow from '../Panels/PropertiesWindow/PropertiesWindow';
 import ControlTree from '../Panels/ControlTree/ControlTree';
 import ImmediateWindow from '../Panels/ImmediateWindow/ImmediateWindow';
 import { WatchWindow, LocalsWindow, CallStackWindow, DebugToolbar } from '../Debug/DebugWindows';
+import AdvancedDebugPanel from '../Debug/AdvancedDebugPanel';
+import GitPanel from '../Panels/GitPanel';
+import MemoryProfiler from '../Debug/MemoryProfiler';
+import TestRunner from '../Testing/TestRunner';
 
 const MainContent: React.FC = () => {
   const {
@@ -22,6 +26,9 @@ const MainContent: React.FC = () => {
     showCallStack,
     executionMode,
     toggleWindow,
+    showGitPanel,
+    showMemoryProfiler,
+    showTestRunner,
   } = useVB6Store();
 
   return (
@@ -36,8 +43,13 @@ const MainContent: React.FC = () => {
 
         {showCodeEditor ? <AdvancedCodeEditor /> : <FormDesigner />}
 
-        {/* Bottom Panel - Immediate Window */}
-        {showImmediateWindow && <ImmediateWindow />}
+        {/* Bottom Panel - Immediate Window and Advanced Debug Panel */}
+        <div className="flex flex-col">
+          {showImmediateWindow && <ImmediateWindow />}
+          {(executionMode === 'break' || executionMode === 'run' || executionMode === 'design') && (
+            <AdvancedDebugPanel className="h-80 border-t border-gray-400" />
+          )}
+        </div>
       </div>
 
       {/* Right Panel - Project Explorer and Properties */}
@@ -58,6 +70,21 @@ const MainContent: React.FC = () => {
         )}
         {showCallStack && (
           <CallStackWindow visible={showCallStack} onClose={() => toggleWindow('showCallStack')} />
+        )}
+        
+        {/* Git Panel */}
+        {showGitPanel && (
+          <GitPanel className="h-96 border-t border-gray-400" />
+        )}
+        
+        {/* Memory Profiler */}
+        {showMemoryProfiler && (
+          <MemoryProfiler className="w-80 h-96 absolute bottom-4 right-4 shadow-lg" />
+        )}
+        
+        {/* Test Runner */}
+        {showTestRunner && (
+          <TestRunner className="h-96 border-t border-gray-400" />
         )}
       </div>
     </div>

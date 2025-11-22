@@ -69,6 +69,16 @@ export const AIAssistant: React.FC = () => {
 
   // Update context when code changes
   useEffect(() => {
+    if (!currentCode) {
+      setContext({
+        currentFile: 'Form1.frm',
+        errors: [],
+        controls,
+        formProperties,
+      });
+      return;
+    }
+    
     const codeAnalysis = analyzeVB6Code(currentCode);
     setContext({
       currentFile: 'Form1.frm',

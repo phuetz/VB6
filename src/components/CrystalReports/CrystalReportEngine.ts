@@ -406,6 +406,7 @@ export class CrystalReportEngine {
     const avgs: { [field: string]: number } = {};
     
     for (const field in sums) {
+      if (!Object.prototype.hasOwnProperty.call(sums, field)) continue;
       avgs[field] = sums[field] / records.length;
     }
     

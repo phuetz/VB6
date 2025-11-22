@@ -21,6 +21,134 @@ interface PerformanceMetrics {
   timestamp: number;
 }
 
+/**
+ * BROWSER FINGERPRINTING BUG FIX: Performance fingerprinting prevention utilities
+ */
+class PerformanceFingerprintingProtection {
+  private static instance: PerformanceFingerprintingProtection;
+  private fingerprintingJitter: number = 0;
+  private performanceNoise: Map<string, number> = new Map();
+  
+  static getInstance(): PerformanceFingerprintingProtection {
+    if (!this.instance) {
+      this.instance = new PerformanceFingerprintingProtection();
+    }
+    return this.instance;
+  }
+  
+  /**
+   * BROWSER FINGERPRINTING BUG FIX: Quantize FPS to prevent CPU fingerprinting
+   */
+  quantizeFPS(fps: number): number {
+    // Quantize FPS to 5-frame intervals to prevent precise CPU performance fingerprinting
+    const quantized = Math.round(fps / 5) * 5;
+    
+    // Add consistent noise based on session to prevent correlation
+    const sessionNoise = this.getSessionNoise('fps');
+    const noisyFPS = quantized + (sessionNoise - 0.5) * 2; // ±1 FPS noise
+    
+    // Clamp to reasonable bounds
+    return Math.max(10, Math.min(120, Math.round(noisyFPS)));
+  }
+  
+  /**
+   * BROWSER FINGERPRINTING BUG FIX: Obfuscate memory usage to prevent RAM fingerprinting
+   */
+  obfuscateMemoryUsage(memoryMB: number): number {
+    // Quantize memory to 10MB increments
+    const quantized = Math.round(memoryMB / 10) * 10;
+    
+    // Add session-consistent noise
+    const sessionNoise = this.getSessionNoise('memory');
+    const noisyMemory = quantized + (sessionNoise - 0.5) * 20; // ±10MB noise
+    
+    // Clamp to reasonable bounds (10MB - 2GB)
+    return Math.max(10, Math.min(2048, Math.round(noisyMemory)));
+  }
+  
+  /**
+   * BROWSER FINGERPRINTING BUG FIX: Randomize timing measurements
+   */
+  obfuscateTiming(timeMs: number): number {
+    // Quantize timing to 1ms intervals to reduce precision
+    const quantized = Math.round(timeMs);
+    
+    // Add timing jitter
+    const jitter = this.getTimingJitter();
+    const noisyTime = quantized + jitter;
+    
+    return Math.max(0, noisyTime);
+  }
+  
+  /**
+   * BROWSER FINGERPRINTING BUG FIX: Anonymize browser information
+   */
+  anonymizeBrowserInfo(): string {
+    // Return generic browser info instead of real userAgent
+    const genericBrowsers = ['Chrome', 'Firefox', 'Safari', 'Edge'];
+    const sessionIndex = this.getSessionNoise('browser') * genericBrowsers.length;
+    return genericBrowsers[Math.floor(sessionIndex)];
+  }
+  
+  /**
+   * BROWSER FINGERPRINTING BUG FIX: Get session-consistent noise
+   */
+  private getSessionNoise(key: string): number {
+    if (!this.performanceNoise.has(key)) {
+      // Generate session-consistent pseudo-random noise
+      let hash = 0;
+      const sessionKey = key + (sessionStorage.getItem('vb6_session') || 'default');
+      for (let i = 0; i < sessionKey.length; i++) {
+        const char = sessionKey.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32-bit integer
+      }
+      this.performanceNoise.set(key, Math.abs(hash % 1000) / 1000);
+    }
+    return this.performanceNoise.get(key)!;
+  }
+  
+  /**
+   * BROWSER FINGERPRINTING BUG FIX: Generate timing jitter
+   */
+  private getTimingJitter(): number {
+    // Generate cryptographically secure timing jitter ±2ms
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const array = new Uint32Array(1);
+      crypto.getRandomValues(array);
+      return (array[0] / 0xFFFFFFFF - 0.5) * 4; // ±2ms
+    } else {
+      // Fallback with multiple entropy sources
+      const r1 = Math.random();
+      const r2 = Math.random();
+      return ((r1 + r2) / 2 - 0.5) * 4;
+    }
+  }
+  
+  /**
+   * BROWSER FINGERPRINTING BUG FIX: Add canvas fingerprinting protection
+   */
+  addCanvasNoise(ctx: CanvasRenderingContext2D): void {
+    // Add subtle noise to canvas to prevent fingerprinting
+    const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+    const data = imageData.data;
+    
+    // Add minimal noise to random pixels (invisible to human eye)
+    const noiseCount = Math.floor(data.length / 1000); // 0.1% of pixels
+    for (let i = 0; i < noiseCount; i++) {
+      const pixelIndex = Math.floor(Math.random() * (data.length / 4)) * 4;
+      if (pixelIndex < data.length - 3) {
+        // Add ±1 value noise to RGB channels (imperceptible)
+        data[pixelIndex] = Math.max(0, Math.min(255, data[pixelIndex] + (Math.random() - 0.5) * 2));
+        data[pixelIndex + 1] = Math.max(0, Math.min(255, data[pixelIndex + 1] + (Math.random() - 0.5) * 2));
+        data[pixelIndex + 2] = Math.max(0, Math.min(255, data[pixelIndex + 2] + (Math.random() - 0.5) * 2));
+      }
+    }
+    
+    ctx.putImageData(imageData, 0, 0);
+  }
+}
+
 export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => void }> = ({
   visible,
   onClose,
@@ -34,7 +162,8 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
     renderTime: 0,
     controlsCount: 0,
     eventsCount: 0,
-    timestamp: Date.now(),
+    // BROWSER FINGERPRINTING BUG FIX: Use obfuscated timestamp
+    timestamp: PerformanceFingerprintingProtection.getInstance().obfuscateTiming(Date.now()),
   });
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -43,49 +172,76 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
   const animationFrameRef = useRef<number>();
   const { recordPerformanceMetrics } = useVB6Store();
 
+  // ULTRA-OPTIMIZED: Fix RAF memory leak with proper cleanup
   useEffect(() => {
-    if (!visible) return;
+    // Only run if visible AND monitoring
+    if (!visible || !isMonitoring) {
+      // Clear any existing RAF immediately
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = undefined;
+      }
+      return;
+    }
+
+    let isActive = true; // Track if effect is still active
 
     const updateMetrics = () => {
-      const now = performance.now();
+      // Check if we should continue
+      if (!isActive || !visible || !isMonitoring) {
+        animationFrameRef.current = undefined;
+        return;
+      }
+
+      // BROWSER FINGERPRINTING BUG FIX: Use obfuscated timing measurements
+      const protection = PerformanceFingerprintingProtection.getInstance();
+      const now = protection.obfuscateTiming(performance.now());
       const deltaTime = now - lastFrameTimeRef.current;
       frameCountRef.current++;
 
       // Calculate FPS every second
       if (deltaTime >= 1000) {
-        const fps = Math.round((frameCountRef.current * 1000) / deltaTime);
+        // BROWSER FINGERPRINTING BUG FIX: Quantize FPS to prevent CPU fingerprinting
+        const rawFps = Math.round((frameCountRef.current * 1000) / deltaTime);
+        const fps = protection.quantizeFPS(rawFps);
 
         const newMetrics: PerformanceMetrics = {
           fps,
-          memoryUsage: (performance as any).memory?.usedJSHeapSize / 1024 / 1024 || 0,
+          // BROWSER FINGERPRINTING BUG FIX: Obfuscate memory usage to prevent RAM fingerprinting
+          memoryUsage: protection.obfuscateMemoryUsage((performance as any).memory?.usedJSHeapSize / 1024 / 1024 || 0),
           cpuUsage: Math.random() * 30 + 10, // Simulated CPU usage
-          renderTime: Math.random() * 5 + 1, // Simulated render time
+          // BROWSER FINGERPRINTING BUG FIX: Obfuscate render timing
+          renderTime: protection.obfuscateTiming(Math.random() * 5 + 1),
           controlsCount: document.querySelectorAll('[data-vb6-control]').length,
           eventsCount: Math.floor(Math.random() * 10),
-          timestamp: Date.now(),
+          // BROWSER FINGERPRINTING BUG FIX: Obfuscate timestamp
+          timestamp: protection.obfuscateTiming(Date.now()),
         };
 
         setCurrentMetrics(newMetrics);
         recordPerformanceMetrics(newMetrics);
 
-        if (isMonitoring) {
-          setMetrics(prev => [...prev.slice(-49), newMetrics]); // Keep last 50 points
-        }
+        setMetrics(prev => [...prev.slice(-49), newMetrics]); // Keep last 50 points
 
         frameCountRef.current = 0;
         lastFrameTimeRef.current = now;
       }
 
-      if (isMonitoring) {
+      // Schedule next frame only if still active
+      if (isActive && visible && isMonitoring) {
         animationFrameRef.current = requestAnimationFrame(updateMetrics);
       }
     };
 
-    updateMetrics();
+    // Start the update loop
+    animationFrameRef.current = requestAnimationFrame(updateMetrics);
 
+    // CRITICAL: Cleanup function must cancel RAF and mark as inactive
     return () => {
+      isActive = false;
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = undefined;
       }
     };
   }, [visible, isMonitoring, recordPerformanceMetrics]);
@@ -142,6 +298,9 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
     });
 
     ctx.stroke();
+    
+    // BROWSER FINGERPRINTING BUG FIX: Add canvas fingerprinting protection
+    PerformanceFingerprintingProtection.getInstance().addCanvasNoise(ctx);
 
     // Draw memory usage line
     ctx.strokeStyle = '#10b981';
@@ -324,7 +483,8 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
                 </div>
                 <div className="flex justify-between">
                   <span>Browser:</span>
-                  <span className="font-mono">{navigator.userAgent.split(' ')[0]}</span>
+                  {/* BROWSER FINGERPRINTING BUG FIX: Use generic browser info */}
+                  <span className="font-mono">{PerformanceFingerprintingProtection.getInstance().anonymizeBrowserInfo()}</span>
                 </div>
               </div>
             </div>

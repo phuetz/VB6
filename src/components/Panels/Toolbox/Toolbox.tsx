@@ -2,7 +2,11 @@ import React from 'react';
 import { useVB6 } from '../../../context/VB6Context';
 import { controlCategories } from '../../../data/controlCategories';
 
-const Toolbox: React.FC = () => {
+interface ToolboxProps {
+  onShowActiveXManager?: () => void;
+}
+
+const Toolbox: React.FC<ToolboxProps> = ({ onShowActiveXManager }) => {
   const { state, dispatch, createControl } = useVB6();
 
   const handleToolboxDragStart = (e: React.DragEvent, controlType: string) => {
@@ -66,7 +70,20 @@ const Toolbox: React.FC = () => {
                   payload: { isDragging: false },
                 })
               }
-              onDoubleClick={() => state.executionMode === 'design' && createControl(control.type)}
+              onDoubleClick={() => {
+                if (state.executionMode === 'design') {
+                  if ((control as any).special === 'activex-manager') {
+                    onShowActiveXManager?.();
+                  } else {
+                    createControl(control.type);
+                  }
+                }
+              }}
+              onClick={() => {
+                if ((control as any).special === 'activex-manager') {
+                  onShowActiveXManager?.();
+                }
+              }}
               title={control.name}
             >
               <div className="text-lg mb-1">{control.icon}</div>

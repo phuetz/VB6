@@ -4,136 +4,214 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a comprehensive web-based Visual Basic 6 IDE clone built with React and TypeScript. It features a complete VB6 language implementation including lexer, parser, semantic analyzer, transpiler, and runtime, along with a sophisticated form designer that supports drag-and-drop control placement and all major VB6 controls.
+Web-based Visual Basic 6 IDE clone built with React 18 and TypeScript. Features a complete VB6 language implementation (lexer, parser, semantic analyzer, transpiler, runtime), a sophisticated form designer with 36+ VB6 controls, and a Node.js backend server for database operations, real-time collaboration, and AI assistance. Achieves 70% VB6 compatibility.
 
-## Common Development Commands
+## Quick Reference
 
 ```bash
-# Development
-npm run dev              # Start development server
-npm run build           # Production build
-npm run preview         # Preview production build
+# Frontend (root directory)
+npm run dev              # Start Vite dev server
+npm run build            # Production build
+npm test                 # Vitest in watch mode
+npm run test:run         # Run tests once (CI)
+npm run lint             # ESLint
+npm run format           # Prettier
 
-# Code Quality
-npm run lint            # Lint code with ESLint
-npm run format          # Format code with Prettier
-npm run format:check    # Check if code is properly formatted
-
-# Testing
-npm test               # Run unit tests with Vitest
-npm run test:ui        # Run tests with UI interface
+# Backend (cd server first)
+npm run dev              # Start with nodemon
+npm run start:all        # All servers (database, AI, collaboration)
+npm test                 # Jest tests
 ```
+
+## Development Commands
+
+### Frontend
+```bash
+npm run dev              # Start Vite dev server
+npm run build            # Production build with code splitting
+npm run preview          # Preview production build
+npm run type-check       # TypeScript type checking
+npm run lint             # ESLint code linting
+npm run format           # Format with Prettier
+npm run format:check     # Check formatting
+
+# Testing (Vitest)
+npm test                 # Watch mode
+npm run test:run         # Single run (CI)
+npm run test:ui          # UI interface
+npm run test:coverage    # Coverage report (70% threshold)
+npm run test:startup     # Critical startup tests only
+npm test -- src/test/compiler/vb6Lexer.test.ts  # Single file
+npm test -- --grep "pattern"                     # Pattern match
+
+# Analysis
+npm run analyze          # Bundle size analysis
+npm run budget:check     # Check bundle size budget
+```
+
+### Backend Server
+```bash
+cd server
+npm run dev              # Start with nodemon (auto-restart)
+npm start                # Production server
+npm run start:all        # All servers (database, AI, collaboration)
+npm run start:mock       # Mock servers for development
+npm run build            # Compile TypeScript
+npm test                 # Jest tests
+```
+
+## Code Style & Conventions
+
+### Formatting (Prettier)
+- 2 spaces indentation, semicolons, single quotes, width 100, LF line endings, trailing commas (es5)
+
+### Naming
+- **React components**: `PascalCase` (e.g., `ModernApp.tsx`, `DesignerCanvas.tsx`)
+- **Utilities/scripts**: `kebab-case` (e.g., `fix-infinite-loop.ts`)
+- **Test files**: `*.test.ts` / `*.test.tsx`
+
+### Commits (Conventional)
+- Format: `type(scope): description` (e.g., `feat(runtime): add DateAdd function`)
+- Types: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`
 
 ## Architecture Overview
 
 ### State Management (Dual Pattern)
+The project uses **two state management systems** that coexist:
 
-- **Zustand Store** (`src/stores/vb6Store.ts`): Primary IDE state management (818 lines)
-  - Controls, forms, UI state, debugging, performance monitoring
-  - Actions for all IDE operations (create, update, delete controls, etc.)
-- **React Context** (`src/context/VB6Context.tsx`): Form and control management
-  - Control manipulation, clipboard operations, project save/load
-  - Uses reducer pattern (`src/context/vb6Reducer.ts`)
+1. **Zustand Store** (`src/stores/vb6Store.ts`) - Global IDE state
+   - Controls, forms, UI panels, debugging, performance metrics
+   - Undo/redo history, uses `subscribeWithSelector` middleware
+   - Use shallow selectors: `useVB6Store(state => state.controls, shallow)`
+
+2. **React Context** (`src/context/VB6Context.tsx`) - Form-specific operations
+   - Control manipulation, clipboard, project save/load (JSZip)
+   - Event execution and VB6 code evaluation
+   - Uses reducer pattern (`src/context/vb6Reducer.ts`)
+
+**When adding features:**
+- Use **Zustand** for global IDE state (panels, debugging, performance)
+- Use **React Context** for form-specific operations (control manipulation, events)
 
 ### Component Architecture
-
 ```
 src/components/
-├── Designer/           # Form designer with drag-drop canvas
-├── Editor/            # Monaco-based code editor
-├── Panels/            # Toolbox, Properties, Project Explorer
-├── Layout/            # IDE layout (menus, toolbars, status bar)
-├── Debug/             # Debugging panels and output
-├── Dialogs/           # Modal dialogs and project wizards
-├── DragDrop/          # Advanced drag-drop system
-└── [35+ other specialized components]
+├── Designer/      # Form designer (canvas, resize handles, alignment guides)
+├── Editor/        # Monaco code editor with VB6 syntax
+├── Panels/        # Toolbox, Properties Window, Project Explorer
+├── Controls/      # 36+ VB6 controls (TextBox, Label, MSFlexGrid, etc.)
+├── Debug/         # Debugging panels (Immediate, Locals, Watch, Call Stack)
+├── DragDrop/      # @dnd-kit based drag-drop system
+└── Layout/        # MenuBar, Toolbar, StatusBar
 ```
 
-### VB6 Language Implementation
+### VB6 Compiler Pipeline
 
-- **Lexer** (`vb6Lexer.ts`): Tokenizes VB6 source code
-- **Parser** (`vb6Parser.ts`): Generates Abstract Syntax Tree (AST)
-- **Semantic Analyzer** (`vb6SemanticAnalyzer.ts`): Type checking and validation
-- **Transpiler** (`vb6Transpiler.ts`): Converts VB6 to JavaScript
-- **Runtime** (`VB6Runtime.tsx`): JavaScript runtime for VB6 functions
+```
+src/utils/vb6Lexer.ts → src/utils/vb6Parser.ts → src/utils/vb6SemanticAnalyzer.ts → src/utils/vb6Transpiler.ts
+     (Tokens)              (AST)                   (Type checking)                    (JavaScript)
+```
+
+VB6 syntax changes require coordinated updates across all four stages. Test with both unit tests (`src/test/compiler/`) and integration tests.
+
+**Runtime Library** (`src/runtime/`) - 40+ files implementing VB6 built-in functions (string, math, date/time, file I/O, conversion, collections, error handling, graphics).
+
+### Backend Server (`server/`)
+
+- **Database**: ADO/DAO/RDO/ODBC with MySQL, PostgreSQL, MSSQL, SQLite, MongoDB
+- **Real-time**: WebSocket via Socket.IO for collaboration
+- **AI**: OpenAI/TensorFlow.js for code assistance
+- **Security**: JWT auth, rate limiting, helmet.js CSP
+
+**Routes**: `/api/database`, `/api/ado`, `/api/dao`, `/api/rdo`, `/api/reports`
 
 ## Key Services
 
-- **FileManager** (`src/services/FileManager.ts`): Project file operations and VB6 format import/export
-- **VB6Compiler** (`src/services/VB6Compiler.ts`): VB6 code compilation and transpilation
-- **VB6Debugger** (`src/services/VB6Debugger.ts`): Debugging services with breakpoints
-- **ThemeManager** (`src/services/ThemeManager.ts`): UI theming support
+| Service | Location | Purpose |
+|---------|----------|---------|
+| VB6Compiler | `src/services/VB6Compiler.ts` | Orchestrates compiler pipeline |
+| FileManager | `src/services/FileManager.ts` | VB6 file formats (.frm, .bas, .vbp) |
+| VB6Debugger | `src/services/VB6Debugger.ts` | Breakpoints, step execution |
+| ThemeManager | `src/services/ThemeManager.ts` | Classic VB6/Modern/Dark themes |
 
-## Form Designer Features
+## Form Designer
 
-- Drag-and-drop control placement with grid snapping
-- Multi-select with alignment guides and rubber band selection
-- Zoom functionality (25%-400%) with zoom controls
-- Undo/redo system with complete history management
-- 40+ VB6 controls implemented (TextBox, Label, CommandButton, TreeView, ListView, etc.)
-- Real-time property editing with immediate visual feedback
+### Dual Drag & Drop System
+- **Toolbox → Canvas** (@dnd-kit): Creates new controls, red alignment guides
+- **Canvas manipulation** (native mouse): Moves existing controls, green alignment guides
 
-## Testing Framework
+### Control Manipulation
+- **Resize**: 8-direction handles (single selection only), Shift for aspect ratio
+- **Alignment**: O(n) memoized guides snapping to edges and centers
+- **Grid**: 8px default snapping
+- **Zoom**: 25%-400% with zoom-aware boundaries
+- **Keyboard**: Arrow keys for movement, Ctrl+Arrows for resizing
 
-- **Vitest** with jsdom environment for unit tests
-- **React Testing Library** for component testing
-- Comprehensive test coverage for VB6 language features
-- E2E tests for form designer functionality
+## Testing
 
-## Important Patterns
+- **Framework**: Vitest + React Testing Library (jsdom)
+- **Coverage threshold**: 70%
+- **Setup**: `src/test/setup.ts`
 
-### Provider Hierarchy
-
-```typescript
-<VB6Provider>
-  <DragDropProvider>
-    <App />
-  </DragDropProvider>
-</VB6Provider>
+```
+src/test/
+├── compiler/       # Lexer, parser, transpiler tests
+├── runtime/        # VB6 function tests
+├── components/     # Component tests
+├── integration/    # E2E tests
+└── compatibility/  # VB6 compatibility validation
 ```
 
-### Hook-based Logic
+## Development Patterns
 
-- `useAutoSave.ts`: Auto-save functionality
-- `useControlManipulation.ts`: Control operations and transformations
-- `useDragDrop.ts`: Advanced drag-drop with multi-select support
-- `useKeyboardShortcuts.ts`: IDE keyboard shortcuts
-- `useUndoRedo.ts`: History management for designer actions
+### Key Hooks
+| Hook | Purpose |
+|------|---------|
+| `useControlManipulation.ts` | Control operations with memoized alignment guides |
+| `useAutoSave.ts` | Debounced auto-save to localStorage |
+| `useUndoRedo.ts` | History management with snapshots |
+| `useCollaboration.ts` | WebSocket real-time collaboration |
 
 ### Control System
-
-- Controls use consistent property patterns (Name, Left, Top, Width, Height, etc.)
-- Event system supports all VB6 events (Click, MouseMove, KeyPress, etc.)
-- Properties are dynamically generated based on control type
-- Tab order and Z-index management for proper layering
-
-## Development Notes
-
-### Build Configuration
-
-- **Vite** build system with React plugin
-- **TypeScript** in strict mode with multiple tsconfig files
-- **Monaco Editor** integration for code editing with VB6 syntax highlighting
-- **Tailwind CSS** for styling with PostCSS processing
-
-### State Updates
-
-- Always use the Zustand store or Context actions for state changes
-- The designer canvas responds to state changes through selectors
-- Undo/redo automatically captures state snapshots before major operations
-- Performance monitoring tracks render times and memory usage
+- Properties: `Name`, `Left`, `Top`, `Width`, `Height`, `Caption`/`Text`
+- Events: `Click`, `MouseMove`, `KeyPress`, `Load`, `Resize`, etc.
+- Properties defined in `VB6CompleteProperties.ts`, defaults in `controlDefaults.ts`
 
 ### Adding New Controls
+1. Define interface in `src/context/types.ts`
+2. Implement component in `src/components/Controls/YourControl.tsx`
+3. Add defaults in `src/utils/controlDefaults.ts`
+4. Register in `VB6Controls.tsx`
+5. Add to toolbox in `src/data/controlCategories.ts`
 
-1. Add control definition to control types
-2. Implement control component in `src/components/Controls/`
-3. Add default properties to `src/utils/controlDefaults.ts`
-4. Register in control factory and toolbox
-5. Add event handlers and property editors as needed
+## Build & Configuration
 
-### Language Feature Development
+### Vite (`vite.config.ts`)
+- **Code splitting**: Manual chunks (react-vendor, editor-vendor, vb6-runtime, designer, controls)
+- **Bundle targets**: <1MB main, <500KB per chunk
+- **Monaco**: Lazy-loaded, excluded from optimizeDeps
 
-- VB6 syntax changes require updates to lexer, parser, and transpiler
-- Test language features with both unit tests and integration tests
-- Semantic analyzer handles type checking and variable resolution
-- Runtime provides JavaScript implementations of VB6 built-in functions
+### TypeScript
+- Strict mode enabled
+- Path alias: `@/` → `src/`
+
+### Environment
+- Copy `.env.example` to `.env` (never commit secrets)
+- Frontend env: `src/config/env.ts`
+- Backend env: `server/.env`
+
+## Performance Guidelines
+
+- Use `useCallback` and memoization for expensive operations
+- Clean up event listeners in unmount
+- Use shallow Zustand selectors: `useVB6Store(state => state.controls, shallow)`
+- Lazy load Monaco and heavy components
+- Capture undo/redo snapshots only before major operations
+
+## VB6 Compatibility Notes
+
+- **70% overall compatibility** - sufficient for most VB6 applications
+- File system access limited by browser security (uses FileSystem API where available)
+- Windows API calls partially emulated via `VB6WindowsAPIBridge.ts`
+- ActiveX controls use WebAssembly bridge
+- `DoEvents` simulated with `requestIdleCallback`

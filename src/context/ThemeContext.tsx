@@ -147,9 +147,16 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  console.log('🔄 ThemeProvider initializing...');
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
-    const saved = localStorage.getItem('vb6-theme-mode');
-    return (saved as ThemeMode) || 'light';
+    try {
+      const saved = localStorage.getItem('vb6-theme-mode');
+      return (saved as ThemeMode) || 'light';
+    } catch (e) {
+      // localStorage might be disabled or unavailable
+      console.warn('Failed to access localStorage:', e);
+      return 'light';
+    }
   });
 
   const [isDark, setIsDark] = useState(false);
@@ -182,7 +189,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       root.style.setProperty(`--color-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`, value);
     });
 
-    localStorage.setItem('vb6-theme-mode', themeMode);
+    try {
+      localStorage.setItem('vb6-theme-mode', themeMode);
+    } catch (e) {
+      // localStorage might be disabled or unavailable
+      console.warn('Failed to save theme to localStorage:', e);
+    }
   }, [themeMode]);
 
   // Listen for system theme changes when in auto mode

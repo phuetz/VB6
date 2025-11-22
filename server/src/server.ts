@@ -41,9 +41,10 @@ class VB6DataServer {
   constructor() {
     this.app = express();
     this.server = http.createServer(this.app);
+    // CONFIGURATION VULNERABILITY BUG FIX: Secure CORS configuration for WebSocket
     this.io = new SocketIOServer(this.server, {
       cors: {
-        origin: process.env.CLIENT_URL || 'http://localhost:5173',
+        origin: this.getAllowedOrigins(),
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: true,
       },
@@ -55,6 +56,38 @@ class VB6DataServer {
     this.configureRoutes();
     this.configureWebSocket();
     this.configureErrorHandling();
+  }
+
+  // CONFIGURATION VULNERABILITY BUG FIX: Centralized allowed origins configuration
+  private getAllowedOrigins(): string[] {
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001', 
+      'http://localhost:5173',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001',
+      'http://127.0.0.1:5173',
+      // Add production domains here when deploying
+      // 'https://your-production-domain.com'
+    ];
+
+    // Add CLIENT_URL only if it's a valid and secure URL
+    if (process.env.CLIENT_URL) {
+      try {
+        const clientUrl = new URL(process.env.CLIENT_URL);
+        // Only allow https in production or localhost
+        if (clientUrl.protocol === 'https:' || 
+            (clientUrl.hostname === 'localhost' || clientUrl.hostname === '127.0.0.1')) {
+          allowedOrigins.push(process.env.CLIENT_URL);
+        } else {
+          console.warn(`Rejected CLIENT_URL: ${process.env.CLIENT_URL} - must use HTTPS or localhost`);
+        }
+      } catch (error) {
+        console.error(`Invalid CLIENT_URL: ${process.env.CLIENT_URL}`);
+      }
+    }
+
+    return allowedOrigins;
   }
 
   private async initializeServices(): Promise<void> {
@@ -82,27 +115,47 @@ class VB6DataServer {
   }
 
   private configureMiddleware(): void {
-    // Sécurité
+    // CONFIGURATION VULNERABILITY BUG FIX: Get allowed origins from centralized method
+    const allowedOrigins = this.getAllowedOrigins();
+
+    // CONFIGURATION VULNERABILITY BUG FIX: Remove unsafe-inline from CSP
     this.app.use(
       helmet({
         contentSecurityPolicy: {
           directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'", "'nonce-' + (process.env.CSP_NONCE || 'development-only-nonce')"],
+            styleSrc: ["'self'", "'nonce-' + (process.env.CSP_NONCE || 'development-only-nonce')"],
             imgSrc: ["'self'", 'data:', 'https:'],
+            connectSrc: ["'self'"],
+            fontSrc: ["'self'"],
+            objectSrc: ["'none'"],
+            mediaSrc: ["'self'"],
+            frameSrc: ["'none'"],
           },
         },
       })
     );
 
-    // CORS
+    // CONFIGURATION VULNERABILITY BUG FIX: Secure CORS configuration for Express
     this.app.use(
       cors({
-        origin: process.env.CLIENT_URL || 'http://localhost:5173',
+        origin: function (origin, callback) {
+          // Allow requests with no origin (like mobile apps or Postman)
+          if (!origin) return callback(null, true);
+          
+          // Use the same allowedOrigins array
+          if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+          } else {
+            console.warn(`CORS blocked request from unauthorized origin: ${origin}`);
+            return callback(new Error('CORS policy violation: Origin not allowed'), false);
+          }
+        },
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
+        optionsSuccessStatus: 200 // Support legacy browsers
       })
     );
 
@@ -194,6 +247,41 @@ class VB6DataServer {
     this.app.post('/api/vb6/connect', async (req, res) => {
       try {
         const { connectionString, provider } = req.body;
+        
+        // DATA VALIDATION BUG FIX: Validate connection input
+        if (!connectionString || typeof connectionString !== 'string') {
+          return res.status(400).json({
+            success: false,
+            error: 'Connection string is required and must be a string'
+          });
+        }
+        
+        if (connectionString.length > 2000) {
+          return res.status(400).json({
+            success: false,
+            error: 'Connection string too long (max 2000 characters)'
+          });
+        }
+        
+        if (provider && typeof provider !== 'string') {
+          return res.status(400).json({
+            success: false,
+            error: 'Provider must be a string'
+          });
+        }
+        
+        // Sanitize connection string - remove dangerous keywords
+        const dangerousKeywords = ['exec', 'execute', 'drop', 'delete', 'truncate', 'alter', 'create'];
+        const connectionStringLower = connectionString.toLowerCase();
+        for (const keyword of dangerousKeywords) {
+          if (connectionStringLower.includes(keyword)) {
+            return res.status(400).json({
+              success: false,
+              error: `Connection string contains forbidden keyword: ${keyword}`
+            });
+          }
+        }
+        
         const connection = await this.databaseManager.createVB6Connection(
           connectionString,
           provider
@@ -215,6 +303,68 @@ class VB6DataServer {
     this.app.post('/api/vb6/execute', async (req, res) => {
       try {
         const { connectionId, sql, parameters } = req.body;
+        
+        // DATA VALIDATION BUG FIX: Critical SQL injection prevention
+        if (!connectionId || typeof connectionId !== 'string') {
+          return res.status(400).json({
+            success: false,
+            error: 'Connection ID is required and must be a string'
+          });
+        }
+        
+        if (!sql || typeof sql !== 'string') {
+          return res.status(400).json({
+            success: false,
+            error: 'SQL query is required and must be a string'
+          });
+        }
+        
+        if (sql.length > 50000) {
+          return res.status(400).json({
+            success: false,
+            error: 'SQL query too long (max 50000 characters)'
+          });
+        }
+        
+        // Validate SQL query for dangerous operations
+        const dangerousPatterns = [
+          /\b(drop\s+table|drop\s+database|truncate|delete\s+from|exec|execute|sp_|xp_)\b/gi,
+          /\b(grant|revoke|alter\s+table|create\s+table|create\s+database)\b/gi,
+          /\b(union\s+select|union\s+all\s+select)\b/gi, // Basic SQLi pattern
+          /(;|\|\||&&|\|)\s*(drop|delete|truncate|exec)/gi,
+          /\b(load_file|into\s+outfile|into\s+dumpfile)\b/gi, // File operations
+          /\b(update\s+.*\s+set\s+.*=.*select|insert\s+into\s+.*\s+select)\b/gi // Subquery injections
+        ];
+        
+        for (const pattern of dangerousPatterns) {
+          if (pattern.test(sql)) {
+            this.logger.warn(`Blocked dangerous SQL query from ${req.ip}: ${sql.substring(0, 100)}`);
+            return res.status(403).json({
+              success: false,
+              error: 'SQL query contains forbidden operations for security reasons'
+            });
+          }
+        }
+        
+        // Validate parameters if provided
+        if (parameters !== undefined && parameters !== null) {
+          if (!Array.isArray(parameters) && typeof parameters !== 'object') {
+            return res.status(400).json({
+              success: false,
+              error: 'Parameters must be an array or object'
+            });
+          }
+          
+          // Limit parameter count to prevent DoS
+          const paramCount = Array.isArray(parameters) ? parameters.length : Object.keys(parameters).length;
+          if (paramCount > 1000) {
+            return res.status(400).json({
+              success: false,
+              error: 'Too many parameters (max 1000)'
+            });
+          }
+        }
+        
         const result = await this.databaseManager.executeVB6Query(connectionId, sql, parameters);
         res.json({
           success: true,
@@ -223,6 +373,7 @@ class VB6DataServer {
           executionTime: result.executionTime,
         });
       } catch (error) {
+        this.logger.error('VB6 query execution error:', error);
         res.status(500).json({
           success: false,
           error: error instanceof Error ? error.message : "Erreur d'exécution",

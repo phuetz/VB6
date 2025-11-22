@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VB6Provider Direct Test</title>
+    <style>
+        body { font-family: Arial; margin: 20px; background: #f5f5f5; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        pre { background: #fff; padding: 10px; border-radius: 4px; overflow: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 VB6Provider Direct Test</h1>
+    <div id="status"></div>
+    <div id="logs"><pre id="console-logs"></pre></div>
+    
+    <script type="module">
+        const statusDiv = document.getElementById('status');
+        const consoleDiv = document.getElementById('console-logs');
+        
+        function addStatus(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            statusDiv.appendChild(div);
+        }
+        
+        function addConsoleLog(message) {
+            consoleDiv.textContent += `${new Date().toLocaleTimeString()}: ${message}\n`;
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+        
+        // Capture console logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        console.log = function(...args) {
+            addConsoleLog('[LOG] ' + args.join(' '));
+            return originalLog.apply(this, args);
+        };
+        
+        console.error = function(...args) {
+            addConsoleLog('[ERROR] ' + args.join(' '));
+            return originalError.apply(this, args);
+        };
+        
+        console.warn = function(...args) {
+            addConsoleLog('[WARN] ' + args.join(' '));
+            return originalWarn.apply(this, args);
+        };
+        
+        // Error handlers
+        window.addEventListener('error', (e) => {
+            addStatus(`❌ Error: ${e.message} at ${e.filename}:${e.lineno}`, 'error');
+            addConsoleLog(`[GLOBAL ERROR] ${e.message} at ${e.filename}:${e.lineno}`);
+        });
+        
+        window.addEventListener('unhandledrejection', (e) => {
+            addStatus(`❌ Promise Rejection: ${e.reason}`, 'error');
+            addConsoleLog(`[PROMISE REJECTION] ${e.reason}`);
+        });
+        
+        addStatus('🔍 Starting VB6Provider test...', 'info');
+        
+        try {
+            // Test 1: Import React
+            addStatus('📦 Importing React...', 'info');
+            const { StrictMode, createElement } = await import('react');
+            const { createRoot } = await import('react-dom/client');
+            addStatus('✅ React imported successfully', 'success');
+            
+            // Test 2: Import VB6Provider
+            addStatus('📦 Importing VB6Provider...', 'info');
+            const { VB6Provider, useVB6 } = await import('/src/context/VB6Context.tsx');
+            addStatus('✅ VB6Provider imported successfully', 'success');
+            
+            // Test 3: Create a simple component that uses VB6Provider
+            addStatus('🔧 Creating test component...', 'info');
+            
+            function TestComponent() {
+                console.log('🧪 TestComponent rendering...');
+                try {
+                    const vb6Context = useVB6();
+                    console.log('✅ useVB6 hook worked!', vb6Context);
+                    return createElement('div', { style: { padding: '20px', background: '#e8f5e8', margin: '10px 0', borderRadius: '4px' } }, [
+                        createElement('h3', { key: 'title' }, '✅ VB6Provider Test Successful!'),
+                        createElement('p', { key: 'desc' }, 'The VB6Provider is working correctly.'),
+                        createElement('pre', { key: 'state' }, JSON.stringify(vb6Context.state, null, 2))
+                    ]);
+                } catch (error) {
+                    console.error('❌ useVB6 hook failed:', error);
+                    return createElement('div', { style: { padding: '20px', background: '#f8d7da', margin: '10px 0', borderRadius: '4px' } }, [
+                        createElement('h3', { key: 'title' }, '❌ VB6Provider Test Failed'),
+                        createElement('p', { key: 'desc' }, `Error: ${error.message}`)
+                    ]);
+                }
+            }
+            
+            // Test 4: Render with VB6Provider
+            addStatus('🎨 Rendering test component...', 'info');
+            const testDiv = document.createElement('div');
+            testDiv.id = 'test-root';
+            document.body.appendChild(testDiv);
+            
+            const root = createRoot(testDiv);
+            
+            root.render(
+                createElement(StrictMode, {}, 
+                    createElement(VB6Provider, {},
+                        createElement(TestComponent)
+                    )
+                )
+            );
+            
+            addStatus('✅ Component rendered successfully', 'success');
+            
+        } catch (error) {
+            addStatus(`❌ Test failed: ${error.message}`, 'error');
+            console.error('❌ Full error:', error);
+        }
+    </script>
+</body>
+</html>

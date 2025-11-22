@@ -5,6 +5,13 @@ import * as matchers from '@testing-library/jest-dom/matchers';
 // Extend Vitest's expect with jest-dom matchers
 expect.extend(matchers);
 
+// Ensure Array.isArray is always available
+if (typeof Array.isArray !== 'function') {
+  (Array as any).isArray = function(obj: any): obj is any[] {
+    return Object.prototype.toString.call(obj) === '[object Array]';
+  };
+}
+
 // Patch Error handling to prevent serialization issues in vitest
 // This prevents the 'Cannot read properties of undefined (reading 'length')' error
 const originalToString = Error.prototype.toString;
@@ -525,33 +532,156 @@ beforeEach(() => {
   });
   global.cancelAnimationFrame = vi.fn();
 
-  // Mock HTMLCanvasElement
-  HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
-    fillRect: vi.fn(),
-    clearRect: vi.fn(),
-    getImageData: vi.fn(() => ({ data: new Array(4) })),
-    putImageData: vi.fn(),
-    createImageData: vi.fn(() => ({ data: new Array(4) })),
-    setTransform: vi.fn(),
-    drawImage: vi.fn(),
-    save: vi.fn(),
-    fillText: vi.fn(),
-    restore: vi.fn(),
-    beginPath: vi.fn(),
-    moveTo: vi.fn(),
-    lineTo: vi.fn(),
-    closePath: vi.fn(),
-    stroke: vi.fn(),
-    translate: vi.fn(),
-    scale: vi.fn(),
-    rotate: vi.fn(),
-    arc: vi.fn(),
-    fill: vi.fn(),
-    measureText: vi.fn(() => ({ width: 100 })),
-    transform: vi.fn(),
-    rect: vi.fn(),
-    clip: vi.fn(),
-  }));
+  // Helper function to convert hex color to RGBA
+  const colorToRGBA = (color: string): { r: number; g: number; b: number; a: number } => {
+    // Handle #RRGGBB format
+    if (color.startsWith('#')) {
+      const hex = color.slice(1);
+      if (hex.length === 6) {
+        return {
+          r: parseInt(hex.substring(0, 2), 16),
+          g: parseInt(hex.substring(2, 4), 16),
+          b: parseInt(hex.substring(4, 6), 16),
+          a: 255
+        };
+      }
+    }
+    // Handle rgb() format
+    if (color.startsWith('rgb(') || color.startsWith('rgba(')) {
+      const match = color.match(/[\d.]+/g);
+      if (match && match.length >= 3) {
+        return {
+          r: Math.floor(parseFloat(match[0])),
+          g: Math.floor(parseFloat(match[1])),
+          b: Math.floor(parseFloat(match[2])),
+          a: match.length > 3 ? Math.floor(parseFloat(match[3]) * 255) : 255
+        };
+      }
+    }
+    // Default to black
+    return { r: 0, g: 0, b: 0, a: 255 };
+  };
+
+  // Mock HTMLCanvasElement with comprehensive canvas methods
+  // Store pixel data and context per canvas element (keyed by element reference)
+  const canvasPixelData = new WeakMap<HTMLCanvasElement, Map<string, Uint8ClampedArray>>();
+  const canvasContexts = new WeakMap<HTMLCanvasElement, any>();
+
+  const createMockContext = function(this: HTMLCanvasElement) {
+    // Return cached context if it exists (same context instance for same canvas)
+    if (canvasContexts.has(this)) {
+      return canvasContexts.get(this)!;
+    }
+
+    // Get or create pixel storage for this specific canvas
+    if (!canvasPixelData.has(this)) {
+      canvasPixelData.set(this, new Map());
+    }
+    const pixelData = canvasPixelData.get(this)!;
+
+    // Create a context object with mutable properties
+    const contextObj: any = {
+      fillStyle: '#000000',
+      strokeStyle: '#000000',
+      lineWidth: 1,
+      globalAlpha: 1,
+      globalCompositeOperation: 'source-over',
+      font: '10px sans-serif',
+
+      fillRect: vi.fn(function(x: number, y: number, w: number, h: number) {
+        // Store pixel color for fillRect calls (used by PSet)
+        if (w === 1 && h === 1) {
+          // This is likely a pixel fill from PSet
+          const pixelColor = contextObj.fillStyle;
+          // Convert hex color to RGB values
+          const rgba = colorToRGBA(pixelColor);
+          const data = new Uint8ClampedArray(4);
+          data[0] = rgba.r;
+          data[1] = rgba.g;
+          data[2] = rgba.b;
+          data[3] = rgba.a;
+          pixelData.set(`${Math.floor(x)},${Math.floor(y)}`, data);
+        }
+      }),
+      clearRect: vi.fn((x: number, y: number, w: number, h: number) => {
+        // Clear pixels in the rect
+        for (let px = Math.floor(x); px < x + w; px++) {
+          for (let py = Math.floor(y); py < y + h; py++) {
+            pixelData.delete(`${px},${py}`);
+          }
+        }
+      }),
+      getImageData: vi.fn((x: number, y: number, w: number, h: number) => {
+        // Return actual pixel data if stored, otherwise return black pixels
+        // Floor coordinates to match how fillRect stores them
+        const key = `${Math.floor(x)},${Math.floor(y)}`;
+        if (pixelData.has(key)) {
+          return {
+            data: pixelData.get(key)!,
+            width: w,
+            height: h,
+            colorSpace: 'srgb'
+          };
+        }
+        // Return default black pixel (0,0,0,255) in RGBA format
+        const data = new Uint8ClampedArray(4);
+        data[0] = 0;  // R
+        data[1] = 0;  // G
+        data[2] = 0;  // B
+        data[3] = 255; // A
+        return {
+          data,
+          width: w,
+          height: h,
+          colorSpace: 'srgb'
+        };
+      }),
+      putImageData: vi.fn((imageData: any, x: number, y: number) => {
+        const key = `${x},${y}`;
+        pixelData.set(key, imageData.data);
+      }),
+      createImageData: vi.fn((w: number, h?: number) => {
+        if (typeof h === 'number') {
+          return { data: new Uint8ClampedArray(w * h * 4), width: w, height: h };
+        }
+        // Assume w is ImageData
+        return { data: new Uint8ClampedArray(4), width: 1, height: 1 };
+      }),
+      setTransform: vi.fn(),
+      drawImage: vi.fn(),
+      save: vi.fn(),
+      fillText: vi.fn(),
+      restore: vi.fn(),
+      beginPath: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      closePath: vi.fn(),
+      stroke: vi.fn(),
+      strokeRect: vi.fn(),
+      translate: vi.fn(),
+      scale: vi.fn(),
+      rotate: vi.fn(),
+      arc: vi.fn(),
+      fill: vi.fn(),
+      measureText: vi.fn(() => ({ width: 100 })),
+      transform: vi.fn(),
+      rect: vi.fn(),
+      clip: vi.fn(),
+      setLineDash: vi.fn(),
+      createPattern: vi.fn((canvas: HTMLCanvasElement, repeat: string) => {
+        // Return a mock pattern object that can be used as fillStyle
+        return { type: 'pattern', canvas, repeat };
+      }),
+    };
+
+    // Cache the context for this canvas
+    canvasContexts.set(this, contextObj);
+    return contextObj;
+  };
+
+  HTMLCanvasElement.prototype.getContext = vi.fn(function(this: HTMLCanvasElement) {
+    return createMockContext.call(this);
+  });
 
   // Mock WebRTC - use function constructor to avoid instanceof issues
   function RTCPeerConnectionMock() {
@@ -643,13 +773,22 @@ beforeEach(() => {
   global.FileReader = FileReaderMock as any;
 
   // Mock Clipboard API
-  Object.defineProperty(navigator, 'clipboard', {
-    value: {
+  try {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: vi.fn().mockResolvedValue(undefined),
+        readText: vi.fn().mockResolvedValue(''),
+      },
+      writable: true,
+      configurable: true,
+    });
+  } catch (e) {
+    // If property already defined, just override it
+    (navigator as any).clipboard = {
       writeText: vi.fn().mockResolvedValue(undefined),
       readText: vi.fn().mockResolvedValue(''),
-    },
-    writable: true,
-  });
+    };
+  }
 
   // Mock console methods to reduce test noise
   // Note: These mocks can interfere with vitest's error serialization

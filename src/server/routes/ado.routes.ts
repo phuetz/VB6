@@ -78,12 +78,17 @@ router.post('/recordset/:id/movefirst', asyncHandler(async (req: Request, res: R
   recordset.eof = false;
   recordset.bof = recordset.rows.length === 0;
   
+  // LOGIC BUG FIX: Check if position is valid before accessing array
+  const currentData = recordset.position >= 0 && recordset.position < recordset.rows.length 
+    ? recordset.rows[recordset.position] 
+    : null;
+
   res.json({
     success: true,
     position: recordset.position,
     eof: recordset.eof,
     bof: recordset.bof,
-    data: recordset.rows[recordset.position],
+    data: currentData,
   });
 }));
 
@@ -103,12 +108,17 @@ router.post('/recordset/:id/movenext', asyncHandler(async (req: Request, res: Re
     recordset.eof = true;
   }
   
+  // LOGIC BUG FIX: Check if position is valid before accessing array
+  const currentData = recordset.position >= 0 && recordset.position < recordset.rows.length 
+    ? recordset.rows[recordset.position] 
+    : null;
+
   res.json({
     success: true,
     position: recordset.position,
     eof: recordset.eof,
     bof: recordset.bof,
-    data: recordset.rows[recordset.position],
+    data: currentData,
   });
 }));
 
@@ -128,12 +138,17 @@ router.post('/recordset/:id/moveprevious', asyncHandler(async (req: Request, res
     recordset.bof = true;
   }
   
+  // LOGIC BUG FIX: Check if position is valid before accessing array
+  const currentData = recordset.position >= 0 && recordset.position < recordset.rows.length 
+    ? recordset.rows[recordset.position] 
+    : null;
+
   res.json({
     success: true,
     position: recordset.position,
     eof: recordset.eof,
     bof: recordset.bof,
-    data: recordset.rows[recordset.position],
+    data: currentData,
   });
 }));
 
@@ -149,12 +164,17 @@ router.post('/recordset/:id/movelast', asyncHandler(async (req: Request, res: Re
   recordset.bof = false;
   recordset.eof = recordset.rows.length === 0;
   
+  // LOGIC BUG FIX: Check if position is valid before accessing array
+  const currentData = recordset.position >= 0 && recordset.position < recordset.rows.length 
+    ? recordset.rows[recordset.position] 
+    : null;
+
   res.json({
     success: true,
     position: recordset.position,
     eof: recordset.eof,
     bof: recordset.bof,
-    data: recordset.rows[recordset.position],
+    data: currentData,
   });
 }));
 

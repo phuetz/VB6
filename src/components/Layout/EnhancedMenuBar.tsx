@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { useVB6Store } from '../../stores/vb6Store';
+// ULTRA-OPTIMIZED: Import domain-specific stores
+import { useUIStore } from '../../stores/UIStore';
+import { useVB6Store } from '../../stores/vb6Store'; // Keep for legacy features not yet migrated
 import {
   FileText,
   FolderOpen,
@@ -25,14 +27,33 @@ import {
   AlertCircle,
   Command,
   Download,
+  Upload,
   Scissors,
   FileCode,
   ArrowLeftRight,
   Bug,
+  GitFork,
+  TestTube,
+  FileCheck,
+  FileText as FileBarChart,
+  Zap,
+  Activity,
 } from 'lucide-react';
 
-const EnhancedMenuBar: React.FC = () => {
+interface EnhancedMenuBarProps {
+  onShowProjectTemplates?: () => void;
+  onImportForm?: () => void;
+  onExportForm?: () => void;
+  onShowDatabaseManager?: () => void;
+  onShowReportDesigner?: () => void;
+  onShowDebugPanel?: () => void;
+  onShowHotReloadDashboard?: () => void;
+}
+
+const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplates, onImportForm, onExportForm, onShowDatabaseManager, onShowReportDesigner, onShowDebugPanel, onShowHotReloadDashboard }) => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  
+  // ULTRA-OPTIMIZED: Use UIStore for UI-related state
   const {
     executionMode,
     showCodeEditor,
@@ -40,10 +61,13 @@ const EnhancedMenuBar: React.FC = () => {
     showPropertiesWindow,
     showControlTree,
     showToolbox,
+    showGitPanel,
+    showMemoryProfiler,
+    showTestRunner,
     toggleWindow,
     setExecutionMode,
     showDialog,
-  } = useVB6Store();
+  } = useUIStore();
 
   const setShowErrorList = () => console.log('Show error list');
   const setShowCommandPalette = () => console.log('Show command palette');
@@ -51,6 +75,7 @@ const EnhancedMenuBar: React.FC = () => {
   const setShowSnippetManager = () => console.log('Show snippet manager');
   const setShowCodeFormatter = () => console.log('Show code formatter');
   const setShowCodeConverter = () => console.log('Show code converter');
+  const setShowTestDebugger = () => console.log('Show test debugger');
 
   const handleMenuHover = (menuName: string) => {
     if (activeMenu) {
@@ -75,15 +100,26 @@ const EnhancedMenuBar: React.FC = () => {
         action: () => showDialog('showNewProjectDialog', true),
       },
       {
+        label: 'New from Template...',
+        icon: <Package size={14} />,
+        shortcut: 'Ctrl+Shift+N',
+        action: () => onShowProjectTemplates?.(),
+      },
+      {
         label: 'Open Project...',
         icon: <FolderOpen size={14} />,
         shortcut: 'Ctrl+O',
         action: () => console.log('Open project'),
       },
       {
-        label: 'Import...',
-        icon: <FileText size={14} />,
-        action: () => console.log('Import'),
+        label: 'Import VB6 Form...',
+        icon: <Upload size={14} />,
+        action: () => onImportForm?.(),
+      },
+      {
+        label: 'Export VB6 Form...',
+        icon: <Download size={14} />,
+        action: () => onExportForm?.(),
       },
       { separator: true },
       {
@@ -225,6 +261,13 @@ const EnhancedMenuBar: React.FC = () => {
         shortcut: 'F2',
         action: () => showDialog('showObjectBrowser', true),
       },
+      { separator: true },
+      {
+        label: 'Git Integration',
+        icon: <GitFork size={14} />,
+        checked: showGitPanel,
+        action: () => toggleWindow('showGitPanel'),
+      },
     ],
     Project: [
       {
@@ -326,9 +369,22 @@ const EnhancedMenuBar: React.FC = () => {
     ],
     Debug: [
       {
+        label: 'Start Debugging',
+        icon: <Play size={14} />,
+        shortcut: 'F5',
+        action: () => onShowDebugPanel?.(),
+      },
+      {
+        label: 'Debugger',
+        icon: <Bug size={14} />,
+        shortcut: 'Ctrl+Shift+D',
+        action: () => onShowDebugPanel?.(),
+      },
+      { separator: true },
+      {
         label: 'Step Into',
         shortcut: 'F8',
-        action: () => console.log('Step into'),
+        action: () => onShowDebugPanel?.(),
       },
       {
         label: 'Step Over',
@@ -344,7 +400,39 @@ const EnhancedMenuBar: React.FC = () => {
       {
         label: 'Toggle Breakpoint',
         shortcut: 'F9',
-        action: () => console.log('Toggle breakpoint'),
+        action: () => onShowDebugPanel?.(),
+      },
+      {
+        label: 'Conditional Breakpoint...',
+        shortcut: 'Ctrl+F9',
+        action: () => console.log('Add conditional breakpoint'),
+      },
+      {
+        label: 'Tracepoint...',
+        shortcut: 'Ctrl+Shift+F9',
+        action: () => console.log('Add tracepoint'),
+      },
+      {
+        label: 'Data Breakpoint...',
+        action: () => console.log('Add data breakpoint'),
+      },
+      { separator: true },
+      {
+        label: 'Exception Settings...',
+        action: () => console.log('Configure exception breakpoints'),
+      },
+      {
+        label: 'Take Snapshot',
+        action: () => console.log('Take debug snapshot'),
+      },
+      { separator: true },
+      {
+        label: 'Start Profiling',
+        action: () => console.log('Start performance profiling'),
+      },
+      {
+        label: 'Stop Profiling',
+        action: () => console.log('Stop performance profiling'),
       },
       {
         label: 'Clear All Breakpoints',
@@ -370,6 +458,13 @@ const EnhancedMenuBar: React.FC = () => {
         label: 'Debug Logs',
         icon: <Bug size={14} />,
         action: () => toggleWindow('showLogPanel'),
+      },
+      { separator: true },
+      {
+        label: 'Memory Profiler',
+        icon: <ActivitySquare size={14} />,
+        checked: showMemoryProfiler,
+        action: () => toggleWindow('showMemoryProfiler'),
       },
     ],
     Run: [
@@ -413,6 +508,19 @@ const EnhancedMenuBar: React.FC = () => {
         label: 'Menu Editor...',
         action: () => showDialog('showMenuEditor', true),
       },
+      { separator: true },
+      {
+        label: 'Database Manager...',
+        icon: <Database size={14} />,
+        action: () => onShowDatabaseManager?.(),
+        shortcut: 'Ctrl+Shift+D',
+      },
+      {
+        label: 'Report Designer...',
+        icon: <FileBarChart size={14} />,
+        action: () => onShowReportDesigner?.(),
+        shortcut: 'Ctrl+R',
+      },
       {
         label: 'Snippets Manager...',
         icon: <Scissors size={14} />,
@@ -429,11 +537,63 @@ const EnhancedMenuBar: React.FC = () => {
         icon: <ArrowLeftRight size={14} />,
         action: () => setShowCodeConverter(true),
       },
+      {
+        label: 'Hot-Reload Dashboard...',
+        icon: <Zap size={14} />,
+        action: () => onShowHotReloadDashboard?.(),
+        shortcut: 'Ctrl+Shift+H',
+      },
       { separator: true },
       {
         label: 'Options...',
         icon: <Settings size={14} />,
         action: () => showDialog('showOptionsDialog', true),
+      },
+    ],
+    Test: [
+      {
+        label: 'Test Explorer',
+        icon: <TestTube size={14} />,
+        checked: showTestRunner,
+        action: () => toggleWindow('showTestRunner'),
+        shortcut: 'Ctrl+Shift+T',
+      },
+      {
+        label: 'Run All Tests',
+        icon: <Play size={14} />,
+        action: () => console.log('Run all tests'),
+        shortcut: 'Ctrl+R, A',
+      },
+      {
+        label: 'Debug Test',
+        icon: <Bug size={14} />,
+        action: () => setShowTestDebugger(true),
+        shortcut: 'Ctrl+R, D',
+      },
+      { separator: true },
+      {
+        label: 'Create Unit Test...',
+        icon: <FileCheck size={14} />,
+        action: () => console.log('Create unit test'),
+      },
+      {
+        label: 'Create Integration Test...',
+        action: () => console.log('Create integration test'),
+      },
+      {
+        label: 'Create Visual Test...',
+        action: () => console.log('Create visual test'),
+      },
+      { separator: true },
+      {
+        label: 'Code Coverage',
+        icon: <BarChart size={14} />,
+        action: () => console.log('Show code coverage'),
+        shortcut: 'Ctrl+R, C',
+      },
+      {
+        label: 'Test Settings...',
+        action: () => console.log('Test settings'),
       },
     ],
     Help: [

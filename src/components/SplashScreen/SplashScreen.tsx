@@ -6,6 +6,7 @@ interface SplashScreenProps {
 }
 
 const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
+  console.log('🎨 SplashScreen component rendering...');
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('');
   const [visible, setVisible] = useState(true);
@@ -24,12 +25,14 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
   ];
 
   useEffect(() => {
+    console.log('🎨 SplashScreen starting animation...');
     let currentProgress = 0;
     let stepIndex = 0;
 
     const processSteps = () => {
       if (stepIndex < steps.length) {
         const step = steps[stepIndex];
+        console.log(`🎨 SplashScreen step ${stepIndex + 1}/${steps.length}: ${step.name}`);
         setCurrentStep(step.name);
 
         const increment = 100 / steps.length;
@@ -47,10 +50,15 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
           }
         }, intervalTime);
       } else {
+        console.log('🎨 SplashScreen animation complete!');
         setProgress(100);
         setTimeout(() => {
+          console.log('🎨 SplashScreen hiding...');
           setVisible(false);
-          setTimeout(onComplete, 500);
+          setTimeout(() => {
+            console.log('🎨 SplashScreen calling onComplete callback');
+            onComplete();
+          }, 500);
         }, 500);
       }
     };

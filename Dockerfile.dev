@@ -1,0 +1,35 @@
+# Dockerfile pour développement avec outils de debug
+FROM node:18-alpine
+
+# Installer les outils de développement
+RUN apk add --no-cache \
+    git \
+    python3 \
+    make \
+    g++ \
+    bash \
+    curl \
+    vim
+
+# Définir le répertoire de travail
+WORKDIR /app
+
+# Installer les outils globaux de développement
+RUN npm install -g \
+    nodemon \
+    typescript \
+    @types/node \
+    eslint \
+    prettier
+
+# Copier package.json pour installer les dépendances
+COPY package*.json ./
+
+# Installer toutes les dépendances (dev + prod)
+RUN npm install
+
+# Exposer les ports
+EXPOSE 5173 9229
+
+# Commande par défaut (sera souvent remplacée)
+CMD ["npm", "run", "dev"]

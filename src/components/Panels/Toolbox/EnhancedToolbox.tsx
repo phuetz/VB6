@@ -25,6 +25,15 @@ const VB6_CONTROLS: ControlDefinition[] = [
     keywords: ['select', 'pointer', 'cursor'],
   },
   {
+    type: 'ActiveXManager',
+    icon: '🔌',
+    name: 'Insert ActiveX...',
+    description: 'Browse and insert ActiveX controls',
+    category: 'ActiveX',
+    defaultSize: { width: 120, height: 80 },
+    keywords: ['activex', 'ocx', 'com', 'component'],
+  },
+  {
     type: 'CommandButton',
     icon: '🔘',
     name: 'CommandButton',
@@ -184,16 +193,12 @@ const CONTROL_CATEGORIES = ['General', 'ActiveX', 'Data', 'Internet', 'Multimedi
 
 interface EnhancedToolboxProps {
   className?: string;
+  onShowActiveXManager?: () => void;
 }
 
-export const EnhancedToolbox: React.FC<EnhancedToolboxProps> = ({ className = '' }) => {
-  const { executionMode, toggleWindow } = useVB6Store(
-    state => ({
-      executionMode: state.executionMode,
-      toggleWindow: state.toggleWindow,
-    }),
-    shallow
-  );
+export const EnhancedToolbox: React.FC<EnhancedToolboxProps> = ({ className = '', onShowActiveXManager }) => {
+  const executionMode = useVB6Store(state => state.executionMode);
+  const toggleWindow = useVB6Store(state => state.toggleWindow);
   const [selectedCategory, setSelectedCategory] = useState('General');
   const [selectedTool, setSelectedTool] = useState('Pointer');
   const [searchTerm, setSearchTerm] = useState('');
@@ -272,11 +277,18 @@ export const EnhancedToolbox: React.FC<EnhancedToolboxProps> = ({ className = ''
                 defaultSize: controlDef.defaultSize,
                 allowCopy: true,
               }}
-              disabled={executionMode === 'run' || controlDef.type === 'Pointer'}
+              disabled={executionMode === 'run' || controlDef.type === 'Pointer' || controlDef.type === 'ActiveXManager'}
               className={`relative bg-gray-200 border border-gray-400 p-2 text-center text-xs select-none transition-all duration-200 hover:bg-gray-300 hover:shadow-md ${
                 selectedTool === controlDef.type ? 'bg-blue-200 border-blue-500 shadow-md' : ''
               }`}
               onDragStart={() => handleToolSelect(controlDef)}
+              onClick={() => {
+                if (controlDef.type === 'ActiveXManager') {
+                  onShowActiveXManager?.();
+                } else {
+                  handleToolSelect(controlDef);
+                }
+              }}
             >
               <PulseHighlight isActive={selectedTool === controlDef.type} color="rgb(59, 130, 246)">
                 <div className="relative">

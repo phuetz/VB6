@@ -1,11 +1,13 @@
-import React, { useCallback, useRef, useState, useEffect } from 'react';
+import React, { useCallback, useRef, useState, useEffect, useMemo } from 'react';
 import { shallow } from 'zustand/shallow';
-import { DragDropProvider, useDragDrop } from './DragDropProvider';
+import { useDragDrop } from './DragDropProvider';
 import { DroppableZone } from './DroppableZone';
 import { AnimatedDrop, MagneticSnap, PulseHighlight, RippleEffect } from './AnimatedTransitions';
 import { useVB6Store } from '../../stores/vb6Store';
 import ControlRenderer from '../Designer/ControlRenderer';
 import Grid from '../Designer/Grid';
+import { useControlManipulation } from '../../hooks/useControlManipulation';
+import { Control } from '../../context/types';
 
 // Add more descriptive logging to help debug issues
 interface AdvancedDragDropCanvasProps {
@@ -30,37 +32,122 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
     active: boolean;
   }>({ start: { x: 0, y: 0 }, end: { x: 0, y: 0 }, active: false });
 
-  const {
-    controls,
-    selectedControls,
-    executionMode,
-    snapToGrid,
-    gridSize,
-    createControl,
-    updateControl,
-    selectControls,
-    showGrid,
-    designerZoom,
-  } = useVB6Store(
-    state => ({
-      controls: state.controls,
-      selectedControls: state.selectedControls,
-      executionMode: state.executionMode,
-      snapToGrid: state.snapToGrid,
-      gridSize: state.gridSize,
-      createControl: state.createControl,
-      updateControl: state.updateControl,
-      selectControls: state.selectControls,
-      showGrid: state.showGrid,
-      designerZoom: state.designerZoom,
-    }),
-    shallow
-  );
-  const { addLog } = useVB6Store.getState();
+  const controls = useVB6Store(state => state.controls);
+  const selectedControls = useVB6Store(state => state.selectedControls);
+  const executionMode = useVB6Store(state => state.executionMode);
+  const snapToGrid = useVB6Store(state => state.snapToGrid);
+  const gridSize = useVB6Store(state => state.gridSize);
+  const createControl = useVB6Store(state => state.createControl);
+  const updateControl = useVB6Store(state => state.updateControl);
+  const selectControls = useVB6Store(state => state.selectControls);
+  const showGrid = useVB6Store(state => state.showGrid);
+  const designerZoom = useVB6Store(state => state.designerZoom);
+  const addLog = useVB6Store(state => state.addLog);
 
-  const { isDragging, vibrate, playDropSound, dragData } = useDragDrop();
+  // Intégration du système de manipulation de contrôles
+  const {
+    dragState,
+    alignmentGuides,
+    startDrag,
+    startResize,
+    handleMouseMove,
+    handleMouseUp,
+    handleKeyboardMove,
+    handleKeyboardResize,
+    alignControls,
+    makeSameSize,
+  } = useControlManipulation(
+    controls,
+    // PERFORMANCE FIX: O(n²) → O(n) - Use Map for O(1) lookup
+    (() => {
+      const controlsMap = new Map(controls.map(c => [c.id, c]));
+      return selectedControls.map(id => controlsMap.get(id)).filter(Boolean) as Control[];
+    })(),
+    (updatedControls: Control[]) => {
+      updatedControls.forEach(control => {
+        updateControl(control.id, 'x', control.x);
+        updateControl(control.id, 'y', control.y);
+        updateControl(control.id, 'width', control.width);
+        updateControl(control.id, 'height', control.height);
+      });
+    },
+    {
+      snapToGrid: snapToGrid,
+      gridSize: gridSize,
+      showAlignmentGuides: true,
+      enableKeyboardMovement: true,
+      multiSelectEnabled: true,
+    }
+  );
+
+  const { isDragging: isToolboxDragging, vibrate, playDropSound, dragData } = useDragDrop();
 
   const zoomFactor = designerZoom / 100;
+
+  // CRITICAL FIX: Cursor state machine to resolve conflicts
+  const getCursor = useMemo(() => {
+    if (selectionBox.active) return 'crosshair';
+    if (dragState.isResizing) {
+      const handle = dragState.currentHandle;
+      switch (handle) {
+        case 'nw': case 'se': return 'nw-resize';
+        case 'ne': case 'sw': return 'ne-resize';
+        case 'n': case 's': return 'n-resize';
+        case 'e': case 'w': return 'w-resize';
+        default: return 'resize';
+      }
+    }
+    if (dragState.isDragging) return 'grabbing';
+    if (isToolboxDragging) return 'copy';
+    return 'default';
+  }, [selectionBox.active, dragState.isResizing, dragState.isDragging, dragState.currentHandle, isToolboxDragging]);
+
+  // Event listeners globaux pour le système de manipulation
+  useEffect(() => {
+    if (dragState.isDragging || dragState.isResizing) {
+      const handleGlobalMouseMove = (e: MouseEvent) => {
+        e.preventDefault();
+        handleMouseMove(e);
+      };
+
+      const handleGlobalMouseUp = (e: MouseEvent) => {
+        e.preventDefault();
+        handleMouseUp();
+      };
+
+      document.addEventListener('mousemove', handleGlobalMouseMove);
+      document.addEventListener('mouseup', handleGlobalMouseUp);
+      document.body.style.userSelect = 'none';
+      document.body.style.cursor = getCursor;
+
+      return () => {
+        document.removeEventListener('mousemove', handleGlobalMouseMove);
+        document.removeEventListener('mouseup', handleGlobalMouseUp);
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+      };
+    }
+  }, [dragState.isDragging, dragState.isResizing, handleMouseMove, handleMouseUp, getCursor]);
+
+  // Raccourcis clavier pour manipulation
+  useEffect(() => {
+    if (executionMode === 'design') {
+      const handleGlobalKeyDown = (e: KeyboardEvent) => {
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+          if (e.ctrlKey) {
+            handleKeyboardResize(e);
+          } else {
+            handleKeyboardMove(e);
+          }
+        }
+      };
+
+      document.addEventListener('keydown', handleGlobalKeyDown);
+      return () => {
+        document.removeEventListener('keydown', handleGlobalKeyDown);
+      };
+    }
+  }, [executionMode, handleKeyboardMove, handleKeyboardResize]);
 
   // Gestion du drop de nouveaux contrôles
   const handleControlDrop = useCallback(
@@ -80,9 +167,11 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
           finalY = Math.round(finalY / gridSize) * gridSize;
         }
 
-        // Contraintes de position
-        finalX = Math.max(0, Math.min(finalX, width - 100));
-        finalY = Math.max(0, Math.min(finalY, height - 30));
+        // EDGE CASE FIX: Zoom-aware contraintes de position
+        const scaledWidth = (width - 100) / zoomFactor;
+        const scaledHeight = (height - 30) / zoomFactor;
+        finalX = Math.max(0, Math.min(finalX, scaledWidth));
+        finalY = Math.max(0, Math.min(finalY, scaledHeight));
 
         if (data.copy && data.originalId) {
           // Copie d'un contrôle existant
@@ -106,10 +195,12 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
         vibrate([50, 20, 50]);
       } else if (data.type === 'existing-control') {
         // Déplacer un contrôle existant
+        // PERFORMANCE FIX: Single lookup instead of double find()
+        const existingControl = controls.find(c => c.id === data.controlId);
         addLog('info', 'CanvasDrop', `Moving existing control #${data.controlId}`, {
           from: {
-            x: controls.find(c => c.id === data.controlId)?.x,
-            y: controls.find(c => c.id === data.controlId)?.y,
+            x: existingControl?.x,
+            y: existingControl?.y,
           },
           to: position,
         });
@@ -121,6 +212,12 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
           finalX = Math.round(finalX / gridSize) * gridSize;
           finalY = Math.round(finalY / gridSize) * gridSize;
         }
+
+        // EDGE CASE FIX: Zoom-aware bounds for existing control movement
+        const scaledWidth = (width - 50) / zoomFactor;
+        const scaledHeight = (height - 50) / zoomFactor;
+        finalX = Math.max(0, Math.min(finalX, scaledWidth));
+        finalY = Math.max(0, Math.min(finalY, scaledHeight));
 
         // Ensure controlId exists
         if (data.controlId !== undefined) {
@@ -154,7 +251,7 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
   // Gestion de la sélection multiple
   const handleCanvasMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      if (executionMode === 'run' || isDragging) return;
+      if (executionMode === 'run' || isToolboxDragging) return;
 
       const rect = canvasRef.current?.getBoundingClientRect();
       if (!rect) return;
@@ -174,7 +271,7 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
         selectControls([]);
       }
     },
-    [executionMode, isDragging, selectControls, zoomFactor]
+    [executionMode, isToolboxDragging, selectControls, zoomFactor]
   );
 
   const handleCanvasMouseMove = useCallback(
@@ -221,7 +318,7 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
 
   // Calculer les guides d'alignement
   useEffect(() => {
-    if (isDragging && selectedControls.length > 0) {
+    if (isToolboxDragging && selectedControls.length > 0) {
       const guides: Array<{ x?: number; y?: number }> = [];
 
       controls.forEach(control => {
@@ -242,7 +339,7 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
     } else {
       setSnapGuides([]);
     }
-  }, [isDragging, selectedControls, controls]);
+  }, [isToolboxDragging, selectedControls, controls]);
 
   const dropConstraints = React.useMemo(
     () => ({
@@ -276,7 +373,7 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
           height: height * zoomFactor,
           backgroundColor,
           border: '1px solid #000',
-          cursor: selectionBox.active ? 'crosshair' : 'default',
+          cursor: getCursor,
         }}
       >
         <div
@@ -290,28 +387,29 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
           {/* Grille */}
           {showGrid && <Grid />}
 
-          {/* Guides d'alignement */}
-          {snapGuides.map((guide, index) => (
+          {/* Guides d'alignement unifiés */}
+          {/* Guides rouges pour le drag depuis la toolbox */}
+          {isToolboxDragging && snapGuides.map((guide, index) => (
             <div
-              key={index}
+              key={`toolbox-guide-${index}`}
               className="absolute pointer-events-none z-50"
               style={{
                 ...(guide.x !== undefined && {
                   left: guide.x,
                   top: 0,
-                  width: 1,
+                  width: 2,
                   height: '100%',
-                  backgroundColor: '#ff0000',
-                  opacity: 0.7,
+                  backgroundColor: '#ff4444',
+                  opacity: 0.8,
                   zIndex: 1000,
                 }),
                 ...(guide.y !== undefined && {
                   left: 0,
                   top: guide.y,
                   width: '100%',
-                  height: 1,
-                  backgroundColor: '#ff0000',
-                  opacity: 0.7,
+                  height: 2,
+                  backgroundColor: '#ff4444',
+                  opacity: 0.8,
                   zIndex: 1000,
                 }),
               }}
@@ -323,6 +421,44 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
               )}
             </div>
           ))}
+          
+          {/* Guides verts pour la manipulation de contrôles existants */}
+          {(dragState.isDragging || dragState.isResizing) && (
+            <>
+              {alignmentGuides.x.map((x, index) => (
+                <div
+                  key={`control-guide-x-${index}`}
+                  className="absolute pointer-events-none z-50"
+                  style={{
+                    left: x,
+                    top: 0,
+                    width: 2,
+                    height: '100%',
+                    backgroundColor: '#00dd00',
+                    opacity: 0.9,
+                    zIndex: 1001,
+                    boxShadow: '0 0 2px rgba(0,221,0,0.5)',
+                  }}
+                />
+              ))}
+              {alignmentGuides.y.map((y, index) => (
+                <div
+                  key={`control-guide-y-${index}`}
+                  className="absolute pointer-events-none z-50"
+                  style={{
+                    left: 0,
+                    top: y,
+                    width: '100%',
+                    height: 2,
+                    backgroundColor: '#00dd00',
+                    opacity: 0.9,
+                    zIndex: 1001,
+                    boxShadow: '0 0 2px rgba(0,221,0,0.5)',
+                  }}
+                />
+              ))}
+            </>
+          )}
 
           {/* Contrôles */}
           {controls.map(control => (
@@ -331,7 +467,12 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
               isActive={selectedControls.some(sc => sc.id === control.id)}
             >
               <AnimatedDrop isVisible={control.visible} delay={control.id * 50}>
-                <ControlRenderer control={control} />
+                <ControlRenderer 
+                  control={control} 
+                  onStartDrag={startDrag}
+                  onStartResize={startResize}
+                  dragState={dragState}
+                />
               </AnimatedDrop>
             </PulseHighlight>
           ))}
@@ -351,7 +492,7 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
           )}
 
           {/* Debug overlay */}
-          {isDragging && dragData && (
+          {isToolboxDragging && dragData && (
             <div className="absolute top-2 right-2 bg-white bg-opacity-90 text-xs p-2 rounded border border-gray-400 z-50 pointer-events-none">
               <div>
                 <strong>Dragging:</strong> {dragData.controlType || dragData.type}
@@ -361,6 +502,23 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
               </div>
               <div>
                 <strong>Guides:</strong> {snapGuides.length}
+              </div>
+            </div>
+          )}
+
+          {/* Debug overlay pour le système de manipulation */}
+          {(dragState.isDragging || dragState.isResizing) && (
+            <div className="absolute top-2 left-2 bg-green-100 bg-opacity-90 text-xs p-2 rounded border border-green-400 z-50 pointer-events-none">
+              <div>
+                <strong>Mode:</strong> {dragState.isResizing ? 'Resizing' : 'Dragging'}
+              </div>
+              {dragState.isResizing && (
+                <div>
+                  <strong>Handle:</strong> {dragState.currentHandle}
+                </div>
+              )}
+              <div>
+                <strong>Guides:</strong> X:{alignmentGuides.x.length} Y:{alignmentGuides.y.length}
               </div>
             </div>
           )}
@@ -377,9 +535,5 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
 };
 
 export const AdvancedDragDropCanvas: React.FC<AdvancedDragDropCanvasProps> = props => {
-  return (
-    <DragDropProvider>
-      <CanvasContent {...props} />
-    </DragDropProvider>
-  );
+  return <CanvasContent {...props} />;
 };

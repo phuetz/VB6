@@ -829,7 +829,7 @@ export class CrystalReportsController {
   }
 
   private evaluateSelectionFormula(formula: string, record: any): boolean {
-    // Évaluation basique des formules de sélection
+    // Évaluation sécurisée des formules de sélection sans eval()
     try {
       let condition = formula;
 
@@ -837,15 +837,91 @@ export class CrystalReportsController {
       Object.keys(record).forEach(field => {
         const fieldRef = `{${field}}`;
         const value = typeof record[field] === 'string' ? `"${record[field]}"` : record[field];
-        condition = condition.replace(new RegExp(fieldRef, 'g'), value);
+        condition = condition.replace(new RegExp(fieldRef, 'g'), String(value));
       });
 
-      // Évaluation simple (dangereux en production - à sécuriser)
-      return eval(condition);
+      // Évaluation sécurisée avec parser de conditions
+      return this.parseConditionSafely(condition, record);
     } catch (error) {
       this.logger.warn('Erreur évaluation formule de sélection:', error);
       return true;
+    }  
+  }
+
+  private parseConditionSafely(condition: string, record: any): boolean {
+    // Parser sécurisé pour les conditions Crystal Reports
+    const trimmed = condition.trim();
+    
+    // Opérateurs de comparaison supportés
+    const operators = ['>=', '<=', '<>', '!=', '=', '>', '<'];
+    
+    for (const op of operators) {
+      if (trimmed.includes(op)) {
+        const parts = trimmed.split(op).map(p => p.trim());
+        if (parts.length === 2) {
+          const [left, right] = parts;
+          const leftValue = this.parseValue(left);
+          const rightValue = this.parseValue(right);
+          
+          switch (op) {
+            case '=':
+              return leftValue == rightValue;
+            case '<>':
+            case '!=':
+              return leftValue != rightValue;
+            case '>':
+              return leftValue > rightValue;
+            case '<':
+              return leftValue < rightValue;
+            case '>=':
+              return leftValue >= rightValue;
+            case '<=':
+              return leftValue <= rightValue;
+          }
+        }
+      }
     }
+    
+    // Opérateurs logiques
+    if (trimmed.includes(' AND ') || trimmed.includes(' and ')) {
+      const parts = trimmed.split(/ AND | and /i);
+      return parts.every(part => this.parseConditionSafely(part.trim(), record));
+    }
+    
+    if (trimmed.includes(' OR ') || trimmed.includes(' or ')) {
+      const parts = trimmed.split(/ OR | or /i);
+      return parts.some(part => this.parseConditionSafely(part.trim(), record));
+    }
+    
+    // Valeurs booléennes directes
+    if (trimmed.toLowerCase() === 'true') return true;
+    if (trimmed.toLowerCase() === 'false') return false;
+    
+    // Par défaut, considérer comme vrai si la condition ne peut pas être parsée
+    return true;
+  }
+
+  private parseValue(value: string): any {
+    const trimmed = value.trim();
+    
+    // Chaînes entre guillemets
+    if ((trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+        (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+      return trimmed.slice(1, -1);
+    }
+    
+    // Nombres
+    if (/^-?\d+(\.\d+)?$/.test(trimmed)) {
+      return parseFloat(trimmed);
+    }
+    
+    // Booléens
+    if (trimmed.toLowerCase() === 'true') return true;
+    if (trimmed.toLowerCase() === 'false') return false;
+    if (trimmed.toLowerCase() === 'null') return null;
+    
+    // Valeur littérale
+    return trimmed;
   }
 
   private sanitizeReport(report: CrystalReport): any {

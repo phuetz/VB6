@@ -6,6 +6,55 @@
 import React, { useState, useRef, useEffect, useCallback, forwardRef } from 'react';
 import { useVB6Store } from '../../stores/vb6Store';
 
+// Import des nouveaux contrôles graphiques
+export { LineControl } from './LineControl';
+export { ShapeControl } from './ShapeControl';
+export { ImageControl } from './ImageControl';
+export { ActiveXControl } from './ActiveXControl';
+
+/**
+ * CSS INJECTION BUG FIX: Validate image URLs for security
+ */
+function isValidImageURL(url: string): boolean {
+  if (typeof url !== 'string' || url.length === 0) return false;
+  
+  try {
+    const urlObj = new URL(url, window.location.origin);
+    
+    // Only allow safe protocols
+    if (!['http:', 'https:', 'data:', 'blob:'].includes(urlObj.protocol)) {
+      return false;
+    }
+    
+    // For data URLs, only allow image types
+    if (urlObj.protocol === 'data:') {
+      if (!url.toLowerCase().startsWith('data:image/')) {
+        return false;
+      }
+    }
+    
+    // Check for common image file extensions
+    const validExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.bmp', '.ico'];
+    const hasValidExtension = validExtensions.some(ext => 
+      urlObj.pathname.toLowerCase().endsWith(ext)
+    );
+    
+    // Allow data URLs and blob URLs even without extensions
+    if (urlObj.protocol === 'data:' || urlObj.protocol === 'blob:') {
+      return true;
+    }
+    
+    // Basic length check (prevent CSS bombs)
+    if (url.length > 2000) {
+      return false;
+    }
+    
+    return hasValidExtension;
+  } catch (e) {
+    return false;
+  }
+}
+
 // Types et interfaces pour les contrôles VB6
 export interface VB6ControlProps {
   id: number;
@@ -104,7 +153,8 @@ export const CommandButton = forwardRef<HTMLButtonElement, VB6ControlProps>((pro
     fontWeight: font?.bold ? 'bold' : 'normal',
     fontStyle: font?.italic ? 'italic' : 'normal',
     textDecoration: font?.underline ? 'underline' : 'none',
-    backgroundImage: picture && style === 'Graphical' ? `url(${picture})` : undefined,
+    // CSS INJECTION BUG FIX: Validate picture URL before using in CSS
+    backgroundImage: picture && style === 'Graphical' && isValidImageURL(picture) ? `url(${picture})` : undefined,
     backgroundSize: 'contain',
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center',
@@ -122,9 +172,17 @@ export const CommandButton = forwardRef<HTMLButtonElement, VB6ControlProps>((pro
       title={toolTipText}
       data-name={name}
       data-tag={tag}
+      // ACCESSIBILITY FIX: Add ARIA attributes for screen readers
+      aria-label={caption || `Button ${name}`}
+      aria-describedby={`${name}-desc`}
+      role="button"
       {...rest}
     >
       {style === 'Standard' && caption}
+      {/* ACCESSIBILITY FIX: Hidden description for screen readers */}
+      <span id={`${name}-desc`} style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
+        VB6 Command Button {enabled ? 'enabled' : 'disabled'}
+      </span>
     </button>
   );
 });
@@ -219,40 +277,71 @@ export const TextBox = forwardRef<HTMLInputElement, VB6ControlProps>((props, ref
 
   if (multiLine) {
     return (
-      <textarea
-        ref={ref as React.Ref<HTMLTextAreaElement>}
-        style={textStyle}
-        value={passwordChar ? passwordChar.repeat(value.length) : value}
-        onChange={handleChange}
-        onKeyPress={handleKeyPress}
-        disabled={!enabled || locked}
-        readOnly={locked}
-        tabIndex={tabStop ? tabIndex : -1}
-        title={toolTipText}
-        data-name={name}
-        data-tag={tag}
-        {...rest}
-      />
+      <>
+        {/* ACCESSIBILITY FIX: Add label for screen readers */}
+        <label htmlFor={`textbox-${name}`} style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
+          {name} Multi-line Text Input {passwordChar ? '(Password)' : ''}
+        </label>
+        <textarea
+          id={`textbox-${name}`}
+          ref={ref as React.Ref<HTMLTextAreaElement>}
+          style={textStyle}
+          value={passwordChar ? passwordChar.repeat(value.length) : value}
+          onChange={handleChange}
+          onKeyPress={handleKeyPress}
+          disabled={!enabled || locked}
+          readOnly={locked}
+          tabIndex={tabStop ? tabIndex : -1}
+          title={toolTipText}
+          data-name={name}
+          data-tag={tag}
+          // ACCESSIBILITY FIX: Add ARIA attributes
+          aria-label={`${name} text area`}
+          aria-describedby={`${name}-textbox-desc`}
+          aria-invalid={false}
+          aria-multiline="true"
+          {...rest}
+        />
+        {/* ACCESSIBILITY FIX: Hidden description for screen readers */}
+        <span id={`${name}-textbox-desc`} style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
+          VB6 TextBox control (multi-line) {enabled ? 'enabled' : 'disabled'} {locked ? 'read-only' : 'editable'}
+        </span>
+      </>
     );
   }
 
   return (
-    <input
-      ref={ref as React.Ref<HTMLInputElement>}
-      type={passwordChar ? 'password' : 'text'}
-      style={textStyle}
-      value={value}
-      onChange={handleChange}
-      onKeyPress={handleKeyPress}
-      disabled={!enabled || locked}
-      readOnly={locked}
-      maxLength={maxLength || undefined}
-      tabIndex={tabStop ? tabIndex : -1}
-      title={toolTipText}
-      data-name={name}
-      data-tag={tag}
-      {...rest}
-    />
+    <>
+      {/* ACCESSIBILITY FIX: Add label for screen readers */}
+      <label htmlFor={`textbox-${name}`} style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
+        {name} Text Input {passwordChar ? '(Password)' : ''}
+      </label>
+      <input
+        id={`textbox-${name}`}
+        ref={ref as React.Ref<HTMLInputElement>}
+        type={passwordChar ? 'password' : 'text'}
+        style={textStyle}
+        value={value}
+        onChange={handleChange}
+        onKeyPress={handleKeyPress}
+        disabled={!enabled || locked}
+        readOnly={locked}
+        maxLength={maxLength || undefined}
+        tabIndex={tabStop ? tabIndex : -1}
+        title={toolTipText}
+        data-name={name}
+        data-tag={tag}
+        // ACCESSIBILITY FIX: Add ARIA attributes
+        aria-label={`${name} text input`}
+        aria-describedby={`${name}-textbox-desc`}
+        aria-invalid={false}
+        {...rest}
+      />
+      {/* ACCESSIBILITY FIX: Hidden description for screen readers */}
+      <span id={`${name}-textbox-desc`} style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
+        VB6 TextBox control {enabled ? 'enabled' : 'disabled'} {locked ? 'read-only' : 'editable'}
+      </span>
+    </>
   );
 });
 

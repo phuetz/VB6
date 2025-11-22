@@ -16,6 +16,8 @@ import fastifyCors from '@fastify/cors';
 import fastifyAuth from '@fastify/auth';
 import fastifyJwt from '@fastify/jwt';
 import fastifyRedis from '@fastify/redis';
+import fastifyCsrf from '@fastify/csrf-protection';
+import fastifyCookie from '@fastify/cookie';
 import fastifyMongodb from '@fastify/mongodb';
 import fastifyMysql from '@fastify/mysql';
 import fastifyPostgres from '@fastify/postgres';
@@ -126,14 +128,19 @@ class VB6FastifyServer {
   }
 
   private async registerPlugins(): Promise<void> {
-    // Sécurité
+    // CONFIGURATION VULNERABILITY BUG FIX: Remove unsafe-inline from CSP
     await this.fastify.register(fastifyHelmet, {
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          scriptSrc: ["'self'"],
+          styleSrc: ["'self'", "'nonce-' + (process.env.CSP_NONCE || 'development-only-nonce')"],
+          scriptSrc: ["'self'", "'nonce-' + (process.env.CSP_NONCE || 'development-only-nonce')"],
           imgSrc: ["'self'", "data:", "https:"],
+          connectSrc: ["'self'"],
+          fontSrc: ["'self'"],
+          objectSrc: ["'none'"],
+          mediaSrc: ["'self'"],
+          frameSrc: ["'none'"],
         },
       },
     });
@@ -166,6 +173,16 @@ class VB6FastifyServer {
       prefix: '/static/',
     });
 
+    // Cookies (required for CSRF protection)
+    await this.fastify.register(fastifyCookie, {
+      secret: process.env.COOKIE_SECRET || 'vb6-studio-cookie-secret-key',
+      parseOptions: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+      },
+    });
+
     // JWT
     await this.fastify.register(fastifyJwt, {
       secret: process.env.JWT_SECRET || 'vb6-studio-secret-key',
@@ -174,6 +191,16 @@ class VB6FastifyServer {
 
     // Auth
     await this.fastify.register(fastifyAuth);
+
+    // CSRF VULNERABILITY BUG FIX: Add CSRF protection to prevent Cross-Site Request Forgery attacks
+    await this.fastify.register(fastifyCsrf, {
+      sessionPlugin: '@fastify/cookie',
+      csrfOpts: {
+        hmacKey: process.env.CSRF_SECRET || 'vb6-studio-csrf-secret-key-change-in-production',
+        ignoreMethods: ['GET', 'HEAD', 'OPTIONS'],
+        userIdField: 'username', // Field from JWT payload to use as user identifier
+      },
+    });
 
     // Redis
     if (process.env.REDIS_URL) {
@@ -251,6 +278,14 @@ class VB6FastifyServer {
       reply.code(200).send(health);
     });
 
+    // CSRF VULNERABILITY BUG FIX: Provide CSRF token to authenticated clients
+    this.fastify.get('/csrf-token', {
+      preHandler: this.fastify.auth([this.fastify.verifyJWT]),
+    }, async (request, reply) => {
+      const token = await reply.generateCsrf();
+      reply.send({ csrfToken: token });
+    });
+
     // Authentification
     this.fastify.register(async (fastify) => {
       await fastify.register(this.authRoutes.bind(this));
@@ -259,18 +294,36 @@ class VB6FastifyServer {
     // Routes de base de données
     this.fastify.register(async (fastify) => {
       await fastify.addHook('preHandler', fastify.auth([fastify.verifyJWT]));
+      // CSRF VULNERABILITY BUG FIX: Add CSRF validation to all state-changing routes
+      await fastify.addHook('preHandler', async (request, reply) => {
+        if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) {
+          await fastify.csrfProtection(request, reply);
+        }
+      });
       await fastify.register(this.databaseRoutes.bind(this));
     });
 
     // Routes de rapports
     this.fastify.register(async (fastify) => {
       await fastify.addHook('preHandler', fastify.auth([fastify.verifyJWT]));
+      // CSRF VULNERABILITY BUG FIX: Add CSRF validation to all state-changing routes
+      await fastify.addHook('preHandler', async (request, reply) => {
+        if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) {
+          await fastify.csrfProtection(request, reply);
+        }
+      });
       await fastify.register(this.reportsRoutes.bind(this));
     });
 
     // Routes d'administration
     this.fastify.register(async (fastify) => {
       await fastify.addHook('preHandler', fastify.auth([fastify.verifyJWT]));
+      // CSRF VULNERABILITY BUG FIX: Add CSRF validation to all state-changing routes
+      await fastify.addHook('preHandler', async (request, reply) => {
+        if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) {
+          await fastify.csrfProtection(request, reply);
+        }
+      });
       await fastify.register(this.adminRoutes.bind(this));
     });
   }

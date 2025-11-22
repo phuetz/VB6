@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple VB6 Test</title>
+    <style>
+        body { font-family: Arial; margin: 40px; }
+        .log { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+    </style>
+</head>
+<body>
+    <h1>VB6 Web IDE - Simple Test</h1>
+    <div id="logs"></div>
+    
+    <script>
+        function addLog(message, type = 'log') {
+            console.log(message);
+            const logs = document.getElementById('logs');
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            logs.appendChild(div);
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        addLog('🔍 Starting simple test...');
+        
+        // Test basic functionality
+        try {
+            addLog('✅ JavaScript working');
+            
+            // Test fetch to main app
+            fetch('/')
+                .then(response => response.text())
+                .then(html => {
+                    if (html.includes('VB6Provider')) {
+                        addLog('✅ VB6Provider found in main app', 'success');
+                    } else {
+                        addLog('❌ VB6Provider not found in main app', 'error');
+                    }
+                    
+                    if (html.includes('root')) {
+                        addLog('✅ Root element found in HTML', 'success');
+                    } else {
+                        addLog('❌ Root element missing from HTML', 'error');
+                    }
+                })
+                .catch(err => {
+                    addLog('❌ Failed to fetch main app: ' + err.message, 'error');
+                });
+                
+            // Test localStorage
+            try {
+                localStorage.setItem('test', 'value');
+                const val = localStorage.getItem('test');
+                localStorage.removeItem('test');
+                addLog('✅ localStorage working: ' + val, 'success');
+            } catch (e) {
+                addLog('❌ localStorage error: ' + e.message, 'error');
+            }
+            
+        } catch (error) {
+            addLog('❌ Critical error: ' + error.message, 'error');
+        }
+    </script>
+</body>
+</html>

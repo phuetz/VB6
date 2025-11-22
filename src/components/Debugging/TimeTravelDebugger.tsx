@@ -124,14 +124,26 @@ export const TimeTravelDebugger: React.FC = () => {
     simulateExecution();
   };
 
+  // Ref to store interval ID
+  const executionIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
   // Simulate code execution with snapshots
   const simulateExecution = () => {
+    // Clear any existing interval
+    if (executionIntervalRef.current) {
+      clearInterval(executionIntervalRef.current);
+      executionIntervalRef.current = null;
+    }
+
     let line = 1;
     const lines = currentCode.split('\n').length;
     
-    const executionInterval = setInterval(() => {
+    executionIntervalRef.current = setInterval(() => {
       if (!state.isRunning || state.isPaused) {
-        clearInterval(executionInterval);
+        if (executionIntervalRef.current) {
+          clearInterval(executionIntervalRef.current);
+          executionIntervalRef.current = null;
+        }
         return;
       }
 
@@ -165,6 +177,16 @@ export const TimeTravelDebugger: React.FC = () => {
     }, 1000 / state.executionSpeed);
   };
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (executionIntervalRef.current) {
+        clearInterval(executionIntervalRef.current);
+        executionIntervalRef.current = null;
+      }
+    };
+  }, []);
+
   // Pause execution
   const pauseExecution = () => {
     setState(prev => ({ ...prev, isPaused: true }));
@@ -181,6 +203,12 @@ export const TimeTravelDebugger: React.FC = () => {
 
   // Stop debugging
   const stopDebugging = () => {
+    // Clear interval when stopping
+    if (executionIntervalRef.current) {
+      clearInterval(executionIntervalRef.current);
+      executionIntervalRef.current = null;
+    }
+    
     setState(prev => ({
       ...prev,
       isRunning: false,

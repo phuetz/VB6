@@ -65,15 +65,24 @@ export const ControlManipulator: React.FC<ControlManipulatorProps> = ({
     }
   }, [dragState, handleMouseMove, handleMouseUp]);
 
-  // Gestionnaires de clavier
+  // MEMORY LEAK FIX: Combined keyboard handler to prevent duplicate listeners
   useEffect(() => {
     if (isSelected && executionMode === 'design') {
-      document.addEventListener('keydown', handleKeyboardMove);
-      document.addEventListener('keydown', handleKeyboardResize);
+      const handleKeyDown = (e: KeyboardEvent) => {
+        // Check if it's a move or resize operation
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+          if (e.ctrlKey) {
+            handleKeyboardResize(e);
+          } else {
+            handleKeyboardMove(e);
+          }
+        }
+      };
+
+      document.addEventListener('keydown', handleKeyDown);
 
       return () => {
-        document.removeEventListener('keydown', handleKeyboardMove);
-        document.removeEventListener('keydown', handleKeyboardResize);
+        document.removeEventListener('keydown', handleKeyDown);
       };
     }
   }, [isSelected, executionMode, handleKeyboardMove, handleKeyboardResize]);

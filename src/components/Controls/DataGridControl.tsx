@@ -182,14 +182,8 @@ export const DataGridControl = forwardRef<any, DataGridProps>((props, ref) => {
   const editorRef = useRef<HTMLInputElement>(null);
   const { fireEvent, updateControl } = useVB6Store();
 
-  // Load data from dataSource
-  useEffect(() => {
-    if (dataSource) {
-      loadData();
-    }
-  }, [dataSource, dataMember]);
-
-  const loadData = async () => {
+  // REACT STRICT MODE FIX: Define loadData with useCallback to prevent re-creation
+  const loadData = useCallback(async () => {
     try {
       // Simulate data loading from recordset
       if (dataSource?.recordset) {
@@ -216,7 +210,14 @@ export const DataGridControl = forwardRef<any, DataGridProps>((props, ref) => {
     } catch (error) {
       fireEvent(name, 'Error', { error: error.message });
     }
-  };
+  }, [dataSource, columns.length, defColWidth, fireEvent, name]);
+
+  // Load data from dataSource
+  useEffect(() => {
+    if (dataSource) {
+      loadData();
+    }
+  }, [dataSource, dataMember, loadData]);
 
   // Cell rendering
   const getCellValue = (rowIndex: number, colIndex: number): string => {
@@ -231,7 +232,7 @@ export const DataGridControl = forwardRef<any, DataGridProps>((props, ref) => {
       return formatNumber(value, column.numberFormat);
     }
     
-    return value?.toString() || '';
+    return value ? Object.prototype.toString.call(value) : '';
   };
 
   const formatNumber = (value: number, format: string): string => {
@@ -653,6 +654,11 @@ export const DataGridControl = forwardRef<any, DataGridProps>((props, ref) => {
                   }}
                   onMouseDown={(e) => {
                     e.stopPropagation();
+                    
+                    // EVENT HANDLING RACE FIX: Prevent multiple listener registration
+                    if ((e.target as any)._resizing) return;
+                    (e.target as any)._resizing = true;
+                    
                     const startX = e.clientX;
                     const startWidth = column.width;
                     
@@ -664,6 +670,8 @@ export const DataGridControl = forwardRef<any, DataGridProps>((props, ref) => {
                     const handleUp = () => {
                       document.removeEventListener('mousemove', handleMove);
                       document.removeEventListener('mouseup', handleUp);
+                      // Clear the flag
+                      (e.target as any)._resizing = false;
                     };
                     
                     document.addEventListener('mousemove', handleMove);

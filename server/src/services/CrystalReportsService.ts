@@ -470,7 +470,9 @@ export class CrystalReportsService {
       this.reportsCache.delete(reportId);
       
       const reportPath = path.join(process.cwd(), 'reports', 'definitions', `${reportId}.json`);
-      await fs.unlink(reportPath).catch(() => {}); // Ignore si le fichier n'existe pas
+      await fs.unlink(reportPath).catch(() => {
+        // Ignore if file doesn't exist - this is expected behavior
+      });
 
       this.logger.info(`Rapport supprimé: ${reportId}`);
     } catch (error) {

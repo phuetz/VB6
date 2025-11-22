@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import crypto from 'crypto';
 
 // Enable CORS for all servers
 const corsOptions = {
@@ -19,10 +20,25 @@ dbApp.get('/health', (req, res) => {
 });
 
 dbApp.post('/api/ado/connection', (req, res) => {
+  // DATA VALIDATION BUG FIX: Validate database name
+  const database = req.body.database;
+  if (database && typeof database !== 'string') {
+    return res.status(400).json({ error: 'Database name must be a string' });
+  }
+  
+  if (database && database.length > 100) {
+    return res.status(400).json({ error: 'Database name too long (max 100 characters)' });
+  }
+  
+  // Sanitize database name - only allow alphanumeric and underscores
+  const sanitizedDatabase = database ? database.replace(/[^a-zA-Z0-9_]/g, '') : 'MockDB';
+  
+  // CRYPTOGRAPHIC BUG FIX: Use cryptographically secure ID generation
+  const secureId = crypto.randomBytes(16).toString('hex');
   res.json({ 
-    connectionId: 'mock-conn-' + Date.now(),
+    connectionId: 'mock-conn-' + secureId,
     status: 'connected',
-    database: req.body.database || 'MockDB'
+    database: sanitizedDatabase
   });
 });
 
@@ -93,10 +109,22 @@ aiApp.get('/health', (req, res) => {
 aiApp.post('/api/ai/generate', (req, res) => {
   const { request } = req.body;
   
+  // DATA VALIDATION BUG FIX: Validate AI request input
+  if (!request || typeof request !== 'string') {
+    return res.status(400).json({ error: 'Request must be a non-empty string' });
+  }
+  
+  if (request.length > 10000) {
+    return res.status(400).json({ error: 'Request too long (max 10000 characters)' });
+  }
+  
+  // Sanitize request to prevent injection attacks
+  const sanitizedRequest = request.replace(/[<>&"']/g, ''); // Remove common XSS characters
+  
   // Mock AI response
   const suggestions = [];
   
-  if (request.includes('button')) {
+  if (sanitizedRequest.includes('button')) {
     suggestions.push({
       type: 'completion',
       title: 'Create Command Button',

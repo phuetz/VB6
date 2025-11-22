@@ -17,6 +17,7 @@ import {
 } from '@dnd-kit/core';
 import { useVB6Store } from '../../stores/vb6Store';
 import { useUndoRedo } from '../../hooks/useUndoRedo';
+import { perfMonitor } from '../../utils/performanceMonitor';
 
 interface DragDropContextType {
   isDragging: boolean;
@@ -29,10 +30,10 @@ interface DragDropContextType {
   vibrate: (pattern?: number | number[]) => void;
 }
 
-// Define a more specific type for dropZones to avoid undefined errors
+// CIRCULAR REFERENCE FIX: Use WeakRef for DOM elements to prevent memory leaks
 interface DropZone {
   id: string;
-  element: HTMLElement | null;
+  element: WeakRef<HTMLElement> | null;
   accepts: string[];
   onDrop: (data: any, position: { x: number; y: number }) => void;
   highlight: boolean;
@@ -54,6 +55,14 @@ export const useDragDrop = () => {
 };
 
 export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  console.log('🔄 DragDropProvider initializing...');
+  perfMonitor.startMeasure('DragDropProvider-render');
+  
+  // Check for render loops
+  if (perfMonitor.checkRenderLoop('DragDropProvider')) {
+    console.error('🔴 Render loop detected in DragDropProvider!');
+  }
+  
   const [isDragging, setIsDragging] = useState(false);
   const [dragData, setDragData] = useState<any>(null);
   const [dropZones, setDropZones] = useState<DropZone[]>([]);
@@ -63,15 +72,13 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isCtrlPressed, setIsCtrlPressed] = useState(false);
 
   const audioContextRef = useRef<AudioContext | null>(null);
-  const { snapToGrid, gridSize } = useVB6Store(
-    state => ({
-      snapToGrid: state.snapToGrid,
-      gridSize: state.gridSize,
-    }),
-    shallow
-  );
+  
+  // Fix: Use separate selectors to avoid infinite loop
+  const snapToGrid = useVB6Store(state => state.snapToGrid);
+  const gridSize = useVB6Store(state => state.gridSize);
+  
   const { saveState } = useUndoRedo();
-  const { addLog } = useVB6Store.getState();
+  const addLog = useVB6Store(state => state.addLog);
 
   // Sensors avec support tactile amélioré
   const sensors = useSensors(
@@ -144,8 +151,8 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, []);
 
-  // Gestion des raccourcis clavier
-  React.useEffect(() => {
+  // REACT STRICT MODE FIX: Gestion des raccourcis clavier with proper hook usage
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey) {
         setIsCtrlPressed(true);
@@ -171,7 +178,17 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('keyup', handleKeyUp);
     };
-  }, [isDragging]);
+  }, [isDragging]); // INFINITE LOOP FIX: Remove setter functions from dependencies
+
+  // REACT STRICT MODE FIX: Cleanup AudioContext on unmount with proper hook usage
+  useEffect(() => {
+    return () => {
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
+    };
+  }, []);
 
   // Détection de collision personnalisée
   const customCollisionDetection: CollisionDetection = useCallback(
@@ -193,7 +210,7 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     (event: DragStartEvent) => {
       const { active } = event;
       const data = active?.data?.current;
-      addLog('debug', 'DragDrop', `Drag start event received`, {
+      console.debug('DragDrop: Drag start event received', {
         id: active?.id,
         data,
       });
@@ -215,7 +232,7 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     (event: DragOverEvent) => {
       const { over, delta } = event;
       if (!delta) {
-        addLog('warn', 'DragDrop', 'No delta in dragOver event', event);
+        console.warn('DragDrop: No delta in dragOver event', event);
         return;
       }
 
@@ -234,13 +251,13 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setActiveDropZone(null);
       }
     },
-    [activeDropZone, dropZones, dragData, vibrate, playSound, addLog]
+    [activeDropZone, dropZones, dragData, vibrate, playSound]
   );
 
   useEffect(() => {
-    addLog('info', 'DragDrop', `DragDropProvider initialized with ${dropZones.length} drop zones`);
-    return () => addLog('info', 'DragDrop', 'DragDropProvider unmounted');
-  }, []);
+    console.log(`DragDrop: DragDropProvider initialized with ${dropZones.length} drop zones`);
+    return () => console.log('DragDrop: DragDropProvider unmounted');
+  }, [dropZones.length]);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -250,14 +267,14 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setShowConstraints(false);
 
       if (over) {
-        addLog('debug', 'DragDrop', `Drop over target: ${over.id}`, { over, active });
+        console.debug('DragDrop: Drop over target:', { over, active });
 
         const zone = dropZones.find(z => z.id === over.id);
         if (zone && zone.accepts.includes(dragData?.type)) {
           const dropPosition = { x: delta.x, y: delta.y };
 
           // Appliquer les contraintes de la zone
-          addLog('debug', 'DragDrop', `Applying drop constraints`, {
+          console.debug('DragDrop: Applying drop constraints', {
             constraints: zone.constraints,
             position: dropPosition,
           });
@@ -280,7 +297,7 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               );
 
               if (!isInAllowedArea) {
-                addLog('warn', 'DragDrop', `Drop position out of allowed area`, {
+                console.warn('DragDrop: Drop position out of allowed area', {
                   position: dropPosition,
                   allowedAreas: zone.constraints.allowedAreas,
                 });
@@ -296,10 +313,8 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           // Gérer la copie avec Ctrl
           const shouldCopy = isCtrlPressed && dragData?.allowCopy;
           const finalData = shouldCopy ? { ...dragData, copy: true } : dragData;
-          addLog(
-            'info',
-            'DragDrop',
-            `Dropping ${shouldCopy ? 'copy of' : ''} ${dragData?.type || 'item'}`,
+          console.info(
+            `DragDrop: Dropping ${shouldCopy ? 'copy of' : ''} ${dragData?.type || 'item'}`,
             {
               data: finalData,
               position: dropPosition,
@@ -310,7 +325,7 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           playDropSound();
           vibrate([50, 20, 50]);
         } else {
-          addLog('warn', 'DragDrop', `Invalid drop: ${dragData?.type} not accepted by ${over.id}`, {
+          console.warn(`DragDrop: Invalid drop: ${dragData?.type} not accepted by ${over.id}`, {
             accepts: zone?.accepts,
             dragData,
           });
@@ -321,13 +336,13 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       } else {
         // Drop en dehors d'une zone valide
         playErrorSound();
-        addLog('warn', 'DragDrop', `Drop outside valid drop zone`);
+        console.warn('DragDrop: Drop outside valid drop zone');
         vibrate(100);
       }
 
       setDragData(null);
       setActiveDropZone(null);
-      addLog('debug', 'DragDrop', `Drag end complete`);
+      console.debug('DragDrop: Drag end complete');
     },
     [dropZones, dragData, isCtrlPressed, playDropSound, playErrorSound, vibrate]
   );
@@ -350,6 +365,12 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     playDragSound,
     vibrate,
   };
+
+  // End performance measurement - FIXED: Add empty dependency array
+  useEffect(() => {
+    perfMonitor.endMeasure('DragDropProvider-render');
+    perfMonitor.logSummary();
+  }, []); // CRITICAL: Empty dependency array to prevent infinite loop
 
   return (
     <DragDropContext.Provider value={contextValue}>
@@ -436,58 +457,57 @@ const ConstraintsOverlay: React.FC<{
         const isActive = zone.id === activeDropZone;
         const isValid = zone.accepts.includes(dragData?.type);
 
-        if (!zone.element) return null;
+        // CIRCULAR REFERENCE FIX: Handle WeakRef safely
+        const element = zone.element?.deref();
+        if (!element) return null;
 
-        if (zone.element) {
-          const rect = zone.element.getBoundingClientRect();
-          return (
-            <React.Fragment key={zone.id}>
+        const rect = element.getBoundingClientRect();
+        return (
+          <React.Fragment key={zone.id}>
+            <div
+              key={zone.id}
+              className={`absolute border-2 border-dashed transition-all duration-200 ${
+                isActive && isValid
+                  ? 'border-green-500 bg-green-100 bg-opacity-20'
+                  : isValid
+                    ? 'border-blue-500 bg-blue-100 bg-opacity-10'
+                    : 'border-red-500 bg-red-100 bg-opacity-10'
+              }`}
+              style={{
+                left: rect.left,
+                top: rect.top,
+                width: rect.width,
+                height: rect.height,
+                borderRadius: '8px',
+                animation: isActive ? 'dropZonePulse 1s ease-in-out infinite' : 'none',
+              }}
+            >
+              {/* Indicateur du type de zone */}
               <div
-                key={zone.id}
-                className={`absolute border-2 border-dashed transition-all duration-200 ${
-                  isActive && isValid
-                    ? 'border-green-500 bg-green-100 bg-opacity-20'
-                    : isValid
-                      ? 'border-blue-500 bg-blue-100 bg-opacity-10'
-                      : 'border-red-500 bg-red-100 bg-opacity-10'
+                className={`absolute top-2 left-2 text-xs px-2 py-1 rounded ${
+                  isValid ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'
                 }`}
-                style={{
-                  left: rect.left,
-                  top: rect.top,
-                  width: rect.width,
-                  height: rect.height,
-                  borderRadius: '8px',
-                  animation: isActive ? 'dropZonePulse 1s ease-in-out infinite' : 'none',
-                }}
               >
-                {/* Indicateur du type de zone */}
-                <div
-                  className={`absolute top-2 left-2 text-xs px-2 py-1 rounded ${
-                    isValid ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'
-                  }`}
-                >
-                  {zone.id}: {zone.accepts.join(', ')}
-                </div>
-                <div
-                  className={`absolute bottom-2 right-2 text-xs px-2 py-1 rounded bg-blue-200 text-blue-800`}
-                >
-                  x: {Math.round(rect.left)}, y: {Math.round(rect.top)}, w: {Math.round(rect.width)}
-                  , h: {Math.round(rect.height)}
-                </div>
-
-                {/* Grille si contrainte de grille active */}
-                {zone.constraints?.snapToGrid && zone.constraints.gridSize && isActive && (
-                  <GridOverlay
-                    gridSize={zone.constraints.gridSize}
-                    width={rect.width}
-                    height={rect.height}
-                  />
-                )}
+                {zone.id}: {zone.accepts.join(', ')}
               </div>
-            </React.Fragment>
-          );
-        }
-        return null;
+              <div
+                className={`absolute bottom-2 right-2 text-xs px-2 py-1 rounded bg-blue-200 text-blue-800`}
+              >
+                x: {Math.round(rect.left)}, y: {Math.round(rect.top)}, w: {Math.round(rect.width)}
+                , h: {Math.round(rect.height)}
+              </div>
+
+              {/* Grille si contrainte de grille active */}
+              {zone.constraints?.snapToGrid && zone.constraints.gridSize && isActive && (
+                <GridOverlay
+                  gridSize={zone.constraints.gridSize}
+                  width={rect.width}
+                  height={rect.height}
+                />
+              )}
+            </div>
+          </React.Fragment>
+        );
       })}
     </div>
   );

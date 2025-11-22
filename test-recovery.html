@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VB6 IDE Recovery Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .primary { background: #2196F3; color: white; }
+        .success { background: #4CAF50; color: white; }
+        .warning { background: #FF9800; color: white; }
+        .danger { background: #F44336; color: white; }
+        button:hover { opacity: 0.9; }
+        .log {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            background: #e3f2fd;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>VB6 IDE Recovery System Test</h1>
+        
+        <div class="status" id="status">
+            <strong>Status:</strong> <span id="statusText">Ready to test</span>
+        </div>
+
+        <h2>Test Actions</h2>
+        <div>
+            <button class="primary" onclick="openApp()">Open VB6 IDE</button>
+            <button class="success" onclick="openAppWithSafeMode()">Open in Safe Mode</button>
+            <button class="warning" onclick="clearCrashFlag()">Clear Crash Flag</button>
+            <button class="danger" onclick="simulateCrash()">Simulate Crash</button>
+        </div>
+
+        <h2>Recovery Points</h2>
+        <div>
+            <button class="primary" onclick="checkRecoveryPoints()">Check Recovery Points</button>
+            <button class="success" onclick="createManualRecovery()">Create Manual Recovery</button>
+            <button class="warning" onclick="clearRecoveryPoints()">Clear All Recovery Points</button>
+        </div>
+
+        <h2>Log Output</h2>
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+            logEl.innerHTML += `<div style="color: ${color}">[${time}] ${message}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function updateStatus(text, type = 'info') {
+            const statusEl = document.getElementById('statusText');
+            statusEl.textContent = text;
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.background = type === 'error' ? '#ffebee' : 
+                                        type === 'success' ? '#e8f5e9' : '#e3f2fd';
+        }
+
+        function openApp() {
+            log('Opening VB6 IDE...');
+            window.open('http://localhost:5183/', '_blank');
+            updateStatus('VB6 IDE opened in new window', 'success');
+        }
+
+        function openAppWithSafeMode() {
+            log('Opening VB6 IDE in Safe Mode...');
+            window.open('http://localhost:5183/?safe=true', '_blank');
+            updateStatus('VB6 IDE opened in Safe Mode', 'success');
+        }
+
+        function clearCrashFlag() {
+            localStorage.removeItem('vb6-crash-detected');
+            log('Crash flag cleared', 'success');
+            updateStatus('Crash flag cleared', 'success');
+        }
+
+        function simulateCrash() {
+            localStorage.setItem('vb6-crash-detected', 'true');
+            log('Crash flag set', 'error');
+            updateStatus('Crash simulated - app will open in safe mode next time', 'error');
+        }
+
+        function checkRecoveryPoints() {
+            const points = localStorage.getItem('vb6-recovery-points');
+            if (points) {
+                try {
+                    const parsed = JSON.parse(points);
+                    log(`Found ${parsed.length} recovery points:`, 'success');
+                    parsed.forEach((point, index) => {
+                        const date = new Date(point.timestamp).toLocaleString();
+                        log(`  ${index + 1}. ${point.description} - ${date}`);
+                    });
+                } catch (e) {
+                    log('Error parsing recovery points: ' + e.message, 'error');
+                }
+            } else {
+                log('No recovery points found');
+            }
+        }
+
+        function createManualRecovery() {
+            // Simulate creating a recovery point
+            const existingPoints = localStorage.getItem('vb6-recovery-points');
+            let points = existingPoints ? JSON.parse(existingPoints) : [];
+            
+            const newPoint = {
+                timestamp: Date.now(),
+                description: 'Manual test recovery point',
+                state: {
+                    controls: [],
+                    selectedControls: [],
+                    currentCode: '// Test recovery state',
+                    executionMode: 'design',
+                    snapToGrid: true,
+                    gridSize: 10,
+                    designerZoom: 100
+                }
+            };
+            
+            points.push(newPoint);
+            if (points.length > 10) {
+                points.shift(); // Keep only last 10
+            }
+            
+            localStorage.setItem('vb6-recovery-points', JSON.stringify(points));
+            log('Manual recovery point created', 'success');
+            updateStatus('Recovery point created', 'success');
+        }
+
+        function clearRecoveryPoints() {
+            localStorage.removeItem('vb6-recovery-points');
+            log('All recovery points cleared', 'success');
+            updateStatus('Recovery points cleared', 'success');
+        }
+
+        // Check initial state
+        window.onload = () => {
+            log('Recovery test page loaded');
+            const crashFlag = localStorage.getItem('vb6-crash-detected');
+            if (crashFlag === 'true') {
+                updateStatus('WARNING: Crash flag is set - app will open in safe mode', 'error');
+                log('Crash flag detected', 'error');
+            } else {
+                updateStatus('No crash flag detected - app will open normally', 'success');
+            }
+            checkRecoveryPoints();
+        };
+    </script>
+</body>
+</html>

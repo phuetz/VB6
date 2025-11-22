@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Storage</title>
+</head>
+<body>
+    <h1>Clear VB6 IDE Storage</h1>
+    <button onclick="clearAll()">Clear All Storage</button>
+    <div id="result"></div>
+    
+    <script>
+        function clearAll() {
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+                document.getElementById('result').innerHTML = '<p style="color: green;">✅ Storage cleared successfully!</p>';
+            } catch (e) {
+                document.getElementById('result').innerHTML = '<p style="color: red;">❌ Error: ' + e + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>

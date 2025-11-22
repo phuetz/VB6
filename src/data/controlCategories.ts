@@ -15,8 +15,14 @@ export const controlCategories = {
     { type: 'Line', icon: '／', name: 'Line', cursor: 'crosshair' },
     { type: 'Image', icon: '📷', name: 'Image', cursor: 'default' },
     { type: 'PictureBox', icon: '🖼', name: 'PictureBox', cursor: 'default' },
+    { type: 'DriveListBox', icon: '💾', name: 'DriveListBox', cursor: 'pointer' },
+    { type: 'DirListBox', icon: '📁', name: 'DirListBox', cursor: 'pointer' },
+    { type: 'FileListBox', icon: '📄', name: 'FileListBox', cursor: 'pointer' },
+    { type: 'Data', icon: '💾', name: 'Data', cursor: 'default' },
   ],
   ActiveX: [
+    { type: 'ActiveX', icon: '🔌', name: 'Insert ActiveX Control...', cursor: 'default', special: 'activex-manager' },
+    { type: 'ADODataControl', icon: '🗄️', name: 'ADO Data Control', cursor: 'default' },
     { type: 'ListView', icon: '📋', name: 'ListView', cursor: 'default' },
     { type: 'ImageList', icon: '🖼️', name: 'ImageList', cursor: 'default' },
     { type: 'TreeView', icon: '🌳', name: 'TreeView', cursor: 'default' },
@@ -30,5 +36,26 @@ export const controlCategories = {
     { type: 'RichTextBox', icon: '📝', name: 'RichTextBox', cursor: 'text' },
     { type: 'MonthView', icon: '📆', name: 'MonthView', cursor: 'pointer' },
     { type: 'Animation', icon: '🎬', name: 'Animation', cursor: 'default' },
+  ],
+  DataBound: [
+    { type: 'DBList', icon: '📋', name: 'DBList', cursor: 'pointer' },
+    { type: 'DBCombo', icon: '▼', name: 'DBCombo', cursor: 'pointer' },
+    { type: 'DataRepeater', icon: '⁂', name: 'DataRepeater', cursor: 'default' },
+    { type: 'DataList', icon: '📑', name: 'DataList', cursor: 'default' },
+    { type: 'DataCombo', icon: '📌', name: 'DataCombo', cursor: 'pointer' },
+    { type: 'DataGrid', icon: '▦', name: 'DataGrid', cursor: 'default' },
+  ],
+  Charts: [
+    { type: 'MSChart', icon: '📊', name: 'MSChart (Chart)', cursor: 'pointer' },
+  ],
+  Graphics: [
+    { type: 'PictureClip', icon: '🖼️', name: 'PictureClip', cursor: 'pointer' },
+  ],
+  Internet: [
+    { type: 'Winsock', icon: '🌐', name: 'Winsock', cursor: 'default' },
+    { type: 'Inet', icon: '🌍', name: 'Internet Transfer', cursor: 'default' },
+  ],
+  Insertable: [
+    { type: 'OLE', icon: '📎', name: 'OLE', cursor: 'default' },
   ],
 };

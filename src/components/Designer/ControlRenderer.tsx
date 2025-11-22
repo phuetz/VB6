@@ -2,16 +2,57 @@ import React, { useCallback, useEffect } from 'react';
 import { useVB6 } from '../../context/VB6Context';
 import { Control } from '../../context/types';
 import ResizeHandles from './ResizeHandles';
+import { LineControl } from '../Controls/LineControl';
+import { ShapeControl } from '../Controls/ShapeControl';
+import { ImageControl as ImageControlComponent } from '../Controls/ImageControl';
+import { DriveListBox } from '../Controls/DriveListBox';
+import { DirListBox } from '../Controls/DirListBox';
+import { FileListBox } from '../Controls/FileListBox';
+import { DataControl } from '../Controls/DataControl';
+import { ADODataControl } from '../Controls/ADODataControl';
+import { OLEControl } from '../Controls/OLEControl';
+import { WinsockControl } from '../Controls/WinsockControl';
+import { InetControl } from '../Controls/InetControl';
+import { ActiveXControl } from '../Controls/ActiveXControl';
+import { DBListControl, DBComboControl } from '../Controls/DBListComboControl';
+import { DataRepeaterControl } from '../Controls/DataRepeaterControl';
+import { MSChartControl } from '../Controls/MSChartControl';
+import { PictureClipControl } from '../Controls/PictureClipControl';
 
 interface ControlRendererProps {
   control: Control;
+  onStartDrag?: (e: React.MouseEvent, control: Control) => void;
+  onStartResize?: (e: React.MouseEvent, control: Control, handle: string) => void;
+  dragState?: {
+    isDragging: boolean;
+    isResizing: boolean;
+    startPosition: { x: number; y: number };
+    startSize: { width: number; height: number };
+    currentHandle: string | null;
+    dragOffset: { x: number; y: number };
+  };
 }
 
-const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
+const ControlRenderer: React.FC<ControlRendererProps> = ({ 
+  control, 
+  onStartDrag, 
+  onStartResize, 
+  dragState 
+}) => {
   const { state, dispatch, updateControl, executeEvent } = useVB6();
 
   const isSelected = state.selectedControls.find(sc => sc.id === control.id);
   const testId = `${control.type}-${control.id}`;
+
+  // Handle drag start for control manipulation
+  const handleControlMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (state.executionMode === 'run' || !onStartDrag) return;
+      e.stopPropagation();
+      onStartDrag(e, control);
+    },
+    [state.executionMode, onStartDrag, control]
+  );
 
   const handleControlClick = useCallback(
     (e: React.MouseEvent) => {
@@ -86,16 +127,17 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
     }
   }, [control, state.executionMode, executeEvent]);
 
-  // Base style
+  // Base style with drag transform
   const baseStyle: React.CSSProperties = {
     position: 'absolute',
     left: control.x,
     top: control.y,
-    cursor: state.executionMode === 'run' ? 'default' : 'move',
+    cursor: state.executionMode === 'run' ? 'default' : dragState?.isDragging ? 'grabbing' : 'move',
     userSelect: state.executionMode === 'run' ? 'auto' : 'none',
-    opacity: control.enabled ? 1 : 0.5,
-    zIndex: control.tabIndex || control.id,
+    opacity: control.enabled ? (dragState?.isDragging ? 0.5 : 1) : 0.5,
+    zIndex: dragState?.isDragging ? 1000 : (control.tabIndex || control.id),
     border: isSelected && state.executionMode === 'design' ? '1px dashed #0066cc' : undefined,
+    transition: dragState?.isDragging ? 'none' : 'all 150ms ease',
   };
 
   // Render specific control types
@@ -120,6 +162,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
             disabled={!control.enabled}
           >
             {control.caption}
@@ -149,6 +192,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             }}
             onClick={handleControlClick}
             onDoubleClick={handleControlDoubleClick}
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
           >
             {control.caption}
           </div>
@@ -160,6 +204,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             <div
               data-testid={testId}
               style={{ ...baseStyle, width: control.width, height: control.height }}
+              onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
             >
               <textarea
                 value={control.text || ''}
@@ -186,6 +231,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
             <div
               data-testid={testId}
               style={{ ...baseStyle, width: control.width, height: control.height }}
+              onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
             >
               <input
                 type={control.passwordChar ? 'password' : 'text'}
@@ -541,28 +587,14 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
       case 'Image':
         return (
           <div
-            style={{
-              ...baseStyle,
-              width: control.autoSize && control.picture ? 'auto' : control.width,
-              height: control.autoSize && control.picture ? 'auto' : control.height,
-              border: control.borderStyle === 1 ? '1px solid #000' : 'none',
-              overflow: 'hidden',
-            }}
-            onClick={handleControlClick}
-            onDoubleClick={handleControlDoubleClick}
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
           >
-            {control.picture ? (
-              <img
-                src={control.picture}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: control.stretch ? 'fill' : 'contain',
-                }}
-              />
-            ) : (
-              <span style={{ fontSize: '10px', color: '#555' }}>Image</span>
-            )}
+            <ImageControlComponent 
+              control={control} 
+              isDesignMode={state.executionMode === 'design'}
+              onClick={handleControlClick}
+              onDoubleClick={handleControlDoubleClick}
+            />
           </div>
         );
 
@@ -599,75 +631,65 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
       case 'Data':
         return (
           <div
-            style={{
-              ...baseStyle,
-              width: control.width,
-              height: control.height,
-              backgroundColor: '#f0f0f0',
-              border: '1px solid #000',
-              display: 'flex',
-              alignItems: 'center',
-              paddingLeft: '4px',
-              fontSize: '10px',
-              fontFamily: control.font?.name || 'MS Sans Serif',
-            }}
-            onClick={handleControlClick}
-            onDoubleClick={handleControlDoubleClick}
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
           >
-            {control.name}
+            <DataControl 
+              control={control} 
+              isDesignMode={state.executionMode === 'design'}
+              onPropertyChange={(prop, value) => updateControl(control.id, prop, value)}
+            />
           </div>
         );
 
       case 'OLE':
         return (
           <div
-            style={{
-              ...baseStyle,
-              width: control.width,
-              height: control.height,
-              backgroundColor: '#ffffff',
-              border: '1px dashed #000',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '10px',
-              fontFamily: control.font?.name || 'MS Sans Serif',
-            }}
-            onClick={handleControlClick}
-            onDoubleClick={handleControlDoubleClick}
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
           >
-            OLE
+            <OLEControl 
+              control={control} 
+              isDesignMode={state.executionMode === 'design'}
+              onPropertyChange={(prop, value) => updateControl(control.id, prop, value)}
+            />
           </div>
         );
 
       case 'DriveListBox':
+        return (
+          <div
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
+          >
+            <DriveListBox 
+              control={control} 
+              isDesignMode={state.executionMode === 'design'}
+              onPropertyChange={(prop, value) => updateControl(control.id, prop, value)}
+            />
+          </div>
+        );
+        
       case 'DirListBox':
+        return (
+          <div
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
+          >
+            <DirListBox 
+              control={control} 
+              isDesignMode={state.executionMode === 'design'}
+              onPropertyChange={(prop, value) => updateControl(control.id, prop, value)}
+            />
+          </div>
+        );
+        
       case 'FileListBox':
         return (
           <div
-            style={{ ...baseStyle, width: control.width, height: control.height }}
-            onClick={handleControlClick}
-            onDoubleClick={handleControlDoubleClick}
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
           >
-            <select
-              value={control.value}
-              onChange={e => handleControlChange(e.target.value, 'value')}
-              style={{
-                width: '100%',
-                height: '100%',
-                backgroundColor: control.backColor,
-                color: control.foreColor,
-                fontSize: `${control.font?.size || 8}pt`,
-                fontFamily: control.font?.name || 'MS Sans Serif',
-              }}
-              disabled={!control.enabled}
-            >
-              {(control.items || []).map((item: string, idx: number) => (
-                <option key={idx} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
+            <FileListBox 
+              control={control} 
+              isDesignMode={state.executionMode === 'design'}
+              onPropertyChange={(prop, value) => updateControl(control.id, prop, value)}
+            />
           </div>
         );
 
@@ -996,34 +1018,29 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
       case 'Shape':
         return (
           <div
-            style={{
-              ...baseStyle,
-              width: control.width,
-              height: control.height,
-              backgroundColor: control.backStyle === 1 ? control.backColor : 'transparent',
-              border:
-                control.borderStyle === 1
-                  ? `${control.borderWidth}px solid ${control.borderColor}`
-                  : 'none',
-              borderRadius: control.shape === 2 || control.shape === 3 ? '50%' : 0,
-            }}
-            onClick={handleControlClick}
-            onDoubleClick={handleControlDoubleClick}
-          />
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
+          >
+            <ShapeControl 
+              control={control} 
+              isDesignMode={state.executionMode === 'design'}
+              onClick={handleControlClick}
+              onDoubleClick={handleControlDoubleClick}
+            />
+          </div>
         );
 
       case 'Line':
         return (
           <div
-            style={{
-              ...baseStyle,
-              width: control.width,
-              height: control.borderWidth,
-              backgroundColor: control.borderColor,
-            }}
-            onClick={handleControlClick}
-            onDoubleClick={handleControlDoubleClick}
-          />
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
+          >
+            <LineControl 
+              control={control} 
+              isDesignMode={state.executionMode === 'design'}
+              onClick={handleControlClick}
+              onDoubleClick={handleControlDoubleClick}
+            />
+          </div>
         );
 
       case 'WebBrowser':
@@ -1042,27 +1059,42 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           />
         );
 
-      case 'Inet':
       case 'Winsock':
         return (
           <div
-            data-testid={testId}
-            style={{
-              ...baseStyle,
-              width: control.width,
-              height: control.height,
-              backgroundColor: '#f0f0f0',
-              border: '1px dashed #000',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '10px',
-              fontFamily: control.font?.name || 'MS Sans Serif',
-            }}
-            onClick={handleControlClick}
-            onDoubleClick={handleControlDoubleClick}
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
           >
-            {control.type}
+            <WinsockControl 
+              control={control} 
+              isDesignMode={state.executionMode === 'design'}
+              onPropertyChange={(prop, value) => updateControl(control.id, prop, value)}
+            />
+          </div>
+        );
+        
+      case 'ADODataControl':
+        return (
+          <div
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
+          >
+            <ADODataControl 
+              control={control} 
+              isDesignMode={state.executionMode === 'design'}
+              onPropertyChange={(prop, value) => updateControl(control.id, prop, value)}
+            />
+          </div>
+        );
+        
+      case 'Inet':
+        return (
+          <div
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
+          >
+            <InetControl 
+              control={control} 
+              isDesignMode={state.executionMode === 'design'}
+              onPropertyChange={(prop, value) => updateControl(control.id, prop, value)}
+            />
           </div>
         );
 
@@ -1166,7 +1198,123 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
         );
       }
 
+      case 'DBList':
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+            }}
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            <DBListControl
+              control={{
+                type: 'DBList',
+                ...control
+              }}
+              isDesignMode={state.executionMode === 'design'}
+              onPropertyChange={(prop, val) => updateControl(control.id, prop, val)}
+              onEvent={(eventName, eventData) => executeEvent(control.id, eventName, eventData)}
+            />
+          </div>
+        );
+
+      case 'DBCombo':
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+            }}
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            <DBComboControl
+              control={{
+                type: 'DBCombo',
+                ...control
+              }}
+              isDesignMode={state.executionMode === 'design'}
+              onPropertyChange={(prop, val) => updateControl(control.id, prop, val)}
+              onEvent={(eventName, eventData) => executeEvent(control.id, eventName, eventData)}
+            />
+          </div>
+        );
+
       case 'DataRepeater':
+        return (
+          <div
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
+          >
+            <DataRepeaterControl
+              control={{
+                type: 'DataRepeater',
+                ...control
+              }}
+              isDesignMode={state.executionMode === 'design'}
+              onPropertyChange={(prop, val) => updateControl(control.id, prop, val)}
+              onEvent={(eventName, eventData) => executeEvent(control.id, eventName, eventData)}
+            />
+          </div>
+        );
+
+      case 'MSChart':
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+            }}
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
+          >
+            <MSChartControl
+              id={control.id}
+              name={control.name}
+              left={0}
+              top={0}
+              width={control.width}
+              height={control.height}
+              chartType={control.chartType || 1}
+              showLegend={control.showLegend !== false}
+              legendLocation={control.legendLocation || 1}
+              titleText={control.titleText || ''}
+              data={control.data}
+              visible={control.visible}
+              enabled={control.enabled}
+            />
+          </div>
+        );
+
+      case 'PictureClip':
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              width: control.width,
+              height: control.height,
+            }}
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
+            onClick={handleControlClick}
+            onDoubleClick={handleControlDoubleClick}
+          >
+            <PictureClipControl
+              control={{
+                type: 'PictureClip',
+                ...control
+              }}
+              isDesignMode={state.executionMode === 'design'}
+              onPropertyChange={(prop, val) => updateControl(control.id, prop, val)}
+              onEvent={(eventName, eventData) => executeEvent(control.id, eventName, eventData)}
+            />
+          </div>
+        );
+
       case 'DataEnvironment':
       case 'DataReport':
       case 'CrystalReport':
@@ -1205,6 +1353,28 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
           />
         );
 
+      case 'ActiveXControl':
+        return (
+          <div
+            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
+          >
+            <ActiveXControl
+              id={control.id.toString()}
+              name={control.name}
+              progId={control.progId || ''}
+              left={0}
+              top={0}
+              width={control.width}
+              height={control.height}
+              properties={control.properties || {}}
+              events={control.events || {}}
+              isDesignMode={state.executionMode === 'design'}
+              onPropertyChange={(name, value) => updateControl(control.id, name, value)}
+              onEvent={(eventName, eventData) => executeEvent(control.id, eventName, eventData)}
+            />
+          </div>
+        );
+
       default:
         return (
           <div
@@ -1235,9 +1405,14 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({ control }) => {
   }
 
   return (
-    <div className="relative">
+    <div 
+      className="relative"
+      onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
+    >
       {renderControl()}
-      {isSelected && state.executionMode === 'design' && <ResizeHandles control={control} />}
+      {isSelected && state.executionMode === 'design' && (
+        <ResizeHandles control={control} onStartResize={onStartResize} />
+      )}
     </div>
   );
 };

@@ -235,7 +235,9 @@ export const DebugToolbar: React.FC = () => {
   }, [dispatch]);
 
   const handleStep = useCallback((type: 'into' | 'over' | 'out') => {
-    console.log(`Debug step: ${type}`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Debug step: ${type}`);
+    }
   }, []);
 
   return (

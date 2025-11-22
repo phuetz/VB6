@@ -293,10 +293,50 @@ class DatabaseService {
     };
   }
 
+  // SECURITY FIX: Safe JSON parser to prevent prototype pollution
+  safeJSONParse(jsonString) {
+    try {
+      const parsed = JSON.parse(jsonString);
+      
+      // Check for prototype pollution attempts
+      if (parsed && typeof parsed === 'object') {
+        const dangerousKeys = ['__proto__', 'constructor', 'prototype'];
+        for (const key of dangerousKeys) {
+          if (key in parsed) {
+            throw new Error(`Dangerous key "${key}" found in JSON - potential prototype pollution attack`);
+          }
+        }
+        
+        // Recursively check nested objects
+        const checkNested = (obj) => {
+          if (obj && typeof obj === 'object') {
+            for (const [key, value] of Object.entries(obj)) {
+              if (dangerousKeys.includes(key)) {
+                throw new Error(`Dangerous key "${key}" found in nested object - potential prototype pollution attack`);
+              }
+              if (typeof value === 'object' && value !== null) {
+                checkNested(value);
+              }
+            }
+          }
+        };
+        checkNested(parsed);
+        
+        // Create clean object without prototype chain
+        return Object.create(null, Object.getOwnPropertyDescriptors(parsed));
+      }
+      
+      return parsed;
+    } catch (error) {
+      throw new Error(`JSON parsing failed: ${error.message}`);
+    }
+  }
+
   // Exécution MongoDB
   async executeMongoDBQuery(connection, query, parameters) {
     const { db } = connection;
-    const { collection, operation, ...queryParams } = JSON.parse(query);
+    const parsedQuery = this.safeJSONParse(query);
+    const { collection, operation, ...queryParams } = parsedQuery;
     
     const coll = db.collection(collection);
     let result;
@@ -448,25 +488,28 @@ class DatabaseService {
     }
 
     switch (connectionInfo.type.toLowerCase()) {
-      case 'mysql':
+      case 'mysql': {
         const mysqlConn = await connectionInfo.connection.getConnection();
         await mysqlConn.beginTransaction();
         connectionInfo.transaction = mysqlConn;
         break;
+      }
       
       case 'postgresql':
-      case 'postgres':
+      case 'postgres': {
         const pgClient = await connectionInfo.connection.connect();
         await pgClient.query('BEGIN');
         connectionInfo.transaction = pgClient;
         break;
+      }
       
       case 'mssql':
-      case 'sqlserver':
+      case 'sqlserver': {
         const transaction = new mssql.Transaction(connectionInfo.connection);
         await transaction.begin();
         connectionInfo.transaction = transaction;
         break;
+      }
     }
 
     return { transactionId: connectionId };
@@ -627,9 +670,31 @@ class DatabaseService {
     return results;
   }
 
+  // SECURITY FIX: Validate SQL identifiers to prevent SQL injection
+  validateSQLIdentifier(identifier) {
+    // Only allow alphanumeric characters, underscores, and dots (for schema.table)
+    if (!/^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)?$/.test(identifier)) {
+      throw new Error(`Invalid SQL identifier: ${identifier} - potential SQL injection attack`);
+    }
+    
+    // Prevent SQL keywords that could be used for injection
+    const dangerousKeywords = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE', 'EXEC', 'EXECUTE', 'UNION', 'OR', 'AND', '--', ';'];
+    const upperIdentifier = identifier.toUpperCase();
+    for (const keyword of dangerousKeywords) {
+      if (upperIdentifier.includes(keyword)) {
+        throw new Error(`Dangerous keyword "${keyword}" found in identifier: ${identifier}`);
+      }
+    }
+    
+    return identifier;
+  }
+
   async exportData(connectionId, tableName, options = {}) {
-    const limit = options.limit || 10000;
-    const offset = options.offset || 0;
+    // SECURITY FIX: Validate all inputs to prevent SQL injection
+    const validatedTableName = this.validateSQLIdentifier(tableName);
+    
+    const limit = Math.max(1, Math.min(50000, parseInt(options.limit) || 10000)); // Limit between 1-50000
+    const offset = Math.max(0, parseInt(options.offset) || 0); // Offset >= 0
     const format = options.format || 'json';
 
     let query;
@@ -638,19 +703,20 @@ class DatabaseService {
       case 'postgresql':
       case 'postgres':
       case 'sqlite':
-        query = `SELECT * FROM ${tableName} LIMIT ${limit} OFFSET ${offset}`;
+        // Use parameterized query for LIMIT/OFFSET where possible
+        query = `SELECT * FROM \`${validatedTableName}\` LIMIT ? OFFSET ?`;
         break;
       
       case 'mssql':
       case 'sqlserver':
-        query = `SELECT * FROM ${tableName} ORDER BY 1 OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY`;
+        query = `SELECT * FROM [${validatedTableName}] ORDER BY 1 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY`;
         break;
     }
 
     const result = await this.executeQuery({
       connectionId,
       query,
-      parameters: []
+      parameters: [limit, offset]
     });
 
     // Convertir selon le format demandé
@@ -707,15 +773,30 @@ class DatabaseService {
   convertToSQL(tableName, data) {
     if (!data || data.length === 0) return '';
     
+    // SECURITY FIX: Validate table name to prevent SQL injection
+    const validatedTableName = this.validateSQLIdentifier(tableName);
+    
     const sql = data.map(row => {
-      const columns = Object.keys(row).join(', ');
+      // SECURITY FIX: Validate column names to prevent SQL injection
+      const validatedColumns = Object.keys(row).map(column => {
+        try {
+          return this.validateSQLIdentifier(column);
+        } catch (error) {
+          throw new Error(`Invalid column name "${column}": ${error.message}`);
+        }
+      });
+      
+      const columns = validatedColumns.join(', ');
       const values = Object.values(row).map(value => {
         if (value === null) return 'NULL';
         if (typeof value === 'string') return `'${value.replace(/'/g, "''")}'`;
-        return value;
+        if (typeof value === 'number') return value;
+        if (typeof value === 'boolean') return value ? 'TRUE' : 'FALSE';
+        // Convert other types to string and escape
+        return `'${String(value).replace(/'/g, "''")}'`;
       }).join(', ');
       
-      return `INSERT INTO ${tableName} (${columns}) VALUES (${values});`;
+      return `INSERT INTO \`${validatedTableName}\` (\`${validatedColumns.join('\`, \`')}\`) VALUES (${values});`;
     }).join('\n');
 
     return sql;
@@ -735,18 +816,28 @@ class DatabaseService {
   async insertBatch(connectionInfo, tableName, data) {
     if (!data || data.length === 0) return;
 
+    // SECURITY FIX: Validate table name and column names to prevent SQL injection
+    const validatedTableName = this.validateSQLIdentifier(tableName);
     const columns = Object.keys(data[0]);
+    const validatedColumns = columns.map(column => {
+      try {
+        return this.validateSQLIdentifier(column);
+      } catch (error) {
+        throw new Error(`Invalid column name "${column}": ${error.message}`);
+      }
+    });
     
     switch (connectionInfo.type.toLowerCase()) {
-      case 'mysql':
-        const placeholders = data.map(() => `(${columns.map(() => '?').join(',')})`).join(',');
+      case 'mysql': {
+        const placeholders = data.map(() => `(${validatedColumns.map(() => '?').join(',')})`).join(',');
         const values = data.flatMap(row => columns.map(col => row[col]));
         
         await connectionInfo.connection.execute(
-          `INSERT INTO ${tableName} (${columns.join(',')}) VALUES ${placeholders}`,
+          `INSERT INTO \`${validatedTableName}\` (\`${validatedColumns.join('\`, \`')}\`) VALUES ${placeholders}`,
           values
         );
         break;
+      }
       
       case 'postgresql':
       case 'postgres':
@@ -755,8 +846,8 @@ class DatabaseService {
         try {
           await client.query('BEGIN');
           
-          const placeholders = columns.map((_, i) => `$${i + 1}`).join(',');
-          const insertQuery = `INSERT INTO ${tableName} (${columns.join(',')}) VALUES (${placeholders})`;
+          const placeholders = validatedColumns.map((_, i) => `$${i + 1}`).join(',');
+          const insertQuery = `INSERT INTO "${validatedTableName}" ("${validatedColumns.join('", "')}") VALUES (${placeholders})`;
           
           for (const row of data) {
             await client.query(insertQuery, columns.map(col => row[col]));

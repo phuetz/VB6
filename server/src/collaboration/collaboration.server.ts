@@ -66,8 +66,33 @@ const io = new Server(server, {
   },
 });
 
-// Middleware
-app.use(cors());
+// CONFIGURATION VULNERABILITY BUG FIX: Secure CORS configuration  
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or Postman)
+    if (!origin) return callback(null, true);
+    
+    // CONFIGURATION VULNERABILITY BUG FIX: Whitelist allowed origins only
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001', 
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001',
+      // Add production domains here when deploying
+      // 'https://your-production-domain.com'
+    ];
+    
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      console.warn(`CORS blocked collaboration request from unauthorized origin: ${origin}`);
+      return callback(new Error('CORS policy violation: Origin not allowed'), false);
+    }
+  },
+  credentials: true, // Allow cookies/auth headers
+  optionsSuccessStatus: 200 // Support legacy browsers
+}));
+
 app.use(express.json());
 
 // In-memory storage (replace with Redis for production)

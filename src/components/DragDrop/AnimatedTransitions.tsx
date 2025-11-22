@@ -10,7 +10,7 @@ interface AnimatedDropProps {
 export const AnimatedDrop: React.FC<AnimatedDropProps> = ({ children, isVisible, delay = 0 }) => {
   const [shouldRender, setShouldRender] = React.useState(isVisible);
   const [animationClass, setAnimationClass] = React.useState('');
-  const { addLog } = useVB6Store.getState();
+  const addLog = useVB6Store(state => state.addLog);
 
   React.useEffect(() => {
     addLog('debug', 'AnimatedDrop', `Animation state change: isVisible=${isVisible}`);
@@ -44,7 +44,7 @@ export const MagneticSnap: React.FC<MagneticSnapProps> = ({
   snapPosition,
 }) => {
   const [currentPosition, setCurrentPosition] = React.useState(snapPosition);
-  const { addLog } = useVB6Store.getState();
+  const addLog = useVB6Store(state => state.addLog);
 
   React.useEffect(() => {
     if (isSnapping) {
@@ -104,7 +104,7 @@ export const PulseHighlight: React.FC<PulseHighlightProps> = ({
   isActive,
   color = 'rgb(59, 130, 246)',
 }) => {
-  const { addLog } = useVB6Store.getState();
+  const addLog = useVB6Store(state => state.addLog);
 
   React.useEffect(() => {
     if (isActive) {
@@ -135,7 +135,7 @@ interface RippleEffectProps {
 
 export const RippleEffect: React.FC<RippleEffectProps> = ({ isTriggered, onComplete }) => {
   const [ripples, setRipples] = React.useState<Array<{ id: number; x: number; y: number }>>([]);
-  const { addLog } = useVB6Store.getState();
+  const addLog = useVB6Store(state => state.addLog);
 
   React.useEffect(() => {
     if (isTriggered) {

@@ -106,12 +106,12 @@ export enum IsolationLevelEnum {
   adXactUnspecified = 0xFFFFFFFF,
   adXactChaos = 0x00000010,
   adXactReadUncommitted = 0x00000100,
-  adXactBrowse = 0x00000100, // Same as adXactReadUncommitted
+  // adXactBrowse = 0x00000100, // Same as adXactReadUncommitted (commented to avoid duplicate)
   adXactCursorStability = 0x00001000,
-  adXactReadCommitted = 0x00001000, // Same as adXactCursorStability
+  // adXactReadCommitted = 0x00001000, // Same as adXactCursorStability (commented to avoid duplicate)
   adXactRepeatableRead = 0x00010000,
   adXactSerializable = 0x00100000,
-  adXactIsolated = 0x00100000 // Same as adXactSerializable
+  // adXactIsolated = 0x00100000 // Same as adXactSerializable (commented to avoid duplicate)
 }
 
 export enum EditModeEnum {

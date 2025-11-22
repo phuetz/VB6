@@ -1,22 +1,25 @@
 import React from 'react';
-import { useVB6Store } from '../../stores/vb6Store';
+// ULTRA-OPTIMIZED: Import domain-specific stores
+import { useUIStore } from '../../stores/UIStore';
+import { useDesignerStore } from '../../stores/DesignerStore';
+import { useDebugStore, debugSelectors } from '../../stores/DebugStore';
+import { useVB6Store } from '../../stores/vb6Store'; // Keep for legacy features
 import { Bug } from 'lucide-react';
 
 const StatusBar: React.FC = () => {
-  const {
-    executionMode,
-    selectedControls,
-    errorList,
-    logs,
-    showLogPanel,
-    showCodeEditor,
-    toggleWindow,
-  } = useVB6Store();
+  // ULTRA-OPTIMIZED: Use domain-specific stores
+  const { executionMode, showLogPanel, showCodeEditor, toggleWindow } = useUIStore();
+  const { selectedControls } = useDesignerStore();
+  const { errorList, logs } = useVB6Store(); // Still in legacy store
+
+  // CRITICAL: Safe access to logs array
+  const safeErrorList = errorList || [];
+  const safeLogs = logs || [];
 
   // Get error counts for status bar
-  const errorCount = logs.filter(l => l.level === 'error').length;
-  const warningCount = logs.filter(l => l.level === 'warn').length;
-  const lastLog = logs[logs.length - 1];
+  const errorCount = safeLogs.filter(l => l?.level === 'error').length;
+  const warningCount = safeLogs.filter(l => l?.level === 'warn').length;
+  const lastLog = safeLogs[safeLogs.length - 1];
 
   return (
     <div className="h-6 bg-gray-200 border-t border-gray-400 flex items-center px-2 text-xs">
@@ -28,18 +31,18 @@ const StatusBar: React.FC = () => {
             : '■ Design mode'}
       </span>
 
-      {selectedControls.length > 0 && (
+      {selectedControls && selectedControls.length > 0 && (
         <span className="ml-4">
           {selectedControls.length === 1
-            ? `${selectedControls[0].name}: ${selectedControls[0].x}, ${selectedControls[0].y}, ${selectedControls[0].width} x ${selectedControls[0].height}`
+            ? `${selectedControls[0]?.name || 'Control'}: ${selectedControls[0]?.x || 0}, ${selectedControls[0]?.y || 0}, ${selectedControls[0]?.width || 0} x ${selectedControls[0]?.height || 0}`
             : `${selectedControls.length} controls selected`}
         </span>
       )}
 
-      {errorList.length > 0 && (
+      {safeErrorList.length > 0 && (
         <span className="ml-4 text-red-600">
-          {errorList.filter(e => e.type === 'error').length} errors,{' '}
-          {errorList.filter(e => e.type === 'warning').length} warnings
+          {safeErrorList.filter(e => e?.type === 'error').length} errors,{' '}
+          {safeErrorList.filter(e => e?.type === 'warning').length} warnings
         </span>
       )}
 

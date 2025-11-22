@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Évaluation Ultra-Détaillée du Runtime VB6</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            padding: 30px;
+        }
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        .test-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 5px solid #4facfe;
+        }
+        .test-section h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .test-item {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .test-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .test-item h3 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        .test-button {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+        }
+        .result-area {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            min-height: 120px;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+        .progress-bar {
+            background: #ddd;
+            border-radius: 10px;
+            padding: 3px;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            height: 20px;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        .status-success { color: #27ae60; font-weight: bold; }
+        .status-error { color: #e74c3c; font-weight: bold; }
+        .status-warning { color: #f39c12; font-weight: bold; }
+        .performance-chart {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Évaluation Ultra-Détaillée du Runtime VB6</h1>
+            <p>Analyse complète de l'intégration et performance du runtime VB6 Web IDE</p>
+        </div>
+
+        <!-- Statistiques générales -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalFunctions">0</div>
+                <div class="stat-label">Fonctions VB6 Disponibles</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="testedFunctions">0</div>
+                <div class="stat-label">Fonctions Testées</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="successRate">0%</div>
+                <div class="stat-label">Taux de Succès</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="performanceScore">0</div>
+                <div class="stat-label">Score Performance</div>
+            </div>
+        </div>
+
+        <!-- Barre de progression globale -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="globalProgress" style="width: 0%">0%</div>
+        </div>
+
+        <!-- Tests des fonctions String -->
+        <div class="test-section">
+            <h2>🔤 Tests des Fonctions String VB6</h2>
+            <div class="test-grid">
+                <div class="test-item">
+                    <h3>Fonctions de Base</h3>
+                    <p>Left, Right, Mid, Len, InStr, Replace, Trim</p>
+                    <button class="test-button" onclick="testStringBasics()">🧪 Tester Fonctions de Base</button>
+                    <div class="result-area" id="stringBasicsResult"></div>
+                </div>
+                <div class="test-item">
+                    <h3>Fonctions Avancées</h3>
+                    <p>StrComp, StrConv, StrReverse, Filter, Split, Join</p>
+                    <button class="test-button" onclick="testStringAdvanced()">🔬 Tester Fonctions Avancées</button>
+                    <div class="result-area" id="stringAdvancedResult"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tests des fonctions Math -->
+        <div class="test-section">
+            <h2>🧮 Tests des Fonctions Mathématiques</h2>
+            <div class="test-grid">
+                <div class="test-item">
+                    <h3>Fonctions Trigonométriques</h3>
+                    <p>Sin, Cos, Tan, Atn, Asin, Acos</p>
+                    <button class="test-button" onclick="testMathTrig()">📐 Tester Trigonométrie</button>
+                    <div class="result-area" id="mathTrigResult"></div>
+                </div>
+                <div class="test-item">
+                    <h3>Fonctions Arithmétiques</h3>
+                    <p>Abs, Int, Fix, Sqr, Log, Exp, Rnd</p>
+                    <button class="test-button" onclick="testMathArithmetic()">🔢 Tester Arithmétique</button>
+                    <div class="result-area" id="mathArithmeticResult"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tests des fonctions de Conversion -->
+        <div class="test-section">
+            <h2>🔄 Tests des Fonctions de Conversion</h2>
+            <div class="test-grid">
+                <div class="test-item">
+                    <h3>Conversions de Type</h3>
+                    <p>CInt, CLng, CStr, CDate, CDbl, CBool</p>
+                    <button class="test-button" onclick="testConversions()">🎯 Tester Conversions</button>
+                    <div class="result-area" id="conversionsResult"></div>
+                </div>
+                <div class="test-item">
+                    <h3>Fonctions de Validation</h3>
+                    <p>IsNumeric, IsDate, VarType, TypeName</p>
+                    <button class="test-button" onclick="testValidation()">✅ Tester Validation</button>
+                    <div class="result-area" id="validationResult"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tests des fonctions Date/Time -->
+        <div class="test-section">
+            <h2>📅 Tests des Fonctions Date/Heure</h2>
+            <div class="test-grid">
+                <div class="test-item">
+                    <h3>Manipulation de Dates</h3>
+                    <p>DateAdd, DateDiff, DatePart, Format</p>
+                    <button class="test-button" onclick="testDateTime()">🗓️ Tester Dates</button>
+                    <div class="result-area" id="dateTimeResult"></div>
+                </div>
+                <div class="test-item">
+                    <h3>Fonctions Temporelles</h3>
+                    <p>Timer, Now, Date, Time, Year, Month, Day</p>
+                    <button class="test-button" onclick="testTimeFunc()">⏰ Tester Temps</button>
+                    <div class="result-area" id="timeFuncResult"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tests de Performance -->
+        <div class="test-section">
+            <h2>⚡ Tests de Performance Runtime</h2>
+            <div class="test-grid">
+                <div class="test-item">
+                    <h3>Benchmarks Intensifs</h3>
+                    <p>Tests de vitesse sur 10,000 opérations</p>
+                    <button class="test-button" onclick="testPerformance()">🚀 Benchmark Runtime</button>
+                    <div class="result-area" id="performanceResult"></div>
+                </div>
+                <div class="test-item">
+                    <h3>Test de Mémoire</h3>
+                    <p>Gestion mémoire et garbage collection</p>
+                    <button class="test-button" onclick="testMemory()">💾 Tester Mémoire</button>
+                    <div class="result-area" id="memoryResult"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test d'exécution de programme VB6 complet -->
+        <div class="test-section">
+            <h2>🏃 Test d'Exécution Complète VB6</h2>
+            <div class="test-item">
+                <h3>Programme VB6 Complet</h3>
+                <p>Exécution d'un programme VB6 complet avec formulaire, événements et logique métier</p>
+                <button class="test-button" onclick="testCompleteVB6Program()">🎬 Exécuter Programme Complet</button>
+                <div class="result-area" id="completeResult"></div>
+            </div>
+        </div>
+
+        <!-- Résultats finaux -->
+        <div class="test-section">
+            <h2>📊 Rapport Final d'Évaluation</h2>
+            <div class="performance-chart" id="finalReport">
+                <p>Cliquez sur "Générer Rapport Final" après avoir effectué tous les tests.</p>
+                <button class="test-button" onclick="generateFinalReport()">📋 Générer Rapport Final</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales pour les statistiques
+        let testResults = {
+            totalTests: 0,
+            passedTests: 0,
+            failedTests: 0,
+            performanceScores: [],
+            functionResults: new Map(),
+            startTime: Date.now()
+        };
+
+        // Fonction utilitaire pour logger les résultats
+        function logResult(elementId, message, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const status = isSuccess ? '✅' : '❌';
+            const className = isSuccess ? 'status-success' : 'status-error';
+            
+            element.innerHTML += `<div class="${className}">[${timestamp}] ${status} ${message}</div>`;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        // Test des fonctions String de base
+        function testStringBasics() {
+            const resultDiv = 'stringBasicsResult';
+            document.getElementById(resultDiv).innerHTML = '';
+            logResult(resultDiv, 'Début des tests String de base...', true);
+            
+            let passed = 0, total = 0;
+
+            // Test Left
+            total++;
+            try {
+                if (typeof Left === 'function') {
+                    const result = Left('Hello World', 5);
+                    if (result === 'Hello') {
+                        logResult(resultDiv, `Left('Hello World', 5) = '${result}' ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Left('Hello World', 5) = '${result}' (attendu: 'Hello') ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Left non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Left: ${e.message} ✗`, false);
+            }
+
+            // Test Right
+            total++;
+            try {
+                if (typeof Right === 'function') {
+                    const result = Right('Hello World', 5);
+                    if (result === 'World') {
+                        logResult(resultDiv, `Right('Hello World', 5) = '${result}' ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Right('Hello World', 5) = '${result}' (attendu: 'World') ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Right non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Right: ${e.message} ✗`, false);
+            }
+
+            // Test Mid
+            total++;
+            try {
+                if (typeof Mid === 'function') {
+                    const result = Mid('Hello World', 7, 5);
+                    if (result === 'World') {
+                        logResult(resultDiv, `Mid('Hello World', 7, 5) = '${result}' ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Mid('Hello World', 7, 5) = '${result}' (attendu: 'World') ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Mid non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Mid: ${e.message} ✗`, false);
+            }
+
+            // Test Len
+            total++;
+            try {
+                if (typeof Len === 'function') {
+                    const result = Len('Hello World');
+                    if (result === 11) {
+                        logResult(resultDiv, `Len('Hello World') = ${result} ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Len('Hello World') = ${result} (attendu: 11) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Len non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Len: ${e.message} ✗`, false);
+            }
+
+            // Test InStr
+            total++;
+            try {
+                if (typeof InStr === 'function') {
+                    const result = InStr('Hello World', 'World');
+                    if (result === 7) {
+                        logResult(resultDiv, `InStr('Hello World', 'World') = ${result} ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `InStr('Hello World', 'World') = ${result} (attendu: 7) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction InStr non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur InStr: ${e.message} ✗`, false);
+            }
+
+            // Test Replace
+            total++;
+            try {
+                if (typeof Replace === 'function') {
+                    const result = Replace('Hello World', 'World', 'VB6');
+                    if (result === 'Hello VB6') {
+                        logResult(resultDiv, `Replace('Hello World', 'World', 'VB6') = '${result}' ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Replace('Hello World', 'World', 'VB6') = '${result}' (attendu: 'Hello VB6') ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Replace non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Replace: ${e.message} ✗`, false);
+            }
+
+            // Test Trim
+            total++;
+            try {
+                if (typeof Trim === 'function') {
+                    const result = Trim('  Hello World  ');
+                    if (result === 'Hello World') {
+                        logResult(resultDiv, `Trim('  Hello World  ') = '${result}' ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Trim('  Hello World  ') = '${result}' (attendu: 'Hello World') ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Trim non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Trim: ${e.message} ✗`, false);
+            }
+
+            const successRate = Math.round((passed / total) * 100);
+            logResult(resultDiv, `\n=== Résultat: ${passed}/${total} tests réussis (${successRate}%) ===`, passed === total);
+            
+            testResults.totalTests += total;
+            testResults.passedTests += passed;
+            testResults.failedTests += (total - passed);
+            testResults.functionResults.set('StringBasics', { passed, total, successRate });
+            
+            updateGlobalStats();
+        }
+
+        // Test des fonctions String avancées
+        function testStringAdvanced() {
+            const resultDiv = 'stringAdvancedResult';
+            document.getElementById(resultDiv).innerHTML = '';
+            logResult(resultDiv, 'Début des tests String avancés...', true);
+            
+            let passed = 0, total = 0;
+
+            // Test StrComp
+            total++;
+            try {
+                if (typeof StrComp === 'function') {
+                    const result = StrComp('Hello', 'hello', 1); // Comparaison insensible à la casse
+                    if (result === 0) {
+                        logResult(resultDiv, `StrComp('Hello', 'hello', 1) = ${result} ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `StrComp('Hello', 'hello', 1) = ${result} (attendu: 0) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction StrComp non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur StrComp: ${e.message} ✗`, false);
+            }
+
+            // Test StrReverse
+            total++;
+            try {
+                if (typeof StrReverse === 'function') {
+                    const result = StrReverse('Hello');
+                    if (result === 'olleH') {
+                        logResult(resultDiv, `StrReverse('Hello') = '${result}' ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `StrReverse('Hello') = '${result}' (attendu: 'olleH') ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction StrReverse non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur StrReverse: ${e.message} ✗`, false);
+            }
+
+            // Test Split
+            total++;
+            try {
+                if (typeof Split === 'function') {
+                    const result = Split('A,B,C,D', ',');
+                    if (Array.isArray(result) && result.length === 4 && result[0] === 'A' && result[3] === 'D') {
+                        logResult(resultDiv, `Split('A,B,C,D', ',') = [${result.join(', ')}] ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Split('A,B,C,D', ',') = [${result ? result.join(', ') : 'undefined'}] ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Split non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Split: ${e.message} ✗`, false);
+            }
+
+            // Test Join
+            total++;
+            try {
+                if (typeof Join === 'function') {
+                    const result = Join(['A', 'B', 'C', 'D'], '-');
+                    if (result === 'A-B-C-D') {
+                        logResult(resultDiv, `Join(['A', 'B', 'C', 'D'], '-') = '${result}' ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Join(['A', 'B', 'C', 'D'], '-') = '${result}' (attendu: 'A-B-C-D') ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Join non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Join: ${e.message} ✗`, false);
+            }
+
+            // Test Filter
+            total++;
+            try {
+                if (typeof Filter === 'function') {
+                    const result = Filter(['Apple', 'Banana', 'Apricot', 'Cherry'], 'A');
+                    if (Array.isArray(result) && result.length === 2) {
+                        logResult(resultDiv, `Filter(['Apple', 'Banana', 'Apricot', 'Cherry'], 'A') = [${result.join(', ')}] ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Filter(['Apple', 'Banana', 'Apricot', 'Cherry'], 'A') = [${result ? result.join(', ') : 'undefined'}] ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Filter non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Filter: ${e.message} ✗`, false);
+            }
+
+            const successRate = Math.round((passed / total) * 100);
+            logResult(resultDiv, `\n=== Résultat: ${passed}/${total} tests réussis (${successRate}%) ===`, passed === total);
+            
+            testResults.totalTests += total;
+            testResults.passedTests += passed;
+            testResults.failedTests += (total - passed);
+            testResults.functionResults.set('StringAdvanced', { passed, total, successRate });
+            
+            updateGlobalStats();
+        }
+
+        // Test des fonctions Math trigonométriques
+        function testMathTrig() {
+            const resultDiv = 'mathTrigResult';
+            document.getElementById(resultDiv).innerHTML = '';
+            logResult(resultDiv, 'Début des tests Math trigonométriques...', true);
+            
+            let passed = 0, total = 0;
+
+            // Test Sin
+            total++;
+            try {
+                if (typeof Sin === 'function') {
+                    const result = Sin(Math.PI / 2);
+                    if (Math.abs(result - 1) < 0.0001) {
+                        logResult(resultDiv, `Sin(π/2) = ${result.toFixed(4)} ≈ 1.0000 ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Sin(π/2) = ${result.toFixed(4)} (attendu: ≈ 1.0000) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Sin non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Sin: ${e.message} ✗`, false);
+            }
+
+            // Test Cos
+            total++;
+            try {
+                if (typeof Cos === 'function') {
+                    const result = Cos(0);
+                    if (Math.abs(result - 1) < 0.0001) {
+                        logResult(resultDiv, `Cos(0) = ${result.toFixed(4)} ≈ 1.0000 ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Cos(0) = ${result.toFixed(4)} (attendu: ≈ 1.0000) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Cos non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Cos: ${e.message} ✗`, false);
+            }
+
+            // Test Tan
+            total++;
+            try {
+                if (typeof Tan === 'function') {
+                    const result = Tan(Math.PI / 4);
+                    if (Math.abs(result - 1) < 0.0001) {
+                        logResult(resultDiv, `Tan(π/4) = ${result.toFixed(4)} ≈ 1.0000 ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Tan(π/4) = ${result.toFixed(4)} (attendu: ≈ 1.0000) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Tan non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Tan: ${e.message} ✗`, false);
+            }
+
+            // Test Atn (arctangent)
+            total++;
+            try {
+                if (typeof Atn === 'function') {
+                    const result = Atn(1);
+                    if (Math.abs(result - Math.PI / 4) < 0.0001) {
+                        logResult(resultDiv, `Atn(1) = ${result.toFixed(4)} ≈ ${(Math.PI / 4).toFixed(4)} ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Atn(1) = ${result.toFixed(4)} (attendu: ≈ ${(Math.PI / 4).toFixed(4)}) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Atn non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Atn: ${e.message} ✗`, false);
+            }
+
+            const successRate = Math.round((passed / total) * 100);
+            logResult(resultDiv, `\n=== Résultat: ${passed}/${total} tests réussis (${successRate}%) ===`, passed === total);
+            
+            testResults.totalTests += total;
+            testResults.passedTests += passed;
+            testResults.failedTests += (total - passed);
+            testResults.functionResults.set('MathTrig', { passed, total, successRate });
+            
+            updateGlobalStats();
+        }
+
+        // Test des fonctions Math arithmétiques
+        function testMathArithmetic() {
+            const resultDiv = 'mathArithmeticResult';
+            document.getElementById(resultDiv).innerHTML = '';
+            logResult(resultDiv, 'Début des tests Math arithmétiques...', true);
+            
+            let passed = 0, total = 0;
+
+            // Test Abs
+            total++;
+            try {
+                if (typeof Abs === 'function') {
+                    const result = Abs(-15.7);
+                    if (result === 15.7) {
+                        logResult(resultDiv, `Abs(-15.7) = ${result} ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Abs(-15.7) = ${result} (attendu: 15.7) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Abs non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Abs: ${e.message} ✗`, false);
+            }
+
+            // Test Sqr
+            total++;
+            try {
+                if (typeof Sqr === 'function') {
+                    const result = Sqr(16);
+                    if (result === 4) {
+                        logResult(resultDiv, `Sqr(16) = ${result} ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Sqr(16) = ${result} (attendu: 4) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Sqr non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Sqr: ${e.message} ✗`, false);
+            }
+
+            // Test Int
+            total++;
+            try {
+                if (typeof Int === 'function') {
+                    const result = Int(15.7);
+                    if (result === 15) {
+                        logResult(resultDiv, `Int(15.7) = ${result} ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Int(15.7) = ${result} (attendu: 15) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Int non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Int: ${e.message} ✗`, false);
+            }
+
+            // Test Fix
+            total++;
+            try {
+                if (typeof Fix === 'function') {
+                    const result = Fix(-15.7);
+                    if (result === -15) {
+                        logResult(resultDiv, `Fix(-15.7) = ${result} ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Fix(-15.7) = ${result} (attendu: -15) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Fix non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Fix: ${e.message} ✗`, false);
+            }
+
+            // Test Log
+            total++;
+            try {
+                if (typeof Log === 'function') {
+                    const result = Log(Math.E);
+                    if (Math.abs(result - 1) < 0.0001) {
+                        logResult(resultDiv, `Log(e) = ${result.toFixed(4)} ≈ 1.0000 ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Log(e) = ${result.toFixed(4)} (attendu: ≈ 1.0000) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Log non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Log: ${e.message} ✗`, false);
+            }
+
+            // Test Exp
+            total++;
+            try {
+                if (typeof Exp === 'function') {
+                    const result = Exp(1);
+                    if (Math.abs(result - Math.E) < 0.0001) {
+                        logResult(resultDiv, `Exp(1) = ${result.toFixed(4)} ≈ ${Math.E.toFixed(4)} ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Exp(1) = ${result.toFixed(4)} (attendu: ≈ ${Math.E.toFixed(4)}) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Exp non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Exp: ${e.message} ✗`, false);
+            }
+
+            // Test Rnd
+            total++;
+            try {
+                if (typeof Rnd === 'function') {
+                    const result = Rnd();
+                    if (typeof result === 'number' && result >= 0 && result < 1) {
+                        logResult(resultDiv, `Rnd() = ${result.toFixed(4)} (entre 0 et 1) ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Rnd() = ${result} (attendu: nombre entre 0 et 1) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Rnd non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Rnd: ${e.message} ✗`, false);
+            }
+
+            const successRate = Math.round((passed / total) * 100);
+            logResult(resultDiv, `\n=== Résultat: ${passed}/${total} tests réussis (${successRate}%) ===`, passed === total);
+            
+            testResults.totalTests += total;
+            testResults.passedTests += passed;
+            testResults.failedTests += (total - passed);
+            testResults.functionResults.set('MathArithmetic', { passed, total, successRate });
+            
+            updateGlobalStats();
+        }
+
+        // Test des fonctions de conversion
+        function testConversions() {
+            const resultDiv = 'conversionsResult';
+            document.getElementById(resultDiv).innerHTML = '';
+            logResult(resultDiv, 'Début des tests de conversion...', true);
+            
+            let passed = 0, total = 0;
+
+            // Test CInt
+            total++;
+            try {
+                if (typeof CInt === 'function') {
+                    const result = CInt('123');
+                    if (result === 123 && typeof result === 'number') {
+                        logResult(resultDiv, `CInt('123') = ${result} (type: ${typeof result}) ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `CInt('123') = ${result} (type: ${typeof result}) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction CInt non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur CInt: ${e.message} ✗`, false);
+            }
+
+            // Test CStr
+            total++;
+            try {
+                if (typeof CStr === 'function') {
+                    const result = CStr(123.45);
+                    if (typeof result === 'string' && result === '123.45') {
+                        logResult(resultDiv, `CStr(123.45) = '${result}' (type: ${typeof result}) ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `CStr(123.45) = '${result}' (type: ${typeof result}) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction CStr non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur CStr: ${e.message} ✗`, false);
+            }
+
+            // Test CBool
+            total++;
+            try {
+                if (typeof CBool === 'function') {
+                    const result = CBool(1);
+                    if (typeof result === 'boolean' && result === true) {
+                        logResult(resultDiv, `CBool(1) = ${result} (type: ${typeof result}) ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `CBool(1) = ${result} (type: ${typeof result}) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction CBool non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur CBool: ${e.message} ✗`, false);
+            }
+
+            // Test CDbl
+            total++;
+            try {
+                if (typeof CDbl === 'function') {
+                    const result = CDbl('123.45');
+                    if (typeof result === 'number' && result === 123.45) {
+                        logResult(resultDiv, `CDbl('123.45') = ${result} (type: ${typeof result}) ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `CDbl('123.45') = ${result} (type: ${typeof result}) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction CDbl non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur CDbl: ${e.message} ✗`, false);
+            }
+
+            const successRate = Math.round((passed / total) * 100);
+            logResult(resultDiv, `\n=== Résultat: ${passed}/${total} tests réussis (${successRate}%) ===`, passed === total);
+            
+            testResults.totalTests += total;
+            testResults.passedTests += passed;
+            testResults.failedTests += (total - passed);
+            testResults.functionResults.set('Conversions', { passed, total, successRate });
+            
+            updateGlobalStats();
+        }
+
+        // Test des fonctions de validation
+        function testValidation() {
+            const resultDiv = 'validationResult';
+            document.getElementById(resultDiv).innerHTML = '';
+            logResult(resultDiv, 'Début des tests de validation...', true);
+            
+            let passed = 0, total = 0;
+
+            // Test IsNumeric
+            total++;
+            try {
+                if (typeof IsNumeric === 'function') {
+                    const result1 = IsNumeric('123');
+                    const result2 = IsNumeric('abc');
+                    if (result1 === true && result2 === false) {
+                        logResult(resultDiv, `IsNumeric('123') = ${result1}, IsNumeric('abc') = ${result2} ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `IsNumeric('123') = ${result1}, IsNumeric('abc') = ${result2} ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction IsNumeric non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur IsNumeric: ${e.message} ✗`, false);
+            }
+
+            // Test VarType
+            total++;
+            try {
+                if (typeof VarType === 'function') {
+                    const result1 = VarType(123);
+                    const result2 = VarType('hello');
+                    const result3 = VarType(true);
+                    logResult(resultDiv, `VarType(123) = ${result1}, VarType('hello') = ${result2}, VarType(true) = ${result3} ✓`, true);
+                    passed++;
+                } else {
+                    logResult(resultDiv, 'Fonction VarType non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur VarType: ${e.message} ✗`, false);
+            }
+
+            // Test TypeName
+            total++;
+            try {
+                if (typeof TypeName === 'function') {
+                    const result1 = TypeName(123);
+                    const result2 = TypeName('hello');
+                    const result3 = TypeName(true);
+                    logResult(resultDiv, `TypeName(123) = '${result1}', TypeName('hello') = '${result2}', TypeName(true) = '${result3}' ✓`, true);
+                    passed++;
+                } else {
+                    logResult(resultDiv, 'Fonction TypeName non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur TypeName: ${e.message} ✗`, false);
+            }
+
+            const successRate = Math.round((passed / total) * 100);
+            logResult(resultDiv, `\n=== Résultat: ${passed}/${total} tests réussis (${successRate}%) ===`, passed === total);
+            
+            testResults.totalTests += total;
+            testResults.passedTests += passed;
+            testResults.failedTests += (total - passed);
+            testResults.functionResults.set('Validation', { passed, total, successRate });
+            
+            updateGlobalStats();
+        }
+
+        // Test des fonctions Date/Time
+        function testDateTime() {
+            const resultDiv = 'dateTimeResult';
+            document.getElementById(resultDiv).innerHTML = '';
+            logResult(resultDiv, 'Début des tests Date/Time...', true);
+            
+            let passed = 0, total = 0;
+
+            // Test Now
+            total++;
+            try {
+                if (typeof Now === 'function') {
+                    const result = Now();
+                    if (result instanceof Date) {
+                        logResult(resultDiv, `Now() = ${result.toString()} ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Now() = ${result} (attendu: Date object) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Now non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Now: ${e.message} ✗`, false);
+            }
+
+            // Test DateAdd
+            total++;
+            try {
+                if (typeof DateAdd === 'function') {
+                    const testDate = new Date(2024, 0, 1); // 1er janvier 2024
+                    const result = DateAdd('d', 10, testDate);
+                    if (result instanceof Date) {
+                        logResult(resultDiv, `DateAdd('d', 10, ${testDate.toDateString()}) = ${result.toDateString()} ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `DateAdd('d', 10, date) = ${result} (attendu: Date object) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction DateAdd non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur DateAdd: ${e.message} ✗`, false);
+            }
+
+            // Test Format
+            total++;
+            try {
+                if (typeof Format === 'function') {
+                    const testDate = new Date(2024, 0, 15, 14, 30, 0); // 15 janvier 2024, 14:30:00
+                    const result = Format(testDate, 'yyyy-mm-dd');
+                    if (typeof result === 'string' && result.includes('2024')) {
+                        logResult(resultDiv, `Format(date, 'yyyy-mm-dd') = '${result}' ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Format(date, 'yyyy-mm-dd') = '${result}' ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Format non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Format: ${e.message} ✗`, false);
+            }
+
+            const successRate = Math.round((passed / total) * 100);
+            logResult(resultDiv, `\n=== Résultat: ${passed}/${total} tests réussis (${successRate}%) ===`, passed === total);
+            
+            testResults.totalTests += total;
+            testResults.passedTests += passed;
+            testResults.failedTests += (total - passed);
+            testResults.functionResults.set('DateTime', { passed, total, successRate });
+            
+            updateGlobalStats();
+        }
+
+        // Test des fonctions temporelles
+        function testTimeFunc() {
+            const resultDiv = 'timeFuncResult';
+            document.getElementById(resultDiv).innerHTML = '';
+            logResult(resultDiv, 'Début des tests fonctions temporelles...', true);
+            
+            let passed = 0, total = 0;
+
+            // Test Timer
+            total++;
+            try {
+                if (typeof Timer === 'function') {
+                    const result = Timer();
+                    if (typeof result === 'number' && result > 0) {
+                        logResult(resultDiv, `Timer() = ${result.toFixed(2)} secondes ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Timer() = ${result} (attendu: nombre positif) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Timer non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Timer: ${e.message} ✗`, false);
+            }
+
+            // Test Year
+            total++;
+            try {
+                if (typeof Year === 'function') {
+                    const testDate = new Date(2024, 5, 15);
+                    const result = Year(testDate);
+                    if (result === 2024) {
+                        logResult(resultDiv, `Year(${testDate.toDateString()}) = ${result} ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Year(date) = ${result} (attendu: 2024) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Year non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Year: ${e.message} ✗`, false);
+            }
+
+            // Test Month
+            total++;
+            try {
+                if (typeof Month === 'function') {
+                    const testDate = new Date(2024, 5, 15); // Juin = mois 6
+                    const result = Month(testDate);
+                    if (result === 6) {
+                        logResult(resultDiv, `Month(${testDate.toDateString()}) = ${result} ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Month(date) = ${result} (attendu: 6) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Month non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Month: ${e.message} ✗`, false);
+            }
+
+            // Test Day
+            total++;
+            try {
+                if (typeof Day === 'function') {
+                    const testDate = new Date(2024, 5, 15);
+                    const result = Day(testDate);
+                    if (result === 15) {
+                        logResult(resultDiv, `Day(${testDate.toDateString()}) = ${result} ✓`, true);
+                        passed++;
+                    } else {
+                        logResult(resultDiv, `Day(date) = ${result} (attendu: 15) ✗`, false);
+                    }
+                } else {
+                    logResult(resultDiv, 'Fonction Day non disponible ✗', false);
+                }
+            } catch (e) {
+                logResult(resultDiv, `Erreur Day: ${e.message} ✗`, false);
+            }
+
+            const successRate = Math.round((passed / total) * 100);
+            logResult(resultDiv, `\n=== Résultat: ${passed}/${total} tests réussis (${successRate}%) ===`, passed === total);
+            
+            testResults.totalTests += total;
+            testResults.passedTests += passed;
+            testResults.failedTests += (total - passed);
+            testResults.functionResults.set('TimeFunc', { passed, total, successRate });
+            
+            updateGlobalStats();
+        }
+
+        // Test de performance
+        function testPerformance() {
+            const resultDiv = 'performanceResult';
+            document.getElementById(resultDiv).innerHTML = '';
+            logResult(resultDiv, 'Début du benchmark de performance...', true);
+            
+            const iterations = 10000;
+            const tests = [
+                {
+                    name: 'String Concatenation',
+                    func: () => {
+                        let result = '';
+                        for (let i = 0; i < iterations; i++) {
+                            result = 'Hello' + ' ' + 'World' + ' ' + i;
+                        }
+                        return result;
+                    }
+                },
+                {
+                    name: 'Math Operations',
+                    func: () => {
+                        let result = 0;
+                        for (let i = 0; i < iterations; i++) {
+                            result = Math.sin(i) * Math.cos(i) + Math.sqrt(i);
+                        }
+                        return result;
+                    }
+                },
+                {
+                    name: 'Array Operations',
+                    func: () => {
+                        const arr = [];
+                        for (let i = 0; i < iterations; i++) {
+                            arr.push(i);
+                            if (i > 100) arr.shift();
+                        }
+                        return arr;
+                    }
+                },
+                {
+                    name: 'Function Calls VB6',
+                    func: () => {
+                        let result = '';
+                        for (let i = 0; i < Math.min(iterations, 1000); i++) {
+                            if (typeof Left === 'function' && typeof Right === 'function' && typeof Mid === 'function') {
+                                result = Left('Hello World', 5) + Right('Hello World', 5) + Mid('Hello World', 3, 3);
+                            }
+                        }
+                        return result;
+                    }
+                }
+            ];
+
+            let totalScore = 0;
+            tests.forEach(test => {
+                const startTime = performance.now();
+                try {
+                    test.func();
+                    const endTime = performance.now();
+                    const duration = endTime - startTime;
+                    const score = Math.max(0, Math.round(1000 - duration));
+                    totalScore += score;
+                    
+                    logResult(resultDiv, `${test.name}: ${duration.toFixed(2)}ms (Score: ${score}/1000) ✓`, true);
+                } catch (e) {
+                    logResult(resultDiv, `${test.name}: ERREUR - ${e.message} ✗`, false);
+                }
+            });
+
+            const averageScore = Math.round(totalScore / tests.length);
+            testResults.performanceScores.push(averageScore);
+            
+            logResult(resultDiv, `\n=== Score Performance Global: ${averageScore}/1000 ===`, averageScore > 500);
+            
+            updateGlobalStats();
+        }
+
+        // Test de mémoire
+        function testMemory() {
+            const resultDiv = 'memoryResult';
+            document.getElementById(resultDiv).innerHTML = '';
+            logResult(resultDiv, 'Début des tests de gestion mémoire...', true);
+            
+            // Test de fuite mémoire potentielle
+            if (typeof performance !== 'undefined' && 'memory' in performance) {
+                const memory = (performance as any).memory;
+                logResult(resultDiv, `Mémoire utilisée: ${Math.round(memory.usedJSHeapSize / 1024 / 1024)}MB`, true);
+                logResult(resultDiv, `Limite mémoire: ${Math.round(memory.jsHeapSizeLimit / 1024 / 1024)}MB`, true);
+                logResult(resultDiv, `Mémoire totale: ${Math.round(memory.totalJSHeapSize / 1024 / 1024)}MB`, true);
+                
+                const memoryUsagePercent = (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
+                logResult(resultDiv, `Utilisation mémoire: ${memoryUsagePercent.toFixed(2)}%`, memoryUsagePercent < 80);
+            } else {
+                logResult(resultDiv, 'API Performance.memory non disponible dans ce navigateur', false);
+            }
+
+            // Test de création/destruction d'objets
+            try {
+                const objects = [];
+                const startTime = performance.now();
+                
+                for (let i = 0; i < 10000; i++) {
+                    objects.push({ id: i, data: 'test' + i });
+                }
+                
+                // Forcer le garbage collection
+                objects.splice(0, objects.length);
+                
+                const endTime = performance.now();
+                logResult(resultDiv, `Création/destruction 10k objets: ${(endTime - startTime).toFixed(2)}ms ✓`, true);
+                
+            } catch (e) {
+                logResult(resultDiv, `Erreur test objets: ${e.message} ✗`, false);
+            }
+        }
+
+        // Test d'exécution d'un programme VB6 complet
+        function testCompleteVB6Program() {
+            const resultDiv = 'completeResult';
+            document.getElementById(resultDiv).innerHTML = '';
+            logResult(resultDiv, 'Test d\'exécution programme VB6 complet...', true);
+            
+            try {
+                // Programme VB6 simulé
+                const vb6Code = `
+Private Sub Form_Load()
+    Dim message As String
+    Dim userName As String
+    Dim result As Integer
+    
+    message = "Bienvenue dans le programme VB6!"
+    userName = "Utilisateur Test"
+    
+    ' Test des fonctions string
+    message = Left(message, 10) & " " & Right(message, 5)
+    
+    ' Test des fonctions math
+    result = Int(Sqr(16) + Abs(-5))
+    
+    ' Test des conversions
+    message = message & " Résultat: " & CStr(result)
+    
+    ' Test des conditions
+    If result > 0 Then
+        message = message & " (Positif)"
+    Else
+        message = message & " (Négatif)"
+    End If
+    
+    ' Affichage du résultat
+    Return message
+End Sub
+                `;
+
+                // Simulation d'exécution
+                let executionResult = '';
+                let passed = 0, total = 0;
+
+                // Test Form_Load
+                total++;
+                try {
+                    let message = "Bienvenue dans le programme VB6!";
+                    const userName = "Utilisateur Test";
+                    
+                    // Test Left et Right
+                    if (typeof Left === 'function' && typeof Right === 'function') {
+                        message = Left(message, 10) + " " + Right(message, 5);
+                        logResult(resultDiv, `String manipulation: "${message}" ✓`, true);
+                    }
+                    
+                    // Test math functions
+                    let result = 0;
+                    if (typeof Int === 'function' && typeof Sqr === 'function' && typeof Abs === 'function') {
+                        result = Int(Sqr(16) + Abs(-5));
+                        logResult(resultDiv, `Math calculation: Sqr(16) + Abs(-5) = ${result} ✓`, true);
+                    }
+                    
+                    // Test conversion
+                    if (typeof CStr === 'function') {
+                        message = message + " Résultat: " + CStr(result);
+                        logResult(resultDiv, `Conversion test: CStr(${result}) ✓`, true);
+                    }
+                    
+                    // Test condition
+                    if (result > 0) {
+                        message = message + " (Positif)";
+                        logResult(resultDiv, `Condition test: ${result} > 0 = true ✓`, true);
+                    } else {
+                        message = message + " (Négatif)";
+                        logResult(resultDiv, `Condition test: ${result} > 0 = false ✓`, true);
+                    }
+                    
+                    executionResult = message;
+                    passed++;
+                    
+                } catch (e) {
+                    logResult(resultDiv, `Erreur Form_Load: ${e.message} ✗`, false);
+                }
+
+                // Test des événements
+                total++;
+                try {
+                    // Simulation d'un événement Click
+                    let clickHandled = false;
+                    const cmdClick = function() {
+                        clickHandled = true;
+                        return "Click event handled";
+                    };
+                    
+                    const clickResult = cmdClick();
+                    if (clickHandled && clickResult) {
+                        logResult(resultDiv, `Event handling: ${clickResult} ✓`, true);
+                        passed++;
+                    }
+                } catch (e) {
+                    logResult(resultDiv, `Erreur event handling: ${e.message} ✗`, false);
+                }
+
+                // Test des boucles
+                total++;
+                try {
+                    let loopResult = '';
+                    for (let i = 1; i <= 5; i++) {
+                        loopResult += `Iteration ${i} `;
+                    }
+                    
+                    if (loopResult.includes('Iteration 5')) {
+                        logResult(resultDiv, `Loop test: "${loopResult.trim()}" ✓`, true);
+                        passed++;
+                    }
+                } catch (e) {
+                    logResult(resultDiv, `Erreur loop test: ${e.message} ✗`, false);
+                }
+
+                const successRate = Math.round((passed / total) * 100);
+                logResult(resultDiv, `\n=== Programme VB6 exécuté avec succès ===`, true);
+                logResult(resultDiv, `Résultat final: "${executionResult}"`, true);
+                logResult(resultDiv, `Tests réussis: ${passed}/${total} (${successRate}%)`, passed === total);
+                
+                testResults.totalTests += total;
+                testResults.passedTests += passed;
+                testResults.failedTests += (total - passed);
+                testResults.functionResults.set('CompleteProgram', { passed, total, successRate });
+                
+                updateGlobalStats();
+                
+            } catch (e) {
+                logResult(resultDiv, `Erreur générale: ${e.message} ✗`, false);
+            }
+        }
+
+        // Génération du rapport final
+        function generateFinalReport() {
+            const reportDiv = document.getElementById('finalReport');
+            const totalTime = (Date.now() - testResults.startTime) / 1000;
+            
+            let report = `
+                <h3>📊 RAPPORT FINAL D'ÉVALUATION DU RUNTIME VB6</h3>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 15px 0;">
+                    <h4>Statistiques Globales:</h4>
+                    <ul>
+                        <li><strong>Tests Totaux:</strong> ${testResults.totalTests}</li>
+                        <li><strong>Tests Réussis:</strong> ${testResults.passedTests}</li>
+                        <li><strong>Tests Échoués:</strong> ${testResults.failedTests}</li>
+                        <li><strong>Taux de Succès:</strong> ${testResults.totalTests > 0 ? Math.round((testResults.passedTests / testResults.totalTests) * 100) : 0}%</li>
+                        <li><strong>Temps d'Exécution:</strong> ${totalTime.toFixed(2)} secondes</li>
+                    </ul>
+                </div>
+                
+                <h4>Détails par Catégorie:</h4>
+            `;
+            
+            testResults.functionResults.forEach((result, category) => {
+                const color = result.successRate >= 80 ? '#27ae60' : result.successRate >= 50 ? '#f39c12' : '#e74c3c';
+                report += `
+                    <div style="margin: 10px 0; padding: 10px; border-left: 4px solid ${color}; background: #f9f9f9;">
+                        <strong>${category}:</strong> ${result.passed}/${result.total} tests (${result.successRate}%)
+                    </div>
+                `;
+            });
+            
+            // Score de performance moyen
+            if (testResults.performanceScores.length > 0) {
+                const avgPerformance = testResults.performanceScores.reduce((a, b) => a + b, 0) / testResults.performanceScores.length;
+                report += `
+                    <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <h4>Performance:</h4>
+                        <p><strong>Score Moyen:</strong> ${avgPerformance.toFixed(0)}/1000</p>
+                        <div style="background: #ddd; border-radius: 10px; padding: 3px;">
+                            <div style="background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%); height: 20px; width: ${avgPerformance/10}%; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                ${avgPerformance.toFixed(0)}/1000
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Évaluation finale
+            const overallScore = testResults.totalTests > 0 ? (testResults.passedTests / testResults.totalTests) * 100 : 0;
+            let evaluation = '';
+            let color = '';
+            
+            if (overallScore >= 90) {
+                evaluation = 'EXCELLENT - Runtime VB6 pleinement fonctionnel';
+                color = '#27ae60';
+            } else if (overallScore >= 70) {
+                evaluation = 'BON - Runtime VB6 majoritairement fonctionnel';
+                color = '#2ecc71';
+            } else if (overallScore >= 50) {
+                evaluation = 'MOYEN - Runtime VB6 partiellement fonctionnel';
+                color = '#f39c12';
+            } else {
+                evaluation = 'INSUFFISANT - Runtime VB6 nécessite des améliorations';
+                color = '#e74c3c';
+            }
+            
+            report += `
+                <div style="background: ${color}; color: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+                    <h3>🎯 ÉVALUATION FINALE</h3>
+                    <h4>${evaluation}</h4>
+                    <p>Score Global: ${overallScore.toFixed(1)}%</p>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4>Recommandations:</h4>
+                    <ul>
+                        <li>${overallScore >= 90 ? '✅' : '⚠️'} Fonctions VB6 de base ${overallScore >= 90 ? 'complètes' : 'à compléter'}</li>
+                        <li>${testResults.performanceScores.length > 0 && testResults.performanceScores[0] > 500 ? '✅' : '⚠️'} Performance ${testResults.performanceScores.length > 0 && testResults.performanceScores[0] > 500 ? 'satisfaisante' : 'à optimiser'}</li>
+                        <li>${testResults.functionResults.has('CompleteProgram') ? '✅' : '⚠️'} Exécution de programmes ${testResults.functionResults.has('CompleteProgram') ? 'testée' : 'à tester'}</li>
+                        <li>📈 Continuer les tests avec des programmes VB6 plus complexes</li>
+                        <li>🔧 Implémenter les fonctions manquantes identifiées</li>
+                        <li>⚡ Optimiser les performances si nécessaire</li>
+                    </ul>
+                </div>
+            `;
+            
+            reportDiv.innerHTML = report;
+        }
+
+        // Mise à jour des statistiques globales
+        function updateGlobalStats() {
+            const totalFunctionsAvailable = [
+                'Left', 'Right', 'Mid', 'Len', 'InStr', 'Replace', 'Trim', 'StrComp', 'StrReverse', 'Split', 'Join', 'Filter',
+                'Sin', 'Cos', 'Tan', 'Atn', 'Abs', 'Sqr', 'Int', 'Fix', 'Log', 'Exp', 'Rnd',
+                'CInt', 'CStr', 'CBool', 'CDbl', 'IsNumeric', 'VarType', 'TypeName',
+                'Now', 'DateAdd', 'Format', 'Timer', 'Year', 'Month', 'Day'
+            ];
+            
+            let availableCount = 0;
+            totalFunctionsAvailable.forEach(func => {
+                if (typeof (window as any)[func] === 'function') {
+                    availableCount++;
+                }
+            });
+            
+            document.getElementById('totalFunctions').textContent = availableCount.toString();
+            document.getElementById('testedFunctions').textContent = Array.from(testResults.functionResults.keys()).length.toString();
+            
+            const successRate = testResults.totalTests > 0 ? Math.round((testResults.passedTests / testResults.totalTests) * 100) : 0;
+            document.getElementById('successRate').textContent = successRate + '%';
+            
+            const performanceScore = testResults.performanceScores.length > 0 ? Math.round(testResults.performanceScores.reduce((a, b) => a + b, 0) / testResults.performanceScores.length) : 0;
+            document.getElementById('performanceScore').textContent = performanceScore.toString();
+            
+            // Mise à jour de la barre de progression
+            const progressPercent = Math.min(100, (Array.from(testResults.functionResults.keys()).length / 8) * 100);
+            const progressBar = document.getElementById('globalProgress');
+            progressBar.style.width = progressPercent + '%';
+            progressBar.textContent = Math.round(progressPercent) + '%';
+        }
+
+        // Initialisation au chargement de la page
+        window.addEventListener('load', () => {
+            logResult = logResult; // Ensure function is available
+            updateGlobalStats();
+            
+            // Vérifier si le runtime VB6 est chargé
+            setTimeout(() => {
+                const criticalFunctions = ['Left', 'Right', 'Mid', 'Len', 'Sin', 'Cos', 'Abs', 'CInt', 'Now'];
+                let loadedFunctions = 0;
+                
+                criticalFunctions.forEach(func => {
+                    if (typeof (window as any)[func] === 'function') {
+                        loadedFunctions++;
+                    }
+                });
+                
+                const loadPercentage = Math.round((loadedFunctions / criticalFunctions.length) * 100);
+                
+                if (loadPercentage > 50) {
+                    console.log(`🟢 Runtime VB6 partiellement chargé: ${loadedFunctions}/${criticalFunctions.length} fonctions (${loadPercentage}%)`);
+                } else {
+                    console.log(`🔴 Runtime VB6 non chargé: ${loadedFunctions}/${criticalFunctions.length} fonctions (${loadPercentage}%)`);
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

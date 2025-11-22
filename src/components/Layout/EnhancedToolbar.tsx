@@ -18,32 +18,39 @@ import {
   Bug,
   ListTodo,
 } from 'lucide-react';
-import { useVB6Store } from '../../stores/vb6Store';
+// ULTRA-OPTIMIZED: Import domain-specific stores
+import { useUIStore } from '../../stores/UIStore';
+import { useDesignerStore } from '../../stores/DesignerStore';
+import { useVB6Store } from '../../stores/vb6Store'; // Keep for legacy features
 import { UndoRedoToolbar } from './UndoRedoToolbar';
 import { useUndoRedo } from '../../hooks/useUndoRedo';
 
 export const EnhancedToolbar: React.FC = () => {
+  // ULTRA-OPTIMIZED: Use domain-specific stores
   const {
     executionMode,
     showGrid,
     showSnippetManager,
-    snapToGrid,
     showLogPanel,
     showTodoList,
-    selectedControls,
-    clipboard,
     showCodeFormatter,
     showCodeConverter,
     designerZoom,
     setDesignerZoom,
     setExecutionMode,
     toggleWindow,
+    showDialog,
+  } = useUIStore();
+  
+  const {
+    selectedControls,
+    clipboard,
     copyControls,
     pasteControls,
     duplicateControls,
     setDragState,
-    showDialog,
-  } = useVB6Store();
+    snapToGrid,
+  } = useDesignerStore();
 
   const { saveState } = useUndoRedo();
 

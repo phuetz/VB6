@@ -1,0 +1,40 @@
+# Configuration Prometheus pour VB6 Web IDE
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'vb6-ide-monitor'
+
+# Règles d'alerte
+rule_files:
+  - 'alerts.yml'
+
+# Configuration des scrapes
+scrape_configs:
+  # Monitoring de l'application VB6 IDE
+  - job_name: 'vb6-ide'
+    static_configs:
+      - targets: ['vb6-ide:80']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Monitoring Nginx
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-proxy:9113']
+
+  # Monitoring du système Docker
+  - job_name: 'docker'
+    static_configs:
+      - targets: ['localhost:9323']
+
+  # Monitoring Prometheus lui-même
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Monitoring Node.js (si exposé)
+  - job_name: 'nodejs'
+    static_configs:
+      - targets: ['vb6-ide:9091']
+    metrics_path: '/metrics'

@@ -1,0 +1,86 @@
+# Docker Compose pour développement avec hot-reload
+version: '3.8'
+
+services:
+  # Service de développement VB6 Web IDE
+  vb6-ide-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: vb6-web-ide-dev
+    ports:
+      - "5173:5173"  # Vite dev server
+      - "9229:9229"  # Node.js debugging
+    environment:
+      - NODE_ENV=development
+      - VITE_APP_ENV=development
+      - CHOKIDAR_USEPOLLING=true  # Pour le hot-reload dans Docker
+      - WATCHPACK_POLLING=true
+    volumes:
+      # Mount du code source pour le hot-reload
+      - .:/app:delegated
+      - /app/node_modules  # Exclure node_modules
+      - vb6_dev_cache:/app/.cache
+    command: npm run dev -- --host 0.0.0.0
+    stdin_open: true
+    tty: true
+    networks:
+      - vb6-dev-network
+
+  # Base de données pour développement
+  postgres-dev:
+    image: postgres:15-alpine
+    container_name: vb6-postgres-dev
+    environment:
+      - POSTGRES_DB=vb6ide
+      - POSTGRES_USER=vb6dev
+      - POSTGRES_PASSWORD=devpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    networks:
+      - vb6-dev-network
+
+  # Redis pour développement
+  redis-dev:
+    image: redis:7-alpine
+    container_name: vb6-redis-dev
+    ports:
+      - "6379:6379"
+    command: redis-server --loglevel debug
+    networks:
+      - vb6-dev-network
+
+  # Mailhog pour tester les emails
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: vb6-mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - vb6-dev-network
+
+  # Adminer pour gérer la base de données
+  adminer:
+    image: adminer:latest
+    container_name: vb6-adminer
+    ports:
+      - "8090:8080"
+    environment:
+      - ADMINER_DEFAULT_SERVER=postgres-dev
+    depends_on:
+      - postgres-dev
+    networks:
+      - vb6-dev-network
+
+networks:
+  vb6-dev-network:
+    driver: bridge
+
+volumes:
+  vb6_dev_cache:
+    driver: local
+  postgres_dev_data:
+    driver: local

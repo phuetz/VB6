@@ -7,17 +7,37 @@ import { useState, useEffect } from 'react';
 import { authService, AuthState, User } from '../services/AuthService';
 
 export function useAuth() {
-  const [authState, setAuthState] = useState<AuthState>(authService.getState());
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔐 useAuth hook initializing...');
+  }
+  const [authState, setAuthState] = useState<AuthState>(() => {
+    const state = authService.getState();
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔐 Initial auth state:', state);
+    }
+    return state;
+  });
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [requiredFeature, setRequiredFeature] = useState<string | undefined>();
 
   useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔐 Setting up auth state subscription...');
+    }
     // Subscribe to auth state changes
     const unsubscribe = authService.subscribe((state) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔐 Auth state changed:', state);
+      }
       setAuthState(state);
     });
 
-    return unsubscribe;
+    return () => {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔐 Cleaning up auth subscription');
+      }
+      unsubscribe();
+    };
   }, []);
 
   // Check if user is authenticated
