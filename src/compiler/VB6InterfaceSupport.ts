@@ -524,6 +524,185 @@ export class VB6InterfaceProcessor {
   }
 
   /**
+   * Auto-generate implementation stubs for missing interface methods
+   * This is used when a class declares Implements but hasn't provided all methods
+   */
+  generateImplementationStubs(className: string, interfaceName: string): string {
+    const interfaceDecl = this.getInterface(interfaceName);
+    if (!interfaceDecl) {
+      return `// Interface ${interfaceName} not found\n`;
+    }
+
+    let vb6Code = '';
+
+    // Generate method stubs
+    for (const method of interfaceDecl.methods) {
+      const implMethodName = `${interfaceName}_${method.name}`;
+      const params = method.parameters.map(p => {
+        let paramStr = '';
+        if (p.optional) paramStr += 'Optional ';
+        paramStr += p.byRef ? 'ByRef ' : 'ByVal ';
+        paramStr += `${p.name} As ${p.type}`;
+        if (p.optional && p.defaultValue !== undefined) {
+          paramStr += ` = ${this.formatDefaultValue(p.defaultValue)}`;
+        }
+        return paramStr;
+      }).join(', ');
+
+      if (method.isFunction) {
+        vb6Code += `Private Function ${implMethodName}(${params}) As ${method.returnType}\n`;
+        vb6Code += `    ' TODO: Implement ${interfaceName}.${method.name}\n`;
+        vb6Code += `    ${implMethodName} = ${this.getDefaultReturnValue(method.returnType || 'Variant')}\n`;
+        vb6Code += `End Function\n\n`;
+      } else {
+        vb6Code += `Private Sub ${implMethodName}(${params})\n`;
+        vb6Code += `    ' TODO: Implement ${interfaceName}.${method.name}\n`;
+        vb6Code += `End Sub\n\n`;
+      }
+    }
+
+    // Generate property stubs
+    for (const property of interfaceDecl.properties) {
+      const implPropertyName = `${interfaceName}_${property.name}`;
+
+      if (!property.writeOnly) {
+        // Generate Property Get
+        vb6Code += `Private Property Get ${implPropertyName}() As ${property.type}\n`;
+        vb6Code += `    ' TODO: Implement ${interfaceName}.${property.name} getter\n`;
+        vb6Code += `    ${implPropertyName} = ${this.getDefaultReturnValue(property.type)}\n`;
+        vb6Code += `End Property\n\n`;
+      }
+
+      if (!property.readOnly) {
+        // Generate Property Let/Set
+        const setterType = property.type.toLowerCase() === 'object' ||
+                          property.type.toLowerCase() === 'variant' ? 'Set' : 'Let';
+        vb6Code += `Private Property ${setterType} ${implPropertyName}(ByVal value As ${property.type})\n`;
+        vb6Code += `    ' TODO: Implement ${interfaceName}.${property.name} setter\n`;
+        vb6Code += `End Property\n\n`;
+      }
+    }
+
+    return vb6Code;
+  }
+
+  /**
+   * Generate JavaScript implementation stubs
+   */
+  generateJSImplementationStubs(className: string, interfaceName: string): string {
+    const interfaceDecl = this.getInterface(interfaceName);
+    if (!interfaceDecl) {
+      return `// Interface ${interfaceName} not found\n`;
+    }
+
+    let jsCode = `// Interface ${interfaceName} implementation stubs for ${className}\n`;
+
+    // Generate method stubs
+    for (const method of interfaceDecl.methods) {
+      const implMethodName = `${interfaceName}_${method.name}`;
+      const params = method.parameters.map(p => p.name).join(', ');
+
+      jsCode += `${implMethodName}(${params}) {\n`;
+
+      // Add default value handling for optional parameters
+      for (const param of method.parameters) {
+        if (param.optional && param.defaultValue !== undefined) {
+          const defaultVal = this.formatJSValue(param.defaultValue);
+          jsCode += `  if (${param.name} === undefined) ${param.name} = ${defaultVal};\n`;
+        }
+      }
+
+      jsCode += `  // TODO: Implement ${interfaceName}.${method.name}\n`;
+
+      if (method.isFunction) {
+        jsCode += `  return ${this.formatJSValue(this.parseDefaultValue(this.getDefaultReturnValue(method.returnType || 'Variant')))};\n`;
+      }
+
+      jsCode += `}\n\n`;
+    }
+
+    // Generate property stubs
+    for (const property of interfaceDecl.properties) {
+      const propName = `_${interfaceName}_${property.name}`;
+
+      // Private backing field
+      jsCode += `// Backing field for ${property.name}\n`;
+      jsCode += `${propName} = ${this.formatJSValue(this.parseDefaultValue(this.getDefaultReturnValue(property.type)))};\n\n`;
+
+      if (!property.writeOnly) {
+        // Getter
+        jsCode += `get ${interfaceName}_${property.name}() {\n`;
+        jsCode += `  return this.${propName};\n`;
+        jsCode += `}\n\n`;
+      }
+
+      if (!property.readOnly) {
+        // Setter
+        jsCode += `set ${interfaceName}_${property.name}(value) {\n`;
+        jsCode += `  this.${propName} = value;\n`;
+        jsCode += `}\n\n`;
+      }
+    }
+
+    return jsCode;
+  }
+
+  /**
+   * Format default value for VB6 code
+   */
+  private formatDefaultValue(value: any): string {
+    if (typeof value === 'string') return `"${value}"`;
+    if (value === null) return 'Nothing';
+    if (typeof value === 'boolean') return value ? 'True' : 'False';
+    return String(value);
+  }
+
+  /**
+   * Format value for JavaScript code
+   */
+  private formatJSValue(value: any): string {
+    if (typeof value === 'string') return `"${value}"`;
+    if (value === null) return 'null';
+    if (typeof value === 'boolean') return value ? 'true' : 'false';
+    return String(value);
+  }
+
+  /**
+   * Generate a complete class with all interface implementations
+   */
+  generateCompleteClassJS(className: string, interfaces: string[]): string {
+    let jsCode = `class ${className} {\n`;
+    jsCode += `  constructor() {\n`;
+
+    // Collect all backing fields
+    const backingFields: string[] = [];
+    for (const interfaceName of interfaces) {
+      const interfaceDecl = this.getInterface(interfaceName);
+      if (interfaceDecl) {
+        for (const property of interfaceDecl.properties) {
+          const fieldName = `_${interfaceName}_${property.name}`;
+          const defaultValue = this.formatJSValue(this.parseDefaultValue(this.getDefaultReturnValue(property.type)));
+          backingFields.push(`    this.${fieldName} = ${defaultValue};`);
+        }
+      }
+    }
+
+    jsCode += backingFields.join('\n') + '\n';
+    jsCode += `  }\n\n`;
+
+    // Generate all interface implementations
+    for (const interfaceName of interfaces) {
+      jsCode += `  // ========== ${interfaceName} Implementation ==========\n\n`;
+      const stubs = this.generateJSImplementationStubs(className, interfaceName);
+      // Indent the stubs
+      jsCode += stubs.split('\n').map(line => line ? '  ' + line : line).join('\n');
+    }
+
+    jsCode += `}\n`;
+    return jsCode;
+  }
+
+  /**
    * Validate interface implementation
    */
   validateImplementation(className: string, interfaceName: string): string[] {

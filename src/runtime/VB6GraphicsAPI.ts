@@ -746,6 +746,549 @@ export class VB6GraphicsEngine {
     }
     return canvas;
   }
+
+  /**
+   * VB6 Print Method
+   * Prints text at the current position
+   */
+  Print(elementId: string, ...args: any[]): void {
+    try {
+      const ctx = this.getContext(elementId);
+
+      // Format output
+      const output = args.map(arg => {
+        if (arg === null) return 'Null';
+        if (arg === undefined) return '';
+        if (typeof arg === 'boolean') return arg ? 'True' : 'False';
+        return String(arg);
+      }).join('');
+
+      // Convert coordinates
+      const pixelX = this.scaleToPixels(ctx.CurrentX, true, ctx);
+      const pixelY = this.scaleToPixels(ctx.CurrentY, false, ctx);
+
+      // Set text properties
+      ctx.context.fillStyle = this.colorToCSS(ctx.ForeColor);
+      ctx.context.font = `${ctx.DrawWidth * 10 || 12}px Arial`;
+      ctx.context.textBaseline = 'top';
+
+      // Draw text
+      ctx.context.fillText(output, pixelX, pixelY);
+
+      // Update CurrentY for next line (move down by font height)
+      const metrics = ctx.context.measureText(output);
+      ctx.CurrentY += this.pixelsToScale(
+        (metrics.actualBoundingBoxAscent || 12) + (metrics.actualBoundingBoxDescent || 4) + 2,
+        false,
+        ctx
+      );
+      ctx.CurrentX = 0; // Reset X to start of line
+
+      console.log(`[VB6 Graphics] Print: "${output}"`);
+    } catch (error) {
+      errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Print');
+    }
+  }
+
+  /**
+   * Convert pixels back to scale units
+   */
+  private pixelsToScale(value: number, isX: boolean, ctx: VB6GraphicsContext): number {
+    if (ctx.ScaleMode === VB6DrawingConstants.vbPixels) {
+      return value;
+    }
+
+    const scaleRange = isX ? ctx.ScaleWidth : ctx.ScaleHeight;
+    const canvasSize = isX ? ctx.canvas.width : ctx.canvas.height;
+    const scaleOffset = isX ? ctx.ScaleLeft : ctx.ScaleTop;
+
+    return (value / canvasSize) * scaleRange + scaleOffset;
+  }
+
+  /**
+   * VB6 TextWidth Method
+   * Returns the width of a string in scale units
+   */
+  TextWidth(elementId: string, text: string): number {
+    const ctx = this.getContext(elementId);
+    ctx.context.font = `${ctx.DrawWidth * 10 || 12}px Arial`;
+    const metrics = ctx.context.measureText(text);
+    return this.pixelsToScale(metrics.width, true, ctx);
+  }
+
+  /**
+   * VB6 TextHeight Method
+   * Returns the height of a string in scale units
+   */
+  TextHeight(elementId: string, text: string): number {
+    const ctx = this.getContext(elementId);
+    ctx.context.font = `${ctx.DrawWidth * 10 || 12}px Arial`;
+    const metrics = ctx.context.measureText(text);
+    const height = (metrics.actualBoundingBoxAscent || 12) + (metrics.actualBoundingBoxDescent || 4);
+    return this.pixelsToScale(height, false, ctx);
+  }
+
+  /**
+   * VB6 RGB Function
+   * Returns a VB6 color value from RGB components
+   */
+  static RGB(red: number, green: number, blue: number): number {
+    const r = Math.max(0, Math.min(255, Math.floor(red)));
+    const g = Math.max(0, Math.min(255, Math.floor(green)));
+    const b = Math.max(0, Math.min(255, Math.floor(blue)));
+    return r | (g << 8) | (b << 16);
+  }
+
+  /**
+   * VB6 QBColor Function
+   * Returns a VB6 color value from QBasic color index (0-15)
+   */
+  static QBColor(color: number): number {
+    const qbColors = [
+      0x000000, // 0 - Black
+      0x800000, // 1 - Blue
+      0x008000, // 2 - Green
+      0x808000, // 3 - Cyan
+      0x000080, // 4 - Red
+      0x800080, // 5 - Magenta
+      0x008080, // 6 - Brown/Yellow
+      0xC0C0C0, // 7 - White/Light Gray
+      0x808080, // 8 - Gray
+      0xFF0000, // 9 - Light Blue
+      0x00FF00, // 10 - Light Green
+      0xFFFF00, // 11 - Light Cyan
+      0x0000FF, // 12 - Light Red
+      0xFF00FF, // 13 - Light Magenta
+      0x00FFFF, // 14 - Yellow
+      0xFFFFFF  // 15 - Bright White
+    ];
+    return qbColors[Math.max(0, Math.min(15, Math.floor(color)))] || 0;
+  }
+
+  /**
+   * VB6 Move Method (for positioning)
+   * Moves the current drawing position
+   */
+  Move(elementId: string, x: number, y: number): void {
+    const ctx = this.getContext(elementId);
+    ctx.CurrentX = x;
+    ctx.CurrentY = y;
+  }
+
+  /**
+   * Draw arc (part of circle)
+   */
+  Arc(elementId: string, x: number, y: number, radius: number, startAngle: number, endAngle: number, color?: number): void {
+    try {
+      const ctx = this.getContext(elementId);
+      this.applyContextSettings(ctx);
+
+      const pixelX = this.scaleToPixels(x, true, ctx);
+      const pixelY = this.scaleToPixels(y, false, ctx);
+      const pixelRadius = this.scaleToPixels(radius, true, ctx);
+
+      const drawColor = color !== undefined ? color : ctx.ForeColor;
+
+      ctx.context.beginPath();
+      ctx.context.arc(pixelX, pixelY, pixelRadius, startAngle, endAngle);
+      ctx.context.strokeStyle = this.colorToCSS(drawColor);
+      ctx.context.lineWidth = ctx.DrawWidth;
+      ctx.context.stroke();
+
+      console.log(`[VB6 Graphics] Arc drawn at (${x}, ${y})`);
+    } catch (error) {
+      errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Arc');
+    }
+  }
+
+  /**
+   * Draw pie slice (filled arc)
+   */
+  Pie(elementId: string, x: number, y: number, radius: number, startAngle: number, endAngle: number, color?: number, fillColor?: number): void {
+    try {
+      const ctx = this.getContext(elementId);
+      this.applyContextSettings(ctx);
+
+      const pixelX = this.scaleToPixels(x, true, ctx);
+      const pixelY = this.scaleToPixels(y, false, ctx);
+      const pixelRadius = this.scaleToPixels(radius, true, ctx);
+
+      const drawColor = color !== undefined ? color : ctx.ForeColor;
+      const fill = fillColor !== undefined ? fillColor : ctx.FillColor;
+
+      ctx.context.beginPath();
+      ctx.context.moveTo(pixelX, pixelY);
+      ctx.context.arc(pixelX, pixelY, pixelRadius, startAngle, endAngle);
+      ctx.context.closePath();
+
+      // Fill
+      ctx.context.fillStyle = this.colorToCSS(fill);
+      ctx.context.fill();
+
+      // Stroke
+      ctx.context.strokeStyle = this.colorToCSS(drawColor);
+      ctx.context.lineWidth = ctx.DrawWidth;
+      ctx.context.stroke();
+
+      console.log(`[VB6 Graphics] Pie drawn at (${x}, ${y})`);
+    } catch (error) {
+      errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Pie');
+    }
+  }
+
+  /**
+   * Draw polygon
+   */
+  Polygon(elementId: string, points: Array<{x: number, y: number}>, color?: number, fillColor?: number, filled: boolean = false): void {
+    try {
+      const ctx = this.getContext(elementId);
+      this.applyContextSettings(ctx);
+
+      if (points.length < 3) {
+        throw new Error('Polygon requires at least 3 points');
+      }
+
+      const drawColor = color !== undefined ? color : ctx.ForeColor;
+      const fill = fillColor !== undefined ? fillColor : ctx.FillColor;
+
+      ctx.context.beginPath();
+
+      const firstPoint = points[0];
+      ctx.context.moveTo(
+        this.scaleToPixels(firstPoint.x, true, ctx),
+        this.scaleToPixels(firstPoint.y, false, ctx)
+      );
+
+      for (let i = 1; i < points.length; i++) {
+        ctx.context.lineTo(
+          this.scaleToPixels(points[i].x, true, ctx),
+          this.scaleToPixels(points[i].y, false, ctx)
+        );
+      }
+
+      ctx.context.closePath();
+
+      // Fill if requested
+      if (filled || ctx.FillStyle === VB6DrawingConstants.vbFSSolid) {
+        ctx.context.fillStyle = this.colorToCSS(fill);
+        ctx.context.fill();
+      }
+
+      // Stroke
+      ctx.context.strokeStyle = this.colorToCSS(drawColor);
+      ctx.context.lineWidth = ctx.DrawWidth;
+      ctx.context.stroke();
+
+      console.log(`[VB6 Graphics] Polygon drawn with ${points.length} points`);
+    } catch (error) {
+      errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Polygon');
+    }
+  }
+
+  /**
+   * Draw rounded rectangle
+   */
+  RoundRect(elementId: string, x1: number, y1: number, x2: number, y2: number, cornerRadius: number, color?: number, fillColor?: number, filled: boolean = false): void {
+    try {
+      const ctx = this.getContext(elementId);
+      this.applyContextSettings(ctx);
+
+      const pixelX1 = this.scaleToPixels(x1, true, ctx);
+      const pixelY1 = this.scaleToPixels(y1, false, ctx);
+      const pixelX2 = this.scaleToPixels(x2, true, ctx);
+      const pixelY2 = this.scaleToPixels(y2, false, ctx);
+      const pixelRadius = this.scaleToPixels(cornerRadius, true, ctx);
+
+      const drawColor = color !== undefined ? color : ctx.ForeColor;
+      const fill = fillColor !== undefined ? fillColor : ctx.FillColor;
+
+      const width = pixelX2 - pixelX1;
+      const height = pixelY2 - pixelY1;
+      const r = Math.min(pixelRadius, Math.min(width / 2, height / 2));
+
+      ctx.context.beginPath();
+      ctx.context.moveTo(pixelX1 + r, pixelY1);
+      ctx.context.arcTo(pixelX2, pixelY1, pixelX2, pixelY2, r);
+      ctx.context.arcTo(pixelX2, pixelY2, pixelX1, pixelY2, r);
+      ctx.context.arcTo(pixelX1, pixelY2, pixelX1, pixelY1, r);
+      ctx.context.arcTo(pixelX1, pixelY1, pixelX2, pixelY1, r);
+      ctx.context.closePath();
+
+      // Fill if requested
+      if (filled || ctx.FillStyle === VB6DrawingConstants.vbFSSolid) {
+        ctx.context.fillStyle = this.colorToCSS(fill);
+        ctx.context.fill();
+      }
+
+      // Stroke
+      ctx.context.strokeStyle = this.colorToCSS(drawColor);
+      ctx.context.lineWidth = ctx.DrawWidth;
+      ctx.context.stroke();
+
+      console.log(`[VB6 Graphics] Rounded rectangle drawn from (${x1}, ${y1}) to (${x2}, ${y2})`);
+    } catch (error) {
+      errorHandler.raiseError(5, 'Invalid procedure call or argument', 'RoundRect');
+    }
+  }
+
+  /**
+   * Draw ellipse
+   */
+  Ellipse(elementId: string, x: number, y: number, radiusX: number, radiusY: number, color?: number, fillColor?: number, filled: boolean = false): void {
+    try {
+      const ctx = this.getContext(elementId);
+      this.applyContextSettings(ctx);
+
+      const pixelX = this.scaleToPixels(x, true, ctx);
+      const pixelY = this.scaleToPixels(y, false, ctx);
+      const pixelRadiusX = this.scaleToPixels(radiusX, true, ctx);
+      const pixelRadiusY = this.scaleToPixels(radiusY, false, ctx);
+
+      const drawColor = color !== undefined ? color : ctx.ForeColor;
+      const fill = fillColor !== undefined ? fillColor : ctx.FillColor;
+
+      ctx.context.beginPath();
+      ctx.context.ellipse(pixelX, pixelY, pixelRadiusX, pixelRadiusY, 0, 0, Math.PI * 2);
+
+      // Fill if requested
+      if (filled || ctx.FillStyle === VB6DrawingConstants.vbFSSolid) {
+        ctx.context.fillStyle = this.colorToCSS(fill);
+        ctx.context.fill();
+      }
+
+      // Stroke
+      ctx.context.strokeStyle = this.colorToCSS(drawColor);
+      ctx.context.lineWidth = ctx.DrawWidth;
+      ctx.context.stroke();
+
+      console.log(`[VB6 Graphics] Ellipse drawn at (${x}, ${y})`);
+    } catch (error) {
+      errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Ellipse');
+    }
+  }
+
+  /**
+   * Draw gradient fill (extended feature)
+   */
+  GradientFill(elementId: string, x1: number, y1: number, x2: number, y2: number, color1: number, color2: number, direction: 'horizontal' | 'vertical' | 'diagonal' = 'vertical'): void {
+    try {
+      const ctx = this.getContext(elementId);
+
+      const pixelX1 = this.scaleToPixels(x1, true, ctx);
+      const pixelY1 = this.scaleToPixels(y1, false, ctx);
+      const pixelX2 = this.scaleToPixels(x2, true, ctx);
+      const pixelY2 = this.scaleToPixels(y2, false, ctx);
+
+      let gradient: CanvasGradient;
+
+      switch (direction) {
+        case 'horizontal':
+          gradient = ctx.context.createLinearGradient(pixelX1, pixelY1, pixelX2, pixelY1);
+          break;
+        case 'diagonal':
+          gradient = ctx.context.createLinearGradient(pixelX1, pixelY1, pixelX2, pixelY2);
+          break;
+        case 'vertical':
+        default:
+          gradient = ctx.context.createLinearGradient(pixelX1, pixelY1, pixelX1, pixelY2);
+          break;
+      }
+
+      gradient.addColorStop(0, this.colorToCSS(color1));
+      gradient.addColorStop(1, this.colorToCSS(color2));
+
+      ctx.context.fillStyle = gradient;
+      ctx.context.fillRect(pixelX1, pixelY1, pixelX2 - pixelX1, pixelY2 - pixelY1);
+
+      console.log(`[VB6 Graphics] Gradient fill from (${x1}, ${y1}) to (${x2}, ${y2})`);
+    } catch (error) {
+      errorHandler.raiseError(5, 'Invalid procedure call or argument', 'GradientFill');
+    }
+  }
+
+  /**
+   * Save canvas to image
+   */
+  SavePicture(elementId: string, format: 'png' | 'jpeg' | 'webp' = 'png', quality: number = 0.92): string {
+    try {
+      const ctx = this.getContext(elementId);
+      return ctx.canvas.toDataURL(`image/${format}`, quality);
+    } catch (error) {
+      errorHandler.raiseError(5, 'Invalid procedure call or argument', 'SavePicture');
+      return '';
+    }
+  }
+
+  /**
+   * Set font properties
+   */
+  SetFont(elementId: string, fontName: string, fontSize: number, bold: boolean = false, italic: boolean = false, underline: boolean = false): void {
+    const ctx = this.getContext(elementId);
+
+    let fontStyle = '';
+    if (italic) fontStyle += 'italic ';
+    if (bold) fontStyle += 'bold ';
+
+    ctx.context.font = `${fontStyle}${fontSize}px ${fontName}`;
+
+    // Store for later use
+    (ctx as any).FontName = fontName;
+    (ctx as any).FontSize = fontSize;
+    (ctx as any).FontBold = bold;
+    (ctx as any).FontItalic = italic;
+    (ctx as any).FontUnderline = underline;
+  }
+
+  /**
+   * Refresh/redraw the graphics
+   */
+  Refresh(elementId: string): void {
+    // In HTML5 Canvas, this is a no-op as rendering is immediate
+    // But we can trigger a repaint if needed
+    const ctx = this.getContext(elementId);
+    ctx.canvas.style.display = 'none';
+    ctx.canvas.offsetHeight; // Force reflow
+    ctx.canvas.style.display = '';
+    console.log(`[VB6 Graphics] Refreshed ${elementId}`);
+  }
+
+  /**
+   * Copy image from one location to another
+   */
+  BitBlt(destElementId: string, destX: number, destY: number, width: number, height: number, srcElementId: string, srcX: number, srcY: number, operation: number = VB6DrawingConstants.vbCopyPen): void {
+    try {
+      const destCtx = this.getContext(destElementId);
+      const srcCtx = this.getContext(srcElementId);
+
+      const srcPixelX = this.scaleToPixels(srcX, true, srcCtx);
+      const srcPixelY = this.scaleToPixels(srcY, false, srcCtx);
+      const destPixelX = this.scaleToPixels(destX, true, destCtx);
+      const destPixelY = this.scaleToPixels(destY, false, destCtx);
+      const pixelWidth = this.scaleToPixels(width, true, srcCtx);
+      const pixelHeight = this.scaleToPixels(height, false, srcCtx);
+
+      // Get source image data
+      const imageData = srcCtx.context.getImageData(srcPixelX, srcPixelY, pixelWidth, pixelHeight);
+
+      // Apply operation
+      switch (operation) {
+        case VB6DrawingConstants.vbNotCopyPen:
+          // Invert colors
+          for (let i = 0; i < imageData.data.length; i += 4) {
+            imageData.data[i] = 255 - imageData.data[i];
+            imageData.data[i + 1] = 255 - imageData.data[i + 1];
+            imageData.data[i + 2] = 255 - imageData.data[i + 2];
+          }
+          break;
+        case VB6DrawingConstants.vbBlackness:
+          // Fill with black
+          for (let i = 0; i < imageData.data.length; i += 4) {
+            imageData.data[i] = 0;
+            imageData.data[i + 1] = 0;
+            imageData.data[i + 2] = 0;
+          }
+          break;
+        case VB6DrawingConstants.vbWhiteness:
+          // Fill with white
+          for (let i = 0; i < imageData.data.length; i += 4) {
+            imageData.data[i] = 255;
+            imageData.data[i + 1] = 255;
+            imageData.data[i + 2] = 255;
+          }
+          break;
+        // Default is copy (vbCopyPen) - no modification needed
+      }
+
+      // Put to destination
+      destCtx.context.putImageData(imageData, destPixelX, destPixelY);
+
+      console.log(`[VB6 Graphics] BitBlt from ${srcElementId} to ${destElementId}`);
+    } catch (error) {
+      errorHandler.raiseError(5, 'Invalid procedure call or argument', 'BitBlt');
+    }
+  }
+
+  /**
+   * Flood fill from a point
+   */
+  FloodFill(elementId: string, x: number, y: number, color: number, fillType: 'border' | 'surface' = 'surface'): void {
+    try {
+      const ctx = this.getContext(elementId);
+
+      const pixelX = Math.floor(this.scaleToPixels(x, true, ctx));
+      const pixelY = Math.floor(this.scaleToPixels(y, false, ctx));
+
+      const width = ctx.canvas.width;
+      const height = ctx.canvas.height;
+
+      const imageData = ctx.context.getImageData(0, 0, width, height);
+      const data = imageData.data;
+
+      // Get target color at the start point
+      const startIdx = (pixelY * width + pixelX) * 4;
+      const targetR = data[startIdx];
+      const targetG = data[startIdx + 1];
+      const targetB = data[startIdx + 2];
+      const targetA = data[startIdx + 3];
+
+      // Get fill color
+      const fillR = color & 0xFF;
+      const fillG = (color >> 8) & 0xFF;
+      const fillB = (color >> 16) & 0xFF;
+
+      // Don't fill if already the same color
+      if (targetR === fillR && targetG === fillG && targetB === fillB) {
+        return;
+      }
+
+      // Stack-based flood fill
+      const stack: Array<[number, number]> = [[pixelX, pixelY]];
+      const visited = new Set<string>();
+
+      while (stack.length > 0) {
+        const [cx, cy] = stack.pop()!;
+        const key = `${cx},${cy}`;
+
+        if (visited.has(key) || cx < 0 || cx >= width || cy < 0 || cy >= height) {
+          continue;
+        }
+
+        const idx = (cy * width + cx) * 4;
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+
+        // Check if this pixel should be filled
+        const shouldFill = fillType === 'surface'
+          ? (r === targetR && g === targetG && b === targetB)
+          : !(r === fillR && g === fillG && b === fillB);
+
+        if (!shouldFill) {
+          continue;
+        }
+
+        visited.add(key);
+
+        // Fill the pixel
+        data[idx] = fillR;
+        data[idx + 1] = fillG;
+        data[idx + 2] = fillB;
+        data[idx + 3] = 255;
+
+        // Add neighbors to stack
+        stack.push([cx + 1, cy]);
+        stack.push([cx - 1, cy]);
+        stack.push([cx, cy + 1]);
+        stack.push([cx, cy - 1]);
+      }
+
+      ctx.context.putImageData(imageData, 0, 0);
+
+      console.log(`[VB6 Graphics] FloodFill at (${x}, ${y})`);
+    } catch (error) {
+      errorHandler.raiseError(5, 'Invalid procedure call or argument', 'FloodFill');
+    }
+  }
 }
 
 // Global graphics engine instance
@@ -754,6 +1297,15 @@ const graphicsEngine = new VB6GraphicsEngine();
 // Global VB6 Graphics Functions
 export function Line(elementId: string, x1?: number, y1?: number, x2?: number, y2?: number, color?: number, drawFlag?: string): void {
   graphicsEngine.Line(elementId, x1, y1, x2, y2, color, drawFlag);
+}
+
+// RGB and QBColor functions
+export function RGB(red: number, green: number, blue: number): number {
+  return VB6GraphicsEngine.RGB(red, green, blue);
+}
+
+export function QBColor(color: number): number {
+  return VB6GraphicsEngine.QBColor(color);
 }
 
 export function Circle(elementId: string, x: number, y: number, radius: number, color?: number, start?: number, end?: number, aspect?: number): void {
@@ -789,16 +1341,81 @@ export function GetGraphicsProperty(elementId: string, property: string): any {
   return graphicsEngine.getProperty(elementId, property);
 }
 
+// Text output functions
+export function Print(elementId: string, ...args: any[]): void {
+  graphicsEngine.Print(elementId, ...args);
+}
+
+export function TextWidth(elementId: string, text: string): number {
+  return graphicsEngine.TextWidth(elementId, text);
+}
+
+export function TextHeight(elementId: string, text: string): number {
+  return graphicsEngine.TextHeight(elementId, text);
+}
+
+// Position function
+export function Move(elementId: string, x: number, y: number): void {
+  graphicsEngine.Move(elementId, x, y);
+}
+
+// Shape drawing functions
+export function Arc(elementId: string, x: number, y: number, radius: number, startAngle: number, endAngle: number, color?: number): void {
+  graphicsEngine.Arc(elementId, x, y, radius, startAngle, endAngle, color);
+}
+
+export function Pie(elementId: string, x: number, y: number, radius: number, startAngle: number, endAngle: number, color?: number, fillColor?: number): void {
+  graphicsEngine.Pie(elementId, x, y, radius, startAngle, endAngle, color, fillColor);
+}
+
+export function Polygon(elementId: string, points: Array<{x: number, y: number}>, color?: number, fillColor?: number, filled?: boolean): void {
+  graphicsEngine.Polygon(elementId, points, color, fillColor, filled);
+}
+
+export function RoundRect(elementId: string, x1: number, y1: number, x2: number, y2: number, cornerRadius: number, color?: number, fillColor?: number, filled?: boolean): void {
+  graphicsEngine.RoundRect(elementId, x1, y1, x2, y2, cornerRadius, color, fillColor, filled);
+}
+
+export function Ellipse(elementId: string, x: number, y: number, radiusX: number, radiusY: number, color?: number, fillColor?: number, filled?: boolean): void {
+  graphicsEngine.Ellipse(elementId, x, y, radiusX, radiusY, color, fillColor, filled);
+}
+
+export function GradientFill(elementId: string, x1: number, y1: number, x2: number, y2: number, color1: number, color2: number, direction?: 'horizontal' | 'vertical' | 'diagonal'): void {
+  graphicsEngine.GradientFill(elementId, x1, y1, x2, y2, color1, color2, direction);
+}
+
+// Image functions
+export function SavePicture(elementId: string, format?: 'png' | 'jpeg' | 'webp', quality?: number): string {
+  return graphicsEngine.SavePicture(elementId, format, quality);
+}
+
+export function BitBlt(destElementId: string, destX: number, destY: number, width: number, height: number, srcElementId: string, srcX: number, srcY: number, operation?: number): void {
+  graphicsEngine.BitBlt(destElementId, destX, destY, width, height, srcElementId, srcX, srcY, operation);
+}
+
+export function FloodFill(elementId: string, x: number, y: number, color: number, fillType?: 'border' | 'surface'): void {
+  graphicsEngine.FloodFill(elementId, x, y, color, fillType);
+}
+
+// Font and display functions
+export function SetFont(elementId: string, fontName: string, fontSize: number, bold?: boolean, italic?: boolean, underline?: boolean): void {
+  graphicsEngine.SetFont(elementId, fontName, fontSize, bold, italic, underline);
+}
+
+export function Refresh(elementId: string): void {
+  graphicsEngine.Refresh(elementId);
+}
+
 // Export the complete graphics API
 export const VB6GraphicsAPI = {
   // Engine
   VB6GraphicsEngine,
-  
+
   // Constants
   VB6DrawingConstants,
   VB6LineConstants,
-  
-  // Functions
+
+  // Core drawing functions
   Line,
   Circle,
   PSet,
@@ -806,9 +1423,40 @@ export const VB6GraphicsAPI = {
   Cls,
   Scale,
   PaintPicture,
+
+  // Color functions
+  RGB,
+  QBColor,
+
+  // Text functions
+  Print,
+  TextWidth,
+  TextHeight,
+
+  // Position function
+  Move,
+
+  // Shape functions
+  Arc,
+  Pie,
+  Polygon,
+  RoundRect,
+  Ellipse,
+  GradientFill,
+
+  // Image functions
+  SavePicture,
+  BitBlt,
+  FloodFill,
+
+  // Font and display functions
+  SetFont,
+  Refresh,
+
+  // Property accessor functions
   SetGraphicsProperty,
   GetGraphicsProperty,
-  
+
   // Global engine instance
   engine: graphicsEngine
 };

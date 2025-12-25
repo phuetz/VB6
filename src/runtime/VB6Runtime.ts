@@ -806,6 +806,226 @@ export class VB6Runtime {
     return typeof expression === 'object' && expression !== null;
   }
 
+  /**
+   * VB6 Like operator for pattern matching
+   * Supports: * (any chars), ? (single char), # (digit), [charlist], [!charlist]
+   */
+  public like(inputString: string, pattern: string): boolean {
+    if (inputString === null || inputString === undefined) inputString = '';
+    if (pattern === null || pattern === undefined) pattern = '';
+
+    const str = String(inputString);
+    const pat = String(pattern);
+
+    // Convert VB6 Like pattern to RegExp
+    let regexPattern = pat
+      .replace(/\\/g, '\\\\')
+      .replace(/\./g, '\\.')
+      .replace(/\^/g, '\\^')
+      .replace(/\$/g, '\\$')
+      .replace(/\+/g, '\\+')
+      .replace(/\(/g, '\\(')
+      .replace(/\)/g, '\\)')
+      .replace(/\|/g, '\\|')
+      .replace(/\{/g, '\\{')
+      .replace(/\}/g, '\\}')
+      .replace(/\*/g, '.*')      // * matches any number of characters
+      .replace(/\?/g, '.')        // ? matches any single character
+      .replace(/#/g, '[0-9]');    // # matches any single digit
+
+    // Handle [!charlist] - matches any character NOT in the list
+    regexPattern = regexPattern.replace(/\[!/g, '[^');
+
+    try {
+      const regex = new RegExp(`^${regexPattern}$`, 'i');
+      return regex.test(str);
+    } catch (e) {
+      // Invalid pattern - return false
+      return false;
+    }
+  }
+
+  /**
+   * Print to file for Print # statement
+   */
+  public printToFile(fileNumber: number, ...items: any[]): void {
+    // Format items and log to console (or write to virtual file system)
+    const output = items.map(item => String(item)).join('');
+    console.log(`[File #${fileNumber}] ${output}`);
+  }
+
+  /**
+   * LSet - left-aligns string in fixed-length field
+   */
+  public lset(target: string, value: string): string {
+    const targetLen = target?.length || 0;
+    if (targetLen === 0) return value;
+    const val = String(value);
+    if (val.length >= targetLen) {
+      return val.substring(0, targetLen);
+    }
+    return val + ' '.repeat(targetLen - val.length);
+  }
+
+  /**
+   * RSet - right-aligns string in fixed-length field
+   */
+  public rset(target: string, value: string): string {
+    const targetLen = target?.length || 0;
+    if (targetLen === 0) return value;
+    const val = String(value);
+    if (val.length >= targetLen) {
+      return val.substring(0, targetLen);
+    }
+    return ' '.repeat(targetLen - val.length) + val;
+  }
+
+  // Simple in-memory file system for VB6 file operations
+  private files: Map<number, { content: string; position: number; mode: string }> = new Map();
+
+  /**
+   * Open file
+   */
+  public open(fileName: string, fileNumber: number, mode: string = 'Input', access?: string, lock?: string): void {
+    this.files.set(fileNumber, {
+      content: '',
+      position: 0,
+      mode: mode
+    });
+    console.log(`[VB6] Opened file "${fileName}" as #${fileNumber} (${mode})`);
+  }
+
+  /**
+   * Close specific files
+   */
+  public close(...fileNumbers: number[]): void {
+    for (const num of fileNumbers) {
+      if (this.files.has(num)) {
+        this.files.delete(num);
+        console.log(`[VB6] Closed file #${num}`);
+      }
+    }
+  }
+
+  /**
+   * Close all files
+   */
+  public closeAll(): void {
+    this.files.clear();
+    console.log('[VB6] Closed all files');
+  }
+
+  /**
+   * Line Input - reads a line from file
+   */
+  public lineInput(fileNumber: number): string {
+    const file = this.files.get(fileNumber);
+    if (!file) return '';
+
+    const remaining = file.content.substring(file.position);
+    const newlineIndex = remaining.indexOf('\n');
+    if (newlineIndex === -1) {
+      file.position = file.content.length;
+      return remaining;
+    }
+
+    const line = remaining.substring(0, newlineIndex);
+    file.position += newlineIndex + 1;
+    return line.replace(/\r$/, '');
+  }
+
+  /**
+   * Input - reads comma-separated values from file
+   */
+  public input(fileNumber: number, count: number = 1): any[] {
+    const file = this.files.get(fileNumber);
+    if (!file) return [];
+
+    const remaining = file.content.substring(file.position);
+    const results: any[] = [];
+
+    let pos = 0;
+    for (let i = 0; i < count; i++) {
+      // Skip whitespace
+      while (pos < remaining.length && /\s/.test(remaining[pos])) pos++;
+
+      if (pos >= remaining.length) {
+        results.push('');
+        continue;
+      }
+
+      // Read quoted string or value until comma/newline
+      if (remaining[pos] === '"') {
+        pos++;
+        let value = '';
+        while (pos < remaining.length && remaining[pos] !== '"') {
+          value += remaining[pos++];
+        }
+        pos++; // Skip closing quote
+        results.push(value);
+      } else {
+        let value = '';
+        while (pos < remaining.length && remaining[pos] !== ',' && remaining[pos] !== '\n') {
+          value += remaining[pos++];
+        }
+        results.push(value.trim());
+      }
+
+      // Skip comma
+      if (pos < remaining.length && remaining[pos] === ',') pos++;
+    }
+
+    file.position += pos;
+    return results;
+  }
+
+  /**
+   * Write - writes data to file with quotes around strings
+   */
+  public write(fileNumber: number, ...items: any[]): void {
+    const file = this.files.get(fileNumber);
+    if (!file) return;
+
+    const formatted = items.map(item => {
+      if (typeof item === 'string') return `"${item}"`;
+      return String(item);
+    }).join(',');
+
+    file.content += formatted + '\n';
+  }
+
+  /**
+   * Seek - sets file position
+   */
+  public seek(fileNumber: number, position: number): void {
+    const file = this.files.get(fileNumber);
+    if (file) {
+      file.position = position - 1; // VB6 positions are 1-based
+    }
+  }
+
+  /**
+   * Get - reads record from random-access file
+   */
+  public get(fileNumber: number, recordNumber?: number): any {
+    const file = this.files.get(fileNumber);
+    if (!file) return null;
+
+    // Simplified - just return remaining content
+    const remaining = file.content.substring(file.position);
+    return remaining;
+  }
+
+  /**
+   * Put - writes record to random-access file
+   */
+  public put(fileNumber: number, recordNumber: number | undefined, data: any): void {
+    const file = this.files.get(fileNumber);
+    if (!file) return;
+
+    file.content += String(data);
+  }
+
   public TypeName(varname: any): string {
     const typeNames = {
       [VbVarType.vbEmpty]: 'Empty',
@@ -824,6 +1044,652 @@ export class VB6Runtime {
     };
 
     return typeNames[this.VarType(varname)] || 'Unknown';
+  }
+
+  // ============================================================
+  // VB6 Array Functions - Multi-dimensional array support
+  // ============================================================
+
+  /**
+   * Create 1D array with custom bounds (supports VB6 "Dim arr(1 To 10)")
+   * Returns an array with __lbound and __ubound metadata
+   */
+  public createArray(lowerBound: number, upperBound: number, defaultFactory: () => any): any[] {
+    const size = upperBound - lowerBound + 1;
+    const arr: any[] = new Array(size).fill(null).map(() => defaultFactory());
+    // Store bounds metadata on array
+    (arr as any).__lbound = lowerBound;
+    (arr as any).__ubound = upperBound;
+    return arr;
+  }
+
+  /**
+   * Create multi-dimensional array with bounds
+   * VB6: Dim arr(1 To 5, 1 To 10, 0 To 3)
+   * bounds = [[1, 5], [1, 10], [0, 3]]
+   */
+  public createMultiArray(bounds: [number, number][], defaultFactory: () => any): any {
+    if (bounds.length === 0) return [];
+
+    const createDimension = (dimIndex: number): any => {
+      const [lower, upper] = bounds[dimIndex];
+      const size = upper - lower + 1;
+
+      if (dimIndex === bounds.length - 1) {
+        // Innermost dimension
+        const arr = new Array(size).fill(null).map(() => defaultFactory());
+        (arr as any).__lbound = lower;
+        (arr as any).__ubound = upper;
+        return arr;
+      }
+
+      // Create nested arrays
+      const arr: any[] = new Array(size).fill(null).map(() => createDimension(dimIndex + 1));
+      (arr as any).__lbound = lower;
+      (arr as any).__ubound = upper;
+      return arr;
+    };
+
+    const result = createDimension(0);
+    (result as any).__bounds = bounds;
+    (result as any).__dimensions = bounds.length;
+    return result;
+  }
+
+  /**
+   * ReDim Preserve for multi-dimensional arrays
+   * In VB6, only the last dimension can be resized with Preserve
+   */
+  public reDimPreserve(oldArray: any[], newSizes: number[], defaultFactory: () => any): any[] {
+    if (!oldArray || newSizes.length === 0) {
+      return this.createNestedArray(newSizes, 0, defaultFactory);
+    }
+
+    if (newSizes.length === 1) {
+      // Simple 1D case
+      const newSize = newSizes[0] + 1;
+      const newArr = new Array(newSize).fill(null).map((_, i) =>
+        i < oldArray.length ? oldArray[i] : defaultFactory()
+      );
+      // Preserve bounds if they exist
+      if ((oldArray as any).__lbound !== undefined) {
+        (newArr as any).__lbound = (oldArray as any).__lbound;
+      }
+      (newArr as any).__ubound = newSizes[0];
+      return newArr;
+    }
+
+    // Multi-dimensional: Only resize last dimension (VB6 rule)
+    const copyDimension = (oldArr: any[], sizes: number[], dimIndex: number): any[] => {
+      const newSize = sizes[dimIndex] + 1;
+
+      if (dimIndex === sizes.length - 1) {
+        // Last dimension - resize it
+        return new Array(newSize).fill(null).map((_, i) =>
+          oldArr && i < oldArr.length ? oldArr[i] : defaultFactory()
+        );
+      }
+
+      // Not last dimension - copy structure
+      return new Array(newSize).fill(null).map((_, i) => {
+        if (oldArr && i < oldArr.length) {
+          return copyDimension(oldArr[i], sizes, dimIndex + 1);
+        }
+        return this.createNestedArray(sizes.slice(dimIndex + 1), 0, defaultFactory);
+      });
+    };
+
+    return copyDimension(oldArray, newSizes, 0);
+  }
+
+  /**
+   * Create nested array without bounds (simple multi-dimensional)
+   */
+  private createNestedArray(sizes: number[], dimIndex: number, defaultFactory: () => any): any[] {
+    const size = sizes[dimIndex] + 1;
+    if (dimIndex === sizes.length - 1) {
+      return new Array(size).fill(null).map(() => defaultFactory());
+    }
+    return new Array(size).fill(null).map(() =>
+      this.createNestedArray(sizes, dimIndex + 1, defaultFactory)
+    );
+  }
+
+  /**
+   * LBound - Get lower bound of array dimension
+   * VB6: LBound(arr) or LBound(arr, 2) for multi-dimensional
+   */
+  public lbound(arr: any, dimension: number = 1): number {
+    if (!arr || !Array.isArray(arr)) return 0;
+
+    if (dimension === 1) {
+      return (arr as any).__lbound ?? 0;
+    }
+
+    // Navigate to the specified dimension
+    let current: any = arr;
+    for (let i = 1; i < dimension; i++) {
+      if (Array.isArray(current) && current.length > 0) {
+        current = current[0];
+      } else {
+        return 0;
+      }
+    }
+
+    return (current as any)?.__lbound ?? 0;
+  }
+
+  /**
+   * UBound - Get upper bound of array dimension
+   * VB6: UBound(arr) or UBound(arr, 2) for multi-dimensional
+   */
+  public ubound(arr: any, dimension: number = 1): number {
+    if (!arr || !Array.isArray(arr)) return -1;
+
+    if (dimension === 1) {
+      if ((arr as any).__ubound !== undefined) {
+        return (arr as any).__ubound;
+      }
+      return arr.length - 1;
+    }
+
+    // Navigate to the specified dimension
+    let current: any = arr;
+    for (let i = 1; i < dimension; i++) {
+      if (Array.isArray(current) && current.length > 0) {
+        current = current[0];
+      } else {
+        return -1;
+      }
+    }
+
+    if ((current as any)?.__ubound !== undefined) {
+      return (current as any).__ubound;
+    }
+    return Array.isArray(current) ? current.length - 1 : -1;
+  }
+
+  /**
+   * Array function - Create array from arguments
+   * VB6: arr = Array(1, 2, 3, 4, 5)
+   */
+  public array(...items: any[]): any[] {
+    const arr = [...items];
+    (arr as any).__lbound = 0;
+    (arr as any).__ubound = items.length - 1;
+    return arr;
+  }
+
+  /**
+   * IsArray - Check if variable is an array
+   */
+  public isArray(value: any): boolean {
+    return Array.isArray(value);
+  }
+
+  /**
+   * Split - Split string into array
+   * VB6: arr = Split(str, ",")
+   */
+  public split(expression: string, delimiter: string = ' ', limit: number = -1): string[] {
+    if (expression === null || expression === undefined) return [];
+    const str = String(expression);
+    const arr = limit === -1 ? str.split(delimiter) : str.split(delimiter, limit);
+    (arr as any).__lbound = 0;
+    (arr as any).__ubound = arr.length - 1;
+    return arr;
+  }
+
+  /**
+   * Join - Join array into string
+   * VB6: str = Join(arr, ",")
+   */
+  public join(sourceArray: any[], delimiter: string = ' '): string {
+    if (!Array.isArray(sourceArray)) return '';
+    return sourceArray.join(delimiter);
+  }
+
+  /**
+   * Filter - Filter array elements
+   * VB6: arr = Filter(sourceArray, match, include)
+   */
+  public filter(sourceArray: string[], match: string, include: boolean = true, compare: number = 0): string[] {
+    if (!Array.isArray(sourceArray)) return [];
+
+    const result = sourceArray.filter(item => {
+      const itemStr = String(item);
+      const matchStr = String(match);
+      const found = compare === 0
+        ? itemStr.includes(matchStr)  // Binary (case-sensitive)
+        : itemStr.toLowerCase().includes(matchStr.toLowerCase());  // Text (case-insensitive)
+      return include ? found : !found;
+    });
+
+    (result as any).__lbound = 0;
+    (result as any).__ubound = result.length - 1;
+    return result;
+  }
+
+  // ============================================================
+  // VB6 Type Checking Functions
+  // ============================================================
+
+  /**
+   * TypeOf...Is - Check if object is of a specific type
+   * VB6: If TypeOf obj Is Form Then
+   */
+  public isTypeOf(obj: any, typeName: string): boolean {
+    if (obj === null || obj === undefined) return false;
+
+    const typeNameLower = typeName.toLowerCase();
+
+    // Check common VB6 types
+    switch (typeNameLower) {
+      case 'object':
+        return typeof obj === 'object' && obj !== null;
+      case 'nothing':
+        return obj === null || obj === undefined;
+      case 'string':
+        return typeof obj === 'string';
+      case 'integer':
+      case 'long':
+      case 'single':
+      case 'double':
+      case 'number':
+        return typeof obj === 'number';
+      case 'boolean':
+        return typeof obj === 'boolean';
+      case 'date':
+        return obj instanceof Date;
+      case 'array':
+        return Array.isArray(obj);
+      case 'collection':
+        return obj && typeof obj.Add === 'function' && typeof obj.Item === 'function';
+      case 'dictionary':
+        return obj && typeof obj.Add === 'function' && typeof obj.Exists === 'function';
+    }
+
+    // Check constructor name
+    if (obj.constructor?.name === typeName) return true;
+
+    // Check prototype chain
+    if (typeof obj === 'object' && obj !== null) {
+      // Check __implements array for interface checking
+      if (obj.__implements && Array.isArray(obj.__implements)) {
+        if (obj.__implements.includes(typeName)) return true;
+      }
+
+      // Check if object has implements method
+      if (typeof obj.implements === 'function') {
+        return obj.implements(typeName);
+      }
+
+      // Check instanceof for class types
+      try {
+        const constructor = (globalThis as any)[typeName];
+        if (constructor && obj instanceof constructor) return true;
+      } catch {
+        // Constructor not found
+      }
+    }
+
+    return false;
+  }
+
+  // ============================================================
+  // VB6 Debug Functions
+  // ============================================================
+
+  /**
+   * Debug.Print - Output to debug window (console)
+   */
+  public debugPrint(...args: any[]): void {
+    const output = args.map(arg => {
+      if (arg === null) return 'Null';
+      if (arg === undefined) return 'Empty';
+      if (typeof arg === 'boolean') return arg ? 'True' : 'False';
+      if (arg instanceof Date) return this.formatDateForDebug(arg);
+      return String(arg);
+    }).join(' ');
+
+    console.log(`[Debug] ${output}`);
+  }
+
+  /**
+   * Debug.Assert - Assert condition (throws if false in debug mode)
+   */
+  public debugAssert(condition: boolean, message?: string): void {
+    if (!condition) {
+      const assertMsg = message || 'Debug.Assert failed';
+      console.error(`[Debug.Assert] ${assertMsg}`);
+
+      // In debug mode, we could break or throw
+      // For now, log to console and optionally throw
+      if (this.debugMode) {
+        throw new Error(`Assertion failed: ${assertMsg}`);
+      }
+    }
+  }
+
+  /**
+   * Format date for debug output
+   */
+  private formatDateForDebug(date: Date): string {
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const year = date.getFullYear();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+
+    return `${month}/${day}/${year} ${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+
+  // Debug mode flag
+  private debugMode: boolean = false;
+
+  /**
+   * Enable/disable debug mode
+   */
+  public setDebugMode(enabled: boolean): void {
+    this.debugMode = enabled;
+  }
+
+  /**
+   * Get debug mode status
+   */
+  public getDebugMode(): boolean {
+    return this.debugMode;
+  }
+
+  // ============================================================
+  // VB6 Windows API Call Support
+  // ============================================================
+
+  /**
+   * Generic API call wrapper for unmapped Declare statements
+   */
+  public apiCall(lib: string, func: string, args: any[]): any {
+    console.warn(`[VB6 API] Unmapped API call: ${lib}.${func}(${args.join(', ')})`);
+    return 0;
+  }
+
+  /**
+   * Get system metric (SM_* constants)
+   */
+  public getSystemMetric(index: number): number {
+    switch (index) {
+      case 0:  // SM_CXSCREEN
+        return window.screen.width;
+      case 1:  // SM_CYSCREEN
+        return window.screen.height;
+      case 2:  // SM_CXVSCROLL
+        return 17;
+      case 3:  // SM_CYHSCROLL
+        return 17;
+      case 4:  // SM_CYCAPTION
+        return 23;
+      case 5:  // SM_CXBORDER
+        return 1;
+      case 6:  // SM_CYBORDER
+        return 1;
+      case 16: // SM_CXFULLSCREEN
+        return window.innerWidth;
+      case 17: // SM_CYFULLSCREEN
+        return window.innerHeight;
+      case 28: // SM_CXMIN
+        return 112;
+      case 29: // SM_CYMIN
+        return 27;
+      case 32: // SM_CXMINTRACK
+        return 136;
+      case 33: // SM_CYMINTRACK
+        return 27;
+      default:
+        return 0;
+    }
+  }
+
+  /**
+   * Play a beep sound
+   */
+  public beep(frequency: number = 440, duration: number = 200): void {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      oscillator.frequency.value = frequency;
+      oscillator.connect(audioContext.destination);
+      oscillator.start();
+      setTimeout(() => {
+        oscillator.stop();
+        audioContext.close();
+      }, duration);
+    } catch (e) {
+      console.log('[VB6] Beep');
+    }
+  }
+
+  /**
+   * Play a sound file
+   */
+  public playSound(soundFile: string): void {
+    try {
+      const audio = new Audio(soundFile);
+      audio.play();
+    } catch (e) {
+      console.log(`[VB6] PlaySound: ${soundFile}`);
+    }
+  }
+
+  /**
+   * MCI send string (multimedia control)
+   */
+  public mciSendString(command: string): number {
+    console.log(`[VB6 MCI] ${command}`);
+    return 0;
+  }
+
+  // ============================================================
+  // VB6 Advanced Date Functions
+  // ============================================================
+
+  /**
+   * DateAdd - Add interval to date
+   * VB6: DateAdd("m", 3, #1/1/2024#)
+   */
+  public dateAdd(interval: string, number: number, date: Date): Date {
+    const result = new Date(date);
+    const intervalLower = interval.toLowerCase();
+
+    switch (intervalLower) {
+      case 'yyyy': // Year
+        result.setFullYear(result.getFullYear() + number);
+        break;
+      case 'q':    // Quarter
+        result.setMonth(result.getMonth() + (number * 3));
+        break;
+      case 'm':    // Month
+        result.setMonth(result.getMonth() + number);
+        break;
+      case 'y':    // Day of year
+      case 'd':    // Day
+      case 'w':    // Weekday
+        result.setDate(result.getDate() + number);
+        break;
+      case 'ww':   // Week
+        result.setDate(result.getDate() + (number * 7));
+        break;
+      case 'h':    // Hour
+        result.setHours(result.getHours() + number);
+        break;
+      case 'n':    // Minute
+        result.setMinutes(result.getMinutes() + number);
+        break;
+      case 's':    // Second
+        result.setSeconds(result.getSeconds() + number);
+        break;
+    }
+
+    return result;
+  }
+
+  /**
+   * DateDiff - Get difference between dates
+   * VB6: DateDiff("d", date1, date2)
+   */
+  public dateDiff(interval: string, date1: Date, date2: Date, firstDayOfWeek: number = 1, firstWeekOfYear: number = 1): number {
+    const d1 = new Date(date1).getTime();
+    const d2 = new Date(date2).getTime();
+    const diff = d2 - d1;
+    const intervalLower = interval.toLowerCase();
+
+    switch (intervalLower) {
+      case 'yyyy': // Year
+        return new Date(date2).getFullYear() - new Date(date1).getFullYear();
+      case 'q':    // Quarter
+        const q1 = Math.floor(new Date(date1).getMonth() / 3);
+        const q2 = Math.floor(new Date(date2).getMonth() / 3);
+        const yearDiff = new Date(date2).getFullYear() - new Date(date1).getFullYear();
+        return (yearDiff * 4) + (q2 - q1);
+      case 'm':    // Month
+        const months1 = new Date(date1).getFullYear() * 12 + new Date(date1).getMonth();
+        const months2 = new Date(date2).getFullYear() * 12 + new Date(date2).getMonth();
+        return months2 - months1;
+      case 'y':    // Day of year
+      case 'd':    // Day
+      case 'w':    // Weekday
+        return Math.floor(diff / (1000 * 60 * 60 * 24));
+      case 'ww':   // Week
+        return Math.floor(diff / (1000 * 60 * 60 * 24 * 7));
+      case 'h':    // Hour
+        return Math.floor(diff / (1000 * 60 * 60));
+      case 'n':    // Minute
+        return Math.floor(diff / (1000 * 60));
+      case 's':    // Second
+        return Math.floor(diff / 1000);
+      default:
+        return 0;
+    }
+  }
+
+  /**
+   * DatePart - Get part of date
+   * VB6: DatePart("m", date)
+   */
+  public datePart(interval: string, date: Date, firstDayOfWeek: number = 1, firstWeekOfYear: number = 1): number {
+    const d = new Date(date);
+    const intervalLower = interval.toLowerCase();
+
+    switch (intervalLower) {
+      case 'yyyy': // Year
+        return d.getFullYear();
+      case 'q':    // Quarter
+        return Math.floor(d.getMonth() / 3) + 1;
+      case 'm':    // Month
+        return d.getMonth() + 1;
+      case 'y':    // Day of year
+        const start = new Date(d.getFullYear(), 0, 0);
+        const diff = d.getTime() - start.getTime();
+        return Math.floor(diff / (1000 * 60 * 60 * 24));
+      case 'd':    // Day
+        return d.getDate();
+      case 'w':    // Weekday (1 = Sunday in VB6 default)
+        return d.getDay() + 1;
+      case 'ww':   // Week of year
+        const startOfYear = new Date(d.getFullYear(), 0, 1);
+        const days = Math.floor((d.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
+        return Math.ceil((days + startOfYear.getDay() + 1) / 7);
+      case 'h':    // Hour
+        return d.getHours();
+      case 'n':    // Minute
+        return d.getMinutes();
+      case 's':    // Second
+        return d.getSeconds();
+      default:
+        return 0;
+    }
+  }
+
+  /**
+   * DateSerial - Create date from year, month, day
+   */
+  public dateSerial(year: number, month: number, day: number): Date {
+    // VB6 months are 1-based, JavaScript months are 0-based
+    return new Date(year, month - 1, day);
+  }
+
+  /**
+   * TimeSerial - Create time from hour, minute, second
+   */
+  public timeSerial(hour: number, minute: number, second: number): Date {
+    const d = new Date();
+    d.setHours(hour, minute, second, 0);
+    return d;
+  }
+
+  /**
+   * DateValue - Extract date from date/time
+   */
+  public dateValue(date: Date | string): Date {
+    const d = new Date(date);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  /**
+   * TimeValue - Extract time from date/time (returns Date with time only)
+   */
+  public timeValue(date: Date | string): Date {
+    const d = new Date(date);
+    const result = new Date(1899, 11, 30); // VB6 base date
+    result.setHours(d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds());
+    return result;
+  }
+
+  /**
+   * IsDate - Check if value can be converted to date
+   */
+  public isDate(expression: any): boolean {
+    if (expression instanceof Date) return !isNaN(expression.getTime());
+    if (typeof expression === 'string') {
+      const d = new Date(expression);
+      return !isNaN(d.getTime());
+    }
+    return false;
+  }
+
+  /**
+   * MonthName - Get name of month
+   */
+  public monthName(month: number, abbreviate: boolean = false): string {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const abbrev = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    if (month < 1 || month > 12) return '';
+    return abbreviate ? abbrev[month - 1] : months[month - 1];
+  }
+
+  /**
+   * WeekdayName - Get name of weekday
+   */
+  public weekdayName(weekday: number, abbreviate: boolean = false, firstDayOfWeek: number = 1): string {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const abbrev = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    // Adjust for firstDayOfWeek (1 = Sunday, 2 = Monday, etc.)
+    const adjustedIndex = (weekday - 1 + (firstDayOfWeek - 1)) % 7;
+    if (adjustedIndex < 0 || adjustedIndex > 6) return '';
+    return abbreviate ? abbrev[adjustedIndex] : days[adjustedIndex];
+  }
+
+  /**
+   * Timer - Seconds since midnight
+   */
+  public timer(): number {
+    const now = new Date();
+    return now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + now.getMilliseconds() / 1000;
   }
 
   /**

@@ -1,34 +1,46 @@
+// CRITICAL FIX: Preserve Array.isArray at the VERY START before any imports
+// This runs BEFORE any module loading that might corrupt Array.isArray
+const _originalArrayIsArray = Array.isArray.bind(Array);
+
+// Protect Array.isArray immediately with non-configurable property
+Object.defineProperty(Array, 'isArray', {
+  value: _originalArrayIsArray,
+  writable: true,
+  configurable: true,
+  enumerable: false
+});
+
+// Also protect on globalThis
+if (typeof globalThis !== 'undefined' && globalThis.Array) {
+  Object.defineProperty(globalThis.Array, 'isArray', {
+    value: _originalArrayIsArray,
+    writable: true,
+    configurable: true,
+    enumerable: false
+  });
+}
+
+// Now import modules
 import { expect, afterEach, beforeEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
 
-// Extend Vitest's expect with jest-dom matchers
-expect.extend(matchers);
+// Re-save after imports (in case imports overwrote it)
+const _nativeIsArray = typeof Array.isArray === 'function' ? Array.isArray : _originalArrayIsArray;
 
-// Ensure Array.isArray is always available
-if (typeof Array.isArray !== 'function') {
-  (Array as any).isArray = function(obj: any): obj is any[] {
-    return Object.prototype.toString.call(obj) === '[object Array]';
-  };
+// Immediately restore and protect Array.isArray with multiple safeguards
+function ensureArrayIsArray() {
+  if (typeof Array.isArray !== 'function') {
+    // @ts-ignore - Direct assignment as fallback
+    Array.isArray = _nativeIsArray;
+  }
 }
 
-// Patch Error handling to prevent serialization issues in vitest
-// This prevents the 'Cannot read properties of undefined (reading 'length')' error
-const originalToString = Error.prototype.toString;
-Object.defineProperty(Error.prototype, 'toString', {
-  value: function(this: any) {
-    try {
-      if (typeof originalToString === 'function') {
-        return originalToString.call(this);
-      }
-    } catch (e) {
-      // Fallback if toString fails
-    }
-    return `${this.constructor?.name || 'Error'}: ${this.message || ''}`;
-  },
-  writable: false,
-  configurable: true
-});
+// Initial protection after imports
+ensureArrayIsArray();
+
+// Extend Vitest's expect with jest-dom matchers
+expect.extend(matchers);
 
 
 // Setup process global before anything else
@@ -280,6 +292,9 @@ if (typeof global.util === 'undefined') {
 
 // Global mocks
 beforeEach(() => {
+  // CRITICAL: Ensure Array.isArray is available at start of each test
+  ensureArrayIsArray();
+
   // Mock window.matchMedia - ensure it's available immediately
   const matchMediaMock = vi.fn().mockImplementation(query => ({
     matches: false,
@@ -905,8 +920,11 @@ beforeEach(() => {
 
 // ULTRA THINK CLEANUP: Complete cleanup after each test
 afterEach(() => {
+  // CRITICAL: Restore Array.isArray BEFORE any cleanup that might use it
+  ensureArrayIsArray();
+
   cleanup();
-  
+
   // Clean up DOM container
   if (document && document.getElementById) {
     const rootElement = document.getElementById('root');
@@ -914,13 +932,16 @@ afterEach(() => {
       rootElement.parentNode.removeChild(rootElement);
     }
   }
-  
+
   // Reset document.body className for ThemeManager tests
   if (document.body) {
     document.body.className = '';
   }
-  
+
   // Clear all mocks and restore original implementations
   vi.clearAllMocks();
   vi.restoreAllMocks();
+
+  // CRITICAL: Restore Array.isArray AFTER restoreAllMocks
+  ensureArrayIsArray();
 });

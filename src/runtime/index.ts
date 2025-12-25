@@ -81,6 +81,9 @@ export * from './VB6APIDeclarations';
 export * from './VB6AdvancedOOP';
 export * from './VB6LateBinding';
 
+// Enhanced Runtime Functions
+export * from './VB6EnhancedRuntime';
+
 // Final Missing Functions - TRUE 100% Compatibility
 export * from './VB6FinalRuntimeFunctions';
 export * from './VB6UltimateMissingFunctions';

@@ -1,10 +1,127 @@
 import { Theme } from '../types/extended';
 
+// Monaco theme names that correspond to our themes
+export type MonacoThemeName = 'vs' | 'vs-dark' | 'hc-black' | 'vb6-classic' | 'vb6-dark';
+
+// VB6-specific IDE color scheme
+export interface VB6IDEColors {
+  // Code editor
+  codeBackground: string;
+  codeText: string;
+  codeKeyword: string;
+  codeComment: string;
+  codeString: string;
+  codeNumber: string;
+  codeFunction: string;
+  codeOperator: string;
+  codeLine: string;
+  codeSelection: string;
+  codeCursor: string;
+
+  // Form designer
+  designerGrid: string;
+  designerSelection: string;
+  designerHandle: string;
+  designerGuide: string;
+
+  // Properties panel
+  propertyCategory: string;
+  propertyName: string;
+  propertyValue: string;
+  propertyBorder: string;
+
+  // Toolbox
+  toolboxCategory: string;
+  toolboxItem: string;
+  toolboxHover: string;
+  toolboxSelected: string;
+}
+
 export class ThemeManager {
   private static currentTheme: Theme;
   private static listeners: Array<(theme: Theme) => void> = [];
   private static mediaQueryList: MediaQueryList | null = null;
   private static mediaQueryHandler: ((e: MediaQueryListEvent) => void) | null = null;
+  private static monacoEditorCallback: ((themeName: MonacoThemeName) => void) | null = null;
+
+  // VB6 IDE-specific color schemes
+  static readonly vb6IDEColors: { [key: string]: VB6IDEColors } = {
+    classic: {
+      codeBackground: '#FFFFFF',
+      codeText: '#000000',
+      codeKeyword: '#0000FF',
+      codeComment: '#008000',
+      codeString: '#800000',
+      codeNumber: '#000000',
+      codeFunction: '#000000',
+      codeOperator: '#000000',
+      codeLine: '#FFFFC0',
+      codeSelection: '#0078D7',
+      codeCursor: '#000000',
+      designerGrid: '#E0E0E0',
+      designerSelection: '#000080',
+      designerHandle: '#000000',
+      designerGuide: '#FF0000',
+      propertyCategory: '#C0C0C0',
+      propertyName: '#000000',
+      propertyValue: '#000000',
+      propertyBorder: '#808080',
+      toolboxCategory: '#C0C0C0',
+      toolboxItem: '#000000',
+      toolboxHover: '#000080',
+      toolboxSelected: '#0000FF',
+    },
+    dark: {
+      codeBackground: '#1E1E1E',
+      codeText: '#D4D4D4',
+      codeKeyword: '#569CD6',
+      codeComment: '#6A9955',
+      codeString: '#CE9178',
+      codeNumber: '#B5CEA8',
+      codeFunction: '#DCDCAA',
+      codeOperator: '#D4D4D4',
+      codeLine: '#2D2D30',
+      codeSelection: '#264F78',
+      codeCursor: '#AEAFAD',
+      designerGrid: '#3C3C3C',
+      designerSelection: '#007ACC',
+      designerHandle: '#FFFFFF',
+      designerGuide: '#FF6B6B',
+      propertyCategory: '#2D2D30',
+      propertyName: '#D4D4D4',
+      propertyValue: '#9CDCFE',
+      propertyBorder: '#3C3C3C',
+      toolboxCategory: '#2D2D30',
+      toolboxItem: '#D4D4D4',
+      toolboxHover: '#094771',
+      toolboxSelected: '#007ACC',
+    },
+    highContrast: {
+      codeBackground: '#000000',
+      codeText: '#FFFFFF',
+      codeKeyword: '#FFFF00',
+      codeComment: '#00FF00',
+      codeString: '#FF69B4',
+      codeNumber: '#00FFFF',
+      codeFunction: '#FFFF00',
+      codeOperator: '#FFFFFF',
+      codeLine: '#1A1A1A',
+      codeSelection: '#FFFF00',
+      codeCursor: '#FFFFFF',
+      designerGrid: '#333333',
+      designerSelection: '#FFFF00',
+      designerHandle: '#FFFFFF',
+      designerGuide: '#FF0000',
+      propertyCategory: '#1A1A1A',
+      propertyName: '#FFFFFF',
+      propertyValue: '#00FFFF',
+      propertyBorder: '#FFFFFF',
+      toolboxCategory: '#1A1A1A',
+      toolboxItem: '#FFFFFF',
+      toolboxHover: '#FFFF00',
+      toolboxSelected: '#00FFFF',
+    },
+  };
 
   static readonly defaultThemes: { [key: string]: Theme } = {
     classic: {
@@ -167,8 +284,14 @@ export class ThemeManager {
   static setTheme(theme: Theme): void {
     this.currentTheme = theme;
     this.applyTheme(theme);
+    this.applyVB6IDEColors();
     this.saveTheme(theme);
     this.notifyListeners(theme);
+
+    // Notify Monaco editor about theme change
+    if (this.monacoEditorCallback) {
+      this.monacoEditorCallback(this.getMonacoTheme());
+    }
   }
 
   static setThemeByName(themeName: string): void {
@@ -425,10 +548,58 @@ export class ThemeManager {
     return '#000000';
   }
 
+  /**
+   * Get VB6 IDE colors for current theme
+   */
+  static getVB6IDEColors(): VB6IDEColors {
+    const theme = this.getCurrentTheme();
+    if (theme.name.includes('Dark') || theme.name === 'Modern Dark') {
+      return this.vb6IDEColors.dark;
+    } else if (theme.name === 'High Contrast') {
+      return this.vb6IDEColors.highContrast;
+    }
+    return this.vb6IDEColors.classic;
+  }
+
+  /**
+   * Get the corresponding Monaco theme name
+   */
+  static getMonacoTheme(): MonacoThemeName {
+    const theme = this.getCurrentTheme();
+    if (theme.name === 'High Contrast') {
+      return 'hc-black';
+    } else if (theme.name.includes('Dark') || theme.name === 'Modern Dark') {
+      return 'vb6-dark';
+    }
+    return 'vb6-classic';
+  }
+
+  /**
+   * Register callback for Monaco editor theme changes
+   */
+  static onMonacoThemeChange(callback: (themeName: MonacoThemeName) => void): void {
+    this.monacoEditorCallback = callback;
+  }
+
+  /**
+   * Apply VB6 IDE colors as CSS variables
+   */
+  private static applyVB6IDEColors(): void {
+    const root = document.documentElement;
+    const colors = this.getVB6IDEColors();
+
+    Object.entries(colors).forEach(([key, value]) => {
+      // Convert camelCase to kebab-case
+      const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+      root.style.setProperty(`--vb6-${cssKey}`, value);
+    });
+  }
+
   // Initialize theme system
   static initialize(): void {
     // Apply current theme on startup
     this.applyTheme(this.getCurrentTheme());
+    this.applyVB6IDEColors();
 
     // Listen for system theme changes
     if (window.matchMedia) {

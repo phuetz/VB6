@@ -205,19 +205,21 @@ export class VB6OptionalParametersProcessor {
 
   /**
    * Generate JavaScript function with optional parameters
+   * @param signature The function signature
+   * @param bodyCode Optional transpiled JavaScript body code
    */
-  generateJavaScript(signature: VB6FunctionSignature): string {
+  generateJavaScript(signature: VB6FunctionSignature, bodyCode?: string): string {
     const funcName = signature.name;
     const params = signature.parameters;
-    
+
     let jsCode = `// ${signature.isFunction ? 'Function' : 'Sub'}: ${funcName}\n`;
     jsCode += `${funcName}: function(`;
-    
+
     // Generate parameter list (all parameters, but with defaults)
     const paramNames = params.map(p => p.name);
     jsCode += paramNames.join(', ');
     jsCode += `) {\n`;
-    
+
     // Handle optional parameters with default values
     for (const param of params) {
       if (param.defaultValue !== undefined) {
@@ -226,23 +228,103 @@ export class VB6OptionalParametersProcessor {
         jsCode += `  }\n`;
       }
     }
-    
+
     // Add IsMissing function simulation
     jsCode += `\n  // IsMissing function for optional parameters\n`;
     jsCode += `  const IsMissing = (param) => param === undefined;\n\n`;
-    
+
     // Add parameter validation
     jsCode += this.generateParameterValidation(signature);
-    
-    jsCode += `  // Function body would go here\n`;
-    jsCode += `  // TODO: Implement function logic\n`;
-    
-    if (signature.isFunction) {
-      jsCode += `  return ${this.getTypeDefaultValue(signature.returnType || 'Variant')}; // Default return value\n`;
+
+    // Add function body if provided, otherwise generate a stub
+    if (bodyCode && bodyCode.trim()) {
+      // Indent the body code
+      const indentedBody = bodyCode.split('\n')
+        .map(line => line ? '  ' + line : line)
+        .join('\n');
+      jsCode += indentedBody;
+      if (!indentedBody.endsWith('\n')) jsCode += '\n';
+    } else if (signature.isFunction) {
+      // Default return for functions without body
+      jsCode += `  return ${this.getTypeDefaultValue(signature.returnType || 'Variant')};\n`;
     }
-    
+
     jsCode += `},\n\n`;
-    
+
+    return jsCode;
+  }
+
+  /**
+   * Generate JavaScript function as a class method
+   * @param signature The function signature
+   * @param bodyCode Optional transpiled JavaScript body code
+   */
+  generateJavaScriptMethod(signature: VB6FunctionSignature, bodyCode?: string): string {
+    const funcName = signature.name;
+    const params = signature.parameters;
+
+    let jsCode = `${funcName}(`;
+
+    // Generate parameter list
+    const paramNames = params.map(p => p.name);
+    jsCode += paramNames.join(', ');
+    jsCode += `) {\n`;
+
+    // Handle optional parameters with default values
+    for (const param of params) {
+      if (param.defaultValue !== undefined) {
+        jsCode += `  if (${param.name} === undefined) ${param.name} = ${this.valueToJS(param.defaultValue)};\n`;
+      }
+    }
+
+    // Add function body if provided
+    if (bodyCode && bodyCode.trim()) {
+      const indentedBody = bodyCode.split('\n')
+        .map(line => line ? '  ' + line : line)
+        .join('\n');
+      jsCode += indentedBody;
+      if (!indentedBody.endsWith('\n')) jsCode += '\n';
+    } else if (signature.isFunction) {
+      jsCode += `  return ${this.getTypeDefaultValue(signature.returnType || 'Variant')};\n`;
+    }
+
+    jsCode += `}\n`;
+
+    return jsCode;
+  }
+
+  /**
+   * Generate ES6 arrow function with optional parameters
+   * @param signature The function signature
+   * @param bodyCode Optional transpiled JavaScript body code
+   */
+  generateArrowFunction(signature: VB6FunctionSignature, bodyCode?: string): string {
+    const funcName = signature.name;
+    const params = signature.parameters;
+
+    // Build parameter list with default values inline
+    const paramList = params.map(p => {
+      if (p.defaultValue !== undefined) {
+        return `${p.name} = ${this.valueToJS(p.defaultValue)}`;
+      }
+      return p.name;
+    }).join(', ');
+
+    let jsCode = `const ${funcName} = (${paramList}) => {\n`;
+
+    // Add function body if provided
+    if (bodyCode && bodyCode.trim()) {
+      const indentedBody = bodyCode.split('\n')
+        .map(line => line ? '  ' + line : line)
+        .join('\n');
+      jsCode += indentedBody;
+      if (!indentedBody.endsWith('\n')) jsCode += '\n';
+    } else if (signature.isFunction) {
+      jsCode += `  return ${this.getTypeDefaultValue(signature.returnType || 'Variant')};\n`;
+    }
+
+    jsCode += `};\n`;
+
     return jsCode;
   }
 

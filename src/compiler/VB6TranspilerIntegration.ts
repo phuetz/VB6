@@ -11,16 +11,17 @@
  * - Validation et debugging intégrés
  */
 
-import { 
+import {
   VB6RecursiveDescentParser,
   VB6ModuleNode,
   VB6ProcedureNode,
   VB6DeclarationNode,
+  VB6ParameterNode,
   parseVB6Code
 } from './VB6RecursiveDescentParser';
 
 import { tokenizeVB6 } from './VB6AdvancedLexer';
-import { VB6ModuleAST, VB6Procedure, VB6Variable } from '../utils/vb6Parser';
+import { VB6ModuleAST, VB6Procedure, VB6Variable, VB6Event, VB6Property, VB6Parameter } from '../utils/vb6Parser';
 
 /**
  * Configuration de l'intégration
@@ -52,12 +53,17 @@ export class VB6ASTAdapter {
    * Convertir le nouveau AST vers l'ancien format pour compatibilité
    */
   static adaptModuleNode(newAST: VB6ModuleNode): VB6ModuleAST {
+    // Filter out property procedures - they'll be combined into properties
+    const regularProcedures = newAST.procedures.filter(
+      proc => !['PropertyGet', 'PropertyLet', 'PropertySet'].includes(proc.procedureType)
+    );
+
     const adaptedAST: VB6ModuleAST = {
       name: newAST.name,
       variables: this.adaptVariables(newAST.declarations),
-      procedures: this.adaptProcedures(newAST.procedures),
-      properties: [], // TODO: implémenter l'adaptation des propriétés
-      events: []      // TODO: implémenter l'adaptation des événements
+      procedures: this.adaptProcedures(regularProcedures),
+      properties: this.adaptProperties(newAST.procedures),
+      events: this.adaptEvents(newAST.declarations)
     };
 
     return adaptedAST;
@@ -110,15 +116,272 @@ export class VB6ASTAdapter {
   }
 
   /**
-   * Extraire le corps d'une procédure depuis l'AST
+   * Extraire le corps d'une procédure depuis l'AST et générer le JavaScript
    */
   private static extractProcedureBody(proc: VB6ProcedureNode): string {
-    // Pour le moment, retourner un placeholder
-    // TODO: implémenter la conversion complète des statements en code
-    if (proc.body && proc.body.length > 0) {
-      return '// TODO: Generate body from AST statements';
+    if (!proc.body || proc.body.length === 0) {
+      return '';
     }
-    return '';
+
+    return proc.body.map(stmt => this.generateStatement(stmt, 1)).join('');
+  }
+
+  /**
+   * Générer le JavaScript pour un statement AST
+   */
+  private static generateStatement(stmt: any, indentLevel: number): string {
+    const indent = '  '.repeat(indentLevel);
+
+    switch (stmt.statementType) {
+      case 'Assignment':
+        return indent + `${this.generateExpression(stmt.target)} = ${this.generateExpression(stmt.value)};\n`;
+
+      case 'Call':
+        const args = (stmt.arguments || []).map((arg: any) =>
+          this.generateExpression(arg.value || arg)
+        ).join(', ');
+        const callTarget = stmt.procedureName || stmt.name || this.generateExpression(stmt.target);
+        return indent + `${callTarget}(${args});\n`;
+
+      case 'If':
+        let ifCode = indent + `if (${this.generateExpression(stmt.condition)}) {\n`;
+        ifCode += (stmt.thenStatements || []).map((s: any) => this.generateStatement(s, indentLevel + 1)).join('');
+        ifCode += indent + '}';
+        for (const elseIf of stmt.elseIfClauses || []) {
+          ifCode += ` else if (${this.generateExpression(elseIf.condition)}) {\n`;
+          ifCode += (elseIf.statements || []).map((s: any) => this.generateStatement(s, indentLevel + 1)).join('');
+          ifCode += indent + '}';
+        }
+        if (stmt.elseStatements && stmt.elseStatements.length > 0) {
+          ifCode += ` else {\n`;
+          ifCode += stmt.elseStatements.map((s: any) => this.generateStatement(s, indentLevel + 1)).join('');
+          ifCode += indent + '}';
+        }
+        return ifCode + '\n';
+
+      case 'For':
+        const step = stmt.stepValue ? this.generateExpression(stmt.stepValue) : '1';
+        let forCode = indent + `for (let ${stmt.variable} = ${this.generateExpression(stmt.startValue)}; `;
+        forCode += `${stmt.variable} <= ${this.generateExpression(stmt.endValue)}; `;
+        forCode += `${stmt.variable} += ${step}) {\n`;
+        forCode += (stmt.body || []).map((s: any) => this.generateStatement(s, indentLevel + 1)).join('');
+        forCode += indent + '}\n';
+        return forCode;
+
+      case 'ForEach':
+        let forEachCode = indent + `for (const ${stmt.variable} of ${this.generateExpression(stmt.collection)}) {\n`;
+        forEachCode += (stmt.body || []).map((s: any) => this.generateStatement(s, indentLevel + 1)).join('');
+        forEachCode += indent + '}\n';
+        return forEachCode;
+
+      case 'While':
+        let whileCode = indent + `while (${this.generateExpression(stmt.condition)}) {\n`;
+        whileCode += (stmt.body || []).map((s: any) => this.generateStatement(s, indentLevel + 1)).join('');
+        whileCode += indent + '}\n';
+        return whileCode;
+
+      case 'Do':
+        return this.generateDoLoop(stmt, indent, indentLevel);
+
+      case 'Select':
+        return this.generateSelectCase(stmt, indent, indentLevel);
+
+      case 'Exit':
+        const exitType = (stmt.exitType || 'Sub').toLowerCase();
+        if (exitType === 'for' || exitType === 'do' || exitType === 'while') {
+          return indent + 'break;\n';
+        }
+        return indent + 'return;\n';
+
+      case 'Return':
+        return indent + 'return;\n';
+
+      case 'Set':
+        return indent + `${this.generateExpression(stmt.target)} = ${this.generateExpression(stmt.value)};\n`;
+
+      case 'LocalVariable':
+        const varValue = stmt.initialValue ? ` = ${this.generateExpression(stmt.initialValue)}` : '';
+        return indent + `let ${stmt.name}${varValue};\n`;
+
+      case 'ReDim':
+        const preserve = stmt.preserve ? 'VB6.reDimPreserve' : 'VB6.reDim';
+        const dims = (stmt.dimensions || []).map((d: any) => this.generateExpression(d)).join(', ');
+        return indent + `${stmt.variable} = ${preserve}(${stmt.variable}, [${dims}]);\n`;
+
+      case 'Debug':
+        const debugArgs = (stmt.arguments || []).map((a: any) => this.generateExpression(a)).join(', ');
+        return indent + `console.log(${debugArgs});\n`;
+
+      case 'Print':
+        const printArgs = (stmt.expressions || stmt.items || []).map((a: any) => this.generateExpression(a)).join(', ');
+        if (stmt.fileNumber) {
+          return indent + `VB6.print(${this.generateExpression(stmt.fileNumber)}, ${printArgs});\n`;
+        }
+        return indent + `console.log(${printArgs});\n`;
+
+      case 'OnError':
+        if (stmt.errorAction === 'ResumeNext') {
+          return indent + 'VB6.setErrorMode("resumeNext");\n';
+        } else if (stmt.errorAction === 'GoTo0') {
+          return indent + 'VB6.clearErrorHandler();\n';
+        } else if (stmt.label) {
+          return indent + `VB6.setErrorHandler("${stmt.label}");\n`;
+        }
+        return indent + '// Error handling\n';
+
+      case 'With':
+        let withCode = indent + `{ const __with__ = ${this.generateExpression(stmt.expression)};\n`;
+        withCode += (stmt.body || []).map((s: any) => this.generateStatement(s, indentLevel + 1)).join('');
+        withCode += indent + '}\n';
+        return withCode;
+
+      case 'FunctionCall':
+      case 'Expression':
+        return indent + this.generateExpression(stmt.expression || stmt) + ';\n';
+
+      default:
+        return indent + `// Unsupported statement: ${stmt.statementType}\n`;
+    }
+  }
+
+  /**
+   * Générer un Do...Loop
+   */
+  private static generateDoLoop(stmt: any, indent: string, indentLevel: number): string {
+    const condType = stmt.conditionType?.toLowerCase() || '';
+    let code = '';
+
+    if (stmt.conditionAtEnd) {
+      code += indent + 'do {\n';
+      code += (stmt.body || []).map((s: any) => this.generateStatement(s, indentLevel + 1)).join('');
+      if (condType === 'while' && stmt.condition) {
+        code += indent + `} while (${this.generateExpression(stmt.condition)});\n`;
+      } else if (condType === 'until' && stmt.condition) {
+        code += indent + `} while (!(${this.generateExpression(stmt.condition)}));\n`;
+      } else {
+        code += indent + '} while (true);\n';
+      }
+    } else {
+      if (condType === 'while' && stmt.condition) {
+        code += indent + `while (${this.generateExpression(stmt.condition)}) {\n`;
+      } else if (condType === 'until' && stmt.condition) {
+        code += indent + `while (!(${this.generateExpression(stmt.condition)})) {\n`;
+      } else {
+        code += indent + 'while (true) {\n';
+      }
+      code += (stmt.body || []).map((s: any) => this.generateStatement(s, indentLevel + 1)).join('');
+      code += indent + '}\n';
+    }
+
+    return code;
+  }
+
+  /**
+   * Générer un Select Case
+   */
+  private static generateSelectCase(stmt: any, indent: string, indentLevel: number): string {
+    const expr = this.generateExpression(stmt.expression);
+    let code = indent + `switch (${expr}) {\n`;
+
+    for (const caseClause of stmt.cases || []) {
+      if (caseClause.isElse) {
+        code += indent + '  default:\n';
+      } else {
+        for (const value of caseClause.values || []) {
+          code += indent + `  case ${this.generateExpression(value)}:\n`;
+        }
+      }
+      code += (caseClause.statements || []).map((s: any) => this.generateStatement(s, indentLevel + 2)).join('');
+      code += indent + '    break;\n';
+    }
+
+    code += indent + '}\n';
+    return code;
+  }
+
+  /**
+   * Générer une expression en JavaScript
+   */
+  private static generateExpression(expr: any): string {
+    if (!expr) return 'undefined';
+    if (typeof expr === 'string') return expr;
+    if (typeof expr === 'number') return String(expr);
+    if (typeof expr === 'boolean') return String(expr);
+
+    switch (expr.expressionType) {
+      case 'Literal':
+        if (typeof expr.value === 'string') {
+          return `"${expr.value.replace(/"/g, '\\"')}"`;
+        }
+        return String(expr.value);
+
+      case 'Identifier':
+        return expr.name || expr.value || 'unknown';
+
+      case 'MemberAccess':
+        return `${this.generateExpression(expr.object)}.${expr.member || expr.property}`;
+
+      case 'ArrayAccess':
+        const indices = (expr.indices || []).map((idx: any) => `[${this.generateExpression(idx)}]`).join('');
+        return `${this.generateExpression(expr.array)}${indices}`;
+
+      case 'FunctionCall':
+        const funcArgs = (expr.arguments || []).map((arg: any) =>
+          this.generateExpression(arg.value || arg)
+        ).join(', ');
+        return `${expr.name}(${funcArgs})`;
+
+      case 'BinaryOp':
+        const left = this.generateExpression(expr.left);
+        const right = this.generateExpression(expr.right);
+        const op = this.mapOperator(expr.operator);
+        return `(${left} ${op} ${right})`;
+
+      case 'UnaryOp':
+        const operand = this.generateExpression(expr.operand);
+        if (expr.operator.toLowerCase() === 'not') {
+          return `!(${operand})`;
+        } else if (expr.operator === '-') {
+          return `-(${operand})`;
+        }
+        return operand;
+
+      case 'Parenthesized':
+        return `(${this.generateExpression(expr.expression)})`;
+
+      case 'New':
+        return `new ${expr.className}()`;
+
+      case 'Nothing':
+        return 'null';
+
+      case 'Me':
+        return 'this';
+
+      default:
+        if (expr.name) return expr.name;
+        if (expr.value !== undefined) return String(expr.value);
+        return 'undefined';
+    }
+  }
+
+  /**
+   * Mapper les opérateurs VB6 vers JavaScript
+   */
+  private static mapOperator(op: string): string {
+    const operators: Record<string, string> = {
+      'and': '&&',
+      'or': '||',
+      'not': '!',
+      'mod': '%',
+      '=': '===',
+      '<>': '!==',
+      '&': '+',
+      'like': '.match', // simplified
+      'is': '===',
+      '\\': 'Math.floor(/) ', // integer division
+    };
+    return operators[op.toLowerCase()] || op;
   }
 
   /**
@@ -129,6 +392,81 @@ export class VB6ASTAdapter {
       return expression.value;
     }
     return undefined;
+  }
+
+  /**
+   * Adapter les événements depuis les déclarations
+   */
+  private static adaptEvents(declarations: VB6DeclarationNode[]): VB6Event[] {
+    return declarations
+      .filter(decl => decl.declarationType === 'Event')
+      .map(decl => ({
+        name: decl.name,
+        parameters: this.adaptParameters(decl.parameters || []),
+        visibility: (decl.visibility?.toLowerCase() as 'public' | 'private') || 'public'
+      }));
+  }
+
+  /**
+   * Adapter les propriétés depuis les procédures PropertyGet/Let/Set
+   */
+  private static adaptProperties(procedures: VB6ProcedureNode[]): VB6Property[] {
+    const propertyMap = new Map<string, VB6Property>();
+
+    // Group property procedures by name
+    procedures
+      .filter(proc => ['PropertyGet', 'PropertyLet', 'PropertySet'].includes(proc.procedureType))
+      .forEach(proc => {
+        const existing = propertyMap.get(proc.name) || {
+          name: proc.name,
+          visibility: (proc.visibility?.toLowerCase() as 'public' | 'private') || 'public',
+          parameters: [],
+          getter: undefined,
+          setter: undefined
+        };
+
+        const adaptedProc: VB6Procedure = {
+          name: proc.name,
+          type: this.mapProcedureType(proc.procedureType),
+          parameters: proc.parameters.map(param => ({
+            name: param.name,
+            type: param.dataType?.typeName || 'Variant',
+            isOptional: param.parameterType === 'Optional',
+            isByRef: param.parameterType === 'ByRef',
+            defaultValue: param.defaultValue ? this.extractLiteralValue(param.defaultValue) : undefined
+          })),
+          returnType: proc.returnType?.typeName || null,
+          visibility: (proc.visibility?.toLowerCase() as 'public' | 'private') || 'public',
+          body: this.extractProcedureBody(proc)
+        };
+
+        if (proc.procedureType === 'PropertyGet') {
+          existing.getter = adaptedProc;
+          // PropertyGet parameters become the property's parameters (excluding return value param)
+          existing.parameters = adaptedProc.parameters;
+        } else {
+          // PropertyLet/PropertySet - the last param is the value being set
+          existing.setter = adaptedProc;
+          // Exclude the last parameter (the value) from property parameters
+          if (existing.parameters.length === 0 && adaptedProc.parameters.length > 1) {
+            existing.parameters = adaptedProc.parameters.slice(0, -1);
+          }
+        }
+
+        propertyMap.set(proc.name, existing);
+      });
+
+    return Array.from(propertyMap.values());
+  }
+
+  /**
+   * Adapter les paramètres du nouveau format vers l'ancien
+   */
+  private static adaptParameters(params: VB6ParameterNode[]): VB6Parameter[] {
+    return params.map(param => ({
+      name: param.name,
+      type: param.dataType?.typeName || null
+    }));
   }
 }
 

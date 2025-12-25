@@ -68,7 +68,9 @@ export enum TokenType {
   KEYWORD_BYREF = 'BYREF',
   KEYWORD_OPTIONAL = 'OPTIONAL',
   KEYWORD_PARAMARRAY = 'PARAMARRAY',
-  
+  KEYWORD_STEP = 'STEP',
+  KEYWORD_UNTIL = 'UNTIL',
+
   // Types VB6
   TYPE_BOOLEAN = 'BOOLEAN',
   TYPE_BYTE = 'BYTE',
@@ -169,7 +171,32 @@ export interface VB6Parameter extends VB6ASTNode {
 
 export interface VB6Statement extends VB6ASTNode {
   type: 'Statement';
-  statementType: string;
+  statementType: 'Assignment' | 'Call' | 'If' | 'For' | 'While' | 'Do' | 'Select' | 'Dim' | 'Return' | 'Exit' | 'Expression';
+  // Assignment specific
+  target?: string;
+  value?: string;
+  // Call specific
+  name?: string;
+  args?: string[];
+  // If specific
+  condition?: string;
+  thenBody?: VB6Statement[];
+  elseBody?: VB6Statement[];
+  // For specific
+  variable?: string;
+  from?: string;
+  to?: string;
+  step?: string;
+  body?: VB6Statement[];
+  // While/Do specific (reuses condition and body)
+  // Select specific
+  expression?: string;
+  cases?: { values: string[]; statements: VB6Statement[] }[];
+  // Dim specific
+  varName?: string;
+  dataType?: string;
+  // Return/Exit
+  returnValue?: string;
 }
 
 export interface VB6UserDefinedType extends VB6ASTNode {
@@ -199,7 +226,7 @@ class VB6KeywordTrie {
   private buildKeywordTrie() {
     const keywords = [
       'DIM', 'AS', 'PUBLIC', 'PRIVATE', 'SUB', 'FUNCTION', 'END',
-      'IF', 'THEN', 'ELSE', 'ELSEIF', 'FOR', 'TO', 'NEXT', 'WHILE', 'WEND',
+      'IF', 'THEN', 'ELSE', 'ELSEIF', 'FOR', 'TO', 'STEP', 'NEXT', 'WHILE', 'WEND',
       'DO', 'LOOP', 'UNTIL', 'SELECT', 'CASE', 'TYPE', 'DECLARE', 'CONST',
       'STATIC', 'GLOBAL', 'EXIT', 'RETURN', 'GOTO', 'GOSUB', 'ON', 'ERROR',
       'RESUME', 'WITHEVENTS', 'RAISEEVENT', 'IMPLEMENTS', 'EVENT', 'PROPERTY',
@@ -749,13 +776,17 @@ export class VB6Parser {
     }
     
     this.skipNewlines();
-    
-    // Parse body (simplified - just skip to End for now)
+
+    // Parse body statements
     const body: VB6Statement[] = [];
     while (!this.check(TokenType.KEYWORD_END) && !this.isEOF()) {
-      this.advance(); // Skip body for now
+      const stmt = this.parseStatement();
+      if (stmt) {
+        body.push(stmt);
+      }
+      this.skipNewlines();
     }
-    
+
     this.consume(TokenType.KEYWORD_END);
     if (procedureType === 'Sub') {
       this.consume(TokenType.KEYWORD_SUB);
@@ -807,7 +838,289 @@ export class VB6Parser {
       column: startToken.column
     };
   }
-  
+
+  /**
+   * Parse a single statement
+   */
+  private parseStatement(): VB6Statement | null {
+    const startToken = this.current();
+    this.skipNewlines();
+
+    // Check for end of block
+    if (this.check(TokenType.KEYWORD_END) ||
+        this.check(TokenType.KEYWORD_ELSE) ||
+        this.check(TokenType.KEYWORD_NEXT) ||
+        this.check(TokenType.KEYWORD_LOOP) ||
+        this.check(TokenType.KEYWORD_WEND) ||
+        this.isEOF()) {
+      return null;
+    }
+
+    // Dim statement
+    if (this.match(TokenType.KEYWORD_DIM)) {
+      const varName = this.consume(TokenType.IDENTIFIER).value;
+      let dataType = 'Variant';
+      if (this.match(TokenType.KEYWORD_AS)) {
+        dataType = this.advance().value;
+      }
+      return {
+        type: 'Statement',
+        statementType: 'Dim',
+        varName,
+        dataType,
+        line: startToken.line,
+        column: startToken.column
+      };
+    }
+
+    // If statement
+    if (this.match(TokenType.KEYWORD_IF)) {
+      const condition = this.parseExpressionAsString();
+      this.consume(TokenType.KEYWORD_THEN);
+      this.skipNewlines();
+
+      // Parse Then body
+      const thenBody: VB6Statement[] = [];
+      while (!this.check(TokenType.KEYWORD_ELSE) &&
+             !this.check(TokenType.KEYWORD_END) &&
+             !this.isEOF()) {
+        const stmt = this.parseStatement();
+        if (stmt) thenBody.push(stmt);
+        this.skipNewlines();
+      }
+
+      // Parse Else body
+      let elseBody: VB6Statement[] | undefined;
+      if (this.match(TokenType.KEYWORD_ELSE)) {
+        this.skipNewlines();
+        elseBody = [];
+        while (!this.check(TokenType.KEYWORD_END) && !this.isEOF()) {
+          const stmt = this.parseStatement();
+          if (stmt) elseBody.push(stmt);
+          this.skipNewlines();
+        }
+      }
+
+      // Consume End If
+      if (this.check(TokenType.KEYWORD_END)) {
+        this.advance();
+        if (this.match(TokenType.KEYWORD_IF)) {
+          // consumed
+        }
+      }
+
+      return {
+        type: 'Statement',
+        statementType: 'If',
+        condition,
+        thenBody,
+        elseBody,
+        line: startToken.line,
+        column: startToken.column
+      };
+    }
+
+    // For statement
+    if (this.match(TokenType.KEYWORD_FOR)) {
+      const variable = this.consume(TokenType.IDENTIFIER).value;
+      this.consume(TokenType.OPERATOR);  // =
+      const from = this.parseExpressionAsString();
+      this.consume(TokenType.KEYWORD_TO);
+      const to = this.parseExpressionAsString();
+
+      let step: string | undefined;
+      if (this.match(TokenType.KEYWORD_STEP)) {
+        step = this.parseExpressionAsString();
+      }
+      this.skipNewlines();
+
+      // Parse body
+      const body: VB6Statement[] = [];
+      while (!this.check(TokenType.KEYWORD_NEXT) && !this.isEOF()) {
+        const stmt = this.parseStatement();
+        if (stmt) body.push(stmt);
+        this.skipNewlines();
+      }
+
+      // Consume Next
+      if (this.match(TokenType.KEYWORD_NEXT)) {
+        // Optional variable name after Next
+        if (this.check(TokenType.IDENTIFIER)) this.advance();
+      }
+
+      return {
+        type: 'Statement',
+        statementType: 'For',
+        variable,
+        from,
+        to,
+        step,
+        body,
+        line: startToken.line,
+        column: startToken.column
+      };
+    }
+
+    // While statement
+    if (this.match(TokenType.KEYWORD_WHILE)) {
+      const condition = this.parseExpressionAsString();
+      this.skipNewlines();
+
+      const body: VB6Statement[] = [];
+      while (!this.check(TokenType.KEYWORD_WEND) && !this.isEOF()) {
+        const stmt = this.parseStatement();
+        if (stmt) body.push(stmt);
+        this.skipNewlines();
+      }
+
+      this.match(TokenType.KEYWORD_WEND);
+
+      return {
+        type: 'Statement',
+        statementType: 'While',
+        condition,
+        body,
+        line: startToken.line,
+        column: startToken.column
+      };
+    }
+
+    // Do statement
+    if (this.match(TokenType.KEYWORD_DO)) {
+      let condition: string | undefined;
+
+      // Check for Do While or Do Until
+      if (this.match(TokenType.KEYWORD_WHILE)) {
+        condition = 'while:' + this.parseExpressionAsString();
+      } else if (this.match(TokenType.KEYWORD_UNTIL)) {
+        condition = 'until:' + this.parseExpressionAsString();
+      }
+      this.skipNewlines();
+
+      const body: VB6Statement[] = [];
+      while (!this.check(TokenType.KEYWORD_LOOP) && !this.isEOF()) {
+        const stmt = this.parseStatement();
+        if (stmt) body.push(stmt);
+        this.skipNewlines();
+      }
+
+      // Consume Loop
+      if (this.match(TokenType.KEYWORD_LOOP)) {
+        // Check for Loop While or Loop Until
+        if (!condition) {
+          if (this.match(TokenType.KEYWORD_WHILE)) {
+            condition = 'loopwhile:' + this.parseExpressionAsString();
+          } else if (this.match(TokenType.KEYWORD_UNTIL)) {
+            condition = 'loopuntil:' + this.parseExpressionAsString();
+          }
+        }
+      }
+
+      return {
+        type: 'Statement',
+        statementType: 'Do',
+        condition,
+        body,
+        line: startToken.line,
+        column: startToken.column
+      };
+    }
+
+    // Exit statement
+    if (this.match(TokenType.KEYWORD_EXIT)) {
+      const exitType = this.advance().value; // Sub, Function, For, Do, etc.
+      return {
+        type: 'Statement',
+        statementType: 'Exit',
+        returnValue: exitType,
+        line: startToken.line,
+        column: startToken.column
+      };
+    }
+
+    // Identifier - could be assignment or call
+    if (this.check(TokenType.IDENTIFIER)) {
+      const name = this.advance().value;
+
+      // Check for assignment
+      if (this.match(TokenType.OPERATOR) && this.peek(-1)?.value === '=') {
+        // It's an assignment - but we already advanced past =, so go back concept
+        const value = this.parseExpressionAsString();
+        return {
+          type: 'Statement',
+          statementType: 'Assignment',
+          target: name,
+          value,
+          line: startToken.line,
+          column: startToken.column
+        };
+      }
+
+      // Check for function call with parentheses
+      if (this.match(TokenType.LPAREN)) {
+        const args: string[] = [];
+        while (!this.check(TokenType.RPAREN) && !this.isEOF()) {
+          args.push(this.parseExpressionAsString());
+          if (!this.match(TokenType.COMMA)) break;
+        }
+        this.match(TokenType.RPAREN);
+        return {
+          type: 'Statement',
+          statementType: 'Call',
+          name,
+          args,
+          line: startToken.line,
+          column: startToken.column
+        };
+      }
+
+      // It's a call without parentheses (VB6 allows this)
+      const args: string[] = [];
+      while (!this.check(TokenType.NEWLINE) && !this.isEOF() && !this.check(TokenType.KEYWORD_END)) {
+        args.push(this.parseExpressionAsString());
+        if (!this.match(TokenType.COMMA)) break;
+      }
+
+      return {
+        type: 'Statement',
+        statementType: 'Call',
+        name,
+        args,
+        line: startToken.line,
+        column: startToken.column
+      };
+    }
+
+    // Unknown token - skip it
+    this.advance();
+    return null;
+  }
+
+  /**
+   * Parse an expression and return it as a string (simplified)
+   */
+  private parseExpressionAsString(): string {
+    const parts: string[] = [];
+
+    while (!this.isEOF() &&
+           !this.check(TokenType.NEWLINE) &&
+           !this.check(TokenType.KEYWORD_THEN) &&
+           !this.check(TokenType.KEYWORD_TO) &&
+           !this.check(TokenType.KEYWORD_STEP) &&
+           !this.check(TokenType.KEYWORD_END) &&
+           !this.check(TokenType.KEYWORD_ELSE) &&
+           !this.check(TokenType.KEYWORD_NEXT) &&
+           !this.check(TokenType.KEYWORD_LOOP) &&
+           !this.check(TokenType.KEYWORD_WEND) &&
+           !this.check(TokenType.COMMA) &&
+           !this.check(TokenType.RPAREN)) {
+      const token = this.advance();
+      parts.push(token.value);
+    }
+
+    return parts.join(' ');
+  }
+
   private isDeclaration(): boolean {
     return this.check(TokenType.KEYWORD_DIM) ||
            this.check(TokenType.KEYWORD_PUBLIC) ||
@@ -954,21 +1267,126 @@ const VB6Runtime = window.VB6Runtime || require('../runtime/VB6UltraRuntime');
   
   private generateProcedure(proc: VB6Procedure): string {
     let output = `  // ${proc.procedureType}: ${proc.name}\n`;
-    
+
     const paramList = proc.parameters.map(p => p.name).join(', ');
-    
-    if (proc.procedureType === 'Function') {
-      output += `  ${proc.name}(${paramList}) {\n`;
-      output += `    // TODO: Generate function body\n`;
+    output += `  ${proc.name}(${paramList}) {\n`;
+
+    // Generate body from statements
+    output += this.generateStatements(proc.body, '    ');
+
+    // For functions, add return statement if not already present
+    if (proc.procedureType === 'Function' && proc.body.length === 0) {
       output += `    return ${this.getDefaultValue(proc.returnType || 'Variant')};\n`;
-      output += `  }\n\n`;
-    } else {
-      output += `  ${proc.name}(${paramList}) {\n`;
-      output += `    // TODO: Generate sub body\n`;
-      output += `  }\n\n`;
     }
-    
+
+    output += `  }\n\n`;
     return output;
+  }
+
+  private generateStatements(statements: VB6Statement[], indent: string): string {
+    let output = '';
+    for (const stmt of statements) {
+      output += this.generateStatement(stmt, indent);
+    }
+    return output;
+  }
+
+  private generateStatement(stmt: VB6Statement, indent: string): string {
+    switch (stmt.statementType) {
+      case 'Dim':
+        return `${indent}let ${stmt.varName} = ${this.getDefaultValue(stmt.dataType || 'Variant')};\n`;
+
+      case 'Assignment':
+        return `${indent}${stmt.target} = ${this.translateExpression(stmt.value || '')};\n`;
+
+      case 'Call':
+        const args = (stmt.args || []).map(a => this.translateExpression(a)).join(', ');
+        return `${indent}${stmt.name}(${args});\n`;
+
+      case 'If':
+        let ifCode = `${indent}if (${this.translateExpression(stmt.condition || '')}) {\n`;
+        ifCode += this.generateStatements(stmt.thenBody || [], indent + '  ');
+        if (stmt.elseBody && stmt.elseBody.length > 0) {
+          ifCode += `${indent}} else {\n`;
+          ifCode += this.generateStatements(stmt.elseBody, indent + '  ');
+        }
+        ifCode += `${indent}}\n`;
+        return ifCode;
+
+      case 'For':
+        const step = stmt.step ? this.translateExpression(stmt.step) : '1';
+        let forCode = `${indent}for (let ${stmt.variable} = ${this.translateExpression(stmt.from || '0')}; `;
+        forCode += `${stmt.variable} <= ${this.translateExpression(stmt.to || '0')}; `;
+        forCode += `${stmt.variable} += ${step}) {\n`;
+        forCode += this.generateStatements(stmt.body || [], indent + '  ');
+        forCode += `${indent}}\n`;
+        return forCode;
+
+      case 'While':
+        let whileCode = `${indent}while (${this.translateExpression(stmt.condition || '')}) {\n`;
+        whileCode += this.generateStatements(stmt.body || [], indent + '  ');
+        whileCode += `${indent}}\n`;
+        return whileCode;
+
+      case 'Do':
+        const cond = stmt.condition || '';
+        if (cond.startsWith('while:')) {
+          let doCode = `${indent}while (${this.translateExpression(cond.substring(6))}) {\n`;
+          doCode += this.generateStatements(stmt.body || [], indent + '  ');
+          doCode += `${indent}}\n`;
+          return doCode;
+        } else if (cond.startsWith('until:')) {
+          let doCode = `${indent}while (!(${this.translateExpression(cond.substring(6))})) {\n`;
+          doCode += this.generateStatements(stmt.body || [], indent + '  ');
+          doCode += `${indent}}\n`;
+          return doCode;
+        } else if (cond.startsWith('loopwhile:')) {
+          let doCode = `${indent}do {\n`;
+          doCode += this.generateStatements(stmt.body || [], indent + '  ');
+          doCode += `${indent}} while (${this.translateExpression(cond.substring(10))});\n`;
+          return doCode;
+        } else if (cond.startsWith('loopuntil:')) {
+          let doCode = `${indent}do {\n`;
+          doCode += this.generateStatements(stmt.body || [], indent + '  ');
+          doCode += `${indent}} while (!(${this.translateExpression(cond.substring(10))}));\n`;
+          return doCode;
+        } else {
+          // Infinite loop
+          let doCode = `${indent}while (true) {\n`;
+          doCode += this.generateStatements(stmt.body || [], indent + '  ');
+          doCode += `${indent}}\n`;
+          return doCode;
+        }
+
+      case 'Exit':
+        if (stmt.returnValue === 'Sub' || stmt.returnValue === 'Function') {
+          return `${indent}return;\n`;
+        } else if (stmt.returnValue === 'For' || stmt.returnValue === 'Do') {
+          return `${indent}break;\n`;
+        }
+        return `${indent}return;\n`;
+
+      default:
+        return `${indent}// Unhandled statement: ${stmt.statementType}\n`;
+    }
+  }
+
+  private translateExpression(expr: string): string {
+    if (!expr) return '""';
+
+    // Basic VB6 to JS translation
+    return expr
+      .replace(/\bAnd\b/gi, '&&')
+      .replace(/\bOr\b/gi, '||')
+      .replace(/\bNot\b/gi, '!')
+      .replace(/\bMod\b/gi, '%')
+      .replace(/\b<>\b/g, '!==')
+      .replace(/\bTrue\b/gi, 'true')
+      .replace(/\bFalse\b/gi, 'false')
+      .replace(/\bNothing\b/gi, 'null')
+      .replace(/\bEmpty\b/gi, 'undefined')
+      .replace(/&/g, '+')  // String concatenation
+      .trim();
   }
   
   private generateFooter(ast: VB6Module): string {

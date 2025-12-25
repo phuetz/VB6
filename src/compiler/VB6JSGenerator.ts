@@ -440,8 +440,226 @@ export class VB6JSGenerator {
       return this.translateErrorHandling(statement);
     }
 
+    // Do...Loop statements
+    if (statement.toLowerCase().startsWith('do ')) {
+      return this.translateDoStatement(statement);
+    }
+
+    // Select Case
+    if (statement.toLowerCase().startsWith('select case ')) {
+      return this.translateSelectCase(statement);
+    }
+
+    // Set statement (object assignment)
+    if (statement.toLowerCase().startsWith('set ')) {
+      const assignment = statement.substring(4);
+      return this.translateAssignmentStatement(assignment);
+    }
+
+    // ReDim statement
+    if (statement.toLowerCase().startsWith('redim ')) {
+      return this.translateReDimStatement(statement);
+    }
+
+    // Print/Debug.Print
+    if (statement.toLowerCase().startsWith('debug.print ') || statement.toLowerCase().startsWith('print ')) {
+      return this.translatePrintStatement(statement);
+    }
+
+    // MsgBox statement
+    if (statement.toLowerCase().startsWith('msgbox ')) {
+      const args = statement.substring(7);
+      return `alert(${this.translateExpression(args)});`;
+    }
+
+    // Next statement (end of For loop)
+    if (statement.toLowerCase().startsWith('next')) {
+      return '}  // Next';
+    }
+
+    // Wend statement (end of While loop)
+    if (statement.toLowerCase() === 'wend') {
+      return '}  // Wend';
+    }
+
+    // Loop statement (end of Do loop)
+    if (statement.toLowerCase().startsWith('loop')) {
+      return this.translateLoopEnd(statement);
+    }
+
+    // End If
+    if (statement.toLowerCase() === 'end if') {
+      return '}  // End If';
+    }
+
+    // End Select
+    if (statement.toLowerCase() === 'end select') {
+      return '}  // End Select';
+    }
+
+    // Else statement
+    if (statement.toLowerCase() === 'else') {
+      return '} else {';
+    }
+
+    // ElseIf statement
+    if (statement.toLowerCase().startsWith('elseif ')) {
+      const condition = statement.substring(7).replace(/ then$/i, '');
+      return `} else if (${this.translateExpression(condition)}) {`;
+    }
+
+    // Case statement
+    if (statement.toLowerCase().startsWith('case ')) {
+      return this.translateCaseStatement(statement);
+    }
+
+    // GoTo statement
+    if (statement.toLowerCase().startsWith('goto ')) {
+      const label = statement.substring(5).trim();
+      return `VB6.goto("${label}");`;
+    }
+
+    // Call statement
+    if (statement.toLowerCase().startsWith('call ')) {
+      const call = statement.substring(5);
+      return this.translateFunctionCall(call);
+    }
+
+    // Simple procedure call (no parentheses)
+    if (/^[a-zA-Z_]\w*(\s+.+)?$/.test(statement) && !statement.includes('=')) {
+      const parts = statement.split(/\s+/);
+      const procName = parts[0];
+      const args = parts.slice(1).join(' ');
+      if (args) {
+        return `${procName}(${this.translateExpression(args)});`;
+      }
+      return `${procName}();`;
+    }
+
     // Default: comment out untranslated statements
-    return `// TODO: Translate VB6 statement: ${statement}`;
+    return `// Untranslated VB6: ${statement}`;
+  }
+
+  /**
+   * Translate Do statement
+   */
+  private translateDoStatement(statement: string): string {
+    const lower = statement.toLowerCase();
+
+    if (lower.startsWith('do while ')) {
+      const condition = statement.substring(9);
+      return `while (${this.translateExpression(condition)}) {`;
+    }
+
+    if (lower.startsWith('do until ')) {
+      const condition = statement.substring(9);
+      return `while (!(${this.translateExpression(condition)})) {`;
+    }
+
+    // Plain Do (loop condition at end)
+    return 'do {';
+  }
+
+  /**
+   * Translate Loop end statement
+   */
+  private translateLoopEnd(statement: string): string {
+    const lower = statement.toLowerCase();
+
+    if (lower.startsWith('loop while ')) {
+      const condition = statement.substring(11);
+      return `} while (${this.translateExpression(condition)});`;
+    }
+
+    if (lower.startsWith('loop until ')) {
+      const condition = statement.substring(11);
+      return `} while (!(${this.translateExpression(condition)}));`;
+    }
+
+    return '} while (true);  // Loop';
+  }
+
+  /**
+   * Translate Select Case
+   */
+  private translateSelectCase(statement: string): string {
+    const expr = statement.substring(12);
+    return `switch (${this.translateExpression(expr)}) {`;
+  }
+
+  /**
+   * Translate Case statement
+   */
+  private translateCaseStatement(statement: string): string {
+    const lower = statement.toLowerCase();
+
+    if (lower === 'case else') {
+      return 'default:';
+    }
+
+    const value = statement.substring(5);
+
+    // Handle multiple values: Case 1, 2, 3
+    if (value.includes(',')) {
+      const values = value.split(',').map(v => `case ${this.translateExpression(v.trim())}:`);
+      return values.join('\n') + '\n  // Fall through';
+    }
+
+    // Handle range: Case 1 To 10
+    if (lower.includes(' to ')) {
+      const [start, end] = value.toLowerCase().split(' to ').map(v => this.translateExpression(v.trim()));
+      return `// Case ${start} To ${end} (range handling requires loop)\ncase ${start}: // Start of range`;
+    }
+
+    // Handle Is comparison: Case Is > 10
+    if (lower.startsWith('is ')) {
+      const comparison = value.substring(3).trim();
+      return `// Case Is ${comparison} (comparison requires if statement)\ndefault: if (!(${this.translateExpression('_switch ' + comparison)})) break;`;
+    }
+
+    return `case ${this.translateExpression(value)}:`;
+  }
+
+  /**
+   * Translate ReDim statement
+   */
+  private translateReDimStatement(statement: string): string {
+    const lower = statement.toLowerCase();
+    const preserve = lower.includes('preserve');
+    const content = statement.substring(preserve ? 14 : 6);
+
+    const match = content.match(/(\w+)\s*\((.+)\)/);
+    if (match) {
+      const [, arrayName, dims] = match;
+      const sizes = dims.split(',').map(d => this.translateExpression(d.trim()));
+
+      if (preserve) {
+        return `${arrayName} = VB6.reDimPreserve(${arrayName}, [${sizes.join(', ')}]);`;
+      }
+      return `${arrayName} = VB6.createArray([${sizes.join(', ')}]);`;
+    }
+
+    return `// ReDim: ${statement}`;
+  }
+
+  /**
+   * Translate Print statement
+   */
+  private translatePrintStatement(statement: string): string {
+    const lower = statement.toLowerCase();
+    let content: string;
+
+    if (lower.startsWith('debug.print ')) {
+      content = statement.substring(12);
+    } else if (lower.startsWith('print ')) {
+      content = statement.substring(6);
+    } else {
+      content = statement;
+    }
+
+    // Handle multiple arguments separated by ; or ,
+    const args = content.split(/[;,]/).map(a => this.translateExpression(a.trim())).filter(a => a);
+    return `console.log(${args.join(', ')});`;
   }
 
   /**
@@ -544,20 +762,32 @@ export class VB6JSGenerator {
    * Translate error handling
    */
   private translateErrorHandling(statement: string): string {
-    if (statement.toLowerCase() === 'on error goto 0') {
+    const lower = statement.toLowerCase().trim();
+
+    // On Error GoTo 0 - disable error handling
+    if (lower === 'on error goto 0') {
+      return 'VB6.clearErrorHandler();';
+    }
+
+    // On Error GoTo -1 - clear error state
+    if (lower === 'on error goto -1') {
       return 'VB6.Err.clear();';
     }
-    
-    if (statement.toLowerCase().includes('on error resume next')) {
+
+    // On Error Resume Next - inline error handling
+    if (lower.includes('on error resume next')) {
       return 'VB6.setErrorMode("resumeNext");';
     }
-    
+
+    // On Error GoTo Label - jump to error handler
     const gotoMatch = statement.match(/on error goto\s+(\w+)/i);
     if (gotoMatch) {
-      return `VB6.setErrorHandler("${gotoMatch[1]}");`;
+      const label = gotoMatch[1];
+      return `VB6.setErrorHandler("${label}"); // Error handler: ${label}`;
     }
-    
-    return `// TODO: Translate error handling: ${statement}`;
+
+    // Handle any other On Error variations
+    return `VB6.handleError(/* ${statement} */);`;
   }
 
   /**

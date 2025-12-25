@@ -36,96 +36,119 @@ const VB6_LANGUAGE_CONFIG: monaco.languages.ILanguageConfiguration = {
   },
 };
 
-// VB6 Syntax Highlighting
+// VB6 Syntax Highlighting - Complete keyword list
 const VB6_LANGUAGE_TOKENS: monaco.languages.IMonarchLanguage = {
   defaultToken: '',
   tokenPostfix: '.vb',
   ignoreCase: true,
 
   keywords: [
-    'And',
-    'As',
-    'Boolean',
-    'ByRef',
-    'Byte',
-    'ByVal',
-    'Call',
-    'Case',
-    'Const',
-    'Currency',
-    'Dim',
-    'Do',
-    'Double',
-    'Each',
-    'Else',
-    'ElseIf',
-    'End',
-    'Enum',
-    'Exit',
-    'False',
-    'For',
-    'Function',
-    'Get',
-    'GoTo',
-    'If',
-    'In',
-    'Integer',
-    'Is',
-    'Let',
-    'Long',
-    'Loop',
-    'Mod',
-    'New',
-    'Next',
-    'Not',
-    'Nothing',
-    'Object',
-    'On',
-    'Option',
-    'Optional',
-    'Or',
-    'Private',
-    'Property',
-    'Public',
-    'Resume',
-    'Select',
-    'Set',
-    'Single',
-    'Static',
-    'String',
-    'Sub',
-    'Then',
-    'To',
-    'True',
-    'Type',
-    'Until',
-    'Variant',
-    'Wend',
-    'While',
-    'With',
-    'Xor',
+    // Control flow
+    'If', 'Then', 'Else', 'ElseIf', 'End', 'Select', 'Case', 'For', 'Next', 'To', 'Step',
+    'While', 'Wend', 'Do', 'Loop', 'Until', 'Each', 'In', 'Exit', 'GoTo', 'GoSub', 'Return',
+    'On', 'Error', 'Resume', 'With',
+    // Declarations
+    'Dim', 'ReDim', 'Preserve', 'As', 'Private', 'Public', 'Friend', 'Static', 'Global',
+    'Const', 'Type', 'Enum', 'Declare', 'Lib', 'Alias', 'Sub', 'Function', 'Property',
+    'Get', 'Let', 'Set', 'Class', 'Module', 'Event', 'RaiseEvent', 'Implements',
+    // Parameters
+    'ByVal', 'ByRef', 'Optional', 'ParamArray',
+    // Types
+    'Boolean', 'Byte', 'Integer', 'Long', 'Single', 'Double', 'Currency', 'Decimal',
+    'Date', 'String', 'Object', 'Variant', 'Any',
+    // Operators
+    'And', 'Or', 'Not', 'Xor', 'Eqv', 'Imp', 'Mod', 'Like', 'Is', 'TypeOf',
+    // Literals
+    'True', 'False', 'Nothing', 'Null', 'Empty', 'Me',
+    // Object
+    'New', 'Call', 'WithEvents',
+    // Misc
+    'Option', 'Explicit', 'Compare', 'Base', 'Binary', 'Text', 'Database',
+    'Attribute', 'VB_Name', 'VB_GlobalNameSpace', 'VB_Creatable', 'VB_PredeclaredId',
+    'DefBool', 'DefByte', 'DefInt', 'DefLng', 'DefCur', 'DefSng', 'DefDbl',
+    'DefDec', 'DefDate', 'DefStr', 'DefObj', 'DefVar',
+    'Debug', 'Print', 'Assert', 'DoEvents', 'Stop', 'Beep',
   ],
 
-  operators: ['=', '>', '<', '<=', '>=', '<>', '+', '-', '*', '/', '\\', '^', '&'],
+  builtinFunctions: [
+    // String functions
+    'Len', 'Left', 'Right', 'Mid', 'Trim', 'LTrim', 'RTrim', 'UCase', 'LCase',
+    'InStr', 'InStrRev', 'Replace', 'Split', 'Join', 'StrComp', 'String', 'Space',
+    'Asc', 'Chr', 'Format', 'CStr', 'StrReverse', 'StrConv',
+    // Numeric functions
+    'Abs', 'Int', 'Fix', 'Sgn', 'Sqr', 'Exp', 'Log', 'Sin', 'Cos', 'Tan', 'Atn',
+    'Rnd', 'Randomize', 'Round', 'Hex', 'Oct', 'Val',
+    // Conversion functions
+    'CBool', 'CByte', 'CCur', 'CDate', 'CDbl', 'CDec', 'CInt', 'CLng', 'CSng', 'CVar',
+    // Date/Time functions
+    'Now', 'Date', 'Time', 'Timer', 'Year', 'Month', 'Day', 'Hour', 'Minute', 'Second',
+    'Weekday', 'DateAdd', 'DateDiff', 'DatePart', 'DateSerial', 'DateValue',
+    'TimeSerial', 'TimeValue', 'MonthName', 'WeekdayName', 'IsDate',
+    // Array functions
+    'Array', 'UBound', 'LBound', 'Erase',
+    // Type functions
+    'IsArray', 'IsDate', 'IsEmpty', 'IsError', 'IsMissing', 'IsNull', 'IsNumeric', 'IsObject',
+    'TypeName', 'VarType',
+    // File functions
+    'Dir', 'EOF', 'FileLen', 'FreeFile', 'Loc', 'LOF', 'Seek', 'FileAttr', 'GetAttr', 'SetAttr',
+    'FileCopy', 'Kill', 'Name', 'MkDir', 'RmDir', 'ChDir', 'ChDrive', 'CurDir',
+    // I/O functions
+    'Open', 'Close', 'Input', 'Line', 'Print', 'Write', 'Get', 'Put', 'Seek',
+    // Dialog functions
+    'MsgBox', 'InputBox', 'Shell',
+    // Misc functions
+    'IIf', 'Choose', 'Switch', 'CreateObject', 'GetObject', 'Environ', 'Command', 'DoEvents',
+    'QBColor', 'RGB', 'LoadPicture', 'SavePicture', 'LoadResString', 'LoadResPicture',
+  ],
+
+  operators: ['=', '>', '<', '<=', '>=', '<>', '+', '-', '*', '/', '\\', '^', '&', ':='],
 
   symbols: /[=><!~?:&|+*/^%-]+/,
 
   tokenizer: {
     root: [
+      // Comments (VB6 style)
+      [/'.*$/, 'comment'],
+      [/\bRem\b.*$/i, 'comment'],
+
+      // Compiler directives
+      [/#(If|Else|ElseIf|End If|Const)\b/i, 'keyword.control.directive'],
+
+      // Line continuation
+      [/_$/, 'keyword.operator.continuation'],
+
+      // Date literals
+      [/#[^#]+#/, 'number.date'],
+
+      // Strings
+      [/"([^"\\]|\\.)*$/, 'string.invalid'],
+      [/"/, 'string', '@string'],
+
+      // Numbers - hex
+      [/&H[0-9A-Fa-f]+&?/, 'number.hex'],
+      // Numbers - octal
+      [/&O[0-7]+&?/, 'number.octal'],
+      // Numbers - float
+      [/\d*\.\d+([eE][-+]?\d+)?[!#@]?/, 'number.float'],
+      // Numbers - integer
+      [/\d+[%&^]?/, 'number'],
+
+      // Keywords and identifiers
       [
         /[a-zA-Z_$][\w$]*/,
         {
           cases: {
             '@keywords': 'keyword',
+            '@builtinFunctions': 'support.function',
             '@default': 'identifier',
           },
         },
       ],
-      [/\d*\.\d+([eE][-+]?\d+)?/, 'number.float'],
-      [/\d+/, 'number'],
-      [/"([^"\\]|\\.)*$/, 'string.invalid'],
-      [/"/, 'string', '@string'],
-      [/'.*$/, 'comment'],
+
+      // Type declaration character suffixes
+      [/[%&!#@$]/, 'keyword.operator.type'],
+
+      // Operators
       [
         /@symbols/,
         {
@@ -135,17 +158,85 @@ const VB6_LANGUAGE_TOKENS: monaco.languages.IMonarchLanguage = {
           },
         },
       ],
+
+      // Delimiters
+      [/[{}()[\]]/, '@brackets'],
+      [/[,;]/, 'delimiter'],
+
+      // Whitespace
       [/\s+/, 'white'],
     ],
 
     string: [
       [/[^\\"]+/, 'string'],
+      [/""/, 'string.escape'], // VB6 escaped quote
       [/"/, 'string', '@pop'],
     ],
   },
 };
 
-// VB6 Completion Provider
+// VB6 Classic Theme (inspired by VB6 IDE colors)
+const VB6_CLASSIC_THEME: monaco.editor.IStandaloneThemeData = {
+  base: 'vs',
+  inherit: true,
+  rules: [
+    { token: 'comment', foreground: '008000', fontStyle: 'italic' }, // Green comments
+    { token: 'keyword', foreground: '0000FF' }, // Blue keywords
+    { token: 'keyword.control.directive', foreground: '800080' }, // Purple directives
+    { token: 'string', foreground: '800000' }, // Dark red strings
+    { token: 'string.escape', foreground: '800000' },
+    { token: 'number', foreground: '000000' }, // Black numbers
+    { token: 'number.float', foreground: '000000' },
+    { token: 'number.hex', foreground: '000000' },
+    { token: 'number.octal', foreground: '000000' },
+    { token: 'number.date', foreground: '800080' }, // Purple dates
+    { token: 'operator', foreground: '000000' },
+    { token: 'support.function', foreground: '000000', fontStyle: 'bold' }, // Bold built-in functions
+    { token: 'identifier', foreground: '000000' },
+    { token: 'delimiter', foreground: '000000' },
+  ],
+  colors: {
+    'editor.background': '#FFFFFF',
+    'editor.foreground': '#000000',
+    'editor.lineHighlightBackground': '#FFFFC0', // Yellow highlight
+    'editor.selectionBackground': '#0078D7',
+    'editorCursor.foreground': '#000000',
+    'editorLineNumber.foreground': '#808080',
+    'editorGutter.background': '#F0F0F0',
+  },
+};
+
+// VB6 Dark Theme (modern dark variant)
+const VB6_DARK_THEME: monaco.editor.IStandaloneThemeData = {
+  base: 'vs-dark',
+  inherit: true,
+  rules: [
+    { token: 'comment', foreground: '6A9955', fontStyle: 'italic' }, // Green comments
+    { token: 'keyword', foreground: '569CD6' }, // Light blue keywords
+    { token: 'keyword.control.directive', foreground: 'C586C0' }, // Purple directives
+    { token: 'string', foreground: 'CE9178' }, // Orange strings
+    { token: 'string.escape', foreground: 'D7BA7D' },
+    { token: 'number', foreground: 'B5CEA8' }, // Light green numbers
+    { token: 'number.float', foreground: 'B5CEA8' },
+    { token: 'number.hex', foreground: 'B5CEA8' },
+    { token: 'number.date', foreground: 'DCDCAA' }, // Yellow dates
+    { token: 'operator', foreground: 'D4D4D4' },
+    { token: 'support.function', foreground: 'DCDCAA' }, // Yellow built-in functions
+    { token: 'identifier', foreground: '9CDCFE' },
+    { token: 'delimiter', foreground: 'D4D4D4' },
+  ],
+  colors: {
+    'editor.background': '#1E1E1E',
+    'editor.foreground': '#D4D4D4',
+    'editor.lineHighlightBackground': '#2D2D30',
+    'editor.selectionBackground': '#264F78',
+    'editorCursor.foreground': '#AEAFAD',
+    'editorLineNumber.foreground': '#858585',
+    'editorGutter.background': '#1E1E1E',
+  },
+};
+
+// VB6 Completion Provider with comprehensive snippets
 const VB6_COMPLETION_PROVIDER: monaco.languages.CompletionItemProvider = {
   provideCompletionItems: (model, position) => {
     const suggestions: monaco.languages.CompletionItem[] = [
@@ -157,54 +248,227 @@ const VB6_COMPLETION_PROVIDER: monaco.languages.CompletionItemProvider = {
         detail: `VB6 keyword: ${keyword}`,
       })),
 
-      // Functions
+      // Built-in Functions
+      ...((VB6_LANGUAGE_TOKENS as any).builtinFunctions || []).map((func: string) => ({
+        label: func,
+        kind: monaco.languages.CompletionItemKind.Function,
+        insertText: `${func}(\${1})`,
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: `VB6 built-in function: ${func}`,
+      })),
+
+      // Dialog Functions
       {
         label: 'MsgBox',
         kind: monaco.languages.CompletionItemKind.Function,
-        insertText: 'MsgBox "${1:message}"',
+        insertText: 'MsgBox "${1:message}", ${2:vbInformation}, "${3:Title}"',
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'Displays a message box',
-        documentation: 'MsgBox(Prompt [, Buttons] [, Title])',
+        documentation: 'MsgBox(Prompt [, Buttons] [, Title] [, HelpFile] [, Context])',
       },
       {
         label: 'InputBox',
         kind: monaco.languages.CompletionItemKind.Function,
-        insertText: 'InputBox("${1:prompt}")',
+        insertText: 'InputBox("${1:prompt}", "${2:Title}", "${3:Default}")',
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'Displays an input dialog box',
-        documentation: 'InputBox(Prompt [, Title] [, Default])',
-      },
-      {
-        label: 'Len',
-        kind: monaco.languages.CompletionItemKind.Function,
-        insertText: 'Len(${1:string})',
-        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-        detail: 'Returns the length of a string',
+        documentation: 'InputBox(Prompt [, Title] [, Default] [, XPos] [, YPos])',
       },
 
-      // Control structures
+      // Control Structures - If
       {
-        label: 'If Then',
+        label: 'If Then End If',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: ['If ${1:condition} Then', '    ${2:// code}', 'End If'].join('\n'),
+        insertText: ['If ${1:condition} Then', '    ${2}', 'End If'].join('\n'),
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-        detail: 'If-Then statement',
+        detail: 'If-Then block',
       },
       {
-        label: 'For Loop',
+        label: 'If Then Else',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: ['For ${1:i} = ${2:1} To ${3:10}', '    ${4:// code}', 'Next ${1:i}'].join(
-          '\n'
-        ),
+        insertText: ['If ${1:condition} Then', '    ${2}', 'Else', '    ${3}', 'End If'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'If-Then-Else block',
+      },
+      {
+        label: 'If Then ElseIf Else',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['If ${1:condition1} Then', '    ${2}', 'ElseIf ${3:condition2} Then', '    ${4}', 'Else', '    ${5}', 'End If'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'If-ElseIf-Else block',
+      },
+
+      // Control Structures - Loops
+      {
+        label: 'For Next',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['For ${1:i} = ${2:1} To ${3:10}', '    ${4}', 'Next ${1:i}'].join('\n'),
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'For-Next loop',
       },
       {
-        label: 'Sub Procedure',
+        label: 'For Step Next',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: ['Private Sub ${1:SubName}()', '    ${2:// code}', 'End Sub'].join('\n'),
+        insertText: ['For ${1:i} = ${2:1} To ${3:10} Step ${4:2}', '    ${5}', 'Next ${1:i}'].join('\n'),
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-        detail: 'Sub procedure',
+        detail: 'For-Step-Next loop',
+      },
+      {
+        label: 'For Each Next',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['For Each ${1:item} In ${2:collection}', '    ${3}', 'Next ${1:item}'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'For Each-Next loop',
+      },
+      {
+        label: 'Do While Loop',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['Do While ${1:condition}', '    ${2}', 'Loop'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'Do While-Loop',
+      },
+      {
+        label: 'Do Loop While',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['Do', '    ${1}', 'Loop While ${2:condition}'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'Do-Loop While',
+      },
+      {
+        label: 'Do Until Loop',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['Do Until ${1:condition}', '    ${2}', 'Loop'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'Do Until-Loop',
+      },
+      {
+        label: 'While Wend',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['While ${1:condition}', '    ${2}', 'Wend'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'While-Wend loop',
+      },
+
+      // Control Structures - Select Case
+      {
+        label: 'Select Case',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['Select Case ${1:expression}', '    Case ${2:value1}', '        ${3}', '    Case ${4:value2}', '        ${5}', '    Case Else', '        ${6}', 'End Select'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'Select Case block',
+      },
+
+      // Control Structures - With
+      {
+        label: 'With End With',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['With ${1:object}', '    .${2:Property} = ${3:value}', 'End With'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'With block',
+      },
+
+      // Procedures
+      {
+        label: 'Private Sub',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['Private Sub ${1:SubName}(${2:parameters})', '    ${3}', 'End Sub'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'Private Sub procedure',
+      },
+      {
+        label: 'Public Sub',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['Public Sub ${1:SubName}(${2:parameters})', '    ${3}', 'End Sub'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'Public Sub procedure',
+      },
+      {
+        label: 'Private Function',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['Private Function ${1:FunctionName}(${2:parameters}) As ${3:Variant}', '    ${4}', '    ${1:FunctionName} = ${5:result}', 'End Function'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'Private Function',
+      },
+      {
+        label: 'Public Function',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['Public Function ${1:FunctionName}(${2:parameters}) As ${3:Variant}', '    ${4}', '    ${1:FunctionName} = ${5:result}', 'End Function'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'Public Function',
+      },
+
+      // Properties
+      {
+        label: 'Property Get',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['Public Property Get ${1:PropertyName}() As ${2:Variant}', '    ${1:PropertyName} = m${1:PropertyName}', 'End Property'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'Property Get procedure',
+      },
+      {
+        label: 'Property Let',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['Public Property Let ${1:PropertyName}(ByVal value As ${2:Variant})', '    m${1:PropertyName} = value', 'End Property'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'Property Let procedure',
+      },
+      {
+        label: 'Property Set',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['Public Property Set ${1:PropertyName}(ByVal value As ${2:Object})', '    Set m${1:PropertyName} = value', 'End Property'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'Property Set procedure',
+      },
+
+      // Error Handling
+      {
+        label: 'On Error GoTo',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['On Error GoTo ${1:ErrorHandler}', '    ${2}', '    Exit Sub', '', '${1:ErrorHandler}:', '    MsgBox "Error " & Err.Number & ": " & Err.Description', '    Resume Next'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'Error handling with label',
+      },
+      {
+        label: 'On Error Resume Next',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'On Error Resume Next',
+        detail: 'Continue on error',
+      },
+
+      // Type/Enum
+      {
+        label: 'Type End Type',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['Private Type ${1:TypeName}', '    ${2:Field1} As ${3:String}', '    ${4:Field2} As ${5:Long}', 'End Type'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'User-Defined Type',
+      },
+      {
+        label: 'Enum End Enum',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: ['Public Enum ${1:EnumName}', '    ${2:Value1} = ${3:0}', '    ${4:Value2} = ${5:1}', 'End Enum'].join('\n'),
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: 'Enumeration',
+      },
+
+      // Constants
+      {
+        label: 'vbCrLf',
+        kind: monaco.languages.CompletionItemKind.Constant,
+        insertText: 'vbCrLf',
+        detail: 'Carriage return + Line feed',
+      },
+      {
+        label: 'vbNullString',
+        kind: monaco.languages.CompletionItemKind.Constant,
+        insertText: 'vbNullString',
+        detail: 'Zero-length string',
+      },
+      {
+        label: 'vbTab',
+        kind: monaco.languages.CompletionItemKind.Constant,
+        insertText: 'vbTab',
+        detail: 'Tab character',
       },
     ];
 
@@ -240,6 +504,10 @@ const MonacoCodeEditor: React.FC = () => {
     monaco.languages.register({ id: 'vb6' });
     monaco.languages.setLanguageConfiguration('vb6', VB6_LANGUAGE_CONFIG);
     monaco.languages.setMonarchTokensProvider('vb6', VB6_LANGUAGE_TOKENS);
+
+    // Register VB6 themes
+    monaco.editor.defineTheme('vb6-classic', VB6_CLASSIC_THEME);
+    monaco.editor.defineTheme('vb6-dark', VB6_DARK_THEME);
     
     // Register advanced IntelliSense providers
     // Completion provider
@@ -270,11 +538,11 @@ const MonacoCodeEditor: React.FC = () => {
 
     // Note: Parameter hints are provided through signature help
 
-    // Create editor
+    // Create editor with VB6 classic theme
     const editor = monaco.editor.create(containerRef.current, {
       value: '',
       language: 'vb6',
-      theme: 'vs',
+      theme: 'vb6-classic',
       automaticLayout: true,
       fontSize: 12,
       fontFamily: 'Consolas, Monaco, "Courier New", monospace',

@@ -42,8 +42,15 @@ End Sub
       expect(result.javascript).toContain('function');
 
       // Should be syntactically valid JavaScript
+      // Use AsyncFunction if code contains async/await
       expect(() => {
-        new Function(result.javascript);
+        if (result.javascript.includes('async ') || result.javascript.includes('await ')) {
+          // AsyncFunction constructor for async code
+          const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+          new AsyncFunction(result.javascript);
+        } else {
+          new Function(result.javascript);
+        }
       }).not.toThrow();
     });
 
