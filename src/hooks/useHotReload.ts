@@ -26,6 +26,19 @@ export interface HotReloadActions {
   testHotReload: () => Promise<boolean>;
 }
 
+// Types for hot reload events
+export interface HotReloadError {
+  message: string;
+  code?: string;
+  stack?: string;
+}
+
+export interface HotReloadMetrics {
+  averageReloadTime: number;
+  totalReloads?: number;
+  errorCount?: number;
+}
+
 export interface UseHotReloadOptions {
   enabled?: boolean;
   autoWatch?: boolean;
@@ -33,7 +46,7 @@ export interface UseHotReloadOptions {
   preserveState?: boolean;
   onReloadStart?: () => void;
   onReloadComplete?: (patch: HotReloadPatch) => void;
-  onReloadError?: (error: any) => void;
+  onReloadError?: (error: HotReloadError) => void;
   onRollback?: (reason: string) => void;
 }
 
@@ -74,12 +87,12 @@ export const useHotReload = (options: UseHotReloadOptions = {}): [HotReloadStatu
     });
 
     // Set up event listeners
-    const handleReloadStart = (data: any) => {
+    const handleReloadStart = () => {
       setStatus(prev => ({ ...prev, isReloading: true, lastError: null }));
       options.onReloadStart?.();
     };
 
-    const handleReloadComplete = (data: { patch: HotReloadPatch; metrics: any }) => {
+    const handleReloadComplete = (data: { patch: HotReloadPatch; metrics: HotReloadMetrics }) => {
       setStatus(prev => ({
         ...prev,
         isReloading: false,
@@ -97,7 +110,7 @@ export const useHotReload = (options: UseHotReloadOptions = {}): [HotReloadStatu
       options.onReloadComplete?.(data.patch);
     };
 
-    const handleReloadError = (data: { error: any; filePath: string }) => {
+    const handleReloadError = (data: { error: HotReloadError; filePath: string }) => {
       setStatus(prev => ({
         ...prev,
         isReloading: false,
@@ -107,7 +120,7 @@ export const useHotReload = (options: UseHotReloadOptions = {}): [HotReloadStatu
       options.onReloadError?.(data.error);
     };
 
-    const handleRollback = (data: { reason: any; patch: HotReloadPatch }) => {
+    const handleRollback = (data: { reason: HotReloadError; patch: HotReloadPatch }) => {
       setStatus(prev => ({
         ...prev,
         rollbackCount: prev.rollbackCount + 1,
@@ -251,17 +264,35 @@ export const useHotReload = (options: UseHotReloadOptions = {}): [HotReloadStatu
   return [status, actions];
 };
 
+// Types for VB6 state
+interface VB6ControlState {
+  id: number;
+  type: string;
+  name: string;
+  text?: string;
+  caption?: string;
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  visible?: boolean;
+}
+
+interface VB6AppState {
+  controls?: VB6ControlState[];
+}
+
 // 🔧 Helper functions
-function generateCodeFromState(state: any): string {
+function generateCodeFromState(state: VB6AppState): string {
   // Convert VB6 state back to VB6 code
   let code = `' Generated VB6 Code - ${new Date().toISOString()}\n`;
   code += `Option Explicit\n\n`;
-  
+
   // Add form declaration
   code += `Private Sub Form_Load()\n`;
-  
+
   // Add control initializations
-  state.controls?.forEach((control: any) => {
+  state.controls?.forEach((control: VB6ControlState) => {
     if (control.type === 'TextBox') {
       code += `    ${control.name}.Text = "${control.text || ''}"\n`;
       code += `    ${control.name}.Left = ${control.x || 0}\n`;
@@ -290,7 +321,7 @@ function generateCodeFromState(state: any): string {
   code += `End Sub\n\n`;
   
   // Add event handlers
-  state.controls?.forEach((control: any) => {
+  state.controls?.forEach((control: VB6ControlState) => {
     if (control.type === 'CommandButton') {
       code += `Private Sub ${control.name}_Click()\n`;
       code += `    MsgBox "Hello from ${control.name}!"\n`;

@@ -1,6 +1,6 @@
 /**
  * VB6 Real-Time Collaboration Engine
- * 
+ *
  * Advanced real-time collaboration system for VB6 Web IDE featuring:
  * - CRDT-based state synchronization for conflict-free collaborative editing
  * - WebRTC peer-to-peer communication with automatic relay fallback
@@ -11,6 +11,9 @@
  */
 
 import { EventEmitter } from 'events';
+import { createLogger } from './LoggingService';
+
+const logger = createLogger('Collaboration');
 
 // CRDT Types
 interface CRDTOperation {
@@ -144,7 +147,7 @@ export class VB6CollaborationEngine extends EventEmitter {
       this.performPeriodicSync();
     }, 30000);
     
-    console.log('🤝 VB6 Collaboration Engine initialized');
+    logger.info('VB6 Collaboration Engine initialized');
   }
   
   /**
@@ -173,7 +176,7 @@ export class VB6CollaborationEngine extends EventEmitter {
     
     this.collaborators.set(this.myUserId, this.myUserInfo);
     
-    console.log(`🚀 Created collaboration session: ${sessionName} (${sessionId})`);
+    logger.info(`Created collaboration session: ${sessionName} (${sessionId})`);
     this.emit('sessionCreated', this.currentSession);
     
     return sessionId;
@@ -184,7 +187,7 @@ export class VB6CollaborationEngine extends EventEmitter {
    */
   async joinSession(sessionId: string): Promise<void> {
     if (this.currentSession?.id === sessionId) {
-      console.log('Already in this session');
+      logger.debug('Already in this session');
       return;
     }
     
@@ -196,7 +199,7 @@ export class VB6CollaborationEngine extends EventEmitter {
     try {
       // This would typically involve signaling server communication
       // For now, we'll simulate joining
-      console.log(`🔗 Joining collaboration session: ${sessionId}`);
+      logger.info(`Joining collaboration session: ${sessionId}`);
       
       // Initialize session state
       this.currentSession = {
@@ -216,11 +219,11 @@ export class VB6CollaborationEngine extends EventEmitter {
       // Request full state sync
       this.requestFullSync();
       
-      console.log(`✅ Joined session: ${sessionId}`);
+      logger.info(`Joined session: ${sessionId}`);
       this.emit('sessionJoined', this.currentSession);
       
     } catch (error) {
-      console.error('❌ Failed to join session:', error);
+      logger.error('Failed to join session:', error);
       throw error;
     }
   }
@@ -251,7 +254,7 @@ export class VB6CollaborationEngine extends EventEmitter {
     this.collaborators.clear();
     this.documents.clear();
     
-    console.log(`👋 Left session: ${sessionId}`);
+    logger.info(`Left session: ${sessionId}`);
     this.emit('sessionLeft', sessionId);
   }
   
@@ -287,7 +290,7 @@ export class VB6CollaborationEngine extends EventEmitter {
       messageId: this.generateMessageId()
     });
     
-    console.log(`📝 Applied operation: ${operation.type} at ${operation.position}`);
+    logger.debug(`Applied operation: ${operation.type} at ${operation.position}`);
   }
   
   /**
@@ -458,7 +461,7 @@ export class VB6CollaborationEngine extends EventEmitter {
    */
   async connectToPeer(peerId: string, isInitiator: boolean = false): Promise<void> {
     if (this.peerConnections.has(peerId)) {
-      console.log(`Already connected to peer: ${peerId}`);
+      logger.debug(`Already connected to peer: ${peerId}`);
       return;
     }
     
@@ -487,7 +490,7 @@ export class VB6CollaborationEngine extends EventEmitter {
       await peerConnection.setLocalDescription(offer);
       
       // In a real implementation, this would go through a signaling server
-      console.log(`📞 Created offer for peer: ${peerId}`);
+      logger.debug(`Created offer for peer: ${peerId}`);
       this.emit('offerCreated', { peerId, offer });
     }
   }
@@ -506,7 +509,7 @@ export class VB6CollaborationEngine extends EventEmitter {
     const answer = await peer.connection.createAnswer();
     await peer.connection.setLocalDescription(answer);
     
-    console.log(`📞 Created answer for peer: ${peerId}`);
+    logger.debug(`Created answer for peer: ${peerId}`);
     this.emit('answerCreated', { peerId, answer });
   }
   
@@ -516,12 +519,12 @@ export class VB6CollaborationEngine extends EventEmitter {
   async handleAnswer(peerId: string, answer: RTCSessionDescriptionInit): Promise<void> {
     const peer = this.peerConnections.get(peerId);
     if (!peer) {
-      console.error(`No peer connection found for: ${peerId}`);
+      logger.error(`No peer connection found for: ${peerId}`);
       return;
     }
-    
+
     await peer.connection.setRemoteDescription(answer);
-    console.log(`✅ Set remote description for peer: ${peerId}`);
+    logger.debug(`Set remote description for peer: ${peerId}`);
   }
   
   /**
@@ -530,10 +533,10 @@ export class VB6CollaborationEngine extends EventEmitter {
   async handleIceCandidate(peerId: string, candidate: RTCIceCandidateInit): Promise<void> {
     const peer = this.peerConnections.get(peerId);
     if (!peer) {
-      console.error(`No peer connection found for: ${peerId}`);
+      logger.error(`No peer connection found for: ${peerId}`);
       return;
     }
-    
+
     await peer.connection.addIceCandidate(candidate);
   }
   
@@ -555,7 +558,7 @@ export class VB6CollaborationEngine extends EventEmitter {
     
     // Connection state handler
     connection.onconnectionstatechange = () => {
-      console.log(`🔗 Peer ${peer.id} connection state: ${connection.connectionState}`);
+      logger.debug(`Peer ${peer.id} connection state: ${connection.connectionState}`);
       
       if (connection.connectionState === 'connected') {
         peer.isConnected = true;
@@ -586,13 +589,13 @@ export class VB6CollaborationEngine extends EventEmitter {
     const { dataChannel } = peer;
     
     dataChannel.onopen = () => {
-      console.log(`📡 Data channel opened with peer: ${peer.id}`);
+      logger.debug(`Data channel opened with peer: ${peer.id}`);
       peer.isConnected = true;
       this.emit('peerConnected', peer.id);
     };
     
     dataChannel.onclose = () => {
-      console.log(`📡 Data channel closed with peer: ${peer.id}`);
+      logger.debug(`Data channel closed with peer: ${peer.id}`);
       peer.isConnected = false;
       this.emit('peerDisconnected', peer.id);
     };
@@ -602,12 +605,12 @@ export class VB6CollaborationEngine extends EventEmitter {
         const message: CollaborationMessage = JSON.parse(event.data);
         this.handleIncomingMessage(message, peer.id);
       } catch (error) {
-        console.error('Failed to parse peer message:', error);
+        logger.error('Failed to parse peer message:', error);
       }
     };
     
     dataChannel.onerror = (error) => {
-      console.error(`Data channel error with peer ${peer.id}:`, error);
+      logger.error(`Data channel error with peer ${peer.id}:`, error);
     };
   }
   
@@ -731,7 +734,7 @@ export class VB6CollaborationEngine extends EventEmitter {
         try {
           peer.dataChannel.send(messageData);
         } catch (error) {
-          console.error(`Failed to send message to peer ${peerId}:`, error);
+          logger.error(`Failed to send message to peer ${peerId}:`, error);
         }
       }
     }
@@ -985,7 +988,7 @@ export class VB6CollaborationEngine extends EventEmitter {
     this.documents.clear();
     this.currentSession = null;
     
-    console.log('🔄 VB6 Collaboration Engine destroyed');
+    logger.info('VB6 Collaboration Engine destroyed');
   }
 }
 

@@ -23,6 +23,13 @@
  */
 
 import { VB6Runtime } from '../runtime/VB6Runtime';
+import {
+  COMPropertyValue,
+  COMObjectProxy,
+  DispatchParameter,
+  DispatchResult,
+  TypeLibrary,
+} from './types/VB6ServiceTypes';
 
 // ============================================================================
 // COM/ACTIVEX TYPES & INTERFACES
@@ -74,7 +81,7 @@ export interface ActiveXProperty {
   bindable: boolean;
   requestEdit: boolean;
   displayBindable: boolean;
-  defaultValue?: any;
+  defaultValue?: COMPropertyValue;
   description?: string;
 }
 
@@ -90,7 +97,7 @@ export interface ActiveXParameter {
   name: string;
   type: string;
   optional: boolean;
-  defaultValue?: any;
+  defaultValue?: COMPropertyValue;
 }
 
 export interface ActiveXEvent {
@@ -102,9 +109,9 @@ export interface ActiveXEvent {
 
 export interface IDispatch {
   GetTypeInfoCount(): number;
-  GetTypeInfo(index: number): any;
+  GetTypeInfo(index: number): DispatchResult;
   GetIDsOfNames(names: string[]): number[];
-  Invoke(dispId: number, flags: number, params: any[]): any;
+  Invoke(dispId: number, flags: number, params: DispatchParameter[]): DispatchResult;
 }
 
 // ============================================================================
@@ -115,8 +122,8 @@ class COMRegistry {
   private static instance: COMRegistry;
   private registeredClasses: Map<string, COMClassInfo> = new Map();
   private registeredControls: Map<string, ActiveXControlInfo> = new Map();
-  private typeLibraries: Map<string, any> = new Map();
-  private runningObjects: Map<string, any> = new Map();
+  private typeLibraries: Map<string, TypeLibrary> = new Map();
+  private runningObjects: Map<string, COMObjectProxy> = new Map();
 
   private constructor() {
     this.registerBuiltInCOMObjects();
@@ -336,13 +343,13 @@ class COMRegistry {
 // ============================================================================
 
 export class COMObjectFactory {
-  private static proxyCache: Map<string, any> = new Map();
+  private static proxyCache: Map<string, COMObjectProxy> = new Map();
   private static eventHandlers: Map<string, Map<string, Function[]>> = new Map();
 
   /**
    * CreateObject VB6 - Late binding
    */
-  public static CreateObject(progId: string, serverName?: string): any {
+  public static CreateObject(progId: string, serverName?: string): COMObjectProxy {
     console.log(`🔧 CreateObject("${progId}"${serverName ? ', "' + serverName + '"' : ''})`);
 
     const registry = COMRegistry.getInstance();
@@ -360,7 +367,7 @@ export class COMObjectFactory {
   /**
    * GetObject VB6 - Obtenir objet existant
    */
-  public static GetObject(pathName?: string, progId?: string): any {
+  public static GetObject(pathName?: string, progId?: string): COMObjectProxy {
     console.log(`🔍 GetObject(${pathName ? '"' + pathName + '"' : ''}${progId ? ', "' + progId + '"' : ''})`);
 
     // Si pathName fourni, charger depuis fichier
@@ -382,7 +389,7 @@ export class COMObjectFactory {
   /**
    * Créer proxy COM avec IDispatch
    */
-  private static createCOMProxy(progId: string, classInfo: COMClassInfo): any {
+  private static createCOMProxy(progId: string, classInfo: COMClassInfo): COMObjectProxy {
     // Vérifier cache
     const cached = COMObjectFactory.proxyCache.get(progId);
     if (cached) {
@@ -390,7 +397,7 @@ export class COMObjectFactory {
     }
 
     // Créer proxy selon le type
-    let proxy: any;
+    let proxy: COMObjectProxy;
 
     switch (progId) {
       case 'Scripting.FileSystemObject':
@@ -962,8 +969,23 @@ export class COMObjectFactory {
       }),
       
       'Node.Application': () => ({
-        Execute: (script: string) => eval(script),
-        Version: process.version
+        Execute: (script: string) => {
+          // SECURITY: eval() remplacé par exécution sécurisée
+          // Seules les expressions mathématiques simples sont autorisées
+          if (!/^[\d\s+\-*/(),.]+$/.test(script)) {
+            console.warn('Node.Application.Execute: Script execution disabled for security. Only safe math expressions allowed.');
+            return undefined;
+          }
+          try {
+            // Utilise Function() avec scope limité au lieu de eval()
+            const safeFunc = new Function('return (' + script + ')');
+            return safeFunc();
+          } catch (e) {
+            console.error('Node.Application.Execute error:', e);
+            return undefined;
+          }
+        },
+        Version: typeof process !== 'undefined' ? process.version : 'browser'
       }),
       
       'Fetch.HTTP': () => ({

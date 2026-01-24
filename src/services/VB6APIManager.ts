@@ -4,6 +4,9 @@
  */
 
 import { VB6API, VB6APIFunction, DeclareFunction, VB6Constants } from '../runtime/VB6APIDeclarations';
+import { createLogger } from './LoggingService';
+
+const logger = createLogger('APIManager');
 
 export interface APIDeclaration {
   id: string;
@@ -95,9 +98,9 @@ export class VB6APIManager {
       };
       
       return declaration;
-      
+
     } catch (error) {
-      console.error('Error parsing API declaration:', error);
+      logger.error('Error parsing API declaration:', error);
       return null;
     }
   }
@@ -110,8 +113,8 @@ export class VB6APIManager {
     // Register with VB6API system
     const success = DeclareFunction(declaration.declaration);
     declaration.isRegistered = success;
-    
-    console.log(`API Declaration registered: ${declaration.name} from ${declaration.library} - ${success ? 'Success' : 'Failed'}`);
+
+    logger.info(`API Declaration registered: ${declaration.name} from ${declaration.library} - ${success ? 'Success' : 'Failed'}`);
   }
 
   // Get all registered declarations
@@ -134,7 +137,7 @@ export class VB6APIManager {
     try {
       const declaration = this.getDeclaration(functionName);
       if (!declaration || !declaration.isRegistered) {
-        console.warn(`API function ${functionName} not declared or not registered`);
+        logger.warn(`API function ${functionName} not declared or not registered`);
         return null;
       }
       
@@ -143,9 +146,9 @@ export class VB6APIManager {
       
       // Call through VB6API system
       return VB6API.callAPI(functionName, ...validatedArgs);
-      
+
     } catch (error) {
-      console.error(`Error calling API ${functionName}:`, error);
+      logger.error(`Error calling API ${functionName}:`, error);
       return null;
     }
   }
@@ -288,8 +291,8 @@ export class VB6APIManager {
     // Make API manager globally available
     globalAny.VB6APIManager = this;
     globalAny.CallAPI = (functionName: string, ...args: any[]) => this.callAPI(functionName, ...args);
-    
-    console.log('VB6 API Manager initialized with', this.declarations.size, 'API declarations');
+
+    logger.info('VB6 API Manager initialized with', this.declarations.size, 'API declarations');
   }
 
   // Helper method for transpiler integration

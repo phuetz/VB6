@@ -4,6 +4,11 @@
  * Supports Open, Close, Input, Print, Get, Put, Line Input, Write, and all VB6 file functions
  */
 
+import { createLogger } from './LoggingService';
+import { PropertyValue } from './types/VB6ServiceTypes';
+
+const logger = createLogger('FileIO');
+
 // VB6 File Access Modes
 export enum VB6FileMode {
   Input = 1,        // Sequential input
@@ -65,7 +70,7 @@ interface VB6FileHandle {
 
 // Record Structure for Random Access Files
 export interface VB6Record {
-  [field: string]: any;
+  [field: string]: PropertyValue;
 }
 
 // File System Statistics
@@ -422,12 +427,12 @@ export class VB6FileIOSystem {
 
   ChDir(path: string): void {
     // Change current directory (simplified)
-    console.log(`Changed directory to: ${path}`);
+    logger.debug(`Changed directory to: ${path}`);
   }
 
   ChDrive(drive: string): void {
     // Change current drive (simplified)
-    console.log(`Changed drive to: ${drive}`);
+    logger.debug(`Changed drive to: ${drive}`);
   }
 
   CurDir(drive?: string): string {
@@ -437,12 +442,12 @@ export class VB6FileIOSystem {
 
   MkDir(path: string): void {
     // Create directory (simplified)
-    console.log(`Created directory: ${path}`);
+    logger.debug(`Created directory: ${path}`);
   }
 
   RmDir(path: string): void {
     // Remove directory (simplified)
-    console.log(`Removed directory: ${path}`);
+    logger.debug(`Removed directory: ${path}`);
   }
 
   // File Management
@@ -483,7 +488,7 @@ export class VB6FileIOSystem {
     if (!this.FileExists(fileName)) {
       throw new Error(`File not found: ${fileName}`);
     }
-    console.log(`Set attributes for ${fileName}: ${attributes}`);
+    logger.debug(`Set attributes for ${fileName}: ${attributes}`);
   }
 
   // Special File Operations
@@ -899,13 +904,13 @@ if (typeof window !== 'undefined') {
   
   // File system object
   globalAny.VB6FileIO = VB6FileIO;
-  
+
   // Constants
   globalAny.VB6FileMode = VB6FileMode;
   globalAny.VB6FileAccess = VB6FileAccess;
   globalAny.VB6FileShare = VB6FileShare;
-  
-  console.log('VB6 File I/O System initialized with full sequential, random, and binary file support');
+
+  logger.info('VB6 File I/O System initialized with full sequential, random, and binary file support');
 }
 
 export default VB6FileIOSystem;

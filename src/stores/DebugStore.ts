@@ -9,6 +9,12 @@ import { subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
 
+// Types pour les valeurs de débogage (unknown est plus sûr que any)
+export type DebugValue = unknown;
+
+// Types pour les arguments de fonction
+export type FunctionArguments = Record<string, DebugValue>;
+
 // Types pour le débogage
 export interface Breakpoint {
   id: string;
@@ -22,7 +28,7 @@ export interface Breakpoint {
 export interface WatchExpression {
   id: string;
   expression: string;
-  value: any;
+  value: DebugValue;
   error?: string;
 }
 
@@ -31,12 +37,12 @@ export interface CallStackFrame {
   name: string;
   file: string;
   line: number;
-  arguments: Record<string, any>;
+  arguments: FunctionArguments;
 }
 
 export interface LocalVariable {
   name: string;
-  value: any;
+  value: DebugValue;
   type: string;
   scope: 'local' | 'module' | 'global';
 }
@@ -47,7 +53,7 @@ export interface ConsoleEntry {
   type: 'log' | 'error' | 'warn' | 'info' | 'debug';
   message: string;
   source?: string;
-  data?: any;
+  data?: DebugValue;
 }
 
 export interface PerformanceMetric {
@@ -121,12 +127,12 @@ interface DebugActions {
   // Variables et expressions
   addWatchExpression: (expression: string) => void;
   removeWatchExpression: (id: string) => void;
-  updateWatchExpression: (id: string, value: any) => void;
-  evaluateExpression: (expression: string) => Promise<any>;
+  updateWatchExpression: (id: string, value: DebugValue) => void;
+  evaluateExpression: (expression: string) => Promise<DebugValue>;
   updateLocalVariables: (variables: LocalVariable[]) => void;
   
   // Console
-  addConsoleOutput: (type: ConsoleEntry['type'], message: string, source?: string, data?: any) => void;
+  addConsoleOutput: (type: ConsoleEntry['type'], message: string, source?: string, data?: DebugValue) => void;
   clearConsole: () => void;
   setConsoleFilter: (filter: DebugState['consoleFilter']) => void;
   

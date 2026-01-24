@@ -4,6 +4,8 @@
  * Provides add-in loading, unloading, event handling, and menu integration
  */
 
+import { AddInSettingValue, AddInEventPayload, IDEObjectReference, IDEControlReference } from './types/VB6ServiceTypes';
+
 export enum VB6AddInType {
   TOOLBAR = 'toolbar',
   MENU_ITEM = 'menu_item',
@@ -77,7 +79,7 @@ export interface VB6AddInInfo {
   providesWindows: VB6AddInWindow[];
   
   // Configuration
-  settings: Map<string, any>;
+  settings: Map<string, AddInSettingValue>;
   enabled: boolean;
   autoLoad: boolean;
   loadOnStartup: boolean;
@@ -159,24 +161,24 @@ export interface VB6AddInWindow {
 export interface VB6AddInEventData {
   eventType: VB6AddInEvent;
   source: string;
-  data: any;
+  data: AddInEventPayload;
   timestamp: Date;
   handled: boolean;
 }
 
 export interface VB6IDEContext {
   // Current state
-  currentProject?: any;
-  currentForm?: any;
-  currentModule?: any;
-  selectedControls: any[];
-  
+  currentProject?: IDEObjectReference;
+  currentForm?: IDEObjectReference;
+  currentModule?: IDEObjectReference;
+  selectedControls: IDEControlReference[];
+
   // Methods available to add-ins
   showMessage(message: string, title?: string): void;
   showInputBox(prompt: string, title?: string, defaultValue?: string): string | null;
-  createForm(name: string): any;
-  addControl(type: string, container: any): any;
-  generateCode(template: string, parameters: any): string;
+  createForm(name: string): IDEObjectReference;
+  addControl(type: string, container: IDEObjectReference): IDEControlReference;
+  generateCode(template: string, parameters: Record<string, unknown>): string;
   openFile(path: string): boolean;
   saveFile(path: string, content: string): boolean;
   compileProject(): boolean;
@@ -208,52 +210,52 @@ export class VB6AddInManager {
   private createIDEContext(): VB6IDEContext {
     return {
       selectedControls: [],
-      
+
       showMessage: (message: string, title?: string) => {
         alert(`${title || 'VB6 IDE'}: ${message}`);
       },
-      
+
       showInputBox: (prompt: string, title?: string, defaultValue?: string): string | null => {
         return window.prompt(`${title || 'VB6 IDE'}: ${prompt}`, defaultValue || '');
       },
-      
-      createForm: (name: string) => {
+
+      createForm: (name: string): IDEObjectReference => {
         return { name, type: 'Form' };
       },
-      
-      addControl: (type: string, container: any) => {
-        return { type, container };
+
+      addControl: (type: string, container: IDEObjectReference): IDEControlReference => {
+        return { type, name: `${type}1`, container: container.name };
       },
-      
-      generateCode: (template: string, parameters: any): string => {
+
+      generateCode: (template: string, parameters: Record<string, unknown>): string => {
         let code = template;
         for (const [key, value] of Object.entries(parameters)) {
           code = code.replace(new RegExp(`\\{${key}\\}`, 'g'), String(value));
         }
         return code;
       },
-      
-      openFile: (path: string): boolean => {
+
+      openFile: (_path: string): boolean => {
         return true;
       },
-      
-      saveFile: (path: string, content: string): boolean => {
+
+      saveFile: (_path: string, _content: string): boolean => {
         return true;
       },
-      
+
       compileProject: (): boolean => {
         return true;
       },
-      
+
       runProject: (): boolean => {
         return true;
       },
-      
-      addReference: (path: string): boolean => {
+
+      addReference: (_path: string): boolean => {
         return true;
       },
-      
-      addComponent: (path: string): boolean => {
+
+      addComponent: (_path: string): boolean => {
         return true;
       }
     };
@@ -820,12 +822,12 @@ export class VB6AddInManager {
   }
 
   // Add-in Settings
-  getAddInSetting(addInId: string, key: string): any {
+  getAddInSetting(addInId: string, key: string): AddInSettingValue | undefined {
     const addIn = this.getAddIn(addInId);
     return addIn ? addIn.settings.get(key) : undefined;
   }
 
-  setAddInSetting(addInId: string, key: string, value: any): boolean {
+  setAddInSetting(addInId: string, key: string, value: AddInSettingValue): boolean {
     const addIn = this.getAddIn(addInId);
     if (addIn) {
       addIn.settings.set(key, value);

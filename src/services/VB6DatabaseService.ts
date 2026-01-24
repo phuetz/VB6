@@ -1,8 +1,13 @@
+import { createLogger } from './LoggingService';
+import { EventListener, FieldValue } from './types/VB6ServiceTypes';
+
+const logger = createLogger('Database');
+
 // Browser-compatible EventEmitter implementation
 class EventEmitter {
-  private events: { [key: string]: ((...args: any[]) => any)[] } = {};
+  private events: { [key: string]: EventListener[] } = {};
 
-  on(event: string, listener: (...args: any[]) => any): this {
+  on(event: string, listener: EventListener): this {
     if (!this.events[event]) {
       this.events[event] = [];
     }
@@ -10,7 +15,7 @@ class EventEmitter {
     return this;
   }
 
-  emit(event: string, ...args: any[]): boolean {
+  emit(event: string, ...args: unknown[]): boolean {
     if (!this.events[event]) {
       return false;
     }
@@ -18,13 +23,13 @@ class EventEmitter {
       try {
         listener(...args);
       } catch (error) {
-        console.error('Event listener error:', error);
+        logger.error('Event listener error:', error);
       }
     });
     return true;
   }
 
-  off(event: string, listener?: (...args: any[]) => any): this {
+  off(event: string, listener?: EventListener): this {
     if (!this.events[event]) {
       return this;
     }

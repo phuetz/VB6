@@ -2,12 +2,24 @@
 // Provides web-based implementations of popular VB6 ActiveX controls
 
 import { EventEmitter } from 'events';
+import { createLogger } from './LoggingService';
+import {
+  ActiveXPropertyValue,
+  ActiveXPropertyMap,
+  ActiveXMethod,
+  ActiveXMethodMap,
+  ActiveXError,
+  ActiveXPostData,
+  EventListener,
+} from './types/VB6ServiceTypes';
+
+const logger = createLogger('ActiveX');
 
 // Browser-compatible EventEmitter
 class BrowserEventEmitter {
-  private events: { [key: string]: ((...args: any[]) => any)[] } = {};
+  private events: { [key: string]: EventListener[] } = {};
 
-  on(event: string, listener: (...args: any[]) => any): this {
+  on(event: string, listener: EventListener): this {
     if (!this.events[event]) {
       this.events[event] = [];
     }
@@ -15,7 +27,7 @@ class BrowserEventEmitter {
     return this;
   }
 
-  emit(event: string, ...args: any[]): boolean {
+  emit(event: string, ...args: unknown[]): boolean {
     if (!this.events[event]) {
       return false;
     }
@@ -23,13 +35,13 @@ class BrowserEventEmitter {
       try {
         listener(...args);
       } catch (error) {
-        console.error('Event listener error:', error);
+        logger.error('Event listener error:', error);
       }
     });
     return true;
   }
 
-  off(event: string, listener?: (...args: any[]) => any): this {
+  off(event: string, listener?: EventListener): this {
     if (!this.events[event]) {
       return this;
     }
@@ -69,15 +81,15 @@ export interface IActiveXControl {
   id: string;
   type: ActiveXControlType;
   version: string;
-  properties: { [key: string]: any };
-  methods: { [key: string]: (...args: any[]) => any };
+  properties: ActiveXPropertyMap;
+  methods: ActiveXMethodMap;
   events: BrowserEventEmitter;
-  
+
   initialize(): Promise<void>;
   destroy(): void;
-  getProperty(name: string): any;
-  setProperty(name: string, value: any): void;
-  invokeMethod(name: string, ...args: any[]): any;
+  getProperty(name: string): ActiveXPropertyValue;
+  setProperty(name: string, value: ActiveXPropertyValue): void;
+  invokeMethod(name: string, ...args: unknown[]): unknown;
 }
 
 // Base ActiveX Control Implementation
@@ -85,8 +97,8 @@ export abstract class ActiveXControlBase implements IActiveXControl {
   id: string;
   type: ActiveXControlType;
   version: string = '1.0';
-  properties: { [key: string]: any } = {};
-  methods: { [key: string]: (...args: any[]) => any } = {};
+  properties: ActiveXPropertyMap = {};
+  methods: ActiveXMethodMap = {};
   events: BrowserEventEmitter;
 
   constructor(id: string, type: ActiveXControlType) {
@@ -102,17 +114,17 @@ export abstract class ActiveXControlBase implements IActiveXControl {
   protected abstract initializeProperties(): void;
   protected abstract initializeMethods(): void;
 
-  getProperty(name: string): any {
+  getProperty(name: string): ActiveXPropertyValue {
     return this.properties[name];
   }
 
-  setProperty(name: string, value: any): void {
+  setProperty(name: string, value: ActiveXPropertyValue): void {
     const oldValue = this.properties[name];
     this.properties[name] = value;
     this.events.emit('PropertyChanged', { name, oldValue, newValue: value });
   }
 
-  invokeMethod(name: string, ...args: any[]): any {
+  invokeMethod(name: string, ...args: unknown[]): unknown {
     const method = this.methods[name];
     if (!method) {
       throw new Error(`Method '${name}' not found on ${this.type} control`);
@@ -121,11 +133,19 @@ export abstract class ActiveXControlBase implements IActiveXControl {
   }
 }
 
+// Serial port types for Web Serial API
+interface SerialPort {
+  open(options: { baudRate: number }): Promise<void>;
+  close(): Promise<void>;
+  readable: ReadableStream;
+  writable: WritableStream;
+}
+
 // MSComm Control (Serial Communication)
 export class MSCommControl extends ActiveXControlBase {
-  private port: any = null;
-  private reader: any = null;
-  private writer: any = null;
+  private port: SerialPort | null = null;
+  private reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+  private writer: WritableStreamDefaultWriter<Uint8Array> | null = null;
 
   constructor(id: string) {
     super(id, ActiveXControlType.MSComm);
@@ -165,9 +185,9 @@ export class MSCommControl extends ActiveXControlBase {
   async initialize(): Promise<void> {
     // Check if Web Serial API is available
     if ('serial' in navigator) {
-      console.log('Web Serial API is supported');
+      logger.info('Web Serial API is supported');
     } else {
-      console.warn('Web Serial API is not supported in this browser');
+      logger.warn('Web Serial API is not supported in this browser');
     }
   }
 
@@ -196,7 +216,7 @@ export class MSCommControl extends ActiveXControlBase {
       // Set up reading
       this.startReading();
     } catch (error) {
-      console.error('Failed to open port:', error);
+      logger.error('Failed to open port:', error);
       throw error;
     }
   }
@@ -249,7 +269,7 @@ export class MSCommControl extends ActiveXControlBase {
         }
       }
     } catch (error) {
-      console.error('Read error:', error);
+      logger.error('Read error:', error);
     } finally {
       reader.releaseLock();
     }
@@ -504,8 +524,8 @@ export class WebBrowserControl extends ActiveXControlBase {
     }
   }
 
-  private navigate(url: string, flags?: number, targetFrameName?: string, 
-                   postData?: any, headers?: string): void {
+  private navigate(url: string, flags?: number, targetFrameName?: string,
+                   postData?: ActiveXPostData, headers?: string): void {
     if (!this.iframe) return;
     
     this.properties.Busy = true;
@@ -575,16 +595,16 @@ export class WebBrowserControl extends ActiveXControlBase {
         }
         break;
       case 7: // Print Preview
-        console.log('Print preview not supported in iframe');
+        logger.warn('Print preview not supported in iframe');
         break;
     }
   }
 
-  private getBrowserProperty(property: string): any {
+  private getBrowserProperty(property: string): ActiveXPropertyValue {
     return this.properties[property];
   }
 
-  private putBrowserProperty(property: string, value: any): void {
+  private putBrowserProperty(property: string, value: ActiveXPropertyValue): void {
     this.properties[property] = value;
   }
 
@@ -599,12 +619,12 @@ export class WebBrowserControl extends ActiveXControlBase {
     this.events.emit('DocumentComplete', { URL: this.properties.LocationURL });
   }
 
-  private handleError(error: any): void {
+  private handleError(error: Event | ActiveXError): void {
     this.properties.Busy = false;
-    this.events.emit('NavigateError', { 
-      URL: this.properties.LocationURL, 
+    this.events.emit('NavigateError', {
+      URL: this.properties.LocationURL,
       StatusCode: 404,
-      Cancel: false 
+      Cancel: false
     });
   }
 
@@ -780,11 +800,14 @@ export class CommonDialogControl extends ActiveXControlBase {
   }
 }
 
+// Constructor type for ActiveX controls
+type ActiveXControlConstructor = new (id: string) => ActiveXControlBase;
+
 // ActiveX Service Manager
 export class VB6ActiveXService {
   private static instance: VB6ActiveXService;
   private controls: Map<string, IActiveXControl> = new Map();
-  private registeredControls: Map<string, typeof ActiveXControlBase> = new Map();
+  private registeredControls: Map<string, ActiveXControlConstructor> = new Map();
 
   static getInstance(): VB6ActiveXService {
     if (!VB6ActiveXService.instance) {
@@ -795,10 +818,11 @@ export class VB6ActiveXService {
   }
 
   private registerDefaultControls(): void {
-    this.registeredControls.set('MSComm.MSComm', MSCommControl as any);
-    this.registeredControls.set('MSChart20Lib.MSChart', MSChartControl as any);
-    this.registeredControls.set('SHDocVw.InternetExplorer', WebBrowserControl as any);
-    this.registeredControls.set('MSComDlg.CommonDialog', CommonDialogControl as any);
+    // Type-safe registration using constructor type
+    this.registeredControls.set('MSComm.MSComm', MSCommControl);
+    this.registeredControls.set('MSChart20Lib.MSChart', MSChartControl);
+    this.registeredControls.set('SHDocVw.InternetExplorer', WebBrowserControl);
+    this.registeredControls.set('MSComDlg.CommonDialog', CommonDialogControl);
   }
 
   async createControl(progId: string, controlId: string): Promise<IActiveXControl> {

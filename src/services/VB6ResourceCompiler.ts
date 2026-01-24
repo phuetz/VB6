@@ -1039,4 +1039,4 @@ export class VB6ResourceCompiler {
 // Global instance
 export const VB6ResourceCompilerInstance = VB6ResourceCompiler.getInstance();
 
-console.log('VB6 Resource Compiler initialized with full RC script support');
+// VB6 Resource Compiler initialization logged by LoggingService

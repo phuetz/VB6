@@ -3,6 +3,11 @@
  * Provides complete support for Property Get/Let/Set procedures
  */
 
+import { createLogger } from './LoggingService';
+import { PropertyValue } from './types/VB6ServiceTypes';
+
+const logger = createLogger('PropertySystem');
+
 export enum VB6PropertyType {
   Get = 'Get',
   Let = 'Let',
@@ -25,13 +30,13 @@ export interface VB6PropertyParameter {
   name: string;
   type: string;
   isOptional?: boolean;
-  defaultValue?: any;
+  defaultValue?: PropertyValue;
   isByRef?: boolean;
   isParamArray?: boolean;
 }
 
-export interface VB6PropertyValue {
-  value: any;
+export interface VB6PropertyValueStore {
+  value: PropertyValue;
   type: string;
   isObject: boolean;
   lastModified: Date;
@@ -64,7 +69,7 @@ export class VB6PropertySystem {
     const propertyOverloads = classProperties.get(property.name)!;
     propertyOverloads.push(property);
 
-    console.log(`Registered ${property.propertyType} property: ${className}.${property.name}`);
+    logger.debug(`Registered ${property.propertyType} property: ${className}.${property.name}`);
   }
 
   /**
@@ -93,7 +98,7 @@ export class VB6PropertySystem {
       }
     }
 
-    console.log(`Created instance: ${id} of class ${className}`);
+    logger.debug(`Created instance: ${id} of class ${className}`);
     return id;
   }
 
@@ -474,7 +479,7 @@ export class VB6PropertySystem {
   destroyInstance(instanceId: string): void {
     this.propertyValues.delete(instanceId);
     this.propertyAccessors.delete(instanceId);
-    console.log(`Destroyed instance: ${instanceId}`);
+    logger.debug(`Destroyed instance: ${instanceId}`);
   }
 
   /**

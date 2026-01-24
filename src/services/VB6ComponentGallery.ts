@@ -4,6 +4,10 @@
  * Provides component browsing, installation, registration, and dependency management
  */
 
+import { createLogger } from './LoggingService';
+
+const logger = createLogger('ComponentGallery');
+
 export enum VB6ComponentType {
   OCX_CONTROL = 'ocx',
   DLL_LIBRARY = 'dll',
@@ -640,9 +644,9 @@ export class VB6ComponentGallery {
   private async simulateInstallation(component: VB6ComponentInfo, options: VB6ComponentInstallOptions): Promise<void> {
     return new Promise(resolve => {
       setTimeout(() => {
-        console.log(`Installing component: ${component.name}`);
-        console.log(`File: ${component.fileName}`);
-        console.log(`Options:`, options);
+        logger.debug(`Installing component: ${component.name}`);
+        logger.debug(`File: ${component.fileName}`);
+        logger.debug(`Options:`, options);
         resolve();
       }, 1000);
     });
@@ -651,7 +655,7 @@ export class VB6ComponentGallery {
   private async simulateUninstallation(component: VB6ComponentInfo): Promise<void> {
     return new Promise(resolve => {
       setTimeout(() => {
-        console.log(`Uninstalling component: ${component.name}`);
+        logger.debug(`Uninstalling component: ${component.name}`);
         resolve();
       }, 500);
     });
@@ -660,12 +664,12 @@ export class VB6ComponentGallery {
   private async simulateRegistration(component: VB6ComponentInfo): Promise<void> {
     return new Promise(resolve => {
       setTimeout(() => {
-        console.log(`Registering component: ${component.name}`);
+        logger.debug(`Registering component: ${component.name}`);
         if (component.clsid) {
-          console.log(`CLSID: ${component.clsid}`);
+          logger.debug(`CLSID: ${component.clsid}`);
         }
         if (component.progId) {
-          console.log(`ProgID: ${component.progId}`);
+          logger.debug(`ProgID: ${component.progId}`);
         }
         resolve();
       }, 500);
@@ -708,35 +712,35 @@ export const VB6ComponentGalleryInstance = VB6ComponentGallery.getInstance();
 // Helper functions for VB6 compatibility
 export function LoadComponentLibrary(path: string): boolean {
   try {
-    console.log(`Loading component library: ${path}`);
+    logger.debug(`Loading component library: ${path}`);
     // In a real implementation, would load the actual library
     return true;
   } catch (error) {
-    console.error(`Error loading component library: ${error}`);
+    logger.error(`Error loading component library: ${error}`);
     return false;
   }
 }
 
 export function RegisterComponent(path: string): boolean {
   try {
-    console.log(`Registering component: ${path}`);
+    logger.debug(`Registering component: ${path}`);
     // In a real implementation, would register with Windows registry
     return true;
   } catch (error) {
-    console.error(`Error registering component: ${error}`);
+    logger.error(`Error registering component: ${error}`);
     return false;
   }
 }
 
 export function UnregisterComponent(clsid: string): boolean {
   try {
-    console.log(`Unregistering component: ${clsid}`);
+    logger.debug(`Unregistering component: ${clsid}`);
     // In a real implementation, would unregister from Windows registry
     return true;
   } catch (error) {
-    console.error(`Error unregistering component: ${error}`);
+    logger.error(`Error unregistering component: ${error}`);
     return false;
   }
 }
 
-console.log('VB6 Component Gallery initialized with built-in component library');
+logger.info('VB6 Component Gallery initialized with built-in component library');

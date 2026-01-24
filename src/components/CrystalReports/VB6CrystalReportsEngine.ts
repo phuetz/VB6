@@ -23,6 +23,7 @@
  */
 
 import { VB6DataEnvironment, DERecordset } from '../../data/VB6DataEnvironment';
+import { safeMathEvaluator } from '../../utils/safeExpressionEvaluator';
 
 // ============================================================================
 // CRYSTAL REPORTS TYPES & CONSTANTS
@@ -462,10 +463,10 @@ export class VB6CrystalReportsEngine {
         return currentRecord?.[fieldName] || '';
       });
 
-      // Évaluer expressions mathématiques simples
-      if (/^[\\d\\s+\\-*/%()]+$/.test(result)) {
+      // Évaluer expressions mathématiques simples (sécurisé sans eval)
+      if (/^[\d\s+\-*/(),.]+$/.test(result)) {
         try {
-          return eval(result);
+          return safeMathEvaluator(result);
         } catch {
           return result;
         }

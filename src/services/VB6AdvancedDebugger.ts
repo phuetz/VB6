@@ -1,10 +1,11 @@
 /**
  * VB6 Advanced Debugger Service
- * 
+ *
  * Enhanced debugging capabilities with conditional breakpoints, tracepoints, and more
  */
 
 import { DebugState, DebugFrame, WatchExpression } from '../types/extended';
+import { DebugValue, EvaluationContext, MemorySnapshot } from './types/VB6ServiceTypes';
 
 // Enhanced breakpoint types
 export interface Breakpoint {
@@ -20,7 +21,7 @@ export interface Breakpoint {
 
 export interface DebugVariable {
   name: string;
-  value: any;
+  value: DebugValue;
   type: string;
   scope: 'local' | 'module' | 'global';
   canEdit: boolean;
@@ -245,13 +246,13 @@ export class VB6AdvancedDebugger {
   }
 
   // Enhanced expression evaluation with timeout
-  async evaluateExpression(expression: string, timeout?: number): Promise<any> {
+  async evaluateExpression(expression: string, timeout?: number): Promise<DebugValue> {
     return new Promise((resolve, reject) => {
       const timeoutMs = timeout || this.options.evaluationTimeout;
       const timer = setTimeout(() => {
         reject(new Error('Evaluation timeout'));
       }, timeoutMs);
-      
+
       try {
         const context = this.createEvaluationContext();
         const func = new Function(...Object.keys(context), `return ${expression}`);
@@ -304,8 +305,8 @@ export class VB6AdvancedDebugger {
   }
 
   // Handle exceptions
-  private async handleException(error: any): Promise<void> {
-    const exceptionType = error.constructor.name || 'Error';
+  private async handleException(error: Error | { constructor?: { name?: string }; message?: string }): Promise<void> {
+    const exceptionType = error.constructor?.name || 'Error';
     const exceptionBreakpoint = this.exceptionBreakpoints.get(exceptionType);
     
     if (exceptionBreakpoint && exceptionBreakpoint.enabled) {
@@ -438,12 +439,12 @@ export class VB6AdvancedDebugger {
   }
 
   // Get detailed type information
-  private getVariableType(value: any): string {
+  private getVariableType(value: DebugValue): string {
     if (value === null) return 'Null';
     if (value === undefined) return 'Empty';
     if (Array.isArray(value)) return `Array(${value.length})`;
     if (value instanceof Date) return 'Date';
-    if (typeof value === 'object') return value.constructor?.name || 'Object';
+    if (typeof value === 'object') return (value as object).constructor?.name || 'Object';
     return typeof value;
   }
 
@@ -723,8 +724,8 @@ export class VB6AdvancedDebugger {
   // Private members from base class
   private profilingData?: ProfilingData;
   
-  private createEvaluationContext(): any {
-    const context: any = {};
+  private createEvaluationContext(): EvaluationContext {
+    const context: EvaluationContext = {};
 
     // Add current variables
     this.variables.forEach((variable, key) => {
@@ -754,10 +755,10 @@ export class VB6AdvancedDebugger {
     context.Int = Math.floor;
     context.Round = Math.round;
     context.Sqr = Math.sqrt;
-    context.IsNull = (val: any) => val === null;
-    context.IsEmpty = (val: any) => val === undefined || val === '';
-    context.IsNumeric = (val: any) => !isNaN(Number(val));
-    context.TypeName = (val: any) => this.getVariableType(val);
+    context.IsNull = (val: DebugValue) => val === null;
+    context.IsEmpty = (val: DebugValue) => val === undefined || val === '';
+    context.IsNumeric = (val: DebugValue) => !isNaN(Number(val));
+    context.TypeName = (val: DebugValue) => this.getVariableType(val);
 
     return context;
   }
@@ -856,16 +857,16 @@ export class VB6AdvancedDebugger {
     return line % 15 === 0;
   }
   
-  private getVariableValue(name: string): any {
+  private getVariableValue(name: string): DebugValue {
     const variable = this.variables.get(name);
     if (variable) {
       return variable.value;
     }
-    
+
     if (this.currentFrame && this.currentFrame.variables[name] !== undefined) {
       return this.currentFrame.variables[name];
     }
-    
+
     return undefined;
   }
   
@@ -974,7 +975,7 @@ export class VB6AdvancedDebugger {
     this.notifyStateChange();
   }
 
-  setVariableValue(name: string, value: any): void {
+  setVariableValue(name: string, value: DebugValue): void {
     const variable = this.variables.get(name);
     if (variable) {
       variable.value = value;
@@ -990,7 +991,7 @@ interface DataBreakpoint {
   variableName: string;
   accessType: 'read' | 'write' | 'readWrite';
   enabled: boolean;
-  lastValue: any;
+  lastValue: DebugValue;
 }
 
 interface StepFilter {
@@ -1012,7 +1013,7 @@ interface ProfilingData {
   startTime: number;
   functionCalls: Map<string, FunctionProfileData>;
   lineExecutions: Map<string, number>;
-  memorySnapshots: any[];
+  memorySnapshots: MemorySnapshot[];
 }
 
 interface FunctionProfileData {

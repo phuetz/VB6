@@ -107,26 +107,37 @@ export const MMControl: React.FC<MMControlProps> = ({
 
   // Update timer for position tracking
   useEffect(() => {
+    // Clear any existing timer first
+    if (updateTimerRef.current) {
+      clearInterval(updateTimerRef.current);
+      updateTimerRef.current = undefined;
+    }
+
     if (updateInterval > 0 && !isDesignMode) {
+      const controlName = control.name;
+      const media = mediaRef.current;
+
       updateTimerRef.current = setInterval(() => {
-        if (mediaRef.current && !mediaRef.current.paused) {
-          const newPosition = Math.floor(mediaRef.current.currentTime * 1000);
+        if (media && !media.paused) {
+          const newPosition = Math.floor(media.currentTime * 1000);
           setCurrentPosition(newPosition);
           onPropertyChange?.('position', newPosition);
-          
+
           if (window.VB6Runtime?.fireEvent) {
-            window.VB6Runtime.fireEvent(control.name, 'PositionChange', newPosition);
+            window.VB6Runtime.fireEvent(controlName, 'PositionChange', newPosition);
           }
         }
       }, updateInterval);
-
-      return () => {
-        if (updateTimerRef.current) {
-          clearInterval(updateTimerRef.current);
-        }
-      };
     }
-  }, [updateInterval, isDesignMode, control.name, mediaRef, onPropertyChange]);
+
+    // Cleanup function that always runs
+    return () => {
+      if (updateTimerRef.current) {
+        clearInterval(updateTimerRef.current);
+        updateTimerRef.current = undefined;
+      }
+    };
+  }, [updateInterval, isDesignMode, control.name, onPropertyChange]);
 
   // Media event handlers
   const handleLoadedMetadata = useCallback(() => {

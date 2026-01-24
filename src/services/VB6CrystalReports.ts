@@ -4,6 +4,10 @@
  * Supports report design, data binding, parameters, and export functionality
  */
 
+import { createLogger } from './LoggingService';
+
+const logger = createLogger('CrystalReports');
+
 export enum CrystalReportType {
   STANDARD = 'standard',
   SUBREPORT = 'subreport',
@@ -753,7 +757,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         try {
-          console.log(`Opening Crystal Report: ${fileName}`);
+          logger.debug(`Opening Crystal Report: ${fileName}`);
           
           // Check if already loaded
           const existingReport = Array.from(this.reports.values()).find(r => r.fileName === fileName);
@@ -820,7 +824,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
   async saveReport(report: CrystalReport, fileName?: string): Promise<boolean> {
     return new Promise((resolve) => {
       setTimeout(() => {
-        console.log(`Saving Crystal Report: ${fileName || report.fileName}`);
+        logger.debug(`Saving Crystal Report: ${fileName || report.fileName}`);
         if (fileName) {
           report.fileName = fileName;
         }
@@ -831,14 +835,14 @@ export class VB6CrystalReports implements CrystalReportEngine {
   }
 
   closeReport(report: CrystalReport): boolean {
-    console.log(`Closing Crystal Report: ${report.name}`);
+    logger.debug(`Closing Crystal Report: ${report.name}`);
     this.reports.delete(report.id);
     return true;
   }
 
   // Data Operations
   setDataSource(report: CrystalReport, dataSource: CrystalDataSource): boolean {
-    console.log(`Setting data source for report: ${report.name}`);
+    logger.debug(`Setting data source for report: ${report.name}`);
     
     // Replace or add data source
     const existingIndex = report.dataSources.findIndex(ds => ds.id === dataSource.id);
@@ -853,7 +857,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
   }
 
   setParameters(report: CrystalReport, parameters: Map<string, any>): boolean {
-    console.log(`Setting parameters for report: ${report.name}`);
+    logger.debug(`Setting parameters for report: ${report.name}`);
     
     for (const [paramName, value] of parameters) {
       const param = report.parameters.find(p => p.name === paramName);
@@ -868,7 +872,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
   async refreshData(report: CrystalReport): Promise<boolean> {
     return new Promise((resolve) => {
       setTimeout(() => {
-        console.log(`Refreshing data for report: ${report.name}`);
+        logger.debug(`Refreshing data for report: ${report.name}`);
         resolve(true);
       }, 1000);
     });
@@ -878,7 +882,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
   async printReport(report: CrystalReport, showDialog: boolean = true): Promise<boolean> {
     return new Promise((resolve) => {
       setTimeout(() => {
-        console.log(`Printing report: ${report.name} (Show Dialog: ${showDialog})`);
+        logger.debug(`Printing report: ${report.name} (Show Dialog: ${showDialog})`);
         if (showDialog) {
           const proceed = window.confirm(`Print ${report.name}?`);
           resolve(proceed);
@@ -892,7 +896,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
   async previewReport(report: CrystalReport): Promise<boolean> {
     return new Promise((resolve) => {
       setTimeout(() => {
-        console.log(`Previewing report: ${report.name}`);
+        logger.debug(`Previewing report: ${report.name}`);
         // In a real implementation, would show the report viewer
         if (this.viewer) {
           this.viewer.reportSource = report;
@@ -906,12 +910,12 @@ export class VB6CrystalReports implements CrystalReportEngine {
   async exportReport(report: CrystalReport, format: CrystalExportFormat, fileName: string): Promise<boolean> {
     return new Promise((resolve) => {
       setTimeout(() => {
-        console.log(`Exporting report ${report.name} to ${format.toUpperCase()}: ${fileName}`);
-        
+        logger.debug(`Exporting report ${report.name} to ${format.toUpperCase()}: ${fileName}`);
+
         // Simulate export process
         const exportSize = Math.floor(Math.random() * 1000000) + 50000; // 50KB to 1MB
-        console.log(`Export completed: ${fileName} (${(exportSize / 1024).toFixed(1)} KB)`);
-        
+        logger.info(`Export completed: ${fileName} (${(exportSize / 1024).toFixed(1)} KB)`);
+
         this.viewer?.onExport?.(report, format);
         resolve(true);
       }, 1500);
@@ -920,7 +924,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
 
   // Report Manipulation
   addField(report: CrystalReport, sectionId: string, field: CrystalField): boolean {
-    console.log(`Adding field ${field.name} to section ${sectionId} in report ${report.name}`);
+    logger.debug(`Adding field ${field.name} to section ${sectionId} in report ${report.name}`);
     
     // Add field to report
     const existingField = report.fields.find(f => f.id === field.id);
@@ -955,7 +959,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
   }
 
   removeField(report: CrystalReport, fieldId: string): boolean {
-    console.log(`Removing field ${fieldId} from report ${report.name}`);
+    logger.debug(`Removing field ${fieldId} from report ${report.name}`);
     
     // Remove from fields array
     const fieldIndex = report.fields.findIndex(f => f.id === fieldId);
@@ -973,7 +977,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
   }
 
   moveField(report: CrystalReport, fieldId: string, left: number, top: number): boolean {
-    console.log(`Moving field ${fieldId} to position (${left}, ${top}) in report ${report.name}`);
+    logger.debug(`Moving field ${fieldId} to position (${left}, ${top}) in report ${report.name}`);
     
     // Find and move field objects in all sections
     for (const section of report.sections) {
@@ -990,7 +994,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
 
   // Formula Operations
   addFormula(report: CrystalReport, formula: CrystalFormula): boolean {
-    console.log(`Adding formula ${formula.name} to report ${report.name}`);
+    logger.debug(`Adding formula ${formula.name} to report ${report.name}`);
     
     const existingFormula = report.formulas.find(f => f.id === formula.id);
     if (!existingFormula) {
@@ -1003,7 +1007,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
   }
 
   editFormula(report: CrystalReport, formulaId: string, text: string): boolean {
-    console.log(`Editing formula ${formulaId} in report ${report.name}`);
+    logger.debug(`Editing formula ${formulaId} in report ${report.name}`);
     
     const formula = report.formulas.find(f => f.id === formulaId);
     if (formula) {
@@ -1016,7 +1020,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
   }
 
   deleteFormula(report: CrystalReport, formulaId: string): boolean {
-    console.log(`Deleting formula ${formulaId} from report ${report.name}`);
+    logger.debug(`Deleting formula ${formulaId} from report ${report.name}`);
     
     const formulaIndex = report.formulas.findIndex(f => f.id === formulaId);
     if (formulaIndex >= 0) {
@@ -1167,4 +1171,4 @@ export function CreateObject(className: string): any {
   }
 }
 
-console.log('VB6 Crystal Reports Integration initialized with report engine and viewer support');
+logger.info('VB6 Crystal Reports Integration initialized with report engine and viewer support');

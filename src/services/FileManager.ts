@@ -1,6 +1,9 @@
 import { Project } from '../types/extended';
 import JSZip from 'jszip';
 import { parseVBP } from '../utils/vb6ProjectImporter';
+import { createLogger } from './LoggingService';
+
+const logger = createLogger('FileManager');
 
 export class FileManager {
   static async openProject(): Promise<Project | null> {
@@ -23,7 +26,7 @@ export class FileManager {
             return await fileHandle.getFile();
           } catch (err) {
             // User cancelled or API not available - fall through to input fallback
-            console.warn('File System Access API failed, using fallback:', err);
+            logger.warn('File System Access API failed, using fallback:', err);
           }
         }
 
@@ -143,7 +146,7 @@ export class FileManager {
 
       return this.safeParseJSON(content);
     } catch (error) {
-      console.error('Error opening project:', error);
+      logger.error('Error opening project:', error);
       return null;
     }
   }
@@ -184,7 +187,7 @@ export class FileManager {
           return true;
         } catch (err) {
           // User cancelled or API not available - fall through to download fallback
-          console.warn('File System Access API failed, using fallback:', err);
+          logger.warn('File System Access API failed, using fallback:', err);
         }
       }
       
@@ -197,7 +200,7 @@ export class FileManager {
       URL.revokeObjectURL(url);
       return true;
     } catch (error) {
-      console.error('Error saving project:', error);
+      logger.error('Error saving project:', error);
       return false;
     }
   }
@@ -245,7 +248,7 @@ export class FileManager {
           return true;
         } catch (err) {
           // User cancelled or API not available - fall through to download fallback
-          console.warn('File System Access API failed, using fallback:', err);
+          logger.warn('File System Access API failed, using fallback:', err);
         }
       }
       
@@ -258,7 +261,7 @@ export class FileManager {
       URL.revokeObjectURL(url);
       return true;
     } catch (error) {
-      console.error('Error exporting project archive:', error);
+      logger.error('Error exporting project archive:', error);
       return false;
     }
   }
@@ -277,7 +280,7 @@ export class FileManager {
 
       return project;
     } catch (error) {
-      console.error('Error importing project archive:', error);
+      logger.error('Error importing project archive:', error);
       return null;
     }
   }
@@ -308,7 +311,7 @@ export class FileManager {
           return await file.text();
         } catch (err) {
           // User cancelled or API not available - fall through to input fallback
-          console.warn('File System Access API failed, using fallback:', err);
+          logger.warn('File System Access API failed, using fallback:', err);
         }
       }
       
@@ -331,7 +334,7 @@ export class FileManager {
         input.click();
       });
     } catch (error) {
-      console.error('Error importing file:', error);
+      logger.error('Error importing file:', error);
       return null;
     }
   }
@@ -475,13 +478,13 @@ window.${project.name} = ${project.name};
     for (const [key, value] of Object.entries(obj)) {
       // Skip dangerous properties
       if (dangerousProperties.includes(key)) {
-        console.warn(`Blocked dangerous property in JSON: ${key}`);
+        logger.warn(`Blocked dangerous property in JSON: ${key}`);
         continue;
       }
       
       // Validate property names - only allow safe characters
       if (!/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key) && key !== 'length') {
-        console.warn(`Blocked suspicious property name in JSON: ${key}`);
+        logger.warn(`Blocked suspicious property name in JSON: ${key}`);
         continue;
       }
       

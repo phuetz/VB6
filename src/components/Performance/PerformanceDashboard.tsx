@@ -5,9 +5,71 @@
  * showing metrics, bottlenecks, and optimization recommendations.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { performanceOptimizer } from '../../performance/PerformanceOptimizer';
-import { useVB6Performance } from '../../stores/OptimizedVB6Store';
+
+// Local types for performance tracking (migrated from OptimizedVB6Store)
+interface RenderMetrics {
+  controlsRendered: number;
+  renderTime: number;
+  lastRenderTimestamp: number;
+  averageRenderTime: number;
+  peakRenderTime: number;
+}
+
+interface OperationHistoryEntry {
+  type: string;
+  timestamp: number;
+  duration: number;
+  details?: Record<string, unknown>;
+}
+
+// Local hook to replace useVB6Performance from deleted OptimizedVB6Store
+const useLocalPerformanceMetrics = () => {
+  const [renderMetrics, setRenderMetrics] = useState<RenderMetrics>({
+    controlsRendered: 0,
+    renderTime: 0,
+    lastRenderTimestamp: 0,
+    averageRenderTime: 0,
+    peakRenderTime: 0
+  });
+  const [operationHistory, setOperationHistory] = useState<OperationHistoryEntry[]>([]);
+  const operationCountRef = useRef(0);
+
+  const recordOperation = useCallback((type: string, duration: number, details?: Record<string, unknown>) => {
+    setOperationHistory(prev => {
+      const newEntry: OperationHistoryEntry = {
+        type,
+        timestamp: Date.now(),
+        duration,
+        details
+      };
+      const updated = [...prev, newEntry];
+      // Keep only last 1000 entries
+      return updated.slice(-1000);
+    });
+    operationCountRef.current++;
+  }, []);
+
+  const updateRenderMetrics = useCallback((metrics: Partial<RenderMetrics>) => {
+    setRenderMetrics(prev => {
+      const updated = { ...prev, ...metrics };
+      if (metrics.renderTime) {
+        updated.peakRenderTime = Math.max(prev.peakRenderTime, metrics.renderTime);
+        // Simple rolling average
+        updated.averageRenderTime = (prev.averageRenderTime * 0.9) + (metrics.renderTime * 0.1);
+      }
+      return updated;
+    });
+  }, []);
+
+  return {
+    renderMetrics,
+    operationHistory,
+    recordOperation,
+    updateRenderMetrics
+  };
+};
 
 interface PerformanceData {
   timestamp: number;
@@ -24,7 +86,7 @@ export const PerformanceDashboard: React.FC = () => {
   const [selectedMetric, setSelectedMetric] = useState<keyof PerformanceData>('fps');
   const [autoOptimize, setAutoOptimize] = useState(false);
   
-  const { renderMetrics, operationHistory, recordOperation } = useVB6Performance();
+  const { renderMetrics, operationHistory, recordOperation } = useLocalPerformanceMetrics();
   
   // Real-time metrics
   const [realTimeMetrics, setRealTimeMetrics] = useState({

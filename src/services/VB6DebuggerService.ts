@@ -3,6 +3,7 @@
 
 import { vb6Compiler } from './VB6Compiler';
 import { vb6Runtime } from '../runtime/VB6Runtime';
+import { DebugValue, DebugEventData, ExecutionContext, EventListener } from './types/VB6ServiceTypes';
 
 // Debugger interfaces
 export interface Breakpoint {
@@ -19,7 +20,7 @@ export interface Breakpoint {
 export interface WatchExpression {
   id: string;
   expression: string;
-  value?: any;
+  value?: DebugValue;
   type?: string;
   error?: string;
   expandable?: boolean;
@@ -45,7 +46,7 @@ export interface VariableScope {
 
 export interface Variable {
   name: string;
-  value: any;
+  value: DebugValue;
   type: string;
   readable: boolean;
   writable: boolean;
@@ -79,24 +80,24 @@ export enum StepType {
 // Debug events
 export interface DebugEvent {
   type: 'breakpoint' | 'step' | 'exception' | 'output' | 'statusChanged';
-  data: any;
+  data: DebugEventData;
   timestamp: Date;
 }
 
 // Browser-compatible EventEmitter
 class DebugEventEmitter {
-  private listeners: { [event: string]: ((...args: any[]) => any)[] } = {};
+  private listeners: { [event: string]: EventListener[] } = {};
 
-  on(event: string, callback: (...args: any[]) => any): void {
+  on(event: string, callback: EventListener): void {
     if (!this.listeners[event]) {
       this.listeners[event] = [];
     }
     this.listeners[event].push(callback);
   }
 
-  off(event: string, callback?: (...args: any[]) => any): void {
+  off(event: string, callback?: EventListener): void {
     if (!this.listeners[event]) return;
-    
+
     if (callback) {
       this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
     } else {
@@ -104,9 +105,9 @@ class DebugEventEmitter {
     }
   }
 
-  emit(event: string, data: any): void {
+  emit(event: string, data: DebugEventData): void {
     if (!this.listeners[event]) return;
-    
+
     this.listeners[event].forEach(callback => {
       try {
         callback(data);
@@ -129,7 +130,7 @@ export class VB6DebuggerService {
   };
   
   // Execution context
-  private executionContext: any = null;
+  private executionContext: ExecutionContext | null = null;
   private sourceMap: Map<string, string[]> = new Map(); // file -> lines
   private pauseOnNextStatement = false;
   private stepDepth = 0;

@@ -1,6 +1,10 @@
 // Service de gestion des répertoires favoris
 // Permet de gérer les répertoires favoris de l'utilisateur avec persistance
 
+import { createLogger } from './LoggingService';
+
+const logger = createLogger('Favorites');
+
 export interface FavoriteDirectory {
   id: string;
   path: string;
@@ -41,7 +45,7 @@ export class FavoritesService {
         }));
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des favoris:', error);
+      logger.error('Erreur lors du chargement des favoris:', error);
       this.favorites = [];
     }
   }
@@ -52,7 +56,7 @@ export class FavoritesService {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.favorites));
       this.notifyListeners();
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde des favoris:', error);
+      logger.error('Erreur lors de la sauvegarde des favoris:', error);
     }
   }
 
@@ -227,7 +231,7 @@ export class FavoritesService {
         return true;
       }
     } catch (error) {
-      console.error('Erreur lors de l\'importation des favoris:', error);
+      logger.error('Erreur lors de l\'importation des favoris:', error);
     }
     return false;
   }

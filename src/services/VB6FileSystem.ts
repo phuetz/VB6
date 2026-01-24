@@ -3,6 +3,10 @@
  * Provides compatibility with VB6 file operations: Open, Get, Put, Close, etc.
  */
 
+import { createLogger } from './LoggingService';
+
+const logger = createLogger('FileSystem');
+
 export enum VB6FileMode {
   Input = 1,      // For Input
   Output = 2,     // For Output  
@@ -459,7 +463,7 @@ export class VB6FileSystem {
       throw new Error(`File not found: ${pathname}`);
     }
     // In a real implementation, would store attributes
-    console.log(`SetAttr: ${pathname} = ${attributes}`);
+    logger.debug(`SetAttr: ${pathname} = ${attributes}`);
   }
 
   /**

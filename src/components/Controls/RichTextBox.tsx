@@ -282,17 +282,22 @@ const RichTextBox: React.FC<RichTextBoxProps> = ({
     };
   }, [isDragging, isResizing, dragStart, resizeCorner, onMove, onResize]);
 
-  // Set up content editable events
+  // Set up content editable events with proper cleanup
   useEffect(() => {
     const editor = editorRef.current;
     if (!editor) return;
 
-    editor.addEventListener('input', handleTextChange);
-    document.addEventListener('selectionchange', handleSelectionChange);
+    // Create stable references for cleanup
+    const textChangeHandler = handleTextChange;
+    const selectionChangeHandler = handleSelectionChange;
 
+    editor.addEventListener('input', textChangeHandler);
+    document.addEventListener('selectionchange', selectionChangeHandler);
+
+    // Cleanup function with captured references
     return () => {
-      editor.removeEventListener('input', handleTextChange);
-      document.removeEventListener('selectionchange', handleSelectionChange);
+      editor.removeEventListener('input', textChangeHandler);
+      document.removeEventListener('selectionchange', selectionChangeHandler);
     };
   }, [handleTextChange, handleSelectionChange]);
 

@@ -4,6 +4,11 @@
  * Compatible with VB6 Data Environment and Data Report Designer
  */
 
+import { createLogger } from './LoggingService';
+import { DataParameterValue, DataEnvRecord, DataEnvEventPayload } from './types/VB6ServiceTypes';
+
+const logger = createLogger('DataEnvironment');
+
 export enum DataConnectionType {
   OLEDB = 'oledb',
   ODBC = 'odbc',
@@ -118,8 +123,8 @@ export interface DataParameter {
   size: number;
   precision?: number;
   scale?: number;
-  value?: any;
-  defaultValue?: any;
+  value?: DataParameterValue;
+  defaultValue?: DataParameterValue;
   allowNull: boolean;
 }
 
@@ -132,8 +137,8 @@ export interface DataField {
   allowNull: boolean;
   primaryKey: boolean;
   autoIncrement: boolean;
-  defaultValue?: any;
-  originalValue?: any;
+  defaultValue?: DataParameterValue;
+  originalValue?: DataParameterValue;
 }
 
 export enum DataFieldType {
@@ -225,7 +230,7 @@ export interface DataEnvironment {
 export interface DataEnvironmentEvent {
   type: 'connection_open' | 'connection_close' | 'command_execute' | 'recordset_open' | 'recordset_close' | 'error';
   source: string;
-  data: any;
+  data: DataEnvEventPayload;
   timestamp: Date;
 }
 
@@ -459,7 +464,7 @@ export class VB6DataEnvironment {
     const env = environmentId ? this.environments.get(environmentId) : this.currentEnvironment;
     if (env) {
       env.modified = new Date();
-      console.log(`Saved Data Environment: ${env.name}`);
+      logger.info(`Saved Data Environment: ${env.name}`);
       return true;
     }
     return false;
@@ -544,10 +549,10 @@ export class VB6DataEnvironment {
       
       connection.state = 'open';
       connection.lastUsed = new Date();
-      
+
       this.fireEvent('connection_open', connectionId, { connection });
-      console.log(`Opened connection: ${connection.name}`);
-      
+      logger.info(`Opened connection: ${connection.name}`);
+
       return true;
     } catch (error) {
       connection.state = 'broken';
@@ -563,8 +568,8 @@ export class VB6DataEnvironment {
 
     connection.state = 'closed';
     this.fireEvent('connection_close', connectionId, { connection });
-    console.log(`Closed connection: ${connection.name}`);
-    
+    logger.info(`Closed connection: ${connection.name}`);
+
     return true;
   }
 
@@ -576,16 +581,16 @@ export class VB6DataEnvironment {
         return;
       }
 
-      console.log(`Testing connection: ${connection.name}`);
-      
+      logger.debug(`Testing connection: ${connection.name}`);
+
       // Simulate connection test
       setTimeout(() => {
         const success = Math.random() > 0.1; // 90% success rate
         if (success) {
-          console.log(`Connection test successful: ${connection.name}`);
+          logger.info(`Connection test successful: ${connection.name}`);
         } else {
           connection.lastError = 'Connection timeout';
-          console.log(`Connection test failed: ${connection.name}`);
+          logger.warn(`Connection test failed: ${connection.name}`);
         }
         resolve(success);
       }, 1000);
@@ -641,7 +646,7 @@ export class VB6DataEnvironment {
     return connection.commands.find(cmd => cmd.id === commandId) || null;
   }
 
-  async executeCommand(connectionId: string, commandId: string, parameters?: Map<string, any>): Promise<any[]> {
+  async executeCommand(connectionId: string, commandId: string, parameters?: Map<string, DataParameterValue>): Promise<DataEnvRecord[]> {
     const connection = this.getConnection(connectionId);
     const command = this.getCommand(connectionId, commandId);
     
@@ -680,7 +685,7 @@ export class VB6DataEnvironment {
       connection.state = 'open';
       this.fireEvent('command_execute', commandId, { command, connection, recordCount: sampleData.length });
 
-      console.log(`Executed command: ${command.name} (${sampleData.length} records)`);
+      logger.info(`Executed command: ${command.name} (${sampleData.length} records)`);
       return sampleData;
     } catch (error) {
       connection.state = 'broken';
@@ -690,53 +695,53 @@ export class VB6DataEnvironment {
     }
   }
 
-  private generateSampleData(command: DataCommand): any[] {
+  private generateSampleData(command: DataCommand): DataEnvRecord[] {
     const sampleCount = Math.floor(Math.random() * 20) + 5; // 5-25 records
-    const data: any[] = [];
+    const data: DataEnvRecord[] = [];
 
     for (let i = 0; i < sampleCount; i++) {
-      const record: any = {};
-      
+      const record: DataEnvRecord = {};
+
       for (const field of command.fields) {
         record[field.name] = this.generateSampleValue(field);
       }
-      
+
       data.push(record);
     }
 
     return data;
   }
 
-  private generateSampleValue(field: DataField): any {
+  private generateSampleValue(field: DataField): DataParameterValue {
     switch (field.type) {
       case DataFieldType.INTEGER:
       case DataFieldType.SMALLINT:
       case DataFieldType.BIGINT:
         return Math.floor(Math.random() * 1000) + 1;
-      
+
       case DataFieldType.SINGLE:
       case DataFieldType.DOUBLE:
       case DataFieldType.DECIMAL:
       case DataFieldType.NUMERIC:
         return Math.random() * 1000;
-      
+
       case DataFieldType.CURRENCY:
         return Math.random() * 100;
-      
+
       case DataFieldType.BOOLEAN:
         return Math.random() > 0.5;
-      
+
       case DataFieldType.DATE:
       case DataFieldType.DBTIMESTAMP:
         return new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000);
-      
+
       case DataFieldType.VARCHAR:
       case DataFieldType.CHAR:
       case DataFieldType.BSTR: {
         const strings = ['Sample', 'Test', 'Data', 'Value', 'Example', 'Demo', 'Item'];
         return strings[Math.floor(Math.random() * strings.length)] + ' ' + (Math.floor(Math.random() * 100) + 1);
       }
-      
+
       default:
         return `Sample ${field.type}`;
     }
@@ -812,9 +817,9 @@ export class VB6DataEnvironment {
     }
   }
 
-  private fireEvent(type: string, source: string, data: any): void {
+  private fireEvent(type: DataEnvironmentEvent['type'], source: string, data: DataEnvEventPayload): void {
     const event: DataEnvironmentEvent = {
-      type: type as any,
+      type,
       source,
       data,
       timestamp: new Date()
@@ -826,7 +831,7 @@ export class VB6DataEnvironment {
         try {
           handler(event);
         } catch (error) {
-          console.error(`Error in event handler for ${type}:`, error);
+          logger.error(`Error in event handler for ${type}:`, error);
         }
       }
     }
@@ -962,12 +967,12 @@ export class VB6DataEnvironment {
   }
 
   // VB6 Compatibility
-  createDataEnvironmentObject(): any {
+  createDataEnvironmentObject(): VB6DataEnvironmentCompatObject {
     return {
       Connections: {
         Add: (name: string, connectionString: string) => {
           if (!this.currentEnvironment) return null;
-          
+
           const connection = this.addConnection({
             name,
             displayName: name,
@@ -983,7 +988,7 @@ export class VB6DataEnvironment {
             state: 'closed',
             connectionString
           });
-          
+
           return {
             Name: connection.name,
             ConnectionString: connection.connectionString,
@@ -992,7 +997,7 @@ export class VB6DataEnvironment {
             Execute: (sql: string) => this.executeCommand(connection.id, sql)
           };
         },
-        
+
         Item: (name: string) => {
           const connection = this.getAllConnections().find(c => c.name === name);
           return connection ? {
@@ -1002,12 +1007,12 @@ export class VB6DataEnvironment {
           } : null;
         }
       },
-      
+
       Commands: {
         Add: (name: string, connectionName: string) => {
           const connection = this.getAllConnections().find(c => c.name === connectionName);
           if (!connection) return null;
-          
+
           const command = this.addCommand(connection.id, {
             name,
             displayName: name,
@@ -1019,11 +1024,11 @@ export class VB6DataEnvironment {
             prepared: false,
             fields: []
           });
-          
+
           return {
             Name: command.name,
             CommandText: command.commandText,
-            Execute: (params?: any[]) => this.executeCommand(connection.id, command.id)
+            Execute: (_params?: DataParameterValue[]) => this.executeCommand(connection.id, command.id)
           };
         }
       }
@@ -1031,7 +1036,41 @@ export class VB6DataEnvironment {
   }
 }
 
+/** VB6-compatible connection wrapper */
+interface VB6ConnectionWrapper {
+  Name: string;
+  ConnectionString: string;
+  Open: () => Promise<boolean>;
+  Close: () => boolean;
+  Execute: (sql: string) => Promise<DataEnvRecord[]>;
+}
+
+/** VB6-compatible connection info */
+interface VB6ConnectionInfo {
+  Name: string;
+  ConnectionString: string;
+  State: string;
+}
+
+/** VB6-compatible command wrapper */
+interface VB6CommandWrapper {
+  Name: string;
+  CommandText: string;
+  Execute: (_params?: DataParameterValue[]) => Promise<DataEnvRecord[]>;
+}
+
+/** VB6-compatible data environment object */
+interface VB6DataEnvironmentCompatObject {
+  Connections: {
+    Add: (name: string, connectionString: string) => VB6ConnectionWrapper | null;
+    Item: (name: string) => VB6ConnectionInfo | null;
+  };
+  Commands: {
+    Add: (name: string, connectionName: string) => VB6CommandWrapper | null;
+  };
+}
+
 // Global instance
 export const VB6DataEnvironmentInstance = VB6DataEnvironment.getInstance();
 
-console.log('VB6 Data Environment Designer initialized with complete database design capabilities');
+logger.info('VB6 Data Environment Designer initialized with complete database design capabilities');

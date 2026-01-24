@@ -6,6 +6,92 @@ import ControlArrayManager from '../utils/controlArrayManager';
 import { DebugState } from '../types/extended';
 import { authService } from '../services/AuthService';
 
+// Types pour le store VB6
+export type VB6PropertyValue = string | number | boolean | null | undefined | object;
+
+export interface StoreHistoryEntry {
+  controls: Control[];
+  nextId: number;
+  timestamp?: number;
+}
+
+export interface VB6ProjectData {
+  projectName?: string;
+  forms?: Array<{
+    id: number;
+    name: string;
+    caption: string;
+    controls: Control[];
+    properties?: Record<string, VB6PropertyValue>;
+  }>;
+  modules?: Array<{ name: string; code: string }>;
+  references?: string[];
+  settings?: Record<string, VB6PropertyValue>;
+}
+
+export interface VB6PerformanceMetric {
+  name: string;
+  value: number;
+  timestamp?: number;
+  category?: string;
+}
+
+export interface RefactoringOptions {
+  oldName?: string;
+  newName?: string;
+  scope?: 'local' | 'module' | 'project';
+  target?: string;
+}
+
+export interface StoreBreakpoint {
+  id: string;
+  file: string;
+  line: number;
+  enabled: boolean;
+  condition?: string;
+  hitCount?: number;
+}
+
+export interface IntelliSenseItem {
+  label: string;
+  kind: 'method' | 'property' | 'event' | 'variable' | 'constant' | 'keyword' | 'snippet';
+  detail?: string;
+  documentation?: string;
+  insertText?: string;
+}
+
+export interface VB6Error {
+  id: string;
+  type: 'error' | 'warning' | 'info';
+  message: string;
+  file?: string;
+  line?: number;
+  column?: number;
+  code?: string;
+}
+
+export interface VB6Snippet {
+  id: string;
+  name: string;
+  description?: string;
+  code: string;
+  category?: string;
+  language?: string;
+  usageCount: number;
+}
+
+export interface SnippetUpdate {
+  name?: string;
+  description?: string;
+  code?: string;
+  category?: string;
+}
+
+export interface BreakpointUpdate {
+  enabled?: boolean;
+  condition?: string;
+}
+
 interface VB6Store extends VB6State {
   // Debug state
   debugState: DebugState;
@@ -23,13 +109,13 @@ interface VB6Store extends VB6State {
   lastSaved?: Date | null;
   currentCode?: string;
   selectedControlId?: string;
-  history: any[];
+  history: StoreHistoryEntry[];
   historyIndex: number;
   
   // Actions
   createControl: (type: string, x?: number, y?: number) => void;
   addControl: (control: Control) => void; // For backward compatibility
-  updateControl: (controlId: number | string, propertyOrUpdates: string | object, value?: any) => void;
+  updateControl: (controlId: number | string, propertyOrUpdates: string | object, value?: VB6PropertyValue) => void;
   updateControls: (updatedControls: Control[]) => void;
   updateCode: (code: string) => void;
   insertCode: (code: string, position: number) => void;
@@ -39,7 +125,7 @@ interface VB6Store extends VB6State {
   selectControls: (controlIds: number[]) => void;
   selectControl: (controlId: number) => void; // Singular version for backward compatibility
   updatePerformanceMetrics: (metrics: { renderTime: number; memoryUsage: number; cpuUsage?: number; fps?: number }) => void;
-  loadProject: (projectData: any) => void;
+  loadProject: (projectData: VB6ProjectData) => void;
   copyControl: (controlId: string) => void;
   copyControls: () => void;
   pasteControls: () => void;
@@ -61,7 +147,7 @@ interface VB6Store extends VB6State {
     controlType?: string;
     position?: { x: number; y: number };
   }) => void;
-  updateFormProperty: (property: string, value: any) => void;
+  updateFormProperty: (property: string, value: VB6PropertyValue) => void;
   addConsoleOutput: (message: string) => void;
   clearConsole: () => void;
   setImmediateCommand: (command: string) => void;
@@ -71,7 +157,7 @@ interface VB6Store extends VB6State {
   pushHistory: (controls: Control[], nextId: number) => void;
   showTemplateManager: boolean;
   showOptionsDialog: boolean;
-  recordPerformanceMetrics: (metric: any) => void;
+  recordPerformanceMetrics: (metric: VB6PerformanceMetric) => void;
   clearPerformanceLogs: () => void;
   // Todo list
   todoItems: { id: string; text: string; completed: boolean }[];
@@ -514,7 +600,7 @@ End Function`,
       );
     },
 
-    updateControl: (controlId: number | string, propertyOrUpdates: string | object, value?: any) => {
+    updateControl: (controlId: number | string, propertyOrUpdates: string | object, value?: VB6PropertyValue) => {
       const state = get();
 
       // Find control by ID (support both string and number IDs)
@@ -857,7 +943,7 @@ End Function`,
       });
     },
 
-    updateFormProperty: (property: string, value: any) => {
+    updateFormProperty: (property: string, value: VB6PropertyValue) => {
       const state = get();
       set({
         formProperties: {
@@ -972,12 +1058,12 @@ End Function`,
     },
 
     // Refactoring
-    applyRefactoring: (type: string, options: any) => {
+    applyRefactoring: (type: string, options: RefactoringOptions) => {
       // Implementation would apply the refactoring and update code
     },
 
     // Breakpoint Management
-    addBreakpoint: (breakpoint: any) => {
+    addBreakpoint: (breakpoint: StoreBreakpoint) => {
       const state = get();
       set({
         breakpoints: [...state.breakpoints, breakpoint],
@@ -991,7 +1077,7 @@ End Function`,
       });
     },
 
-    updateBreakpoint: (id: string, updates: any) => {
+    updateBreakpoint: (id: string, updates: BreakpointUpdate) => {
       const state = get();
       set({
         breakpoints: state.breakpoints.map(bp => (bp.id === id ? { ...bp, ...updates } : bp)),
@@ -999,7 +1085,7 @@ End Function`,
     },
 
     // Enhanced IntelliSense
-    showIntelliSense: (position: { x: number; y: number }, items: any[]) => {
+    showIntelliSense: (position: { x: number; y: number }, items: IntelliSenseItem[]) => {
       set({
         intellisenseVisible: true,
         intellisensePosition: position,
@@ -1008,7 +1094,7 @@ End Function`,
     },
 
     // Error List Management
-    addError: (error: any) => {
+    addError: (error: VB6Error) => {
       const state = get();
       set({
         errorList: [...state.errorList, error],
@@ -1022,7 +1108,7 @@ End Function`,
     },
 
     // Snippet Manager
-    insertSnippet: (snippet: any) => {
+    insertSnippet: (snippet: VB6Snippet) => {
       const state = get();
 
       if (state.showCodeEditor && state.selectedControls.length > 0 && state.selectedEvent) {
@@ -1046,14 +1132,14 @@ End Function`,
       }
     },
 
-    addSnippet: (snippet: any) => {
+    addSnippet: (snippet: VB6Snippet) => {
       const state = get();
       set({
         snippets: [...state.snippets, snippet],
       });
     },
 
-    updateSnippet: (id: string, updates: any) => {
+    updateSnippet: (id: string, updates: SnippetUpdate) => {
       const state = get();
       set({
         snippets: state.snippets.map(s => (s.id === id ? { ...s, ...updates } : s)),
@@ -1127,7 +1213,7 @@ End Function`,
       level: 'info' | 'warn' | 'error' | 'debug',
       source: string,
       message: string,
-      data?: any
+      data?: unknown
     ) => {
       const state = get();
 
@@ -1153,7 +1239,7 @@ End Function`,
       return log;
     },
 
-    recordPerformanceMetrics: (metric: any) => {
+    recordPerformanceMetrics: (metric: VB6PerformanceMetric) => {
       const state = get();
       // Keep last 500 metrics
       set({
@@ -1359,7 +1445,7 @@ End Function`,
       state.pushHistory([...state.controls, newControl], state.nextId + 1);
     },
 
-    loadProject: (projectData: any) => {
+    loadProject: (projectData: VB6ProjectData) => {
       try {
         set({
           projectName: projectData.projectName || projectData.name || 'Project1',

@@ -1,8 +1,12 @@
 /**
  * Git Integration Service for VB6 IDE
- * 
+ *
  * Provides version control capabilities through Git
  */
+
+import { createLogger } from './LoggingService';
+
+const logger = createLogger('Git');
 
 export interface GitStatus {
   branch: string;
@@ -85,7 +89,7 @@ export class GitIntegrationService {
       });
       return response.ok;
     } catch (error) {
-      console.error('Failed to initialize Git repository:', error);
+      logger.error('Failed to initialize Git repository:', error);
       return false;
     }
   }
@@ -103,7 +107,7 @@ export class GitIntegrationService {
       if (!response.ok) throw new Error('Failed to get Git status');
       return await response.json();
     } catch (error) {
-      console.error('Failed to get Git status:', error);
+      logger.error('Failed to get Git status:', error);
       return this.getEmptyStatus();
     }
   }
@@ -124,7 +128,7 @@ export class GitIntegrationService {
       });
       return response.ok;
     } catch (error) {
-      console.error('Failed to stage files:', error);
+      logger.error('Failed to stage files:', error);
       return false;
     }
   }
@@ -145,7 +149,7 @@ export class GitIntegrationService {
       });
       return response.ok;
     } catch (error) {
-      console.error('Failed to unstage files:', error);
+      logger.error('Failed to unstage files:', error);
       return false;
     }
   }
@@ -166,11 +170,11 @@ export class GitIntegrationService {
       });
       
       if (!response.ok) throw new Error('Failed to commit');
-      
+
       const result = await response.json();
       return result.hash;
     } catch (error) {
-      console.error('Failed to commit:', error);
+      logger.error('Failed to commit:', error);
       return null;
     }
   }
@@ -188,7 +192,7 @@ export class GitIntegrationService {
       if (!response.ok) throw new Error('Failed to get history');
       return await response.json();
     } catch (error) {
-      console.error('Failed to get history:', error);
+      logger.error('Failed to get history:', error);
       return [];
     }
   }
@@ -206,7 +210,7 @@ export class GitIntegrationService {
       if (!response.ok) throw new Error('Failed to get branches');
       return await response.json();
     } catch (error) {
-      console.error('Failed to get branches:', error);
+      logger.error('Failed to get branches:', error);
       return [];
     }
   }
@@ -227,7 +231,7 @@ export class GitIntegrationService {
       });
       return response.ok;
     } catch (error) {
-      console.error('Failed to create branch:', error);
+      logger.error('Failed to create branch:', error);
       return false;
     }
   }
@@ -248,7 +252,7 @@ export class GitIntegrationService {
       });
       return response.ok;
     } catch (error) {
-      console.error('Failed to checkout branch:', error);
+      logger.error('Failed to checkout branch:', error);
       return false;
     }
   }
@@ -272,10 +276,10 @@ export class GitIntegrationService {
         const error = await response.json();
         return { success: false, conflicts: error.conflicts };
       }
-      
+
       return { success: true };
     } catch (error) {
-      console.error('Failed to merge branch:', error);
+      logger.error('Failed to merge branch:', error);
       return { success: false };
     }
   }
@@ -293,7 +297,7 @@ export class GitIntegrationService {
       if (!response.ok) throw new Error('Failed to get diff');
       return await response.json();
     } catch (error) {
-      console.error('Failed to get diff:', error);
+      logger.error('Failed to get diff:', error);
       return null;
     }
   }
@@ -311,7 +315,7 @@ export class GitIntegrationService {
       if (!response.ok) throw new Error('Failed to get remotes');
       return await response.json();
     } catch (error) {
-      console.error('Failed to get remotes:', error);
+      logger.error('Failed to get remotes:', error);
       return [];
     }
   }
@@ -332,7 +336,7 @@ export class GitIntegrationService {
       });
       return response.ok;
     } catch (error) {
-      console.error('Failed to add remote:', error);
+      logger.error('Failed to add remote:', error);
       return false;
     }
   }
@@ -353,7 +357,7 @@ export class GitIntegrationService {
       });
       return response.ok;
     } catch (error) {
-      console.error('Failed to push:', error);
+      logger.error('Failed to push:', error);
       return false;
     }
   }
@@ -377,10 +381,10 @@ export class GitIntegrationService {
         const error = await response.json();
         return { success: false, conflicts: error.conflicts };
       }
-      
+
       return { success: true };
     } catch (error) {
-      console.error('Failed to pull:', error);
+      logger.error('Failed to pull:', error);
       return { success: false };
     }
   }
@@ -401,7 +405,7 @@ export class GitIntegrationService {
       });
       return response.ok;
     } catch (error) {
-      console.error('Failed to clone repository:', error);
+      logger.error('Failed to clone repository:', error);
       return false;
     }
   }
@@ -409,7 +413,7 @@ export class GitIntegrationService {
   // Simulation methods for development
 
   private simulateInit(): boolean {
-    console.log('Simulated: Git repository initialized');
+    logger.debug('Simulated: Git repository initialized');
     return true;
   }
 
@@ -430,18 +434,18 @@ export class GitIntegrationService {
   }
 
   private simulateStage(paths: string[]): boolean {
-    console.log('Simulated: Staged files:', paths);
+    logger.debug('Simulated: Staged files:', paths);
     return true;
   }
 
   private simulateUnstage(paths: string[]): boolean {
-    console.log('Simulated: Unstaged files:', paths);
+    logger.debug('Simulated: Unstaged files:', paths);
     return true;
   }
 
   private simulateCommit(message: string): string {
     const hash = Math.random().toString(36).substring(2, 9);
-    console.log('Simulated: Created commit', hash, 'with message:', message);
+    logger.debug('Simulated: Created commit', hash, 'with message:', message);
     return hash;
   }
 
@@ -483,17 +487,17 @@ export class GitIntegrationService {
   }
 
   private simulateCreateBranch(name: string): boolean {
-    console.log('Simulated: Created branch', name);
+    logger.debug('Simulated: Created branch', name);
     return true;
   }
 
   private simulateCheckout(branch: string): boolean {
-    console.log('Simulated: Switched to branch', branch);
+    logger.debug('Simulated: Switched to branch', branch);
     return true;
   }
 
   private simulateMerge(branch: string): { success: boolean; conflicts?: string[] } {
-    console.log('Simulated: Merged branch', branch);
+    logger.debug('Simulated: Merged branch', branch);
     // Simulate occasional conflicts
     if (Math.random() > 0.8) {
       return {

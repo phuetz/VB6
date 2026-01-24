@@ -8,6 +8,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useVB6Store } from '../../stores/vb6Store';
 import { Control } from '../../context/types';
+import { sanitizeCode } from '../../utils/htmlSanitizer';
 
 interface ShowcaseStep {
   id: string;
@@ -409,7 +410,8 @@ End Sub`;
         
         <div className="bg-gray-900 p-4 rounded h-96 overflow-y-auto font-mono text-sm">
           <pre className="text-gray-300">
-            <code dangerouslySetInnerHTML={{ __html: highlightVB6Code(code) }} />
+            {/* SECURITY: HTML sanitizé via DOMPurify (TASK-004) */}
+            <code dangerouslySetInnerHTML={{ __html: sanitizeCode(highlightVB6Code(code)) }} />
           </pre>
         </div>
         

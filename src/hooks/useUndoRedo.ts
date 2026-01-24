@@ -6,6 +6,21 @@ import { undoRedoService, UndoRedoAction, UndoRedoState } from '../services/Undo
 import { useVB6Store } from '../stores/vb6Store';
 import { Control } from '../context/types';
 
+// Snapshot types for undo/redo operations
+export interface PositionSnapshot {
+  id: number;
+  x: number;
+  y: number;
+}
+
+export interface SizeSnapshot extends PositionSnapshot {
+  width: number;
+  height: number;
+}
+
+// Property value type - can be any VB6 compatible value
+export type PropertyValue = string | number | boolean | null | undefined | Date | object;
+
 export interface UseUndoRedoReturn {
   // State
   canUndo: boolean;
@@ -24,7 +39,7 @@ export interface UseUndoRedoReturn {
   recordDelete: (controls: Control[]) => void;
   recordMove: (controls: Control[], beforePositions: Array<{id: number; x: number; y: number}>) => void;
   recordResize: (controls: Control[], beforeSizes: Array<{id: number; x: number; y: number; width: number; height: number}>) => void;
-  recordPropertyChange: (controls: Control[], property: string, beforeValues: any[], afterValues: any[]) => void;
+  recordPropertyChange: (controls: Control[], property: string, beforeValues: PropertyValue[], afterValues: PropertyValue[]) => void;
   recordCopy: (controls: Control[]) => void;
   recordPaste: (controls: Control[]) => void;
   recordDuplicate: (originalControls: Control[], duplicatedControls: Control[]) => void;
@@ -98,7 +113,7 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
         // Restore previous positions
         if (action.data.before) {
           const updatedControls = controls.map(control => {
-            const beforePos = action.data.before?.find((pos: any) => pos.id === control.id);
+            const beforePos = action.data.before?.find((pos: PositionSnapshot) => pos.id === control.id);
             if (beforePos) {
               return { ...control, x: beforePos.x, y: beforePos.y };
             }
@@ -113,7 +128,7 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
         // Restore previous sizes
         if (action.data.before) {
           const updatedControls = controls.map(control => {
-            const beforeSize = action.data.before?.find((size: any) => size.id === control.id);
+            const beforeSize = action.data.before?.find((size: SizeSnapshot) => size.id === control.id);
             if (beforeSize) {
               return {
                 ...control,
@@ -168,7 +183,7 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
         // Restore previous positions for alignment
         if (action.data.before) {
           const updatedControls = controls.map(control => {
-            const beforePos = action.data.before?.find((pos: any) => pos.id === control.id);
+            const beforePos = action.data.before?.find((pos: PositionSnapshot) => pos.id === control.id);
             if (beforePos) {
               return { ...control, x: beforePos.x, y: beforePos.y };
             }
@@ -220,7 +235,7 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
         // Restore forward positions
         if (action.data.after) {
           const updatedControls = controls.map(control => {
-            const afterPos = action.data.after?.find((pos: any) => pos.id === control.id);
+            const afterPos = action.data.after?.find((pos: PositionSnapshot) => pos.id === control.id);
             if (afterPos) {
               return { ...control, x: afterPos.x, y: afterPos.y };
             }
@@ -235,7 +250,7 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
         // Restore forward sizes
         if (action.data.after) {
           const updatedControls = controls.map(control => {
-            const afterSize = action.data.after?.find((size: any) => size.id === control.id);
+            const afterSize = action.data.after?.find((size: SizeSnapshot) => size.id === control.id);
             if (afterSize) {
               return {
                 ...control,
@@ -291,7 +306,7 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
         // Restore forward positions for alignment
         if (action.data.after) {
           const updatedControls = controls.map(control => {
-            const afterPos = action.data.after?.find((pos: any) => pos.id === control.id);
+            const afterPos = action.data.after?.find((pos: PositionSnapshot) => pos.id === control.id);
             if (afterPos) {
               return { ...control, x: afterPos.x, y: afterPos.y };
             }
@@ -321,7 +336,7 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
     undoRedoService.recordResize(controls, beforeSizes);
   }, []);
 
-  const recordPropertyChange = useCallback((controls: Control[], property: string, beforeValues: any[], afterValues: any[]) => {
+  const recordPropertyChange = useCallback((controls: Control[], property: string, beforeValues: PropertyValue[], afterValues: PropertyValue[]) => {
     undoRedoService.recordPropertyChange(controls, property, beforeValues, afterValues);
   }, []);
 

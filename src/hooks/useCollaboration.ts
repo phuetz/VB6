@@ -124,7 +124,7 @@ export const useCollaboration = (options: UseCollaborationOptions): [Collaborati
       }, 5000);
     };
 
-    const handleDocumentUpdated = (data: { documentId: string; document: any; operation: any }) => {
+    const handleDocumentUpdated = (data: { documentId: string; document: Record<string, unknown>; operation: Record<string, unknown> }) => {
       // Emit document change event for external listeners
       const event = new CustomEvent('collaborationDocumentUpdated', {
         detail: data

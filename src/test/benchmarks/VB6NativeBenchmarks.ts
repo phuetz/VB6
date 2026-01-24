@@ -113,11 +113,12 @@ describe('VB6 Native Performance Benchmarks - Phase 3', () => {
     
     try {
       // Simuler l'exécution (normalement on exécuterait le code transpilé)
+      let result = 0;
       for (let i = 0; i < iterations; i++) {
-        // Simulation d'exécution - dans un vrai benchmark,
-        // on exécuterait le JavaScript généré
-        eval('1 + 1'); // Placeholder pour simulation
+        // Simulation d'exécution sécurisée sans eval()
+        result += 1 + 1; // Placeholder pour simulation
       }
+      void result; // Prevent unused variable warning
     } catch (error) {
       console.error(`Benchmark ${name} failed:`, error);
     }

@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useVB6Store } from '../../stores/vb6Store';
 import { VB6ControlPropsEnhanced } from '../Controls/VB6ControlsEnhanced';
+import { sanitizeReport } from '../../utils/htmlSanitizer';
 import AnimatedButton from '../UI/AnimatedButton';
 
 interface ReportParameter {
@@ -760,11 +761,9 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
           {reportData && !isLoading && !error && (
             <div style={pageStyle}>
               {/* Render report content here */}
-              <div dangerouslySetInnerHTML={{ 
-                __html: (reportData.pages?.[currentPage - 1] || '')
-                  .replace(/<script[^>]*>.*?<\/script>/gi, '') // Remove scripts
-                  .replace(/on\w+="[^"]*"/gi, '') // Remove event handlers
-                  .replace(/javascript:/gi, '') // Remove javascript: URLs
+              {/* SECURITY: HTML sanitizé via DOMPurify (TASK-004) */}
+              <div dangerouslySetInnerHTML={{
+                __html: sanitizeReport(reportData.pages?.[currentPage - 1] || '')
               }} />
             </div>
           )}

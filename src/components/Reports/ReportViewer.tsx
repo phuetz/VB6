@@ -3,14 +3,15 @@ import {
   X, ZoomIn, ZoomOut, Download, Printer, ChevronLeft, ChevronRight, 
   RotateCcw, Search, Settings, FileText, Eye 
 } from 'lucide-react';
-import { 
-  vb6ReportEngine, 
-  ReportDefinition, 
-  ReportOutput, 
-  ReportPage, 
+import {
+  vb6ReportEngine,
+  ReportDefinition,
+  ReportOutput,
+  ReportPage,
   ReportPageElement,
-  ReportFieldType 
+  ReportFieldType
 } from '../../services/VB6ReportEngine';
+import { sanitizeHTML } from '../../utils/htmlSanitizer';
 
 interface ReportViewerProps {
   visible: boolean;
@@ -221,11 +222,12 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
       const regex = new RegExp(`(${searchTerm})`, 'gi');
       const highlightedContent = content.replace(regex, '<mark>$1</mark>');
       
+      // SECURITY: HTML sanitizé via DOMPurify (TASK-004)
       return (
         <div
           key={element.id}
           style={style}
-          dangerouslySetInnerHTML={{ __html: highlightedContent }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHTML(highlightedContent) }}
         />
       );
     }

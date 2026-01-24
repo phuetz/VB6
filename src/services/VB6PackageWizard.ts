@@ -4,6 +4,10 @@
  * Compatible with VB6 Package & Deployment Wizard for creating installation packages
  */
 
+import { createLogger } from './LoggingService';
+
+const logger = createLogger('PackageWizard');
+
 export enum PackageType {
   STANDARD_SETUP = 'standard_setup',
   INTERNET_PACKAGE = 'internet_package',
@@ -543,7 +547,7 @@ export class VB6PackageWizard {
     const project = projectId ? this.projects.get(projectId) : this.currentProject;
     if (project) {
       project.modified = new Date();
-      if (process.env.NODE_ENV === 'development') { console.log(`Saved packaging project: ${project.name}`); }
+      logger.debug(`Saved packaging project: ${project.name}`);
       return true;
     }
     return false;
@@ -616,7 +620,7 @@ export class VB6PackageWizard {
   async analyzeDependencies(projectPath: string): Promise<PackageDependency[]> {
     return new Promise((resolve) => {
       setTimeout(() => {
-        if (process.env.NODE_ENV === 'development') { console.log(`Analyzing dependencies for: ${projectPath}`); }
+        logger.debug(`Analyzing dependencies for: ${projectPath}`);
         
         // Simulate dependency analysis
         const dependencies: PackageDependency[] = [
@@ -736,9 +740,9 @@ export class VB6PackageWizard {
       const startTime = Date.now();
       
       setTimeout(() => {
-        if (process.env.NODE_ENV === 'development') { console.log(`Building package: ${project.name}`); }
-        if (process.env.NODE_ENV === 'development') { console.log(`Package type: ${project.packageType}`); }
-        if (process.env.NODE_ENV === 'development') { console.log(`Output folder: ${project.outputFolder}`); }
+        logger.debug(`Building package: ${project.name}`);
+        logger.debug(`Package type: ${project.packageType}`);
+        logger.debug(`Output folder: ${project.outputFolder}`);
         
         // Simulate build process
         const errors: string[] = [];
@@ -786,9 +790,9 @@ export class VB6PackageWizard {
           compressionRatio: 1 - compressionRatio
         };
 
-        if (process.env.NODE_ENV === 'development') { console.log(`Build ${success ? 'completed' : 'failed'} in ${buildTime}ms`); }
-        if (success && process.env.NODE_ENV === 'development') {
-          console.log(`Package created: ${result.packagePath} (${(setupSize / 1024).toFixed(1)} KB)`);
+        logger.info(`Build ${success ? 'completed' : 'failed'} in ${buildTime}ms`);
+        if (success) {
+          logger.info(`Package created: ${result.packagePath} (${(setupSize / 1024).toFixed(1)} KB)`);
         }
 
         resolve(result);
@@ -817,17 +821,17 @@ export class VB6PackageWizard {
 
     return new Promise((resolve) => {
       setTimeout(() => {
-        if (process.env.NODE_ENV === 'development') { console.log(`Deploying package to: ${target.name}`); }
-        if (process.env.NODE_ENV === 'development') { console.log(`Package: ${packagePath}`); }
-        if (process.env.NODE_ENV === 'development') { console.log(`Target type: ${target.type}`); }
-        
+        logger.debug(`Deploying package to: ${target.name}`);
+        logger.debug(`Package: ${packagePath}`);
+        logger.debug(`Target type: ${target.type}`);
+
         // Simulate deployment
         target.lastDeployed = new Date();
         target.deployCount++;
-        
+
         const success = Math.random() > 0.1; // 90% success rate
-        if (process.env.NODE_ENV === 'development') { console.log(`Deployment ${success ? 'successful' : 'failed'}`); }
-        
+        logger.info(`Deployment ${success ? 'successful' : 'failed'}`);
+
         resolve(success);
       }, 1500);
     });
@@ -982,6 +986,4 @@ export class VB6PackageWizard {
 // Global instance
 export const VB6PackageWizardInstance = VB6PackageWizard.getInstance();
 
-if (process.env.NODE_ENV === 'development') {
-  console.log('VB6 Package & Deployment Wizard initialized with project templates and dependency analysis');
-}
+logger.info('VB6 Package & Deployment Wizard initialized with project templates and dependency analysis');

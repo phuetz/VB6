@@ -13,6 +13,10 @@ import { VB6Parser } from '../utils/vb6Parser';
 import { VB6SemanticAnalyzer } from '../utils/vb6SemanticAnalyzer';
 import { VB6Transpiler } from '../utils/vb6Transpiler';
 import { Control } from '../context/types';
+import { createLogger } from './LoggingService';
+import { TestValue, TestEnvironment, MockImplementation, MockCallArgs } from './types/VB6ServiceTypes';
+
+const logger = createLogger('TestFramework');
 
 export interface TestCase {
   id: string;
@@ -23,8 +27,8 @@ export interface TestCase {
   code: string;
   setup?: string;
   teardown?: string;
-  expectedResult?: any;
-  actualResult?: any;
+  expectedResult?: TestValue;
+  actualResult?: TestValue;
   status: 'pending' | 'running' | 'passed' | 'failed' | 'skipped';
   error?: string;
   duration?: number;
@@ -58,8 +62,8 @@ export interface TestResult {
 
 export interface AssertionResult {
   type: string;
-  expected: any;
-  actual: any;
+  expected: TestValue;
+  actual: TestValue;
   passed: boolean;
   message?: string;
   location?: { line: number; column: number };
@@ -77,24 +81,24 @@ export interface MockObject {
   name: string;
   type: string;
   methods: Map<string, MockMethod>;
-  properties: Map<string, any>;
+  properties: Map<string, TestValue>;
   callHistory: MockCall[];
 }
 
 export interface MockMethod {
   name: string;
-  implementation?: (...args: any[]) => any;
-  returnValue?: any;
+  implementation?: MockImplementation;
+  returnValue?: TestValue;
   throwError?: Error;
   callCount: number;
-  calledWith: any[][];
+  calledWith: MockCallArgs[];
 }
 
 export interface MockCall {
   method: string;
-  args: any[];
+  args: MockCallArgs;
   timestamp: number;
-  returnValue?: any;
+  returnValue?: TestValue;
   error?: Error;
 }
 
@@ -105,7 +109,7 @@ export class VB6TestFramework {
   private testSuites: Map<string, TestSuite> = new Map();
   private mocks: Map<string, MockObject> = new Map();
   private coverageData: Map<string, CoverageInfo> = new Map();
-  private testEnvironment: any = {};
+  private testEnvironment: TestEnvironment = {};
   private runningTests: Set<string> = new Set();
 
   constructor() {
@@ -190,7 +194,7 @@ export class VB6TestFramework {
       try {
         await this.executeCode(suite.setupAll);
       } catch (error) {
-        console.error('Setup all failed:', error);
+        logger.error('Setup all failed:', error);
         suite.status = 'failed';
         return results;
       }
@@ -215,7 +219,7 @@ export class VB6TestFramework {
       try {
         await this.executeCode(suite.teardownAll);
       } catch (error) {
-        console.error('Teardown all failed:', error);
+        logger.error('Teardown all failed:', error);
       }
     }
 
@@ -565,7 +569,7 @@ export class VB6TestFramework {
 
     if (!passed) {
       const errorMsg = message || `Assertion failed: ${type} - Expected: ${expected}, Actual: ${actual}`;
-      console.error(errorMsg);
+      logger.error(errorMsg);
     }
   }
 

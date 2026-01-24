@@ -1,3 +1,109 @@
+// Types de base pour les valeurs VB6
+export type VB6Value = string | number | boolean | null | undefined | Date | object;
+export type ControlPropertyValue = string | number | boolean | null | undefined;
+
+// Types pour les modules VB6
+export interface VB6Module {
+  id: number;
+  name: string;
+  code: string;
+  type: 'standard' | 'class' | 'form';
+}
+
+export interface VB6UserControl {
+  id: number;
+  name: string;
+  code: string;
+  designerCode?: string;
+}
+
+export interface VB6Reference {
+  name: string;
+  guid?: string;
+  version?: string;
+  path?: string;
+  checked: boolean;
+}
+
+export interface VB6Component {
+  name: string;
+  filename: string;
+  guid?: string;
+  selected: boolean;
+}
+
+// Types pour IntelliSense
+export interface IntelliSenseSuggestion {
+  label: string;
+  kind: 'method' | 'property' | 'event' | 'variable' | 'constant' | 'keyword' | 'snippet';
+  detail?: string;
+  documentation?: string;
+  insertText?: string;
+}
+
+// Types pour le débogage
+export interface WatchExpression {
+  id: string;
+  expression: string;
+  value: VB6Value;
+  type?: string;
+  error?: string;
+}
+
+export interface CallStackFrame {
+  id: string;
+  procedure: string;
+  module: string;
+  line: number;
+}
+
+export interface VB6Error {
+  id: string;
+  type: 'error' | 'warning' | 'info';
+  message: string;
+  file?: string;
+  line?: number;
+  column?: number;
+}
+
+// Types pour l'historique
+export interface HistoryEntry {
+  controls: Control[];
+  nextId: number;
+  timestamp: number;
+}
+
+// Types pour la sélection et le redimensionnement
+export interface SelectionBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface ResizeStart {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface MoveStart {
+  x: number;
+  y: number;
+}
+
+// Types pour les projets
+export interface VB6Project {
+  name: string;
+  forms: Form[];
+  modules: VB6Module[];
+  classModules: VB6Module[];
+  userControls?: VB6UserControl[];
+  references?: VB6Reference[];
+  components?: VB6Component[];
+}
+
 export interface Control {
   id: number;
   type: string;
@@ -10,7 +116,7 @@ export interface Control {
   enabled: boolean;
   caption?: string;
   text?: string;
-  value?: any;
+  value?: VB6Value;
   backColor?: string;
   foreColor?: string;
   font?: {
@@ -28,7 +134,13 @@ export interface Control {
   index?: number; // Index in control array (undefined for non-array controls)
   arrayName?: string; // Base name for control array (e.g., "Command1" for Command1(0), Command1(1))
   isArray?: boolean; // Whether this control is part of an array
-  [key: string]: any;
+  // Additional dynamic properties
+  left?: number;
+  top?: number;
+  zIndex?: number;
+  formId?: string;
+  properties?: Record<string, ControlPropertyValue>;
+  [key: string]: ControlPropertyValue | Record<string, ControlPropertyValue> | undefined;
 }
 
 export interface Form {
@@ -43,11 +155,11 @@ export interface VB6State {
   projectName: string;
   forms: Form[];
   activeFormId: number;
-  modules: any[];
-  classModules: any[];
-  userControls: any[];
-  references: any[];
-  components: any[];
+  modules: VB6Module[];
+  classModules: VB6Module[];
+  userControls: VB6UserControl[];
+  references: VB6Reference[];
+  components: VB6Component[];
 
   // Controls
   controls: Control[];
@@ -91,7 +203,7 @@ export interface VB6State {
   eventCode: { [key: string]: string };
   intellisenseVisible: boolean;
   intellisensePosition: { x: number; y: number };
-  intellisenseSuggestions: any[];
+  intellisenseSuggestions: IntelliSenseSuggestion[];
 
   // Form Properties
   formProperties: {
@@ -105,20 +217,20 @@ export interface VB6State {
     MinButton: boolean;
     ControlBox: boolean;
     ShowInTaskbar: boolean;
-    [key: string]: any;
+    [key: string]: ControlPropertyValue;
   };
 
   // Debug
   consoleOutput: string[];
   immediateCommand: string;
   breakpoints: { [key: string]: boolean };
-  watchExpressions: any[];
-  localVariables: { [key: string]: any };
-  callStack: any[];
-  errorList: any[];
+  watchExpressions: WatchExpression[];
+  localVariables: Record<string, VB6Value>;
+  callStack: CallStackFrame[];
+  errorList: VB6Error[];
 
   // History
-  history: any[];
+  history: HistoryEntry[];
   historyIndex: number;
 
   // Drag & Drop
@@ -147,7 +259,7 @@ export interface VB6State {
 
 export type VB6Action =
   | { type: 'CREATE_CONTROL'; payload: { type: string; x: number; y: number } }
-  | { type: 'UPDATE_CONTROL'; payload: { controlId: number; property: string; value: any } }
+  | { type: 'UPDATE_CONTROL'; payload: { controlId: number; property: string; value: ControlPropertyValue } }
   | { type: 'DELETE_CONTROLS'; payload: { controlIds: number[] } }
   | { type: 'SELECT_CONTROLS'; payload: { controlIds: number[] } }
   | { type: 'COPY_CONTROLS' }
@@ -155,7 +267,7 @@ export type VB6Action =
   | { type: 'SET_GRID_SIZE'; payload: { size: number } }
   | { type: 'UNDO' }
   | { type: 'REDO' }
-  | { type: 'EXECUTE_EVENT'; payload: { control: any; eventName: string; eventData?: any } }
+  | { type: 'EXECUTE_EVENT'; payload: { control: Control; eventName: string; eventData?: Record<string, VB6Value> } }
   | { type: 'SAVE_PROJECT' }
   | { type: 'LOAD_PROJECT'; payload: { file: File } }
   | { type: 'SET_EXECUTION_MODE'; payload: { mode: 'design' | 'run' | 'break' } }
@@ -166,14 +278,14 @@ export type VB6Action =
       type: 'SET_DRAG_STATE';
       payload: { isDragging: boolean; controlType?: string; position?: { x: number; y: number } };
     }
-  | { type: 'SET_SELECTION_STATE'; payload: { isSelecting: boolean; box?: any; start?: any } }
-  | { type: 'SET_RESIZE_STATE'; payload: { isResizing: boolean; handle?: string; start?: any } }
-  | { type: 'SET_MOVE_STATE'; payload: { isMoving: boolean; start?: any } }
-  | { type: 'UPDATE_FORM_PROPERTY'; payload: { property: string; value: any } }
+  | { type: 'SET_SELECTION_STATE'; payload: { isSelecting: boolean; box?: SelectionBox; start?: MoveStart } }
+  | { type: 'SET_RESIZE_STATE'; payload: { isResizing: boolean; handle?: string; start?: ResizeStart } }
+  | { type: 'SET_MOVE_STATE'; payload: { isMoving: boolean; start?: MoveStart } }
+  | { type: 'UPDATE_FORM_PROPERTY'; payload: { property: string; value: ControlPropertyValue } }
   | { type: 'ADD_FORM'; payload: { name: string } }
   | { type: 'SET_ACTIVE_FORM'; payload: { id: number } }
   | { type: 'RENAME_FORM'; payload: { id: number; name: string } }
-  | { type: 'SET_PROJECT'; payload: { project: any } }
+  | { type: 'SET_PROJECT'; payload: { project: VB6Project } }
   | { type: 'ADD_CONSOLE_OUTPUT'; payload: { message: string } }
   | { type: 'CLEAR_CONSOLE' }
   | { type: 'SET_IMMEDIATE_COMMAND'; payload: { command: string } }

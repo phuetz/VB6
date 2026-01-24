@@ -5,6 +5,9 @@
  */
 
 import { DAORecordset, CreateBackendConnection, DAOBackendConnectionBridge } from '../runtime/VB6DAOSystem';
+import { createLogger } from './LoggingService';
+
+const logger = createLogger('BackendData');
 
 export interface BackendConnectionConfig {
   baseUrl?: string;
@@ -48,7 +51,7 @@ export class VB6BackendDataService {
       this.isConnected = await this.connection.connect(connectionString);
 
       if (this.isConnected) {
-        console.log('Successfully connected to backend database');
+        logger.info('Successfully connected to backend database');
         this.retryCount = 0;
       } else {
         throw new Error('Backend connection failed');
@@ -56,7 +59,7 @@ export class VB6BackendDataService {
 
       return this.isConnected;
     } catch (error) {
-      console.error('Connection error:', error);
+      logger.error('Connection error:', error);
 
       if (this.retryCount < (this.config.retryAttempts || 3)) {
         this.retryCount++;
@@ -94,7 +97,7 @@ export class VB6BackendDataService {
         if (cached) {
           recordset.ConnectToBackend(this.connection);
           // Populate recordset from cache
-          console.log('Using cached result for query');
+          logger.debug('Using cached result for query');
           return;
         }
       }
@@ -108,7 +111,7 @@ export class VB6BackendDataService {
         this.setInCache(cacheKey, recordset);
       }
     } catch (error) {
-      console.error('Failed to load recordset from backend:', error);
+      logger.error('Failed to load recordset from backend:', error);
       throw error;
     }
   }
@@ -196,7 +199,7 @@ export class VB6BackendDataService {
 
       return result;
     } catch (error) {
-      console.error('Query execution failed:', error);
+      logger.error('Query execution failed:', error);
       throw error;
     }
   }
@@ -212,7 +215,7 @@ export class VB6BackendDataService {
     try {
       return await this.connection.beginTransaction();
     } catch (error) {
-      console.error('Failed to begin transaction:', error);
+      logger.error('Failed to begin transaction:', error);
       throw error;
     }
   }
@@ -229,7 +232,7 @@ export class VB6BackendDataService {
       await this.connection.commitTransaction(transactionId);
       this.invalidateCache();
     } catch (error) {
-      console.error('Failed to commit transaction:', error);
+      logger.error('Failed to commit transaction:', error);
       throw error;
     }
   }
@@ -245,7 +248,7 @@ export class VB6BackendDataService {
     try {
       await this.connection.rollbackTransaction(transactionId);
     } catch (error) {
-      console.error('Failed to rollback transaction:', error);
+      logger.error('Failed to rollback transaction:', error);
       throw error;
     }
   }

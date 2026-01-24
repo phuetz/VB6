@@ -10,13 +10,40 @@ import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
 import { Control } from '../context/types';
 
+// Types pour les valeurs de propriétés VB6
+export type VB6PropertyValue = string | number | boolean | null;
+
+// Types pour l'historique d'actions
+export interface HistoryActionData {
+  form?: VB6Form;
+  formId?: number;
+  module?: VB6Module;
+  moduleId?: number;
+  oldName?: string;
+  newName?: string;
+  sourceId?: number;
+  newForm?: VB6Form;
+}
+
+// Types pour les données de projet chargées
+export interface ProjectData {
+  metadata?: Partial<ProjectMetadata>;
+  forms?: VB6Form[];
+  modules?: VB6Module[];
+  classModules?: VB6Module[];
+  userControls?: VB6Module[];
+  references?: VB6Reference[];
+  components?: VB6Component[];
+  activeFormId?: number | null;
+}
+
 // Types spécialisés pour le store projet
 export interface VB6Form {
   id: number;
   name: string;
   caption: string;
   controls: Control[];
-  properties: Record<string, any>;
+  properties: Record<string, VB6PropertyValue>;
   code: Record<string, string>;
   dirty: boolean;
   lastModified: Date;
@@ -90,12 +117,12 @@ interface ProjectState {
   undoStack: Array<{
     action: string;
     timestamp: Date;
-    data: any;
+    data: HistoryActionData;
   }>;
   redoStack: Array<{
     action: string;
     timestamp: Date;
-    data: any;
+    data: HistoryActionData;
   }>;
 }
 
@@ -103,7 +130,7 @@ interface ProjectState {
 interface ProjectActions {
   // Gestion du projet
   createNewProject: (name: string, type?: string) => void;
-  loadProject: (projectData: any) => void;
+  loadProject: (projectData: ProjectData) => void;
   saveProject: () => Promise<boolean>;
   saveProjectAs: (name: string) => Promise<boolean>;
   closeProject: () => void;
@@ -134,7 +161,7 @@ interface ProjectActions {
   toggleComponent: (filename: string) => void;
   
   // Historique et undo/redo
-  pushToHistory: (action: string, data: any) => void;
+  pushToHistory: (action: string, data: HistoryActionData) => void;
   undo: () => boolean;
   redo: () => boolean;
   clearHistory: () => void;
@@ -252,7 +279,7 @@ export const useProjectStore = create<ProjectStore>()(
             state.metadata = {
               ...DEFAULT_PROJECT_METADATA,
               name,
-              projectType: type as any,
+              projectType: type as ProjectMetadata['projectType'],
               created: new Date(),
               lastModified: new Date()
             };
@@ -279,7 +306,7 @@ export const useProjectStore = create<ProjectStore>()(
             state.redoStack = [];
           }),
 
-        loadProject: (projectData: any) =>
+        loadProject: (projectData: ProjectData) =>
           set((state) => {
             
             try {
@@ -659,7 +686,7 @@ export const useProjectStore = create<ProjectStore>()(
           }),
 
         // History management
-        pushToHistory: (action: string, data: any) =>
+        pushToHistory: (action: string, data: HistoryActionData) =>
           set((state) => {
             state.undoStack.push({
               action,

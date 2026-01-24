@@ -7,7 +7,7 @@ interface AutoSaveOptions {
   onError?: (error: Error) => void;
 }
 
-export const useAutoSave = (data: any, options: AutoSaveOptions) => {
+export const useAutoSave = <T = unknown>(data: T, options: AutoSaveOptions) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedDataRef = useRef<string>('');
   const isSavingRef = useRef<boolean>(false); // RACE CONDITION BUG FIX: Prevent concurrent saves

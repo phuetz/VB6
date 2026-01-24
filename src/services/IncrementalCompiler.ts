@@ -1,10 +1,13 @@
 /**
  * Incremental Compilation Service for VB6
- * 
+ *
  * Provides fast incremental compilation by tracking dependencies and changes
  */
 
 import { VB6Parser } from '../parsers/vb6Parser';
+import { createLogger } from './LoggingService';
+
+const logger = createLogger('IncrementalCompiler');
 import { VB6SemanticAnalyzer } from '../analyzers/vb6SemanticAnalyzer';
 import { VB6Transpiler } from '../transpilers/vb6Transpiler';
 
@@ -339,7 +342,7 @@ export class IncrementalCompiler {
         }
       }
     } catch (error) {
-      console.error(`Failed to analyze dependencies for ${fileInfo.path}:`, error);
+      logger.error(`Failed to analyze dependencies for ${fileInfo.path}:`, error);
     }
   }
 

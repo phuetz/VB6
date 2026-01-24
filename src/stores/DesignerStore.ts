@@ -11,6 +11,27 @@ import { devtools } from 'zustand/middleware';
 import { Control } from '../context/types';
 import { getDefaultProperties } from '../utils/controlDefaults';
 
+// Types pour les valeurs de propriétés de contrôle
+export type ControlPropertyValue = string | number | boolean | null | undefined;
+
+// Types pour les données de drag
+export interface DragDataCreate {
+  controlType: string;
+}
+
+export interface DragDataMove {
+  controlIds: number[];
+  originalPositions: Array<{ id: number; left: number; top: number }>;
+}
+
+export interface DragDataResize {
+  controlId: number;
+  handle: 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
+  originalBounds: { left: number; top: number; width: number; height: number };
+}
+
+export type DragData = DragDataCreate | DragDataMove | DragDataResize | null;
+
 // Types optimisés pour le designer
 export interface CanvasState {
   width: number;
@@ -43,7 +64,7 @@ export interface DragState {
   dragType: 'create' | 'move' | 'resize' | 'select' | null;
   dragStartPos: { x: number; y: number } | null;
   dragCurrentPos: { x: number; y: number } | null;
-  dragData: any;
+  dragData: DragData;
   previewControl: Control | null;
 }
 
@@ -116,9 +137,9 @@ interface DesignerState {
 // Actions du designer
 interface DesignerActions {
   // Gestion des contrôles
-  createControl: (type: string, x?: number, y?: number, properties?: Record<string, any>) => Control;
+  createControl: (type: string, x?: number, y?: number, properties?: Record<string, ControlPropertyValue>) => Control;
   deleteControls: (controlIds: number[]) => void;
-  updateControl: (controlId: number, property: string, value: any) => void;
+  updateControl: (controlId: number, property: string, value: ControlPropertyValue) => void;
   updateControlBounds: (controlId: number, bounds: { left: number; top: number; width: number; height: number }) => void;
   duplicateControls: (controlIds: number[]) => Control[];
   getControl: (controlId: number) => Control | null;
@@ -150,7 +171,7 @@ interface DesignerActions {
   resetPan: () => void;
   
   // Opérations de drag & drop
-  startDrag: (type: 'create' | 'move' | 'resize' | 'select', pos: { x: number; y: number }, data?: any) => void;
+  startDrag: (type: 'create' | 'move' | 'resize' | 'select', pos: { x: number; y: number }, data?: DragData) => void;
   updateDrag: (pos: { x: number; y: number }) => void;
   endDrag: () => void;
   cancelDrag: () => void;
@@ -268,9 +289,9 @@ export const useDesignerStore = create<DesignerStore>()(
         isLocked: false,
 
         // Gestion des contrôles
-        createControl: (type: string, x = 120, y = 120, properties = {}) => {
+        createControl: (type: string, x = 120, y = 120, properties: Record<string, ControlPropertyValue> = {}) => {
           const state = get();
-          if (state.isLocked) return null as any;
+          if (state.isLocked) return null as unknown as Control;
           
           const controlId = state.nextControlId;
           const defaultProps = getDefaultProperties(type);
@@ -328,16 +349,16 @@ export const useDesignerStore = create<DesignerStore>()(
             state.pushToHistory.call(state, 'deleteControls');
           }),
 
-        updateControl: (controlId: number, property: string, value: any) =>
+        updateControl: (controlId: number, property: string, value: ControlPropertyValue) =>
           set((state) => {
             if (state.isLocked) return;
-            
+
             const control = state.controls.find(c => c.id === controlId);
             if (!control) return;
-            
+
             // Mettre à jour la propriété
             if (property === 'left' || property === 'top' || property === 'width' || property === 'height') {
-              (control as any)[property] = value;
+              (control as Record<string, ControlPropertyValue>)[property] = value;
               control.properties[property.charAt(0).toUpperCase() + property.slice(1)] = value;
             } else {
               control.properties[property] = value;
@@ -625,7 +646,7 @@ export const useDesignerStore = create<DesignerStore>()(
           }),
 
         // Opérations de drag & drop
-        startDrag: (type: 'create' | 'move' | 'resize' | 'select', pos: { x: number; y: number }, data?: any) =>
+        startDrag: (type: 'create' | 'move' | 'resize' | 'select', pos: { x: number; y: number }, data?: DragData) =>
           set((state) => {
             state.drag.isDragging = true;
             state.drag.dragType = type;

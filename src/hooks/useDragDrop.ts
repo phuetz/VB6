@@ -1,25 +1,30 @@
 import { useCallback, useRef, useState } from 'react';
 
-interface DragDropOptions {
-  onDragStart?: (e: DragEvent, item: any) => void;
-  onDragEnd?: (e: DragEvent, item: any) => void;
-  onDrop?: (e: DragEvent, item: any, target: any) => void;
+// Generic type for drag/drop items
+type DragDropItem = Record<string, unknown>;
+
+interface DragDropOptions<TItem extends DragDropItem = DragDropItem, TTarget extends DragDropItem = DragDropItem> {
+  onDragStart?: (e: DragEvent, item: TItem) => void;
+  onDragEnd?: (e: DragEvent, item: TItem) => void;
+  onDrop?: (e: DragEvent, item: TItem, target: TTarget) => void;
   onDragOver?: (e: DragEvent) => void;
   onDragEnter?: (e: DragEvent) => void;
   onDragLeave?: (e: DragEvent) => void;
   acceptedTypes?: string[];
-  transferData?: any;
+  transferData?: Record<string, unknown>;
 }
 
-export const useDragDrop = (options: DragDropOptions = {}) => {
+export const useDragDrop = <TItem extends DragDropItem = DragDropItem, TTarget extends DragDropItem = DragDropItem>(
+  options: DragDropOptions<TItem, TTarget> = {}
+) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [draggedItem, setDraggedItem] = useState<any>(null);
-  const [dropTarget, setDropTarget] = useState<any>(null);
+  const [draggedItem, setDraggedItem] = useState<TItem | null>(null);
+  const [dropTarget, setDropTarget] = useState<TTarget | null>(null);
   const dragRef = useRef<HTMLElement>(null);
   const dropRef = useRef<HTMLElement>(null);
 
   const handleDragStart = useCallback(
-    (e: DragEvent, item: any) => {
+    (e: DragEvent, item: TItem) => {
       setIsDragging(true);
       setDraggedItem(item);
 
@@ -75,10 +80,10 @@ export const useDragDrop = (options: DragDropOptions = {}) => {
   );
 
   const handleDrop = useCallback(
-    (e: DragEvent, target: any) => {
+    (e: DragEvent, target: TTarget) => {
       e.preventDefault();
 
-      let droppedItem: any;
+      let droppedItem: TItem | null;
 
       try {
         const textData = e.dataTransfer?.getData('text/plain');
@@ -100,7 +105,7 @@ export const useDragDrop = (options: DragDropOptions = {}) => {
   );
 
   const makeDraggable = useCallback(
-    (element: HTMLElement, item: any) => {
+    (element: HTMLElement, item: TItem) => {
       element.draggable = true;
 
       const startHandler = (e: DragEvent) => handleDragStart(e, item);
@@ -118,7 +123,7 @@ export const useDragDrop = (options: DragDropOptions = {}) => {
   );
 
   const makeDroppable = useCallback(
-    (element: HTMLElement, target: any) => {
+    (element: HTMLElement, target: TTarget) => {
       const overHandler = (e: DragEvent) => handleDragOver(e);
       const enterHandler = (e: DragEvent) => handleDragEnter(e);
       const leaveHandler = (e: DragEvent) => handleDragLeave(e);

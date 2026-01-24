@@ -1,4 +1,8 @@
 import { vb6DatabaseService, ADOConnection, ADORecordset } from './VB6DatabaseService';
+import { createLogger } from './LoggingService';
+import { VB6Value, ReportDataRow, ReportParameterValue } from './types/VB6ServiceTypes';
+
+const logger = createLogger('ReportEngine');
 
 // Report Section Types
 export enum ReportSectionType {
@@ -218,7 +222,7 @@ class FormulaEngine {
       const func = new Function('context', `return ${jsExpression}`);
       return func(context);
     } catch (error) {
-      console.error('Formula evaluation error:', error);
+      logger.error('Formula evaluation error:', error);
       return '#ERROR';
     }
   }

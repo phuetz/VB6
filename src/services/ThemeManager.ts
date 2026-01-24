@@ -1,4 +1,7 @@
 import { Theme } from '../types/extended';
+import { createLogger } from './LoggingService';
+
+const logger = createLogger('ThemeManager');
 
 // Monaco theme names that correspond to our themes
 export type MonacoThemeName = 'vs' | 'vs-dark' | 'hc-black' | 'vb6-classic' | 'vb6-dark';
@@ -299,7 +302,7 @@ export class ThemeManager {
     if (theme) {
       this.setTheme(theme);
     } else {
-      console.warn(`Theme "${themeName}" not found`);
+      logger.warn(`Theme "${themeName}" not found`);
     }
   }
 
@@ -347,7 +350,7 @@ export class ThemeManager {
         return theme;
       }
     } catch (error) {
-      console.error('Error importing theme:', error);
+      logger.error('Error importing theme:', error);
     }
     return null;
   }
@@ -373,7 +376,7 @@ export class ThemeManager {
       if (this.isValidCSSColor(value)) {
         root.style.setProperty(`--color-${key}`, value);
       } else {
-        console.warn(`Invalid color value rejected: ${key}=${value}`);
+        logger.warn(`Invalid color value rejected: ${key}=${value}`);
       }
     });
 
@@ -470,7 +473,7 @@ export class ThemeManager {
     try {
       localStorage.setItem('vb6-theme', JSON.stringify(theme));
     } catch (error) {
-      console.error('Error saving theme:', error);
+      logger.error('Error saving theme:', error);
     }
   }
 
@@ -479,7 +482,7 @@ export class ThemeManager {
       try {
         listener(theme);
       } catch (error) {
-        console.error('Error in theme listener:', error);
+        logger.error('Error in theme listener:', error);
       }
     });
   }
@@ -629,7 +632,7 @@ export class ThemeManager {
     // Clear listeners
     this.listeners = [];
     
-    console.log('✅ ThemeManager destroyed and cleaned up');
+    logger.debug('ThemeManager destroyed and cleaned up');
   }
 
   // Constructor for instance-based usage in tests
@@ -644,21 +647,21 @@ export class ThemeManager {
       if (typeof themeNameOrTheme === 'string') {
         // Validate theme name exists
         if (!ThemeManager.defaultThemes[themeNameOrTheme]) {
-          console.warn(`Theme "${themeNameOrTheme}" not found`);
+          logger.warn(`Theme "${themeNameOrTheme}" not found`);
           return false;
         }
         ThemeManager.setThemeByName(themeNameOrTheme);
       } else {
         // Validate theme object structure
         if (!ThemeManager.validateTheme(themeNameOrTheme)) {
-          console.warn('Invalid theme structure');
+          logger.warn('Invalid theme structure');
           return false;
         }
         ThemeManager.setTheme(themeNameOrTheme);
       }
       return true;
     } catch (error) {
-      console.warn('Failed to set theme:', error);
+      logger.warn('Failed to set theme:', error);
       return false;
     }
   }
@@ -675,13 +678,13 @@ export class ThemeManager {
       Object.entries(variables).forEach(([key, value]) => {
         // Validate CSS variable name format
         if (!key.startsWith('--')) {
-          console.warn(`Invalid CSS variable name: ${key}. Must start with '--'`);
+          logger.warn(`Invalid CSS variable name: ${key}. Must start with '--'`);
           return;
         }
         
         // Validate CSS variable value
         if (!ThemeManager.isValidCSSValue(value)) {
-          console.warn(`Invalid CSS variable value for ${key}: ${value}`);
+          logger.warn(`Invalid CSS variable value for ${key}: ${value}`);
           return;
         }
         
@@ -691,7 +694,7 @@ export class ThemeManager {
       
       return hasValidVariables;
     } catch (error) {
-      console.warn('DOM error during CSS variable setting:', error);
+      logger.warn('DOM error during CSS variable setting:', error);
       return false;
     }
   }

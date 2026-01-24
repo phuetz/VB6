@@ -1,9 +1,13 @@
 // Ultra-Think AI-Powered IntelliSense Engine
-// 🧠 Système révolutionnaire d'autocomplétion contextuelle avec ML intégré
+// Systeme d'autocompletion contextuelle avec ML integre
 
 import { VB6Parser } from '../utils/vb6Parser';
+import { createLogger } from './LoggingService';
+
+const logger = createLogger('IntelliSense');
 import { VB6SemanticAnalyzer } from '../utils/vb6SemanticAnalyzer';
 import { Control } from '../context/types';
+import { ParsedIntelliSenseContext, CommandArguments, StoredPatternData } from './types/VB6ServiceTypes';
 
 // Types pour le système IntelliSense
 export interface CompletionItem {
@@ -79,7 +83,7 @@ export interface Position {
 export interface Command {
   title: string;
   command: string;
-  arguments?: any[];
+  arguments?: CommandArguments;
 }
 
 // Context pour suggestions intelligentes
@@ -262,32 +266,32 @@ export class AIIntelliSenseEngine {
     
     // Update learning data
     this.updateLearningData(context, sorted);
-    
-    console.log(`IntelliSense completed in ${(performance.now() - startTime).toFixed(1)}ms`);
-    
+
+    logger.debug(`IntelliSense completed in ${(performance.now() - startTime).toFixed(1)}ms`);
+
     return sorted.slice(0, this.config.maxSuggestions);
   }
 
   // 🧪 Parse current code context
-  private parseContext(context: CompletionContext): any {
+  private parseContext(context: CompletionContext): ParsedIntelliSenseContext {
     const { code, position } = context;
-    
+
     // Get relevant code window
     const startOffset = Math.max(0, this.getOffset(code, position) - this.config.contextWindow);
     const endOffset = Math.min(code.length, this.getOffset(code, position) + this.config.contextWindow);
     const codeWindow = code.substring(startOffset, endOffset);
-    
+
     // Parse AST
     const ast = this.parser.parse(codeWindow);
-    
+
     // Get current scope information
     const currentLine = code.split('\n')[position.line];
     const beforeCursor = currentLine.substring(0, position.character);
     const afterCursor = currentLine.substring(position.character);
-    
+
     // Detect context type
     const contextType = this.detectContextType(beforeCursor, afterCursor, ast);
-    
+
     return {
       ast,
       currentLine,
@@ -299,7 +303,7 @@ export class AIIntelliSenseEngine {
   }
 
   // 🎨 Generate keyword suggestions
-  private getKeywordSuggestions(parseResult: any, context: CompletionContext): CompletionItem[] {
+  private getKeywordSuggestions(parseResult: ParsedIntelliSenseContext, _context: CompletionContext): CompletionItem[] {
     const { beforeCursor, contextType } = parseResult;
     const suggestions: CompletionItem[] = [];
     
@@ -336,7 +340,7 @@ export class AIIntelliSenseEngine {
   }
 
   // 🔧 Generate function suggestions
-  private getFunctionSuggestions(parseResult: any, context: CompletionContext): CompletionItem[] {
+  private getFunctionSuggestions(parseResult: ParsedIntelliSenseContext, _context: CompletionContext): CompletionItem[] {
     const { beforeCursor } = parseResult;
     const suggestions: CompletionItem[] = [];
     const lastWord = this.getLastWord(beforeCursor);
@@ -362,8 +366,8 @@ export class AIIntelliSenseEngine {
   }
 
   // 🎮 Generate control-based suggestions
-  private getControlSuggestions(parseResult: any, context: CompletionContext): CompletionItem[] {
-    const { beforeCursor, afterCursor } = parseResult;
+  private getControlSuggestions(parseResult: ParsedIntelliSenseContext, context: CompletionContext): CompletionItem[] {
+    const { beforeCursor } = parseResult;
     const suggestions: CompletionItem[] = [];
     
     // Detect if we're after a control reference (e.g., "TextBox1.")
@@ -434,7 +438,7 @@ export class AIIntelliSenseEngine {
   }
 
   // 🤖 AI-powered suggestions based on patterns
-  private async getAISuggestions(parseResult: any, context: CompletionContext): Promise<CompletionItem[]> {
+  private async getAISuggestions(parseResult: ParsedIntelliSenseContext, context: CompletionContext): Promise<CompletionItem[]> {
     const suggestions: CompletionItem[] = [];
     
     // Analyze code patterns
@@ -472,7 +476,7 @@ export class AIIntelliSenseEngine {
   }
 
   // 📝 Generate snippet suggestions
-  private getSnippetSuggestions(parseResult: any, context: CompletionContext): CompletionItem[] {
+  private getSnippetSuggestions(parseResult: ParsedIntelliSenseContext, _context: CompletionContext): CompletionItem[] {
     const snippets: CompletionItem[] = [];
     const lastWord = this.getLastWord(parseResult.beforeCursor);
     
@@ -656,7 +660,7 @@ export class AIIntelliSenseEngine {
     return match ? match[1] : '';
   }
 
-  private detectContextType(before: string, after: string, ast: any): string {
+  private detectContextType(before: string, _after: string, _ast: unknown): string {
     if (/\bDim\s+\w*$/.test(before)) return 'declaration';
     if (/\bAs\s+\w*$/.test(before)) return 'type';
     if (/\w+\.$/.test(before)) return 'member_access';
@@ -693,17 +697,18 @@ export class AIIntelliSenseEngine {
     try {
       const saved = localStorage.getItem('vb6-intellisense-patterns');
       if (saved) {
-        const data = JSON.parse(saved);
-        data.forEach((item: any) => {
+        const data = JSON.parse(saved) as StoredPatternData[];
+        data.forEach((item: StoredPatternData) => {
           this.userPatterns.set(item.id, {
             ...item,
             pattern: new RegExp(item.pattern, 'i'),
-            lastUsed: new Date(item.lastUsed)
+            lastUsed: new Date(item.lastUsed),
+            category: item.category as CodePattern['category']
           });
         });
       }
     } catch (error) {
-      console.error('Failed to load IntelliSense preferences:', error);
+      logger.error('Failed to load IntelliSense preferences:', error);
     }
   }
 
@@ -715,7 +720,7 @@ export class AIIntelliSenseEngine {
       }));
       localStorage.setItem('vb6-intellisense-patterns', JSON.stringify(data));
     } catch (error) {
-      console.error('Failed to save IntelliSense preferences:', error);
+      logger.error('Failed to save IntelliSense preferences:', error);
     }
   }
 

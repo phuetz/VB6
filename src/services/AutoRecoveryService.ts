@@ -1,4 +1,7 @@
 import { useVB6Store } from '../stores/vb6Store';
+import { createLogger } from './LoggingService';
+
+const logger = createLogger('AutoRecovery');
 
 interface RecoveryPoint {
   timestamp: number;
@@ -30,12 +33,12 @@ class AutoRecoveryService {
   private setupErrorRecovery() {
     // Store handlers for cleanup
     this.errorHandler = (event: ErrorEvent) => {
-      console.log('🚨 Error detected, creating recovery point...');
+      logger.info('Error detected, creating recovery point...');
       this.createRecoveryPoint('Error recovery point: ' + event.message);
     };
     
     this.rejectionHandler = (event: PromiseRejectionEvent) => {
-      console.log('🚨 Unhandled rejection, creating recovery point...');
+      logger.info('Unhandled rejection, creating recovery point...');
       this.createRecoveryPoint('Promise rejection recovery point');
     };
 
@@ -46,7 +49,7 @@ class AutoRecoveryService {
   }
 
   startAutoSave(intervalMs: number = 60000) {
-    console.log('🔄 Starting auto-save with interval:', intervalMs + 'ms');
+    logger.info('Starting auto-save with interval:', intervalMs + 'ms');
     
     if (this.autoSaveInterval) {
       clearInterval(this.autoSaveInterval);
@@ -61,7 +64,7 @@ class AutoRecoveryService {
     if (this.autoSaveInterval) {
       clearInterval(this.autoSaveInterval);
       this.autoSaveInterval = null;
-      console.log('🛑 Auto-save stopped');
+      logger.info('Auto-save stopped');
     }
   }
 
@@ -70,7 +73,7 @@ class AutoRecoveryService {
     
     // Avoid creating too many recovery points too quickly
     if (now - this.lastSaveTime < 5000) {
-      console.log('⏳ Skipping recovery point (too soon)');
+      logger.debug('Skipping recovery point (too soon)');
       return;
     }
 
@@ -100,10 +103,10 @@ class AutoRecoveryService {
       this.saveRecoveryPoints();
       this.lastSaveTime = now;
       
-      console.log('✅ Recovery point created:', description);
-      console.log(`📊 Total recovery points: ${this.recoveryPoints.length}`);
+      logger.info('Recovery point created:', description);
+      logger.debug(`Total recovery points: ${this.recoveryPoints.length}`);
     } catch (error) {
-      console.error('❌ Failed to create recovery point:', error);
+      logger.error('Failed to create recovery point:', error);
     }
   }
 
@@ -115,7 +118,7 @@ class AutoRecoveryService {
     const recoveryPoint = this.recoveryPoints.find(rp => rp.timestamp === timestamp);
     
     if (!recoveryPoint) {
-      console.error('❌ Recovery point not found');
+      logger.error('Recovery point not found');
       return false;
     }
 
@@ -145,10 +148,10 @@ class AutoRecoveryService {
         store.setDesignerZoom(recoveryPoint.state.designerZoom);
       }
 
-      console.log('✅ Recovery point restored:', recoveryPoint.description);
+      logger.info('Recovery point restored:', recoveryPoint.description);
       return true;
     } catch (error) {
-      console.error('❌ Failed to restore recovery point:', error);
+      logger.error('Failed to restore recovery point:', error);
       return false;
     }
   }
@@ -160,7 +163,7 @@ class AutoRecoveryService {
   clearRecoveryPoints() {
     this.recoveryPoints = [];
     this.saveRecoveryPoints();
-    console.log('🗑️ All recovery points cleared');
+    logger.info('All recovery points cleared');
   }
 
   private saveRecoveryPoints() {
@@ -168,7 +171,7 @@ class AutoRecoveryService {
       const data = JSON.stringify(this.recoveryPoints);
       localStorage.setItem('vb6-recovery-points', data);
     } catch (error) {
-      console.error('❌ Failed to save recovery points:', error);
+      logger.error('Failed to save recovery points:', error);
     }
   }
 
@@ -177,10 +180,10 @@ class AutoRecoveryService {
       const data = localStorage.getItem('vb6-recovery-points');
       if (data) {
         this.recoveryPoints = JSON.parse(data);
-        console.log(`📂 Loaded ${this.recoveryPoints.length} recovery points`);
+        logger.info(`Loaded ${this.recoveryPoints.length} recovery points`);
       }
     } catch (error) {
-      console.error('❌ Failed to load recovery points:', error);
+      logger.error('Failed to load recovery points:', error);
       this.recoveryPoints = [];
     }
   }
@@ -207,10 +210,10 @@ class AutoRecoveryService {
       this.recoveryPoints.push(recoveryPoint);
       this.saveRecoveryPoints();
       
-      console.log('✅ Recovery point imported:', recoveryPoint.description);
+      logger.info('Recovery point imported:', recoveryPoint.description);
       return true;
     } catch (error) {
-      console.error('❌ Failed to import recovery point:', error);
+      logger.error('Failed to import recovery point:', error);
       return false;
     }
   }
@@ -236,7 +239,7 @@ class AutoRecoveryService {
     // Clear recovery points from memory
     this.recoveryPoints = [];
     
-    console.log('✅ AutoRecoveryService destroyed and cleaned up');
+    logger.info('AutoRecoveryService destroyed and cleaned up');
   }
 }
 

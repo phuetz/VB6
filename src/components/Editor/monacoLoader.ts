@@ -1,24 +1,27 @@
 // ULTRA-OPTIMIZED: Monaco Editor lazy loading configuration
 // This file is loaded only when the code editor is actually needed
 
+import { registerVB6Language } from './VB6MonacoLanguage';
+
 let monacoPromise: Promise<typeof import('monaco-editor')> | null = null;
 let isMonacoConfigured = false;
 
 export async function loadMonaco() {
   if (!monacoPromise) {
     console.log('🔧 ULTRA-OPTIMIZE: Loading Monaco Editor (4.7MB)...');
-    
+
     monacoPromise = import('monaco-editor').then(monaco => {
       if (!isMonacoConfigured) {
         configureMonaco(monaco);
+        registerVB6Language(monaco);
         isMonacoConfigured = true;
       }
-      
+
       console.log('✅ ULTRA-OPTIMIZE: Monaco Editor loaded successfully');
       return monaco;
     });
   }
-  
+
   return monacoPromise;
 }
 

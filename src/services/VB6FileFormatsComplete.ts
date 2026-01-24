@@ -5,6 +5,10 @@
  */
 
 import { VB6Form } from '../types/VB6Form';
+import { createLogger } from './LoggingService';
+import { PropertyValue, ParsedMetadata, ControlDefinition, ProcedureInfo } from './types/VB6ServiceTypes';
+
+const logger = createLogger('FileFormats');
 
 // ============================================================================
 // INTERFACES POUR FORMATS DE FICHIERS VB6
@@ -328,7 +332,7 @@ export class VB6FileFormatsHandler {
           break;
         }
       } catch (e) {
-        console.warn('Error parsing resource entry:', e);
+        logger.warn('Error parsing resource entry:', e);
         break;
       }
     }
@@ -772,7 +776,7 @@ export class VB6FileFormatsHandler {
         }
       }
     } catch (error) {
-      console.warn('Error extracting metadata:', error);
+      logger.warn('Error extracting metadata:', error);
     }
 
     return metadata;

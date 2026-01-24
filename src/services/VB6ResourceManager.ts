@@ -4,6 +4,10 @@
  * Provides full compatibility with VB6 resource compilation and linking
  */
 
+import { createLogger } from './LoggingService';
+
+const logger = createLogger('ResourceManager');
+
 // VB6 Resource Types (from Windows SDK)
 export enum VB6ResourceType {
   RT_CURSOR = 1,
@@ -188,7 +192,7 @@ export class VB6ResourceManager {
       this.isDirty = false;
       return true;
     } catch (error) {
-      console.error('Error loading resource file:', error);
+      logger.error('Error loading resource file:', error);
       return false;
     }
   }
@@ -817,4 +821,4 @@ export function LoadResData(id: number | string, type: VB6ResourceType): ArrayBu
   return resource ? resource.data as ArrayBuffer : null;
 }
 
-console.log('VB6 Resource Manager initialized with full .res file support');
+logger.info('VB6 Resource Manager initialized with full .res file support');

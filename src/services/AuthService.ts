@@ -4,6 +4,9 @@
  */
 
 import { eventSystem } from './VB6EventSystem';
+import { createLogger } from './LoggingService';
+
+const logger = createLogger('Auth');
 
 export interface User {
   id: string;
@@ -368,7 +371,7 @@ class AuthService {
 
     // BUSINESS LOGIC BYPASS BUG FIX: Validate feature name to prevent privilege escalation
     if (!feature || typeof feature !== 'string' || feature.length > 100) {
-      console.warn('Invalid feature name provided to hasPermission');
+      logger.warn('Invalid feature name provided to hasPermission');
       return false;
     }
     
@@ -391,7 +394,7 @@ class AuthService {
     ]);
     
     if (!validFeatures.has(feature)) {
-      console.warn(`Unknown feature requested: ${feature}`);
+      logger.warn(`Unknown feature requested: ${feature}`);
       return false;
     }
 
@@ -399,7 +402,7 @@ class AuthService {
     if (this.state.user.role === 'admin') {
       // Verify admin status hasn't expired
       if (this.state.user.subscription?.status !== 'active') {
-        console.warn('Admin user with inactive subscription');
+        logger.warn('Admin user with inactive subscription');
         return false;
       }
       
@@ -417,7 +420,7 @@ class AuthService {
       // BUSINESS LOGIC BYPASS BUG FIX: Check subscription expiration
       const expiresAt = new Date(this.state.user.subscription.expiresAt);
       if (expiresAt < new Date()) {
-        console.warn('Subscription has expired');
+        logger.warn('Subscription has expired');
         return false;
       }
       
@@ -475,7 +478,7 @@ class AuthService {
       const performanceNow = (typeof performance !== 'undefined' && performance.now) ? 
         performance.now().toString(36) : Math.random().toString(36).substring(2);
       
-      console.warn('Using fallback random generation - consider upgrading to secure crypto');
+      logger.warn('Using fallback random generation - consider upgrading to secure crypto');
       return (timestamp + random1 + random2 + performanceNow).substring(0, 32);
     }
   }
@@ -498,7 +501,7 @@ class AuthService {
       
       return parsed;
     } catch (error) {
-      console.warn('JSON parsing failed:', error);
+      logger.warn('JSON parsing failed:', error);
       return null;
     }
   }

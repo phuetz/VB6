@@ -5,25 +5,38 @@
  */
 
 import { Control } from '../context/types';
+import { createLogger } from './LoggingService';
+import { PropertyValue, EventListener } from './types/VB6ServiceTypes';
+
+const logger = createLogger('UserControlManager');
+
+/** Control property value that can be serialized */
+export type ControlPropertyValue = PropertyValue;
+
+/** Method implementation function */
+export type MethodImplementation = (...args: unknown[]) => unknown;
+
+/** Event handler callback */
+export type EventHandler = (...args: unknown[]) => void;
 
 export interface UserControlProperty {
   name: string;
   type: string;
-  defaultValue: any;
+  defaultValue: ControlPropertyValue;
   description?: string;
   category?: string;
   isReadOnly?: boolean;
   isDesignTimeOnly?: boolean;
   isRuntimeOnly?: boolean;
-  enumValues?: { [key: string]: any };
+  enumValues?: { [key: string]: ControlPropertyValue };
 }
 
 export interface UserControlMethod {
   name: string;
-  parameters: { name: string; type: string; optional?: boolean; defaultValue?: any }[];
+  parameters: { name: string; type: string; optional?: boolean; defaultValue?: ControlPropertyValue }[];
   returnType: string;
   description?: string;
-  implementation: (...args: any[]) => any;
+  implementation: MethodImplementation;
 }
 
 export interface UserControlEvent {
@@ -79,20 +92,20 @@ export interface UserControlDefinition {
 export interface UserControlInstance {
   id: string;
   definition: UserControlDefinition;
-  propertyValues: { [propertyName: string]: any };
+  propertyValues: { [propertyName: string]: ControlPropertyValue };
   constituent: Control[];
-  
+
   // Runtime state
   isDesignMode: boolean;
   isInitialized: boolean;
   isVisible: boolean;
   isEnabled: boolean;
-  
+
   // Event handlers
-  eventHandlers: { [eventName: string]: ((...args: any[]) => void)[] };
-  
+  eventHandlers: { [eventName: string]: EventHandler[] };
+
   // Methods
-  methods: { [methodName: string]: (...args: any[]) => any };
+  methods: { [methodName: string]: MethodImplementation };
 }
 
 export class VB6UserControlManager {
@@ -116,15 +129,15 @@ export class VB6UserControlManager {
       
       // Register the control
       this.registeredControls.set(definition.name, definition);
-      
+
       // Make it available globally for VB6 code
       this.exposeUserControlGlobally(definition);
-      
-      console.log(`User control registered: ${definition.name}`);
+
+      logger.info(`User control registered: ${definition.name}`);
       return true;
-      
+
     } catch (error) {
-      console.error(`Failed to register user control ${definition.name}:`, error);
+      logger.error(`Failed to register user control ${definition.name}:`, error);
       return false;
     }
   }
@@ -133,7 +146,7 @@ export class VB6UserControlManager {
   createUserControlInstance(controlName: string, initialProperties?: { [key: string]: any }): UserControlInstance | null {
     const definition = this.registeredControls.get(controlName);
     if (!definition) {
-      console.error(`User control not found: ${controlName}`);
+      logger.error(`User control not found: ${controlName}`);
       return null;
     }
 
@@ -207,24 +220,24 @@ export class VB6UserControlManager {
 
     // Check if property is read-only
     if (propertyDef.isReadOnly) {
-      console.warn(`Property ${propertyName} is read-only`);
+      logger.warn(`Property ${propertyName} is read-only`);
       return false;
     }
 
     // Check design-time/runtime restrictions
     if (propertyDef.isDesignTimeOnly && !instance.isDesignMode) {
-      console.warn(`Property ${propertyName} can only be set at design time`);
+      logger.warn(`Property ${propertyName} can only be set at design time`);
       return false;
     }
 
     if (propertyDef.isRuntimeOnly && instance.isDesignMode) {
-      console.warn(`Property ${propertyName} can only be set at runtime`);
+      logger.warn(`Property ${propertyName} can only be set at runtime`);
       return false;
     }
 
     // Type validation
     if (!this.validatePropertyValue(value, propertyDef.type)) {
-      console.error(`Invalid value for property ${propertyName}: expected ${propertyDef.type}`);
+      logger.error(`Invalid value for property ${propertyName}: expected ${propertyDef.type}`);
       return false;
     }
 
@@ -267,14 +280,14 @@ export class VB6UserControlManager {
   callUserControlMethod(instanceId: string, methodName: string, ...args: any[]): any {
     const instance = this.activeInstances.get(instanceId);
     if (!instance || !instance.methods[methodName]) {
-      console.error(`Method ${methodName} not found on user control ${instanceId}`);
+      logger.error(`Method ${methodName} not found on user control ${instanceId}`);
       return undefined;
     }
 
     try {
       return instance.methods[methodName](...args);
     } catch (error) {
-      console.error(`Error calling method ${methodName} on user control ${instanceId}:`, error);
+      logger.error(`Error calling method ${methodName} on user control ${instanceId}:`, error);
       return undefined;
     }
   }
@@ -287,7 +300,7 @@ export class VB6UserControlManager {
         try {
           handler(eventData);
         } catch (error) {
-          console.error(`Error in event handler for ${eventName}:`, error);
+          logger.error(`Error in event handler for ${eventName}:`, error);
         }
       });
     }
@@ -366,7 +379,7 @@ export class VB6UserControlManager {
     try {
       return this.parseUserControlFile(ctlContent);
     } catch (error) {
-      console.error('Failed to load user control from source:', error);
+      logger.error('Failed to load user control from source:', error);
       return null;
     }
   }
@@ -595,13 +608,13 @@ export class VB6UserControlManager {
 
       // Simple code execution (in real implementation, would use proper VB6 interpreter)
       // This is a simplified version for demonstration
-      console.log(`Executing ${context} code for ${instance.definition.name}:`, code);
-      
+      logger.debug(`Executing ${context} code for ${instance.definition.name}:`, code);
+
       // For now, just log the code execution
       return null;
-      
+
     } catch (error) {
-      console.error(`Error executing ${context} code:`, error);
+      logger.error(`Error executing ${context} code:`, error);
       return null;
     }
   }

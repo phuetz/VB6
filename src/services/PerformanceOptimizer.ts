@@ -4,6 +4,9 @@
  */
 
 import { debounce, throttle } from 'lodash';
+import { createLogger } from './LoggingService';
+
+const logger = createLogger('PerformanceOptimizer');
 
 export interface PerformanceMetrics {
   memoryUsage: number;
@@ -274,7 +277,7 @@ export class PerformanceOptimizer {
         // Process performance entries
         entries.forEach(entry => {
           if (entry.entryType === 'measure') {
-            console.debug(`Performance: ${entry.name} took ${entry.duration}ms`);
+            logger.debug(`Performance: ${entry.name} took ${entry.duration}ms`);
           }
         });
       });
@@ -434,7 +437,7 @@ export class PerformanceOptimizer {
     }
 
     if (warnings.length > 0) {
-      console.warn('Performance warnings:', warnings);
+      logger.warn('Performance warnings:', warnings);
       
       // Dispatch performance warning event
       window.dispatchEvent(new CustomEvent('performance-warning', {

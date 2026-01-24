@@ -84,6 +84,34 @@ export * from './VB6LateBinding';
 // Enhanced Runtime Functions
 export * from './VB6EnhancedRuntime';
 
+// Comprehensive Function Libraries
+export * from './VB6ComprehensiveStringFunctions';
+export * from './VB6ComprehensiveMathFunctions';
+
+// Call Stack Management
+export * from './VB6CallStackManager';
+
+// Enhanced Collections (Dictionary, Stack, Queue, etc.)
+export * from './VB6EnhancedCollections';
+
+// Binary File I/O
+export * from './VB6BinaryFileIO';
+
+// Shell and Process Management
+export * from './VB6ShellProcess';
+
+// Advanced Graphics (Canvas-based GDI)
+export * from './VB6AdvancedGraphics';
+
+// Extended Constants
+export * from './VB6ExtendedConstants';
+
+// Control Arrays
+export * from './VB6ControlArray';
+
+// Data Binding
+export * from './VB6DataBinding';
+
 // Final Missing Functions - TRUE 100% Compatibility
 export * from './VB6FinalRuntimeFunctions';
 export * from './VB6UltimateMissingFunctions';

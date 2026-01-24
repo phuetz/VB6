@@ -1,6 +1,19 @@
 import { CompiledCode, CompilerError, Project, Module, Procedure } from '../types/extended';
 import { VB6APIManagerInstance } from './VB6APIManager';
 import { VB6AdvancedCompiler } from '../compiler/VB6AdvancedCompiler';
+import { createLogger } from './LoggingService';
+import {
+  CompilerVariableValue,
+  FormDefinition,
+  ControlDefinitionCompiler,
+  ClassModuleDefinition,
+  VariableDefinition,
+  ConstantDefinition,
+  ConversionPattern,
+  DefaultValuesMap
+} from './types/VB6ServiceTypes';
+
+const logger = createLogger('Compiler');
 import { VB6IncrementalCache } from '../compiler/VB6IncrementalCache';
 import { VB6UltraJIT } from '../compiler/VB6UltraJIT';
 import { VB6ProfileGuidedOptimizer } from '../compiler/VB6ProfileGuidedOptimizer';
@@ -27,7 +40,7 @@ interface CompilerOptions {
 export class VB6Compiler {
   private errors: CompilerError[] = [];
   private warnings: CompilerError[] = [];
-  private variables: Map<string, any> = new Map();
+  private variables: Map<string, CompilerVariableValue> = new Map();
   private procedures: Map<string, Procedure> = new Map();
   
   // Advanced compilation components
@@ -156,9 +169,7 @@ export class VB6Compiler {
 
   async compile(project: Project): Promise<CompiledCode> {
     const compilerType = this.useUnified ? 'Unified (Phase 2)' : this.useAdvanced ? 'Advanced' : 'Legacy';
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🚀 Compiling ${project.name} with ${compilerType} compiler...`);
-    }
+    logger.debug(`Compiling ${project.name} with ${compilerType} compiler...`);
     
     // Use unified compiler first (Phase 2 implementation)
     if (this.useUnified && this.unifiedCompiler) {
@@ -179,9 +190,7 @@ export class VB6Compiler {
     const startTime = performance.now();
     
     try {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`📦 Starting unified compilation for ${project.modules?.length || 1} modules...`);
-      }
+      logger.debug(`Starting unified compilation for ${project.modules?.length || 1} modules...`);
 
       // Initialize error handling context
       this.errorHandler!.enterContext('compileUnified', project.name);
@@ -237,41 +246,39 @@ export class VB6Compiler {
       }
 
       const duration = performance.now() - startTime;
-      
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`✅ Unified compilation completed in ${duration.toFixed(2)}ms`);
-        console.log(`📊 Metrics: ${result.metrics.tokensGenerated} tokens, ${result.metrics.functionsCompiled} functions`);
-        
-        if (result.errors.length > 0) {
-          console.log(`⚠️  ${result.errors.length} errors found`);
-        }
-        
-        if (result.warnings.length > 0) {
-          console.log(`⚠️  ${result.warnings.length} warnings found`);
-        }
 
-        // Log performance metrics
-        const lexerMetrics = this.optimizedLexer?.getMetrics();
-        if (lexerMetrics && lexerMetrics.throughput > 0) {
-          console.log(`🔥 Lexer performance: ${(lexerMetrics.throughput / 1000).toFixed(1)}k tokens/sec`);
-          
-          if (lexerMetrics.throughput >= 400000) {
-            console.log(`🎯 Performance target achieved! (400k+ tokens/sec)`);
-          }
-        }
+      logger.info(`Unified compilation completed in ${duration.toFixed(2)}ms`);
+      logger.debug(`Metrics: ${result.metrics.tokensGenerated} tokens, ${result.metrics.functionsCompiled} functions`);
 
-        // Log cache metrics
-        if (this.compilationCache) {
-          const cacheMetrics = this.compilationCache.getMetrics();
-          console.log(`💾 Cache: ${cacheMetrics.hits} hits, ${cacheMetrics.misses} misses (${(cacheMetrics.hitRatio * 100).toFixed(1)}% hit rate)`);
-        }
+      if (result.errors.length > 0) {
+        logger.warn(`${result.errors.length} errors found`);
+      }
 
-        // Log WASM metrics
-        if (this.wasmOptimizer) {
-          const wasmMetrics = this.wasmOptimizer.getMetrics();
-          if (wasmMetrics.hotPathsDetected > 0) {
-            console.log(`⚡ WASM: ${wasmMetrics.hotPathsDetected} hot paths detected, ${wasmMetrics.modulesGenerated} modules generated`);
-          }
+      if (result.warnings.length > 0) {
+        logger.warn(`${result.warnings.length} warnings found`);
+      }
+
+      // Log performance metrics
+      const lexerMetrics = this.optimizedLexer?.getMetrics();
+      if (lexerMetrics && lexerMetrics.throughput > 0) {
+        logger.debug(`Lexer performance: ${(lexerMetrics.throughput / 1000).toFixed(1)}k tokens/sec`);
+
+        if (lexerMetrics.throughput >= 400000) {
+          logger.info(`Performance target achieved! (400k+ tokens/sec)`);
+        }
+      }
+
+      // Log cache metrics
+      if (this.compilationCache) {
+        const cacheMetrics = this.compilationCache.getMetrics();
+        logger.debug(`Cache: ${cacheMetrics.hits} hits, ${cacheMetrics.misses} misses (${(cacheMetrics.hitRatio * 100).toFixed(1)}% hit rate)`);
+      }
+
+      // Log WASM metrics
+      if (this.wasmOptimizer) {
+        const wasmMetrics = this.wasmOptimizer.getMetrics();
+        if (wasmMetrics.hotPathsDetected > 0) {
+          logger.debug(`WASM: ${wasmMetrics.hotPathsDetected} hot paths detected, ${wasmMetrics.modulesGenerated} modules generated`);
         }
       }
 
@@ -319,10 +326,8 @@ export class VB6Compiler {
 
       const duration = performance.now() - startTime;
       const errorMsg = error instanceof Error ? error.message : 'Unknown compilation error';
-      
-      if (process.env.NODE_ENV === 'development') {
-        console.error(`❌ Unified compilation failed after ${duration.toFixed(2)}ms:`, errorMsg);
-      }
+
+      logger.error(`Unified compilation failed after ${duration.toFixed(2)}ms:`, errorMsg);
 
       return {
         success: false,
@@ -400,29 +405,23 @@ export class VB6Compiler {
       if (this.profiler) {
         const profileData = this.profiler.stopProfiling();
         const hints = this.profiler.getOptimizationHints();
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`📊 Profile data collected: ${profileData.executionProfiles.size} functions`);
-        }
+        logger.debug(`Profile data collected: ${profileData.executionProfiles.size} functions`);
       }
-      
+
       const duration = performance.now() - startTime;
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`✅ Advanced compilation completed in ${duration.toFixed(2)}ms`);
-      }
-      
+      logger.info(`Advanced compilation completed in ${duration.toFixed(2)}ms`);
+
       // Cache statistics
       if (this.cache) {
         const stats = this.cache.getStats();
         const hitRate = (stats.hits / (stats.hits + stats.misses)) * 100;
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`💾 Cache hit rate: ${hitRate.toFixed(1)}%`);
-        }
+        logger.debug(`Cache hit rate: ${hitRate.toFixed(1)}%`);
       }
       
       return result;
-      
+
     } catch (error) {
-      console.error('Advanced compilation failed, falling back to legacy:', error);
+      logger.error('Advanced compilation failed, falling back to legacy:', error);
       return this.compileLegacy(project);
     }
   }
@@ -502,7 +501,7 @@ class ${module.name} {
       .join('\n');
   }
 
-  private compileForms(forms: any[]): string {
+  private compileForms(forms: FormDefinition[]): string {
     return forms
       .map(form => {
         return `
@@ -523,7 +522,7 @@ class ${this.sanitizeIdentifier(form.name)} {
     ${
       form.controls
         ?.map(
-          (control: any) => `
+          (control: ControlDefinitionCompiler) => `
     this.controls['${this.sanitizePropertyKey(control.name)}'] = {
       type: '${this.sanitizeIdentifier(control.type)}',
       properties: ${this.safeJsonStringify(control)},
@@ -611,7 +610,7 @@ class ${this.sanitizeIdentifier(form.name)} {
       .join('\n');
   }
 
-  private compileClassModules(classModules: any[]): string {
+  private compileClassModules(classModules: ClassModuleDefinition[]): string {
     return classModules
       .map(cls => {
         return `
@@ -634,7 +633,7 @@ class ${cls.name} {
       .join('\n');
   }
 
-  private compileVariables(variables: any[]): string {
+  private compileVariables(variables: VariableDefinition[]): string {
     return variables
       .map(variable => {
         const defaultValue = this.getDefaultValue(variable.type);
@@ -644,7 +643,7 @@ class ${cls.name} {
       .join('\n    ');
   }
 
-  private compileConstants(constants: any[]): string {
+  private compileConstants(constants: ConstantDefinition[]): string {
     return constants
       .map(constant => {
         // CODE GENERATION BUG FIX: Sanitize constant names and values
@@ -838,14 +837,14 @@ class ${cls.name} {
     return jsCode;
   }
 
-  private getDefaultValue(type: string): any {
+  private getDefaultValue(type: string): DefaultValuesMap[string] {
     // COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Add constant generation jitter
-    
+
     // EDGE CASE FIX: Input validation and bounds checking
     if (typeof type !== 'string' || type.length > 50) {
       return null; // Prevent malicious input
     }
-    
+
     // COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Randomize default value creation
     const defaults = this.createRandomizedDefaults({
       String: '',
@@ -860,7 +859,7 @@ class ${cls.name} {
       Object: null,
       Variant: null,
     });
-    
+
     // COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Add anti-constant-folding noise
     this.addConstantFoldingNoise();
 
@@ -877,16 +876,14 @@ class ${cls.name} {
       
       // Log processed declarations
       if (declarations.length > 0) {
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`Processed ${declarations.length} API declarations:`,
-            declarations.map(d => `${d.name} from ${d.library}`));
-        }
+        logger.debug(`Processed ${declarations.length} API declarations:`,
+          declarations.map(d => `${d.name} from ${d.library}`));
       }
-      
+
       return processedCode;
-      
+
     } catch (error) {
-      console.error('Error processing API declarations:', error);
+      logger.error('Error processing API declarations:', error);
       this.warnings.push({
         type: 'warning',
         message: `API declaration processing failed: ${error.message}`,
@@ -995,7 +992,7 @@ const VB6Runtime = {
     if (typeof window !== 'undefined' && window.CallAPI) {
       return window.CallAPI(functionName, ...args);
     } else {
-      console.warn('VB6 API system not available:', functionName);
+      logger.warn('VB6 API system not available:', functionName);
       return null;
     }
   },
@@ -1005,7 +1002,7 @@ const VB6Runtime = {
     if (typeof window !== 'undefined' && window.DeclareFunction) {
       return window.DeclareFunction(declaration);
     } else {
-      console.warn('VB6 API declaration system not available');
+      logger.warn('VB6 API declaration system not available');
       return false;
     }
   },
@@ -1208,10 +1205,10 @@ document.addEventListener('DOMContentLoaded', function() {
     return str.replace(/[\n\r*/]/g, ' ').substring(0, 200);
   }
 
-  private safeJsonStringify(obj: any): string {
+  private safeJsonStringify(obj: unknown): string {
     try {
       // CODE GENERATION BUG FIX: Use JSON.stringify with replacer to prevent code injection
-      return JSON.stringify(obj, (key, value) => {
+      return JSON.stringify(obj, (key, value: unknown) => {
         // Prevent prototype pollution
         if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
           return undefined;
@@ -1222,7 +1219,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return value;
       });
-    } catch (error) {
+    } catch {
       // Handle circular references or other stringify errors
       return 'null';
     }
@@ -1447,35 +1444,35 @@ document.addEventListener('DOMContentLoaded', function() {
   /**
    * COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Randomize conversions
    */
-  private randomizeConversions(conversions: any[]): any[] {
+  private randomizeConversions(conversions: ConversionPattern[]): ConversionPattern[] {
     // Some conversions must happen in order, others can be shuffled
     const criticalConversions = conversions.slice(0, 3); // Keep first 3 in order
     const flexibleConversions = conversions.slice(3);
-    
+
     return [...criticalConversions, ...this.shuffleArray(flexibleConversions)];
   }
-  
+
   /**
    * COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Create randomized defaults
    */
-  private createRandomizedDefaults(defaults: { [key: string]: any }): { [key: string]: any } {
+  private createRandomizedDefaults(defaults: DefaultValuesMap): DefaultValuesMap {
     // Add noise to default values to prevent constant folding
-    const randomized: { [key: string]: any } = {};
+    const randomized: DefaultValuesMap = {};
     const keys = this.shuffleArray(Object.keys(defaults));
-    
+
     keys.forEach(key => {
       let value = defaults[key];
-      
+
       // Add subtle variations to prevent optimization
       if (typeof value === 'number' && value === 0) {
         value = Math.random() < 0.5 ? 0 : 0.0; // Different zero representations
       } else if (typeof value === 'string' && value === '') {
         value = Math.random() < 0.5 ? '' : new String('').toString(); // Different empty string creation
       }
-      
+
       randomized[key] = value;
     });
-    
+
     return randomized;
   }
   

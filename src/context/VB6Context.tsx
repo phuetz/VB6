@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useCallback } from 'react';
 import { vb6Reducer, initialState } from './vb6Reducer';
-import { VB6State, VB6Action } from './types';
+import { VB6State, VB6Action, Control, ControlPropertyValue, VB6Value } from './types';
 import { FileManager } from '../services/FileManager';
 import JSZip from 'jszip';
 
@@ -9,14 +9,14 @@ interface VB6ContextType {
   dispatch: React.Dispatch<VB6Action>;
   // Actions
   createControl: (type: string, x?: number, y?: number) => void;
-  updateControl: (controlId: number, property: string, value: any) => void;
+  updateControl: (controlId: number, property: string, value: ControlPropertyValue) => void;
   deleteControls: (controlIds: number[]) => void;
   selectControls: (controlIds: number[]) => void;
   copyControls: () => void;
   pasteControls: () => void;
   undo: () => void;
   redo: () => void;
-  executeEvent: (control: any, eventName: string, eventData?: any) => void;
+  executeEvent: (control: Control, eventName: string, eventData?: Record<string, VB6Value>) => void;
   saveProject: () => void;
   loadProject: (file: File) => void;
 }
@@ -44,7 +44,7 @@ export const VB6Provider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   }, []);
 
-  const updateControl = useCallback((controlId: number, property: string, value: any) => {
+  const updateControl = useCallback((controlId: number, property: string, value: ControlPropertyValue) => {
     dispatch({
       type: 'UPDATE_CONTROL',
       payload: { controlId, property, value },
@@ -82,7 +82,7 @@ export const VB6Provider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const executeEvent = useCallback(
-    async (control: any, eventName: string, eventData?: any) => {
+    async (control: Control, eventName: string, eventData?: Record<string, VB6Value>) => {
       const eventKey = `${control.name}_${eventName}`;
       const code = state.eventCode[eventKey];
 

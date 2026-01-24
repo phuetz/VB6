@@ -3,6 +3,10 @@
  * Handles all VB6 events with proper propagation and cancellation
  */
 
+import { createLogger } from './LoggingService';
+
+const logger = createLogger('EventSystem');
+
 export interface VB6Event {
   name: string;
   sender: string;
@@ -186,7 +190,7 @@ export class VB6EventSystem {
           this.off(handler.id);
         }
       } catch (error) {
-        console.error(`Error in global event handler for ${event.name}:`, error);
+        logger.error(`Error in global event handler for ${event.name}:`, error);
       }
     }
 
@@ -208,7 +212,7 @@ export class VB6EventSystem {
             this.off(handler.id);
           }
         } catch (error) {
-          console.error(`Error in event handler for ${key}:`, error);
+          logger.error(`Error in event handler for ${key}:`, error);
         }
       }
     }

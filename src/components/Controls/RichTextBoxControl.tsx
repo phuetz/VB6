@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useRef, forwardRef, useCallback } from 'react';
 import { VB6ControlPropsEnhanced } from './VB6ControlsEnhanced';
 import { useVB6Store } from '../../stores/vb6Store';
+import { sanitizeRichText } from '../../utils/htmlSanitizer';
 
 // RichTextBox Constants
 export enum RtfSelectionType {
@@ -528,10 +529,11 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
       />
       
       {/* Hidden div for RTF rendering support */}
+      {/* SECURITY: HTML sanitizé via DOMPurify (TASK-004) */}
       <div
         ref={editorRef}
         style={{ display: 'none' }}
-        dangerouslySetInnerHTML={{ __html: currentRTF }}
+        dangerouslySetInnerHTML={{ __html: sanitizeRichText(currentRTF) }}
       />
     </div>
   );

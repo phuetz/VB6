@@ -1,7 +1,16 @@
 // Ultra-Think Hot-Reload Engine with AST Diffing & Incremental Compilation
-// 🔥 Système révolutionnaire de rechargement à chaud pour VB6 Web
+// Systeme de rechargement a chaud pour VB6 Web
 
 import { VB6Parser } from '../utils/vb6Parser';
+import { createLogger } from './LoggingService';
+import {
+  ASTMetadata,
+  HotReloadListener,
+  HotReloadAppState,
+  ParsedAST,
+} from './types/VB6ServiceTypes';
+
+const logger = createLogger('HotReload');
 import { VB6Transpiler } from '../utils/vb6Transpiler';
 import { VB6SemanticAnalyzer } from '../utils/vb6SemanticAnalyzer';
 import { Control } from '../context/types';
@@ -17,7 +26,7 @@ export interface ASTNode {
   endColumn: number;
   children: ASTNode[];
   hash: string; // Pour la détection de changements
-  metadata?: any;
+  metadata?: ASTMetadata;
 }
 
 export interface ASTDiff {
@@ -55,10 +64,26 @@ export interface SourceMap {
 }
 
 export interface StatePreservationData {
-  controlStates: Record<string, any>;
-  variableValues: Record<string, any>;
-  formProperties: Record<string, any>;
-  executionContext: any;
+  controlStates: Record<string, ControlState>;
+  variableValues: Record<string, unknown>;
+  formProperties: Record<string, unknown>;
+  executionContext: ExecutionContextData | null;
+}
+
+/** Control state for hot reload preservation */
+interface ControlState {
+  id?: string;
+  type?: string;
+  value?: unknown;
+  properties?: Record<string, unknown>;
+}
+
+/** Execution context data */
+interface ExecutionContextData {
+  currentProcedure?: string;
+  currentModule?: string;
+  lineNumber?: number;
+  variables?: Record<string, unknown>;
 }
 
 export interface RollbackData {
@@ -77,6 +102,9 @@ export interface HotReloadConfig {
   errorRecovery: boolean;
   verboseLogging: boolean;
 }
+
+/** Hot reload event handler type */
+type HotReloadEventHandler = (data: unknown) => void;
 
 export class HotReloadEngine {
   private static instance: HotReloadEngine;
@@ -117,8 +145,8 @@ export class HotReloadEngine {
     rollbackCount: 0
   };
   
-  // Event listeners
-  private listeners: Map<string, ((data: any) => void)[]> = new Map([
+  // Event listeners - typed with unknown for flexibility
+  private listeners: Map<string, HotReloadEventHandler[]> = new Map([
     ['beforeReload', []],
     ['afterReload', []],
     ['error', []],
@@ -421,47 +449,47 @@ export class HotReloadEngine {
   // 💾 State preservation system
   private async preserveCurrentState(): Promise<StatePreservationData> {
     this.log('💾 Preserving current application state...');
-    
+
     try {
       // Get DOM state for all controls
-      const controlStates: Record<string, any> = {};
+      const controlStates: Record<string, ControlState> = {};
       const controls = document.querySelectorAll('[data-control-id]');
-      
+
       controls.forEach(element => {
         const controlId = element.getAttribute('data-control-id');
         if (controlId) {
           controlStates[controlId] = this.extractControlState(element as HTMLElement);
         }
       });
-      
+
       // Preserve JavaScript variable values
-      const variableValues: Record<string, any> = {};
-      if (typeof window !== 'undefined' && (window as any).vb6Runtime) {
-        const runtime = (window as any).vb6Runtime;
-        if (runtime.variables) {
-          Object.assign(variableValues, runtime.variables);
+      const variableValues: Record<string, unknown> = {};
+      if (typeof window !== 'undefined') {
+        const windowWithRuntime = window as Window & { vb6Runtime?: { variables?: Record<string, unknown> } };
+        if (windowWithRuntime.vb6Runtime?.variables) {
+          Object.assign(variableValues, windowWithRuntime.vb6Runtime.variables);
         }
       }
-      
+
       // Get form properties
-      const formProperties: Record<string, any> = {};
+      const formProperties: Record<string, unknown> = {};
       const formElement = document.querySelector('[data-vb6-form]');
       if (formElement) {
         formProperties.backColor = getComputedStyle(formElement).backgroundColor;
         formProperties.width = formElement.clientWidth;
         formProperties.height = formElement.clientHeight;
       }
-      
+
       const stateData: StatePreservationData = {
         controlStates,
         variableValues,
         formProperties,
         executionContext: this.captureExecutionContext()
       };
-      
+
       this.preservedState = stateData;
       this.emit('statePreserved', stateData);
-      
+
       return stateData;
     } catch (error) {
       this.log('❌ State preservation failed:', error);
@@ -579,16 +607,16 @@ export class HotReloadEngine {
   }
 
   // Helper methods
-  private convertToHotReloadAST(parseAST: any): ASTNode {
+  private convertToHotReloadAST(parseAST: ParsedAST): ASTNode {
     // Convert parser AST to our format with hash generation
     return this.walkASTNode(parseAST, 0, 0);
   }
 
-  private walkASTNode(node: any, line: number, column: number): ASTNode {
-    const children = (node.children || []).map((child: any, index: number) => 
+  private walkASTNode(node: ParsedAST, line: number, column: number): ASTNode {
+    const children = (node.children || []).map((child: ParsedAST, index: number) =>
       this.walkASTNode(child, line + index, column)
     );
-    
+
     const nodeData = {
       type: node.type || 'Unknown',
       id: this.generateNodeId(node),
@@ -600,14 +628,14 @@ export class HotReloadEngine {
       children,
       metadata: node.metadata || {}
     };
-    
+
     return {
       ...nodeData,
       hash: this.hashObject(nodeData)
     };
   }
 
-  private generateNodeId(node: any): string {
+  private generateNodeId(node: ParsedAST): string {
     return `${node.type}_${node.name || 'anonymous'}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
@@ -625,36 +653,36 @@ export class HotReloadEngine {
     return Math.abs(hash).toString(36);
   }
 
-  private hashObject(obj: any): string {
+  private hashObject(obj: Record<string, unknown>): string {
     return this.hashCode(JSON.stringify(obj, Object.keys(obj).sort()));
   }
 
-  private log(message: string, ...args: any[]): void {
+  private log(message: string, ...args: unknown[]): void {
     if (this.config.verboseLogging) {
-      console.log(`[HotReload] ${message}`, ...args);
+      logger.debug(message, ...args);
     }
   }
 
-  private emit(event: string, data: any): void {
+  private emit(event: string, data: unknown): void {
     const eventListeners = this.listeners.get(event) || [];
     eventListeners.forEach(listener => {
       try {
         listener(data);
       } catch (error) {
-        console.error(`Hot-reload event listener error:`, error);
+        logger.error(`Hot-reload event listener error:`, error);
       }
     });
   }
 
   // Public API
-  public on(event: string, listener: (data: any) => void): void {
+  public on(event: string, listener: HotReloadEventHandler): void {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, []);
     }
     this.listeners.get(event)!.push(listener);
   }
 
-  public off(event: string, listener: (data: any) => void): void {
+  public off(event: string, listener: HotReloadEventHandler): void {
     const eventListeners = this.listeners.get(event);
     if (eventListeners) {
       const index = eventListeners.indexOf(listener);
@@ -682,8 +710,8 @@ export class HotReloadEngine {
   }
 
   // Stub methods to be implemented based on specific runtime
-  private extractControlState(element: HTMLElement): any { return {}; }
-  private captureExecutionContext(): any { return null; }
+  private extractControlState(element: HTMLElement): ControlState { return {}; }
+  private captureExecutionContext(): ExecutionContextData | null { return null; }
   private extractAreaCode(code: string, area: AffectedArea): string { return ''; }
   private async compileCodeArea(code: string, area: AffectedArea): Promise<string> { return ''; }
   private replaceCompiledArea(fullCode: string, areaCode: string, area: AffectedArea): string { return fullCode; }
