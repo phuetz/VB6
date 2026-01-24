@@ -14,6 +14,7 @@ import PropertiesWindow from './components/Panels/PropertiesWindow/PropertiesWin
 import ControlTree from './components/Panels/ControlTree/ControlTree';
 import ImmediateWindow from './components/Panels/ImmediateWindow/ImmediateWindow';
 import { useVB6Store } from './stores/vb6Store';
+import { shallow } from 'zustand/shallow';
 import SplashScreen from './components/SplashScreen/SplashScreen';
 import { TodoList } from './components/Todo/TodoList';
 import { LogPanel } from './components/Debug/LogPanel';
@@ -72,6 +73,7 @@ interface MainContentProps {
 
 const MainContent: React.FC<MainContentProps> = ({ onShowActiveXManager }) => {
   console.log('🔄 MainContent component rendering...');
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
   const {
     showToolbox,
     showCodeEditor,
@@ -81,8 +83,20 @@ const MainContent: React.FC<MainContentProps> = ({ onShowActiveXManager }) => {
     showImmediateWindow,
     formProperties,
     selectedControls,
-    updateControls,
-  } = useVB6Store();
+  } = useVB6Store(
+    (state) => ({
+      showToolbox: state.showToolbox,
+      showCodeEditor: state.showCodeEditor,
+      showProjectExplorer: state.showProjectExplorer,
+      showPropertiesWindow: state.showPropertiesWindow,
+      showControlTree: state.showControlTree,
+      showImmediateWindow: state.showImmediateWindow,
+      formProperties: state.formProperties,
+      selectedControls: state.selectedControls,
+    }),
+    shallow
+  );
+  const updateControls = useVB6Store((state) => state.updateControls);
 
   const [showLayoutToolbar, setShowLayoutToolbar] = useState(true);
 
@@ -158,15 +172,25 @@ function ModernApp() {
 
   // State for all dialog components
   console.log('🔄 Initializing VB6 store...');
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
   const {
     showTemplateManager,
     showPerformanceMonitor,
     showOptionsDialog,
-    showDialog,
-    toggleWindow,
     showSnippetManager,
     showTodoList,
-  } = useVB6Store();
+  } = useVB6Store(
+    (state) => ({
+      showTemplateManager: state.showTemplateManager,
+      showPerformanceMonitor: state.showPerformanceMonitor,
+      showOptionsDialog: state.showOptionsDialog,
+      showSnippetManager: state.showSnippetManager,
+      showTodoList: state.showTodoList,
+    }),
+    shallow
+  );
+  const showDialog = useVB6Store((state) => state.showDialog);
+  const toggleWindow = useVB6Store((state) => state.toggleWindow);
   console.log('✅ VB6 store initialized');
 
   const [showProjectWizard, setShowProjectWizard] = useState(false);

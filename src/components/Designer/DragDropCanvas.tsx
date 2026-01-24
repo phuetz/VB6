@@ -12,6 +12,7 @@ import {
   closestCenter,
 } from '@dnd-kit/core';
 import { useVB6Store } from '../../stores/vb6Store';
+import { shallow } from 'zustand/shallow';
 import ControlRenderer from './ControlRenderer';
 import Grid from './Grid';
 import AlignmentGuides from './AlignmentGuides';
@@ -38,6 +39,7 @@ const DragDropCanvas: React.FC<DragDropCanvasProps> = () => {
       accepts: ['toolbox-control', 'existing-control'],
     },
   });
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
   const {
     controls,
     executionMode,
@@ -46,11 +48,24 @@ const DragDropCanvas: React.FC<DragDropCanvasProps> = () => {
     isDragging,
     dragPosition,
     draggedControlType,
-    createControl,
-    updateControl,
-    setDragState,
-    selectControls,
-  } = useVB6Store();
+  } = useVB6Store(
+    (state) => ({
+      controls: state.controls,
+      executionMode: state.executionMode,
+      snapToGrid: state.snapToGrid,
+      gridSize: state.gridSize,
+      isDragging: state.isDragging,
+      dragPosition: state.dragPosition,
+      draggedControlType: state.draggedControlType,
+    }),
+    shallow
+  );
+
+  // Actions don't need shallow comparison
+  const createControl = useVB6Store((state) => state.createControl);
+  const updateControl = useVB6Store((state) => state.updateControl);
+  const setDragState = useVB6Store((state) => state.setDragState);
+  const selectControls = useVB6Store((state) => state.selectControls);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

@@ -83,17 +83,64 @@ router.get('/connections', asyncHandler(async (req: Request, res: Response) => {
   });
 }));
 
+// SECURITY FIX: Transaction storage with timeout cleanup
+const TRANSACTION_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+const MAX_TRANSACTIONS_PER_USER = 10;
+
+interface TransactionEntry {
+  transaction: unknown;
+  createdAt: number;
+  connectionId: string;
+}
+
+// Cleanup stale transactions periodically
+const cleanupStaleTransactions = (transactions: Record<string, TransactionEntry>) => {
+  const now = Date.now();
+  for (const [txnId, entry] of Object.entries(transactions)) {
+    if (now - entry.createdAt > TRANSACTION_TIMEOUT_MS) {
+      logger.warn(`Cleaning up stale transaction: ${txnId}`);
+      try {
+        (entry.transaction as { rollback: () => Promise<void> }).rollback?.();
+      } catch (e) {
+        logger.error(`Failed to rollback stale transaction ${txnId}:`, e);
+      }
+      delete transactions[txnId];
+    }
+  }
+};
+
 // Begin transaction
 router.post('/transaction/begin', asyncHandler(async (req: Request, res: Response) => {
   const { connectionId } = req.body;
-  
+
   const transaction = await dbPool.beginTransaction(connectionId);
-  const transactionId = `txn_${Date.now()}`;
-  
-  // Store transaction reference (in production, use a proper session store)
-  req.app.locals.transactions = req.app.locals.transactions || {};
-  req.app.locals.transactions[transactionId] = transaction;
-  
+  const transactionId = `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+  // Initialize transactions store with proper typing
+  if (!req.app.locals.transactions) {
+    req.app.locals.transactions = {} as Record<string, TransactionEntry>;
+    // Set up periodic cleanup (every 60 seconds)
+    setInterval(() => cleanupStaleTransactions(req.app.locals.transactions), 60000);
+  }
+
+  // Cleanup stale transactions before adding new one
+  cleanupStaleTransactions(req.app.locals.transactions);
+
+  // Limit number of active transactions
+  const activeCount = Object.keys(req.app.locals.transactions).length;
+  if (activeCount >= MAX_TRANSACTIONS_PER_USER * 10) { // Global limit
+    return res.status(429).json({
+      success: false,
+      error: 'Too many active transactions. Please commit or rollback existing ones.',
+    });
+  }
+
+  req.app.locals.transactions[transactionId] = {
+    transaction,
+    createdAt: Date.now(),
+    connectionId,
+  };
+
   res.json({
     success: true,
     transactionId,
@@ -103,18 +150,18 @@ router.post('/transaction/begin', asyncHandler(async (req: Request, res: Respons
 // Commit transaction
 router.post('/transaction/commit', asyncHandler(async (req: Request, res: Response) => {
   const { transactionId } = req.body;
-  const transaction = req.app.locals.transactions?.[transactionId];
-  
-  if (!transaction) {
+  const entry = req.app.locals.transactions?.[transactionId] as TransactionEntry | undefined;
+
+  if (!entry) {
     return res.status(404).json({
       success: false,
-      error: 'Transaction not found',
+      error: 'Transaction not found or expired',
     });
   }
-  
-  await transaction.commit();
+
+  await (entry.transaction as { commit: () => Promise<void> }).commit();
   delete req.app.locals.transactions[transactionId];
-  
+
   res.json({
     success: true,
     message: 'Transaction committed successfully',
@@ -124,18 +171,18 @@ router.post('/transaction/commit', asyncHandler(async (req: Request, res: Respon
 // Rollback transaction
 router.post('/transaction/rollback', asyncHandler(async (req: Request, res: Response) => {
   const { transactionId } = req.body;
-  const transaction = req.app.locals.transactions?.[transactionId];
-  
-  if (!transaction) {
+  const entry = req.app.locals.transactions?.[transactionId] as TransactionEntry | undefined;
+
+  if (!entry) {
     return res.status(404).json({
       success: false,
-      error: 'Transaction not found',
+      error: 'Transaction not found or expired',
     });
   }
-  
-  await transaction.rollback();
+
+  await (entry.transaction as { rollback: () => Promise<void> }).rollback();
   delete req.app.locals.transactions[transactionId];
-  
+
   res.json({
     success: true,
     message: 'Transaction rolled back successfully',

@@ -8,7 +8,23 @@ import jwt from 'jsonwebtoken';
 import { AppError } from './errorHandler';
 import { logger } from '../utils/logger';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'vb6-database-server-secret';
+// SECURITY FIX: Require JWT_SECRET in production, only use default in development
+const getJwtSecret = (): string => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret && process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET environment variable is required in production');
+  }
+  if (!secret) {
+    logger.warn('WARNING: Using default JWT secret. Set JWT_SECRET in production!');
+    return 'vb6-dev-secret-change-in-production';
+  }
+  if (secret.length < 32) {
+    logger.warn('WARNING: JWT_SECRET should be at least 32 characters');
+  }
+  return secret;
+};
+
+const JWT_SECRET = getJwtSecret();
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 
 export interface AuthRequest extends Request {

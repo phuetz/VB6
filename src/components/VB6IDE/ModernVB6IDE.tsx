@@ -12,15 +12,26 @@ import ProjectExplorer from '../Panels/ProjectExplorer/ProjectExplorer';
 import PropertiesWindow from '../Panels/PropertiesWindow/PropertiesWindow';
 import ImmediateWindow from '../Panels/ImmediateWindow/ImmediateWindow';
 import { useVB6Store } from '../../stores/vb6Store';
+import { shallow } from 'zustand/shallow';
 
 const ModernMainContent: React.FC = () => {
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
   const {
     showToolbox,
     showCodeEditor,
     showProjectExplorer,
     showPropertiesWindow,
     showImmediateWindow,
-  } = useVB6Store();
+  } = useVB6Store(
+    (state) => ({
+      showToolbox: state.showToolbox,
+      showCodeEditor: state.showCodeEditor,
+      showProjectExplorer: state.showProjectExplorer,
+      showPropertiesWindow: state.showPropertiesWindow,
+      showImmediateWindow: state.showImmediateWindow,
+    }),
+    shallow
+  );
 
   return (
     <div className="flex-1 flex overflow-hidden">

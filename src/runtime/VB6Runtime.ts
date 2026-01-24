@@ -12,6 +12,32 @@ import { VB6DatabaseObjects } from './VB6DatabaseObjects';
 import { VB6GraphicsAPI } from './VB6GraphicsAPI';
 import { VB6PrinterAPI } from './VB6PrinterObject';
 
+// TYPE SAFETY FIX: Define interfaces for VB6 runtime objects
+export interface VB6ControlBase {
+  Name: string;
+  Index?: number;
+  Visible?: boolean;
+  Enabled?: boolean;
+  Left?: number;
+  Top?: number;
+  Width?: number;
+  Height?: number;
+  SetFocus?: () => void;
+}
+
+export interface VB6FormBase {
+  Name: string;
+  Caption?: string;
+  Visible?: boolean;
+  WindowState?: number;
+  Show?: (modal?: number) => void;
+  Hide?: () => void;
+  Unload?: () => void;
+  Controls?: VB6ControlBase[];
+}
+
+export type VB6Variant = string | number | boolean | null | undefined | Date | object | unknown[];
+
 // VB6 Runtime Constants
 export enum VbAppWinStyle {
   vbHide = 0,
@@ -239,8 +265,8 @@ export class VB6App extends EventEmitter {
 
 // VB6 Screen Object
 export class VB6Screen extends EventEmitter {
-  private _activeControl: any = null;
-  private _activeForm: any = null;
+  private _activeControl: VB6ControlBase | null = null;
+  private _activeForm: VB6FormBase | null = null;
   private _mousePointer: number = 0;
   private _mouseIcon: string = '';
   // EVENT HANDLING BUG FIX: Track window listeners for cleanup
@@ -283,21 +309,21 @@ export class VB6Screen extends EventEmitter {
     return 15; // VB6 standard
   }
 
-  get ActiveControl(): any {
+  get ActiveControl(): VB6ControlBase | null {
     return this._activeControl;
   }
 
-  set ActiveControl(value: any) {
+  set ActiveControl(value: VB6ControlBase | null) {
     const oldControl = this._activeControl;
     this._activeControl = value;
     this.emit('ActiveControlChanged', { oldControl, newControl: value });
   }
 
-  get ActiveForm(): any {
+  get ActiveForm(): VB6FormBase | null {
     return this._activeForm;
   }
 
-  set ActiveForm(value: any) {
+  set ActiveForm(value: VB6FormBase | null) {
     const oldForm = this._activeForm;
     this._activeForm = value;
     this.emit('ActiveFormChanged', { oldForm, newForm: value });
@@ -773,7 +799,7 @@ export class VB6Runtime {
     return {};
   }
 
-  public VarType(varname: any): VbVarType {
+  public VarType(varname: VB6Variant): VbVarType {
     if (varname === null) return VbVarType.vbNull;
     if (varname === undefined) return VbVarType.vbEmpty;
     if (typeof varname === 'boolean') return VbVarType.vbBoolean;
