@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { useVB6Store } from '../../stores/vb6Store';
+import { shallow } from 'zustand/shallow';
 import { ThemeManager } from '../../services/ThemeManager';
 
 interface OptionsDialogProps {
@@ -9,7 +10,8 @@ interface OptionsDialogProps {
 }
 
 const OptionsDialog: React.FC<OptionsDialogProps> = ({ visible, onClose }) => {
-  const { showDialog } = useVB6Store();
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
+  const showDialog = useVB6Store((state) => state.showDialog);
   const [selectedTheme, setSelectedTheme] = useState<string>(ThemeManager.getCurrentTheme().name);
 
   const themes = Object.keys(ThemeManager.defaultThemes);

@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useVB6Store } from '../../../stores/vb6Store';
+import { shallow } from 'zustand/shallow';
 import { Control } from '../../../context/types';
 import { 
   Type, 
@@ -15,7 +16,16 @@ import PropertyManager from './PropertyManager';
 import './VB6PropertiesWindow.css';
 
 const VB6PropertiesWindow: React.FC = () => {
-  const { selectedControls, updateControl, formProperties, updateFormProperty } = useVB6Store();
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
+  const { selectedControls, updateControl, formProperties, updateFormProperty } = useVB6Store(
+    (state) => ({
+      selectedControls: state.selectedControls,
+      updateControl: state.updateControl,
+      formProperties: state.formProperties,
+      updateFormProperty: state.updateFormProperty,
+    }),
+    shallow
+  );
   const [viewMode, setViewMode] = useState<'categorized' | 'alphabetic'>('categorized');
   const [showDescriptions, setShowDescriptions] = useState(true);
   const [showValidation, setShowValidation] = useState(true);

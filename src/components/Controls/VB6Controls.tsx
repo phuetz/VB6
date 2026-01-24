@@ -5,6 +5,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, forwardRef } from 'react';
 import { useVB6Store } from '../../stores/vb6Store';
+import { shallow } from 'zustand/shallow';
 
 // Import des nouveaux contrôles graphiques
 export { LineControl } from './LineControl';
@@ -103,7 +104,11 @@ export const CommandButton = forwardRef<HTMLButtonElement, VB6ControlProps>((pro
   } = props;
 
   const [isPressed, setIsPressed] = useState(false);
-  const { fireEvent, updateControl } = useVB6Store();
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
+  const { fireEvent, updateControl } = useVB6Store(
+    (state) => ({ fireEvent: state.fireEvent, updateControl: state.updateControl }),
+    shallow
+  );
 
   const handleClick = useCallback(() => {
     if (enabled) {
@@ -221,7 +226,11 @@ export const TextBox = forwardRef<HTMLInputElement, VB6ControlProps>((props, ref
   const [selStart, setSelStart] = useState(0);
   const [selLength, setSelLength] = useState(0);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
-  const { fireEvent, updateControl } = useVB6Store();
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
+  const { fireEvent, updateControl } = useVB6Store(
+    (state) => ({ fireEvent: state.fireEvent, updateControl: state.updateControl }),
+    shallow
+  );
 
   useEffect(() => {
     setValue(text);
@@ -436,7 +445,11 @@ export const CheckBox = forwardRef<HTMLDivElement, VB6ControlProps>((props, ref)
   } = props;
 
   const [checkValue, setCheckValue] = useState(value);
-  const { fireEvent, updateControl } = useVB6Store();
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
+  const { fireEvent, updateControl } = useVB6Store(
+    (state) => ({ fireEvent: state.fireEvent, updateControl: state.updateControl }),
+    shallow
+  );
 
   const handleClick = useCallback(() => {
     if (enabled) {
@@ -520,7 +533,11 @@ export const OptionButton = forwardRef<HTMLDivElement, VB6ControlProps>((props, 
   } = props;
 
   const [selected, setSelected] = useState(value);
-  const { fireEvent, updateControl, controls } = useVB6Store();
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
+  const { fireEvent, updateControl, controls } = useVB6Store(
+    (state) => ({ fireEvent: state.fireEvent, updateControl: state.updateControl, controls: state.controls }),
+    shallow
+  );
 
   const handleClick = useCallback(() => {
     if (enabled && !selected) {
@@ -620,7 +637,11 @@ export const ListBox = forwardRef<HTMLSelectElement, VB6ControlProps>((props, re
 
   const [selectedIndex, setSelectedIndex] = useState(listIndex);
   const [items, setItems] = useState(sorted ? [...list].sort() : list);
-  const { fireEvent, updateControl } = useVB6Store();
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
+  const { fireEvent, updateControl } = useVB6Store(
+    (state) => ({ fireEvent: state.fireEvent, updateControl: state.updateControl }),
+    shallow
+  );
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -700,7 +721,11 @@ export const ComboBox = forwardRef<HTMLSelectElement, VB6ControlProps>((props, r
   const [value, setValue] = useState(text);
   const [selectedIndex, setSelectedIndex] = useState(listIndex);
   const [items] = useState(sorted ? [...list].sort() : list);
-  const { fireEvent, updateControl } = useVB6Store();
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
+  const { fireEvent, updateControl } = useVB6Store(
+    (state) => ({ fireEvent: state.fireEvent, updateControl: state.updateControl }),
+    shallow
+  );
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -839,7 +864,8 @@ export const PictureBox = forwardRef<HTMLDivElement, VB6ControlProps>((props, re
   } = props;
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { fireEvent } = useVB6Store();
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
+  const fireEvent = useVB6Store((state) => state.fireEvent);
 
   const pictureStyle: React.CSSProperties = {
     position: 'absolute',
@@ -904,7 +930,8 @@ export const Timer = forwardRef<HTMLDivElement, VB6ControlProps>((props, ref) =>
   } = props;
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const { fireEvent } = useVB6Store();
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
+  const fireEvent = useVB6Store((state) => state.fireEvent);
 
   useEffect(() => {
     if (timerEnabled && interval > 0) {

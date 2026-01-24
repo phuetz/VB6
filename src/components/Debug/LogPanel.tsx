@@ -13,6 +13,7 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { useVB6Store } from '../../stores/vb6Store';
+import { shallow } from 'zustand/shallow';
 
 export interface LogEntry {
   id: string;
@@ -24,7 +25,16 @@ export interface LogEntry {
 }
 
 export const LogPanel: React.FC = () => {
-  const { logs, clearLogs, toggleWindow, showLogPanel } = useVB6Store();
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
+  const { logs, clearLogs, toggleWindow, showLogPanel } = useVB6Store(
+    (state) => ({
+      logs: state.logs,
+      clearLogs: state.clearLogs,
+      toggleWindow: state.toggleWindow,
+      showLogPanel: state.showLogPanel,
+    }),
+    shallow
+  );
   const [filter, setFilter] = useState<'all' | 'info' | 'warn' | 'error' | 'debug'>('all');
   const [showData, setShowData] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');

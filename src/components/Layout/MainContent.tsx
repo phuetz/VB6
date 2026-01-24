@@ -1,5 +1,6 @@
 import React from 'react';
 import { useVB6Store } from '../../stores/vb6Store';
+import { shallow } from 'zustand/shallow';
 import AdvancedToolbox from '../Panels/Toolbox/AdvancedToolbox';
 import FormDesigner from '../Designer/FormDesigner';
 import AdvancedCodeEditor from '../Editor/AdvancedCodeEditor';
@@ -14,6 +15,7 @@ import MemoryProfiler from '../Debug/MemoryProfiler';
 import TestRunner from '../Testing/TestRunner';
 
 const MainContent: React.FC = () => {
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
   const {
     showToolbox,
     showCodeEditor,
@@ -29,7 +31,25 @@ const MainContent: React.FC = () => {
     showGitPanel,
     showMemoryProfiler,
     showTestRunner,
-  } = useVB6Store();
+  } = useVB6Store(
+    (state) => ({
+      showToolbox: state.showToolbox,
+      showCodeEditor: state.showCodeEditor,
+      showProjectExplorer: state.showProjectExplorer,
+      showPropertiesWindow: state.showPropertiesWindow,
+      showControlTree: state.showControlTree,
+      showImmediateWindow: state.showImmediateWindow,
+      showWatchWindow: state.showWatchWindow,
+      showLocalsWindow: state.showLocalsWindow,
+      showCallStack: state.showCallStack,
+      executionMode: state.executionMode,
+      toggleWindow: state.toggleWindow,
+      showGitPanel: state.showGitPanel,
+      showMemoryProfiler: state.showMemoryProfiler,
+      showTestRunner: state.showTestRunner,
+    }),
+    shallow
+  );
 
   return (
     <div className="flex-1 flex overflow-hidden">

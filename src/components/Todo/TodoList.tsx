@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, CheckSquare, Square, X } from 'lucide-react';
 import { useVB6Store } from '../../stores/vb6Store';
+import { shallow } from 'zustand/shallow';
 
 interface TodoListProps {
   visible: boolean;
@@ -8,7 +9,16 @@ interface TodoListProps {
 }
 
 export const TodoList: React.FC<TodoListProps> = ({ visible, onClose }) => {
-  const { todoItems, addTodo, toggleTodo, deleteTodo } = useVB6Store();
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
+  const { todoItems, addTodo, toggleTodo, deleteTodo } = useVB6Store(
+    (state) => ({
+      todoItems: state.todoItems,
+      addTodo: state.addTodo,
+      toggleTodo: state.toggleTodo,
+      deleteTodo: state.deleteTodo,
+    }),
+    shallow
+  );
   const [text, setText] = useState('');
 
   if (!visible) return null;

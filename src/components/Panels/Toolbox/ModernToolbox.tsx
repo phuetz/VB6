@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { useVB6Store } from '../../../stores/vb6Store';
+import { shallow } from 'zustand/shallow';
 
 interface ControlDefinition {
   type: string;
@@ -186,7 +187,8 @@ interface DraggableControlProps {
 }
 
 const DraggableControl: React.FC<DraggableControlProps> = ({ control, isSelected, onSelect }) => {
-  const { executionMode } = useVB6Store();
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
+  const executionMode = useVB6Store((state) => state.executionMode);
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: `toolbox-${control.type}`,
@@ -234,7 +236,8 @@ const DraggableControl: React.FC<DraggableControlProps> = ({ control, isSelected
 };
 
 const ModernToolbox: React.FC = () => {
-  const { toggleWindow } = useVB6Store();
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
+  const toggleWindow = useVB6Store((state) => state.toggleWindow);
   const [selectedCategory, setSelectedCategory] = React.useState('General');
   const [selectedTool, setSelectedTool] = React.useState('Pointer');
 
