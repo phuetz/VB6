@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useVB6Store } from '../../stores/vb6Store';
+import { shallow } from 'zustand/shallow';
 import { Eye, EyeOff, Activity, Layers, MousePointer, Grid, Zap, RefreshCw } from 'lucide-react';
 
 interface DebugOverlay {
@@ -34,13 +35,23 @@ export const VisualDebugger: React.FC = () => {
   const [stateUpdates, setStateUpdates] = useState<string[]>([]);
   const eventLogRef = useRef<HTMLDivElement>(null);
 
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
   const {
     controls,
     selectedControls,
     gridSize,
     snapToGrid,
     designerZoom,
-  } = useVB6Store();
+  } = useVB6Store(
+    (state) => ({
+      controls: state.controls,
+      selectedControls: state.selectedControls,
+      gridSize: state.gridSize,
+      snapToGrid: state.snapToGrid,
+      designerZoom: state.designerZoom,
+    }),
+    shallow
+  );
 
   // Mouse tracking
   useEffect(() => {

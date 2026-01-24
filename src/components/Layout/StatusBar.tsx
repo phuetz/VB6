@@ -4,13 +4,18 @@ import { useUIStore } from '../../stores/UIStore';
 import { useDesignerStore } from '../../stores/DesignerStore';
 import { useDebugStore, debugSelectors } from '../../stores/DebugStore';
 import { useVB6Store } from '../../stores/vb6Store'; // Keep for legacy features
+import { shallow } from 'zustand/shallow';
 import { Bug } from 'lucide-react';
 
 const StatusBar: React.FC = () => {
   // ULTRA-OPTIMIZED: Use domain-specific stores
   const { executionMode, showLogPanel, showCodeEditor, toggleWindow } = useUIStore();
   const { selectedControls } = useDesignerStore();
-  const { errorList, logs } = useVB6Store(); // Still in legacy store
+  // PERFORMANCE FIX: Use shallow selector
+  const { errorList, logs } = useVB6Store(
+    (state) => ({ errorList: state.errorList, logs: state.logs }),
+    shallow
+  );
 
   // CRITICAL: Safe access to logs array
   const safeErrorList = errorList || [];

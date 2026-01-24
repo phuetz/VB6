@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as monaco from 'monaco-editor';
 import { useVB6Store } from '../../stores/vb6Store';
+import { shallow } from 'zustand/shallow';
 import RefactoringPanel from '../Dialogs/RefactoringPanel';
 import { VB6RefactoringService } from '../../services/VB6RefactoringService';
 import { VB6IntelliSenseService } from '../../services/VB6IntelliSense';
@@ -486,15 +487,26 @@ const MonacoCodeEditor: React.FC = () => {
   const refactoringService = useRef(new VB6RefactoringService());
   const vb6IntelliSense = useRef(new VB6IntelliSenseService());
 
+  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
   const {
     selectedControls,
     selectedEvent,
     eventCode,
     controls,
-    updateEventCode,
-    setSelectedEvent,
-    selectControls,
-  } = useVB6Store();
+  } = useVB6Store(
+    (state) => ({
+      selectedControls: state.selectedControls,
+      selectedEvent: state.selectedEvent,
+      eventCode: state.eventCode,
+      controls: state.controls,
+    }),
+    shallow
+  );
+
+  // Actions don't need shallow comparison
+  const updateEventCode = useVB6Store((state) => state.updateEventCode);
+  const setSelectedEvent = useVB6Store((state) => state.setSelectedEvent);
+  const selectControls = useVB6Store((state) => state.selectControls);
 
   // Initialize Monaco Editor
   useEffect(() => {
