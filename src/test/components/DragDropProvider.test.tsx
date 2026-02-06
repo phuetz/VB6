@@ -10,40 +10,44 @@ import React, { useEffect, useState } from 'react';
 
 // Mock des dépendances
 vi.mock('../../stores/vb6Store', () => ({
-  useVB6Store: vi.fn((selector) => {
+  useVB6Store: vi.fn(selector => {
     const mockState = {
       snapToGrid: true,
       gridSize: 8,
-      addLog: vi.fn()
+      addLog: vi.fn(),
     };
     return selector(mockState);
-  })
+  }),
 }));
 
 vi.mock('../../hooks/useUndoRedo', () => ({
   useUndoRedo: () => ({
-    saveState: vi.fn()
-  })
+    saveState: vi.fn(),
+  }),
 }));
 
 vi.mock('../../utils/performanceMonitor', () => ({
   perfMonitor: {
     startMeasure: vi.fn(),
-    checkRenderLoop: vi.fn(() => false)
-  }
+    checkRenderLoop: vi.fn(() => false),
+  },
 }));
 
 // Mock @dnd-kit/core
 vi.mock('@dnd-kit/core', () => ({
-  DndContext: ({ children }: { children: React.ReactNode }) => <div data-testid="dnd-context">{children}</div>,
-  DragOverlay: ({ children }: { children: React.ReactNode }) => <div data-testid="drag-overlay">{children}</div>,
+  DndContext: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="dnd-context">{children}</div>
+  ),
+  DragOverlay: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="drag-overlay">{children}</div>
+  ),
   useSensor: vi.fn(),
   useSensors: vi.fn(() => []),
   MouseSensor: vi.fn(),
   TouchSensor: vi.fn(),
   PointerSensor: vi.fn(),
   closestCenter: vi.fn(),
-  rectIntersection: vi.fn()
+  rectIntersection: vi.fn(),
 }));
 
 // Composant de test pour vérifier les hooks
@@ -89,10 +93,13 @@ describe('DragDropProvider', () => {
       const initialRenderCount = parseInt(renderCountElement.textContent || '0');
 
       // Wait for a reasonable time to see if renders stabilize
-      await waitFor(() => {
-        const currentRenderCount = parseInt(renderCountElement.textContent || '0');
-        expect(currentRenderCount).toBeLessThan(10); // Should not exceed reasonable render count
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          const currentRenderCount = parseInt(renderCountElement.textContent || '0');
+          expect(currentRenderCount).toBeLessThan(10); // Should not exceed reasonable render count
+        },
+        { timeout: 1000 }
+      );
 
       // Force a rerender to ensure stability
       rerender(
@@ -214,17 +221,17 @@ describe('DragDropProvider', () => {
           frequency: { setValueAtTime: vi.fn() },
           start: vi.fn(),
           stop: vi.fn(),
-          type: 'sine'
+          type: 'sine',
         })),
         createGain: vi.fn(() => ({
           connect: vi.fn(),
           gain: {
             setValueAtTime: vi.fn(),
-            exponentialRampToValueAtTime: vi.fn()
-          }
+            exponentialRampToValueAtTime: vi.fn(),
+          },
         })),
         destination: {},
-        currentTime: 0
+        currentTime: 0,
       }));
 
       const { unmount } = render(
@@ -259,7 +266,7 @@ describe('DragDropProvider', () => {
               element: null,
               accepts: ['test'],
               onDrop: () => {},
-              highlight: false
+              highlight: false,
             });
           }, 100);
 
@@ -279,10 +286,13 @@ describe('DragDropProvider', () => {
         </DragDropProvider>
       );
 
-      await waitFor(() => {
-        const renderCount = parseInt(screen.getByTestId('render-count').textContent || '0');
-        expect(renderCount).toBeLessThan(10); // Should stabilize quickly
-      }, { timeout: 2000 });
+      await waitFor(
+        () => {
+          const renderCount = parseInt(screen.getByTestId('render-count').textContent || '0');
+          expect(renderCount).toBeLessThan(10); // Should stabilize quickly
+        },
+        { timeout: 2000 }
+      );
     });
   });
 
@@ -302,7 +312,7 @@ describe('DragDropProvider', () => {
       };
 
       render(<TestComponentOutsideProvider />);
-      
+
       expect(screen.getByTestId('error-caught')).toHaveTextContent(
         'useDragDrop must be used within a DragDropProvider'
       );
@@ -316,13 +326,13 @@ describe('DragDropProvider', () => {
       // Mock store with changing values
       const { useVB6Store } = await import('../../stores/vb6Store');
       let callCount = 0;
-      
+
       (useVB6Store as any).mockImplementation((selector: any) => {
         callCount++;
         const mockState = {
           snapToGrid: callCount % 2 === 0, // Alternate between true/false
           gridSize: 8,
-          addLog: vi.fn()
+          addLog: vi.fn(),
         };
         return selector(mockState);
       });
@@ -333,10 +343,13 @@ describe('DragDropProvider', () => {
         </DragDropProvider>
       );
 
-      await waitFor(() => {
-        const renderCount = parseInt(screen.getByTestId('render-count').textContent || '0');
-        expect(renderCount).toBeLessThan(20); // Should not spiral into infinite renders
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          const renderCount = parseInt(screen.getByTestId('render-count').textContent || '0');
+          expect(renderCount).toBeLessThan(20); // Should not spiral into infinite renders
+        },
+        { timeout: 1000 }
+      );
     });
   });
 });

@@ -1,11 +1,13 @@
 # Nouveaux Contrôles VB6 Implémentés
 
 ## Vue d'ensemble
+
 Cette documentation décrit les nouveaux contrôles VB6 qui ont été implémentés pour améliorer la compatibilité avec VB6.
 
 ## Contrôles Graphiques
 
 ### 1. LineControl
+
 - **Fichier**: `src/components/Controls/LineControl.tsx`
 - **Propriétés VB6 supportées**:
   - `x1`, `y1`, `x2`, `y2`: Coordonnées de début et fin
@@ -17,6 +19,7 @@ Cette documentation décrit les nouveaux contrôles VB6 qui ont été implément
 - **Implémentation**: Utilise SVG pour le rendu avec support complet des styles de ligne VB6
 
 ### 2. ShapeControl
+
 - **Fichier**: `src/components/Controls/ShapeControl.tsx`
 - **Propriétés VB6 supportées**:
   - `shape`: Type de forme (0-5)
@@ -33,6 +36,7 @@ Cette documentation décrit les nouveaux contrôles VB6 qui ont été implément
 - **Implémentation**: SVG avec patterns pour les styles de remplissage VB6
 
 ### 3. ImageControl
+
 - **Fichier**: `src/components/Controls/ImageControl.tsx`
 - **Propriétés VB6 supportées**:
   - `picture`: URL de l'image
@@ -45,6 +49,7 @@ Cette documentation décrit les nouveaux contrôles VB6 qui ont été implément
 ## Contrôles de Navigation Fichiers
 
 ### 4. DriveListBox
+
 - **Fichier**: `src/components/Controls/DriveListBox.tsx`
 - **Propriétés VB6 supportées**:
   - `drive`: Lecteur sélectionné
@@ -53,6 +58,7 @@ Cette documentation décrit les nouveaux contrôles VB6 qui ont été implément
 - **Événements**: Change
 
 ### 5. DirListBox
+
 - **Fichier**: `src/components/Controls/DirListBox.tsx`
 - **Propriétés VB6 supportées**:
   - `path`: Chemin du répertoire
@@ -61,10 +67,11 @@ Cette documentation décrit les nouveaux contrôles VB6 qui ont été implément
 - **Événements**: Change, PathChange
 
 ### 6. FileListBox
+
 - **Fichier**: `src/components/Controls/FileListBox.tsx`
 - **Propriétés VB6 supportées**:
   - `path`: Chemin du répertoire
-  - `pattern`: Filtre de fichiers (ex: *.txt)
+  - `pattern`: Filtre de fichiers (ex: \*.txt)
   - `fileName`: Fichier sélectionné
   - `multiSelect`: Sélection multiple (0=None, 1=Simple, 2=Extended)
   - `archive`, `hidden`, `normal`, `readOnly`, `system`: Filtres d'attributs
@@ -74,7 +81,9 @@ Cette documentation décrit les nouveaux contrôles VB6 qui ont été implément
 ## Intégration
 
 ### ControlFactory
+
 Les nouveaux contrôles sont intégrés dans le système de factory:
+
 ```typescript
 // src/components/Controls/index.ts
 export const ControlFactory = {
@@ -88,19 +97,24 @@ export const ControlFactory = {
 ```
 
 ### ControlRenderer
+
 Le ControlRenderer a été mis à jour pour utiliser les composants dédiés au lieu du rendu inline:
+
 ```typescript
 case 'Line':
   return <LineControl control={control} isDesignMode={...} />;
 ```
 
 ### Toolbox
+
 Les contrôles sont disponibles dans la toolbox:
+
 - Catégorie "General": Line, Shape, Image, DriveListBox, DirListBox, FileListBox
 
 ## État d'Implémentation
 
 ✅ **Complétés**:
+
 - LineControl avec tous les styles VB6
 - ShapeControl avec toutes les formes et patterns
 - ImageControl avec stretch et appearance
@@ -109,6 +123,7 @@ Les contrôles sont disponibles dans la toolbox:
 - FileListBox avec filtres et multi-sélection
 
 🔄 **Prochaines étapes**:
+
 - Tests d'intégration dans le designer
 - Support des événements VB6 complets
 - Optimisation des performances pour grandes listes

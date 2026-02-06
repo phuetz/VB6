@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  GitBranch, 
-  GitFork, 
-  GitCommit, 
+import {
+  GitBranch,
+  GitFork,
+  GitCommit,
   GitPullRequest,
   GitMerge,
   Plus,
@@ -15,9 +15,14 @@ import {
   FileEdit,
   X,
   Check,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react';
-import { gitService, GitStatus, GitCommit as GitCommitType, GitBranch as GitBranchType } from '../../services/GitIntegrationService';
+import {
+  gitService,
+  GitStatus,
+  GitCommit as GitCommitType,
+  GitBranch as GitBranchType,
+} from '../../services/GitIntegrationService';
 
 interface GitPanelProps {
   className?: string;
@@ -41,14 +46,14 @@ const GitPanel: React.FC<GitPanelProps> = ({ className = '' }) => {
   const loadGitData = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const [status, history, branchList] = await Promise.all([
         gitService.getStatus(),
         gitService.getHistory(20),
-        gitService.getBranches()
+        gitService.getBranches(),
       ]);
-      
+
       setGitStatus(status);
       setCommitHistory(history);
       setBranches(branchList);
@@ -81,7 +86,7 @@ const GitPanel: React.FC<GitPanelProps> = ({ className = '' }) => {
   const handleStageSelected = async () => {
     const files = Array.from(selectedFiles);
     if (files.length === 0) return;
-    
+
     try {
       await gitService.stage(files);
       setSelectedFiles(new Set());
@@ -96,7 +101,7 @@ const GitPanel: React.FC<GitPanelProps> = ({ className = '' }) => {
       setError('Please enter a commit message');
       return;
     }
-    
+
     try {
       const hash = await gitService.commit(commitMessage);
       if (hash) {
@@ -113,7 +118,7 @@ const GitPanel: React.FC<GitPanelProps> = ({ className = '' }) => {
   const handleCreateBranch = async () => {
     const branchName = prompt('Enter new branch name:');
     if (!branchName) return;
-    
+
     try {
       await gitService.createBranch(branchName);
       await loadGitData();
@@ -155,10 +160,14 @@ const GitPanel: React.FC<GitPanelProps> = ({ className = '' }) => {
 
   const getFileIcon = (status: string) => {
     switch (status) {
-      case 'added': return <FilePlus size={16} className="text-green-600" />;
-      case 'modified': return <FileEdit size={16} className="text-blue-600" />;
-      case 'deleted': return <FileMinus size={16} className="text-red-600" />;
-      default: return <FileText size={16} className="text-gray-600" />;
+      case 'added':
+        return <FilePlus size={16} className="text-green-600" />;
+      case 'modified':
+        return <FileEdit size={16} className="text-blue-600" />;
+      case 'deleted':
+        return <FileMinus size={16} className="text-red-600" />;
+      default:
+        return <FileText size={16} className="text-gray-600" />;
     }
   };
 
@@ -168,7 +177,7 @@ const GitPanel: React.FC<GitPanelProps> = ({ className = '' }) => {
     const allFiles = [
       ...gitStatus.staged.map(f => ({ ...f, staged: true })),
       ...gitStatus.unstaged.map(f => ({ ...f, staged: false })),
-      ...gitStatus.untracked.map(f => ({ path: f, status: 'added' as const, staged: false }))
+      ...gitStatus.untracked.map(f => ({ path: f, status: 'added' as const, staged: false })),
     ];
 
     return (
@@ -177,7 +186,7 @@ const GitPanel: React.FC<GitPanelProps> = ({ className = '' }) => {
         <div className="p-3 border-b">
           <textarea
             value={commitMessage}
-            onChange={(e) => setCommitMessage(e.target.value)}
+            onChange={e => setCommitMessage(e.target.value)}
             placeholder="Enter commit message..."
             className="w-full p-2 text-xs border rounded resize-none"
             rows={3}
@@ -205,20 +214,15 @@ const GitPanel: React.FC<GitPanelProps> = ({ className = '' }) => {
         {/* File list */}
         <div className="flex-1 overflow-y-auto">
           {allFiles.length === 0 ? (
-            <div className="p-4 text-center text-gray-500 text-xs">
-              No changes to commit
-            </div>
+            <div className="p-4 text-center text-gray-500 text-xs">No changes to commit</div>
           ) : (
             <div className="p-2">
               {allFiles.map((file, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-2 p-1 hover:bg-gray-100 text-xs"
-                >
+                <div key={index} className="flex items-center gap-2 p-1 hover:bg-gray-100 text-xs">
                   <input
                     type="checkbox"
                     checked={selectedFiles.has(file.path)}
-                    onChange={(e) => {
+                    onChange={e => {
                       const newSelected = new Set(selectedFiles);
                       if (e.target.checked) {
                         newSelected.add(file.path);
@@ -260,12 +264,10 @@ const GitPanel: React.FC<GitPanelProps> = ({ className = '' }) => {
   const renderHistoryTab = () => (
     <div className="flex-1 overflow-y-auto">
       {commitHistory.length === 0 ? (
-        <div className="p-4 text-center text-gray-500 text-xs">
-          No commits yet
-        </div>
+        <div className="p-4 text-center text-gray-500 text-xs">No commits yet</div>
       ) : (
         <div className="p-2">
-          {commitHistory.map((commit) => (
+          {commitHistory.map(commit => (
             <div key={commit.hash} className="border-b p-2 hover:bg-gray-50">
               <div className="flex items-center gap-2">
                 <GitCommit size={14} className="text-gray-600" />
@@ -296,15 +298,13 @@ const GitPanel: React.FC<GitPanelProps> = ({ className = '' }) => {
           New Branch
         </button>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto">
         {branches.length === 0 ? (
-          <div className="p-4 text-center text-gray-500 text-xs">
-            No branches found
-          </div>
+          <div className="p-4 text-center text-gray-500 text-xs">No branches found</div>
         ) : (
           <div className="p-2">
-            {branches.map((branch) => (
+            {branches.map(branch => (
               <div
                 key={branch.name}
                 className={`flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer ${
@@ -312,11 +312,12 @@ const GitPanel: React.FC<GitPanelProps> = ({ className = '' }) => {
                 }`}
                 onClick={() => !branch.current && handleCheckoutBranch(branch.name)}
               >
-                <GitBranch size={14} className={branch.current ? 'text-blue-600' : 'text-gray-600'} />
+                <GitBranch
+                  size={14}
+                  className={branch.current ? 'text-blue-600' : 'text-gray-600'}
+                />
                 <span className="text-xs flex-1">{branch.name}</span>
-                {branch.current && (
-                  <Check size={14} className="text-green-600" />
-                )}
+                {branch.current && <Check size={14} className="text-green-600" />}
               </div>
             ))}
           </div>
@@ -334,25 +335,13 @@ const GitPanel: React.FC<GitPanelProps> = ({ className = '' }) => {
           Git Integration
         </span>
         <div className="flex gap-1">
-          <button
-            onClick={handlePull}
-            className="p-1 hover:bg-blue-700 rounded"
-            title="Pull"
-          >
+          <button onClick={handlePull} className="p-1 hover:bg-blue-700 rounded" title="Pull">
             <Download size={14} />
           </button>
-          <button
-            onClick={handlePush}
-            className="p-1 hover:bg-blue-700 rounded"
-            title="Push"
-          >
+          <button onClick={handlePush} className="p-1 hover:bg-blue-700 rounded" title="Push">
             <Upload size={14} />
           </button>
-          <button
-            onClick={loadGitData}
-            className="p-1 hover:bg-blue-700 rounded"
-            title="Refresh"
-          >
+          <button onClick={loadGitData} className="p-1 hover:bg-blue-700 rounded" title="Refresh">
             <RefreshCw size={14} />
           </button>
         </div>
@@ -380,10 +369,7 @@ const GitPanel: React.FC<GitPanelProps> = ({ className = '' }) => {
         <div className="px-2 py-1 bg-red-100 text-red-700 text-xs flex items-center gap-1">
           <AlertCircle size={12} />
           {error}
-          <button
-            onClick={() => setError(null)}
-            className="ml-auto"
-          >
+          <button onClick={() => setError(null)} className="ml-auto">
             <X size={12} />
           </button>
         </div>
@@ -398,11 +384,13 @@ const GitPanel: React.FC<GitPanelProps> = ({ className = '' }) => {
           onClick={() => setActiveTab('changes')}
         >
           Changes
-          {gitStatus && (gitStatus.staged.length + gitStatus.unstaged.length + gitStatus.untracked.length) > 0 && (
-            <span className="ml-1 px-1 bg-blue-500 text-white rounded-full text-xs">
-              {gitStatus.staged.length + gitStatus.unstaged.length + gitStatus.untracked.length}
-            </span>
-          )}
+          {gitStatus &&
+            gitStatus.staged.length + gitStatus.unstaged.length + gitStatus.untracked.length >
+              0 && (
+              <span className="ml-1 px-1 bg-blue-500 text-white rounded-full text-xs">
+                {gitStatus.staged.length + gitStatus.unstaged.length + gitStatus.untracked.length}
+              </span>
+            )}
         </button>
         <button
           className={`px-3 py-1 text-xs ${

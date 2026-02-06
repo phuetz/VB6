@@ -9,9 +9,11 @@ This document describes the comprehensive enhancements made to the VB6 virtual f
 ### Components
 
 #### 1. **VB6PersistentFileSystem.ts** (Core Storage Layer)
+
 The foundation for all file system operations with dual-storage backend.
 
 **Key Features:**
+
 - **IndexedDB Primary Storage**: Uses IndexedDB for:
   - Unlimited storage (typically 50MB+ per domain)
   - Efficient key-value operations with indices
@@ -33,30 +35,31 @@ The foundation for all file system operations with dual-storage backend.
 
 ```typescript
 interface PersistentVFSEntry {
-  id: string;                    // Unique identifier
-  name: string;                  // Filename/directory name
-  path: string;                  // Full path (/dir/subdir/file)
-  type: 'file' | 'directory';    // Entry type
+  id: string; // Unique identifier
+  name: string; // Filename/directory name
+  path: string; // Full path (/dir/subdir/file)
+  type: 'file' | 'directory'; // Entry type
   content?: string | ArrayBuffer; // File content
-  attributes: number;            // VB6 file attributes bitmask
-  size: number;                  // File size in bytes
-  created: number;               // Creation timestamp
-  modified: number;              // Modification timestamp
-  accessed: number;              // Access timestamp
+  attributes: number; // VB6 file attributes bitmask
+  size: number; // File size in bytes
+  created: number; // Creation timestamp
+  modified: number; // Modification timestamp
+  accessed: number; // Access timestamp
 }
 ```
 
 **File Attributes (VB6FileAttribute enum):**
+
 ```typescript
 enum VB6FileAttribute {
-  vbNormal = 0,      // Normal file
-  vbReadOnly = 1,    // Read-only (write operations blocked)
-  vbHidden = 2,      // Hidden file (excluded from Dir())
-  vbSystem = 4,      // System file
-  vbVolume = 8,      // Volume label
-  vbDirectory = 16,  // Directory
-  vbArchive = 32,    // Archive flag (set on file modification)
-  vbAlias = 64       // Alias/shortcut
+  vbNormal = 0, // Normal file
+  vbReadOnly = 1, // Read-only (write operations blocked)
+  vbHidden = 2, // Hidden file (excluded from Dir())
+  vbSystem = 4, // System file
+  vbVolume = 8, // Volume label
+  vbDirectory = 16, // Directory
+  vbArchive = 32, // Archive flag (set on file modification)
+  vbAlias = 64, // Alias/shortcut
 }
 ```
 
@@ -97,62 +100,65 @@ await persistentVFS.clear()     // Clear all files
 ```
 
 #### 2. **VB6FileSystemEnhanced.ts** (VB6-Compatible API Wrapper)
+
 Provides the standard VB6 file I/O functions with async/await pattern.
 
 **Exported Functions:**
 
 ```typescript
 // Initialization
-async function initializeFileSystem(): Promise<void>
+async function initializeFileSystem(): Promise<void>;
 
 // Standard File Operations
-async function FreeFile(): number
-async function Open(pathname, fileNumber, mode, access, lock, recordLength?): Promise<number>
-async function Close(...fileNumbers): Promise<void>
-async function Reset(): Promise<void>
+async function FreeFile(): number;
+async function Open(pathname, fileNumber, mode, access, lock, recordLength?): Promise<number>;
+async function Close(...fileNumbers): Promise<void>;
+async function Reset(): Promise<void>;
 
 // Reading
-async function Input(length, fileNumber): Promise<string>
-async function LineInput(fileNumber): Promise<string>
+async function Input(length, fileNumber): Promise<string>;
+async function LineInput(fileNumber): Promise<string>;
 
 // Writing
-async function Print(fileNumber, ...expressions): Promise<void>
-async function Write(fileNumber, ...expressions): Promise<void>
+async function Print(fileNumber, ...expressions): Promise<void>;
+async function Write(fileNumber, ...expressions): Promise<void>;
 
 // Random/Binary Access
-async function Get(fileNumber, recordNumber?): Promise<any>
-async function Put(fileNumber, recordNumber?, data?): Promise<void>
+async function Get(fileNumber, recordNumber?): Promise<any>;
+async function Put(fileNumber, recordNumber?, data?): Promise<void>;
 
 // Positioning
-function Seek(fileNumber, position?): number
-function Loc(fileNumber): number
-async function EOF(fileNumber): Promise<boolean>
-async function LOF(fileNumber): Promise<number>
+function Seek(fileNumber, position?): number;
+function Loc(fileNumber): number;
+async function EOF(fileNumber): Promise<boolean>;
+async function LOF(fileNumber): Promise<number>;
 
 // File Management
-async function FileLen(pathname): Promise<number>
-async function FileDateTime(pathname): Promise<Date>
-async function GetAttr(pathname): Promise<number>
-async function SetAttr(pathname, attributes): Promise<void>
-async function Kill(pathname): Promise<void>
-async function FileCopy(source, destination): Promise<void>
-async function Name(oldPath, newPath): Promise<void>
+async function FileLen(pathname): Promise<number>;
+async function FileDateTime(pathname): Promise<Date>;
+async function GetAttr(pathname): Promise<number>;
+async function SetAttr(pathname, attributes): Promise<void>;
+async function Kill(pathname): Promise<void>;
+async function FileCopy(source, destination): Promise<void>;
+async function Name(oldPath, newPath): Promise<void>;
 
 // Directory Operations
-async function MkDir(path): Promise<void>
-async function RmDir(path): Promise<void>
-async function ChDir(path): Promise<void>
-function CurDir(drive?): string
-function ChDrive(drive): void
+async function MkDir(path): Promise<void>;
+async function RmDir(path): Promise<void>;
+async function ChDir(path): Promise<void>;
+function CurDir(drive?): string;
+function ChDrive(drive): void;
 
 // Directory Listing
-async function Dir(pathname?, attributes?): Promise<string>
+async function Dir(pathname?, attributes?): Promise<string>;
 ```
 
 #### 3. **VirtualFileBrowser.tsx** (UI Component)
+
 Complete file manager UI for browsing and managing the virtual file system.
 
 **Features:**
+
 - **Directory Navigation**
   - Breadcrumb navigation with direct path access
   - Parent directory navigation
@@ -184,6 +190,7 @@ Complete file manager UI for browsing and managing the virtual file system.
 ## VB6 Compatibility Features
 
 ### 1. **File Paths**
+
 The system supports VB6-style file paths with automatic conversion:
 
 ```vb6
@@ -196,12 +203,14 @@ MkDir "C:\NewFolder"                            ' Create directory
 ```
 
 **Path Normalization:**
+
 - `C:\Temp\file.txt` → `/drives/C/Temp/file.txt`
 - `..\file.txt` → Resolves parent directory
 - `//double//slash` → `/single/slash`
 - Path traversal attempts (`..` above root) → Blocked
 
 ### 2. **File Attributes** (GetAttr/SetAttr)
+
 Complete VB6 file attribute support:
 
 ```vb6
@@ -220,6 +229,7 @@ SetAttr "C:\Temp\data.txt", vbReadOnly Or vbArchive
 ```
 
 **Attribute Values:**
+
 - `vbNormal (0)`: Normal file
 - `vbReadOnly (1)`: Cannot be modified
 - `vbHidden (2)`: Not listed by Dir()
@@ -228,6 +238,7 @@ SetAttr "C:\Temp\data.txt", vbReadOnly Or vbArchive
 - Combined: `vbReadOnly Or vbArchive` = 33
 
 ### 3. **File Modes**
+
 All VB6 file modes are supported:
 
 ```vb6
@@ -253,6 +264,7 @@ Put #5, 1, recordData
 ```
 
 ### 4. **Dir() Function with Patterns**
+
 Full wildcard support:
 
 ```vb6
@@ -274,11 +286,13 @@ filename = Dir("C:\Temp\*", vbHidden)
 ```
 
 **Wildcard Support:**
+
 - `*` - Matches any number of characters
 - `?` - Matches exactly one character
 - Regular characters must match exactly
 
 ### 5. **Binary File Operations**
+
 Get/Put operations for binary data:
 
 ```vb6
@@ -302,6 +316,7 @@ Put #2, 5, record              ' Write record 5
 ```
 
 ### 6. **File Locking Simulation**
+
 Lock/Unlock operations are tracked:
 
 ```vb6
@@ -326,6 +341,7 @@ Unlock #1, 10, 20
 **Database:** `VB6FileSystem` (v1)
 
 **Object Store:** `files`
+
 - **Key Path:** `id` (Unique identifier)
 - **Indices:**
   - `path` (unique): Full file path
@@ -336,11 +352,13 @@ Unlock #1, 10, 20
 ### Storage Limits
 
 **IndexedDB:**
+
 - Typical: 50MB per domain (varies by browser)
 - Persistent quota: User approves increased quota
 - Query via index: O(log n) performance
 
 **localStorage Fallback:**
+
 - Typical: 5-10MB per domain
 - Simple key-value: O(n) list performance
 - Suitable for small file systems (<1000 files)
@@ -348,6 +366,7 @@ Unlock #1, 10, 20
 ### Data Persistence
 
 Files are saved in multiple ways:
+
 1. **After every write operation** via `writeToFile()`
 2. **After file operations** (create, delete, rename)
 3. **Automatic cache invalidation** on modifications
@@ -355,6 +374,7 @@ Files are saved in multiple ways:
 ## Usage Examples
 
 ### Basic File I/O
+
 ```typescript
 import { initializeFileSystem, Open, Print, Close, Input } from '@/runtime/VB6FileSystemEnhanced';
 
@@ -363,12 +383,12 @@ async function example() {
   await initializeFileSystem();
 
   // Create and write to file
-  const fileNum = await Open("C:\\Temp\\test.txt", 0, 2); // Output mode
-  await Print(fileNum, "Hello, World!");
+  const fileNum = await Open('C:\\Temp\\test.txt', 0, 2); // Output mode
+  await Print(fileNum, 'Hello, World!');
   await Close(fileNum);
 
   // Read from file
-  const fileNum2 = await Open("C:\\Temp\\test.txt", 0, 1); // Input mode
+  const fileNum2 = await Open('C:\\Temp\\test.txt', 0, 1); // Input mode
   const content = await Input(100, fileNum2);
   console.log(content);
   await Close(fileNum2);
@@ -376,19 +396,20 @@ async function example() {
 ```
 
 ### Directory Operations
+
 ```typescript
 import { MkDir, ChDir, Dir, CurDir } from '@/runtime/VB6FileSystemEnhanced';
 
 async function dirExample() {
   // Create directory
-  await MkDir("C:\\Temp\\MyFolder");
+  await MkDir('C:\\Temp\\MyFolder');
 
   // Change directory
-  await ChDir("C:\\Temp\\MyFolder");
-  console.log(CurDir());  // "C:\Temp\MyFolder"
+  await ChDir('C:\\Temp\\MyFolder');
+  console.log(CurDir()); // "C:\Temp\MyFolder"
 
   // List files
-  let filename = await Dir("*.*");
+  let filename = await Dir('*.*');
   while (filename) {
     console.log(filename);
     filename = await Dir();
@@ -397,25 +418,27 @@ async function dirExample() {
 ```
 
 ### File Attributes
+
 ```typescript
 import { GetAttr, SetAttr, VB6FileAttribute } from '@/runtime/VB6FileSystemEnhanced';
 
 async function attrExample() {
   // Get current attributes
-  let attr = await GetAttr("C:\\data.txt");
+  let attr = await GetAttr('C:\\data.txt');
   console.log(attr); // Bitmask value
 
   // Make file read-only
   attr |= VB6FileAttribute.vbReadOnly;
-  await SetAttr("C:\\data.txt", attr);
+  await SetAttr('C:\\data.txt', attr);
 
   // Hide file
   attr |= VB6FileAttribute.vbHidden;
-  await SetAttr("C:\\data.txt", attr);
+  await SetAttr('C:\\data.txt', attr);
 }
 ```
 
 ### Using in VB6 Code
+
 ```vb6
 Sub Main()
     ' File system is auto-initialized
@@ -446,6 +469,7 @@ End Sub
 ## Browser Integration
 
 ### Initialization in App
+
 Add to main application initialization:
 
 ```typescript
@@ -456,6 +480,7 @@ await initializeFileSystem();
 ```
 
 ### Accessing from Components
+
 ```typescript
 import { persistentVFS } from '@/runtime/VB6PersistentFileSystem';
 import { Open, Close, Print } from '@/runtime/VB6FileSystemEnhanced';
@@ -486,7 +511,7 @@ async function saveData(data: string) {
    - Record-based access
 
 4. **Dir() Function**
-   - Wildcard matching (*, ?)
+   - Wildcard matching (\*, ?)
    - Attribute filtering
    - Sequential iteration
 
@@ -547,6 +572,7 @@ async function saveData(data: string) {
 ## Migration from Old System
 
 ### Automatic Migration
+
 Old localStorage files are NOT automatically migrated. To migrate:
 
 ```typescript
@@ -570,23 +596,27 @@ async function migrateOldFileSystem() {
 ## Troubleshooting
 
 ### Files Not Persisting
+
 1. Check browser IndexedDB is enabled
 2. Verify localStorage is available
 3. Check storage quota not exceeded
 4. Clear browser cache/cookies if needed
 
 ### Permission Denied Errors
+
 1. Check file attributes (vbReadOnly)
 2. Verify directory exists before file operations
 3. Check path is valid and normalized
 
 ### Dir() Returns Empty
-1. Verify pattern is correct (* or ?)
+
+1. Verify pattern is correct (\* or ?)
 2. Check directory exists
 3. Verify files match pattern
 4. Check file attributes (vbHidden)
 
 ### Storage Quota Exceeded
+
 1. Delete unused files
 2. Export/archive old data
 3. Clear browser cache

@@ -7,7 +7,7 @@
 export const WIN32_CONSTANTS = {
   // GetWindowsDirectory constants
   MAX_PATH: 260,
-  
+
   // MessageBox constants
   MB_OK: 0x00000000,
   MB_OKCANCEL: 0x00000001,
@@ -19,7 +19,7 @@ export const WIN32_CONSTANTS = {
   MB_ICONQUESTION: 0x00000020,
   MB_ICONEXCLAMATION: 0x00000030,
   MB_ICONASTERISK: 0x00000040,
-  
+
   // MessageBox return values
   IDOK: 1,
   IDCANCEL: 2,
@@ -28,7 +28,7 @@ export const WIN32_CONSTANTS = {
   IDIGNORE: 5,
   IDYES: 6,
   IDNO: 7,
-  
+
   // GetSystemMetrics constants
   SM_CXSCREEN: 0,
   SM_CYSCREEN: 1,
@@ -36,14 +36,14 @@ export const WIN32_CONSTANTS = {
   SM_CYFULLSCREEN: 17,
   SM_CXMAXIMIZED: 61,
   SM_CYMAXIMIZED: 62,
-  
+
   // Registry keys
   HKEY_CLASSES_ROOT: 0x80000000,
   HKEY_CURRENT_USER: 0x80000001,
   HKEY_LOCAL_MACHINE: 0x80000002,
   HKEY_USERS: 0x80000003,
   HKEY_CURRENT_CONFIG: 0x80000005,
-  
+
   // File attributes
   FILE_ATTRIBUTE_READONLY: 0x00000001,
   FILE_ATTRIBUTE_HIDDEN: 0x00000002,
@@ -51,7 +51,7 @@ export const WIN32_CONSTANTS = {
   FILE_ATTRIBUTE_DIRECTORY: 0x00000010,
   FILE_ATTRIBUTE_ARCHIVE: 0x00000020,
   FILE_ATTRIBUTE_NORMAL: 0x00000080,
-  
+
   // Special folder IDs
   CSIDL_DESKTOP: 0x0000,
   CSIDL_PROGRAMS: 0x0002,
@@ -92,7 +92,7 @@ export const WIN32_CONSTANTS = {
 // Virtual Windows File System
 class VirtualWindowsFS {
   private paths: Map<string, string> = new Map();
-  
+
   constructor() {
     // Initialize common Windows paths
     this.paths.set('WINDOWS', '/virtual/Windows');
@@ -107,16 +107,22 @@ class VirtualWindowsFS {
     this.paths.set('DESKTOP', '/virtual/Users/user/Desktop');
     this.paths.set('PERSONAL', '/virtual/Users/user/Documents');
     this.paths.set('FAVORITES', '/virtual/Users/user/Favorites');
-    this.paths.set('STARTUP', '/virtual/Users/user/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup');
+    this.paths.set(
+      'STARTUP',
+      '/virtual/Users/user/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup'
+    );
     this.paths.set('STARTMENU', '/virtual/Users/user/AppData/Roaming/Microsoft/Windows/Start Menu');
-    this.paths.set('PROGRAMS', '/virtual/Users/user/AppData/Roaming/Microsoft/Windows/Start Menu/Programs');
+    this.paths.set(
+      'PROGRAMS',
+      '/virtual/Users/user/AppData/Roaming/Microsoft/Windows/Start Menu/Programs'
+    );
     this.paths.set('FONTS', '/virtual/Windows/Fonts');
   }
-  
+
   getPath(key: string): string {
     return this.paths.get(key) || '/virtual';
   }
-  
+
   setPath(key: string, path: string): void {
     this.paths.set(key, path);
   }
@@ -134,7 +140,7 @@ export function GetWindowsDirectory(): string {
 }
 
 /**
- * Gets the System directory path  
+ * Gets the System directory path
  */
 export function GetSystemDirectory(): string {
   return virtualFS.getPath('SYSTEM32');
@@ -165,9 +171,9 @@ export function SHGetSpecialFolderPath(csidl: number): string {
     [WIN32_CONSTANTS.CSIDL_SYSTEM]: 'SYSTEM32',
     [WIN32_CONSTANTS.CSIDL_PROGRAM_FILES]: 'PROGRAM_FILES',
     [WIN32_CONSTANTS.CSIDL_PROGRAM_FILES_COMMON]: 'PROGRAM_FILES_COMMON',
-    [WIN32_CONSTANTS.CSIDL_FONTS]: 'FONTS'
+    [WIN32_CONSTANTS.CSIDL_FONTS]: 'FONTS',
   };
-  
+
   const folderKey = folderMap[csidl];
   return folderKey ? virtualFS.getPath(folderKey) : '/virtual';
 }
@@ -236,7 +242,6 @@ export function GetUserName(): string {
 export function SetUserName(userName: string): boolean {
   try {
     localStorage.setItem('vb6_username', userName);
-    console.log(`👤 SetUserName: ${userName}`);
     return true;
   } catch {
     return false;
@@ -246,10 +251,14 @@ export function SetUserName(userName: string): boolean {
 /**
  * Displays a message box
  */
-export function MessageBox(text: string, caption: string = '', type: number = WIN32_CONSTANTS.MB_OK): number {
-  const buttons = type & 0x0F;
-  const icon = type & 0xF0;
-  
+export function MessageBox(
+  text: string,
+  caption: string = '',
+  type: number = WIN32_CONSTANTS.MB_OK
+): number {
+  const buttons = type & 0x0f;
+  const icon = type & 0xf0;
+
   let iconText = '';
   switch (icon) {
     case WIN32_CONSTANTS.MB_ICONHAND:
@@ -265,21 +274,21 @@ export function MessageBox(text: string, caption: string = '', type: number = WI
       iconText = 'ℹ️ ';
       break;
   }
-  
+
   const fullText = iconText + text;
   const fullCaption = caption || 'VB6 Application';
-  
+
   switch (buttons) {
     case WIN32_CONSTANTS.MB_OK:
       alert(fullText);
       return WIN32_CONSTANTS.IDOK;
-      
+
     case WIN32_CONSTANTS.MB_OKCANCEL:
       return confirm(fullText) ? WIN32_CONSTANTS.IDOK : WIN32_CONSTANTS.IDCANCEL;
-      
+
     case WIN32_CONSTANTS.MB_YESNO:
       return confirm(fullText) ? WIN32_CONSTANTS.IDYES : WIN32_CONSTANTS.IDNO;
-      
+
     case WIN32_CONSTANTS.MB_YESNOCANCEL: {
       // Custom implementation for three buttons
       const result = prompt(fullText + '\n\nEnter: Y for Yes, N for No, C for Cancel', 'Y');
@@ -289,11 +298,12 @@ export function MessageBox(text: string, caption: string = '', type: number = WI
       if (response === 'N') return WIN32_CONSTANTS.IDNO;
       return WIN32_CONSTANTS.IDCANCEL;
     }
-      
+
     case WIN32_CONSTANTS.MB_RETRYCANCEL:
-      return confirm(fullText + '\n\nClick OK to Retry, Cancel to Cancel') 
-        ? WIN32_CONSTANTS.IDRETRY : WIN32_CONSTANTS.IDCANCEL;
-        
+      return confirm(fullText + '\n\nClick OK to Retry, Cancel to Cancel')
+        ? WIN32_CONSTANTS.IDRETRY
+        : WIN32_CONSTANTS.IDCANCEL;
+
     case WIN32_CONSTANTS.MB_ABORTRETRYIGNORE: {
       // Custom implementation for three buttons
       const ariResult = prompt(fullText + '\n\nEnter: A for Abort, R for Retry, I for Ignore', 'R');
@@ -303,7 +313,7 @@ export function MessageBox(text: string, caption: string = '', type: number = WI
       if (ariResponse === 'R') return WIN32_CONSTANTS.IDRETRY;
       return WIN32_CONSTANTS.IDIGNORE;
     }
-      
+
     default:
       alert(fullText);
       return WIN32_CONSTANTS.IDOK;
@@ -317,19 +327,19 @@ export function GetFileAttributes(filename: string): number {
   // In browser environment, we can only simulate this
   // Check if it's a known directory path
   const lowerPath = filename.toLowerCase();
-  
-  if (lowerPath.includes('system') || 
-      lowerPath.includes('windows') || 
-      lowerPath.includes('program files')) {
+
+  if (
+    lowerPath.includes('system') ||
+    lowerPath.includes('windows') ||
+    lowerPath.includes('program files')
+  ) {
     return WIN32_CONSTANTS.FILE_ATTRIBUTE_DIRECTORY | WIN32_CONSTANTS.FILE_ATTRIBUTE_SYSTEM;
   }
-  
-  if (lowerPath.endsWith('.sys') || 
-      lowerPath.endsWith('.dll') || 
-      lowerPath.endsWith('.exe')) {
+
+  if (lowerPath.endsWith('.sys') || lowerPath.endsWith('.dll') || lowerPath.endsWith('.exe')) {
     return WIN32_CONSTANTS.FILE_ATTRIBUTE_SYSTEM;
   }
-  
+
   // Default to normal file
   return WIN32_CONSTANTS.FILE_ATTRIBUTE_NORMAL;
 }
@@ -339,7 +349,6 @@ export function GetFileAttributes(filename: string): number {
  */
 export function SetFileAttributes(filename: string, attributes: number): boolean {
   // In browser environment, this is simulated
-  console.log(`SetFileAttributes: ${filename}, attributes: ${attributes}`);
   return true;
 }
 
@@ -356,7 +365,6 @@ export function GetCurrentDirectory(): string {
  */
 export function SetCurrentDirectory(pathName: string): boolean {
   // In browser environment, this is simulated
-  console.log(`SetCurrentDirectory: ${pathName}`);
   return true;
 }
 
@@ -365,7 +373,6 @@ export function SetCurrentDirectory(pathName: string): boolean {
  */
 export function CreateDirectory(pathName: string): boolean {
   // In browser environment, this is simulated
-  console.log(`CreateDirectory: ${pathName}`);
   // Could potentially use localStorage to track created directories
   const createdDirs = JSON.parse(localStorage.getItem('vb6_created_dirs') || '[]');
   if (!createdDirs.includes(pathName)) {
@@ -380,7 +387,6 @@ export function CreateDirectory(pathName: string): boolean {
  */
 export function RemoveDirectory(pathName: string): boolean {
   // In browser environment, this is simulated
-  console.log(`RemoveDirectory: ${pathName}`);
   const createdDirs = JSON.parse(localStorage.getItem('vb6_created_dirs') || '[]');
   const index = createdDirs.indexOf(pathName);
   if (index > -1) {
@@ -396,13 +402,13 @@ export function RemoveDirectory(pathName: string): boolean {
 export function GetDiskFreeSpace(): number {
   // Estimate based on navigator storage if available
   if ('storage' in navigator && 'estimate' in navigator.storage) {
-    navigator.storage.estimate().then((estimate) => {
+    navigator.storage.estimate().then(estimate => {
       const quota = estimate.quota || 0;
       const usage = estimate.usage || 0;
       return quota - usage;
     });
   }
-  
+
   // Return a reasonable default (1GB)
   return 1024 * 1024 * 1024;
 }
@@ -421,7 +427,7 @@ export function GetVersionEx(): {
   let majorVersion = 10;
   let minorVersion = 0;
   const buildNumber = 19045;
-  
+
   // Try to parse version from user agent
   if (userAgent.includes('Windows NT')) {
     const match = userAgent.match(/Windows NT (\d+)\.(\d+)/);
@@ -430,13 +436,13 @@ export function GetVersionEx(): {
       minorVersion = parseInt(match[2]);
     }
   }
-  
+
   return {
     dwMajorVersion: majorVersion,
     dwMinorVersion: minorVersion,
     dwBuildNumber: buildNumber,
     dwPlatformId: 2, // VER_PLATFORM_WIN32_NT
-    szCSDVersion: ''
+    szCSDVersion: '',
   };
 }
 
@@ -450,7 +456,7 @@ export class VB6Registry {
       [WIN32_CONSTANTS.HKEY_CURRENT_USER]: 'HKCU',
       [WIN32_CONSTANTS.HKEY_LOCAL_MACHINE]: 'HKLM',
       [WIN32_CONSTANTS.HKEY_USERS]: 'HKU',
-      [WIN32_CONSTANTS.HKEY_CURRENT_CONFIG]: 'HKCC'
+      [WIN32_CONSTANTS.HKEY_CURRENT_CONFIG]: 'HKCC',
     };
 
     const hKeyName = hKeyNames[hKey] || 'HKEY';
@@ -464,14 +470,14 @@ export class VB6Registry {
   private static initializeDefaults(): void {
     const defaults = {
       'vb6_registry_HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion': {
-        'ProgramFilesDir': 'C:\\Program Files',
-        'CommonFilesDir': 'C:\\Program Files\\Common Files',
-        'ProductId': '00000-00000-00000-00000',
-        'RegisteredOwner': 'User',
-        'RegisteredOrganization': 'Organization',
-        'CurrentVersion': '10.0',
-        'CurrentBuild': '19045'
-      }
+        ProgramFilesDir: 'C:\\Program Files',
+        CommonFilesDir: 'C:\\Program Files\\Common Files',
+        ProductId: '00000-00000-00000-00000',
+        RegisteredOwner: 'User',
+        RegisteredOrganization: 'Organization',
+        CurrentVersion: '10.0',
+        CurrentBuild: '19045',
+      },
     };
 
     if (typeof localStorage !== 'undefined') {
@@ -488,11 +494,9 @@ export class VB6Registry {
     if (typeof localStorage !== 'undefined') {
       const data = localStorage.getItem(registryKey);
       if (data) {
-        console.log(`🔑 RegOpenKeyEx: ${registryKey} (found)`);
         return hKey;
       }
     }
-    console.log(`🔑 RegOpenKeyEx: ${registryKey} (not found)`);
     return hKey; // Return handle anyway for compatibility
   }
 
@@ -504,10 +508,8 @@ export class VB6Registry {
       const registryData = JSON.parse(localStorage.getItem(registryKey) || '{}');
       const value = registryData[valueName];
       if (value !== undefined) {
-        console.log(`📖 RegQueryValueEx: ${registryKey}\\${valueName} = ${value}`);
         return String(value);
       }
-      console.log(`📖 RegQueryValueEx: ${registryKey}\\${valueName} (not found)`);
       return null;
     } catch {
       return null;
@@ -527,7 +529,6 @@ export class VB6Registry {
       const registryData = JSON.parse(localStorage.getItem(registryKey) || '{}');
       registryData[valueName] = value;
       localStorage.setItem(registryKey, JSON.stringify(registryData));
-      console.log(`✍️ RegSetValueEx: ${registryKey}\\${valueName} = ${value}`);
       return true;
     } catch {
       return false;
@@ -542,7 +543,6 @@ export class VB6Registry {
       const registryData = JSON.parse(localStorage.getItem(registryKey) || '{}');
       delete registryData[valueName];
       localStorage.setItem(registryKey, JSON.stringify(registryData));
-      console.log(`🗑️ RegDeleteValue: ${registryKey}\\${valueName}`);
       return true;
     } catch {
       return false;
@@ -556,9 +556,6 @@ export class VB6Registry {
     try {
       if (!localStorage.getItem(registryKey)) {
         localStorage.setItem(registryKey, JSON.stringify({}));
-        console.log(`🔑 RegCreateKeyEx: ${registryKey} (created)`);
-      } else {
-        console.log(`🔑 RegCreateKeyEx: ${registryKey} (already exists)`);
       }
       return true;
     } catch {
@@ -567,7 +564,6 @@ export class VB6Registry {
   }
 
   static RegCloseKey(hKey: number): boolean {
-    console.log(`🔑 RegCloseKey: ${hKey}`);
     return true;
   }
 
@@ -577,7 +573,6 @@ export class VB6Registry {
 
     try {
       localStorage.removeItem(registryKey);
-      console.log(`🗑️ RegDeleteKey: ${registryKey}`);
       return true;
     } catch {
       return false;
@@ -596,10 +591,8 @@ export class VB6Registry {
  * Sleep function - Async sleep with logging
  */
 export async function Sleep(milliseconds: number): Promise<void> {
-  console.log(`😴 Sleep: ${milliseconds}ms`);
   return new Promise(resolve => {
     setTimeout(() => {
-      console.log(`😴 Sleep completed: ${milliseconds}ms`);
       resolve();
     }, milliseconds);
   });
@@ -614,7 +607,6 @@ export function SleepSync(milliseconds: number): void {
   while (Date.now() - start < milliseconds) {
     // Busy wait - not ideal but matches VB6 behavior
   }
-  console.log(`😴 SleepSync completed: ${milliseconds}ms`);
 }
 
 /**
@@ -629,8 +621,7 @@ export function GetTickCount(): number {
     tickCount = Date.now();
   }
 
-  console.log(`⏱️ GetTickCount: ${tickCount}ms`);
-  return tickCount & 0xFFFFFFFF; // Wrap to 32-bit like Windows
+  return tickCount & 0xffffffff; // Wrap to 32-bit like Windows
 }
 
 /**
@@ -642,23 +633,21 @@ export function Beep(frequency: number = 800, duration: number = 200): void {
       const audioContext = new AudioContext();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
-      
+
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
-      
+
       oscillator.frequency.value = frequency;
       oscillator.type = 'sine';
-      
+
       gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
-      
+
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + duration / 1000);
     } catch (error) {
-      console.log(`Beep: ${frequency}Hz for ${duration}ms`);
+      // Audio API may not be available in all environments
     }
-  } else {
-    console.log(`Beep: ${frequency}Hz for ${duration}ms`);
   }
 }
 
@@ -706,14 +695,14 @@ export const VB6_WINDOWS_APIS = {
   VB6Registry,
 
   // Constants
-  WIN32_CONSTANTS
+  WIN32_CONSTANTS,
 };
 
 // Make APIs globally available
 if (typeof window !== 'undefined') {
   const globalAny = window as any;
   globalAny.VB6WindowsAPIs = VB6_WINDOWS_APIS;
-  
+
   // Also expose individual functions globally for direct VB6 compatibility
   Object.assign(globalAny, VB6_WINDOWS_APIS);
 }

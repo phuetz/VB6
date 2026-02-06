@@ -24,7 +24,7 @@ import {
   FormatNumber,
   FormatPercent,
   FormatDateTime,
-  VB6FormatConstants
+  VB6FormatConstants,
 } from '../VB6ConversionFunctions';
 
 describe('VB6ConversionFunctions', () => {
@@ -66,10 +66,10 @@ describe('VB6ConversionFunctions', () => {
   });
 
   describe('CInt', () => {
-    it('should convert to integer with banker\'s rounding', () => {
-      expect(CInt(1.5)).toBe(2);  // Round to even
-      expect(CInt(2.5)).toBe(2);  // Round to even
-      expect(CInt(3.5)).toBe(4);  // Round to even
+    it("should convert to integer with banker's rounding", () => {
+      expect(CInt(1.5)).toBe(2); // Round to even
+      expect(CInt(2.5)).toBe(2); // Round to even
+      expect(CInt(3.5)).toBe(4); // Round to even
       expect(CInt(1.6)).toBe(2);
       expect(CInt(-1.5)).toBe(-2);
     });
@@ -247,7 +247,7 @@ describe('VB6ConversionFunctions', () => {
   describe('FormatDateTime', () => {
     it('should format date/time with named formats', () => {
       const date = new Date(2024, 0, 15, 14, 30, 45);
-      
+
       expect(FormatDateTime(date, VB6FormatConstants.vbShortDate)).toBe('1/15/2024');
       expect(FormatDateTime(date, VB6FormatConstants.vbLongDate)).toContain('January');
       expect(FormatDateTime(date, VB6FormatConstants.vbShortTime)).toMatch(/2:30/);

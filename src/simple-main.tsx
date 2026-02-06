@@ -7,12 +7,14 @@ function SimpleApp() {
     <div style={{ padding: '40px', fontFamily: 'Arial' }}>
       <h1>🎉 VB6 Web IDE - Test Simple</h1>
       <p>Si vous voyez ce message, l'application fonctionne !</p>
-      <div style={{ 
-        background: '#f0f0f0', 
-        border: '1px solid #ccc', 
-        padding: '20px', 
-        margin: '20px 0' 
-      }}>
+      <div
+        style={{
+          background: '#f0f0f0',
+          border: '1px solid #ccc',
+          padding: '20px',
+          margin: '20px 0',
+        }}
+      >
         <h2>Statut :</h2>
         <ul>
           <li>✅ React fonctionne</li>
@@ -20,7 +22,7 @@ function SimpleApp() {
           <li>✅ Serveur Vite fonctionne</li>
         </ul>
       </div>
-      <button 
+      <button
         onClick={() => alert('Button works!')}
         style={{
           background: '#007acc',
@@ -28,7 +30,7 @@ function SimpleApp() {
           border: 'none',
           padding: '10px 20px',
           fontSize: '16px',
-          cursor: 'pointer'
+          cursor: 'pointer',
         }}
       >
         Test Button
@@ -48,5 +50,3 @@ root.render(
     <SimpleApp />
   </StrictMode>
 );
-
-console.log('✅ Simple app rendered successfully!');

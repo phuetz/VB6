@@ -54,7 +54,7 @@ const IntegrationTestApp: React.FC = () => {
 describe('Infinite Loop Prevention - Integration Tests', () => {
   let consoleErrorSpy: any;
   let consoleWarnSpy: any;
-  
+
   beforeEach(() => {
     vi.clearAllMocks();
     // Use a simple counter instead of vi.spyOn to avoid serialization issues
@@ -92,14 +92,17 @@ describe('Infinite Loop Prevention - Integration Tests', () => {
           </VB6Provider>
         );
 
-        await waitFor(() => {
-          try {
-            const element = screen.getByTestId('app-status');
-            expect(element).toBeTruthy();
-          } catch (e) {
-            // Element may not be rendered yet
-          }
-        }, { timeout: 500 });
+        await waitFor(
+          () => {
+            try {
+              const element = screen.getByTestId('app-status');
+              expect(element).toBeTruthy();
+            } catch (e) {
+              // Element may not be rendered yet
+            }
+          },
+          { timeout: 500 }
+        );
 
         // Check that no infinite loop errors were logged
         expect(consoleErrorSpy.callWithMaxDepthError).not.toBe(true);
@@ -149,14 +152,17 @@ describe('Infinite Loop Prevention - Integration Tests', () => {
           </VB6Provider>
         );
 
-        await waitFor(() => {
-          try {
-            const renderCount = parseInt(screen.getByTestId('render-count').textContent || '0');
-            expect(renderCount).toBeLessThan(30);
-          } catch (e) {
-            // Element may not be rendered yet
-          }
-        }, { timeout: 500 });
+        await waitFor(
+          () => {
+            try {
+              const renderCount = parseInt(screen.getByTestId('render-count').textContent || '0');
+              expect(renderCount).toBeLessThan(30);
+            } catch (e) {
+              // Element may not be rendered yet
+            }
+          },
+          { timeout: 500 }
+        );
       } catch (e) {
         // If render fails, just verify it's not an infinite loop error
         const message = e instanceof Error ? e.message : String(e);
@@ -314,7 +320,7 @@ describe('Infinite Loop Prevention - Integration Tests', () => {
             () => setSelectedControls([1, 2]),
             () => setSelectedControls([1, 2, 3]),
             () => setSelectedControls([2, 3]),
-            () => setSelectedControls([])
+            () => setSelectedControls([]),
           ];
 
           let index = 0;
@@ -346,10 +352,13 @@ describe('Infinite Loop Prevention - Integration Tests', () => {
         </VB6Provider>
       );
 
-      await waitFor(() => {
-        const renderCount = parseInt(screen.getByTestId('render-count').textContent || '0');
-        expect(renderCount).toBeLessThan(20);
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          const renderCount = parseInt(screen.getByTestId('render-count').textContent || '0');
+          expect(renderCount).toBeLessThan(20);
+        },
+        { timeout: 1000 }
+      );
     });
   });
 
@@ -394,10 +403,13 @@ describe('Infinite Loop Prevention - Integration Tests', () => {
         </VB6Provider>
       );
 
-      await waitFor(() => {
-        const counter = parseInt(screen.getByTestId('counter').textContent || '0');
-        expect(counter).toBe(19);
-      }, { timeout: 2000 });
+      await waitFor(
+        () => {
+          const counter = parseInt(screen.getByTestId('counter').textContent || '0');
+          expect(counter).toBe(19);
+        },
+        { timeout: 2000 }
+      );
 
       const renderCount = parseInt(screen.getByTestId('render-count').textContent || '0');
       expect(renderCount).toBeLessThan(50); // Should handle stress without excessive renders

@@ -91,7 +91,7 @@ End Sub
 
     it('should parse HelloWorld form structure correctly', () => {
       const parseResult = fileFormats.parseVB6Form(helloWorldContent);
-      
+
       expect(parseResult.success).toBe(true);
       expect(parseResult.form).toBeDefined();
       expect(parseResult.form?.name).toBe('Form1');
@@ -100,31 +100,31 @@ End Sub
 
     it('should extract all controls from HelloWorld form', () => {
       const parseResult = fileFormats.parseVB6Form(helloWorldContent);
-      
+
       expect(parseResult.controls).toHaveLength(3);
-      
+
       const cmdExit = parseResult.controls?.find(c => c.name === 'cmdExit');
       const cmdHello = parseResult.controls?.find(c => c.name === 'cmdHello');
       const lblMessage = parseResult.controls?.find(c => c.name === 'lblMessage');
-      
+
       expect(cmdExit).toBeDefined();
       expect(cmdExit?.type).toBe('CommandButton');
       expect(cmdExit?.properties.Caption).toBe('&Quitter');
-      
+
       expect(cmdHello).toBeDefined();
       expect(cmdHello?.type).toBe('CommandButton');
       expect(cmdHello?.properties.Caption).toBe('&Bonjour');
-      
+
       expect(lblMessage).toBeDefined();
       expect(lblMessage?.type).toBe('Label');
     });
 
     it('should parse HelloWorld code events correctly', () => {
       const codeResult = fileFormats.parseVB6Code(helloWorldContent);
-      
+
       expect(codeResult.success).toBe(true);
       expect(codeResult.procedures).toHaveLength(3);
-      
+
       const procedures = codeResult.procedures?.map(p => p.name) || [];
       expect(procedures).toContain('Form_Load');
       expect(procedures).toContain('cmdHello_Click');
@@ -133,11 +133,11 @@ End Sub
 
     it('should transpile HelloWorld events to JavaScript', () => {
       const codeResult = fileFormats.parseVB6Code(helloWorldContent);
-      
+
       if (codeResult.procedures) {
         const formLoadProc = codeResult.procedures.find(p => p.name === 'Form_Load');
         expect(formLoadProc).toBeDefined();
-        
+
         const jsCode = transpiler.transpileVB6ToJS(formLoadProc!.body);
         expect(jsCode).toContain('this.caption');
         expect(jsCode).toContain('lblMessage.caption');
@@ -167,10 +167,10 @@ Begin VB.CommandButton cmdNumber
    Width           =   615
 End
       `;
-      
+
       const parseResult = fileFormats.parseVB6Form(calculatorContent);
       expect(parseResult.success).toBe(true);
-      
+
       // Should handle control arrays
       const numberButtons = parseResult.controls?.filter(c => c.name.startsWith('cmdNumber'));
       expect(numberButtons?.length).toBeGreaterThanOrEqual(2);
@@ -199,11 +199,11 @@ Private Sub PerformCalculation()
     End Select
 End Sub
       `;
-      
+
       const codeResult = fileFormats.parseVB6Code(calculatorCode);
       expect(codeResult.success).toBe(true);
       expect(codeResult.procedures).toHaveLength(2);
-      
+
       const clickProc = codeResult.procedures?.find(p => p.name === 'cmdNumber_Click');
       expect(clickProc).toBeDefined();
       expect(clickProc?.parameters).toContain('Index As Integer');
@@ -230,16 +230,16 @@ Begin MSDataListLib.DataList dlCustomers
    Width           =   3855
 End
       `;
-      
+
       const parseResult = fileFormats.parseVB6Form(databaseContent);
       expect(parseResult.success).toBe(true);
-      
+
       const dataGrid = parseResult.controls?.find(c => c.name === 'dgCustomers');
       const dataList = parseResult.controls?.find(c => c.name === 'dlCustomers');
-      
+
       expect(dataGrid).toBeDefined();
       expect(dataGrid?.type).toBe('DataGrid');
-      
+
       expect(dataList).toBeDefined();
       expect(dataList?.type).toBe('DataList');
     });
@@ -260,10 +260,10 @@ Private Sub LoadCustomerData()
     Next i
 End Sub
       `;
-      
+
       const codeResult = fileFormats.parseVB6Code(databaseCode);
       expect(codeResult.success).toBe(true);
-      
+
       // Should parse user-defined types
       const customerType = codeResult.types?.find(t => t.name === 'Customer');
       expect(customerType).toBeDefined();
@@ -290,16 +290,16 @@ Begin VB.Timer tmrAnimation
    Top             =   6960
 End
       `;
-      
+
       const parseResult = fileFormats.parseVB6Form(graphicsContent);
       expect(parseResult.success).toBe(true);
-      
+
       const canvas = parseResult.controls?.find(c => c.name === 'picCanvas');
       const timer = parseResult.controls?.find(c => c.name === 'tmrAnimation');
-      
+
       expect(canvas).toBeDefined();
       expect(canvas?.type).toBe('PictureBox');
-      
+
       expect(timer).toBeDefined();
       expect(timer?.type).toBe('Timer');
       expect(timer?.properties.Interval).toBe('50');
@@ -320,13 +320,13 @@ Private Sub HSBtoRGB(h As Single, s As Single, b As Single, r As Integer, g As I
     x = c * (1 - Abs(((h / 60) Mod 2) - 1))
 End Sub
       `;
-      
+
       const codeResult = fileFormats.parseVB6Code(graphicsCode);
       expect(codeResult.success).toBe(true);
-      
+
       const drawProc = codeResult.procedures?.find(p => p.name === 'DrawCircles');
       const hsbProc = codeResult.procedures?.find(p => p.name === 'HSBtoRGB');
-      
+
       expect(drawProc).toBeDefined();
       expect(hsbProc).toBeDefined();
       expect(hsbProc?.parameters).toContain('h As Single');
@@ -347,7 +347,7 @@ Begin VB.Form frmGame
    End
 End
       `;
-      
+
       const parseResult = fileFormats.parseVB6Form(gameContent);
       expect(parseResult.success).toBe(true);
       expect(parseResult.form?.properties.KeyPreview).toBe('-1');
@@ -381,20 +381,20 @@ Private Sub MoveSnake()
     End Select
 End Sub
       `;
-      
+
       const codeResult = fileFormats.parseVB6Code(gameCode);
       expect(codeResult.success).toBe(true);
-      
+
       // Should parse constants
       const constants = codeResult.constants;
       expect(constants).toBeDefined();
       expect(constants?.some(c => c.name === 'GRID_SIZE')).toBe(true);
       expect(constants?.some(c => c.name === 'DIR_UP')).toBe(true);
-      
+
       // Should parse user-defined types
       const pointType = codeResult.types?.find(t => t.name === 'Point');
       const snakeType = codeResult.types?.find(t => t.name === 'Snake');
-      
+
       expect(pointType).toBeDefined();
       expect(snakeType).toBeDefined();
     });
@@ -412,10 +412,10 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
     End Select
 End Sub
       `;
-      
+
       const codeResult = fileFormats.parseVB6Code(keyboardCode);
       expect(codeResult.success).toBe(true);
-      
+
       const keyDownProc = codeResult.procedures?.find(p => p.name === 'Form_KeyDown');
       expect(keyDownProc).toBeDefined();
       expect(keyDownProc?.parameters).toContain('KeyCode As Integer');
@@ -426,11 +426,11 @@ End Sub
   describe('Program Integration', () => {
     it('should load and run all test programs without errors', async () => {
       const programs = ['HelloWorld', 'CalculatorTest', 'DatabaseTest', 'GraphicsTest', 'GameTest'];
-      
+
       for (const program of programs) {
         // Simuler le chargement du programme
         const result = await formImporter.importVB6Form(`${program}.frm`, 'mock-content');
-        
+
         expect(result.success).toBe(true);
         expect(result.form).toBeDefined();
         expect(result.errors).toHaveLength(0);
@@ -443,9 +443,9 @@ End Sub
         'Private Sub cmdButton_Click()\n    MsgBox "Hello"\nEnd Sub',
         'Dim userName As String\nuserName = InputBox("Name")',
         'For i = 1 To 10\n    Debug.Print i\nNext i',
-        'If x > 0 Then\n    y = x * 2\nEnd If'
+        'If x > 0 Then\n    y = x * 2\nEnd If',
       ];
-      
+
       codeSnippets.forEach((code, index) => {
         const parseResult = parser.parseVB6Code(code);
         expect(parseResult.success).toBe(true);
@@ -459,12 +459,12 @@ End Sub
         'If userName <> "" Then MsgBox "Welcome"',
         'For i = 1 To 10: sum = sum + i: Next i',
         'result = previousValue + currentValue',
-        'picCanvas.Circle (x, y), radius, color'
+        'picCanvas.Circle (x, y), radius, color',
       ];
-      
+
       vb6Events.forEach(vb6Code => {
         const jsCode = transpiler.transpileVB6ToJS(vb6Code);
-        
+
         expect(jsCode).toBeDefined();
         expect(jsCode.length).toBeGreaterThan(0);
         expect(jsCode).not.toContain('&'); // VB6 concatenation should be converted
@@ -474,14 +474,25 @@ End Sub
 
     it('should handle all VB6 control types used in test programs', () => {
       const controlTypes = [
-        'CommandButton', 'Label', 'TextBox', 'PictureBox', 'Timer',
-        'Frame', 'CheckBox', 'OptionButton', 'ListBox', 'ComboBox',
-        'HScrollBar', 'VScrollBar', 'DataGrid', 'DataList'
+        'CommandButton',
+        'Label',
+        'TextBox',
+        'PictureBox',
+        'Timer',
+        'Frame',
+        'CheckBox',
+        'OptionButton',
+        'ListBox',
+        'ComboBox',
+        'HScrollBar',
+        'VScrollBar',
+        'DataGrid',
+        'DataList',
       ];
-      
+
       controlTypes.forEach(controlType => {
         const mockControl = fileFormats.createDefaultControl(controlType);
-        
+
         expect(mockControl).toBeDefined();
         expect(mockControl.type).toBe(controlType);
         expect(mockControl.properties).toBeDefined();
@@ -495,10 +506,10 @@ End Sub
         clientHeight: 6630,
         controls: [
           { name: 'cmdButton', left: 1080, top: 480, width: 975, height: 375 },
-          { name: 'lblMessage', left: 360, top: 720, width: 3975, height: 855 }
-        ]
+          { name: 'lblMessage', left: 360, top: 720, width: 3975, height: 855 },
+        ],
       };
-      
+
       // Vérifier que tous les contrôles sont dans les limites du formulaire
       mockForm.controls.forEach(control => {
         expect(control.left + control.width).toBeLessThanOrEqual(mockForm.clientWidth);
@@ -526,11 +537,11 @@ Private Sub ComplexCalculation()
     Debug.Print "Result: " & result
 End Sub
       `;
-      
+
       const startTime = performance.now();
       const parseResult = fileFormats.parseVB6Code(largeVB6Code);
       const endTime = performance.now();
-      
+
       expect(parseResult.success).toBe(true);
       expect(endTime - startTime).toBeLessThan(1000); // Should parse in less than 1 second
     });
@@ -545,9 +556,9 @@ Begin VB.Form Form1
 Begin VB.CommandButton cmd1
    // Missing properties
       `;
-      
+
       const parseResult = fileFormats.parseVB6Form(malformedForm);
-      
+
       expect(parseResult.success).toBe(false);
       expect(parseResult.errors).toBeDefined();
       expect(parseResult.errors!.length).toBeGreaterThan(0);
@@ -561,9 +572,9 @@ Private Sub Test()
     For i = 1 To ' Incomplete For loop
     End Sub ' Missing Next
       `;
-      
+
       const codeResult = fileFormats.parseVB6Code(invalidCode);
-      
+
       expect(codeResult.success).toBe(false);
       expect(codeResult.errors).toBeDefined();
       expect(codeResult.errors!.length).toBeGreaterThan(0);
@@ -571,9 +582,9 @@ Private Sub Test()
 
     it('should provide helpful error messages', () => {
       const invalidForm = 'Begin VB.Form\nCaption = \nEnd'; // Missing value
-      
+
       const parseResult = fileFormats.parseVB6Form(invalidForm);
-      
+
       expect(parseResult.success).toBe(false);
       expect(parseResult.errors![0]).toMatch(/missing|expected|invalid/i);
     });

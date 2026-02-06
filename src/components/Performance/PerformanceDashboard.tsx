@@ -1,6 +1,6 @@
 /**
  * VB6 IDE Performance Dashboard
- * 
+ *
  * Real-time performance monitoring and optimization dashboard
  * showing metrics, bottlenecks, and optimization recommendations.
  */
@@ -31,25 +31,28 @@ const useLocalPerformanceMetrics = () => {
     renderTime: 0,
     lastRenderTimestamp: 0,
     averageRenderTime: 0,
-    peakRenderTime: 0
+    peakRenderTime: 0,
   });
   const [operationHistory, setOperationHistory] = useState<OperationHistoryEntry[]>([]);
   const operationCountRef = useRef(0);
 
-  const recordOperation = useCallback((type: string, duration: number, details?: Record<string, unknown>) => {
-    setOperationHistory(prev => {
-      const newEntry: OperationHistoryEntry = {
-        type,
-        timestamp: Date.now(),
-        duration,
-        details
-      };
-      const updated = [...prev, newEntry];
-      // Keep only last 1000 entries
-      return updated.slice(-1000);
-    });
-    operationCountRef.current++;
-  }, []);
+  const recordOperation = useCallback(
+    (type: string, duration: number, details?: Record<string, unknown>) => {
+      setOperationHistory(prev => {
+        const newEntry: OperationHistoryEntry = {
+          type,
+          timestamp: Date.now(),
+          duration,
+          details,
+        };
+        const updated = [...prev, newEntry];
+        // Keep only last 1000 entries
+        return updated.slice(-1000);
+      });
+      operationCountRef.current++;
+    },
+    []
+  );
 
   const updateRenderMetrics = useCallback((metrics: Partial<RenderMetrics>) => {
     setRenderMetrics(prev => {
@@ -57,7 +60,7 @@ const useLocalPerformanceMetrics = () => {
       if (metrics.renderTime) {
         updated.peakRenderTime = Math.max(prev.peakRenderTime, metrics.renderTime);
         // Simple rolling average
-        updated.averageRenderTime = (prev.averageRenderTime * 0.9) + (metrics.renderTime * 0.1);
+        updated.averageRenderTime = prev.averageRenderTime * 0.9 + metrics.renderTime * 0.1;
       }
       return updated;
     });
@@ -67,7 +70,7 @@ const useLocalPerformanceMetrics = () => {
     renderMetrics,
     operationHistory,
     recordOperation,
-    updateRenderMetrics
+    updateRenderMetrics,
   };
 };
 
@@ -85,9 +88,9 @@ export const PerformanceDashboard: React.FC = () => {
   const [historicalData, setHistoricalData] = useState<PerformanceData[]>([]);
   const [selectedMetric, setSelectedMetric] = useState<keyof PerformanceData>('fps');
   const [autoOptimize, setAutoOptimize] = useState(false);
-  
+
   const { renderMetrics, operationHistory, recordOperation } = useLocalPerformanceMetrics();
-  
+
   // Real-time metrics
   const [realTimeMetrics, setRealTimeMetrics] = useState({
     fps: 0,
@@ -95,9 +98,9 @@ export const PerformanceDashboard: React.FC = () => {
     renderTime: 0,
     compilationTime: 0,
     controlCount: 0,
-    bundleSize: 0
+    bundleSize: 0,
   });
-  
+
   // Update real-time metrics
   useEffect(() => {
     const interval = setInterval(() => {
@@ -108,9 +111,9 @@ export const PerformanceDashboard: React.FC = () => {
         renderTime: metrics.renderTime,
         compilationTime: metrics.compilationTime,
         controlCount: metrics.controlCount,
-        bundleSize: metrics.bundleSize
+        bundleSize: metrics.bundleSize,
       });
-      
+
       // Add to historical data
       setHistoricalData(prev => {
         const newData = {
@@ -119,58 +122,58 @@ export const PerformanceDashboard: React.FC = () => {
           memory: metrics.memoryUsage,
           renderTime: metrics.renderTime,
           compilationTime: metrics.compilationTime,
-          controlCount: metrics.controlCount
+          controlCount: metrics.controlCount,
         };
-        
+
         const updated = [...prev, newData];
         // Keep only last 100 data points
         return updated.slice(-100);
       });
     }, 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
-  
+
   // Performance analysis
   const performanceAnalysis = useMemo(() => {
     const recent = historicalData.slice(-10);
     if (recent.length === 0) return null;
-    
+
     const avgFPS = recent.reduce((sum, d) => sum + d.fps, 0) / recent.length;
     const avgMemory = recent.reduce((sum, d) => sum + d.memory, 0) / recent.length;
     const avgRenderTime = recent.reduce((sum, d) => sum + d.renderTime, 0) / recent.length;
-    
+
     const issues = [];
     const recommendations = [];
-    
+
     if (avgFPS < 30) {
       issues.push('Low FPS detected');
       recommendations.push('Enable control virtualization');
       recommendations.push('Reduce complexity of form designer');
     }
-    
+
     if (avgMemory > 500) {
       issues.push('High memory usage');
       recommendations.push('Clear compilation cache');
       recommendations.push('Reduce number of open tabs');
     }
-    
+
     if (avgRenderTime > 16) {
       issues.push('Slow rendering detected');
       recommendations.push('Enable render throttling');
       recommendations.push('Use memoized components');
     }
-    
+
     return {
       avgFPS: avgFPS.toFixed(1),
       avgMemory: avgMemory.toFixed(1),
       avgRenderTime: avgRenderTime.toFixed(2),
       issues,
       recommendations,
-      score: Math.max(0, 100 - issues.length * 20)
+      score: Math.max(0, 100 - issues.length * 20),
     };
   }, [historicalData]);
-  
+
   // Auto-optimization
   useEffect(() => {
     if (autoOptimize && performanceAnalysis) {
@@ -179,33 +182,33 @@ export const PerformanceDashboard: React.FC = () => {
       }
     }
   }, [performanceAnalysis, autoOptimize]);
-  
+
   const performAutoOptimization = useCallback(() => {
-    recordOperation('auto-optimization', 0, { 
-      issues: performanceAnalysis?.issues || [] 
+    recordOperation('auto-optimization', 0, {
+      issues: performanceAnalysis?.issues || [],
     });
-    
+
     // Trigger garbage collection
     performanceOptimizer.performGarbageCollection();
-    
+
     // Clear caches if memory is high
     if (realTimeMetrics.memory > 400) {
       performanceOptimizer.performGarbageCollection();
     }
   }, [performanceAnalysis, realTimeMetrics.memory, recordOperation]);
-  
+
   // Manual optimization actions
   const handleClearCaches = useCallback(() => {
     performanceOptimizer.performGarbageCollection();
     recordOperation('manual-cache-clear', 0);
   }, [recordOperation]);
-  
+
   const handleGenerateReport = useCallback(() => {
     const report = performanceOptimizer.generateReport();
     if (process.env.NODE_ENV === 'development') {
-      console.log('Performance Report:', report);
+      // noop
     }
-    
+
     // Create downloadable report
     const blob = new Blob([report], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -215,15 +218,15 @@ export const PerformanceDashboard: React.FC = () => {
     a.click();
     URL.revokeObjectURL(url);
   }, []);
-  
+
   // Chart data for selected metric
   const chartData = useMemo(() => {
     return historicalData.map(data => ({
       x: data.timestamp,
-      y: data[selectedMetric]
+      y: data[selectedMetric],
     }));
   }, [historicalData, selectedMetric]);
-  
+
   if (!isVisible) {
     return (
       <button
@@ -235,7 +238,7 @@ export const PerformanceDashboard: React.FC = () => {
       </button>
     );
   }
-  
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-2xl w-11/12 h-5/6 max-w-6xl overflow-hidden">
@@ -247,20 +250,17 @@ export const PerformanceDashboard: React.FC = () => {
               <input
                 type="checkbox"
                 checked={autoOptimize}
-                onChange={(e) => setAutoOptimize(e.target.checked)}
+                onChange={e => setAutoOptimize(e.target.checked)}
                 className="rounded"
               />
               <span className="text-sm">Auto-optimize</span>
             </label>
-            <button
-              onClick={() => setIsVisible(false)}
-              className="text-gray-400 hover:text-white"
-            >
+            <button onClick={() => setIsVisible(false)} className="text-gray-400 hover:text-white">
               ✕
             </button>
           </div>
         </div>
-        
+
         <div className="flex h-full">
           {/* Sidebar */}
           <div className="w-80 bg-gray-50 p-6 overflow-y-auto">
@@ -272,21 +272,39 @@ export const PerformanceDashboard: React.FC = () => {
                   label="FPS"
                   value={realTimeMetrics.fps}
                   unit=""
-                  status={realTimeMetrics.fps >= 30 ? 'good' : realTimeMetrics.fps >= 15 ? 'warning' : 'critical'}
+                  status={
+                    realTimeMetrics.fps >= 30
+                      ? 'good'
+                      : realTimeMetrics.fps >= 15
+                        ? 'warning'
+                        : 'critical'
+                  }
                   target={60}
                 />
                 <MetricCard
                   label="Memory"
                   value={realTimeMetrics.memory}
                   unit="MB"
-                  status={realTimeMetrics.memory <= 200 ? 'good' : realTimeMetrics.memory <= 500 ? 'warning' : 'critical'}
+                  status={
+                    realTimeMetrics.memory <= 200
+                      ? 'good'
+                      : realTimeMetrics.memory <= 500
+                        ? 'warning'
+                        : 'critical'
+                  }
                   target={200}
                 />
                 <MetricCard
                   label="Render Time"
                   value={realTimeMetrics.renderTime}
                   unit="ms"
-                  status={realTimeMetrics.renderTime <= 8 ? 'good' : realTimeMetrics.renderTime <= 16 ? 'warning' : 'critical'}
+                  status={
+                    realTimeMetrics.renderTime <= 8
+                      ? 'good'
+                      : realTimeMetrics.renderTime <= 16
+                        ? 'warning'
+                        : 'critical'
+                  }
                   target={8}
                 />
                 <MetricCard
@@ -298,52 +316,61 @@ export const PerformanceDashboard: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             {/* Performance Score */}
             {performanceAnalysis && (
               <div className="mb-6">
                 <h3 className="text-lg font-semibold mb-4">Performance Score</h3>
                 <div className="text-center">
-                  <div className={`text-4xl font-bold mb-2 ${
-                    performanceAnalysis.score >= 80 ? 'text-green-600' :
-                    performanceAnalysis.score >= 60 ? 'text-yellow-600' : 'text-red-600'
-                  }`}>
+                  <div
+                    className={`text-4xl font-bold mb-2 ${
+                      performanceAnalysis.score >= 80
+                        ? 'text-green-600'
+                        : performanceAnalysis.score >= 60
+                          ? 'text-yellow-600'
+                          : 'text-red-600'
+                    }`}
+                  >
                     {performanceAnalysis.score}
                   </div>
                   <div className="text-sm text-gray-600">out of 100</div>
                 </div>
               </div>
             )}
-            
+
             {/* Issues & Recommendations */}
             {performanceAnalysis && (
               <div className="mb-6">
                 <h3 className="text-lg font-semibold mb-4">Issues & Recommendations</h3>
-                
+
                 {performanceAnalysis.issues.length > 0 && (
                   <div className="mb-4">
                     <h4 className="font-medium text-red-600 mb-2">Issues</h4>
                     <ul className="text-sm space-y-1">
                       {performanceAnalysis.issues.map((issue, index) => (
-                        <li key={index} className="text-red-600">• {issue}</li>
+                        <li key={index} className="text-red-600">
+                          • {issue}
+                        </li>
                       ))}
                     </ul>
                   </div>
                 )}
-                
+
                 {performanceAnalysis.recommendations.length > 0 && (
                   <div>
                     <h4 className="font-medium text-blue-600 mb-2">Recommendations</h4>
                     <ul className="text-sm space-y-1">
                       {performanceAnalysis.recommendations.map((rec, index) => (
-                        <li key={index} className="text-blue-600">• {rec}</li>
+                        <li key={index} className="text-blue-600">
+                          • {rec}
+                        </li>
                       ))}
                     </ul>
                   </div>
                 )}
               </div>
             )}
-            
+
             {/* Actions */}
             <div className="space-y-2">
               <button
@@ -366,7 +393,7 @@ export const PerformanceDashboard: React.FC = () => {
               </button>
             </div>
           </div>
-          
+
           {/* Main Content */}
           <div className="flex-1 p-6">
             {/* Metric Selector */}
@@ -387,36 +414,42 @@ export const PerformanceDashboard: React.FC = () => {
                 ))}
               </div>
             </div>
-            
+
             {/* Chart */}
             <div className="bg-white border rounded-lg p-4 mb-6" style={{ height: '300px' }}>
               <PerformanceChart data={chartData} metric={selectedMetric} />
             </div>
-            
+
             {/* Operation History */}
             <div className="bg-white border rounded-lg">
               <div className="p-4 border-b">
                 <h3 className="text-lg font-semibold">Recent Operations</h3>
               </div>
               <div className="max-h-48 overflow-y-auto">
-                {operationHistory.slice(-20).reverse().map((operation, index) => (
-                  <div key={index} className="p-3 border-b last:border-b-0 flex justify-between items-center">
-                    <div>
-                      <div className="font-medium">{operation.type}</div>
-                      <div className="text-sm text-gray-600">
-                        {new Date(operation.timestamp).toLocaleTimeString()}
+                {operationHistory
+                  .slice(-20)
+                  .reverse()
+                  .map((operation, index) => (
+                    <div
+                      key={index}
+                      className="p-3 border-b last:border-b-0 flex justify-between items-center"
+                    >
+                      <div>
+                        <div className="font-medium">{operation.type}</div>
+                        <div className="text-sm text-gray-600">
+                          {new Date(operation.timestamp).toLocaleTimeString()}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-mono text-sm">{operation.duration.toFixed(2)}ms</div>
+                        {operation.details && (
+                          <div className="text-xs text-gray-500">
+                            {JSON.stringify(operation.details)}
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-mono text-sm">{operation.duration.toFixed(2)}ms</div>
-                      {operation.details && (
-                        <div className="text-xs text-gray-500">
-                          {JSON.stringify(operation.details)}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </div>
           </div>
@@ -435,15 +468,20 @@ const MetricCard: React.FC<{
   target: number;
 }> = ({ label, value, unit, status, target }) => {
   const percentage = (value / target) * 100;
-  
+
   return (
     <div className="bg-white p-3 rounded border">
       <div className="flex justify-between items-center mb-2">
         <span className="text-sm font-medium">{label}</span>
-        <span className={`w-3 h-3 rounded-full ${
-          status === 'good' ? 'bg-green-500' :
-          status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
-        }`}></span>
+        <span
+          className={`w-3 h-3 rounded-full ${
+            status === 'good'
+              ? 'bg-green-500'
+              : status === 'warning'
+                ? 'bg-yellow-500'
+                : 'bg-red-500'
+          }`}
+        ></span>
       </div>
       <div className="text-lg font-bold">
         {value.toFixed(1)} {unit}
@@ -451,8 +489,11 @@ const MetricCard: React.FC<{
       <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
         <div
           className={`h-2 rounded-full transition-all ${
-            status === 'good' ? 'bg-green-500' :
-            status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
+            status === 'good'
+              ? 'bg-green-500'
+              : status === 'warning'
+                ? 'bg-yellow-500'
+                : 'bg-red-500'
           }`}
           style={{ width: `${Math.min(100, percentage)}%` }}
         ></div>
@@ -471,16 +512,14 @@ const PerformanceChart: React.FC<{
 }> = ({ data, metric }) => {
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-500">
-        No data available
-      </div>
+      <div className="flex items-center justify-center h-full text-gray-500">No data available</div>
     );
   }
-  
+
   const maxY = Math.max(...data.map(d => d.y)) || 1;
   const minY = Math.min(...data.map(d => d.y)) || 0;
   const range = maxY - minY || 1;
-  
+
   return (
     <div className="relative h-full">
       <svg className="w-full h-full">
@@ -496,37 +535,31 @@ const PerformanceChart: React.FC<{
             strokeWidth="1"
           />
         ))}
-        
+
         {/* Data line */}
         {data.length > 1 && (
           <polyline
             fill="none"
             stroke="#3b82f6"
             strokeWidth="2"
-            points={data.map((point, index) => {
-              const x = (index / (data.length - 1)) * 100;
-              const y = ((maxY - point.y) / range) * 100;
-              return `${x},${y}`;
-            }).join(' ')}
+            points={data
+              .map((point, index) => {
+                const x = (index / (data.length - 1)) * 100;
+                const y = ((maxY - point.y) / range) * 100;
+                return `${x},${y}`;
+              })
+              .join(' ')}
           />
         )}
-        
+
         {/* Data points */}
         {data.map((point, index) => {
           const x = (index / (data.length - 1)) * 100;
           const y = ((maxY - point.y) / range) * 100;
-          return (
-            <circle
-              key={index}
-              cx={`${x}%`}
-              cy={`${y}%`}
-              r="3"
-              fill="#3b82f6"
-            />
-          );
+          return <circle key={index} cx={`${x}%`} cy={`${y}%`} r="3" fill="#3b82f6" />;
         })}
       </svg>
-      
+
       {/* Y-axis labels */}
       <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-gray-500 -ml-8">
         <span>{maxY.toFixed(1)}</span>

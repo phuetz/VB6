@@ -1,6 +1,6 @@
 /**
  * VB6 Advanced Runtime Functions - Fonctions critiques manquantes
- * 
+ *
  * Implémente les fonctionnalités runtime VB6 essentielles pour 95%+ compatibilité:
  * - DoEvents (coopérative multitasking)
  * - GoSub/Return (subroutines locales)
@@ -92,7 +92,7 @@ export class VB6AdvancedRuntime {
     try {
       // 1. Traiter événements DOM en attente
       this.processWindowEvents();
-      
+
       // 2. Traiter callbacks DoEvents enregistrés
       for (const callback of this.doEventsCallbacks) {
         try {
@@ -104,12 +104,11 @@ export class VB6AdvancedRuntime {
       }
 
       // 3. Permettre au navigateur de traiter ses tâches
-      return new Promise<number>((resolve) => {
+      return new Promise<number>(resolve => {
         setTimeout(() => {
           resolve(eventsProcessed);
         }, 0);
       }) as any; // VB6 DoEvents retourne un Integer
-
     } finally {
       this.isProcessingEvents = false;
     }
@@ -139,7 +138,7 @@ export class VB6AdvancedRuntime {
     // Forcer le traitement des événements DOM
     const event = new CustomEvent('vb6-doevents');
     document.dispatchEvent(event);
-    
+
     // Traiter les timers VB6 en attente
     this.processVB6Timers();
   }
@@ -153,10 +152,10 @@ export class VB6AdvancedRuntime {
     timers.forEach(timer => {
       const enabled = timer.getAttribute('data-vb6-enabled') === 'true';
       const interval = parseInt(timer.getAttribute('data-vb6-interval') || '0');
-      
+
       if (enabled && interval > 0) {
-        const event = new CustomEvent('vb6-timer-tick', { 
-          detail: { timerName: timer.getAttribute('data-vb6-name') }
+        const event = new CustomEvent('vb6-timer-tick', {
+          detail: { timerName: timer.getAttribute('data-vb6-name') },
         });
         timer.dispatchEvent(event);
       }
@@ -175,13 +174,11 @@ export class VB6AdvancedRuntime {
     const frame: VB6SubroutineFrame = {
       label,
       returnAddress: currentLine + 1,
-      localVars: { ...localVars }
+      localVars: { ...localVars },
     };
 
     // Empiler frame
     this.subroutineStack.push(frame);
-    
-    console.log(`GoSub ${label} from line ${currentLine}`);
   }
 
   /**
@@ -194,9 +191,7 @@ export class VB6AdvancedRuntime {
 
     const frame = this.subroutineStack.pop()!;
     const returnLine = frame.returnAddress;
-    
-    console.log(`Return from ${frame.label} to line ${returnLine}`);
-    
+
     return returnLine;
   }
 
@@ -207,7 +202,7 @@ export class VB6AdvancedRuntime {
     if (this.subroutineStack.length === 0) {
       return {};
     }
-    
+
     return this.subroutineStack[this.subroutineStack.length - 1].localVars;
   }
 
@@ -231,10 +226,8 @@ export class VB6AdvancedRuntime {
     this.errorHandlers.push({
       type: 'GoTo',
       label,
-      active: true
+      active: true,
     });
-    
-    console.log(`On Error GoTo ${label} activated`);
   }
 
   /**
@@ -243,10 +236,8 @@ export class VB6AdvancedRuntime {
   public OnErrorResumeNext(): void {
     this.errorHandlers.push({
       type: 'ResumeNext',
-      active: true
+      active: true,
     });
-    
-    console.log('On Error Resume Next activated');
   }
 
   /**
@@ -257,7 +248,7 @@ export class VB6AdvancedRuntime {
     if (handler && handler.type === 'Resume') {
       return this.currentLine;
     }
-    
+
     throw new Error('Resume without error handler');
   }
 
@@ -269,7 +260,7 @@ export class VB6AdvancedRuntime {
     if (handler && handler.type === 'ResumeNext') {
       return this.currentLine + 1;
     }
-    
+
     throw new Error('Resume Next without error handler');
   }
 
@@ -279,7 +270,6 @@ export class VB6AdvancedRuntime {
   public ResumeLabel(label: string): void {
     const handler = this.getActiveErrorHandler();
     if (handler && handler.type === 'GoTo') {
-      console.log(`Resume ${label}`);
       // Implementation spécifique au transpiler
     }
   }
@@ -289,7 +279,7 @@ export class VB6AdvancedRuntime {
    */
   public HandleRuntimeError(error: Error, line: number): boolean {
     this.currentLine = line;
-    
+
     const handler = this.getActiveErrorHandler();
     if (!handler || !handler.active) {
       return false; // Pas de handler, propager erreur
@@ -304,13 +294,11 @@ export class VB6AdvancedRuntime {
 
     switch (handler.type) {
       case 'GoTo':
-        console.log(`Error handled, goto ${handler.label}`);
         return true;
-        
+
       case 'ResumeNext':
-        console.log('Error handled, resume next');
         return true;
-        
+
       default:
         return false;
     }
@@ -343,7 +331,7 @@ export class VB6AdvancedRuntime {
    */
   public Open(fileName: string, mode: string, fileNumber?: number, recordLength?: number): number {
     const actualFileNumber = fileNumber || this.nextFileNumber++;
-    
+
     const handle: VB6FileHandle = {
       fileNumber: actualFileNumber,
       fileName,
@@ -351,15 +339,14 @@ export class VB6AdvancedRuntime {
       recordLength,
       position: 0,
       isOpen: true,
-      buffer: mode === 'Binary' ? new Uint8Array(0) : ''
+      buffer: mode === 'Binary' ? new Uint8Array(0) : '',
     };
 
     this.fileHandles.set(actualFileNumber, handle);
-    
+
     // En environnement web, simuler avec localStorage ou IndexedDB
     this.initializeFileBuffer(handle);
-    
-    console.log(`Open "${fileName}" for ${mode} as #${actualFileNumber}`);
+
     return actualFileNumber;
   }
 
@@ -418,7 +405,7 @@ export class VB6AdvancedRuntime {
     const buffer = handle.buffer as string;
     const result = buffer.substring(handle.position, handle.position + count);
     handle.position += result.length;
-    
+
     return result;
   }
 
@@ -507,9 +494,9 @@ export class VB6AdvancedRuntime {
    * Declare Function - Déclarer fonction externe
    */
   public DeclareFunction(
-    name: string, 
-    library: string, 
-    alias: string | null, 
+    name: string,
+    library: string,
+    alias: string | null,
     returnType: string,
     parameters: VB6DeclaredParameter[]
   ): void {
@@ -519,12 +506,10 @@ export class VB6AdvancedRuntime {
       alias: alias || name,
       returnType,
       parameters,
-      isAsync: false
+      isAsync: false,
     };
 
     this.declaredFunctions.set(name, declaredFunc);
-    
-    console.log(`Declared ${name} from ${library}`);
   }
 
   /**
@@ -540,13 +525,13 @@ export class VB6AdvancedRuntime {
     switch (func.library) {
       case 'kernel32':
         return this.callKernel32(func.alias || func.name, args);
-        
+
       case 'user32':
         return this.callUser32(func.alias || func.name, args);
-        
+
       case 'gdi32':
         return this.callGdi32(func.alias || func.name, args);
-        
+
       default:
         console.warn(`Library ${func.library} not implemented`);
         return this.getDefaultReturnValue(func.returnType);
@@ -556,8 +541,8 @@ export class VB6AdvancedRuntime {
   private callKernel32(funcName: string, args: any[]): any {
     switch (funcName.toLowerCase()) {
       case 'gettickcount':
-        return Date.now() & 0xFFFFFFFF; // 32-bit milliseconds
-        
+        return Date.now() & 0xffffffff; // 32-bit milliseconds
+
       case 'sleep': {
         const ms = args[0] || 0;
         setTimeout(() => {}, ms);
@@ -567,10 +552,10 @@ export class VB6AdvancedRuntime {
       case 'getcomputername':
       case 'getcomputernamea':
         return 'WEB-COMPUTER';
-        
+
       case 'getusernamea':
         return 'WebUser';
-        
+
       default:
         console.warn(`Kernel32 function ${funcName} not implemented`);
         return 0;
@@ -590,11 +575,11 @@ export class VB6AdvancedRuntime {
       case 'findwindow':
       case 'findwindowa':
         return 0; // Pas de fenêtres dans navigateur
-        
+
       case 'getwindowtext':
       case 'getwindowtexta':
         return document.title.length;
-        
+
       default:
         console.warn(`User32 function ${funcName} not implemented`);
         return 0;
@@ -605,7 +590,7 @@ export class VB6AdvancedRuntime {
     switch (funcName.toLowerCase()) {
       case 'getdevicecaps':
         return 96; // DPI standard
-        
+
       default:
         console.warn(`GDI32 function ${funcName} not implemented`);
         return 0;
@@ -642,7 +627,7 @@ export class VB6AdvancedRuntime {
       DoEventsSupported: true,
       FileIOSupported: true,
       APICallsSupported: true,
-      ErrorHandlingSupported: true
+      ErrorHandlingSupported: true,
     };
   }
 
@@ -652,13 +637,11 @@ export class VB6AdvancedRuntime {
   public Cleanup(): void {
     // Fermer tous les fichiers
     this.Close();
-    
+
     // Vider stacks
     this.subroutineStack = [];
     this.errorHandlers = [];
     this.doEventsCallbacks = [];
-    
-    console.log('VB6 Advanced Runtime cleaned up');
   }
 }
 

@@ -11,7 +11,7 @@ import {
   ArrowRightLeft,
   AlertCircle,
   Package,
-  X
+  X,
 } from 'lucide-react';
 
 interface RefactoringPanelProps {
@@ -25,28 +25,28 @@ const RefactoringPanel: React.FC<RefactoringPanelProps> = ({ editor, onClose }) 
   const [renameValue, setRenameValue] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [previewChanges, setPreviewChanges] = useState<string>('');
-  
+
   const refactoringService = new VB6RefactoringService();
 
   useEffect(() => {
     if (editor) {
       updateAvailableActions();
-      
+
       // Listen for selection changes
       const disposable = editor.onDidChangeCursorSelection(() => {
         updateAvailableActions();
       });
-      
+
       return () => disposable.dispose();
     }
   }, [editor]);
 
   const updateAvailableActions = () => {
     if (!editor) return;
-    
+
     const model = editor.getModel();
     const selection = editor.getSelection();
-    
+
     if (model && selection) {
       const actions = refactoringService.getRefactoringActions(model, selection);
       setAvailableActions(actions);
@@ -55,11 +55,11 @@ const RefactoringPanel: React.FC<RefactoringPanelProps> = ({ editor, onClose }) 
 
   const handleActionSelect = (action: RefactoringAction) => {
     setSelectedAction(action);
-    
+
     if (action.id === 'rename') {
       const model = editor?.getModel();
       const position = editor?.getPosition();
-      
+
       if (model && position) {
         const wordInfo = model.getWordAtPosition(position);
         if (wordInfo) {
@@ -71,23 +71,23 @@ const RefactoringPanel: React.FC<RefactoringPanelProps> = ({ editor, onClose }) 
 
   const handleApplyRefactoring = async () => {
     if (!editor || !selectedAction) return;
-    
+
     setIsProcessing(true);
-    
+
     try {
       let edits: monaco.editor.IIdentifiedSingleEditOperation[] = [];
-      
+
       if (selectedAction.id === 'rename' && renameValue) {
         const model = editor.getModel();
         const position = editor.getPosition();
-        
+
         if (model && position) {
           edits = await refactoringService.renameSymbol(model, position, renameValue);
         }
       } else {
         edits = selectedAction.apply();
       }
-      
+
       if (edits.length > 0) {
         editor.executeEdits('refactoring', edits);
         setSelectedAction(null);
@@ -103,21 +103,21 @@ const RefactoringPanel: React.FC<RefactoringPanelProps> = ({ editor, onClose }) 
 
   const getActionIcon = (actionId: string) => {
     const icons: { [key: string]: JSX.Element } = {
-      'rename': <FileEdit size={16} />,
-      'extractMethod': <FunctionSquare size={16} />,
-      'extractVariable': <Variable size={16} />,
-      'inlineVariable': <ArrowRightLeft size={16} />,
-      'convertToProperty': <Code size={16} />,
-      'addErrorHandling': <AlertCircle size={16} />,
-      'optimizeImports': <Package size={16} />
+      rename: <FileEdit size={16} />,
+      extractMethod: <FunctionSquare size={16} />,
+      extractVariable: <Variable size={16} />,
+      inlineVariable: <ArrowRightLeft size={16} />,
+      convertToProperty: <Code size={16} />,
+      addErrorHandling: <AlertCircle size={16} />,
+      optimizeImports: <Package size={16} />,
     };
-    
+
     return icons[actionId] || <Wand2 size={16} />;
   };
 
   const renderActionDetails = () => {
     if (!selectedAction) return null;
-    
+
     switch (selectedAction.id) {
       case 'rename':
         return (
@@ -126,7 +126,7 @@ const RefactoringPanel: React.FC<RefactoringPanelProps> = ({ editor, onClose }) 
             <input
               type="text"
               value={renameValue}
-              onChange={(e) => setRenameValue(e.target.value)}
+              onChange={e => setRenameValue(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded"
               placeholder="New name"
               autoFocus
@@ -136,40 +136,40 @@ const RefactoringPanel: React.FC<RefactoringPanelProps> = ({ editor, onClose }) 
             </p>
           </div>
         );
-        
+
       case 'extractMethod':
         return (
           <div className="mt-4 p-4 bg-gray-50 rounded">
             <h4 className="font-semibold mb-2">Extract Method</h4>
             <p className="text-sm text-gray-600">
-              The selected code will be extracted into a new method.
-              Parameters will be automatically detected.
+              The selected code will be extracted into a new method. Parameters will be
+              automatically detected.
             </p>
           </div>
         );
-        
+
       case 'extractVariable':
         return (
           <div className="mt-4 p-4 bg-gray-50 rounded">
             <h4 className="font-semibold mb-2">Extract Variable</h4>
             <p className="text-sm text-gray-600">
-              The selected expression will be extracted into a new variable.
-              The type will be automatically inferred.
+              The selected expression will be extracted into a new variable. The type will be
+              automatically inferred.
             </p>
           </div>
         );
-        
+
       case 'addErrorHandling':
         return (
           <div className="mt-4 p-4 bg-gray-50 rounded">
             <h4 className="font-semibold mb-2">Add Error Handling</h4>
             <p className="text-sm text-gray-600">
-              Error handling code will be added to the current procedure
-              with a standard error handler pattern.
+              Error handling code will be added to the current procedure with a standard error
+              handler pattern.
             </p>
           </div>
         );
-        
+
       default:
         return (
           <div className="mt-4 p-4 bg-gray-50 rounded">
@@ -189,11 +189,7 @@ const RefactoringPanel: React.FC<RefactoringPanelProps> = ({ editor, onClose }) 
             <Wand2 size={20} />
             Refactoring Tools
           </h3>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded"
-            title="Close"
-          >
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded" title="Close">
             <X size={20} />
           </button>
         </div>
@@ -209,7 +205,7 @@ const RefactoringPanel: React.FC<RefactoringPanelProps> = ({ editor, onClose }) 
               </p>
             ) : (
               <div className="space-y-2">
-                {availableActions.map((action) => (
+                {availableActions.map(action => (
                   <button
                     key={action.id}
                     onClick={() => handleActionSelect(action)}
@@ -248,15 +244,14 @@ const RefactoringPanel: React.FC<RefactoringPanelProps> = ({ editor, onClose }) 
 
         {/* Footer */}
         <div className="p-4 border-t flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
-          >
+          <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">
             Cancel
           </button>
           <button
             onClick={handleApplyRefactoring}
-            disabled={!selectedAction || isProcessing || (selectedAction.id === 'rename' && !renameValue)}
+            disabled={
+              !selectedAction || isProcessing || (selectedAction.id === 'rename' && !renameValue)
+            }
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             {isProcessing ? 'Processing...' : 'Apply Refactoring'}

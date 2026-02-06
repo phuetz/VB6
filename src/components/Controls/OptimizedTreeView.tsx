@@ -52,12 +52,12 @@ const OptimizedTreeView: React.FC<OptimizedTreeViewProps> = ({
   // Flatten tree for virtual scrolling
   const flattenedNodes = useMemo<FlatNode[]>(() => {
     const flat: FlatNode[] = [];
-    
+
     const flatten = (nodes: TreeNode[], level: number = 0, parentExpanded: boolean = true) => {
       nodes.forEach(node => {
         const hasChildren = node.children && node.children.length > 0;
         const isExpanded = expandedNodes.has(node.key);
-        
+
         flat.push({
           ...node,
           level,
@@ -83,7 +83,7 @@ const OptimizedTreeView: React.FC<OptimizedTreeViewProps> = ({
   // Calculate visible range
   const itemHeight = 24;
   const overscan = 5;
-  
+
   const visibleRange = useMemo(() => {
     const start = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
     const end = Math.min(
@@ -99,145 +99,154 @@ const OptimizedTreeView: React.FC<OptimizedTreeViewProps> = ({
   }, [visibleNodes, visibleRange]);
 
   // Handle node expansion with lazy loading
-  const handleNodeExpand = useCallback(async (nodeKey: string, node: FlatNode) => {
-    const newExpanded = new Set(expandedNodes);
-    
-    if (newExpanded.has(nodeKey)) {
-      newExpanded.delete(nodeKey);
-      setExpandedNodes(newExpanded);
-    } else {
-      // Check if we need to lazy load children
-      if (control.properties.LazyLoad && !node.children && !loadingNodes.current.has(nodeKey)) {
-        loadingNodes.current.add(nodeKey);
-        
-        // Update node to show loading state
-        const updatedNodes = [...treeData];
-        const updateNode = (nodes: TreeNode[]): boolean => {
-          for (let i = 0; i < nodes.length; i++) {
-            if (nodes[i].key === nodeKey) {
-              nodes[i].isLoading = true;
-              return true;
-            }
-            if (nodes[i].children && updateNode(nodes[i].children!)) {
-              return true;
-            }
-          }
-          return false;
-        };
-        
-        updateNode(updatedNodes);
-        onUpdate({ Nodes: updatedNodes });
+  const handleNodeExpand = useCallback(
+    async (nodeKey: string, node: FlatNode) => {
+      const newExpanded = new Set(expandedNodes);
 
-        // Simulate async loading
-        setTimeout(() => {
-          // Generate mock children
-          const children: TreeNode[] = [];
-          for (let i = 0; i < 5; i++) {
-            children.push({
-              key: `${nodeKey}-child-${i}`,
-              text: `Child ${i + 1}`,
-              parent: nodeKey,
-            });
-          }
+      if (newExpanded.has(nodeKey)) {
+        newExpanded.delete(nodeKey);
+        setExpandedNodes(newExpanded);
+      } else {
+        // Check if we need to lazy load children
+        if (control.properties.LazyLoad && !node.children && !loadingNodes.current.has(nodeKey)) {
+          loadingNodes.current.add(nodeKey);
 
-          // Update tree with loaded children
-          const finalNodes = [...treeData];
-          const addChildren = (nodes: TreeNode[]): boolean => {
+          // Update node to show loading state
+          const updatedNodes = [...treeData];
+          const updateNode = (nodes: TreeNode[]): boolean => {
             for (let i = 0; i < nodes.length; i++) {
               if (nodes[i].key === nodeKey) {
-                nodes[i].children = children;
-                nodes[i].isLoading = false;
+                nodes[i].isLoading = true;
                 return true;
               }
-              if (nodes[i].children && addChildren(nodes[i].children!)) {
+              if (nodes[i].children && updateNode(nodes[i].children!)) {
                 return true;
               }
             }
             return false;
           };
 
-          addChildren(finalNodes);
-          onUpdate({ Nodes: finalNodes });
-          loadingNodes.current.delete(nodeKey);
-          
-          // Expand after loading
+          updateNode(updatedNodes);
+          onUpdate({ Nodes: updatedNodes });
+
+          // Simulate async loading
+          setTimeout(() => {
+            // Generate mock children
+            const children: TreeNode[] = [];
+            for (let i = 0; i < 5; i++) {
+              children.push({
+                key: `${nodeKey}-child-${i}`,
+                text: `Child ${i + 1}`,
+                parent: nodeKey,
+              });
+            }
+
+            // Update tree with loaded children
+            const finalNodes = [...treeData];
+            const addChildren = (nodes: TreeNode[]): boolean => {
+              for (let i = 0; i < nodes.length; i++) {
+                if (nodes[i].key === nodeKey) {
+                  nodes[i].children = children;
+                  nodes[i].isLoading = false;
+                  return true;
+                }
+                if (nodes[i].children && addChildren(nodes[i].children!)) {
+                  return true;
+                }
+              }
+              return false;
+            };
+
+            addChildren(finalNodes);
+            onUpdate({ Nodes: finalNodes });
+            loadingNodes.current.delete(nodeKey);
+
+            // Expand after loading
+            newExpanded.add(nodeKey);
+            setExpandedNodes(newExpanded);
+          }, 500);
+        } else {
           newExpanded.add(nodeKey);
           setExpandedNodes(newExpanded);
-        }, 500);
-      } else {
-        newExpanded.add(nodeKey);
-        setExpandedNodes(newExpanded);
+        }
       }
-    }
 
-    // Fire Expand/Collapse event
-    if (control.events?.Expand && !expandedNodes.has(nodeKey)) {
-      try {
-        const fn = new Function('Node', control.events.Expand);
-        fn(node);
-      } catch (error) {
-        console.error('Error in Expand event:', error);
+      // Fire Expand/Collapse event
+      if (control.events?.Expand && !expandedNodes.has(nodeKey)) {
+        try {
+          const fn = new Function('Node', control.events.Expand);
+          fn(node);
+        } catch (error) {
+          console.error('Error in Expand event:', error);
+        }
+      } else if (control.events?.Collapse && expandedNodes.has(nodeKey)) {
+        try {
+          const fn = new Function('Node', control.events.Collapse);
+          fn(node);
+        } catch (error) {
+          console.error('Error in Collapse event:', error);
+        }
       }
-    } else if (control.events?.Collapse && expandedNodes.has(nodeKey)) {
-      try {
-        const fn = new Function('Node', control.events.Collapse);
-        fn(node);
-      } catch (error) {
-        console.error('Error in Collapse event:', error);
-      }
-    }
-  }, [expandedNodes, control.properties.LazyLoad, control.events, treeData, onUpdate]);
+    },
+    [expandedNodes, control.properties.LazyLoad, control.events, treeData, onUpdate]
+  );
 
   // Handle node selection
-  const handleNodeSelect = useCallback((nodeKey: string, node: FlatNode) => {
-    if (!isRunning) {
-      onSelect();
-      return;
-    }
-
-    setSelectedNode(nodeKey);
-
-    // Fire NodeClick event
-    if (control.events?.NodeClick) {
-      try {
-        const fn = new Function('Node', control.events.NodeClick);
-        fn(node);
-      } catch (error) {
-        console.error('Error in NodeClick event:', error);
+  const handleNodeSelect = useCallback(
+    (nodeKey: string, node: FlatNode) => {
+      if (!isRunning) {
+        onSelect();
+        return;
       }
-    }
-  }, [isRunning, control.events?.NodeClick, onSelect]);
+
+      setSelectedNode(nodeKey);
+
+      // Fire NodeClick event
+      if (control.events?.NodeClick) {
+        try {
+          const fn = new Function('Node', control.events.NodeClick);
+          fn(node);
+        } catch (error) {
+          console.error('Error in NodeClick event:', error);
+        }
+      }
+    },
+    [isRunning, control.events?.NodeClick, onSelect]
+  );
 
   // Handle checkbox change
-  const handleCheckChange = useCallback((nodeKey: string, checked: boolean) => {
-    const newChecked = new Set(checkedNodes);
-    
-    if (checked) {
-      newChecked.add(nodeKey);
-    } else {
-      newChecked.delete(nodeKey);
-    }
-    
-    setCheckedNodes(newChecked);
+  const handleCheckChange = useCallback(
+    (nodeKey: string, checked: boolean) => {
+      const newChecked = new Set(checkedNodes);
 
-    // Update node checked state
-    const updatedNodes = [...treeData];
-    const updateNodeCheck = (nodes: TreeNode[]): boolean => {
-      for (let i = 0; i < nodes.length; i++) {
-        if (nodes[i].key === nodeKey) {
-          nodes[i].checked = checked;
-          return true;
-        }
-        if (nodes[i].children && updateNodeCheck(nodes[i].children!)) {
-          return true;
-        }
+      if (checked) {
+        newChecked.add(nodeKey);
+      } else {
+        newChecked.delete(nodeKey);
       }
-      return false;
-    };
-    
-    updateNodeCheck(updatedNodes);
-    onUpdate({ Nodes: updatedNodes });
-  }, [checkedNodes, treeData, onUpdate]);
+
+      setCheckedNodes(newChecked);
+
+      // Update node checked state
+      const updatedNodes = [...treeData];
+      const updateNodeCheck = (nodes: TreeNode[]): boolean => {
+        for (let i = 0; i < nodes.length; i++) {
+          if (nodes[i].key === nodeKey) {
+            nodes[i].checked = checked;
+            return true;
+          }
+          if (nodes[i].children && updateNodeCheck(nodes[i].children!)) {
+            return true;
+          }
+        }
+        return false;
+      };
+
+      updateNodeCheck(updatedNodes);
+      onUpdate({ Nodes: updatedNodes });
+    },
+    [checkedNodes, treeData, onUpdate]
+  );
 
   // Handle scroll
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
@@ -260,9 +269,11 @@ const OptimizedTreeView: React.FC<OptimizedTreeViewProps> = ({
   // Render node icon
   const renderNodeIcon = (node: FlatNode) => {
     if (node.isLoading) {
-      return <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />;
+      return (
+        <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+      );
     }
-    
+
     if (node.hasChildren) {
       return expandedNodes.has(node.key) ? (
         <FolderOpen size={16} className="text-yellow-600" />
@@ -270,7 +281,7 @@ const OptimizedTreeView: React.FC<OptimizedTreeViewProps> = ({
         <Folder size={16} className="text-yellow-600" />
       );
     }
-    
+
     return <File size={16} className="text-gray-500" />;
   };
 
@@ -289,11 +300,7 @@ const OptimizedTreeView: React.FC<OptimizedTreeViewProps> = ({
         height,
       }}
     >
-      <div
-        ref={containerRef}
-        className="h-full overflow-auto"
-        onScroll={handleScroll}
-      >
+      <div ref={containerRef} className="h-full overflow-auto" onScroll={handleScroll}>
         {/* Virtual spacer */}
         <div style={{ height: visibleNodes.length * itemHeight }}>
           {/* Rendered nodes */}
@@ -322,7 +329,7 @@ const OptimizedTreeView: React.FC<OptimizedTreeViewProps> = ({
                   {/* Expand/Collapse button */}
                   {node.hasChildren ? (
                     <button
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation();
                         handleNodeExpand(node.key, node);
                       }}
@@ -343,8 +350,8 @@ const OptimizedTreeView: React.FC<OptimizedTreeViewProps> = ({
                     <input
                       type="checkbox"
                       checked={isChecked}
-                      onChange={(e) => handleCheckChange(node.key, e.target.checked)}
-                      onClick={(e) => e.stopPropagation()}
+                      onChange={e => handleCheckChange(node.key, e.target.checked)}
+                      onClick={e => e.stopPropagation()}
                       className="mr-2"
                     />
                   )}

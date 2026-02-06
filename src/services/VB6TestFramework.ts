@@ -1,6 +1,6 @@
 /**
  * VB6 Testing Framework
- * 
+ *
  * Provides comprehensive testing capabilities for VB6 code including:
  * - Unit testing with assertions
  * - Integration testing for forms and controls
@@ -14,7 +14,12 @@ import { VB6SemanticAnalyzer } from '../utils/vb6SemanticAnalyzer';
 import { VB6Transpiler } from '../utils/vb6Transpiler';
 import { Control } from '../context/types';
 import { createLogger } from './LoggingService';
-import { TestValue, TestEnvironment, MockImplementation, MockCallArgs } from './types/VB6ServiceTypes';
+import {
+  TestValue,
+  TestEnvironment,
+  MockImplementation,
+  MockCallArgs,
+} from './types/VB6ServiceTypes';
 
 const logger = createLogger('TestFramework');
 
@@ -132,7 +137,7 @@ export class VB6TestFramework {
       passedCount: 0,
       failedCount: 0,
       skippedCount: 0,
-      totalDuration: 0
+      totalDuration: 0,
     };
 
     this.testSuites.set(suite.id, suite);
@@ -151,7 +156,7 @@ export class VB6TestFramework {
     const testCase: TestCase = {
       ...test,
       id: this.generateId(),
-      status: 'pending'
+      status: 'pending',
     };
 
     suite.tests.push(testCase);
@@ -248,7 +253,7 @@ export class VB6TestFramework {
       suiteId,
       passed: false,
       duration: 0,
-      assertions: []
+      assertions: [],
     };
 
     try {
@@ -306,7 +311,7 @@ export class VB6TestFramework {
       type,
       methods: new Map(),
       properties: new Map(),
-      callHistory: []
+      callHistory: [],
     };
 
     this.mocks.set(name, mock);
@@ -317,8 +322,8 @@ export class VB6TestFramework {
    * Add a mock method
    */
   mockMethod(
-    mockName: string, 
-    methodName: string, 
+    mockName: string,
+    methodName: string,
     options: {
       returnValue?: any;
       implementation?: (...args: any[]) => any;
@@ -336,7 +341,7 @@ export class VB6TestFramework {
       returnValue: options.returnValue,
       throwError: options.throwError,
       callCount: 0,
-      calledWith: []
+      calledWith: [],
     };
 
     mock.methods.set(methodName, method);
@@ -375,7 +380,7 @@ export class VB6TestFramework {
       functions: { total: 0, covered: 0, percentage: 0 },
       branches: { total: 0, covered: 0, percentage: 0 },
       statements: { total: 0, covered: 0, percentage: 0 },
-      uncoveredLines: []
+      uncoveredLines: [],
     };
 
     for (const coverage of this.coverageData.values()) {
@@ -405,7 +410,7 @@ export class VB6TestFramework {
 
     return {
       overall,
-      byFile: new Map(this.coverageData)
+      byFile: new Map(this.coverageData),
     };
   }
 
@@ -421,19 +426,23 @@ export class VB6TestFramework {
     const totalDuration = suites.reduce((sum, suite) => sum + suite.totalDuration, 0);
 
     if (format === 'json') {
-      return JSON.stringify({
-        summary: {
-          totalSuites: suites.length,
-          totalTests,
-          totalPassed,
-          totalFailed,
-          totalSkipped,
-          totalDuration,
-          passRate: totalTests > 0 ? (totalPassed / totalTests) * 100 : 0
+      return JSON.stringify(
+        {
+          summary: {
+            totalSuites: suites.length,
+            totalTests,
+            totalPassed,
+            totalFailed,
+            totalSkipped,
+            totalDuration,
+            passRate: totalTests > 0 ? (totalPassed / totalTests) * 100 : 0,
+          },
+          suites,
+          coverage: this.getCoverageReport(),
         },
-        suites,
-        coverage: this.getCoverageReport()
-      }, null, 2);
+        null,
+        2
+      );
     }
 
     if (format === 'html') {
@@ -469,7 +478,9 @@ export class VB6TestFramework {
       lines.push('-'.repeat(80));
       lines.push(`Suite: ${suite.name}`);
       lines.push(`Status: ${suite.status}`);
-      lines.push(`Tests: ${suite.tests.length} (Passed: ${suite.passedCount}, Failed: ${suite.failedCount})`);
+      lines.push(
+        `Tests: ${suite.tests.length} (Passed: ${suite.passedCount}, Failed: ${suite.failedCount})`
+      );
       lines.push('');
 
       for (const test of suite.tests) {
@@ -506,7 +517,13 @@ export class VB6TestFramework {
         this.addAssertion('IsNull', null, value, value === null || value === undefined, message);
       },
       IsNotNull: (value: any, message?: string) => {
-        this.addAssertion('IsNotNull', 'not null', value, value !== null && value !== undefined, message);
+        this.addAssertion(
+          'IsNotNull',
+          'not null',
+          value,
+          value !== null && value !== undefined,
+          message
+        );
       },
       Contains: (substring: string, string: string, message?: string) => {
         this.addAssertion('Contains', substring, string, string.includes(substring), message);
@@ -521,15 +538,23 @@ export class VB6TestFramework {
           error = e;
         }
         const passed = threw && (!expectedError || error?.message?.includes(expectedError));
-        this.addAssertion('Throws', expectedError || 'any error', error?.message || 'no error', passed, message);
-      }
+        this.addAssertion(
+          'Throws',
+          expectedError || 'any error',
+          error?.message || 'no error',
+          passed,
+          message
+        );
+      },
     };
 
     // Set up mock support
     this.testEnvironment.Mock = {
       Create: (name: string, type: string) => this.createMock(name, type),
-      Setup: (mockName: string, methodName: string, options: any) => this.mockMethod(mockName, methodName, options),
-      Verify: (mockName: string, methodName: string, expectedCalls?: number) => this.verifyMock(mockName, methodName, expectedCalls),
+      Setup: (mockName: string, methodName: string, options: any) =>
+        this.mockMethod(mockName, methodName, options),
+      Verify: (mockName: string, methodName: string, expectedCalls?: number) =>
+        this.verifyMock(mockName, methodName, expectedCalls),
       Reset: (mockName: string) => {
         const mock = this.mocks.get(mockName);
         if (mock) {
@@ -539,7 +564,7 @@ export class VB6TestFramework {
             method.calledWith = [];
           }
         }
-      }
+      },
     };
   }
 
@@ -549,10 +574,10 @@ export class VB6TestFramework {
   }
 
   private addAssertion(
-    type: string, 
-    expected: any, 
-    actual: any, 
-    passed: boolean, 
+    type: string,
+    expected: any,
+    actual: any,
+    passed: boolean,
     message?: string
   ): void {
     if (!this.testEnvironment.assertions) {
@@ -564,11 +589,12 @@ export class VB6TestFramework {
       expected,
       actual,
       passed,
-      message
+      message,
     });
 
     if (!passed) {
-      const errorMsg = message || `Assertion failed: ${type} - Expected: ${expected}, Actual: ${actual}`;
+      const errorMsg =
+        message || `Assertion failed: ${type} - Expected: ${expected}, Actual: ${actual}`;
       logger.error(errorMsg);
     }
   }
@@ -583,7 +609,9 @@ export class VB6TestFramework {
       const fn = new Function('test', 'Assert', 'Mock', jsCode);
       return await fn(this.testEnvironment, this.testEnvironment.Assert, this.testEnvironment.Mock);
     } catch (error) {
-      throw new Error(`Code execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Code execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -599,7 +627,7 @@ export class VB6TestFramework {
       functions: { total: 0, covered: 0, percentage: 0 },
       branches: { total: 0, covered: 0, percentage: 0 },
       statements: { total: 0, covered: 0, percentage: 0 },
-      uncoveredLines: []
+      uncoveredLines: [],
     });
   }
 
@@ -643,18 +671,26 @@ export class VB6TestFramework {
     <p>Skipped: <span class="skipped">${suites.reduce((sum, s) => sum + s.skippedCount, 0)}</span></p>
   </div>
   
-  ${suites.map(suite => `
+  ${suites
+    .map(
+      suite => `
     <div class="suite">
       <div class="suite-header">${suite.name} - ${suite.status}</div>
-      ${suite.tests.map(test => `
+      ${suite.tests
+        .map(
+          test => `
         <div class="test">
           <span class="${test.status}">${test.status === 'passed' ? '✓' : test.status === 'failed' ? '✗' : '○'}</span>
           ${test.name} (${test.duration || 0}ms)
           ${test.error ? `<div class="error">${test.error}</div>` : ''}
         </div>
-      `).join('')}
+      `
+        )
+        .join('')}
     </div>
-  `).join('')}
+  `
+    )
+    .join('')}
   
   <div class="coverage">
     <h2>Code Coverage</h2>
@@ -697,7 +733,11 @@ export class VB6TestFramework {
     return `snapshot_${elementId}_${Date.now()}`;
   }
 
-  async compareSnapshots(actual: string, expected: string, threshold: number = 0.1): Promise<boolean> {
+  async compareSnapshots(
+    actual: string,
+    expected: string,
+    threshold: number = 0.1
+  ): Promise<boolean> {
     // In a real implementation, this would compare visual snapshots
     // For now, return true
     return true;
@@ -706,7 +746,10 @@ export class VB6TestFramework {
   /**
    * Performance testing support
    */
-  async measurePerformance(fn: () => any, iterations: number = 100): Promise<{
+  async measurePerformance(
+    fn: () => any,
+    iterations: number = 100
+  ): Promise<{
     average: number;
     min: number;
     max: number;
@@ -727,7 +770,7 @@ export class VB6TestFramework {
       average: times.reduce((sum, t) => sum + t, 0) / times.length,
       min: times[0],
       max: times[times.length - 1],
-      median: times[Math.floor(times.length / 2)]
+      median: times[Math.floor(times.length / 2)],
     };
   }
 }

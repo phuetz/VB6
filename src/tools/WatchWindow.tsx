@@ -7,7 +7,7 @@ export enum WatchType {
   Variable = 'Variable',
   Property = 'Property',
   Method = 'Method',
-  Custom = 'Custom'
+  Custom = 'Custom',
 }
 
 export enum WatchStatus {
@@ -15,7 +15,7 @@ export enum WatchStatus {
   Error = 'Error',
   OutOfScope = 'OutOfScope',
   NotEvaluated = 'NotEvaluated',
-  Evaluating = 'Evaluating'
+  Evaluating = 'Evaluating',
 }
 
 export interface WatchExpression {
@@ -84,14 +84,14 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
   onEvaluateExpression,
   onBreakOnChange,
   onExportWatches,
-  onImportWatches
+  onImportWatches,
 }) => {
   const [watches, setWatches] = useState<WatchExpression[]>([]);
   const [categories, setCategories] = useState<WatchCategory[]>([
     { id: 'default', name: 'General', color: '#007acc', isExpanded: true, watches: [] },
     { id: 'variables', name: 'Variables', color: '#28a745', isExpanded: true, watches: [] },
     { id: 'properties', name: 'Properties', color: '#ffc107', isExpanded: true, watches: [] },
-    { id: 'custom', name: 'Custom', color: '#6f42c1', isExpanded: true, watches: [] }
+    { id: 'custom', name: 'Custom', color: '#6f42c1', isExpanded: true, watches: [] },
   ]);
   const [selectedWatch, setSelectedWatch] = useState<WatchExpression | null>(null);
   const [newExpression, setNewExpression] = useState('');
@@ -109,14 +109,14 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
     fontSize: 11,
     highlightChanges: true,
     sortBy: 'name',
-    sortOrder: 'asc'
+    sortOrder: 'asc',
   });
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
   const [contextMenuWatch, setContextMenuWatch] = useState<WatchExpression | null>(null);
   const [showSettings, setShowSettings] = useState(false);
-  
+
   const eventEmitter = useRef(new EventEmitter());
   const updateTimer = useRef<NodeJS.Timeout>();
   const addExpressionRef = useRef<HTMLInputElement>(null);
@@ -136,7 +136,7 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
         updateCount: 5,
         valueHistory: [
           { value: 'Jane Smith', timestamp: new Date(Date.now() - 60000) },
-          { value: 'John Doe', timestamp: new Date() }
+          { value: 'John Doe', timestamp: new Date() },
         ],
         isExpanded: false,
         hasChildren: false,
@@ -145,7 +145,7 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
         enabled: true,
         breakOnChange: false,
         hitCount: 0,
-        color: '#28a745'
+        color: '#28a745',
       },
       {
         id: 'watch2',
@@ -161,7 +161,7 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
         valueHistory: [
           { value: 80, timestamp: new Date(Date.now() - 120000) },
           { value: 82, timestamp: new Date(Date.now() - 60000) },
-          { value: 84, timestamp: new Date() }
+          { value: 84, timestamp: new Date() },
         ],
         isExpanded: false,
         hasChildren: false,
@@ -171,7 +171,7 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
         breakOnChange: true,
         hitCount: 3,
         lastHitTime: new Date(Date.now() - 30000),
-        color: '#6f42c1'
+        color: '#6f42c1',
       },
       {
         id: 'watch3',
@@ -183,9 +183,7 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
         dataType: 'String',
         lastUpdated: new Date(),
         updateCount: 8,
-        valueHistory: [
-          { value: 'John', timestamp: new Date() }
-        ],
+        valueHistory: [{ value: 'John', timestamp: new Date() }],
         isExpanded: false,
         hasChildren: false,
         children: [],
@@ -193,7 +191,7 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
         enabled: true,
         breakOnChange: false,
         hitCount: 0,
-        color: '#ffc107'
+        color: '#ffc107',
       },
       {
         id: 'watch4',
@@ -213,7 +211,7 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
         enabled: true,
         breakOnChange: false,
         hitCount: 0,
-        color: '#dc3545'
+        color: '#dc3545',
       },
       {
         id: 'watch5',
@@ -225,17 +223,15 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
         dataType: 'Integer()',
         lastUpdated: new Date(),
         updateCount: 3,
-        valueHistory: [
-          { value: [1, 2, 3, 4, 5], timestamp: new Date() }
-        ],
+        valueHistory: [{ value: [1, 2, 3, 4, 5], timestamp: new Date() }],
         isExpanded: false,
         hasChildren: true,
         children: [],
         category: 'variables',
         enabled: true,
         breakOnChange: false,
-        hitCount: 0
-      }
+        hitCount: 0,
+      },
     ];
 
     setWatches(sampleWatches);
@@ -271,66 +267,73 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
   }, [watches, isDebugMode]);
 
   // Update a single watch
-  const updateWatch = useCallback(async (watch: WatchExpression): Promise<void> => {
-    try {
-      let newValue: any;
-      let newStatus = WatchStatus.Valid;
-      let errorMessage: string | undefined;
+  const updateWatch = useCallback(
+    async (watch: WatchExpression): Promise<void> => {
+      try {
+        let newValue: any;
+        let newStatus = WatchStatus.Valid;
+        let errorMessage: string | undefined;
 
-      if (onEvaluateExpression) {
-        try {
-          newValue = await onEvaluateExpression(watch.expression);
-        } catch (error) {
-          newValue = null;
-          newStatus = WatchStatus.Error;
-          errorMessage = String(error);
+        if (onEvaluateExpression) {
+          try {
+            newValue = await onEvaluateExpression(watch.expression);
+          } catch (error) {
+            newValue = null;
+            newStatus = WatchStatus.Error;
+            errorMessage = String(error);
+          }
+        } else {
+          // Simulate evaluation for demo
+          newValue = simulateEvaluateExpression(watch.expression);
+          if (newValue === undefined) {
+            newStatus = WatchStatus.Error;
+            errorMessage = 'Cannot evaluate expression';
+          }
         }
-      } else {
-        // Simulate evaluation for demo
-        newValue = simulateEvaluateExpression(watch.expression);
-        if (newValue === undefined) {
-          newStatus = WatchStatus.Error;
-          errorMessage = 'Cannot evaluate expression';
-        }
+
+        const hasChanged = JSON.stringify(newValue) !== JSON.stringify(watch.value);
+
+        setWatches(prev =>
+          prev.map(w => {
+            if (w.id !== watch.id) return w;
+
+            const updatedWatch: WatchExpression = {
+              ...w,
+              value: newValue,
+              displayValue: formatWatchValue(newValue, w.type),
+              status: newStatus,
+              errorMessage,
+              lastUpdated: new Date(),
+              updateCount: w.updateCount + 1,
+              valueHistory: hasChanged
+                ? [
+                    ...w.valueHistory.slice(-(settings.maxHistoryItems - 1)),
+                    { value: newValue, timestamp: new Date() },
+                  ]
+                : w.valueHistory,
+            };
+
+            // Trigger break on change if enabled
+            if (hasChanged && w.breakOnChange) {
+              updatedWatch.hitCount++;
+              updatedWatch.lastHitTime = new Date();
+              onBreakOnChange?.(updatedWatch);
+            }
+
+            return updatedWatch;
+          })
+        );
+      } catch (error) {
+        console.error('Failed to update watch:', error);
       }
-
-      const hasChanged = JSON.stringify(newValue) !== JSON.stringify(watch.value);
-      
-      setWatches(prev => prev.map(w => {
-        if (w.id !== watch.id) return w;
-
-        const updatedWatch: WatchExpression = {
-          ...w,
-          value: newValue,
-          displayValue: formatWatchValue(newValue, w.type),
-          status: newStatus,
-          errorMessage,
-          lastUpdated: new Date(),
-          updateCount: w.updateCount + 1,
-          valueHistory: hasChanged ? [
-            ...w.valueHistory.slice(-(settings.maxHistoryItems - 1)),
-            { value: newValue, timestamp: new Date() }
-          ] : w.valueHistory
-        };
-
-        // Trigger break on change if enabled
-        if (hasChanged && w.breakOnChange) {
-          updatedWatch.hitCount++;
-          updatedWatch.lastHitTime = new Date();
-          onBreakOnChange?.(updatedWatch);
-        }
-
-        return updatedWatch;
-      }));
-    } catch (error) {
-      console.error('Failed to update watch:', error);
-    }
-  }, [onEvaluateExpression, settings.maxHistoryItems, onBreakOnChange]);
+    },
+    [onEvaluateExpression, settings.maxHistoryItems, onBreakOnChange]
+  );
 
   // Simulate expression evaluation for demo
   const simulateEvaluateExpression = (expression: string): any => {
     const expr = expression.toLowerCase().trim();
-    
+
     if (expr === 'strusername') return 'John Doe';
     if (expr === 'intcount * 2') return Math.floor(Math.random() * 100);
     if (expr === 'objuser.firstname') return 'John';
@@ -339,16 +342,16 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
     if (expr === 'true') return true;
     if (expr === 'false') return false;
     if (expr.includes('invalidvar')) return undefined;
-    
+
     // Try to parse as number
     const num = parseFloat(expr);
     if (!isNaN(num)) return num;
-    
+
     // Default string value
     if (expr.startsWith('"') && expr.endsWith('"')) {
       return expr.slice(1, -1);
     }
-    
+
     return undefined;
   };
 
@@ -382,40 +385,43 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
   };
 
   // Add new watch
-  const addWatch = useCallback((expression: string, category: string = 'default', name?: string) => {
-    if (!expression.trim()) return;
+  const addWatch = useCallback(
+    (expression: string, category: string = 'default', name?: string) => {
+      if (!expression.trim()) return;
 
-    const newWatch: WatchExpression = {
-      id: `watch_${Date.now()}_${Math.random()}`,
-      expression: expression.trim(),
-      name,
-      type: detectWatchType(expression),
-      value: null,
-      displayValue: '<Not evaluated>',
-      status: WatchStatus.NotEvaluated,
-      lastUpdated: new Date(),
-      updateCount: 0,
-      valueHistory: [],
-      isExpanded: false,
-      hasChildren: false,
-      children: [],
-      category,
-      enabled: true,
-      breakOnChange: false,
-      hitCount: 0,
-      color: categories.find(c => c.id === category)?.color
-    };
+      const newWatch: WatchExpression = {
+        id: `watch_${Date.now()}_${Math.random()}`,
+        expression: expression.trim(),
+        name,
+        type: detectWatchType(expression),
+        value: null,
+        displayValue: '<Not evaluated>',
+        status: WatchStatus.NotEvaluated,
+        lastUpdated: new Date(),
+        updateCount: 0,
+        valueHistory: [],
+        isExpanded: false,
+        hasChildren: false,
+        children: [],
+        category,
+        enabled: true,
+        breakOnChange: false,
+        hitCount: 0,
+        color: categories.find(c => c.id === category)?.color,
+      };
 
-    setWatches(prev => [...prev, newWatch]);
-    
-    // Update immediately if in debug mode
-    if (isDebugMode) {
-      updateWatch(newWatch);
-    }
+      setWatches(prev => [...prev, newWatch]);
 
-    setNewExpression('');
-    setShowAddDialog(false);
-  }, [categories, isDebugMode, updateWatch]);
+      // Update immediately if in debug mode
+      if (isDebugMode) {
+        updateWatch(newWatch);
+      }
+
+      setNewExpression('');
+      setShowAddDialog(false);
+    },
+    [categories, isDebugMode, updateWatch]
+  );
 
   // Detect watch type from expression
   const detectWatchType = (expression: string): WatchType => {
@@ -425,46 +431,56 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
     if (expression.includes('.')) {
       return WatchType.Property;
     }
-    if (expression.includes('+') || expression.includes('-') || expression.includes('*') || expression.includes('/')) {
+    if (
+      expression.includes('+') ||
+      expression.includes('-') ||
+      expression.includes('*') ||
+      expression.includes('/')
+    ) {
       return WatchType.Expression;
     }
     return WatchType.Variable;
   };
 
   // Remove watch
-  const removeWatch = useCallback((watchId: string) => {
-    setWatches(prev => prev.filter(w => w.id !== watchId));
-    if (selectedWatch?.id === watchId) {
-      setSelectedWatch(null);
-    }
-  }, [selectedWatch]);
+  const removeWatch = useCallback(
+    (watchId: string) => {
+      setWatches(prev => prev.filter(w => w.id !== watchId));
+      if (selectedWatch?.id === watchId) {
+        setSelectedWatch(null);
+      }
+    },
+    [selectedWatch]
+  );
 
   // Toggle watch enabled state
   const toggleWatchEnabled = useCallback((watchId: string) => {
-    setWatches(prev => prev.map(w => 
-      w.id === watchId ? { ...w, enabled: !w.enabled } : w
-    ));
+    setWatches(prev => prev.map(w => (w.id === watchId ? { ...w, enabled: !w.enabled } : w)));
   }, []);
 
   // Toggle break on change
   const toggleBreakOnChange = useCallback((watchId: string) => {
-    setWatches(prev => prev.map(w => 
-      w.id === watchId ? { ...w, breakOnChange: !w.breakOnChange } : w
-    ));
+    setWatches(prev =>
+      prev.map(w => (w.id === watchId ? { ...w, breakOnChange: !w.breakOnChange } : w))
+    );
   }, []);
 
   // Edit watch expression
   const editWatch = useCallback((watchId: string, newExpression: string) => {
-    setWatches(prev => prev.map(w => 
-      w.id === watchId ? { 
-        ...w, 
-        expression: newExpression,
-        type: detectWatchType(newExpression),
-        status: WatchStatus.NotEvaluated,
-        displayValue: '<Not evaluated>',
-        updateCount: 0
-      } : w
-    ));
+    setWatches(prev =>
+      prev.map(w =>
+        w.id === watchId
+          ? {
+              ...w,
+              expression: newExpression,
+              type: detectWatchType(newExpression),
+              status: WatchStatus.NotEvaluated,
+              displayValue: '<Not evaluated>',
+              updateCount: 0,
+            }
+          : w
+      )
+    );
   }, []);
 
   // Filter and sort watches
@@ -474,17 +490,18 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
     // Apply search filter
     if (searchText) {
       const searchLower = searchText.toLowerCase();
-      filtered = filtered.filter(w => 
-        w.expression.toLowerCase().includes(searchLower) ||
-        (w.name && w.name.toLowerCase().includes(searchLower)) ||
-        w.displayValue.toLowerCase().includes(searchLower)
+      filtered = filtered.filter(
+        w =>
+          w.expression.toLowerCase().includes(searchLower) ||
+          (w.name && w.name.toLowerCase().includes(searchLower)) ||
+          w.displayValue.toLowerCase().includes(searchLower)
       );
     }
 
     // Sort watches
     filtered.sort((a, b) => {
       let comparison = 0;
-      
+
       switch (settings.sortBy) {
         case 'name':
           comparison = (a.name || a.expression).localeCompare(b.name || b.expression);
@@ -512,14 +529,17 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
       return { default: processedWatches };
     }
 
-    return processedWatches.reduce((groups, watch) => {
-      const category = watch.category || 'default';
-      if (!groups[category]) {
-        groups[category] = [];
-      }
-      groups[category].push(watch);
-      return groups;
-    }, {} as Record<string, WatchExpression[]>);
+    return processedWatches.reduce(
+      (groups, watch) => {
+        const category = watch.category || 'default';
+        if (!groups[category]) {
+          groups[category] = [];
+        }
+        groups[category].push(watch);
+        return groups;
+      },
+      {} as Record<string, WatchExpression[]>
+    );
   }, [processedWatches, settings.groupByCategory]);
 
   // Get watch status icon
@@ -549,32 +569,34 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
         if (newExpr && newExpr !== contextMenuWatch.expression) {
           editWatch(contextMenuWatch.id, newExpr);
         }
-      }
+      },
     },
     {
       label: 'Toggle Enabled',
-      action: () => contextMenuWatch && toggleWatchEnabled(contextMenuWatch.id)
+      action: () => contextMenuWatch && toggleWatchEnabled(contextMenuWatch.id),
     },
     {
       label: 'Break on Change',
-      action: () => contextMenuWatch && toggleBreakOnChange(contextMenuWatch.id)
+      action: () => contextMenuWatch && toggleBreakOnChange(contextMenuWatch.id),
     },
     {
       label: 'Copy Value',
-      action: () => contextMenuWatch && navigator.clipboard.writeText(contextMenuWatch.displayValue)
+      action: () =>
+        contextMenuWatch && navigator.clipboard.writeText(contextMenuWatch.displayValue),
     },
     {
       label: 'Remove Watch',
-      action: () => contextMenuWatch && removeWatch(contextMenuWatch.id)
-    }
+      action: () => contextMenuWatch && removeWatch(contextMenuWatch.id),
+    },
   ];
 
   // Render watch row
   const renderWatch = (watch: WatchExpression): React.ReactNode => {
     const isSelected = selectedWatch?.id === watch.id;
-    const hasChanged = watch.valueHistory.length > 1 && 
-      watch.valueHistory[watch.valueHistory.length - 1]?.value !== 
-      watch.valueHistory[watch.valueHistory.length - 2]?.value;
+    const hasChanged =
+      watch.valueHistory.length > 1 &&
+      watch.valueHistory[watch.valueHistory.length - 1]?.value !==
+        watch.valueHistory[watch.valueHistory.length - 2]?.value;
 
     return (
       <div
@@ -586,7 +608,7 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
         }`}
         style={{ fontSize: `${settings.fontSize}px` }}
         onClick={() => setSelectedWatch(watch)}
-        onContextMenu={(e) => {
+        onContextMenu={e => {
           e.preventDefault();
           setContextMenuWatch(watch);
           setContextMenuPosition({ x: e.clientX, y: e.clientY });
@@ -599,7 +621,7 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
           checked={watch.enabled}
           onChange={() => toggleWatchEnabled(watch.id)}
           className="mr-2"
-          onClick={(e) => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
         />
 
         {/* Status icon */}
@@ -607,14 +629,8 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
 
         {/* Expression/Name */}
         <div className="w-40 font-mono text-sm truncate">
-          <div className="font-medium text-gray-800">
-            {watch.name || watch.expression}
-          </div>
-          {watch.name && (
-            <div className="text-xs text-gray-500 truncate">
-              {watch.expression}
-            </div>
-          )}
+          <div className="font-medium text-gray-800">{watch.name || watch.expression}</div>
+          {watch.name && <div className="text-xs text-gray-500 truncate">{watch.expression}</div>}
         </div>
 
         {/* Value */}
@@ -630,27 +646,23 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
 
         {/* Type */}
         {settings.showDataTypes && (
-          <div className="w-16 text-xs text-gray-500 truncate">
-            {watch.dataType || watch.type}
-          </div>
+          <div className="w-16 text-xs text-gray-500 truncate">{watch.dataType || watch.type}</div>
         )}
 
         {/* Hit count */}
         {settings.showHitCounts && (
-          <div className="w-12 text-xs text-gray-500 text-center">
-            {watch.hitCount}
-          </div>
+          <div className="w-12 text-xs text-gray-500 text-center">{watch.hitCount}</div>
         )}
 
         {/* Break on change indicator */}
         {watch.breakOnChange && (
-          <span className="w-4 text-center text-red-600" title="Break on change">🔴</span>
+          <span className="w-4 text-center text-red-600" title="Break on change">
+            🔴
+          </span>
         )}
 
         {/* Update count */}
-        <div className="w-8 text-xs text-gray-400 text-center">
-          {watch.updateCount}
-        </div>
+        <div className="w-8 text-xs text-gray-400 text-center">{watch.updateCount}</div>
       </div>
     );
   };
@@ -666,9 +678,7 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
               Debug Mode
             </span>
           )}
-          {isEvaluating && (
-            <div className="text-xs text-blue-600 animate-pulse">Evaluating...</div>
-          )}
+          {isEvaluating && <div className="text-xs text-blue-600 animate-pulse">Evaluating...</div>}
         </div>
 
         <div className="flex items-center gap-1">
@@ -676,10 +686,10 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
             type="text"
             placeholder="Search..."
             value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+            onChange={e => setSearchText(e.target.value)}
             className="px-2 py-1 text-xs border border-gray-300 rounded w-20"
           />
-          
+
           <button
             onClick={() => setShowAddDialog(true)}
             className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
@@ -687,7 +697,7 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
           >
             ➕
           </button>
-          
+
           <button
             onClick={updateAllWatches}
             disabled={!isDebugMode || isEvaluating}
@@ -696,7 +706,7 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
           >
             🔄
           </button>
-          
+
           <button
             onClick={() => setShowSettings(!showSettings)}
             className="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
@@ -715,34 +725,36 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
               <input
                 type="checkbox"
                 checked={settings.autoUpdate}
-                onChange={(e) => setSettings(prev => ({ ...prev, autoUpdate: e.target.checked }))}
+                onChange={e => setSettings(prev => ({ ...prev, autoUpdate: e.target.checked }))}
               />
               Auto Update
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={settings.showDataTypes}
-                onChange={(e) => setSettings(prev => ({ ...prev, showDataTypes: e.target.checked }))}
+                onChange={e => setSettings(prev => ({ ...prev, showDataTypes: e.target.checked }))}
               />
               Show Types
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={settings.showHitCounts}
-                onChange={(e) => setSettings(prev => ({ ...prev, showHitCounts: e.target.checked }))}
+                onChange={e => setSettings(prev => ({ ...prev, showHitCounts: e.target.checked }))}
               />
               Hit Counts
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={settings.groupByCategory}
-                onChange={(e) => setSettings(prev => ({ ...prev, groupByCategory: e.target.checked }))}
+                onChange={e =>
+                  setSettings(prev => ({ ...prev, groupByCategory: e.target.checked }))
+                }
               />
               Group by Category
             </label>
@@ -751,7 +763,7 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
       )}
 
       {/* Column Headers */}
-      <div 
+      <div
         className="flex items-center py-2 px-2 bg-gray-200 border-b border-gray-300 text-xs font-medium text-gray-700"
         style={{ fontSize: `${settings.fontSize}px` }}
       >
@@ -767,34 +779,36 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
 
       {/* Watches List */}
       <div className="flex-1 overflow-y-auto">
-        {settings.groupByCategory ? (
-          Object.entries(groupedWatches).map(([categoryId, categoryWatches]) => {
-            const category = categories.find(c => c.id === categoryId);
-            return (
-              <div key={categoryId}>
-                <div className="flex items-center gap-2 py-1 px-2 bg-gray-100 border-b border-gray-200 text-sm font-medium">
-                  <button
-                    onClick={() => setCategories(prev => prev.map(c => 
-                      c.id === categoryId ? { ...c, isExpanded: !c.isExpanded } : c
-                    ))}
-                    className="text-gray-600"
-                  >
-                    {category?.isExpanded ? '▼' : '▶'}
-                  </button>
-                  <div 
-                    className="w-3 h-3 rounded"
-                    style={{ backgroundColor: category?.color || '#ccc' }}
-                  />
-                  <span>{category?.name || categoryId}</span>
-                  <span className="text-xs text-gray-500">({categoryWatches.length})</span>
+        {settings.groupByCategory
+          ? Object.entries(groupedWatches).map(([categoryId, categoryWatches]) => {
+              const category = categories.find(c => c.id === categoryId);
+              return (
+                <div key={categoryId}>
+                  <div className="flex items-center gap-2 py-1 px-2 bg-gray-100 border-b border-gray-200 text-sm font-medium">
+                    <button
+                      onClick={() =>
+                        setCategories(prev =>
+                          prev.map(c =>
+                            c.id === categoryId ? { ...c, isExpanded: !c.isExpanded } : c
+                          )
+                        )
+                      }
+                      className="text-gray-600"
+                    >
+                      {category?.isExpanded ? '▼' : '▶'}
+                    </button>
+                    <div
+                      className="w-3 h-3 rounded"
+                      style={{ backgroundColor: category?.color || '#ccc' }}
+                    />
+                    <span>{category?.name || categoryId}</span>
+                    <span className="text-xs text-gray-500">({categoryWatches.length})</span>
+                  </div>
+                  {category?.isExpanded && categoryWatches.map(watch => renderWatch(watch))}
                 </div>
-                {category?.isExpanded && categoryWatches.map(watch => renderWatch(watch))}
-              </div>
-            );
-          })
-        ) : (
-          processedWatches.map(watch => renderWatch(watch))
-        )}
+              );
+            })
+          : processedWatches.map(watch => renderWatch(watch))}
 
         {processedWatches.length === 0 && (
           <div className="flex items-center justify-center h-full text-gray-500">
@@ -814,25 +828,27 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
           type="text"
           placeholder="Enter expression to watch..."
           value={newExpression}
-          onChange={(e) => setNewExpression(e.target.value)}
-          onKeyPress={(e) => {
+          onChange={e => setNewExpression(e.target.value)}
+          onKeyPress={e => {
             if (e.key === 'Enter') {
               addWatch(newExpression, selectedCategory);
             }
           }}
           className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
         />
-        
+
         <select
           value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
+          onChange={e => setSelectedCategory(e.target.value)}
           className="px-2 py-1 text-sm border border-gray-300 rounded"
         >
           {categories.map(cat => (
-            <option key={cat.id} value={cat.id}>{cat.name}</option>
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
           ))}
         </select>
-        
+
         <button
           onClick={() => addWatch(newExpression, selectedCategory)}
           disabled={!newExpression.trim()}
@@ -848,7 +864,7 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
           className="fixed bg-white border border-gray-300 shadow-lg z-50 py-1"
           style={{
             left: contextMenuPosition.x,
-            top: contextMenuPosition.y
+            top: contextMenuPosition.y,
           }}
           onMouseLeave={() => setShowContextMenu(false)}
         >
@@ -880,9 +896,7 @@ export const WatchWindow: React.FC<WatchWindowProps> = ({
           {settings.autoUpdate && isDebugMode && (
             <span className="text-green-600">Auto-update: {settings.updateInterval}ms</span>
           )}
-          {!isDebugMode && (
-            <span className="text-orange-600">Debug mode required</span>
-          )}
+          {!isDebugMode && <span className="text-orange-600">Debug mode required</span>}
         </div>
       </div>
     </div>

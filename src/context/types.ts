@@ -104,9 +104,81 @@ export interface VB6Project {
   components?: VB6Component[];
 }
 
+// All known VB6 control type names
+export type ControlTypeName =
+  | 'CommandButton'
+  | 'Label'
+  | 'TextBox'
+  | 'Frame'
+  | 'CheckBox'
+  | 'OptionButton'
+  | 'ListBox'
+  | 'ComboBox'
+  | 'Timer'
+  | 'PictureBox'
+  | 'Image'
+  | 'Shape'
+  | 'Line'
+  | 'HScrollBar'
+  | 'VScrollBar'
+  | 'DriveListBox'
+  | 'DirListBox'
+  | 'FileListBox'
+  | 'Data'
+  | 'ADODataControl'
+  | 'OLE'
+  | 'Winsock'
+  | 'Inet'
+  | 'ProgressBar'
+  | 'Slider'
+  | 'UpDown'
+  | 'TabStrip'
+  | 'Toolbar'
+  | 'ListView'
+  | 'StatusBar'
+  | 'ImageList'
+  | 'TreeView'
+  | 'DateTimePicker'
+  | 'MonthView'
+  | 'RichTextBox'
+  | 'ImageCombo'
+  | 'Animation'
+  | 'FlatScrollBar'
+  | 'MaskedEdit'
+  | 'WebBrowser'
+  | 'DataGrid'
+  | 'DataList'
+  | 'DataCombo'
+  | 'DBList'
+  | 'DBCombo'
+  | 'DataRepeater'
+  | 'MSChart'
+  | 'PictureClip'
+  | 'DataEnvironment'
+  | 'DataReport'
+  | 'CrystalReport'
+  | 'MediaPlayer'
+  | 'MMControl'
+  | 'GraphicsCanvas'
+  | 'ActiveXControl'
+  | 'MSFlexGrid'
+  | 'MAPISession'
+  | 'MAPIMessages'
+  | 'SysInfo'
+  | 'Menu';
+
+export interface ControlFont {
+  name: string;
+  size: number;
+  bold: boolean;
+  italic: boolean;
+  underline: boolean;
+}
+
+// Base control interface with all explicitly-typed properties (no index signature)
 export interface Control {
   id: number;
-  type: string;
+  type: ControlTypeName | (string & Record<never, never>);
   name: string;
   x: number;
   y: number;
@@ -114,33 +186,188 @@ export interface Control {
   height: number;
   visible: boolean;
   enabled: boolean;
+  tabIndex: number;
+  tabStop: boolean;
+  tag: string;
+  toolTipText: string;
+
+  // Common text/display
   caption?: string;
   text?: string;
   value?: VB6Value;
   backColor?: string;
   foreColor?: string;
-  font?: {
-    name: string;
-    size: number;
-    bold: boolean;
-    italic: boolean;
-    underline: boolean;
-  };
-  tabIndex: number;
-  tabStop: boolean;
-  tag: string;
-  toolTipText: string;
-  // Control Array properties
-  index?: number; // Index in control array (undefined for non-array controls)
-  arrayName?: string; // Base name for control array (e.g., "Command1" for Command1(0), Command1(1))
-  isArray?: boolean; // Whether this control is part of an array
-  // Additional dynamic properties
+  font?: ControlFont;
+
+  // Control Array
+  index?: number;
+  arrayName?: string;
+  isArray?: boolean;
+
+  // Layout
   left?: number;
   top?: number;
   zIndex?: number;
   formId?: string;
+
+  // Common optional properties (used across multiple control types)
+  locked?: boolean;
+  alignment?: number | string;
+  borderStyle?: number | string;
+  autoSize?: boolean;
+  backStyle?: number;
+  wordWrap?: boolean;
+  multiLine?: boolean;
+  scrollBars?: number;
+  maxLength?: number;
+  passwordChar?: string;
+  style?: number | string;
+  sorted?: boolean;
+  multiSelect?: number;
+  interval?: number;
+  picture?: string | null;
+  stretch?: boolean;
+  appearance?: number;
+  dragMode?: number;
+
+  // Numeric range controls
+  min?: number;
+  max?: number;
+  smallChange?: number;
+  largeChange?: number;
+  increment?: number;
+
+  // Shape/Line
+  shape?: number;
+  fillColor?: string;
+  fillStyle?: number;
+  borderColor?: string;
+  borderWidth?: number;
+  drawMode?: number;
+  x1?: number;
+  y1?: number;
+  x2?: number;
+  y2?: number;
+
+  // File system controls
+  drive?: string;
+  path?: string;
+  pattern?: string;
+  fileName?: string;
+  archive?: boolean;
+  hidden?: boolean;
+  readOnly?: boolean;
+  system?: boolean;
+  normal?: boolean;
+
+  // Data controls
+  dataSource?: string;
+  dataField?: string;
+  dataMember?: string;
+  connectionString?: string;
+  recordSource?: string;
+  connect?: string;
+  databaseName?: string;
+
+  // Collection-based properties
+  items?: unknown[];
+  columns?: unknown[];
+  data?: unknown;
+  rows?: unknown[];
+  nodes?: unknown[];
+  tabs?: string[];
+  buttons?: string[];
+  panels?: unknown[];
+  images?: unknown[];
+
+  // Miscellaneous
+  orientation?: string;
+  view?: string;
+  url?: string;
+  file?: string;
+  mask?: string;
+  protocol?: number;
+  default?: boolean;
+  cancel?: boolean;
+
+  // Dynamic properties bag (for VB6 properties not explicitly listed above)
   properties?: Record<string, ControlPropertyValue>;
-  [key: string]: ControlPropertyValue | Record<string, ControlPropertyValue> | undefined;
+}
+
+// Helper to set a property on a control dynamically (replaces index signature usage)
+export function setControlProperty(control: Control, property: string, value: unknown): Control {
+  return { ...control, [property]: value };
+}
+
+// Helper to get a property from a control dynamically
+export function getControlProperty(control: Control, property: string): unknown {
+  return (control as Record<string, unknown>)[property];
+}
+
+// Specific control type interfaces for type narrowing
+export interface TextBoxControl extends Control {
+  type: 'TextBox';
+}
+
+export interface LabelControl extends Control {
+  type: 'Label';
+}
+
+export interface CommandButtonControl extends Control {
+  type: 'CommandButton';
+}
+
+export interface CheckBoxControl extends Control {
+  type: 'CheckBox';
+}
+
+export interface OptionButtonControl extends Control {
+  type: 'OptionButton';
+}
+
+export interface ListBoxControl extends Control {
+  type: 'ListBox';
+}
+
+export interface ComboBoxControl extends Control {
+  type: 'ComboBox';
+}
+
+export interface FrameControl extends Control {
+  type: 'Frame';
+}
+
+export interface PictureBoxControl extends Control {
+  type: 'PictureBox';
+}
+
+export interface TimerControl extends Control {
+  type: 'Timer';
+}
+
+export interface ImageControl extends Control {
+  type: 'Image';
+}
+
+export interface ShapeControl extends Control {
+  type: 'Shape';
+}
+
+export interface LineControl extends Control {
+  type: 'Line';
+}
+
+// Type guard helpers
+export function isTextBox(c: Control): c is TextBoxControl {
+  return c.type === 'TextBox';
+}
+
+export function isLabel(c: Control): c is LabelControl {
+  return c.type === 'Label';
+}
+
+export function isCommandButton(c: Control): c is CommandButtonControl {
+  return c.type === 'CommandButton';
 }
 
 export interface Form {
@@ -175,28 +402,6 @@ export interface VB6State {
   showAlignmentGuides: boolean;
   alignmentGuides: { x: number[]; y: number[] };
   designerZoom: number;
-
-  // Windows visibility
-  showProjectExplorer: boolean;
-  showPropertiesWindow: boolean;
-  showControlTree: boolean;
-  showToolbox: boolean;
-  showImmediateWindow: boolean;
-  showFormLayout: boolean;
-  showObjectBrowser: boolean;
-  showWatchWindow: boolean;
-  showLocalsWindow: boolean;
-  showCallStack: boolean;
-  showErrorList: boolean;
-
-  // Dialogs
-  showMenuEditor: boolean;
-  showNewProjectDialog: boolean;
-  showReferences: boolean;
-  showComponents: boolean;
-  showTabOrder: boolean;
-  showUserControlDesigner: boolean;
-  showOptionsDialog: boolean;
 
   // Code Editor
   selectedEvent: string;
@@ -259,7 +464,10 @@ export interface VB6State {
 
 export type VB6Action =
   | { type: 'CREATE_CONTROL'; payload: { type: string; x: number; y: number } }
-  | { type: 'UPDATE_CONTROL'; payload: { controlId: number; property: string; value: ControlPropertyValue } }
+  | {
+      type: 'UPDATE_CONTROL';
+      payload: { controlId: number; property: string; value: ControlPropertyValue };
+    }
   | { type: 'DELETE_CONTROLS'; payload: { controlIds: number[] } }
   | { type: 'SELECT_CONTROLS'; payload: { controlIds: number[] } }
   | { type: 'COPY_CONTROLS' }
@@ -267,7 +475,10 @@ export type VB6Action =
   | { type: 'SET_GRID_SIZE'; payload: { size: number } }
   | { type: 'UNDO' }
   | { type: 'REDO' }
-  | { type: 'EXECUTE_EVENT'; payload: { control: Control; eventName: string; eventData?: Record<string, VB6Value> } }
+  | {
+      type: 'EXECUTE_EVENT';
+      payload: { control: Control; eventName: string; eventData?: Record<string, VB6Value> };
+    }
   | { type: 'SAVE_PROJECT' }
   | { type: 'LOAD_PROJECT'; payload: { file: File } }
   | { type: 'SET_EXECUTION_MODE'; payload: { mode: 'design' | 'run' | 'break' } }
@@ -278,8 +489,14 @@ export type VB6Action =
       type: 'SET_DRAG_STATE';
       payload: { isDragging: boolean; controlType?: string; position?: { x: number; y: number } };
     }
-  | { type: 'SET_SELECTION_STATE'; payload: { isSelecting: boolean; box?: SelectionBox; start?: MoveStart } }
-  | { type: 'SET_RESIZE_STATE'; payload: { isResizing: boolean; handle?: string; start?: ResizeStart } }
+  | {
+      type: 'SET_SELECTION_STATE';
+      payload: { isSelecting: boolean; box?: SelectionBox; start?: MoveStart };
+    }
+  | {
+      type: 'SET_RESIZE_STATE';
+      payload: { isResizing: boolean; handle?: string; start?: ResizeStart };
+    }
   | { type: 'SET_MOVE_STATE'; payload: { isMoving: boolean; start?: MoveStart } }
   | { type: 'UPDATE_FORM_PROPERTY'; payload: { property: string; value: ControlPropertyValue } }
   | { type: 'ADD_FORM'; payload: { name: string } }

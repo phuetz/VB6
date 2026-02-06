@@ -1,4 +1,10 @@
-import { VB6Enum, VB6UDT, VB6Const, VB6DeclareFunction, VB6ExtendedModuleAST } from '../utils/vb6ParserExtended';
+import {
+  VB6Enum,
+  VB6UDT,
+  VB6Const,
+  VB6DeclareFunction,
+  VB6ExtendedModuleAST,
+} from '../utils/vb6ParserExtended';
 import { vb6TypeSystem } from './VB6TypeSystem';
 
 /**
@@ -6,22 +12,21 @@ import { vb6TypeSystem } from './VB6TypeSystem';
  * Handles UDTs, Enums, Constants, Declares, etc.
  */
 export class VB6EnumTranspiler {
-  
   /**
    * Transpile VB6 Enum to JavaScript
    */
   transpileEnum(enumDef: VB6Enum): string {
     let js = '';
-    
+
     // Create enum object
     // PARSER EDGE CASE FIX: Sanitize enum name to prevent code injection
     const safeName = this.sanitizeIdentifier(enumDef.name);
     js += `// ${enumDef.visibility} Enum ${safeName}\n`;
     js += `const ${safeName} = Object.freeze({\n`;
-    
+
     let currentValue = 0;
     const enumEntries: string[] = [];
-    
+
     for (const value of enumDef.values) {
       if (value.value !== undefined) {
         if (typeof value.value === 'number') {
@@ -32,26 +37,30 @@ export class VB6EnumTranspiler {
           currentValue = resolvedValue;
         }
       }
-      
+
       // PARSER EDGE CASE FIX: Sanitize enum value names
       const safeValueName = this.sanitizeIdentifier(value.name);
       enumEntries.push(`  ${safeValueName}: ${currentValue}`);
-      
+
       // Also create reverse mapping for debugging
-      if (typeof currentValue === 'number' && currentValue >= -2147483648 && currentValue <= 2147483647) {
+      if (
+        typeof currentValue === 'number' &&
+        currentValue >= -2147483648 &&
+        currentValue <= 2147483647
+      ) {
         enumEntries.push(`  ${currentValue}: '${safeValueName}'`);
       }
-      
+
       currentValue++;
     }
-    
+
     js += enumEntries.join(',\n');
     js += '\n});\n\n';
-    
+
     // Register in type system
     // PARSER EDGE CASE FIX: Use safe JSON stringify
     js += `vb6TypeSystem.registerEnum(${this.safeJsonStringify(enumDef)});\n\n`;
-    
+
     return js;
   }
 
@@ -60,13 +69,13 @@ export class VB6EnumTranspiler {
    */
   transpileUDT(udt: VB6UDT): string {
     let js = '';
-    
+
     // Create UDT class
     // PARSER EDGE CASE FIX: Sanitize UDT name
     const safeName = this.sanitizeIdentifier(udt.name);
     js += `// ${udt.visibility} Type ${safeName}\n`;
     js += `class ${safeName} {\n`;
-    
+
     // Constructor
     js += '  constructor() {\n';
     for (const field of udt.fields) {
@@ -75,7 +84,7 @@ export class VB6EnumTranspiler {
       js += `    this.${this.sanitizeIdentifier(field.name)} = ${defaultValue};\n`;
     }
     js += '  }\n\n';
-    
+
     // Clone method for copying UDT instances
     js += '  clone() {\n';
     js += `    const copy = new ${safeName}();\n`;
@@ -89,18 +98,18 @@ export class VB6EnumTranspiler {
     }
     js += '    return copy;\n';
     js += '  }\n\n';
-    
+
     // toString method for debugging
     js += '  toString() {\n';
     js += `    return \`${safeName} { \${Object.entries(this).map(([k,v]) => \`\${k}: \${v}\`).join(', ')} }\`;\n`;
     js += '  }\n';
-    
+
     js += '}\n\n';
-    
+
     // Register in type system
     // PARSER EDGE CASE FIX: Use safe JSON stringify
     js += `vb6TypeSystem.registerUDT(${this.safeJsonStringify(udt)});\n\n`;
-    
+
     return js;
   }
 
@@ -109,7 +118,7 @@ export class VB6EnumTranspiler {
    */
   transpileConstant(constant: VB6Const): string {
     let js = '';
-    
+
     const jsValue = this.transpileConstantValue(constant.value);
     js += `// ${constant.visibility} Const ${constant.name}`;
     if (constant.type) {
@@ -118,11 +127,11 @@ export class VB6EnumTranspiler {
     js += '\n';
     // PARSER EDGE CASE FIX: Sanitize constant name
     js += `const ${this.sanitizeIdentifier(constant.name)} = ${jsValue};\n\n`;
-    
+
     // Register in type system
     // PARSER EDGE CASE FIX: Use safe JSON stringify
     js += `vb6TypeSystem.registerConstant(${this.safeJsonStringify(constant)});\n\n`;
-    
+
     return js;
   }
 
@@ -131,7 +140,7 @@ export class VB6EnumTranspiler {
    */
   transpileDeclare(declare: VB6DeclareFunction): string {
     let js = '';
-    
+
     js += `// ${declare.visibility} Declare ${declare.isFunction ? 'Function' : 'Sub'} ${declare.name}\n`;
     // PARSER EDGE CASE FIX: Escape library name
     js += `// Lib "${this.escapeString(declare.libraryName)}"`;
@@ -139,27 +148,27 @@ export class VB6EnumTranspiler {
       js += ` Alias "${this.escapeString(declare.aliasName)}"`;
     }
     js += '\n';
-    
+
     // PARSER EDGE CASE FIX: Sanitize parameter and function names
     const params = declare.parameters.map(p => this.sanitizeIdentifier(p.name)).join(', ');
     const safeName = this.sanitizeIdentifier(declare.name);
-    
+
     js += `${declare.isFunction ? 'function' : 'function'} ${safeName}(${params}) {\n`;
     js += '  // Windows API call simulation\n';
     js += `  console.warn('Windows API call: ${this.escapeString(declare.name)} from ${this.escapeString(declare.libraryName)}');\n`;
-    
+
     if (declare.isFunction) {
       // Return appropriate default value based on return type
       const defaultReturn = this.getTypeDefaultValue(declare.returnType || 'Long');
       js += `  return ${defaultReturn}; // Simulated return value\n`;
     }
-    
+
     js += '}\n\n';
-    
+
     // Register in type system
     // PARSER EDGE CASE FIX: Use safe JSON stringify
     js += `vb6TypeSystem.registerDeclare(${this.safeJsonStringify(declare)});\n\n`;
-    
+
     return js;
   }
 
@@ -168,14 +177,14 @@ export class VB6EnumTranspiler {
    */
   transpileWithEventsVariable(varName: string, className: string): string {
     let js = '';
-    
+
     // PARSER EDGE CASE FIX: Sanitize variable and class names
     const safeVarName = this.sanitizeIdentifier(varName);
     const safeClassName = this.sanitizeIdentifier(className);
     js += `// WithEvents ${safeVarName} As ${safeClassName}\n`;
     js += `let ${safeVarName} = null;\n`;
     js += `let ${safeVarName}_Events = new EventTarget();\n\n`;
-    
+
     // Helper function to connect events
     js += `function Connect${safeVarName}() {\n`;
     js += `  if (${varName} && ${varName}.addEventListener) {\n`;
@@ -190,7 +199,7 @@ export class VB6EnumTranspiler {
     js += `      });\n`;
     js += `  }\n`;
     js += `}\n\n`;
-    
+
     return js;
   }
 
@@ -199,7 +208,7 @@ export class VB6EnumTranspiler {
    */
   transpileRaiseEvent(eventName: string, parameters: string[]): string {
     let js = '';
-    
+
     const paramList = parameters.join(', ');
     js += `// RaiseEvent ${eventName}(${paramList})\n`;
     js += `if (typeof ${eventName}_Event === 'function') {\n`;
@@ -210,19 +219,24 @@ export class VB6EnumTranspiler {
     js += `document.dispatchEvent(new CustomEvent('${this.escapeString(eventName)}', {\n`;
     js += `  detail: { ${parameters.map((p, i) => `param${i}: ${p}`).join(', ')} }\n`;
     js += `}));\n\n`;
-    
+
     return js;
   }
 
   /**
    * Transpile Property Get/Let/Set procedures
    */
-  transpileProperty(propertyName: string, propertyType: 'get' | 'let' | 'set', 
-                   parameters: string[], returnType?: string, body?: string): string {
+  transpileProperty(
+    propertyName: string,
+    propertyType: 'get' | 'let' | 'set',
+    parameters: string[],
+    returnType?: string,
+    body?: string
+  ): string {
     let js = '';
-    
+
     const backingField = `_${propertyName}`;
-    
+
     if (propertyType === 'get') {
       js += `// Property Get ${propertyName}\n`;
       js += `get ${propertyName}() {\n`;
@@ -251,7 +265,7 @@ export class VB6EnumTranspiler {
       }
       js += `}\n\n`;
     }
-    
+
     return js;
   }
 
@@ -260,45 +274,48 @@ export class VB6EnumTranspiler {
    */
   transpileExtendedModule(ast: VB6ExtendedModuleAST): string {
     let js = '';
-    
+
     // Header comment
     // PARSER EDGE CASE FIX: Sanitize module name in comment
     js += `// Transpiled from VB6 module: ${this.escapeString(ast.name)}\n`;
     js += `// Generated on ${new Date().toISOString()}\n\n`;
-    
+
     // Import type system
     js += `import { vb6TypeSystem } from './VB6TypeSystem';\n\n`;
-    
+
     // Transpile constants first (they might be used by other constructs)
     js += '// ===== CONSTANTS =====\n';
     for (const constant of ast.constants) {
       js += this.transpileConstant(constant);
     }
-    
+
     // Transpile enums
     js += '// ===== ENUMS =====\n';
     for (const enumDef of ast.enums) {
       js += this.transpileEnum(enumDef);
     }
-    
+
     // Transpile UDTs
     js += '// ===== USER DEFINED TYPES =====\n';
     for (const udt of ast.udts) {
       js += this.transpileUDT(udt);
     }
-    
+
     // Transpile declare statements
     js += '// ===== DECLARE STATEMENTS =====\n';
     for (const declare of ast.declares) {
       js += this.transpileDeclare(declare);
     }
-    
+
     // Transpile WithEvents variables
     js += '// ===== WITH EVENTS VARIABLES =====\n';
     for (const withEventsVar of ast.withEventsVariables) {
-      js += this.transpileWithEventsVariable(withEventsVar.name, withEventsVar.objectType || 'Object');
+      js += this.transpileWithEventsVariable(
+        withEventsVar.name,
+        withEventsVar.objectType || 'Object'
+      );
     }
-    
+
     return js;
   }
 
@@ -308,17 +325,22 @@ export class VB6EnumTranspiler {
   private resolveEnumExpression(expression: string): number {
     // Simple expression evaluator for enum values
     // PARSER EDGE CASE FIX: Add bounds checking and validation
-    
+
     if (typeof expression !== 'string' || expression.length > 100) {
       return 0;
     }
-    
+
     // Try direct number parsing with bounds check
     const numValue = parseFloat(expression);
-    if (!isNaN(numValue) && isFinite(numValue) && numValue >= -2147483648 && numValue <= 2147483647) {
+    if (
+      !isNaN(numValue) &&
+      isFinite(numValue) &&
+      numValue >= -2147483648 &&
+      numValue <= 2147483647
+    ) {
       return Math.floor(numValue);
     }
-    
+
     // Handle hex numbers
     // PARSER EDGE CASE FIX: Limit hex number length
     if (expression.match(/^&H[0-9A-F]{1,8}$/i)) {
@@ -327,7 +349,7 @@ export class VB6EnumTranspiler {
         return hexValue;
       }
     }
-    
+
     // Handle octal numbers
     // PARSER EDGE CASE FIX: Limit octal number length
     if (expression.match(/^&O[0-7]{1,11}$/i)) {
@@ -336,7 +358,7 @@ export class VB6EnumTranspiler {
         return octValue;
       }
     }
-    
+
     // Try to resolve as constant
     try {
       return vb6TypeSystem.getConstantValue(expression);
@@ -358,7 +380,7 @@ export class VB6EnumTranspiler {
       }
       return '[]';
     }
-    
+
     return this.getTypeDefaultValue(field.type);
   }
 
@@ -367,7 +389,7 @@ export class VB6EnumTranspiler {
    */
   private getTypeDefaultValue(vb6Type: string): string {
     const lowerType = vb6Type.toLowerCase();
-    
+
     switch (lowerType) {
       case 'byte':
       case 'integer':
@@ -415,21 +437,21 @@ export class VB6EnumTranspiler {
   /**
    * Parse VB6 array bounds
    */
-  private parseArrayBounds(bounds: string): Array<{lower: number, upper: number}> {
+  private parseArrayBounds(bounds: string): Array<{ lower: number; upper: number }> {
     // PARSER EDGE CASE FIX: Add input validation
     if (typeof bounds !== 'string' || bounds.length > 1000) {
-      return [{lower: 0, upper: 0}];
+      return [{ lower: 0, upper: 0 }];
     }
-    
+
     // Remove parentheses and split by comma for multi-dimensional arrays
     const cleaned = bounds.replace(/[()]/g, '').trim();
     const dimensions = cleaned.split(',').slice(0, 10); // Limit dimensions
-    
+
     return dimensions.map(dim => {
       const trimmed = dim.trim();
       // PARSER EDGE CASE FIX: Use bounded regex
       const toMatch = trimmed.match(/^(\d{1,10})\s+To\s+(\d{1,10})$/i);
-      
+
       if (toMatch) {
         // PARSER EDGE CASE FIX: Add bounds checking
         const lower = parseInt(toMatch[1], 10);
@@ -451,7 +473,7 @@ export class VB6EnumTranspiler {
   /**
    * Create JavaScript array initialization with VB6 bounds
    */
-  private createArrayWithBounds(bounds: Array<{lower: number, upper: number}>): string {
+  private createArrayWithBounds(bounds: Array<{ lower: number; upper: number }>): string {
     if (bounds.length === 1) {
       // Single dimension
       const size = bounds[0].upper - bounds[0].lower + 1;
@@ -480,9 +502,9 @@ export class VB6EnumTranspiler {
     if (typeof body !== 'string' || body.length > 100000) {
       return '  // Body too large or invalid\n';
     }
-    
+
     let js = body;
-    
+
     // Basic VB6 to JS transformations
     js = js.replace(/\bDim\b/gi, 'let');
     js = js.replace(/\bAs\s+\w+/gi, ''); // Remove type declarations
@@ -493,7 +515,7 @@ export class VB6EnumTranspiler {
     js = js.replace(/\bAnd\b/gi, '&&');
     js = js.replace(/\bOr\b/gi, '||');
     js = js.replace(/\bNot\b/gi, '!');
-    
+
     return '  ' + js.split('\n').join('\n  ') + '\n';
   }
   // PARSER EDGE CASE FIX: Add sanitization helper methods
@@ -508,17 +530,19 @@ export class VB6EnumTranspiler {
 
   private escapeString(str: string): string {
     if (!str || typeof str !== 'string') return '';
-    return str.replace(/[\\'"\n\r\t]/g, (match) => {
-      const escapes: {[key: string]: string} = {
-        '\\': '\\\\',
-        "'": "\\'",
-        '"': '\\"',
-        '\n': '\\n',
-        '\r': '\\r',
-        '\t': '\\t'
-      };
-      return escapes[match] || match;
-    }).substring(0, 1000);
+    return str
+      .replace(/[\\'"\n\r\t]/g, match => {
+        const escapes: { [key: string]: string } = {
+          '\\': '\\\\',
+          "'": "\\'",
+          '"': '\\"',
+          '\n': '\\n',
+          '\r': '\\r',
+          '\t': '\\t',
+        };
+        return escapes[match] || match;
+      })
+      .substring(0, 1000);
   }
 
   private safeJsonStringify(obj: any): string {

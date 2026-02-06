@@ -3,6 +3,7 @@
 ## Overview
 
 Complete implementation of VB6's variable scope features including:
+
 - **Static Variables** - Variables that retain their values between procedure calls
 - **Friend Scope** - Methods and properties accessible within the same project but not externally
 - **Scope Management** - Complete variable scope chain (Global → Module → Procedure → Static)
@@ -41,6 +42,7 @@ End Sub
 ```
 
 **TypeScript Usage:**
+
 ```typescript
 import { VB6AdvancedLanguageProcessor } from './VB6AdvancedLanguageFeatures';
 
@@ -103,6 +105,7 @@ End Sub
 ```
 
 **TypeScript Usage:**
+
 ```typescript
 import { VB6AdvancedLanguageProcessor } from './VB6AdvancedLanguageFeatures';
 
@@ -110,17 +113,17 @@ const processor = new VB6AdvancedLanguageProcessor();
 
 // Within same project - allowed
 const internal = processor.isFriendAccessible(
-    'MyApp.DataLayer',      // Target module
-    'MyApp.BusinessLayer',  // Calling module
-    'InternalQuery'         // Member name
+  'MyApp.DataLayer', // Target module
+  'MyApp.BusinessLayer', // Calling module
+  'InternalQuery' // Member name
 );
 console.log(internal); // true
 
 // From external project - denied
 const external = processor.isFriendAccessible(
-    'MyApp.DataLayer',      // Target module
-    'ThirdParty.Plugin',    // Calling module (different project!)
-    'InternalQuery'         // Member name
+  'MyApp.DataLayer', // Target module
+  'ThirdParty.Plugin', // Calling module (different project!)
+  'InternalQuery' // Member name
 );
 console.log(external); // false
 ```
@@ -153,6 +156,7 @@ End Sub
 ```
 
 **TypeScript Usage (Variable Manager):**
+
 ```typescript
 import { VB6VariableManager } from './VB6VariableManager';
 import { VB6DataType } from './VB6Types';
@@ -161,12 +165,12 @@ const manager = new VB6VariableManager();
 
 // Declare static variable
 manager.declareVariable(
-    'counter',
-    VB6DataType.vbInteger,
-    'procedure',
-    'Module1',
-    'TestProc',
-    true  // isStatic = true
+  'counter',
+  VB6DataType.vbInteger,
+  'procedure',
+  'Module1',
+  'TestProc',
+  true // isStatic = true
 );
 
 // Set value
@@ -190,22 +194,22 @@ console.log(stillThere.value); // 42
 
 ```typescript
 class VB6AdvancedLanguageProcessor {
-    // Context management
-    setCurrentContext(module: string, procedure: string): void;
+  // Context management
+  setCurrentContext(module: string, procedure: string): void;
 
-    // Static variables
-    declareStaticVariable(name: string, type: string, initialValue?: any): any;
-    getStaticVariable(name: string): any;
-    setStaticVariable(name: string, value: any): void;
+  // Static variables
+  declareStaticVariable(name: string, type: string, initialValue?: any): any;
+  getStaticVariable(name: string): any;
+  setStaticVariable(name: string, value: any): void;
 
-    // Friend scope
-    isFriendAccessible(targetModule: string, callingModule: string, memberName: string): boolean;
+  // Friend scope
+  isFriendAccessible(targetModule: string, callingModule: string, memberName: string): boolean;
 
-    // Code generation
-    generateStaticVariableJS(name: string, type: string, initialValue?: any): string;
+  // Code generation
+  generateStaticVariableJS(name: string, type: string, initialValue?: any): string;
 
-    // Cleanup
-    clear(): void;
+  // Cleanup
+  clear(): void;
 }
 ```
 
@@ -213,32 +217,27 @@ class VB6AdvancedLanguageProcessor {
 
 ```typescript
 class VB6VariableManager {
-    // Variable declaration
-    declareVariable(
-        name: string,
-        type: VB6DataType,
-        scope: 'global' | 'module' | 'procedure',
-        moduleContext?: string,
-        procedureContext?: string,
-        isStatic?: boolean
-    ): VB6Variable;
+  // Variable declaration
+  declareVariable(
+    name: string,
+    type: VB6DataType,
+    scope: 'global' | 'module' | 'procedure',
+    moduleContext?: string,
+    procedureContext?: string,
+    isStatic?: boolean
+  ): VB6Variable;
 
-    // Variable access
-    getVariable(
-        name: string,
-        moduleContext?: string,
-        procedureContext?: string
-    ): VB6Variable | undefined;
+  // Variable access
+  getVariable(
+    name: string,
+    moduleContext?: string,
+    procedureContext?: string
+  ): VB6Variable | undefined;
 
-    setVariable(
-        name: string,
-        value: any,
-        moduleContext?: string,
-        procedureContext?: string
-    ): boolean;
+  setVariable(name: string, value: any, moduleContext?: string, procedureContext?: string): boolean;
 
-    // Scope management
-    cleanupProcedureScope(procedureContext: string): void;
+  // Scope management
+  cleanupProcedureScope(procedureContext: string): void;
 }
 ```
 
@@ -246,42 +245,42 @@ class VB6VariableManager {
 
 ```typescript
 interface VB6StaticVariable {
-    name: string;
-    type: string;
-    value: any;
-    module: string;
-    procedure: string;
+  name: string;
+  type: string;
+  value: any;
+  module: string;
+  procedure: string;
 }
 
 interface VB6Variable {
-    name: string;
-    type: VB6DataType;
-    value: any;
-    isArray: boolean;
-    isPublic: boolean;
-    isPrivate: boolean;
-    isStatic: boolean;
-    isDim: boolean;
-    isConst: boolean;
-    scope: 'global' | 'module' | 'procedure';
+  name: string;
+  type: VB6DataType;
+  value: any;
+  isArray: boolean;
+  isPublic: boolean;
+  isPrivate: boolean;
+  isStatic: boolean;
+  isDim: boolean;
+  isConst: boolean;
+  scope: 'global' | 'module' | 'procedure';
 }
 
 enum VB6DataType {
-    vbEmpty,
-    vbNull,
-    vbInteger,
-    vbLong,
-    vbSingle,
-    vbDouble,
-    vbCurrency,
-    vbDate,
-    vbString,
-    vbObject,
-    vbError,
-    vbBoolean,
-    vbVariant,
-    vbByte,
-    vbDecimal
+  vbEmpty,
+  vbNull,
+  vbInteger,
+  vbLong,
+  vbSingle,
+  vbDouble,
+  vbCurrency,
+  vbDate,
+  vbString,
+  vbObject,
+  vbError,
+  vbBoolean,
+  vbVariant,
+  vbByte,
+  vbDecimal,
 }
 ```
 
@@ -295,18 +294,18 @@ import { VB6AdvancedLanguageProcessor } from './VB6AdvancedLanguageFeatures';
 const processor = new VB6AdvancedLanguageProcessor();
 
 function GetNextID(): number {
-    processor.setCurrentContext('IDGenerator', 'GetNextID');
+  processor.setCurrentContext('IDGenerator', 'GetNextID');
 
-    // Declare static variable (initializes to 0 only on first call)
-    let currentID = processor.declareStaticVariable('currentID', 'Long', 0);
+  // Declare static variable (initializes to 0 only on first call)
+  let currentID = processor.declareStaticVariable('currentID', 'Long', 0);
 
-    // Increment
-    currentID++;
+  // Increment
+  currentID++;
 
-    // Save new value
-    processor.setStaticVariable('currentID', currentID);
+  // Save new value
+  processor.setStaticVariable('currentID', currentID);
 
-    return currentID;
+  return currentID;
 }
 
 console.log(GetNextID()); // 1
@@ -322,20 +321,20 @@ import { VB6AdvancedLanguageProcessor } from './VB6AdvancedLanguageFeatures';
 const processor = new VB6AdvancedLanguageProcessor();
 
 function InitializeDatabase(): void {
-    processor.setCurrentContext('Database', 'Initialize');
+  processor.setCurrentContext('Database', 'Initialize');
 
-    // Check if already initialized
-    let isInitialized = processor.declareStaticVariable('initialized', 'Boolean', false);
+  // Check if already initialized
+  let isInitialized = processor.declareStaticVariable('initialized', 'Boolean', false);
 
-    if (!isInitialized) {
-        console.log('Initializing database...');
-        // ... perform expensive initialization ...
+  if (!isInitialized) {
+    console.log('Initializing database...');
+    // ... perform expensive initialization ...
 
-        // Mark as initialized
-        processor.setStaticVariable('initialized', true);
-    } else {
-        console.log('Already initialized, skipping...');
-    }
+    // Mark as initialized
+    processor.setStaticVariable('initialized', true);
+  } else {
+    console.log('Already initialized, skipping...');
+  }
 }
 
 InitializeDatabase(); // "Initializing database..."
@@ -350,23 +349,23 @@ import { VB6AdvancedLanguageProcessor } from './VB6AdvancedLanguageFeatures';
 const processor = new VB6AdvancedLanguageProcessor();
 
 function AddToTotal(value: number): number {
-    processor.setCurrentContext('Calculator', 'AddToTotal');
+  processor.setCurrentContext('Calculator', 'AddToTotal');
 
-    // Get current total (starts at 0)
-    let total = processor.declareStaticVariable('total', 'Double', 0);
+  // Get current total (starts at 0)
+  let total = processor.declareStaticVariable('total', 'Double', 0);
 
-    // Add new value
-    total += value;
+  // Add new value
+  total += value;
 
-    // Save
-    processor.setStaticVariable('total', total);
+  // Save
+  processor.setStaticVariable('total', total);
 
-    return total;
+  return total;
 }
 
-console.log(AddToTotal(10));  // 10
-console.log(AddToTotal(20));  // 30
-console.log(AddToTotal(15));  // 45
+console.log(AddToTotal(10)); // 10
+console.log(AddToTotal(20)); // 30
+console.log(AddToTotal(15)); // 45
 ```
 
 ### Example 4: Friend Scope in Class Library
@@ -378,34 +377,36 @@ const processor = new VB6AdvancedLanguageProcessor();
 
 // Internal implementation details (Friend scope)
 function validateConnection(conn: any): boolean {
-    // This should only be callable within MyLibrary
-    const canCall = processor.isFriendAccessible(
-        'MyLibrary.ConnectionValidator',  // This function's module
-        'MyLibrary.PublicAPI',             // Calling module
-        'validateConnection'
+  // This should only be callable within MyLibrary
+  const canCall = processor.isFriendAccessible(
+    'MyLibrary.ConnectionValidator', // This function's module
+    'MyLibrary.PublicAPI', // Calling module
+    'validateConnection'
+  );
+
+  if (!canCall) {
+    throw new Error(
+      'validateConnection is Friend-scoped and not accessible from external projects'
     );
+  }
 
-    if (!canCall) {
-        throw new Error('validateConnection is Friend-scoped and not accessible from external projects');
-    }
-
-    return conn !== null && conn.isOpen;
+  return conn !== null && conn.isOpen;
 }
 
 // Public API
 function connectToDatabase(connString: string): any {
-    // Public method can be called from anywhere
-    console.log('Connecting to database...');
+  // Public method can be called from anywhere
+  console.log('Connecting to database...');
 
-    // Call Friend method (same project - OK)
-    processor.setCurrentContext('MyLibrary', 'PublicAPI');
-    const conn = { isOpen: true };
+  // Call Friend method (same project - OK)
+  processor.setCurrentContext('MyLibrary', 'PublicAPI');
+  const conn = { isOpen: true };
 
-    if (validateConnection(conn)) {
-        return conn;
-    }
+  if (validateConnection(conn)) {
+    return conn;
+  }
 
-    return null;
+  return null;
 }
 ```
 
@@ -414,50 +415,50 @@ function connectToDatabase(connString: string): any {
 ```typescript
 // Data Layer (Friend methods for internal use)
 class DataLayer {
-    // Public method
-    public getData(): any[] {
-        return this.executeQuery('SELECT * FROM Data');
+  // Public method
+  public getData(): any[] {
+    return this.executeQuery('SELECT * FROM Data');
+  }
+
+  // Friend method - accessible within app, not from plugins
+  private executeQuery(sql: string): any[] {
+    const processor = new VB6AdvancedLanguageProcessor();
+
+    const canCall = processor.isFriendAccessible(
+      'MyApp.DataLayer',
+      'MyApp.BusinessLayer', // Same app - OK
+      'executeQuery'
+    );
+
+    if (!canCall) {
+      throw new Error('executeQuery is Friend-scoped');
     }
 
-    // Friend method - accessible within app, not from plugins
-    private executeQuery(sql: string): any[] {
-        const processor = new VB6AdvancedLanguageProcessor();
-
-        const canCall = processor.isFriendAccessible(
-            'MyApp.DataLayer',
-            'MyApp.BusinessLayer',  // Same app - OK
-            'executeQuery'
-        );
-
-        if (!canCall) {
-            throw new Error('executeQuery is Friend-scoped');
-        }
-
-        console.log(`Executing: ${sql}`);
-        return [];
-    }
+    console.log(`Executing: ${sql}`);
+    return [];
+  }
 }
 
 // Business Layer (same project - can call Friend methods)
 class BusinessLayer {
-    private dataLayer = new DataLayer();
+  private dataLayer = new DataLayer();
 
-    public processData(): void {
-        // Can call Friend method because same project
-        const data = this.dataLayer.getData();
-        console.log('Processing', data.length, 'records');
-    }
+  public processData(): void {
+    // Can call Friend method because same project
+    const data = this.dataLayer.getData();
+    console.log('Processing', data.length, 'records');
+  }
 }
 
 // Plugin (different project - cannot call Friend methods)
 class ThirdPartyPlugin {
-    public useData(dataLayer: DataLayer): void {
-        // Can only call Public methods
-        const data = dataLayer.getData(); // OK
+  public useData(dataLayer: DataLayer): void {
+    // Can only call Public methods
+    const data = dataLayer.getData(); // OK
 
-        // Cannot call Friend method
-        // dataLayer.executeQuery('...') // ERROR - Friend scope
-    }
+    // Cannot call Friend method
+    // dataLayer.executeQuery('...') // ERROR - Friend scope
+  }
 }
 ```
 
@@ -580,11 +581,13 @@ This implementation is **100% compatible** with VB6 scoping rules:
 ### Static Variable Storage
 
 Static variables are stored with a composite key:
+
 ```
 {module}.{procedure}.{variableName}
 ```
 
 This ensures perfect isolation:
+
 ```typescript
 // Module1.Proc1.counter is independent of Module1.Proc2.counter
 // Module1.Proc1.counter is independent of Module2.Proc1.counter
@@ -593,6 +596,7 @@ This ensures perfect isolation:
 ### Friend Scope Resolution
 
 Friend scope uses project prefix matching:
+
 ```typescript
 // "MyApp.Module1" → project: "MyApp"
 // "MyApp.Module2" → project: "MyApp"
@@ -606,6 +610,7 @@ Friend scope uses project prefix matching:
 ### Variable Manager Cleanup
 
 When a procedure exits:
+
 - **Regular variables** are deleted
 - **Static variables** are preserved
 
@@ -617,6 +622,7 @@ manager.cleanupProcedureScope('MyProc');
 ## Next Steps
 
 With Static variables and Friend scope complete, the next task is:
+
 - **Task 1.10**: ParamArray and Optional with IsMissing
 
 After task 1.10, **Phase 1 (Compiler Language Features) will be 100% complete!**

@@ -14,14 +14,14 @@
 export class VB6DefTypeManager {
   private static instance: VB6DefTypeManager;
   private typeRanges: Map<string, string> = new Map();
-  
+
   static getInstance(): VB6DefTypeManager {
     if (!VB6DefTypeManager.instance) {
       VB6DefTypeManager.instance = new VB6DefTypeManager();
     }
     return VB6DefTypeManager.instance;
   }
-  
+
   /**
    * Set default type for a range of letters
    * @param startLetter Starting letter (A-Z)
@@ -31,24 +31,24 @@ export class VB6DefTypeManager {
   setTypeRange(startLetter: string, endLetter: string, varType: string): void {
     const start = startLetter.toUpperCase().charCodeAt(0);
     const end = endLetter.toUpperCase().charCodeAt(0);
-    
+
     for (let i = start; i <= end; i++) {
       const letter = String.fromCharCode(i);
       this.typeRanges.set(letter, varType);
     }
   }
-  
+
   /**
    * Get default type for a variable name
    * @param varName Variable name
    */
   getDefaultType(varName: string): string {
     if (!varName || varName.length === 0) return 'Variant';
-    
+
     const firstLetter = varName[0].toUpperCase();
     return this.typeRanges.get(firstLetter) || 'Variant';
   }
-  
+
   /**
    * Clear all type ranges
    */
@@ -188,9 +188,9 @@ function parseLetterRange(range: string): [string, string | null] {
  * @param target Target string variable (simulated as object with value property)
  * @param source Source string to assign
  */
-export function LSet(target: { value: string, length?: number }, source: string): void {
+export function LSet(target: { value: string; length?: number }, source: string): void {
   const targetLength = target.length || target.value.length;
-  
+
   if (source.length >= targetLength) {
     // Truncate if source is longer
     target.value = source.substring(0, targetLength);
@@ -206,9 +206,9 @@ export function LSet(target: { value: string, length?: number }, source: string)
  * @param target Target string variable (simulated as object with value property)
  * @param source Source string to assign
  */
-export function RSet(target: { value: string, length?: number }, source: string): void {
+export function RSet(target: { value: string; length?: number }, source: string): void {
   const targetLength = target.length || target.value.length;
-  
+
   if (source.length >= targetLength) {
     // Truncate if source is longer
     target.value = source.substring(0, targetLength);
@@ -223,14 +223,18 @@ export function RSet(target: { value: string, length?: number }, source: string)
  * @param length Fixed length
  * @param initialValue Initial value (optional)
  */
-export function createFixedString(length: number, initialValue: string = ''): { value: string, length: number } {
-  const value = initialValue.length > length 
-    ? initialValue.substring(0, length)
-    : initialValue.padEnd(length, ' ');
-    
+export function createFixedString(
+  length: number,
+  initialValue: string = ''
+): { value: string; length: number } {
+  const value =
+    initialValue.length > length
+      ? initialValue.substring(0, length)
+      : initialValue.padEnd(length, ' ');
+
   return {
     value,
-    length
+    length,
   };
 }
 
@@ -243,29 +247,28 @@ export function createFixedString(length: number, initialValue: string = ''): { 
  */
 export class VB6OptionSettings {
   private static instance: VB6OptionSettings;
-  
+
   // Option settings
   public optionExplicit: boolean = false;
   public optionBase: number = 0; // 0 or 1
   public optionCompare: 'Binary' | 'Text' | 'Database' = 'Binary';
   public optionPrivateModule: boolean = false;
-  
+
   static getInstance(): VB6OptionSettings {
     if (!VB6OptionSettings.instance) {
       VB6OptionSettings.instance = new VB6OptionSettings();
     }
     return VB6OptionSettings.instance;
   }
-  
+
   /**
    * Set Option Explicit
    * Requires all variables to be declared
    */
   setOptionExplicit(value: boolean): void {
     this.optionExplicit = value;
-    console.log(`[VB6] Option Explicit ${value ? 'On' : 'Off'}`);
   }
-  
+
   /**
    * Set Option Base
    * Sets default lower bound for arrays (0 or 1)
@@ -275,36 +278,37 @@ export class VB6OptionSettings {
       throw new Error('Option Base must be 0 or 1');
     }
     this.optionBase = value;
-    console.log(`[VB6] Option Base ${value}`);
   }
-  
+
   /**
    * Set Option Compare
    * Sets string comparison method
    */
   setOptionCompare(value: 'Binary' | 'Text' | 'Database'): void {
     this.optionCompare = value;
-    console.log(`[VB6] Option Compare ${value}`);
   }
-  
+
   /**
    * Set Option Private Module
    * Makes all module-level declarations private
    */
   setOptionPrivateModule(value: boolean): void {
     this.optionPrivateModule = value;
-    console.log(`[VB6] Option Private Module ${value ? 'On' : 'Off'}`);
   }
-  
+
   /**
    * Get comparison mode for string operations
    */
   getCompareMode(): number {
     switch (this.optionCompare) {
-      case 'Binary': return 0;
-      case 'Text': return 1;
-      case 'Database': return 2;
-      default: return 0;
+      case 'Binary':
+        return 0;
+      case 'Text':
+        return 1;
+      case 'Database':
+        return 2;
+      default:
+        return 0;
     }
   }
 }
@@ -365,14 +369,14 @@ export function Rem(...args: any[]): void {
 export class VB6AttributeManager {
   private static instance: VB6AttributeManager;
   private attributes: Map<string, Map<string, any>> = new Map();
-  
+
   static getInstance(): VB6AttributeManager {
     if (!VB6AttributeManager.instance) {
       VB6AttributeManager.instance = new VB6AttributeManager();
     }
     return VB6AttributeManager.instance;
   }
-  
+
   /**
    * Set an attribute
    * @param objectName Object name (module, class, procedure)
@@ -385,7 +389,7 @@ export class VB6AttributeManager {
     }
     this.attributes.get(objectName)!.set(attributeName, value);
   }
-  
+
   /**
    * Get an attribute
    * @param objectName Object name
@@ -395,7 +399,7 @@ export class VB6AttributeManager {
     const objAttributes = this.attributes.get(objectName);
     return objAttributes ? objAttributes.get(attributeName) : undefined;
   }
-  
+
   /**
    * Get all attributes for an object
    * @param objectName Object name
@@ -410,26 +414,11 @@ const attributeManager = VB6AttributeManager.getInstance();
 /**
  * Attribute - Set metadata attribute
  * @param objectName Object name
- * @param attributeName Attribute name  
+ * @param attributeName Attribute name
  * @param value Attribute value
  */
 export function Attribute(objectName: string, attributeName: string, value: any): void {
   attributeManager.setAttribute(objectName, attributeName, value);
-  
-  // Handle special VB6 attributes
-  if (attributeName === 'VB_Name') {
-    console.log(`[VB6] Module Name: ${value}`);
-  } else if (attributeName === 'VB_GlobalNameSpace') {
-    console.log(`[VB6] Global Namespace: ${value}`);
-  } else if (attributeName === 'VB_Creatable') {
-    console.log(`[VB6] Creatable: ${value}`);
-  } else if (attributeName === 'VB_PredeclaredId') {
-    console.log(`[VB6] Predeclared ID: ${value}`);
-  } else if (attributeName === 'VB_Exposed') {
-    console.log(`[VB6] Exposed: ${value}`);
-  } else if (attributeName === 'VB_Description') {
-    console.log(`[VB6] Description: ${value}`);
-  }
 }
 
 // ============================================================================
@@ -445,7 +434,7 @@ export function Attribute(objectName: string, attributeName: string, value: any)
 export function Eqv(a: any, b: any): boolean {
   const boolA = Boolean(a);
   const boolB = Boolean(b);
-  
+
   // Equivalence: (A AND B) OR (NOT A AND NOT B)
   return (boolA && boolB) || (!boolA && !boolB);
 }
@@ -459,7 +448,7 @@ export function Eqv(a: any, b: any): boolean {
 export function Imp(a: any, b: any): boolean {
   const boolA = Boolean(a);
   const boolB = Boolean(b);
-  
+
   // Implication: NOT A OR B
   return !boolA || boolB;
 }
@@ -475,14 +464,14 @@ export function Imp(a: any, b: any): boolean {
 export class VB6StaticVariableManager {
   private static instance: VB6StaticVariableManager;
   private staticVars: Map<string, Map<string, any>> = new Map();
-  
+
   static getInstance(): VB6StaticVariableManager {
     if (!VB6StaticVariableManager.instance) {
       VB6StaticVariableManager.instance = new VB6StaticVariableManager();
     }
     return VB6StaticVariableManager.instance;
   }
-  
+
   /**
    * Get or create a static variable
    * @param functionName Function containing the static variable
@@ -493,16 +482,16 @@ export class VB6StaticVariableManager {
     if (!this.staticVars.has(functionName)) {
       this.staticVars.set(functionName, new Map());
     }
-    
+
     const funcVars = this.staticVars.get(functionName)!;
-    
+
     if (!funcVars.has(varName)) {
       funcVars.set(varName, initialValue);
     }
-    
+
     return funcVars.get(varName);
   }
-  
+
   /**
    * Set a static variable value
    * @param functionName Function containing the static variable
@@ -513,10 +502,10 @@ export class VB6StaticVariableManager {
     if (!this.staticVars.has(functionName)) {
       this.staticVars.set(functionName, new Map());
     }
-    
+
     this.staticVars.get(functionName)!.set(varName, value);
   }
-  
+
   /**
    * Clear all static variables for a function
    * @param functionName Function name
@@ -524,7 +513,7 @@ export class VB6StaticVariableManager {
   clearFunction(functionName: string): void {
     this.staticVars.delete(functionName);
   }
-  
+
   /**
    * Clear all static variables
    */
@@ -541,7 +530,11 @@ const staticVarManager = VB6StaticVariableManager.getInstance();
  * @param varName Variable name
  * @param initialValue Initial value
  */
-export function Static(functionName: string, varName: string, initialValue?: any): {
+export function Static(
+  functionName: string,
+  varName: string,
+  initialValue?: any
+): {
   get(): any;
   set(value: any): void;
 } {
@@ -551,7 +544,7 @@ export function Static(functionName: string, varName: string, initialValue?: any
     },
     set(value: any) {
       staticVarManager.setStatic(functionName, varName, value);
-    }
+    },
   };
 }
 
@@ -574,39 +567,39 @@ export const VB6MissingStatements = {
   DefObj,
   DefVar,
   defTypeManager,
-  
+
   // LSet & RSet
   LSet,
   RSet,
   createFixedString,
-  
+
   // Option statements
   OptionExplicit,
   OptionBase,
   OptionCompare,
   OptionPrivateModule,
   optionSettings,
-  
+
   // Rem statement
   Rem,
-  
+
   // Attribute statement
   Attribute,
   attributeManager,
-  
+
   // Logical operators
   Eqv,
   Imp,
-  
+
   // Static variables
   Static,
-  staticVarManager
+  staticVarManager,
 };
 
 // Make functions globally available
 if (typeof window !== 'undefined') {
   const globalAny = window as any;
-  
+
   // DefType statements
   globalAny.DefBool = DefBool;
   globalAny.DefByte = DefByte;
@@ -620,32 +613,29 @@ if (typeof window !== 'undefined') {
   globalAny.DefStr = DefStr;
   globalAny.DefObj = DefObj;
   globalAny.DefVar = DefVar;
-  
+
   // LSet & RSet
   globalAny.LSet = LSet;
   globalAny.RSet = RSet;
-  
+
   // Option statements
   globalAny.OptionExplicit = OptionExplicit;
   globalAny.OptionBase = OptionBase;
   globalAny.OptionCompare = OptionCompare;
   globalAny.OptionPrivateModule = OptionPrivateModule;
-  
+
   // Rem statement
   globalAny.Rem = Rem;
-  
+
   // Attribute statement
   globalAny.Attribute = Attribute;
-  
+
   // Logical operators
   globalAny.Eqv = Eqv;
   globalAny.Imp = Imp;
-  
+
   // Static support
   globalAny.Static = Static;
-  
-  console.log('[VB6] Missing statements loaded - DefType, LSet/RSet, Option, Rem, Attribute, Eqv/Imp');
-  console.log('[VB6] ABSOLUTE 100% VB6 language compatibility achieved!');
 }
 
 export default VB6MissingStatements;

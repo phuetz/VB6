@@ -12,14 +12,14 @@ export enum MetricType {
   Handles = 'Handles',
   Threads = 'Threads',
   ProcessorTime = 'Processor Time',
-  WorkingSet = 'Working Set'
+  WorkingSet = 'Working Set',
 }
 
 export enum ProfilingMode {
   Sampling = 'Sampling',
   Instrumentation = 'Instrumentation',
   Memory = 'Memory',
-  Concurrency = 'Concurrency'
+  Concurrency = 'Concurrency',
 }
 
 export enum PerformanceLevel {
@@ -27,7 +27,7 @@ export enum PerformanceLevel {
   Good = 'Good',
   Fair = 'Fair',
   Poor = 'Poor',
-  Critical = 'Critical'
+  Critical = 'Critical',
 }
 
 // Performance Metrics
@@ -158,22 +158,26 @@ interface ApplicationPerformanceExplorerProps {
 
 export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExplorerProps> = ({
   onSessionChange,
-  onExport
+  onExport,
 }) => {
   const [sessions, setSessions] = useState<PerformanceSession[]>([]);
   const [currentSession, setCurrentSession] = useState<PerformanceSession | null>(null);
-  const [selectedTab, setSelectedTab] = useState<'overview' | 'functions' | 'memory' | 'counters' | 'recommendations'>('overview');
+  const [selectedTab, setSelectedTab] = useState<
+    'overview' | 'functions' | 'memory' | 'counters' | 'recommendations'
+  >('overview');
   const [isRecording, setIsRecording] = useState(false);
   const [showNewSessionDialog, setShowNewSessionDialog] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState('');
-  const [selectedProfilingMode, setSelectedProfilingMode] = useState<ProfilingMode>(ProfilingMode.Sampling);
+  const [selectedProfilingMode, setSelectedProfilingMode] = useState<ProfilingMode>(
+    ProfilingMode.Sampling
+  );
   const [performanceCounters, setPerformanceCounters] = useState<PerformanceCounter[]>([]);
   const [selectedCounters, setSelectedCounters] = useState<Set<string>>(new Set());
   const [realtimeUpdate, setRealtimeUpdate] = useState(true);
   const [chartTimeRange, setChartTimeRange] = useState<'1m' | '5m' | '15m' | '1h'>('5m');
   const [sortBy, setSortBy] = useState<'totalTime' | 'callCount' | 'averageTime'>('totalTime');
   const [filterText, setFilterText] = useState('');
-  
+
   const eventEmitter = useRef(new EventEmitter());
   const recordingTimer = useRef<NodeJS.Timeout>();
   const chartCanvas = useRef<HTMLCanvasElement>(null);
@@ -186,11 +190,12 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
         category: 'Processor',
         name: '% Processor Time',
         instance: '_Total',
-        description: 'The percentage of elapsed time that the processor spends executing a non-idle thread',
+        description:
+          'The percentage of elapsed time that the processor spends executing a non-idle thread',
         value: 0,
         unit: '%',
         enabled: true,
-        color: '#3b82f6'
+        color: '#3b82f6',
       },
       {
         id: '2',
@@ -200,7 +205,7 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
         value: 0,
         unit: 'MB',
         enabled: true,
-        color: '#10b981'
+        color: '#10b981',
       },
       {
         id: '3',
@@ -211,90 +216,98 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
         value: 0,
         unit: 'KB',
         enabled: true,
-        color: '#f59e0b'
+        color: '#f59e0b',
       },
       {
         id: '4',
         category: 'Process',
         name: '% Processor Time',
         instance: 'YourApp',
-        description: 'The percentage of elapsed time that all threads of the process used the processor to execute instructions',
+        description:
+          'The percentage of elapsed time that all threads of the process used the processor to execute instructions',
         value: 0,
         unit: '%',
         enabled: true,
-        color: '#ef4444'
+        color: '#ef4444',
       },
       {
         id: '5',
         category: 'Process',
         name: 'Private Bytes',
         instance: 'YourApp',
-        description: 'The current size of memory that the process has allocated that cannot be shared with other processes',
+        description:
+          'The current size of memory that the process has allocated that cannot be shared with other processes',
         value: 0,
         unit: 'KB',
         enabled: false,
-        color: '#8b5cf6'
+        color: '#8b5cf6',
       },
       {
         id: '6',
         category: 'PhysicalDisk',
         name: '% Disk Time',
         instance: '_Total',
-        description: 'The percentage of elapsed time that the disk drive was busy servicing read or write requests',
+        description:
+          'The percentage of elapsed time that the disk drive was busy servicing read or write requests',
         value: 0,
         unit: '%',
         enabled: false,
-        color: '#ec4899'
-      }
+        color: '#ec4899',
+      },
     ];
-    
+
     setPerformanceCounters(defaultCounters);
     setSelectedCounters(new Set(defaultCounters.filter(c => c.enabled).map(c => c.id)));
   }, []);
 
   // Start new performance session
-  const startNewSession = useCallback((applicationPath: string, mode: ProfilingMode) => {
-    const newSession: PerformanceSession = {
-      id: `session_${Date.now()}`,
-      name: `Session ${sessions.length + 1}`,
-      applicationPath,
-      profilingMode: mode,
-      startTime: new Date(),
-      duration: 0,
-      status: 'Recording',
-      metrics: generateInitialMetrics(),
-      functions: [],
-      memoryAnalysis: {
-        totalAllocated: 0,
-        totalFreed: 0,
-        currentUsage: 0,
-        peakUsage: 0,
-        allocations: [],
-        leaks: [],
-        heapFragmentation: 0,
-        gcCollections: 0
-      },
-      events: [{
-        timestamp: new Date(),
-        type: 'Performance',
-        description: 'Performance session started',
-        severity: 'Info'
-      }],
-      recommendations: []
-    };
+  const startNewSession = useCallback(
+    (applicationPath: string, mode: ProfilingMode) => {
+      const newSession: PerformanceSession = {
+        id: `session_${Date.now()}`,
+        name: `Session ${sessions.length + 1}`,
+        applicationPath,
+        profilingMode: mode,
+        startTime: new Date(),
+        duration: 0,
+        status: 'Recording',
+        metrics: generateInitialMetrics(),
+        functions: [],
+        memoryAnalysis: {
+          totalAllocated: 0,
+          totalFreed: 0,
+          currentUsage: 0,
+          peakUsage: 0,
+          allocations: [],
+          leaks: [],
+          heapFragmentation: 0,
+          gcCollections: 0,
+        },
+        events: [
+          {
+            timestamp: new Date(),
+            type: 'Performance',
+            description: 'Performance session started',
+            severity: 'Info',
+          },
+        ],
+        recommendations: [],
+      };
 
-    setSessions(prev => [...prev, newSession]);
-    setCurrentSession(newSession);
-    setIsRecording(true);
-    setShowNewSessionDialog(false);
+      setSessions(prev => [...prev, newSession]);
+      setCurrentSession(newSession);
+      setIsRecording(true);
+      setShowNewSessionDialog(false);
 
-    // Start recording timer
-    recordingTimer.current = setInterval(() => {
-      updateSessionData(newSession);
-    }, 1000);
+      // Start recording timer
+      recordingTimer.current = setInterval(() => {
+        updateSessionData(newSession);
+      }, 1000);
 
-    onSessionChange?.(newSession);
-  }, [sessions, onSessionChange]);
+      onSessionChange?.(newSession);
+    },
+    [sessions, onSessionChange]
+  );
 
   // Generate initial metrics
   const generateInitialMetrics = (): PerformanceMetric[] => [
@@ -307,7 +320,7 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
       threshold: { warning: 70, critical: 90 },
       history: [],
       trend: 'stable',
-      level: PerformanceLevel.Good
+      level: PerformanceLevel.Good,
     },
     {
       id: 'memory',
@@ -318,7 +331,7 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
       threshold: { warning: 500, critical: 1000 },
       history: [],
       trend: 'stable',
-      level: PerformanceLevel.Good
+      level: PerformanceLevel.Good,
     },
     {
       id: 'diskio',
@@ -329,8 +342,8 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
       threshold: { warning: 1000, critical: 5000 },
       history: [],
       trend: 'stable',
-      level: PerformanceLevel.Good
-    }
+      level: PerformanceLevel.Good,
+    },
   ];
 
   // Update session data with simulated performance data
@@ -354,14 +367,19 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
             break;
         }
 
-        const level = newValue >= metric.threshold.critical ? PerformanceLevel.Critical :
-                     newValue >= metric.threshold.warning ? PerformanceLevel.Poor :
-                     newValue >= metric.threshold.warning * 0.7 ? PerformanceLevel.Fair :
-                     newValue >= metric.threshold.warning * 0.4 ? PerformanceLevel.Good :
-                     PerformanceLevel.Excellent;
+        const level =
+          newValue >= metric.threshold.critical
+            ? PerformanceLevel.Critical
+            : newValue >= metric.threshold.warning
+              ? PerformanceLevel.Poor
+              : newValue >= metric.threshold.warning * 0.7
+                ? PerformanceLevel.Fair
+                : newValue >= metric.threshold.warning * 0.4
+                  ? PerformanceLevel.Good
+                  : PerformanceLevel.Excellent;
 
-        const trend = newValue > metric.value + 5 ? 'up' :
-                     newValue < metric.value - 5 ? 'down' : 'stable';
+        const trend =
+          newValue > metric.value + 5 ? 'up' : newValue < metric.value - 5 ? 'down' : 'stable';
 
         return {
           ...metric,
@@ -370,23 +388,26 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
           trend,
           history: [
             ...metric.history.slice(-59), // Keep last 60 points
-            { timestamp: now, value: newValue }
-          ]
+            { timestamp: now, value: newValue },
+          ],
         };
       });
 
       // Update function profiling data
-      const updatedFunctions = prev.functions.length === 0 ? generateSampleFunctions() : prev.functions.map(func => ({
-        ...func,
-        callCount: func.callCount + Math.floor(Math.random() * 10),
-        totalTime: func.totalTime + Math.random() * 100
-      }));
+      const updatedFunctions =
+        prev.functions.length === 0
+          ? generateSampleFunctions()
+          : prev.functions.map(func => ({
+              ...func,
+              callCount: func.callCount + Math.floor(Math.random() * 10),
+              totalTime: func.totalTime + Math.random() * 100,
+            }));
 
       return {
         ...prev,
         duration: now.getTime() - prev.startTime.getTime(),
         metrics: updatedMetrics,
-        functions: updatedFunctions
+        functions: updatedFunctions,
       };
     });
   }, []);
@@ -410,12 +431,12 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
       callers: [],
       callees: [
         { name: 'InitializeControls', callCount: 1, time: 75 },
-        { name: 'LoadUserSettings', callCount: 1, time: 25 }
+        { name: 'LoadUserSettings', callCount: 1, time: 25 },
       ],
       hotspots: [
         { lineNumber: 50, hitCount: 1, time: 75 },
-        { lineNumber: 55, hitCount: 1, time: 25 }
-      ]
+        { lineNumber: 55, hitCount: 1, time: 25 },
+      ],
     },
     {
       id: '2',
@@ -431,14 +452,12 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
       exclusiveTime: 75,
       inclusiveTime: 75,
       percentage: 12.8,
-      callers: [
-        { name: 'Form1_Load', callCount: 1, time: 75 }
-      ],
+      callers: [{ name: 'Form1_Load', callCount: 1, time: 75 }],
       callees: [],
       hotspots: [
         { lineNumber: 125, hitCount: 1, time: 30 },
-        { lineNumber: 130, hitCount: 1, time: 45 }
-      ]
+        { lineNumber: 130, hitCount: 1, time: 45 },
+      ],
     },
     {
       id: '3',
@@ -456,17 +475,17 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
       percentage: 42.6,
       callers: [
         { name: 'LoadData', callCount: 3, time: 150 },
-        { name: 'SaveData', callCount: 2, time: 100 }
+        { name: 'SaveData', callCount: 2, time: 100 },
       ],
       callees: [
         { name: 'OpenConnection', callCount: 5, time: 25 },
-        { name: 'ExecuteSQL', callCount: 5, time: 25 }
+        { name: 'ExecuteSQL', callCount: 5, time: 25 },
       ],
       hotspots: [
         { lineNumber: 205, hitCount: 5, time: 125 },
-        { lineNumber: 220, hitCount: 5, time: 75 }
-      ]
-    }
+        { lineNumber: 220, hitCount: 5, time: 75 },
+      ],
+    },
   ];
 
   // Stop recording session
@@ -482,12 +501,10 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
         ...prev,
         status: 'Complete' as const,
         endTime: new Date(),
-        recommendations: generateRecommendations(prev)
+        recommendations: generateRecommendations(prev),
       };
 
-      setSessions(prevSessions => 
-        prevSessions.map(s => s.id === prev.id ? updatedSession : s)
-      );
+      setSessions(prevSessions => prevSessions.map(s => (s.id === prev.id ? updatedSession : s)));
 
       return updatedSession;
     });
@@ -506,12 +523,13 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
         category: 'CPU Performance',
         issue: 'High CPU usage detected',
         impact: 'High' as const,
-        recommendation: 'Consider optimizing CPU-intensive operations or implementing background processing',
+        recommendation:
+          'Consider optimizing CPU-intensive operations or implementing background processing',
         codeLocation: {
           file: 'Form1.frm',
           line: 150,
-          function: 'ProcessData'
-        }
+          function: 'ProcessData',
+        },
       });
     }
 
@@ -526,8 +544,8 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
         codeLocation: {
           file: 'DataModule.bas',
           line: 75,
-          function: 'LoadLargeDataset'
-        }
+          function: 'LoadLargeDataset',
+        },
       });
     }
 
@@ -542,8 +560,8 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
         codeLocation: {
           file: func.fileName,
           line: func.lineNumber,
-          function: func.name
-        }
+          function: func.name,
+        },
       });
     });
 
@@ -551,41 +569,44 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
   };
 
   // Export session data
-  const exportSession = useCallback((format: 'HTML' | 'XML' | 'CSV') => {
-    if (!currentSession) return;
+  const exportSession = useCallback(
+    (format: 'HTML' | 'XML' | 'CSV') => {
+      if (!currentSession) return;
 
-    let content = '';
-    let filename = '';
-    let mimeType = '';
+      let content = '';
+      let filename = '';
+      let mimeType = '';
 
-    switch (format) {
-      case 'HTML':
-        content = generateHTMLReport(currentSession);
-        filename = `performance_report_${currentSession.id}.html`;
-        mimeType = 'text/html';
-        break;
-      case 'XML':
-        content = generateXMLReport(currentSession);
-        filename = `performance_report_${currentSession.id}.xml`;
-        mimeType = 'text/xml';
-        break;
-      case 'CSV':
-        content = generateCSVReport(currentSession);
-        filename = `performance_report_${currentSession.id}.csv`;
-        mimeType = 'text/csv';
-        break;
-    }
+      switch (format) {
+        case 'HTML':
+          content = generateHTMLReport(currentSession);
+          filename = `performance_report_${currentSession.id}.html`;
+          mimeType = 'text/html';
+          break;
+        case 'XML':
+          content = generateXMLReport(currentSession);
+          filename = `performance_report_${currentSession.id}.xml`;
+          mimeType = 'text/xml';
+          break;
+        case 'CSV':
+          content = generateCSVReport(currentSession);
+          filename = `performance_report_${currentSession.id}.csv`;
+          mimeType = 'text/csv';
+          break;
+      }
 
-    const blob = new Blob([content], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(url);
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
 
-    onExport?.(currentSession, format);
-  }, [currentSession, onExport]);
+      onExport?.(currentSession, format);
+    },
+    [currentSession, onExport]
+  );
 
   // Generate HTML report
   const generateHTMLReport = (session: PerformanceSession): string => {
@@ -615,28 +636,34 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
     <h2>Performance Metrics</h2>
     <table>
         <tr><th>Metric</th><th>Value</th><th>Unit</th><th>Level</th></tr>
-        ${session.metrics.map(metric => 
-          `<tr>
+        ${session.metrics
+          .map(
+            metric =>
+              `<tr>
             <td>${metric.name}</td>
             <td>${metric.value.toFixed(2)}</td>
             <td>${metric.unit}</td>
             <td class="metric-${metric.level.toLowerCase()}">${metric.level}</td>
           </tr>`
-        ).join('')}
+          )
+          .join('')}
     </table>
     
     <h2>Function Profiling</h2>
     <table>
         <tr><th>Function</th><th>Calls</th><th>Total Time (ms)</th><th>Avg Time (ms)</th><th>Percentage</th></tr>
-        ${session.functions.map(func => 
-          `<tr>
+        ${session.functions
+          .map(
+            func =>
+              `<tr>
             <td>${func.name}</td>
             <td>${func.callCount}</td>
             <td>${func.totalTime.toFixed(2)}</td>
             <td>${func.averageTime.toFixed(2)}</td>
             <td>${func.percentage.toFixed(1)}%</td>
           </tr>`
-        ).join('')}
+          )
+          .join('')}
     </table>
 </body>
 </html>`;
@@ -653,15 +680,21 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
         <Status>${session.status}</Status>
         
         <Metrics>
-            ${session.metrics.map(metric => 
-              `<Metric type="${metric.type}" name="${metric.name}" value="${metric.value}" unit="${metric.unit}" level="${metric.level}" />`
-            ).join('')}
+            ${session.metrics
+              .map(
+                metric =>
+                  `<Metric type="${metric.type}" name="${metric.name}" value="${metric.value}" unit="${metric.unit}" level="${metric.level}" />`
+              )
+              .join('')}
         </Metrics>
         
         <Functions>
-            ${session.functions.map(func => 
-              `<Function name="${func.name}" calls="${func.callCount}" totalTime="${func.totalTime}" avgTime="${func.averageTime}" percentage="${func.percentage}" />`
-            ).join('')}
+            ${session.functions
+              .map(
+                func =>
+                  `<Function name="${func.name}" calls="${func.callCount}" totalTime="${func.totalTime}" avgTime="${func.averageTime}" percentage="${func.percentage}" />`
+              )
+              .join('')}
         </Functions>
     </Session>
 </PerformanceReport>`;
@@ -677,21 +710,25 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
   };
 
   // Filter functions based on search text
-  const filteredFunctions = currentSession?.functions.filter(func =>
-    func.name.toLowerCase().includes(filterText.toLowerCase()) ||
-    func.module.toLowerCase().includes(filterText.toLowerCase())
-  ).sort((a, b) => {
-    switch (sortBy) {
-      case 'totalTime':
-        return b.totalTime - a.totalTime;
-      case 'callCount':
-        return b.callCount - a.callCount;
-      case 'averageTime':
-        return b.averageTime - a.averageTime;
-      default:
-        return 0;
-    }
-  }) || [];
+  const filteredFunctions =
+    currentSession?.functions
+      .filter(
+        func =>
+          func.name.toLowerCase().includes(filterText.toLowerCase()) ||
+          func.module.toLowerCase().includes(filterText.toLowerCase())
+      )
+      .sort((a, b) => {
+        switch (sortBy) {
+          case 'totalTime':
+            return b.totalTime - a.totalTime;
+          case 'callCount':
+            return b.callCount - a.callCount;
+          case 'averageTime':
+            return b.averageTime - a.averageTime;
+          default:
+            return 0;
+        }
+      }) || [];
 
   const renderOverviewTab = () => (
     <div className="p-4 space-y-6">
@@ -701,13 +738,19 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
           <div key={metric.id} className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-700">{metric.name}</h3>
-              <span className={`text-xs px-2 py-1 rounded ${
-                metric.level === PerformanceLevel.Excellent ? 'bg-green-100 text-green-800' :
-                metric.level === PerformanceLevel.Good ? 'bg-blue-100 text-blue-800' :
-                metric.level === PerformanceLevel.Fair ? 'bg-yellow-100 text-yellow-800' :
-                metric.level === PerformanceLevel.Poor ? 'bg-orange-100 text-orange-800' :
-                'bg-red-100 text-red-800'
-              }`}>
+              <span
+                className={`text-xs px-2 py-1 rounded ${
+                  metric.level === PerformanceLevel.Excellent
+                    ? 'bg-green-100 text-green-800'
+                    : metric.level === PerformanceLevel.Good
+                      ? 'bg-blue-100 text-blue-800'
+                      : metric.level === PerformanceLevel.Fair
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : metric.level === PerformanceLevel.Poor
+                          ? 'bg-orange-100 text-orange-800'
+                          : 'bg-red-100 text-red-800'
+                }`}
+              >
                 {metric.level}
               </span>
             </div>
@@ -715,16 +758,21 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
               <span className="text-2xl font-bold text-gray-900">
                 {metric.value.toFixed(1)} {metric.unit}
               </span>
-              <span className={`text-sm ${
-                metric.trend === 'up' ? 'text-red-500' :
-                metric.trend === 'down' ? 'text-green-500' :
-                'text-gray-500'
-              }`}>
+              <span
+                className={`text-sm ${
+                  metric.trend === 'up'
+                    ? 'text-red-500'
+                    : metric.trend === 'down'
+                      ? 'text-green-500'
+                      : 'text-gray-500'
+                }`}
+              >
                 {metric.trend === 'up' ? '↗' : metric.trend === 'down' ? '↘' : '→'}
               </span>
             </div>
             <div className="mt-2 text-xs text-gray-500">
-              Warning: {metric.threshold.warning} {metric.unit}, Critical: {metric.threshold.critical} {metric.unit}
+              Warning: {metric.threshold.warning} {metric.unit}, Critical:{' '}
+              {metric.threshold.critical} {metric.unit}
             </div>
           </div>
         ))}
@@ -773,19 +821,27 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
             </div>
             <div>
               <span className="font-medium text-gray-700">Start Time:</span>
-              <span className="ml-2 text-gray-600">{currentSession.startTime.toLocaleString()}</span>
+              <span className="ml-2 text-gray-600">
+                {currentSession.startTime.toLocaleString()}
+              </span>
             </div>
             <div>
               <span className="font-medium text-gray-700">Duration:</span>
-              <span className="ml-2 text-gray-600">{Math.round(currentSession.duration / 1000)}s</span>
+              <span className="ml-2 text-gray-600">
+                {Math.round(currentSession.duration / 1000)}s
+              </span>
             </div>
             <div>
               <span className="font-medium text-gray-700">Status:</span>
-              <span className={`ml-2 px-2 py-1 rounded text-xs ${
-                currentSession.status === 'Recording' ? 'bg-red-100 text-red-800' :
-                currentSession.status === 'Complete' ? 'bg-green-100 text-green-800' :
-                'bg-yellow-100 text-yellow-800'
-              }`}>
+              <span
+                className={`ml-2 px-2 py-1 rounded text-xs ${
+                  currentSession.status === 'Recording'
+                    ? 'bg-red-100 text-red-800'
+                    : currentSession.status === 'Complete'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-yellow-100 text-yellow-800'
+                }`}
+              >
                 {currentSession.status}
               </span>
             </div>
@@ -804,7 +860,7 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
             <div className="flex gap-2">
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={e => setSortBy(e.target.value as any)}
                 className="px-3 py-1 border border-gray-300 rounded text-sm"
               >
                 <option value="totalTime">Sort by Total Time</option>
@@ -815,24 +871,38 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
                 type="text"
                 placeholder="Filter functions..."
                 value={filterText}
-                onChange={(e) => setFilterText(e.target.value)}
+                onChange={e => setFilterText(e.target.value)}
                 className="px-3 py-1 border border-gray-300 rounded text-sm"
               />
             </div>
           </div>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Function</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Module</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Calls</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total Time</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Avg Time</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">%</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                  Function
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                  Module
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                  Calls
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                  Total Time
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                  Avg Time
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                  %
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -842,12 +912,14 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
                   <td className="px-4 py-2 text-sm text-gray-600">{func.module}</td>
                   <td className="px-4 py-2 text-sm text-gray-600">{func.callCount}</td>
                   <td className="px-4 py-2 text-sm text-gray-600">{func.totalTime.toFixed(2)}ms</td>
-                  <td className="px-4 py-2 text-sm text-gray-600">{func.averageTime.toFixed(2)}ms</td>
+                  <td className="px-4 py-2 text-sm text-gray-600">
+                    {func.averageTime.toFixed(2)}ms
+                  </td>
                   <td className="px-4 py-2 text-sm text-gray-600">
                     <div className="flex items-center">
                       <div className="w-12 bg-gray-200 rounded-full h-2 mr-2">
-                        <div 
-                          className="bg-blue-500 h-2 rounded-full" 
+                        <div
+                          className="bg-blue-500 h-2 rounded-full"
                           style={{ width: `${Math.min(100, func.percentage)}%` }}
                         />
                       </div>
@@ -864,10 +936,12 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
             </tbody>
           </table>
         </div>
-        
+
         {filteredFunctions.length === 0 && (
           <div className="text-center py-8 text-gray-500">
-            {currentSession ? 'No functions match the current filter' : 'No profiling data available'}
+            {currentSession
+              ? 'No functions match the current filter'
+              : 'No profiling data available'}
           </div>
         )}
       </div>
@@ -884,23 +958,33 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Current Usage:</span>
-                <span className="text-sm font-medium">{(currentSession.memoryAnalysis.currentUsage / 1024 / 1024).toFixed(1)} MB</span>
+                <span className="text-sm font-medium">
+                  {(currentSession.memoryAnalysis.currentUsage / 1024 / 1024).toFixed(1)} MB
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Peak Usage:</span>
-                <span className="text-sm font-medium">{(currentSession.memoryAnalysis.peakUsage / 1024 / 1024).toFixed(1)} MB</span>
+                <span className="text-sm font-medium">
+                  {(currentSession.memoryAnalysis.peakUsage / 1024 / 1024).toFixed(1)} MB
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Total Allocated:</span>
-                <span className="text-sm font-medium">{(currentSession.memoryAnalysis.totalAllocated / 1024 / 1024).toFixed(1)} MB</span>
+                <span className="text-sm font-medium">
+                  {(currentSession.memoryAnalysis.totalAllocated / 1024 / 1024).toFixed(1)} MB
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Total Freed:</span>
-                <span className="text-sm font-medium">{(currentSession.memoryAnalysis.totalFreed / 1024 / 1024).toFixed(1)} MB</span>
+                <span className="text-sm font-medium">
+                  {(currentSession.memoryAnalysis.totalFreed / 1024 / 1024).toFixed(1)} MB
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Heap Fragmentation:</span>
-                <span className="text-sm font-medium">{currentSession.memoryAnalysis.heapFragmentation.toFixed(1)}%</span>
+                <span className="text-sm font-medium">
+                  {currentSession.memoryAnalysis.heapFragmentation.toFixed(1)}%
+                </span>
               </div>
             </div>
           )}
@@ -924,16 +1008,19 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
         <div className="p-4 border-b border-gray-200">
           <h3 className="text-lg font-medium text-gray-800">Performance Counters</h3>
         </div>
-        
+
         <div className="p-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {performanceCounters.map(counter => (
-              <div key={counter.id} className="flex items-center justify-between p-3 border border-gray-200 rounded">
+              <div
+                key={counter.id}
+                className="flex items-center justify-between p-3 border border-gray-200 rounded"
+              >
                 <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     checked={selectedCounters.has(counter.id)}
-                    onChange={(e) => {
+                    onChange={e => {
                       const newSelected = new Set(selectedCounters);
                       if (e.target.checked) {
                         newSelected.add(counter.id);
@@ -956,7 +1043,7 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
                   <div className="text-sm font-medium text-gray-900">
                     {counter.value.toFixed(1)} {counter.unit}
                   </div>
-                  <div 
+                  <div
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: counter.color }}
                   />
@@ -975,7 +1062,7 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
         <div className="p-4 border-b border-gray-200">
           <h3 className="text-lg font-medium text-gray-800">Performance Recommendations</h3>
         </div>
-        
+
         <div className="p-4">
           {currentSession?.recommendations.length ? (
             <div className="space-y-4">
@@ -983,11 +1070,15 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
                 <div key={index} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className={`px-2 py-1 text-xs rounded ${
-                        rec.impact === 'High' ? 'bg-red-100 text-red-800' :
-                        rec.impact === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-blue-100 text-blue-800'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 text-xs rounded ${
+                          rec.impact === 'High'
+                            ? 'bg-red-100 text-red-800'
+                            : rec.impact === 'Medium'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-blue-100 text-blue-800'
+                        }`}
+                      >
                         {rec.impact} Impact
                       </span>
                       <span className="text-sm font-medium text-gray-900">{rec.category}</span>
@@ -997,7 +1088,8 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
                   <p className="text-sm text-gray-600 mb-3">{rec.recommendation}</p>
                   {rec.codeLocation && (
                     <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-                      Location: {rec.codeLocation.file}:{rec.codeLocation.line} in {rec.codeLocation.function}()
+                      Location: {rec.codeLocation.file}:{rec.codeLocation.line} in{' '}
+                      {rec.codeLocation.function}()
                     </div>
                   )}
                 </div>
@@ -1021,7 +1113,9 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
       <div className="bg-white border-b border-gray-200 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-semibold text-gray-800">Application Performance Explorer</h1>
+            <h1 className="text-xl font-semibold text-gray-800">
+              Application Performance Explorer
+            </h1>
             {isRecording && (
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
@@ -1029,7 +1123,7 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
               </div>
             )}
           </div>
-          
+
           <div className="flex gap-2">
             {!isRecording ? (
               <button
@@ -1046,7 +1140,7 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
                 Stop Recording
               </button>
             )}
-            
+
             {currentSession && (
               <div className="flex gap-1">
                 <button
@@ -1075,7 +1169,7 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
             { id: 'functions', label: 'Functions', icon: '⚡' },
             { id: 'memory', label: 'Memory', icon: '🧠' },
             { id: 'counters', label: 'Counters', icon: '📈' },
-            { id: 'recommendations', label: 'Recommendations', icon: '💡' }
+            { id: 'recommendations', label: 'Recommendations', icon: '💡' },
           ].map(tab => (
             <button
               key={tab.id}
@@ -1100,7 +1194,9 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
             <div className="text-center">
               <div className="text-6xl mb-4">⚡</div>
               <h2 className="text-xl font-semibold text-gray-800 mb-2">No Active Session</h2>
-              <p className="text-gray-600 mb-4">Start a performance profiling session to analyze your application</p>
+              <p className="text-gray-600 mb-4">
+                Start a performance profiling session to analyze your application
+              </p>
               <button
                 onClick={() => setShowNewSessionDialog(true)}
                 className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
@@ -1125,7 +1221,7 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96">
             <h3 className="text-lg font-medium mb-4">New Performance Session</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1134,28 +1230,30 @@ export const ApplicationPerformanceExplorer: React.FC<ApplicationPerformanceExpl
                 <input
                   type="text"
                   value={selectedApplication}
-                  onChange={(e) => setSelectedApplication(e.target.value)}
+                  onChange={e => setSelectedApplication(e.target.value)}
                   placeholder="C:\\MyApp\\MyApp.exe"
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Profiling Mode
                 </label>
                 <select
                   value={selectedProfilingMode}
-                  onChange={(e) => setSelectedProfilingMode(e.target.value as ProfilingMode)}
+                  onChange={e => setSelectedProfilingMode(e.target.value as ProfilingMode)}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 >
                   {Object.values(ProfilingMode).map(mode => (
-                    <option key={mode} value={mode}>{mode}</option>
+                    <option key={mode} value={mode}>
+                      {mode}
+                    </option>
                   ))}
                 </select>
               </div>
             </div>
-            
+
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => setShowNewSessionDialog(false)}

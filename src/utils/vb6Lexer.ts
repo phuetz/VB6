@@ -8,6 +8,14 @@ export enum TokenType {
   Comment = 'Comment',
   NewLine = 'NewLine',
   Whitespace = 'Whitespace',
+  DateLiteral = 'DateLiteral',
+  HexLiteral = 'HexLiteral',
+  OctalLiteral = 'OctalLiteral',
+  FloatLiteral = 'FloatLiteral',
+  LineContinuation = 'LineContinuation',
+  PreprocessorDirective = 'PreprocessorDirective',
+  TypeSuffix = 'TypeSuffix',
+  EOF = 'EOF',
 }
 
 export interface Token {
@@ -19,6 +27,8 @@ export interface Token {
 
 const KEYWORDS = new Set([
   'and',
+  'addressof',
+  'alias',
   'as',
   'boolean',
   'byref',
@@ -26,8 +36,12 @@ const KEYWORDS = new Set([
   'byval',
   'call',
   'case',
+  'class',
   'const',
   'currency',
+  'date',
+  'debug',
+  'declare',
   'dim',
   'do',
   'double',
@@ -36,19 +50,31 @@ const KEYWORDS = new Set([
   'elseif',
   'end',
   'enum',
+  'eqv',
+  'erase',
+  'error',
+  'event',
   'exit',
   'false',
   'for',
+  'friend',
   'function',
   'get',
+  'global',
+  'gosub',
   'goto',
   'if',
+  'imp',
+  'implements',
   'in',
   'integer',
   'is',
   'let',
+  'lib',
+  'like',
   'long',
   'loop',
+  'me',
   'mod',
   'new',
   'next',
@@ -59,50 +85,66 @@ const KEYWORDS = new Set([
   'option',
   'optional',
   'or',
+  'paramarray',
+  'preserve',
+  'print',
   'private',
   'property',
   'public',
+  'raiseevent',
+  'redim',
+  'rem',
   'resume',
+  'return',
   'select',
   'set',
   'single',
   'static',
+  'step',
+  'stop',
   'string',
   'sub',
   'then',
   'to',
   'true',
   'type',
+  'typeof',
   'until',
   'variant',
   'wend',
   'while',
   'with',
+  'withevents',
   'xor',
 ]);
 
-const OPERATORS = ['>=', '<=', '<>', '\\', '=', '>', '<', '+', '-', '*', '/', '^', '&'];
-const PUNCTUATIONS = ['(', ')', ',', '.', ':'];
+const OPERATORS = ['>=', '<=', '<>', ':=', '\\', '=', '>', '<', '+', '-', '*', '/', '^', '&'];
+const PUNCTUATIONS = ['(', ')', ',', '.', ':', ';', '!'];
+const TYPE_SUFFIXES = new Set(['%', '&', '!', '#', '@', '$']);
 
 export function lexVB6(code: string): Token[] {
   // LEXER BUG FIX: Add input validation and size limits
   if (typeof code !== 'string') {
     throw new Error('Invalid code input');
   }
-  if (code.length > 1000000) { // 1MB limit
+  if (code.length > 1000000) {
+    // 1MB limit
     throw new Error('Code too large to lex');
   }
   const tokens: Token[] = [];
   let i = 0;
   let line = 1;
   let column = 1;
+  let isLineStart = true;
 
   const addToken = (type: TokenType, value: string, l = line, c = column) => {
-    // LEXER BUG FIX: Limit token array size to prevent memory exhaustion
     if (tokens.length >= 1000000) {
       throw new Error('Too many tokens');
     }
     tokens.push({ type, value, line: l, column: c });
+    if (type !== TokenType.Whitespace && type !== TokenType.NewLine) {
+      isLineStart = false;
+    }
   };
 
   while (i < code.length) {
@@ -118,6 +160,7 @@ export function lexVB6(code: string): Token[] {
       i++;
       line++;
       column = 1;
+      isLineStart = true;
       continue;
     }
 
@@ -144,6 +187,43 @@ export function lexVB6(code: string): Token[] {
         column++;
       }
       addToken(TokenType.Comment, code.slice(start, i), line, startCol);
+      continue;
+    }
+
+    // Preprocessor directives and date literals
+    if (ch === '#') {
+      const startCol = column;
+      // Check for preprocessor directive: #If, #Else, #ElseIf, #End, #Const
+      if (isLineStart) {
+        const restOfLine = code.slice(i + 1).match(/^\s*(If|Else|ElseIf|End|Const)\b/i);
+        if (restOfLine) {
+          const start = i;
+          while (i < code.length && code[i] !== '\n') {
+            i++;
+            column++;
+          }
+          addToken(TokenType.PreprocessorDirective, code.slice(start, i), line, startCol);
+          continue;
+        }
+      }
+      // Date literal: #12/31/2023# or #1:30 PM#
+      const start = i;
+      i++;
+      column++;
+      while (i < code.length && code[i] !== '#' && code[i] !== '\n') {
+        i++;
+        column++;
+      }
+      if (i < code.length && code[i] === '#') {
+        i++;
+        column++;
+        addToken(TokenType.DateLiteral, code.slice(start, i), line, startCol);
+      } else {
+        // Not a date literal, emit as punctuation
+        addToken(TokenType.Punctuation, '#', line, startCol);
+        i = start + 1;
+        column = startCol + 1;
+      }
       continue;
     }
 
@@ -181,20 +261,52 @@ export function lexVB6(code: string): Token[] {
     if (/[0-9]/.test(ch)) {
       const start = i;
       const startCol = column;
-      // LEXER BUG FIX: Limit number literal length
+      let hasDecimal = false;
+      let hasExponent = false;
       const maxNumber = Math.min(i + 100, code.length);
-      while (i < maxNumber && /[0-9A-Fa-fxX&.]/.test(code[i])) {
+      while (i < maxNumber && /[0-9]/.test(code[i])) {
         i++;
         column++;
       }
-      addToken(TokenType.NumberLiteral, code.slice(start, i), line, startCol);
+      // Decimal part
+      if (i < maxNumber && code[i] === '.' && /[0-9]/.test(code[i + 1] || '')) {
+        hasDecimal = true;
+        i++;
+        column++;
+        while (i < maxNumber && /[0-9]/.test(code[i])) {
+          i++;
+          column++;
+        }
+      }
+      // Exponent part (E/e/D/d for VB6)
+      if (i < maxNumber && /[eEdD]/.test(code[i])) {
+        hasExponent = true;
+        i++;
+        column++;
+        if (i < maxNumber && /[+-]/.test(code[i])) {
+          i++;
+          column++;
+        }
+        while (i < maxNumber && /[0-9]/.test(code[i])) {
+          i++;
+          column++;
+        }
+      }
+      const numValue = code.slice(start, i);
+      const numType = hasDecimal || hasExponent ? TokenType.FloatLiteral : TokenType.NumberLiteral;
+      addToken(numType, numValue, line, startCol);
+      // Check for type suffix after number
+      if (i < code.length && TYPE_SUFFIXES.has(code[i])) {
+        addToken(TokenType.TypeSuffix, code[i], line, column);
+        i++;
+        column++;
+      }
       continue;
     }
 
     if (/[A-Za-z_]/.test(ch)) {
       const start = i;
       const startCol = column;
-      // LEXER BUG FIX: Limit identifier length
       const maxIdentifier = Math.min(i + 256, code.length);
       while (i < maxIdentifier && /[A-Za-z0-9_]/.test(code[i])) {
         i++;
@@ -202,13 +314,74 @@ export function lexVB6(code: string): Token[] {
       }
       const value = code.slice(start, i);
       const lower = value.toLowerCase();
-      addToken(
-        KEYWORDS.has(lower) ? TokenType.Keyword : TokenType.Identifier,
-        value,
-        line,
-        startCol
-      );
+
+      // Line continuation: standalone _ at end of line
+      if (value === '_') {
+        let j = i;
+        while (j < code.length && (code[j] === ' ' || code[j] === '\t')) j++;
+        if (j >= code.length || code[j] === '\n' || code[j] === '\r') {
+          addToken(TokenType.LineContinuation, '_', line, startCol);
+          // Skip trailing whitespace (newline handled by next iteration)
+          i = j;
+          column += j - start - 1;
+          continue;
+        }
+      }
+
+      // Rem comment: consumes rest of line
+      if (lower === 'rem') {
+        const commentStart = start;
+        while (i < code.length && code[i] !== '\n') {
+          i++;
+          column++;
+        }
+        addToken(TokenType.Comment, code.slice(commentStart, i), line, startCol);
+        continue;
+      }
+
+      const tokenType = KEYWORDS.has(lower) ? TokenType.Keyword : TokenType.Identifier;
+      addToken(tokenType, value, line, startCol);
+      // Check for type suffix after identifier
+      if (tokenType === TokenType.Identifier && i < code.length && TYPE_SUFFIXES.has(code[i])) {
+        addToken(TokenType.TypeSuffix, code[i], line, column);
+        i++;
+        column++;
+      }
       continue;
+    }
+
+    // Hex and octal literals: &H... and &O...
+    if (ch === '&' && i + 1 < code.length) {
+      const next = code[i + 1];
+      if (next === 'H' || next === 'h') {
+        const start = i;
+        const startCol = column;
+        i += 2;
+        column += 2;
+        while (i < code.length && /[0-9A-Fa-f]/.test(code[i])) {
+          i++;
+          column++;
+        }
+        // Optional trailing & for Long type
+        if (i < code.length && code[i] === '&') {
+          i++;
+          column++;
+        }
+        addToken(TokenType.HexLiteral, code.slice(start, i), line, startCol);
+        continue;
+      }
+      if (next === 'O' || next === 'o') {
+        const start = i;
+        const startCol = column;
+        i += 2;
+        column += 2;
+        while (i < code.length && /[0-7]/.test(code[i])) {
+          i++;
+          column++;
+        }
+        addToken(TokenType.OctalLiteral, code.slice(start, i), line, startCol);
+        continue;
+      }
     }
 
     const two = code.slice(i, i + 2);
@@ -232,11 +405,20 @@ export function lexVB6(code: string): Token[] {
       continue;
     }
 
+    // Type suffix characters in standalone position
+    if (TYPE_SUFFIXES.has(ch)) {
+      addToken(TokenType.TypeSuffix, ch);
+      i++;
+      column++;
+      continue;
+    }
+
     // Unknown character
     addToken(TokenType.Punctuation, ch);
     i++;
     column++;
   }
 
+  addToken(TokenType.EOF, '', line, column);
   return tokens;
 }

@@ -32,11 +32,7 @@ export interface APITextViewerProps {
   onInsertAPI: (declaration: string) => void;
 }
 
-export const APITextViewer: React.FC<APITextViewerProps> = ({
-  visible,
-  onClose,
-  onInsertAPI
-}) => {
+export const APITextViewer: React.FC<APITextViewerProps> = ({ visible, onClose, onInsertAPI }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedAPI, setSelectedAPI] = useState<APIDeclaration | null>(null);
   const [searchText, setSearchText] = useState('');
@@ -66,7 +62,7 @@ export const APITextViewer: React.FC<APITextViewerProps> = ({
     'Security',
     'Hardware',
     'Internet',
-    'Database'
+    'Database',
   ];
 
   // Initialize API database
@@ -83,10 +79,10 @@ export const APITextViewer: React.FC<APITextViewerProps> = ({
 
   const loadAPIDatabase = async () => {
     setLoading(true);
-    
+
     // Simulate loading API database
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     const apis: APIDeclaration[] = [
       // File Operations
       {
@@ -94,52 +90,128 @@ export const APITextViewer: React.FC<APITextViewerProps> = ({
         category: 'File Operations',
         type: 'Declare',
         library: 'kernel32',
-        declaration: 'Private Declare Function CreateFile Lib "kernel32" Alias "CreateFileA" (ByVal lpFileName As String, ByVal dwDesiredAccess As Long, ByVal dwShareMode As Long, lpSecurityAttributes As Any, ByVal dwCreationDisposition As Long, ByVal dwFlagsAndAttributes As Long, ByVal hTemplateFile As Long) As Long',
+        declaration:
+          'Private Declare Function CreateFile Lib "kernel32" Alias "CreateFileA" (ByVal lpFileName As String, ByVal dwDesiredAccess As Long, ByVal dwShareMode As Long, lpSecurityAttributes As Any, ByVal dwCreationDisposition As Long, ByVal dwFlagsAndAttributes As Long, ByVal hTemplateFile As Long) As Long',
         description: 'Creates or opens a file or I/O device.',
         returnType: 'Long',
         parameters: [
-          { name: 'lpFileName', type: 'String', direction: 'In', optional: false, description: 'Name of the file or device to be created or opened' },
-          { name: 'dwDesiredAccess', type: 'Long', direction: 'In', optional: false, description: 'Requested access to the file or device' },
-          { name: 'dwShareMode', type: 'Long', direction: 'In', optional: false, description: 'Requested sharing mode of the file or device' },
-          { name: 'lpSecurityAttributes', type: 'Any', direction: 'In', optional: true, description: 'Pointer to security attributes' },
-          { name: 'dwCreationDisposition', type: 'Long', direction: 'In', optional: false, description: 'Action to take on a file or device that exists or does not exist' },
-          { name: 'dwFlagsAndAttributes', type: 'Long', direction: 'In', optional: false, description: 'File or device attributes and flags' },
-          { name: 'hTemplateFile', type: 'Long', direction: 'In', optional: true, description: 'Handle to a template file' }
-        ]
+          {
+            name: 'lpFileName',
+            type: 'String',
+            direction: 'In',
+            optional: false,
+            description: 'Name of the file or device to be created or opened',
+          },
+          {
+            name: 'dwDesiredAccess',
+            type: 'Long',
+            direction: 'In',
+            optional: false,
+            description: 'Requested access to the file or device',
+          },
+          {
+            name: 'dwShareMode',
+            type: 'Long',
+            direction: 'In',
+            optional: false,
+            description: 'Requested sharing mode of the file or device',
+          },
+          {
+            name: 'lpSecurityAttributes',
+            type: 'Any',
+            direction: 'In',
+            optional: true,
+            description: 'Pointer to security attributes',
+          },
+          {
+            name: 'dwCreationDisposition',
+            type: 'Long',
+            direction: 'In',
+            optional: false,
+            description: 'Action to take on a file or device that exists or does not exist',
+          },
+          {
+            name: 'dwFlagsAndAttributes',
+            type: 'Long',
+            direction: 'In',
+            optional: false,
+            description: 'File or device attributes and flags',
+          },
+          {
+            name: 'hTemplateFile',
+            type: 'Long',
+            direction: 'In',
+            optional: true,
+            description: 'Handle to a template file',
+          },
+        ],
       },
       {
         name: 'ReadFile',
         category: 'File Operations',
         type: 'Declare',
         library: 'kernel32',
-        declaration: 'Private Declare Function ReadFile Lib "kernel32" (ByVal hFile As Long, lpBuffer As Any, ByVal nNumberOfBytesToRead As Long, lpNumberOfBytesRead As Long, lpOverlapped As Any) As Long',
+        declaration:
+          'Private Declare Function ReadFile Lib "kernel32" (ByVal hFile As Long, lpBuffer As Any, ByVal nNumberOfBytesToRead As Long, lpNumberOfBytesRead As Long, lpOverlapped As Any) As Long',
         description: 'Reads data from the specified file or input/output (I/O) device.',
         returnType: 'Long',
         parameters: [
-          { name: 'hFile', type: 'Long', direction: 'In', optional: false, description: 'Handle to the device' },
-          { name: 'lpBuffer', type: 'Any', direction: 'Out', optional: false, description: 'Pointer to the buffer that receives the data read from a file or device' },
-          { name: 'nNumberOfBytesToRead', type: 'Long', direction: 'In', optional: false, description: 'Maximum number of bytes to be read' },
-          { name: 'lpNumberOfBytesRead', type: 'Long', direction: 'Out', optional: false, description: 'Pointer to the variable that receives the number of bytes read' },
-          { name: 'lpOverlapped', type: 'Any', direction: 'InOut', optional: true, description: 'Pointer to an OVERLAPPED structure' }
-        ]
+          {
+            name: 'hFile',
+            type: 'Long',
+            direction: 'In',
+            optional: false,
+            description: 'Handle to the device',
+          },
+          {
+            name: 'lpBuffer',
+            type: 'Any',
+            direction: 'Out',
+            optional: false,
+            description: 'Pointer to the buffer that receives the data read from a file or device',
+          },
+          {
+            name: 'nNumberOfBytesToRead',
+            type: 'Long',
+            direction: 'In',
+            optional: false,
+            description: 'Maximum number of bytes to be read',
+          },
+          {
+            name: 'lpNumberOfBytesRead',
+            type: 'Long',
+            direction: 'Out',
+            optional: false,
+            description: 'Pointer to the variable that receives the number of bytes read',
+          },
+          {
+            name: 'lpOverlapped',
+            type: 'Any',
+            direction: 'InOut',
+            optional: true,
+            description: 'Pointer to an OVERLAPPED structure',
+          },
+        ],
       },
       {
         name: 'WriteFile',
         category: 'File Operations',
         type: 'Declare',
         library: 'kernel32',
-        declaration: 'Private Declare Function WriteFile Lib "kernel32" (ByVal hFile As Long, lpBuffer As Any, ByVal nNumberOfBytesToWrite As Long, lpNumberOfBytesWritten As Long, lpOverlapped As Any) As Long',
+        declaration:
+          'Private Declare Function WriteFile Lib "kernel32" (ByVal hFile As Long, lpBuffer As Any, ByVal nNumberOfBytesToWrite As Long, lpNumberOfBytesWritten As Long, lpOverlapped As Any) As Long',
         description: 'Writes data to the specified file or input/output (I/O) device.',
-        returnType: 'Long'
+        returnType: 'Long',
       },
       {
         name: 'CloseHandle',
         category: 'File Operations',
         type: 'Declare',
         library: 'kernel32',
-        declaration: 'Private Declare Function CloseHandle Lib "kernel32" (ByVal hObject As Long) As Long',
+        declaration:
+          'Private Declare Function CloseHandle Lib "kernel32" (ByVal hObject As Long) As Long',
         description: 'Closes an open object handle.',
-        returnType: 'Long'
+        returnType: 'Long',
       },
 
       // Memory Management
@@ -148,36 +220,41 @@ export const APITextViewer: React.FC<APITextViewerProps> = ({
         category: 'Memory Management',
         type: 'Declare',
         library: 'kernel32',
-        declaration: 'Private Declare Function GlobalAlloc Lib "kernel32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long',
+        declaration:
+          'Private Declare Function GlobalAlloc Lib "kernel32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long',
         description: 'Allocates the specified number of bytes from the heap.',
-        returnType: 'Long'
+        returnType: 'Long',
       },
       {
         name: 'GlobalFree',
         category: 'Memory Management',
         type: 'Declare',
         library: 'kernel32',
-        declaration: 'Private Declare Function GlobalFree Lib "kernel32" (ByVal hMem As Long) As Long',
+        declaration:
+          'Private Declare Function GlobalFree Lib "kernel32" (ByVal hMem As Long) As Long',
         description: 'Frees the specified global memory object and invalidates its handle.',
-        returnType: 'Long'
+        returnType: 'Long',
       },
       {
         name: 'GlobalLock',
         category: 'Memory Management',
         type: 'Declare',
         library: 'kernel32',
-        declaration: 'Private Declare Function GlobalLock Lib "kernel32" (ByVal hMem As Long) As Long',
-        description: 'Locks a global memory object and returns a pointer to the first byte of the object\'s memory block.',
-        returnType: 'Long'
+        declaration:
+          'Private Declare Function GlobalLock Lib "kernel32" (ByVal hMem As Long) As Long',
+        description:
+          "Locks a global memory object and returns a pointer to the first byte of the object's memory block.",
+        returnType: 'Long',
       },
       {
         name: 'GlobalUnlock',
         category: 'Memory Management',
         type: 'Declare',
         library: 'kernel32',
-        declaration: 'Private Declare Function GlobalUnlock Lib "kernel32" (ByVal hMem As Long) As Long',
+        declaration:
+          'Private Declare Function GlobalUnlock Lib "kernel32" (ByVal hMem As Long) As Long',
         description: 'Decrements the lock count associated with a memory object.',
-        returnType: 'Long'
+        returnType: 'Long',
       },
 
       // String Functions
@@ -186,27 +263,30 @@ export const APITextViewer: React.FC<APITextViewerProps> = ({
         category: 'String Functions',
         type: 'Declare',
         library: 'kernel32',
-        declaration: 'Private Declare Function lstrlen Lib "kernel32" Alias "lstrlenA" (ByVal lpString As String) As Long',
+        declaration:
+          'Private Declare Function lstrlen Lib "kernel32" Alias "lstrlenA" (ByVal lpString As String) As Long',
         description: 'Determines the length of the specified string.',
-        returnType: 'Long'
+        returnType: 'Long',
       },
       {
         name: 'lstrcpy',
         category: 'String Functions',
         type: 'Declare',
         library: 'kernel32',
-        declaration: 'Private Declare Function lstrcpy Lib "kernel32" Alias "lstrcpyA" (ByVal lpString1 As String, ByVal lpString2 As String) As Long',
+        declaration:
+          'Private Declare Function lstrcpy Lib "kernel32" Alias "lstrcpyA" (ByVal lpString1 As String, ByVal lpString2 As String) As Long',
         description: 'Copies a string to a buffer.',
-        returnType: 'Long'
+        returnType: 'Long',
       },
       {
         name: 'lstrcmp',
         category: 'String Functions',
         type: 'Declare',
         library: 'kernel32',
-        declaration: 'Private Declare Function lstrcmp Lib "kernel32" Alias "lstrcmpA" (ByVal lpString1 As String, ByVal lpString2 As String) As Long',
+        declaration:
+          'Private Declare Function lstrcmp Lib "kernel32" Alias "lstrcmpA" (ByVal lpString1 As String, ByVal lpString2 As String) As Long',
         description: 'Compares two character strings.',
-        returnType: 'Long'
+        returnType: 'Long',
       },
 
       // Registry Functions
@@ -215,27 +295,31 @@ export const APITextViewer: React.FC<APITextViewerProps> = ({
         category: 'Registry Functions',
         type: 'Declare',
         library: 'advapi32',
-        declaration: 'Private Declare Function RegOpenKeyEx Lib "advapi32.dll" Alias "RegOpenKeyExA" (ByVal hKey As Long, ByVal lpSubKey As String, ByVal ulOptions As Long, ByVal samDesired As Long, phkResult As Long) As Long',
+        declaration:
+          'Private Declare Function RegOpenKeyEx Lib "advapi32.dll" Alias "RegOpenKeyExA" (ByVal hKey As Long, ByVal lpSubKey As String, ByVal ulOptions As Long, ByVal samDesired As Long, phkResult As Long) As Long',
         description: 'Opens the specified registry key.',
-        returnType: 'Long'
+        returnType: 'Long',
       },
       {
         name: 'RegQueryValueEx',
         category: 'Registry Functions',
         type: 'Declare',
         library: 'advapi32',
-        declaration: 'Private Declare Function RegQueryValueEx Lib "advapi32.dll" Alias "RegQueryValueExA" (ByVal hKey As Long, ByVal lpValueName As String, ByVal lpReserved As Long, lpType As Long, lpData As Any, lpcbData As Long) As Long',
-        description: 'Retrieves the type and data for the specified value name associated with an open registry key.',
-        returnType: 'Long'
+        declaration:
+          'Private Declare Function RegQueryValueEx Lib "advapi32.dll" Alias "RegQueryValueExA" (ByVal hKey As Long, ByVal lpValueName As String, ByVal lpReserved As Long, lpType As Long, lpData As Any, lpcbData As Long) As Long',
+        description:
+          'Retrieves the type and data for the specified value name associated with an open registry key.',
+        returnType: 'Long',
       },
       {
         name: 'RegCloseKey',
         category: 'Registry Functions',
         type: 'Declare',
         library: 'advapi32',
-        declaration: 'Private Declare Function RegCloseKey Lib "advapi32.dll" (ByVal hKey As Long) As Long',
+        declaration:
+          'Private Declare Function RegCloseKey Lib "advapi32.dll" (ByVal hKey As Long) As Long',
         description: 'Closes a handle to the specified registry key.',
-        returnType: 'Long'
+        returnType: 'Long',
       },
 
       // System Information
@@ -244,27 +328,31 @@ export const APITextViewer: React.FC<APITextViewerProps> = ({
         category: 'System Information',
         type: 'Declare',
         library: 'kernel32',
-        declaration: 'Private Declare Sub GetSystemInfo Lib "kernel32" (lpSystemInfo As SYSTEM_INFO)',
+        declaration:
+          'Private Declare Sub GetSystemInfo Lib "kernel32" (lpSystemInfo As SYSTEM_INFO)',
         description: 'Retrieves information about the current system.',
-        returnType: 'None'
+        returnType: 'None',
       },
       {
         name: 'GetVersionEx',
         category: 'System Information',
         type: 'Declare',
         library: 'kernel32',
-        declaration: 'Private Declare Function GetVersionEx Lib "kernel32" Alias "GetVersionExA" (lpVersionInformation As OSVERSIONINFO) As Long',
-        description: 'Obtains extended information about the version of the operating system that is currently running.',
-        returnType: 'Long'
+        declaration:
+          'Private Declare Function GetVersionEx Lib "kernel32" Alias "GetVersionExA" (lpVersionInformation As OSVERSIONINFO) As Long',
+        description:
+          'Obtains extended information about the version of the operating system that is currently running.',
+        returnType: 'Long',
       },
       {
         name: 'GetComputerName',
         category: 'System Information',
         type: 'Declare',
         library: 'kernel32',
-        declaration: 'Private Declare Function GetComputerName Lib "kernel32" Alias "GetComputerNameA" (ByVal lpBuffer As String, nSize As Long) As Long',
+        declaration:
+          'Private Declare Function GetComputerName Lib "kernel32" Alias "GetComputerNameA" (ByVal lpBuffer As String, nSize As Long) As Long',
         description: 'Retrieves the NetBIOS name of the local computer.',
-        returnType: 'Long'
+        returnType: 'Long',
       },
 
       // Window Management
@@ -273,36 +361,41 @@ export const APITextViewer: React.FC<APITextViewerProps> = ({
         category: 'Window Management',
         type: 'Declare',
         library: 'user32',
-        declaration: 'Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long',
-        description: 'Retrieves a handle to the top-level window whose class name and window name match the specified strings.',
-        returnType: 'Long'
+        declaration:
+          'Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long',
+        description:
+          'Retrieves a handle to the top-level window whose class name and window name match the specified strings.',
+        returnType: 'Long',
       },
       {
         name: 'GetWindowText',
         category: 'Window Management',
         type: 'Declare',
         library: 'user32',
-        declaration: 'Private Declare Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hwnd As Long, ByVal lpString As String, ByVal cch As Long) As Long',
-        description: 'Copies the text of the specified window\'s title bar into a buffer.',
-        returnType: 'Long'
+        declaration:
+          'Private Declare Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hwnd As Long, ByVal lpString As String, ByVal cch As Long) As Long',
+        description: "Copies the text of the specified window's title bar into a buffer.",
+        returnType: 'Long',
       },
       {
         name: 'SetWindowText',
         category: 'Window Management',
         type: 'Declare',
         library: 'user32',
-        declaration: 'Private Declare Function SetWindowText Lib "user32" Alias "SetWindowTextA" (ByVal hwnd As Long, ByVal lpString As String) As Long',
-        description: 'Changes the text of the specified window\'s title bar.',
-        returnType: 'Long'
+        declaration:
+          'Private Declare Function SetWindowText Lib "user32" Alias "SetWindowTextA" (ByVal hwnd As Long, ByVal lpString As String) As Long',
+        description: "Changes the text of the specified window's title bar.",
+        returnType: 'Long',
       },
       {
         name: 'ShowWindow',
         category: 'Window Management',
         type: 'Declare',
         library: 'user32',
-        declaration: 'Private Declare Function ShowWindow Lib "user32" (ByVal hwnd As Long, ByVal nCmdShow As Long) As Long',
-        description: 'Sets the specified window\'s show state.',
-        returnType: 'Long'
+        declaration:
+          'Private Declare Function ShowWindow Lib "user32" (ByVal hwnd As Long, ByVal nCmdShow As Long) As Long',
+        description: "Sets the specified window's show state.",
+        returnType: 'Long',
       },
 
       // Drawing Functions
@@ -312,17 +405,19 @@ export const APITextViewer: React.FC<APITextViewerProps> = ({
         type: 'Declare',
         library: 'user32',
         declaration: 'Private Declare Function GetDC Lib "user32" (ByVal hwnd As Long) As Long',
-        description: 'Retrieves a handle to a device context (DC) for the client area of a specified window.',
-        returnType: 'Long'
+        description:
+          'Retrieves a handle to a device context (DC) for the client area of a specified window.',
+        returnType: 'Long',
       },
       {
         name: 'ReleaseDC',
         category: 'Drawing Functions',
         type: 'Declare',
         library: 'user32',
-        declaration: 'Private Declare Function ReleaseDC Lib "user32" (ByVal hwnd As Long, ByVal hdc As Long) As Long',
+        declaration:
+          'Private Declare Function ReleaseDC Lib "user32" (ByVal hwnd As Long, ByVal hdc As Long) As Long',
         description: 'Releases a device context (DC), freeing it for use by other applications.',
-        returnType: 'Long'
+        returnType: 'Long',
       },
 
       // Constants
@@ -335,7 +430,7 @@ export const APITextViewer: React.FC<APITextViewerProps> = ({
 Public Const GENERIC_WRITE = &H40000000
 Public Const GENERIC_EXECUTE = &H20000000
 Public Const GENERIC_ALL = &H10000000`,
-        description: 'Constants for file access rights.'
+        description: 'Constants for file access rights.',
       },
       {
         name: 'File Share Constants',
@@ -345,7 +440,7 @@ Public Const GENERIC_ALL = &H10000000`,
         declaration: `Public Const FILE_SHARE_READ = &H1
 Public Const FILE_SHARE_WRITE = &H2
 Public Const FILE_SHARE_DELETE = &H4`,
-        description: 'Constants for file sharing modes.'
+        description: 'Constants for file sharing modes.',
       },
       {
         name: 'Registry Keys',
@@ -356,7 +451,7 @@ Public Const FILE_SHARE_DELETE = &H4`,
 Public Const HKEY_CURRENT_USER = &H80000001
 Public Const HKEY_LOCAL_MACHINE = &H80000002
 Public Const HKEY_USERS = &H80000003`,
-        description: 'Registry root key constants.'
+        description: 'Registry root key constants.',
       },
 
       // Types
@@ -377,7 +472,7 @@ Public Const HKEY_USERS = &H80000003`,
     wProcessorLevel As Integer
     wProcessorRevision As Integer
 End Type`,
-        description: 'Contains information about a computer system.'
+        description: 'Contains information about a computer system.',
       },
       {
         name: 'OSVERSIONINFO',
@@ -392,8 +487,8 @@ End Type`,
     dwPlatformId As Long
     szCSDVersion As String * 128
 End Type`,
-        description: 'Contains operating system version information.'
-      }
+        description: 'Contains operating system version information.',
+      },
     ];
 
     setApiDatabase(apis);
@@ -411,10 +506,11 @@ End Type`,
     // Filter by search text
     if (searchText.trim()) {
       const search = searchText.toLowerCase();
-      filtered = filtered.filter(api => 
-        api.name.toLowerCase().includes(search) ||
-        api.description.toLowerCase().includes(search) ||
-        api.declaration.toLowerCase().includes(search)
+      filtered = filtered.filter(
+        api =>
+          api.name.toLowerCase().includes(search) ||
+          api.description.toLowerCase().includes(search) ||
+          api.declaration.toLowerCase().includes(search)
       );
     }
 
@@ -439,13 +535,15 @@ End Type`,
 
   const formatParameterList = (params: APIParameter[] | undefined) => {
     if (!params) return '';
-    
-    return params.map(param => {
-      const direction = param.direction === 'Out' ? 'ByRef ' : 
-                      param.direction === 'InOut' ? 'ByRef ' : 'ByVal ';
-      const optional = param.optional ? 'Optional ' : '';
-      return `${optional}${direction}${param.name} As ${param.type}`;
-    }).join(', ');
+
+    return params
+      .map(param => {
+        const direction =
+          param.direction === 'Out' ? 'ByRef ' : param.direction === 'InOut' ? 'ByRef ' : 'ByVal ';
+        const optional = param.optional ? 'Optional ' : '';
+        return `${optional}${direction}${param.name} As ${param.type}`;
+      })
+      .join(', ');
   };
 
   if (!visible) return null;
@@ -456,7 +554,9 @@ End Type`,
       <div className="viewer-dialog">
         <div className="viewer-header">
           <h2>API Text Viewer</h2>
-          <button className="close-button" onClick={onClose}>×</button>
+          <button className="close-button" onClick={onClose}>
+            ×
+          </button>
         </div>
 
         <div className="viewer-content">
@@ -464,9 +564,9 @@ End Type`,
           <div className="left-panel">
             <div className="category-section">
               <label>Available Items:</label>
-              <select 
+              <select
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
+                onChange={e => setSelectedCategory(e.target.value)}
                 className="category-select"
               >
                 {categories.map(category => (
@@ -483,7 +583,7 @@ End Type`,
                 ref={searchInputRef}
                 type="text"
                 value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
+                onChange={e => setSearchText(e.target.value)}
                 placeholder="Type API name or keyword..."
                 className="search-input"
               />
@@ -584,24 +684,16 @@ End Type`,
               </span>
             )}
           </div>
-          
+
           <div className="button-group">
-            <button 
-              onClick={handleInsertAPI}
-              disabled={!selectedAPI}
-              className="insert-button"
-            >
+            <button onClick={handleInsertAPI} disabled={!selectedAPI} className="insert-button">
               Insert
             </button>
-            
-            <button 
-              onClick={handleCopyToClipboard}
-              disabled={!selectedAPI}
-              className="copy-button"
-            >
+
+            <button onClick={handleCopyToClipboard} disabled={!selectedAPI} className="copy-button">
               Copy
             </button>
-            
+
             <button onClick={onClose} className="close-button-footer">
               Close
             </button>
@@ -680,19 +772,22 @@ End Type`,
           background: #f0f0f0;
         }
 
-        .category-section, .search-section {
+        .category-section,
+        .search-section {
           padding: 8px;
           border-bottom: 1px solid #c0c0c0;
         }
 
-        .category-section label, .search-section label {
+        .category-section label,
+        .search-section label {
           display: block;
           font-size: 11px;
           font-weight: bold;
           margin-bottom: 4px;
         }
 
-        .category-select, .search-input {
+        .category-select,
+        .search-input {
           width: 100%;
           padding: 2px;
           border: 1px inset #c0c0c0;
@@ -802,7 +897,8 @@ End Type`,
           gap: 8px;
         }
 
-        .api-type-badge, .api-library-badge {
+        .api-type-badge,
+        .api-library-badge {
           padding: 2px 6px;
           border-radius: 3px;
           font-size: 9px;
@@ -819,11 +915,17 @@ End Type`,
           color: white;
         }
 
-        .api-description, .api-parameters, .api-return, .api-declaration {
+        .api-description,
+        .api-parameters,
+        .api-return,
+        .api-declaration {
           margin-bottom: 16px;
         }
 
-        .api-description strong, .api-parameters strong, .api-return strong, .api-declaration strong {
+        .api-description strong,
+        .api-parameters strong,
+        .api-return strong,
+        .api-declaration strong {
           display: block;
           margin-bottom: 4px;
           color: #000080;
@@ -835,7 +937,8 @@ End Type`,
           font-size: 10px;
         }
 
-        .parameters-table th, .parameters-table td {
+        .parameters-table th,
+        .parameters-table td {
           border: 1px solid #c0c0c0;
           padding: 4px;
           text-align: left;
@@ -877,7 +980,9 @@ End Type`,
           gap: 6px;
         }
 
-        .insert-button, .copy-button, .close-button-footer {
+        .insert-button,
+        .copy-button,
+        .close-button-footer {
           padding: 4px 12px;
           border: 1px outset #c0c0c0;
           background: #f0f0f0;
@@ -885,12 +990,15 @@ End Type`,
           font-size: 11px;
         }
 
-        .insert-button:disabled, .copy-button:disabled {
+        .insert-button:disabled,
+        .copy-button:disabled {
           color: #999;
           cursor: not-allowed;
         }
 
-        .insert-button:not(:disabled):hover, .copy-button:not(:disabled):hover, .close-button-footer:hover {
+        .insert-button:not(:disabled):hover,
+        .copy-button:not(:disabled):hover,
+        .close-button-footer:hover {
           background: #e0e0e0;
         }
 

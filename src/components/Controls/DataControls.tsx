@@ -33,7 +33,17 @@ export interface VB6Recordset {
 
 export interface VB6Field {
   name: string;
-  type: 'String' | 'Integer' | 'Long' | 'Single' | 'Double' | 'Currency' | 'Date' | 'Boolean' | 'Memo' | 'Binary';
+  type:
+    | 'String'
+    | 'Integer'
+    | 'Long'
+    | 'Single'
+    | 'Double'
+    | 'Currency'
+    | 'Date'
+    | 'Boolean'
+    | 'Memo'
+    | 'Binary';
   size: number;
   value: any;
   originalValue: any;
@@ -115,7 +125,7 @@ export const DataControl = forwardRef<HTMLDivElement, any>((props, ref) => {
       // Simulate database refresh
       const response = await fetch(`/api/data/${databaseName}/${recordSource}`);
       const data = await response.json();
-      
+
       const newRecordset: VB6Recordset = {
         fields: data.fields || [],
         data: data.records || [],
@@ -128,7 +138,7 @@ export const DataControl = forwardRef<HTMLDivElement, any>((props, ref) => {
         source: recordSource,
         state: 'Open',
       };
-      
+
       setRecordset(newRecordset);
       setCurrentPosition(0);
       updateControl(id, 'recordset', newRecordset);
@@ -173,14 +183,7 @@ export const DataControl = forwardRef<HTMLDivElement, any>((props, ref) => {
   };
 
   return (
-    <div
-      ref={ref}
-      style={dataStyle}
-      title={toolTipText}
-      data-name={name}
-      data-tag={tag}
-      {...rest}
-    >
+    <div ref={ref} style={dataStyle} title={toolTipText} data-name={name} data-tag={tag} {...rest}>
       <button onClick={moveFirst} disabled={!enabled || !recordset}>
         |◀
       </button>
@@ -248,30 +251,29 @@ export const DBGrid = forwardRef<HTMLDivElement, any>((props, ref) => {
     fontFamily: font?.name || 'MS Sans Serif',
   };
 
-  const handleRowClick = useCallback((rowIndex: number) => {
-    if (enabled) {
-      setSelectedRow(rowIndex);
-      fireEvent(name, 'RowColChange', { lastRow: selectedRow, lastCol: 0 });
-    }
-  }, [enabled, selectedRow, name, fireEvent]);
+  const handleRowClick = useCallback(
+    (rowIndex: number) => {
+      if (enabled) {
+        setSelectedRow(rowIndex);
+        fireEvent(name, 'RowColChange', { lastRow: selectedRow, lastCol: 0 });
+      }
+    },
+    [enabled, selectedRow, name, fireEvent]
+  );
 
-  const handleCellEdit = useCallback((rowIndex: number, colIndex: number, value: any) => {
-    if (enabled && allowUpdate) {
-      fireEvent(name, 'BeforeUpdate', { cancel: false });
-      // Update cell value
-      fireEvent(name, 'AfterUpdate', {});
-    }
-  }, [enabled, allowUpdate, name, fireEvent]);
+  const handleCellEdit = useCallback(
+    (rowIndex: number, colIndex: number, value: any) => {
+      if (enabled && allowUpdate) {
+        fireEvent(name, 'BeforeUpdate', { cancel: false });
+        // Update cell value
+        fireEvent(name, 'AfterUpdate', {});
+      }
+    },
+    [enabled, allowUpdate, name, fireEvent]
+  );
 
   return (
-    <div
-      ref={ref}
-      style={gridStyle}
-      title={toolTipText}
-      data-name={name}
-      data-tag={tag}
-      {...rest}
-    >
+    <div ref={ref} style={gridStyle} title={toolTipText} data-name={name} data-tag={tag} {...rest}>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         {columnHeaders && (
           <thead>
@@ -296,16 +298,14 @@ export const DBGrid = forwardRef<HTMLDivElement, any>((props, ref) => {
               onClick={() => handleRowClick(rowIndex)}
             >
               {recordSelectors && (
-                <td style={{ border: '1px solid #808080', padding: 2, textAlign: 'center' }}>
-                  ▶
-                </td>
+                <td style={{ border: '1px solid #808080', padding: 2, textAlign: 'center' }}>▶</td>
               )}
               {recordset.fields.map((field, colIndex) => (
                 <td
                   key={colIndex}
                   style={{ border: '1px solid #808080', padding: 2 }}
                   contentEditable={allowUpdate}
-                  onBlur={(e) =>
+                  onBlur={e =>
                     handleCellEdit(rowIndex, colIndex, (e.target as HTMLElement).innerText)
                   }
                 >
@@ -498,7 +498,9 @@ export const MSFlexGrid = forwardRef<HTMLDivElement, any>((props, ref) => {
   const [selectedRow, setSelectedRow] = useState(0);
   const [selectedCol, setSelectedCol] = useState(0);
   const [cellData, setCellData] = useState<string[][]>(
-    Array(rows).fill(null).map(() => Array(cols).fill(''))
+    Array(rows)
+      .fill(null)
+      .map(() => Array(cols).fill(''))
   );
   const { fireEvent } = useVB6Store();
 
@@ -517,65 +519,72 @@ export const MSFlexGrid = forwardRef<HTMLDivElement, any>((props, ref) => {
     fontFamily: 'MS Sans Serif',
   };
 
-  const handleCellClick = useCallback((row: number, col: number) => {
-    if (enabled) {
-      setSelectedRow(row);
-      setSelectedCol(col);
-      fireEvent(name, 'Click', { row, col });
-    }
-  }, [enabled, name, fireEvent]);
+  const handleCellClick = useCallback(
+    (row: number, col: number) => {
+      if (enabled) {
+        setSelectedRow(row);
+        setSelectedCol(col);
+        fireEvent(name, 'Click', { row, col });
+      }
+    },
+    [enabled, name, fireEvent]
+  );
 
-  const handleCellEdit = useCallback((row: number, col: number, value: string) => {
-    if (enabled) {
-      const newData = [...cellData];
-      newData[row][col] = value;
-      setCellData(newData);
-      fireEvent(name, 'AfterEdit', { row, col, text: value });
-    }
-  }, [enabled, cellData, name, fireEvent]);
+  const handleCellEdit = useCallback(
+    (row: number, col: number, value: string) => {
+      if (enabled) {
+        const newData = [...cellData];
+        newData[row][col] = value;
+        setCellData(newData);
+        fireEvent(name, 'AfterEdit', { row, col, text: value });
+      }
+    },
+    [enabled, cellData, name, fireEvent]
+  );
 
   return (
-    <div
-      ref={ref}
-      style={gridStyle}
-      title={toolTipText}
-      data-name={name}
-      data-tag={tag}
-      {...rest}
-    >
+    <div ref={ref} style={gridStyle} title={toolTipText} data-name={name} data-tag={tag} {...rest}>
       <table style={{ borderCollapse: 'collapse', width: '100%' }}>
         <tbody>
-          {Array(rows).fill(null).map((_, rowIndex) => (
-            <tr key={rowIndex}>
-              {Array(cols).fill(null).map((_, colIndex) => {
-                const isFixed = rowIndex < fixedRows || colIndex < fixedCols;
-                const isSelected = rowIndex === selectedRow && colIndex === selectedCol;
-                
-                return (
-                  <td
-                    key={colIndex}
-                    style={{
-                      width: colWidth[colIndex] / 15, // Convert twips to pixels
-                      height: rowHeight[rowIndex] / 15,
-                      backgroundColor: isSelected ? '#316AC5' : isFixed ? backColorFixed : backColor,
-                      color: isSelected ? '#FFFFFF' : isFixed ? foreColorFixed : foreColor,
-                      border: gridLines ? '1px solid #808080' : 'none',
-                      padding: 2,
-                      textAlign: 'left',
-                      verticalAlign: 'top',
-                    }}
-                    onClick={() => handleCellClick(rowIndex, colIndex)}
-                    contentEditable={!isFixed && enabled}
-                    onBlur={(e) =>
-                      handleCellEdit(rowIndex, colIndex, (e.target as HTMLElement).innerText)
-                    }
-                  >
-                    {cellData[rowIndex]?.[colIndex] || ''}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
+          {Array(rows)
+            .fill(null)
+            .map((_, rowIndex) => (
+              <tr key={rowIndex}>
+                {Array(cols)
+                  .fill(null)
+                  .map((_, colIndex) => {
+                    const isFixed = rowIndex < fixedRows || colIndex < fixedCols;
+                    const isSelected = rowIndex === selectedRow && colIndex === selectedCol;
+
+                    return (
+                      <td
+                        key={colIndex}
+                        style={{
+                          width: colWidth[colIndex] / 15, // Convert twips to pixels
+                          height: rowHeight[rowIndex] / 15,
+                          backgroundColor: isSelected
+                            ? '#316AC5'
+                            : isFixed
+                              ? backColorFixed
+                              : backColor,
+                          color: isSelected ? '#FFFFFF' : isFixed ? foreColorFixed : foreColor,
+                          border: gridLines ? '1px solid #808080' : 'none',
+                          padding: 2,
+                          textAlign: 'left',
+                          verticalAlign: 'top',
+                        }}
+                        onClick={() => handleCellClick(rowIndex, colIndex)}
+                        contentEditable={!isFixed && enabled}
+                        onBlur={e =>
+                          handleCellEdit(rowIndex, colIndex, (e.target as HTMLElement).innerText)
+                        }
+                      >
+                        {cellData[rowIndex]?.[colIndex] || ''}
+                      </td>
+                    );
+                  })}
+              </tr>
+            ))}
         </tbody>
       </table>
     </div>

@@ -1,6 +1,6 @@
 /**
  * VB6 Error Handling Implementation
- * 
+ *
  * Complete implementation of VB6 error handling:
  * On Error Resume Next, On Error GoTo, Err object, etc.
  */
@@ -40,7 +40,7 @@ export class VB6ErrorHandler {
       source: '',
       helpContext: 0,
       helpFile: '',
-      lastDllError: 0
+      lastDllError: 0,
     };
   }
 
@@ -108,7 +108,7 @@ export class VB6ErrorHandler {
       source: source || 'VB6 Runtime',
       helpContext: helpContext || 0,
       helpFile: helpFile || '',
-      lastDllError: 0
+      lastDllError: 0,
     };
 
     // Add to error stack
@@ -184,14 +184,16 @@ export class VB6ErrorHandler {
    * Get current error object (Err)
    */
   getError(): VB6Error {
-    return this.currentError || {
-      number: 0,
-      description: '',
-      source: '',
-      helpContext: 0,
-      helpFile: '',
-      lastDllError: 0
-    };
+    return (
+      this.currentError || {
+        number: 0,
+        description: '',
+        source: '',
+        helpContext: 0,
+        helpFile: '',
+        lastDllError: 0,
+      }
+    );
   }
 
   /**
@@ -217,7 +219,7 @@ export class VB6ErrorHandler {
       13: 'Type mismatch',
       14: 'Out of string space',
       16: 'Expression too complex',
-      17: 'Can\'t perform requested operation',
+      17: "Can't perform requested operation",
       18: 'User interrupt occurred',
       20: 'Resume without error',
       28: 'Out of stack space',
@@ -240,34 +242,34 @@ export class VB6ErrorHandler {
       68: 'Device unavailable',
       70: 'Permission denied',
       71: 'Disk not ready',
-      74: 'Can\'t rename with different drive',
+      74: "Can't rename with different drive",
       75: 'Path/File access error',
       76: 'Path not found',
       91: 'Object variable or With block variable not set',
       92: 'For loop not initialized',
       93: 'Invalid pattern string',
       94: 'Invalid use of Null',
-      
+
       // Runtime errors
-      340: 'Control array element doesn\'t exist',
+      340: "Control array element doesn't exist",
       380: 'Invalid property value',
       381: 'Invalid property array index',
-      382: 'Property Set can\'t be executed at run time',
-      383: 'Property Set can\'t be used with a read-only property',
+      382: "Property Set can't be executed at run time",
+      383: "Property Set can't be used with a read-only property",
       385: 'Need property array index',
       387: 'Property Set not permitted',
-      393: 'Property Get can\'t be executed at run time',
-      394: 'Property Get can\'t be executed on write-only property',
-      
+      393: "Property Get can't be executed at run time",
+      394: "Property Get can't be executed on write-only property",
+
       // ActiveX/COM errors
-      429: 'ActiveX component can\'t create object',
+      429: "ActiveX component can't create object",
       430: 'Class does not support Automation or does not support expected interface',
       432: 'File name or class name not found during Automation operation',
-      438: 'Object doesn\'t support this property or method',
+      438: "Object doesn't support this property or method",
       440: 'Automation error',
-      445: 'Object doesn\'t support this action',
-      446: 'Object doesn\'t support named arguments',
-      447: 'Object doesn\'t support current locale setting',
+      445: "Object doesn't support this action",
+      446: "Object doesn't support named arguments",
+      447: "Object doesn't support current locale setting",
       448: 'Named argument not found',
       449: 'Argument not optional',
       450: 'Wrong number of arguments or invalid property assignment',
@@ -283,7 +285,7 @@ export class VB6ErrorHandler {
       461: 'Method or data member not found',
       462: 'The remote server machine does not exist or is unavailable',
       463: 'Class not registered on local machine',
-      
+
       // Database errors
       3001: 'Invalid argument',
       3003: 'Too few parameters. Expected [number]',
@@ -291,9 +293,9 @@ export class VB6ErrorHandler {
       3201: 'You cannot add or change a record because a related record is required',
       3251: 'Operation is not supported for this type of object',
       3265: 'Item not found in this collection',
-      
+
       // Custom errors (32767 - 65535 range available for custom errors)
-      32755: 'User canceled operation'
+      32755: 'User canceled operation',
     };
 
     return errorDescriptions[errorNumber] || `Unknown error (${errorNumber})`;
@@ -340,10 +342,7 @@ export class VB6ErrorHandler {
   /**
    * Execute code with error handling
    */
-  executeWithErrorHandling<T>(
-    code: () => T,
-    errorHandler?: (error: VB6Error) => T
-  ): T {
+  executeWithErrorHandling<T>(code: () => T, errorHandler?: (error: VB6Error) => T): T {
     try {
       return code();
     } catch (error) {
@@ -352,7 +351,7 @@ export class VB6ErrorHandler {
 
       if (error instanceof Error) {
         errorDescription = error.message;
-        
+
         // Map JavaScript errors to VB6 error numbers
         if (error.name === 'ReferenceError') {
           errorNumber = 91; // Object variable not set
@@ -388,7 +387,7 @@ export const Err = {
   get Number(): number {
     return errorHandler.getError().number;
   },
-  
+
   set Number(value: number) {
     const error = errorHandler.getError();
     error.number = value;
@@ -398,47 +397,47 @@ export const Err = {
       error.description = '';
     }
   },
-  
+
   get Description(): string {
     return errorHandler.getError().description;
   },
-  
+
   set Description(value: string) {
     errorHandler.getError().description = value;
   },
-  
+
   get Source(): string {
     return errorHandler.getError().source;
   },
-  
+
   set Source(value: string) {
     errorHandler.getError().source = value;
   },
-  
+
   get HelpContext(): number {
     return errorHandler.getError().helpContext;
   },
-  
+
   set HelpContext(value: number) {
     errorHandler.getError().helpContext = value;
   },
-  
+
   get HelpFile(): string {
     return errorHandler.getError().helpFile;
   },
-  
+
   set HelpFile(value: string) {
     errorHandler.getError().helpFile = value;
   },
-  
+
   get LastDllError(): number {
     return errorHandler.getError().lastDllError;
   },
-  
+
   Clear(): void {
     errorHandler.clearError();
   },
-  
+
   Raise(
     number: number,
     source?: string,
@@ -447,7 +446,7 @@ export const Err = {
     helpContext?: number
   ): void {
     errorHandler.raiseError(number, description, source, helpFile, helpContext);
-  }
+  },
 };
 
 // Global error handling functions
@@ -484,17 +483,13 @@ export function Error(errorNumber?: number): string {
 }
 
 // Helper function to wrap VB6 code execution
-export function VB6Execute<T>(
-  code: () => T,
-  errorLabel?: string,
-  errorHandler?: () => void
-): T {
+export function VB6Execute<T>(code: () => T, errorLabel?: string, errorHandler?: () => void): T {
   const handler = VB6ErrorHandler.getInstance();
-  
+
   if (errorLabel && errorHandler) {
     handler.registerErrorHandler(errorLabel, errorHandler);
   }
-  
+
   return handler.executeWithErrorHandling(code);
 }
 
@@ -510,5 +505,5 @@ export const VB6ErrorHandling = {
   CVErr,
   IsError,
   Error,
-  VB6Execute
+  VB6Execute,
 };

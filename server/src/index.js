@@ -34,8 +34,8 @@ const logger = winston.createLogger({
     new winston.transports.File({ filename: 'error.log', level: 'error' }),
     new winston.transports.File({ filename: 'combined.log' }),
     new winston.transports.Console({
-      format: winston.format.simple()
-    })
+      format: winston.format.simple(),
+    }),
   ],
 });
 
@@ -45,8 +45,8 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: {
     origin: process.env.CLIENT_URL || 'http://localhost:5173',
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
-  }
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  },
 });
 
 // Rate limiter
@@ -66,28 +66,30 @@ const rateLimiterMiddleware = async (req, res, next) => {
 };
 
 // CONFIGURATION VULNERABILITY FIX: Improve CSP security
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'nonce-' + (process.env.CSP_NONCE || 'development-only-nonce')"],
-      scriptSrc: ["'self'", "'nonce-' + (process.env.CSP_NONCE || 'development-only-nonce')"],
-      imgSrc: ["'self'", "data:"],
-      connectSrc: ["'self'"],
-      fontSrc: ["'self'"],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
-      frameSrc: ["'none'"],
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'nonce-' + (process.env.CSP_NONCE || 'development-only-nonce')"],
+        scriptSrc: ["'self'", "'nonce-' + (process.env.CSP_NONCE || 'development-only-nonce')"],
+        imgSrc: ["'self'", 'data:'],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'none'"],
+      },
     },
-  },
-}));
+  })
+);
 app.use(compression());
 // CONFIGURATION VULNERABILITY FIX: Validate CORS origin
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5183',
   'https://localhost:5173',
-  'https://localhost:5183'
+  'https://localhost:5183',
 ];
 
 // Add CLIENT_URL only if it's a valid URL
@@ -95,8 +97,11 @@ if (process.env.CLIENT_URL) {
   try {
     const clientUrl = new URL(process.env.CLIENT_URL);
     // Only allow https in production or localhost
-    if (clientUrl.protocol === 'https:' || 
-        (clientUrl.hostname === 'localhost' || clientUrl.hostname === '127.0.0.1')) {
+    if (
+      clientUrl.protocol === 'https:' ||
+      clientUrl.hostname === 'localhost' ||
+      clientUrl.hostname === '127.0.0.1'
+    ) {
       allowedOrigins.push(process.env.CLIENT_URL);
     } else {
       logger.warn(`Rejected CLIENT_URL: ${process.env.CLIENT_URL} - must use HTTPS or localhost`);
@@ -106,27 +111,34 @@ if (process.env.CLIENT_URL) {
   }
 }
 
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 // CONFIGURATION VULNERABILITY FIX: Reduce body size limits to prevent DoS
 const bodyLimit = process.env.MAX_BODY_SIZE || '10mb'; // Default 10MB, configurable
-app.use(bodyParser.json({ 
-  limit: bodyLimit,
-  // Add additional security options
-  verify: (req, res, buf, encoding) => {
-    // Log large requests for monitoring
-    if (buf.length > 5 * 1024 * 1024) { // 5MB threshold
-      logger.warn(`Large request body: ${buf.length} bytes from ${req.ip}`);
-    }
-  }
-}));
-app.use(bodyParser.urlencoded({ 
-  extended: true, 
-  limit: bodyLimit,
-  parameterLimit: 1000 // Limit number of parameters
-}));
+app.use(
+  bodyParser.json({
+    limit: bodyLimit,
+    // Add additional security options
+    verify: (req, res, buf, encoding) => {
+      // Log large requests for monitoring
+      if (buf.length > 5 * 1024 * 1024) {
+        // 5MB threshold
+        logger.warn(`Large request body: ${buf.length} bytes from ${req.ip}`);
+      }
+    },
+  })
+);
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+    limit: bodyLimit,
+    parameterLimit: 1000, // Limit number of parameters
+  })
+);
 app.use(rateLimiterMiddleware);
 
 // Middleware de logging
@@ -135,7 +147,7 @@ app.use((req, res, next) => {
     method: req.method,
     url: req.url,
     ip: req.ip,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
   next();
 });
@@ -154,25 +166,25 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     memory: process.memoryUsage(),
-    connections: DatabaseService.getActiveConnections()
+    connections: DatabaseService.getActiveConnections(),
   });
 });
 
 // WebSocket pour les mises à jour en temps réel
-io.on('connection', (socket) => {
+io.on('connection', socket => {
   logger.info('Client connected:', socket.id);
 
-  socket.on('subscribe', (channel) => {
+  socket.on('subscribe', channel => {
     socket.join(channel);
     logger.info(`Client ${socket.id} subscribed to ${channel}`);
   });
 
-  socket.on('unsubscribe', (channel) => {
+  socket.on('unsubscribe', channel => {
     socket.leave(channel);
     logger.info(`Client ${socket.id} unsubscribed from ${channel}`);
   });
 
-  socket.on('query', async (data) => {
+  socket.on('query', async data => {
     try {
       const result = await DatabaseService.executeQuery(data);
       socket.emit('queryResult', result);
@@ -193,15 +205,15 @@ app.use((err, req, res, next) => {
     stack: err.stack,
     url: req.url,
     method: req.method,
-    ip: req.ip
+    ip: req.ip,
   });
 
   res.status(err.status || 500).json({
     error: {
       message: err.message,
       status: err.status || 500,
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    },
   });
 });
 
@@ -211,8 +223,8 @@ app.use((req, res) => {
     error: {
       message: 'Route not found',
       status: 404,
-      path: req.path
-    }
+      path: req.path,
+    },
   });
 });
 
@@ -221,7 +233,7 @@ const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   logger.info(`VB6 Database Server running on port ${PORT}`);
   logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  
+
   // Initialisation des services
   DatabaseService.initialize();
   CacheService.initialize();
@@ -235,7 +247,7 @@ process.on('SIGTERM', async () => {
   server.close(() => {
     logger.info('HTTP server closed');
   });
-  
+
   await DatabaseService.closeAllConnections();
   await CacheService.shutdown();
   process.exit(0);

@@ -17,16 +17,16 @@ describe('ThemeManager', () => {
       appendChild: vi.fn(),
       removeChild: vi.fn(),
       querySelector: vi.fn(),
-      children: []
+      children: [],
     };
 
     const mockBody = {
       classList: {
         add: vi.fn(),
         remove: vi.fn(),
-        contains: vi.fn().mockReturnValue(false)
+        contains: vi.fn().mockReturnValue(false),
       },
-      style: {}
+      style: {},
     };
 
     mockDocument = {
@@ -38,7 +38,7 @@ describe('ThemeManager', () => {
             textContent: '',
             setAttribute: vi.fn(),
             getAttribute: vi.fn(),
-            id: ''
+            id: '',
           };
         }
         if (tag === 'link') {
@@ -47,7 +47,7 @@ describe('ThemeManager', () => {
             href: '',
             setAttribute: vi.fn(),
             getAttribute: vi.fn(),
-            id: ''
+            id: '',
           };
         }
         return {};
@@ -58,16 +58,16 @@ describe('ThemeManager', () => {
         style: {
           setProperty: vi.fn(),
           removeProperty: vi.fn(),
-          getPropertyValue: vi.fn().mockReturnValue('')
-        }
-      }
+          getPropertyValue: vi.fn().mockReturnValue(''),
+        },
+      },
     };
 
     // Mock localStorage
     mockLocalStorage = {
       getItem: vi.fn(),
       setItem: vi.fn(),
-      removeItem: vi.fn()
+      removeItem: vi.fn(),
     };
 
     // Mock console to suppress warnings in tests
@@ -91,17 +91,17 @@ describe('ThemeManager', () => {
 
     it('should restore theme from localStorage', () => {
       mockLocalStorage.getItem.mockReturnValue('dark');
-      
+
       const newThemeManager = new ThemeManager();
-      
+
       expect(mockDocument.body.classList.add).toHaveBeenCalledWith('theme-dark');
     });
 
     it('should handle invalid theme from localStorage', () => {
       mockLocalStorage.getItem.mockReturnValue('invalid-theme');
-      
+
       const newThemeManager = new ThemeManager();
-      
+
       expect(mockDocument.body.classList.add).toHaveBeenCalledWith('theme-vb6-classic');
     });
   });
@@ -109,7 +109,7 @@ describe('ThemeManager', () => {
   describe('Theme Switching', () => {
     it('should switch to a valid theme', () => {
       const result = themeManager.setTheme('dark');
-      
+
       expect(result).toBe(true);
       expect(mockDocument.body.classList.remove).toHaveBeenCalledWith('theme-vb6-classic');
       expect(mockDocument.body.classList.add).toHaveBeenCalledWith('theme-dark');
@@ -118,14 +118,14 @@ describe('ThemeManager', () => {
 
     it('should reject invalid theme names', () => {
       const result = themeManager.setTheme('invalid-theme');
-      
+
       expect(result).toBe(false);
       expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('Invalid theme'));
     });
 
     it('should handle theme switching with custom CSS', () => {
       themeManager.setTheme('modern');
-      
+
       expect(mockDocument.createElement).toHaveBeenCalledWith('link');
       expect(mockDocument.head.appendChild).toHaveBeenCalled();
     });
@@ -133,7 +133,7 @@ describe('ThemeManager', () => {
     it('should clean up previous theme resources', () => {
       themeManager.setTheme('dark');
       themeManager.setTheme('light');
-      
+
       expect(mockDocument.body.classList.remove).toHaveBeenCalledWith('theme-dark');
       expect(mockDocument.body.classList.add).toHaveBeenCalledWith('theme-light');
     });
@@ -144,19 +144,28 @@ describe('ThemeManager', () => {
       const variables = {
         '--primary-color': '#ff0000',
         '--secondary-color': '#00ff00',
-        '--background-color': '#ffffff'
+        '--background-color': '#ffffff',
       };
-      
+
       themeManager.setCustomVariables(variables);
-      
-      expect(mockDocument.documentElement.style.setProperty).toHaveBeenCalledWith('--primary-color', '#ff0000');
-      expect(mockDocument.documentElement.style.setProperty).toHaveBeenCalledWith('--secondary-color', '#00ff00');
-      expect(mockDocument.documentElement.style.setProperty).toHaveBeenCalledWith('--background-color', '#ffffff');
+
+      expect(mockDocument.documentElement.style.setProperty).toHaveBeenCalledWith(
+        '--primary-color',
+        '#ff0000'
+      );
+      expect(mockDocument.documentElement.style.setProperty).toHaveBeenCalledWith(
+        '--secondary-color',
+        '#00ff00'
+      );
+      expect(mockDocument.documentElement.style.setProperty).toHaveBeenCalledWith(
+        '--background-color',
+        '#ffffff'
+      );
     });
 
     it('should validate CSS color values', () => {
       const ThemeManagerClass = ThemeManager as any;
-      
+
       // Valid colors
       expect(ThemeManagerClass.isValidCSSColor('#ff0000')).toBe(true);
       expect(ThemeManagerClass.isValidCSSColor('#fff')).toBe(true);
@@ -165,12 +174,16 @@ describe('ThemeManager', () => {
       expect(ThemeManagerClass.isValidCSSColor('hsl(0, 100%, 50%)')).toBe(true);
       expect(ThemeManagerClass.isValidCSSColor('red')).toBe(true);
       expect(ThemeManagerClass.isValidCSSColor('transparent')).toBe(true);
-      
+
       // Invalid colors - CSS injection attempts
-      expect(ThemeManagerClass.isValidCSSColor('red; background: url(javascript:alert(1))')).toBe(false);
+      expect(ThemeManagerClass.isValidCSSColor('red; background: url(javascript:alert(1))')).toBe(
+        false
+      );
       expect(ThemeManagerClass.isValidCSSColor('red/**/; background: red')).toBe(false);
       expect(ThemeManagerClass.isValidCSSColor('expression(alert(1))')).toBe(false);
-      expect(ThemeManagerClass.isValidCSSColor('url(data:text/html,<script>alert(1)</script>)')).toBe(false);
+      expect(
+        ThemeManagerClass.isValidCSSColor('url(data:text/html,<script>alert(1)</script>)')
+      ).toBe(false);
       expect(ThemeManagerClass.isValidCSSColor('#ff0000; position: fixed')).toBe(false);
     });
 
@@ -178,28 +191,39 @@ describe('ThemeManager', () => {
       const dangerousVariables = {
         '--color': 'red; background: url(javascript:alert(1))',
         '--size': 'expression(alert(1))',
-        '--bg': 'url(data:text/html,<script>alert(1)</script>)'
+        '--bg': 'url(data:text/html,<script>alert(1)</script>)',
       };
-      
+
       themeManager.setCustomVariables(dangerousVariables);
-      
+
       // Should not set any of the dangerous variables
-      expect(mockDocument.documentElement.style.setProperty).not.toHaveBeenCalledWith('--color', expect.stringContaining('javascript'));
-      expect(mockDocument.documentElement.style.setProperty).not.toHaveBeenCalledWith('--size', expect.stringContaining('expression'));
-      expect(mockDocument.documentElement.style.setProperty).not.toHaveBeenCalledWith('--bg', expect.stringContaining('script'));
+      expect(mockDocument.documentElement.style.setProperty).not.toHaveBeenCalledWith(
+        '--color',
+        expect.stringContaining('javascript')
+      );
+      expect(mockDocument.documentElement.style.setProperty).not.toHaveBeenCalledWith(
+        '--size',
+        expect.stringContaining('expression')
+      );
+      expect(mockDocument.documentElement.style.setProperty).not.toHaveBeenCalledWith(
+        '--bg',
+        expect.stringContaining('script')
+      );
     });
 
     it('should handle invalid CSS variable names', () => {
       const longName = '--a'.repeat(200);
       const invalidVariables = {
-        'invalid-name': '#ff0000',  // Should start with --
-        '--': '#00ff00',           // Too short
-        [longName]: '#0000ff' // Too long
+        'invalid-name': '#ff0000', // Should start with --
+        '--': '#00ff00', // Too short
+        [longName]: '#0000ff', // Too long
       };
-      
+
       themeManager.setCustomVariables(invalidVariables);
-      
-      expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('Invalid CSS variable name'));
+
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid CSS variable name')
+      );
     });
   });
 
@@ -207,9 +231,9 @@ describe('ThemeManager', () => {
     it('should export current theme configuration', () => {
       themeManager.setTheme('dark');
       themeManager.setCustomVariables({ '--primary-color': '#ff0000' });
-      
+
       const exported = themeManager.exportTheme();
-      
+
       expect(exported.name).toBe('dark');
       expect(exported.variables['--primary-color']).toBe('#ff0000');
       expect(exported.timestamp).toBeDefined();
@@ -220,16 +244,22 @@ describe('ThemeManager', () => {
         name: 'custom',
         variables: {
           '--primary-color': '#ff0000',
-          '--secondary-color': '#00ff00'
+          '--secondary-color': '#00ff00',
         },
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
-      
+
       const result = themeManager.importTheme(themeConfig);
-      
+
       expect(result).toBe(true);
-      expect(mockDocument.documentElement.style.setProperty).toHaveBeenCalledWith('--primary-color', '#ff0000');
-      expect(mockDocument.documentElement.style.setProperty).toHaveBeenCalledWith('--secondary-color', '#00ff00');
+      expect(mockDocument.documentElement.style.setProperty).toHaveBeenCalledWith(
+        '--primary-color',
+        '#ff0000'
+      );
+      expect(mockDocument.documentElement.style.setProperty).toHaveBeenCalledWith(
+        '--secondary-color',
+        '#00ff00'
+      );
     });
 
     it('should reject malicious theme imports', () => {
@@ -237,15 +267,17 @@ describe('ThemeManager', () => {
         name: 'malicious',
         variables: {
           '--color': 'red; background: url(javascript:alert(1))',
-          '--evil': 'expression(alert(1))'
+          '--evil': 'expression(alert(1))',
         },
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
-      
+
       const result = themeManager.importTheme(maliciousConfig);
-      
+
       expect(result).toBe(false);
-      expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('Invalid theme configuration'));
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid theme configuration')
+      );
     });
 
     it('should validate theme configuration structure', () => {
@@ -256,9 +288,9 @@ describe('ThemeManager', () => {
         { name: 'test' }, // Missing variables
         { variables: {} }, // Missing name
         { name: '', variables: {} }, // Empty name
-        { name: 'test', variables: 'invalid' } // Invalid variables type
+        { name: 'test', variables: 'invalid' }, // Invalid variables type
       ];
-      
+
       invalidConfigs.forEach(config => {
         const result = themeManager.importTheme(config as any);
         expect(result).toBe(false);
@@ -269,14 +301,14 @@ describe('ThemeManager', () => {
   describe('High Contrast Mode', () => {
     it('should enable high contrast mode', () => {
       themeManager.setHighContrast(true);
-      
+
       expect(mockDocument.body.classList.add).toHaveBeenCalledWith('high-contrast');
       expect(mockLocalStorage.setItem).toHaveBeenCalledWith('vb6-high-contrast', 'true');
     });
 
     it('should disable high contrast mode', () => {
       themeManager.setHighContrast(false);
-      
+
       expect(mockDocument.body.classList.remove).toHaveBeenCalledWith('high-contrast');
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('vb6-high-contrast');
     });
@@ -286,9 +318,9 @@ describe('ThemeManager', () => {
         if (key === 'vb6-high-contrast') return 'true';
         return null;
       });
-      
+
       const newThemeManager = new ThemeManager();
-      
+
       expect(mockDocument.body.classList.add).toHaveBeenCalledWith('high-contrast');
     });
   });
@@ -296,15 +328,18 @@ describe('ThemeManager', () => {
   describe('Font Scaling', () => {
     it('should set valid font scale', () => {
       const result = themeManager.setFontScale(1.2);
-      
+
       expect(result).toBe(true);
-      expect(mockDocument.documentElement.style.setProperty).toHaveBeenCalledWith('--font-scale', '1.2');
+      expect(mockDocument.documentElement.style.setProperty).toHaveBeenCalledWith(
+        '--font-scale',
+        '1.2'
+      );
       expect(mockLocalStorage.setItem).toHaveBeenCalledWith('vb6-font-scale', '1.2');
     });
 
     it('should reject invalid font scales', () => {
       const invalidScales = [0, -1, 3.5, NaN, Infinity];
-      
+
       invalidScales.forEach(scale => {
         const result = themeManager.setFontScale(scale);
         expect(result).toBe(false);
@@ -313,10 +348,16 @@ describe('ThemeManager', () => {
 
     it('should clamp font scale to valid range', () => {
       themeManager.setFontScale(0.3); // Below minimum
-      expect(mockDocument.documentElement.style.setProperty).toHaveBeenCalledWith('--font-scale', '0.5');
-      
+      expect(mockDocument.documentElement.style.setProperty).toHaveBeenCalledWith(
+        '--font-scale',
+        '0.5'
+      );
+
       themeManager.setFontScale(4.0); // Above maximum
-      expect(mockDocument.documentElement.style.setProperty).toHaveBeenCalledWith('--font-scale', '3');
+      expect(mockDocument.documentElement.style.setProperty).toHaveBeenCalledWith(
+        '--font-scale',
+        '3'
+      );
     });
   });
 
@@ -325,27 +366,29 @@ describe('ThemeManager', () => {
       mockDocument.documentElement.style.setProperty.mockImplementation(() => {
         throw new Error('DOM error');
       });
-      
+
       const result = themeManager.setCustomVariables({ '--color': '#ff0000' });
-      
+
       expect(result).toBe(false);
-      expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Failed to set CSS variables'));
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to set CSS variables')
+      );
     });
 
     it('should handle localStorage errors gracefully', () => {
       mockLocalStorage.setItem.mockImplementation(() => {
         throw new Error('localStorage is full');
       });
-      
+
       const result = themeManager.setTheme('dark');
-      
+
       expect(result).toBe(true); // Theme should still be applied
       expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to save theme'));
     });
 
     it('should handle missing DOM elements', () => {
       global.document = null as any;
-      
+
       expect(() => new ThemeManager()).not.toThrow();
     });
   });
@@ -353,13 +396,13 @@ describe('ThemeManager', () => {
   describe('Performance', () => {
     it('should throttle rapid theme changes', () => {
       const setThemeSpy = vi.spyOn(themeManager, 'setTheme');
-      
+
       // Rapid theme changes
       for (let i = 0; i < 10; i++) {
         themeManager.setTheme('dark');
         themeManager.setTheme('light');
       }
-      
+
       // Should have been called but with throttling
       expect(setThemeSpy).toHaveBeenCalled();
     });
@@ -369,11 +412,11 @@ describe('ThemeManager', () => {
       for (let i = 0; i < 1000; i++) {
         largeVariableSet[`--var-${i}`] = `#${i.toString(16).padStart(6, '0')}`;
       }
-      
+
       const startTime = performance.now();
       themeManager.setCustomVariables(largeVariableSet);
       const endTime = performance.now();
-      
+
       expect(endTime - startTime).toBeLessThan(1000); // Should complete within 1 second
     });
   });
@@ -381,7 +424,7 @@ describe('ThemeManager', () => {
   describe('Edge Cases', () => {
     it('should handle special characters in theme names', () => {
       const specialNames = ['theme-with-dashes', 'theme_with_underscores', 'theme123'];
-      
+
       specialNames.forEach(name => {
         const result = themeManager.setTheme(name);
         // These should be handled gracefully (either accepted or rejected cleanly)
@@ -392,23 +435,23 @@ describe('ThemeManager', () => {
     it('should handle very long CSS variable values', () => {
       const longValue = '#ff0000'.repeat(1000);
       const variables = { '--long-value': longValue };
-      
+
       const result = themeManager.setCustomVariables(variables);
-      
+
       // Should either accept or reject cleanly, not crash
       expect(typeof result).toBe('boolean');
     });
 
     it('should handle concurrent theme operations', async () => {
       const promises = [];
-      
+
       for (let i = 0; i < 10; i++) {
         promises.push(Promise.resolve(themeManager.setTheme('dark')));
         promises.push(Promise.resolve(themeManager.setTheme('light')));
       }
-      
+
       await Promise.all(promises);
-      
+
       // Should complete without errors
       expect(true).toBe(true);
     });

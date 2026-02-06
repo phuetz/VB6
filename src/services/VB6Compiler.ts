@@ -10,7 +10,7 @@ import {
   VariableDefinition,
   ConstantDefinition,
   ConversionPattern,
-  DefaultValuesMap
+  DefaultValuesMap,
 } from './types/VB6ServiceTypes';
 
 const logger = createLogger('Compiler');
@@ -19,13 +19,44 @@ import { VB6UltraJIT } from '../compiler/VB6UltraJIT';
 import { VB6ProfileGuidedOptimizer } from '../compiler/VB6ProfileGuidedOptimizer';
 
 // Import new unified compiler components
-import { VB6UnifiedCompiler, CompilerOptions as UnifiedOptions, CompilationResult } from '../compiler/VB6UnifiedCompiler';
+import {
+  VB6UnifiedCompiler,
+  CompilerOptions as UnifiedOptions,
+  CompilationResult,
+} from '../compiler/VB6UnifiedCompiler';
 import { VB6JSGenerator } from '../compiler/VB6JSGenerator';
 import { VB6UDTTranspiler } from '../compiler/VB6UDTTranspiler';
 import { VB6OptimizedLexer } from '../compiler/VB6OptimizedLexer';
 import { VB6CompilationCache } from '../compiler/VB6CompilationCache';
 import { VB6WasmOptimizer } from '../compiler/VB6WasmOptimizer';
 import { VB6AdvancedErrorHandler } from '../compiler/VB6AdvancedErrorHandling';
+import {
+  VB6RecursiveDescentParser,
+  parseVB6Code,
+  VB6ModuleNode,
+  VB6ParseError,
+} from '../compiler/VB6RecursiveDescentParser';
+import { lexVB6 } from '../utils/vb6Lexer';
+import { adaptTokens } from '../compiler/tokenAdapter';
+import {
+  VB6AdvancedSemanticAnalyzer,
+  SemanticError,
+  AnalysisResult,
+} from '../compiler/VB6AdvancedSemanticAnalyzer';
+import { VB6ASTAdapter } from '../compiler/VB6TranspilerIntegration';
+import { transpileModuleToJS } from '../utils/vb6Transpiler';
+import { parseVB6Module } from '../utils/vb6Parser';
+
+export interface CompilerDiagnostic {
+  severity: 'error' | 'warning' | 'info';
+  message: string;
+  line: number;
+  column: number;
+  endLine?: number;
+  endColumn?: number;
+  code?: string;
+  source: 'parser' | 'semantic' | 'transpiler';
+}
 
 interface CompilerOptions {
   useAdvancedOptimizations?: boolean;
@@ -42,7 +73,7 @@ export class VB6Compiler {
   private warnings: CompilerError[] = [];
   private variables: Map<string, CompilerVariableValue> = new Map();
   private procedures: Map<string, Procedure> = new Map();
-  
+
   // Advanced compilation components
   private advancedCompiler: VB6AdvancedCompiler | null = null;
   private cache: VB6IncrementalCache | null = null;
@@ -62,7 +93,7 @@ export class VB6Compiler {
 
   constructor(options: CompilerOptions = {}) {
     this.useAdvanced = options.useAdvancedOptimizations !== false;
-    
+
     // Initialize unified compiler (Phase 2) - preferred compilation path
     if (this.useUnified) {
       const unifiedOptions: UnifiedOptions = {
@@ -73,7 +104,7 @@ export class VB6Compiler {
           caseSensitive: false,
           bufferSize: 64 * 1024,
           enableMetrics: true,
-          enableErrorRecovery: true
+          enableErrorRecovery: true,
         },
         generator: {
           useES6Classes: true,
@@ -81,7 +112,7 @@ export class VB6Compiler {
           enableOptimizations: options.optimizationLevel! > 0,
           targetRuntime: 'browser',
           strictMode: false,
-          generateTypeScript: false
+          generateTypeScript: false,
         },
         udt: {
           generateTypeScript: false,
@@ -90,7 +121,7 @@ export class VB6Compiler {
           optimizeMemoryLayout: true,
           generateComments: true,
           strictTypeChecking: false,
-          enableCloning: true
+          enableCloning: true,
         },
         wasm: {
           enableSIMD: options.enableWebAssembly || false,
@@ -103,31 +134,31 @@ export class VB6Compiler {
           hotPathThreshold: 1000,
           complexityThreshold: 10,
           enableProfiler: true,
-          enableBinaryen: false
+          enableBinaryen: false,
         },
         cache: {
           enabled: options.enableCache !== false,
           maxSize: 200 * 1024 * 1024,
-          enablePersistence: true
+          enablePersistence: true,
         },
         workers: {
           enabled: options.enableParallel !== false,
           maxWorkers: Math.max(1, navigator?.hardwareConcurrency || 4),
-          chunkSize: 100000
+          chunkSize: 100000,
         },
         output: {
           target: 'es2017',
           format: 'esm',
           sourceMaps: false,
           minify: options.optimizationLevel! > 2,
-          bundleRuntime: true
+          bundleRuntime: true,
         },
         debug: {
           enableProfiling: options.enablePGO !== false,
           enableTracing: false,
           logLevel: 'warn',
-          enableMetrics: true
-        }
+          enableMetrics: true,
+        },
       };
 
       this.unifiedCompiler = new VB6UnifiedCompiler(unifiedOptions);
@@ -140,11 +171,11 @@ export class VB6Compiler {
       if (unifiedOptions.cache.enabled) {
         this.compilationCache = new VB6CompilationCache({
           maxSize: unifiedOptions.cache.maxSize,
-          enablePersistence: unifiedOptions.cache.enablePersistence
+          enablePersistence: unifiedOptions.cache.enablePersistence,
         });
       }
     }
-    
+
     if (this.useAdvanced) {
       // Initialize advanced compilation pipeline (fallback)
       this.advancedCompiler = new VB6AdvancedCompiler({
@@ -158,19 +189,250 @@ export class VB6Compiler {
         wasmSIMD: true,
         wasmThreads: true,
         wasmExceptions: true,
-        wasmGC: true
+        wasmGC: true,
       });
-      
+
       this.cache = new VB6IncrementalCache();
       this.jit = new VB6UltraJIT();
       this.profiler = new VB6ProfileGuidedOptimizer();
     }
   }
 
+  /**
+   * Parse VB6 source code using the recursive descent parser.
+   * Falls back to the legacy parser convenience function on failure.
+   */
+  parseSource(source: string): {
+    ast: VB6ModuleNode | null;
+    errors: VB6ParseError[];
+    usedParser: 'recursive-descent' | 'recursive-descent-with-main-lexer' | 'legacy';
+  } {
+    // Try 1: Use RDP with main lexer (enhanced token set)
+    try {
+      const tokens = lexVB6(source);
+      const vb6Tokens = adaptTokens(tokens);
+      const parser = new VB6RecursiveDescentParser(vb6Tokens);
+      const result = parser.parseModule();
+      if (result.ast && result.errors.length === 0) {
+        return { ...result, usedParser: 'recursive-descent-with-main-lexer' };
+      }
+    } catch {
+      // Fall through to next strategy
+    }
+
+    // Try 2: Use RDP with its own advanced lexer
+    try {
+      const result = parseVB6Code(source);
+      if (result.ast) {
+        return { ...result, usedParser: 'recursive-descent' };
+      }
+    } catch {
+      // Fall through to legacy
+    }
+
+    // Try 3: Legacy parser (returns simplified AST, not full VB6ModuleNode)
+    return { ast: null, errors: [], usedParser: 'legacy' };
+  }
+
+  /**
+   * Parse and run semantic analysis on VB6 source code.
+   * Uses the RecursiveDescentParser for AST, then VB6AdvancedSemanticAnalyzer
+   * for type checking, scope analysis, and control flow.
+   */
+  analyzeSource(source: string): {
+    parseResult: ReturnType<VB6Compiler['parseSource']>;
+    semanticResult: AnalysisResult | null;
+    semanticErrors: SemanticError[];
+  } {
+    const parseResult = this.parseSource(source);
+
+    if (!parseResult.ast) {
+      return { parseResult, semanticResult: null, semanticErrors: [] };
+    }
+
+    try {
+      const analyzer = new VB6AdvancedSemanticAnalyzer();
+      const semanticResult = analyzer.analyze(parseResult.ast);
+      return {
+        parseResult,
+        semanticResult,
+        semanticErrors: [...semanticResult.errors, ...semanticResult.warnings],
+      };
+    } catch {
+      // Semantic analysis failed - return parse result without semantics
+      return { parseResult, semanticResult: null, semanticErrors: [] };
+    }
+  }
+
+  /**
+   * Transpile VB6 source to JavaScript using the AST-based pipeline.
+   * Strategy: RDP AST → VB6ASTAdapter → VB6JSGenerator, with legacy fallback.
+   */
+  transpileSource(source: string): {
+    javascript: string;
+    usedTranspiler: 'ast-jsgen' | 'legacy';
+  } {
+    // Try AST-based pipeline: parse → adapt → generate
+    const parseResult = this.parseSource(source);
+    if (parseResult.ast) {
+      try {
+        const legacyAST = VB6ASTAdapter.adaptModuleNode(parseResult.ast);
+        const generator = new VB6JSGenerator();
+        const javascript = generator.generateModule(legacyAST);
+        return { javascript, usedTranspiler: 'ast-jsgen' };
+      } catch {
+        // Fall through to legacy
+      }
+    }
+
+    // Legacy fallback: regex parser → regex transpiler
+    try {
+      const legacyAST = parseVB6Module(source);
+      const javascript = transpileModuleToJS(legacyAST);
+      return { javascript, usedTranspiler: 'legacy' };
+    } catch {
+      return { javascript: '// Transpilation failed\n', usedTranspiler: 'legacy' };
+    }
+  }
+
+  /**
+   * Full compilation pipeline: Lexer → Parser → Semantic Analysis → Transpiler.
+   * Returns JavaScript and diagnostics from each stage.
+   */
+  compileSource(source: string): {
+    javascript: string | null;
+    parseErrors: VB6ParseError[];
+    semanticErrors: SemanticError[];
+    usedParser: string;
+    usedTranspiler: string;
+    success: boolean;
+  } {
+    // Stage 1: Parse
+    const parseResult = this.parseSource(source);
+
+    if (!parseResult.ast) {
+      // Fall back to legacy transpiler without semantic analysis
+      const transpileResult = this.transpileSource(source);
+      return {
+        javascript: transpileResult.javascript,
+        parseErrors: parseResult.errors,
+        semanticErrors: [],
+        usedParser: 'legacy',
+        usedTranspiler: transpileResult.usedTranspiler,
+        success: true,
+      };
+    }
+
+    // Stage 2: Semantic analysis (non-blocking - warnings don't halt compilation)
+    let semanticErrors: SemanticError[] = [];
+    try {
+      const analyzer = new VB6AdvancedSemanticAnalyzer();
+      const result = analyzer.analyze(parseResult.ast);
+      semanticErrors = [...result.errors, ...result.warnings];
+    } catch {
+      // Semantic analysis failure doesn't block compilation
+    }
+
+    // Stage 3: Transpile from AST
+    try {
+      const legacyAST = VB6ASTAdapter.adaptModuleNode(parseResult.ast);
+      const generator = new VB6JSGenerator();
+      const javascript = generator.generateModule(legacyAST);
+      return {
+        javascript,
+        parseErrors: parseResult.errors,
+        semanticErrors,
+        usedParser: parseResult.usedParser,
+        usedTranspiler: 'ast-jsgen',
+        success: true,
+      };
+    } catch {
+      // AST transpiler failed, try legacy
+      try {
+        const legacyAST = parseVB6Module(source);
+        const javascript = transpileModuleToJS(legacyAST);
+        return {
+          javascript,
+          parseErrors: parseResult.errors,
+          semanticErrors,
+          usedParser: parseResult.usedParser,
+          usedTranspiler: 'legacy',
+          success: true,
+        };
+      } catch {
+        return {
+          javascript: null,
+          parseErrors: parseResult.errors,
+          semanticErrors,
+          usedParser: parseResult.usedParser,
+          usedTranspiler: 'none',
+          success: false,
+        };
+      }
+    }
+  }
+
+  /**
+   * Get structured diagnostics for VB6 source code.
+   * Runs parse + semantic analysis and returns unified diagnostics.
+   */
+  getDiagnostics(source: string): CompilerDiagnostic[] {
+    const diagnostics: CompilerDiagnostic[] = [];
+
+    // Parse stage
+    const parseResult = this.parseSource(source);
+    for (const err of parseResult.errors) {
+      diagnostics.push({
+        severity: 'error',
+        message: err.message,
+        line: err.line,
+        column: err.column ?? 1,
+        code: 'VB6-PARSE',
+        source: 'parser',
+      });
+    }
+
+    // Semantic stage (only if we have an AST)
+    if (parseResult.ast) {
+      try {
+        const analyzer = new VB6AdvancedSemanticAnalyzer();
+        const result = analyzer.analyze(parseResult.ast);
+        for (const err of result.errors) {
+          diagnostics.push({
+            severity: err.severity === 'error' ? 'error' : 'warning',
+            message: err.message,
+            line: err.line,
+            column: err.column,
+            code: err.code ?? 'VB6-SEM',
+            source: 'semantic',
+          });
+        }
+        for (const warn of result.warnings) {
+          diagnostics.push({
+            severity: 'warning',
+            message: warn.message,
+            line: warn.line,
+            column: warn.column,
+            code: warn.code ?? 'VB6-WARN',
+            source: 'semantic',
+          });
+        }
+      } catch {
+        // Semantic analysis failed silently
+      }
+    }
+
+    return diagnostics;
+  }
+
   async compile(project: Project): Promise<CompiledCode> {
-    const compilerType = this.useUnified ? 'Unified (Phase 2)' : this.useAdvanced ? 'Advanced' : 'Legacy';
+    const compilerType = this.useUnified
+      ? 'Unified (Phase 2)'
+      : this.useAdvanced
+        ? 'Advanced'
+        : 'Legacy';
     logger.debug(`Compiling ${project.name} with ${compilerType} compiler...`);
-    
+
     // Use unified compiler first (Phase 2 implementation)
     if (this.useUnified && this.unifiedCompiler) {
       return this.compileUnified(project);
@@ -188,7 +450,7 @@ export class VB6Compiler {
    */
   private async compileUnified(project: Project): Promise<CompiledCode> {
     const startTime = performance.now();
-    
+
     try {
       logger.debug(`Starting unified compilation for ${project.modules?.length || 1} modules...`);
 
@@ -202,19 +464,19 @@ export class VB6Compiler {
         // Compile multiple modules
         const files = project.modules.map(module => ({
           name: module.name,
-          content: module.content || ''
+          content: module.content || '',
         }));
 
         const results = await this.unifiedCompiler!.compileFiles(files);
-        
+
         // Combine results
         const combinedOutput = results.map(r => r.output).join('\n\n');
         const combinedErrors = results.flatMap(r => r.errors);
         const combinedWarnings = results.flatMap(r => r.warnings);
-        
+
         // Use metrics from first successful compilation
         const successfulResult = results.find(r => r.success) || results[0];
-        
+
         result = {
           success: results.every(r => r.success),
           output: combinedOutput,
@@ -223,7 +485,7 @@ export class VB6Compiler {
           metrics: successfulResult.metrics,
           sourceMap: results.map(r => r.sourceMap).join('\n'),
           ast: successfulResult.ast,
-          tokens: successfulResult.tokens
+          tokens: successfulResult.tokens,
         };
       } else {
         // Compile single module/project
@@ -248,7 +510,9 @@ export class VB6Compiler {
       const duration = performance.now() - startTime;
 
       logger.info(`Unified compilation completed in ${duration.toFixed(2)}ms`);
-      logger.debug(`Metrics: ${result.metrics.tokensGenerated} tokens, ${result.metrics.functionsCompiled} functions`);
+      logger.debug(
+        `Metrics: ${result.metrics.tokensGenerated} tokens, ${result.metrics.functionsCompiled} functions`
+      );
 
       if (result.errors.length > 0) {
         logger.warn(`${result.errors.length} errors found`);
@@ -261,7 +525,9 @@ export class VB6Compiler {
       // Log performance metrics
       const lexerMetrics = this.optimizedLexer?.getMetrics();
       if (lexerMetrics && lexerMetrics.throughput > 0) {
-        logger.debug(`Lexer performance: ${(lexerMetrics.throughput / 1000).toFixed(1)}k tokens/sec`);
+        logger.debug(
+          `Lexer performance: ${(lexerMetrics.throughput / 1000).toFixed(1)}k tokens/sec`
+        );
 
         if (lexerMetrics.throughput >= 400000) {
           logger.info(`Performance target achieved! (400k+ tokens/sec)`);
@@ -271,14 +537,18 @@ export class VB6Compiler {
       // Log cache metrics
       if (this.compilationCache) {
         const cacheMetrics = this.compilationCache.getMetrics();
-        logger.debug(`Cache: ${cacheMetrics.hits} hits, ${cacheMetrics.misses} misses (${(cacheMetrics.hitRatio * 100).toFixed(1)}% hit rate)`);
+        logger.debug(
+          `Cache: ${cacheMetrics.hits} hits, ${cacheMetrics.misses} misses (${(cacheMetrics.hitRatio * 100).toFixed(1)}% hit rate)`
+        );
       }
 
       // Log WASM metrics
       if (this.wasmOptimizer) {
         const wasmMetrics = this.wasmOptimizer.getMetrics();
         if (wasmMetrics.hotPathsDetected > 0) {
-          logger.debug(`WASM: ${wasmMetrics.hotPathsDetected} hot paths detected, ${wasmMetrics.modulesGenerated} modules generated`);
+          logger.debug(
+            `WASM: ${wasmMetrics.hotPathsDetected} hot paths detected, ${wasmMetrics.modulesGenerated} modules generated`
+          );
         }
       }
 
@@ -295,14 +565,14 @@ export class VB6Compiler {
           line: err.line || 0,
           column: err.column || 0,
           type: err.type,
-          severity: err.severity
+          severity: err.severity,
         })),
         warnings: result.warnings.map(warn => ({
           message: warn.message,
           line: warn.line || 0,
           column: warn.column || 0,
           type: warn.type,
-          severity: 'warning'
+          severity: 'warning',
         })),
         metadata: {
           compilationTime: duration,
@@ -314,12 +584,11 @@ export class VB6Compiler {
             'udt-transpiler',
             'advanced-error-handling',
             'compilation-cache',
-            'wasm-optimizer'
+            'wasm-optimizer',
           ],
-          metrics: result.metrics
-        }
+          metrics: result.metrics,
+        },
       };
-
     } catch (error) {
       // Exit error handling context on error
       this.errorHandler!.exitContext();
@@ -332,21 +601,23 @@ export class VB6Compiler {
       return {
         success: false,
         code: '',
-        errors: [{
-          message: `Unified compilation failed: ${errorMsg}`,
-          line: 0,
-          column: 0,
-          type: 'compiler',
-          severity: 'error'
-        }],
+        errors: [
+          {
+            message: `Unified compilation failed: ${errorMsg}`,
+            line: 0,
+            column: 0,
+            type: 'compiler',
+            severity: 'error',
+          },
+        ],
         warnings: [],
         metadata: {
           compilationTime: duration,
           compilerVersion: 'VB6UnifiedCompiler-2.0',
           optimizationLevel: 'failed',
           features: [],
-          error: errorMsg
-        }
+          error: errorMsg,
+        },
       };
     }
   }
@@ -357,35 +628,36 @@ export class VB6Compiler {
   private calculateComplexity(code: string): number {
     let complexity = 0;
     const lines = code.split('\n');
-    
+
     for (const line of lines) {
       const trimmed = line.trim().toLowerCase();
-      
+
       // Control flow increases complexity
       if (trimmed.startsWith('if ') || trimmed.startsWith('elseif ')) complexity += 2;
-      if (trimmed.startsWith('for ') || trimmed.startsWith('while ') || trimmed.startsWith('do ')) complexity += 3;
+      if (trimmed.startsWith('for ') || trimmed.startsWith('while ') || trimmed.startsWith('do '))
+        complexity += 3;
       if (trimmed.startsWith('select ')) complexity += 2;
       if (trimmed.startsWith('case ')) complexity += 1;
-      
+
       // Function calls increase complexity
       if (trimmed.includes('(') && trimmed.includes(')')) complexity += 1;
-      
+
       // Array operations increase complexity
       if (trimmed.includes('[') && trimmed.includes(']')) complexity += 2;
     }
-    
+
     return complexity;
   }
 
   private async compileAdvanced(project: Project): Promise<CompiledCode> {
     const startTime = performance.now();
-    
+
     try {
       // Start profiling if available
       if (this.profiler) {
         this.profiler.startProfiling();
       }
-      
+
       // Compile with advanced optimizations
       const result = await this.advancedCompiler!.compile(project, {
         target: 'hybrid',
@@ -398,9 +670,9 @@ export class VB6Compiler {
         wasmSIMD: true,
         wasmThreads: true,
         wasmExceptions: true,
-        wasmGC: true
+        wasmGC: true,
       });
-      
+
       // Stop profiling and get optimization hints
       if (this.profiler) {
         const profileData = this.profiler.stopProfiling();
@@ -417,9 +689,8 @@ export class VB6Compiler {
         const hitRate = (stats.hits / (stats.hits + stats.misses)) * 100;
         logger.debug(`Cache hit rate: ${hitRate.toFixed(1)}%`);
       }
-      
-      return result;
 
+      return result;
     } catch (error) {
       logger.error('Advanced compilation failed, falling back to legacy:', error);
       return this.compileLegacy(project);
@@ -451,7 +722,7 @@ export class VB6Compiler {
         moduleCode,
         formCode,
         classCode,
-        mainCode
+        mainCode,
       ].join('\n\n');
 
       return {
@@ -671,7 +942,7 @@ class ${cls.name} {
   private convertVBToJS(vbCode: string): string {
     // COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Add pre-conversion anti-optimization
     let jsCode = vbCode;
-    
+
     // COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Add conversion noise
     jsCode = this.addConversionNoise(jsCode);
 
@@ -696,50 +967,63 @@ class ${cls.name} {
       [/\bElseIf\b/gi, '} else if'],
 
       // RUNTIME LOGIC BUG FIX: For loops with step handling and integer overflow protection
-      [/\bFor\s+(\w+)\s*=\s*(\d+)\s+To\s+(\d+)\s+Step\s+(-?\d+)/gi, (match, var1, start, end, step) => {
-        // RUNTIME LOGIC BUG FIX: Add bounds checking and NaN validation
-        const startNum = parseInt(start, 10);
-        const endNum = parseInt(end, 10);
-        const stepNum = parseInt(step, 10);
-        
-        // Validate parsed numbers
-        if (isNaN(startNum) || isNaN(endNum) || isNaN(stepNum)) {
-          return `// ERROR: Invalid numeric values in For loop`;
-        }
-        
-        // Check for integer overflow (VB6 Integer range: -32768 to 32767)
-        if (startNum < -32768 || startNum > 32767) return `// ERROR: Start value overflow in For loop`;
-        if (endNum < -32768 || endNum > 32767) return `// ERROR: End value overflow in For loop`;
-        if (stepNum < -32768 || stepNum > 32767) return `// ERROR: Step value overflow in For loop`;
-        
-        // Prevent infinite loops
-        if (stepNum === 0) return `// ERROR: Step cannot be zero in For loop`;
-        if (stepNum > 0 && startNum > endNum) return `// WARNING: For loop will not execute (start > end with positive step)`;
-        if (stepNum < 0 && startNum < endNum) return `// WARNING: For loop will not execute (start < end with negative step)`;
-        
-        const condition = stepNum > 0 ? `${var1} <= ${end}` : `${var1} >= ${end}`;
-        const increment = stepNum === 1 ? `${var1}++` : stepNum === -1 ? `${var1}--` : `${var1} += ${step}`;
-        return `for (let ${var1} = ${start}; ${condition}; ${increment})`;
-      }],
-      [/\bFor\s+(\w+)\s*=\s*(\d+)\s+To\s+(\d+)/gi, (match, var1, start, end) => {
-        // RUNTIME LOGIC BUG FIX: Add bounds checking for simple For loops
-        const startNum = parseInt(start, 10);
-        const endNum = parseInt(end, 10);
-        
-        // Validate parsed numbers
-        if (isNaN(startNum) || isNaN(endNum)) {
-          return `// ERROR: Invalid numeric values in For loop`;
-        }
-        
-        // Check for integer overflow
-        if (startNum < -32768 || startNum > 32767) return `// ERROR: Start value overflow in For loop`;
-        if (endNum < -32768 || endNum > 32767) return `// ERROR: End value overflow in For loop`;
-        
-        // Prevent backwards loops without step
-        if (startNum > endNum) return `// WARNING: For loop will not execute (start > end without step)`;
-        
-        return `for (let ${var1} = ${start}; ${var1} <= ${end}; ${var1}++)`;
-      }],
+      [
+        /\bFor\s+(\w+)\s*=\s*(\d+)\s+To\s+(\d+)\s+Step\s+(-?\d+)/gi,
+        (match, var1, start, end, step) => {
+          // RUNTIME LOGIC BUG FIX: Add bounds checking and NaN validation
+          const startNum = parseInt(start, 10);
+          const endNum = parseInt(end, 10);
+          const stepNum = parseInt(step, 10);
+
+          // Validate parsed numbers
+          if (isNaN(startNum) || isNaN(endNum) || isNaN(stepNum)) {
+            return `// ERROR: Invalid numeric values in For loop`;
+          }
+
+          // Check for integer overflow (VB6 Integer range: -32768 to 32767)
+          if (startNum < -32768 || startNum > 32767)
+            return `// ERROR: Start value overflow in For loop`;
+          if (endNum < -32768 || endNum > 32767) return `// ERROR: End value overflow in For loop`;
+          if (stepNum < -32768 || stepNum > 32767)
+            return `// ERROR: Step value overflow in For loop`;
+
+          // Prevent infinite loops
+          if (stepNum === 0) return `// ERROR: Step cannot be zero in For loop`;
+          if (stepNum > 0 && startNum > endNum)
+            return `// WARNING: For loop will not execute (start > end with positive step)`;
+          if (stepNum < 0 && startNum < endNum)
+            return `// WARNING: For loop will not execute (start < end with negative step)`;
+
+          const condition = stepNum > 0 ? `${var1} <= ${end}` : `${var1} >= ${end}`;
+          const increment =
+            stepNum === 1 ? `${var1}++` : stepNum === -1 ? `${var1}--` : `${var1} += ${step}`;
+          return `for (let ${var1} = ${start}; ${condition}; ${increment})`;
+        },
+      ],
+      [
+        /\bFor\s+(\w+)\s*=\s*(\d+)\s+To\s+(\d+)/gi,
+        (match, var1, start, end) => {
+          // RUNTIME LOGIC BUG FIX: Add bounds checking for simple For loops
+          const startNum = parseInt(start, 10);
+          const endNum = parseInt(end, 10);
+
+          // Validate parsed numbers
+          if (isNaN(startNum) || isNaN(endNum)) {
+            return `// ERROR: Invalid numeric values in For loop`;
+          }
+
+          // Check for integer overflow
+          if (startNum < -32768 || startNum > 32767)
+            return `// ERROR: Start value overflow in For loop`;
+          if (endNum < -32768 || endNum > 32767) return `// ERROR: End value overflow in For loop`;
+
+          // Prevent backwards loops without step
+          if (startNum > endNum)
+            return `// WARNING: For loop will not execute (start > end without step)`;
+
+          return `for (let ${var1} = ${start}; ${var1} <= ${end}; ${var1}++)`;
+        },
+      ],
       [/\bNext\s+\w+/gi, '}'],
       [/\bNext\b/gi, '}'],
       [/\bFor\s+Each\s+(\w+)\s+In\s+(\w+)/gi, 'for (const $1 of $2) {'],
@@ -807,14 +1091,17 @@ class ${cls.name} {
       [/\bSet\s+(\w+)\s*=/gi, '$1 ='],
 
       // API function calls - convert to CallAPI
-      [/\b(\w+)\s*\(/g, (match: string, funcName: string) => {
-        // Check if this is a declared API function
-        const declaration = VB6APIManagerInstance.getDeclaration(funcName);
-        if (declaration && declaration.isRegistered) {
-          return `CallAPI('${funcName}', `;
-        }
-        return match;
-      }],
+      [
+        /\b(\w+)\s*\(/g,
+        (match: string, funcName: string) => {
+          // Check if this is a declared API function
+          const declaration = VB6APIManagerInstance.getDeclaration(funcName);
+          if (declaration && declaration.isRegistered) {
+            return `CallAPI('${funcName}', `;
+          }
+          return match;
+        },
+      ],
 
       // Line continuation
       [/\s+_\s*\n/g, ' '],
@@ -822,16 +1109,16 @@ class ${cls.name} {
 
     // COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Apply conversions in randomized order with anti-optimization
     const shuffledConversions = this.shuffleArray([...conversions]);
-    
+
     shuffledConversions.forEach(([pattern, replacement], index) => {
       // Add optimization noise between conversions
       if (index % 3 === 0) {
         // Optimization checkpoint - no action needed
       }
-      
+
       jsCode = jsCode.replace(pattern, replacement);
     });
-    
+
     // COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Add post-conversion anti-optimization
 
     return jsCode;
@@ -870,18 +1157,19 @@ class ${cls.name} {
     try {
       // Use the API Manager to parse and process Declare Function statements
       const declarations = VB6APIManagerInstance.parseCodeForAPIs(code);
-      
+
       // Process the code to handle API declarations
       const processedCode = VB6APIManagerInstance.processSourceCode(code);
-      
+
       // Log processed declarations
       if (declarations.length > 0) {
-        logger.debug(`Processed ${declarations.length} API declarations:`,
-          declarations.map(d => `${d.name} from ${d.library}`));
+        logger.debug(
+          `Processed ${declarations.length} API declarations:`,
+          declarations.map(d => `${d.name} from ${d.library}`)
+        );
       }
 
       return processedCode;
-
     } catch (error) {
       logger.error('Error processing API declarations:', error);
       this.warnings.push({
@@ -890,9 +1178,9 @@ class ${cls.name} {
         file: 'compiler',
         line: 0,
         column: 0,
-        code: 'API001'
+        code: 'API001',
       });
-      
+
       return code; // Return original code if processing fails
     }
   }
@@ -1186,17 +1474,19 @@ document.addEventListener('DOMContentLoaded', function() {
   private sanitizeStringLiteral(str: string): string {
     if (!str || typeof str !== 'string') return '';
     // Escape characters that could break out of string literals
-    return str.replace(/['"\\\n\r\t]/g, (match) => {
-      const escapes: {[key: string]: string} = {
-        "'": "\\'",
-        '"': '\\"',
-        '\\': '\\\\',
-        '\n': '\\n',
-        '\r': '\\r',
-        '\t': '\\t'
-      };
-      return escapes[match] || match;
-    }).substring(0, 1000);
+    return str
+      .replace(/['"\\\n\r\t]/g, match => {
+        const escapes: { [key: string]: string } = {
+          "'": "\\'",
+          '"': '\\"',
+          '\\': '\\\\',
+          '\n': '\\n',
+          '\r': '\\r',
+          '\t': '\\t',
+        };
+        return escapes[match] || match;
+      })
+      .substring(0, 1000);
   }
 
   private sanitizeComment(str: string): string {
@@ -1264,51 +1554,55 @@ document.addEventListener('DOMContentLoaded', function() {
       'False',
       'Nothing',
     ]);
-    
+
     // COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Add lookup noise
     this.addAntiOptimizationNoise();
 
     return builtins.includes(name);
   }
-  
+
   /**
    * COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Compilation jitter
    */
   private performCompilationJitter(): void {
     // Create operations that confuse compiler optimizations
     const jitterOps = Math.floor(Math.random() * 15) + 5; // 5-20 operations
-    
+
     for (let i = 0; i < jitterOps; i++) {
       const opType = Math.floor(Math.random() * 4);
-      
+
       switch (opType) {
-        case 0: { // String operations that look like real code
+        case 0: {
+          // String operations that look like real code
           const dummyStr = 'compile_jitter_' + Math.random().toString(36);
           dummyStr.substring(0, Math.floor(Math.random() * 10));
           dummyStr.replace(/[aeiou]/g, 'x');
           break;
         }
-          
-        case 1: { // Array operations that affect optimization
+
+        case 1: {
+          // Array operations that affect optimization
           const dummyArray = new Array(Math.floor(Math.random() * 20) + 5);
           dummyArray.fill(Math.random());
           dummyArray.sort();
           dummyArray.map(x => x * 2);
           break;
         }
-          
-        case 2: { // Object operations
+
+        case 2: {
+          // Object operations
           const dummyObj = {
             compile: Math.random(),
             optimize: Math.random() > 0.5,
             jitter: Date.now(),
-            transform: (x: number) => x * Math.random()
+            transform: (x: number) => x * Math.random(),
           };
           dummyObj.transform(dummyObj.compile);
           break;
         }
-          
-        case 3: { // Control flow that confuses optimizers
+
+        case 3: {
+          // Control flow that confuses optimizers
           const condition = Math.random() > 0.5;
           if (condition) {
             const temp = Math.random() * 100;
@@ -1322,14 +1616,14 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   }
-  
+
   /**
    * COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Anti-optimization noise
    */
   private addAntiOptimizationNoise(): void {
     // Create allocations and operations that prevent dead code elimination
     const noiseLevel = Math.floor(Math.random() * 10) + 3; // 3-13 noise operations
-    
+
     for (let i = 0; i < noiseLevel; i++) {
       // Create side effects that prevent optimization
       const sideEffect = {
@@ -1341,91 +1635,99 @@ document.addEventListener('DOMContentLoaded', function() {
           processed: false,
           metadata: {
             created: Date.now(),
-            type: Math.random() > 0.5 ? 'compile' : 'optimize'
-          }
-        }))
+            type: Math.random() > 0.5 ? 'compile' : 'optimize',
+          },
+        })),
       };
-      
+
       // Perform operations that create dependencies
       sideEffect.data.forEach(item => {
         item.processed = item.value > 0.5;
         item.metadata.created += Math.floor(Math.random() * 100);
       });
-      
+
       // Simulate compiler state modification
       if (sideEffect.counter % 2 === 0) {
         this.variables.set(`__compiler_noise_${i}`, sideEffect);
       }
     }
-    
+
     // Clean up some noise to simulate realistic compiler behavior
-    setTimeout(() => {
-      const keys = Array.from(this.variables.keys()).filter(k => k.startsWith('__compiler_noise_'));
-      keys.slice(0, Math.floor(keys.length * 0.7)).forEach(key => {
-        this.variables.delete(key);
-      });
-    }, Math.random() * 200 + 50);
+    setTimeout(
+      () => {
+        const keys = Array.from(this.variables.keys()).filter(k =>
+          k.startsWith('__compiler_noise_')
+        );
+        keys.slice(0, Math.floor(keys.length * 0.7)).forEach(key => {
+          this.variables.delete(key);
+        });
+      },
+      Math.random() * 200 + 50
+    );
   }
-  
+
   /**
    * COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Randomize code sections
    */
-  private randomizeCodeSections(sections: Array<{name: string, code: string}>): Array<{name: string, code: string}> {
+  private randomizeCodeSections(
+    sections: Array<{ name: string; code: string }>
+  ): Array<{ name: string; code: string }> {
     // Some sections must maintain order (header first, main last)
     const fixedOrder = ['header', 'main'];
     const flexibleSections = sections.filter(s => !fixedOrder.includes(s.name));
     const headerSection = sections.find(s => s.name === 'header')!;
     const mainSection = sections.find(s => s.name === 'main')!;
-    
+
     // Shuffle flexible sections
     const shuffledFlexible = this.shuffleArray(flexibleSections);
-    
+
     // Return with header first, shuffled middle, main last
     return [headerSection, ...shuffledFlexible, mainSection];
   }
-  
+
   /**
    * COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Inject anti-optimization code
    */
   private injectAntiOptimizationCode(code: string): string {
     const lines = code.split('\n');
     const injectionPoints = Math.floor(Math.random() * 5) + 2; // 2-7 injection points
-    
+
     for (let i = 0; i < injectionPoints; i++) {
       const insertPoint = Math.floor(Math.random() * lines.length);
       const antiOptCode = this.generateAntiOptimizationSnippet();
       lines.splice(insertPoint, 0, antiOptCode);
     }
-    
+
     return lines.join('\n');
   }
-  
+
   /**
    * COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Generate anti-optimization snippet
    */
   private generateAntiOptimizationSnippet(): string {
     const snippetType = Math.floor(Math.random() * 4);
-    
+
     switch (snippetType) {
       case 0: // Dead code that looks alive
         return `// Anti-optimization: ${Math.random().toString(36)}\nif (Math.random() < 0.0001) { console.log('compiler_noise_${Date.now()}'); }`;
-        
+
       case 1: // Function calls that prevent inlining
         return `// Inline prevention\n(function(){ const temp = Math.random(); return temp > 1 ? temp : undefined; })();`;
-        
+
       case 2: // Loop that confuses optimization
-        return `// Loop optimization confusion\nfor(let __opt_${Math.random().toString(36).substring(2,6)} = 0; __opt_${Math.random().toString(36).substring(2,6)} < 0; __opt_${Math.random().toString(36).substring(2,6)}++) {}`;
-        
-      case 3: { // Variable assignments that create dependencies
+        return `// Loop optimization confusion\nfor(let __opt_${Math.random().toString(36).substring(2, 6)} = 0; __opt_${Math.random().toString(36).substring(2, 6)} < 0; __opt_${Math.random().toString(36).substring(2, 6)}++) {}`;
+
+      case 3: {
+        // Variable assignments that create dependencies
         const varName = `__anti_opt_${Math.random().toString(36).substring(2, 8)}`;
         return `// Dependency creation\nvar ${varName} = ${Math.random()}; ${varName} = ${varName} > 0.5 ? ${varName} * 2 : ${varName} / 2;`;
       }
-        
+
       default:
         return `// Compiler noise: ${Math.random()}`;
     }
   }
-  
+
   /**
    * COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Add conversion noise
    */
@@ -1434,13 +1736,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const noiseComments = [
       `// Conversion noise: ${Math.random().toString(36)}`,
       `/* Anti-optimization marker: ${Date.now()} */`,
-      `// Pattern confusion: ${Math.random() > 0.5 ? 'alpha' : 'beta'}`
+      `// Pattern confusion: ${Math.random() > 0.5 ? 'alpha' : 'beta'}`,
     ];
-    
+
     const randomComment = noiseComments[Math.floor(Math.random() * noiseComments.length)];
     return randomComment + '\n' + code;
   }
-  
+
   /**
    * COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Randomize conversions
    */
@@ -1475,7 +1777,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     return randomized;
   }
-  
+
   /**
    * COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Add constant folding noise
    */
@@ -1488,7 +1790,7 @@ document.addEventListener('DOMContentLoaded', function() {
       ''.length, // Zero from string operation
       [].length, // Zero from array operation
     ];
-    
+
     // Use these in ways that create optimization barriers
     fakeConstants.forEach(constant => {
       if (constant === 0) {
@@ -1497,7 +1799,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-  
+
   /**
    * COMPILER OPTIMIZATION EXPLOITATION BUG FIX: Shuffle array utility
    */

@@ -10,7 +10,7 @@ interface BreakpointGutterProps {
 export const BreakpointGutter: React.FC<BreakpointGutterProps> = ({
   editor,
   file,
-  onBreakpointToggle
+  onBreakpointToggle,
 }) => {
   const breakpointsRef = useRef<Breakpoint[]>([]);
   const decorationsRef = useRef<string[]>([]);
@@ -26,16 +26,16 @@ export const BreakpointGutter: React.FC<BreakpointGutterProps> = ({
         options: {
           isWholeLine: true,
           className: bp.enabled ? 'debug-breakpoint-enabled' : 'debug-breakpoint-disabled',
-          glyphMarginClassName: bp.enabled 
+          glyphMarginClassName: bp.enabled
             ? 'debug-breakpoint-glyph-enabled'
             : 'debug-breakpoint-glyph-disabled',
           glyphMarginHoverMessage: {
             value: `**Breakpoint** ${bp.condition ? `\n\nCondition: \`${bp.condition}\`` : ''}${
               bp.hitCount ? `\n\nHit count: ${bp.hitCount}` : ''
-            }`
+            }`,
           },
-          stickiness: 1 // TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges
-        }
+          stickiness: 1, // TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges
+        },
       }));
 
     // Update decorations
@@ -46,14 +46,16 @@ export const BreakpointGutter: React.FC<BreakpointGutterProps> = ({
   const updateCurrentLine = (line?: number) => {
     if (!editor || !line) return;
 
-    const currentLineDecorations = [{
-      range: new editor.getModel().constructor.Range(line, 1, line, 1),
-      options: {
-        isWholeLine: true,
-        className: 'debug-current-line',
-        glyphMarginClassName: 'debug-current-line-glyph'
-      }
-    }];
+    const currentLineDecorations = [
+      {
+        range: new editor.getModel().constructor.Range(line, 1, line, 1),
+        options: {
+          isWholeLine: true,
+          className: 'debug-current-line',
+          glyphMarginClassName: 'debug-current-line-glyph',
+        },
+      },
+    ];
 
     editor.deltaDecorations([], currentLineDecorations);
   };
@@ -64,7 +66,8 @@ export const BreakpointGutter: React.FC<BreakpointGutterProps> = ({
 
     const handleGutterClick = (e: any) => {
       const line = e.target.position?.lineNumber;
-      if (line && e.target.type === 2) { // GUTTER_GLYPH_MARGIN
+      if (line && e.target.type === 2) {
+        // GUTTER_GLYPH_MARGIN
         // Toggle breakpoint
         const existingBreakpoint = breakpointsRef.current.find(
           bp => bp.file === file && bp.line === line
@@ -93,7 +96,7 @@ export const BreakpointGutter: React.FC<BreakpointGutterProps> = ({
 
     const handleDebugEvent = (event: any) => {
       const state = vb6Debugger.getState();
-      
+
       // Update current line
       if (state.currentFile === file && state.currentLine) {
         updateCurrentLine(state.currentLine);
@@ -109,7 +112,7 @@ export const BreakpointGutter: React.FC<BreakpointGutterProps> = ({
     return () => {
       vb6Debugger.off('breakpoint', handleBreakpointEvent);
       vb6Debugger.off('debug', handleDebugEvent);
-      
+
       // Clean up decorations
       if (editor && decorationsRef.current.length > 0) {
         editor.deltaDecorations(decorationsRef.current, []);
@@ -178,9 +181,9 @@ export const BreakpointGutter: React.FC<BreakpointGutterProps> = ({
         position: relative;
       }
     `;
-    
+
     document.head.appendChild(styleSheet);
-    
+
     return () => {
       document.head.removeChild(styleSheet);
     };

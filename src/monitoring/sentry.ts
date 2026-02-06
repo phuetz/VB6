@@ -29,4 +29,3 @@ export async function initSentryIfEnabled(): Promise<void> {
 
   console.info('Sentry monitoring is currently disabled');
 }
-

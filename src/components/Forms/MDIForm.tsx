@@ -13,22 +13,22 @@ export interface MDIFormProps {
   Name: string;
   Caption: string;
   WindowState: number; // 0-Normal, 1-Minimized, 2-Maximized
-  
+
   // Position et taille
   Left: number;
   Top: number;
   Width: number;
   Height: number;
-  
+
   // Apparence
   BackColor?: string;
   Picture?: string;
   Icon?: string;
-  
+
   // Comportement MDI
   AutoShowChildren: boolean;
   ScrollBars: boolean;
-  
+
   // Propriétés standard de formulaire
   Visible: boolean;
   Enabled: boolean;
@@ -39,17 +39,17 @@ export interface MDIFormProps {
   Moveable: boolean;
   ShowInTaskbar: boolean;
   StartUpPosition: number;
-  
+
   // Menu
   NegotiateMenus: boolean;
-  
+
   // Événements
   onLoad?: () => void;
   onUnload?: (cancel: { value: boolean }) => void;
   onResize?: () => void;
   onActivate?: () => void;
   onDeactivate?: () => void;
-  
+
   // Enfants MDI
   children?: React.ReactNode;
 }
@@ -66,21 +66,21 @@ export interface MDIChildForm extends VB6Form {
 export interface MDIFormInstance {
   // Propriétés VB6 MDI
   ActiveForm: MDIChildForm | null;
-  
+
   // Collection des formulaires enfants
   MDIChildren: MDIChildForm[];
-  
+
   // Méthodes VB6
   Arrange(arrangement: number): void; // 0-Cascade, 1-TileHorizontal, 2-TileVertical, 3-ArrangeIcons
   Show(modal?: boolean): void;
   Hide(): void;
   SetFocus(): void;
-  
+
   // Gestion des enfants
   AddChild(childForm: MDIChildForm): void;
   RemoveChild(childForm: MDIChildForm): void;
   CloseAllChildren(): void;
-  
+
   // Navigation
   NextChild(): void;
   PreviousChild(): void;
@@ -115,7 +115,7 @@ export const MDIForm = forwardRef<HTMLDivElement, MDIFormProps>((props, ref) => 
     onResize,
     onActivate,
     onDeactivate,
-    children
+    children,
   } = props;
 
   const [childForms, setChildForms] = useState<MDIChildForm[]>([]);
@@ -123,7 +123,7 @@ export const MDIForm = forwardRef<HTMLDivElement, MDIFormProps>((props, ref) => 
   const [isMinimized, setIsMinimized] = useState(WindowState === 1);
   const [isMaximized, setIsMaximized] = useState(WindowState === 2);
   const [mdiClientArea, setMdiClientArea] = useState({ width: Width - 20, height: Height - 60 });
-  
+
   const mdiFormRef = useRef<HTMLDivElement>(null);
   const clientAreaRef = useRef<HTMLDivElement>(null);
 
@@ -182,15 +182,15 @@ export const MDIForm = forwardRef<HTMLDivElement, MDIFormProps>((props, ref) => 
     AddChild(childForm: MDIChildForm) {
       childForm.MDIParent = this;
       childForm.MDIChild = true;
-      
+
       setChildForms(prev => {
         const newChildren = [...prev, childForm];
-        
+
         // Définir comme actif si c'est le premier ou si AutoShowChildren est activé
         if (newChildren.length === 1 || AutoShowChildren) {
           setActiveChild(childForm);
         }
-        
+
         return newChildren;
       });
     },
@@ -198,12 +198,12 @@ export const MDIForm = forwardRef<HTMLDivElement, MDIFormProps>((props, ref) => 
     RemoveChild(childForm: MDIChildForm) {
       setChildForms(prev => {
         const newChildren = prev.filter(child => child !== childForm);
-        
+
         // Si le formulaire supprimé était actif, activer le suivant
         if (activeChild === childForm) {
           setActiveChild(newChildren.length > 0 ? newChildren[newChildren.length - 1] : null);
         }
-        
+
         return newChildren;
       });
     },
@@ -215,7 +215,7 @@ export const MDIForm = forwardRef<HTMLDivElement, MDIFormProps>((props, ref) => 
 
     NextChild() {
       if (childForms.length === 0) return;
-      
+
       const currentIndex = activeChild ? childForms.indexOf(activeChild) : -1;
       const nextIndex = (currentIndex + 1) % childForms.length;
       setActiveChild(childForms[nextIndex]);
@@ -223,90 +223,100 @@ export const MDIForm = forwardRef<HTMLDivElement, MDIFormProps>((props, ref) => 
 
     PreviousChild() {
       if (childForms.length === 0) return;
-      
+
       const currentIndex = activeChild ? childForms.indexOf(activeChild) : -1;
       const prevIndex = currentIndex <= 0 ? childForms.length - 1 : currentIndex - 1;
       setActiveChild(childForms[prevIndex]);
-    }
+    },
   };
 
   // Arrangements des fenêtres enfants
   const arrangeChildrenCascade = useCallback(() => {
     const cascade = 30; // Décalage en cascade
-    
-    setChildForms(prev => prev.map((child, index) => ({
-      ...child,
-      Left: index * cascade,
-      Top: index * cascade,
-      Width: Math.min(400, mdiClientArea.width - (index * cascade)),
-      Height: Math.min(300, mdiClientArea.height - (index * cascade)),
-      WindowState: 0, // Normal
-      ZOrder: prev.length - index
-    })));
+
+    setChildForms(prev =>
+      prev.map((child, index) => ({
+        ...child,
+        Left: index * cascade,
+        Top: index * cascade,
+        Width: Math.min(400, mdiClientArea.width - index * cascade),
+        Height: Math.min(300, mdiClientArea.height - index * cascade),
+        WindowState: 0, // Normal
+        ZOrder: prev.length - index,
+      }))
+    );
   }, [mdiClientArea]);
 
   const arrangeChildrenTileHorizontal = useCallback(() => {
     if (childForms.length === 0) return;
-    
+
     const tileHeight = Math.floor(mdiClientArea.height / childForms.length);
-    
-    setChildForms(prev => prev.map((child, index) => ({
-      ...child,
-      Left: 0,
-      Top: index * tileHeight,
-      Width: mdiClientArea.width,
-      Height: tileHeight,
-      WindowState: 0
-    })));
+
+    setChildForms(prev =>
+      prev.map((child, index) => ({
+        ...child,
+        Left: 0,
+        Top: index * tileHeight,
+        Width: mdiClientArea.width,
+        Height: tileHeight,
+        WindowState: 0,
+      }))
+    );
   }, [childForms.length, mdiClientArea]);
 
   const arrangeChildrenTileVertical = useCallback(() => {
     if (childForms.length === 0) return;
-    
+
     const tileWidth = Math.floor(mdiClientArea.width / childForms.length);
-    
-    setChildForms(prev => prev.map((child, index) => ({
-      ...child,
-      Left: index * tileWidth,
-      Top: 0,
-      Width: tileWidth,
-      Height: mdiClientArea.height,
-      WindowState: 0
-    })));
+
+    setChildForms(prev =>
+      prev.map((child, index) => ({
+        ...child,
+        Left: index * tileWidth,
+        Top: 0,
+        Width: tileWidth,
+        Height: mdiClientArea.height,
+        WindowState: 0,
+      }))
+    );
   }, [childForms.length, mdiClientArea]);
 
   const arrangeIcons = useCallback(() => {
     const iconSize = 32;
     const spacing = 40;
-    let x = 10, y = mdiClientArea.height - iconSize - 10;
-    
-    setChildForms(prev => prev.map((child, index) => {
-      if (child.WindowState === 1) { // Minimized
-        const result = {
-          ...child,
-          Left: x,
-          Top: y,
-          Width: iconSize * 3,
-          Height: iconSize
-        };
-        
-        x += spacing;
-        if (x + spacing > mdiClientArea.width) {
-          x = 10;
-          y -= spacing;
+    let x = 10,
+      y = mdiClientArea.height - iconSize - 10;
+
+    setChildForms(prev =>
+      prev.map((child, index) => {
+        if (child.WindowState === 1) {
+          // Minimized
+          const result = {
+            ...child,
+            Left: x,
+            Top: y,
+            Width: iconSize * 3,
+            Height: iconSize,
+          };
+
+          x += spacing;
+          if (x + spacing > mdiClientArea.width) {
+            x = 10;
+            y -= spacing;
+          }
+
+          return result;
         }
-        
-        return result;
-      }
-      return child;
-    }));
+        return child;
+      })
+    );
   }, [mdiClientArea]);
 
   // Gestion des événements clavier MDI
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!Enabled) return;
-      
+
       // Ctrl+F4 - Fermer le formulaire enfant actif
       if (event.ctrlKey && event.key === 'F4') {
         event.preventDefault();
@@ -314,13 +324,13 @@ export const MDIForm = forwardRef<HTMLDivElement, MDIFormProps>((props, ref) => 
           mdiInstance.RemoveChild(activeChild);
         }
       }
-      
+
       // Ctrl+F6 - Formulaire enfant suivant
       if (event.ctrlKey && event.key === 'F6') {
         event.preventDefault();
         mdiInstance.NextChild();
       }
-      
+
       // Ctrl+Shift+F6 - Formulaire enfant précédent
       if (event.ctrlKey && event.shiftKey && event.key === 'F6') {
         event.preventDefault();
@@ -357,7 +367,7 @@ export const MDIForm = forwardRef<HTMLDivElement, MDIFormProps>((props, ref) => 
     overflow: 'hidden',
     zIndex: 1000,
     fontFamily: 'MS Sans Serif, sans-serif',
-    fontSize: '8pt'
+    fontSize: '8pt',
   };
 
   const titleBarStyle: React.CSSProperties = {
@@ -369,7 +379,7 @@ export const MDIForm = forwardRef<HTMLDivElement, MDIFormProps>((props, ref) => 
     justifyContent: 'space-between',
     padding: '0 8px',
     fontWeight: 'bold',
-    userSelect: 'none'
+    userSelect: 'none',
   };
 
   const clientAreaStyle: React.CSSProperties = {
@@ -380,18 +390,25 @@ export const MDIForm = forwardRef<HTMLDivElement, MDIFormProps>((props, ref) => 
     backgroundImage: Picture ? `url(${Picture})` : undefined,
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center',
-    backgroundSize: 'cover'
+    backgroundSize: 'cover',
   };
 
   const getBorderStyle = (borderStyle: number): string => {
     switch (borderStyle) {
-      case 0: return 'none';
-      case 1: return '1px solid #808080';
-      case 2: return '2px outset #C0C0C0';
-      case 3: return '2px solid #808080';
-      case 4: return '1px solid #808080'; // Tool Window
-      case 5: return '2px outset #C0C0C0'; // Sizable Tool Window
-      default: return '2px outset #C0C0C0';
+      case 0:
+        return 'none';
+      case 1:
+        return '1px solid #808080';
+      case 2:
+        return '2px outset #C0C0C0';
+      case 3:
+        return '2px solid #808080';
+      case 4:
+        return '1px solid #808080'; // Tool Window
+      case 5:
+        return '2px outset #C0C0C0'; // Sizable Tool Window
+      default:
+        return '2px outset #C0C0C0';
     }
   };
 
@@ -407,7 +424,7 @@ export const MDIForm = forwardRef<HTMLDivElement, MDIFormProps>((props, ref) => 
       display: child.Visible ? 'flex' : 'none',
       flexDirection: 'column',
       zIndex: child === activeChild ? 100 : child.ZOrder || 1,
-      opacity: child.Enabled ? 1 : 0.5
+      opacity: child.Enabled ? 1 : 0.5,
     };
 
     const childTitleBarStyle: React.CSSProperties = {
@@ -419,40 +436,33 @@ export const MDIForm = forwardRef<HTMLDivElement, MDIFormProps>((props, ref) => 
       justifyContent: 'space-between',
       padding: '0 4px',
       fontSize: '7pt',
-      cursor: 'move'
+      cursor: 'move',
     };
 
     return (
-      <div
-        key={child.Name}
-        style={childStyle}
-        onClick={() => setActiveChild(child)}
-      >
+      <div key={child.Name} style={childStyle} onClick={() => setActiveChild(child)}>
         <div style={childTitleBarStyle}>
           <span>{child.Caption}</span>
           <div>
-            <button 
+            <button
               style={windowButtonStyle}
               onClick={() => {
                 const newChild = { ...child, WindowState: 1, Minimized: true };
-                setChildForms(prev => prev.map(c => c === child ? newChild : c));
+                setChildForms(prev => prev.map(c => (c === child ? newChild : c)));
               }}
             >
               _
             </button>
-            <button 
+            <button
               style={windowButtonStyle}
               onClick={() => {
                 const newChild = { ...child, WindowState: child.WindowState === 2 ? 0 : 2 };
-                setChildForms(prev => prev.map(c => c === child ? newChild : c));
+                setChildForms(prev => prev.map(c => (c === child ? newChild : c)));
               }}
             >
               {child.WindowState === 2 ? '❐' : '□'}
             </button>
-            <button 
-              style={windowButtonStyle}
-              onClick={() => mdiInstance.RemoveChild(child)}
-            >
+            <button style={windowButtonStyle} onClick={() => mdiInstance.RemoveChild(child)}>
               ✕
             </button>
           </div>
@@ -475,44 +485,35 @@ export const MDIForm = forwardRef<HTMLDivElement, MDIFormProps>((props, ref) => 
     margin: '0 1px',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   };
 
   if (!Visible) return null;
 
   return (
-    <div
-      ref={ref}
-      style={containerStyle}
-      data-control-type="MDIForm"
-      data-control-name={Name}
-    >
+    <div ref={ref} style={containerStyle} data-control-type="MDIForm" data-control-name={Name}>
       {/* Barre de titre */}
       <div style={titleBarStyle}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          {Icon && <img src={Icon} alt="" style={{ width: '16px', height: '16px', marginRight: '4px' }} />}
+          {Icon && (
+            <img src={Icon} alt="" style={{ width: '16px', height: '16px', marginRight: '4px' }} />
+          )}
           <span>{Caption}</span>
         </div>
-        
+
         {ControlBox && (
           <div style={{ display: 'flex' }}>
             {MinButton && (
-              <button 
-                style={windowButtonStyle}
-                onClick={() => setIsMinimized(!isMinimized)}
-              >
+              <button style={windowButtonStyle} onClick={() => setIsMinimized(!isMinimized)}>
                 _
               </button>
             )}
             {MaxButton && (
-              <button 
-                style={windowButtonStyle}
-                onClick={() => setIsMaximized(!isMaximized)}
-              >
+              <button style={windowButtonStyle} onClick={() => setIsMaximized(!isMaximized)}>
                 {isMaximized ? '❐' : '□'}
               </button>
             )}
-            <button 
+            <button
               style={windowButtonStyle}
               onClick={() => {
                 const cancel = { value: false };
@@ -531,10 +532,7 @@ export const MDIForm = forwardRef<HTMLDivElement, MDIFormProps>((props, ref) => 
       </div>
 
       {/* Zone client MDI */}
-      <div
-        ref={clientAreaRef}
-        style={clientAreaStyle}
-      >
+      <div ref={clientAreaRef} style={clientAreaStyle}>
         {childForms.map(child => renderChildForm(child))}
         {children}
       </div>
@@ -556,7 +554,7 @@ export const MDIUtils = {
       Minimized: false,
       Maximized: false,
       ZOrder: 1,
-      
+
       // Propriétés VB6Form standard
       Index: 0,
       Tag: '',
@@ -581,7 +579,7 @@ export const MDIUtils = {
         Bold: false,
         Italic: false,
         Underline: false,
-        Strikethrough: false
+        Strikethrough: false,
       },
       BorderStyle: 2,
       ControlBox: true,
@@ -614,7 +612,7 @@ export const MDIUtils = {
       KeyPreview: false,
       RightToLeft: false,
       Controls: [],
-      
+
       // Méthodes VB6Form
       Show: () => {},
       Hide: () => {},
@@ -631,9 +629,9 @@ export const MDIUtils = {
       Print: () => {},
       PaintPicture: () => {},
       ScaleX: () => 0,
-      ScaleY: () => 0
+      ScaleY: () => 0,
     };
-  }
+  },
 };
 
 export default MDIForm;

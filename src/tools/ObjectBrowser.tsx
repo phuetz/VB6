@@ -19,7 +19,7 @@ export enum ObjectKind {
   Property = 'Property',
   Event = 'Event',
   Variable = 'Variable',
-  Type = 'Type'
+  Type = 'Type',
 }
 
 export enum MemberType {
@@ -27,14 +27,14 @@ export enum MemberType {
   Property = 'Property',
   Event = 'Event',
   Constant = 'Constant',
-  Field = 'Field'
+  Field = 'Field',
 }
 
 export enum AccessModifier {
   Public = 'Public',
   Private = 'Private',
   Friend = 'Friend',
-  Protected = 'Protected'
+  Protected = 'Protected',
 }
 
 // Object Browser Interfaces
@@ -189,24 +189,50 @@ export class ObjectBrowserEngine {
             {
               name: 'Left',
               returnType: 'String',
-              description: 'Returns a specified number of characters from the left side of a string',
+              description:
+                'Returns a specified number of characters from the left side of a string',
               access: AccessModifier.Public,
               parameters: [
-                { name: 'string', type: 'String', description: 'Source string', isOptional: false, direction: 'In' },
-                { name: 'length', type: 'Long', description: 'Number of characters', isOptional: false, direction: 'In' }
+                {
+                  name: 'string',
+                  type: 'String',
+                  description: 'Source string',
+                  isOptional: false,
+                  direction: 'In',
+                },
+                {
+                  name: 'length',
+                  type: 'Long',
+                  description: 'Number of characters',
+                  isOptional: false,
+                  direction: 'In',
+                },
               ],
-              helpKeyword: 'Left Function'
+              helpKeyword: 'Left Function',
             },
             {
               name: 'Right',
               returnType: 'String',
-              description: 'Returns a specified number of characters from the right side of a string',
+              description:
+                'Returns a specified number of characters from the right side of a string',
               access: AccessModifier.Public,
               parameters: [
-                { name: 'string', type: 'String', description: 'Source string', isOptional: false, direction: 'In' },
-                { name: 'length', type: 'Long', description: 'Number of characters', isOptional: false, direction: 'In' }
+                {
+                  name: 'string',
+                  type: 'String',
+                  description: 'Source string',
+                  isOptional: false,
+                  direction: 'In',
+                },
+                {
+                  name: 'length',
+                  type: 'Long',
+                  description: 'Number of characters',
+                  isOptional: false,
+                  direction: 'In',
+                },
               ],
-              helpKeyword: 'Right Function'
+              helpKeyword: 'Right Function',
             },
             {
               name: 'Mid',
@@ -214,11 +240,29 @@ export class ObjectBrowserEngine {
               description: 'Returns a specified number of characters from a string',
               access: AccessModifier.Public,
               parameters: [
-                { name: 'string', type: 'String', description: 'Source string', isOptional: false, direction: 'In' },
-                { name: 'start', type: 'Long', description: 'Starting position', isOptional: false, direction: 'In' },
-                { name: 'length', type: 'Long', description: 'Number of characters', isOptional: true, direction: 'In' }
+                {
+                  name: 'string',
+                  type: 'String',
+                  description: 'Source string',
+                  isOptional: false,
+                  direction: 'In',
+                },
+                {
+                  name: 'start',
+                  type: 'Long',
+                  description: 'Starting position',
+                  isOptional: false,
+                  direction: 'In',
+                },
+                {
+                  name: 'length',
+                  type: 'Long',
+                  description: 'Number of characters',
+                  isOptional: true,
+                  direction: 'In',
+                },
               ],
-              helpKeyword: 'Mid Function'
+              helpKeyword: 'Mid Function',
             },
             {
               name: 'Len',
@@ -226,9 +270,15 @@ export class ObjectBrowserEngine {
               description: 'Returns the number of characters in a string',
               access: AccessModifier.Public,
               parameters: [
-                { name: 'string', type: 'String', description: 'Source string', isOptional: false, direction: 'In' }
+                {
+                  name: 'string',
+                  type: 'String',
+                  description: 'Source string',
+                  isOptional: false,
+                  direction: 'In',
+                },
               ],
-              helpKeyword: 'Len Function'
+              helpKeyword: 'Len Function',
             },
             {
               name: 'UCase',
@@ -236,9 +286,15 @@ export class ObjectBrowserEngine {
               description: 'Returns a string converted to uppercase',
               access: AccessModifier.Public,
               parameters: [
-                { name: 'string', type: 'String', description: 'Source string', isOptional: false, direction: 'In' }
+                {
+                  name: 'string',
+                  type: 'String',
+                  description: 'Source string',
+                  isOptional: false,
+                  direction: 'In',
+                },
               ],
-              helpKeyword: 'UCase Function'
+              helpKeyword: 'UCase Function',
             },
             {
               name: 'LCase',
@@ -246,10 +302,16 @@ export class ObjectBrowserEngine {
               description: 'Returns a string converted to lowercase',
               access: AccessModifier.Public,
               parameters: [
-                { name: 'string', type: 'String', description: 'Source string', isOptional: false, direction: 'In' }
+                {
+                  name: 'string',
+                  type: 'String',
+                  description: 'Source string',
+                  isOptional: false,
+                  direction: 'In',
+                },
               ],
-              helpKeyword: 'LCase Function'
-            }
+              helpKeyword: 'LCase Function',
+            },
           ],
           constants: [
             {
@@ -258,7 +320,7 @@ export class ObjectBrowserEngine {
               value: 'Chr(13) + Chr(10)',
               description: 'Carriage return and line feed',
               access: AccessModifier.Public,
-              helpKeyword: 'vbCrLf Constant'
+              helpKeyword: 'vbCrLf Constant',
             },
             {
               name: 'vbTab',
@@ -266,10 +328,10 @@ export class ObjectBrowserEngine {
               value: 'Chr(9)',
               description: 'Tab character',
               access: AccessModifier.Public,
-              helpKeyword: 'vbTab Constant'
-            }
+              helpKeyword: 'vbTab Constant',
+            },
           ],
-          types: []
+          types: [],
         },
         {
           name: 'Math',
@@ -284,9 +346,15 @@ export class ObjectBrowserEngine {
               description: 'Returns the absolute value of a number',
               access: AccessModifier.Public,
               parameters: [
-                { name: 'number', type: 'Variant', description: 'Any valid numeric expression', isOptional: false, direction: 'In' }
+                {
+                  name: 'number',
+                  type: 'Variant',
+                  description: 'Any valid numeric expression',
+                  isOptional: false,
+                  direction: 'In',
+                },
               ],
-              helpKeyword: 'Abs Function'
+              helpKeyword: 'Abs Function',
             },
             {
               name: 'Sqr',
@@ -294,9 +362,15 @@ export class ObjectBrowserEngine {
               description: 'Returns the square root of a number',
               access: AccessModifier.Public,
               parameters: [
-                { name: 'number', type: 'Double', description: 'Any valid numeric expression >= 0', isOptional: false, direction: 'In' }
+                {
+                  name: 'number',
+                  type: 'Double',
+                  description: 'Any valid numeric expression >= 0',
+                  isOptional: false,
+                  direction: 'In',
+                },
               ],
-              helpKeyword: 'Sqr Function'
+              helpKeyword: 'Sqr Function',
             },
             {
               name: 'Sin',
@@ -304,9 +378,15 @@ export class ObjectBrowserEngine {
               description: 'Returns the sine of an angle',
               access: AccessModifier.Public,
               parameters: [
-                { name: 'number', type: 'Double', description: 'Angle in radians', isOptional: false, direction: 'In' }
+                {
+                  name: 'number',
+                  type: 'Double',
+                  description: 'Angle in radians',
+                  isOptional: false,
+                  direction: 'In',
+                },
               ],
-              helpKeyword: 'Sin Function'
+              helpKeyword: 'Sin Function',
             },
             {
               name: 'Cos',
@@ -314,13 +394,19 @@ export class ObjectBrowserEngine {
               description: 'Returns the cosine of an angle',
               access: AccessModifier.Public,
               parameters: [
-                { name: 'number', type: 'Double', description: 'Angle in radians', isOptional: false, direction: 'In' }
+                {
+                  name: 'number',
+                  type: 'Double',
+                  description: 'Angle in radians',
+                  isOptional: false,
+                  direction: 'In',
+                },
               ],
-              helpKeyword: 'Cos Function'
-            }
+              helpKeyword: 'Cos Function',
+            },
           ],
           constants: [],
-          types: []
+          types: [],
         },
         {
           name: 'Interaction',
@@ -335,11 +421,29 @@ export class ObjectBrowserEngine {
               description: 'Displays a message in a dialog box',
               access: AccessModifier.Public,
               parameters: [
-                { name: 'prompt', type: 'String', description: 'Message to display', isOptional: false, direction: 'In' },
-                { name: 'buttons', type: 'VbMsgBoxStyle', description: 'Buttons and icon to display', isOptional: true, direction: 'In' },
-                { name: 'title', type: 'String', description: 'Dialog box title', isOptional: true, direction: 'In' }
+                {
+                  name: 'prompt',
+                  type: 'String',
+                  description: 'Message to display',
+                  isOptional: false,
+                  direction: 'In',
+                },
+                {
+                  name: 'buttons',
+                  type: 'VbMsgBoxStyle',
+                  description: 'Buttons and icon to display',
+                  isOptional: true,
+                  direction: 'In',
+                },
+                {
+                  name: 'title',
+                  type: 'String',
+                  description: 'Dialog box title',
+                  isOptional: true,
+                  direction: 'In',
+                },
               ],
-              helpKeyword: 'MsgBox Function'
+              helpKeyword: 'MsgBox Function',
             },
             {
               name: 'InputBox',
@@ -347,12 +451,30 @@ export class ObjectBrowserEngine {
               description: 'Displays a prompt in a dialog box and returns user input',
               access: AccessModifier.Public,
               parameters: [
-                { name: 'prompt', type: 'String', description: 'Message to display', isOptional: false, direction: 'In' },
-                { name: 'title', type: 'String', description: 'Dialog box title', isOptional: true, direction: 'In' },
-                { name: 'default', type: 'String', description: 'Default response', isOptional: true, direction: 'In' }
+                {
+                  name: 'prompt',
+                  type: 'String',
+                  description: 'Message to display',
+                  isOptional: false,
+                  direction: 'In',
+                },
+                {
+                  name: 'title',
+                  type: 'String',
+                  description: 'Dialog box title',
+                  isOptional: true,
+                  direction: 'In',
+                },
+                {
+                  name: 'default',
+                  type: 'String',
+                  description: 'Default response',
+                  isOptional: true,
+                  direction: 'In',
+                },
               ],
-              helpKeyword: 'InputBox Function'
-            }
+              helpKeyword: 'InputBox Function',
+            },
           ],
           constants: [
             {
@@ -360,19 +482,19 @@ export class ObjectBrowserEngine {
               type: 'Integer',
               value: '1',
               description: 'OK button was clicked',
-              access: AccessModifier.Public
+              access: AccessModifier.Public,
             },
             {
               name: 'vbCancel',
               type: 'Integer',
               value: '2',
               description: 'Cancel button was clicked',
-              access: AccessModifier.Public
-            }
+              access: AccessModifier.Public,
+            },
           ],
-          types: []
-        }
-      ]
+          types: [],
+        },
+      ],
     };
 
     // VB6 Forms Library
@@ -407,7 +529,7 @@ export class ObjectBrowserEngine {
                   description: 'The text displayed in the title bar',
                   access: AccessModifier.Public,
                   isReadOnly: false,
-                  isStatic: false
+                  isStatic: false,
                 },
                 {
                   name: 'Width',
@@ -415,7 +537,7 @@ export class ObjectBrowserEngine {
                   description: 'Width of the form in twips',
                   access: AccessModifier.Public,
                   isReadOnly: false,
-                  isStatic: false
+                  isStatic: false,
                 },
                 {
                   name: 'Height',
@@ -423,7 +545,7 @@ export class ObjectBrowserEngine {
                   description: 'Height of the form in twips',
                   access: AccessModifier.Public,
                   isReadOnly: false,
-                  isStatic: false
+                  isStatic: false,
                 },
                 {
                   name: 'Left',
@@ -431,7 +553,7 @@ export class ObjectBrowserEngine {
                   description: 'Left position of the form',
                   access: AccessModifier.Public,
                   isReadOnly: false,
-                  isStatic: false
+                  isStatic: false,
                 },
                 {
                   name: 'Top',
@@ -439,7 +561,7 @@ export class ObjectBrowserEngine {
                   description: 'Top position of the form',
                   access: AccessModifier.Public,
                   isReadOnly: false,
-                  isStatic: false
+                  isStatic: false,
                 },
                 {
                   name: 'Visible',
@@ -447,8 +569,8 @@ export class ObjectBrowserEngine {
                   description: 'Determines if the form is visible',
                   access: AccessModifier.Public,
                   isReadOnly: false,
-                  isStatic: false
-                }
+                  isStatic: false,
+                },
               ],
               methods: [
                 {
@@ -458,8 +580,14 @@ export class ObjectBrowserEngine {
                   access: AccessModifier.Public,
                   isStatic: false,
                   parameters: [
-                    { name: 'Modal', type: 'Boolean', description: 'Show as modal dialog', isOptional: true, direction: 'In' }
-                  ]
+                    {
+                      name: 'Modal',
+                      type: 'Boolean',
+                      description: 'Show as modal dialog',
+                      isOptional: true,
+                      direction: 'In',
+                    },
+                  ],
                 },
                 {
                   name: 'Hide',
@@ -467,7 +595,7 @@ export class ObjectBrowserEngine {
                   description: 'Hides the form',
                   access: AccessModifier.Public,
                   isStatic: false,
-                  parameters: []
+                  parameters: [],
                 },
                 {
                   name: 'Move',
@@ -476,33 +604,63 @@ export class ObjectBrowserEngine {
                   access: AccessModifier.Public,
                   isStatic: false,
                   parameters: [
-                    { name: 'Left', type: 'Single', description: 'New left position', isOptional: false, direction: 'In' },
-                    { name: 'Top', type: 'Single', description: 'New top position', isOptional: true, direction: 'In' },
-                    { name: 'Width', type: 'Single', description: 'New width', isOptional: true, direction: 'In' },
-                    { name: 'Height', type: 'Single', description: 'New height', isOptional: true, direction: 'In' }
-                  ]
-                }
+                    {
+                      name: 'Left',
+                      type: 'Single',
+                      description: 'New left position',
+                      isOptional: false,
+                      direction: 'In',
+                    },
+                    {
+                      name: 'Top',
+                      type: 'Single',
+                      description: 'New top position',
+                      isOptional: true,
+                      direction: 'In',
+                    },
+                    {
+                      name: 'Width',
+                      type: 'Single',
+                      description: 'New width',
+                      isOptional: true,
+                      direction: 'In',
+                    },
+                    {
+                      name: 'Height',
+                      type: 'Single',
+                      description: 'New height',
+                      isOptional: true,
+                      direction: 'In',
+                    },
+                  ],
+                },
               ],
               events: [
                 {
                   name: 'Load',
                   description: 'Occurs when the form is loaded',
-                  parameters: []
+                  parameters: [],
                 },
                 {
                   name: 'Unload',
                   description: 'Occurs when the form is unloaded',
                   parameters: [
-                    { name: 'Cancel', type: 'Integer', description: 'Set to True to cancel unload', isOptional: false, direction: 'InOut' }
-                  ]
+                    {
+                      name: 'Cancel',
+                      type: 'Integer',
+                      description: 'Set to True to cancel unload',
+                      isOptional: false,
+                      direction: 'InOut',
+                    },
+                  ],
                 },
                 {
                   name: 'Resize',
                   description: 'Occurs when the form is resized',
-                  parameters: []
-                }
+                  parameters: [],
+                },
               ],
-              constants: []
+              constants: [],
             },
             {
               name: 'TextBox',
@@ -521,7 +679,7 @@ export class ObjectBrowserEngine {
                   description: 'The text displayed in the control',
                   access: AccessModifier.Public,
                   isReadOnly: false,
-                  isStatic: false
+                  isStatic: false,
                 },
                 {
                   name: 'MaxLength',
@@ -529,7 +687,7 @@ export class ObjectBrowserEngine {
                   description: 'Maximum number of characters',
                   access: AccessModifier.Public,
                   isReadOnly: false,
-                  isStatic: false
+                  isStatic: false,
                 },
                 {
                   name: 'MultiLine',
@@ -537,8 +695,8 @@ export class ObjectBrowserEngine {
                   description: 'Allow multiple lines',
                   access: AccessModifier.Public,
                   isReadOnly: false,
-                  isStatic: false
-                }
+                  isStatic: false,
+                },
               ],
               methods: [
                 {
@@ -547,31 +705,37 @@ export class ObjectBrowserEngine {
                   description: 'Sets focus to the control',
                   access: AccessModifier.Public,
                   isStatic: false,
-                  parameters: []
-                }
+                  parameters: [],
+                },
               ],
               events: [
                 {
                   name: 'Change',
                   description: 'Occurs when the text changes',
-                  parameters: []
+                  parameters: [],
                 },
                 {
                   name: 'KeyPress',
                   description: 'Occurs when a key is pressed',
                   parameters: [
-                    { name: 'KeyAscii', type: 'Integer', description: 'ASCII code of the key', isOptional: false, direction: 'InOut' }
-                  ]
-                }
+                    {
+                      name: 'KeyAscii',
+                      type: 'Integer',
+                      description: 'ASCII code of the key',
+                      isOptional: false,
+                      direction: 'InOut',
+                    },
+                  ],
+                },
               ],
-              constants: []
-            }
+              constants: [],
+            },
           ],
           functions: [],
           constants: [],
-          types: []
-        }
-      ]
+          types: [],
+        },
+      ],
     };
 
     this._libraries.set('VB6 Runtime', vb6Runtime);
@@ -604,7 +768,7 @@ export class ObjectBrowserEngine {
                 module: module.name,
                 path: `${library.name}.${module.name}.${func.name}`,
                 description: func.description,
-                matchType
+                matchType,
               });
             }
           }
@@ -622,7 +786,7 @@ export class ObjectBrowserEngine {
                 module: module.name,
                 path: `${library.name}.${module.name}.${constant.name}`,
                 description: constant.description,
-                matchType
+                matchType,
               });
             }
           }
@@ -640,7 +804,7 @@ export class ObjectBrowserEngine {
                 module: module.name,
                 path: `${library.name}.${module.name}.${cls.name}`,
                 description: cls.description,
-                matchType
+                matchType,
               });
             }
 
@@ -656,7 +820,7 @@ export class ObjectBrowserEngine {
                     module: module.name,
                     path: `${library.name}.${module.name}.${cls.name}.${prop.name}`,
                     description: prop.description,
-                    matchType: propMatchType
+                    matchType: propMatchType,
                   });
                 }
               }
@@ -673,7 +837,7 @@ export class ObjectBrowserEngine {
                     module: module.name,
                     path: `${library.name}.${module.name}.${cls.name}.${method.name}`,
                     description: method.description,
-                    matchType: methodMatchType
+                    matchType: methodMatchType,
                   });
                 }
               }
@@ -690,7 +854,7 @@ export class ObjectBrowserEngine {
                     module: module.name,
                     path: `${library.name}.${module.name}.${cls.name}.${event.name}`,
                     description: event.description,
-                    matchType: eventMatchType
+                    matchType: eventMatchType,
                   });
                 }
               }
@@ -786,9 +950,11 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
   intelliSenseEngine,
   onItemSelected,
   onShowHelp,
-  onCopyDeclaration
+  onCopyDeclaration,
 }) => {
-  const [engine] = useState(() => new ObjectBrowserEngine(intelliSenseEngine || new IntelliSenseEngine()));
+  const [engine] = useState(
+    () => new ObjectBrowserEngine(intelliSenseEngine || new IntelliSenseEngine())
+  );
   const [selectedLibrary, setSelectedLibrary] = useState<string>('');
   const [selectedModule, setSelectedModule] = useState<string>('');
   const [selectedClass, setSelectedClass] = useState<string>('');
@@ -803,18 +969,18 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const libraries = useMemo(() => engine.getLibraries(), [engine]);
-  const selectedLibraryData = useMemo(() => 
-    selectedLibrary ? engine.getLibrary(selectedLibrary) : null, 
+  const selectedLibraryData = useMemo(
+    () => (selectedLibrary ? engine.getLibrary(selectedLibrary) : null),
     [engine, selectedLibrary]
   );
 
-  const selectedModuleData = useMemo(() => 
-    selectedLibraryData?.modules.find(m => m.name === selectedModule), 
+  const selectedModuleData = useMemo(
+    () => selectedLibraryData?.modules.find(m => m.name === selectedModule),
     [selectedLibraryData, selectedModule]
   );
 
-  const selectedClassData = useMemo(() => 
-    selectedModuleData?.classes.find(c => c.name === selectedClass), 
+  const selectedClassData = useMemo(
+    () => selectedModuleData?.classes.find(c => c.name === selectedClass),
     [selectedModuleData, selectedClass]
   );
 
@@ -832,16 +998,19 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
     }
   }, [selectedLibraryData, selectedModule]);
 
-  const handleSearch = useCallback((query: string) => {
-    if (query.trim()) {
-      const results = engine.search(query, filter.length > 0 ? filter : undefined);
-      setSearchResults(results);
-      setIsSearchMode(true);
-    } else {
-      setSearchResults([]);
-      setIsSearchMode(false);
-    }
-  }, [engine, filter]);
+  const handleSearch = useCallback(
+    (query: string) => {
+      if (query.trim()) {
+        const results = engine.search(query, filter.length > 0 ? filter : undefined);
+        setSearchResults(results);
+        setIsSearchMode(true);
+      } else {
+        setSearchResults([]);
+        setIsSearchMode(false);
+      }
+    },
+    [engine, filter]
+  );
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -859,45 +1028,65 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
 
   const getKindIcon = (kind: ObjectKind): string => {
     switch (kind) {
-      case ObjectKind.Library: return '📚';
-      case ObjectKind.Module: return '📁';
-      case ObjectKind.Class: return '📦';
-      case ObjectKind.Interface: return '🔌';
-      case ObjectKind.Function: return '🔧';
-      case ObjectKind.Subroutine: return '⚡';
-      case ObjectKind.Property: return '🏷️';
-      case ObjectKind.Event: return '⚡';
-      case ObjectKind.Constant: return '🔒';
-      case ObjectKind.Variable: return '📊';
-      case ObjectKind.Type: return '📋';
-      case ObjectKind.Enum: return '📝';
-      default: return '📄';
+      case ObjectKind.Library:
+        return '📚';
+      case ObjectKind.Module:
+        return '📁';
+      case ObjectKind.Class:
+        return '📦';
+      case ObjectKind.Interface:
+        return '🔌';
+      case ObjectKind.Function:
+        return '🔧';
+      case ObjectKind.Subroutine:
+        return '⚡';
+      case ObjectKind.Property:
+        return '🏷️';
+      case ObjectKind.Event:
+        return '⚡';
+      case ObjectKind.Constant:
+        return '🔒';
+      case ObjectKind.Variable:
+        return '📊';
+      case ObjectKind.Type:
+        return '📋';
+      case ObjectKind.Enum:
+        return '📝';
+      default:
+        return '📄';
     }
   };
 
   const getAccessIcon = (access: AccessModifier): string => {
     switch (access) {
-      case AccessModifier.Public: return '🌐';
-      case AccessModifier.Private: return '🔒';
-      case AccessModifier.Friend: return '👥';
-      case AccessModifier.Protected: return '🛡️';
-      default: return '';
+      case AccessModifier.Public:
+        return '🌐';
+      case AccessModifier.Private:
+        return '🔒';
+      case AccessModifier.Friend:
+        return '👥';
+      case AccessModifier.Protected:
+        return '🛡️';
+      default:
+        return '';
     }
   };
 
   const formatParameters = (parameters: ParameterInfo[]): string => {
-    return parameters.map(p => {
-      let param = p.name;
-      if (p.isOptional) param = `[${param}]`;
-      param += `: ${p.type}`;
-      if (p.defaultValue) param += ` = ${p.defaultValue}`;
-      return param;
-    }).join(', ');
+    return parameters
+      .map(p => {
+        let param = p.name;
+        if (p.isOptional) param = `[${param}]`;
+        param += `: ${p.type}`;
+        if (p.defaultValue) param += ` = ${p.defaultValue}`;
+        return param;
+      })
+      .join(', ');
   };
 
   const copyDeclaration = (item: any, kind: ObjectKind) => {
     let declaration = '';
-    
+
     switch (kind) {
       case ObjectKind.Function: {
         const func = item as FunctionInfo;
@@ -923,62 +1112,66 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
       default:
         declaration = item.name || '';
     }
-    
+
     onCopyDeclaration?.(declaration);
   };
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      height: '100%', 
-      fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
-      fontSize: '12px',
-      backgroundColor: '#f0f0f0'
-    }}>
-      {/* Toolbar */}
-      <div style={{ 
-        padding: '8px', 
-        borderBottom: '1px solid #ccc',
-        backgroundColor: '#e0e0e0',
+    <div
+      style={{
         display: 'flex',
-        gap: '8px',
-        alignItems: 'center'
-      }}>
+        flexDirection: 'column',
+        height: '100%',
+        fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
+        fontSize: '12px',
+        backgroundColor: '#f0f0f0',
+      }}
+    >
+      {/* Toolbar */}
+      <div
+        style={{
+          padding: '8px',
+          borderBottom: '1px solid #ccc',
+          backgroundColor: '#e0e0e0',
+          display: 'flex',
+          gap: '8px',
+          alignItems: 'center',
+        }}
+      >
         <input
           ref={searchInputRef}
           type="text"
           placeholder="Search objects..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={e => setSearchQuery(e.target.value)}
           style={{
             flex: 1,
             padding: '4px 8px',
             border: '1px solid #ccc',
-            borderRadius: '2px'
+            borderRadius: '2px',
           }}
         />
-        
+
         <select
           value={viewMode}
-          onChange={(e) => setViewMode(e.target.value as 'tree' | 'list')}
+          onChange={e => setViewMode(e.target.value as 'tree' | 'list')}
           style={{ padding: '4px', border: '1px solid #ccc' }}
         >
           <option value="tree">Tree View</option>
           <option value="list">List View</option>
         </select>
-        
+
         <button
           onClick={() => {
             setSearchQuery('');
             setIsSearchMode(false);
             searchInputRef.current?.focus();
           }}
-          style={{ 
-            padding: '4px 8px', 
+          style={{
+            padding: '4px 8px',
             border: '1px solid #ccc',
             backgroundColor: 'white',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
         >
           Clear
@@ -986,20 +1179,25 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
       </div>
 
       {/* Filter Bar */}
-      <div style={{
-        padding: '4px 8px',
-        borderBottom: '1px solid #ccc',
-        backgroundColor: '#f8f8f8',
-        display: 'flex',
-        gap: '4px',
-        flexWrap: 'wrap'
-      }}>
+      <div
+        style={{
+          padding: '4px 8px',
+          borderBottom: '1px solid #ccc',
+          backgroundColor: '#f8f8f8',
+          display: 'flex',
+          gap: '4px',
+          flexWrap: 'wrap',
+        }}
+      >
         {Object.values(ObjectKind).map(kind => (
-          <label key={kind} style={{ display: 'flex', alignItems: 'center', gap: '2px', fontSize: '10px' }}>
+          <label
+            key={kind}
+            style={{ display: 'flex', alignItems: 'center', gap: '2px', fontSize: '10px' }}
+          >
             <input
               type="checkbox"
               checked={filter.includes(kind)}
-              onChange={(e) => {
+              onChange={e => {
                 if (e.target.checked) {
                   setFilter(prev => [...prev, kind]);
                 } else {
@@ -1014,12 +1212,14 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
 
       <div style={{ display: 'flex', flex: 1 }}>
         {/* Navigation Pane */}
-        <div style={{ 
-          width: '300px', 
-          borderRight: '1px solid #ccc', 
-          backgroundColor: 'white',
-          overflow: 'auto'
-        }}>
+        <div
+          style={{
+            width: '300px',
+            borderRight: '1px solid #ccc',
+            backgroundColor: 'white',
+            overflow: 'auto',
+          }}
+        >
           {isSearchMode ? (
             /* Search Results */
             <div style={{ padding: '8px' }}>
@@ -1035,11 +1235,11 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
                     backgroundColor: selectedItem === result.item ? '#e6f3ff' : 'transparent',
                     border: '1px solid transparent',
                     borderRadius: '2px',
-                    marginBottom: '2px'
+                    marginBottom: '2px',
                   }}
                   onClick={() => handleItemClick(result.item, result.kind)}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f8ff'}
-                  onMouseLeave={(e) => {
+                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f0f8ff')}
+                  onMouseLeave={e => {
                     if (selectedItem !== result.item) {
                       e.currentTarget.style.backgroundColor = 'transparent';
                     }
@@ -1070,7 +1270,7 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
                       cursor: 'pointer',
                       fontWeight: 'bold',
                       backgroundColor: selectedLibrary === library.name ? '#e6f3ff' : 'transparent',
-                      borderRadius: '2px'
+                      borderRadius: '2px',
                     }}
                     onClick={() => {
                       setSelectedLibrary(library.name);
@@ -1080,137 +1280,147 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
                   >
                     <span>{getKindIcon(ObjectKind.Library)}</span> {library.name}
                   </div>
-                  
+
                   {/* Modules */}
-                  {selectedLibrary === library.name && library.modules.map(module => (
-                    <div key={module.name} style={{ marginLeft: '16px', marginTop: '4px' }}>
-                      <div
-                        style={{
-                          padding: '2px 4px',
-                          cursor: 'pointer',
-                          backgroundColor: selectedModule === module.name ? '#e6f3ff' : 'transparent',
-                          borderRadius: '2px'
-                        }}
-                        onClick={() => {
-                          setSelectedModule(module.name);
-                          setSelectedClass('');
-                        }}
-                      >
-                        <span>{getKindIcon(module.kind)}</span> {module.name}
-                      </div>
-                      
-                      {/* Classes */}
-                      {selectedModule === module.name && module.classes.map(cls => (
-                        <div key={cls.name} style={{ marginLeft: '16px', marginTop: '2px' }}>
-                          <div
-                            style={{
-                              padding: '2px 4px',
-                              cursor: 'pointer',
-                              backgroundColor: selectedClass === cls.name ? '#e6f3ff' : 'transparent',
-                              borderRadius: '2px'
-                            }}
-                            onClick={() => {
-                              setSelectedClass(cls.name);
-                              handleItemClick(cls, ObjectKind.Class);
-                            }}
-                          >
-                            <span>{getKindIcon(ObjectKind.Class)}</span> {cls.name}
-                          </div>
-                          
-                          {/* Class Members */}
-                          {selectedClass === cls.name && (
-                            <div style={{ marginLeft: '16px' }}>
-                              {/* Properties */}
-                              {cls.properties.map(prop => (
-                                <div
-                                  key={`prop-${prop.name}`}
-                                  style={{
-                                    padding: '1px 4px',
-                                    cursor: 'pointer',
-                                    fontSize: '11px',
-                                    backgroundColor: selectedItem === prop ? '#e6f3ff' : 'transparent'
-                                  }}
-                                  onClick={() => handleItemClick(prop, ObjectKind.Property)}
-                                >
-                                  <span>{getAccessIcon(prop.access)}</span>
-                                  <span>{getKindIcon(ObjectKind.Property)}</span> {prop.name}
+                  {selectedLibrary === library.name &&
+                    library.modules.map(module => (
+                      <div key={module.name} style={{ marginLeft: '16px', marginTop: '4px' }}>
+                        <div
+                          style={{
+                            padding: '2px 4px',
+                            cursor: 'pointer',
+                            backgroundColor:
+                              selectedModule === module.name ? '#e6f3ff' : 'transparent',
+                            borderRadius: '2px',
+                          }}
+                          onClick={() => {
+                            setSelectedModule(module.name);
+                            setSelectedClass('');
+                          }}
+                        >
+                          <span>{getKindIcon(module.kind)}</span> {module.name}
+                        </div>
+
+                        {/* Classes */}
+                        {selectedModule === module.name &&
+                          module.classes.map(cls => (
+                            <div key={cls.name} style={{ marginLeft: '16px', marginTop: '2px' }}>
+                              <div
+                                style={{
+                                  padding: '2px 4px',
+                                  cursor: 'pointer',
+                                  backgroundColor:
+                                    selectedClass === cls.name ? '#e6f3ff' : 'transparent',
+                                  borderRadius: '2px',
+                                }}
+                                onClick={() => {
+                                  setSelectedClass(cls.name);
+                                  handleItemClick(cls, ObjectKind.Class);
+                                }}
+                              >
+                                <span>{getKindIcon(ObjectKind.Class)}</span> {cls.name}
+                              </div>
+
+                              {/* Class Members */}
+                              {selectedClass === cls.name && (
+                                <div style={{ marginLeft: '16px' }}>
+                                  {/* Properties */}
+                                  {cls.properties.map(prop => (
+                                    <div
+                                      key={`prop-${prop.name}`}
+                                      style={{
+                                        padding: '1px 4px',
+                                        cursor: 'pointer',
+                                        fontSize: '11px',
+                                        backgroundColor:
+                                          selectedItem === prop ? '#e6f3ff' : 'transparent',
+                                      }}
+                                      onClick={() => handleItemClick(prop, ObjectKind.Property)}
+                                    >
+                                      <span>{getAccessIcon(prop.access)}</span>
+                                      <span>{getKindIcon(ObjectKind.Property)}</span> {prop.name}
+                                    </div>
+                                  ))}
+
+                                  {/* Methods */}
+                                  {cls.methods.map(method => (
+                                    <div
+                                      key={`method-${method.name}`}
+                                      style={{
+                                        padding: '1px 4px',
+                                        cursor: 'pointer',
+                                        fontSize: '11px',
+                                        backgroundColor:
+                                          selectedItem === method ? '#e6f3ff' : 'transparent',
+                                      }}
+                                      onClick={() => handleItemClick(method, ObjectKind.Function)}
+                                    >
+                                      <span>{getAccessIcon(method.access)}</span>
+                                      <span>{getKindIcon(ObjectKind.Function)}</span> {method.name}
+                                    </div>
+                                  ))}
+
+                                  {/* Events */}
+                                  {cls.events.map(event => (
+                                    <div
+                                      key={`event-${event.name}`}
+                                      style={{
+                                        padding: '1px 4px',
+                                        cursor: 'pointer',
+                                        fontSize: '11px',
+                                        backgroundColor:
+                                          selectedItem === event ? '#e6f3ff' : 'transparent',
+                                      }}
+                                      onClick={() => handleItemClick(event, ObjectKind.Event)}
+                                    >
+                                      <span>{getKindIcon(ObjectKind.Event)}</span> {event.name}
+                                    </div>
+                                  ))}
                                 </div>
-                              ))}
-                              
-                              {/* Methods */}
-                              {cls.methods.map(method => (
-                                <div
-                                  key={`method-${method.name}`}
-                                  style={{
-                                    padding: '1px 4px',
-                                    cursor: 'pointer',
-                                    fontSize: '11px',
-                                    backgroundColor: selectedItem === method ? '#e6f3ff' : 'transparent'
-                                  }}
-                                  onClick={() => handleItemClick(method, ObjectKind.Function)}
-                                >
-                                  <span>{getAccessIcon(method.access)}</span>
-                                  <span>{getKindIcon(ObjectKind.Function)}</span> {method.name}
-                                </div>
-                              ))}
-                              
-                              {/* Events */}
-                              {cls.events.map(event => (
-                                <div
-                                  key={`event-${event.name}`}
-                                  style={{
-                                    padding: '1px 4px',
-                                    cursor: 'pointer',
-                                    fontSize: '11px',
-                                    backgroundColor: selectedItem === event ? '#e6f3ff' : 'transparent'
-                                  }}
-                                  onClick={() => handleItemClick(event, ObjectKind.Event)}
-                                >
-                                  <span>{getKindIcon(ObjectKind.Event)}</span> {event.name}
-                                </div>
-                              ))}
+                              )}
                             </div>
-                          )}
-                        </div>
-                      ))}
-                      
-                      {/* Module Functions */}
-                      {selectedModule === module.name && module.functions.map(func => (
-                        <div
-                          key={`func-${func.name}`}
-                          style={{
-                            padding: '2px 4px',
-                            cursor: 'pointer',
-                            fontSize: '11px',
-                            marginLeft: '16px',
-                            backgroundColor: selectedItem === func ? '#e6f3ff' : 'transparent'
-                          }}
-                          onClick={() => handleItemClick(func, ObjectKind.Function)}
-                        >
-                          <span>{getAccessIcon(func.access)}</span>
-                          <span>{getKindIcon(ObjectKind.Function)}</span> {func.name}
-                        </div>
-                      ))}
-                      
-                      {/* Module Constants */}
-                      {selectedModule === module.name && module.constants.map(constant => (
-                        <div
-                          key={`const-${constant.name}`}
-                          style={{
-                            padding: '2px 4px',
-                            cursor: 'pointer',
-                            fontSize: '11px',
-                            marginLeft: '16px',
-                            backgroundColor: selectedItem === constant ? '#e6f3ff' : 'transparent'
-                          }}
-                          onClick={() => handleItemClick(constant, ObjectKind.Constant)}
-                        >
-                          <span>{getAccessIcon(constant.access)}</span>
-                          <span>{getKindIcon(ObjectKind.Constant)}</span> {constant.name}
-                        </div>
-                      ))}
-                    </div>
-                  ))}
+                          ))}
+
+                        {/* Module Functions */}
+                        {selectedModule === module.name &&
+                          module.functions.map(func => (
+                            <div
+                              key={`func-${func.name}`}
+                              style={{
+                                padding: '2px 4px',
+                                cursor: 'pointer',
+                                fontSize: '11px',
+                                marginLeft: '16px',
+                                backgroundColor: selectedItem === func ? '#e6f3ff' : 'transparent',
+                              }}
+                              onClick={() => handleItemClick(func, ObjectKind.Function)}
+                            >
+                              <span>{getAccessIcon(func.access)}</span>
+                              <span>{getKindIcon(ObjectKind.Function)}</span> {func.name}
+                            </div>
+                          ))}
+
+                        {/* Module Constants */}
+                        {selectedModule === module.name &&
+                          module.constants.map(constant => (
+                            <div
+                              key={`const-${constant.name}`}
+                              style={{
+                                padding: '2px 4px',
+                                cursor: 'pointer',
+                                fontSize: '11px',
+                                marginLeft: '16px',
+                                backgroundColor:
+                                  selectedItem === constant ? '#e6f3ff' : 'transparent',
+                              }}
+                              onClick={() => handleItemClick(constant, ObjectKind.Constant)}
+                            >
+                              <span>{getAccessIcon(constant.access)}</span>
+                              <span>{getKindIcon(ObjectKind.Constant)}</span> {constant.name}
+                            </div>
+                          ))}
+                      </div>
+                    ))}
                 </div>
               ))}
             </div>
@@ -1218,33 +1428,37 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
         </div>
 
         {/* Details Pane */}
-        <div style={{ 
-          flex: 1, 
-          padding: '16px', 
-          backgroundColor: 'white', 
-          overflow: 'auto' 
-        }}>
+        <div
+          style={{
+            flex: 1,
+            padding: '16px',
+            backgroundColor: 'white',
+            overflow: 'auto',
+          }}
+        >
           {selectedItem && selectedItemKind ? (
             <div>
               {/* Header */}
-              <div style={{ 
-                borderBottom: '2px solid #ccc', 
-                paddingBottom: '8px', 
-                marginBottom: '16px' 
-              }}>
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '8px', 
-                  fontSize: '16px', 
-                  fontWeight: 'bold' 
-                }}>
+              <div
+                style={{
+                  borderBottom: '2px solid #ccc',
+                  paddingBottom: '8px',
+                  marginBottom: '16px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                  }}
+                >
                   <span>{getKindIcon(selectedItemKind)}</span>
                   <span>{selectedItem.name}</span>
                   {selectedItem.access && (
-                    <span style={{ fontSize: '12px', color: '#666' }}>
-                      ({selectedItem.access})
-                    </span>
+                    <span style={{ fontSize: '12px', color: '#666' }}>({selectedItem.access})</span>
                   )}
                 </div>
                 <div style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>
@@ -1264,43 +1478,50 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
               {/* Syntax/Declaration */}
               <div style={{ marginBottom: '16px' }}>
                 <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>Declaration</h4>
-                <div style={{
-                  backgroundColor: '#f8f8f8',
-                  border: '1px solid #ddd',
-                  padding: '8px',
-                  fontFamily: 'Consolas, Monaco, monospace',
-                  fontSize: '11px',
-                  whiteSpace: 'pre-wrap'
-                }}>
-                  {selectedItemKind === ObjectKind.Function && (() => {
-                    const func = selectedItem as FunctionInfo;
-                    return `${func.access} Function ${func.name}(${formatParameters(func.parameters)}) As ${func.returnType}`;
-                  })()}
-                  
-                  {selectedItemKind === ObjectKind.Property && (() => {
-                    const prop = selectedItem as PropertyInfo;
-                    return `${prop.access} Property ${prop.name} As ${prop.type}${prop.isReadOnly ? ' (ReadOnly)' : ''}`;
-                  })()}
-                  
-                  {selectedItemKind === ObjectKind.Constant && (() => {
-                    const constant = selectedItem as ConstantInfo;
-                    return `${constant.access} Const ${constant.name} As ${constant.type} = ${constant.value}`;
-                  })()}
-                  
-                  {selectedItemKind === ObjectKind.Event && (() => {
-                    const event = selectedItem as EventInfo;
-                    return `Event ${event.name}(${formatParameters(event.parameters)})`;
-                  })()}
-                  
-                  {selectedItemKind === ObjectKind.Class && (() => {
-                    const cls = selectedItem as ClassInfo;
-                    let decl = `${cls.access} Class ${cls.name}`;
-                    if (cls.baseClass) decl += `\n    Inherits ${cls.baseClass}`;
-                    if (cls.interfaces.length > 0) {
-                      decl += `\n    Implements ${cls.interfaces.join(', ')}`;
-                    }
-                    return decl;
-                  })()}
+                <div
+                  style={{
+                    backgroundColor: '#f8f8f8',
+                    border: '1px solid #ddd',
+                    padding: '8px',
+                    fontFamily: 'Consolas, Monaco, monospace',
+                    fontSize: '11px',
+                    whiteSpace: 'pre-wrap',
+                  }}
+                >
+                  {selectedItemKind === ObjectKind.Function &&
+                    (() => {
+                      const func = selectedItem as FunctionInfo;
+                      return `${func.access} Function ${func.name}(${formatParameters(func.parameters)}) As ${func.returnType}`;
+                    })()}
+
+                  {selectedItemKind === ObjectKind.Property &&
+                    (() => {
+                      const prop = selectedItem as PropertyInfo;
+                      return `${prop.access} Property ${prop.name} As ${prop.type}${prop.isReadOnly ? ' (ReadOnly)' : ''}`;
+                    })()}
+
+                  {selectedItemKind === ObjectKind.Constant &&
+                    (() => {
+                      const constant = selectedItem as ConstantInfo;
+                      return `${constant.access} Const ${constant.name} As ${constant.type} = ${constant.value}`;
+                    })()}
+
+                  {selectedItemKind === ObjectKind.Event &&
+                    (() => {
+                      const event = selectedItem as EventInfo;
+                      return `Event ${event.name}(${formatParameters(event.parameters)})`;
+                    })()}
+
+                  {selectedItemKind === ObjectKind.Class &&
+                    (() => {
+                      const cls = selectedItem as ClassInfo;
+                      let decl = `${cls.access} Class ${cls.name}`;
+                      if (cls.baseClass) decl += `\n    Inherits ${cls.baseClass}`;
+                      if (cls.interfaces.length > 0) {
+                        decl += `\n    Implements ${cls.interfaces.join(', ')}`;
+                      }
+                      return decl;
+                    })()}
                 </div>
               </div>
 
@@ -1311,22 +1532,35 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
                     <thead>
                       <tr style={{ backgroundColor: '#f0f0f0' }}>
-                        <th style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'left' }}>Name</th>
-                        <th style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'left' }}>Type</th>
-                        <th style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'left' }}>Direction</th>
-                        <th style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'left' }}>Description</th>
+                        <th style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'left' }}>
+                          Name
+                        </th>
+                        <th style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'left' }}>
+                          Type
+                        </th>
+                        <th style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'left' }}>
+                          Direction
+                        </th>
+                        <th style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'left' }}>
+                          Description
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {selectedItem.parameters.map((param: ParameterInfo, index: number) => (
                         <tr key={index}>
                           <td style={{ border: '1px solid #ddd', padding: '4px' }}>
-                            {param.name}{param.isOptional && ' (Optional)'}
+                            {param.name}
+                            {param.isOptional && ' (Optional)'}
                             {param.defaultValue && ` = ${param.defaultValue}`}
                           </td>
                           <td style={{ border: '1px solid #ddd', padding: '4px' }}>{param.type}</td>
-                          <td style={{ border: '1px solid #ddd', padding: '4px' }}>{param.direction}</td>
-                          <td style={{ border: '1px solid #ddd', padding: '4px' }}>{param.description}</td>
+                          <td style={{ border: '1px solid #ddd', padding: '4px' }}>
+                            {param.direction}
+                          </td>
+                          <td style={{ border: '1px solid #ddd', padding: '4px' }}>
+                            {param.description}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -1335,43 +1569,56 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
               )}
 
               {/* Class Members Summary */}
-              {selectedItemKind === ObjectKind.Class && (() => {
-                const cls = selectedItem as ClassInfo;
-                return (
-                  <div style={{ marginBottom: '16px' }}>
-                    <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>Members Summary</h4>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                      <div>
-                        <h5 style={{ margin: '0 0 4px 0' }}>Properties ({cls.properties.length})</h5>
-                        <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '11px' }}>
-                          {cls.properties.slice(0, 5).map(prop => (
-                            <li key={prop.name}>{prop.name}: {prop.type}</li>
-                          ))}
-                          {cls.properties.length > 5 && <li>... and {cls.properties.length - 5} more</li>}
-                        </ul>
-                      </div>
-                      
-                      <div>
-                        <h5 style={{ margin: '0 0 4px 0' }}>Methods ({cls.methods.length})</h5>
-                        <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '11px' }}>
-                          {cls.methods.slice(0, 5).map(method => (
-                            <li key={method.name}>{method.name}(): {method.returnType}</li>
-                          ))}
-                          {cls.methods.length > 5 && <li>... and {cls.methods.length - 5} more</li>}
-                        </ul>
+              {selectedItemKind === ObjectKind.Class &&
+                (() => {
+                  const cls = selectedItem as ClassInfo;
+                  return (
+                    <div style={{ marginBottom: '16px' }}>
+                      <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>Members Summary</h4>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div>
+                          <h5 style={{ margin: '0 0 4px 0' }}>
+                            Properties ({cls.properties.length})
+                          </h5>
+                          <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '11px' }}>
+                            {cls.properties.slice(0, 5).map(prop => (
+                              <li key={prop.name}>
+                                {prop.name}: {prop.type}
+                              </li>
+                            ))}
+                            {cls.properties.length > 5 && (
+                              <li>... and {cls.properties.length - 5} more</li>
+                            )}
+                          </ul>
+                        </div>
+
+                        <div>
+                          <h5 style={{ margin: '0 0 4px 0' }}>Methods ({cls.methods.length})</h5>
+                          <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '11px' }}>
+                            {cls.methods.slice(0, 5).map(method => (
+                              <li key={method.name}>
+                                {method.name}(): {method.returnType}
+                              </li>
+                            ))}
+                            {cls.methods.length > 5 && (
+                              <li>... and {cls.methods.length - 5} more</li>
+                            )}
+                          </ul>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })()}
+                  );
+                })()}
 
               {/* Actions */}
-              <div style={{ 
-                borderTop: '1px solid #eee', 
-                paddingTop: '8px', 
-                display: 'flex', 
-                gap: '8px' 
-              }}>
+              <div
+                style={{
+                  borderTop: '1px solid #eee',
+                  paddingTop: '8px',
+                  display: 'flex',
+                  gap: '8px',
+                }}
+              >
                 <button
                   onClick={() => copyDeclaration(selectedItem, selectedItemKind)}
                   style={{
@@ -1379,12 +1626,12 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
                     border: '1px solid #ccc',
                     backgroundColor: 'white',
                     cursor: 'pointer',
-                    fontSize: '11px'
+                    fontSize: '11px',
                   }}
                 >
                   Copy Declaration
                 </button>
-                
+
                 {selectedItem.helpKeyword && (
                   <button
                     onClick={() => onShowHelp?.(selectedItem.helpKeyword)}
@@ -1393,7 +1640,7 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
                       border: '1px solid #ccc',
                       backgroundColor: 'white',
                       cursor: 'pointer',
-                      fontSize: '11px'
+                      fontSize: '11px',
                     }}
                   >
                     Show Help
@@ -1402,12 +1649,14 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
               </div>
             </div>
           ) : (
-            <div style={{ 
-              textAlign: 'center', 
-              color: '#999', 
-              marginTop: '50px',
-              fontSize: '14px'
-            }}>
+            <div
+              style={{
+                textAlign: 'center',
+                color: '#999',
+                marginTop: '50px',
+                fontSize: '14px',
+              }}
+            >
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
               <div>Select an item from the navigation pane to view details</div>
               <div style={{ fontSize: '12px', marginTop: '8px' }}>

@@ -8,22 +8,22 @@ export interface UseFavoritesReturn {
   // État
   favorites: FavoriteDirectory[];
   isLoading: boolean;
-  
+
   // Actions
   addFavorite: (path: string, name?: string, projectType?: 'vb6' | 'vbnet' | 'other') => boolean;
   removeFavorite: (path: string) => boolean;
   isFavorite: (path: string) => boolean;
   toggleFavorite: (path: string, name?: string, projectType?: 'vb6' | 'vbnet' | 'other') => boolean;
-  
+
   // Gestion
   renameFavorite: (path: string, newName: string) => boolean;
   moveFavorite: (path: string, direction: 'up' | 'down') => boolean;
   markAsAccessed: (path: string) => void;
-  
+
   // Filtres
   getFavoritesByType: (projectType: 'vb6' | 'vbnet' | 'other') => FavoriteDirectory[];
   getRecentlyAccessed: (limit?: number) => FavoriteDirectory[];
-  
+
   // Utilitaires
   cleanupFavorites: () => number;
   exportFavorites: () => string;
@@ -48,7 +48,7 @@ export const useFavorites = (): UseFavoritesReturn => {
     setIsLoading(false);
 
     // S'abonner aux changements
-    const unsubscribe = favoritesService.subscribe((updatedFavorites) => {
+    const unsubscribe = favoritesService.subscribe(updatedFavorites => {
       setFavorites(updatedFavorites);
     });
 
@@ -56,13 +56,12 @@ export const useFavorites = (): UseFavoritesReturn => {
   }, []);
 
   // Ajouter un favori
-  const addFavorite = useCallback((
-    path: string, 
-    name?: string, 
-    projectType?: 'vb6' | 'vbnet' | 'other'
-  ): boolean => {
-    return favoritesService.addFavorite(path, name, projectType);
-  }, []);
+  const addFavorite = useCallback(
+    (path: string, name?: string, projectType?: 'vb6' | 'vbnet' | 'other'): boolean => {
+      return favoritesService.addFavorite(path, name, projectType);
+    },
+    []
+  );
 
   // Supprimer un favori
   const removeFavorite = useCallback((path: string): boolean => {
@@ -75,17 +74,16 @@ export const useFavorites = (): UseFavoritesReturn => {
   }, []);
 
   // Basculer l'état favori
-  const toggleFavorite = useCallback((
-    path: string, 
-    name?: string, 
-    projectType?: 'vb6' | 'vbnet' | 'other'
-  ): boolean => {
-    if (favoritesService.isFavorite(path)) {
-      return favoritesService.removeFavorite(path);
-    } else {
-      return favoritesService.addFavorite(path, name, projectType);
-    }
-  }, []);
+  const toggleFavorite = useCallback(
+    (path: string, name?: string, projectType?: 'vb6' | 'vbnet' | 'other'): boolean => {
+      if (favoritesService.isFavorite(path)) {
+        return favoritesService.removeFavorite(path);
+      } else {
+        return favoritesService.addFavorite(path, name, projectType);
+      }
+    },
+    []
+  );
 
   // Renommer un favori
   const renameFavorite = useCallback((path: string, newName: string): boolean => {
@@ -136,22 +134,22 @@ export const useFavorites = (): UseFavoritesReturn => {
     // État
     favorites,
     isLoading,
-    
+
     // Actions
     addFavorite,
     removeFavorite,
     isFavorite,
     toggleFavorite,
-    
+
     // Gestion
     renameFavorite,
     moveFavorite,
     markAsAccessed,
-    
+
     // Filtres
     getFavoritesByType,
     getRecentlyAccessed,
-    
+
     // Utilitaires
     cleanupFavorites,
     exportFavorites,

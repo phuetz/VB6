@@ -496,10 +496,6 @@ export function enableVerboseLogging(): void {
 // EXPORTS
 // ============================================================================
 
-export {
-  Logger,
-  consoleTransport,
-  defaultFormatter,
-};
+export { Logger, consoleTransport, defaultFormatter };
 
 export default logger;

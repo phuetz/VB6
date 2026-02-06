@@ -33,7 +33,12 @@ export interface UserControlProperty {
 
 export interface UserControlMethod {
   name: string;
-  parameters: { name: string; type: string; optional?: boolean; defaultValue?: ControlPropertyValue }[];
+  parameters: {
+    name: string;
+    type: string;
+    optional?: boolean;
+    defaultValue?: ControlPropertyValue;
+  }[];
   returnType: string;
   description?: string;
   implementation: MethodImplementation;
@@ -50,39 +55,39 @@ export interface UserControlDefinition {
   description?: string;
   version?: string;
   author?: string;
-  
+
   // Visual properties
   width: number;
   height: number;
   backColor?: string;
   foreColor?: string;
-  
+
   // Constituent controls
   controls: Control[];
-  
+
   // Custom properties
   properties: UserControlProperty[];
-  
+
   // Custom methods
   methods: UserControlMethod[];
-  
+
   // Custom events
   events: UserControlEvent[];
-  
+
   // Code modules
   initializeCode?: string;
   terminateCode?: string;
   resizeCode?: string;
   paintCode?: string;
-  
+
   // Property procedures
   propertyGetCode?: { [propertyName: string]: string };
   propertySetCode?: { [propertyName: string]: string };
   propertyLetCode?: { [propertyName: string]: string };
-  
+
   // Event handlers
   eventHandlers?: { [eventName: string]: string };
-  
+
   // Design-time behavior
   isInvisibleAtRuntime?: boolean;
   isContainer?: boolean;
@@ -126,7 +131,7 @@ export class VB6UserControlManager {
     try {
       // Validate definition
       this.validateUserControlDefinition(definition);
-      
+
       // Register the control
       this.registeredControls.set(definition.name, definition);
 
@@ -135,7 +140,6 @@ export class VB6UserControlManager {
 
       logger.info(`User control registered: ${definition.name}`);
       return true;
-
     } catch (error) {
       logger.error(`Failed to register user control ${definition.name}:`, error);
       return false;
@@ -143,7 +147,10 @@ export class VB6UserControlManager {
   }
 
   // Create an instance of a user control
-  createUserControlInstance(controlName: string, initialProperties?: { [key: string]: any }): UserControlInstance | null {
+  createUserControlInstance(
+    controlName: string,
+    initialProperties?: { [key: string]: any }
+  ): UserControlInstance | null {
     const definition = this.registeredControls.get(controlName);
     if (!definition) {
       logger.error(`User control not found: ${controlName}`);
@@ -151,7 +158,7 @@ export class VB6UserControlManager {
     }
 
     const instanceId = `${controlName}_${this.nextInstanceId++}`;
-    
+
     // Initialize property values with defaults
     const propertyValues: { [propertyName: string]: any } = {};
     definition.properties.forEach(prop => {
@@ -162,7 +169,7 @@ export class VB6UserControlManager {
     const constituent = definition.controls.map(control => ({
       ...control,
       id: `${instanceId}_${control.name}`,
-      name: `${instanceId}_${control.name}`
+      name: `${instanceId}_${control.name}`,
     }));
 
     // Create instance
@@ -176,7 +183,7 @@ export class VB6UserControlManager {
       isVisible: true,
       isEnabled: true,
       eventHandlers: {},
-      methods: {}
+      methods: {},
     };
 
     // Initialize events
@@ -307,7 +314,11 @@ export class VB6UserControlManager {
   }
 
   // Add event handler
-  addEventHandler(instanceId: string, eventName: string, handler: (...args: any[]) => void): boolean {
+  addEventHandler(
+    instanceId: string,
+    eventName: string,
+    handler: (...args: any[]) => void
+  ): boolean {
     const instance = this.activeInstances.get(instanceId);
     if (!instance || !instance.eventHandlers[eventName]) return false;
 
@@ -316,7 +327,11 @@ export class VB6UserControlManager {
   }
 
   // Remove event handler
-  removeEventHandler(instanceId: string, eventName: string, handler: (...args: any[]) => void): boolean {
+  removeEventHandler(
+    instanceId: string,
+    eventName: string,
+    handler: (...args: any[]) => void
+  ): boolean {
     const instance = this.activeInstances.get(instanceId);
     if (!instance || !instance.eventHandlers[eventName]) return false;
 
@@ -395,7 +410,7 @@ export class VB6UserControlManager {
       propertyGetCode: {},
       propertySetCode: {},
       propertyLetCode: {},
-      eventHandlers: {}
+      eventHandlers: {},
     };
 
     let currentSection = '';
@@ -458,7 +473,7 @@ export class VB6UserControlManager {
           const parameters = this.parseParameters(paramStr);
           definition.events!.push({
             name: eventName,
-            parameters
+            parameters,
           });
         }
         continue;
@@ -472,17 +487,17 @@ export class VB6UserControlManager {
           currentSection = type;
           currentProperty = methodName;
           codeBuffer = [];
-          
+
           if (type === 'Function') {
             const parameters = this.parseParameters(paramStr);
             definition.methods!.push({
               name: methodName,
               parameters,
               returnType: 'Variant',
-              implementation: function(...args: any[]) {
+              implementation: function (...args: any[]) {
                 // This would be replaced with actual implementation
                 return null;
-              }
+              },
             });
           }
         }
@@ -504,23 +519,25 @@ export class VB6UserControlManager {
   }
 
   // Parse parameter string
-  private parseParameters(paramStr: string): { name: string; type: string; optional?: boolean; defaultValue?: any }[] {
+  private parseParameters(
+    paramStr: string
+  ): { name: string; type: string; optional?: boolean; defaultValue?: any }[] {
     if (!paramStr.trim()) return [];
 
     return paramStr.split(',').map(param => {
       const trimmed = param.trim();
       const match = trimmed.match(/(Optional\s+)?(\w+)\s+As\s+(\w+)(?:\s*=\s*(.+))?/);
-      
+
       if (match) {
         const [, optional, name, type, defaultValue] = match;
         return {
           name,
           type,
           optional: !!optional,
-          defaultValue: defaultValue ? this.parseDefaultValue(defaultValue) : undefined
+          defaultValue: defaultValue ? this.parseDefaultValue(defaultValue) : undefined,
         };
       }
-      
+
       return { name: trimmed, type: 'Variant' };
     });
   }
@@ -598,12 +615,17 @@ export class VB6UserControlManager {
   }
 
   // Execute user-defined code
-  private executeUserCode(instance: UserControlInstance, code: string, context: string, vars?: any): any {
+  private executeUserCode(
+    instance: UserControlInstance,
+    code: string,
+    context: string,
+    vars?: any
+  ): any {
     try {
       // Create execution context
       const userControlContext = {
         UserControl: instance,
-        ...vars
+        ...vars,
       };
 
       // Simple code execution (in real implementation, would use proper VB6 interpreter)
@@ -612,7 +634,6 @@ export class VB6UserControlManager {
 
       // For now, just log the code execution
       return null;
-
     } catch (error) {
       logger.error(`Error executing ${context} code:`, error);
       return null;
@@ -626,7 +647,7 @@ export class VB6UserControlManager {
       globalAny.VB6UserControls = globalAny.VB6UserControls || {};
       globalAny.VB6UserControls[definition.name] = {
         definition,
-        create: (props?: any) => this.createUserControlInstance(definition.name, props)
+        create: (props?: any) => this.createUserControlInstance(definition.name, props),
       };
     }
   }

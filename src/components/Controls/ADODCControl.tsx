@@ -7,7 +7,7 @@ interface ADODCControlProps {
 }
 
 export const ADODCControl: React.FC<ADODCControlProps> = ({ control }) => {
-  const updateControl = useVB6Store((state) => state.updateControl);
+  const updateControl = useVB6Store(state => state.updateControl);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [recordset, setRecordset] = useState<any[]>([]);
   const [isConnected, setIsConnected] = useState(false);
@@ -28,10 +28,8 @@ export const ADODCControl: React.FC<ADODCControlProps> = ({ control }) => {
   // Connexion à la base de données
   useEffect(() => {
     if (connectionString && recordSource) {
-      console.log('ADO Connection:', connectionString);
-      console.log('Record Source:', recordSource);
       setIsConnected(true);
-      
+
       // Simuler des données ADO
       setRecordset([
         { id: 1, CustomerName: 'Microsoft Corp.', City: 'Redmond', Country: 'USA' },
@@ -45,25 +43,25 @@ export const ADODCControl: React.FC<ADODCControlProps> = ({ control }) => {
   // Navigation methods
   const moveFirst = useCallback(() => {
     setCurrentIndex(0);
-    updateControl(control.id, { 
-      properties: { 
-        ...control.properties, 
+    updateControl(control.id, {
+      properties: {
+        ...control.properties,
         absolutePosition: 1,
         bof: false,
-        eof: false 
-      } 
+        eof: false,
+      },
     });
   }, [control.id, control.properties, updateControl]);
 
   const moveLast = useCallback(() => {
     setCurrentIndex(recordset.length - 1);
-    updateControl(control.id, { 
-      properties: { 
-        ...control.properties, 
+    updateControl(control.id, {
+      properties: {
+        ...control.properties,
         absolutePosition: recordset.length,
         bof: false,
-        eof: false 
-      } 
+        eof: false,
+      },
     });
   }, [recordset.length, control.id, control.properties, updateControl]);
 
@@ -78,22 +76,23 @@ export const ADODCControl: React.FC<ADODCControlProps> = ({ control }) => {
   const movePrevious = useCallback(() => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
-      updateControl(control.id, { 
-        properties: { 
-          ...control.properties, 
+      updateControl(control.id, {
+        properties: {
+          ...control.properties,
           absolutePosition: currentIndex,
           bof: false,
-          eof: false 
-        } 
+          eof: false,
+        },
       });
     } else {
-      updateControl(control.id, { 
-        properties: { 
-          ...control.properties, 
-          bof: true 
-        } 
+      updateControl(control.id, {
+        properties: {
+          ...control.properties,
+          bof: true,
+        },
       });
-      if (bofAction === 0) { // adDoMoveFirst
+      if (bofAction === 0) {
+        // adDoMoveFirst
         moveFirst();
       }
     }
@@ -102,33 +101,43 @@ export const ADODCControl: React.FC<ADODCControlProps> = ({ control }) => {
   const moveNext = useCallback(() => {
     if (currentIndex < recordset.length - 1) {
       setCurrentIndex(currentIndex + 1);
-      updateControl(control.id, { 
-        properties: { 
-          ...control.properties, 
+      updateControl(control.id, {
+        properties: {
+          ...control.properties,
           absolutePosition: currentIndex + 2,
           bof: false,
-          eof: false 
-        } 
+          eof: false,
+        },
       });
     } else {
-      updateControl(control.id, { 
-        properties: { 
-          ...control.properties, 
-          eof: true 
-        } 
+      updateControl(control.id, {
+        properties: {
+          ...control.properties,
+          eof: true,
+        },
       });
-      if (eofAction === 0) { // adDoMoveLast
+      if (eofAction === 0) {
+        // adDoMoveLast
         moveLast();
-      } else if (eofAction === 2) { // adDoAddNew
+      } else if (eofAction === 2) {
+        // adDoAddNew
         addNew();
       }
     }
-  }, [currentIndex, recordset.length, control.id, control.properties, updateControl, eofAction, moveLast, addNew]);
+  }, [
+    currentIndex,
+    recordset.length,
+    control.id,
+    control.properties,
+    updateControl,
+    eofAction,
+    moveLast,
+    addNew,
+  ]);
 
   const updateRecord = () => {
     setEditMode('None');
     // Sauvegarder les modifications
-    console.log('Saving record changes...');
   };
 
   const cancelUpdate = () => {
@@ -221,7 +230,10 @@ export const ADODCControl: React.FC<ADODCControlProps> = ({ control }) => {
     <div style={style}>
       {orientation === 0 && renderButtons()}
       <div style={captionStyle}>
-        {caption} {isConnected && recordset.length > 0 ? `[${currentIndex + 1} / ${recordset.length}]` : '[No records]'}
+        {caption}{' '}
+        {isConnected && recordset.length > 0
+          ? `[${currentIndex + 1} / ${recordset.length}]`
+          : '[No records]'}
       </div>
       {orientation === 1 && renderButtons()}
     </div>

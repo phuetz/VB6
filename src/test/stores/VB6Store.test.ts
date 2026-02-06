@@ -62,42 +62,42 @@ interface VB6StoreState {
   // Project management
   currentProject: VB6Project | null;
   projects: VB6Project[];
-  
+
   // Form management
   currentForm: VB6Form | null;
   forms: Map<string, VB6Form>;
-  
+
   // Control management
   controls: Map<string, VB6Control>;
   selectedControls: string[];
   clipboard: VB6Control[];
-  
+
   // IDE state
   zoom: number;
   gridSize: number;
   snapToGrid: boolean;
   showGrid: boolean;
   showGuides: boolean;
-  
+
   // UI state
   activePanel: string | null;
   panelVisibility: Record<string, boolean>;
   theme: 'light' | 'dark';
-  
+
   // History and undo/redo
   history: VB6StoreState[];
   historyIndex: number;
   maxHistorySize: number;
-  
+
   // Performance and debugging
   isDebugging: boolean;
   breakpoints: Map<string, number[]>;
   watchedVariables: string[];
-  
+
   // Collaboration
   isCollaborating: boolean;
   collaborators: any[];
-  
+
   // Actions
   actions: {
     // Project actions
@@ -105,31 +105,31 @@ interface VB6StoreState {
     loadProject: (projectPath: string) => void;
     saveProject: () => void;
     closeProject: () => void;
-    
+
     // Form actions
     createForm: (form: Omit<VB6Form, 'id' | 'controls'>) => void;
     selectForm: (formId: string) => void;
     updateForm: (formId: string, updates: Partial<VB6Form>) => void;
     deleteForm: (formId: string) => void;
-    
+
     // Control actions
     addControl: (control: Omit<VB6Control, 'id'>) => string;
     updateControl: (controlId: string, updates: Partial<VB6Control>) => void;
     deleteControl: (controlId: string) => void;
     selectControls: (controlIds: string[]) => void;
     clearSelection: () => void;
-    
+
     // Clipboard actions
     copyControls: (controlIds: string[]) => void;
     cutControls: (controlIds: string[]) => void;
     pasteControls: (position?: { x: number; y: number }) => void;
-    
+
     // History actions
     undo: () => void;
     redo: () => void;
     saveToHistory: () => void;
     clearHistory: () => void;
-    
+
     // UI actions
     setZoom: (zoom: number) => void;
     setGridSize: (size: number) => void;
@@ -137,11 +137,11 @@ interface VB6StoreState {
     toggleGrid: () => void;
     toggleGuides: () => void;
     setTheme: (theme: 'light' | 'dark') => void;
-    
+
     // Panel actions
     setActivePanel: (panelId: string | null) => void;
     togglePanelVisibility: (panelId: string) => void;
-    
+
     // Debug actions
     startDebugging: () => void;
     stopDebugging: () => void;
@@ -149,7 +149,7 @@ interface VB6StoreState {
     removeBreakpoint: (file: string, line: number) => void;
     addWatchVariable: (variable: string) => void;
     removeWatchVariable: (variable: string) => void;
-    
+
     // Collaboration actions
     startCollaboration: () => void;
     stopCollaboration: () => void;
@@ -180,9 +180,7 @@ describe('VB6 Store - Project Management', () => {
 
     store.actions.createProject(newProject);
 
-    expect(mockStore.setState).toHaveBeenCalledWith(
-      expect.any(Function)
-    );
+    expect(mockStore.setState).toHaveBeenCalledWith(expect.any(Function));
 
     // Simulate state update
     const stateUpdater = mockStore.setState.mock.calls[0][0];
@@ -198,7 +196,7 @@ describe('VB6 Store - Project Management', () => {
 
   it('should load an existing project', async () => {
     const projectPath = '/projects/existing/project.vbp';
-    
+
     // Mock project loading
     const loadProject = vi.fn().mockResolvedValue({
       id: 'project1',
@@ -283,7 +281,7 @@ describe('VB6 Store - Form Management', () => {
       width: 4800,
       height: 3600,
       properties: {
-        BackColor: 0x8000000F,
+        BackColor: 0x8000000f,
         BorderStyle: 1,
       },
       startupPosition: 2,
@@ -343,7 +341,7 @@ describe('VB6 Store - Form Management', () => {
     const updates: Partial<VB6Form> = {
       caption: 'New Caption',
       width: 6000,
-      properties: { BackColor: 0xFF0000 },
+      properties: { BackColor: 0xff0000 },
     };
 
     store.actions.updateForm(formId, updates);
@@ -354,7 +352,7 @@ describe('VB6 Store - Form Management', () => {
     const updatedForm = newState.forms.get(formId);
     expect(updatedForm?.caption).toBe('New Caption');
     expect(updatedForm?.width).toBe(6000);
-    expect(updatedForm?.properties.BackColor).toBe(0xFF0000);
+    expect(updatedForm?.properties.BackColor).toBe(0xff0000);
   });
 
   it('should delete a form', () => {
@@ -584,7 +582,7 @@ describe('VB6 Store - Clipboard Operations', () => {
 
   beforeEach(() => {
     store = createMockStore(createInitialState());
-    
+
     // Set up controls
     const controls = ['ctrl1', 'ctrl2', 'ctrl3'].map(createTestControl);
     controls.forEach(ctrl => store.controls.set(ctrl.id, ctrl));
@@ -620,10 +618,7 @@ describe('VB6 Store - Clipboard Operations', () => {
 
   it('should paste controls from clipboard', () => {
     // First copy some controls
-    store.clipboard = [
-      createTestControl('copy1'),
-      createTestControl('copy2'),
-    ];
+    store.clipboard = [createTestControl('copy1'), createTestControl('copy2')];
 
     const pastePosition = { x: 200, y: 150 };
     store.actions.pasteControls(pastePosition);
@@ -636,9 +631,7 @@ describe('VB6 Store - Clipboard Operations', () => {
 
     // Find pasted controls
     const allControls = Array.from(newState.controls.values());
-    const pastedControls = allControls.filter(c => 
-      !['ctrl1', 'ctrl2', 'ctrl3'].includes(c.id)
-    );
+    const pastedControls = allControls.filter(c => !['ctrl1', 'ctrl2', 'ctrl3'].includes(c.id));
 
     expect(pastedControls).toHaveLength(2);
     expect(pastedControls[0].left).toBe(200);
@@ -671,8 +664,9 @@ describe('VB6 Store - Clipboard Operations', () => {
     // Current implementation doesn't maintain parent-child relationships
     // This is a limitation that would need to be fixed in the actual store implementation
     // For now, just verify that controls were pasted
-    const pastedControls = Array.from(newState.controls.values())
-      .filter(c => !['ctrl1', 'ctrl2', 'ctrl3'].includes(c.id));
+    const pastedControls = Array.from(newState.controls.values()).filter(
+      c => !['ctrl1', 'ctrl2', 'ctrl3'].includes(c.id)
+    );
 
     expect(pastedControls).toHaveLength(2);
     expect(pastedControls.some(c => c.type === 'Frame')).toBe(true);
@@ -702,10 +696,10 @@ describe('VB6 Store - History and Undo/Redo', () => {
   it('should perform undo operation', () => {
     // Save initial state
     store.actions.saveToHistory();
-    
+
     // Make changes
     const controlId = store.actions.addControl(createTestControl('new'));
-    
+
     // Save changed state
     store.actions.saveToHistory();
 
@@ -720,7 +714,7 @@ describe('VB6 Store - History and Undo/Redo', () => {
     };
     const newState = stateUpdater(initialHistoryState);
 
-    // The undo implementation returns the historyIndex unchanged if it can't process, 
+    // The undo implementation returns the historyIndex unchanged if it can't process,
     // or our test setup might be incorrect. Adjust based on actual behavior.
     expect(newState.historyIndex).toBe(2); // Keep expectation aligned with actual result
   });
@@ -1159,7 +1153,7 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
 
   // Mock actions
   store.actions = {
-    createProject: vi.fn((project) => {
+    createProject: vi.fn(project => {
       const newProject = { ...project, id: generateId() };
       mockStore.setState((state: VB6StoreState) => ({
         ...state,
@@ -1168,21 +1162,25 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
       }));
     }),
 
-    loadProject: vi.fn(async (projectPath) => {
+    loadProject: vi.fn(async projectPath => {
       // Mock implementation
       mockStore.setState((state: VB6StoreState) => ({
         ...state,
-        currentProject: { /* mock project */ } as any,
+        currentProject: {
+          /* mock project */
+        } as any,
       }));
     }),
 
     saveProject: vi.fn(() => {
       mockStore.setState((state: VB6StoreState) => ({
         ...state,
-        currentProject: state.currentProject ? {
-          ...state.currentProject,
-          properties: { ...state.currentProject.properties, modified: false },
-        } : null,
+        currentProject: state.currentProject
+          ? {
+              ...state.currentProject,
+              properties: { ...state.currentProject.properties, modified: false },
+            }
+          : null,
       }));
     }),
 
@@ -1196,14 +1194,14 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
       }));
     }),
 
-    createForm: vi.fn((form) => {
+    createForm: vi.fn(form => {
       const formId = generateId();
       const newForm: VB6Form = {
         ...form,
         id: formId,
         controls: [],
       };
-      
+
       // Handle naming conflicts
       const existingNames = Array.from(store.forms.values()).map(f => f.name);
       if (existingNames.includes(newForm.name)) {
@@ -1226,7 +1224,7 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
       });
     }),
 
-    selectForm: vi.fn((formId) => {
+    selectForm: vi.fn(formId => {
       mockStore.setState((state: VB6StoreState) => ({
         ...state,
         currentForm: state.forms.get(formId) || null,
@@ -1243,14 +1241,15 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
         return {
           ...state,
           forms: newForms,
-          currentForm: state.currentForm?.id === formId 
-            ? { ...state.currentForm, ...updates }
-            : state.currentForm,
+          currentForm:
+            state.currentForm?.id === formId
+              ? { ...state.currentForm, ...updates }
+              : state.currentForm,
         };
       });
     }),
 
-    deleteForm: vi.fn((formId) => {
+    deleteForm: vi.fn(formId => {
       mockStore.setState((state: VB6StoreState) => {
         const newForms = new Map(state.forms);
         const formToDelete = newForms.get(formId);
@@ -1273,7 +1272,7 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
       });
     }),
 
-    addControl: vi.fn((control) => {
+    addControl: vi.fn(control => {
       const controlId = generateId();
       const newControl: VB6Control = {
         ...control,
@@ -1297,10 +1296,12 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
           ...state,
           controls: newControls,
           forms: newForms,
-          currentForm: state.currentForm ? {
-            ...state.currentForm,
-            controls: [...state.currentForm.controls, controlId],
-          } : state.currentForm,
+          currentForm: state.currentForm
+            ? {
+                ...state.currentForm,
+                controls: [...state.currentForm.controls, controlId],
+              }
+            : state.currentForm,
         };
       });
 
@@ -1321,11 +1322,11 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
       });
     }),
 
-    deleteControl: vi.fn((controlId) => {
+    deleteControl: vi.fn(controlId => {
       mockStore.setState((state: VB6StoreState) => {
         const controlToDelete = state.controls.get(controlId);
         const newControls = new Map(state.controls);
-        
+
         // Delete control and its children
         const toDelete = [controlId];
         if (controlToDelete?.children) {
@@ -1348,16 +1349,18 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
           ...state,
           controls: newControls,
           forms: newForms,
-          currentForm: state.currentForm ? {
-            ...state.currentForm,
-            controls: state.currentForm.controls.filter(id => !toDelete.includes(id)),
-          } : state.currentForm,
+          currentForm: state.currentForm
+            ? {
+                ...state.currentForm,
+                controls: state.currentForm.controls.filter(id => !toDelete.includes(id)),
+              }
+            : state.currentForm,
           selectedControls: state.selectedControls.filter(id => !toDelete.includes(id)),
         };
       });
     }),
 
-    selectControls: vi.fn((controlIds) => {
+    selectControls: vi.fn(controlIds => {
       mockStore.setState((state: VB6StoreState) => ({
         ...state,
         selectedControls: [...controlIds],
@@ -1371,7 +1374,7 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
       }));
     }),
 
-    copyControls: vi.fn((controlIds) => {
+    copyControls: vi.fn(controlIds => {
       mockStore.setState((state: VB6StoreState) => {
         const controlsToCopy = controlIds
           .map(id => state.controls.get(id))
@@ -1385,7 +1388,7 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
       });
     }),
 
-    cutControls: vi.fn((controlIds) => {
+    cutControls: vi.fn(controlIds => {
       mockStore.setState((state: VB6StoreState) => {
         const controlsToCopy = controlIds
           .map(id => state.controls.get(id))
@@ -1404,7 +1407,7 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
       });
     }),
 
-    pasteControls: vi.fn((position) => {
+    pasteControls: vi.fn(position => {
       if (store.clipboard.length === 0) return;
 
       mockStore.setState((state: VB6StoreState) => {
@@ -1417,8 +1420,8 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
           const newControl: VB6Control = {
             ...clipboardControl,
             id: newId,
-            left: offset.x + (index * 20),
-            top: offset.y + (index * 20),
+            left: offset.x + index * 20,
+            top: offset.y + index * 20,
           };
           newControls.set(newId, newControl);
           pastedIds.push(newId);
@@ -1478,7 +1481,7 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
       }));
     }),
 
-    setZoom: vi.fn((zoom) => {
+    setZoom: vi.fn(zoom => {
       const clampedZoom = Math.max(25, Math.min(400, zoom));
       mockStore.setState((state: VB6StoreState) => ({
         ...state,
@@ -1486,7 +1489,7 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
       }));
     }),
 
-    setGridSize: vi.fn((size) => {
+    setGridSize: vi.fn(size => {
       mockStore.setState((state: VB6StoreState) => ({
         ...state,
         gridSize: size,
@@ -1514,7 +1517,7 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
       }));
     }),
 
-    setTheme: vi.fn((theme) => {
+    setTheme: vi.fn(theme => {
       const validTheme = ['light', 'dark'].includes(theme) ? theme : 'light';
       mockStore.setState((state: VB6StoreState) => ({
         ...state,
@@ -1522,14 +1525,14 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
       }));
     }),
 
-    setActivePanel: vi.fn((panelId) => {
+    setActivePanel: vi.fn(panelId => {
       mockStore.setState((state: VB6StoreState) => ({
         ...state,
         activePanel: panelId,
       }));
     }),
 
-    togglePanelVisibility: vi.fn((panelId) => {
+    togglePanelVisibility: vi.fn(panelId => {
       mockStore.setState((state: VB6StoreState) => ({
         ...state,
         panelVisibility: {
@@ -1573,7 +1576,10 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
       mockStore.setState((state: VB6StoreState) => {
         const newBreakpoints = new Map(state.breakpoints);
         const existing = newBreakpoints.get(file) || [];
-        newBreakpoints.set(file, existing.filter(l => l !== line));
+        newBreakpoints.set(
+          file,
+          existing.filter(l => l !== line)
+        );
         return {
           ...state,
           breakpoints: newBreakpoints,
@@ -1581,14 +1587,14 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
       });
     }),
 
-    addWatchVariable: vi.fn((variable) => {
+    addWatchVariable: vi.fn(variable => {
       mockStore.setState((state: VB6StoreState) => ({
         ...state,
         watchedVariables: [...state.watchedVariables, variable],
       }));
     }),
 
-    removeWatchVariable: vi.fn((variable) => {
+    removeWatchVariable: vi.fn(variable => {
       mockStore.setState((state: VB6StoreState) => ({
         ...state,
         watchedVariables: state.watchedVariables.filter(v => v !== variable),
@@ -1610,14 +1616,14 @@ function createMockStore(initialState: VB6StoreState): VB6StoreState {
       }));
     }),
 
-    addCollaborator: vi.fn((collaborator) => {
+    addCollaborator: vi.fn(collaborator => {
       mockStore.setState((state: VB6StoreState) => ({
         ...state,
         collaborators: [...state.collaborators, collaborator],
       }));
     }),
 
-    removeCollaborator: vi.fn((collaboratorId) => {
+    removeCollaborator: vi.fn(collaboratorId => {
       mockStore.setState((state: VB6StoreState) => ({
         ...state,
         collaborators: state.collaborators.filter(c => c.id !== collaboratorId),
@@ -1664,25 +1670,28 @@ function validateProject(project: any): void {
 
 // Selector functions
 function getSelectedControls(state: VB6StoreState): VB6Control[] {
-  return state.selectedControls
-    .map(id => state.controls.get(id))
-    .filter(Boolean) as VB6Control[];
+  return state.selectedControls.map(id => state.controls.get(id)).filter(Boolean) as VB6Control[];
 }
 
 function getControlsByType(state: VB6StoreState): Record<string, VB6Control[]> {
   const result: Record<string, VB6Control[]> = {};
-  
+
   Array.from(state.controls.values()).forEach(control => {
     if (!result[control.type]) {
       result[control.type] = [];
     }
     result[control.type].push(control);
   });
-  
+
   return result;
 }
 
-function getFormBounds(state: VB6StoreState): { left: number; top: number; right: number; bottom: number } {
+function getFormBounds(state: VB6StoreState): {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+} {
   const controls = Array.from(state.controls.values());
   if (controls.length === 0) {
     return { left: 0, top: 0, right: 0, bottom: 0 };

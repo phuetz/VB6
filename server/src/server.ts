@@ -62,7 +62,7 @@ class VB6DataServer {
   private getAllowedOrigins(): string[] {
     const allowedOrigins = [
       'http://localhost:3000',
-      'http://localhost:3001', 
+      'http://localhost:3001',
       'http://localhost:5173',
       'http://127.0.0.1:3000',
       'http://127.0.0.1:3001',
@@ -76,11 +76,16 @@ class VB6DataServer {
       try {
         const clientUrl = new URL(process.env.CLIENT_URL);
         // Only allow https in production or localhost
-        if (clientUrl.protocol === 'https:' || 
-            (clientUrl.hostname === 'localhost' || clientUrl.hostname === '127.0.0.1')) {
+        if (
+          clientUrl.protocol === 'https:' ||
+          clientUrl.hostname === 'localhost' ||
+          clientUrl.hostname === '127.0.0.1'
+        ) {
           allowedOrigins.push(process.env.CLIENT_URL);
         } else {
-          console.warn(`Rejected CLIENT_URL: ${process.env.CLIENT_URL} - must use HTTPS or localhost`);
+          console.warn(
+            `Rejected CLIENT_URL: ${process.env.CLIENT_URL} - must use HTTPS or localhost`
+          );
         }
       } catch (error) {
         console.error(`Invalid CLIENT_URL: ${process.env.CLIENT_URL}`);
@@ -143,7 +148,7 @@ class VB6DataServer {
         origin: function (origin, callback) {
           // Allow requests with no origin (like mobile apps or Postman)
           if (!origin) return callback(null, true);
-          
+
           // Use the same allowedOrigins array
           if (allowedOrigins.includes(origin)) {
             return callback(null, true);
@@ -155,7 +160,7 @@ class VB6DataServer {
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
-        optionsSuccessStatus: 200 // Support legacy browsers
+        optionsSuccessStatus: 200, // Support legacy browsers
       })
     );
 
@@ -247,41 +252,49 @@ class VB6DataServer {
     this.app.post('/api/vb6/connect', async (req, res) => {
       try {
         const { connectionString, provider } = req.body;
-        
+
         // DATA VALIDATION BUG FIX: Validate connection input
         if (!connectionString || typeof connectionString !== 'string') {
           return res.status(400).json({
             success: false,
-            error: 'Connection string is required and must be a string'
+            error: 'Connection string is required and must be a string',
           });
         }
-        
+
         if (connectionString.length > 2000) {
           return res.status(400).json({
             success: false,
-            error: 'Connection string too long (max 2000 characters)'
+            error: 'Connection string too long (max 2000 characters)',
           });
         }
-        
+
         if (provider && typeof provider !== 'string') {
           return res.status(400).json({
             success: false,
-            error: 'Provider must be a string'
+            error: 'Provider must be a string',
           });
         }
-        
+
         // Sanitize connection string - remove dangerous keywords
-        const dangerousKeywords = ['exec', 'execute', 'drop', 'delete', 'truncate', 'alter', 'create'];
+        const dangerousKeywords = [
+          'exec',
+          'execute',
+          'drop',
+          'delete',
+          'truncate',
+          'alter',
+          'create',
+        ];
         const connectionStringLower = connectionString.toLowerCase();
         for (const keyword of dangerousKeywords) {
           if (connectionStringLower.includes(keyword)) {
             return res.status(400).json({
               success: false,
-              error: `Connection string contains forbidden keyword: ${keyword}`
+              error: `Connection string contains forbidden keyword: ${keyword}`,
             });
           }
         }
-        
+
         const connection = await this.databaseManager.createVB6Connection(
           connectionString,
           provider
@@ -303,29 +316,29 @@ class VB6DataServer {
     this.app.post('/api/vb6/execute', async (req, res) => {
       try {
         const { connectionId, sql, parameters } = req.body;
-        
+
         // DATA VALIDATION BUG FIX: Critical SQL injection prevention
         if (!connectionId || typeof connectionId !== 'string') {
           return res.status(400).json({
             success: false,
-            error: 'Connection ID is required and must be a string'
+            error: 'Connection ID is required and must be a string',
           });
         }
-        
+
         if (!sql || typeof sql !== 'string') {
           return res.status(400).json({
             success: false,
-            error: 'SQL query is required and must be a string'
+            error: 'SQL query is required and must be a string',
           });
         }
-        
+
         if (sql.length > 50000) {
           return res.status(400).json({
             success: false,
-            error: 'SQL query too long (max 50000 characters)'
+            error: 'SQL query too long (max 50000 characters)',
           });
         }
-        
+
         // Validate SQL query for dangerous operations
         const dangerousPatterns = [
           /\b(drop\s+table|drop\s+database|truncate|delete\s+from|exec|execute|sp_|xp_)\b/gi,
@@ -333,38 +346,42 @@ class VB6DataServer {
           /\b(union\s+select|union\s+all\s+select)\b/gi, // Basic SQLi pattern
           /(;|\|\||&&|\|)\s*(drop|delete|truncate|exec)/gi,
           /\b(load_file|into\s+outfile|into\s+dumpfile)\b/gi, // File operations
-          /\b(update\s+.*\s+set\s+.*=.*select|insert\s+into\s+.*\s+select)\b/gi // Subquery injections
+          /\b(update\s+.*\s+set\s+.*=.*select|insert\s+into\s+.*\s+select)\b/gi, // Subquery injections
         ];
-        
+
         for (const pattern of dangerousPatterns) {
           if (pattern.test(sql)) {
-            this.logger.warn(`Blocked dangerous SQL query from ${req.ip}: ${sql.substring(0, 100)}`);
+            this.logger.warn(
+              `Blocked dangerous SQL query from ${req.ip}: ${sql.substring(0, 100)}`
+            );
             return res.status(403).json({
               success: false,
-              error: 'SQL query contains forbidden operations for security reasons'
+              error: 'SQL query contains forbidden operations for security reasons',
             });
           }
         }
-        
+
         // Validate parameters if provided
         if (parameters !== undefined && parameters !== null) {
           if (!Array.isArray(parameters) && typeof parameters !== 'object') {
             return res.status(400).json({
               success: false,
-              error: 'Parameters must be an array or object'
+              error: 'Parameters must be an array or object',
             });
           }
-          
+
           // Limit parameter count to prevent DoS
-          const paramCount = Array.isArray(parameters) ? parameters.length : Object.keys(parameters).length;
+          const paramCount = Array.isArray(parameters)
+            ? parameters.length
+            : Object.keys(parameters).length;
           if (paramCount > 1000) {
             return res.status(400).json({
               success: false,
-              error: 'Too many parameters (max 1000)'
+              error: 'Too many parameters (max 1000)',
             });
           }
         }
-        
+
         const result = await this.databaseManager.executeVB6Query(connectionId, sql, parameters);
         res.json({
           success: true,

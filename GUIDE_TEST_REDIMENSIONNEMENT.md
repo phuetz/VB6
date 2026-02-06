@@ -11,6 +11,7 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
 ### ✅ 1. Création de Contrôles (Drag depuis Toolbox - Guides Rouges)
 
 **Procédure :**
+
 1. Ouvrir l'application (`npm run dev`)
 2. Dans la Toolbox (panneau gauche), sélectionner un contrôle (ex: TextBox, Label, CommandButton)
 3. Faire glisser vers le canvas au centre
@@ -24,6 +25,7 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
 ### ✅ 2. Sélection de Contrôles
 
 **Procédure :**
+
 1. Cliquer sur un contrôle existant
 2. **Vérifications :**
    - ✅ Contrôle devient sélectionné (surbrillance)
@@ -31,6 +33,7 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
    - ✅ Propriétés s'affichent dans le panneau droit
 
 **Multi-sélection :**
+
 1. Maintenir Ctrl et cliquer sur plusieurs contrôles
 2. **Vérifications :**
    - ✅ Plusieurs contrôles sélectionnés simultanément
@@ -39,6 +42,7 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
 ### ✅ 3. Redimensionnement (Guides Verts)
 
 **Procédure :**
+
 1. Sélectionner UN SEUL contrôle
 2. Faire glisser une des 8 poignées de redimensionnement
 3. **Vérifications :**
@@ -49,12 +53,14 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
    - ✅ Debug overlay (coin supérieur gauche) affiche mode "Resizing"
 
 **Poignées à tester :**
+
 - **Coins :** NW, NE, SE, SW (redimensionnement diagonal)
 - **Côtés :** N, E, S, W (redimensionnement unidirectionnel)
 
 ### ✅ 4. Déplacement de Contrôles (Guides Verts)
 
 **Procédure :**
+
 1. Sélectionner un contrôle
 2. Cliquer-glisser sur le contrôle (pas sur les poignées)
 3. **Vérifications :**
@@ -70,6 +76,7 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
 ### ✅ 5. Navigation Clavier
 
 **Procédure :**
+
 1. Sélectionner un contrôle
 2. Utiliser les flèches du clavier
 3. **Vérifications :**
@@ -85,12 +92,14 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
 ### ✅ 6. Distinction Guides Rouges vs Verts
 
 **Guides ROUGES (Toolbox Drag) :**
+
 - Apparaissent uniquement lors du **drag depuis la toolbox**
 - Couleur : `#ff4444` (rouge vif)
 - Épaisseur : 2px
 - Z-index : 1000
 
 **Guides VERTS (Control Manipulation) :**
+
 - Apparaissent lors du **déplacement/redimensionnement** de contrôles existants
 - Couleur : `#00dd00` (vert vif) avec ombre
 - Épaisseur : 2px
@@ -99,6 +108,7 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
 ### ✅ 7. Types d'Alignement
 
 **Vérifier que les guides apparaissent pour :**
+
 - ✅ Alignement des bords gauches
 - ✅ Alignement des bords droits
 - ✅ Alignement des centres horizontaux
@@ -113,6 +123,7 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
 ### ✅ 8. Gestion du Zoom
 
 **Procédure :**
+
 1. Modifier le zoom (25%, 50%, 100%, 200%, 400%)
 2. Tester création, déplacement et redimensionnement
 3. **Vérifications :**
@@ -123,6 +134,7 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
 ### ✅ 9. Sélections Complexes
 
 **Rubber Band Selection :**
+
 1. Cliquer-glisser sur zone vide du canvas
 2. **Vérifications :**
    - ✅ Rectangle de sélection apparaît
@@ -130,6 +142,7 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
    - ✅ Curseur "crosshair" pendant la sélection
 
 **Multi-sélection + Déplacement :**
+
 1. Sélectionner plusieurs contrôles (Ctrl+clic)
 2. Déplacer le groupe
 3. **Vérifications :**
@@ -140,6 +153,7 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
 ### ✅ 10. Contrôles Verrouillés
 
 **Procédure :**
+
 1. Créer un contrôle
 2. Le verrouiller (si cette fonctionnalité existe)
 3. **Vérifications :**
@@ -154,6 +168,7 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
 ### ✅ 11. Stress Test
 
 **Procédure :**
+
 1. Créer 20+ contrôles sur le canvas
 2. Sélectionner et déplacer différents contrôles
 3. **Vérifications :**
@@ -165,6 +180,7 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
 ### ✅ 12. Drag Prolongé
 
 **Procédure :**
+
 1. Maintenir un drag/resize pendant 10+ secondes
 2. Effectuer des mouvements complexes
 3. **Vérifications :**
@@ -181,11 +197,13 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
 **Pendant les opérations, vérifier :**
 
 **Overlay Toolbox (Rouge - coin supérieur droit) :**
+
 - Affiche : Type de contrôle en cours de création
 - Affiche : État de la grille et snap
 - Affiche : Nombre de guides actifs
 
 **Overlay Manipulation (Vert - coin supérieur gauche) :**
+
 - Affiche : Mode (Dragging/Resizing)
 - Affiche : Handle actuel pour le resize
 - Affiche : Nombre de guides X/Y
@@ -193,6 +211,7 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
 ### ✅ 14. Console Logs
 
 **Ouvrir DevTools Console et vérifier :**
+
 - ✅ Pas d'erreurs JavaScript
 - ✅ Logs informatifs des opérations (création, déplacement, etc.)
 - ✅ Pas de warnings de performance
@@ -204,6 +223,7 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
 ### ✅ 15. Workflow Complet
 
 **Scénario réaliste :**
+
 1. Créer un TextBox depuis la toolbox
 2. Le redimensionner pour le rendre plus large
 3. Créer un Label
@@ -218,6 +238,7 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
 ### ✅ 16. Transitions d'État
 
 **Tester les transitions :**
+
 - Toolbox drag → Sélection → Resize → Déplacement
 - Multi-sélection → Sélection simple → Resize
 - Zoom changes pendant les opérations
@@ -230,7 +251,7 @@ Ce guide vous permet de tester et valider le système de redimensionnement et ma
 ### ✅ SUCCÈS COMPLET si :
 
 1. **🟢 Fonctionnalités Core :** Création, sélection, redimensionnement, déplacement
-2. **🟢 Guides Visuels :** Distinction claire rouge/vert, alignement précis  
+2. **🟢 Guides Visuels :** Distinction claire rouge/vert, alignement précis
 3. **🟢 Performance :** Fluidité même avec 20+ contrôles
 4. **🟢 Edge Cases :** Zoom, multi-sélection, boundaries
 5. **🟢 UX Cohérence :** Curseurs appropriés, feedback visuel
@@ -259,4 +280,4 @@ Ce système de redimensionnement représente une implémentation **production-re
 
 ---
 
-*Guide créé le $(date) - Système testé et validé avec les correctifs ultra-think*
+_Guide créé le $(date) - Système testé et validé avec les correctifs ultra-think_

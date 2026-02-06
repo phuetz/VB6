@@ -337,9 +337,7 @@ describe('ErrorBoundary', () => {
   describe('Custom Error Messages', () => {
     it('should display custom fallback when provided', () => {
       // Custom fallback is a simple ReactNode in ErrorBoundary
-      const CustomFallback = (
-        <div>Custom error: This is a custom fallback</div>
-      );
+      const CustomFallback = <div>Custom error: This is a custom fallback</div>;
 
       render(
         <ErrorBoundary fallback={CustomFallback}>

@@ -1,6 +1,6 @@
 /**
  * VB6 FlatScrollBar Control Implementation
- * 
+ *
  * Flat-style scrollbar with full VB6 compatibility
  */
 
@@ -13,29 +13,29 @@ export interface FlatScrollBarControl {
   top: number;
   width: number;
   height: number;
-  
+
   // Value Properties
   min: number;
   max: number;
   value: number;
   smallChange: number;
   largeChange: number;
-  
+
   // Orientation
   orientation: number; // 0=Horizontal, 1=Vertical
-  
+
   // Flat Appearance Properties
   appearance: number; // 0=Flat, 1=3D
   arrows: boolean; // Show arrow buttons
-  
+
   // Behavior
   enabled: boolean;
   visible: boolean;
-  
+
   // Appearance
   mousePointer: number;
   tag: string;
-  
+
   // Events
   onChange?: string;
   onScroll?: string;
@@ -52,7 +52,7 @@ export const FlatScrollBarControl: React.FC<FlatScrollBarControlProps> = ({
   control,
   isDesignMode = false,
   onPropertyChange,
-  onEvent
+  onEvent,
 }) => {
   const {
     name,
@@ -71,7 +71,7 @@ export const FlatScrollBarControl: React.FC<FlatScrollBarControlProps> = ({
     enabled = true,
     visible = true,
     mousePointer = 0,
-    tag = ''
+    tag = '',
   } = control;
 
   const [currentValue, setCurrentValue] = useState(value);
@@ -88,26 +88,29 @@ export const FlatScrollBarControl: React.FC<FlatScrollBarControlProps> = ({
     setCurrentValue(value);
   }, [value]);
 
-  const handleValueChange = useCallback((newValue: number) => {
-    const clampedValue = Math.max(min, Math.min(max, newValue));
-    if (clampedValue !== currentValue) {
-      setCurrentValue(clampedValue);
-      onPropertyChange?.('value', clampedValue);
-      onEvent?.('Change');
-      onEvent?.('Scroll');
-    }
-  }, [currentValue, min, max, onPropertyChange, onEvent]);
+  const handleValueChange = useCallback(
+    (newValue: number) => {
+      const clampedValue = Math.max(min, Math.min(max, newValue));
+      if (clampedValue !== currentValue) {
+        setCurrentValue(clampedValue);
+        onPropertyChange?.('value', clampedValue);
+        onEvent?.('Change');
+        onEvent?.('Scroll');
+      }
+    },
+    [currentValue, min, max, onPropertyChange, onEvent]
+  );
 
   const getThumbPosition = useCallback(() => {
     if (max <= min) return 0;
     const range = max - min;
     const valueOffset = currentValue - min;
     const percentage = valueOffset / range;
-    
+
     const trackSize = isHorizontal ? width - (arrows ? 32 : 0) : height - (arrows ? 32 : 0);
     const thumbSize = Math.max(20, trackSize * 0.1);
     const availableSpace = trackSize - thumbSize;
-    
+
     return percentage * availableSpace;
   }, [currentValue, min, max, isHorizontal, width, height, arrows]);
 
@@ -116,72 +119,108 @@ export const FlatScrollBarControl: React.FC<FlatScrollBarControlProps> = ({
     return Math.max(20, trackSize * 0.1);
   }, [isHorizontal, width, height, arrows]);
 
-  const handleArrowClick = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
-    if (!enabled) return;
-    
-    let delta = 0;
-    if ((isHorizontal && direction === 'left') || (!isHorizontal && direction === 'up')) {
-      delta = -smallChange;
-    } else if ((isHorizontal && direction === 'right') || (!isHorizontal && direction === 'down')) {
-      delta = smallChange;
-    }
-    
-    handleValueChange(currentValue + delta);
-  }, [enabled, isHorizontal, smallChange, currentValue, handleValueChange]);
+  const handleArrowClick = useCallback(
+    (direction: 'up' | 'down' | 'left' | 'right') => {
+      if (!enabled) return;
 
-  const handleTrackClick = useCallback((event: React.MouseEvent) => {
-    if (!enabled || !scrollbarRef.current) return;
-    
-    const rect = scrollbarRef.current.getBoundingClientRect();
-    const clickPos = isHorizontal 
-      ? event.clientX - rect.left - (arrows ? 16 : 0)
-      : event.clientY - rect.top - (arrows ? 16 : 0);
-    
-    const trackSize = isHorizontal ? width - (arrows ? 32 : 0) : height - (arrows ? 32 : 0);
-    const thumbSize = getThumbSize();
-    const thumbPos = getThumbPosition();
-    
-    // Check if click is on thumb
-    if (clickPos >= thumbPos && clickPos <= thumbPos + thumbSize) {
-      return; // Don't handle track click if clicking on thumb
-    }
-    
-    // Determine direction
-    const isBeforeThumb = clickPos < thumbPos;
-    const delta = isBeforeThumb ? -largeChange : largeChange;
-    
-    handleValueChange(currentValue + delta);
-  }, [enabled, isHorizontal, arrows, width, height, currentValue, largeChange, handleValueChange, getThumbPosition, getThumbSize]);
+      let delta = 0;
+      if ((isHorizontal && direction === 'left') || (!isHorizontal && direction === 'up')) {
+        delta = -smallChange;
+      } else if (
+        (isHorizontal && direction === 'right') ||
+        (!isHorizontal && direction === 'down')
+      ) {
+        delta = smallChange;
+      }
 
-  const handleThumbMouseDown = useCallback((event: React.MouseEvent) => {
-    if (!enabled) return;
-    
-    event.preventDefault();
-    setIsDragging(true);
-    setDragStart({
-      x: event.clientX,
-      y: event.clientY,
-      value: currentValue
-    });
-  }, [enabled, currentValue]);
+      handleValueChange(currentValue + delta);
+    },
+    [enabled, isHorizontal, smallChange, currentValue, handleValueChange]
+  );
 
-  const handleMouseMove = useCallback((event: MouseEvent) => {
-    if (!isDragging || !enabled || !scrollbarRef.current) return;
-    
-    const rect = scrollbarRef.current.getBoundingClientRect();
-    const trackSize = isHorizontal ? width - (arrows ? 32 : 0) : height - (arrows ? 32 : 0);
-    const thumbSize = getThumbSize();
-    const availableSpace = trackSize - thumbSize;
-    
-    const delta = isHorizontal 
-      ? event.clientX - dragStart.x 
-      : event.clientY - dragStart.y;
-    
-    const pixelsPerValue = availableSpace / (max - min);
-    const valueDelta = delta / pixelsPerValue;
-    
-    handleValueChange(dragStart.value + valueDelta);
-  }, [isDragging, enabled, isHorizontal, width, height, arrows, dragStart, max, min, getThumbSize, handleValueChange]);
+  const handleTrackClick = useCallback(
+    (event: React.MouseEvent) => {
+      if (!enabled || !scrollbarRef.current) return;
+
+      const rect = scrollbarRef.current.getBoundingClientRect();
+      const clickPos = isHorizontal
+        ? event.clientX - rect.left - (arrows ? 16 : 0)
+        : event.clientY - rect.top - (arrows ? 16 : 0);
+
+      const trackSize = isHorizontal ? width - (arrows ? 32 : 0) : height - (arrows ? 32 : 0);
+      const thumbSize = getThumbSize();
+      const thumbPos = getThumbPosition();
+
+      // Check if click is on thumb
+      if (clickPos >= thumbPos && clickPos <= thumbPos + thumbSize) {
+        return; // Don't handle track click if clicking on thumb
+      }
+
+      // Determine direction
+      const isBeforeThumb = clickPos < thumbPos;
+      const delta = isBeforeThumb ? -largeChange : largeChange;
+
+      handleValueChange(currentValue + delta);
+    },
+    [
+      enabled,
+      isHorizontal,
+      arrows,
+      width,
+      height,
+      currentValue,
+      largeChange,
+      handleValueChange,
+      getThumbPosition,
+      getThumbSize,
+    ]
+  );
+
+  const handleThumbMouseDown = useCallback(
+    (event: React.MouseEvent) => {
+      if (!enabled) return;
+
+      event.preventDefault();
+      setIsDragging(true);
+      setDragStart({
+        x: event.clientX,
+        y: event.clientY,
+        value: currentValue,
+      });
+    },
+    [enabled, currentValue]
+  );
+
+  const handleMouseMove = useCallback(
+    (event: MouseEvent) => {
+      if (!isDragging || !enabled || !scrollbarRef.current) return;
+
+      const rect = scrollbarRef.current.getBoundingClientRect();
+      const trackSize = isHorizontal ? width - (arrows ? 32 : 0) : height - (arrows ? 32 : 0);
+      const thumbSize = getThumbSize();
+      const availableSpace = trackSize - thumbSize;
+
+      const delta = isHorizontal ? event.clientX - dragStart.x : event.clientY - dragStart.y;
+
+      const pixelsPerValue = availableSpace / (max - min);
+      const valueDelta = delta / pixelsPerValue;
+
+      handleValueChange(dragStart.value + valueDelta);
+    },
+    [
+      isDragging,
+      enabled,
+      isHorizontal,
+      width,
+      height,
+      arrows,
+      dragStart,
+      max,
+      min,
+      getThumbSize,
+      handleValueChange,
+    ]
+  );
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -218,9 +257,21 @@ export const FlatScrollBarControl: React.FC<FlatScrollBarControlProps> = ({
 
   const getCursorStyle = () => {
     const cursors = [
-      'default', 'auto', 'crosshair', 'text', 'wait', 'help',
-      'pointer', 'not-allowed', 'move', 'col-resize', 'row-resize',
-      'n-resize', 's-resize', 'e-resize', 'w-resize'
+      'default',
+      'auto',
+      'crosshair',
+      'text',
+      'wait',
+      'help',
+      'pointer',
+      'not-allowed',
+      'move',
+      'col-resize',
+      'row-resize',
+      'n-resize',
+      's-resize',
+      'e-resize',
+      'w-resize',
     ];
     return cursors[mousePointer] || 'default';
   };
@@ -228,10 +279,10 @@ export const FlatScrollBarControl: React.FC<FlatScrollBarControlProps> = ({
   const getPartStyle = (part: string, baseStyle: React.CSSProperties) => {
     const isHovered = hoveredPart === part;
     const isPressed = pressedPart === part;
-    
+
     let background = appearance === 0 ? '#e0e0e0' : '#f0f0f0';
     let border = appearance === 0 ? 'none' : '1px outset #d0d0d0';
-    
+
     if (isPressed) {
       background = '#c0c0c0';
       border = appearance === 0 ? '1px inset #808080' : '1px inset #d0d0d0';
@@ -239,12 +290,12 @@ export const FlatScrollBarControl: React.FC<FlatScrollBarControlProps> = ({
       background = '#f0f0f0';
       border = appearance === 0 ? '1px solid #808080' : '1px outset #d0d0d0';
     }
-    
+
     return {
       ...baseStyle,
       background,
       border,
-      cursor: enabled ? 'pointer' : 'not-allowed'
+      cursor: enabled ? 'pointer' : 'not-allowed',
     };
   };
 
@@ -260,8 +311,8 @@ export const FlatScrollBarControl: React.FC<FlatScrollBarControlProps> = ({
     opacity: enabled ? 1 : 0.5,
     outline: isDesignMode ? '1px dotted #333' : 'none',
     display: 'flex',
-    flexDirection: isHorizontal ? 'row' : 'column' as const,
-    userSelect: 'none' as const
+    flexDirection: isHorizontal ? 'row' : ('column' as const),
+    userSelect: 'none' as const,
   };
 
   const arrowButtonStyle = {
@@ -271,14 +322,14 @@ export const FlatScrollBarControl: React.FC<FlatScrollBarControlProps> = ({
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '10px',
-    color: enabled ? '#000' : '#808080'
+    color: enabled ? '#000' : '#808080',
   };
 
   const trackStyle = {
     flex: 1,
     position: 'relative' as const,
     background: appearance === 0 ? '#f8f8f8' : '#e0e0e0',
-    border: appearance === 0 ? 'none' : '1px inset #c0c0c0'
+    border: appearance === 0 ? 'none' : '1px inset #c0c0c0',
   };
 
   const thumbPosition = getThumbPosition();
@@ -294,7 +345,7 @@ export const FlatScrollBarControl: React.FC<FlatScrollBarControlProps> = ({
     cursor: enabled ? (isHorizontal ? 'ew-resize' : 'ns-resize') : 'not-allowed',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   };
 
   return (
@@ -346,7 +397,7 @@ export const FlatScrollBarControl: React.FC<FlatScrollBarControlProps> = ({
                   transparent 1px,
                   #a0a0a0 1px,
                   #a0a0a0 2px
-                )`
+                )`,
               }}
             />
           )}
@@ -381,7 +432,7 @@ export const FlatScrollBarControl: React.FC<FlatScrollBarControlProps> = ({
             padding: '2px',
             border: '1px solid #ccc',
             whiteSpace: 'nowrap',
-            zIndex: 1000
+            zIndex: 1000,
           }}
         >
           {name} ({currentValue}/{max}) - {isHorizontal ? 'H' : 'V'}
@@ -402,7 +453,7 @@ export const FlatScrollBarHelpers = {
     width,
     height: 17, // Standard height for horizontal scrollbar
     appearance: 0, // Flat
-    arrows: true
+    arrows: true,
   }),
 
   /**
@@ -414,7 +465,7 @@ export const FlatScrollBarHelpers = {
     width: 17, // Standard width for vertical scrollbar
     height,
     appearance: 0, // Flat
-    arrows: true
+    arrows: true,
   }),
 
   /**
@@ -429,10 +480,16 @@ export const FlatScrollBarHelpers = {
   /**
    * Calculate value from pixel position
    */
-  pixelToValue: (pixel: number, trackSize: number, thumbSize: number, min: number, max: number): number => {
+  pixelToValue: (
+    pixel: number,
+    trackSize: number,
+    thumbSize: number,
+    min: number,
+    max: number
+  ): number => {
     const availableSpace = trackSize - thumbSize;
     if (availableSpace <= 0) return min;
-    
+
     const ratio = Math.max(0, Math.min(1, pixel / availableSpace));
     return min + (max - min) * ratio;
   },
@@ -440,12 +497,18 @@ export const FlatScrollBarHelpers = {
   /**
    * Calculate pixel position from value
    */
-  valueToPixel: (value: number, trackSize: number, thumbSize: number, min: number, max: number): number => {
+  valueToPixel: (
+    value: number,
+    trackSize: number,
+    thumbSize: number,
+    min: number,
+    max: number
+  ): number => {
     if (max <= min) return 0;
     const ratio = (value - min) / (max - min);
     const availableSpace = trackSize - thumbSize;
     return ratio * availableSpace;
-  }
+  },
 };
 
 export default FlatScrollBarControl;

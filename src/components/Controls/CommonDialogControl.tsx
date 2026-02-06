@@ -1,6 +1,6 @@
 /**
  * VB6 CommonDialog Control Implementation
- * 
+ *
  * Common dialog control providing file, color, font, and print dialogs
  */
 
@@ -13,7 +13,7 @@ export interface CommonDialogControl {
   top: number;
   width: number;
   height: number;
-  
+
   // File Dialog Properties
   fileName: string;
   fileTitle: string;
@@ -22,14 +22,14 @@ export interface CommonDialogControl {
   initDir: string;
   defaultExt: string;
   dialogTitle: string;
-  
+
   // Flags
   flags: number;
-  
+
   // Color Dialog
   color: string;
   customColors: string[];
-  
+
   // Font Dialog
   fontName: string;
   fontSize: number;
@@ -38,7 +38,7 @@ export interface CommonDialogControl {
   fontUnderline: boolean;
   fontStrikeThru: boolean;
   fontColor: string;
-  
+
   // Print Dialog
   copies: number;
   fromPage: number;
@@ -46,11 +46,11 @@ export interface CommonDialogControl {
   minPage: number;
   maxPage: number;
   printRange: number; // 0=All, 1=Selection, 2=Pages
-  
+
   // Common
   cancelError: boolean;
   tag: string;
-  
+
   // Events
   onError?: string;
 }
@@ -84,13 +84,13 @@ export const CommonDialogConstants = {
   cdlOFNExplorer: 0x80000,
   cdlOFNNoDereferenceLinks: 0x100000,
   cdlOFNLongNames: 0x200000,
-  
+
   // Color Dialog Flags
   cdlCCRGBInit: 0x1,
   cdlCCFullOpen: 0x2,
   cdlCCPreventFullOpen: 0x4,
   cdlCCShowHelp: 0x8,
-  
+
   // Font Dialog Flags
   cdlCFScreenFonts: 0x1,
   cdlCFPrinterFonts: 0x2,
@@ -111,7 +111,7 @@ export const CommonDialogConstants = {
   cdlCFNoFaceSel: 0x80000,
   cdlCFNoStyleSel: 0x100000,
   cdlCFNoSizeSel: 0x200000,
-  
+
   // Print Dialog Flags
   cdlPDAllPages: 0x0,
   cdlPDSelection: 0x1,
@@ -132,14 +132,14 @@ export const CommonDialogConstants = {
   cdlPDEnableSetupTemplate: 0x8000,
   cdlPDEnablePrintHookMsg: 0x10000,
   cdlPDEnableSetupHookMsg: 0x20000,
-  cdlPDUseDevModeCopies: 0x40000
+  cdlPDUseDevModeCopies: 0x40000,
 };
 
 export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
   control,
   isDesignMode = false,
   onPropertyChange,
-  onEvent
+  onEvent,
 }) => {
   const {
     name,
@@ -171,7 +171,7 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
     maxPage = 9999,
     printRange = 0,
     cancelError = false,
-    tag = ''
+    tag = '',
   } = control;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -180,15 +180,15 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
   // Parse VB6 filter format: "Text Files (*.txt)|*.txt|All Files (*.*)|*.*"
   const parseFilter = useCallback((filterString: string) => {
     if (!filterString) return [];
-    
+
     const parts = filterString.split('|');
     const filters = [];
-    
+
     for (let i = 0; i < parts.length; i += 2) {
       if (i + 1 < parts.length) {
         const description = parts[i];
         const extension = parts[i + 1];
-        
+
         // Convert VB6 wildcard to HTML accept format
         const accept = extension
           .split(';')
@@ -199,20 +199,21 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
           })
           .filter(ext => ext)
           .join(',');
-          
+
         filters.push({ description, extension, accept });
       }
     }
-    
+
     return filters;
   }, []);
 
   // Show Open File Dialog
   const showOpen = useCallback(() => {
     const filters = parseFilter(filter);
-    const accept = filters.length > 0 && filterIndex > 0 && filterIndex <= filters.length 
-      ? filters[filterIndex - 1].accept 
-      : '';
+    const accept =
+      filters.length > 0 && filterIndex > 0 && filterIndex <= filters.length
+        ? filters[filterIndex - 1].accept
+        : '';
 
     if (fileInputRef.current) {
       fileInputRef.current.accept = accept;
@@ -232,7 +233,7 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
     a.download = fileName || 'document.txt';
     a.click();
     URL.revokeObjectURL(url);
-    
+
     onPropertyChange?.('fileName', a.download);
   }, [fileName, onPropertyChange]);
 
@@ -244,20 +245,20 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
     colorInput.style.position = 'absolute';
     colorInput.style.top = '-1000px';
     document.body.appendChild(colorInput);
-    
-    colorInput.addEventListener('change', (e) => {
+
+    colorInput.addEventListener('change', e => {
       const target = e.target as HTMLInputElement;
       onPropertyChange?.('color', target.value);
       document.body.removeChild(colorInput);
     });
-    
+
     colorInput.addEventListener('cancel', () => {
       if (cancelError) {
         onEvent?.('Error', { number: 32755, description: 'User canceled operation' });
       }
       document.body.removeChild(colorInput);
     });
-    
+
     colorInput.click();
   }, [color, cancelError, onPropertyChange, onEvent]);
 
@@ -277,18 +278,18 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
       z-index: 10000;
       box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     `;
-    
+
     // Create font dialog content safely using DOM methods
     const title = document.createElement('h3');
     title.textContent = 'Font';
-    
+
     // Font Name section
     const nameDiv = document.createElement('div');
     const nameLabel = document.createElement('label');
     nameLabel.textContent = 'Font Name: ';
     const nameSelect = document.createElement('select');
     nameSelect.id = 'fontName';
-    
+
     const fonts = ['Arial', 'Times New Roman', 'Courier New', 'MS Sans Serif'];
     fonts.forEach(font => {
       const option = document.createElement('option');
@@ -299,7 +300,7 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
     });
     nameLabel.appendChild(nameSelect);
     nameDiv.appendChild(nameLabel);
-    
+
     // Font Size section
     const sizeDiv = document.createElement('div');
     const sizeLabel = document.createElement('label');
@@ -312,10 +313,10 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
     sizeInput.max = '72';
     sizeLabel.appendChild(sizeInput);
     sizeDiv.appendChild(sizeLabel);
-    
+
     // Font Style section
     const styleDiv = document.createElement('div');
-    
+
     const boldLabel = document.createElement('label');
     const boldInput = document.createElement('input');
     boldInput.type = 'checkbox';
@@ -323,7 +324,7 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
     boldInput.checked = fontBold;
     boldLabel.appendChild(boldInput);
     boldLabel.appendChild(document.createTextNode(' Bold'));
-    
+
     const italicLabel = document.createElement('label');
     const italicInput = document.createElement('input');
     italicInput.type = 'checkbox';
@@ -331,7 +332,7 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
     italicInput.checked = fontItalic;
     italicLabel.appendChild(italicInput);
     italicLabel.appendChild(document.createTextNode(' Italic'));
-    
+
     const underlineLabel = document.createElement('label');
     const underlineInput = document.createElement('input');
     underlineInput.type = 'checkbox';
@@ -339,11 +340,11 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
     underlineInput.checked = fontUnderline;
     underlineLabel.appendChild(underlineInput);
     underlineLabel.appendChild(document.createTextNode(' Underline'));
-    
+
     styleDiv.appendChild(boldLabel);
     styleDiv.appendChild(italicLabel);
     styleDiv.appendChild(underlineLabel);
-    
+
     // Font Color section
     const colorDiv = document.createElement('div');
     const colorLabel = document.createElement('label');
@@ -354,7 +355,7 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
     colorInput.value = fontColor;
     colorLabel.appendChild(colorInput);
     colorDiv.appendChild(colorLabel);
-    
+
     // Buttons section
     const buttonDiv = document.createElement('div');
     buttonDiv.style.marginTop = '10px';
@@ -366,7 +367,7 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
     cancelBtn.textContent = 'Cancel';
     buttonDiv.appendChild(okBtn);
     buttonDiv.appendChild(cancelBtn);
-    
+
     // Assemble dialog
     fontDialog.appendChild(title);
     fontDialog.appendChild(nameDiv);
@@ -374,11 +375,11 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
     fontDialog.appendChild(styleDiv);
     fontDialog.appendChild(colorDiv);
     fontDialog.appendChild(buttonDiv);
-    
+
     document.body.appendChild(fontDialog);
-    
+
     // Use the already created button references instead of querying
-    
+
     okBtn.onclick = () => {
       const nameInput = fontDialog.querySelector('#fontName') as HTMLSelectElement;
       const sizeInput = fontDialog.querySelector('#fontSize') as HTMLInputElement;
@@ -386,24 +387,34 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
       const italicInput = fontDialog.querySelector('#fontItalic') as HTMLInputElement;
       const underlineInput = fontDialog.querySelector('#fontUnderline') as HTMLInputElement;
       const colorInput = fontDialog.querySelector('#fontColor') as HTMLInputElement;
-      
+
       onPropertyChange?.('fontName', nameInput.value);
       onPropertyChange?.('fontSize', parseInt(sizeInput.value));
       onPropertyChange?.('fontBold', boldInput.checked);
       onPropertyChange?.('fontItalic', italicInput.checked);
       onPropertyChange?.('fontUnderline', underlineInput.checked);
       onPropertyChange?.('fontColor', colorInput.value);
-      
+
       document.body.removeChild(fontDialog);
     };
-    
+
     cancelBtn.onclick = () => {
       if (cancelError) {
         onEvent?.('Error', { number: 32755, description: 'User canceled operation' });
       }
       document.body.removeChild(fontDialog);
     };
-  }, [fontName, fontSize, fontBold, fontItalic, fontUnderline, fontColor, cancelError, onPropertyChange, onEvent]);
+  }, [
+    fontName,
+    fontSize,
+    fontBold,
+    fontItalic,
+    fontUnderline,
+    fontColor,
+    cancelError,
+    onPropertyChange,
+    onEvent,
+  ]);
 
   // Show Print Dialog (simplified)
   const showPrinter = useCallback(() => {
@@ -412,25 +423,28 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
   }, []);
 
   // File input change handler
-  const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      onPropertyChange?.('fileName', file.name);
-      onPropertyChange?.('fileTitle', file.name);
-      
-      // For multiple files
-      if (files.length > 1) {
-        const fileNames = Array.from(files).map(f => f.name);
-        onPropertyChange?.('fileName', fileNames.join(' '));
+  const handleFileChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const files = event.target.files;
+      if (files && files.length > 0) {
+        const file = files[0];
+        onPropertyChange?.('fileName', file.name);
+        onPropertyChange?.('fileTitle', file.name);
+
+        // For multiple files
+        if (files.length > 1) {
+          const fileNames = Array.from(files).map(f => f.name);
+          onPropertyChange?.('fileName', fileNames.join(' '));
+        }
+      } else if (cancelError) {
+        onEvent?.('Error', { number: 32755, description: 'User canceled operation' });
       }
-    } else if (cancelError) {
-      onEvent?.('Error', { number: 32755, description: 'User canceled operation' });
-    }
-    
-    // Reset input
-    event.target.value = '';
-  }, [cancelError, onPropertyChange, onEvent]);
+
+      // Reset input
+      event.target.value = '';
+    },
+    [cancelError, onPropertyChange, onEvent]
+  );
 
   // VB6 Compatible methods
   const vb6Methods = {
@@ -439,9 +453,7 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
     ShowColor: showColor,
     ShowFont: showFont,
     ShowPrinter: showPrinter,
-    ShowHelp: () => {
-      console.log('ShowHelp not implemented in web environment');
-    }
+    ShowHelp: () => {},
   };
 
   // Expose methods to parent
@@ -460,7 +472,7 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
         style={{ display: 'none' }}
         onChange={handleFileChange}
       />
-      
+
       {/* Visual representation in design mode */}
       {isDesignMode ? (
         <div
@@ -478,7 +490,7 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
             justifyContent: 'center',
             fontSize: '10px',
             color: '#666',
-            cursor: 'default'
+            cursor: 'default',
           }}
           data-name={name}
           data-type="CommonDialog"
@@ -495,7 +507,7 @@ export const CommonDialogControl: React.FC<CommonDialogControlProps> = ({
               padding: '2px',
               border: '1px solid #ccc',
               whiteSpace: 'nowrap',
-              zIndex: 1000
+              zIndex: 1000,
             }}
           >
             {name} (CommonDialog)

@@ -93,26 +93,26 @@ export interface ProjectMetadata {
 interface ProjectState {
   // Métadonnées du projet
   metadata: ProjectMetadata;
-  
+
   // Structure du projet
   forms: VB6Form[];
   modules: VB6Module[];
   classModules: VB6Module[];
   userControls: VB6Module[];
-  
+
   // Références et composants
   references: VB6Reference[];
   components: VB6Component[];
-  
+
   // État de navigation
   activeFormId: number | null;
   activeModuleId: number | null;
-  
+
   // État global du projet
   isDirty: boolean;
   isLoading: boolean;
   lastSaved: Date | null;
-  
+
   // Historique des modifications
   undoStack: Array<{
     action: string;
@@ -134,7 +134,7 @@ interface ProjectActions {
   saveProject: () => Promise<boolean>;
   saveProjectAs: (name: string) => Promise<boolean>;
   closeProject: () => void;
-  
+
   // Gestion des formulaires
   createForm: (name?: string) => VB6Form;
   deleteForm: (formId: number) => void;
@@ -142,30 +142,30 @@ interface ProjectActions {
   duplicateForm: (formId: number) => VB6Form;
   setActiveForm: (formId: number) => void;
   updateFormMetadata: (formId: number, metadata: Partial<VB6Form>) => void;
-  
+
   // Gestion des modules
   createModule: (type: 'standard' | 'class' | 'user-control', name?: string) => VB6Module;
   deleteModule: (moduleId: number) => void;
   renameModule: (moduleId: number, newName: string) => void;
   setActiveModule: (moduleId: number) => void;
   updateModuleCode: (moduleId: number, code: string) => void;
-  
+
   // Gestion des références
   addReference: (reference: VB6Reference) => void;
   removeReference: (name: string) => void;
   toggleReference: (name: string) => void;
-  
+
   // Gestion des composants
   addComponent: (component: VB6Component) => void;
   removeComponent: (filename: string) => void;
   toggleComponent: (filename: string) => void;
-  
+
   // Historique et undo/redo
   pushToHistory: (action: string, data: HistoryActionData) => void;
   undo: () => boolean;
   redo: () => boolean;
   clearHistory: () => void;
-  
+
   // Utilitaires
   markDirty: () => void;
   markClean: () => void;
@@ -188,17 +188,17 @@ const DEFAULT_PROJECT_METADATA: ProjectMetadata = {
   startupObject: 'Form1',
   projectType: 'exe',
   compatibilityMode: false,
-  threadingModel: 'apartment'
+  threadingModel: 'apartment',
 };
 
 const DEFAULT_REFERENCES: VB6Reference[] = [
-  { 
-    name: 'Visual Basic For Applications', 
-    location: 'VBA6.DLL', 
-    checked: true, 
+  {
+    name: 'Visual Basic For Applications',
+    location: 'VBA6.DLL',
+    checked: true,
     builtin: true,
     version: '6.0.0.0',
-    description: 'Microsoft Visual Basic for Applications Extensibility 5.3'
+    description: 'Microsoft Visual Basic for Applications Extensibility 5.3',
   },
   {
     name: 'Visual Basic runtime objects and procedures',
@@ -206,7 +206,7 @@ const DEFAULT_REFERENCES: VB6Reference[] = [
     checked: true,
     builtin: true,
     version: '6.0.0.0',
-    description: 'Microsoft Visual Basic 6.0 Runtime'
+    description: 'Microsoft Visual Basic 6.0 Runtime',
   },
   {
     name: 'Visual Basic objects and procedures',
@@ -214,16 +214,16 @@ const DEFAULT_REFERENCES: VB6Reference[] = [
     checked: true,
     builtin: true,
     version: '6.0.0.0',
-    description: 'Microsoft Visual Basic 6.0 Object Library'
+    description: 'Microsoft Visual Basic 6.0 Object Library',
   },
-  { 
-    name: 'OLE Automation', 
-    location: 'stdole2.tlb', 
-    checked: true, 
+  {
+    name: 'OLE Automation',
+    location: 'stdole2.tlb',
+    checked: true,
     builtin: true,
     version: '2.0.0.0',
-    description: 'Microsoft OLE 2.40 for Windows NT and Windows 95'
-  }
+    description: 'Microsoft OLE 2.40 for Windows NT and Windows 95',
+  },
 ];
 
 // ULTRA-OPTIMIZED PROJECT STORE avec middlewares avancés
@@ -233,32 +233,34 @@ export const useProjectStore = create<ProjectStore>()(
       immer((set, get) => ({
         // État initial optimisé
         metadata: DEFAULT_PROJECT_METADATA,
-        forms: [{
-          id: 1,
-          name: 'Form1',
-          caption: 'Form1',
-          controls: [],
-          properties: {
-            BackColor: '#8000000F',
-            BorderStyle: '2',
-            ClientHeight: '3195',
-            ClientLeft: '60',
-            ClientTop: '345',
-            ClientWidth: '4680',
-            MaxButton: 'True',
-            MinButton: 'True',
-            Moveable: 'True',
-            ScaleHeight: '213',
-            ScaleMode: '3',
-            ScaleWidth: '312',
-            ShowInTaskbar: 'True',
-            StartUpPosition: '3',
-            WindowState: '0'
+        forms: [
+          {
+            id: 1,
+            name: 'Form1',
+            caption: 'Form1',
+            controls: [],
+            properties: {
+              BackColor: '#8000000F',
+              BorderStyle: '2',
+              ClientHeight: '3195',
+              ClientLeft: '60',
+              ClientTop: '345',
+              ClientWidth: '4680',
+              MaxButton: 'True',
+              MinButton: 'True',
+              Moveable: 'True',
+              ScaleHeight: '213',
+              ScaleMode: '3',
+              ScaleWidth: '312',
+              ShowInTaskbar: 'True',
+              StartUpPosition: '3',
+              WindowState: '0',
+            },
+            code: {},
+            dirty: false,
+            lastModified: new Date(),
           },
-          code: {},
-          dirty: false,
-          lastModified: new Date()
-        }],
+        ],
         modules: [],
         classModules: [],
         userControls: [],
@@ -274,27 +276,28 @@ export const useProjectStore = create<ProjectStore>()(
 
         // Actions optimisées avec Immer pour immutabilité
         createNewProject: (name: string, type = 'exe') =>
-          set((state) => {
-            
+          set(state => {
             state.metadata = {
               ...DEFAULT_PROJECT_METADATA,
               name,
               projectType: type as ProjectMetadata['projectType'],
               created: new Date(),
-              lastModified: new Date()
+              lastModified: new Date(),
             };
-            
-            state.forms = [{
-              id: 1,
-              name: 'Form1',
-              caption: 'Form1',
-              controls: [],
-              properties: { ...state.forms[0]?.properties || {} },
-              code: {},
-              dirty: false,
-              lastModified: new Date()
-            }];
-            
+
+            state.forms = [
+              {
+                id: 1,
+                name: 'Form1',
+                caption: 'Form1',
+                controls: [],
+                properties: { ...(state.forms[0]?.properties || {}) },
+                code: {},
+                dirty: false,
+                lastModified: new Date(),
+              },
+            ];
+
             state.modules = [];
             state.classModules = [];
             state.userControls = [];
@@ -307,8 +310,7 @@ export const useProjectStore = create<ProjectStore>()(
           }),
 
         loadProject: (projectData: ProjectData) =>
-          set((state) => {
-            
+          set(state => {
             try {
               state.metadata = { ...DEFAULT_PROJECT_METADATA, ...projectData.metadata };
               state.forms = projectData.forms || [];
@@ -317,7 +319,7 @@ export const useProjectStore = create<ProjectStore>()(
               state.userControls = projectData.userControls || [];
               state.references = projectData.references || DEFAULT_REFERENCES;
               state.components = projectData.components || [];
-              state.activeFormId = projectData.activeFormId || (state.forms[0]?.id || null);
+              state.activeFormId = projectData.activeFormId || state.forms[0]?.id || null;
               state.isDirty = false;
               state.isLoading = false;
               state.lastSaved = new Date();
@@ -329,13 +331,12 @@ export const useProjectStore = create<ProjectStore>()(
 
         saveProject: async () => {
           const state = get();
-          
+
           try {
-            
             const projectData = {
               metadata: {
                 ...state.metadata,
-                lastModified: new Date()
+                lastModified: new Date(),
               },
               forms: state.forms,
               modules: state.modules,
@@ -343,18 +344,18 @@ export const useProjectStore = create<ProjectStore>()(
               userControls: state.userControls,
               references: state.references,
               components: state.components,
-              activeFormId: state.activeFormId
+              activeFormId: state.activeFormId,
             };
-            
+
             // Simuler la sauvegarde (en réalité, utiliserait File System Access API)
             localStorage.setItem('vb6-project-' + state.metadata.name, JSON.stringify(projectData));
-            
-            set((draft) => {
+
+            set(draft => {
               draft.isDirty = false;
               draft.lastSaved = new Date();
               draft.metadata.lastModified = new Date();
             });
-            
+
             return true;
           } catch (error) {
             console.error('❌ Error saving project:', error);
@@ -363,15 +364,14 @@ export const useProjectStore = create<ProjectStore>()(
         },
 
         saveProjectAs: async (name: string) => {
-          set((state) => {
+          set(state => {
             state.metadata.name = name;
           });
           return get().saveProject();
         },
 
         closeProject: () =>
-          set((state) => {
-            
+          set(state => {
             // Reset to default state
             state.metadata = DEFAULT_PROJECT_METADATA;
             state.forms = [];
@@ -390,7 +390,7 @@ export const useProjectStore = create<ProjectStore>()(
           const state = get();
           const nextId = Math.max(...state.forms.map(f => f.id), 0) + 1;
           const formName = name || `Form${nextId}`;
-          
+
           const newForm: VB6Form = {
             id: nextId,
             name: formName,
@@ -408,65 +408,63 @@ export const useProjectStore = create<ProjectStore>()(
               ScaleHeight: '213',
               ScaleMode: '3',
               ScaleWidth: '312',
-              StartUpPosition: '3'
+              StartUpPosition: '3',
             },
             code: {},
             dirty: false,
-            lastModified: new Date()
+            lastModified: new Date(),
           };
-          
-          set((draft) => {
+
+          set(draft => {
             draft.forms.push(newForm);
             draft.activeFormId = nextId;
             draft.isDirty = true;
             draft.pushToHistory('createForm', { form: newForm });
           });
-          
+
           return newForm;
         },
 
         deleteForm: (formId: number) =>
-          set((state) => {
+          set(state => {
             const formIndex = state.forms.findIndex(f => f.id === formId);
             if (formIndex === -1) return;
-            
+
             const deletedForm = state.forms[formIndex];
             state.forms.splice(formIndex, 1);
-            
+
             // Ajuster l'ID actif si nécessaire
             if (state.activeFormId === formId) {
               state.activeFormId = state.forms[0]?.id || null;
             }
-            
+
             state.isDirty = true;
             state.pushToHistory.call(state, 'deleteForm', { form: deletedForm });
-            
           }),
 
         renameForm: (formId: number, newName: string) =>
-          set((state) => {
+          set(state => {
             const form = state.forms.find(f => f.id === formId);
             if (!form) return;
-            
+
             const oldName = form.name;
             form.name = newName;
             form.caption = newName;
             form.dirty = true;
             form.lastModified = new Date();
             state.isDirty = true;
-            
+
             state.pushToHistory.call(state, 'renameForm', { formId, oldName, newName });
-            
           }),
 
         duplicateForm: (formId: number) => {
           const state = get();
           const sourceForm = state.forms.find(f => f.id === formId);
           if (!sourceForm) return sourceForm!;
-          
+
           const nextId = Math.max(...state.forms.map(f => f.id), 0) + 1;
           const newName = `${sourceForm.name}_Copy`;
-          
+
           const newForm: VB6Form = {
             ...sourceForm,
             id: nextId,
@@ -474,62 +472,66 @@ export const useProjectStore = create<ProjectStore>()(
             caption: newName,
             controls: sourceForm.controls.map(ctrl => ({
               ...ctrl,
-              id: ctrl.id + 1000 // Offset IDs to avoid conflicts
+              id: ctrl.id + 1000, // Offset IDs to avoid conflicts
             })),
             dirty: false,
-            lastModified: new Date()
+            lastModified: new Date(),
           };
-          
-          set((draft) => {
+
+          set(draft => {
             draft.forms.push(newForm);
             draft.activeFormId = nextId;
             draft.isDirty = true;
             draft.pushToHistory('duplicateForm', { sourceId: formId, newForm });
           });
-          
+
           return newForm;
         },
 
         setActiveForm: (formId: number) =>
-          set((state) => {
+          set(state => {
             if (state.forms.some(f => f.id === formId)) {
               state.activeFormId = formId;
             }
           }),
 
         updateFormMetadata: (formId: number, metadata: Partial<VB6Form>) =>
-          set((state) => {
+          set(state => {
             const form = state.forms.find(f => f.id === formId);
             if (!form) return;
-            
+
             Object.assign(form, metadata);
             form.dirty = true;
             form.lastModified = new Date();
             state.isDirty = true;
-            
           }),
 
         // Module management
         createModule: (type: 'standard' | 'class' | 'user-control', name?: string) => {
           const state = get();
-          const modules = type === 'class' ? state.classModules : 
-                         type === 'user-control' ? state.userControls : state.modules;
-          
+          const modules =
+            type === 'class'
+              ? state.classModules
+              : type === 'user-control'
+                ? state.userControls
+                : state.modules;
+
           const nextId = Math.max(...modules.map(m => m.id), 0) + 1;
           const moduleName = name || `Module${nextId}`;
-          
+
           const newModule: VB6Module = {
             id: nextId,
             name: moduleName,
             type,
-            code: type === 'class' ? 
-              `VERSION 1.0 CLASS\nBEGIN\n  MultiUse = -1  'True\nEND\nAttribute VB_Name = "${moduleName}"\n\n` :
-              `Attribute VB_Name = "${moduleName}"\n\n`,
+            code:
+              type === 'class'
+                ? `VERSION 1.0 CLASS\nBEGIN\n  MultiUse = -1  'True\nEND\nAttribute VB_Name = "${moduleName}"\n\n`
+                : `Attribute VB_Name = "${moduleName}"\n\n`,
             dirty: false,
-            lastModified: new Date()
+            lastModified: new Date(),
           };
-          
-          set((draft) => {
+
+          set(draft => {
             if (type === 'class') {
               draft.classModules.push(newModule);
             } else if (type === 'user-control') {
@@ -537,22 +539,22 @@ export const useProjectStore = create<ProjectStore>()(
             } else {
               draft.modules.push(newModule);
             }
-            
+
             draft.activeModuleId = nextId;
             draft.isDirty = true;
             draft.pushToHistory('createModule', { module: newModule });
           });
-          
+
           return newModule;
         },
 
         deleteModule: (moduleId: number) =>
-          set((state) => {
+          set(state => {
             let deletedModule: VB6Module | undefined;
-            
+
             // Chercher dans tous les types de modules
             const moduleArrays = [state.modules, state.classModules, state.userControls];
-            
+
             for (const modules of moduleArrays) {
               const index = modules.findIndex(m => m.id === moduleId);
               if (index !== -1) {
@@ -561,44 +563,42 @@ export const useProjectStore = create<ProjectStore>()(
                 break;
               }
             }
-            
+
             if (deletedModule) {
               if (state.activeModuleId === moduleId) {
                 state.activeModuleId = null;
               }
               state.isDirty = true;
               state.pushToHistory.call(state, 'deleteModule', { module: deletedModule });
-              
             }
           }),
 
         renameModule: (moduleId: number, newName: string) =>
-          set((state) => {
+          set(state => {
             const moduleArrays = [state.modules, state.classModules, state.userControls];
             let foundModule: VB6Module | undefined;
-            
+
             for (const modules of moduleArrays) {
               foundModule = modules.find(m => m.id === moduleId);
               if (foundModule) break;
             }
-            
+
             if (foundModule) {
               const oldName = foundModule.name;
               foundModule.name = newName;
               foundModule.dirty = true;
               foundModule.lastModified = new Date();
               state.isDirty = true;
-              
+
               state.pushToHistory.call(state, 'renameModule', { moduleId, oldName, newName });
-              
             }
           }),
 
         setActiveModule: (moduleId: number) =>
-          set((state) => {
+          set(state => {
             const moduleArrays = [state.modules, state.classModules, state.userControls];
             const moduleExists = moduleArrays.some(modules => modules.some(m => m.id === moduleId));
-            
+
             if (moduleExists) {
               state.activeModuleId = moduleId;
               state.activeFormId = null; // Désélectionner le formulaire actif
@@ -606,99 +606,92 @@ export const useProjectStore = create<ProjectStore>()(
           }),
 
         updateModuleCode: (moduleId: number, code: string) =>
-          set((state) => {
+          set(state => {
             const moduleArrays = [state.modules, state.classModules, state.userControls];
             let foundModule: VB6Module | undefined;
-            
+
             for (const modules of moduleArrays) {
               foundModule = modules.find(m => m.id === moduleId);
               if (foundModule) break;
             }
-            
+
             if (foundModule) {
               foundModule.code = code;
               foundModule.dirty = true;
               foundModule.lastModified = new Date();
               state.isDirty = true;
-              
             }
           }),
 
         // Reference management
         addReference: (reference: VB6Reference) =>
-          set((state) => {
+          set(state => {
             if (!state.references.some(ref => ref.name === reference.name)) {
               state.references.push(reference);
               state.isDirty = true;
-              
             }
           }),
 
         removeReference: (name: string) =>
-          set((state) => {
+          set(state => {
             const index = state.references.findIndex(ref => ref.name === name);
             if (index !== -1 && !state.references[index].builtin) {
               state.references.splice(index, 1);
               state.isDirty = true;
-              
             }
           }),
 
         toggleReference: (name: string) =>
-          set((state) => {
+          set(state => {
             const reference = state.references.find(ref => ref.name === name);
             if (reference) {
               reference.checked = !reference.checked;
               state.isDirty = true;
-              
             }
           }),
 
         // Component management
         addComponent: (component: VB6Component) =>
-          set((state) => {
+          set(state => {
             if (!state.components.some(comp => comp.filename === component.filename)) {
               state.components.push(component);
               state.isDirty = true;
-              
             }
           }),
 
         removeComponent: (filename: string) =>
-          set((state) => {
+          set(state => {
             const index = state.components.findIndex(comp => comp.filename === filename);
             if (index !== -1) {
               const component = state.components[index];
               state.components.splice(index, 1);
               state.isDirty = true;
-              
             }
           }),
 
         toggleComponent: (filename: string) =>
-          set((state) => {
+          set(state => {
             const component = state.components.find(comp => comp.filename === filename);
             if (component) {
               component.selected = !component.selected;
               state.isDirty = true;
-              
             }
           }),
 
         // History management
         pushToHistory: (action: string, data: HistoryActionData) =>
-          set((state) => {
+          set(state => {
             state.undoStack.push({
               action,
               timestamp: new Date(),
-              data
+              data,
             });
-            
+
             // Limiter la taille de l'historique
             if (state.undoStack.length > 50) {
               state.undoStack.shift();
             }
-            
+
             // Vider la pile redo
             state.redoStack = [];
           }),
@@ -706,9 +699,9 @@ export const useProjectStore = create<ProjectStore>()(
         undo: () => {
           const state = get();
           const lastAction = state.undoStack.pop();
-          
+
           if (lastAction) {
-            set((draft) => {
+            set(draft => {
               draft.redoStack.push(lastAction);
               // Implémenter la logique d'undo spécifique selon l'action
             });
@@ -720,9 +713,9 @@ export const useProjectStore = create<ProjectStore>()(
         redo: () => {
           const state = get();
           const nextAction = state.redoStack.pop();
-          
+
           if (nextAction) {
-            set((draft) => {
+            set(draft => {
               draft.undoStack.push(nextAction);
               // Implémenter la logique de redo spécifique selon l'action
             });
@@ -732,19 +725,19 @@ export const useProjectStore = create<ProjectStore>()(
         },
 
         clearHistory: () =>
-          set((state) => {
+          set(state => {
             state.undoStack = [];
             state.redoStack = [];
           }),
 
         // Utility methods
         markDirty: () =>
-          set((state) => {
+          set(state => {
             state.isDirty = true;
           }),
 
         markClean: () =>
-          set((state) => {
+          set(state => {
             state.isDirty = false;
             state.lastSaved = new Date();
           }),
@@ -756,16 +749,15 @@ export const useProjectStore = create<ProjectStore>()(
             forms: state.forms,
             modules: state.modules,
             classModules: state.classModules,
-            userControls: state.userControls
+            userControls: state.userControls,
           }).length;
-          
+
           return size;
         },
 
         exportProject: async (format: 'vbp' | 'json' | 'zip') => {
           const state = get();
-          
-          
+
           const projectData = {
             metadata: state.metadata,
             forms: state.forms,
@@ -773,36 +765,35 @@ export const useProjectStore = create<ProjectStore>()(
             classModules: state.classModules,
             userControls: state.userControls,
             references: state.references,
-            components: state.components
+            components: state.components,
           };
-          
+
           if (format === 'json') {
             const jsonString = JSON.stringify(projectData, null, 2);
             return new Blob([jsonString], { type: 'application/json' });
           }
-          
+
           // Pour VBP et ZIP, implémenter la logique de conversion
           return new Blob(['Not implemented yet'], { type: 'text/plain' });
         },
 
         importProject: async (file: File) => {
           try {
-            
             const text = await file.text();
             const projectData = JSON.parse(text);
-            
+
             get().loadProject(projectData);
-            
+
             return true;
           } catch (error) {
             console.error('❌ Error importing project:', error);
             return false;
           }
-        }
+        },
       })),
       {
         name: 'project-store',
-        version: 1
+        version: 1,
       }
     )
   )
@@ -815,31 +806,30 @@ export const projectSelectors = {
     const { forms, activeFormId } = useProjectStore.getState();
     return forms.find(f => f.id === activeFormId) || null;
   },
-  
+
   getActiveModule: () => {
     const { modules, classModules, userControls, activeModuleId } = useProjectStore.getState();
     if (!activeModuleId) return null;
-    
-    return [...modules, ...classModules, ...userControls].find(m => m.id === activeModuleId) || null;
+
+    return (
+      [...modules, ...classModules, ...userControls].find(m => m.id === activeModuleId) || null
+    );
   },
-  
+
   // Sélecteurs de métadonnées
   getProjectInfo: () => {
     const { metadata, isDirty, lastSaved } = useProjectStore.getState();
     return { metadata, isDirty, lastSaved };
   },
-  
+
   // Sélecteurs de listes
   getAllForms: () => useProjectStore.getState().forms,
   getAllModules: () => {
     const { modules, classModules, userControls } = useProjectStore.getState();
     return [...modules, ...classModules, ...userControls];
   },
-  
-  getEnabledReferences: () => 
-    useProjectStore.getState().references.filter(ref => ref.checked),
-  
-  getSelectedComponents: () => 
-    useProjectStore.getState().components.filter(comp => comp.selected)
-};
 
+  getEnabledReferences: () => useProjectStore.getState().references.filter(ref => ref.checked),
+
+  getSelectedComponents: () => useProjectStore.getState().components.filter(comp => comp.selected),
+};

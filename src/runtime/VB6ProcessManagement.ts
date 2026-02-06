@@ -9,24 +9,24 @@ export const PROCESS_CONSTANTS = {
   CREATE_NEW_CONSOLE: 0x00000010,
   CREATE_NO_WINDOW: 0x08000000,
   DETACHED_PROCESS: 0x00000008,
-  
+
   // Priority classes
   IDLE_PRIORITY_CLASS: 0x00000040,
   NORMAL_PRIORITY_CLASS: 0x00000020,
   HIGH_PRIORITY_CLASS: 0x00000080,
   REALTIME_PRIORITY_CLASS: 0x00000100,
-  
+
   // Wait constants
   WAIT_ABANDONED: 0x00000080,
   WAIT_OBJECT_0: 0x00000000,
   WAIT_TIMEOUT: 0x00000102,
-  INFINITE: 0xFFFFFFFF,
-  
+  INFINITE: 0xffffffff,
+
   // System metrics
   SM_CPROCESSORS: 91,
   SM_CXSCREEN: 0,
   SM_CYSCREEN: 1,
-  
+
   // Memory status
   GMEM_FIXED: 0x0000,
   GMEM_MOVEABLE: 0x0002,
@@ -38,14 +38,14 @@ export const PROCESS_CONSTANTS = {
   GMEM_NOT_BANKED: 0x1000,
   GMEM_SHARE: 0x2000,
   GMEM_DDESHARE: 0x2000,
-  
+
   // File attributes for process files
   FILE_ATTRIBUTE_READONLY: 0x00000001,
   FILE_ATTRIBUTE_HIDDEN: 0x00000002,
   FILE_ATTRIBUTE_SYSTEM: 0x00000004,
   FILE_ATTRIBUTE_DIRECTORY: 0x00000010,
   FILE_ATTRIBUTE_ARCHIVE: 0x00000020,
-  FILE_ATTRIBUTE_NORMAL: 0x00000080
+  FILE_ATTRIBUTE_NORMAL: 0x00000080,
 };
 
 // Process information structure
@@ -93,14 +93,14 @@ class ProcessRegistry {
   private processes: Map<number, ProcessInfo> = new Map();
   private nextProcessId: number = 1000;
   private intervals: Map<number, NodeJS.Timeout> = new Map();
-  
+
   static getInstance(): ProcessRegistry {
     if (!ProcessRegistry.instance) {
       ProcessRegistry.instance = new ProcessRegistry();
     }
     return ProcessRegistry.instance;
   }
-  
+
   createProcess(commandLine: string, workingDirectory?: string, priority?: number): number {
     const processId = this.nextProcessId++;
     const processInfo: ProcessInfo = {
@@ -110,84 +110,80 @@ class ProcessRegistry {
       workingDirectory: workingDirectory || '/virtual',
       creationTime: new Date(),
       priority: priority || PROCESS_CONSTANTS.NORMAL_PRIORITY_CLASS,
-      state: 'running'
+      state: 'running',
     };
-    
+
     this.processes.set(processId, processInfo);
-    
+
     // Simulate process lifecycle
     const interval = setInterval(() => {
       const process = this.processes.get(processId);
-      if (process && Math.random() < 0.001) { // 0.1% chance per check to terminate
+      if (process && Math.random() < 0.001) {
+        // 0.1% chance per check to terminate
         this.terminateProcess(processId, Math.floor(Math.random() * 256));
       }
     }, 1000);
-    
+
     this.intervals.set(processId, interval);
-    
-    console.log(`Process created: ${processInfo.processName} (PID: ${processId})`);
+
     return processId;
   }
-  
+
   private extractProcessName(commandLine: string): string {
     const parts = commandLine.split(' ');
     const executable = parts[0];
     const lastSlash = Math.max(executable.lastIndexOf('/'), executable.lastIndexOf('\\'));
     return lastSlash >= 0 ? executable.substring(lastSlash + 1) : executable;
   }
-  
+
   getProcess(processId: number): ProcessInfo | null {
     return this.processes.get(processId) || null;
   }
-  
+
   getAllProcesses(): ProcessInfo[] {
     return Array.from(this.processes.values());
   }
-  
+
   terminateProcess(processId: number, exitCode: number = 0): boolean {
     const process = this.processes.get(processId);
     if (!process) return false;
-    
+
     process.state = 'terminated';
     process.exitCode = exitCode;
-    
+
     const interval = this.intervals.get(processId);
     if (interval) {
       clearInterval(interval);
       this.intervals.delete(processId);
     }
-    
-    console.log(`Process terminated: ${process.processName} (PID: ${processId}, Exit Code: ${exitCode})`);
+
     return true;
   }
-  
+
   suspendProcess(processId: number): boolean {
     const process = this.processes.get(processId);
     if (!process || process.state !== 'running') return false;
-    
+
     process.state = 'suspended';
-    console.log(`Process suspended: ${process.processName} (PID: ${processId})`);
     return true;
   }
-  
+
   resumeProcess(processId: number): boolean {
     const process = this.processes.get(processId);
     if (!process || process.state !== 'suspended') return false;
-    
+
     process.state = 'running';
-    console.log(`Process resumed: ${process.processName} (PID: ${processId})`);
     return true;
   }
-  
+
   setProcessPriority(processId: number, priority: number): boolean {
     const process = this.processes.get(processId);
     if (!process) return false;
-    
+
     process.priority = priority;
-    console.log(`Process priority changed: ${process.processName} (PID: ${processId}, Priority: ${priority})`);
     return true;
   }
-  
+
   cleanup(): void {
     this.intervals.forEach(interval => clearInterval(interval));
     this.intervals.clear();
@@ -203,24 +199,31 @@ let systemInfoCache: SystemInfo | null = null;
 /**
  * Create a new process (VB6 CreateProcess equivalent)
  */
+interface ProcessInformation {
+  hProcess?: number;
+  hThread?: number;
+  dwProcessId?: number;
+  dwThreadId?: number;
+}
+
 export function CreateProcess(
   applicationName: string | null,
   commandLine: string,
-  processAttributes: any = null,
-  threadAttributes: any = null,
+  processAttributes: unknown = null,
+  threadAttributes: unknown = null,
   inheritHandles: boolean = false,
   creationFlags: number = 0,
-  environment: any = null,
+  environment: unknown = null,
   currentDirectory: string | null = null,
-  startupInfo: any = null,
-  processInformation: any = null
+  startupInfo: unknown = null,
+  processInformation: ProcessInformation | null = null
 ): boolean {
   try {
     const actualCommandLine = applicationName || commandLine;
     const workingDir = currentDirectory || '/virtual';
-    
+
     const processId = processRegistry.createProcess(actualCommandLine, workingDir);
-    
+
     // Simulate process information structure
     if (processInformation) {
       processInformation.hProcess = processId;
@@ -228,7 +231,7 @@ export function CreateProcess(
       processInformation.dwProcessId = processId;
       processInformation.dwThreadId = processId + 10000;
     }
-    
+
     return true;
   } catch (error) {
     console.error('CreateProcess failed:', error);
@@ -250,19 +253,18 @@ export function ShellExecute(
   try {
     const commandLine = `${file} ${parameters}`.trim();
     const processId = processRegistry.createProcess(commandLine, directory || '/virtual');
-    
+
     // Simulate opening URLs in browser
     if (operation === 'open' && (file.startsWith('http://') || file.startsWith('https://'))) {
       window.open(file, '_blank');
       return processId;
     }
-    
+
     // Simulate opening files
     if (operation === 'open') {
-      console.log(`Opening file: ${file}`);
       return processId;
     }
-    
+
     return processId;
   } catch (error) {
     console.error('ShellExecute failed:', error);
@@ -283,26 +285,29 @@ export function TerminateProcess(processHandle: number, exitCode: number = 0): b
 export function GetExitCodeProcess(processHandle: number): number | null {
   const process = processRegistry.getProcess(processHandle);
   if (!process) return null;
-  
-  return process.state === 'terminated' ? (process.exitCode || 0) : 259; // STILL_ACTIVE
+
+  return process.state === 'terminated' ? process.exitCode || 0 : 259; // STILL_ACTIVE
 }
 
 /**
  * Wait for process to complete
  */
-export function WaitForSingleObject(handle: number, timeout: number = PROCESS_CONSTANTS.INFINITE): Promise<number> {
-  return new Promise((resolve) => {
+export function WaitForSingleObject(
+  handle: number,
+  timeout: number = PROCESS_CONSTANTS.INFINITE
+): Promise<number> {
+  return new Promise(resolve => {
     const process = processRegistry.getProcess(handle);
     if (!process) {
       resolve(PROCESS_CONSTANTS.WAIT_ABANDONED);
       return;
     }
-    
+
     if (process.state === 'terminated') {
       resolve(PROCESS_CONSTANTS.WAIT_OBJECT_0);
       return;
     }
-    
+
     const startTime = Date.now();
     const checkProcess = () => {
       const currentProcess = processRegistry.getProcess(handle);
@@ -310,15 +315,15 @@ export function WaitForSingleObject(handle: number, timeout: number = PROCESS_CO
         resolve(PROCESS_CONSTANTS.WAIT_OBJECT_0);
         return;
       }
-      
+
       if (timeout !== PROCESS_CONSTANTS.INFINITE && Date.now() - startTime >= timeout) {
         resolve(PROCESS_CONSTANTS.WAIT_TIMEOUT);
         return;
       }
-      
+
       setTimeout(checkProcess, 100);
     };
-    
+
     checkProcess();
   });
 }
@@ -334,9 +339,9 @@ export function EnumProcesses(): ProcessInfo[] {
  * Find process by name
  */
 export function FindProcess(processName: string): ProcessInfo[] {
-  return processRegistry.getAllProcesses().filter(p => 
-    p.processName.toLowerCase().includes(processName.toLowerCase())
-  );
+  return processRegistry
+    .getAllProcesses()
+    .filter(p => p.processName.toLowerCase().includes(processName.toLowerCase()));
 }
 
 /**
@@ -354,8 +359,12 @@ export function GetSystemInfo(): SystemInfo {
   if (systemInfoCache) {
     return systemInfoCache;
   }
-  
-  const nav = navigator as any;
+
+  interface ExtendedNavigator extends Navigator {
+    deviceMemory?: number;
+  }
+
+  const nav = navigator as ExtendedNavigator;
   const systemInfo: SystemInfo = {
     computerName: window.location.hostname || 'VB6-BROWSER',
     userName: 'User',
@@ -367,9 +376,9 @@ export function GetSystemInfo(): SystemInfo {
     pageFileSize: 8 * 1024 * 1024 * 1024, // 8GB simulated
     systemDirectory: '/virtual/Windows/System32',
     windowsDirectory: '/virtual/Windows',
-    tempDirectory: '/virtual/temp'
+    tempDirectory: '/virtual/temp',
   };
-  
+
   systemInfoCache = systemInfo;
   return systemInfo;
 }
@@ -379,7 +388,7 @@ export function GetSystemInfo(): SystemInfo {
  */
 export function GlobalMemoryStatus(): MemoryStatus {
   const systemInfo = GetSystemInfo();
-  
+
   return {
     totalPhysical: systemInfo.totalMemory,
     availablePhysical: systemInfo.availableMemory,
@@ -387,7 +396,9 @@ export function GlobalMemoryStatus(): MemoryStatus {
     availablePageFile: systemInfo.pageFileSize / 2,
     totalVirtual: 2 * 1024 * 1024 * 1024, // 2GB virtual
     availableVirtual: 1 * 1024 * 1024 * 1024, // 1GB available
-    memoryLoad: Math.floor(((systemInfo.totalMemory - systemInfo.availableMemory) / systemInfo.totalMemory) * 100)
+    memoryLoad: Math.floor(
+      ((systemInfo.totalMemory - systemInfo.availableMemory) / systemInfo.totalMemory) * 100
+    ),
   };
 }
 
@@ -397,12 +408,12 @@ export function GlobalMemoryStatus(): MemoryStatus {
 export function GlobalAlloc(flags: number, size: number): ArrayBuffer | null {
   try {
     const buffer = new ArrayBuffer(size);
-    
+
     if (flags & PROCESS_CONSTANTS.GMEM_ZEROINIT) {
       const view = new Uint8Array(buffer);
       view.fill(0);
     }
-    
+
     return buffer;
   } catch (error) {
     console.error('GlobalAlloc failed:', error);
@@ -541,7 +552,7 @@ export function Sleep(milliseconds: number): Promise<void> {
  * Get tick count
  */
 export function GetTickCount(): number {
-  return Date.now() & 0xFFFFFFFF; // Return as 32-bit value like Windows
+  return Date.now() & 0xffffffff; // Return as 32-bit value like Windows
 }
 
 /**
@@ -563,13 +574,13 @@ export const VB6ProcessManagement = {
   TerminateProcess,
   GetExitCodeProcess,
   WaitForSingleObject,
-  
+
   // Process enumeration
   EnumProcesses,
   FindProcess,
   GetCurrentProcessId,
   GetCurrentThreadId,
-  
+
   // System information
   GetSystemInfo,
   GetSystemMetrics,
@@ -577,7 +588,7 @@ export const VB6ProcessManagement = {
   GetWindowsDirectoryA,
   GetSystemDirectoryA,
   GetTempPathA,
-  
+
   // Memory management
   GlobalMemoryStatus,
   GlobalAlloc,
@@ -585,35 +596,60 @@ export const VB6ProcessManagement = {
   GlobalSize,
   GlobalLock,
   GlobalUnlock,
-  
+
   // Process priority
   SetPriorityClass,
   GetPriorityClass,
-  
+
   // Thread management
   SuspendThread,
   ResumeThread,
-  
+
   // Timing functions
   Sleep,
   GetTickCount,
   QueryPerformanceCounter,
   QueryPerformanceFrequency,
-  
+
   // Constants
   PROCESS_CONSTANTS,
-  
+
   // Registry access
-  ProcessRegistry: processRegistry
+  ProcessRegistry: processRegistry,
 };
 
 // Make functions globally available
 if (typeof window !== 'undefined') {
-  const globalAny = window as any;
-  globalAny.VB6ProcessManagement = VB6ProcessManagement;
-  
+  interface WindowWithVB6 extends Window {
+    VB6ProcessManagement?: typeof VB6ProcessManagement;
+    CreateProcess?: typeof CreateProcess;
+    ShellExecute?: typeof ShellExecute;
+    TerminateProcess?: typeof TerminateProcess;
+    GetExitCodeProcess?: typeof GetExitCodeProcess;
+    WaitForSingleObject?: typeof WaitForSingleObject;
+    EnumProcesses?: typeof EnumProcesses;
+    FindProcess?: typeof FindProcess;
+    GetCurrentProcessId?: typeof GetCurrentProcessId;
+    GetSystemInfo?: typeof GetSystemInfo;
+    GlobalMemoryStatus?: typeof GlobalMemoryStatus;
+    GlobalAlloc?: typeof GlobalAlloc;
+    GlobalFree?: typeof GlobalFree;
+    GetSystemMetrics?: typeof GetSystemMetrics;
+    GetVersion?: typeof GetVersion;
+    GetWindowsDirectory?: typeof GetWindowsDirectoryA;
+    GetSystemDirectory?: typeof GetSystemDirectoryA;
+    GetTempPath?: typeof GetTempPathA;
+    SetPriorityClass?: typeof SetPriorityClass;
+    GetPriorityClass?: typeof GetPriorityClass;
+    Sleep?: typeof Sleep;
+    GetTickCount?: typeof GetTickCount;
+  }
+
+  const globalWindow = window as WindowWithVB6;
+  globalWindow.VB6ProcessManagement = VB6ProcessManagement;
+
   // Expose individual functions globally for VB6 compatibility
-  Object.assign(globalAny, {
+  Object.assign(globalWindow, {
     CreateProcess,
     ShellExecute,
     TerminateProcess,
@@ -634,18 +670,18 @@ if (typeof window !== 'undefined') {
     SetPriorityClass,
     GetPriorityClass,
     Sleep,
-    GetTickCount
+    GetTickCount,
   });
-  
+
   // EVENT HANDLING BUG FIX: Track beforeunload listener for cleanup
   const beforeUnloadHandler = () => {
     processRegistry.cleanup();
   };
-  
+
   window.addEventListener('beforeunload', beforeUnloadHandler);
-  
+
   // Store reference for cleanup
-  (VB6ProcessManagement as any)._beforeUnloadHandler = beforeUnloadHandler;
+  (VB6ProcessManagement as unknown as Record<string, unknown>)._beforeUnloadHandler = beforeUnloadHandler;
 }
 
 /**
@@ -653,10 +689,11 @@ if (typeof window !== 'undefined') {
  * Call this when the module is no longer needed
  */
 export function disposeVB6ProcessManagement(): void {
-  const handler = (VB6ProcessManagement as any)._beforeUnloadHandler;
-  if (handler && typeof window !== 'undefined') {
+  const management = VB6ProcessManagement as unknown as Record<string, unknown>;
+  const handler = management._beforeUnloadHandler;
+  if (typeof handler === 'function' && typeof window !== 'undefined') {
     window.removeEventListener('beforeunload', handler);
-    (VB6ProcessManagement as any)._beforeUnloadHandler = null;
+    management._beforeUnloadHandler = null;
   }
 }
 

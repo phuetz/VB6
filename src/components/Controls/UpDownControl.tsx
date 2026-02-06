@@ -1,6 +1,6 @@
 /**
  * VB6 UpDown (Spin Button) Control Implementation
- * 
+ *
  * Spinner control with full VB6 compatibility
  */
 
@@ -13,35 +13,35 @@ export interface UpDownControl {
   top: number;
   width: number;
   height: number;
-  
+
   // Value Properties
   min: number;
   max: number;
   value: number;
   increment: number;
-  
+
   // Behavior
   wrap: boolean; // Wrap around when reaching min/max
   autoRepeat: boolean; // Auto-repeat when holding button
-  
+
   // Buddy Control
   buddyControl: string; // Name of associated control
   buddyProperty: string; // Property to update in buddy
-  
+
   // Appearance
   orientation: number; // 0=Vertical, 1=Horizontal
   alignment: number; // 0=Right/Bottom, 1=Left/Top
-  
+
   // Behavior
   enabled: boolean;
   visible: boolean;
-  
+
   // Appearance
   appearance: number; // 0=Flat, 1=3D
   borderStyle: number; // 0=None, 1=Fixed Single
   mousePointer: number;
   tag: string;
-  
+
   // Events
   onChange?: string;
   onUpClick?: string;
@@ -59,7 +59,7 @@ export const UpDownControl: React.FC<UpDownControlProps> = ({
   control,
   isDesignMode = false,
   onPropertyChange,
-  onEvent
+  onEvent,
 }) => {
   const {
     name,
@@ -82,7 +82,7 @@ export const UpDownControl: React.FC<UpDownControlProps> = ({
     appearance = 1,
     borderStyle = 1,
     mousePointer = 0,
-    tag = ''
+    tag = '',
   } = control;
 
   const [currentValue, setCurrentValue] = useState(value);
@@ -96,40 +96,42 @@ export const UpDownControl: React.FC<UpDownControlProps> = ({
     setCurrentValue(value);
   }, [value]);
 
-  const handleValueChange = useCallback((newValue: number, direction: 'up' | 'down') => {
-    let clampedValue = newValue;
-    
-    if (wrap) {
-      // Wrap around
-      if (newValue > max) {
-        clampedValue = min;
-      } else if (newValue < min) {
-        clampedValue = max;
-      }
-    } else {
-      // Clamp to range
-      clampedValue = Math.max(min, Math.min(max, newValue));
-    }
-    
-    if (clampedValue !== currentValue) {
-      setCurrentValue(clampedValue);
-      onPropertyChange?.('value', clampedValue);
-      
-      // Update buddy control if specified
-      if (buddyControl && buddyProperty) {
-        // In a real implementation, this would find and update the buddy control
-        console.log(`Updating ${buddyControl}.${buddyProperty} = ${clampedValue}`);
-      }
-      
-      // Fire events
-      onEvent?.('Change');
-      if (direction === 'up') {
-        onEvent?.('UpClick');
+  const handleValueChange = useCallback(
+    (newValue: number, direction: 'up' | 'down') => {
+      let clampedValue = newValue;
+
+      if (wrap) {
+        // Wrap around
+        if (newValue > max) {
+          clampedValue = min;
+        } else if (newValue < min) {
+          clampedValue = max;
+        }
       } else {
-        onEvent?.('DownClick');
+        // Clamp to range
+        clampedValue = Math.max(min, Math.min(max, newValue));
       }
-    }
-  }, [currentValue, min, max, wrap, buddyControl, buddyProperty, onPropertyChange, onEvent]);
+
+      if (clampedValue !== currentValue) {
+        setCurrentValue(clampedValue);
+        onPropertyChange?.('value', clampedValue);
+
+        // Update buddy control if specified
+        if (buddyControl && buddyProperty) {
+          // In a real implementation, this would find and update the buddy control
+        }
+
+        // Fire events
+        onEvent?.('Change');
+        if (direction === 'up') {
+          onEvent?.('UpClick');
+        } else {
+          onEvent?.('DownClick');
+        }
+      }
+    },
+    [currentValue, min, max, wrap, buddyControl, buddyProperty, onPropertyChange, onEvent]
+  );
 
   const handleUpClick = useCallback(() => {
     if (!enabled) return;
@@ -141,21 +143,24 @@ export const UpDownControl: React.FC<UpDownControlProps> = ({
     handleValueChange(currentValue - increment, 'down');
   }, [enabled, currentValue, increment, handleValueChange]);
 
-  const startAutoRepeat = useCallback((action: () => void) => {
-    if (!autoRepeat || !enabled) return;
-    
-    // Clear any existing timers
-    if (autoRepeatTimeout) clearTimeout(autoRepeatTimeout);
-    if (autoRepeatInterval) clearInterval(autoRepeatInterval);
-    
-    // Start with a delay, then repeat
-    const timeout = setTimeout(() => {
-      const interval = setInterval(action, 100); // Repeat every 100ms
-      setAutoRepeatInterval(interval);
-    }, 500); // Initial delay of 500ms
-    
-    setAutoRepeatTimeout(timeout);
-  }, [autoRepeat, enabled, autoRepeatTimeout, autoRepeatInterval]);
+  const startAutoRepeat = useCallback(
+    (action: () => void) => {
+      if (!autoRepeat || !enabled) return;
+
+      // Clear any existing timers
+      if (autoRepeatTimeout) clearTimeout(autoRepeatTimeout);
+      if (autoRepeatInterval) clearInterval(autoRepeatInterval);
+
+      // Start with a delay, then repeat
+      const timeout = setTimeout(() => {
+        const interval = setInterval(action, 100); // Repeat every 100ms
+        setAutoRepeatInterval(interval);
+      }, 500); // Initial delay of 500ms
+
+      setAutoRepeatTimeout(timeout);
+    },
+    [autoRepeat, enabled, autoRepeatTimeout, autoRepeatInterval]
+  );
 
   const stopAutoRepeat = useCallback(() => {
     if (autoRepeatTimeout) {
@@ -168,21 +173,27 @@ export const UpDownControl: React.FC<UpDownControlProps> = ({
     }
   }, [autoRepeatTimeout, autoRepeatInterval]);
 
-  const handleUpMouseDown = useCallback((event: React.MouseEvent) => {
-    if (!enabled) return;
-    event.preventDefault();
-    setIsUpPressed(true);
-    handleUpClick();
-    startAutoRepeat(handleUpClick);
-  }, [enabled, handleUpClick, startAutoRepeat]);
+  const handleUpMouseDown = useCallback(
+    (event: React.MouseEvent) => {
+      if (!enabled) return;
+      event.preventDefault();
+      setIsUpPressed(true);
+      handleUpClick();
+      startAutoRepeat(handleUpClick);
+    },
+    [enabled, handleUpClick, startAutoRepeat]
+  );
 
-  const handleDownMouseDown = useCallback((event: React.MouseEvent) => {
-    if (!enabled) return;
-    event.preventDefault();
-    setIsDownPressed(true);
-    handleDownClick();
-    startAutoRepeat(handleDownClick);
-  }, [enabled, handleDownClick, startAutoRepeat]);
+  const handleDownMouseDown = useCallback(
+    (event: React.MouseEvent) => {
+      if (!enabled) return;
+      event.preventDefault();
+      setIsDownPressed(true);
+      handleDownClick();
+      startAutoRepeat(handleDownClick);
+    },
+    [enabled, handleDownClick, startAutoRepeat]
+  );
 
   const handleMouseUp = useCallback(() => {
     setIsUpPressed(false);
@@ -197,20 +208,23 @@ export const UpDownControl: React.FC<UpDownControlProps> = ({
   }, [stopAutoRepeat]);
 
   // Keyboard handling
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-    if (!enabled) return;
-    
-    switch (event.key) {
-      case 'ArrowUp':
-        event.preventDefault();
-        handleUpClick();
-        break;
-      case 'ArrowDown':
-        event.preventDefault();
-        handleDownClick();
-        break;
-    }
-  }, [enabled, handleUpClick, handleDownClick]);
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (!enabled) return;
+
+      switch (event.key) {
+        case 'ArrowUp':
+          event.preventDefault();
+          handleUpClick();
+          break;
+        case 'ArrowDown':
+          event.preventDefault();
+          handleDownClick();
+          break;
+      }
+    },
+    [enabled, handleUpClick, handleDownClick]
+  );
 
   // Cleanup timers on unmount
   useEffect(() => {
@@ -230,9 +244,21 @@ export const UpDownControl: React.FC<UpDownControlProps> = ({
 
   const getCursorStyle = () => {
     const cursors = [
-      'default', 'auto', 'crosshair', 'text', 'wait', 'help',
-      'pointer', 'not-allowed', 'move', 'col-resize', 'row-resize',
-      'n-resize', 's-resize', 'e-resize', 'w-resize'
+      'default',
+      'auto',
+      'crosshair',
+      'text',
+      'wait',
+      'help',
+      'pointer',
+      'not-allowed',
+      'move',
+      'col-resize',
+      'row-resize',
+      'n-resize',
+      's-resize',
+      'e-resize',
+      'w-resize',
     ];
     return cursors[mousePointer] || 'default';
   };
@@ -250,7 +276,7 @@ export const UpDownControl: React.FC<UpDownControlProps> = ({
     opacity: enabled ? 1 : 0.5,
     outline: isDesignMode ? '1px dotted #333' : 'none',
     display: 'flex',
-    flexDirection: isVertical ? 'column' : 'row' as const
+    flexDirection: isVertical ? 'column' : ('row' as const),
   };
 
   const buttonStyle = {
@@ -264,20 +290,20 @@ export const UpDownControl: React.FC<UpDownControlProps> = ({
     fontSize: '8px',
     userSelect: 'none' as const,
     ':hover': {
-      background: enabled ? '#f0f0f0' : '#e0e0e0'
-    }
+      background: enabled ? '#f0f0f0' : '#e0e0e0',
+    },
   };
 
   const upButtonStyle = {
     ...buttonStyle,
     background: isUpPressed ? '#d0d0d0' : '#e0e0e0',
     borderBottom: isVertical ? '1px solid #808080' : 'none',
-    borderRight: !isVertical ? '1px solid #808080' : 'none'
+    borderRight: !isVertical ? '1px solid #808080' : 'none',
   };
 
   const downButtonStyle = {
     ...buttonStyle,
-    background: isDownPressed ? '#d0d0d0' : '#e0e0e0'
+    background: isDownPressed ? '#d0d0d0' : '#e0e0e0',
   };
 
   return (
@@ -323,13 +349,10 @@ export const UpDownControl: React.FC<UpDownControlProps> = ({
             padding: '2px',
             border: '1px solid #ccc',
             whiteSpace: 'nowrap',
-            zIndex: 1000
+            zIndex: 1000,
           }}
         >
-          {name} ({currentValue})
-          {buddyControl && (
-            <div>Buddy: {buddyControl}</div>
-          )}
+          {name} ({currentValue}){buddyControl && <div>Buddy: {buddyControl}</div>}
         </div>
       )}
     </div>

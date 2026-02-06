@@ -21,7 +21,7 @@ export enum RDOEnvironmentMode {
   rdModeReadOnly = 1,
   rdModeShareDenyNone = 2,
   rdModeShareDenyWrite = 3,
-  rdModeShareExclusive = 4
+  rdModeShareExclusive = 4,
 }
 
 // Cursor types
@@ -29,7 +29,7 @@ export enum RDOCursorType {
   rdOpenForwardOnly = 0,
   rdOpenKeyset = 1,
   rdOpenDynamic = 2,
-  rdOpenStatic = 3
+  rdOpenStatic = 3,
 }
 
 // Lock types
@@ -38,7 +38,7 @@ export enum RDOLockType {
   rdConcurLock = 2,
   rdConcurRowVer = 3,
   rdConcurValues = 4,
-  rdConcurBatch = 5
+  rdConcurBatch = 5,
 }
 
 // Result set types
@@ -46,13 +46,13 @@ export enum RDOResultsetType {
   rdOpenForwardOnly = 0,
   rdOpenKeyset = 1,
   rdOpenDynamic = 2,
-  rdOpenStatic = 3
+  rdOpenStatic = 3,
 }
 
 // Connection states
 export enum RDOConnectionState {
   rdStateClosed = 0,
-  rdStateOpen = 1
+  rdStateOpen = 1,
 }
 
 // Transaction states
@@ -60,14 +60,14 @@ export enum RDOTransactionState {
   rdTxnNone = 0,
   rdTxnInProgress = 1,
   rdTxnCommitted = 2,
-  rdTxnAborted = 3
+  rdTxnAborted = 3,
 }
 
 // Query types
 export enum RDOQueryType {
   rdQuerySelect = 0,
   rdQueryAction = 1,
-  rdQueryProcedures = 2
+  rdQueryProcedures = 2,
 }
 
 export interface RDOConnection {
@@ -135,7 +135,7 @@ export const MSRDCControl = forwardRef<HTMLDivElement, MSRDCControlProps>(
       stillConnecting: false,
       stillExecuting: false,
       rowsAffected: 0,
-      lastQueryResults: []
+      lastQueryResults: [],
     });
 
     const [resultset, setResultset] = useState<RDOResultset | null>(null);
@@ -144,7 +144,7 @@ export const MSRDCControl = forwardRef<HTMLDivElement, MSRDCControlProps>(
     const [error, setError] = useState<string | null>(null);
     const [sql, setSql] = useState(control.sql || '');
     const [caption, setCaption] = useState(control.caption || 'Remote Data');
-    
+
     // Sample data for demonstration
     const sampleDataRef = useRef<any[]>([]);
 
@@ -158,13 +158,13 @@ export const MSRDCControl = forwardRef<HTMLDivElement, MSRDCControlProps>(
     const establishConnection = async () => {
       try {
         setConnection(prev => ({ ...prev, stillConnecting: true }));
-        
+
         // Simulate connection establishment
         await new Promise(resolve => setTimeout(resolve, 500));
-        
+
         setIsConnected(true);
         setConnection(prev => ({ ...prev, stillConnecting: false }));
-        
+
         // Auto-execute SQL if provided
         if (sql) {
           await executeQuery(sql);
@@ -183,31 +183,32 @@ export const MSRDCControl = forwardRef<HTMLDivElement, MSRDCControlProps>(
 
       try {
         setConnection(prev => ({ ...prev, stillExecuting: true }));
-        
+
         // Simulate query execution
         await new Promise(resolve => setTimeout(resolve, 300));
-        
+
         // Generate sample data based on query
         const data = generateSampleData(query);
         sampleDataRef.current = data;
-        
+
         // Create resultset
-        const fields: RDOField[] = data.length > 0 
-          ? Object.keys(data[0]).map((key, index) => ({
-              name: key,
-              value: data[0][key],
-              type: typeof data[0][key] === 'number' ? 3 : 200, // adInteger : adVarChar
-              size: 255,
-              sourceColumn: key,
-              sourceTable: 'RemoteTable',
-              required: false,
-              allowZeroLength: true,
-              attributes: 0,
-              ordinalPosition: index,
-              originalValue: data[0][key],
-              status: 0
-            }))
-          : [];
+        const fields: RDOField[] =
+          data.length > 0
+            ? Object.keys(data[0]).map((key, index) => ({
+                name: key,
+                value: data[0][key],
+                type: typeof data[0][key] === 'number' ? 3 : 200, // adInteger : adVarChar
+                size: 255,
+                sourceColumn: key,
+                sourceTable: 'RemoteTable',
+                required: false,
+                allowZeroLength: true,
+                attributes: 0,
+                ordinalPosition: index,
+                originalValue: data[0][key],
+                status: 0,
+              }))
+            : [];
 
         const newResultset: RDOResultset = {
           BOF: data.length === 0,
@@ -229,18 +230,18 @@ export const MSRDCControl = forwardRef<HTMLDivElement, MSRDCControlProps>(
           absolutePosition: data.length > 0 ? 1 : 0,
           batchCollisionCount: 0,
           batchCollisions: [],
-          batchSize: control.batchSize || 1
+          batchSize: control.batchSize || 1,
         };
 
         setResultset(newResultset);
         setCurrentRow(data.length > 0 ? 0 : -1);
-        setConnection(prev => ({ 
-          ...prev, 
+        setConnection(prev => ({
+          ...prev,
           stillExecuting: false,
           rowsAffected: data.length,
-          lastQueryResults: data
+          lastQueryResults: data,
         }));
-        
+
         onChange?.({ resultset: newResultset, data });
       } catch (err) {
         handleError(`Query execution failed: ${err}`);
@@ -251,37 +252,121 @@ export const MSRDCControl = forwardRef<HTMLDivElement, MSRDCControlProps>(
     const generateSampleData = (query: string): any[] => {
       // Generate sample data based on query pattern
       const upperQuery = query.toUpperCase();
-      
+
       if (upperQuery.includes('CUSTOMER')) {
         return [
-          { CustomerID: 1, CustomerName: 'Acme Corp', City: 'New York', Country: 'USA', Balance: 15000 },
-          { CustomerID: 2, CustomerName: 'Global Tech', City: 'London', Country: 'UK', Balance: 22000 },
-          { CustomerID: 3, CustomerName: 'Smart Systems', City: 'Tokyo', Country: 'Japan', Balance: 18500 },
-          { CustomerID: 4, CustomerName: 'Euro Logistics', City: 'Paris', Country: 'France', Balance: 31000 },
-          { CustomerID: 5, CustomerName: 'Pacific Trade', City: 'Sydney', Country: 'Australia', Balance: 27500 }
+          {
+            CustomerID: 1,
+            CustomerName: 'Acme Corp',
+            City: 'New York',
+            Country: 'USA',
+            Balance: 15000,
+          },
+          {
+            CustomerID: 2,
+            CustomerName: 'Global Tech',
+            City: 'London',
+            Country: 'UK',
+            Balance: 22000,
+          },
+          {
+            CustomerID: 3,
+            CustomerName: 'Smart Systems',
+            City: 'Tokyo',
+            Country: 'Japan',
+            Balance: 18500,
+          },
+          {
+            CustomerID: 4,
+            CustomerName: 'Euro Logistics',
+            City: 'Paris',
+            Country: 'France',
+            Balance: 31000,
+          },
+          {
+            CustomerID: 5,
+            CustomerName: 'Pacific Trade',
+            City: 'Sydney',
+            Country: 'Australia',
+            Balance: 27500,
+          },
         ];
       } else if (upperQuery.includes('ORDER')) {
         return [
-          { OrderID: 1001, CustomerID: 1, OrderDate: '2024-01-15', Amount: 5000, Status: 'Shipped' },
-          { OrderID: 1002, CustomerID: 2, OrderDate: '2024-01-18', Amount: 7500, Status: 'Processing' },
-          { OrderID: 1003, CustomerID: 1, OrderDate: '2024-01-20', Amount: 3200, Status: 'Delivered' },
-          { OrderID: 1004, CustomerID: 3, OrderDate: '2024-01-22', Amount: 9800, Status: 'Shipped' },
-          { OrderID: 1005, CustomerID: 4, OrderDate: '2024-01-25', Amount: 12000, Status: 'Pending' }
+          {
+            OrderID: 1001,
+            CustomerID: 1,
+            OrderDate: '2024-01-15',
+            Amount: 5000,
+            Status: 'Shipped',
+          },
+          {
+            OrderID: 1002,
+            CustomerID: 2,
+            OrderDate: '2024-01-18',
+            Amount: 7500,
+            Status: 'Processing',
+          },
+          {
+            OrderID: 1003,
+            CustomerID: 1,
+            OrderDate: '2024-01-20',
+            Amount: 3200,
+            Status: 'Delivered',
+          },
+          {
+            OrderID: 1004,
+            CustomerID: 3,
+            OrderDate: '2024-01-22',
+            Amount: 9800,
+            Status: 'Shipped',
+          },
+          {
+            OrderID: 1005,
+            CustomerID: 4,
+            OrderDate: '2024-01-25',
+            Amount: 12000,
+            Status: 'Pending',
+          },
         ];
       } else if (upperQuery.includes('PRODUCT')) {
         return [
-          { ProductID: 1, ProductName: 'Widget Pro', Category: 'Hardware', Price: 99.99, Stock: 150 },
-          { ProductID: 2, ProductName: 'Super Gadget', Category: 'Electronics', Price: 249.99, Stock: 75 },
+          {
+            ProductID: 1,
+            ProductName: 'Widget Pro',
+            Category: 'Hardware',
+            Price: 99.99,
+            Stock: 150,
+          },
+          {
+            ProductID: 2,
+            ProductName: 'Super Gadget',
+            Category: 'Electronics',
+            Price: 249.99,
+            Stock: 75,
+          },
           { ProductID: 3, ProductName: 'Mega Tool', Category: 'Tools', Price: 149.99, Stock: 200 },
-          { ProductID: 4, ProductName: 'Ultra Device', Category: 'Electronics', Price: 399.99, Stock: 50 },
-          { ProductID: 5, ProductName: 'Power Kit', Category: 'Hardware', Price: 179.99, Stock: 100 }
+          {
+            ProductID: 4,
+            ProductName: 'Ultra Device',
+            Category: 'Electronics',
+            Price: 399.99,
+            Stock: 50,
+          },
+          {
+            ProductID: 5,
+            ProductName: 'Power Kit',
+            Category: 'Hardware',
+            Price: 179.99,
+            Stock: 100,
+          },
         ];
       } else {
         // Generic sample data
         return [
           { ID: 1, Name: 'Remote Item 1', Value: 100, Status: 'Active' },
           { ID: 2, Name: 'Remote Item 2', Value: 200, Status: 'Active' },
-          { ID: 3, Name: 'Remote Item 3', Value: 300, Status: 'Inactive' }
+          { ID: 3, Name: 'Remote Item 3', Value: 300, Status: 'Inactive' },
         ];
       }
     };
@@ -294,46 +379,72 @@ export const MSRDCControl = forwardRef<HTMLDivElement, MSRDCControlProps>(
     // VB6 Methods implementation
     const vb6Methods = {
       // Connection properties
-      get Connect() { return connection.connect; },
+      get Connect() {
+        return connection.connect;
+      },
       set Connect(value: string) {
         setConnection(prev => ({ ...prev, connect: value }));
         control.connect = value;
       },
 
-      get CursorDriver() { return connection.cursorDriver; },
+      get CursorDriver() {
+        return connection.cursorDriver;
+      },
       set CursorDriver(value: number) {
         setConnection(prev => ({ ...prev, cursorDriver: value }));
       },
 
-      get LoginTimeout() { return connection.loginTimeout; },
+      get LoginTimeout() {
+        return connection.loginTimeout;
+      },
       set LoginTimeout(value: number) {
         setConnection(prev => ({ ...prev, loginTimeout: value }));
       },
 
-      get QueryTimeout() { return connection.queryTimeout; },
+      get QueryTimeout() {
+        return connection.queryTimeout;
+      },
       set QueryTimeout(value: number) {
         setConnection(prev => ({ ...prev, queryTimeout: value }));
       },
 
-      get StillConnecting() { return connection.stillConnecting; },
-      get StillExecuting() { return connection.stillExecuting; },
-      get RowsAffected() { return connection.rowsAffected; },
+      get StillConnecting() {
+        return connection.stillConnecting;
+      },
+      get StillExecuting() {
+        return connection.stillExecuting;
+      },
+      get RowsAffected() {
+        return connection.rowsAffected;
+      },
 
       // Resultset properties
-      get Resultset() { return resultset; },
-      get BOF() { return resultset?.BOF || true; },
-      get EOF() { return resultset?.EOF || true; },
-      get RecordCount() { return resultset?.rowCount || 0; },
+      get Resultset() {
+        return resultset;
+      },
+      get BOF() {
+        return resultset?.BOF || true;
+      },
+      get EOF() {
+        return resultset?.EOF || true;
+      },
+      get RecordCount() {
+        return resultset?.rowCount || 0;
+      },
 
       // SQL property
-      get SQL() { return sql; },
+      get SQL() {
+        return sql;
+      },
       set SQL(value: string) {
         setSql(value);
         control.sql = value;
       },
 
       // Caption property
-      get Caption() { return caption; },
+      get Caption() {
+        return caption;
+      },
       set Caption(value: string) {
         setCaption(value);
         control.caption = value;
@@ -369,9 +480,8 @@ export const MSRDCControl = forwardRef<HTMLDivElement, MSRDCControlProps>(
 
       UpdateRow: () => {
         if (!resultset || currentRow < 0) return;
-        
+
         // Update current row data
-        console.log('Updating row:', currentRow);
         onChange?.({ action: 'update', row: currentRow });
       },
 
@@ -382,7 +492,6 @@ export const MSRDCControl = forwardRef<HTMLDivElement, MSRDCControlProps>(
 
       CancelUpdate: () => {
         // Cancel pending updates
-        console.log('Update cancelled');
       },
 
       // Navigation methods
@@ -422,50 +531,49 @@ export const MSRDCControl = forwardRef<HTMLDivElement, MSRDCControlProps>(
 
       // Batch operations
       BatchUpdate: () => {
-        console.log('Performing batch update');
         onChange?.({ action: 'batchUpdate' });
       },
 
-      CancelBatch: () => {
-        console.log('Batch update cancelled');
-      },
+      CancelBatch: () => {},
 
       // Transaction methods
-      BeginTrans: () => {
-        console.log('Beginning transaction');
-      },
+      BeginTrans: () => {},
 
-      CommitTrans: () => {
-        console.log('Committing transaction');
-      },
+      CommitTrans: () => {},
 
-      RollbackTrans: () => {
-        console.log('Rolling back transaction');
-      }
+      RollbackTrans: () => {},
     };
 
     const updateResultsetPosition = (row: number) => {
       if (!resultset) return;
-      
-      setResultset(prev => prev ? {
-        ...prev,
-        BOF: row < 0,
-        EOF: row >= prev.rowCount,
-        absolutePosition: row + 1,
-        perCentPosition: prev.rowCount > 0 ? (row / prev.rowCount) * 100 : 0
-      } : null);
+
+      setResultset(prev =>
+        prev
+          ? {
+              ...prev,
+              BOF: row < 0,
+              EOF: row >= prev.rowCount,
+              absolutePosition: row + 1,
+              perCentPosition: prev.rowCount > 0 ? (row / prev.rowCount) * 100 : 0,
+            }
+          : null
+      );
 
       // Update field values
       if (sampleDataRef.current[row]) {
         const rowData = sampleDataRef.current[row];
-        setResultset(prev => prev ? {
-          ...prev,
-          fields: prev.fields.map(field => ({
-            ...field,
-            value: rowData[field.name],
-            originalValue: rowData[field.name]
-          }))
-        } : null);
+        setResultset(prev =>
+          prev
+            ? {
+                ...prev,
+                fields: prev.fields.map(field => ({
+                  ...field,
+                  value: rowData[field.name],
+                  originalValue: rowData[field.name],
+                })),
+              }
+            : null
+        );
       }
     };
 
@@ -496,7 +604,7 @@ export const MSRDCControl = forwardRef<HTMLDivElement, MSRDCControlProps>(
       fontSize: '8pt',
       cursor: isDesignMode ? 'default' : 'auto',
       opacity: control.visible !== false ? 1 : 0,
-      zIndex: control.zIndex || 'auto'
+      zIndex: control.zIndex || 'auto',
     };
 
     const buttonStyle: React.CSSProperties = {
@@ -510,7 +618,7 @@ export const MSRDCControl = forwardRef<HTMLDivElement, MSRDCControlProps>(
       justifyContent: 'center',
       fontSize: '12px',
       fontWeight: 'bold',
-      boxShadow: 'inset 1px 1px 0 #ffffff, inset -1px -1px 0 #808080'
+      boxShadow: 'inset 1px 1px 0 #ffffff, inset -1px -1px 0 #808080',
     };
 
     return (
@@ -523,29 +631,36 @@ export const MSRDCControl = forwardRef<HTMLDivElement, MSRDCControlProps>(
         data-control-name={control.name}
       >
         {/* Status/Caption area */}
-        <div style={{
-          flex: 1,
-          padding: '2px 4px',
-          backgroundColor: control.captionBackColor || '#000080',
-          color: control.captionForeColor || '#FFFFFF',
-          display: 'flex',
-          alignItems: 'center',
-          fontSize: '8pt'
-        }}>
-          {connection.stillConnecting ? 'Connecting...' :
-           connection.stillExecuting ? 'Executing...' :
-           error ? `Error: ${error}` :
-           caption}
+        <div
+          style={{
+            flex: 1,
+            padding: '2px 4px',
+            backgroundColor: control.captionBackColor || '#000080',
+            color: control.captionForeColor || '#FFFFFF',
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: '8pt',
+          }}
+        >
+          {connection.stillConnecting
+            ? 'Connecting...'
+            : connection.stillExecuting
+              ? 'Executing...'
+              : error
+                ? `Error: ${error}`
+                : caption}
         </div>
-        
+
         {/* Navigation buttons */}
-        <div style={{
-          height: '24px',
-          display: 'flex',
-          alignItems: 'center',
-          backgroundColor: '#C0C0C0',
-          borderTop: '1px solid #808080'
-        }}>
+        <div
+          style={{
+            height: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            backgroundColor: '#C0C0C0',
+            borderTop: '1px solid #808080',
+          }}
+        >
           {/* First button */}
           <button
             style={buttonStyle}
@@ -555,7 +670,7 @@ export const MSRDCControl = forwardRef<HTMLDivElement, MSRDCControlProps>(
           >
             |&lt;
           </button>
-          
+
           {/* Previous button */}
           <button
             style={buttonStyle}
@@ -565,20 +680,21 @@ export const MSRDCControl = forwardRef<HTMLDivElement, MSRDCControlProps>(
           >
             &lt;
           </button>
-          
+
           {/* Position indicator */}
-          <div style={{
-            flex: 1,
-            textAlign: 'center',
-            fontSize: '8pt',
-            padding: '0 4px'
-          }}>
-            {isConnected && resultset ? 
-              `Record ${currentRow + 1} of ${resultset.rowCount}` :
-              'No Records'
-            }
+          <div
+            style={{
+              flex: 1,
+              textAlign: 'center',
+              fontSize: '8pt',
+              padding: '0 4px',
+            }}
+          >
+            {isConnected && resultset
+              ? `Record ${currentRow + 1} of ${resultset.rowCount}`
+              : 'No Records'}
           </div>
-          
+
           {/* Next button */}
           <button
             style={buttonStyle}
@@ -588,7 +704,7 @@ export const MSRDCControl = forwardRef<HTMLDivElement, MSRDCControlProps>(
           >
             &gt;
           </button>
-          
+
           {/* Last button */}
           <button
             style={buttonStyle}

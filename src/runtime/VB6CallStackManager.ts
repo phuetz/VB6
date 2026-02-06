@@ -78,7 +78,7 @@ export class VB6CallStackManager {
       const error: CallStackError = {
         message: `Stack overflow: Maximum recursion depth of ${this.maxDepth} exceeded`,
         stack: this.getStackCopy(),
-        depth: this.stack.length
+        depth: this.stack.length,
       };
 
       if (this.onStackOverflow) {
@@ -99,7 +99,7 @@ export class VB6CallStackManager {
       moduleName,
       line,
       timestamp: Date.now(),
-      arguments: { ...args }
+      arguments: { ...args },
     };
 
     this.stack.push(frame);
@@ -283,13 +283,16 @@ export class VB6CallStackManager {
 
 export const globalCallStack = new VB6CallStackManager({
   maxDepth: 1000,
-  onStackOverflow: (error) => {
+  onStackOverflow: error => {
     console.error('[VB6 Runtime Error] Stack Overflow');
     console.error('Call Stack:');
-    console.error(error.stack.slice(-20).map(f =>
-      `  ${f.moduleName}.${f.procedureName}`
-    ).join('\n'));
-  }
+    console.error(
+      error.stack
+        .slice(-20)
+        .map(f => `  ${f.moduleName}.${f.procedureName}`)
+        .join('\n')
+    );
+  },
 });
 
 // ============================================================================
@@ -300,11 +303,7 @@ export const globalCallStack = new VB6CallStackManager({
  * Decorator for tracking procedure calls
  */
 export function TrackProcedure(moduleName: string = 'Module1') {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = function (...args: any[]) {
@@ -349,9 +348,7 @@ export function withRecursionLimit<T>(
   const currentDepth = globalCallStack.getRecursionCount(procedureName);
 
   if (currentDepth >= maxDepth) {
-    throw new Error(
-      `Maximum recursion depth (${maxDepth}) exceeded for ${procedureName}`
-    );
+    throw new Error(`Maximum recursion depth (${maxDepth}) exceeded for ${procedureName}`);
   }
 
   globalCallStack.enter(procedureName, 'Module1', 0, {});
@@ -369,11 +366,7 @@ export function withRecursionLimit<T>(
 /**
  * VB6-compatible procedure entry point
  */
-export function ProcedureEnter(
-  name: string,
-  module: string = 'Module1',
-  line: number = 0
-): void {
+export function ProcedureEnter(name: string, module: string = 'Module1', line: number = 0): void {
   globalCallStack.enter(name, module, line, {});
 }
 

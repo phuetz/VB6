@@ -14,7 +14,7 @@ export enum PackageType {
   DEPENDENCY_FILE = 'dependency_file',
   CAB_FILE = 'cab_file',
   MSI_INSTALLER = 'msi_installer',
-  XCOPY_DEPLOYMENT = 'xcopy_deployment'
+  XCOPY_DEPLOYMENT = 'xcopy_deployment',
 }
 
 export enum DistributionMedia {
@@ -23,7 +23,7 @@ export enum DistributionMedia {
   DVD = 'dvd',
   NETWORK_SHARE = 'network_share',
   WEB_DOWNLOAD = 'web_download',
-  SINGLE_FILE = 'single_file'
+  SINGLE_FILE = 'single_file',
 }
 
 export enum ComponentType {
@@ -36,7 +36,7 @@ export enum ComponentType {
   REGISTRY_ENTRY = 'registry_entry',
   SHORTCUT = 'shortcut',
   FONT = 'font',
-  HELP_FILE = 'help_file'
+  HELP_FILE = 'help_file',
 }
 
 export enum InstallLocation {
@@ -47,7 +47,7 @@ export enum InstallLocation {
   COMMON_FILES = 'common_files',
   FONTS_FOLDER = 'fonts_folder',
   TEMP_FOLDER = 'temp_folder',
-  CUSTOM_PATH = 'custom_path'
+  CUSTOM_PATH = 'custom_path',
 }
 
 export enum RegistryRoot {
@@ -55,7 +55,7 @@ export enum RegistryRoot {
   HKEY_CURRENT_USER = 'HKEY_CURRENT_USER',
   HKEY_LOCAL_MACHINE = 'HKEY_LOCAL_MACHINE',
   HKEY_USERS = 'HKEY_USERS',
-  HKEY_CURRENT_CONFIG = 'HKEY_CURRENT_CONFIG'
+  HKEY_CURRENT_CONFIG = 'HKEY_CURRENT_CONFIG',
 }
 
 export interface PackageProject {
@@ -64,44 +64,44 @@ export interface PackageProject {
   displayName: string;
   description: string;
   version: string;
-  
+
   // Project info
   sourceProject: string;
   outputFolder: string;
   packageType: PackageType;
   distributionMedia: DistributionMedia;
-  
+
   // Application info
   applicationName: string;
   applicationVersion: string;
   companyName: string;
   copyrightInfo: string;
   productName: string;
-  
+
   // Files and dependencies
   files: PackageFile[];
   dependencies: PackageDependency[];
   registryEntries: RegistryEntry[];
   shortcuts: ShortcutEntry[];
-  
+
   // Installation options
   installLocation: InstallLocation;
   customInstallPath?: string;
   createUninstaller: boolean;
   requireRestart: boolean;
   runAfterInstall: boolean;
-  
+
   // Distribution options
   compressionLevel: number;
   passwordProtected: boolean;
   digitalSignature: boolean;
-  
+
   // Metadata
   created: Date;
   modified: Date;
   lastBuilt?: Date;
   buildCount: number;
-  
+
   // Advanced options
   supportedPlatforms: string[];
   minimumWindowsVersion: string;
@@ -120,7 +120,7 @@ export interface PackageFile {
   type: ComponentType;
   location: InstallLocation;
   customPath?: string;
-  
+
   // Properties
   shared: boolean;
   system: boolean;
@@ -128,14 +128,14 @@ export interface PackageFile {
   hidden: boolean;
   compress: boolean;
   register: boolean;
-  
+
   // Version info
   checkVersion: boolean;
   versionConflict: 'newer' | 'older' | 'same' | 'ignore';
-  
+
   // Dependencies
   dependencies: string[];
-  
+
   created: Date;
   modified: Date;
 }
@@ -147,21 +147,21 @@ export interface PackageDependency {
   version?: string;
   type: ComponentType;
   source: string;
-  
+
   // Requirements
   required: boolean;
   downloadUrl?: string;
   redistributable: boolean;
-  
+
   // Installation
   installLocation: InstallLocation;
   registerComponent: boolean;
-  
+
   // Detection
   detectionMethod: 'file' | 'registry' | 'version';
   detectionPath: string;
   detectionValue?: string;
-  
+
   status: 'missing' | 'found' | 'outdated' | 'unknown';
   installedVersion?: string;
   recommendedVersion?: string;
@@ -174,12 +174,12 @@ export interface RegistryEntry {
   valueName: string;
   valueData: string;
   valueType: 'string' | 'dword' | 'binary' | 'multi_string';
-  
+
   // Options
   createKey: boolean;
   overwriteValue: boolean;
   removeOnUninstall: boolean;
-  
+
   description?: string;
   created: Date;
 }
@@ -193,15 +193,15 @@ export interface ShortcutEntry {
   iconPath?: string;
   iconIndex?: number;
   description?: string;
-  
+
   // Location
   location: 'desktop' | 'start_menu' | 'programs' | 'startup' | 'custom';
   customPath?: string;
-  
+
   // Options
   runMinimized: boolean;
   runMaximized: boolean;
-  
+
   created: Date;
 }
 
@@ -221,18 +221,18 @@ export interface DeploymentTarget {
   id: string;
   name: string;
   type: 'ftp' | 'web' | 'network' | 'cd' | 'custom';
-  
+
   // Connection info
   serverUrl?: string;
   username?: string;
   password?: string;
   remotePath?: string;
-  
+
   // Options
   testConnection: boolean;
   overwriteExisting: boolean;
   createBackup: boolean;
-  
+
   created: Date;
   lastDeployed?: Date;
   deployCount: number;
@@ -278,8 +278,8 @@ export class VB6PackageWizard {
         ['CreateStartMenuEntry', true],
         ['CreateDesktopShortcut', true],
         ['CheckDiskSpace', true],
-        ['ShowProgress', true]
-      ])
+        ['ShowProgress', true],
+      ]),
     });
 
     // Internet Package Template
@@ -294,8 +294,8 @@ export class VB6PackageWizard {
         ['CreateCABFiles', true],
         ['SignCABFiles', false],
         ['CompressFiles', true],
-        ['DownloadSupport', true]
-      ])
+        ['DownloadSupport', true],
+      ]),
     });
 
     // XCOPY Deployment Template
@@ -309,8 +309,8 @@ export class VB6PackageWizard {
       settings: new Map([
         ['CopyOnly', true],
         ['NoRegistration', true],
-        ['PortableApp', true]
-      ])
+        ['PortableApp', true],
+      ]),
     });
   }
 
@@ -351,7 +351,7 @@ export class VB6PackageWizard {
           versionConflict: 'newer',
           dependencies: ['vb6runtime', 'msvbvm60.dll'],
           created: new Date('2002-01-01'),
-          modified: new Date()
+          modified: new Date(),
         },
         {
           id: 'config-file',
@@ -372,8 +372,8 @@ export class VB6PackageWizard {
           versionConflict: 'ignore',
           dependencies: [],
           created: new Date('2002-01-01'),
-          modified: new Date()
-        }
+          modified: new Date(),
+        },
       ],
       dependencies: [
         {
@@ -391,7 +391,7 @@ export class VB6PackageWizard {
           detectionPath: 'System32\\msvbvm60.dll',
           status: 'found',
           installedVersion: '6.0.81.69',
-          recommendedVersion: '6.0.81.69'
+          recommendedVersion: '6.0.81.69',
         },
         {
           id: 'oleaut32',
@@ -408,8 +408,8 @@ export class VB6PackageWizard {
           detectionPath: 'System32\\oleaut32.dll',
           status: 'found',
           installedVersion: '2.40.4277.1',
-          recommendedVersion: '2.40.4277.1'
-        }
+          recommendedVersion: '2.40.4277.1',
+        },
       ],
       registryEntries: [
         {
@@ -423,7 +423,7 @@ export class VB6PackageWizard {
           overwriteValue: true,
           removeOnUninstall: true,
           description: 'Application installation path',
-          created: new Date()
+          created: new Date(),
         },
         {
           id: 'app-version',
@@ -436,8 +436,8 @@ export class VB6PackageWizard {
           overwriteValue: true,
           removeOnUninstall: true,
           description: 'Application version',
-          created: new Date()
-        }
+          created: new Date(),
+        },
       ],
       shortcuts: [
         {
@@ -448,7 +448,7 @@ export class VB6PackageWizard {
           location: 'desktop',
           runMinimized: false,
           runMaximized: false,
-          created: new Date()
+          created: new Date(),
         },
         {
           id: 'start-menu-shortcut',
@@ -459,8 +459,8 @@ export class VB6PackageWizard {
           customPath: 'Sample Company\\Sample Application',
           runMinimized: false,
           runMaximized: false,
-          created: new Date()
-        }
+          created: new Date(),
+        },
       ],
       installLocation: InstallLocation.PROGRAM_FILES,
       customInstallPath: 'Sample Company\\Sample Application',
@@ -473,7 +473,13 @@ export class VB6PackageWizard {
       created: new Date('2002-01-01'),
       modified: new Date(),
       buildCount: 0,
-      supportedPlatforms: ['Windows 95', 'Windows 98', 'Windows NT 4.0', 'Windows 2000', 'Windows XP'],
+      supportedPlatforms: [
+        'Windows 95',
+        'Windows 98',
+        'Windows NT 4.0',
+        'Windows 2000',
+        'Windows XP',
+      ],
       minimumWindowsVersion: '4.0',
       requiredSpace: 2048,
       settings: new Map([
@@ -481,8 +487,8 @@ export class VB6PackageWizard {
         ['CreateDesktopShortcut', true],
         ['ShowSplashScreen', false],
         ['AllowCustomInstallPath', true],
-        ['CheckForUpdates', false]
-      ])
+        ['CheckForUpdates', false],
+      ]),
     };
 
     this.projects.set(sampleProject.id, sampleProject);
@@ -492,7 +498,7 @@ export class VB6PackageWizard {
   // Project Management
   createProject(name: string, templateId?: string): PackageProject {
     const template = templateId ? this.templates.get(templateId) : null;
-    
+
     const project: PackageProject = {
       id: `project-${Date.now()}`,
       name,
@@ -526,7 +532,7 @@ export class VB6PackageWizard {
       minimumWindowsVersion: '4.0',
       requiredSpace: 1024,
       settings: new Map(),
-      ...template
+      ...template,
     };
 
     this.projects.set(project.id, project);
@@ -583,7 +589,7 @@ export class VB6PackageWizard {
       ...file,
       id: `file-${Date.now()}`,
       created: new Date(),
-      modified: new Date()
+      modified: new Date(),
     };
 
     this.currentProject.files.push(newFile);
@@ -618,10 +624,10 @@ export class VB6PackageWizard {
 
   // Dependency Analysis
   async analyzeDependencies(projectPath: string): Promise<PackageDependency[]> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => {
         logger.debug(`Analyzing dependencies for: ${projectPath}`);
-        
+
         // Simulate dependency analysis
         const dependencies: PackageDependency[] = [
           {
@@ -639,7 +645,7 @@ export class VB6PackageWizard {
             detectionPath: 'System32\\msvbvm60.dll',
             status: 'found',
             installedVersion: '6.0.81.69',
-            recommendedVersion: '6.0.81.69'
+            recommendedVersion: '6.0.81.69',
           },
           {
             id: 'mscomctl-detected',
@@ -655,8 +661,8 @@ export class VB6PackageWizard {
             detectionMethod: 'registry',
             detectionPath: 'HKEY_CLASSES_ROOT\\CLSID\\{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}',
             status: 'missing',
-            recommendedVersion: '6.0.81.69'
-          }
+            recommendedVersion: '6.0.81.69',
+          },
         ];
 
         if (this.currentProject) {
@@ -676,7 +682,7 @@ export class VB6PackageWizard {
 
     const newDependency: PackageDependency = {
       ...dependency,
-      id: `dep-${Date.now()}`
+      id: `dep-${Date.now()}`,
     };
 
     this.currentProject.dependencies.push(newDependency);
@@ -705,7 +711,7 @@ export class VB6PackageWizard {
     const newEntry: RegistryEntry = {
       ...entry,
       id: `reg-${Date.now()}`,
-      created: new Date()
+      created: new Date(),
     };
 
     this.currentProject.registryEntries.push(newEntry);
@@ -721,7 +727,7 @@ export class VB6PackageWizard {
     const newShortcut: ShortcutEntry = {
       ...shortcut,
       id: `shortcut-${Date.now()}`,
-      created: new Date()
+      created: new Date(),
     };
 
     this.currentProject.shortcuts.push(newShortcut);
@@ -736,29 +742,31 @@ export class VB6PackageWizard {
       throw new Error('No project specified for building');
     }
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const startTime = Date.now();
-      
+
       setTimeout(() => {
         logger.debug(`Building package: ${project.name}`);
         logger.debug(`Package type: ${project.packageType}`);
         logger.debug(`Output folder: ${project.outputFolder}`);
-        
+
         // Simulate build process
         const errors: string[] = [];
         const warnings: string[] = [];
-        
+
         // Check for missing dependencies
-        const missingDeps = project.dependencies.filter(dep => dep.status === 'missing' && dep.required);
+        const missingDeps = project.dependencies.filter(
+          dep => dep.status === 'missing' && dep.required
+        );
         if (missingDeps.length > 0) {
           errors.push(`Missing required dependencies: ${missingDeps.map(d => d.name).join(', ')}`);
         }
-        
+
         // Check for files
         if (project.files.length === 0) {
           errors.push('No files specified for packaging');
         }
-        
+
         // Warnings for outdated dependencies
         const outdatedDeps = project.dependencies.filter(dep => dep.status === 'outdated');
         if (outdatedDeps.length > 0) {
@@ -767,7 +775,7 @@ export class VB6PackageWizard {
 
         const buildTime = Date.now() - startTime;
         const success = errors.length === 0;
-        
+
         if (success) {
           project.buildCount++;
           project.lastBuilt = new Date();
@@ -775,7 +783,8 @@ export class VB6PackageWizard {
 
         // Calculate package size and compression
         const totalSize = project.files.reduce((sum, file) => sum + file.fileSize, 0);
-        const compressionRatio = project.compressionLevel > 0 ? 0.3 + (project.compressionLevel / 10 * 0.4) : 1.0;
+        const compressionRatio =
+          project.compressionLevel > 0 ? 0.3 + (project.compressionLevel / 10) * 0.4 : 1.0;
         const setupSize = Math.floor(totalSize * compressionRatio);
 
         const result: BuildResult = {
@@ -787,12 +796,14 @@ export class VB6PackageWizard {
           buildTime,
           filesIncluded: project.files.length,
           dependenciesResolved: project.dependencies.filter(d => d.status === 'found').length,
-          compressionRatio: 1 - compressionRatio
+          compressionRatio: 1 - compressionRatio,
         };
 
         logger.info(`Build ${success ? 'completed' : 'failed'} in ${buildTime}ms`);
         if (success) {
-          logger.info(`Package created: ${result.packagePath} (${(setupSize / 1024).toFixed(1)} KB)`);
+          logger.info(
+            `Package created: ${result.packagePath} (${(setupSize / 1024).toFixed(1)} KB)`
+          );
         }
 
         resolve(result);
@@ -801,12 +812,14 @@ export class VB6PackageWizard {
   }
 
   // Deployment
-  addDeploymentTarget(target: Omit<DeploymentTarget, 'id' | 'created' | 'deployCount'>): DeploymentTarget {
+  addDeploymentTarget(
+    target: Omit<DeploymentTarget, 'id' | 'created' | 'deployCount'>
+  ): DeploymentTarget {
     const newTarget: DeploymentTarget = {
       ...target,
       id: `target-${Date.now()}`,
       created: new Date(),
-      deployCount: 0
+      deployCount: 0,
     };
 
     this.deploymentTargets.set(newTarget.id, newTarget);
@@ -819,7 +832,7 @@ export class VB6PackageWizard {
       throw new Error(`Deployment target ${targetId} not found`);
     }
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => {
         logger.debug(`Deploying package to: ${target.name}`);
         logger.debug(`Package: ${packagePath}`);
@@ -851,7 +864,7 @@ export class VB6PackageWizard {
       compressionLevel: project.compressionLevel,
       supportedPlatforms: [...project.supportedPlatforms],
       minimumWindowsVersion: project.minimumWindowsVersion,
-      settings: new Map(project.settings)
+      settings: new Map(project.settings),
     };
 
     this.templates.set(name, template);
@@ -861,7 +874,7 @@ export class VB6PackageWizard {
     return Array.from(this.templates.entries()).map(([id, template]) => ({
       id,
       name: template.name || id,
-      template
+      template,
     }));
   }
 
@@ -886,8 +899,8 @@ export class VB6PackageWizard {
       dependencyStats: {
         totalDependencies: 0,
         missingDependencies: 0,
-        outdatedDependencies: 0
-      }
+        outdatedDependencies: 0,
+      },
     };
 
     if (projects.length > 0) {
@@ -986,4 +999,6 @@ export class VB6PackageWizard {
 // Global instance
 export const VB6PackageWizardInstance = VB6PackageWizard.getInstance();
 
-logger.info('VB6 Package & Deployment Wizard initialized with project templates and dependency analysis');
+logger.info(
+  'VB6 Package & Deployment Wizard initialized with project templates and dependency analysis'
+);

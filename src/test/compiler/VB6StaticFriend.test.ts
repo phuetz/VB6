@@ -2,11 +2,9 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   VB6AdvancedLanguageProcessor,
   advancedLanguageProcessor,
-  VB6StaticVariable
+  VB6StaticVariable,
 } from '../../compiler/VB6AdvancedLanguageFeatures';
-import {
-  VB6VariableManager
-} from '../../runtime/managers/VB6VariableManager';
+import { VB6VariableManager } from '../../runtime/managers/VB6VariableManager';
 import { VB6DataType } from '../../runtime/types/VB6Types';
 
 describe('VB6 Static Variables - Advanced Language Processor', () => {
@@ -284,21 +282,13 @@ describe('VB6 Friend Scope - Advanced Language Processor', () => {
     });
 
     it('should handle simple module names', () => {
-      const isAccessible = processor.isFriendAccessible(
-        'Module1',
-        'Module2',
-        'TestMethod'
-      );
+      const isAccessible = processor.isFriendAccessible('Module1', 'Module2', 'TestMethod');
 
       // Different "projects" - simple names without prefix are treated as separate projects
       expect(isAccessible).toBe(false);
 
       // Same module should be accessible
-      const sameModule = processor.isFriendAccessible(
-        'Module1',
-        'Module1',
-        'TestMethod'
-      );
+      const sameModule = processor.isFriendAccessible('Module1', 'Module1', 'TestMethod');
       expect(sameModule).toBe(true);
     });
 
@@ -316,7 +306,7 @@ describe('VB6 Friend Scope - Advanced Language Processor', () => {
       );
 
       expect(isAccessible1).toBe(false); // Different projects
-      expect(isAccessible2).toBe(true);  // Same project
+      expect(isAccessible2).toBe(true); // Same project
     });
   });
 
@@ -517,25 +507,11 @@ describe('VB6 Static Variables - Variable Manager', () => {
   describe('Static Variable Scope Resolution', () => {
     it('should resolve static variables before procedure variables', () => {
       // Declare static variable
-      manager.declareVariable(
-        'x',
-        VB6DataType.vbInteger,
-        'procedure',
-        'Module1',
-        'Proc1',
-        true
-      );
+      manager.declareVariable('x', VB6DataType.vbInteger, 'procedure', 'Module1', 'Proc1', true);
       manager.setVariable('x', 100, 'Module1', 'Proc1');
 
       // Declare another static in different procedure
-      manager.declareVariable(
-        'x',
-        VB6DataType.vbInteger,
-        'procedure',
-        'Module1',
-        'Proc2',
-        true
-      );
+      manager.declareVariable('x', VB6DataType.vbInteger, 'procedure', 'Module1', 'Proc2', true);
       manager.setVariable('x', 200, 'Module1', 'Proc2');
 
       // Each should resolve to its own static value

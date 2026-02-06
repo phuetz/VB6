@@ -7,6 +7,20 @@
 import { VB6Form } from '../types/VB6Form';
 import { VB6Printer } from '../types/VB6Printer';
 
+/** Error with VB6 metadata attached */
+interface VB6Error extends Error {
+  vb6Number: number;
+  vb6Source: string;
+}
+
+/** Window augmentation for VB6 global objects */
+interface VB6GlobalWindow {
+  Forms: VB6FormsCollection;
+  Printers: VB6PrintersCollection;
+  Debug: VB6DebugObject;
+  Err: VB6ErrObject;
+}
+
 // ============================================================================
 // FORMS COLLECTION - Collection globale des formulaires
 // ============================================================================
@@ -46,7 +60,7 @@ export class VB6FormsCollection {
   // Supprimer un formulaire
   Remove(indexOrName: number | string): void {
     let form: VB6Form | null = null;
-    
+
     if (typeof indexOrName === 'number') {
       form = this.formsByIndex[indexOrName];
       if (form) {
@@ -128,7 +142,7 @@ export class VB6PrintersCollection {
       new VB6Printer('Microsoft XPS Document Writer', true, false),
       new VB6Printer('Fax', false, false),
     ];
-    
+
     // Imprimante par défaut
     this.defaultPrinter = this.printers[0];
   }
@@ -193,47 +207,50 @@ export class VB6DebugObject {
 
   // Debug.Print - Affiche dans la console
   Print(...args: any[]): void {
-    const message = args.map(arg => 
-      arg === null ? 'Null' : 
-      arg === undefined ? '' : 
-      String(arg)
-    ).join(' ');
-    
-    console.log(`[VB6 Debug] ${message}`);
+    const message = args
+      .map(arg => (arg === null ? 'Null' : arg === undefined ? '' : String(arg)))
+      .join(' ');
+
     this.output.push(message);
-    
+
     // Déclencher événement pour l'IDE
     if (typeof window !== 'undefined' && window.postMessage) {
-      window.postMessage({
-        type: 'VB6_DEBUG_PRINT',
-        message,
-        timestamp: new Date().toISOString()
-      }, '*');
+      window.postMessage(
+        {
+          type: 'VB6_DEBUG_PRINT',
+          message,
+          timestamp: new Date().toISOString(),
+        },
+        '*'
+      );
     }
   }
 
   // Debug.Assert - Assertion conditionnelle
   Assert(condition: boolean, message?: string): void {
     if (!this.assertEnabled) return;
-    
+
     if (!condition) {
       const assertMessage = message || 'Assertion failed';
       this.Print(`ASSERTION FAILED: ${assertMessage}`);
-      
+
       // Dans un navigateur, déclencher un breakpoint si les DevTools sont ouverts
       if (typeof window !== 'undefined') {
         console.error(`VB6 Assert Failed: ${assertMessage}`);
         // eslint-disable-next-line no-debugger
         debugger;
       }
-      
+
       // Déclencher l'événement pour l'IDE
       if (typeof window !== 'undefined' && window.postMessage) {
-        window.postMessage({
-          type: 'VB6_DEBUG_ASSERT',
-          message: assertMessage,
-          timestamp: new Date().toISOString()
-        }, '*');
+        window.postMessage(
+          {
+            type: 'VB6_DEBUG_ASSERT',
+            message: assertMessage,
+            timestamp: new Date().toISOString(),
+          },
+          '*'
+        );
       }
     }
   }
@@ -340,7 +357,13 @@ export class VB6ErrObject {
     this._lastDllError = 0;
   }
 
-  Raise(number: number, source?: string, description?: string, helpFile?: string, helpContext?: number): void {
+  Raise(
+    number: number,
+    source?: string,
+    description?: string,
+    helpFile?: string,
+    helpContext?: number
+  ): void {
     this._number = number;
     this._source = source || '';
     this._description = description || this.getDefaultDescription(number);
@@ -348,9 +371,10 @@ export class VB6ErrObject {
     this._helpContext = helpContext || 0;
 
     // Créer et lancer l'erreur JavaScript
-    const error = new Error(this._description);
-    (error as any).vb6Number = number;
-    (error as any).vb6Source = this._source;
+    const error: VB6Error = Object.assign(new Error(this._description), {
+      vb6Number: number,
+      vb6Source: this._source,
+    });
     throw error;
   }
 
@@ -380,7 +404,7 @@ export class VB6ErrObject {
       68: 'Device unavailable',
       70: 'Permission denied',
       71: 'Disk not ready',
-      74: 'Can\'t rename with different drive',
+      74: "Can't rename with different drive",
       75: 'Path/File access error',
       76: 'Path not found',
       91: 'Object variable or With block variable not set',
@@ -391,8 +415,8 @@ export class VB6ErrObject {
       381: 'Invalid property array index',
       382: 'Set not supported at runtime',
       383: 'Set not supported (read-only property)',
-      438: 'Object doesn\'t support this property or method',
-      445: 'Object doesn\'t support this action',
+      438: "Object doesn't support this property or method",
+      445: "Object doesn't support this action",
       449: 'Argument not optional',
       450: 'Wrong number of arguments or invalid property assignment',
       451: 'Property let procedure not defined and property get procedure did not return an object',
@@ -406,7 +430,7 @@ export class VB6ErrObject {
       460: 'Invalid clipboard format',
       461: 'Method or data member not found',
       462: 'The remote server machine does not exist or is unavailable',
-      463: 'Class not registered on local machine'
+      463: 'Class not registered on local machine',
     };
 
     return errorMessages[errorNumber] || `Error ${errorNumber}`;
@@ -414,9 +438,10 @@ export class VB6ErrObject {
 
   // Méthode pour définir une erreur depuis JavaScript
   SetFromJavaScriptError(jsError: Error): void {
-    this._number = (jsError as any).vb6Number || 440; // Automation error
+    const vb6Err = jsError as Partial<VB6Error>;
+    this._number = vb6Err.vb6Number || 440; // Automation error
     this._description = jsError.message;
-    this._source = (jsError as any).vb6Source || 'JavaScript';
+    this._source = vb6Err.vb6Source || 'JavaScript';
   }
 }
 
@@ -431,10 +456,11 @@ export const Err = VB6ErrObject.getInstance();
 
 // Ajouter aux globals du navigateur pour compatibilité VB6
 if (typeof window !== 'undefined') {
-  (window as any).Forms = Forms;
-  (window as any).Printers = Printers;
-  (window as any).Debug = Debug;
-  (window as any).Err = Err;
+  const vb6Window = window as unknown as VB6GlobalWindow;
+  vb6Window.Forms = Forms;
+  vb6Window.Printers = Printers;
+  vb6Window.Debug = Debug;
+  vb6Window.Err = Err;
 }
 
 // Export par défaut
@@ -446,5 +472,5 @@ export default {
   VB6FormsCollection,
   VB6PrintersCollection,
   VB6DebugObject,
-  VB6ErrObject
+  VB6ErrObject,
 };

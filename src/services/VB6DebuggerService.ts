@@ -3,7 +3,12 @@
 
 import { vb6Compiler } from './VB6Compiler';
 import { vb6Runtime } from '../runtime/VB6Runtime';
-import { DebugValue, DebugEventData, ExecutionContext, EventListener } from './types/VB6ServiceTypes';
+import {
+  DebugValue,
+  DebugEventData,
+  ExecutionContext,
+  EventListener,
+} from './types/VB6ServiceTypes';
 
 // Debugger interfaces
 export interface Breakpoint {
@@ -74,7 +79,7 @@ export enum StepType {
   Into = 'stepInto',
   Over = 'stepOver',
   Out = 'stepOut',
-  Continue = 'continue'
+  Continue = 'continue',
 }
 
 // Debug events
@@ -126,16 +131,16 @@ export class VB6DebuggerService {
     status: 'idle',
     breakpoints: [],
     watchExpressions: [],
-    callStack: []
+    callStack: [],
   };
-  
+
   // Execution context
   private executionContext: ExecutionContext | null = null;
   private sourceMap: Map<string, string[]> = new Map(); // file -> lines
   private pauseOnNextStatement = false;
   private stepDepth = 0;
   private targetStepDepth = 0;
-  
+
   // Performance monitoring
   private executionStartTime: number = 0;
   private statementCount: number = 0;
@@ -165,12 +170,12 @@ export class VB6DebuggerService {
       line,
       enabled: true,
       hitCount: 0,
-      ...options
+      ...options,
     };
 
     this.state.breakpoints.push(breakpoint);
     this.emitEvent('breakpoint', { action: 'added', breakpoint });
-    
+
     return breakpoint;
   }
 
@@ -221,13 +226,13 @@ export class VB6DebuggerService {
   addWatch(expression: string): WatchExpression {
     const watch: WatchExpression = {
       id: `watch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      expression
+      expression,
     };
 
     this.state.watchExpressions.push(watch);
     this.evaluateWatch(watch);
     this.emitEvent('watch', { action: 'added', watch });
-    
+
     return watch;
   }
 
@@ -259,12 +264,12 @@ export class VB6DebuggerService {
         // Create evaluation context with current scope
         const evalContext = this.createEvaluationContext();
         const result = this.evaluateExpression(watch.expression, evalContext);
-        
+
         watch.value = result.value;
         watch.type = result.type;
         watch.error = undefined;
         watch.expandable = this.isExpandable(result.value);
-        
+
         if (watch.expandable) {
           watch.children = this.expandValue(result.value);
         }
@@ -291,23 +296,23 @@ export class VB6DebuggerService {
       this.updateStatus('running');
       this.executionStartTime = Date.now();
       this.statementCount = 0;
-      
+
       // Compile with debug info
       const compiled = await vb6Compiler.compile(code, {
         debug: true,
         sourceMap: true,
-        instrumentCode: true
+        instrumentCode: true,
       });
-      
+
       // Store source map
       this.sourceMap.set(file, code.split('\n'));
-      
+
       // Create execution context with debug hooks
       this.executionContext = this.createExecutionContext(compiled, file);
-      
+
       // Execute
       await this.executeCode(compiled.code);
-      
+
       this.updateStatus('idle');
     } catch (error: any) {
       this.handleException(error);
@@ -331,29 +336,29 @@ export class VB6DebuggerService {
 
   async step(type: StepType): Promise<void> {
     if (this.state.status !== 'paused') return;
-    
+
     this.updateStatus('stepping');
-    
+
     switch (type) {
       case StepType.Into:
         this.pauseOnNextStatement = true;
         break;
-        
+
       case StepType.Over:
         this.targetStepDepth = this.stepDepth;
         this.pauseOnNextStatement = false;
         break;
-        
+
       case StepType.Out:
         this.targetStepDepth = Math.max(0, this.stepDepth - 1);
         this.pauseOnNextStatement = false;
         break;
-        
+
       case StepType.Continue:
         this.pauseOnNextStatement = false;
         break;
     }
-    
+
     this.continueExecution();
   }
 
@@ -384,14 +389,14 @@ export class VB6DebuggerService {
 
   // Variable inspection
   getVariables(frameId?: string): VariableScope {
-    const frame = frameId 
+    const frame = frameId
       ? this.state.callStack.find(f => f.id === frameId)
       : this.state.callStack[0];
-    
+
     if (!frame) {
       return { locals: [], globals: [], module: [] };
     }
-    
+
     return frame.scope;
   }
 
@@ -399,15 +404,15 @@ export class VB6DebuggerService {
     if (this.state.status !== 'paused') {
       throw new Error('Debugger must be paused to evaluate expressions');
     }
-    
-    const frame = frameId 
+
+    const frame = frameId
       ? this.state.callStack.find(f => f.id === frameId)
       : this.state.callStack[0];
-    
+
     if (!frame) {
       throw new Error('No active stack frame');
     }
-    
+
     const context = this.createEvaluationContext(frame);
     return this.evaluateInContext(expression, context);
   }
@@ -428,8 +433,8 @@ export class VB6DebuggerService {
         },
         onException: (error: any) => {
           this.handleException(error);
-        }
-      }
+        },
+      },
     };
   }
 
@@ -438,14 +443,14 @@ export class VB6DebuggerService {
     this.state.currentFile = file;
     this.state.currentLine = line;
     this.state.currentColumn = column;
-    
+
     // Check breakpoints
     const breakpoint = this.checkBreakpoint(file, line);
     if (breakpoint) {
       this.handleBreakpointHit(breakpoint);
       return;
     }
-    
+
     // Check step conditions
     if (this.shouldPause()) {
       this.pauseExecution('step');
@@ -456,7 +461,7 @@ export class VB6DebuggerService {
     const breakpoints = this.state.breakpoints.filter(
       bp => bp.enabled && bp.file === file && bp.line === line
     );
-    
+
     for (const bp of breakpoints) {
       // Check condition if present
       if (bp.condition) {
@@ -468,20 +473,20 @@ export class VB6DebuggerService {
           continue;
         }
       }
-      
+
       // Update hit count
       bp.hitCount = (bp.hitCount || 0) + 1;
       this.breakpointHits.set(bp.id, bp.hitCount);
-      
+
       // Check if it's a log point
       if (bp.logMessage) {
         this.logBreakpointMessage(bp);
         if (!bp.temporary) continue;
       }
-      
+
       return bp;
     }
-    
+
     return null;
   }
 
@@ -490,19 +495,19 @@ export class VB6DebuggerService {
     if (breakpoint.temporary) {
       this.removeBreakpoint(breakpoint.id);
     }
-    
+
     this.pauseExecution('breakpoint', breakpoint);
   }
 
   private shouldPause(): boolean {
     if (this.pauseOnNextStatement) return true;
-    
+
     if (this.state.status === 'stepping') {
       if (this.stepDepth <= this.targetStepDepth) {
         return true;
       }
     }
-    
+
     return false;
   }
 
@@ -510,13 +515,13 @@ export class VB6DebuggerService {
     this.updateStatus('paused');
     this.updateCallStack();
     this.evaluateAllWatches();
-    
-    this.emitEvent('paused', { 
-      reason, 
+
+    this.emitEvent('paused', {
+      reason,
       data,
       file: this.state.currentFile,
       line: this.state.currentLine,
-      callStack: this.state.callStack
+      callStack: this.state.callStack,
     });
   }
 
@@ -527,23 +532,23 @@ export class VB6DebuggerService {
 
   private handleFunctionEnter(name: string, file: string, args: any[]): void {
     this.stepDepth++;
-    
+
     const frame: CallStackFrame = {
       id: `frame_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       name,
       file,
       line: this.state.currentLine || 1,
       scope: this.captureScope(args),
-      isUserCode: true
+      isUserCode: true,
     };
-    
+
     this.state.callStack.unshift(frame);
     this.emitEvent('callStack', { action: 'push', frame });
   }
 
   private handleFunctionExit(name: string, returnValue: any): void {
     this.stepDepth = Math.max(0, this.stepDepth - 1);
-    
+
     if (this.state.callStack.length > 0) {
       const frame = this.state.callStack.shift();
       this.emitEvent('callStack', { action: 'pop', frame, returnValue });
@@ -554,9 +559,9 @@ export class VB6DebuggerService {
     this.state.exception = {
       message: error.message || String(error),
       type: error.name || 'Error',
-      stackTrace: error.stack || ''
+      stackTrace: error.stack || '',
     };
-    
+
     this.pauseExecution('exception', this.state.exception);
     this.emitEvent('exception', this.state.exception);
   }
@@ -571,17 +576,17 @@ export class VB6DebuggerService {
     const locals: Variable[] = [];
     const globals: Variable[] = [];
     const module: Variable[] = [];
-    
+
     // Add function arguments
     args.forEach((arg, index) => {
       locals.push(this.createVariable(`arg${index}`, arg));
     });
-    
+
     // Add local variables from execution context
     if (this.executionContext) {
       // Integration with VB6 runtime to get variables
     }
-    
+
     return { locals, globals, module };
   }
 
@@ -594,7 +599,7 @@ export class VB6DebuggerService {
       readable: true,
       writable: true,
       expandable: this.isExpandable(value),
-      children: this.isExpandable(value) ? this.expandValue(value) : undefined
+      children: this.isExpandable(value) ? this.expandValue(value) : undefined,
     };
   }
 
@@ -626,14 +631,14 @@ export class VB6DebuggerService {
   }
 
   private isExpandable(value: any): boolean {
-    return value !== null && 
-           value !== undefined && 
-           (Array.isArray(value) || typeof value === 'object');
+    return (
+      value !== null && value !== undefined && (Array.isArray(value) || typeof value === 'object')
+    );
   }
 
   private expandValue(value: any): Variable[] {
     const children: Variable[] = [];
-    
+
     if (Array.isArray(value)) {
       value.forEach((item, index) => {
         children.push(this.createVariable(`[${index}]`, item));
@@ -643,13 +648,13 @@ export class VB6DebuggerService {
         children.push(this.createVariable(key, val));
       });
     }
-    
+
     return children;
   }
 
   private createEvaluationContext(frame?: CallStackFrame): any {
     const context: any = {};
-    
+
     if (frame) {
       // Add variables from scope
       frame.scope.locals.forEach(v => {
@@ -659,10 +664,10 @@ export class VB6DebuggerService {
         context[v.name] = v.value;
       });
     }
-    
+
     // Add VB6 runtime functions
     Object.assign(context, vb6Runtime);
-    
+
     return context;
   }
 
@@ -671,10 +676,10 @@ export class VB6DebuggerService {
       // Safe evaluation using Function constructor
       const func = new Function(...Object.keys(context), `return (${expression})`);
       const value = func(...Object.values(context));
-      
+
       return {
         value,
-        type: this.getValueType(value)
+        type: this.getValueType(value),
       };
     } catch (error: any) {
       throw new Error(`Evaluation error: ${error.message}`);
@@ -683,9 +688,9 @@ export class VB6DebuggerService {
 
   private logBreakpointMessage(breakpoint: Breakpoint): void {
     if (!breakpoint.logMessage) return;
-    
+
     let message = breakpoint.logMessage;
-    
+
     // Replace expressions in {} with evaluated values
     const context = this.createEvaluationContext();
     message = message.replace(/\{([^}]+)\}/g, (match, expr) => {
@@ -696,19 +701,19 @@ export class VB6DebuggerService {
         return match;
       }
     });
-    
-    this.emitEvent('output', { 
+
+    this.emitEvent('output', {
       type: 'logpoint',
       message,
       timestamp: new Date(),
-      location: `${breakpoint.file}:${breakpoint.line}`
+      location: `${breakpoint.file}:${breakpoint.line}`,
     });
   }
 
   private updateStatus(status: DebuggerState['status']): void {
     const oldStatus = this.state.status;
     this.state.status = status;
-    
+
     if (oldStatus !== status) {
       this.emitEvent('statusChanged', { oldStatus, newStatus: status });
     }
@@ -718,9 +723,9 @@ export class VB6DebuggerService {
     const event: DebugEvent = {
       type: type as any,
       data,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
-    
+
     this.events.emit(type, event);
     this.events.emit('debug', event); // Global debug event
   }
@@ -746,15 +751,13 @@ export class VB6DebuggerService {
   }
 
   getExecutionStats(): any {
-    const elapsed = this.executionStartTime 
-      ? Date.now() - this.executionStartTime 
-      : 0;
-    
+    const elapsed = this.executionStartTime ? Date.now() - this.executionStartTime : 0;
+
     return {
       elapsedTime: elapsed,
       statementCount: this.statementCount,
       statementsPerSecond: elapsed > 0 ? (this.statementCount / elapsed) * 1000 : 0,
-      breakpointHits: Object.fromEntries(this.breakpointHits)
+      breakpointHits: Object.fromEntries(this.breakpointHits),
     };
   }
 }

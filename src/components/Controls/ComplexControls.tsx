@@ -46,27 +46,33 @@ export const TreeView = forwardRef<HTMLDivElement, any>((props, ref) => {
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const { fireEvent, updateControl } = useVB6Store();
 
-  const toggleNode = useCallback((nodeId: string) => {
-    if (!enabled) return;
+  const toggleNode = useCallback(
+    (nodeId: string) => {
+      if (!enabled) return;
 
-    const newExpanded = new Set(expandedNodes);
-    if (newExpanded.has(nodeId)) {
-      newExpanded.delete(nodeId);
-      fireEvent(name, 'Collapse', { node: nodeId });
-    } else {
-      newExpanded.add(nodeId);
-      fireEvent(name, 'Expand', { node: nodeId });
-    }
-    setExpandedNodes(newExpanded);
-  }, [enabled, expandedNodes, name, fireEvent]);
+      const newExpanded = new Set(expandedNodes);
+      if (newExpanded.has(nodeId)) {
+        newExpanded.delete(nodeId);
+        fireEvent(name, 'Collapse', { node: nodeId });
+      } else {
+        newExpanded.add(nodeId);
+        fireEvent(name, 'Expand', { node: nodeId });
+      }
+      setExpandedNodes(newExpanded);
+    },
+    [enabled, expandedNodes, name, fireEvent]
+  );
 
-  const selectNode = useCallback((nodeId: string) => {
-    if (!enabled) return;
+  const selectNode = useCallback(
+    (nodeId: string) => {
+      if (!enabled) return;
 
-    setSelectedNodeId(nodeId);
-    updateControl(id, 'selectedNode', nodeId);
-    fireEvent(name, 'NodeClick', { node: nodeId });
-  }, [enabled, id, name, fireEvent, updateControl]);
+      setSelectedNodeId(nodeId);
+      updateControl(id, 'selectedNode', nodeId);
+      fireEvent(name, 'NodeClick', { node: nodeId });
+    },
+    [enabled, id, name, fireEvent, updateControl]
+  );
 
   const renderNode = (node: any, level: number = 0): JSX.Element => {
     const hasChildren = node.children && node.children.length > 0;
@@ -120,7 +126,7 @@ export const TreeView = forwardRef<HTMLDivElement, any>((props, ref) => {
           {hasChildren && showPlusMinus && (
             <button
               className="w-3 h-3 border border-gray-400 bg-white text-xs flex items-center justify-center mr-1"
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 toggleNode(node.key);
               }}
@@ -136,7 +142,7 @@ export const TreeView = forwardRef<HTMLDivElement, any>((props, ref) => {
               type="checkbox"
               className="mr-1"
               checked={node.checked || false}
-              onChange={(e) => {
+              onChange={e => {
                 e.stopPropagation();
                 fireEvent(name, 'NodeCheck', { node: node.key, checked: e.target.checked });
               }}
@@ -159,10 +165,13 @@ export const TreeView = forwardRef<HTMLDivElement, any>((props, ref) => {
               type="text"
               value={node.text}
               onBlur={() => setEditingNode(null)}
-              onKeyDown={(e) => {
+              onKeyDown={e => {
                 if (e.key === 'Enter') {
                   setEditingNode(null);
-                  fireEvent(name, 'AfterLabelEdit', { node: node.key, text: e.currentTarget.value });
+                  fireEvent(name, 'AfterLabelEdit', {
+                    node: node.key,
+                    text: e.currentTarget.value,
+                  });
                 }
               }}
               className="flex-1 border-none outline-none bg-transparent"
@@ -180,9 +189,7 @@ export const TreeView = forwardRef<HTMLDivElement, any>((props, ref) => {
 
         {/* Noeuds enfants */}
         {hasChildren && isExpanded && (
-          <div>
-            {node.children.map((child: any) => renderNode(child, level + 1))}
-          </div>
+          <div>{node.children.map((child: any) => renderNode(child, level + 1))}</div>
         )}
       </div>
     );
@@ -204,17 +211,8 @@ export const TreeView = forwardRef<HTMLDivElement, any>((props, ref) => {
   };
 
   return (
-    <div
-      ref={ref}
-      style={treeStyle}
-      title={toolTipText}
-      data-name={name}
-      data-tag={tag}
-      {...rest}
-    >
-      <div className="relative">
-        {nodes.map((node: any) => renderNode(node, 0))}
-      </div>
+    <div ref={ref} style={treeStyle} title={toolTipText} data-name={name} data-tag={tag} {...rest}>
+      <div className="relative">{nodes.map((node: any) => renderNode(node, 0))}</div>
     </div>
   );
 });
@@ -260,34 +258,40 @@ export const ListView = forwardRef<HTMLDivElement, any>((props, ref) => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const { fireEvent, updateControl } = useVB6Store();
 
-  const selectItem = useCallback((itemId: string, ctrlKey: boolean = false) => {
-    if (!enabled) return;
+  const selectItem = useCallback(
+    (itemId: string, ctrlKey: boolean = false) => {
+      if (!enabled) return;
 
-    let newSelected = new Set(selectedItemIds);
+      let newSelected = new Set(selectedItemIds);
 
-    if (multiSelect && ctrlKey) {
-      if (newSelected.has(itemId)) {
-        newSelected.delete(itemId);
+      if (multiSelect && ctrlKey) {
+        if (newSelected.has(itemId)) {
+          newSelected.delete(itemId);
+        } else {
+          newSelected.add(itemId);
+        }
       } else {
-        newSelected.add(itemId);
+        newSelected = new Set([itemId]);
       }
-    } else {
-      newSelected = new Set([itemId]);
-    }
 
-    setSelectedItemIds(newSelected);
-    updateControl(id, 'selectedItems', Array.from(newSelected));
-    fireEvent(name, 'ItemClick', { item: itemId });
-  }, [enabled, multiSelect, selectedItemIds, id, name, fireEvent, updateControl]);
+      setSelectedItemIds(newSelected);
+      updateControl(id, 'selectedItems', Array.from(newSelected));
+      fireEvent(name, 'ItemClick', { item: itemId });
+    },
+    [enabled, multiSelect, selectedItemIds, id, name, fireEvent, updateControl]
+  );
 
-  const sortItems = useCallback((column: string) => {
-    if (!enabled) return;
+  const sortItems = useCallback(
+    (column: string) => {
+      if (!enabled) return;
 
-    const newDirection = sortColumn === column && sortDirection === 'asc' ? 'desc' : 'asc';
-    setSortColumn(column);
-    setSortDirection(newDirection);
-    fireEvent(name, 'ColumnClick', { column, direction: newDirection });
-  }, [enabled, sortColumn, sortDirection, name, fireEvent]);
+      const newDirection = sortColumn === column && sortDirection === 'asc' ? 'desc' : 'asc';
+      setSortColumn(column);
+      setSortDirection(newDirection);
+      fireEvent(name, 'ColumnClick', { column, direction: newDirection });
+    },
+    [enabled, sortColumn, sortDirection, name, fireEvent]
+  );
 
   const renderReportView = () => (
     <div className="w-full h-full flex flex-col">
@@ -327,21 +331,21 @@ export const ListView = forwardRef<HTMLDivElement, any>((props, ref) => {
               fontSize: font?.size || 8,
               fontFamily: font?.name || 'MS Sans Serif',
             }}
-            onClick={(e) => selectItem(item.key, e.ctrlKey)}
+            onClick={e => selectItem(item.key, e.ctrlKey)}
           >
             {checkboxes && (
               <div className="px-2 py-1 border-r border-gray-300">
                 <input
                   type="checkbox"
                   checked={item.checked || false}
-                  onChange={(e) => {
+                  onChange={e => {
                     e.stopPropagation();
                     fireEvent(name, 'ItemCheck', { item: item.key, checked: e.target.checked });
                   }}
                 />
               </div>
             )}
-            
+
             {columnHeaders.map((header: any, index: number) => (
               <div
                 key={index}
@@ -382,7 +386,7 @@ export const ListView = forwardRef<HTMLDivElement, any>((props, ref) => {
               backgroundColor: selectedItemIds.has(item.key) ? '#316AC5' : 'transparent',
               color: selectedItemIds.has(item.key) ? '#FFFFFF' : foreColor,
             }}
-            onClick={(e) => selectItem(item.key, e.ctrlKey)}
+            onClick={e => selectItem(item.key, e.ctrlKey)}
           >
             {item.icon && (
               <img
@@ -421,7 +425,7 @@ export const ListView = forwardRef<HTMLDivElement, any>((props, ref) => {
             fontSize: font?.size || 8,
             fontFamily: font?.name || 'MS Sans Serif',
           }}
-          onClick={(e) => selectItem(item.key, e.ctrlKey)}
+          onClick={e => selectItem(item.key, e.ctrlKey)}
         >
           {item.icon && (
             <img
@@ -464,14 +468,7 @@ export const ListView = forwardRef<HTMLDivElement, any>((props, ref) => {
   };
 
   return (
-    <div
-      ref={ref}
-      style={listStyle}
-      title={toolTipText}
-      data-name={name}
-      data-tag={tag}
-      {...rest}
-    >
+    <div ref={ref} style={listStyle} title={toolTipText} data-name={name} data-tag={tag} {...rest}>
       {renderView()}
     </div>
   );
@@ -494,18 +491,21 @@ export const ImageList = forwardRef<HTMLDivElement, any>((props, ref) => {
   const [imageCache, setImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
   const { fireEvent } = useVB6Store();
 
-  const loadImage = useCallback((src: string, key: string) => {
-    if (imageCache.has(key)) return;
+  const loadImage = useCallback(
+    (src: string, key: string) => {
+      if (imageCache.has(key)) return;
 
-    const img = new Image();
-    img.onload = () => {
-      setImageCache(prev => new Map(prev).set(key, img));
-    };
-    img.onerror = () => {
-      fireEvent(name, 'ImageLoadError', { key, src });
-    };
-    img.src = src;
-  }, [imageCache, name, fireEvent]);
+      const img = new Image();
+      img.onload = () => {
+        setImageCache(prev => new Map(prev).set(key, img));
+      };
+      img.onerror = () => {
+        fireEvent(name, 'ImageLoadError', { key, src });
+      };
+      img.src = src;
+    },
+    [imageCache, name, fireEvent]
+  );
 
   useEffect(() => {
     images.forEach((image: any, index: number) => {
@@ -515,13 +515,7 @@ export const ImageList = forwardRef<HTMLDivElement, any>((props, ref) => {
 
   // ImageList est un composant invisible qui stocke les images
   return (
-    <div
-      ref={ref}
-      style={{ display: 'none' }}
-      data-name={name}
-      data-tag={tag}
-      {...rest}
-    >
+    <div ref={ref} style={{ display: 'none' }} data-name={name} data-tag={tag} {...rest}>
       {images.map((image: any, index: number) => (
         <img
           key={image.key || index}
@@ -570,17 +564,20 @@ export const TabStrip = forwardRef<HTMLDivElement, any>((props, ref) => {
   const [hoveredTab, setHoveredTab] = useState<number | null>(null);
   const { fireEvent, updateControl } = useVB6Store();
 
-  const selectTab = useCallback((tabIndex: number) => {
-    if (!enabled || tabIndex === activeTab) return;
+  const selectTab = useCallback(
+    (tabIndex: number) => {
+      if (!enabled || tabIndex === activeTab) return;
 
-    setActiveTab(tabIndex);
-    updateControl(id, 'selectedTab', tabIndex);
-    fireEvent(name, 'Click', { tab: tabIndex });
-  }, [enabled, activeTab, id, name, fireEvent, updateControl]);
+      setActiveTab(tabIndex);
+      updateControl(id, 'selectedTab', tabIndex);
+      fireEvent(name, 'Click', { tab: tabIndex });
+    },
+    [enabled, activeTab, id, name, fireEvent, updateControl]
+  );
 
   const renderTabs = () => {
     const isHorizontal = tabOrientation === 'Top' || tabOrientation === 'Bottom';
-    
+
     return (
       <div
         className={`flex ${isHorizontal ? 'flex-row' : 'flex-col'} ${
@@ -597,7 +594,7 @@ export const TabStrip = forwardRef<HTMLDivElement, any>((props, ref) => {
         {tabs.map((tab: any, index: number) => {
           const isActive = index === activeTab;
           const isHovered = index === hoveredTab;
-          
+
           return (
             <button
               key={index}
@@ -651,14 +648,7 @@ export const TabStrip = forwardRef<HTMLDivElement, any>((props, ref) => {
   };
 
   return (
-    <div
-      ref={ref}
-      style={tabStyle}
-      title={toolTipText}
-      data-name={name}
-      data-tag={tag}
-      {...rest}
-    >
+    <div ref={ref} style={tabStyle} title={toolTipText} data-name={name} data-tag={tag} {...rest}>
       {renderTabs()}
       <div className="flex-1 bg-white border border-gray-300 p-2">
         {tabs[activeTab] && tabs[activeTab].content}
@@ -697,16 +687,22 @@ export const Toolbar = forwardRef<HTMLDivElement, any>((props, ref) => {
   const [pressedButton, setPressedButton] = useState<number | null>(null);
   const { fireEvent } = useVB6Store();
 
-  const handleButtonClick = useCallback((buttonIndex: number, button: any) => {
-    if (!enabled || button.enabled === false) return;
+  const handleButtonClick = useCallback(
+    (buttonIndex: number, button: any) => {
+      if (!enabled || button.enabled === false) return;
 
-    fireEvent(name, 'ButtonClick', { button: buttonIndex, key: button.key });
-  }, [enabled, name, fireEvent]);
+      fireEvent(name, 'ButtonClick', { button: buttonIndex, key: button.key });
+    },
+    [enabled, name, fireEvent]
+  );
 
-  const handleButtonMouseDown = useCallback((buttonIndex: number) => {
-    if (!enabled) return;
-    setPressedButton(buttonIndex);
-  }, [enabled]);
+  const handleButtonMouseDown = useCallback(
+    (buttonIndex: number) => {
+      if (!enabled) return;
+      setPressedButton(buttonIndex);
+    },
+    [enabled]
+  );
 
   const handleButtonMouseUp = useCallback(() => {
     setPressedButton(null);
@@ -761,9 +757,10 @@ export const Toolbar = forwardRef<HTMLDivElement, any>((props, ref) => {
               fontSize: font?.size || 8,
               fontFamily: font?.name || 'MS Sans Serif',
               color: isEnabled ? foreColor : '#808080',
-              border: appearance === '3D' || isHovered || isPressed 
-                ? `2px ${isPressed ? 'inset' : 'outset'} #C0C0C0`
-                : 'none',
+              border:
+                appearance === '3D' || isHovered || isPressed
+                  ? `2px ${isPressed ? 'inset' : 'outset'} #C0C0C0`
+                  : 'none',
               backgroundColor: isHovered && !isPressed ? '#E0E0E0' : 'transparent',
               minWidth: 24,
               height: 24,
@@ -784,9 +781,7 @@ export const Toolbar = forwardRef<HTMLDivElement, any>((props, ref) => {
                 style={{ width: 16, height: 16 }}
               />
             )}
-            {button.caption && (
-              <span className={button.image ? 'ml-1' : ''}>{button.caption}</span>
-            )}
+            {button.caption && <span className={button.image ? 'ml-1' : ''}>{button.caption}</span>}
           </button>
         );
       })}
@@ -819,10 +814,13 @@ export const StatusBar = forwardRef<HTMLDivElement, any>((props, ref) => {
 
   const { fireEvent } = useVB6Store();
 
-  const handlePanelClick = useCallback((panelIndex: number, panel: any) => {
-    if (!enabled) return;
-    fireEvent(name, 'PanelClick', { panel: panelIndex, key: panel.key });
-  }, [enabled, name, fireEvent]);
+  const handlePanelClick = useCallback(
+    (panelIndex: number, panel: any) => {
+      if (!enabled) return;
+      fireEvent(name, 'PanelClick', { panel: panelIndex, key: panel.key });
+    },
+    [enabled, name, fireEvent]
+  );
 
   const statusStyle: React.CSSProperties = {
     position: 'absolute',
@@ -850,9 +848,7 @@ export const StatusBar = forwardRef<HTMLDivElement, any>((props, ref) => {
         data-tag={tag}
         {...rest}
       >
-        <div className="px-2 py-1 flex-1">
-          {simpleText}
-        </div>
+        <div className="px-2 py-1 flex-1">{simpleText}</div>
       </div>
     );
   }

@@ -3,6 +3,7 @@
 ## Directory Functions
 
 ### GetWindowsDirectory()
+
 ```typescript
 import { GetWindowsDirectory } from 'src/runtime/VB6WindowsAPIBridge';
 
@@ -13,6 +14,7 @@ const path = buffer.slice(0, length).join('');
 ```
 
 ### GetSystemDirectory()
+
 ```typescript
 import { GetSystemDirectory } from 'src/runtime/VB6WindowsAPIBridge';
 
@@ -22,6 +24,7 @@ const length = GetSystemDirectory(260, buffer);
 ```
 
 ### GetCurrentDirectory()
+
 ```typescript
 import { GetCurrentDirectory } from 'src/runtime/VB6WindowsAPIBridge';
 
@@ -31,6 +34,7 @@ const length = GetCurrentDirectory(260, buffer);
 ```
 
 ### SetCurrentDirectory()
+
 ```typescript
 import { SetCurrentDirectory } from 'src/runtime/VB6WindowsAPIBridge';
 
@@ -41,6 +45,7 @@ SetCurrentDirectory('C:\\MyFolder');
 ## System Information
 
 ### GetComputerName()
+
 ```typescript
 import { GetComputerName } from 'src/runtime/VB6WindowsAPIBridge';
 
@@ -51,6 +56,7 @@ const name = buffer.join('').replace(/\0.*/, '');
 ```
 
 ### SetComputerName()
+
 ```typescript
 import { SetComputerName } from 'src/runtime/VB6WindowsAPIBridge';
 
@@ -59,6 +65,7 @@ SetComputerName('MY-PC');
 ```
 
 ### GetUserName()
+
 ```typescript
 import { GetUserName } from 'src/runtime/VB6WindowsAPIBridge';
 
@@ -68,6 +75,7 @@ GetUserName(buffer, 32);
 ```
 
 ### SetUserName()
+
 ```typescript
 import { SetUserName } from 'src/runtime/VB6WindowsAPIBridge';
 
@@ -78,11 +86,13 @@ SetUserName('John Doe');
 ## Registry Operations
 
 ### Import Registry Class
+
 ```typescript
 import { VB6Registry, WIN32_CONSTANTS } from 'src/runtime/VB6WindowsAPIs';
 ```
 
 ### Open Registry Key
+
 ```typescript
 const hKey = VB6Registry.RegOpenKeyEx(
   WIN32_CONSTANTS.HKEY_LOCAL_MACHINE,
@@ -92,6 +102,7 @@ const hKey = VB6Registry.RegOpenKeyEx(
 ```
 
 ### Read Registry Value
+
 ```typescript
 const value = VB6Registry.RegQueryValueEx(
   WIN32_CONSTANTS.HKEY_LOCAL_MACHINE,
@@ -102,6 +113,7 @@ const value = VB6Registry.RegQueryValueEx(
 ```
 
 ### Write Registry Value
+
 ```typescript
 VB6Registry.RegSetValueEx(
   WIN32_CONSTANTS.HKEY_CURRENT_USER,
@@ -113,6 +125,7 @@ VB6Registry.RegSetValueEx(
 ```
 
 ### Create Registry Key
+
 ```typescript
 VB6Registry.RegCreateKeyEx(
   WIN32_CONSTANTS.HKEY_CURRENT_USER,
@@ -122,6 +135,7 @@ VB6Registry.RegCreateKeyEx(
 ```
 
 ### Delete Registry Value
+
 ```typescript
 VB6Registry.RegDeleteValue(
   WIN32_CONSTANTS.HKEY_CURRENT_USER,
@@ -131,6 +145,7 @@ VB6Registry.RegDeleteValue(
 ```
 
 ### Delete Registry Key
+
 ```typescript
 VB6Registry.RegDeleteKey(
   WIN32_CONSTANTS.HKEY_CURRENT_USER,
@@ -139,6 +154,7 @@ VB6Registry.RegDeleteKey(
 ```
 
 ### Close Registry Key
+
 ```typescript
 VB6Registry.RegCloseKey(hKey);
 ```
@@ -146,6 +162,7 @@ VB6Registry.RegCloseKey(hKey);
 ## Message Boxes
 
 ### Import Constants
+
 ```typescript
 import { WindowsAPI } from 'src/services/VB6WindowsAPI';
 
@@ -154,19 +171,16 @@ const { MB_OK, MB_YESNO, MB_ICONQUESTION, IDYES, IDNO } = WindowsAPI;
 ```
 
 ### Simple OK Dialog
+
 ```typescript
 MessageBox(hWnd, 'Operation complete!', 'Success', MB_OK);
 // Returns: IDOK (1)
 ```
 
 ### Confirm Yes/No
+
 ```typescript
-const result = MessageBox(
-  hWnd,
-  'Continue?',
-  'Confirm',
-  MB_YESNO | MB_ICONQUESTION
-);
+const result = MessageBox(hWnd, 'Continue?', 'Confirm', MB_YESNO | MB_ICONQUESTION);
 
 if (result === IDYES) {
   // User clicked Yes
@@ -176,6 +190,7 @@ if (result === IDYES) {
 ```
 
 ### Yes/No/Cancel Dialog
+
 ```typescript
 const result = MessageBox(
   hWnd,
@@ -198,27 +213,20 @@ switch (result) {
 ```
 
 ### Error Dialog
+
 ```typescript
-MessageBox(
-  hWnd,
-  'An error occurred!',
-  'Error',
-  MB_OK | MB_ICONERROR
-);
+MessageBox(hWnd, 'An error occurred!', 'Error', MB_OK | MB_ICONERROR);
 // Returns: IDOK (1)
 ```
 
 ### Warning Dialog
+
 ```typescript
-MessageBox(
-  hWnd,
-  'This action cannot be undone.',
-  'Warning',
-  MB_OKCANCEL | MB_ICONWARNING
-);
+MessageBox(hWnd, 'This action cannot be undone.', 'Warning', MB_OKCANCEL | MB_ICONWARNING);
 ```
 
 ### Retry/Cancel Dialog
+
 ```typescript
 const result = MessageBox(
   hWnd,
@@ -227,7 +235,8 @@ const result = MessageBox(
   MB_RETRYCANCEL | MB_ICONERROR
 );
 
-if (result === IDRETRY) { // 4
+if (result === IDRETRY) {
+  // 4
   // Retry operation
 } else {
   // Cancel
@@ -235,6 +244,7 @@ if (result === IDRETRY) { // 4
 ```
 
 ### Abort/Retry/Ignore Dialog
+
 ```typescript
 const result = MessageBox(
   hWnd,
@@ -259,6 +269,7 @@ switch (result) {
 ## Time Functions
 
 ### Get Tick Count
+
 ```typescript
 import { GetTickCount } from 'src/runtime/VB6WindowsAPIBridge';
 
@@ -270,6 +281,7 @@ console.log(`Elapsed: ${elapsed}ms`);
 ```
 
 ### Asynchronous Sleep
+
 ```typescript
 import { Sleep } from 'src/runtime/VB6WindowsAPIs';
 
@@ -281,6 +293,7 @@ async function delayedOperation() {
 ```
 
 ### Synchronous Sleep (Not Recommended)
+
 ```typescript
 import { SleepSync } from 'src/runtime/VB6WindowsAPIs';
 
@@ -291,48 +304,48 @@ console.log('Done!');
 ## Button Type Constants
 
 ```typescript
-MB_OK              // 0 - OK button only
-MB_OKCANCEL        // 1 - OK and Cancel buttons
-MB_ABORTRETRYIGNORE // 2 - Abort, Retry, Ignore buttons
-MB_YESNOCANCEL     // 3 - Yes, No, Cancel buttons
-MB_YESNO           // 4 - Yes and No buttons
-MB_RETRYCANCEL     // 5 - Retry and Cancel buttons
+MB_OK; // 0 - OK button only
+MB_OKCANCEL; // 1 - OK and Cancel buttons
+MB_ABORTRETRYIGNORE; // 2 - Abort, Retry, Ignore buttons
+MB_YESNOCANCEL; // 3 - Yes, No, Cancel buttons
+MB_YESNO; // 4 - Yes and No buttons
+MB_RETRYCANCEL; // 5 - Retry and Cancel buttons
 ```
 
 ## Icon Type Constants
 
 ```typescript
-MB_ICONASTERISK     // Information icon (ℹ️)
-MB_ICONQUESTION     // Question icon (❓)
-MB_ICONEXCLAMATION  // Warning icon (⚠️)
-MB_ICONHAND         // Error icon (❌)
-MB_ICONERROR        // Error icon (❌)
-MB_ICONWARNING      // Warning icon (⚠️)
-MB_ICONINFORMATION  // Information icon (ℹ️)
+MB_ICONASTERISK; // Information icon (ℹ️)
+MB_ICONQUESTION; // Question icon (❓)
+MB_ICONEXCLAMATION; // Warning icon (⚠️)
+MB_ICONHAND; // Error icon (❌)
+MB_ICONERROR; // Error icon (❌)
+MB_ICONWARNING; // Warning icon (⚠️)
+MB_ICONINFORMATION; // Information icon (ℹ️)
 ```
 
 ## Return Value Constants
 
 ```typescript
-IDOK     // 1
-IDCANCEL // 2
-IDABORT  // 3
-IDRETRY  // 4
-IDIGNORE // 5
-IDYES    // 6
-IDNO     // 7
+IDOK; // 1
+IDCANCEL; // 2
+IDABORT; // 3
+IDRETRY; // 4
+IDIGNORE; // 5
+IDYES; // 6
+IDNO; // 7
 ```
 
 ## Registry Key Constants
 
 ```typescript
-HKEY_CLASSES_ROOT      // 0x80000000
-HKEY_CURRENT_USER      // 0x80000001
-HKEY_LOCAL_MACHINE     // 0x80000002
-HKEY_USERS             // 0x80000003
-HKEY_PERFORMANCE_DATA  // 0x80000004
-HKEY_CURRENT_CONFIG    // 0x80000005
-HKEY_DYN_DATA          // 0x80000006
+HKEY_CLASSES_ROOT; // 0x80000000
+HKEY_CURRENT_USER; // 0x80000001
+HKEY_LOCAL_MACHINE; // 0x80000002
+HKEY_USERS; // 0x80000003
+HKEY_PERFORMANCE_DATA; // 0x80000004
+HKEY_CURRENT_CONFIG; // 0x80000005
+HKEY_DYN_DATA; // 0x80000006
 ```
 
 ## Common Registry Paths

@@ -27,7 +27,12 @@ function shouldLog(level: Level) {
   return levelOrder[level] >= levelOrder[minLevel];
 }
 
-export function logEvent(category: string, level: Level, message: string, data?: Record<string, unknown>) {
+export function logEvent(
+  category: string,
+  level: Level,
+  message: string,
+  data?: Record<string, unknown>
+) {
   try {
     if (!shouldLog(level)) return;
     const evt: LogEvent = {
@@ -42,7 +47,7 @@ export function logEvent(category: string, level: Level, message: string, data?:
     // Always console in dev; respect level
     if (import.meta.env.DEV) {
       const fn = level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'log';
-       
+
       console[fn](`[${evt.level}] ${evt.category}: ${evt.message}`, evt.data || '');
     }
     if (!enabled) return;
@@ -86,4 +91,3 @@ export function flush() {
 export function trackPageView(url: string) {
   logEvent('analytics', 'info', 'page_view', { url });
 }
-

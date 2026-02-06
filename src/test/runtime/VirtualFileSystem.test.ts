@@ -5,7 +5,11 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { persistentVFS, VB6FileAttribute, PersistentVFSEntry } from '../../runtime/VB6PersistentFileSystem';
+import {
+  persistentVFS,
+  VB6FileAttribute,
+  PersistentVFSEntry,
+} from '../../runtime/VB6PersistentFileSystem';
 
 describe('PersistentVirtualFileSystem', () => {
   beforeEach(async () => {

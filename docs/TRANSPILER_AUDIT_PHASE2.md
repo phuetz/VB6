@@ -7,29 +7,35 @@
 ## ✅ POINTS POSITIFS
 
 ### 1. Support Property Get/Let/Set
+
 ```typescript
 // Génère correctement les Property procedures
 case 'propertyGet':
   header = `get ${proc.name}()`;
   // Intégration avec vb6PropertySystem
 ```
+
 **Impact**: ✓ Bon support des propriétés VB6
 
 ### 2. Gestion des Instances
+
 ```typescript
 constructor() {
   this._vb6InstanceId = vb6PropertySystem.createInstance('${className}');
 }
 ```
+
 **Impact**: ✓ Isolation correcte des instances de classes
 
 ### 3. Property Descriptors JavaScript
+
 ```typescript
 Object.defineProperty(${className}.prototype, '${propertyName}', {
   get: function() { ... },
   set: function(value) { ... }
 });
 ```
+
 **Impact**: ✓ Compatibilité avec JavaScript natif
 
 ## ❌ PROBLÈMES CRITIQUES
@@ -40,11 +46,12 @@ Object.defineProperty(${className}.prototype, '${propertyName}', {
 // ❌ PROBLÈME: Transpilation simpliste ligne 138-159
 jsCode = jsCode
   .replace(/Dim\s+(\w+)\s+As\s+\w+/g, 'let $1')
-  .replace(/Private Sub\s+(\w+)_(\w+)\s*\(\)/g, 'function $1_$2()')
-  // ... 15+ regex chains
+  .replace(/Private Sub\s+(\w+)_(\w+)\s*\(\)/g, 'function $1_$2()');
+// ... 15+ regex chains
 ```
 
 **Problèmes**:
+
 - ❌ Ne gère pas les cas complexes
 - ❌ Pas de validation syntaxique
 - ❌ Ordre des remplacements critique
@@ -52,6 +59,7 @@ jsCode = jsCode
 - ❌ Impossible à maintenir
 
 **Exemple de bug**:
+
 ```vb6
 ' VB6 Code
 Dim message As String
@@ -75,6 +83,7 @@ transpileVB6ToJS(vb6Code: string): string {
 ```
 
 **Conséquences**:
+
 - ❌ Perte d'information sémantique
 - ❌ Pas de vérification de types
 - ❌ Impossible d'optimiser
@@ -85,6 +94,7 @@ transpileVB6ToJS(vb6Code: string): string {
 ### 3. **Aucune Feature Phase 1 Supportée**
 
 Le transpiler actuel **ne supporte pas**:
+
 - ❌ User-Defined Types (UDT)
 - ❌ Enums
 - ❌ Declare Function/Sub
@@ -102,10 +112,11 @@ Le transpiler actuel **ne supporte pas**:
 
 ```typescript
 // ❌ PROBLÈME: Aucune génération de source maps
-return jsCode;  // Pas de mapping ligne VB6 → ligne JS
+return jsCode; // Pas de mapping ligne VB6 → ligne JS
 ```
 
 **Conséquences**:
+
 - ❌ Debugging impossible
 - ❌ Erreurs JavaScript illisibles
 - ❌ Stack traces inutilisables
@@ -115,6 +126,7 @@ return jsCode;  // Pas de mapping ligne VB6 → ligne JS
 ### 5. **Pas d'Optimisations**
 
 Le transpiler ne fait **aucune** optimisation:
+
 - ❌ Pas de dead code elimination
 - ❌ Pas d'inline expansion
 - ❌ Pas de constant folding
@@ -159,15 +171,15 @@ catch (error) {
 
 ## 📊 MÉTRIQUES
 
-| Critère | Note | Commentaire |
-|---------|------|-------------|
-| **Robustesse** | 2/10 | Regex fragiles, pas de validation |
-| **Compatibilité VB6** | 1/10 | 0/10 features Phase 1 supportées |
-| **Performance** | 3/10 | Pas d'optimisations |
-| **Maintenabilité** | 3/10 | Code dupliqué, architecture simpliste |
-| **Debugging** | 1/10 | Pas de source maps |
-| **Tests** | 2/10 | Pas de tests de performance |
-| **Architecture** | 2/10 | N'utilise pas l'AST |
+| Critère               | Note | Commentaire                           |
+| --------------------- | ---- | ------------------------------------- |
+| **Robustesse**        | 2/10 | Regex fragiles, pas de validation     |
+| **Compatibilité VB6** | 1/10 | 0/10 features Phase 1 supportées      |
+| **Performance**       | 3/10 | Pas d'optimisations                   |
+| **Maintenabilité**    | 3/10 | Code dupliqué, architecture simpliste |
+| **Debugging**         | 1/10 | Pas de source maps                    |
+| **Tests**             | 2/10 | Pas de tests de performance           |
+| **Architecture**      | 2/10 | N'utilise pas l'AST                   |
 
 **MOYENNE: 2/10** ⚠️
 
@@ -199,17 +211,21 @@ export class VB6ASTTranspiler {
       javascript: jsCode,
       sourceMap: this.sourceMap.toString(),
       errors: [],
-      warnings: []
+      warnings: [],
     };
   }
 
   private generateFromAST(node: ASTNode): string {
     // Visitor pattern sur l'AST
-    switch(node.type) {
-      case 'Module': return this.generateModule(node);
-      case 'UDT': return this.generateUDT(node);
-      case 'Enum': return this.generateEnum(node);
-      case 'Procedure': return this.generateProcedure(node);
+    switch (node.type) {
+      case 'Module':
+        return this.generateModule(node);
+      case 'UDT':
+        return this.generateUDT(node);
+      case 'Enum':
+        return this.generateEnum(node);
+      case 'Procedure':
+        return this.generateProcedure(node);
       // ... tous les types de nodes
     }
   }
@@ -219,6 +235,7 @@ export class VB6ASTTranspiler {
 ### Priorité 2 (HAUTE): Support Features Phase 1
 
 Implémenter la transpilation pour:
+
 1. User-Defined Types → Classes JavaScript
 2. Enums → Objects avec freeze
 3. Declare → Bindings natifs
@@ -237,12 +254,14 @@ Implémenter la transpilation pour:
    - Supprimer variables inutilisées
 
 2. **Constant Folding**
+
    ```vb6
    Const Pi = 3.14159
    x = Pi * 2  ' → x = 6.28318
    ```
 
 3. **Inline Expansion**
+
    ```vb6
    Function Add(a, b)
      Add = a + b
@@ -268,7 +287,7 @@ class TranspilerWithMaps {
 
   constructor() {
     this.map = new SourceMapGenerator({
-      file: 'output.js'
+      file: 'output.js',
     });
   }
 
@@ -277,7 +296,7 @@ class TranspilerWithMaps {
     this.map.addMapping({
       source: 'input.vb6',
       original: { line: vb6Line, column: 0 },
-      generated: { line: this.currentJSLine, column: 0 }
+      generated: { line: this.currentJSLine, column: 0 },
     });
   }
 }
@@ -286,45 +305,51 @@ class TranspilerWithMaps {
 ## 📈 PLAN D'AMÉLIORATION
 
 ### Phase 2.1: Audit et Analyse (ACTUEL)
+
 - ✅ Audit du code existant
 - ✅ Identification des problèmes
 - ✅ Recommandations prioritaires
 
 ### Phase 2.2: Transpiler AST (3-4 semaines)
+
 - Réécriture complète basée sur AST
 - Visitor pattern pour génération de code
 - Tests unitaires pour chaque type de node
 
 ### Phase 2.3: Features Phase 1 (2-3 semaines)
+
 - Support des 10 features de Phase 1
 - Tests d'intégration complets
 - Validation avec programmes VB6 réels
 
 ### Phase 2.4: Optimisations (2 semaines)
+
 - Dead code elimination
 - Constant folding
 - Inline expansion
 - Benchmarks de performance
 
 ### Phase 2.5: Source Maps (1 semaine)
+
 - Génération de source maps v3
 - Intégration avec debugger
 - Tests de debugging
 
 ## 🎯 OBJECTIFS MESURABLES
 
-| Objectif | Actuel | Cible Phase 2 |
-|----------|--------|---------------|
-| Features Phase 1 supportées | 0/10 | 10/10 (100%) |
-| Tests passants | N/A | 100+ tests |
-| Performance transpilation | ? | 100K+ lignes/sec |
-| Qualité code généré | 2/10 | 8/10 |
-| Source maps | Non | Oui |
-| Optimisations | 0 | 4+ types |
+| Objectif                    | Actuel | Cible Phase 2    |
+| --------------------------- | ------ | ---------------- |
+| Features Phase 1 supportées | 0/10   | 10/10 (100%)     |
+| Tests passants              | N/A    | 100+ tests       |
+| Performance transpilation   | ?      | 100K+ lignes/sec |
+| Qualité code généré         | 2/10   | 8/10             |
+| Source maps                 | Non    | Oui              |
+| Optimisations               | 0      | 4+ types         |
 
 ## 📝 CONCLUSION
 
 Le transpiler actuel est **fonctionnel mais limité**. Il nécessite une **réécriture complète** pour:
+
 1. Utiliser l'AST au lieu de regex
 2. Supporter les features Phase 1
 3. Générer du code optimisé

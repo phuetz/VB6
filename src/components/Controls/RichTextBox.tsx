@@ -26,7 +26,7 @@ const RichTextBox: React.FC<RichTextBoxProps> = ({
   onSelect,
   onDoubleClick,
   onMove,
-  onResize
+  onResize,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -59,85 +59,94 @@ const RichTextBox: React.FC<RichTextBoxProps> = ({
   const rightMargin = properties.RightMargin || 0;
 
   // Convert RTF to HTML (simplified implementation)
-  const rtfToHtml = useCallback((rtf: string): string => {
-    if (!rtf) return text;
-    
-    // Basic RTF to HTML conversion
-    let html = rtf;
-    
-    // Replace RTF formatting codes with HTML
-    html = html.replace(/\\b([^\\]+)\\b0/g, '<b>$1</b>'); // Bold
-    html = html.replace(/\\i([^\\]+)\\i0/g, '<i>$1</i>'); // Italic
-    html = html.replace(/\\ul([^\\]+)\\ul0/g, '<u>$1</u>'); // Underline
-    html = html.replace(/\\fs(\d+)([^\\]+)/g, '<span style="font-size: $1pt">$2</span>'); // Font size
-    html = html.replace(/\\cf(\d+)([^\\]+)/g, '<span style="color: var(--rtf-color-$1)">$2</span>'); // Color
-    html = html.replace(/\\par/g, '<br>'); // Paragraph break
-    html = html.replace(/\\tab/g, '&nbsp;&nbsp;&nbsp;&nbsp;'); // Tab
-    html = html.replace(/\\\\/g, '\\'); // Escaped backslash
-    html = html.replace(/\\{/g, '{'); // Escaped brace
-    html = html.replace(/\\}/g, '}'); // Escaped brace
-    
-    return html;
-  }, [text]);
+  const rtfToHtml = useCallback(
+    (rtf: string): string => {
+      if (!rtf) return text;
+
+      // Basic RTF to HTML conversion
+      let html = rtf;
+
+      // Replace RTF formatting codes with HTML
+      html = html.replace(/\\b([^\\]+)\\b0/g, '<b>$1</b>'); // Bold
+      html = html.replace(/\\i([^\\]+)\\i0/g, '<i>$1</i>'); // Italic
+      html = html.replace(/\\ul([^\\]+)\\ul0/g, '<u>$1</u>'); // Underline
+      html = html.replace(/\\fs(\d+)([^\\]+)/g, '<span style="font-size: $1pt">$2</span>'); // Font size
+      html = html.replace(
+        /\\cf(\d+)([^\\]+)/g,
+        '<span style="color: var(--rtf-color-$1)">$2</span>'
+      ); // Color
+      html = html.replace(/\\par/g, '<br>'); // Paragraph break
+      html = html.replace(/\\tab/g, '&nbsp;&nbsp;&nbsp;&nbsp;'); // Tab
+      html = html.replace(/\\\\/g, '\\'); // Escaped backslash
+      html = html.replace(/\\{/g, '{'); // Escaped brace
+      html = html.replace(/\\}/g, '}'); // Escaped brace
+
+      return html;
+    },
+    [text]
+  );
 
   // Convert HTML to RTF (simplified implementation)
   const htmlToRtf = useCallback((html: string): string => {
     let rtf = html;
-    
+
     // Convert HTML tags to RTF codes
     rtf = rtf.replace(/<b>(.*?)<\/b>/g, '\\b$1\\b0');
     rtf = rtf.replace(/<i>(.*?)<\/i>/g, '\\i$1\\i0');
     rtf = rtf.replace(/<u>(.*?)<\/u>/g, '\\ul$1\\ul0');
     rtf = rtf.replace(/<br>/g, '\\par');
     rtf = rtf.replace(/&nbsp;/g, ' ');
-    
+
     return `{\\rtf1\\ansi\\deff0 ${rtf}}`;
   }, []);
 
   // Apply formatting to selected text
-  const applyFormat = useCallback((format: RTFFormat) => {
-    if (!editorRef.current || !selectedRange) return;
+  const applyFormat = useCallback(
+    (format: RTFFormat) => {
+      if (!editorRef.current || !selectedRange) return;
 
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return;
 
-    const range = selection.getRangeAt(0);
-    const span = document.createElement('span');
-    
-    // Apply formatting styles
-    if (format.bold !== undefined) {
-      span.style.fontWeight = format.bold ? 'bold' : 'normal';
-    }
-    if (format.italic !== undefined) {
-      span.style.fontStyle = format.italic ? 'italic' : 'normal';
-    }
-    if (format.underline !== undefined) {
-      span.style.textDecoration = format.underline ? 'underline' : 'none';
-    }
-    if (format.fontSize) {
-      span.style.fontSize = `${format.fontSize}pt`;
-    }
-    if (format.fontName) {
-      span.style.fontFamily = format.fontName;
-    }
-    if (format.color) {
-      span.style.color = format.color;
-    }
-    if (format.backColor) {
-      span.style.backgroundColor = format.backColor;
-    }
+      const range = selection.getRangeAt(0);
+      const span = document.createElement('span');
 
-    try {
-      range.surroundContents(span);
-    } catch (e) {
-      // If range spans multiple elements, extract and wrap content
-      const contents = range.extractContents();
-      span.appendChild(contents);
-      range.insertNode(span);
-    }
+      // Apply formatting styles
+      if (format.bold !== undefined) {
+        span.style.fontWeight = format.bold ? 'bold' : 'normal';
+      }
+      if (format.italic !== undefined) {
+        span.style.fontStyle = format.italic ? 'italic' : 'normal';
+      }
+      if (format.underline !== undefined) {
+        span.style.textDecoration = format.underline ? 'underline' : 'none';
+      }
+      if (format.fontSize) {
+        span.style.fontSize = `${format.fontSize}pt`;
+      }
+      if (format.fontName) {
+        span.style.fontFamily = format.fontName;
+      }
+      if (format.color) {
+        span.style.color = format.color;
+      }
+      if (format.backColor) {
+        span.style.backgroundColor = format.backColor;
+      }
 
-    selection.removeAllRanges();
-  }, [selectedRange]);
+      try {
+        range.surroundContents(span);
+      } catch (e) {
+        // If range spans multiple elements, extract and wrap content
+        const contents = range.extractContents();
+        span.appendChild(contents);
+        range.insertNode(span);
+      }
+
+      selection.removeAllRanges();
+    },
+    [selectedRange]
+  );
 
   // VB6 Methods simulation
   const vb6Methods = {
@@ -148,29 +157,27 @@ const RichTextBox: React.FC<RichTextBoxProps> = ({
       const index = content.indexOf(searchString, startPos);
       return index;
     },
-    
+
     GetLineFromChar: (charIndex: number) => {
       if (!editorRef.current) return 0;
       const content = editorRef.current.innerText;
       const textBeforeChar = content.substring(0, charIndex);
       return textBeforeChar.split('\n').length - 1;
     },
-    
+
     LoadFile: (filename: string, fileType?: number) => {
       // Simulate file loading (in real VB6, this would load from disk)
-      console.log(`LoadFile: ${filename}, type: ${fileType}`);
     },
-    
+
     SaveFile: (filename: string, fileType?: number) => {
       // Simulate file saving - use textContent for safer content extraction
       const content = editorRef.current?.textContent || '';
-      console.log(`SaveFile: ${filename}, type: ${fileType}, content:`, content);
     },
-    
+
     Span: (characterStart: number, characterEnd?: number) => {
       // Select text span
       if (!editorRef.current) return;
-      
+
       const range = document.createRange();
       const textNode = editorRef.current.firstChild;
       if (textNode) {
@@ -180,7 +187,7 @@ const RichTextBox: React.FC<RichTextBoxProps> = ({
         selection?.removeAllRanges();
         selection?.addRange(range);
       }
-    }
+    },
   };
 
   // Handle selection change
@@ -194,13 +201,13 @@ const RichTextBox: React.FC<RichTextBoxProps> = ({
   // Handle text change
   const handleTextChange = useCallback(() => {
     if (!editorRef.current) return;
-    
+
     // Use cloneNode and safe serialization instead of innerHTML
     const clone = editorRef.current.cloneNode(true) as HTMLElement;
     const serializer = new XMLSerializer();
     const html = serializer.serializeToString(clone);
     const rtf = htmlToRtf(html);
-    
+
     // Trigger VB6 events
     if (control.events?.Change) {
       control.events.Change();
@@ -245,7 +252,7 @@ const RichTextBox: React.FC<RichTextBoxProps> = ({
     } else {
       setIsDragging(true);
     }
-    
+
     setDragStart({ x: e.clientX, y: e.clientY });
   };
 
@@ -308,7 +315,7 @@ const RichTextBox: React.FC<RichTextBoxProps> = ({
       const parser = new DOMParser();
       const doc = parser.parseFromString(`<div>${rtfToHtml(textRTF)}</div>`, 'text/html');
       const sanitizedDiv = doc.body.firstChild as HTMLElement;
-      
+
       // Clear and safely append content
       editorRef.current.textContent = '';
       if (sanitizedDiv) {
@@ -333,11 +340,16 @@ const RichTextBox: React.FC<RichTextBoxProps> = ({
     fontSize: `${properties.FontSize || 8}pt`,
     color: properties.ForeColor || '#000000',
     cursor: isDragging ? 'move' : 'default',
-    overflow: scrollBars === 0 ? 'hidden' : 
-              scrollBars === 1 ? 'scroll' :
-              scrollBars === 2 ? 'scroll' : 'auto',
+    overflow:
+      scrollBars === 0
+        ? 'hidden'
+        : scrollBars === 1
+          ? 'scroll'
+          : scrollBars === 2
+            ? 'scroll'
+            : 'auto',
     overflowX: scrollBars === 1 || scrollBars === 3 ? 'scroll' : 'hidden',
-    overflowY: scrollBars === 2 || scrollBars === 3 ? 'scroll' : 'hidden'
+    overflowY: scrollBars === 2 || scrollBars === 3 ? 'scroll' : 'hidden',
   };
 
   const editorStyle: React.CSSProperties = {
@@ -352,8 +364,7 @@ const RichTextBox: React.FC<RichTextBoxProps> = ({
     backgroundColor: 'transparent',
     wordWrap: wordWrap ? 'break-word' : 'normal',
     whiteSpace: multiLine ? 'pre-wrap' : 'nowrap',
-    textAlign: selectionAlignment === 1 ? 'right' : 
-               selectionAlignment === 2 ? 'center' : 'left'
+    textAlign: selectionAlignment === 1 ? 'right' : selectionAlignment === 2 ? 'center' : 'left',
   };
 
   return (
@@ -368,7 +379,7 @@ const RichTextBox: React.FC<RichTextBoxProps> = ({
         style={editorStyle}
         contentEditable={!readOnly && !locked}
         suppressContentEditableWarning={true}
-        onKeyDown={(e) => {
+        onKeyDown={e => {
           if (maxLength > 0 && editorRef.current) {
             const currentLength = editorRef.current.innerText.length;
             if (currentLength >= maxLength && e.key.length === 1) {
@@ -377,18 +388,110 @@ const RichTextBox: React.FC<RichTextBoxProps> = ({
           }
         }}
       />
-      
+
       {/* Resize handles */}
       {selected && (
         <>
-          <div className="vb6-resize-handle nw" style={{ position: 'absolute', top: -4, left: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'nw-resize' }} />
-          <div className="vb6-resize-handle ne" style={{ position: 'absolute', top: -4, right: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'ne-resize' }} />
-          <div className="vb6-resize-handle sw" style={{ position: 'absolute', bottom: -4, left: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'sw-resize' }} />
-          <div className="vb6-resize-handle se" style={{ position: 'absolute', bottom: -4, right: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'se-resize' }} />
-          <div className="vb6-resize-handle n" style={{ position: 'absolute', top: -4, left: '50%', marginLeft: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'n-resize' }} />
-          <div className="vb6-resize-handle s" style={{ position: 'absolute', bottom: -4, left: '50%', marginLeft: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 's-resize' }} />
-          <div className="vb6-resize-handle w" style={{ position: 'absolute', top: '50%', left: -4, marginTop: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'w-resize' }} />
-          <div className="vb6-resize-handle e" style={{ position: 'absolute', top: '50%', right: -4, marginTop: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'e-resize' }} />
+          <div
+            className="vb6-resize-handle nw"
+            style={{
+              position: 'absolute',
+              top: -4,
+              left: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'nw-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle ne"
+            style={{
+              position: 'absolute',
+              top: -4,
+              right: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'ne-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle sw"
+            style={{
+              position: 'absolute',
+              bottom: -4,
+              left: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'sw-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle se"
+            style={{
+              position: 'absolute',
+              bottom: -4,
+              right: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'se-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle n"
+            style={{
+              position: 'absolute',
+              top: -4,
+              left: '50%',
+              marginLeft: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'n-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle s"
+            style={{
+              position: 'absolute',
+              bottom: -4,
+              left: '50%',
+              marginLeft: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 's-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle w"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: -4,
+              marginTop: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'w-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle e"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              right: -4,
+              marginTop: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'e-resize',
+            }}
+          />
         </>
       )}
     </div>

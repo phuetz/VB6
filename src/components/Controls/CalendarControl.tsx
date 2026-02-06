@@ -11,7 +11,7 @@ import { useVB6Store } from '../../stores/vb6Store';
 export enum CalendarConstants {
   mvwMaximumDays = 42, // Maximum days displayed
   mvwMinimumWeeks = 1,
-  mvwMaximumWeeks = 6
+  mvwMaximumWeeks = 6,
 }
 
 export enum DayOfWeekConstants {
@@ -21,7 +21,7 @@ export enum DayOfWeekConstants {
   mvwWednesday = 4,
   mvwThursday = 5,
   mvwFriday = 6,
-  mvwSaturday = 7
+  mvwSaturday = 7,
 }
 
 export interface CalendarProps extends VB6ControlPropsEnhanced {
@@ -29,7 +29,7 @@ export interface CalendarProps extends VB6ControlPropsEnhanced {
   value?: Date;
   minDate?: Date;
   maxDate?: Date;
-  
+
   // Display properties
   showDateSelectors?: boolean;
   showDays?: boolean;
@@ -38,13 +38,13 @@ export interface CalendarProps extends VB6ControlPropsEnhanced {
   showToday?: boolean;
   showVerticalGrid?: boolean;
   showWeekNumbers?: boolean;
-  
+
   // Behavior properties
   dayLength?: number; // 0=long, 1=short, 2=single letter
   firstDay?: DayOfWeekConstants;
   monthLength?: number; // 0=long, 1=short
   scrollRate?: number;
-  
+
   // Colors
   backColor?: string;
   dayOfWeekBackColor?: string;
@@ -55,12 +55,12 @@ export interface CalendarProps extends VB6ControlPropsEnhanced {
   trailingForeColor?: string;
   weekNumberBackColor?: string;
   weekNumberForeColor?: string;
-  
+
   // Font properties
   titleFont?: string;
   dayOfWeekFont?: string;
   dateFont?: string;
-  
+
   // Events
   onSelChange?: (value: Date) => void;
   onGetDayBold?: (date: Date, bold: boolean) => void;
@@ -121,13 +121,33 @@ export const CalendarControl = forwardRef<HTMLDivElement, CalendarProps>((props,
 
   // Month and day names
   const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   const monthNamesShort = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
 
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -135,104 +155,121 @@ export const CalendarControl = forwardRef<HTMLDivElement, CalendarProps>((props,
   const dayNamesLetter = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   // VB6 Methods
-  const vb6Methods = useMemo(() => ({
-    AboutBox: () => {
-      alert('Microsoft Calendar Control\nVersion 6.0\n© Microsoft Corporation');
-    },
+  const vb6Methods = useMemo(
+    () => ({
+      AboutBox: () => {
+        alert('Microsoft Calendar Control\nVersion 6.0\n© Microsoft Corporation');
+      },
 
-    NextDay: () => {
-      const newDate = new Date(selectedDate);
-      newDate.setDate(newDate.getDate() + 1);
-      if (newDate <= maxDate) {
-        setSelectedDate(newDate);
-        setCurrentDate(newDate);
-        updateViewIfNeeded(newDate);
-        onSelChange?.(newDate);
-        fireEvent(name, 'SelChange', { value: newDate });
-      }
-    },
+      NextDay: () => {
+        const newDate = new Date(selectedDate);
+        newDate.setDate(newDate.getDate() + 1);
+        if (newDate <= maxDate) {
+          setSelectedDate(newDate);
+          setCurrentDate(newDate);
+          updateViewIfNeeded(newDate);
+          onSelChange?.(newDate);
+          fireEvent(name, 'SelChange', { value: newDate });
+        }
+      },
 
-    PreviousDay: () => {
-      const newDate = new Date(selectedDate);
-      newDate.setDate(newDate.getDate() - 1);
-      if (newDate >= minDate) {
-        setSelectedDate(newDate);
-        setCurrentDate(newDate);
-        updateViewIfNeeded(newDate);
-        onSelChange?.(newDate);
-        fireEvent(name, 'SelChange', { value: newDate });
-      }
-    },
+      PreviousDay: () => {
+        const newDate = new Date(selectedDate);
+        newDate.setDate(newDate.getDate() - 1);
+        if (newDate >= minDate) {
+          setSelectedDate(newDate);
+          setCurrentDate(newDate);
+          updateViewIfNeeded(newDate);
+          onSelChange?.(newDate);
+          fireEvent(name, 'SelChange', { value: newDate });
+        }
+      },
 
-    NextWeek: () => {
-      const newDate = new Date(selectedDate);
-      newDate.setDate(newDate.getDate() + 7);
-      if (newDate <= maxDate) {
-        setSelectedDate(newDate);
-        setCurrentDate(newDate);
-        updateViewIfNeeded(newDate);
-        onSelChange?.(newDate);
-        fireEvent(name, 'SelChange', { value: newDate });
-      }
-    },
+      NextWeek: () => {
+        const newDate = new Date(selectedDate);
+        newDate.setDate(newDate.getDate() + 7);
+        if (newDate <= maxDate) {
+          setSelectedDate(newDate);
+          setCurrentDate(newDate);
+          updateViewIfNeeded(newDate);
+          onSelChange?.(newDate);
+          fireEvent(name, 'SelChange', { value: newDate });
+        }
+      },
 
-    PreviousWeek: () => {
-      const newDate = new Date(selectedDate);
-      newDate.setDate(newDate.getDate() - 7);
-      if (newDate >= minDate) {
-        setSelectedDate(newDate);
-        setCurrentDate(newDate);
-        updateViewIfNeeded(newDate);
-        onSelChange?.(newDate);
-        fireEvent(name, 'SelChange', { value: newDate });
-      }
-    },
+      PreviousWeek: () => {
+        const newDate = new Date(selectedDate);
+        newDate.setDate(newDate.getDate() - 7);
+        if (newDate >= minDate) {
+          setSelectedDate(newDate);
+          setCurrentDate(newDate);
+          updateViewIfNeeded(newDate);
+          onSelChange?.(newDate);
+          fireEvent(name, 'SelChange', { value: newDate });
+        }
+      },
 
-    NextMonth: () => {
-      let newMonth = viewMonth + 1;
-      let newYear = viewYear;
-      if (newMonth > 11) {
-        newMonth = 0;
-        newYear++;
-      }
-      setViewMonth(newMonth);
-      setViewYear(newYear);
-    },
+      NextMonth: () => {
+        let newMonth = viewMonth + 1;
+        let newYear = viewYear;
+        if (newMonth > 11) {
+          newMonth = 0;
+          newYear++;
+        }
+        setViewMonth(newMonth);
+        setViewYear(newYear);
+      },
 
-    PreviousMonth: () => {
-      let newMonth = viewMonth - 1;
-      let newYear = viewYear;
-      if (newMonth < 0) {
-        newMonth = 11;
-        newYear--;
-      }
-      setViewMonth(newMonth);
-      setViewYear(newYear);
-    },
+      PreviousMonth: () => {
+        let newMonth = viewMonth - 1;
+        let newYear = viewYear;
+        if (newMonth < 0) {
+          newMonth = 11;
+          newYear--;
+        }
+        setViewMonth(newMonth);
+        setViewYear(newYear);
+      },
 
-    NextYear: () => {
-      setViewYear(viewYear + 1);
-    },
+      NextYear: () => {
+        setViewYear(viewYear + 1);
+      },
 
-    PreviousYear: () => {
-      setViewYear(viewYear - 1);
-    },
+      PreviousYear: () => {
+        setViewYear(viewYear - 1);
+      },
 
-    Today: () => {
-      const today = new Date();
-      setSelectedDate(today);
-      setCurrentDate(today);
-      setViewMonth(today.getMonth());
-      setViewYear(today.getFullYear());
-      onSelChange?.(today);
-      fireEvent(name, 'SelChange', { value: today });
-    },
+      Today: () => {
+        const today = new Date();
+        setSelectedDate(today);
+        setCurrentDate(today);
+        setViewMonth(today.getMonth());
+        setViewYear(today.getFullYear());
+        onSelChange?.(today);
+        fireEvent(name, 'SelChange', { value: today });
+      },
 
-    Refresh: () => {
-      // Force re-render
-      setCurrentDate(new Date(selectedDate));
-    }
-  }), [selectedDate, viewMonth, viewYear, minDate, maxDate, name, onSelChange, fireEvent, updateControl, setSelectedDate, setCurrentDate, setViewMonth, setViewYear]);
+      Refresh: () => {
+        // Force re-render
+        setCurrentDate(new Date(selectedDate));
+      },
+    }),
+    [
+      selectedDate,
+      viewMonth,
+      viewYear,
+      minDate,
+      maxDate,
+      name,
+      onSelChange,
+      fireEvent,
+      updateControl,
+      setSelectedDate,
+      setCurrentDate,
+      setViewMonth,
+      setViewYear,
+    ]
+  );
 
   const updateViewIfNeeded = (date: Date) => {
     if (date.getMonth() !== viewMonth || date.getFullYear() !== viewYear) {
@@ -243,9 +280,12 @@ export const CalendarControl = forwardRef<HTMLDivElement, CalendarProps>((props,
 
   const getDayNames = () => {
     switch (dayLength) {
-      case 1: return dayNamesShort;
-      case 2: return dayNamesLetter;
-      default: return dayNames;
+      case 1:
+        return dayNamesShort;
+      case 2:
+        return dayNamesLetter;
+      default:
+        return dayNames;
     }
   };
 
@@ -283,7 +323,7 @@ export const CalendarControl = forwardRef<HTMLDivElement, CalendarProps>((props,
     if (!enabled || !isDateInRange(date)) return;
 
     const oldDate = new Date(selectedDate);
-    
+
     // Fire BeforeUpdate event
     const cancel = false;
     onBeforeUpdate?.(oldDate, date, cancel);
@@ -292,7 +332,7 @@ export const CalendarControl = forwardRef<HTMLDivElement, CalendarProps>((props,
     setSelectedDate(date);
     setCurrentDate(date);
     updateViewIfNeeded(date);
-    
+
     onSelChange?.(date);
     fireEvent(name, 'SelChange', { value: date });
   };
@@ -305,7 +345,7 @@ export const CalendarControl = forwardRef<HTMLDivElement, CalendarProps>((props,
     const daysInMonth = getDaysInMonth(viewYear, viewMonth);
     const firstDay = getFirstDayOfMonth(viewYear, viewMonth);
     const daysInPrevMonth = getDaysInMonth(viewYear, viewMonth - 1);
-    
+
     const weeks = [];
     let dayCount = 1;
     let nextMonthDay = 1;
@@ -355,17 +395,25 @@ export const CalendarControl = forwardRef<HTMLDivElement, CalendarProps>((props,
               padding: '2px',
               cursor: enabled && isInRange ? 'pointer' : 'default',
               backgroundColor: isSelected ? '#0000FF' : isHovered ? '#E0E0FF' : 'transparent',
-              color: isSelected ? '#FFFFFF' : 
-                     isTrailing ? trailingForeColor :
-                     !isInRange ? '#C0C0C0' : '#000000',
+              color: isSelected
+                ? '#FFFFFF'
+                : isTrailing
+                  ? trailingForeColor
+                  : !isInRange
+                    ? '#C0C0C0'
+                    : '#000000',
               fontWeight: isBold ? 'bold' : 'normal',
-              border: isToday && showToday ? '1px solid #FF0000' : 
-                      showHorizontalGrid || showVerticalGrid ? `1px solid ${gridForeColor}` : 'none',
+              border:
+                isToday && showToday
+                  ? '1px solid #FF0000'
+                  : showHorizontalGrid || showVerticalGrid
+                    ? `1px solid ${gridForeColor}`
+                    : 'none',
               borderLeft: showVerticalGrid ? `1px solid ${gridForeColor}` : 'none',
               borderTop: showHorizontalGrid ? `1px solid ${gridForeColor}` : 'none',
               font: dateFont,
               width: '28px',
-              height: '20px'
+              height: '20px',
             }}
             onClick={() => handleDateClick(displayDate)}
             onMouseEnter={() => handleDateHover(displayDate)}
@@ -387,7 +435,7 @@ export const CalendarControl = forwardRef<HTMLDivElement, CalendarProps>((props,
                 color: weekNumberForeColor,
                 font: dateFont,
                 border: showVerticalGrid ? `1px solid ${gridForeColor}` : 'none',
-                width: '20px'
+                width: '20px',
               }}
             >
               {getWeekNumber(new Date(viewYear, viewMonth, Math.max(1, dayCount - 7)))}
@@ -453,7 +501,7 @@ export const CalendarControl = forwardRef<HTMLDivElement, CalendarProps>((props,
         fontFamily: 'MS Sans Serif',
         fontSize: '8pt',
         opacity: enabled ? 1 : 0.5,
-        overflow: 'hidden'
+        overflow: 'hidden',
       }}
       {...rest}
     >
@@ -468,7 +516,7 @@ export const CalendarControl = forwardRef<HTMLDivElement, CalendarProps>((props,
             font: titleFont,
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'center'
+            alignItems: 'center',
           }}
         >
           {showDateSelectors && (
@@ -479,16 +527,18 @@ export const CalendarControl = forwardRef<HTMLDivElement, CalendarProps>((props,
                 border: 'none',
                 color: titleForeColor,
                 cursor: 'pointer',
-                fontSize: '12px'
+                fontSize: '12px',
               }}
               disabled={!enabled}
             >
               ◀
             </button>
           )}
-          
-          <span>{getMonthName()} {viewYear}</span>
-          
+
+          <span>
+            {getMonthName()} {viewYear}
+          </span>
+
           {showDateSelectors && (
             <button
               onClick={vb6Methods.NextMonth}
@@ -497,7 +547,7 @@ export const CalendarControl = forwardRef<HTMLDivElement, CalendarProps>((props,
                 border: 'none',
                 color: titleForeColor,
                 cursor: 'pointer',
-                fontSize: '12px'
+                fontSize: '12px',
               }}
               disabled={!enabled}
             >
@@ -512,7 +562,7 @@ export const CalendarControl = forwardRef<HTMLDivElement, CalendarProps>((props,
         style={{
           width: '100%',
           borderCollapse: 'collapse',
-          backgroundColor: backColor
+          backgroundColor: backColor,
         }}
       >
         {/* Day of week headers */}
@@ -527,11 +577,9 @@ export const CalendarControl = forwardRef<HTMLDivElement, CalendarProps>((props,
                     font: dayOfWeekFont,
                     padding: '2px',
                     border: showVerticalGrid ? `1px solid ${gridForeColor}` : 'none',
-                    width: '20px'
+                    width: '20px',
                   }}
-                >
-                  
-                </th>
+                ></th>
               )}
               {dayNamesList.map((dayName, index) => (
                 <th
@@ -543,7 +591,7 @@ export const CalendarControl = forwardRef<HTMLDivElement, CalendarProps>((props,
                     padding: '2px',
                     textAlign: 'center',
                     border: showVerticalGrid ? `1px solid ${gridForeColor}` : 'none',
-                    width: '28px'
+                    width: '28px',
                   }}
                 >
                   {dayName}
@@ -554,9 +602,7 @@ export const CalendarControl = forwardRef<HTMLDivElement, CalendarProps>((props,
         )}
 
         {/* Calendar days */}
-        <tbody>
-          {renderCalendarGrid()}
-        </tbody>
+        <tbody>{renderCalendarGrid()}</tbody>
       </table>
     </div>
   );

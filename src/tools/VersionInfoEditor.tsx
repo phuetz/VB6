@@ -4,7 +4,7 @@ import React, { useState, useCallback } from 'react';
 export enum VersionType {
   Major = 'major',
   Minor = 'minor',
-  Revision = 'revision'
+  Revision = 'revision',
 }
 
 // File Flags
@@ -14,7 +14,7 @@ export enum FileFlags {
   Patched = 0x4,
   PrivateBuild = 0x8,
   InfoInferred = 0x10,
-  SpecialBuild = 0x20
+  SpecialBuild = 0x20,
 }
 
 // File Type
@@ -24,7 +24,7 @@ export enum FileType {
   Driver = 0x3,
   Font = 0x4,
   VXD = 0x5,
-  StaticLib = 0x7
+  StaticLib = 0x7,
 }
 
 // File Subtype (for drivers)
@@ -38,7 +38,7 @@ export enum FileSubtype {
   NetworkDriver = 0x6,
   SystemDriver = 0x7,
   InstallableDriver = 0x8,
-  SoundDriver = 0x9
+  SoundDriver = 0x9,
 }
 
 // Version Info Structure
@@ -62,7 +62,7 @@ export interface VersionInfo {
   fileType: FileType;
   fileSubtype: FileSubtype;
   fileDate: Date;
-  
+
   // String Info
   companyName: string;
   fileDescription: string;
@@ -76,7 +76,7 @@ export interface VersionInfo {
   legalTrademarks?: string;
   privateBuild?: string;
   specialBuild?: string;
-  
+
   // Language & Code Page
   language: string;
   codePage: string;
@@ -95,7 +95,7 @@ const LANGUAGES = [
   { code: '0804', name: 'Chinese (Simplified)' },
   { code: '0404', name: 'Chinese (Traditional)' },
   { code: '0419', name: 'Russian' },
-  { code: '0416', name: 'Portuguese (Brazil)' }
+  { code: '0416', name: 'Portuguese (Brazil)' },
 ];
 
 // Common Code Pages
@@ -105,7 +105,7 @@ const CODE_PAGES = [
   { code: '03A4', name: 'Windows-932 (Japanese Shift-JIS)' },
   { code: '03B5', name: 'Windows-949 (Korean)' },
   { code: '03A8', name: 'Windows-936 (Simplified Chinese GBK)' },
-  { code: '03B6', name: 'Windows-950 (Traditional Chinese Big5)' }
+  { code: '03B6', name: 'Windows-950 (Traditional Chinese Big5)' },
 ];
 
 interface VersionInfoEditorProps {
@@ -117,28 +117,30 @@ interface VersionInfoEditorProps {
 export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
   initialVersionInfo,
   onSave,
-  onExport
+  onExport,
 }) => {
-  const [versionInfo, setVersionInfo] = useState<VersionInfo>(initialVersionInfo || {
-    fileVersion: { major: 1, minor: 0, revision: 0, build: 0 },
-    productVersion: { major: 1, minor: 0, revision: 0, build: 0 },
-    fileFlagsMask: 0x3F,
-    fileFlags: 0,
-    fileOS: 0x4, // VOS_NT_WINDOWS32
-    fileType: FileType.App,
-    fileSubtype: FileSubtype.Unknown,
-    fileDate: new Date(),
-    companyName: '',
-    fileDescription: '',
-    fileVersion: '1.0.0.0',
-    internalName: '',
-    legalCopyright: `Copyright © ${new Date().getFullYear()}`,
-    originalFilename: '',
-    productName: '',
-    productVersion: '1.0.0.0',
-    language: '0409',
-    codePage: '04B0'
-  });
+  const [versionInfo, setVersionInfo] = useState<VersionInfo>(
+    initialVersionInfo || {
+      fileVersion: { major: 1, minor: 0, revision: 0, build: 0 },
+      productVersion: { major: 1, minor: 0, revision: 0, build: 0 },
+      fileFlagsMask: 0x3f,
+      fileFlags: 0,
+      fileOS: 0x4, // VOS_NT_WINDOWS32
+      fileType: FileType.App,
+      fileSubtype: FileSubtype.Unknown,
+      fileDate: new Date(),
+      companyName: '',
+      fileDescription: '',
+      fileVersion: '1.0.0.0',
+      internalName: '',
+      legalCopyright: `Copyright © ${new Date().getFullYear()}`,
+      originalFilename: '',
+      productName: '',
+      productVersion: '1.0.0.0',
+      language: '0409',
+      codePage: '04B0',
+    }
+  );
 
   const [activeTab, setActiveTab] = useState<'fixed' | 'strings' | 'language'>('fixed');
 
@@ -146,70 +148,79 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
     setVersionInfo(prev => ({ ...prev, ...updates }));
   }, []);
 
-  const updateFileVersion = useCallback((field: 'major' | 'minor' | 'revision' | 'build', value: number) => {
-    setVersionInfo(prev => {
-      const newFileVersion = { ...prev.fileVersion, [field]: value };
-      const versionString = `${newFileVersion.major}.${newFileVersion.minor}.${newFileVersion.revision}.${newFileVersion.build}`;
-      return {
-        ...prev,
-        fileVersion: newFileVersion,
-        fileVersion: versionString
-      };
-    });
-  }, []);
+  const updateFileVersion = useCallback(
+    (field: 'major' | 'minor' | 'revision' | 'build', value: number) => {
+      setVersionInfo(prev => {
+        const newFileVersion = { ...prev.fileVersion, [field]: value };
+        const versionString = `${newFileVersion.major}.${newFileVersion.minor}.${newFileVersion.revision}.${newFileVersion.build}`;
+        return {
+          ...prev,
+          fileVersion: newFileVersion,
+          fileVersion: versionString,
+        };
+      });
+    },
+    []
+  );
 
-  const updateProductVersion = useCallback((field: 'major' | 'minor' | 'revision' | 'build', value: number) => {
-    setVersionInfo(prev => {
-      const newProductVersion = { ...prev.productVersion, [field]: value };
-      const versionString = `${newProductVersion.major}.${newProductVersion.minor}.${newProductVersion.revision}.${newProductVersion.build}`;
-      return {
-        ...prev,
-        productVersion: newProductVersion,
-        productVersion: versionString
-      };
-    });
-  }, []);
+  const updateProductVersion = useCallback(
+    (field: 'major' | 'minor' | 'revision' | 'build', value: number) => {
+      setVersionInfo(prev => {
+        const newProductVersion = { ...prev.productVersion, [field]: value };
+        const versionString = `${newProductVersion.major}.${newProductVersion.minor}.${newProductVersion.revision}.${newProductVersion.build}`;
+        return {
+          ...prev,
+          productVersion: newProductVersion,
+          productVersion: versionString,
+        };
+      });
+    },
+    []
+  );
 
   const toggleFileFlag = useCallback((flag: FileFlags) => {
     setVersionInfo(prev => ({
       ...prev,
-      fileFlags: prev.fileFlags ^ flag
+      fileFlags: prev.fileFlags ^ flag,
     }));
   }, []);
 
-  const handleAutoIncrement = useCallback((versionType: 'file' | 'product', incrementType: VersionType) => {
-    if (versionType === 'file') {
-      switch (incrementType) {
-        case VersionType.Major:
-          updateFileVersion('major', versionInfo.fileVersion.major + 1);
-          updateFileVersion('minor', 0);
-          updateFileVersion('revision', 0);
-          break;
-        case VersionType.Minor:
-          updateFileVersion('minor', versionInfo.fileVersion.minor + 1);
-          updateFileVersion('revision', 0);
-          break;
-        case VersionType.Revision:
-          updateFileVersion('revision', versionInfo.fileVersion.revision + 1);
-          break;
+  const handleAutoIncrement = useCallback(
+    (versionType: 'file' | 'product', incrementType: VersionType) => {
+      if (versionType === 'file') {
+        switch (incrementType) {
+          case VersionType.Major:
+            updateFileVersion('major', versionInfo.fileVersion.major + 1);
+            updateFileVersion('minor', 0);
+            updateFileVersion('revision', 0);
+            break;
+          case VersionType.Minor:
+            updateFileVersion('minor', versionInfo.fileVersion.minor + 1);
+            updateFileVersion('revision', 0);
+            break;
+          case VersionType.Revision:
+            updateFileVersion('revision', versionInfo.fileVersion.revision + 1);
+            break;
+        }
+      } else {
+        switch (incrementType) {
+          case VersionType.Major:
+            updateProductVersion('major', versionInfo.productVersion.major + 1);
+            updateProductVersion('minor', 0);
+            updateProductVersion('revision', 0);
+            break;
+          case VersionType.Minor:
+            updateProductVersion('minor', versionInfo.productVersion.minor + 1);
+            updateProductVersion('revision', 0);
+            break;
+          case VersionType.Revision:
+            updateProductVersion('revision', versionInfo.productVersion.revision + 1);
+            break;
+        }
       }
-    } else {
-      switch (incrementType) {
-        case VersionType.Major:
-          updateProductVersion('major', versionInfo.productVersion.major + 1);
-          updateProductVersion('minor', 0);
-          updateProductVersion('revision', 0);
-          break;
-        case VersionType.Minor:
-          updateProductVersion('minor', versionInfo.productVersion.minor + 1);
-          updateProductVersion('revision', 0);
-          break;
-        case VersionType.Revision:
-          updateProductVersion('revision', versionInfo.productVersion.revision + 1);
-          break;
-      }
-    }
-  }, [versionInfo, updateFileVersion, updateProductVersion]);
+    },
+    [versionInfo, updateFileVersion, updateProductVersion]
+  );
 
   const handleSave = useCallback(() => {
     onSave?.(versionInfo);
@@ -223,10 +234,14 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
 
   const generateRCFile = (info: VersionInfo): string => {
     const lines: string[] = [];
-    
+
     lines.push('1 VERSIONINFO');
-    lines.push(`FILEVERSION ${info.fileVersion.major},${info.fileVersion.minor},${info.fileVersion.revision},${info.fileVersion.build}`);
-    lines.push(`PRODUCTVERSION ${info.productVersion.major},${info.productVersion.minor},${info.productVersion.revision},${info.productVersion.build}`);
+    lines.push(
+      `FILEVERSION ${info.fileVersion.major},${info.fileVersion.minor},${info.fileVersion.revision},${info.fileVersion.build}`
+    );
+    lines.push(
+      `PRODUCTVERSION ${info.productVersion.major},${info.productVersion.minor},${info.productVersion.revision},${info.productVersion.build}`
+    );
     lines.push(`FILEFLAGSMASK 0x${info.fileFlagsMask.toString(16)}`);
     lines.push(`FILEFLAGS 0x${info.fileFlags.toString(16)}`);
     lines.push('FILEOS 0x4');
@@ -237,20 +252,25 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
     lines.push('  BEGIN');
     lines.push(`    BLOCK "${info.language}${info.codePage}"`);
     lines.push('    BEGIN');
-    
+
     if (info.companyName) lines.push(`      VALUE "CompanyName", "${info.companyName}\\0"`);
-    if (info.fileDescription) lines.push(`      VALUE "FileDescription", "${info.fileDescription}\\0"`);
+    if (info.fileDescription)
+      lines.push(`      VALUE "FileDescription", "${info.fileDescription}\\0"`);
     if (info.fileVersion) lines.push(`      VALUE "FileVersion", "${info.fileVersion}\\0"`);
     if (info.internalName) lines.push(`      VALUE "InternalName", "${info.internalName}\\0"`);
-    if (info.legalCopyright) lines.push(`      VALUE "LegalCopyright", "${info.legalCopyright}\\0"`);
-    if (info.originalFilename) lines.push(`      VALUE "OriginalFilename", "${info.originalFilename}\\0"`);
+    if (info.legalCopyright)
+      lines.push(`      VALUE "LegalCopyright", "${info.legalCopyright}\\0"`);
+    if (info.originalFilename)
+      lines.push(`      VALUE "OriginalFilename", "${info.originalFilename}\\0"`);
     if (info.productName) lines.push(`      VALUE "ProductName", "${info.productName}\\0"`);
-    if (info.productVersion) lines.push(`      VALUE "ProductVersion", "${info.productVersion}\\0"`);
+    if (info.productVersion)
+      lines.push(`      VALUE "ProductVersion", "${info.productVersion}\\0"`);
     if (info.comments) lines.push(`      VALUE "Comments", "${info.comments}\\0"`);
-    if (info.legalTrademarks) lines.push(`      VALUE "LegalTrademarks", "${info.legalTrademarks}\\0"`);
+    if (info.legalTrademarks)
+      lines.push(`      VALUE "LegalTrademarks", "${info.legalTrademarks}\\0"`);
     if (info.privateBuild) lines.push(`      VALUE "PrivateBuild", "${info.privateBuild}\\0"`);
     if (info.specialBuild) lines.push(`      VALUE "SpecialBuild", "${info.specialBuild}\\0"`);
-    
+
     lines.push('    END');
     lines.push('  END');
     lines.push('  BLOCK "VarFileInfo"');
@@ -258,7 +278,7 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
     lines.push(`    VALUE "Translation", 0x${info.language}, 0x${info.codePage}`);
     lines.push('  END');
     lines.push('END');
-    
+
     return lines.join('\n');
   };
 
@@ -267,7 +287,7 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
     setVersionInfo(prev => ({
       ...prev,
       productVersion: { ...prev.fileVersion },
-      productVersion: prev.fileVersion
+      productVersion: prev.fileVersion,
     }));
   }, []);
 
@@ -343,7 +363,7 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
                     min="0"
                     max="65535"
                     value={versionInfo.fileVersion.major}
-                    onChange={(e) => updateFileVersion('major', parseInt(e.target.value) || 0)}
+                    onChange={e => updateFileVersion('major', parseInt(e.target.value) || 0)}
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                   />
                 </div>
@@ -354,7 +374,7 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
                     min="0"
                     max="65535"
                     value={versionInfo.fileVersion.minor}
-                    onChange={(e) => updateFileVersion('minor', parseInt(e.target.value) || 0)}
+                    onChange={e => updateFileVersion('minor', parseInt(e.target.value) || 0)}
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                   />
                 </div>
@@ -365,7 +385,7 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
                     min="0"
                     max="65535"
                     value={versionInfo.fileVersion.revision}
-                    onChange={(e) => updateFileVersion('revision', parseInt(e.target.value) || 0)}
+                    onChange={e => updateFileVersion('revision', parseInt(e.target.value) || 0)}
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                   />
                 </div>
@@ -376,7 +396,7 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
                     min="0"
                     max="65535"
                     value={versionInfo.fileVersion.build}
-                    onChange={(e) => updateFileVersion('build', parseInt(e.target.value) || 0)}
+                    onChange={e => updateFileVersion('build', parseInt(e.target.value) || 0)}
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                   />
                 </div>
@@ -422,7 +442,7 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
                     min="0"
                     max="65535"
                     value={versionInfo.productVersion.major}
-                    onChange={(e) => updateProductVersion('major', parseInt(e.target.value) || 0)}
+                    onChange={e => updateProductVersion('major', parseInt(e.target.value) || 0)}
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                   />
                 </div>
@@ -433,7 +453,7 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
                     min="0"
                     max="65535"
                     value={versionInfo.productVersion.minor}
-                    onChange={(e) => updateProductVersion('minor', parseInt(e.target.value) || 0)}
+                    onChange={e => updateProductVersion('minor', parseInt(e.target.value) || 0)}
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                   />
                 </div>
@@ -444,7 +464,7 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
                     min="0"
                     max="65535"
                     value={versionInfo.productVersion.revision}
-                    onChange={(e) => updateProductVersion('revision', parseInt(e.target.value) || 0)}
+                    onChange={e => updateProductVersion('revision', parseInt(e.target.value) || 0)}
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                   />
                 </div>
@@ -455,7 +475,7 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
                     min="0"
                     max="65535"
                     value={versionInfo.productVersion.build}
-                    onChange={(e) => updateProductVersion('build', parseInt(e.target.value) || 0)}
+                    onChange={e => updateProductVersion('build', parseInt(e.target.value) || 0)}
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                   />
                 </div>
@@ -537,7 +557,9 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
                   <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
                   <select
                     value={versionInfo.fileType}
-                    onChange={(e) => updateVersionInfo({ fileType: parseInt(e.target.value) as FileType })}
+                    onChange={e =>
+                      updateVersionInfo({ fileType: parseInt(e.target.value) as FileType })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                   >
                     <option value={FileType.App}>Application (.exe)</option>
@@ -553,7 +575,9 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
                     <label className="block text-sm font-medium text-gray-700 mb-1">Subtype</label>
                     <select
                       value={versionInfo.fileSubtype}
-                      onChange={(e) => updateVersionInfo({ fileSubtype: parseInt(e.target.value) as FileSubtype })}
+                      onChange={e =>
+                        updateVersionInfo({ fileSubtype: parseInt(e.target.value) as FileSubtype })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                     >
                       <option value={FileSubtype.Unknown}>Unknown</option>
@@ -581,18 +605,20 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
               <input
                 type="text"
                 value={versionInfo.companyName}
-                onChange={(e) => updateVersionInfo({ companyName: e.target.value })}
+                onChange={e => updateVersionInfo({ companyName: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                 placeholder="Your Company Name"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">File Description</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                File Description
+              </label>
               <input
                 type="text"
                 value={versionInfo.fileDescription}
-                onChange={(e) => updateVersionInfo({ fileDescription: e.target.value })}
+                onChange={e => updateVersionInfo({ fileDescription: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                 placeholder="Application description"
               />
@@ -603,29 +629,33 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
               <input
                 type="text"
                 value={versionInfo.internalName}
-                onChange={(e) => updateVersionInfo({ internalName: e.target.value })}
+                onChange={e => updateVersionInfo({ internalName: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                 placeholder="Internal project name"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Legal Copyright</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Legal Copyright
+              </label>
               <input
                 type="text"
                 value={versionInfo.legalCopyright}
-                onChange={(e) => updateVersionInfo({ legalCopyright: e.target.value })}
+                onChange={e => updateVersionInfo({ legalCopyright: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                 placeholder="Copyright © 2024 Your Company"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Original Filename</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Original Filename
+              </label>
               <input
                 type="text"
                 value={versionInfo.originalFilename}
-                onChange={(e) => updateVersionInfo({ originalFilename: e.target.value })}
+                onChange={e => updateVersionInfo({ originalFilename: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                 placeholder="MyApp.exe"
               />
@@ -636,7 +666,7 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
               <input
                 type="text"
                 value={versionInfo.productName}
-                onChange={(e) => updateVersionInfo({ productName: e.target.value })}
+                onChange={e => updateVersionInfo({ productName: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                 placeholder="My Application"
               />
@@ -646,7 +676,7 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">Comments</label>
               <textarea
                 value={versionInfo.comments || ''}
-                onChange={(e) => updateVersionInfo({ comments: e.target.value })}
+                onChange={e => updateVersionInfo({ comments: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                 rows={3}
                 placeholder="Additional comments..."
@@ -654,11 +684,13 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Legal Trademarks</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Legal Trademarks
+              </label>
               <input
                 type="text"
                 value={versionInfo.legalTrademarks || ''}
-                onChange={(e) => updateVersionInfo({ legalTrademarks: e.target.value })}
+                onChange={e => updateVersionInfo({ legalTrademarks: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                 placeholder="Trademark information"
               />
@@ -666,11 +698,13 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
 
             {(versionInfo.fileFlags & FileFlags.PrivateBuild) !== 0 && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Private Build Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Private Build Description
+                </label>
                 <input
                   type="text"
                   value={versionInfo.privateBuild || ''}
-                  onChange={(e) => updateVersionInfo({ privateBuild: e.target.value })}
+                  onChange={e => updateVersionInfo({ privateBuild: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                   placeholder="Private build information"
                 />
@@ -679,11 +713,13 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
 
             {(versionInfo.fileFlags & FileFlags.SpecialBuild) !== 0 && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Special Build Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Special Build Description
+                </label>
                 <input
                   type="text"
                   value={versionInfo.specialBuild || ''}
-                  onChange={(e) => updateVersionInfo({ specialBuild: e.target.value })}
+                  onChange={e => updateVersionInfo({ specialBuild: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                   placeholder="Special build information"
                 />
@@ -698,7 +734,7 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
               <select
                 value={versionInfo.language}
-                onChange={(e) => updateVersionInfo({ language: e.target.value })}
+                onChange={e => updateVersionInfo({ language: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
               >
                 {LANGUAGES.map(lang => (
@@ -713,7 +749,7 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">Code Page</label>
               <select
                 value={versionInfo.codePage}
-                onChange={(e) => updateVersionInfo({ codePage: e.target.value })}
+                onChange={e => updateVersionInfo({ codePage: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
               >
                 {CODE_PAGES.map(cp => (
@@ -727,10 +763,12 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
             <div className="mt-6 p-4 bg-gray-50 rounded">
               <h4 className="font-medium text-gray-700 mb-2">String Block Identifier</h4>
               <p className="text-sm text-gray-600 mb-2">
-                The string block identifier is formed by concatenating the language and code page values.
+                The string block identifier is formed by concatenating the language and code page
+                values.
               </p>
               <div className="font-mono text-lg bg-white px-3 py-2 border border-gray-300 rounded">
-                {versionInfo.language}{versionInfo.codePage}
+                {versionInfo.language}
+                {versionInfo.codePage}
               </div>
             </div>
 
@@ -750,12 +788,8 @@ export const VersionInfoEditor: React.FC<VersionInfoEditorProps> = ({
       {/* Footer */}
       <div className="p-4 bg-gray-50 border-t border-gray-200">
         <div className="flex items-center justify-between text-sm text-gray-600">
-          <div>
-            Version String: {versionInfo.fileVersion}
-          </div>
-          <div>
-            Last Modified: {versionInfo.fileDate.toLocaleString()}
-          </div>
+          <div>Version String: {versionInfo.fileVersion}</div>
+          <div>Last Modified: {versionInfo.fileDate.toLocaleString()}</div>
         </div>
       </div>
     </div>

@@ -164,15 +164,24 @@ export class DatabaseService {
       const config = this.config.get(connectionId)!;
 
       try {
-        const result = await this.executeQueryOnConnection(connection, config.type, sql, parameters);
-        
+        const result = await this.executeQueryOnConnection(
+          connection,
+          config.type,
+          sql,
+          parameters
+        );
+
         // Mettre en cache les résultats SELECT
         if (useCache && this.isSelectQuery(sql)) {
-          await this.cache.setex(cacheKey, cacheTimeout, JSON.stringify({
-            data: result.data,
-            fields: result.fields,
-            rowsAffected: result.rowsAffected,
-          }));
+          await this.cache.setex(
+            cacheKey,
+            cacheTimeout,
+            JSON.stringify({
+              data: result.data,
+              fields: result.fields,
+              rowsAffected: result.rowsAffected,
+            })
+          );
         }
 
         this.logger.debug(`Requête exécutée sur ${connectionId}`, {
@@ -347,7 +356,7 @@ export class DatabaseService {
     try {
       const pool = this.pools.get(connectionId);
       const config = this.config.get(connectionId)!;
-      
+
       if (!pool || !config) {
         throw new Error(`Configuration non trouvée: ${connectionId}`);
       }
@@ -536,13 +545,14 @@ export class DatabaseService {
         return await oracledb.getConnection({
           user: config.username,
           password: config.password,
-          connectString: config.connectionString || `${config.host}:${config.port || 1521}/${config.database}`,
+          connectString:
+            config.connectionString || `${config.host}:${config.port || 1521}/${config.database}`,
           ...config.options,
         });
 
       case 'sqlite':
         return new Promise((resolve, reject) => {
-          const db = new sqlite3.Database(config.filename!, (err) => {
+          const db = new sqlite3.Database(config.filename!, err => {
             if (err) reject(err);
             else resolve(db);
           });
@@ -602,7 +612,7 @@ export class DatabaseService {
           return result.rows.length > 0;
         }
         case 'sqlite':
-          return new Promise((resolve) => {
+          return new Promise(resolve => {
             connection.get('SELECT 1', (err: any) => {
               resolve(!err);
             });
@@ -671,21 +681,23 @@ export class DatabaseService {
           if (this.isSelectQuery(sql)) {
             connection.all(sql, parameters, (err: any, rows: any[]) => {
               if (err) reject(err);
-              else resolve({
-                data: rows,
-                fields: [],
-                rowsAffected: rows.length,
-              });
+              else
+                resolve({
+                  data: rows,
+                  fields: [],
+                  rowsAffected: rows.length,
+                });
             });
           } else {
-            connection.run(sql, parameters, function(err: any) {
+            connection.run(sql, parameters, function (err: any) {
               if (err) reject(err);
-              else resolve({
-                data: [],
-                fields: [],
-                rowsAffected: this.changes,
-                insertId: this.lastID,
-              });
+              else
+                resolve({
+                  data: [],
+                  fields: [],
+                  rowsAffected: this.changes,
+                  insertId: this.lastID,
+                });
             });
           }
         });
@@ -811,9 +823,9 @@ export class DatabaseService {
       }
 
       case 'postgresql': {
-        const pgPlaceholders = data.map((_, i) => 
-          `(${columns.map((_, j) => `$${i * columns.length + j + 1}`).join(', ')})`
-        ).join(', ');
+        const pgPlaceholders = data
+          .map((_, i) => `(${columns.map((_, j) => `$${i * columns.length + j + 1}`).join(', ')})`)
+          .join(', ');
         const pgSql = `INSERT INTO ${table} (${columns.join(', ')}) VALUES ${pgPlaceholders}`;
         const pgResult = await connection.query(pgSql, values.flat());
         return {
@@ -828,7 +840,12 @@ export class DatabaseService {
         let rowsAffected = 0;
         for (const row of data) {
           const insertSql = `INSERT INTO ${table} (${columns.join(', ')}) VALUES (${columns.map(() => '?').join(', ')})`;
-          const result = await this.executeQueryOnConnection(connection, type, insertSql, values[0]);
+          const result = await this.executeQueryOnConnection(
+            connection,
+            type,
+            insertSql,
+            values[0]
+          );
           rowsAffected += result.rowsAffected;
         }
         return {

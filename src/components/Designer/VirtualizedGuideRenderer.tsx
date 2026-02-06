@@ -25,296 +25,316 @@ interface RenderStyle {
 }
 
 const DEFAULT_STYLE: RenderStyle = {
-  strongGuideColor: '#FF6B6B',      // Red for strong alignment (>70%)
-  mediumGuideColor: '#4ECDC4',      // Teal for medium alignment (>40%)
-  weakGuideColor: '#95E1D3',        // Light teal for weak alignment
+  strongGuideColor: '#FF6B6B', // Red for strong alignment (>70%)
+  mediumGuideColor: '#4ECDC4', // Teal for medium alignment (>40%)
+  weakGuideColor: '#95E1D3', // Light teal for weak alignment
   lineWidth: 1,
   dashPattern: [5, 5],
-  glowEffect: true
+  glowEffect: true,
 };
 
 // Memoized component for maximum performance
-export const VirtualizedGuideRenderer = memo<VirtualizedGuideRendererProps>(({
-  horizontalGuides,
-  verticalGuides,
-  viewport,
-  width,
-  height,
-  showStrength = true,
-  className = '',
-  style = {}
-}) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const contextRef = useRef<CanvasRenderingContext2D | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const renderStyleRef = useRef<RenderStyle>(DEFAULT_STYLE);
-  
-  // Performance optimization: pre-computed path cache
-  const pathCacheRef = useRef<Map<string, Path2D>>(new Map());
-  const lastRenderHashRef = useRef<string>('');
+export const VirtualizedGuideRenderer = memo<VirtualizedGuideRendererProps>(
+  ({
+    horizontalGuides,
+    verticalGuides,
+    viewport,
+    width,
+    height,
+    showStrength = true,
+    className = '',
+    style = {},
+  }) => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const contextRef = useRef<CanvasRenderingContext2D | null>(null);
+    const animationFrameRef = useRef<number | null>(null);
+    const renderStyleRef = useRef<RenderStyle>(DEFAULT_STYLE);
 
-  // Initialize canvas context with optimizations
-  const initializeCanvas = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return null;
+    // Performance optimization: pre-computed path cache
+    const pathCacheRef = useRef<Map<string, Path2D>>(new Map());
+    const lastRenderHashRef = useRef<string>('');
 
-    const ctx = canvas.getContext('2d', {
-      alpha: true,
-      antialias: true,
-      desynchronized: true, // Allow async rendering for better performance
-    });
+    // Initialize canvas context with optimizations
+    const initializeCanvas = useCallback(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return null;
 
-    if (!ctx) return null;
+      const ctx = canvas.getContext('2d', {
+        alpha: true,
+        antialias: true,
+        desynchronized: true, // Allow async rendering for better performance
+      });
 
-    // Enable optimizations
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    
-    contextRef.current = ctx;
-    return ctx;
-  }, []);
+      if (!ctx) return null;
 
-  // Ultra-optimized render function
-  const renderGuides = useCallback(() => {
-    const canvas = canvasRef.current;
-    const ctx = contextRef.current;
-    
-    if (!canvas || !ctx) return;
+      // Enable optimizations
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
 
-    // Performance optimization: check if we need to re-render
-    const renderHash = generateRenderHash(horizontalGuides, verticalGuides, viewport, width, height);
-    if (renderHash === lastRenderHashRef.current) {
-      return; // No changes, skip render
-    }
-    lastRenderHashRef.current = renderHash;
+      contextRef.current = ctx;
+      return ctx;
+    }, []);
 
-    // Clear canvas efficiently
-    ctx.clearRect(0, 0, width, height);
+    // Ultra-optimized render function
+    const renderGuides = useCallback(() => {
+      const canvas = canvasRef.current;
+      const ctx = contextRef.current;
 
-    // Set up rendering context for guides
-    ctx.save();
-    
-    // Apply viewport transformation
-    ctx.translate(-viewport.left, -viewport.top);
-    ctx.scale(viewport.zoom, viewport.zoom);
+      if (!canvas || !ctx) return;
 
-    // Render horizontal guides
-    renderGuideSet(ctx, horizontalGuides, 'horizontal');
-    
-    // Render vertical guides  
-    renderGuideSet(ctx, verticalGuides, 'vertical');
-
-    ctx.restore();
-  }, [horizontalGuides, verticalGuides, viewport, width, height]);
-
-  // Optimized guide set rendering
-  const renderGuideSet = useCallback((
-    ctx: CanvasRenderingContext2D,
-    guides: AlignmentGuide[],
-    type: 'horizontal' | 'vertical'
-  ) => {
-    if (guides.length === 0) return;
-
-    // Group guides by strength for batch rendering
-    const strongGuides = guides.filter(g => g.strength >= 0.7);
-    const mediumGuides = guides.filter(g => g.strength >= 0.4 && g.strength < 0.7);
-    const weakGuides = guides.filter(g => g.strength < 0.4);
-
-    // Render in batches for better performance
-    renderGuideBatch(ctx, strongGuides, type, renderStyleRef.current.strongGuideColor);
-    renderGuideBatch(ctx, mediumGuides, type, renderStyleRef.current.mediumGuideColor);
-    renderGuideBatch(ctx, weakGuides, type, renderStyleRef.current.weakGuideColor);
-  }, []);
-
-  // Batch rendering for same-style guides
-  const renderGuideBatch = useCallback((
-    ctx: CanvasRenderingContext2D,
-    guides: AlignmentGuide[],
-    type: 'horizontal' | 'vertical',
-    color: string
-  ) => {
-    if (guides.length === 0) return;
-
-    ctx.save();
-    
-    // Set up style for this batch
-    ctx.strokeStyle = color;
-    ctx.lineWidth = renderStyleRef.current.lineWidth / viewport.zoom;
-    ctx.lineCap = 'round';
-    ctx.setLineDash(renderStyleRef.current.dashPattern);
-
-    // Add glow effect for strong guides
-    if (renderStyleRef.current.glowEffect && color === renderStyleRef.current.strongGuideColor) {
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 4 / viewport.zoom;
-    }
-
-    // Begin path for batch drawing
-    ctx.beginPath();
-
-    guides.forEach(guide => {
-      if (type === 'horizontal') {
-        // Horizontal line across viewport
-        const y = guide.position;
-        const startX = viewport.left - 50;
-        const endX = viewport.right + 50;
-        
-        ctx.moveTo(startX, y);
-        ctx.lineTo(endX, y);
-      } else {
-        // Vertical line across viewport
-        const x = guide.position;
-        const startY = viewport.top - 50;
-        const endY = viewport.bottom + 50;
-        
-        ctx.moveTo(x, startY);
-        ctx.lineTo(x, endY);
+      // Performance optimization: check if we need to re-render
+      const renderHash = generateRenderHash(
+        horizontalGuides,
+        verticalGuides,
+        viewport,
+        width,
+        height
+      );
+      if (renderHash === lastRenderHashRef.current) {
+        return; // No changes, skip render
       }
-    });
+      lastRenderHashRef.current = renderHash;
 
-    // Draw all lines in one batch operation
-    ctx.stroke();
-    
-    // Render strength indicators if enabled
-    if (showStrength) {
-      renderStrengthIndicators(ctx, guides, type);
-    }
+      // Clear canvas efficiently
+      ctx.clearRect(0, 0, width, height);
 
-    ctx.restore();
-  }, [viewport, showStrength]);
+      // Set up rendering context for guides
+      ctx.save();
 
-  // Render strength indicators (small numbers showing alignment percentage)
-  const renderStrengthIndicators = useCallback((
-    ctx: CanvasRenderingContext2D,
-    guides: AlignmentGuide[],
-    type: 'horizontal' | 'vertical'
-  ) => {
-    ctx.save();
-    
-    ctx.font = `${Math.max(10, 12 / viewport.zoom)}px monospace`;
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+      // Apply viewport transformation
+      ctx.translate(-viewport.left, -viewport.top);
+      ctx.scale(viewport.zoom, viewport.zoom);
 
-    guides.forEach(guide => {
-      const percentage = Math.round(guide.strength * 100);
-      const text = `${percentage}%`;
-      
-      if (type === 'horizontal') {
-        // Position text at left edge of viewport
-        const x = viewport.left + 20;
-        const y = guide.position;
-        
-        // Background for readability
-        const textWidth = ctx.measureText(text).width;
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.fillRect(x - textWidth/2 - 2, y - 6, textWidth + 4, 12);
-        
+      // Render horizontal guides
+      renderGuideSet(ctx, horizontalGuides, 'horizontal');
+
+      // Render vertical guides
+      renderGuideSet(ctx, verticalGuides, 'vertical');
+
+      ctx.restore();
+    }, [horizontalGuides, verticalGuides, viewport, width, height]);
+
+    // Optimized guide set rendering
+    const renderGuideSet = useCallback(
+      (
+        ctx: CanvasRenderingContext2D,
+        guides: AlignmentGuide[],
+        type: 'horizontal' | 'vertical'
+      ) => {
+        if (guides.length === 0) return;
+
+        // Group guides by strength for batch rendering
+        const strongGuides = guides.filter(g => g.strength >= 0.7);
+        const mediumGuides = guides.filter(g => g.strength >= 0.4 && g.strength < 0.7);
+        const weakGuides = guides.filter(g => g.strength < 0.4);
+
+        // Render in batches for better performance
+        renderGuideBatch(ctx, strongGuides, type, renderStyleRef.current.strongGuideColor);
+        renderGuideBatch(ctx, mediumGuides, type, renderStyleRef.current.mediumGuideColor);
+        renderGuideBatch(ctx, weakGuides, type, renderStyleRef.current.weakGuideColor);
+      },
+      []
+    );
+
+    // Batch rendering for same-style guides
+    const renderGuideBatch = useCallback(
+      (
+        ctx: CanvasRenderingContext2D,
+        guides: AlignmentGuide[],
+        type: 'horizontal' | 'vertical',
+        color: string
+      ) => {
+        if (guides.length === 0) return;
+
+        ctx.save();
+
+        // Set up style for this batch
+        ctx.strokeStyle = color;
+        ctx.lineWidth = renderStyleRef.current.lineWidth / viewport.zoom;
+        ctx.lineCap = 'round';
+        ctx.setLineDash(renderStyleRef.current.dashPattern);
+
+        // Add glow effect for strong guides
+        if (
+          renderStyleRef.current.glowEffect &&
+          color === renderStyleRef.current.strongGuideColor
+        ) {
+          ctx.shadowColor = color;
+          ctx.shadowBlur = 4 / viewport.zoom;
+        }
+
+        // Begin path for batch drawing
+        ctx.beginPath();
+
+        guides.forEach(guide => {
+          if (type === 'horizontal') {
+            // Horizontal line across viewport
+            const y = guide.position;
+            const startX = viewport.left - 50;
+            const endX = viewport.right + 50;
+
+            ctx.moveTo(startX, y);
+            ctx.lineTo(endX, y);
+          } else {
+            // Vertical line across viewport
+            const x = guide.position;
+            const startY = viewport.top - 50;
+            const endY = viewport.bottom + 50;
+
+            ctx.moveTo(x, startY);
+            ctx.lineTo(x, endY);
+          }
+        });
+
+        // Draw all lines in one batch operation
+        ctx.stroke();
+
+        // Render strength indicators if enabled
+        if (showStrength) {
+          renderStrengthIndicators(ctx, guides, type);
+        }
+
+        ctx.restore();
+      },
+      [viewport, showStrength]
+    );
+
+    // Render strength indicators (small numbers showing alignment percentage)
+    const renderStrengthIndicators = useCallback(
+      (
+        ctx: CanvasRenderingContext2D,
+        guides: AlignmentGuide[],
+        type: 'horizontal' | 'vertical'
+      ) => {
+        ctx.save();
+
+        ctx.font = `${Math.max(10, 12 / viewport.zoom)}px monospace`;
         ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillText(text, x, y);
-      } else {
-        // Position text at top edge of viewport
-        const x = guide.position;
-        const y = viewport.top + 20;
-        
-        const textWidth = ctx.measureText(text).width;
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.fillRect(x - textWidth/2 - 2, y - 6, textWidth + 4, 12);
-        
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillText(text, x, y);
-      }
-    });
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
 
-    ctx.restore();
-  }, [viewport]);
+        guides.forEach(guide => {
+          const percentage = Math.round(guide.strength * 100);
+          const text = `${percentage}%`;
 
-  // Generate hash for render optimization
-  const generateRenderHash = (
-    hGuides: AlignmentGuide[],
-    vGuides: AlignmentGuide[],
-    vp: ViewportBounds,
-    w: number,
-    h: number
-  ): string => {
-    const guidesHash = [...hGuides, ...vGuides]
-      .map(g => `${g.id}:${g.position}:${g.strength}`)
-      .join('|');
-    
-    return `${guidesHash}_${vp.left}_${vp.top}_${vp.zoom}_${w}_${h}`;
-  };
+          if (type === 'horizontal') {
+            // Position text at left edge of viewport
+            const x = viewport.left + 20;
+            const y = guide.position;
 
-  // Scheduled rendering with RAF
-  const scheduleRender = useCallback(() => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
+            // Background for readability
+            const textWidth = ctx.measureText(text).width;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fillRect(x - textWidth / 2 - 2, y - 6, textWidth + 4, 12);
 
-    animationFrameRef.current = requestAnimationFrame(() => {
-      renderGuides();
-      animationFrameRef.current = null;
-    });
-  }, [renderGuides]);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillText(text, x, y);
+          } else {
+            // Position text at top edge of viewport
+            const x = guide.position;
+            const y = viewport.top + 20;
 
-  // Initialize canvas on mount
-  useEffect(() => {
-    initializeCanvas();
-  }, [initializeCanvas]);
+            const textWidth = ctx.measureText(text).width;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fillRect(x - textWidth / 2 - 2, y - 6, textWidth + 4, 12);
 
-  // Handle canvas resize
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillText(text, x, y);
+          }
+        });
 
-    // Set actual canvas size for sharp rendering
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    
-    // Scale context for high DPI displays
-    const ctx = contextRef.current;
-    if (ctx) {
-      ctx.scale(dpr, dpr);
-    }
+        ctx.restore();
+      },
+      [viewport]
+    );
 
-    // Set CSS size
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+    // Generate hash for render optimization
+    const generateRenderHash = (
+      hGuides: AlignmentGuide[],
+      vGuides: AlignmentGuide[],
+      vp: ViewportBounds,
+      w: number,
+      h: number
+    ): string => {
+      const guidesHash = [...hGuides, ...vGuides]
+        .map(g => `${g.id}:${g.position}:${g.strength}`)
+        .join('|');
 
-    scheduleRender();
-  }, [width, height, scheduleRender]);
+      return `${guidesHash}_${vp.left}_${vp.top}_${vp.zoom}_${w}_${h}`;
+    };
 
-  // Trigger re-render when guides change
-  useEffect(() => {
-    scheduleRender();
-  }, [horizontalGuides, verticalGuides, viewport, scheduleRender]);
-
-  // Cleanup
-  useEffect(() => {
-    return () => {
+    // Scheduled rendering with RAF
+    const scheduleRender = useCallback(() => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
-    };
-  }, []);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className={`virtualized-guide-renderer ${className}`}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        pointerEvents: 'none',
-        zIndex: 10,
-        ...style
-      }}
-      width={width}
-      height={height}
-    />
-  );
-});
+      animationFrameRef.current = requestAnimationFrame(() => {
+        renderGuides();
+        animationFrameRef.current = null;
+      });
+    }, [renderGuides]);
+
+    // Initialize canvas on mount
+    useEffect(() => {
+      initializeCanvas();
+    }, [initializeCanvas]);
+
+    // Handle canvas resize
+    useEffect(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      // Set actual canvas size for sharp rendering
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+
+      // Scale context for high DPI displays
+      const ctx = contextRef.current;
+      if (ctx) {
+        ctx.scale(dpr, dpr);
+      }
+
+      // Set CSS size
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+
+      scheduleRender();
+    }, [width, height, scheduleRender]);
+
+    // Trigger re-render when guides change
+    useEffect(() => {
+      scheduleRender();
+    }, [horizontalGuides, verticalGuides, viewport, scheduleRender]);
+
+    // Cleanup
+    useEffect(() => {
+      return () => {
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+        }
+      };
+    }, []);
+
+    return (
+      <canvas
+        ref={canvasRef}
+        className={`virtualized-guide-renderer ${className}`}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          pointerEvents: 'none',
+          zIndex: 10,
+          ...style,
+        }}
+        width={width}
+        height={height}
+      />
+    );
+  }
+);
 
 VirtualizedGuideRenderer.displayName = 'VirtualizedGuideRenderer';
 

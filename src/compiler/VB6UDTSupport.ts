@@ -1,6 +1,6 @@
 /**
  * VB6 User Defined Types (UDT) Support Implementation
- * 
+ *
  * Provides full support for VB6 Type declarations and usage
  */
 
@@ -8,7 +8,7 @@ export interface VB6UDTField {
   name: string;
   type: string;
   arrayDimensions?: number[];
-  fixedLength?: number;  // For fixed-length strings
+  fixedLength?: number; // For fixed-length strings
   defaultValue?: any;
 }
 
@@ -18,7 +18,7 @@ export interface VB6UDTDeclaration {
   public: boolean;
   module: string;
   line: number;
-  size: number;  // Total size in bytes
+  size: number; // Total size in bytes
 }
 
 export class VB6UDTProcessor {
@@ -43,7 +43,7 @@ export class VB6UDTProcessor {
   parseTypeDeclaration(code: string, line: number): VB6UDTDeclaration | null {
     const typeRegex = /^(Public\s+|Private\s+)?Type\s+(\w+)\s*$/i;
     const match = code.match(typeRegex);
-    
+
     if (!match) return null;
 
     const isPublic = match[1] ? match[1].toLowerCase().includes('public') : false;
@@ -55,7 +55,7 @@ export class VB6UDTProcessor {
       public: isPublic,
       module: this.currentModule,
       line: line,
-      size: 0
+      size: 0,
     };
   }
 
@@ -71,24 +71,24 @@ export class VB6UDTProcessor {
     // Handle array declarations
     const arrayRegex = /^\s*(\w+)\s*\(([^)]+)\)\s+As\s+(.+)$/i;
     const arrayMatch = code.match(arrayRegex);
-    
+
     if (arrayMatch) {
       const name = arrayMatch[1];
       const dimensions = this.parseArrayDimensions(arrayMatch[2]);
       const typeInfo = this.parseFieldType(arrayMatch[3]);
-      
+
       return {
         name,
         type: typeInfo.type,
         arrayDimensions: dimensions,
-        fixedLength: typeInfo.fixedLength
+        fixedLength: typeInfo.fixedLength,
       };
     }
 
     // Handle regular field declarations
     const fieldRegex = /^\s*(\w+)\s+As\s+(.+)$/i;
     const fieldMatch = code.match(fieldRegex);
-    
+
     if (!fieldMatch) return null;
 
     const name = fieldMatch[1];
@@ -97,7 +97,7 @@ export class VB6UDTProcessor {
     return {
       name,
       type: typeInfo.type,
-      fixedLength: typeInfo.fixedLength
+      fixedLength: typeInfo.fixedLength,
     };
   }
 
@@ -108,10 +108,10 @@ export class VB6UDTProcessor {
   private parseArrayDimensions(dimensionStr: string): number[] {
     const dimensions: number[] = [];
     const parts = dimensionStr.split(',');
-    
+
     for (const part of parts) {
       const trimmed = part.trim();
-      
+
       if (trimmed.includes(' To ')) {
         const [start, end] = trimmed.split(' To ');
         const startNum = parseInt(start.trim());
@@ -122,7 +122,7 @@ export class VB6UDTProcessor {
         dimensions.push(isNaN(size) ? 0 : size + 1); // VB6 arrays are 0-based by default
       }
     }
-    
+
     return dimensions;
   }
 
@@ -130,17 +130,17 @@ export class VB6UDTProcessor {
    * Parse field type information
    * Examples: "String * 50", "Long", "Currency", "Date"
    */
-  private parseFieldType(typeStr: string): { type: string, fixedLength?: number } {
+  private parseFieldType(typeStr: string): { type: string; fixedLength?: number } {
     const fixedStringRegex = /^String\s*\*\s*(\d+)$/i;
     const fixedMatch = typeStr.match(fixedStringRegex);
-    
+
     if (fixedMatch) {
       return {
         type: 'String',
-        fixedLength: parseInt(fixedMatch[1])
+        fixedLength: parseInt(fixedMatch[1]),
       };
     }
-    
+
     return { type: typeStr.trim() };
   }
 
@@ -149,7 +149,7 @@ export class VB6UDTProcessor {
    */
   private calculateFieldSize(field: VB6UDTField): number {
     let baseSize = this.getTypeSize(field.type, field.fixedLength);
-    
+
     if (field.arrayDimensions && field.arrayDimensions.length > 0) {
       let totalElements = 1;
       for (const dim of field.arrayDimensions) {
@@ -157,7 +157,7 @@ export class VB6UDTProcessor {
       }
       baseSize *= totalElements;
     }
-    
+
     return baseSize;
   }
 
@@ -166,18 +166,28 @@ export class VB6UDTProcessor {
    */
   private getTypeSize(typeName: string, fixedLength?: number): number {
     switch (typeName.toLowerCase()) {
-      case 'byte': return 1;
-      case 'boolean': return 2;
-      case 'integer': return 2;
-      case 'long': return 4;
-      case 'single': return 4;
-      case 'double': return 8;
-      case 'currency': return 8;
-      case 'date': return 8;
+      case 'byte':
+        return 1;
+      case 'boolean':
+        return 2;
+      case 'integer':
+        return 2;
+      case 'long':
+        return 4;
+      case 'single':
+        return 4;
+      case 'double':
+        return 8;
+      case 'currency':
+        return 8;
+      case 'date':
+        return 8;
       case 'string':
         return fixedLength ? fixedLength : 4; // Variable-length string is a pointer
-      case 'variant': return 16;
-      case 'object': return 4; // Pointer
+      case 'variant':
+        return 16;
+      case 'object':
+        return 4; // Pointer
       default: {
         // Check if it's a user-defined type
         const udtType = this.getType(typeName);
@@ -191,7 +201,7 @@ export class VB6UDTProcessor {
    */
   processType(typeDecl: VB6UDTDeclaration, fieldLines: string[]): VB6UDTDeclaration {
     let totalSize = 0;
-    
+
     for (const line of fieldLines) {
       const field = this.parseTypeField(line);
       if (field) {
@@ -200,7 +210,7 @@ export class VB6UDTProcessor {
         typeDecl.fields.push(field);
       }
     }
-    
+
     typeDecl.size = totalSize;
     return typeDecl;
   }
@@ -233,10 +243,10 @@ export class VB6UDTProcessor {
   generateJavaScript(typeDecl: VB6UDTDeclaration): string {
     const typeName = typeDecl.name;
     const fields = typeDecl.fields;
-    
+
     let jsCode = `// User Defined Type: ${typeName}\n`;
     jsCode += `class ${typeName} {\n`;
-    
+
     // Constructor
     jsCode += `  constructor() {\n`;
     for (const field of fields) {
@@ -248,7 +258,7 @@ export class VB6UDTProcessor {
       }
     }
     jsCode += `  }\n\n`;
-    
+
     // Clone method
     jsCode += `  clone() {\n`;
     jsCode += `    const copy = new ${typeName}();\n`;
@@ -263,7 +273,7 @@ export class VB6UDTProcessor {
     }
     jsCode += `    return copy;\n`;
     jsCode += `  }\n\n`;
-    
+
     // Serialize method
     jsCode += `  serialize() {\n`;
     jsCode += `    return {\n`;
@@ -272,7 +282,7 @@ export class VB6UDTProcessor {
     }
     jsCode += `    };\n`;
     jsCode += `  }\n\n`;
-    
+
     // Deserialize method
     jsCode += `  static deserialize(data) {\n`;
     jsCode += `    const instance = new ${typeName}();\n`;
@@ -283,7 +293,7 @@ export class VB6UDTProcessor {
     jsCode += `    }\n`;
     jsCode += `    return instance;\n`;
     jsCode += `  }\n\n`;
-    
+
     // Size information
     jsCode += `  static get SIZE() { return ${typeDecl.size}; }\n`;
     jsCode += `  static get FIELDS() {\n`;
@@ -293,14 +303,15 @@ export class VB6UDTProcessor {
       jsCode += `        name: '${field.name}',\n`;
       jsCode += `        type: '${field.type}',\n`;
       if (field.fixedLength) jsCode += `        fixedLength: ${field.fixedLength},\n`;
-      if (field.arrayDimensions) jsCode += `        arrayDimensions: [${field.arrayDimensions.join(', ')}],\n`;
+      if (field.arrayDimensions)
+        jsCode += `        arrayDimensions: [${field.arrayDimensions.join(', ')}],\n`;
       jsCode += `      },\n`;
     }
     jsCode += `    ];\n`;
     jsCode += `  }\n`;
-    
+
     jsCode += `}\n\n`;
-    
+
     return jsCode;
   }
 
@@ -311,12 +322,12 @@ export class VB6UDTProcessor {
     if (!field.arrayDimensions || field.arrayDimensions.length === 0) {
       return 'null';
     }
-    
+
     let totalElements = 1;
     for (const dim of field.arrayDimensions) {
       totalElements *= dim;
     }
-    
+
     const defaultValue = this.getFieldDefaultValue(field);
     return `new Array(${totalElements}).fill(${defaultValue})`;
   }
@@ -358,23 +369,23 @@ export class VB6UDTProcessor {
   generateTypeScript(typeDecl: VB6UDTDeclaration): string {
     const typeName = typeDecl.name;
     const fields = typeDecl.fields;
-    
+
     let tsCode = `interface ${typeName} {\n`;
-    
+
     for (const field of fields) {
       let fieldType = this.mapVB6TypeToTypeScript(field.type);
-      
+
       if (field.arrayDimensions && field.arrayDimensions.length > 0) {
         for (let i = 0; i < field.arrayDimensions.length; i++) {
           fieldType += '[]';
         }
       }
-      
+
       tsCode += `  ${field.name}: ${fieldType};\n`;
     }
-    
+
     tsCode += `}\n\n`;
-    
+
     return tsCode;
   }
 
@@ -410,8 +421,7 @@ export class VB6UDTProcessor {
    * Get all types in current module
    */
   getModuleTypes(): VB6UDTDeclaration[] {
-    return Array.from(this.types.values())
-      .filter(t => t.module === this.currentModule);
+    return Array.from(this.types.values()).filter(t => t.module === this.currentModule);
   }
 
   /**
@@ -451,37 +461,37 @@ export const VB6SystemTypes = {
       { name: 'Left', type: 'Long' },
       { name: 'Top', type: 'Long' },
       { name: 'Right', type: 'Long' },
-      { name: 'Bottom', type: 'Long' }
+      { name: 'Bottom', type: 'Long' },
     ],
     public: true,
     module: 'System',
     line: 0,
-    size: 16
+    size: 16,
   },
-  
+
   POINT: {
     name: 'POINT',
     fields: [
       { name: 'x', type: 'Long' },
-      { name: 'y', type: 'Long' }
+      { name: 'y', type: 'Long' },
     ],
     public: true,
     module: 'System',
     line: 0,
-    size: 8
+    size: 8,
   },
-  
+
   SIZE: {
     name: 'SIZE',
     fields: [
       { name: 'cx', type: 'Long' },
-      { name: 'cy', type: 'Long' }
+      { name: 'cy', type: 'Long' },
     ],
     public: true,
     module: 'System',
     line: 0,
-    size: 8
-  }
+    size: 8,
+  },
 };
 
 // Global UDT processor instance

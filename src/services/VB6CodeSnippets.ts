@@ -58,7 +58,7 @@ export const VB6_CODE_SNIPPETS: CodeSnippet[] = [
     Next i
 
     ReverseString = result
-End Function`
+End Function`,
   },
   {
     id: 'str-word-count',
@@ -81,7 +81,7 @@ End Function`
         words = Split(s, " ")
         WordCount = UBound(words) - LBound(words) + 1
     End If
-End Function`
+End Function`,
   },
   {
     id: 'str-proper-case',
@@ -102,7 +102,7 @@ End Function`
     Next i
 
     ProperCase = Join(words, " ")
-End Function`
+End Function`,
   },
   {
     id: 'str-extract-numbers',
@@ -125,7 +125,7 @@ End Function`
     Next i
 
     ExtractNumbers = result
-End Function`
+End Function`,
   },
   {
     id: 'str-pad',
@@ -148,7 +148,7 @@ Public Function PadRight(ByVal s As String, ByVal totalWidth As Long, Optional B
     Else
         PadRight = s & String$(totalWidth - Len(s), padChar)
     End If
-End Function`
+End Function`,
   },
 
   // ============================================================================
@@ -178,7 +178,7 @@ End Function`
 ErrorHandler:
     If fileNum > 0 Then Close #fileNum
     ReadTextFile = ""
-End Function`
+End Function`,
   },
   {
     id: 'file-write-text',
@@ -205,7 +205,7 @@ End Function`
 ErrorHandler:
     If fileNum > 0 Then Close #fileNum
     MsgBox "Error writing file: " & Err.Description, vbCritical
-End Sub`
+End Sub`,
   },
   {
     id: 'file-exists',
@@ -217,7 +217,7 @@ End Sub`
     code: `Public Function FileExists(ByVal filePath As String) As Boolean
     On Error Resume Next
     FileExists = (Dir$(filePath, vbNormal Or vbHidden Or vbSystem) <> "")
-End Function`
+End Function`,
   },
   {
     id: 'file-folder-exists',
@@ -229,7 +229,7 @@ End Function`
     code: `Public Function FolderExists(ByVal folderPath As String) As Boolean
     On Error Resume Next
     FolderExists = (Dir$(folderPath, vbDirectory) <> "")
-End Function`
+End Function`,
   },
   {
     id: 'file-list-files',
@@ -258,7 +258,7 @@ End Function`
     Loop
 
     ListFiles = files
-End Function`
+End Function`,
   },
   {
     id: 'file-copy-folder',
@@ -283,7 +283,7 @@ End Function`
         FileCopy sourceFolder & fileName, destFolder & fileName
         fileName = Dir$()
     Loop
-End Sub`
+End Sub`,
   },
 
   // ============================================================================
@@ -306,7 +306,7 @@ Public Function ConnectToAccess(ByVal dbPath As String) As Database
 ErrorHandler:
     Set ConnectToAccess = Nothing
     MsgBox "Database connection error: " & Err.Description, vbCritical
-End Function`
+End Function`,
   },
   {
     id: 'db-execute-query',
@@ -336,7 +336,7 @@ Public Sub ExecuteNonQuery(ByVal db As Database, ByVal sql As String)
 
 ErrorHandler:
     MsgBox "Execution error: " & Err.Description, vbCritical
-End Sub`
+End Sub`,
   },
   {
     id: 'db-record-to-array',
@@ -374,7 +374,7 @@ End Sub`
 
     rs.MoveFirst
     RecordsetToArray = data
-End Function`
+End Function`,
   },
 
   // ============================================================================
@@ -390,7 +390,7 @@ End Function`
     code: `Public Sub CenterForm(frm As Form)
     frm.Move (Screen.Width - frm.Width) / 2, _
              (Screen.Height - frm.Height) / 2
-End Sub`
+End Sub`,
   },
   {
     id: 'frm-disable-close',
@@ -405,7 +405,7 @@ Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
         Cancel = True
         MsgBox "Please use the Exit button to close.", vbInformation
     End If
-End Sub`
+End Sub`,
   },
   {
     id: 'ctl-fill-combo',
@@ -424,7 +424,7 @@ End Sub`
     Next i
 
     If cbo.ListCount > 0 Then cbo.ListIndex = 0
-End Sub`
+End Sub`,
   },
   {
     id: 'ctl-listview-add',
@@ -445,7 +445,7 @@ End Sub`
 End Sub
 
 ' Usage example:
-' AddListViewItem ListView1, "Item 1", "SubItem 1", "SubItem 2", "SubItem 3"`
+' AddListViewItem ListView1, "Item 1", "SubItem 1", "SubItem 2", "SubItem 3"`,
   },
   {
     id: 'ctl-treeview-add',
@@ -475,7 +475,7 @@ End Sub
     End If
 
     Set AddTreeNode = newNode
-End Function`
+End Function`,
   },
 
   // ============================================================================
@@ -499,7 +499,7 @@ End Function`
     End If
 
     CalculateAge = age
-End Function`
+End Function`,
   },
   {
     id: 'date-business-days',
@@ -524,7 +524,7 @@ End Function`
     Loop
 
     BusinessDays = days
-End Function`
+End Function`,
   },
   {
     id: 'date-format-friendly',
@@ -550,7 +550,7 @@ End Function`
         Case Else
             FriendlyDate = Format(d, "mmmm d, yyyy")
     End Select
-End Function`
+End Function`,
   },
 
   // ============================================================================
@@ -565,7 +565,7 @@ End Function`
     keywords: ['math', 'round', 'currency', 'decimal'],
     code: `Public Function RoundCurrency(ByVal value As Double) As Currency
     RoundCurrency = CCur(Round(value, 2))
-End Function`
+End Function`,
   },
   {
     id: 'math-random-range',
@@ -578,7 +578,7 @@ End Function`
     RandomInRange = Int((maxValue - minValue + 1) * Rnd + minValue)
 End Function
 
-' Don't forget to call Randomize once at program start!`
+' Don't forget to call Randomize once at program start!`,
   },
   {
     id: 'math-percentage',
@@ -597,7 +597,7 @@ End Function
 
 Public Function ApplyPercentage(ByVal value As Double, ByVal percentage As Double) As Double
     ApplyPercentage = value * (percentage / 100)
-End Function`
+End Function`,
   },
 
   // ============================================================================
@@ -631,7 +631,7 @@ End Function`
             End If
         Next j
     Next i
-End Sub`
+End Sub`,
   },
   {
     id: 'arr-search',
@@ -651,7 +651,7 @@ End Sub`
     Next i
 
     ArrayIndexOf = -1 ' Not found
-End Function`
+End Function`,
   },
   {
     id: 'arr-remove',
@@ -670,7 +670,7 @@ End Function`
     Next i
 
     ReDim Preserve arr(LBound(arr) To UBound(arr) - 1)
-End Sub`
+End Sub`,
   },
 
   // ============================================================================
@@ -696,7 +696,7 @@ Public Sub PlaySystemSound(ByVal soundType As Long)
 End Sub
 
 ' Usage:
-' PlaySystemSound MB_ICONINFORMATION`
+' PlaySystemSound MB_ICONINFORMATION`,
   },
   {
     id: 'api-sleep',
@@ -712,7 +712,7 @@ Public Sub Pause(ByVal milliseconds As Long)
 End Sub
 
 ' Usage:
-' Pause 1000 ' Pause for 1 second`
+' Pause 1000 ' Pause for 1 second`,
   },
   {
     id: 'api-get-username',
@@ -736,7 +736,7 @@ Public Function GetWindowsUserName() As String
     Else
         GetWindowsUserName = ""
     End If
-End Function`
+End Function`,
   },
   {
     id: 'api-computer-name',
@@ -760,7 +760,7 @@ Public Function GetWindowsComputerName() As String
     Else
         GetWindowsComputerName = ""
     End If
-End Function`
+End Function`,
   },
 
   // ============================================================================
@@ -783,7 +783,7 @@ End Function`
 ErrorHandler:
     MsgBox "Error " & Err.Number & ": " & Err.Description, _
            vbCritical, "Error in ProcedureName"
-End Sub`
+End Sub`,
   },
   {
     id: 'err-log-file',
@@ -808,7 +808,7 @@ End Sub
 
 ' Usage in error handler:
 ' ErrorHandler:
-'     LogError "ProcedureName", Err.Number, Err.Description`
+'     LogError "ProcedureName", Err.Number, Err.Description`,
   },
 
   // ============================================================================
@@ -832,7 +832,7 @@ End Function
 
 ' Usage:
 ' SaveAppSetting "Window", "Left", CStr(Me.Left)
-' Me.Left = CLng(GetAppSetting("Window", "Left", "0"))`
+' Me.Left = CLng(GetAppSetting("Window", "Left", "0"))`,
   },
 
   // ============================================================================
@@ -860,7 +860,7 @@ End Function
 ' If IsAppRunning(App.Title) Then
 '     MsgBox "Application is already running!", vbExclamation
 '     End
-' End If`
+' End If`,
   },
   {
     id: 'util-input-validation',
@@ -896,7 +896,7 @@ End Function
 
 Public Function IsRequired(ByVal value As String) As Boolean
     IsRequired = (Len(Trim$(value)) > 0)
-End Function`
+End Function`,
   },
   {
     id: 'util-format-bytes',
@@ -922,8 +922,8 @@ End Function`
     Else
         FormatBytes = Format$(bytes, "#,##0") & " bytes"
     End If
-End Function`
-  }
+End Function`,
+  },
 ];
 
 // ============================================================================
@@ -965,11 +965,12 @@ export class VB6SnippetManager {
    */
   search(query: string): CodeSnippet[] {
     const lowerQuery = query.toLowerCase();
-    return this.getAllSnippets().filter(s =>
-      s.name.toLowerCase().includes(lowerQuery) ||
-      s.description.toLowerCase().includes(lowerQuery) ||
-      s.keywords.some(k => k.includes(lowerQuery)) ||
-      s.code.toLowerCase().includes(lowerQuery)
+    return this.getAllSnippets().filter(
+      s =>
+        s.name.toLowerCase().includes(lowerQuery) ||
+        s.description.toLowerCase().includes(lowerQuery) ||
+        s.keywords.some(k => k.includes(lowerQuery)) ||
+        s.code.toLowerCase().includes(lowerQuery)
     );
   }
 
@@ -1012,5 +1013,5 @@ export const snippetManager = new VB6SnippetManager();
 export default {
   VB6_CODE_SNIPPETS,
   VB6SnippetManager,
-  snippetManager
+  snippetManager,
 };

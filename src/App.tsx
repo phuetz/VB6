@@ -3,11 +3,11 @@ import { DragDropProvider } from './components/DragDrop/DragDropProvider';
 import { VB6Provider } from './context/VB6Context';
 import TitleBar from './components/Layout/TitleBar';
 import EnhancedMenuBar from './components/Layout/EnhancedMenuBar';
-import { EnhancedToolbar } from './components/Layout/EnhancedToolbar';
+import Toolbar from './components/Layout/Toolbar';
 import StatusBar from './components/Layout/StatusBar';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import DialogManager from './components/Dialogs/DialogManager';
-import { EnhancedToolbox } from './components/Panels/Toolbox/EnhancedToolbox';
+import Toolbox from './components/Panels/Toolbox/Toolbox';
 import { AdvancedDragDropCanvas } from './components/DragDrop/AdvancedDragDropCanvas';
 import LazyMonacoEditor from './components/Editor/LazyMonacoEditor';
 import ProjectExplorer from './components/Panels/ProjectExplorer/ProjectExplorer';
@@ -15,12 +15,13 @@ import PropertiesWindow from './components/Panels/PropertiesWindow/PropertiesWin
 import ControlTree from './components/Panels/ControlTree/ControlTree';
 import ImmediateWindow from './components/Panels/ImmediateWindow/ImmediateWindow';
 import { useVB6Store } from './stores/vb6Store';
+import { useWindowStore } from './stores/windowStore';
 import { EnhancedIntelliSense } from './components/Editor/EnhancedIntelliSense';
 import { CodeAnalyzer } from './components/Analysis/CodeAnalyzer';
 import { RefactorTools } from './components/Refactoring/RefactorTools';
 import { SnippetManager } from './components/Snippets/SnippetManager';
 import { TodoList } from './components/Todo/TodoList';
-import { BreakpointManager } from './components/Debugging/BreakpointManager';
+import { BreakpointManager } from './components/Debug/BreakpointManager';
 import { ProjectTemplateManager } from './components/Templates/ProjectTemplateManager';
 import { PerformanceMonitor } from './components/Performance/PerformanceMonitor';
 import { ProjectSetupWizard } from './components/ProjectWizard/ProjectSetupWizard';
@@ -31,6 +32,7 @@ import { LogPanel } from './components/Debug/LogPanel';
 import { CodeFormatter } from './components/Formatting/CodeFormatter';
 import { CodeConverter } from './components/Converter/CodeConverter';
 import OptionsDialog from './components/Dialogs/OptionsDialog';
+import { shallow } from 'zustand/shallow';
 import './index.css';
 
 const MainContent: React.FC = () => {
@@ -41,13 +43,29 @@ const MainContent: React.FC = () => {
     showPropertiesWindow,
     showControlTree,
     showImmediateWindow,
-    formProperties,
-  } = useVB6Store();
+  } = useWindowStore(
+    state => ({
+      showToolbox: state.showToolbox,
+      showCodeEditor: state.showCodeEditor,
+      showProjectExplorer: state.showProjectExplorer,
+      showPropertiesWindow: state.showPropertiesWindow,
+      showControlTree: state.showControlTree,
+      showImmediateWindow: state.showImmediateWindow,
+    }),
+    shallow
+  );
+
+  const { formProperties } = useVB6Store(
+    state => ({
+      formProperties: state.formProperties,
+    }),
+    shallow
+  );
 
   return (
     <div className="flex-1 flex overflow-hidden">
       {/* Left Panel - Enhanced Toolbox */}
-      {showToolbox && <EnhancedToolbox />}
+      {showToolbox && <Toolbox />}
 
       {/* Center Panel - Advanced Canvas or Code Editor */}
       <div className="flex-1 flex flex-col bg-gray-300 overflow-hidden">
@@ -80,18 +98,36 @@ const MainContent: React.FC = () => {
 };
 
 function App() {
-  // State for all dialog components
+  // Window/panel visibility state from windowStore
   const {
     showTemplateManager,
     showPerformanceMonitor,
     showOptionsDialog,
+    showSnippetManager,
+    showTodoList,
     showDialog,
     toggleWindow,
-    snippets,
-    showSnippetManager,
-    insertSnippet,
-    showTodoList,
-  } = useVB6Store();
+  } = useWindowStore(
+    state => ({
+      showTemplateManager: state.showTemplateManager,
+      showPerformanceMonitor: state.showPerformanceMonitor,
+      showOptionsDialog: state.showOptionsDialog,
+      showSnippetManager: state.showSnippetManager,
+      showTodoList: state.showTodoList,
+      showDialog: state.showDialog,
+      toggleWindow: state.toggleWindow,
+    }),
+    shallow
+  );
+
+  // Non-window state from vb6Store
+  const { snippets, insertSnippet } = useVB6Store(
+    state => ({
+      snippets: state.snippets,
+      insertSnippet: state.insertSnippet,
+    }),
+    shallow
+  );
   const [showProjectWizard, setShowProjectWizard] = useState(false);
   const [showCodeAnalyzer, setShowCodeAnalyzer] = useState(false);
   const [showRefactorTools, setShowRefactorTools] = useState(false);
@@ -111,7 +147,7 @@ function App() {
         >
           <TitleBar />
           <EnhancedMenuBar />
-          <EnhancedToolbar />
+          <Toolbar />
           <ErrorBoundary>
             <MainContent />
           </ErrorBoundary>
@@ -126,7 +162,6 @@ function App() {
             visible={showTemplateManager}
             onClose={() => showDialog('showTemplateManager', false)}
             onCreateProject={template => {
-              console.log('Creating project from template:', template);
               showDialog('showTemplateManager', false);
             }}
           />
@@ -142,7 +177,6 @@ function App() {
             visible={showProjectWizard}
             onClose={() => setShowProjectWizard(false)}
             onComplete={config => {
-              console.log('Project configuration:', config);
               setShowProjectWizard(false);
             }}
           />
@@ -151,53 +185,33 @@ function App() {
           <CodeAnalyzer
             visible={showCodeAnalyzer}
             onClose={() => setShowCodeAnalyzer(false)}
-            onFixIssue={(issue, fixIndex) => {
-              console.log('Applying fix for issue:', issue, 'fix index:', fixIndex);
-            }}
-            onNavigateToIssue={(file, line, column) => {
-              console.log('Navigating to issue:', file, line, column);
-            }}
+            onFixIssue={(issue, fixIndex) => {}}
+            onNavigateToIssue={(file, line, column) => {}}
           />
 
           <RefactorTools
             visible={showRefactorTools}
             onClose={() => setShowRefactorTools(false)}
-            onApplyRefactoring={(type, options) => {
-              console.log('Applying refactoring:', type, options);
-            }}
+            onApplyRefactoring={(type, options) => {}}
           />
 
           <BreakpointManager
             visible={showBreakpointManager}
             onClose={() => setShowBreakpointManager(false)}
             breakpoints={[]}
-            onAddBreakpoint={bp => {
-              console.log('Adding breakpoint:', bp);
-            }}
-            onRemoveBreakpoint={id => {
-              console.log('Removing breakpoint:', id);
-            }}
-            onUpdateBreakpoint={(id, updates) => {
-              console.log('Updating breakpoint:', id, updates);
-            }}
-            onNavigateToBreakpoint={(file, line) => {
-              console.log('Navigating to breakpoint:', file, line);
-            }}
+            onAddBreakpoint={bp => {}}
+            onRemoveBreakpoint={id => {}}
+            onUpdateBreakpoint={(id, updates) => {}}
+            onNavigateToBreakpoint={(file, line) => {}}
           />
 
           {/* Error List */}
           <EnhancedErrorList
             visible={showErrorList}
             onClose={() => setShowErrorList(false)}
-            onNavigateToError={(file, line, column) => {
-              console.log('Navigating to error:', file, line, column);
-            }}
-            onFixError={errorId => {
-              console.log('Fix error:', errorId);
-            }}
-            onClearErrors={() => {
-              console.log('Clear all errors');
-            }}
+            onNavigateToError={(file, line, column) => {}}
+            onFixError={errorId => {}}
+            onClearErrors={() => {}}
           />
 
           {/* Command Palette */}
@@ -210,9 +224,7 @@ function App() {
           <ExportDialog
             visible={showExportDialog}
             onClose={() => setShowExportDialog(false)}
-            onExport={(format, options) => {
-              console.log('Exporting to', format, 'with options', options);
-            }}
+            onExport={(format, options) => {}}
           />
 
           {/* Snippet Manager */}
@@ -227,18 +239,14 @@ function App() {
           <CodeFormatter
             visible={showCodeFormatter}
             onClose={() => setShowCodeFormatter(false)}
-            onApplyFormatting={formattedCode => {
-              console.log('Apply formatting:', formattedCode);
-            }}
+            onApplyFormatting={formattedCode => {}}
           />
 
           {/* Code Converter */}
           <CodeConverter
             visible={showCodeConverter}
             onClose={() => setShowCodeConverter(false)}
-            onConvertCode={(code, targetLanguage, options) => {
-              console.log('Convert code to', targetLanguage, 'with options', options);
-            }}
+            onConvertCode={(code, targetLanguage, options) => {}}
           />
 
           {/* Options Dialog */}

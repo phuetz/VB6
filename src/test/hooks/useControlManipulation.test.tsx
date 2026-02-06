@@ -10,7 +10,7 @@ import React from 'react';
 
 // Mock des dépendances
 vi.mock('../../stores/vb6Store', () => ({
-  useVB6Store: vi.fn((selector) => {
+  useVB6Store: vi.fn(selector => {
     const mockState = {
       controls: [],
       selectedControlIds: [],
@@ -20,10 +20,10 @@ vi.mock('../../stores/vb6Store', () => ({
       canvasSize: { width: 800, height: 600 },
       updateControl: vi.fn(),
       selectControls: vi.fn(),
-      addLog: vi.fn()
+      addLog: vi.fn(),
     };
     return selector(mockState);
-  })
+  }),
 }));
 
 vi.mock('../../context/VB6Context', () => ({
@@ -31,11 +31,11 @@ vi.mock('../../context/VB6Context', () => ({
     state: {
       controls: [],
       selectedControlIds: [],
-      canvasSize: { width: 800, height: 600 }
+      canvasSize: { width: 800, height: 600 },
     },
     updateControl: vi.fn(),
-    selectControls: vi.fn()
-  })
+    selectControls: vi.fn(),
+  }),
 }));
 
 // Mock performance monitor
@@ -44,8 +44,8 @@ vi.mock('../../utils/performanceMonitor', () => ({
     startMeasure: vi.fn(),
     endMeasure: vi.fn(),
     checkRenderLoop: vi.fn(() => false),
-    measureMemory: vi.fn(() => ({ used: 1000000, total: 10000000 }))
-  }
+    measureMemory: vi.fn(() => ({ used: 1000000, total: 10000000 })),
+  },
 }));
 
 describe('useControlManipulation', () => {
@@ -63,16 +63,19 @@ describe('useControlManipulation', () => {
   describe('Hook Stability', () => {
     it('should not cause infinite re-renders', async () => {
       let renderCount = 0;
-      
+
       const { result } = renderHook(() => {
         renderCount++;
         return useControlManipulation();
       });
 
       // Wait for hook to stabilize
-      await waitFor(() => {
-        expect(renderCount).toBeLessThan(5);
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(renderCount).toBeLessThan(5);
+        },
+        { timeout: 1000 }
+      );
 
       expect(result.current).toBeDefined();
       expect(typeof result.current.selectControl).toBe('function');
@@ -87,7 +90,7 @@ describe('useControlManipulation', () => {
         selectControl: result.current.selectControl,
         moveControl: result.current.moveControl,
         resizeControl: result.current.resizeControl,
-        alignControls: result.current.alignControls
+        alignControls: result.current.alignControls,
       };
 
       // Rerender the hook
@@ -173,18 +176,18 @@ describe('useControlManipulation', () => {
       const { result } = renderHook(() => useControlManipulation());
 
       act(() => {
-        result.current.resizeControl(1, { 
-          width: 200, 
+        result.current.resizeControl(1, {
+          width: 200,
           height: 100,
-          direction: 'se' 
+          direction: 'se',
         });
       });
 
       act(() => {
-        result.current.resizeControl(1, { 
-          width: 150, 
+        result.current.resizeControl(1, {
+          width: 150,
           height: 80,
-          direction: 'nw' 
+          direction: 'nw',
         });
       });
 
@@ -196,10 +199,10 @@ describe('useControlManipulation', () => {
 
       act(() => {
         // Try to resize to very small dimensions
-        result.current.resizeControl(1, { 
-          width: 1, 
+        result.current.resizeControl(1, {
+          width: 1,
           height: 1,
-          direction: 'se' 
+          direction: 'se',
         });
       });
 
@@ -252,7 +255,7 @@ describe('useControlManipulation', () => {
         () => result.current.moveControl(1, { x: 50, y: 50 }),
         () => result.current.resizeControl(1, { width: 100, height: 100, direction: 'se' }),
         () => result.current.alignControls([1, 2], 'left'),
-        () => result.current.selectMultipleControls([1, 2, 3])
+        () => result.current.selectMultipleControls([1, 2, 3]),
       ];
 
       await act(async () => {
@@ -333,7 +336,7 @@ describe('useControlManipulation', () => {
         const mockState = {
           controls: [
             { id: 1, left: 0, top: 0, width: 100, height: 50 },
-            { id: 2, left: 50, top: 50, width: 100, height: 50 }
+            { id: 2, left: 50, top: 50, width: 100, height: 50 },
           ],
           selectedControlIds: [1],
           snapToGrid: true,
@@ -342,7 +345,7 @@ describe('useControlManipulation', () => {
           canvasSize: { width: 800, height: 600 },
           updateControl: mockUpdateControl,
           selectControls: mockSelectControls,
-          addLog: vi.fn()
+          addLog: vi.fn(),
         };
         return selector(mockState);
       });

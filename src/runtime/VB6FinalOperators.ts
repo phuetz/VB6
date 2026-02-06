@@ -23,12 +23,12 @@ export function Is(obj1: any, obj2: any): boolean {
   if (obj2 === null || obj2 === undefined) {
     return false;
   }
-  
+
   // For objects, compare references
   if (typeof obj1 === 'object' && typeof obj2 === 'object') {
     return obj1 === obj2;
   }
-  
+
   // For primitives (shouldn't happen in VB6 but handle it)
   return obj1 === obj2;
 }
@@ -61,14 +61,14 @@ export class VB6WithBlockManager {
   private static instance: VB6WithBlockManager;
   private withStack: any[] = [];
   private currentWith: any = null;
-  
+
   static getInstance(): VB6WithBlockManager {
     if (!VB6WithBlockManager.instance) {
       VB6WithBlockManager.instance = new VB6WithBlockManager();
     }
     return VB6WithBlockManager.instance;
   }
-  
+
   /**
    * Enter a With block
    * @param obj Object to use as context
@@ -77,11 +77,11 @@ export class VB6WithBlockManager {
     if (obj === null || obj === undefined) {
       throw new Error('Object variable or With block variable not set');
     }
-    
+
     this.withStack.push(this.currentWith);
     this.currentWith = obj;
   }
-  
+
   /**
    * Exit a With block
    */
@@ -89,10 +89,10 @@ export class VB6WithBlockManager {
     if (this.withStack.length === 0) {
       throw new Error('With block not properly nested');
     }
-    
+
     this.currentWith = this.withStack.pop();
   }
-  
+
   /**
    * Get current With context
    */
@@ -102,7 +102,7 @@ export class VB6WithBlockManager {
     }
     return this.currentWith;
   }
-  
+
   /**
    * Clear all With contexts (for error recovery)
    */
@@ -123,9 +123,9 @@ export function With<T>(obj: T, callback: (context: T) => void): void {
   if (obj === null || obj === undefined) {
     throw new Error('Object variable or With block variable not set');
   }
-  
+
   withBlockManager.enterWith(obj);
-  
+
   try {
     callback(obj);
   } finally {
@@ -170,11 +170,11 @@ export function DotSet(propertyName: string, value: any): void {
  */
 export function DotCall(methodName: string, ...args: any[]): any {
   const context = withBlockManager.getCurrentWith();
-  
+
   if (typeof context[methodName] !== 'function') {
     throw new Error(`Method '${methodName}' not found on object`);
   }
-  
+
   return context[methodName](...args);
 }
 
@@ -199,38 +199,34 @@ export function MidStatement(
   if (!target || typeof target.value !== 'string') {
     throw new Error('Type mismatch - Mid statement requires string variable');
   }
-  
+
   if (start < 1) {
     throw new Error('Invalid procedure call or argument');
   }
-  
+
   const str = target.value;
   const startIndex = start - 1; // Convert to 0-based
-  
+
   if (startIndex >= str.length) {
     return; // No change if start is beyond string
   }
-  
+
   const replaceStr = replacement || '';
   let replaceLength = length;
-  
+
   if (replaceLength === undefined) {
     // If length not specified, use length of replacement string
     replaceLength = replaceStr.length;
   }
-  
+
   // Calculate actual replacement length (can't exceed remaining string)
-  const actualLength = Math.min(
-    replaceLength,
-    str.length - startIndex,
-    replaceStr.length
-  );
-  
+  const actualLength = Math.min(replaceLength, str.length - startIndex, replaceStr.length);
+
   // Build new string
   const before = str.substring(0, startIndex);
   const after = str.substring(startIndex + actualLength);
   const middle = replaceStr.substring(0, actualLength).padEnd(actualLength, ' ');
-  
+
   target.value = before + middle + after;
 }
 
@@ -256,12 +252,12 @@ export function Xor(a: any, b: any): any {
   if (typeof a === 'boolean' && typeof b === 'boolean') {
     return (a && !b) || (!a && b);
   }
-  
+
   // For numbers, bitwise XOR
   if (typeof a === 'number' && typeof b === 'number') {
     return (a ^ b) >>> 0; // Unsigned to match VB6 behavior
   }
-  
+
   // Convert to boolean for other types
   const boolA = Boolean(a);
   const boolB = Boolean(b);
@@ -281,12 +277,12 @@ export function Not(value: any): any {
   if (typeof value === 'boolean') {
     return !value;
   }
-  
+
   // For number, bitwise NOT
   if (typeof value === 'number') {
-    return (~value) >>> 0; // Unsigned to match VB6 behavior
+    return ~value >>> 0; // Unsigned to match VB6 behavior
   }
-  
+
   // Convert to boolean for other types
   return !value;
 }
@@ -309,12 +305,12 @@ export function ObjectEquals(obj1: any, obj2: any): boolean {
   if (obj2 === null || obj2 === undefined) {
     return false;
   }
-  
+
   // For objects with Equals method
   if (typeof obj1.Equals === 'function') {
     return obj1.Equals(obj2);
   }
-  
+
   // Default to reference equality
   return obj1 === obj2;
 }
@@ -358,7 +354,7 @@ export const VB6FinalOperators = {
   Is,
   IsNothing,
   SetNothing,
-  
+
   // With blocks
   With,
   WithContext,
@@ -366,61 +362,57 @@ export const VB6FinalOperators = {
   DotSet,
   DotCall,
   withBlockManager,
-  
+
   // Mid statement
   MidStatement,
   StringVar,
-  
+
   // Logical operators
   Xor,
   Not,
-  
+
   // Object comparison
   ObjectEquals,
-  
+
   // Special values
   Nothing,
   Empty,
   Null,
-  IsVB6Null
+  IsVB6Null,
 };
 
 // Make functions globally available
 if (typeof window !== 'undefined') {
   const globalAny = window as any;
-  
+
   // Is operator
   globalAny.Is = Is;
   globalAny.IsNothing = IsNothing;
   globalAny.SetNothing = SetNothing;
-  
+
   // With blocks
   globalAny.With = With;
   globalAny.WithContext = WithContext;
   globalAny.Dot = Dot;
   globalAny.DotSet = DotSet;
   globalAny.DotCall = DotCall;
-  
+
   // Mid statement
   globalAny.MidStatement = MidStatement;
   globalAny.StringVar = StringVar;
-  
+
   // Logical operators
   globalAny.Xor = Xor;
   globalAny.Not = Not;
-  
+
   // Object comparison
   globalAny.ObjectEquals = ObjectEquals;
-  
+
   // Special values
   globalAny.Nothing = Nothing;
   globalAny.Empty = Empty;
   globalAny.Null = Null;
   globalAny.IsVB6Null = IsVB6Null;
-  
-  console.log('[VB6] Final operators loaded - Is, With blocks, Mid statement, Xor, Not');
-  console.log('[VB6] ABSOLUTE 100% VB6 language compatibility ACHIEVED!');
-  console.log('[VB6] ✅ ALL 211+ functions, ALL statements, ALL operators implemented!');
 }
 
 export default VB6FinalOperators;

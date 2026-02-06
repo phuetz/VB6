@@ -31,8 +31,8 @@ const ACTIVEX_CATALOG: ActiveXInfo[] = [
       CommPort: 1,
       Settings: '9600,N,8,1',
       RThreshold: 1,
-      SThreshold: 1
-    }
+      SThreshold: 1,
+    },
   },
   {
     progId: 'MSChart20Lib.MSChart',
@@ -44,8 +44,8 @@ const ACTIVEX_CATALOG: ActiveXInfo[] = [
     properties: {
       ChartType: 1,
       ShowLegend: true,
-      Title: 'Chart Title'
-    }
+      Title: 'Chart Title',
+    },
   },
   {
     progId: 'SHDocVw.InternetExplorer',
@@ -57,8 +57,8 @@ const ACTIVEX_CATALOG: ActiveXInfo[] = [
     properties: {
       LocationURL: 'about:blank',
       AddressBar: true,
-      StatusBar: true
-    }
+      StatusBar: true,
+    },
   },
   {
     progId: 'MSComDlg.CommonDialog',
@@ -69,8 +69,8 @@ const ACTIVEX_CATALOG: ActiveXInfo[] = [
     category: 'Dialogs',
     properties: {
       Filter: 'All Files (*.*)|*.*',
-      DialogTitle: ''
-    }
+      DialogTitle: '',
+    },
   },
   {
     progId: 'MSFlexGridLib.MSFlexGrid',
@@ -83,8 +83,8 @@ const ACTIVEX_CATALOG: ActiveXInfo[] = [
       Rows: 10,
       Cols: 5,
       FixedRows: 1,
-      FixedCols: 1
-    }
+      FixedCols: 1,
+    },
   },
   {
     progId: 'MSHierarchicalFlexGridLib.MSHFlexGrid',
@@ -96,8 +96,8 @@ const ACTIVEX_CATALOG: ActiveXInfo[] = [
     properties: {
       Rows: 10,
       Cols: 5,
-      AllowUserResizing: 3
-    }
+      AllowUserResizing: 3,
+    },
   },
   {
     progId: 'MediaPlayer.MediaPlayer',
@@ -109,8 +109,8 @@ const ACTIVEX_CATALOG: ActiveXInfo[] = [
     properties: {
       AutoStart: false,
       ShowControls: true,
-      ShowStatusBar: true
-    }
+      ShowStatusBar: true,
+    },
   },
   {
     progId: 'ShockwaveFlash.ShockwaveFlash',
@@ -122,8 +122,8 @@ const ACTIVEX_CATALOG: ActiveXInfo[] = [
     properties: {
       Playing: false,
       Quality: 'High',
-      ScaleMode: 0
-    }
+      ScaleMode: 0,
+    },
   },
   {
     progId: 'ADODB.Connection',
@@ -135,8 +135,8 @@ const ACTIVEX_CATALOG: ActiveXInfo[] = [
     properties: {
       ConnectionString: '',
       CommandTimeout: 30,
-      CursorLocation: 3
-    }
+      CursorLocation: 3,
+    },
   },
   {
     progId: 'MSDataGridLib.DataGrid',
@@ -148,8 +148,8 @@ const ACTIVEX_CATALOG: ActiveXInfo[] = [
     properties: {
       AllowAddNew: true,
       AllowDelete: true,
-      AllowUpdate: true
-    }
+      AllowUpdate: true,
+    },
   },
   {
     progId: 'MSCAL.Calendar',
@@ -161,8 +161,8 @@ const ACTIVEX_CATALOG: ActiveXInfo[] = [
     properties: {
       ShowDateSelectors: true,
       ShowTitle: true,
-      ShowDays: true
-    }
+      ShowDays: true,
+    },
   },
   {
     progId: 'RichText.RichTextCtrl',
@@ -174,15 +174,15 @@ const ACTIVEX_CATALOG: ActiveXInfo[] = [
     properties: {
       MultiLine: true,
       ScrollBars: 3,
-      AutoVerbMenu: true
-    }
-  }
+      AutoVerbMenu: true,
+    },
+  },
 ];
 
 export const ActiveXManager: React.FC<ActiveXManagerProps> = ({
   visible,
   onClose,
-  onInsertControl
+  onInsertControl,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -200,13 +200,14 @@ export const ActiveXManager: React.FC<ActiveXManagerProps> = ({
   const categories = ['All', ...Array.from(new Set(ACTIVEX_CATALOG.map(c => c.category)))];
 
   const filteredControls = ACTIVEX_CATALOG.filter(control => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch =
+      searchTerm === '' ||
       control.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       control.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       control.progId.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesCategory = selectedCategory === 'All' || control.category === selectedCategory;
-    
+
     return matchesSearch && matchesCategory;
   });
 
@@ -230,14 +231,9 @@ export const ActiveXManager: React.FC<ActiveXManagerProps> = ({
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Package className="text-purple-500" size={24} />
-            <h2 className="text-xl font-semibold text-gray-800">
-              ActiveX Control Manager
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-800">ActiveX Control Manager</h2>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -246,22 +242,27 @@ export const ActiveXManager: React.FC<ActiveXManagerProps> = ({
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={18}
+              />
               <input
                 type="text"
                 placeholder="Search ActiveX controls..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <select
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              onChange={e => setSelectedCategory(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {categories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
               ))}
             </select>
           </div>
@@ -286,16 +287,10 @@ export const ActiveXManager: React.FC<ActiveXManagerProps> = ({
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h3 className="font-medium text-sm text-gray-800">
-                          {control.name}
-                        </h3>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {control.progId}
-                        </p>
+                        <h3 className="font-medium text-sm text-gray-800">{control.name}</h3>
+                        <p className="text-xs text-gray-500 mt-1">{control.progId}</p>
                         {!isSupported && (
-                          <p className="text-xs text-orange-600 mt-1">
-                            (Not yet implemented)
-                          </p>
+                          <p className="text-xs text-orange-600 mt-1">(Not yet implemented)</p>
                         )}
                       </div>
                       <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">
@@ -313,19 +308,13 @@ export const ActiveXManager: React.FC<ActiveXManagerProps> = ({
             {selectedControl ? (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    {selectedControl.name}
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {selectedControl.progId}
-                  </p>
+                  <h3 className="text-lg font-semibold text-gray-800">{selectedControl.name}</h3>
+                  <p className="text-sm text-gray-500 mt-1">{selectedControl.progId}</p>
                 </div>
 
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 mb-2">Description</h4>
-                  <p className="text-sm text-gray-600">
-                    {selectedControl.description}
-                  </p>
+                  <p className="text-sm text-gray-600">{selectedControl.description}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -357,8 +346,8 @@ export const ActiveXManager: React.FC<ActiveXManagerProps> = ({
                     <div className="flex items-start gap-2">
                       <Info className="text-orange-500 flex-shrink-0" size={16} />
                       <div className="text-sm text-orange-700">
-                        This ActiveX control is not yet implemented in the web environment.
-                        Only controls marked as supported can be inserted.
+                        This ActiveX control is not yet implemented in the web environment. Only
+                        controls marked as supported can be inserted.
                       </div>
                     </div>
                   </div>
@@ -377,9 +366,7 @@ export const ActiveXManager: React.FC<ActiveXManagerProps> = ({
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <div className="text-sm text-gray-500">
-            {filteredControls.length} controls found
-          </div>
+          <div className="text-sm text-gray-500">{filteredControls.length} controls found</div>
           <div className="flex gap-3">
             <button
               onClick={onClose}

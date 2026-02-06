@@ -30,27 +30,33 @@ const VirtualList = <T,>({
   const [scrollTop, setScrollTop] = useState(0);
 
   // Calculate visible range based on scroll position
-  const calculateVisibleRange = useCallback((scrollTop: number): VisibleRange => {
-    const visibleStart = Math.floor(scrollTop / itemHeight);
-    const visibleEnd = Math.ceil((scrollTop + height) / itemHeight);
-    
-    // Add overscan
-    const start = Math.max(0, visibleStart - overscan);
-    const end = Math.min(items.length - 1, visibleEnd + overscan);
-    
-    return { start, end };
-  }, [itemHeight, height, overscan, items.length]);
+  const calculateVisibleRange = useCallback(
+    (scrollTop: number): VisibleRange => {
+      const visibleStart = Math.floor(scrollTop / itemHeight);
+      const visibleEnd = Math.ceil((scrollTop + height) / itemHeight);
+
+      // Add overscan
+      const start = Math.max(0, visibleStart - overscan);
+      const end = Math.min(items.length - 1, visibleEnd + overscan);
+
+      return { start, end };
+    },
+    [itemHeight, height, overscan, items.length]
+  );
 
   // Handle scroll events
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const newScrollTop = e.currentTarget.scrollTop;
-    setScrollTop(newScrollTop);
-    
-    const newRange = calculateVisibleRange(newScrollTop);
-    setVisibleRange(newRange);
-    
-    onScroll?.(newScrollTop);
-  }, [calculateVisibleRange, onScroll]);
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const newScrollTop = e.currentTarget.scrollTop;
+      setScrollTop(newScrollTop);
+
+      const newRange = calculateVisibleRange(newScrollTop);
+      setVisibleRange(newRange);
+
+      onScroll?.(newScrollTop);
+    },
+    [calculateVisibleRange, onScroll]
+  );
 
   // Initialize visible range
   useEffect(() => {
@@ -87,10 +93,7 @@ const VirtualList = <T,>({
           }}
         >
           {visibleItems.map((item, index) => (
-            <div
-              key={visibleRange.start + index}
-              style={{ height: itemHeight }}
-            >
+            <div key={visibleRange.start + index} style={{ height: itemHeight }}>
               {renderItem(item, visibleRange.start + index)}
             </div>
           ))}
@@ -136,75 +139,92 @@ export const DynamicVirtualList = <T,>({
   const [totalHeight, setTotalHeight] = useState(items.length * estimatedItemHeight);
 
   // Get item measurement or estimate
-  const getItemMeasurement = useCallback((index: number): ItemMeasurement => {
-    const cached = measurementsRef.current.get(index);
-    if (cached) return cached;
+  const getItemMeasurement = useCallback(
+    (index: number): ItemMeasurement => {
+      const cached = measurementsRef.current.get(index);
+      if (cached) return cached;
 
-    // Estimate based on previous measurements or default
-    const previousMeasurement = index > 0 ? getItemMeasurement(index - 1) : null;
-    const height = estimatedItemHeight;
-    const offset = previousMeasurement ? previousMeasurement.offset + previousMeasurement.height : 0;
+      // Estimate based on previous measurements or default
+      const previousMeasurement = index > 0 ? getItemMeasurement(index - 1) : null;
+      const height = estimatedItemHeight;
+      const offset = previousMeasurement
+        ? previousMeasurement.offset + previousMeasurement.height
+        : 0;
 
-    return { height, offset };
-  }, [estimatedItemHeight]);
+      return { height, offset };
+    },
+    [estimatedItemHeight]
+  );
 
   // Calculate visible range for dynamic heights
-  const calculateVisibleRange = useCallback((scrollTop: number): VisibleRange => {
-    let start = 0;
-    let end = items.length - 1;
+  const calculateVisibleRange = useCallback(
+    (scrollTop: number): VisibleRange => {
+      let start = 0;
+      let end = items.length - 1;
 
-    // Find start index
-    for (let i = 0; i < items.length; i++) {
-      const measurement = getItemMeasurement(i);
-      if (measurement.offset + measurement.height > scrollTop) {
-        start = Math.max(0, i - overscan);
-        break;
+      // Find start index
+      for (let i = 0; i < items.length; i++) {
+        const measurement = getItemMeasurement(i);
+        if (measurement.offset + measurement.height > scrollTop) {
+          start = Math.max(0, i - overscan);
+          break;
+        }
       }
-    }
 
-    // Find end index
-    for (let i = start; i < items.length; i++) {
-      const measurement = getItemMeasurement(i);
-      if (measurement.offset > scrollTop + height) {
-        end = Math.min(items.length - 1, i + overscan);
-        break;
+      // Find end index
+      for (let i = start; i < items.length; i++) {
+        const measurement = getItemMeasurement(i);
+        if (measurement.offset > scrollTop + height) {
+          end = Math.min(items.length - 1, i + overscan);
+          break;
+        }
       }
-    }
 
-    return { start, end };
-  }, [items.length, height, overscan, getItemMeasurement]);
+      return { start, end };
+    },
+    [items.length, height, overscan, getItemMeasurement]
+  );
 
   // Measure rendered items
-  const measureItem = useCallback((index: number, element: HTMLElement | null) => {
-    if (!element) return;
+  const measureItem = useCallback(
+    (index: number, element: HTMLElement | null) => {
+      if (!element) return;
 
-    const height = element.getBoundingClientRect().height;
-    const prevMeasurement = measurementsRef.current.get(index);
-    
-    if (!prevMeasurement || prevMeasurement.height !== height) {
-      const offset = index === 0 ? 0 : getItemMeasurement(index - 1).offset + getItemMeasurement(index - 1).height;
-      measurementsRef.current.set(index, { height, offset });
+      const height = element.getBoundingClientRect().height;
+      const prevMeasurement = measurementsRef.current.get(index);
 
-      // Update total height
-      let newTotalHeight = 0;
-      for (let i = 0; i < items.length; i++) {
-        const measurement = measurementsRef.current.get(i);
-        newTotalHeight += measurement?.height || estimatedItemHeight;
+      if (!prevMeasurement || prevMeasurement.height !== height) {
+        const offset =
+          index === 0
+            ? 0
+            : getItemMeasurement(index - 1).offset + getItemMeasurement(index - 1).height;
+        measurementsRef.current.set(index, { height, offset });
+
+        // Update total height
+        let newTotalHeight = 0;
+        for (let i = 0; i < items.length; i++) {
+          const measurement = measurementsRef.current.get(i);
+          newTotalHeight += measurement?.height || estimatedItemHeight;
+        }
+        setTotalHeight(newTotalHeight);
       }
-      setTotalHeight(newTotalHeight);
-    }
-  }, [items.length, estimatedItemHeight, getItemMeasurement]);
+    },
+    [items.length, estimatedItemHeight, getItemMeasurement]
+  );
 
   // Handle scroll
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const newScrollTop = e.currentTarget.scrollTop;
-    setScrollTop(newScrollTop);
-    
-    const newRange = calculateVisibleRange(newScrollTop);
-    setVisibleRange(newRange);
-    
-    onScroll?.(newScrollTop);
-  }, [calculateVisibleRange, onScroll]);
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const newScrollTop = e.currentTarget.scrollTop;
+      setScrollTop(newScrollTop);
+
+      const newRange = calculateVisibleRange(newScrollTop);
+      setVisibleRange(newRange);
+
+      onScroll?.(newScrollTop);
+    },
+    [calculateVisibleRange, onScroll]
+  );
 
   // Initialize
   useEffect(() => {
@@ -231,7 +251,7 @@ export const DynamicVirtualList = <T,>({
           return (
             <div
               key={key}
-              ref={(el) => measureItem(actualIndex, el)}
+              ref={el => measureItem(actualIndex, el)}
               style={{
                 position: 'absolute',
                 top: measurement.offset,
@@ -277,28 +297,28 @@ export const VirtualTable = <T extends Record<string, any>>({
   onRowClick,
   selectedIndex,
 }: VirtualTableProps<T>) => {
-  const renderRow = useCallback((item: T, index: number) => (
-    <div
-      className={`flex items-center border-b hover:bg-gray-50 cursor-pointer ${
-        selectedIndex === index ? 'bg-blue-50' : ''
-      }`}
-      style={{ height: rowHeight }}
-      onClick={() => onRowClick?.(item, index)}
-    >
-      {columns.map((column) => (
-        <div
-          key={column.key}
-          className="px-2 truncate"
-          style={{ width: column.width || `${100 / columns.length}%` }}
-        >
-          {column.render 
-            ? column.render(item[column.key], item, index)
-            : item[column.key]
-          }
-        </div>
-      ))}
-    </div>
-  ), [columns, rowHeight, onRowClick, selectedIndex]);
+  const renderRow = useCallback(
+    (item: T, index: number) => (
+      <div
+        className={`flex items-center border-b hover:bg-gray-50 cursor-pointer ${
+          selectedIndex === index ? 'bg-blue-50' : ''
+        }`}
+        style={{ height: rowHeight }}
+        onClick={() => onRowClick?.(item, index)}
+      >
+        {columns.map(column => (
+          <div
+            key={column.key}
+            className="px-2 truncate"
+            style={{ width: column.width || `${100 / columns.length}%` }}
+          >
+            {column.render ? column.render(item[column.key], item, index) : item[column.key]}
+          </div>
+        ))}
+      </div>
+    ),
+    [columns, rowHeight, onRowClick, selectedIndex]
+  );
 
   return (
     <div className={`border rounded ${className}`}>
@@ -307,7 +327,7 @@ export const VirtualTable = <T extends Record<string, any>>({
         className="flex items-center bg-gray-100 border-b font-semibold text-sm"
         style={{ height: headerHeight }}
       >
-        {columns.map((column) => (
+        {columns.map(column => (
           <div
             key={column.key}
             className="px-2 truncate"

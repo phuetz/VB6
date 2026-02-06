@@ -36,25 +36,25 @@ interface DataGridProps extends VB6ControlPropsEnhanced {
   // Data binding
   dataSource?: any;
   dataMember?: string;
-  
+
   // Behavior
   allowAddNew: boolean;
   allowArrows: boolean;
   allowDelete: boolean;
   allowRowSizing: boolean;
   allowUpdate: boolean;
-  
+
   // Appearance
   appearance: 0 | 1; // dbgFlat, dbg3D
   backColor: string;
   borderStyle: 0 | 1; // dbgNone, dbgFixedSingle
   caption: string;
   captionHeight: number;
-  
+
   // Current position
   col: number;
   row: number;
-  
+
   // Layout
   columnHeaders: boolean;
   columns?: Column[];
@@ -63,47 +63,47 @@ interface DataGridProps extends VB6ControlPropsEnhanced {
   dataChanged: boolean;
   defColWidth: number;
   editActive: boolean;
-  
+
   // Font
   font: any;
   foreColor: string;
   headFont: any;
   headLines: number;
-  
+
   // Editor
   hWndEditor: number;
-  
+
   // Navigation
   leftCol: number;
   marqueeStyle: 0 | 1 | 2 | 3 | 4 | 5 | 6; // Various marquee styles
   recordSelectors: boolean;
-  
+
   // Row appearance
   rowDividerStyle: 0 | 1 | 2 | 3 | 4 | 5; // Various divider styles
   rowHeight: number;
-  
+
   // Scrolling
   scrollBars: 0 | 1 | 2 | 3 | 4; // dbgNone, dbgHorizontal, dbgVertical, dbgBoth, dbgAutomatic
-  
+
   // Selection
   selStartCol: number;
   selEndCol: number;
   selBookmarks?: any[];
-  
+
   // Splits
   splits?: Split[];
-  
+
   // Tab behavior
   tabAction: 0 | 1 | 2; // dbgControlNavigation, dbgColumnNavigation, dbgGridNavigation
   tabAcrossSplits: boolean;
-  
+
   // Current cell
   text: string;
-  
+
   // Visible area
   visibleCols: number;
   visibleRows: number;
-  
+
   // Other
   wrapCellPointer: boolean;
   hWnd: number;
@@ -111,7 +111,14 @@ interface DataGridProps extends VB6ControlPropsEnhanced {
 
 export const DataGridControl = forwardRef<any, DataGridProps>((props, ref) => {
   const {
-    id, name, left, top, width, height, visible, enabled,
+    id,
+    name,
+    left,
+    top,
+    width,
+    height,
+    visible,
+    enabled,
     dataSource,
     dataMember = '',
     allowAddNew = false,
@@ -168,16 +175,22 @@ export const DataGridControl = forwardRef<any, DataGridProps>((props, ref) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
   const [scrollOffset, setScrollOffset] = useState({ x: 0, y: 0 });
-  const [splits, setSplits] = useState<Split[]>(initialSplits.length > 0 ? initialSplits : [{
-    sizeMode: 0,
-    size: 0,
-    scrollBars: 3,
-    scrollGroup: 0,
-    selStartCol: 0,
-    selEndCol: 0,
-    columns: columns,
-  }]);
-  
+  const [splits, setSplits] = useState<Split[]>(
+    initialSplits.length > 0
+      ? initialSplits
+      : [
+          {
+            sizeMode: 0,
+            size: 0,
+            scrollBars: 3,
+            scrollGroup: 0,
+            selStartCol: 0,
+            selEndCol: 0,
+            columns: columns,
+          },
+        ]
+  );
+
   const gridRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLInputElement>(null);
   const { fireEvent, updateControl } = useVB6Store();
@@ -189,7 +202,7 @@ export const DataGridControl = forwardRef<any, DataGridProps>((props, ref) => {
       if (dataSource?.recordset) {
         const records = dataSource.recordset.rows || [];
         setData(records);
-        
+
         // Auto-generate columns if not provided
         if (columns.length === 0 && records.length > 0) {
           const fields = Object.keys(records[0]);
@@ -204,7 +217,7 @@ export const DataGridControl = forwardRef<any, DataGridProps>((props, ref) => {
           }));
           setColumns(newColumns);
         }
-        
+
         fireEvent(name, 'OnDataSourceChanged', {});
       }
     } catch (error) {
@@ -224,14 +237,14 @@ export const DataGridControl = forwardRef<any, DataGridProps>((props, ref) => {
     if (rowIndex < 0 || rowIndex >= data.length) return '';
     const column = columns[colIndex];
     if (!column) return '';
-    
+
     const row = data[rowIndex];
     const value = row[column.dataField];
-    
+
     if (column.numberFormat && typeof value === 'number') {
       return formatNumber(value, column.numberFormat);
     }
-    
+
     return value ? Object.prototype.toString.call(value) : '';
   };
 
@@ -251,25 +264,28 @@ export const DataGridControl = forwardRef<any, DataGridProps>((props, ref) => {
   };
 
   // Event handlers
-  const handleCellClick = useCallback((rowIndex: number, colIndex: number, e: React.MouseEvent) => {
-    if (!enabled) return;
-    
-    setCurrentPosition({ row: rowIndex, col: colIndex });
-    updateControl(id, 'row', rowIndex);
-    updateControl(id, 'col', colIndex);
-    updateControl(id, 'text', getCellValue(rowIndex, colIndex));
-    
-    fireEvent(name, 'Click', {});
-    fireEvent(name, 'RowColChange', {});
-    
-    if (allowUpdate && columns[colIndex] && !columns[colIndex].locked) {
-      startEditing(rowIndex, colIndex);
-    }
-  }, [enabled, allowUpdate, columns, id, name, fireEvent, updateControl]);
+  const handleCellClick = useCallback(
+    (rowIndex: number, colIndex: number, e: React.MouseEvent) => {
+      if (!enabled) return;
+
+      setCurrentPosition({ row: rowIndex, col: colIndex });
+      updateControl(id, 'row', rowIndex);
+      updateControl(id, 'col', colIndex);
+      updateControl(id, 'text', getCellValue(rowIndex, colIndex));
+
+      fireEvent(name, 'Click', {});
+      fireEvent(name, 'RowColChange', {});
+
+      if (allowUpdate && columns[colIndex] && !columns[colIndex].locked) {
+        startEditing(rowIndex, colIndex);
+      }
+    },
+    [enabled, allowUpdate, columns, id, name, fireEvent, updateControl]
+  );
 
   const startEditing = (rowIndex: number, colIndex: number) => {
     if (!allowUpdate) return;
-    
+
     setIsEditing(true);
     setEditValue(getCellValue(rowIndex, colIndex));
     updateControl(id, 'editActive', true);
@@ -278,7 +294,7 @@ export const DataGridControl = forwardRef<any, DataGridProps>((props, ref) => {
 
   const finishEditing = (save: boolean) => {
     if (!isEditing) return;
-    
+
     if (save && data[currentPosition.row]) {
       const column = columns[currentPosition.col];
       if (column) {
@@ -290,224 +306,261 @@ export const DataGridControl = forwardRef<any, DataGridProps>((props, ref) => {
         fireEvent(name, 'AfterUpdate', {});
       }
     }
-    
+
     setIsEditing(false);
     updateControl(id, 'editActive', false);
     fireEvent(name, 'AfterColUpdate', { colIndex: currentPosition.col });
   };
 
   // Keyboard navigation
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (!enabled) return;
-    
-    const { row, col } = currentPosition;
-    let newRow = row;
-    let newCol = col;
-    let handled = false;
-    
-    if (!isEditing || e.key === 'Tab') {
-      switch (e.key) {
-        case 'ArrowUp':
-          if (allowArrows) {
-            newRow = Math.max(0, row - 1);
-            handled = true;
-          }
-          break;
-        case 'ArrowDown':
-          if (allowArrows) {
-            newRow = Math.min(data.length - 1, row + 1);
-            if (newRow === data.length - 1 && allowAddNew) {
-              // Add new row
-              const newRecord = {};
-              columns.forEach(col => newRecord[col.dataField] = '');
-              setData([...data, newRecord]);
-              newRow = data.length;
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!enabled) return;
+
+      const { row, col } = currentPosition;
+      let newRow = row;
+      let newCol = col;
+      let handled = false;
+
+      if (!isEditing || e.key === 'Tab') {
+        switch (e.key) {
+          case 'ArrowUp':
+            if (allowArrows) {
+              newRow = Math.max(0, row - 1);
+              handled = true;
             }
-            handled = true;
-          }
-          break;
-        case 'ArrowLeft':
-          if (allowArrows && !isEditing) {
-            newCol = Math.max(0, col - 1);
-            handled = true;
-          }
-          break;
-        case 'ArrowRight':
-          if (allowArrows && !isEditing) {
-            newCol = Math.min(columns.length - 1, col + 1);
-            handled = true;
-          }
-          break;
-        case 'Tab':
-          if (tabAction === 1 || tabAction === 2) { // Column or grid navigation
-            if (e.shiftKey) {
-              newCol = col - 1;
-              if (newCol < 0) {
-                newCol = columns.length - 1;
-                newRow = Math.max(0, row - 1);
+            break;
+          case 'ArrowDown':
+            if (allowArrows) {
+              newRow = Math.min(data.length - 1, row + 1);
+              if (newRow === data.length - 1 && allowAddNew) {
+                // Add new row
+                const newRecord = {};
+                columns.forEach(col => (newRecord[col.dataField] = ''));
+                setData([...data, newRecord]);
+                newRow = data.length;
               }
+              handled = true;
+            }
+            break;
+          case 'ArrowLeft':
+            if (allowArrows && !isEditing) {
+              newCol = Math.max(0, col - 1);
+              handled = true;
+            }
+            break;
+          case 'ArrowRight':
+            if (allowArrows && !isEditing) {
+              newCol = Math.min(columns.length - 1, col + 1);
+              handled = true;
+            }
+            break;
+          case 'Tab':
+            if (tabAction === 1 || tabAction === 2) {
+              // Column or grid navigation
+              if (e.shiftKey) {
+                newCol = col - 1;
+                if (newCol < 0) {
+                  newCol = columns.length - 1;
+                  newRow = Math.max(0, row - 1);
+                }
+              } else {
+                newCol = col + 1;
+                if (newCol >= columns.length) {
+                  newCol = 0;
+                  newRow = Math.min(data.length - 1, row + 1);
+                }
+              }
+              handled = true;
+            }
+            break;
+          case 'Enter':
+            if (!isEditing) {
+              startEditing(row, col);
             } else {
-              newCol = col + 1;
-              if (newCol >= columns.length) {
-                newCol = 0;
-                newRow = Math.min(data.length - 1, row + 1);
+              finishEditing(true);
+            }
+            handled = true;
+            break;
+          case 'Escape':
+            if (isEditing) {
+              finishEditing(false);
+            }
+            handled = true;
+            break;
+          case 'Delete':
+            if (allowDelete && !isEditing && row >= 0 && row < data.length) {
+              const confirmDelete = { cancel: false };
+              fireEvent(name, 'BeforeDelete', confirmDelete);
+              if (!confirmDelete.cancel) {
+                setData(data.filter((_, i) => i !== row));
+                fireEvent(name, 'AfterDelete', {});
               }
+              handled = true;
             }
-            handled = true;
-          }
-          break;
-        case 'Enter':
-          if (!isEditing) {
-            startEditing(row, col);
-          } else {
-            finishEditing(true);
-          }
-          handled = true;
-          break;
-        case 'Escape':
-          if (isEditing) {
-            finishEditing(false);
-          }
-          handled = true;
-          break;
-        case 'Delete':
-          if (allowDelete && !isEditing && row >= 0 && row < data.length) {
-            const confirmDelete = { cancel: false };
-            fireEvent(name, 'BeforeDelete', confirmDelete);
-            if (!confirmDelete.cancel) {
-              setData(data.filter((_, i) => i !== row));
-              fireEvent(name, 'AfterDelete', {});
+            break;
+          case 'F2':
+            if (!isEditing) {
+              startEditing(row, col);
+              handled = true;
             }
-            handled = true;
+            break;
+        }
+
+        if (handled) {
+          e.preventDefault();
+          if (newRow !== row || newCol !== col) {
+            setCurrentPosition({ row: newRow, col: newCol });
+            updateControl(id, 'row', newRow);
+            updateControl(id, 'col', newCol);
+            updateControl(id, 'text', getCellValue(newRow, newCol));
+            fireEvent(name, 'RowColChange', {});
           }
-          break;
-        case 'F2':
-          if (!isEditing) {
-            startEditing(row, col);
-            handled = true;
-          }
-          break;
-      }
-      
-      if (handled) {
-        e.preventDefault();
-        if (newRow !== row || newCol !== col) {
-          setCurrentPosition({ row: newRow, col: newCol });
-          updateControl(id, 'row', newRow);
-          updateControl(id, 'col', newCol);
-          updateControl(id, 'text', getCellValue(newRow, newCol));
-          fireEvent(name, 'RowColChange', {});
         }
       }
-    }
-  }, [enabled, currentPosition, data, columns, isEditing, allowArrows, allowAddNew, allowDelete, tabAction, id, name, fireEvent, updateControl]);
+    },
+    [
+      enabled,
+      currentPosition,
+      data,
+      columns,
+      isEditing,
+      allowArrows,
+      allowAddNew,
+      allowDelete,
+      tabAction,
+      id,
+      name,
+      fireEvent,
+      updateControl,
+    ]
+  );
 
   // Column resizing
-  const handleColumnResize = useCallback((colIndex: number, newWidth: number) => {
-    if (!allowRowSizing) return;
-    
-    const newColumns = [...columns];
-    newColumns[colIndex].width = Math.max(100, newWidth);
-    setColumns(newColumns);
-    
-    fireEvent(name, 'ColResize', { colIndex });
-  }, [allowRowSizing, columns, name, fireEvent]);
+  const handleColumnResize = useCallback(
+    (colIndex: number, newWidth: number) => {
+      if (!allowRowSizing) return;
+
+      const newColumns = [...columns];
+      newColumns[colIndex].width = Math.max(100, newWidth);
+      setColumns(newColumns);
+
+      fireEvent(name, 'ColResize', { colIndex });
+    },
+    [allowRowSizing, columns, name, fireEvent]
+  );
 
   // Expose methods through ref
   useEffect(() => {
     if (ref && typeof ref !== 'function') {
       ref.current = {
         // Properties
-        get Columns() { return columns; },
-        get Recordset() { return dataSource?.recordset; },
-        get Bookmark() { return currentPosition.row; },
+        get Columns() {
+          return columns;
+        },
+        get Recordset() {
+          return dataSource?.recordset;
+        },
+        get Bookmark() {
+          return currentPosition.row;
+        },
         set Bookmark(value: number) {
           if (value >= 0 && value < data.length) {
             setCurrentPosition({ ...currentPosition, row: value });
           }
         },
-        
+
         // Methods
         Refresh() {
           loadData();
           fireEvent(name, 'Reposition', {});
         },
-        
+
         Update() {
           finishEditing(true);
         },
-        
+
         CancelUpdate() {
           finishEditing(false);
         },
-        
+
         Delete() {
           if (allowDelete && currentPosition.row >= 0 && currentPosition.row < data.length) {
             setData(data.filter((_, i) => i !== currentPosition.row));
           }
         },
-        
+
         AddNew() {
           if (allowAddNew) {
             const newRecord = {};
-            columns.forEach(col => newRecord[col.dataField] = '');
+            columns.forEach(col => (newRecord[col.dataField] = ''));
             setData([...data, newRecord]);
             setCurrentPosition({ row: data.length, col: 0 });
           }
         },
-        
+
         MoveFirst() {
           if (data.length > 0) {
             setCurrentPosition({ ...currentPosition, row: 0 });
           }
         },
-        
+
         MoveLast() {
           if (data.length > 0) {
             setCurrentPosition({ ...currentPosition, row: data.length - 1 });
           }
         },
-        
+
         MoveNext() {
           if (currentPosition.row < data.length - 1) {
             setCurrentPosition({ ...currentPosition, row: currentPosition.row + 1 });
           }
         },
-        
+
         MovePrevious() {
           if (currentPosition.row > 0) {
             setCurrentPosition({ ...currentPosition, row: currentPosition.row - 1 });
           }
         },
-        
+
         GetBookmark(row: number) {
           return row;
         },
-        
+
         RowBookmark(row: number) {
           return row;
         },
-        
+
         RowTop(row: number) {
           // Scroll to make row visible at top
           setScrollOffset({ ...scrollOffset, y: row * rowHeight });
         },
-        
+
         Rebind() {
           loadData();
         },
-        
+
         ClearFields() {
           if (currentPosition.row >= 0 && currentPosition.row < data.length) {
             const clearedRecord = {};
-            columns.forEach(col => clearedRecord[col.dataField] = '');
+            columns.forEach(col => (clearedRecord[col.dataField] = ''));
             data[currentPosition.row] = clearedRecord;
             setData([...data]);
           }
         },
       };
     }
-  }, [ref, columns, data, currentPosition, dataSource, allowDelete, allowAddNew, scrollOffset, rowHeight]);
+  }, [
+    ref,
+    columns,
+    data,
+    currentPosition,
+    dataSource,
+    allowDelete,
+    allowAddNew,
+    scrollOffset,
+    rowHeight,
+  ]);
 
   // Styles
   const gridStyle: React.CSSProperties = {
@@ -546,10 +599,16 @@ export const DataGridControl = forwardRef<any, DataGridProps>((props, ref) => {
 
   const bodyStyle: React.CSSProperties = {
     flex: 1,
-    overflow: scrollBars === 0 ? 'hidden' :
-              scrollBars === 1 ? 'auto hidden' :
-              scrollBars === 2 ? 'hidden auto' :
-              scrollBars === 4 ? 'auto' : 'auto',
+    overflow:
+      scrollBars === 0
+        ? 'hidden'
+        : scrollBars === 1
+          ? 'auto hidden'
+          : scrollBars === 2
+            ? 'hidden auto'
+            : scrollBars === 4
+              ? 'auto'
+              : 'auto',
     position: 'relative',
   };
 
@@ -562,7 +621,7 @@ export const DataGridControl = forwardRef<any, DataGridProps>((props, ref) => {
   const cellStyle = (rowIndex: number, colIndex: number): React.CSSProperties => {
     const column = columns[colIndex];
     const isCurrentCell = rowIndex === currentPosition.row && colIndex === currentPosition.col;
-    
+
     return {
       flex: `0 0 ${column.width / 15}px`,
       padding: '2px 4px',
@@ -581,26 +640,41 @@ export const DataGridControl = forwardRef<any, DataGridProps>((props, ref) => {
 
   const getRowDividerStyle = (style: number): string => {
     switch (style) {
-      case 0: return 'none';
-      case 1: return '1px solid #000000';
-      case 2: return '1px solid #C0C0C0';
-      case 3: return '1px outset #C0C0C0';
-      case 4: return '1px inset #C0C0C0';
-      case 5: return `1px solid ${foreColor}`;
-      default: return '1px solid #C0C0C0';
+      case 0:
+        return 'none';
+      case 1:
+        return '1px solid #000000';
+      case 2:
+        return '1px solid #C0C0C0';
+      case 3:
+        return '1px outset #C0C0C0';
+      case 4:
+        return '1px inset #C0C0C0';
+      case 5:
+        return `1px solid ${foreColor}`;
+      default:
+        return '1px solid #C0C0C0';
     }
   };
 
   const getMarqueeStyle = (): React.CSSProperties => {
     switch (marqueeStyle) {
-      case 0: return { border: '1px dotted #000000' };
-      case 1: return { border: '1px solid #000000' };
-      case 2: return { backgroundColor: '#E3F2FD' };
-      case 3: return { backgroundColor: '#E3F2FD' };
-      case 4: return { backgroundColor: '#E3F2FD', border: '1px outset #C0C0C0' };
-      case 5: return {};
-      case 6: return { backgroundColor: '#FFFFFF', border: '2px solid #0078D7' };
-      default: return {};
+      case 0:
+        return { border: '1px dotted #000000' };
+      case 1:
+        return { border: '1px solid #000000' };
+      case 2:
+        return { backgroundColor: '#E3F2FD' };
+      case 3:
+        return { backgroundColor: '#E3F2FD' };
+      case 4:
+        return { backgroundColor: '#E3F2FD', border: '1px outset #C0C0C0' };
+      case 5:
+        return {};
+      case 6:
+        return { backgroundColor: '#FFFFFF', border: '2px solid #0078D7' };
+      default:
+        return {};
     }
   };
 
@@ -615,82 +689,77 @@ export const DataGridControl = forwardRef<any, DataGridProps>((props, ref) => {
       data-tag={tag}
       {...rest}
     >
-      {caption && (
-        <div style={headerStyle}>
-          {caption}
-        </div>
-      )}
-      
+      {caption && <div style={headerStyle}>{caption}</div>}
+
       {columnHeaders && (
         <div style={columnsHeaderStyle}>
-          {recordSelectors && (
-            <div style={{ width: 30, borderRight: '1px solid #C0C0C0' }} />
-          )}
-          {columns.map((column, colIndex) => (
-            column.visible && (
-              <div
-                key={colIndex}
-                style={{
-                  flex: `0 0 ${column.width / 15}px`,
-                  padding: '4px',
-                  borderRight: '1px solid #C0C0C0',
-                  fontWeight: 'bold',
-                  position: 'relative',
-                  cursor: 'pointer',
-                }}
-                onClick={() => fireEvent(name, 'HeadClick', { colIndex })}
-              >
-                {column.caption}
-                {/* Column resize handle */}
+          {recordSelectors && <div style={{ width: 30, borderRight: '1px solid #C0C0C0' }} />}
+          {columns.map(
+            (column, colIndex) =>
+              column.visible && (
                 <div
+                  key={colIndex}
                   style={{
-                    position: 'absolute',
-                    right: -2,
-                    top: 0,
-                    bottom: 0,
-                    width: 4,
-                    cursor: 'col-resize',
-                    backgroundColor: 'transparent',
+                    flex: `0 0 ${column.width / 15}px`,
+                    padding: '4px',
+                    borderRight: '1px solid #C0C0C0',
+                    fontWeight: 'bold',
+                    position: 'relative',
+                    cursor: 'pointer',
                   }}
-                  onMouseDown={(e) => {
-                    e.stopPropagation();
-                    
-                    // EVENT HANDLING RACE FIX: Prevent multiple listener registration
-                    if ((e.target as any)._resizing) return;
-                    (e.target as any)._resizing = true;
-                    
-                    const startX = e.clientX;
-                    const startWidth = column.width;
-                    
-                    const handleMove = (e: MouseEvent) => {
-                      const delta = (e.clientX - startX) * 15; // Convert to twips
-                      handleColumnResize(colIndex, startWidth + delta);
-                    };
-                    
-                    const handleUp = () => {
-                      document.removeEventListener('mousemove', handleMove);
-                      document.removeEventListener('mouseup', handleUp);
-                      // Clear the flag
-                      (e.target as any)._resizing = false;
-                    };
-                    
-                    document.addEventListener('mousemove', handleMove);
-                    document.addEventListener('mouseup', handleUp);
-                  }}
-                />
-              </div>
-            )
-          ))}
+                  onClick={() => fireEvent(name, 'HeadClick', { colIndex })}
+                >
+                  {column.caption}
+                  {/* Column resize handle */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: -2,
+                      top: 0,
+                      bottom: 0,
+                      width: 4,
+                      cursor: 'col-resize',
+                      backgroundColor: 'transparent',
+                    }}
+                    onMouseDown={e => {
+                      e.stopPropagation();
+
+                      // EVENT HANDLING RACE FIX: Prevent multiple listener registration
+                      if ((e.target as any)._resizing) return;
+                      (e.target as any)._resizing = true;
+
+                      const startX = e.clientX;
+                      const startWidth = column.width;
+
+                      const handleMove = (e: MouseEvent) => {
+                        const delta = (e.clientX - startX) * 15; // Convert to twips
+                        handleColumnResize(colIndex, startWidth + delta);
+                      };
+
+                      const handleUp = () => {
+                        document.removeEventListener('mousemove', handleMove);
+                        document.removeEventListener('mouseup', handleUp);
+                        // Clear the flag
+                        (e.target as any)._resizing = false;
+                      };
+
+                      document.addEventListener('mousemove', handleMove);
+                      document.addEventListener('mouseup', handleUp);
+                    }}
+                  />
+                </div>
+              )
+          )}
         </div>
       )}
-      
+
       <div style={bodyStyle}>
         {data.map((row, rowIndex) => (
           <div key={rowIndex} style={rowStyle}>
             {recordSelectors && (
-              <div 
-                style={{ 
-                  width: 30, 
+              <div
+                style={{
+                  width: 30,
                   borderRight: '1px solid #C0C0C0',
                   backgroundColor: '#F0F0F0',
                   display: 'flex',
@@ -703,95 +772,101 @@ export const DataGridControl = forwardRef<any, DataGridProps>((props, ref) => {
                 {currentPosition.row === rowIndex && '▶'}
               </div>
             )}
-            {columns.map((column, colIndex) => (
-              column.visible && (
-                <div
-                  key={colIndex}
-                  style={{
-                    ...cellStyle(rowIndex, colIndex),
-                    ...(currentPosition.row === rowIndex && currentPosition.col === colIndex ? getMarqueeStyle() : {}),
-                  }}
-                  onClick={(e) => handleCellClick(rowIndex, colIndex, e)}
-                  onDoubleClick={() => startEditing(rowIndex, colIndex)}
-                >
-                  {isEditing && currentPosition.row === rowIndex && currentPosition.col === colIndex ? (
-                    <input
-                      ref={editorRef}
-                      type="text"
-                      value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
-                      onBlur={() => finishEditing(true)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          finishEditing(true);
-                        } else if (e.key === 'Escape') {
-                          e.preventDefault();
-                          finishEditing(false);
-                        }
-                      }}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        border: 'none',
-                        outline: 'none',
-                        backgroundColor: 'transparent',
-                        font: 'inherit',
-                        padding: 0,
-                        margin: 0,
-                      }}
-                      autoFocus
-                    />
-                  ) : (
-                    <>
-                      {column.button && (
-                        <button
-                          style={{
-                            position: 'absolute',
-                            right: 2,
-                            top: 2,
-                            bottom: 2,
-                            width: 20,
-                            padding: 0,
-                            fontSize: 10,
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            fireEvent(name, 'ButtonClick', { row: rowIndex, col: colIndex });
-                          }}
-                        >
-                          ...
-                        </button>
-                      )}
-                      <span>{getCellValue(rowIndex, colIndex)}</span>
-                    </>
-                  )}
-                </div>
-              )
-            ))}
+            {columns.map(
+              (column, colIndex) =>
+                column.visible && (
+                  <div
+                    key={colIndex}
+                    style={{
+                      ...cellStyle(rowIndex, colIndex),
+                      ...(currentPosition.row === rowIndex && currentPosition.col === colIndex
+                        ? getMarqueeStyle()
+                        : {}),
+                    }}
+                    onClick={e => handleCellClick(rowIndex, colIndex, e)}
+                    onDoubleClick={() => startEditing(rowIndex, colIndex)}
+                  >
+                    {isEditing &&
+                    currentPosition.row === rowIndex &&
+                    currentPosition.col === colIndex ? (
+                      <input
+                        ref={editorRef}
+                        type="text"
+                        value={editValue}
+                        onChange={e => setEditValue(e.target.value)}
+                        onBlur={() => finishEditing(true)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            finishEditing(true);
+                          } else if (e.key === 'Escape') {
+                            e.preventDefault();
+                            finishEditing(false);
+                          }
+                        }}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          border: 'none',
+                          outline: 'none',
+                          backgroundColor: 'transparent',
+                          font: 'inherit',
+                          padding: 0,
+                          margin: 0,
+                        }}
+                        autoFocus
+                      />
+                    ) : (
+                      <>
+                        {column.button && (
+                          <button
+                            style={{
+                              position: 'absolute',
+                              right: 2,
+                              top: 2,
+                              bottom: 2,
+                              width: 20,
+                              padding: 0,
+                              fontSize: 10,
+                            }}
+                            onClick={e => {
+                              e.stopPropagation();
+                              fireEvent(name, 'ButtonClick', { row: rowIndex, col: colIndex });
+                            }}
+                          >
+                            ...
+                          </button>
+                        )}
+                        <span>{getCellValue(rowIndex, colIndex)}</span>
+                      </>
+                    )}
+                  </div>
+                )
+            )}
           </div>
         ))}
-        
+
         {allowAddNew && (
           <div style={{ ...rowStyle, fontStyle: 'italic', color: '#666666' }}>
             {recordSelectors && <div style={{ width: 30, borderRight: '1px solid #C0C0C0' }} />}
-            {columns.map((column, colIndex) => (
-              column.visible && (
-                <div
-                  key={colIndex}
-                  style={cellStyle(data.length, colIndex)}
-                  onClick={() => {
-                    const newRecord = {};
-                    columns.forEach(col => newRecord[col.dataField] = '');
-                    setData([...data, newRecord]);
-                    setCurrentPosition({ row: data.length, col: 0 });
-                    startEditing(data.length, 0);
-                  }}
-                >
-                  {colIndex === 0 && '(new)'}
-                </div>
-              )
-            ))}
+            {columns.map(
+              (column, colIndex) =>
+                column.visible && (
+                  <div
+                    key={colIndex}
+                    style={cellStyle(data.length, colIndex)}
+                    onClick={() => {
+                      const newRecord = {};
+                      columns.forEach(col => (newRecord[col.dataField] = ''));
+                      setData([...data, newRecord]);
+                      setCurrentPosition({ row: data.length, col: 0 });
+                      startEditing(data.length, 0);
+                    }}
+                  >
+                    {colIndex === 0 && '(new)'}
+                  </div>
+                )
+            )}
           </div>
         )}
       </div>

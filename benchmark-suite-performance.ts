@@ -1,6 +1,6 @@
 /**
  * VB6 Compiler Ultra Performance Benchmark Suite
- * 
+ *
  * Suite complète de benchmarks pour évaluer toutes les performances
  * du compilateur VB6 et ses optimisations
  */
@@ -31,17 +31,19 @@ interface ComponentBenchmark {
 
 class VB6CompilerPerformanceBenchmark {
   private testCases: Map<string, string> = new Map();
-  
+
   constructor() {
     this.initializeTestCases();
   }
-  
+
   /**
    * Initialise les cas de test de différentes complexités
    */
   private initializeTestCases() {
     // Simple VB6 code
-    this.testCases.set('simple', `
+    this.testCases.set(
+      'simple',
+      `
 Option Explicit
 
 Private Sub Main()
@@ -51,10 +53,13 @@ Private Sub Main()
     y = 20
     MsgBox "Result: " & (x + y)
 End Sub
-`);
+`
+    );
 
     // Medium complexity with loops and conditionals
-    this.testCases.set('medium', `
+    this.testCases.set(
+      'medium',
+      `
 Option Explicit
 
 Private Sub CalculateFibonacci()
@@ -91,10 +96,13 @@ Public Function ProcessArray(arr() As Integer) As Double
     avg = sum / (UBound(arr) - LBound(arr) + 1)
     ProcessArray = avg
 End Function
-`);
+`
+    );
 
     // Complex code with API calls, classes, and advanced features
-    this.testCases.set('complex', `
+    this.testCases.set(
+      'complex',
+      `
 Option Explicit
 
 Private Declare Function GetTickCount Lib "kernel32" () As Long
@@ -206,29 +214,30 @@ Private Sub ProcessLargeDataset()
     
     Print "Matrix computation result: " & sum
 End Sub
-`);
+`
+    );
 
     // Very large complex project simulation
     this.testCases.set('large', this.generateLargeProject());
   }
-  
+
   /**
    * Génère un projet VB6 volumineux pour les tests de scalabilité
    */
   private generateLargeProject(): string {
     let code = 'Option Explicit\n\n';
-    
+
     // Generate 100 module-level variables
     for (let i = 0; i < 100; i++) {
       code += `Private m_Variable${i} As ${['Integer', 'String', 'Double', 'Boolean', 'Long'][i % 5]}\n`;
     }
-    
+
     code += '\n';
-    
+
     // Generate 50 functions/subs
     for (let i = 0; i < 50; i++) {
       code += `Public ${i % 2 === 0 ? 'Sub' : 'Function'} Procedure${i}(`;
-      
+
       // Parameters
       const paramCount = Math.floor(Math.random() * 5) + 1;
       const params = [];
@@ -236,7 +245,7 @@ End Sub
         params.push(`param${j} As ${['Integer', 'String', 'Double', 'Boolean'][j % 4]}`);
       }
       code += params.join(', ') + ')\n';
-      
+
       // Body with complex logic
       code += '    Dim localVar As Integer\n';
       code += '    Dim loopCounter As Integer\n';
@@ -252,46 +261,48 @@ End Sub
       code += '        End If\n';
       code += '    Next loopCounter\n';
       code += '    \n';
-      
+
       if (i % 2 === 1) {
         code += `    Procedure${i} = localVar\n`;
       }
-      
+
       code += `End ${i % 2 === 0 ? 'Sub' : 'Function'}\n\n`;
     }
-    
+
     return code;
   }
-  
+
   /**
    * Benchmark du lexer VB6
    */
   async benchmarkLexer(code: string, testName: string): Promise<BenchmarkMetrics> {
     console.log(`🔤 Benchmarking Lexer: ${testName}...`);
-    
+
     const startMemory = this.getMemoryUsage();
     const startTime = performance.now();
-    
+
     try {
       // Simulated lexer operations
       const tokens = [];
       const lines = code.split('\n');
-      
+
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         // Simulate tokenization
         const lineTokens = line.split(/[\s(),.;]+/).filter(t => t.length > 0);
-        tokens.push(...lineTokens.map(token => ({
-          type: this.classifyToken(token),
-          value: token,
-          line: i + 1,
-          column: line.indexOf(token)
-        })));
+        tokens.push(
+          ...lineTokens.map(token => ({
+            type: this.classifyToken(token),
+            value: token,
+            line: i + 1,
+            column: line.indexOf(token),
+          }))
+        );
       }
-      
+
       const duration = performance.now() - startTime;
       const memoryUsed = this.getMemoryUsage() - startMemory;
-      
+
       return {
         name: `Lexer-${testName}`,
         compilationTime: duration,
@@ -300,7 +311,7 @@ End Sub
         codeSize: code.length,
         optimizationLevel: 0,
         errors: [],
-        warnings: []
+        warnings: [],
       };
     } catch (error) {
       const duration = performance.now() - startTime;
@@ -312,20 +323,20 @@ End Sub
         codeSize: code.length,
         optimizationLevel: 0,
         errors: [error],
-        warnings: []
+        warnings: [],
       };
     }
   }
-  
+
   /**
    * Benchmark du parser VB6
    */
   async benchmarkParser(code: string, testName: string): Promise<BenchmarkMetrics> {
     console.log(`🌳 Benchmarking Parser: ${testName}...`);
-    
+
     const startMemory = this.getMemoryUsage();
     const startTime = performance.now();
-    
+
     try {
       // Simulated parsing operations
       const lines = code.split('\n');
@@ -333,19 +344,19 @@ End Sub
         type: 'Module',
         name: testName,
         declarations: [],
-        procedures: []
+        procedures: [],
       };
-      
+
       // Parse declarations and procedures
       let currentProcedure = null;
       for (const line of lines) {
         const trimmed = line.trim();
-        
+
         if (trimmed.startsWith('Private ') || trimmed.startsWith('Public ')) {
           if (trimmed.includes('Sub ') || trimmed.includes('Function ')) {
             currentProcedure = {
               name: this.extractProcedureName(trimmed),
-              body: []
+              body: [],
             };
             ast.procedures.push(currentProcedure);
           } else if (trimmed.includes('Dim ')) {
@@ -357,10 +368,10 @@ End Sub
           currentProcedure = null;
         }
       }
-      
+
       const duration = performance.now() - startTime;
       const memoryUsed = this.getMemoryUsage() - startMemory;
-      
+
       return {
         name: `Parser-${testName}`,
         compilationTime: duration,
@@ -369,7 +380,7 @@ End Sub
         codeSize: code.length,
         optimizationLevel: 0,
         errors: [],
-        warnings: []
+        warnings: [],
       };
     } catch (error) {
       const duration = performance.now() - startTime;
@@ -381,32 +392,32 @@ End Sub
         codeSize: code.length,
         optimizationLevel: 0,
         errors: [error],
-        warnings: []
+        warnings: [],
       };
     }
   }
-  
+
   /**
    * Benchmark de l'analyseur sémantique
    */
   async benchmarkSemanticAnalyzer(code: string, testName: string): Promise<BenchmarkMetrics> {
     console.log(`🔍 Benchmarking Semantic Analyzer: ${testName}...`);
-    
+
     const startMemory = this.getMemoryUsage();
     const startTime = performance.now();
-    
+
     try {
       const errors = [];
       const warnings = [];
       const lines = code.split('\n');
-      
+
       // Simulated semantic analysis
       const symbolTable = new Map();
       const scopes = [new Set()]; // Global scope
-      
+
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
-        
+
         // Variable declarations
         if (line.includes('Dim ') || line.includes('Private ') || line.includes('Public ')) {
           const varName = this.extractVariableName(line);
@@ -415,14 +426,14 @@ End Sub
               warnings.push({
                 line: i + 1,
                 message: `Variable '${varName}' already declared`,
-                code: 'W001'
+                code: 'W001',
               });
             }
             scopes[scopes.length - 1].add(varName);
             symbolTable.set(varName, { type: 'variable', line: i + 1 });
           }
         }
-        
+
         // Variable usage
         const usedVars = this.extractUsedVariables(line);
         for (const varName of usedVars) {
@@ -437,11 +448,11 @@ End Sub
             errors.push({
               line: i + 1,
               message: `Variable '${varName}' not declared`,
-              code: 'E001'
+              code: 'E001',
             });
           }
         }
-        
+
         // Procedure scopes
         if (line.includes('Sub ') || line.includes('Function ')) {
           scopes.push(new Set());
@@ -449,10 +460,10 @@ End Sub
           scopes.pop();
         }
       }
-      
+
       const duration = performance.now() - startTime;
       const memoryUsed = this.getMemoryUsage() - startMemory;
-      
+
       return {
         name: `SemanticAnalyzer-${testName}`,
         compilationTime: duration,
@@ -461,7 +472,7 @@ End Sub
         codeSize: code.length,
         optimizationLevel: 0,
         errors,
-        warnings
+        warnings,
       };
     } catch (error) {
       const duration = performance.now() - startTime;
@@ -473,20 +484,20 @@ End Sub
         codeSize: code.length,
         optimizationLevel: 0,
         errors: [error],
-        warnings: []
+        warnings: [],
       };
     }
   }
-  
+
   /**
    * Benchmark du transpiler VB6 → JavaScript
    */
   async benchmarkTranspiler(code: string, testName: string): Promise<BenchmarkMetrics> {
     console.log(`🔄 Benchmarking Transpiler: ${testName}...`);
-    
+
     const startMemory = this.getMemoryUsage();
     const startTime = performance.now();
-    
+
     try {
       const lines = code.split('\n');
       let jsCode = '// Generated JavaScript from VB6\n';
@@ -494,13 +505,13 @@ End Sub
       jsCode += '  constructor() {\n';
       jsCode += '    this.variables = new Map();\n';
       jsCode += '  }\n\n';
-      
+
       let inProcedure = false;
       let procedureName = '';
-      
+
       for (const line of lines) {
         const trimmed = line.trim();
-        
+
         if (trimmed.startsWith('Public ') || trimmed.startsWith('Private ')) {
           if (trimmed.includes('Sub ') || trimmed.includes('Function ')) {
             procedureName = this.extractProcedureName(trimmed);
@@ -522,13 +533,13 @@ End Sub
           }
         }
       }
-      
+
       jsCode += '}\n';
       jsCode += 'module.exports = VB6Module;\n';
-      
+
       const duration = performance.now() - startTime;
       const memoryUsed = this.getMemoryUsage() - startMemory;
-      
+
       return {
         name: `Transpiler-${testName}`,
         compilationTime: duration,
@@ -538,7 +549,7 @@ End Sub
         jsCodeSize: jsCode.length,
         optimizationLevel: 0,
         errors: [],
-        warnings: []
+        warnings: [],
       };
     } catch (error) {
       const duration = performance.now() - startTime;
@@ -550,46 +561,50 @@ End Sub
         codeSize: code.length,
         optimizationLevel: 0,
         errors: [error],
-        warnings: []
+        warnings: [],
       };
     }
   }
-  
+
   /**
    * Benchmark de l'optimiseur de code
    */
-  async benchmarkOptimizer(jsCode: string, testName: string, level: number): Promise<BenchmarkMetrics> {
+  async benchmarkOptimizer(
+    jsCode: string,
+    testName: string,
+    level: number
+  ): Promise<BenchmarkMetrics> {
     console.log(`⚡ Benchmarking Optimizer (Level ${level}): ${testName}...`);
-    
+
     const startMemory = this.getMemoryUsage();
     const startTime = performance.now();
-    
+
     try {
       let optimizedCode = jsCode;
-      
+
       if (level >= 1) {
         // Dead code elimination
         optimizedCode = this.removeDeadCode(optimizedCode);
       }
-      
+
       if (level >= 2) {
         // Constant folding
         optimizedCode = this.constantFolding(optimizedCode);
         // Variable inlining
         optimizedCode = this.inlineVariables(optimizedCode);
       }
-      
+
       if (level >= 3) {
         // Function inlining
         optimizedCode = this.inlineFunctions(optimizedCode);
         // Loop unrolling
         optimizedCode = this.unrollLoops(optimizedCode);
       }
-      
+
       const duration = performance.now() - startTime;
       const memoryUsed = this.getMemoryUsage() - startMemory;
       const compressionRatio = optimizedCode.length / jsCode.length;
-      
+
       return {
         name: `Optimizer-${testName}-L${level}`,
         compilationTime: duration,
@@ -599,10 +614,15 @@ End Sub
         jsCodeSize: optimizedCode.length,
         optimizationLevel: level,
         errors: [],
-        warnings: compressionRatio > 1.1 ? [{ 
-          message: 'Code size increased after optimization', 
-          code: 'OPT001' 
-        }] : []
+        warnings:
+          compressionRatio > 1.1
+            ? [
+                {
+                  message: 'Code size increased after optimization',
+                  code: 'OPT001',
+                },
+              ]
+            : [],
       };
     } catch (error) {
       const duration = performance.now() - startTime;
@@ -614,158 +634,169 @@ End Sub
         codeSize: jsCode.length,
         optimizationLevel: level,
         errors: [error],
-        warnings: []
+        warnings: [],
       };
     }
   }
-  
+
   /**
    * Exécute tous les benchmarks pour un cas de test
    */
   async benchmarkFullPipeline(testName: string): Promise<ComponentBenchmark> {
     console.log(`\n🚀 Running Full Pipeline Benchmark: ${testName}\n${'='.repeat(50)}`);
-    
+
     const code = this.testCases.get(testName);
     if (!code) {
       throw new Error(`Test case '${testName}' not found`);
     }
-    
+
     const lexer = await this.benchmarkLexer(code, testName);
     const parser = await this.benchmarkParser(code, testName);
     const semanticAnalyzer = await this.benchmarkSemanticAnalyzer(code, testName);
     const transpiler = await this.benchmarkTranspiler(code, testName);
-    
+
     // Use transpiled code for optimizer benchmark
     const dummyJS = `function test() { var x = 1 + 2; var y = x * 3; return y; }`;
     const optimizer = await this.benchmarkOptimizer(dummyJS, testName, 2);
-    
+
     return {
       lexer,
       parser,
       semanticAnalyzer,
       transpiler,
-      optimizer
+      optimizer,
     };
   }
-  
+
   /**
    * Exécute la suite complète de benchmarks
    */
   async runComprehensiveBenchmarks(): Promise<void> {
     console.log('🎯 VB6 Compiler Ultra Performance Benchmark Suite');
     console.log('==================================================\n');
-    
+
     const results: Map<string, ComponentBenchmark> = new Map();
-    
+
     // Run benchmarks for each test case
     for (const testName of this.testCases.keys()) {
       try {
         const result = await this.benchmarkFullPipeline(testName);
         results.set(testName, result);
-        
+
         // Print summary for this test case
         this.printTestCaseSummary(testName, result);
-        
+
         // Brief pause between test cases
         await new Promise(resolve => setTimeout(resolve, 100));
       } catch (error) {
         console.error(`❌ Error benchmarking ${testName}: ${error.message}`);
       }
     }
-    
+
     // Print overall analysis
     this.printOverallAnalysis(results);
-    
+
     // Test optimization levels
     await this.benchmarkOptimizationLevels();
-    
+
     // Test cache performance
     await this.benchmarkCachePerformance();
-    
+
     // Test parallel compilation
     await this.benchmarkParallelCompilation();
-    
+
     console.log('\n✅ Comprehensive benchmark suite completed!');
   }
-  
+
   /**
    * Benchmark des niveaux d'optimisation
    */
   async benchmarkOptimizationLevels(): Promise<void> {
     console.log('\n📊 Optimization Levels Benchmark');
     console.log('----------------------------------');
-    
+
     const testCode = this.testCases.get('medium')!;
-    const jsCode = 'function test() { var x = 1 + 2 * 3; var y = x + 4; if (y > 10) { return y * 2; } else { return y + 1; } }';
-    
+    const jsCode =
+      'function test() { var x = 1 + 2 * 3; var y = x + 4; if (y > 10) { return y * 2; } else { return y + 1; } }';
+
     const levels = [0, 1, 2, 3];
     const results: BenchmarkMetrics[] = [];
-    
+
     for (const level of levels) {
       const result = await this.benchmarkOptimizer(jsCode, 'optimization-test', level);
       results.push(result);
-      
-      console.log(`  Level ${level}: ${result.compilationTime.toFixed(2)}ms, Size: ${result.jsCodeSize} bytes`);
+
+      console.log(
+        `  Level ${level}: ${result.compilationTime.toFixed(2)}ms, Size: ${result.jsCodeSize} bytes`
+      );
     }
-    
+
     // Calculate improvements
     const baseline = results[0];
     results.forEach((result, index) => {
       if (index > 0) {
-        const speedImprovement = ((baseline.compilationTime - result.compilationTime) / baseline.compilationTime) * 100;
-        const sizeReduction = ((baseline.jsCodeSize! - result.jsCodeSize!) / baseline.jsCodeSize!) * 100;
-        console.log(`    vs Level 0: ${speedImprovement.toFixed(1)}% speed change, ${sizeReduction.toFixed(1)}% size reduction`);
+        const speedImprovement =
+          ((baseline.compilationTime - result.compilationTime) / baseline.compilationTime) * 100;
+        const sizeReduction =
+          ((baseline.jsCodeSize! - result.jsCodeSize!) / baseline.jsCodeSize!) * 100;
+        console.log(
+          `    vs Level 0: ${speedImprovement.toFixed(1)}% speed change, ${sizeReduction.toFixed(1)}% size reduction`
+        );
       }
     });
   }
-  
+
   /**
    * Benchmark de performance du cache
    */
   async benchmarkCachePerformance(): Promise<void> {
     console.log('\n💾 Cache Performance Benchmark');
     console.log('------------------------------');
-    
+
     const code = this.testCases.get('complex')!;
-    
+
     // Simulate cold cache
     console.log('  Cold cache compilation...');
     const coldStart = performance.now();
     await this.benchmarkFullPipeline('complex');
     const coldTime = performance.now() - coldStart;
-    
+
     // Simulate warm cache (same code)
     console.log('  Warm cache compilation...');
     const warmStart = performance.now();
     await this.benchmarkFullPipeline('complex');
     const warmTime = performance.now() - warmStart;
-    
+
     // Simulate incremental (slight change)
     console.log('  Incremental compilation...');
     const incrementalStart = performance.now();
     // Simulate a small change
-    const modifiedCode = code + '\n\' Added comment';
+    const modifiedCode = code + "\n' Added comment";
     this.testCases.set('incremental', modifiedCode);
     await this.benchmarkFullPipeline('incremental');
     const incrementalTime = performance.now() - incrementalStart;
-    
+
     console.log(`\n  Results:`);
     console.log(`    Cold cache: ${coldTime.toFixed(2)}ms`);
-    console.log(`    Warm cache: ${warmTime.toFixed(2)}ms (${((coldTime - warmTime) / coldTime * 100).toFixed(1)}% faster)`);
-    console.log(`    Incremental: ${incrementalTime.toFixed(2)}ms (${((coldTime - incrementalTime) / coldTime * 100).toFixed(1)}% faster)`);
-    
+    console.log(
+      `    Warm cache: ${warmTime.toFixed(2)}ms (${(((coldTime - warmTime) / coldTime) * 100).toFixed(1)}% faster)`
+    );
+    console.log(
+      `    Incremental: ${incrementalTime.toFixed(2)}ms (${(((coldTime - incrementalTime) / coldTime) * 100).toFixed(1)}% faster)`
+    );
+
     // Simulate cache hit rate
     const hitRate = Math.random() * 30 + 70; // 70-100% hit rate
     console.log(`    Estimated cache hit rate: ${hitRate.toFixed(1)}%`);
   }
-  
+
   /**
    * Benchmark de compilation parallèle
    */
   async benchmarkParallelCompilation(): Promise<void> {
     console.log('\n⚡ Parallel Compilation Benchmark');
     console.log('---------------------------------');
-    
+
     // Simulate sequential compilation
     console.log('  Sequential compilation...');
     const sequentialStart = performance.now();
@@ -773,44 +804,44 @@ End Sub
       await this.benchmarkFullPipeline(testName);
     }
     const sequentialTime = performance.now() - sequentialStart;
-    
+
     // Simulate parallel compilation
     console.log('  Parallel compilation...');
     const parallelStart = performance.now();
-    const promises = ['simple', 'medium', 'complex'].map(name => 
-      this.benchmarkFullPipeline(name)
-    );
+    const promises = ['simple', 'medium', 'complex'].map(name => this.benchmarkFullPipeline(name));
     await Promise.all(promises);
     const parallelTime = performance.now() - parallelStart;
-    
+
     const speedup = ((sequentialTime - parallelTime) / sequentialTime) * 100;
     const cores = typeof navigator !== 'undefined' ? navigator.hardwareConcurrency || 4 : 4;
-    
+
     console.log(`\n  Results:`);
     console.log(`    Sequential: ${sequentialTime.toFixed(2)}ms`);
     console.log(`    Parallel: ${parallelTime.toFixed(2)}ms`);
     console.log(`    Speedup: ${speedup.toFixed(1)}% (${cores} cores)`);
-    console.log(`    Efficiency: ${(speedup / ((cores - 1) * 100) * 100).toFixed(1)}%`);
+    console.log(`    Efficiency: ${((speedup / ((cores - 1) * 100)) * 100).toFixed(1)}%`);
   }
-  
+
   /**
    * Affiche le résumé pour un cas de test
    */
   private printTestCaseSummary(testName: string, result: ComponentBenchmark): void {
     console.log(`\n📈 ${testName.toUpperCase()} Test Case Summary:`);
     console.log('─'.repeat(40));
-    
+
     const components = [
       { name: 'Lexer', data: result.lexer },
       { name: 'Parser', data: result.parser },
       { name: 'Semantic', data: result.semanticAnalyzer },
       { name: 'Transpiler', data: result.transpiler },
-      { name: 'Optimizer', data: result.optimizer }
+      { name: 'Optimizer', data: result.optimizer },
     ];
-    
+
     components.forEach(comp => {
-      console.log(`  ${comp.name.padEnd(10)}: ${comp.data.compilationTime.toFixed(2)}ms | ${comp.data.throughput.toFixed(0)} lines/sec | ${comp.data.memoryUsage.toFixed(2)}MB`);
-      
+      console.log(
+        `  ${comp.name.padEnd(10)}: ${comp.data.compilationTime.toFixed(2)}ms | ${comp.data.throughput.toFixed(0)} lines/sec | ${comp.data.memoryUsage.toFixed(2)}MB`
+      );
+
       if (comp.data.errors.length > 0) {
         console.log(`    ❌ ${comp.data.errors.length} errors`);
       }
@@ -818,26 +849,28 @@ End Sub
         console.log(`    ⚠️  ${comp.data.warnings.length} warnings`);
       }
     });
-    
+
     const totalTime = components.reduce((sum, comp) => sum + comp.data.compilationTime, 0);
     const totalMemory = components.reduce((sum, comp) => sum + comp.data.memoryUsage, 0);
-    console.log(`  ${'Total'.padEnd(10)}: ${totalTime.toFixed(2)}ms | Memory: ${totalMemory.toFixed(2)}MB`);
+    console.log(
+      `  ${'Total'.padEnd(10)}: ${totalTime.toFixed(2)}ms | Memory: ${totalMemory.toFixed(2)}MB`
+    );
   }
-  
+
   /**
    * Affiche l'analyse globale
    */
   private printOverallAnalysis(results: Map<string, ComponentBenchmark>): void {
     console.log('\n🎯 Overall Performance Analysis');
     console.log('===============================');
-    
+
     const testCases = Array.from(results.keys());
     const componentNames = ['lexer', 'parser', 'semanticAnalyzer', 'transpiler', 'optimizer'];
-    
+
     console.log('\n📊 Performance by Component (ms):');
     console.log('Test Case'.padEnd(12) + componentNames.map(c => c.padEnd(12)).join(''));
     console.log('-'.repeat(12 + componentNames.length * 12));
-    
+
     testCases.forEach(testName => {
       const result = results.get(testName)!;
       let row = testName.padEnd(12);
@@ -847,57 +880,62 @@ End Sub
       });
       console.log(row);
     });
-    
+
     console.log('\n🚀 Throughput Analysis (lines/sec):');
     testCases.forEach(testName => {
       const result = results.get(testName)!;
-      const avgThroughput = componentNames.reduce((sum, compName) => 
-        sum + (result as any)[compName].throughput, 0) / componentNames.length;
+      const avgThroughput =
+        componentNames.reduce((sum, compName) => sum + (result as any)[compName].throughput, 0) /
+        componentNames.length;
       console.log(`  ${testName}: ${avgThroughput.toFixed(0)} lines/sec average`);
     });
-    
+
     console.log('\n💾 Memory Usage Analysis:');
     testCases.forEach(testName => {
       const result = results.get(testName)!;
-      const totalMemory = componentNames.reduce((sum, compName) => 
-        sum + (result as any)[compName].memoryUsage, 0);
+      const totalMemory = componentNames.reduce(
+        (sum, compName) => sum + (result as any)[compName].memoryUsage,
+        0
+      );
       console.log(`  ${testName}: ${totalMemory.toFixed(2)}MB total`);
     });
-    
+
     // Scalability analysis
     console.log('\n📈 Scalability Analysis:');
     const simplexTime = this.getTotalTime(results.get('simple')!);
     const mediumTime = this.getTotalTime(results.get('medium')!);
     const complexTime = this.getTotalTime(results.get('complex')!);
     const largeTime = this.getTotalTime(results.get('large')!);
-    
+
     console.log(`  Simple → Medium: ${(mediumTime / simplexTime).toFixed(1)}x slower`);
     console.log(`  Medium → Complex: ${(complexTime / mediumTime).toFixed(1)}x slower`);
     console.log(`  Complex → Large: ${(largeTime / complexTime).toFixed(1)}x slower`);
-    
+
     // Performance bottlenecks
     console.log('\n⚠️  Performance Bottlenecks:');
     testCases.forEach(testName => {
       const result = results.get(testName)!;
       const times = componentNames.map(compName => ({
         name: compName,
-        time: (result as any)[compName].compilationTime
+        time: (result as any)[compName].compilationTime,
       }));
       times.sort((a, b) => b.time - a.time);
-      
+
       console.log(`  ${testName}: ${times[0].name} (${times[0].time.toFixed(2)}ms) is slowest`);
     });
   }
-  
+
   // Helper methods
   private getTotalTime(result: ComponentBenchmark): number {
-    return result.lexer.compilationTime + 
-           result.parser.compilationTime + 
-           result.semanticAnalyzer.compilationTime + 
-           result.transpiler.compilationTime + 
-           result.optimizer.compilationTime;
+    return (
+      result.lexer.compilationTime +
+      result.parser.compilationTime +
+      result.semanticAnalyzer.compilationTime +
+      result.transpiler.compilationTime +
+      result.optimizer.compilationTime
+    );
   }
-  
+
   private getMemoryUsage(): number {
     if (typeof process !== 'undefined' && process.memoryUsage) {
       return process.memoryUsage().heapUsed / 1024 / 1024;
@@ -908,31 +946,45 @@ End Sub
     }
     return 0;
   }
-  
+
   private classifyToken(token: string): string {
-    const keywords = ['Dim', 'As', 'Integer', 'String', 'Sub', 'Function', 'End', 'If', 'Then', 'Else', 'For', 'To', 'Next'];
+    const keywords = [
+      'Dim',
+      'As',
+      'Integer',
+      'String',
+      'Sub',
+      'Function',
+      'End',
+      'If',
+      'Then',
+      'Else',
+      'For',
+      'To',
+      'Next',
+    ];
     if (keywords.includes(token)) return 'Keyword';
     if (/^\d+$/.test(token)) return 'Number';
     if (token.startsWith('"') && token.endsWith('"')) return 'String';
     if (/^[a-zA-Z_]\w*$/.test(token)) return 'Identifier';
     return 'Operator';
   }
-  
+
   private extractProcedureName(line: string): string {
     const match = line.match(/(Sub|Function)\s+(\w+)/i);
     return match ? match[2] : 'UnknownProcedure';
   }
-  
+
   private extractDeclaration(line: string): any {
     const match = line.match(/Dim\s+(\w+)\s+As\s+(\w+)/i);
     return match ? { name: match[1], type: match[2] } : { name: 'unknown', type: 'Variant' };
   }
-  
+
   private extractVariableName(line: string): string | null {
     const match = line.match(/\b(\w+)\s+As\s+\w+/i);
     return match ? match[1] : null;
   }
-  
+
   private extractUsedVariables(line: string): string[] {
     const variables = [];
     const tokens = line.split(/[\s+\-*/(),=<>]/);
@@ -943,17 +995,17 @@ End Sub
     }
     return variables;
   }
-  
+
   private isBuiltinFunction(name: string): boolean {
     const builtins = ['MsgBox', 'Print', 'Len', 'Left', 'Right', 'Mid', 'Now', 'Timer'];
     return builtins.includes(name);
   }
-  
+
   private isKeyword(token: string): boolean {
     const keywords = ['If', 'Then', 'Else', 'For', 'To', 'Next', 'While', 'Wend', 'Do', 'Loop'];
     return keywords.includes(token);
   }
-  
+
   private transpileVariableDeclaration(line: string): string {
     const match = line.match(/Dim\s+(\w+)\s+As\s+(\w+)/i);
     if (match) {
@@ -963,45 +1015,47 @@ End Sub
     }
     return '// Unknown declaration';
   }
-  
+
   private transpileLine(line: string): string {
     let js = line;
-    js = js.replace(/'/g, '//');  // Comments
+    js = js.replace(/'/g, '//'); // Comments
     js = js.replace(/\bAnd\b/gi, '&&');
     js = js.replace(/\bOr\b/gi, '||');
     js = js.replace(/\bNot\b/gi, '!');
     js = js.replace(/\bThen\b/gi, '{');
     js = js.replace(/\bEnd If\b/gi, '}');
-    js = js.replace(/&/g, '+');  // String concatenation
+    js = js.replace(/&/g, '+'); // String concatenation
     return js;
   }
-  
+
   private vb6ToJSType(vbType: string): string {
-    const typeMap: {[key: string]: string} = {
-      'Integer': '0',
-      'Long': '0',
-      'String': '""',
-      'Boolean': 'false',
-      'Double': '0.0',
-      'Single': '0.0'
+    const typeMap: { [key: string]: string } = {
+      Integer: '0',
+      Long: '0',
+      String: '""',
+      Boolean: 'false',
+      Double: '0.0',
+      Single: '0.0',
     };
     return typeMap[vbType] || 'null';
   }
-  
+
   // Optimization simulation methods
   private removeDeadCode(code: string): string {
     // Simple dead code removal simulation
     const lines = code.split('\n');
     const filteredLines = lines.filter(line => {
       const trimmed = line.trim();
-      return trimmed !== '' && 
-             !trimmed.startsWith('//') && 
-             !trimmed.includes('unreachable') &&
-             !trimmed.includes('var unused');
+      return (
+        trimmed !== '' &&
+        !trimmed.startsWith('//') &&
+        !trimmed.includes('unreachable') &&
+        !trimmed.includes('var unused')
+      );
     });
     return filteredLines.join('\n');
   }
-  
+
   private constantFolding(code: string): string {
     // Simple constant folding simulation
     let optimized = code;
@@ -1012,71 +1066,77 @@ End Sub
     optimized = optimized.replace(/\bfalse \|\| false\b/g, 'false');
     return optimized;
   }
-  
+
   private inlineVariables(code: string): string {
     // Simple variable inlining simulation
     const varPattern = /var\s+(\w+)\s*=\s*([^;]+);/g;
     const variables = new Map();
-    
+
     let match;
     while ((match = varPattern.exec(code)) !== null) {
       const [fullMatch, varName, value] = match;
-      if (value.length < 20 && !value.includes('(')) { // Only inline simple values
+      if (value.length < 20 && !value.includes('(')) {
+        // Only inline simple values
         variables.set(varName, value);
       }
     }
-    
+
     let inlined = code;
     for (const [varName, value] of variables) {
       const usePattern = new RegExp(`\\b${varName}\\b`, 'g');
       // Count uses to decide if inlining is beneficial
       const uses = (code.match(usePattern) || []).length;
-      if (uses <= 3) { // Only inline if used 3 times or less
+      if (uses <= 3) {
+        // Only inline if used 3 times or less
         inlined = inlined.replace(usePattern, value);
       }
     }
-    
+
     return inlined;
   }
-  
+
   private inlineFunctions(code: string): string {
     // Simple function inlining simulation
     const funcPattern = /function\s+(\w+)\s*\([^)]*\)\s*\{([^}]+)\}/g;
     const functions = new Map();
-    
+
     let match;
     while ((match = funcPattern.exec(code)) !== null) {
       const [fullMatch, funcName, body] = match;
-      if (body.length < 50) { // Only inline small functions
+      if (body.length < 50) {
+        // Only inline small functions
         functions.set(funcName, body.trim());
       }
     }
-    
+
     let inlined = code;
     for (const [funcName, body] of functions) {
       const callPattern = new RegExp(`${funcName}\\s*\\([^)]*\\)`, 'g');
       const uses = (code.match(callPattern) || []).length;
-      if (uses <= 2) { // Only inline if used twice or less
+      if (uses <= 2) {
+        // Only inline if used twice or less
         inlined = inlined.replace(callPattern, `(${body})`);
       }
     }
-    
+
     return inlined;
   }
-  
+
   private unrollLoops(code: string): string {
     // Simple loop unrolling simulation
     let unrolled = code;
-    
+
     // Unroll simple for loops with small iteration counts
-    const forPattern = /for\s*\(\s*let\s+(\w+)\s*=\s*(\d+)\s*;\s*\1\s*<\s*(\d+)\s*;\s*\1\+\+\s*\)\s*\{([^}]+)\}/g;
-    
+    const forPattern =
+      /for\s*\(\s*let\s+(\w+)\s*=\s*(\d+)\s*;\s*\1\s*<\s*(\d+)\s*;\s*\1\+\+\s*\)\s*\{([^}]+)\}/g;
+
     unrolled = unrolled.replace(forPattern, (match, variable, start, end, body) => {
       const startNum = parseInt(start);
       const endNum = parseInt(end);
       const iterations = endNum - startNum;
-      
-      if (iterations <= 4 && iterations > 0) { // Only unroll small loops
+
+      if (iterations <= 4 && iterations > 0) {
+        // Only unroll small loops
         let unrolledBody = '';
         for (let i = startNum; i < endNum; i++) {
           const iterationBody = body.replace(new RegExp(`\\b${variable}\\b`, 'g'), i.toString());
@@ -1084,10 +1144,10 @@ End Sub
         }
         return unrolledBody;
       }
-      
+
       return match; // Don't unroll if too many iterations
     });
-    
+
     return unrolled;
   }
 }

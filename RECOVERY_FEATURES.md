@@ -7,6 +7,7 @@ The VB6 Web IDE now includes comprehensive diagnostic and recovery features to p
 ## Features Implemented
 
 ### 1. **Diagnostic Dashboard** (`DiagnosticDashboard.tsx`)
+
 - **Real-time Performance Monitoring**
   - FPS counter with color-coded indicators
   - Memory usage tracking (when available)
@@ -25,6 +26,7 @@ The VB6 Web IDE now includes comprehensive diagnostic and recovery features to p
   - Auto-refresh every 2 seconds
 
 ### 2. **Recovery Panel** (`RecoveryPanel.tsx`)
+
 - **Automatic Recovery Points**
   - Auto-save every minute when enabled
   - Captures state on errors
@@ -43,6 +45,7 @@ The VB6 Web IDE now includes comprehensive diagnostic and recovery features to p
   - Relative time display ("5m ago")
 
 ### 3. **Auto Recovery Service** (`AutoRecoveryService.ts`)
+
 - **State Preservation**
   - Controls and their properties
   - Selected controls
@@ -64,21 +67,25 @@ The VB6 Web IDE now includes comprehensive diagnostic and recovery features to p
 ## Usage
 
 ### Normal Operation
+
 1. The app automatically creates recovery points every minute
 2. Recovery points are also created when errors occur
 3. Use the recovery panel (green button, bottom-left) to view/manage points
 
 ### After a Crash
+
 1. If the app crashes, it will detect this on next launch
 2. You'll see the option to start in Safe Mode
 3. Use the recovery panel to restore your last working state
 
 ### Safe Mode
+
 - Access by appending `?safe=true` to the URL
 - Minimal interface for troubleshooting
 - Can still access recovery points
 
 ### Testing
+
 1. Open `test-recovery.html` in a browser
 2. Use the buttons to:
    - Simulate crashes
@@ -89,6 +96,7 @@ The VB6 Web IDE now includes comprehensive diagnostic and recovery features to p
 ## Integration Points
 
 The recovery system integrates with:
+
 - **Zustand Store**: For state capture/restore
 - **Error Boundary**: For React error handling
 - **Performance Monitor**: For diagnostics

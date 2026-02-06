@@ -18,11 +18,19 @@ export const CollaborationManager: React.FC = () => {
   const [showPanel, setShowPanel] = useState(false);
   const [editorElement, setEditorElement] = useState<HTMLElement | null>(null);
   const [currentDocumentId, setCurrentDocumentId] = useState('main-form');
-  
+
   // User colors for cursors and selections
   const userColors = [
-    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',
-    '#48C9B0', '#F368E0', '#00D2D3', '#6C5CE7', '#FDA7DF',
+    '#FF6B6B',
+    '#4ECDC4',
+    '#45B7D1',
+    '#96CEB4',
+    '#FECA57',
+    '#48C9B0',
+    '#F368E0',
+    '#00D2D3',
+    '#6C5CE7',
+    '#FDA7DF',
   ];
 
   // Initialize collaboration with user info
@@ -30,16 +38,10 @@ export const CollaborationManager: React.FC = () => {
     userId: authUser?.id || 'guest_' + Math.random().toString(36).substr(2, 9),
     userName: authUser?.name || 'Guest User',
     userColor: userColors[Math.floor(Math.random() * userColors.length)],
-    enabled: true
+    enabled: true,
   });
 
-  const {
-    isEnabled,
-    isConnected,
-    currentSession,
-    collaborators,
-    engine
-  } = collaborationState;
+  const { isEnabled, isConnected, currentSession, collaborators, engine } = collaborationState;
 
   const {
     createSession,
@@ -49,7 +51,7 @@ export const CollaborationManager: React.FC = () => {
     updateCursor,
     updateSelection,
     enableCollaboration,
-    disableCollaboration
+    disableCollaboration,
   } = collaborationActions;
 
   // Track Monaco editor element
@@ -62,10 +64,10 @@ export const CollaborationManager: React.FC = () => {
     };
 
     findMonacoEditor();
-    
+
     // Check periodically for Monaco editor
     const interval = setInterval(findMonacoEditor, 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -79,7 +81,7 @@ export const CollaborationManager: React.FC = () => {
     // Calculate text diff and send operations
     const oldCode = lastSentCode.current;
     const newCode = currentCode;
-    
+
     if (oldCode.length === 0 && newCode.length > 0) {
       // Initial content
       applyTextOperation(currentDocumentId, 'insert', 0, newCode);
@@ -102,24 +104,27 @@ export const CollaborationManager: React.FC = () => {
   useEffect(() => {
     const handleDocumentUpdate = (event: CustomEvent) => {
       const { documentId, document, operation } = event.detail;
-      
+
       if (documentId === currentDocumentId && document.content !== currentCode) {
         // Update local code without triggering another sync
         lastSentCode.current = document.content;
         updateCode(document.content);
-        
+
         eventSystem.fire('Collaboration', 'DocumentUpdated', {
           documentId,
           operation,
-          author: operation.author
+          author: operation.author,
         });
       }
     };
 
     window.addEventListener('collaborationDocumentUpdated', handleDocumentUpdate as EventListener);
-    
+
     return () => {
-      window.removeEventListener('collaborationDocumentUpdated', handleDocumentUpdate as EventListener);
+      window.removeEventListener(
+        'collaborationDocumentUpdated',
+        handleDocumentUpdate as EventListener
+      );
     };
   }, [currentDocumentId, currentCode, updateCode]);
 
@@ -165,7 +170,14 @@ export const CollaborationManager: React.FC = () => {
       cursorDisposable?.dispose();
       selectionDisposable?.dispose();
     };
-  }, [editorElement, isConnected, currentSession, updateCursor, updateSelection, currentDocumentId]);
+  }, [
+    editorElement,
+    isConnected,
+    currentSession,
+    updateCursor,
+    updateSelection,
+    currentDocumentId,
+  ]);
 
   // Calculate text differences for operation transformation
   const calculateTextDiff = (oldText: string, newText: string) => {
@@ -179,25 +191,31 @@ export const CollaborationManager: React.FC = () => {
     if (newText.length > oldText.length) {
       // Text was inserted
       const commonPrefix = getCommonPrefix(oldText, newText);
-      const insertedText = newText.slice(commonPrefix, commonPrefix + (newText.length - oldText.length));
-      
+      const insertedText = newText.slice(
+        commonPrefix,
+        commonPrefix + (newText.length - oldText.length)
+      );
+
       if (insertedText) {
         changes.push({
           type: 'insert',
           position: commonPrefix,
-          content: insertedText
+          content: insertedText,
         });
       }
     } else if (newText.length < oldText.length) {
       // Text was deleted
       const commonPrefix = getCommonPrefix(oldText, newText);
-      const deletedText = oldText.slice(commonPrefix, commonPrefix + (oldText.length - newText.length));
-      
+      const deletedText = oldText.slice(
+        commonPrefix,
+        commonPrefix + (oldText.length - newText.length)
+      );
+
       if (deletedText) {
         changes.push({
           type: 'delete',
           position: commonPrefix,
-          content: deletedText
+          content: deletedText,
         });
       }
     }
@@ -217,22 +235,25 @@ export const CollaborationManager: React.FC = () => {
   const handleCreateSession = useCallback(async () => {
     const sessionId = await createSession('VB6 Collaboration Session', {
       isPrivate: false,
-      maxParticipants: 10
+      maxParticipants: 10,
     });
-    
+
     if (sessionId) {
       eventSystem.fire('Collaboration', 'SessionCreated', { sessionId });
     }
   }, [createSession]);
 
   // Handle session joining
-  const handleJoinSession = useCallback(async (sessionId: string) => {
-    const success = await joinSession(sessionId);
-    
-    if (success) {
-      eventSystem.fire('Collaboration', 'SessionJoined', { sessionId });
-    }
-  }, [joinSession]);
+  const handleJoinSession = useCallback(
+    async (sessionId: string) => {
+      const success = await joinSession(sessionId);
+
+      if (success) {
+        eventSystem.fire('Collaboration', 'SessionJoined', { sessionId });
+      }
+    },
+    [joinSession]
+  );
 
   // Handle session leaving
   const handleLeaveSession = useCallback(async () => {
@@ -250,15 +271,21 @@ export const CollaborationManager: React.FC = () => {
           whileTap={{ scale: 0.98 }}
           onClick={() => setShowPanel(!showPanel)}
         >
-          <div className={`w-2 h-2 rounded-full ${
-            isConnected && currentSession ? 'bg-green-500 animate-pulse' : 
-            isEnabled ? 'bg-yellow-500' : 'bg-gray-400'
-          }`} />
+          <div
+            className={`w-2 h-2 rounded-full ${
+              isConnected && currentSession
+                ? 'bg-green-500 animate-pulse'
+                : isEnabled
+                  ? 'bg-yellow-500'
+                  : 'bg-gray-400'
+            }`}
+          />
           <span className="text-sm font-medium">
-            {currentSession ? 
-              `${collaborators.length + 1} users` : 
-              isEnabled ? 'Start Collaboration' : 'Offline'
-            }
+            {currentSession
+              ? `${collaborators.length + 1} users`
+              : isEnabled
+                ? 'Start Collaboration'
+                : 'Offline'}
           </span>
           {isConnected && currentSession && (
             <div className="w-1 h-1 bg-blue-500 rounded-full animate-ping" />

@@ -1,29 +1,29 @@
 /**
  * Migration du Lexer VB6 - Phase 1 Critique
- * 
+ *
  * Ce fichier assure la compatibilité entre l'ancien lexer et le nouveau système unifié.
  * Il permet une migration progressive sans casser l'existant.
- * 
+ *
  * IMPORTANT: Ce fichier doit être utilisé temporairement pendant la migration.
  * Une fois tous les imports migrés, il peut être supprimé.
  */
 
 // Import du nouveau système unifié
-import { 
-  UnifiedLexer, 
-  UnifiedToken, 
-  tokenizeUnified, 
+import {
+  UnifiedLexer,
+  UnifiedToken,
+  tokenizeUnified,
   lexVB6Unified,
   LegacyTokenType,
   LegacyToken,
-  LexerFactory
+  LexerFactory,
 } from '../compiler/UnifiedLexer';
 
 // Import de l'ancien système pour compatibilité
-import { 
-  Token as OriginalToken, 
-  TokenType as OriginalTokenType, 
-  lexVB6 as originalLexVB6 
+import {
+  Token as OriginalToken,
+  TokenType as OriginalTokenType,
+  lexVB6 as originalLexVB6,
 } from './vb6Lexer';
 
 /**
@@ -40,7 +40,7 @@ const defaultMigrationConfig: MigrationConfig = {
   enableAdvancedLexer: true,
   enableFallback: true,
   logMigrationWarnings: false,
-  validateResults: false
+  validateResults: false,
 };
 
 /**
@@ -49,21 +49,21 @@ const defaultMigrationConfig: MigrationConfig = {
  */
 export function lexVB6(code: string, config?: Partial<MigrationConfig>): OriginalToken[] {
   const migrationConfig = { ...defaultMigrationConfig, ...config };
-  
+
   try {
     if (migrationConfig.enableAdvancedLexer) {
       // Utiliser le nouveau lexer unifié
       const unifiedTokens = lexVB6Unified(code);
-      
+
       if (migrationConfig.logMigrationWarnings) {
         console.warn('🔄 Migration: Using unified lexer for lexVB6 call');
       }
-      
+
       // Validation optionnelle
       if (migrationConfig.validateResults) {
         validateMigrationResults(code, unifiedTokens, originalLexVB6(code));
       }
-      
+
       return unifiedTokens;
     } else {
       // Utiliser l'ancien lexer
@@ -95,38 +95,41 @@ export class VB6LexerMigrationManager {
   } = {
     unifiedCalls: 0,
     fallbackCalls: 0,
-    errors: 0
+    errors: 0,
   };
 
   /**
    * Tokeniser avec le système le plus approprié selon le contexte
    */
-  tokenize(code: string, context: 'compiler' | 'semantic' | 'transpiler' | 'test' = 'compiler'): OriginalToken[] {
+  tokenize(
+    code: string,
+    context: 'compiler' | 'semantic' | 'transpiler' | 'test' = 'compiler'
+  ): OriginalToken[] {
     try {
       switch (context) {
         case 'compiler':
           // Pour le compilateur, utiliser le lexer avancé avec toutes les fonctionnalités
           return this.tokenizeAdvanced(code);
-        
+
         case 'semantic':
           // Pour l'analyseur sémantique, utiliser le lexer optimisé pour l'analyse
           return this.tokenizeSemantic(code);
-        
+
         case 'transpiler':
           // Pour le transpiler, compatibilité maximale requise
           return this.tokenizeCompatible(code);
-        
+
         case 'test':
           // Pour les tests, validation stricte
           return this.tokenizeWithValidation(code);
-        
+
         default:
           return this.tokenizeAdvanced(code);
       }
     } catch (error) {
       this.migrationStats.errors++;
       this.migrationStats.lastError = error instanceof Error ? error.message : String(error);
-      
+
       // Fallback vers l'ancien lexer
       console.warn(`Migration failed for context ${context}, using fallback:`, error);
       this.migrationStats.fallbackCalls++;
@@ -142,12 +145,12 @@ export class VB6LexerMigrationManager {
       enableDebugging: false,
       validateTokens: false,
       preserveWhitespace: false,
-      preserveComments: true
+      preserveComments: true,
     });
-    
+
     const tokens = advancedLexer.tokenize(code);
     this.migrationStats.unifiedCalls++;
-    
+
     return this.convertToLegacyFormat(tokens);
   }
 
@@ -159,12 +162,12 @@ export class VB6LexerMigrationManager {
       enableDebugging: false,
       validateTokens: true,
       preserveWhitespace: false,
-      preserveComments: false
+      preserveComments: false,
     });
-    
+
     const tokens = semanticLexer.tokenize(code);
     this.migrationStats.unifiedCalls++;
-    
+
     return this.convertToLegacyFormat(tokens);
   }
 
@@ -178,12 +181,12 @@ export class VB6LexerMigrationManager {
       enableDebugging: false,
       validateTokens: false,
       preserveWhitespace: true,
-      preserveComments: true
+      preserveComments: true,
     });
-    
+
     const tokens = compatibleLexer.tokenize(code);
     this.migrationStats.unifiedCalls++;
-    
+
     return this.convertToLegacyFormat(tokens);
   }
 
@@ -194,14 +197,14 @@ export class VB6LexerMigrationManager {
     const testLexer = LexerFactory.createDebugLexer({
       enableDebugging: false, // Pas de debug dans les tests automatiques
       validateTokens: true,
-      maxTokens: 100000 // Limite pour les tests
+      maxTokens: 100000, // Limite pour les tests
     });
-    
+
     const tokens = testLexer.tokenize(code);
     this.migrationStats.unifiedCalls++;
-    
+
     const legacyTokens = this.convertToLegacyFormat(tokens);
-    
+
     // Validation croisée pour les tests
     try {
       const originalTokens = originalLexVB6(code);
@@ -209,7 +212,7 @@ export class VB6LexerMigrationManager {
     } catch (error) {
       console.warn('Token validation failed in test context:', error);
     }
-    
+
     return legacyTokens;
   }
 
@@ -221,7 +224,7 @@ export class VB6LexerMigrationManager {
       type: token.type,
       value: token.value,
       line: token.line,
-      column: token.column
+      column: token.column,
     }));
   }
 
@@ -236,9 +239,11 @@ export class VB6LexerMigrationManager {
     for (let i = 0; i < newTokens.length; i++) {
       const newToken = newTokens[i];
       const oldToken = oldTokens[i];
-      
+
       if (newToken.type !== oldToken.type || newToken.value !== oldToken.value) {
-        throw new Error(`Token mismatch at index ${i}: ${JSON.stringify(newToken)} vs ${JSON.stringify(oldToken)}`);
+        throw new Error(
+          `Token mismatch at index ${i}: ${JSON.stringify(newToken)} vs ${JSON.stringify(oldToken)}`
+        );
       }
     }
   }
@@ -257,7 +262,7 @@ export class VB6LexerMigrationManager {
     this.migrationStats = {
       unifiedCalls: 0,
       fallbackCalls: 0,
-      errors: 0
+      errors: 0,
     };
   }
 }
@@ -271,19 +276,17 @@ export const vb6LexerMigration = new VB6LexerMigrationManager();
  * Validation des résultats de migration
  */
 function validateMigrationResults(
-  code: string, 
-  unifiedTokens: OriginalToken[], 
+  code: string,
+  unifiedTokens: OriginalToken[],
   originalTokens: OriginalToken[]
 ): void {
   // Comparer les tokens essentiels (ignore les différences mineures de whitespace)
-  const essentialUnified = unifiedTokens.filter(t => 
-    t.type !== OriginalTokenType.Whitespace && 
-    t.type !== OriginalTokenType.Comment
+  const essentialUnified = unifiedTokens.filter(
+    t => t.type !== OriginalTokenType.Whitespace && t.type !== OriginalTokenType.Comment
   );
-  
-  const essentialOriginal = originalTokens.filter(t => 
-    t.type !== OriginalTokenType.Whitespace && 
-    t.type !== OriginalTokenType.Comment
+
+  const essentialOriginal = originalTokens.filter(
+    t => t.type !== OriginalTokenType.Whitespace && t.type !== OriginalTokenType.Comment
   );
 
   if (essentialUnified.length !== essentialOriginal.length) {
@@ -295,7 +298,7 @@ function validateMigrationResults(
   for (let i = 0; i < essentialUnified.length; i++) {
     const unified = essentialUnified[i];
     const original = essentialOriginal[i];
-    
+
     if (unified.type !== original.type || unified.value !== original.value) {
       differenceCount++;
     }
@@ -313,11 +316,11 @@ function validateMigrationResults(
  */
 export function createMigrationLexer(config?: Partial<MigrationConfig>) {
   const migrationConfig = { ...defaultMigrationConfig, ...config };
-  
+
   return {
     lexVB6: (code: string) => lexVB6(code, migrationConfig),
     TokenType: OriginalTokenType,
-    migrationManager: vb6LexerMigration
+    migrationManager: vb6LexerMigration,
   };
 }
 

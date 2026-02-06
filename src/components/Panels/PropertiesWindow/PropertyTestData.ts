@@ -42,9 +42,9 @@ export const sampleTextBox: Control = {
     OLEDropMode: '0 - None',
     RightToLeft: false,
     HelpContextID: 0,
-    WhatsThisHelpID: 0
+    WhatsThisHelpID: 0,
   },
-  events: {}
+  events: {},
 };
 
 export const sampleCommandButton: Control = {
@@ -83,9 +83,9 @@ export const sampleCommandButton: Control = {
     HelpContextID: 0,
     WhatsThisHelpID: 0,
     UseMaskColor: false,
-    MaskColor: '#C0C0C0'
+    MaskColor: '#C0C0C0',
   },
-  events: {}
+  events: {},
 };
 
 export const sampleLabel: Control = {
@@ -121,9 +121,9 @@ export const sampleLabel: Control = {
     RightToLeft: false,
     HelpContextID: 0,
     WhatsThisHelpID: 0,
-    UseMnemonic: true
+    UseMnemonic: true,
   },
-  events: {}
+  events: {},
 };
 
 export const sampleListBox: Control = {
@@ -164,9 +164,9 @@ export const sampleListBox: Control = {
     OLEDropMode: '0 - None',
     RightToLeft: false,
     HelpContextID: 0,
-    WhatsThisHelpID: 0
+    WhatsThisHelpID: 0,
   },
-  events: {}
+  events: {},
 };
 
 export const sampleCheckBox: Control = {
@@ -207,9 +207,9 @@ export const sampleCheckBox: Control = {
     HelpContextID: 0,
     WhatsThisHelpID: 0,
     UseMaskColor: false,
-    MaskColor: '#C0C0C0'
+    MaskColor: '#C0C0C0',
   },
-  events: {}
+  events: {},
 };
 
 export const sampleOptionButton: Control = {
@@ -250,9 +250,9 @@ export const sampleOptionButton: Control = {
     HelpContextID: 0,
     WhatsThisHelpID: 0,
     UseMaskColor: false,
-    MaskColor: '#C0C0C0'
+    MaskColor: '#C0C0C0',
   },
-  events: {}
+  events: {},
 };
 
 export const sampleComboBox: Control = {
@@ -294,9 +294,9 @@ export const sampleComboBox: Control = {
     RightToLeft: false,
     HelpContextID: 0,
     WhatsThisHelpID: 0,
-    IntegralHeight: true
+    IntegralHeight: true,
   },
-  events: {}
+  events: {},
 };
 
 export const samplePictureBox: Control = {
@@ -345,9 +345,9 @@ export const samplePictureBox: Control = {
     HelpContextID: 0,
     WhatsThisHelpID: 0,
     Align: '0 - None',
-    Appearance: '1 - 3D'
+    Appearance: '1 - 3D',
   },
-  events: {}
+  events: {},
 };
 
 export const allSampleControls = [
@@ -358,7 +358,7 @@ export const allSampleControls = [
   sampleCheckBox,
   sampleOptionButton,
   sampleComboBox,
-  samplePictureBox
+  samplePictureBox,
 ];
 
 export const sampleFormProperties = {
@@ -405,5 +405,5 @@ export const sampleFormProperties = {
   WindowState: '0 - Normal',
   HelpContextID: 0,
   WhatsThisHelp: false,
-  WhatsThisButton: false
+  WhatsThisButton: false,
 };

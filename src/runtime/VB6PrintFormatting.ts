@@ -18,12 +18,12 @@ export function Spc(n: number): string {
   if (n < 0) {
     throw new Error('Invalid procedure call or argument');
   }
-  
+
   // VB6 limits Spc to output width (typically 80 or 132 columns)
   // We'll use a reasonable maximum
   const maxSpaces = 255;
   const spaces = Math.min(Math.floor(n), maxSpaces);
-  
+
   return ' '.repeat(spaces);
 }
 
@@ -37,17 +37,17 @@ export function Tab(column?: number): string {
   if (column === undefined) {
     return '\t';
   }
-  
+
   if (column < 1) {
     throw new Error('Invalid procedure call or argument');
   }
-  
+
   // In VB6, Tab() moves to the specified column position
   // We simulate this by padding with spaces
   // Note: In real VB6, this would track current print position
   const currentPosition = getCurrentPrintPosition();
   const targetColumn = Math.floor(column);
-  
+
   if (targetColumn <= currentPosition) {
     // If target is before or at current position, move to next line and then to column
     return '\n' + ' '.repeat(targetColumn - 1);
@@ -66,21 +66,21 @@ class PrintContext {
   private currentColumn: number = 1;
   private currentLine: number = 1;
   private lineWidth: number = 80; // Default VB6 print width
-  
+
   static getInstance(): PrintContext {
     if (!PrintContext.instance) {
       PrintContext.instance = new PrintContext();
     }
     return PrintContext.instance;
   }
-  
+
   /**
    * Get current column position
    */
   getCurrentColumn(): number {
     return this.currentColumn;
   }
-  
+
   /**
    * Update position after printing text
    * @param text Text that was printed
@@ -98,7 +98,7 @@ class PrintContext {
       } else {
         this.currentColumn++;
       }
-      
+
       // Wrap if exceeding line width
       if (this.currentColumn > this.lineWidth) {
         this.currentLine++;
@@ -106,7 +106,7 @@ class PrintContext {
       }
     }
   }
-  
+
   /**
    * Reset print position
    */
@@ -114,7 +114,7 @@ class PrintContext {
     this.currentColumn = 1;
     this.currentLine = 1;
   }
-  
+
   /**
    * Set print width (for Width # statement)
    * @param width Line width in characters
@@ -125,7 +125,7 @@ class PrintContext {
     }
     this.lineWidth = width || 80; // 0 means no line width limit
   }
-  
+
   /**
    * Get current line width
    */
@@ -172,16 +172,14 @@ export function Width(fileNumber: number, width: number): void {
   if (width < 0 || width > 255) {
     throw new Error('Invalid procedure call or argument');
   }
-  
+
   // Store width setting for the file
-  if (typeof fileWidths === 'undefined') {
-    (globalThis as any).fileWidths = new Map<number, number>();
+  const globalObj = globalThis as unknown as { fileWidths?: Map<number, number> };
+  if (!globalObj.fileWidths) {
+    globalObj.fileWidths = new Map<number, number>();
   }
-  
-  const fileWidths = (globalThis as any).fileWidths as Map<number, number>;
-  fileWidths.set(fileNumber, width);
-  
-  console.log(`[VB6] Width #${fileNumber}, ${width}`);
+
+  globalObj.fileWidths.set(fileNumber, width);
 }
 
 /**
@@ -190,18 +188,16 @@ export function Width(fileNumber: number, width: number): void {
  * @param device Device name (optional, "SCRN:" for screen, "LPT1:" for printer)
  * @param width Line width
  */
-export function WidthDevice(device: string = "SCRN:", width: number): void {
+export function WidthDevice(device: string = 'SCRN:', width: number): void {
   if (width < 0 || width > 255) {
     throw new Error('Invalid procedure call or argument');
   }
-  
-  if (device === "SCRN:" || device === "") {
+
+  if (device === 'SCRN:' || device === '') {
     // Set screen print width
     printContext.setLineWidth(width);
-    console.log(`[VB6] Width ${device}, ${width}`);
-  } else if (device.startsWith("LPT")) {
+  } else if (device.startsWith('LPT')) {
     // Set printer width (simulated)
-    console.log(`[VB6] Width ${device}, ${width}`);
   }
 }
 
@@ -236,13 +232,13 @@ export function Currency(value: number): number {
   const scaled = Math.round(value * 10000) / 10000;
 
   // Check for overflow
-  const maxCurrency = 9.223372036854776e+15;
-  const minCurrency = -9.223372036854776e+15;
-  
+  const maxCurrency = 9.223372036854776e15;
+  const minCurrency = -9.223372036854776e15;
+
   if (scaled > maxCurrency || scaled < minCurrency) {
     throw new Error('Overflow: Value exceeds Currency range');
   }
-  
+
   return scaled;
 }
 
@@ -262,7 +258,7 @@ export const TypeSuffixes = {
     }
     return int;
   },
-  
+
   /**
    * Long suffix (&) - 32-bit integer
    * @param value Value to convert
@@ -274,7 +270,7 @@ export const TypeSuffixes = {
     }
     return lng;
   },
-  
+
   /**
    * Single suffix (!) - Single precision float
    * @param value Value to convert
@@ -282,7 +278,7 @@ export const TypeSuffixes = {
   SingleSuffix(value: number): number {
     return Math.fround(value);
   },
-  
+
   /**
    * Double suffix (#) - Double precision float
    * @param value Value to convert
@@ -290,7 +286,7 @@ export const TypeSuffixes = {
   DoubleSuffix(value: number): number {
     return Number(value);
   },
-  
+
   /**
    * String suffix ($) - String type
    * @param value Value to convert
@@ -298,14 +294,14 @@ export const TypeSuffixes = {
   StringSuffix(value: any): string {
     return String(value);
   },
-  
+
   /**
    * Currency suffix (@) - Currency type
    * @param value Value to convert
    */
   CurrencySuffix(value: number): number {
     return Currency(value);
-  }
+  },
 };
 
 // ============================================================================
@@ -317,11 +313,9 @@ export const TypeSuffixes = {
  * Different from End Sub/End Function - this stops the entire program
  */
 export function End(): void {
-  console.log('[VB6] End statement - Program terminated');
-  
   // Clean up any resources
   resetPrintPosition();
-  
+
   // In browser environment, we can't actually exit
   // But we can stop execution by throwing a special error
   throw new Error('__VB6_END_PROGRAM__');
@@ -337,7 +331,7 @@ export function End(): void {
  */
 export function formatPrintOutput(...items: any[]): string {
   let output = '';
-  
+
   for (const item of items) {
     if (typeof item === 'string') {
       output += item;
@@ -352,7 +346,7 @@ export function formatPrintOutput(...items: any[]): string {
       updatePrintPosition(str);
     }
   }
-  
+
   return output;
 }
 
@@ -388,43 +382,40 @@ export const VB6PrintFormatting = {
   Call,
   Currency,
   End,
-  
+
   // Type suffixes
   TypeSuffixes,
-  
+
   // Print helpers
   formatPrintOutput,
   moveToNextPrintZone,
   printSemicolon,
   updatePrintPosition,
   resetPrintPosition,
-  
+
   // Print context
-  printContext
+  printContext,
 };
 
 // Make functions globally available
 if (typeof window !== 'undefined') {
-  const globalAny = window as any;
-  
+  const vb6Window = window as unknown as Record<string, unknown>;
+
   // Core print formatting functions
-  globalAny.Spc = Spc;
-  globalAny.Tab = Tab;
-  globalAny.Width = Width;
-  globalAny.Call = Call;
-  globalAny.Currency = Currency;
-  globalAny.End = End;
-  
+  vb6Window.Spc = Spc;
+  vb6Window.Tab = Tab;
+  vb6Window.Width = Width;
+  vb6Window.Call = Call;
+  vb6Window.Currency = Currency;
+  vb6Window.End = End;
+
   // Type suffix helpers (for literal notation simulation)
-  globalAny.IntegerSuffix = TypeSuffixes.IntegerSuffix;
-  globalAny.LongSuffix = TypeSuffixes.LongSuffix;
-  globalAny.SingleSuffix = TypeSuffixes.SingleSuffix;
-  globalAny.DoubleSuffix = TypeSuffixes.DoubleSuffix;
-  globalAny.StringSuffix = TypeSuffixes.StringSuffix;
-  globalAny.CurrencySuffix = TypeSuffixes.CurrencySuffix;
-  
-  console.log('[VB6] Print formatting functions loaded - Spc, Tab, Width, Call, Currency, End');
-  console.log('[VB6] Type suffix functions available for literal notation simulation');
+  vb6Window.IntegerSuffix = TypeSuffixes.IntegerSuffix;
+  vb6Window.LongSuffix = TypeSuffixes.LongSuffix;
+  vb6Window.SingleSuffix = TypeSuffixes.SingleSuffix;
+  vb6Window.DoubleSuffix = TypeSuffixes.DoubleSuffix;
+  vb6Window.StringSuffix = TypeSuffixes.StringSuffix;
+  vb6Window.CurrencySuffix = TypeSuffixes.CurrencySuffix;
 }
 
 export default VB6PrintFormatting;

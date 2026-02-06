@@ -15,6 +15,7 @@ Enhanced the Windows API simulation system to provide realistic values and prope
 ### 1. Directory Path Functions
 
 #### GetWindowsDirectory()
+
 - Returns realistic Windows directory path: `C:\Windows`
 - Properly fills buffer with directory string
 - Logs operation with emoji indicator
@@ -28,11 +29,13 @@ public GetWindowsDirectory(nBufferLength: number, lpBuffer: string[]): number {
 ```
 
 #### GetSystemDirectory()
+
 - Returns system directory: `C:\Windows\System32`
 - Properly handles buffer size validation
 - Used for finding system libraries and tools
 
 #### GetCurrentDirectory()
+
 - Returns current directory (persisted in localStorage)
 - Allows changing via SetCurrentDirectory()
 - Defaults to `C:\` if not set
@@ -40,6 +43,7 @@ public GetWindowsDirectory(nBufferLength: number, lpBuffer: string[]): number {
 ### 2. Computer and User Information
 
 #### GetComputerName()
+
 - Tries localStorage first for customized name
 - Falls back to hostname from window.location
 - Defaults to `VB6-COMPUTER` if unavailable
@@ -64,11 +68,13 @@ private getComputerNameValue(): string {
 ```
 
 #### GetUserName()
+
 - Retrieves from localStorage (`vb6_username`)
 - Defaults to `User` if not set
 - Can be set via SetUserName()
 
 #### SetComputerName() / SetUserName()
+
 - Store values in localStorage for persistence
 - Allow dynamic configuration at runtime
 - Return success/failure status
@@ -76,9 +82,11 @@ private getComputerNameValue(): string {
 ### 3. Enhanced Registry Simulation
 
 #### VB6Registry Class
+
 Complete localStorage-based registry simulation with the following features:
 
 **Methods:**
+
 - `RegOpenKeyEx()` - Open registry key
 - `RegQueryValueEx()` - Read registry value
 - `RegSetValueEx()` - Write registry value
@@ -88,12 +96,14 @@ Complete localStorage-based registry simulation with the following features:
 - `RegCloseKey()` - Close registry key handle
 
 **Features:**
+
 - Full path support (e.g., `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion`)
 - Default values initialized on first use
 - Comprehensive error handling
 - Detailed logging with emoji indicators
 
 **Example:**
+
 ```typescript
 // Read registry value
 const value = VB6Registry.RegQueryValueEx(
@@ -117,6 +127,7 @@ VB6Registry.RegSetValueEx(
 Improved MessageBox() supports all VB6 button types and icons:
 
 **Button Types:**
+
 - MB_OK - Single OK button
 - MB_OKCANCEL - OK and Cancel buttons
 - MB_YESNO - Yes and No buttons
@@ -125,12 +136,14 @@ Improved MessageBox() supports all VB6 button types and icons:
 - MB_ABORTRETRYIGNORE - Abort, Retry, and Ignore buttons
 
 **Icon Types:**
+
 - MB_ICONASTERISK/MB_ICONINFORMATION - ℹ️ Information icon
 - MB_ICONQUESTION - ❓ Question icon
 - MB_ICONEXCLAMATION/MB_ICONWARNING - ⚠️ Warning icon
 - MB_ICONHAND/MB_ICONERROR/MB_ICONSTOP - ❌ Error icon
 
 **Return Values (consistent with Windows):**
+
 - IDOK = 1
 - IDCANCEL = 2
 - IDABORT = 3
@@ -140,6 +153,7 @@ Improved MessageBox() supports all VB6 button types and icons:
 - IDNO = 7
 
 **Example:**
+
 ```typescript
 // Show information dialog with Yes/No buttons
 const result = MessageBox(hWnd, 'Save changes?', 'Confirm', MB_YESNO | MB_ICONQUESTION);
@@ -151,7 +165,9 @@ if (result === IDYES) {
 ### 5. Improved Time Functions
 
 #### GetTickCount()
+
 Returns milliseconds since system start:
+
 - Uses `performance.now()` for accuracy (preferred)
 - Falls back to `Date.now()` if performance API unavailable
 - Returns 32-bit value (masked to match Windows behavior)
@@ -169,7 +185,9 @@ public GetTickCount(): number {
 ```
 
 #### Sleep()
+
 Asynchronous sleep function:
+
 - Returns Promise for non-blocking operation
 - Properly logs start and completion
 - Compatible with async/await syntax
@@ -186,7 +204,9 @@ public async Sleep(dwMilliseconds: number): Promise<void> {
 ```
 
 #### SleepSync()
+
 Synchronous sleep function:
+
 - Blocks execution (busy wait)
 - For compatibility with legacy VB6 code
 - Recommended to use async Sleep() instead
@@ -213,6 +233,7 @@ All API calls now include descriptive emoji indicators in console logs:
 The implementation uses browser localStorage for persistence:
 
 **Keys:**
+
 - `vb6_computer_name` - Stored computer name
 - `vb6_user_name` - Stored user name
 - `vb6_current_dir` - Current working directory
@@ -224,6 +245,7 @@ All values are JSON-serialized for complex data types.
 ## Backward Compatibility
 
 All improvements maintain full backward compatibility:
+
 - Existing code calling these APIs continues to work
 - Return values match Windows API specifications
 - All functions have proper error handling
@@ -232,8 +254,14 @@ All improvements maintain full backward compatibility:
 ## Usage Examples
 
 ### Get System Information
+
 ```typescript
-import { GetWindowsDirectory, GetSystemDirectory, GetComputerName, GetUserName } from 'src/runtime/VB6WindowsAPIBridge';
+import {
+  GetWindowsDirectory,
+  GetSystemDirectory,
+  GetComputerName,
+  GetUserName,
+} from 'src/runtime/VB6WindowsAPIBridge';
 
 const windowsDir = GetWindowsDirectory(260, []);
 const systemDir = GetSystemDirectory(260, []);
@@ -245,6 +273,7 @@ console.log(`Windows: ${windowsDir}`);
 ```
 
 ### Registry Operations
+
 ```typescript
 import { VB6Registry } from 'src/runtime/VB6WindowsAPIs';
 import { WIN32_CONSTANTS } from 'src/runtime/VB6WindowsAPIs';
@@ -266,6 +295,7 @@ VB6Registry.RegSetValueEx(
 ```
 
 ### MessageBox with User Response
+
 ```typescript
 import { MessageBox } from 'src/services/VB6WindowsAPI';
 import { WindowsAPI } from 'src/services/VB6WindowsAPI';
@@ -291,6 +321,7 @@ switch (result) {
 ```
 
 ### Async Sleep
+
 ```typescript
 import { Sleep } from 'src/runtime/VB6WindowsAPIs';
 

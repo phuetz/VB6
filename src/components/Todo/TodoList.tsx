@@ -11,7 +11,7 @@ interface TodoListProps {
 export const TodoList: React.FC<TodoListProps> = ({ visible, onClose }) => {
   // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
   const { todoItems, addTodo, toggleTodo, deleteTodo } = useVB6Store(
-    (state) => ({
+    state => ({
       todoItems: state.todoItems,
       addTodo: state.addTodo,
       toggleTodo: state.toggleTodo,

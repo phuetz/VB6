@@ -20,21 +20,21 @@ export class PerformanceMonitor {
 
   startMeasure(name: string): void {
     if (process.env.NODE_ENV === 'development') {
-      console.log(`⏱️ [PERF] Starting measure: ${name}`);
+      // noop
     }
     this.startTimes.set(name, performance.now());
 
     // Track render loops
     const tracker = this.renderLoopTrackers.get(name) || { count: 0, lastTime: 0 };
     const now = Date.now();
-    
+
     if (now - tracker.lastTime < this.RENDER_LOOP_TIME_WINDOW) {
       tracker.count++;
     } else {
       tracker.count = 1;
       tracker.lastTime = now;
     }
-    
+
     this.renderLoopTrackers.set(name, tracker);
 
     // Create performance mark if available
@@ -56,7 +56,7 @@ export class PerformanceMonitor {
 
     const duration = performance.now() - startTime;
     if (process.env.NODE_ENV === 'development') {
-      console.log(`⏱️ [PERF] ${name}: ${duration.toFixed(2)}ms`);
+      // noop
     }
 
     // Store metric
@@ -89,21 +89,21 @@ export class PerformanceMonitor {
   getAverageTime(name: string): number {
     const times = this.metrics.get(name);
     if (!times || times.length === 0) return 0;
-    
+
     const sum = times.reduce((a, b) => a + b, 0);
     return sum / times.length;
   }
 
   logSummary(): void {
     if (process.env.NODE_ENV === 'development') {
-      console.log('📊 [PERF] Performance Summary:');
+      // noop
     }
     this.metrics.forEach((times, name) => {
       const avg = this.getAverageTime(name);
       const min = Math.min(...times);
       const max = Math.max(...times);
       if (process.env.NODE_ENV === 'development') {
-        console.log(`  ${name}: avg=${avg.toFixed(2)}ms, min=${min.toFixed(2)}ms, max=${max.toFixed(2)}ms`);
+        // noop
       }
     });
   }
@@ -148,7 +148,7 @@ export class PerformanceMonitor {
     this.startTimes.clear();
     this.renderLoopTrackers.clear();
     if (process.env.NODE_ENV === 'development') {
-      console.log('🔄 Performance metrics reset');
+      // noop
     }
   }
 }

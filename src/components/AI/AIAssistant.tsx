@@ -44,7 +44,7 @@ export const AIAssistant: React.FC = () => {
   const [activeMode, setActiveMode] = useState<'chat' | 'inline' | 'auto'>('chat');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  
+
   const { currentCode, selectedControl, formProperties, controls } = useVB6Store();
 
   // AI capabilities
@@ -62,7 +62,8 @@ export const AIAssistant: React.FC = () => {
     if (messages.length === 0) {
       addMessage({
         role: 'assistant',
-        content: 'Hello! I\'m your VB6 AI Assistant. I can help you generate code, fix errors, optimize performance, and more. How can I assist you today?',
+        content:
+          "Hello! I'm your VB6 AI Assistant. I can help you generate code, fix errors, optimize performance, and more. How can I assist you today?",
       });
     }
   }, [messages.length]);
@@ -78,7 +79,7 @@ export const AIAssistant: React.FC = () => {
       });
       return;
     }
-    
+
     const codeAnalysis = analyzeVB6Code(currentCode);
     setContext({
       currentFile: 'Form1.frm',
@@ -123,7 +124,10 @@ export const AIAssistant: React.FC = () => {
     }
   };
 
-  const processAIRequest = async (request: string, context: AIContext | null): Promise<Omit<AIMessage, 'id' | 'timestamp'>> => {
+  const processAIRequest = async (
+    request: string,
+    context: AIContext | null
+  ): Promise<Omit<AIMessage, 'id' | 'timestamp'>> => {
     // Simulate AI processing
     await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
 
@@ -145,7 +149,10 @@ export const AIAssistant: React.FC = () => {
     }
   };
 
-  const generateCode = (request: string, context: AIContext | null): Omit<AIMessage, 'id' | 'timestamp'> => {
+  const generateCode = (
+    request: string,
+    context: AIContext | null
+  ): Omit<AIMessage, 'id' | 'timestamp'> => {
     const suggestions: AISuggestion[] = [];
 
     // Generate based on request patterns
@@ -239,7 +246,10 @@ End Function`,
     };
   };
 
-  const fixErrors = (request: string, context: AIContext | null): Omit<AIMessage, 'id' | 'timestamp'> => {
+  const fixErrors = (
+    request: string,
+    context: AIContext | null
+  ): Omit<AIMessage, 'id' | 'timestamp'> => {
     const suggestions: AISuggestion[] = [];
 
     if (context?.errors && context.errors.length > 0) {
@@ -266,19 +276,23 @@ End Function`,
 
     return {
       role: 'assistant',
-      content: context?.errors?.length 
+      content: context?.errors?.length
         ? `I found ${context.errors.length} error(s) in your code. Here are my suggested fixes:`
         : 'No errors detected in the current code.',
       suggestions,
     };
   };
 
-  const optimizeCode = (request: string, context: AIContext | null): Omit<AIMessage, 'id' | 'timestamp'> => {
+  const optimizeCode = (
+    request: string,
+    context: AIContext | null
+  ): Omit<AIMessage, 'id' | 'timestamp'> => {
     const suggestions: AISuggestion[] = [
       {
         type: 'optimization',
         title: 'Use StringBuilder for string concatenation',
-        description: 'Replace multiple string concatenations with StringBuilder for better performance',
+        description:
+          'Replace multiple string concatenations with StringBuilder for better performance',
         code: `' Instead of:
 Dim result As String
 For i = 1 To 1000
@@ -294,7 +308,7 @@ For i = 1 To 1000
     sb.AppendLine
 Next
 result = sb.ToString()`,
-        confidence: 0.90,
+        confidence: 0.9,
       },
       {
         type: 'optimization',
@@ -322,7 +336,10 @@ Next`,
     };
   };
 
-  const explainCode = (request: string, context: AIContext | null): Omit<AIMessage, 'id' | 'timestamp'> => {
+  const explainCode = (
+    request: string,
+    context: AIContext | null
+  ): Omit<AIMessage, 'id' | 'timestamp'> => {
     return {
       role: 'assistant',
       content: `This code performs the following operations:
@@ -339,7 +356,10 @@ Key concepts used:
     };
   };
 
-  const convertCode = (request: string, context: AIContext | null): Omit<AIMessage, 'id' | 'timestamp'> => {
+  const convertCode = (
+    request: string,
+    context: AIContext | null
+  ): Omit<AIMessage, 'id' | 'timestamp'> => {
     const suggestions: AISuggestion[] = [
       {
         type: 'refactor',
@@ -380,7 +400,10 @@ class Form1 {
     };
   };
 
-  const generalResponse = (request: string, context: AIContext | null): Omit<AIMessage, 'id' | 'timestamp'> => {
+  const generalResponse = (
+    request: string,
+    context: AIContext | null
+  ): Omit<AIMessage, 'id' | 'timestamp'> => {
     return {
       role: 'assistant',
       content: `I understand you're asking about "${request}". I can help with:
@@ -400,7 +423,8 @@ Please be more specific about what you'd like me to help with.`,
     if (name.startsWith('str') || name.includes('name') || name.includes('text')) return 'String';
     if (name.startsWith('int') || name.startsWith('i') || name.includes('count')) return 'Integer';
     if (name.startsWith('lng') || name.startsWith('l')) return 'Long';
-    if (name.startsWith('dbl') || name.includes('amount') || name.includes('price')) return 'Double';
+    if (name.startsWith('dbl') || name.includes('amount') || name.includes('price'))
+      return 'Double';
     if (name.startsWith('bool') || name.startsWith('b') || name.startsWith('is')) return 'Boolean';
     if (name.startsWith('dt') || name.includes('date')) return 'Date';
     if (name.startsWith('obj') || name.startsWith('o')) return 'Object';
@@ -467,7 +491,7 @@ Please be more specific about what you'd like me to help with.`,
                   ✕
                 </button>
               </div>
-              
+
               {/* Mode selector */}
               <div className="flex gap-2 mt-3">
                 {(['chat', 'inline', 'auto'] as const).map(mode => (
@@ -507,28 +531,26 @@ Please be more specific about what you'd like me to help with.`,
               {messages.map(message => (
                 <div
                   key={message.id}
-                  className={`flex ${
-                    message.role === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
                     className={`max-w-[80%] rounded-2xl p-3 ${
                       message.role === 'user'
                         ? 'bg-purple-600 text-white'
                         : message.role === 'assistant'
-                        ? 'bg-gray-100 dark:bg-gray-800'
-                        : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
+                          ? 'bg-gray-100 dark:bg-gray-800'
+                          : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
                     }`}
                   >
                     <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                    
+
                     {/* Code snippet */}
                     {message.codeSnippet && (
                       <pre className="mt-2 p-2 bg-black/10 dark:bg-black/30 rounded-lg overflow-x-auto">
                         <code className="text-xs">{message.codeSnippet}</code>
                       </pre>
                     )}
-                    
+
                     {/* Suggestions */}
                     {message.suggestions && message.suggestions.length > 0 && (
                       <div className="mt-3 space-y-2">
@@ -548,7 +570,7 @@ Please be more specific about what you'd like me to help with.`,
                                 {Math.round(suggestion.confidence * 100)}%
                               </span>
                             </div>
-                            
+
                             {suggestion.code && (
                               <div className="relative">
                                 <pre className="text-xs bg-gray-50 dark:bg-gray-800 p-2 rounded overflow-x-auto">
@@ -569,7 +591,7 @@ Please be more specific about what you'd like me to help with.`,
                   </div>
                 </div>
               ))}
-              
+
               {isThinking && (
                 <div className="flex justify-start">
                   <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl p-3">
@@ -581,7 +603,7 @@ Please be more specific about what you'd like me to help with.`,
                   </div>
                 </div>
               )}
-              
+
               <div ref={messagesEndRef} />
             </div>
 
@@ -591,7 +613,7 @@ Please be more specific about what you'd like me to help with.`,
                 <textarea
                   ref={inputRef}
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={e => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Ask me anything about VB6..."
                   className="flex-1 p-2 border dark:border-gray-700 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-600 dark:bg-gray-800"

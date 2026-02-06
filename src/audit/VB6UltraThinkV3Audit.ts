@@ -1,9 +1,9 @@
 /**
  * VB6 Ultra Think V3 - Audit Forensique Compatibilité 95% → 98%+
- * 
+ *
  * Analyse ultra-détaillée des gaps critiques restants pour atteindre 98%+ compatibilité VB6.
  * Identification forensique basée sur analyse de milliers d'applications VB6 réelles.
- * 
+ *
  * Objectif: Identifier et prioriser les 3% manquants les plus impactants
  */
 
@@ -39,7 +39,7 @@ export interface VB6CompatibilityAudit {
 
 export class VB6UltraThinkV3Auditor {
   private compatibilityMatrix: VB6CompatibilityGap[] = [];
-  
+
   constructor() {
     this.initializeCompatibilityMatrix();
   }
@@ -63,11 +63,11 @@ export class VB6UltraThinkV3Auditor {
         estimatedEffort: 120,
         dependencies: ['COM Bridge', 'DOM Integration', 'HTML/CSS Engine'],
         currentStatus: 'NOT_IMPLEMENTED',
-        alternativesAvailable: false
+        alternativesAvailable: false,
       },
-      
+
       {
-        category: 'ActiveX Controls', 
+        category: 'ActiveX Controls',
         feature: 'MSFlexGrid Advanced (Hierarchical, Sorting, Filtering)',
         criticality: 'CRITICAL',
         impactScore: 85,
@@ -77,7 +77,7 @@ export class VB6UltraThinkV3Auditor {
         estimatedEffort: 80,
         dependencies: ['Advanced Data Binding', 'Sorting Algorithms', 'Virtual Scrolling'],
         currentStatus: 'PARTIAL',
-        alternativesAvailable: true
+        alternativesAvailable: true,
       },
 
       {
@@ -91,7 +91,7 @@ export class VB6UltraThinkV3Auditor {
         estimatedEffort: 60,
         dependencies: ['RTF Parser', 'OLE Integration', 'Rich Formatting Engine'],
         currentStatus: 'PARTIAL',
-        alternativesAvailable: true
+        alternativesAvailable: true,
       },
 
       {
@@ -105,7 +105,7 @@ export class VB6UltraThinkV3Auditor {
         estimatedEffort: 40,
         dependencies: ['HTML5 Media APIs', 'Codec Support', 'DirectShow Bridge'],
         currentStatus: 'NOT_IMPLEMENTED',
-        alternativesAvailable: true
+        alternativesAvailable: true,
       },
 
       // ============================================================================
@@ -120,9 +120,14 @@ export class VB6UltraThinkV3Auditor {
         usageFrequency: 70, // 70% des apps business
         blockerFor: ['Database Applications', 'ERP Systems', 'CRM Software', 'Accounting Software'],
         estimatedEffort: 100,
-        dependencies: ['Database Drivers', 'SQL Engine', 'Cursor Management', 'Transaction Support'],
+        dependencies: [
+          'Database Drivers',
+          'SQL Engine',
+          'Cursor Management',
+          'Transaction Support',
+        ],
         currentStatus: 'PARTIAL',
-        alternativesAvailable: false
+        alternativesAvailable: false,
       },
 
       {
@@ -136,7 +141,7 @@ export class VB6UltraThinkV3Auditor {
         estimatedEffort: 90,
         dependencies: ['Jet Database Engine', 'Access File Format', 'SQL Compatibility'],
         currentStatus: 'NOT_IMPLEMENTED',
-        alternativesAvailable: true
+        alternativesAvailable: true,
       },
 
       {
@@ -150,7 +155,7 @@ export class VB6UltraThinkV3Auditor {
         estimatedEffort: 50,
         dependencies: ['Connection Management', 'Command Objects', 'Data Binding'],
         currentStatus: 'PARTIAL',
-        alternativesAvailable: true
+        alternativesAvailable: true,
       },
 
       // ============================================================================
@@ -167,7 +172,7 @@ export class VB6UltraThinkV3Auditor {
         estimatedEffort: 80,
         dependencies: ['COM Type Information', 'Late Binding Engine', 'Dispatch Interface'],
         currentStatus: 'NOT_IMPLEMENTED',
-        alternativesAvailable: false
+        alternativesAvailable: false,
       },
 
       {
@@ -177,11 +182,15 @@ export class VB6UltraThinkV3Auditor {
         impactScore: 70,
         implementationComplexity: 'COMPLEX',
         usageFrequency: 30,
-        blockerFor: ['Event-Driven Integration', 'COM Server Communication', 'ActiveX Control Events'],
+        blockerFor: [
+          'Event-Driven Integration',
+          'COM Server Communication',
+          'ActiveX Control Events',
+        ],
         estimatedEffort: 40,
         dependencies: ['Event Sink Implementation', 'Connection Points', 'COM Event Handling'],
         currentStatus: 'PARTIAL',
-        alternativesAvailable: false
+        alternativesAvailable: false,
       },
 
       {
@@ -195,7 +204,7 @@ export class VB6UltraThinkV3Auditor {
         estimatedEffort: 120,
         dependencies: ['OCX Loading', 'ActiveX Container', 'Property Pages', 'Type Libraries'],
         currentStatus: 'NOT_IMPLEMENTED',
-        alternativesAvailable: false
+        alternativesAvailable: false,
       },
 
       // ============================================================================
@@ -212,7 +221,7 @@ export class VB6UltraThinkV3Auditor {
         estimatedEffort: 100,
         dependencies: ['Report Format Parser', 'Data Binding', 'Print Engine', 'Export Formats'],
         currentStatus: 'PARTIAL',
-        alternativesAvailable: true
+        alternativesAvailable: true,
       },
 
       {
@@ -226,7 +235,7 @@ export class VB6UltraThinkV3Auditor {
         estimatedEffort: 60,
         dependencies: ['Report Designer UI', 'Data Sources', 'Layout Engine'],
         currentStatus: 'NOT_IMPLEMENTED',
-        alternativesAvailable: true
+        alternativesAvailable: true,
       },
 
       // ============================================================================
@@ -243,7 +252,7 @@ export class VB6UltraThinkV3Auditor {
         estimatedEffort: 25,
         dependencies: ['Web Storage APIs', 'Local Storage Extensions', 'Security Models'],
         currentStatus: 'PARTIAL',
-        alternativesAvailable: true
+        alternativesAvailable: true,
       },
 
       {
@@ -257,7 +266,7 @@ export class VB6UltraThinkV3Auditor {
         estimatedEffort: 50,
         dependencies: ['System Information APIs', 'Web Workers', 'Performance Observer'],
         currentStatus: 'NOT_IMPLEMENTED',
-        alternativesAvailable: true
+        alternativesAvailable: true,
       },
 
       // ============================================================================
@@ -274,7 +283,7 @@ export class VB6UltraThinkV3Auditor {
         estimatedEffort: 35,
         dependencies: ['Type System Extension', 'Memory Layout', 'Serialization'],
         currentStatus: 'PARTIAL',
-        alternativesAvailable: false
+        alternativesAvailable: false,
       },
 
       {
@@ -288,7 +297,7 @@ export class VB6UltraThinkV3Auditor {
         estimatedEffort: 20,
         dependencies: ['Enum Parser', 'Type Checking', 'IntelliSense'],
         currentStatus: 'PARTIAL',
-        alternativesAvailable: true
+        alternativesAvailable: true,
       },
 
       {
@@ -302,7 +311,7 @@ export class VB6UltraThinkV3Auditor {
         estimatedEffort: 40,
         dependencies: ['Interface Parser', 'Implementation Checking', 'Polymorphism'],
         currentStatus: 'PARTIAL',
-        alternativesAvailable: false
+        alternativesAvailable: false,
       },
 
       // ============================================================================
@@ -319,7 +328,7 @@ export class VB6UltraThinkV3Auditor {
         estimatedEffort: 60,
         dependencies: ['Build System', 'Dependency Resolution', 'Installation Scripts'],
         currentStatus: 'NOT_IMPLEMENTED',
-        alternativesAvailable: true
+        alternativesAvailable: true,
       },
 
       // ============================================================================
@@ -336,7 +345,7 @@ export class VB6UltraThinkV3Auditor {
         estimatedEffort: 50,
         dependencies: ['Plugin Architecture', 'IDE Integration', 'API Surface'],
         currentStatus: 'NOT_IMPLEMENTED',
-        alternativesAvailable: true
+        alternativesAvailable: true,
       },
 
       {
@@ -350,8 +359,8 @@ export class VB6UltraThinkV3Auditor {
         estimatedEffort: 30,
         dependencies: ['Component Catalog', 'Template System', 'Version Management'],
         currentStatus: 'NOT_IMPLEMENTED',
-        alternativesAvailable: true
-      }
+        alternativesAvailable: true,
+      },
     ];
   }
 
@@ -361,38 +370,43 @@ export class VB6UltraThinkV3Auditor {
   public performComprehensiveAudit(): VB6CompatibilityAudit {
     const criticalGaps = this.compatibilityMatrix.filter(gap => gap.criticality === 'CRITICAL');
     const highPriorityGaps = this.compatibilityMatrix.filter(gap => gap.criticality === 'HIGH');
-    
+
     const totalEffort = this.compatibilityMatrix.reduce((sum, gap) => sum + gap.estimatedEffort, 0);
     const criticalEffort = criticalGaps.reduce((sum, gap) => sum + gap.estimatedEffort, 0);
-    
+
     // Calculer impact réel sur compatibilité
-    const currentImplemented = this.compatibilityMatrix.filter(gap => 
-      gap.currentStatus === 'IMPLEMENTED'
+    const currentImplemented = this.compatibilityMatrix.filter(
+      gap => gap.currentStatus === 'IMPLEMENTED'
     );
-    
-    const partialImplemented = this.compatibilityMatrix.filter(gap => 
-      gap.currentStatus === 'PARTIAL'
+
+    const partialImplemented = this.compatibilityMatrix.filter(
+      gap => gap.currentStatus === 'PARTIAL'
     );
 
     // Score de compatibilité pondéré par usage et impact
-    const totalWeightedScore = this.compatibilityMatrix.reduce((sum, gap) => 
-      sum + (gap.impactScore * gap.usageFrequency / 100), 0
+    const totalWeightedScore = this.compatibilityMatrix.reduce(
+      (sum, gap) => sum + (gap.impactScore * gap.usageFrequency) / 100,
+      0
     );
-    
-    const implementedWeightedScore = currentImplemented.reduce((sum, gap) => 
-      sum + (gap.impactScore * gap.usageFrequency / 100), 0
-    ) + (partialImplemented.reduce((sum, gap) => 
-      sum + (gap.impactScore * gap.usageFrequency / 100 * 0.5), 0
-    ));
+
+    const implementedWeightedScore =
+      currentImplemented.reduce(
+        (sum, gap) => sum + (gap.impactScore * gap.usageFrequency) / 100,
+        0
+      ) +
+      partialImplemented.reduce(
+        (sum, gap) => sum + ((gap.impactScore * gap.usageFrequency) / 100) * 0.5,
+        0
+      );
 
     const currentCompatibility = Math.round((implementedWeightedScore / totalWeightedScore) * 100);
-    
+
     // Identification des types d'applications bloquées
     const blockedApplicationTypes = new Set<string>();
     criticalGaps.forEach(gap => {
       gap.blockerFor.forEach(appType => blockedApplicationTypes.add(appType));
     });
-    
+
     const recommendations = this.generateRecommendations(criticalGaps, highPriorityGaps);
 
     return {
@@ -404,7 +418,7 @@ export class VB6UltraThinkV3Auditor {
       estimatedEffort: totalEffort,
       gaps: this.compatibilityMatrix,
       recommendations,
-      blockedApplicationTypes: Array.from(blockedApplicationTypes)
+      blockedApplicationTypes: Array.from(blockedApplicationTypes),
     };
   }
 
@@ -412,23 +426,24 @@ export class VB6UltraThinkV3Auditor {
    * Générer recommandations stratégiques
    */
   private generateRecommendations(
-    criticalGaps: VB6CompatibilityGap[], 
+    criticalGaps: VB6CompatibilityGap[],
     highPriorityGaps: VB6CompatibilityGap[]
   ): string[] {
     const recommendations: string[] = [];
-    
+
     // Analyse de ROI (Return on Investment)
-    const sortedByROI = criticalGaps.sort((a, b) => 
-      (b.impactScore * b.usageFrequency / b.estimatedEffort) - 
-      (a.impactScore * a.usageFrequency / a.estimatedEffort)
+    const sortedByROI = criticalGaps.sort(
+      (a, b) =>
+        (b.impactScore * b.usageFrequency) / b.estimatedEffort -
+        (a.impactScore * a.usageFrequency) / a.estimatedEffort
     );
-    
+
     if (sortedByROI.length > 0) {
       recommendations.push(
         `🎯 PRIORITÉ ABSOLUE: Implémenter "${sortedByROI[0].feature}" - ROI maximum (Impact: ${sortedByROI[0].impactScore}, Usage: ${sortedByROI[0].usageFrequency}%, Effort: ${sortedByROI[0].estimatedEffort}h)`
       );
     }
-    
+
     // Analyse des dépendances
     const dependencyMap = new Map<string, number>();
     this.compatibilityMatrix.forEach(gap => {
@@ -436,31 +451,30 @@ export class VB6UltraThinkV3Auditor {
         dependencyMap.set(dep, (dependencyMap.get(dep) || 0) + 1);
       });
     });
-    
+
     const topDependencies = Array.from(dependencyMap.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3);
-    
+
     recommendations.push(
       `🏗️ FONDATIONS: Développer d'abord les dépendances critiques: ${topDependencies.map(d => d[0]).join(', ')}`
     );
-    
+
     // Analyse par catégorie
     const categoryImpact = new Map<string, number>();
     criticalGaps.forEach(gap => {
       const current = categoryImpact.get(gap.category) || 0;
-      categoryImpact.set(gap.category, current + gap.impactScore * gap.usageFrequency / 100);
+      categoryImpact.set(gap.category, current + (gap.impactScore * gap.usageFrequency) / 100);
     });
-    
-    const topCategory = Array.from(categoryImpact.entries())
-      .sort((a, b) => b[1] - a[1])[0];
-    
+
+    const topCategory = Array.from(categoryImpact.entries()).sort((a, b) => b[1] - a[1])[0];
+
     if (topCategory) {
       recommendations.push(
         `📂 CATÉGORIE PRIORITAIRE: Focus sur "${topCategory[0]}" qui représente le plus grand impact (Score: ${Math.round(topCategory[1])})`
       );
     }
-    
+
     // Recommandations spécifiques
     const webBrowserGap = criticalGaps.find(gap => gap.feature.includes('WebBrowser'));
     if (webBrowserGap) {
@@ -468,18 +482,18 @@ export class VB6UltraThinkV3Auditor {
         `🌐 CRITICAL BLOCKER: WebBrowser Control bloque 45% des apps business - considérer iframe + postMessage comme alternative rapide`
       );
     }
-    
+
     const adoGap = criticalGaps.find(gap => gap.feature.includes('ADO Recordset'));
     if (adoGap) {
       recommendations.push(
         `💾 DATA ACCESS CRITICAL: ADO Recordset bloque 70% des apps business - implémenter avec IndexedDB/WebSQL bridge`
       );
     }
-    
+
     recommendations.push(
       `⚡ STRATÉGIE RAPIDE: Implémenter alternatives web natives pour gaps EXTREME complexity avant solutions natives complètes`
     );
-    
+
     recommendations.push(
       `🎯 CIBLE 98%+: Focus sur 5-6 gaps CRITICAL (${criticalEffort}h effort) pour maximum impact compatibilité`
     );
@@ -490,59 +504,62 @@ export class VB6UltraThinkV3Auditor {
   /**
    * Générer roadmap priorisée
    */
-  public generatePrioritizedRoadmap(): { 
-    phase: string; 
-    gaps: VB6CompatibilityGap[]; 
-    effort: number; 
-    compatibilityGain: number; 
+  public generatePrioritizedRoadmap(): {
+    phase: string;
+    gaps: VB6CompatibilityGap[];
+    effort: number;
+    compatibilityGain: number;
     description: string;
   }[] {
     const roadmap = [];
-    
+
     // Phase 1: Quick wins (ROI élevé, complexité modérée)
-    const quickWins = this.compatibilityMatrix.filter(gap => 
-      gap.criticality === 'HIGH' && 
-      gap.implementationComplexity === 'MODERATE' &&
-      gap.currentStatus !== 'IMPLEMENTED'
+    const quickWins = this.compatibilityMatrix.filter(
+      gap =>
+        gap.criticality === 'HIGH' &&
+        gap.implementationComplexity === 'MODERATE' &&
+        gap.currentStatus !== 'IMPLEMENTED'
     );
-    
+
     roadmap.push({
       phase: 'Phase 1: Quick Wins',
       gaps: quickWins,
       effort: quickWins.reduce((sum, gap) => sum + gap.estimatedEffort, 0),
       compatibilityGain: 2.5,
-      description: 'Features à ROI élevé et complexité modérée pour gains rapides'
+      description: 'Features à ROI élevé et complexité modérée pour gains rapides',
     });
-    
+
     // Phase 2: Critical blockers
-    const criticalBlockers = this.compatibilityMatrix.filter(gap =>
-      gap.criticality === 'CRITICAL' &&
-      gap.usageFrequency > 40 &&
-      gap.currentStatus !== 'IMPLEMENTED'
+    const criticalBlockers = this.compatibilityMatrix.filter(
+      gap =>
+        gap.criticality === 'CRITICAL' &&
+        gap.usageFrequency > 40 &&
+        gap.currentStatus !== 'IMPLEMENTED'
     );
-    
+
     roadmap.push({
       phase: 'Phase 2: Critical Blockers',
       gaps: criticalBlockers,
       effort: criticalBlockers.reduce((sum, gap) => sum + gap.estimatedEffort, 0),
       compatibilityGain: 4.0,
-      description: 'Fonctionnalités critiques bloquant les applications business majeures'
+      description: 'Fonctionnalités critiques bloquant les applications business majeures',
     });
-    
+
     // Phase 3: Remaining high-impact
-    const remainingHighImpact = this.compatibilityMatrix.filter(gap =>
-      (gap.criticality === 'HIGH' || gap.impactScore > 60) &&
-      !quickWins.includes(gap) &&
-      !criticalBlockers.includes(gap) &&
-      gap.currentStatus !== 'IMPLEMENTED'
+    const remainingHighImpact = this.compatibilityMatrix.filter(
+      gap =>
+        (gap.criticality === 'HIGH' || gap.impactScore > 60) &&
+        !quickWins.includes(gap) &&
+        !criticalBlockers.includes(gap) &&
+        gap.currentStatus !== 'IMPLEMENTED'
     );
-    
+
     roadmap.push({
       phase: 'Phase 3: High Impact Features',
       gaps: remainingHighImpact,
       effort: remainingHighImpact.reduce((sum, gap) => sum + gap.estimatedEffort, 0),
       compatibilityGain: 1.5,
-      description: 'Fonctionnalités à impact élevé pour compatibilité maximale'
+      description: 'Fonctionnalités à impact élevé pour compatibilité maximale',
     });
 
     return roadmap;
@@ -554,7 +571,7 @@ export class VB6UltraThinkV3Auditor {
   public generateDetailedReport(): string {
     const audit = this.performComprehensiveAudit();
     const roadmap = this.generatePrioritizedRoadmap();
-    
+
     return `
 # VB6 ULTRA THINK V3 - AUDIT FORENSIQUE COMPATIBILITÉ
 
@@ -573,23 +590,35 @@ export class VB6UltraThinkV3Auditor {
 ${audit.blockedApplicationTypes.map(type => `- ${type}`).join('\n')}
 
 ## 🎯 GAPS CRITIQUES (Impact Max)
-${audit.gaps.filter(gap => gap.criticality === 'CRITICAL').map(gap => `
+${audit.gaps
+  .filter(gap => gap.criticality === 'CRITICAL')
+  .map(
+    gap => `
 ### ${gap.feature}
 - **Impact**: ${gap.impactScore}/100 | **Usage**: ${gap.usageFrequency}%
 - **Complexité**: ${gap.implementationComplexity} | **Effort**: ${gap.estimatedEffort}h
 - **Bloque**: ${gap.blockerFor.join(', ')}
 - **Statut**: ${gap.currentStatus}
-`).join('')}
+`
+  )
+  .join('')}
 
 ## 📈 ROADMAP PRIORISÉE
-${roadmap.map(phase => `
+${roadmap
+  .map(
+    phase => `
 ### ${phase.phase}
 - **Effort**: ${phase.effort}h
 - **Gain Compatibilité**: +${phase.compatibilityGain}%
 - **Description**: ${phase.description}
 - **Features**: ${phase.gaps.length} fonctionnalités
-${phase.gaps.slice(0, 3).map(gap => `  - ${gap.feature} (${gap.estimatedEffort}h)`).join('\n')}
-`).join('')}
+${phase.gaps
+  .slice(0, 3)
+  .map(gap => `  - ${gap.feature} (${gap.estimatedEffort}h)`)
+  .join('\n')}
+`
+  )
+  .join('')}
 
 ## 💡 RECOMMANDATIONS STRATÉGIQUES
 ${audit.recommendations.map(rec => `- ${rec}`).join('\n')}

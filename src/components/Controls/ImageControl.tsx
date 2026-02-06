@@ -7,10 +7,10 @@ interface ImageControlProps {
   onPropertyChange?: (property: string, value: any) => void;
 }
 
-export const ImageControl: React.FC<ImageControlProps> = ({ 
-  control, 
+export const ImageControl: React.FC<ImageControlProps> = ({
+  control,
   isDesignMode = false,
-  onPropertyChange 
+  onPropertyChange,
 }) => {
   // VB6 Image properties
   const {
@@ -48,17 +48,17 @@ export const ImageControl: React.FC<ImageControlProps> = ({
   // Handle different image sources (file path, URL, base64)
   const getImageSrc = (): string => {
     if (!picture) return '';
-    
+
     // Check if it's a base64 image
     if (picture.startsWith('data:image')) {
       return picture;
     }
-    
+
     // Check if it's a URL
     if (picture.startsWith('http://') || picture.startsWith('https://')) {
       return picture;
     }
-    
+
     // Otherwise treat as a relative path
     // In a real implementation, this would need to resolve VB6 project paths
     return `/images/${picture}`;
@@ -67,7 +67,7 @@ export const ImageControl: React.FC<ImageControlProps> = ({
   // Get border style
   const getBorderStyle = () => {
     if (borderStyle === 0) return {};
-    
+
     return {
       border: appearance === 0 ? '1px solid #000000' : '1px solid #808080',
       boxShadow: appearance === 1 ? 'inset -1px -1px #ffffff, inset 1px 1px #808080' : undefined,
@@ -106,7 +106,7 @@ export const ImageControl: React.FC<ImageControlProps> = ({
         alignItems: 'center',
         justifyContent: 'center',
         opacity: enabled ? 1 : 0.5,
-        cursor: dragMode === 1 ? 'move' : (enabled ? 'pointer' : 'default'),
+        cursor: dragMode === 1 ? 'move' : enabled ? 'pointer' : 'default',
         ...getBorderStyle(),
       }}
       data-control-type="Image"
@@ -141,7 +141,7 @@ export const ImageControl: React.FC<ImageControlProps> = ({
           {imageError ? 'Error loading image' : 'No image'}
         </div>
       )}
-      
+
       {/* Design mode selection indicator */}
       {isDesignMode && (
         <div
@@ -181,7 +181,6 @@ export const ImageControlMethods = {
   // Drag method
   drag: (control: Control) => {
     // Initiate OLE drag operation
-    console.log(`Initiating drag for ${control.name}`);
   },
 };
 

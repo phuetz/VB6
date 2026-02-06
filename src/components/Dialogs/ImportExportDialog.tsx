@@ -1,5 +1,16 @@
 import React, { useState, useRef } from 'react';
-import { X, Upload, Download, FileText, Code, Eye, AlertCircle, CheckCircle, Copy, Folder } from 'lucide-react';
+import {
+  X,
+  Upload,
+  Download,
+  FileText,
+  Code,
+  Eye,
+  AlertCircle,
+  CheckCircle,
+  Copy,
+  Folder,
+} from 'lucide-react';
 import { vb6FormImportExport, VB6FormDefinition } from '../../services/VB6FormImportExport';
 import { useVB6Store } from '../../stores/vb6Store';
 import { VB6Control } from '../../types/vb6';
@@ -13,7 +24,7 @@ interface ImportExportDialogProps {
 export const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
   visible,
   onClose,
-  mode
+  mode,
 }) => {
   const [activeTab, setActiveTab] = useState<'file' | 'text'>('file');
   const [importText, setImportText] = useState('');
@@ -58,7 +69,7 @@ export const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
 
     try {
       let formDef: VB6FormDefinition;
-      
+
       // Try to detect if it's JSON or VB6 format
       if (importText.trim().startsWith('{')) {
         // JSON format
@@ -67,7 +78,7 @@ export const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
         // VB6 .frm format
         formDef = vb6FormImportExport.parseFormFile(importText);
       }
-      
+
       setPreviewForm(formDef);
       setSuccess(`Successfully parsed ${formDef.name} with ${formDef.controls.length} controls`);
     } catch (err: any) {
@@ -83,7 +94,7 @@ export const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
     try {
       // Convert form definition to VB6 controls
       const newControls = vb6FormImportExport.convertFormDefinitionToControls(previewForm);
-      
+
       // Update the store
       setControls(newControls);
       updateFormProperties({
@@ -91,11 +102,11 @@ export const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
         Caption: previewForm.caption,
         Width: previewForm.width,
         Height: previewForm.height,
-        ...previewForm.properties
+        ...previewForm.properties,
       });
 
       setSuccess(`Imported ${previewForm.name} with ${newControls.length} controls`);
-      
+
       // Close after a short delay
       setTimeout(() => {
         onClose();
@@ -282,7 +293,7 @@ export const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                       </label>
                       <textarea
                         value={importText}
-                        onChange={(e) => setImportText(e.target.value)}
+                        onChange={e => setImportText(e.target.value)}
                         placeholder="Paste your VB6 .frm file content or JSON export here..."
                         className="w-full h-64 p-3 border border-gray-300 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
@@ -305,10 +316,18 @@ export const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                       <h4 className="font-semibold text-gray-800">Form Preview</h4>
                     </div>
                     <div className="space-y-2 text-sm">
-                      <div><strong>Name:</strong> {previewForm.name}</div>
-                      <div><strong>Caption:</strong> {previewForm.caption}</div>
-                      <div><strong>Size:</strong> {previewForm.width} × {previewForm.height}</div>
-                      <div><strong>Controls:</strong> {previewForm.controls.length}</div>
+                      <div>
+                        <strong>Name:</strong> {previewForm.name}
+                      </div>
+                      <div>
+                        <strong>Caption:</strong> {previewForm.caption}
+                      </div>
+                      <div>
+                        <strong>Size:</strong> {previewForm.width} × {previewForm.height}
+                      </div>
+                      <div>
+                        <strong>Controls:</strong> {previewForm.controls.length}
+                      </div>
                       {previewForm.controls.length > 0 && (
                         <div>
                           <strong>Control Types:</strong>{' '}
@@ -334,7 +353,7 @@ export const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                         type="radio"
                         value="frm"
                         checked={exportFormat === 'frm'}
-                        onChange={(e) => setExportFormat(e.target.value as 'frm' | 'json')}
+                        onChange={e => setExportFormat(e.target.value as 'frm' | 'json')}
                         className="mr-2"
                       />
                       <Code className="mr-1" size={16} />
@@ -345,7 +364,7 @@ export const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                         type="radio"
                         value="json"
                         checked={exportFormat === 'json'}
-                        onChange={(e) => setExportFormat(e.target.value as 'frm' | 'json')}
+                        onChange={e => setExportFormat(e.target.value as 'frm' | 'json')}
                         className="mr-2"
                       />
                       <FileText className="mr-1" size={16} />
@@ -361,10 +380,19 @@ export const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <h4 className="font-semibold text-gray-800 mb-2">Current Form</h4>
                     <div className="space-y-1 text-sm">
-                      <div><strong>Name:</strong> {formProperties.Name || 'Form1'}</div>
-                      <div><strong>Caption:</strong> {formProperties.Caption || 'Form1'}</div>
-                      <div><strong>Size:</strong> {formProperties.Width || 600} × {formProperties.Height || 400}</div>
-                      <div><strong>Controls:</strong> {controls.length}</div>
+                      <div>
+                        <strong>Name:</strong> {formProperties.Name || 'Form1'}
+                      </div>
+                      <div>
+                        <strong>Caption:</strong> {formProperties.Caption || 'Form1'}
+                      </div>
+                      <div>
+                        <strong>Size:</strong> {formProperties.Width || 600} ×{' '}
+                        {formProperties.Height || 400}
+                      </div>
+                      <div>
+                        <strong>Controls:</strong> {controls.length}
+                      </div>
                       {controls.length > 0 && (
                         <div>
                           <strong>Control Types:</strong>{' '}
@@ -418,10 +446,9 @@ export const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
         {/* Footer */}
         <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
           <div className="text-sm text-gray-600">
-            {mode === 'import' 
+            {mode === 'import'
               ? 'Import VB6 forms to continue your projects in the web IDE'
-              : 'Export your forms for use in Visual Basic 6'
-            }
+              : 'Export your forms for use in Visual Basic 6'}
           </div>
           <div className="flex gap-3">
             <button

@@ -3,6 +3,7 @@
 ## Overview
 
 Complete implementation of VB6's control flow statements including:
+
 - **GoTo** - Unconditional jump to labels or line numbers
 - **GoSub/Return** - Call and return from subroutines
 - **On...GoTo** - Computed jump based on expression value
@@ -57,6 +58,7 @@ End Sub
 ```
 
 **TypeScript Usage:**
+
 ```typescript
 import { LineNumberManager } from './VB6LineNumbers';
 
@@ -101,6 +103,7 @@ End Sub
 ```
 
 **TypeScript Usage:**
+
 ```typescript
 import { LineNumberManager, GoSubHandler } from './VB6LineNumbers';
 
@@ -156,6 +159,7 @@ End Sub
 ```
 
 **TypeScript Usage:**
+
 ```typescript
 import { LineNumberManager } from './VB6LineNumbers';
 
@@ -169,8 +173,8 @@ const choice = 2;
 const position = LineNumberManager.onGoTo(choice, 'MenuFile', 'MenuEdit', 'MenuView');
 
 if (position === null) {
-    // Choice was out of range (< 1 or > number of targets)
-    console.log('Invalid choice');
+  // Choice was out of range (< 1 or > number of targets)
+  console.log('Invalid choice');
 }
 ```
 
@@ -205,6 +209,7 @@ End Sub
 ```
 
 **TypeScript Usage:**
+
 ```typescript
 import { LineNumberManager } from './VB6LineNumbers';
 
@@ -263,6 +268,7 @@ End Sub
 ```
 
 **TypeScript Usage:**
+
 ```typescript
 import { RegisterLabel, RegisterLine } from './VB6LineNumbers';
 
@@ -295,6 +301,7 @@ End Sub
 ```
 
 **TypeScript Usage:**
+
 ```typescript
 import { Erl, SetLine } from './VB6LineNumbers';
 
@@ -302,7 +309,7 @@ import { Erl, SetLine } from './VB6LineNumbers';
 SetLine(42);
 
 // Get current line (for error reporting)
-const currentLine = Erl();  // Returns 42
+const currentLine = Erl(); // Returns 42
 ```
 
 ## API Reference
@@ -311,46 +318,55 @@ const currentLine = Erl();  // Returns 42
 
 ```typescript
 class VB6LineNumberManager {
-    // Singleton instance
-    static getInstance(): VB6LineNumberManager;
+  // Singleton instance
+  static getInstance(): VB6LineNumberManager;
 
-    // Label and line number registration
-    registerLabel(label: string, lineNumber: number, codePosition: number,
-                  procedure?: string, module?: string): void;
-    registerLineNumber(lineNumber: number, codePosition: number,
-                       procedure?: string, module?: string): void;
+  // Label and line number registration
+  registerLabel(
+    label: string,
+    lineNumber: number,
+    codePosition: number,
+    procedure?: string,
+    module?: string
+  ): void;
+  registerLineNumber(
+    lineNumber: number,
+    codePosition: number,
+    procedure?: string,
+    module?: string
+  ): void;
 
-    // Control flow statements
-    goTo(target: string | number): number;
-    goSub(target: string | number): number;
-    return(): number;
-    onGoTo(index: number, ...targets: (string | number)[]): number | null;
-    onGoSub(index: number, ...targets: (string | number)[]): number | null;
+  // Control flow statements
+  goTo(target: string | number): number;
+  goSub(target: string | number): number;
+  return(): number;
+  onGoTo(index: number, ...targets: (string | number)[]): number | null;
+  onGoSub(index: number, ...targets: (string | number)[]): number | null;
 
-    // Execution context
-    enterProcedure(procedure: string, module?: string, startLine?: number): void;
-    exitProcedure(): void;
-    setCurrentLine(lineNumber: number): void;
+  // Execution context
+  enterProcedure(procedure: string, module?: string, startLine?: number): void;
+  exitProcedure(): void;
+  setCurrentLine(lineNumber: number): void;
 
-    // Error handling integration
-    setErrorHandler(target: string | number | null): void;
-    handleError(errorNumber: number): number | null;
-    resumeAt(target: string | number): number;
+  // Error handling integration
+  setErrorHandler(target: string | number | null): void;
+  handleError(errorNumber: number): number | null;
+  resumeAt(target: string | number): number;
 
-    // Debugging features
-    setBreakpoint(lineNumber: number, procedure?: string, module?: string, enabled?: boolean): void;
-    clearBreakpoints(): void;
-    setTraceMode(enabled: boolean): void;
-    setStepMode(enabled: boolean): void;
+  // Debugging features
+  setBreakpoint(lineNumber: number, procedure?: string, module?: string, enabled?: boolean): void;
+  clearBreakpoints(): void;
+  setTraceMode(enabled: boolean): void;
+  setStepMode(enabled: boolean): void;
 
-    // Information and state
-    getCurrentInfo(): { line: number; procedure: string; module: string; stackDepth: number } | null;
-    getCallStack(): string[];
-    getLocal(name: string): any;
-    setLocal(name: string, value: any): void;
+  // Information and state
+  getCurrentInfo(): { line: number; procedure: string; module: string; stackDepth: number } | null;
+  getCallStack(): string[];
+  getLocal(name: string): any;
+  setLocal(name: string, value: any): void;
 
-    // Reset
-    reset(): void;
+  // Reset
+  reset(): void;
 }
 ```
 
@@ -358,21 +374,25 @@ class VB6LineNumberManager {
 
 ```typescript
 class VB6GoSubHandler {
-    // Singleton instance
-    static getInstance(): VB6GoSubHandler;
+  // Singleton instance
+  static getInstance(): VB6GoSubHandler;
 
-    // GoSub/Return
-    goSub(targetLabel: string, returnAddress: number, procedureName?: string,
-          localVars?: Map<string, any>): string;
-    return(): GoSubContext | null;
+  // GoSub/Return
+  goSub(
+    targetLabel: string,
+    returnAddress: number,
+    procedureName?: string,
+    localVars?: Map<string, any>
+  ): string;
+  return(): GoSubContext | null;
 
-    // Status
-    isInGoSub(): boolean;
-    getStackDepth(): number;
+  // Status
+  isInGoSub(): boolean;
+  getStackDepth(): number;
 
-    // Stack management
-    clearStack(): void;
-    clearProcedureStack(procedureName: string): void;
+  // Stack management
+  clearStack(): void;
+  clearProcedureStack(procedureName: string): void;
 }
 ```
 
@@ -380,10 +400,19 @@ class VB6GoSubHandler {
 
 ```typescript
 // Label and line number registration
-function RegisterLabel(label: string, lineNumber: number, position: number,
-                       procedure?: string, module?: string): void;
-function RegisterLine(lineNumber: number, position: number,
-                      procedure?: string, module?: string): void;
+function RegisterLabel(
+  label: string,
+  lineNumber: number,
+  position: number,
+  procedure?: string,
+  module?: string
+): void;
+function RegisterLine(
+  lineNumber: number,
+  position: number,
+  procedure?: string,
+  module?: string
+): void;
 
 // Control flow
 function GoTo(target: string | number): void;
@@ -405,44 +434,44 @@ function End(): void;
 
 ```typescript
 enum LineTargetType {
-    LineNumber = 'linenumber',
-    Label = 'label',
-    Procedure = 'procedure'
+  LineNumber = 'linenumber',
+  Label = 'label',
+  Procedure = 'procedure',
 }
 
 enum JumpType {
-    GoTo = 'goto',
-    GoSub = 'gosub',
-    OnError = 'onerror',
-    Resume = 'resume',
-    OnGoTo = 'ongoto',
-    OnGoSub = 'ongosub'
+  GoTo = 'goto',
+  GoSub = 'gosub',
+  OnError = 'onerror',
+  Resume = 'resume',
+  OnGoTo = 'ongoto',
+  OnGoSub = 'ongosub',
 }
 
 interface LineEntry {
-    type: LineTargetType;
-    identifier: string | number;
-    lineNumber: number;
-    codePosition: number;
-    procedure?: string;
-    module?: string;
+  type: LineTargetType;
+  identifier: string | number;
+  lineNumber: number;
+  codePosition: number;
+  procedure?: string;
+  module?: string;
 }
 
 interface ExecutionContext {
-    currentLine: number;
-    currentPosition: number;
-    currentProcedure: string;
-    currentModule: string;
-    returnStack: number[];
-    errorHandler?: string | number;
-    locals: Map<string, any>;
+  currentLine: number;
+  currentPosition: number;
+  currentProcedure: string;
+  currentModule: string;
+  returnStack: number[];
+  errorHandler?: string | number;
+  locals: Map<string, any>;
 }
 
 interface GoSubContext {
-    returnAddress: number;
-    returnLabel?: string;
-    procedureName: string;
-    localVariables: Map<string, any>;
+  returnAddress: number;
+  returnLabel?: string;
+  procedureName: string;
+  localVariables: Map<string, any>;
 }
 ```
 
@@ -524,16 +553,16 @@ manager.registerLabel('MenuView', 300, 30, 'MenuHandler', 'Module1');
 manager.registerLabel('MenuHelp', 400, 40, 'MenuHandler', 'Module1');
 
 // User selects menu option
-const userChoice = 2;  // Edit menu
+const userChoice = 2; // Edit menu
 
 const position = manager.onGoTo(userChoice, 'MenuFile', 'MenuEdit', 'MenuView', 'MenuHelp');
 
 if (position !== null) {
-    const info = manager.getCurrentInfo();
-    console.log(`Jumped to menu handler at line ${info?.line}`);
-    // Execute menu handler code
+  const info = manager.getCurrentInfo();
+  console.log(`Jumped to menu handler at line ${info?.line}`);
+  // Execute menu handler code
 } else {
-    console.log('Invalid menu choice');
+  console.log('Invalid menu choice');
 }
 
 manager.exitProcedure();
@@ -557,15 +586,15 @@ const A = new Array(10);
 RegisterLine(30, 2);
 SetLine(30);
 for (let I = 1; I <= 10; I++) {
-    // 40 A(I) = I * I
-    RegisterLine(40, 3);
-    SetLine(40);
-    A[I - 1] = I * I;
+  // 40 A(I) = I * I
+  RegisterLine(40, 3);
+  SetLine(40);
+  A[I - 1] = I * I;
 
-    // 50 PRINT I, A(I)
-    RegisterLine(50, 4);
-    SetLine(50);
-    console.log(I, A[I - 1]);
+  // 50 PRINT I, A(I)
+  RegisterLine(50, 4);
+  SetLine(50);
+  console.log(I, A[I - 1]);
 }
 
 // 60 NEXT I
@@ -605,21 +634,20 @@ manager.registerLabel('ErrorHandler', 1000, 100, 'Main', 'Module1');
 manager.setErrorHandler('ErrorHandler');
 
 try {
-    manager.setCurrentLine(10);
-    console.log('Line 10: Starting');
+  manager.setCurrentLine(10);
+  console.log('Line 10: Starting');
 
-    manager.setCurrentLine(20);
-    console.log('Line 20: Processing');
+  manager.setCurrentLine(20);
+  console.log('Line 20: Processing');
 
-    manager.setCurrentLine(30);
-    throw new Error('Something went wrong');
-
+  manager.setCurrentLine(30);
+  throw new Error('Something went wrong');
 } catch (error) {
-    // Jump to error handler
-    manager.handleError(13);  // Type mismatch error
+  // Jump to error handler
+  manager.handleError(13); // Type mismatch error
 
-    // In error handler
-    console.log(`Error occurred at line ${Erl()}`);  // Shows "Error occurred at line 30"
+  // In error handler
+  console.log(`Error occurred at line ${Erl()}`); // Shows "Error occurred at line 30"
 }
 
 manager.exitProcedure();
@@ -749,9 +777,9 @@ manager.setErrorHandler('ErrorHandler');
 
 // Error occurs - automatically jumps to error handler
 try {
-    // ... code that might error ...
+  // ... code that might error ...
 } catch (e) {
-    manager.handleError(13);  // Jump to ErrorHandler label
+  manager.handleError(13); // Jump to ErrorHandler label
 }
 
 // Resume at specific location
@@ -770,12 +798,13 @@ manager.goSub('Subroutine');
 manager.return();
 
 // Variables are restored
-console.log(manager.getLocal('x'));  // 42
+console.log(manager.getLocal('x')); // 42
 ```
 
 ## Next Steps
 
 With GoTo/GoSub/Return complete, the next task is:
+
 - **Task 1.9**: Static variables and Friend scope
 
 ## Conclusion

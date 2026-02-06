@@ -58,26 +58,26 @@ console.log('- Score de couverture attendu: 5/10 erreurs possibles détectées\n
 console.log('MÉTRIQUES DE PERFORMANCE ESTIMÉES:');
 
 const metrics = {
-  'Lexer': {
-    'Vitesse': 'Très rapide (~1ms pour 1000 lignes)',
-    'Mémoire': 'Efficace avec protection DoS',
-    'Précision': '99% (tokenisation correcte)'
+  Lexer: {
+    Vitesse: 'Très rapide (~1ms pour 1000 lignes)',
+    Mémoire: 'Efficace avec protection DoS',
+    Précision: '99% (tokenisation correcte)',
   },
-  'Parser': {
-    'Vitesse': 'Rapide (~5ms pour 1000 lignes)',
-    'Mémoire': 'Modérée avec limites de sécurité',
-    'Précision': '85% (structures VB6 basiques)'
+  Parser: {
+    Vitesse: 'Rapide (~5ms pour 1000 lignes)',
+    Mémoire: 'Modérée avec limites de sécurité',
+    Précision: '85% (structures VB6 basiques)',
   },
   'Analyseur Sémantique': {
-    'Vitesse': 'Modéré (~50ms pour 1000 lignes)',
-    'Mémoire': 'Faible consommation',
-    'Précision': '20% (seulement variables non déclarées)'
+    Vitesse: 'Modéré (~50ms pour 1000 lignes)',
+    Mémoire: 'Faible consommation',
+    Précision: '20% (seulement variables non déclarées)',
   },
   'Validation Propriétés': {
-    'Vitesse': 'Très rapide (~0.1ms par propriété)',
-    'Mémoire': 'Minimal',
-    'Précision': '95% (excellent pour l\'UI)'
-  }
+    Vitesse: 'Très rapide (~0.1ms par propriété)',
+    Mémoire: 'Minimal',
+    Précision: "95% (excellent pour l'UI)",
+  },
 };
 
 Object.entries(metrics).forEach(([component, stats]) => {
@@ -92,23 +92,23 @@ console.log('COMPARAISON AVEC OUTILS INDUSTRIELS:');
 
 const comparison = {
   'VS Visual Studio VB6 IDE': {
-    'Détection d\'erreurs': '15% vs 100%',
-    'Vitesse d\'analyse': 'Plus rapide (pas de compilation)',
+    "Détection d'erreurs": '15% vs 100%',
+    "Vitesse d'analyse": 'Plus rapide (pas de compilation)',
     'Suggestions de correction': 'Basique vs Avancées',
-    'Intégration IDE': 'Web vs Native'
+    'Intégration IDE': 'Web vs Native',
   },
   'VS ESLint/TSLint équivalent': {
     'Nombre de règles': '~10 vs 200+',
-    'Configurabilité': 'Limitée vs Complète',
-    'Plugins': 'Aucun vs Écosystème riche',
-    'Communauté': 'Projet unique vs Milliers de contributeurs'
+    Configurabilité: 'Limitée vs Complète',
+    Plugins: 'Aucun vs Écosystème riche',
+    Communauté: 'Projet unique vs Milliers de contributeurs',
   },
   'VS SonarQube VB.NET': {
     'Qualité du code': 'Métriques basiques vs Analyse complète',
-    'Sécurité': 'Aucune vs Détection de vulnérabilités',
-    'Maintenance': 'Score simple vs Rapport détaillé',
-    'Standards': 'Règles custom vs Standards industriels'
-  }
+    Sécurité: 'Aucune vs Détection de vulnérabilités',
+    Maintenance: 'Score simple vs Rapport détaillé',
+    Standards: 'Règles custom vs Standards industriels',
+  },
 };
 
 Object.entries(comparison).forEach(([tool, comparisons]) => {
@@ -126,21 +126,21 @@ const specificRecommendations = [
     phase: 'PHASE 1 - Fondations (2-3 semaines)',
     tasks: [
       'Implémentation complète du système de types VB6',
-      'Amélioration de l\'analyseur sémantique avec AST complet', 
+      "Amélioration de l'analyseur sémantique avec AST complet",
       'Ajout de la vérification de portée des variables',
-      'Tests unitaires pour tous les types d\'erreurs VB6'
+      "Tests unitaires pour tous les types d'erreurs VB6",
     ],
-    expectedImpact: 'Couverture passe de 15% à 60%'
+    expectedImpact: 'Couverture passe de 15% à 60%',
   },
   {
     phase: 'PHASE 2 - Validation Avancée (2 semaines)',
     tasks: [
       'Validation des appels de procédures et paramètres',
-      'Détection d\'objets non initialisés',
+      "Détection d'objets non initialisés",
       'Analyse des structures de contrôle (For/While/If)',
-      'Gestion des erreurs et labels'
+      'Gestion des erreurs et labels',
     ],
-    expectedImpact: 'Couverture passe de 60% à 80%'
+    expectedImpact: 'Couverture passe de 60% à 80%',
   },
   {
     phase: 'PHASE 3 - Optimisation (1 semaine)',
@@ -148,20 +148,20 @@ const specificRecommendations = [
       'Analyse incrémentale et cache',
       'Amélioration des performances sur gros projets',
       'Métriques de qualité avancées',
-      'Interface utilisateur pour la configuration'
+      'Interface utilisateur pour la configuration',
     ],
-    expectedImpact: 'Couverture passe de 80% à 90%, performance x5'
+    expectedImpact: 'Couverture passe de 80% à 90%, performance x5',
   },
   {
     phase: 'PHASE 4 - Fonctionnalités Avancées (2 semaines)',
     tasks: [
-      'Support des types définis par l\'utilisateur',
+      "Support des types définis par l'utilisateur",
       'Analyse inter-modules',
       'Détection de code mort et optimisations',
-      'Intégration avec des outils externes'
+      'Intégration avec des outils externes',
     ],
-    expectedImpact: 'Couverture passe de 90% à 95%'
-  }
+    expectedImpact: 'Couverture passe de 90% à 95%',
+  },
 ];
 
 specificRecommendations.forEach((phase, index) => {

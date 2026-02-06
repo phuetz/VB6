@@ -16,7 +16,7 @@ export enum PropertyType {
   Picture = 'Picture',
   Object = 'Object',
   Enum = 'Enum',
-  Array = 'Array'
+  Array = 'Array',
 }
 
 // Property Control Types
@@ -36,7 +36,7 @@ export enum PropertyControlType {
   DirectoryPicker = 'DirectoryPicker',
   Frame = 'Frame',
   TabStrip = 'TabStrip',
-  CommandButton = 'CommandButton'
+  CommandButton = 'CommandButton',
 }
 
 // Property Page Property
@@ -117,24 +117,31 @@ interface PropertyPageDesignerProps {
 export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
   initialPage,
   onSave,
-  onPreview
+  onPreview,
 }) => {
-  const [page, setPage] = useState<PropertyPageDefinition>(initialPage || {
-    name: 'PropertyPage1',
-    caption: 'Property Page',
-    properties: [],
-    tabs: [{
-      id: 'tab1',
-      name: 'Tab1',
-      caption: 'General',
-      controls: [],
-      visible: true
-    }],
-    size: { width: 400, height: 300 },
-    standardButtons: { ok: true, cancel: true, apply: true, help: false }
-  });
+  const [page, setPage] = useState<PropertyPageDefinition>(
+    initialPage || {
+      name: 'PropertyPage1',
+      caption: 'Property Page',
+      properties: [],
+      tabs: [
+        {
+          id: 'tab1',
+          name: 'Tab1',
+          caption: 'General',
+          controls: [],
+          visible: true,
+        },
+      ],
+      size: { width: 400, height: 300 },
+      standardButtons: { ok: true, cancel: true, apply: true, help: false },
+    }
+  );
 
-  const [selectedControl, setSelectedControl] = useState<{ tabId: string; control: PropertyPageControl } | null>(null);
+  const [selectedControl, setSelectedControl] = useState<{
+    tabId: string;
+    control: PropertyPageControl;
+  } | null>(null);
   const [selectedTab, setSelectedTab] = useState<string>(page.tabs[0]?.id || '');
   const [selectedProperty, setSelectedProperty] = useState<PropertyPageProperty | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -144,7 +151,7 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
   const [showGrid, setShowGrid] = useState(true);
   const [gridSize, setGridSize] = useState(8);
   const [activePanel, setActivePanel] = useState<'design' | 'properties' | 'preview'>('design');
-  
+
   const designerRef = useRef<HTMLDivElement>(null);
   const eventEmitter = useRef(new EventEmitter());
 
@@ -159,11 +166,21 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
 
   // Default property categories
   const defaultCategories: PropertyCategory[] = [
-    { name: 'Appearance', displayName: 'Appearance', description: 'Visual appearance properties', expanded: true },
-    { name: 'Behavior', displayName: 'Behavior', description: 'Control behavior properties', expanded: true },
+    {
+      name: 'Appearance',
+      displayName: 'Appearance',
+      description: 'Visual appearance properties',
+      expanded: true,
+    },
+    {
+      name: 'Behavior',
+      displayName: 'Behavior',
+      description: 'Control behavior properties',
+      expanded: true,
+    },
     { name: 'Data', displayName: 'Data', description: 'Data binding properties', expanded: false },
     { name: 'Font', displayName: 'Font', description: 'Font and text properties', expanded: false },
-    { name: 'Misc', displayName: 'Misc', description: 'Miscellaneous properties', expanded: false }
+    { name: 'Misc', displayName: 'Misc', description: 'Miscellaneous properties', expanded: false },
   ];
 
   // Property control toolbox items
@@ -179,96 +196,99 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
     { type: PropertyControlType.ColorPicker, icon: '🎨', name: 'Color Picker' },
     { type: PropertyControlType.FontPicker, icon: 'F', name: 'Font Picker' },
     { type: PropertyControlType.FilePicker, icon: '📁', name: 'File Picker' },
-    { type: PropertyControlType.Slider, icon: '◀═══▶', name: 'Slider' }
+    { type: PropertyControlType.Slider, icon: '◀═══▶', name: 'Slider' },
   ];
 
-  const createControl = useCallback((type: PropertyControlType, x: number, y: number): PropertyPageControl => {
-    const id = `control_${Date.now()}`;
-    const baseControl: PropertyPageControl = {
-      id,
-      type,
-      name: `${type}${id}`,
-      left: x,
-      top: y,
-      width: 100,
-      height: 25,
-      properties: {},
-      tabIndex: 0,
-      visible: true,
-      enabled: true
-    };
+  const createControl = useCallback(
+    (type: PropertyControlType, x: number, y: number): PropertyPageControl => {
+      const id = `control_${Date.now()}`;
+      const baseControl: PropertyPageControl = {
+        id,
+        type,
+        name: `${type}${id}`,
+        left: x,
+        top: y,
+        width: 100,
+        height: 25,
+        properties: {},
+        tabIndex: 0,
+        visible: true,
+        enabled: true,
+      };
 
-    // Set default properties based on type
-    switch (type) {
-      case PropertyControlType.Label:
-        baseControl.properties.caption = 'Label:';
-        baseControl.properties.alignment = 'Left';
-        baseControl.properties.autoSize = true;
-        break;
-      case PropertyControlType.TextBox:
-        baseControl.properties.text = '';
-        baseControl.properties.maxLength = 0;
-        baseControl.properties.passwordChar = '';
-        baseControl.width = 120;
-        break;
-      case PropertyControlType.CheckBox:
-        baseControl.properties.caption = 'Check Box';
-        baseControl.properties.value = false;
-        baseControl.width = 100;
-        break;
-      case PropertyControlType.OptionButton:
-        baseControl.properties.caption = 'Option Button';
-        baseControl.properties.value = false;
-        baseControl.width = 120;
-        break;
-      case PropertyControlType.ComboBox:
-        baseControl.properties.style = 'DropDown';
-        baseControl.properties.sorted = false;
-        baseControl.height = 21;
-        baseControl.width = 120;
-        break;
-      case PropertyControlType.ListBox:
-        baseControl.properties.sorted = false;
-        baseControl.properties.multiSelect = false;
-        baseControl.height = 80;
-        baseControl.width = 120;
-        break;
-      case PropertyControlType.CommandButton:
-        baseControl.properties.caption = 'Command';
-        baseControl.properties.default = false;
-        baseControl.properties.cancel = false;
-        baseControl.width = 75;
-        break;
-      case PropertyControlType.Frame:
-        baseControl.properties.caption = 'Frame';
-        baseControl.width = 150;
-        baseControl.height = 100;
-        break;
-      case PropertyControlType.ColorPicker:
-        baseControl.properties.color = '#000000';
-        baseControl.width = 80;
-        break;
-      case PropertyControlType.FontPicker:
-        baseControl.properties.fontName = 'MS Sans Serif';
-        baseControl.properties.fontSize = 8;
-        baseControl.width = 120;
-        break;
-      case PropertyControlType.FilePicker:
-        baseControl.properties.fileName = '';
-        baseControl.properties.filter = 'All Files (*.*)|*.*';
-        baseControl.width = 200;
-        break;
-      case PropertyControlType.Slider:
-        baseControl.properties.min = 0;
-        baseControl.properties.max = 100;
-        baseControl.properties.value = 50;
-        baseControl.width = 150;
-        baseControl.height = 30;
-        break;
-    }
+      // Set default properties based on type
+      switch (type) {
+        case PropertyControlType.Label:
+          baseControl.properties.caption = 'Label:';
+          baseControl.properties.alignment = 'Left';
+          baseControl.properties.autoSize = true;
+          break;
+        case PropertyControlType.TextBox:
+          baseControl.properties.text = '';
+          baseControl.properties.maxLength = 0;
+          baseControl.properties.passwordChar = '';
+          baseControl.width = 120;
+          break;
+        case PropertyControlType.CheckBox:
+          baseControl.properties.caption = 'Check Box';
+          baseControl.properties.value = false;
+          baseControl.width = 100;
+          break;
+        case PropertyControlType.OptionButton:
+          baseControl.properties.caption = 'Option Button';
+          baseControl.properties.value = false;
+          baseControl.width = 120;
+          break;
+        case PropertyControlType.ComboBox:
+          baseControl.properties.style = 'DropDown';
+          baseControl.properties.sorted = false;
+          baseControl.height = 21;
+          baseControl.width = 120;
+          break;
+        case PropertyControlType.ListBox:
+          baseControl.properties.sorted = false;
+          baseControl.properties.multiSelect = false;
+          baseControl.height = 80;
+          baseControl.width = 120;
+          break;
+        case PropertyControlType.CommandButton:
+          baseControl.properties.caption = 'Command';
+          baseControl.properties.default = false;
+          baseControl.properties.cancel = false;
+          baseControl.width = 75;
+          break;
+        case PropertyControlType.Frame:
+          baseControl.properties.caption = 'Frame';
+          baseControl.width = 150;
+          baseControl.height = 100;
+          break;
+        case PropertyControlType.ColorPicker:
+          baseControl.properties.color = '#000000';
+          baseControl.width = 80;
+          break;
+        case PropertyControlType.FontPicker:
+          baseControl.properties.fontName = 'MS Sans Serif';
+          baseControl.properties.fontSize = 8;
+          baseControl.width = 120;
+          break;
+        case PropertyControlType.FilePicker:
+          baseControl.properties.fileName = '';
+          baseControl.properties.filter = 'All Files (*.*)|*.*';
+          baseControl.width = 200;
+          break;
+        case PropertyControlType.Slider:
+          baseControl.properties.min = 0;
+          baseControl.properties.max = 100;
+          baseControl.properties.value = 50;
+          baseControl.width = 150;
+          baseControl.height = 30;
+          break;
+      }
 
-    return baseControl;
-  }, []);
+      return baseControl;
+    },
+    []
+  );
 
   const addControl = useCallback((tabId: string, control: PropertyPageControl) => {
     setPage(prev => {
@@ -279,47 +299,53 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
       }
       return updated;
     });
-    
+
     setSelectedControl({ tabId, control });
     eventEmitter.current.emit('controlAdded', { tabId, control });
   }, []);
 
-  const updateControl = useCallback((tabId: string, controlId: string, updates: Partial<PropertyPageControl>) => {
-    setPage(prev => {
-      const updated = { ...prev };
-      const tab = updated.tabs.find(t => t.id === tabId);
-      if (tab) {
-        const controlIndex = tab.controls.findIndex(c => c.id === controlId);
-        if (controlIndex >= 0) {
-          tab.controls[controlIndex] = { ...tab.controls[controlIndex], ...updates };
-          
-          if (selectedControl?.control.id === controlId) {
-            setSelectedControl({ tabId, control: tab.controls[controlIndex] });
+  const updateControl = useCallback(
+    (tabId: string, controlId: string, updates: Partial<PropertyPageControl>) => {
+      setPage(prev => {
+        const updated = { ...prev };
+        const tab = updated.tabs.find(t => t.id === tabId);
+        if (tab) {
+          const controlIndex = tab.controls.findIndex(c => c.id === controlId);
+          if (controlIndex >= 0) {
+            tab.controls[controlIndex] = { ...tab.controls[controlIndex], ...updates };
+
+            if (selectedControl?.control.id === controlId) {
+              setSelectedControl({ tabId, control: tab.controls[controlIndex] });
+            }
           }
         }
-      }
-      return updated;
-    });
-    
-    eventEmitter.current.emit('controlUpdated', { tabId, controlId, updates });
-  }, [selectedControl]);
+        return updated;
+      });
 
-  const deleteControl = useCallback((tabId: string, controlId: string) => {
-    setPage(prev => {
-      const updated = { ...prev };
-      const tab = updated.tabs.find(t => t.id === tabId);
-      if (tab) {
-        tab.controls = tab.controls.filter(c => c.id !== controlId);
+      eventEmitter.current.emit('controlUpdated', { tabId, controlId, updates });
+    },
+    [selectedControl]
+  );
+
+  const deleteControl = useCallback(
+    (tabId: string, controlId: string) => {
+      setPage(prev => {
+        const updated = { ...prev };
+        const tab = updated.tabs.find(t => t.id === tabId);
+        if (tab) {
+          tab.controls = tab.controls.filter(c => c.id !== controlId);
+        }
+        return updated;
+      });
+
+      if (selectedControl?.control.id === controlId) {
+        setSelectedControl(null);
       }
-      return updated;
-    });
-    
-    if (selectedControl?.control.id === controlId) {
-      setSelectedControl(null);
-    }
-    
-    eventEmitter.current.emit('controlDeleted', { tabId, controlId });
-  }, [selectedControl]);
+
+      eventEmitter.current.emit('controlDeleted', { tabId, controlId });
+    },
+    [selectedControl]
+  );
 
   const addTab = useCallback(() => {
     const newTab: PropertyPageTab = {
@@ -327,14 +353,14 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
       name: `Tab${page.tabs.length + 1}`,
       caption: `Tab ${page.tabs.length + 1}`,
       controls: [],
-      visible: true
+      visible: true,
     };
-    
+
     setPage(prev => ({
       ...prev,
-      tabs: [...prev.tabs, newTab]
+      tabs: [...prev.tabs, newTab],
     }));
-    
+
     setSelectedTab(newTab.id);
   }, [page.tabs.length]);
 
@@ -348,14 +374,14 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
       description: '',
       readOnly: false,
       browsable: true,
-      designTimeOnly: false
+      designTimeOnly: false,
     };
-    
+
     setPage(prev => ({
       ...prev,
-      properties: [...prev.properties, newProperty]
+      properties: [...prev.properties, newProperty],
     }));
-    
+
     setSelectedProperty(newProperty);
   }, [page.properties.length]);
 
@@ -376,24 +402,27 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
     });
   }, []);
 
-  const handleDrop = useCallback((e: React.MouseEvent) => {
-    if (!draggedItem) return;
+  const handleDrop = useCallback(
+    (e: React.MouseEvent) => {
+      if (!draggedItem) return;
 
-    const rect = e.currentTarget.getBoundingClientRect();
-    const safeZoom = zoom === 0 ? 100 : zoom;
-    const x = (e.clientX - rect.left) / (safeZoom / 100);
-    const y = (e.clientY - rect.top) / (safeZoom / 100);
-    
-    // Snap to grid
-    const safeGridSize = gridSize === 0 ? 8 : gridSize;
-    const snappedX = Math.round(x / safeGridSize) * safeGridSize;
-    const snappedY = Math.round(y / safeGridSize) * safeGridSize;
-    
-    const newControl = createControl(draggedItem, snappedX, snappedY);
-    addControl(selectedTab, newControl);
-    
-    handleDragEnd();
-  }, [draggedItem, zoom, gridSize, createControl, addControl, selectedTab, handleDragEnd]);
+      const rect = e.currentTarget.getBoundingClientRect();
+      const safeZoom = zoom === 0 ? 100 : zoom;
+      const x = (e.clientX - rect.left) / (safeZoom / 100);
+      const y = (e.clientY - rect.top) / (safeZoom / 100);
+
+      // Snap to grid
+      const safeGridSize = gridSize === 0 ? 8 : gridSize;
+      const snappedX = Math.round(x / safeGridSize) * safeGridSize;
+      const snappedY = Math.round(y / safeGridSize) * safeGridSize;
+
+      const newControl = createControl(draggedItem, snappedX, snappedY);
+      addControl(selectedTab, newControl);
+
+      handleDragEnd();
+    },
+    [draggedItem, zoom, gridSize, createControl, addControl, selectedTab, handleDragEnd]
+  );
 
   const handleSave = useCallback(() => {
     onSave?.(page);
@@ -407,7 +436,7 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
 
   const generateVBCode = useCallback((): string => {
     const lines: string[] = [];
-    
+
     // Header
     lines.push(`VERSION 5.00`);
     lines.push(`Begin VB.PropertyPage ${page.name}`);
@@ -421,45 +450,57 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
     lines.push(`   ScaleMode       =   3  'Pixel`);
     lines.push(`   ScaleWidth      =   ${page.size.width}`);
     lines.push('');
-    
+
     // Controls for active tab
     const activeTab = page.tabs.find(t => t.id === selectedTab);
     if (activeTab) {
       activeTab.controls.forEach(control => {
-        const controlType = control.type === PropertyControlType.CommandButton ? 'CommandButton' :
-                          control.type === PropertyControlType.TextBox ? 'TextBox' :
-                          control.type === PropertyControlType.Label ? 'Label' :
-                          control.type === PropertyControlType.CheckBox ? 'CheckBox' :
-                          control.type === PropertyControlType.OptionButton ? 'OptionButton' :
-                          control.type === PropertyControlType.ComboBox ? 'ComboBox' :
-                          control.type === PropertyControlType.ListBox ? 'ListBox' :
-                          control.type === PropertyControlType.Frame ? 'Frame' : 'Control';
-        
+        const controlType =
+          control.type === PropertyControlType.CommandButton
+            ? 'CommandButton'
+            : control.type === PropertyControlType.TextBox
+              ? 'TextBox'
+              : control.type === PropertyControlType.Label
+                ? 'Label'
+                : control.type === PropertyControlType.CheckBox
+                  ? 'CheckBox'
+                  : control.type === PropertyControlType.OptionButton
+                    ? 'OptionButton'
+                    : control.type === PropertyControlType.ComboBox
+                      ? 'ComboBox'
+                      : control.type === PropertyControlType.ListBox
+                        ? 'ListBox'
+                        : control.type === PropertyControlType.Frame
+                          ? 'Frame'
+                          : 'Control';
+
         lines.push(`   Begin VB.${controlType} ${control.name}`);
         lines.push(`      Height          =   ${control.height * 15}`);
         lines.push(`      Left            =   ${control.left * 15}`);
         lines.push(`      Top             =   ${control.top * 15}`);
         lines.push(`      Width           =   ${control.width * 15}`);
-        
+
         // Add specific properties
         Object.entries(control.properties).forEach(([key, value]) => {
           if (typeof value === 'string') {
             lines.push(`      ${key}           =   "${value}"`);
           } else if (typeof value === 'boolean') {
-            lines.push(`      ${key}           =   ${value ? -1 : 0}  '${value ? 'True' : 'False'}`);
+            lines.push(
+              `      ${key}           =   ${value ? -1 : 0}  '${value ? 'True' : 'False'}`
+            );
           } else {
             lines.push(`      ${key}           =   ${value}`);
           }
         });
-        
+
         lines.push(`   End`);
         lines.push('');
       });
     }
-    
+
     lines.push('End');
     lines.push('');
-    
+
     // Property declarations
     page.properties.forEach(prop => {
       lines.push(`' Property: ${prop.name}`);
@@ -467,7 +508,7 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
       lines.push(`Private m${prop.name} As ${prop.dataType}`);
       lines.push('');
     });
-    
+
     // Property procedures
     page.properties.forEach(prop => {
       // Property Get
@@ -475,24 +516,26 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
       lines.push(`    ${prop.name} = m${prop.name}`);
       lines.push(`End Property`);
       lines.push('');
-      
+
       // Property Let/Set
       if (!prop.readOnly) {
         const letOrSet = prop.dataType === PropertyType.Object ? 'Set' : 'Let';
-        lines.push(`Public Property ${letOrSet} ${prop.name}(${letOrSet === 'Set' ? 'ByRef ' : ''}ByVal New_${prop.name} As ${prop.dataType})`);
+        lines.push(
+          `Public Property ${letOrSet} ${prop.name}(${letOrSet === 'Set' ? 'ByRef ' : ''}ByVal New_${prop.name} As ${prop.dataType})`
+        );
         lines.push(`    m${prop.name} = New_${prop.name}`);
         lines.push(`    PropertyChanged "${prop.name}"`);
         lines.push(`End Property`);
         lines.push('');
       }
     });
-    
+
     return lines.join('\n');
   }, [page, selectedTab]);
 
   const renderControl = (control: PropertyPageControl): React.ReactNode => {
     const isSelected = selectedControl?.control.id === control.id;
-    
+
     const style: React.CSSProperties = {
       position: 'absolute',
       left: control.left,
@@ -501,11 +544,11 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
       height: control.height,
       border: isSelected ? '2px solid #0066cc' : '1px solid #ccc',
       fontSize: '8pt',
-      fontFamily: 'MS Sans Serif'
+      fontFamily: 'MS Sans Serif',
     };
-    
+
     let content: React.ReactNode = null;
-    
+
     switch (control.type) {
       case PropertyControlType.Label:
         content = (
@@ -547,36 +590,52 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
         );
         break;
       case PropertyControlType.ColorPicker:
-        content = (
-          <div style={{ ...style, background: control.properties.color || '#000000' }} />
-        );
+        content = <div style={{ ...style, background: control.properties.color || '#000000' }} />;
         break;
       default:
         content = (
-          <div style={{ ...style, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f0f0' }}>
+          <div
+            style={{
+              ...style,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: '#f0f0f0',
+            }}
+          >
             {control.type}
           </div>
         );
     }
-    
+
     return (
       <div
         key={control.id}
-        onClick={(e) => {
+        onClick={e => {
           e.stopPropagation();
           setSelectedControl({ tabId: selectedTab, control });
         }}
         style={{ position: 'relative' }}
       >
         {content}
-        
+
         {isSelected && (
           <>
             {/* Resize handles */}
-            <div style={{ position: 'absolute', right: -4, bottom: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'se-resize' }} />
+            <div
+              style={{
+                position: 'absolute',
+                right: -4,
+                bottom: -4,
+                width: 8,
+                height: 8,
+                backgroundColor: '#0066cc',
+                cursor: 'se-resize',
+              }}
+            />
             {/* Delete button */}
             <button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 deleteControl(selectedTab, control.id);
               }}
@@ -591,7 +650,7 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
                 border: 'none',
                 borderRadius: '50%',
                 fontSize: '12px',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               ×
@@ -614,7 +673,7 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
             <input
               type="text"
               value={page.name}
-              onChange={(e) => setPage(prev => ({ ...prev, name: e.target.value }))}
+              onChange={e => setPage(prev => ({ ...prev, name: e.target.value }))}
               className="px-2 py-1 border border-gray-300 rounded"
             />
           </div>
@@ -661,7 +720,7 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
               <div
                 key={item.type}
                 className="p-2 bg-gray-100 rounded cursor-move hover:bg-gray-200 flex items-center gap-2"
-                onMouseDown={(e) => handleDragStart(item.type, e)}
+                onMouseDown={e => handleDragStart(item.type, e)}
                 onMouseUp={handleDragEnd}
               >
                 <span className="text-lg">{item.icon}</span>
@@ -669,7 +728,7 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
               </div>
             ))}
           </div>
-          
+
           <div className="mt-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-medium text-gray-700">Tabs</h3>
@@ -686,7 +745,9 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
                   key={tab.id}
                   onClick={() => setSelectedTab(tab.id)}
                   className={`p-2 rounded cursor-pointer text-sm ${
-                    selectedTab === tab.id ? 'bg-blue-100 text-blue-700' : 'bg-gray-50 hover:bg-gray-100'
+                    selectedTab === tab.id
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'bg-gray-50 hover:bg-gray-100'
                   }`}
                 >
                   {tab.caption}
@@ -694,7 +755,7 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
               ))}
             </div>
           </div>
-          
+
           <div className="mt-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-medium text-gray-700">Properties</h3>
@@ -711,7 +772,9 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
                   key={prop.name}
                   onClick={() => setSelectedProperty(prop)}
                   className={`p-2 rounded cursor-pointer text-sm ${
-                    selectedProperty?.name === prop.name ? 'bg-green-100 text-green-700' : 'bg-gray-50 hover:bg-gray-100'
+                    selectedProperty?.name === prop.name
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-gray-50 hover:bg-gray-100'
                   }`}
                 >
                   {prop.name} ({prop.dataType})
@@ -733,12 +796,12 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
                 className="bg-white border border-gray-400 relative"
                 style={{ width: page.size.width, height: page.size.height }}
                 onMouseUp={handleDrop}
-                onMouseMove={(e) => {
+                onMouseMove={e => {
                   if (isDragging) {
                     e.currentTarget.style.backgroundColor = '#f0f8ff';
                   }
                 }}
-                onMouseLeave={(e) => {
+                onMouseLeave={e => {
                   if (isDragging) {
                     e.currentTarget.style.backgroundColor = 'white';
                   }
@@ -746,18 +809,20 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
               >
                 {/* Grid */}
                 {showGrid && (
-                  <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundImage: `repeating-linear-gradient(0deg, #f0f0f0 0px, transparent 1px, transparent ${gridSize}px),
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      backgroundImage: `repeating-linear-gradient(0deg, #f0f0f0 0px, transparent 1px, transparent ${gridSize}px),
                                      repeating-linear-gradient(90deg, #f0f0f0 0px, transparent 1px, transparent ${gridSize}px)`,
-                    pointerEvents: 'none'
-                  }} />
+                      pointerEvents: 'none',
+                    }}
+                  />
                 )}
-                
+
                 {/* Tab Header */}
                 <div className="flex border-b border-gray-300 bg-gray-100">
                   {page.tabs.map(tab => (
@@ -772,35 +837,43 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
                     </div>
                   ))}
                 </div>
-                
+
                 {/* Tab Content */}
                 <div className="relative" style={{ height: page.size.height - 25 }}>
                   {activeTab?.controls.map(control => renderControl(control))}
                 </div>
-                
+
                 {/* Standard Buttons */}
                 <div className="absolute bottom-8 right-8 flex gap-2">
                   {page.standardButtons.ok && (
-                    <button className="px-3 py-1 bg-gray-200 border border-gray-400 text-xs">OK</button>
+                    <button className="px-3 py-1 bg-gray-200 border border-gray-400 text-xs">
+                      OK
+                    </button>
                   )}
                   {page.standardButtons.cancel && (
-                    <button className="px-3 py-1 bg-gray-200 border border-gray-400 text-xs">Cancel</button>
+                    <button className="px-3 py-1 bg-gray-200 border border-gray-400 text-xs">
+                      Cancel
+                    </button>
                   )}
                   {page.standardButtons.apply && (
-                    <button className="px-3 py-1 bg-gray-200 border border-gray-400 text-xs">Apply</button>
+                    <button className="px-3 py-1 bg-gray-200 border border-gray-400 text-xs">
+                      Apply
+                    </button>
                   )}
                   {page.standardButtons.help && (
-                    <button className="px-3 py-1 bg-gray-200 border border-gray-400 text-xs">Help</button>
+                    <button className="px-3 py-1 bg-gray-200 border border-gray-400 text-xs">
+                      Help
+                    </button>
                   )}
                 </div>
               </div>
             </div>
           )}
-          
+
           {activePanel === 'properties' && (
             <div className="p-4 overflow-y-auto">
               <h3 className="text-lg font-medium mb-4">Page Properties</h3>
-              
+
               {/* Page Properties */}
               <div className="mb-6 p-4 border border-gray-300 rounded">
                 <h4 className="font-medium mb-2">General</h4>
@@ -810,7 +883,7 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
                     <input
                       type="text"
                       value={page.name}
-                      onChange={(e) => setPage(prev => ({ ...prev, name: e.target.value }))}
+                      onChange={e => setPage(prev => ({ ...prev, name: e.target.value }))}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     />
                   </div>
@@ -819,7 +892,7 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
                     <input
                       type="text"
                       value={page.caption}
-                      onChange={(e) => setPage(prev => ({ ...prev, caption: e.target.value }))}
+                      onChange={e => setPage(prev => ({ ...prev, caption: e.target.value }))}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     />
                   </div>
@@ -828,7 +901,12 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
                     <input
                       type="number"
                       value={page.size.width}
-                      onChange={(e) => setPage(prev => ({ ...prev, size: { ...prev.size, width: Number(e.target.value) } }))}
+                      onChange={e =>
+                        setPage(prev => ({
+                          ...prev,
+                          size: { ...prev.size, width: Number(e.target.value) },
+                        }))
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     />
                   </div>
@@ -837,13 +915,18 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
                     <input
                       type="number"
                       value={page.size.height}
-                      onChange={(e) => setPage(prev => ({ ...prev, size: { ...prev.size, height: Number(e.target.value) } }))}
+                      onChange={e =>
+                        setPage(prev => ({
+                          ...prev,
+                          size: { ...prev.size, height: Number(e.target.value) },
+                        }))
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     />
                   </div>
                 </div>
               </div>
-              
+
               {/* Property Definitions */}
               <div className="mb-6">
                 <h4 className="font-medium mb-2">Custom Properties</h4>
@@ -855,7 +938,7 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
                         <input
                           type="text"
                           value={prop.name}
-                          onChange={(e) => {
+                          onChange={e => {
                             const updated = [...page.properties];
                             updated[index] = { ...prop, name: e.target.value };
                             setPage(prev => ({ ...prev, properties: updated }));
@@ -867,7 +950,7 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
                         <label>Type</label>
                         <select
                           value={prop.dataType}
-                          onChange={(e) => {
+                          onChange={e => {
                             const updated = [...page.properties];
                             updated[index] = { ...prop, dataType: e.target.value as PropertyType };
                             setPage(prev => ({ ...prev, properties: updated }));
@@ -875,7 +958,9 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
                           className="w-full px-2 py-1 border border-gray-300 rounded"
                         >
                           {Object.values(PropertyType).map(type => (
-                            <option key={type} value={type}>{type}</option>
+                            <option key={type} value={type}>
+                              {type}
+                            </option>
                           ))}
                         </select>
                       </div>
@@ -884,7 +969,7 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
                         <input
                           type="text"
                           value={prop.description}
-                          onChange={(e) => {
+                          onChange={e => {
                             const updated = [...page.properties];
                             updated[index] = { ...prop, description: e.target.value };
                             setPage(prev => ({ ...prev, properties: updated }));
@@ -898,7 +983,7 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
               </div>
             </div>
           )}
-          
+
           {activePanel === 'preview' && (
             <div className="p-4">
               <h3 className="text-lg font-medium mb-4">Generated VB6 Code</h3>
@@ -917,19 +1002,21 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
           <div className="w-80 bg-white border-l border-gray-200 overflow-y-auto">
             <div className="p-4">
               <h3 className="font-medium text-gray-700 mb-3">Control Properties</h3>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-600">Name</label>
                 <input
                   type="text"
                   value={selectedControl.control.name}
-                  onChange={(e) => updateControl(selectedControl.tabId, selectedControl.control.id, {
-                    name: e.target.value
-                  })}
+                  onChange={e =>
+                    updateControl(selectedControl.tabId, selectedControl.control.id, {
+                      name: e.target.value,
+                    })
+                  }
                   className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                 />
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-600">Position & Size</label>
                 <div className="grid grid-cols-2 gap-2">
@@ -938,9 +1025,11 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
                     <input
                       type="number"
                       value={selectedControl.control.left}
-                      onChange={(e) => updateControl(selectedControl.tabId, selectedControl.control.id, {
-                        left: Number(e.target.value)
-                      })}
+                      onChange={e =>
+                        updateControl(selectedControl.tabId, selectedControl.control.id, {
+                          left: Number(e.target.value),
+                        })
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     />
                   </div>
@@ -949,9 +1038,11 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
                     <input
                       type="number"
                       value={selectedControl.control.top}
-                      onChange={(e) => updateControl(selectedControl.tabId, selectedControl.control.id, {
-                        top: Number(e.target.value)
-                      })}
+                      onChange={e =>
+                        updateControl(selectedControl.tabId, selectedControl.control.id, {
+                          top: Number(e.target.value),
+                        })
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     />
                   </div>
@@ -960,9 +1051,11 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
                     <input
                       type="number"
                       value={selectedControl.control.width}
-                      onChange={(e) => updateControl(selectedControl.tabId, selectedControl.control.id, {
-                        width: Number(e.target.value)
-                      })}
+                      onChange={e =>
+                        updateControl(selectedControl.tabId, selectedControl.control.id, {
+                          width: Number(e.target.value),
+                        })
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     />
                   </div>
@@ -971,15 +1064,17 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
                     <input
                       type="number"
                       value={selectedControl.control.height}
-                      onChange={(e) => updateControl(selectedControl.tabId, selectedControl.control.id, {
-                        height: Number(e.target.value)
-                      })}
+                      onChange={e =>
+                        updateControl(selectedControl.tabId, selectedControl.control.id, {
+                          height: Number(e.target.value),
+                        })
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     />
                   </div>
                 </div>
               </div>
-              
+
               {/* Control-specific properties */}
               {selectedControl.control.properties.caption !== undefined && (
                 <div className="mb-4">
@@ -987,40 +1082,51 @@ export const PropertyPageDesigner: React.FC<PropertyPageDesignerProps> = ({
                   <input
                     type="text"
                     value={selectedControl.control.properties.caption}
-                    onChange={(e) => updateControl(selectedControl.tabId, selectedControl.control.id, {
-                      properties: { ...selectedControl.control.properties, caption: e.target.value }
-                    })}
+                    onChange={e =>
+                      updateControl(selectedControl.tabId, selectedControl.control.id, {
+                        properties: {
+                          ...selectedControl.control.properties,
+                          caption: e.target.value,
+                        },
+                      })
+                    }
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                   />
                 </div>
               )}
-              
+
               {selectedControl.control.properties.text !== undefined && (
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-600">Text</label>
                   <input
                     type="text"
                     value={selectedControl.control.properties.text}
-                    onChange={(e) => updateControl(selectedControl.tabId, selectedControl.control.id, {
-                      properties: { ...selectedControl.control.properties, text: e.target.value }
-                    })}
+                    onChange={e =>
+                      updateControl(selectedControl.tabId, selectedControl.control.id, {
+                        properties: { ...selectedControl.control.properties, text: e.target.value },
+                      })
+                    }
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                   />
                 </div>
               )}
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-600">Bound Property</label>
                 <select
                   value={selectedControl.control.boundProperty || ''}
-                  onChange={(e) => updateControl(selectedControl.tabId, selectedControl.control.id, {
-                    boundProperty: e.target.value || undefined
-                  })}
+                  onChange={e =>
+                    updateControl(selectedControl.tabId, selectedControl.control.id, {
+                      boundProperty: e.target.value || undefined,
+                    })
+                  }
                   className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                 >
                   <option value="">None</option>
                   {page.properties.map(prop => (
-                    <option key={prop.name} value={prop.name}>{prop.name}</option>
+                    <option key={prop.name} value={prop.name}>
+                      {prop.name}
+                    </option>
                   ))}
                 </select>
               </div>

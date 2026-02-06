@@ -1,6 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { X, Database, Plus, Trash2, Edit, Play, Table, Settings, Download, Upload } from 'lucide-react';
-import { vb6DatabaseService, ADOConnection, ADORecordset, ConnectionState } from '../../services/VB6DatabaseService';
+import {
+  X,
+  Database,
+  Plus,
+  Trash2,
+  Edit,
+  Play,
+  Table,
+  Settings,
+  Download,
+  Upload,
+} from 'lucide-react';
+import {
+  vb6DatabaseService,
+  ADOConnection,
+  ADORecordset,
+  ConnectionState,
+} from '../../services/VB6DatabaseService';
 import DatabaseConnectionDialog from '../Dialogs/DatabaseConnectionDialog';
 import DatabaseQueryBuilder from './DatabaseQueryBuilder';
 
@@ -26,17 +42,16 @@ interface DatabaseManagerProps {
   onClose: () => void;
 }
 
-export const DatabaseManager: React.FC<DatabaseManagerProps> = ({
-  visible,
-  onClose
-}) => {
+export const DatabaseManager: React.FC<DatabaseManagerProps> = ({ visible, onClose }) => {
   const [connections, setConnections] = useState<Map<string, DatabaseConnection>>(new Map());
   const [selectedConnection, setSelectedConnection] = useState<string | null>(null);
   const [availableTables, setAvailableTables] = useState<string[]>([]);
   const [queryHistory, setQueryHistory] = useState<QueryHistory[]>([]);
   const [showConnectionDialog, setShowConnectionDialog] = useState(false);
   const [showQueryBuilder, setShowQueryBuilder] = useState(false);
-  const [activeTab, setActiveTab] = useState<'connections' | 'tables' | 'queries' | 'history'>('connections');
+  const [activeTab, setActiveTab] = useState<'connections' | 'tables' | 'queries' | 'history'>(
+    'connections'
+  );
   const [editingConnection, setEditingConnection] = useState<string | null>(null);
   const [quickQuery, setQuickQuery] = useState('');
   const [queryResults, setQueryResults] = useState<any[]>([]);
@@ -61,7 +76,7 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({
   const loadConnections = () => {
     const serviceConnections = vb6DatabaseService.getAllConnections();
     const connectionMap = new Map<string, DatabaseConnection>();
-    
+
     serviceConnections.forEach((conn, name) => {
       connectionMap.set(name, {
         id: name,
@@ -69,10 +84,10 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({
         connectionString: conn.ConnectionString,
         connection: conn,
         isConnected: conn.State === ConnectionState.Open,
-        lastUsed: new Date()
+        lastUsed: new Date(),
       });
     });
-    
+
     setConnections(connectionMap);
   };
 
@@ -90,18 +105,18 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({
     const history: QueryHistory[] = [
       {
         id: '1',
-        sql: 'SELECT * FROM Customers WHERE Country = \'Germany\'',
+        sql: "SELECT * FROM Customers WHERE Country = 'Germany'",
         executedAt: new Date(Date.now() - 86400000),
         results: 11,
-        duration: 45
+        duration: 45,
       },
       {
         id: '2',
         sql: 'SELECT ProductName, UnitPrice FROM Products ORDER BY UnitPrice DESC',
         executedAt: new Date(Date.now() - 3600000),
         results: 77,
-        duration: 23
-      }
+        duration: 23,
+      },
     ];
     setQueryHistory(history);
   };
@@ -114,17 +129,17 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({
       connectionString,
       connection,
       isConnected: connection.State === ConnectionState.Open,
-      lastUsed: new Date()
+      lastUsed: new Date(),
     };
-    
+
     const updatedConnections = new Map(connections);
     updatedConnections.set(connectionId, newConnection);
     setConnections(updatedConnections);
-    
+
     if (!selectedConnection) {
       setSelectedConnection(connectionId);
     }
-    
+
     setShowConnectionDialog(false);
   };
 
@@ -134,16 +149,16 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({
       if (connection.isConnected) {
         await connection.connection.Close();
       }
-      
+
       const updatedConnections = new Map(connections);
       updatedConnections.delete(connectionId);
       setConnections(updatedConnections);
-      
+
       if (selectedConnection === connectionId) {
         setSelectedConnection(null);
         setAvailableTables([]);
       }
-      
+
       vb6DatabaseService.removeConnection(connectionId);
     }
   };
@@ -158,12 +173,12 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({
       } else {
         await connection.connection.Open();
       }
-      
+
       const updatedConnections = new Map(connections);
       updatedConnections.set(connectionId, {
         ...connection,
         isConnected: connection.connection.State === ConnectionState.Open,
-        lastUsed: new Date()
+        lastUsed: new Date(),
       });
       setConnections(updatedConnections);
     } catch (err: any) {
@@ -188,19 +203,18 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({
       const recordset = await connection.connection.Execute(quickQuery);
       const results = recordset.GetRows();
       const duration = Date.now() - startTime;
-      
+
       setQueryResults(results);
-      
+
       // Add to query history
       const historyEntry: QueryHistory = {
         id: Date.now().toString(),
         sql: quickQuery,
         executedAt: new Date(),
         results: results.length,
-        duration
+        duration,
       };
       setQueryHistory([historyEntry, ...queryHistory]);
-      
     } catch (err: any) {
       setError(`Query execution failed: ${err.message}`);
     } finally {
@@ -258,9 +272,11 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${
-                    conn.isConnected ? 'bg-green-500' : 'bg-gray-400'
-                  }`} />
+                  <div
+                    className={`w-3 h-3 rounded-full ${
+                      conn.isConnected ? 'bg-green-500' : 'bg-gray-400'
+                    }`}
+                  />
                   <div>
                     <h4 className="font-medium text-gray-900">{conn.name}</h4>
                     <p className="text-sm text-gray-600 font-mono truncate max-w-md">
@@ -341,7 +357,7 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({
           {availableTables.map(table => {
             const schema = vb6DatabaseService.getTableSchema(table);
             const fieldCount = Object.keys(schema).length;
-            
+
             return (
               <div key={table} className="bg-white border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
@@ -354,12 +370,14 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({
                   {fieldCount} field{fieldCount !== 1 ? 's' : ''}
                 </p>
                 <div className="space-y-1">
-                  {Object.entries(schema).slice(0, 5).map(([field, type]) => (
-                    <div key={field} className="flex justify-between text-xs">
-                      <span className="font-mono text-gray-700">{field}</span>
-                      <span className="text-gray-500">{type}</span>
-                    </div>
-                  ))}
+                  {Object.entries(schema)
+                    .slice(0, 5)
+                    .map(([field, type]) => (
+                      <div key={field} className="flex justify-between text-xs">
+                        <span className="font-mono text-gray-700">{field}</span>
+                        <span className="text-gray-500">{type}</span>
+                      </div>
+                    ))}
                   {fieldCount > 5 && (
                     <div className="text-xs text-gray-500">
                       ... and {fieldCount - 5} more fields
@@ -402,13 +420,11 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({
       ) : (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Quick Query
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Quick Query</label>
             <div className="flex gap-2">
               <textarea
                 value={quickQuery}
-                onChange={(e) => setQuickQuery(e.target.value)}
+                onChange={e => setQuickQuery(e.target.value)}
                 className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg font-mono"
                 rows={3}
                 placeholder="Enter your SQL query here..."
@@ -435,7 +451,8 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 max-h-60 overflow-auto">
                 <pre className="text-xs font-mono text-gray-700">
                   {JSON.stringify(queryResults.slice(0, 10), null, 2)}
-                  {queryResults.length > 10 && '\n... and ' + (queryResults.length - 10) + ' more rows'}
+                  {queryResults.length > 10 &&
+                    '\n... and ' + (queryResults.length - 10) + ' more rows'}
                 </pre>
               </div>
             </div>
@@ -448,7 +465,7 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({
   const renderHistoryTab = () => (
     <div className="p-4">
       <h3 className="text-lg font-semibold text-gray-800 mb-4">Query History</h3>
-      
+
       {queryHistory.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
           <Play size={48} className="mx-auto mb-4 opacity-20" />
@@ -511,7 +528,7 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({
                 { id: 'connections', label: 'Connections', icon: Database },
                 { id: 'tables', label: 'Tables', icon: Table },
                 { id: 'queries', label: 'Queries', icon: Play },
-                { id: 'history', label: 'History', icon: Settings }
+                { id: 'history', label: 'History', icon: Settings },
               ].map(tab => {
                 const Icon = tab.icon;
                 return (
@@ -560,19 +577,21 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({
       <DatabaseQueryBuilder
         visible={showQueryBuilder}
         onClose={() => setShowQueryBuilder(false)}
-        connection={selectedConnection ? connections.get(selectedConnection)?.connection : undefined}
+        connection={
+          selectedConnection ? connections.get(selectedConnection)?.connection : undefined
+        }
         onQueryResult={(sql, results) => {
           setQuickQuery(sql);
           setQueryResults(results);
           setShowQueryBuilder(false);
-          
+
           // Add to history
           const historyEntry: QueryHistory = {
             id: Date.now().toString(),
             sql,
             executedAt: new Date(),
             results: results.length,
-            duration: 0
+            duration: 0,
           };
           setQueryHistory([historyEntry, ...queryHistory]);
         }}

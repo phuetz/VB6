@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { vb6TestFramework, TestCase, AssertionResult } from '../../services/VB6TestFramework';
 import MonacoEditor from '@monaco-editor/react';
-import { 
-  Bug, 
-  Play, 
-  Pause, 
+import {
+  Bug,
+  Play,
+  Pause,
   StepForward,
   RotateCcw,
   Eye,
@@ -14,7 +14,7 @@ import {
   AlertTriangle,
   Code,
   List,
-  Activity
+  Activity,
 } from 'lucide-react';
 
 interface TestDebuggerProps {
@@ -34,11 +34,7 @@ interface DebugState {
   error: string | null;
 }
 
-const TestDebugger: React.FC<TestDebuggerProps> = ({ 
-  testCase, 
-  suiteId,
-  className = '' 
-}) => {
+const TestDebugger: React.FC<TestDebuggerProps> = ({ testCase, suiteId, className = '' }) => {
   const [debugState, setDebugState] = useState<DebugState>({
     isRunning: false,
     isPaused: false,
@@ -47,7 +43,7 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
     callStack: [],
     assertions: [],
     output: [],
-    error: null
+    error: null,
   });
 
   const [activeTab, setActiveTab] = useState<'code' | 'variables' | 'output'>('code');
@@ -66,7 +62,7 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
       callStack: [],
       assertions: [],
       output: [],
-      error: null
+      error: null,
     });
     setBreakpoints(new Set());
   }, [testCase.id]);
@@ -79,7 +75,7 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
       currentLine: 1,
       error: null,
       output: [`[${new Date().toLocaleTimeString()}] Debug session started`],
-      assertions: []
+      assertions: [],
     }));
 
     try {
@@ -89,7 +85,7 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
       setDebugState(prev => ({
         ...prev,
         error: error instanceof Error ? error.message : 'Unknown error',
-        isRunning: false
+        isRunning: false,
       }));
     }
   }, [testCase]);
@@ -97,12 +93,12 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
   const simulateTestExecution = async () => {
     // This is a simplified simulation. In a real implementation,
     // this would integrate with the actual VB6 runtime debugger
-    
+
     const lines = testCase.code.split('\n');
-    
+
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
-      
+
       // Check for breakpoint
       if (breakpoints.has(i + 1)) {
         setDebugState(prev => ({ ...prev, isPaused: true, currentLine: i + 1 }));
@@ -130,7 +126,7 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
     setDebugState(prev => ({
       ...prev,
       isRunning: false,
-      output: [...prev.output, `[${new Date().toLocaleTimeString()}] Test execution completed`]
+      output: [...prev.output, `[${new Date().toLocaleTimeString()}] Test execution completed`],
     }));
   };
 
@@ -158,13 +154,16 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
         actual: 'actual value',
         passed: Math.random() > 0.3, // Simulate 70% pass rate
         message: `Assertion ${method} on line ${debugState.currentLine}`,
-        location: { line: debugState.currentLine, column: 0 }
+        location: { line: debugState.currentLine, column: 0 },
       };
 
       setDebugState(prev => ({
         ...prev,
         assertions: [...prev.assertions, assertion],
-        output: [...prev.output, `[${new Date().toLocaleTimeString()}] ${assertion.passed ? 'PASS' : 'FAIL'}: ${assertion.message}`]
+        output: [
+          ...prev.output,
+          `[${new Date().toLocaleTimeString()}] ${assertion.passed ? 'PASS' : 'FAIL'}: ${assertion.message}`,
+        ],
       }));
     }
   };
@@ -178,8 +177,8 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
         ...prev,
         variables: {
           ...prev.variables,
-          [varName]: value.replace(/"/g, '')
-        }
+          [varName]: value.replace(/"/g, ''),
+        },
       }));
     }
   };
@@ -197,7 +196,7 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
     setDebugState(prev => ({
       ...prev,
       currentLine: Math.min(prev.currentLine + 1, testCase.code.split('\n').length),
-      isPaused: true
+      isPaused: true,
     }));
   }, [testCase]);
 
@@ -210,7 +209,7 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
       callStack: [],
       assertions: [],
       output: [],
-      error: null
+      error: null,
     });
   }, []);
 
@@ -278,11 +277,7 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
           >
             <StepForward size={14} />
           </button>
-          <button
-            onClick={restart}
-            className="p-1 hover:bg-blue-700 rounded"
-            title="Restart"
-          >
+          <button onClick={restart} className="p-1 hover:bg-blue-700 rounded" title="Restart">
             <RotateCcw size={14} />
           </button>
         </div>
@@ -335,24 +330,27 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
                     fontSize: 12,
                     lineNumbers: 'on',
                     glyphMargin: true,
-                    scrollBeyondLastLine: false
+                    scrollBeyondLastLine: false,
                   }}
-                  onMount={(editor) => {
+                  onMount={editor => {
                     // Add current line highlighting
-                    editor.deltaDecorations([], [
-                      {
-                        range: {
-                          startLineNumber: debugState.currentLine,
-                          startColumn: 1,
-                          endLineNumber: debugState.currentLine,
-                          endColumn: 1
+                    editor.deltaDecorations(
+                      [],
+                      [
+                        {
+                          range: {
+                            startLineNumber: debugState.currentLine,
+                            startColumn: 1,
+                            endLineNumber: debugState.currentLine,
+                            endColumn: 1,
+                          },
+                          options: {
+                            isWholeLine: true,
+                            className: 'bg-yellow-200',
+                          },
                         },
-                        options: {
-                          isWholeLine: true,
-                          className: 'bg-yellow-200'
-                        }
-                      }
-                    ]);
+                      ]
+                    );
 
                     // Add breakpoint markers
                     const breakpointDecorations = Array.from(breakpoints).map(line => ({
@@ -360,20 +358,21 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
                         startLineNumber: line,
                         startColumn: 1,
                         endLineNumber: line,
-                        endColumn: 1
+                        endColumn: 1,
                       },
                       options: {
                         isWholeLine: false,
                         glyphMarginClassName: 'bg-red-500 rounded-full w-3 h-3',
-                        glyphMarginHoverMessage: { value: 'Breakpoint' }
-                      }
+                        glyphMarginHoverMessage: { value: 'Breakpoint' },
+                      },
                     }));
-                    
+
                     editor.deltaDecorations([], breakpointDecorations);
 
                     // Handle glyph margin clicks for breakpoints
-                    editor.onMouseDown((e) => {
-                      if (e.target.type === 2) { // Glyph margin
+                    editor.onMouseDown(e => {
+                      if (e.target.type === 2) {
+                        // Glyph margin
                         const lineNumber = e.target.position?.lineNumber;
                         if (lineNumber) {
                           toggleBreakpoint(lineNumber);
@@ -391,7 +390,10 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
                   <h4 className="text-sm font-semibold mb-2">Local Variables</h4>
                   <div className="space-y-1">
                     {Object.entries(debugState.variables).map(([name, value]) => (
-                      <div key={name} className="flex justify-between text-xs font-mono bg-gray-50 p-2 rounded">
+                      <div
+                        key={name}
+                        className="flex justify-between text-xs font-mono bg-gray-50 p-2 rounded"
+                      >
                         <span className="text-blue-600">{name}</span>
                         <span className="text-gray-700">{JSON.stringify(value)}</span>
                       </div>
@@ -406,7 +408,10 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
                   <h4 className="text-sm font-semibold mb-2">Watch Expressions</h4>
                   <div className="space-y-1 mb-2">
                     {watchExpressions.map((expr, index) => (
-                      <div key={index} className="flex items-center justify-between text-xs font-mono bg-gray-50 p-2 rounded">
+                      <div
+                        key={index}
+                        className="flex items-center justify-between text-xs font-mono bg-gray-50 p-2 rounded"
+                      >
                         <span className="text-blue-600">{expr}</span>
                         <button
                           onClick={() => removeWatchExpression(index)}
@@ -421,8 +426,8 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
                     <input
                       type="text"
                       value={newWatchExpression}
-                      onChange={(e) => setNewWatchExpression(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && addWatchExpression()}
+                      onChange={e => setNewWatchExpression(e.target.value)}
+                      onKeyPress={e => e.key === 'Enter' && addWatchExpression()}
                       placeholder="Add watch expression"
                       className="flex-1 px-2 py-1 text-xs border rounded"
                     />
@@ -441,12 +446,14 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
               <div className="p-3 overflow-y-auto">
                 <div className="space-y-1 font-mono text-xs">
                   {debugState.output.map((line, index) => (
-                    <div 
-                      key={index} 
+                    <div
+                      key={index}
                       className={`${
-                        line.includes('FAIL') ? 'text-red-600' : 
-                        line.includes('PASS') ? 'text-green-600' : 
-                        'text-gray-700'
+                        line.includes('FAIL')
+                          ? 'text-red-600'
+                          : line.includes('PASS')
+                            ? 'text-green-600'
+                            : 'text-gray-700'
                       }`}
                     >
                       {line}
@@ -477,11 +484,11 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
             <div className="flex-1 overflow-y-auto p-3">
               <div className="space-y-2">
                 {debugState.assertions.map((assertion, index) => (
-                  <div 
+                  <div
                     key={index}
                     className={`p-2 rounded text-xs ${
-                      assertion.passed 
-                        ? 'bg-green-50 border border-green-200' 
+                      assertion.passed
+                        ? 'bg-green-50 border border-green-200'
                         : 'bg-red-50 border border-red-200'
                     }`}
                   >
@@ -496,9 +503,7 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
                         <span className="text-gray-500">Line {assertion.location.line}</span>
                       )}
                     </div>
-                    {assertion.message && (
-                      <div className="mt-1">{assertion.message}</div>
-                    )}
+                    {assertion.message && <div className="mt-1">{assertion.message}</div>}
                     <div className="mt-1 font-mono text-xs">
                       <div>Expected: {JSON.stringify(assertion.expected)}</div>
                       <div>Actual: {JSON.stringify(assertion.actual)}</div>
@@ -523,9 +528,11 @@ const TestDebugger: React.FC<TestDebuggerProps> = ({
             <div className="space-y-1 text-xs">
               <div className="flex justify-between">
                 <span className="text-gray-600">State:</span>
-                <span className={`font-medium ${
-                  debugState.isRunning ? 'text-green-600' : 'text-gray-700'
-                }`}>
+                <span
+                  className={`font-medium ${
+                    debugState.isRunning ? 'text-green-600' : 'text-gray-700'
+                  }`}
+                >
                   {debugState.isRunning ? (debugState.isPaused ? 'Paused' : 'Running') : 'Stopped'}
                 </span>
               </div>

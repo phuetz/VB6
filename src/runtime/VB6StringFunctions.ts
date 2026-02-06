@@ -1,6 +1,6 @@
 /**
  * VB6 String Functions Implementation
- * 
+ *
  * Complete implementation of VB6 string manipulation functions
  */
 
@@ -9,7 +9,7 @@ export const VB6StringConstants = {
   vbBinaryCompare: 0,
   vbTextCompare: 1,
   vbDatabaseCompare: 2,
-  
+
   // StrConv constants
   vbUpperCase: 1,
   vbLowerCase: 2,
@@ -19,26 +19,30 @@ export const VB6StringConstants = {
   vbKatakana: 16,
   vbHiragana: 32,
   vbUnicode: 64,
-  vbFromUnicode: 128
+  vbFromUnicode: 128,
 };
 
 /**
  * Compare two strings with specified comparison method
  * StrComp(string1, string2, [compare])
  */
-export function StrComp(string1: string, string2: string, compare: number = VB6StringConstants.vbBinaryCompare): number {
+export function StrComp(
+  string1: string,
+  string2: string,
+  compare: number = VB6StringConstants.vbBinaryCompare
+): number {
   if (string1 === null || string1 === undefined) string1 = '';
   if (string2 === null || string2 === undefined) string2 = '';
-  
+
   let str1 = String(string1);
   let str2 = String(string2);
-  
+
   // Apply comparison type
   if (compare === VB6StringConstants.vbTextCompare) {
     str1 = str1.toLowerCase();
     str2 = str2.toLowerCase();
   }
-  
+
   if (str1 < str2) return -1;
   if (str1 > str2) return 1;
   return 0;
@@ -50,22 +54,22 @@ export function StrComp(string1: string, string2: string, compare: number = VB6S
  */
 export function StrConv(inputString: string, conversion: number, LCID?: number): string {
   if (inputString === null || inputString === undefined) return '';
-  
+
   let result = String(inputString);
-  
+
   // Apply conversions (can be combined with bitwise OR)
   if (conversion & VB6StringConstants.vbUpperCase) {
     result = result.toUpperCase();
   }
-  
+
   if (conversion & VB6StringConstants.vbLowerCase) {
     result = result.toLowerCase();
   }
-  
+
   if (conversion & VB6StringConstants.vbProperCase) {
     result = result.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
   }
-  
+
   // Note: vbWide, vbNarrow, vbKatakana, vbHiragana would require complex Unicode handling
   // Simplified implementation for web environment
   if (conversion & VB6StringConstants.vbWide) {
@@ -73,20 +77,20 @@ export function StrConv(inputString: string, conversion: number, LCID?: number):
     result = result.replace(/[A-Za-z0-9]/g, char => {
       const code = char.charCodeAt(0);
       if (code >= 33 && code <= 126) {
-        return String.fromCharCode(code - 33 + 0xFF01);
+        return String.fromCharCode(code - 33 + 0xff01);
       }
       return char;
     });
   }
-  
+
   if (conversion & VB6StringConstants.vbNarrow) {
     // Convert to half-width characters (simplified)
     result = result.replace(/[\uFF01-\uFF5E]/g, char => {
       const code = char.charCodeAt(0);
-      return String.fromCharCode(code - 0xFF01 + 33);
+      return String.fromCharCode(code - 0xff01 + 33);
     });
   }
-  
+
   return result;
 }
 
@@ -114,14 +118,14 @@ export function Space(number: number): string {
  */
 export function StringFunc(number: number, character: string | number): string {
   if (number < 0) return '';
-  
+
   let char: string;
   if (typeof character === 'number') {
     char = String.fromCharCode(character);
   } else {
     char = String(character).charAt(0) || ' ';
   }
-  
+
   return char.repeat(Math.floor(number));
 }
 
@@ -136,14 +140,15 @@ export function Filter(
   compare: number = VB6StringConstants.vbBinaryCompare
 ): string[] {
   if (!Array.isArray(sourceArray)) return [];
-  
+
   const matchStr = String(match);
-  const compareFunc = compare === VB6StringConstants.vbTextCompare 
-    ? (s: string) => s.toLowerCase()
-    : (s: string) => s;
-  
+  const compareFunc =
+    compare === VB6StringConstants.vbTextCompare
+      ? (s: string) => s.toLowerCase()
+      : (s: string) => s;
+
   const normalizedMatch = compareFunc(matchStr);
-  
+
   return sourceArray.filter(item => {
     const normalizedItem = compareFunc(String(item));
     const contains = normalizedItem.indexOf(normalizedMatch) >= 0;
@@ -162,18 +167,18 @@ export function Split(
   compare: number = VB6StringConstants.vbBinaryCompare
 ): string[] {
   if (expression === null || expression === undefined) return [''];
-  
+
   const str = String(expression);
   const delim = String(delimiter);
-  
+
   if (delim === '') {
     // Split every character
     const chars = str.split('');
     return limit > 0 ? chars.slice(0, limit) : chars;
   }
-  
+
   let parts: string[];
-  
+
   if (compare === VB6StringConstants.vbTextCompare) {
     // Case-insensitive split (more complex implementation needed)
     const regex = new RegExp(delim.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
@@ -181,7 +186,7 @@ export function Split(
   } else {
     parts = str.split(delim);
   }
-  
+
   return limit > 0 ? parts.slice(0, limit) : parts;
 }
 
@@ -208,30 +213,30 @@ export function Replace(
 ): string {
   if (expression === null || expression === undefined) return '';
   if (find === null || find === undefined) return String(expression);
-  
+
   let str = String(expression);
   const findStr = String(find);
   const replaceStr = String(replaceWith);
-  
+
   // Adjust for VB6 1-based indexing
   const startIndex = Math.max(0, start - 1);
   str = str.substring(startIndex);
-  
+
   if (findStr === '') return str;
-  
+
   let flags = 'g';
   if (compare === VB6StringConstants.vbTextCompare) {
     flags += 'i';
   }
-  
+
   const regex = new RegExp(findStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), flags);
-  
+
   if (count === -1) {
     return str.replace(regex, replaceStr);
   } else {
     let result = str;
     let replacements = 0;
-    
+
     result = result.replace(regex, (match, ...args) => {
       if (replacements < count) {
         replacements++;
@@ -239,7 +244,7 @@ export function Replace(
       }
       return match;
     });
-    
+
     return result;
   }
 }
@@ -272,10 +277,10 @@ export function Right(inputString: string, length: number): string {
 export function Mid(inputString: string, start: number, length?: number): string {
   if (inputString === null || inputString === undefined) return '';
   const str = String(inputString);
-  
+
   // VB6 uses 1-based indexing
   const startIndex = Math.max(0, start - 1);
-  
+
   if (length === undefined) {
     return str.substring(startIndex);
   } else {
@@ -299,7 +304,7 @@ export function InStr(
   let searchIn: string;
   let searchFor: string;
   let compareType: number;
-  
+
   if (typeof start === 'string') {
     // InStr(string1, string2, [compare])
     startPos = 1;
@@ -313,20 +318,20 @@ export function InStr(
     searchFor = string2 || '';
     compareType = compare || VB6StringConstants.vbBinaryCompare;
   }
-  
+
   if (searchIn === '' || searchFor === '') return 0;
-  
+
   // Adjust for VB6 1-based indexing
   const startIndex = Math.max(0, startPos - 1);
   const substr = searchIn.substring(startIndex);
-  
+
   let index: number;
   if (compareType === VB6StringConstants.vbTextCompare) {
     index = substr.toLowerCase().indexOf(searchFor.toLowerCase());
   } else {
     index = substr.indexOf(searchFor);
   }
-  
+
   return index >= 0 ? index + startIndex + 1 : 0; // Convert back to 1-based
 }
 
@@ -342,25 +347,25 @@ export function InStrRev(
 ): number {
   if (stringCheck === null || stringCheck === undefined) return 0;
   if (stringMatch === null || stringMatch === undefined) return 0;
-  
+
   const checkStr = String(stringCheck);
   const matchStr = String(stringMatch);
-  
+
   if (checkStr === '' || matchStr === '') return 0;
-  
+
   let searchStr = checkStr;
   if (start !== undefined && start > 0) {
     // VB6 uses 1-based indexing
     searchStr = checkStr.substring(0, start);
   }
-  
+
   let index: number;
   if (compare === VB6StringConstants.vbTextCompare) {
     index = searchStr.toLowerCase().lastIndexOf(matchStr.toLowerCase());
   } else {
     index = searchStr.lastIndexOf(matchStr);
   }
-  
+
   return index >= 0 ? index + 1 : 0; // Convert to 1-based
 }
 
@@ -467,10 +472,10 @@ export function IsNumeric(expression: any): boolean {
 export function Like(inputString: string, pattern: string): boolean {
   if (inputString === null || inputString === undefined) inputString = '';
   if (pattern === null || pattern === undefined) pattern = '';
-  
+
   const str = String(inputString);
   const pat = String(pattern);
-  
+
   // Convert VB6 Like pattern to RegExp
   const regexPattern = pat
     .replace(/\\/g, '\\\\')
@@ -485,9 +490,9 @@ export function Like(inputString: string, pattern: string): boolean {
     .replace(/\}/g, '\\}')
     .replace(/\[/g, '\\[')
     .replace(/\]/g, '\\]')
-    .replace(/\?/g, '.')        // ? matches any single character
-    .replace(/\*/g, '.*');      // * matches any sequence of characters
-  
+    .replace(/\?/g, '.') // ? matches any single character
+    .replace(/\*/g, '.*'); // * matches any sequence of characters
+
   try {
     const regex = new RegExp(`^${regexPattern}$`, 'i');
     return regex.test(str);
@@ -523,5 +528,5 @@ export const VB6StringFunctions = {
   IsAlpha,
   IsNumeric,
   Like,
-  VB6StringConstants
+  VB6StringConstants,
 };

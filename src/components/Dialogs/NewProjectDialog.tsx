@@ -1,5 +1,5 @@
 import React from 'react';
-import { useVB6 } from '../../context/VB6Context';
+import { useWindowStore } from '../../stores/windowStore';
 
 const projectTemplates = [
   { name: 'Standard EXE', description: 'A standard Windows application', icon: '🖥️' },
@@ -15,15 +15,21 @@ const projectTemplates = [
 ];
 
 const NewProjectDialog: React.FC = () => {
-  const { dispatch } = useVB6();
+  const windowShowDialog = useWindowStore(state => state.showDialog);
 
   const handleClose = () => {
-    dispatch({ type: 'SHOW_DIALOG', payload: { dialogName: 'showNewProjectDialog', show: false } });
+    windowShowDialog('showNewProjectDialog', false);
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-200 border-2 border-gray-400 shadow-lg" style={{ width: '500px' }}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="New Project"
+        className="bg-gray-200 border-2 border-gray-400 shadow-lg"
+        style={{ width: '500px' }}
+      >
         <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
           <span>New Project</span>
           <button onClick={handleClose} className="text-white hover:bg-blue-700 px-2">

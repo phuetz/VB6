@@ -26,7 +26,7 @@ export * from './VB6DatabaseObjects';
 export * from './VB6FileSystem';
 export * from './VB6FileSystemObject';
 export * from './VB6FileFunctions';
-export * from './VB6FileIOComplete';  // Complete file I/O with Lock/Unlock/Reset
+export * from './VB6FileIOComplete'; // Complete file I/O with Lock/Unlock/Reset
 
 // String Functions
 export * from './VB6StringFunctions';
@@ -35,7 +35,7 @@ export * from './VB6FormatFunctions';
 
 // Math Functions
 export * from './VB6MathFunctions';
-export * from './VB6FinancialFunctions';  // Financial functions (PV, FV, NPV, IRR, etc.)
+export * from './VB6FinancialFunctions'; // Financial functions (PV, FV, NPV, IRR, etc.)
 
 // Date/Time Functions
 export * from './VB6DateTimeFunctions';
@@ -116,11 +116,11 @@ export * from './VB6DataBinding';
 export * from './VB6FinalRuntimeFunctions';
 export * from './VB6UltimateMissingFunctions';
 export * from './VB6MissingStatements';
-export * from './VB6PrintFormatting';  // Print formatting (Spc, Tab, Width, Call, Currency, End)
-export * from './VB6FinalOperators';  // Is, With blocks, Mid statement, Xor, Not
-export * from './VB6ConditionalCompilation';  // #If...#Then...#Else...#End If
-export * from './VB6NamedArguments';  // Named arguments with := syntax
-export * from './VB6FormGraphics';  // Print, TextWidth, TextHeight for forms/pictureboxes
+export * from './VB6PrintFormatting'; // Print formatting (Spc, Tab, Width, Call, Currency, End)
+export * from './VB6FinalOperators'; // Is, With blocks, Mid statement, Xor, Not
+export * from './VB6ConditionalCompilation'; // #If...#Then...#Else...#End If
+export * from './VB6NamedArguments'; // Named arguments with := syntax
+export * from './VB6FormGraphics'; // Print, TextWidth, TextHeight for forms/pictureboxes
 
 // Complete VB6 Constants Library
 export * from './VB6Constants';
@@ -139,20 +139,25 @@ export * from './managers';
  * Call this to ensure all VB6 functionality is available globally
  */
 export function initializeVB6Runtime(): void {
-  console.log('═══════════════════════════════════════════════════════════════');
-  console.log('║  VB6 WEB IDE - RUNTIME INITIALIZED                         ║');
-  console.log('║  Version: 6.0.100.0 (TRUE 100% Compatibility)              ║');
-  console.log('║  Status: ALL FEATURES LOADED                               ║');
-  console.log('║  Compatibility: 100% COMPLETE                              ║');
-  console.log('═══════════════════════════════════════════════════════════════');
-  
   // Verify critical functions
   const criticalFunctions = [
-    'MsgBox', 'InputBox', 'Format', 'DateAdd', 'CreateObject',
-    'LoadPicture', 'SavePicture', 'Dir', 'Kill', 'Open',
-    'StrPtr', 'ObjPtr', 'VarPtr', 'Error', 'IMEStatus'
+    'MsgBox',
+    'InputBox',
+    'Format',
+    'DateAdd',
+    'CreateObject',
+    'LoadPicture',
+    'SavePicture',
+    'Dir',
+    'Kill',
+    'Open',
+    'StrPtr',
+    'ObjPtr',
+    'VarPtr',
+    'Error',
+    'IMEStatus',
   ];
-  
+
   let allLoaded = true;
   criticalFunctions.forEach(func => {
     if (typeof (window as any)[func] === 'undefined') {
@@ -160,32 +165,8 @@ export function initializeVB6Runtime(): void {
       allLoaded = false;
     }
   });
-  
-  if (allLoaded) {
-    console.log('✅ All critical VB6 functions verified and loaded');
-  }
-  
+
   // Display feature summary
-  console.log('\n📊 Feature Summary:');
-  console.log('  • Language Features: 100% Complete');
-  console.log('  • Runtime Functions: 211+ functions loaded');
-  console.log('  • Constants Library: 400+ constants available');
-  console.log('  • Controls: 58+ controls available');
-  console.log('  • Database: DAO, ADO, RDO support');
-  console.log('  • File System: Full FSO + Lock/Unlock/Reset');
-  console.log('  • Graphics: Complete drawing API + Form graphics');
-  console.log('  • COM/ActiveX: Full support');
-  console.log('  • DDE: Dynamic Data Exchange ready');
-  console.log('  • Pointers: StrPtr/ObjPtr/VarPtr available');
-  console.log('  • IME: Input Method Editor support');
-  console.log('  • Error Messages: Complete database');
-  console.log('  • Financial Functions: All 15 functions');
-  console.log('  • Conditional Compilation: #If...#Then support');
-  console.log('  • Named Arguments: := operator support');
-  console.log('  • Form Methods: Print, TextWidth, TextHeight');
-  
-  console.log('\n🎯 TRUE 100% VB6 Compatibility Achieved!');
-  console.log('═══════════════════════════════════════════════════════════════\n');
 }
 
 // Auto-initialize if in browser environment
@@ -208,7 +189,7 @@ if (typeof window !== 'undefined') {
 export const VB6Runtime = {
   // Initialization
   initialize: initializeVB6Runtime,
-  
+
   // Version info
   version: '6.0.100.0',
   compatibility: '100%',
@@ -222,50 +203,184 @@ export const VB6Runtime = {
     dde: true,
     pointers: true,
     ime: true,
-    errors: true
+    errors: true,
   },
-  
+
   // Feature check
   isFeatureAvailable(feature: string): boolean {
     return typeof (window as any)[feature] !== 'undefined';
   },
-  
+
   // Get all available functions
   getAvailableFunctions(): string[] {
     const functions: string[] = [];
     const vb6Functions = [
-      'Abs', 'Array', 'Asc', 'Atn', 'Beep', 'CallByName', 'CBool', 'CByte',
-      'CCur', 'CDate', 'CDbl', 'CDec', 'ChDir', 'ChDrive', 'Choose', 'Chr',
-      'CInt', 'CLng', 'Close', 'Command', 'Cos', 'CreateObject', 'CSng', 'CStr',
-      'CurDir', 'CVar', 'CVErr', 'Date', 'DateAdd', 'DateDiff', 'DatePart',
-      'DateSerial', 'DateValue', 'Day', 'DDB', 'DeleteSetting', 'Dir', 'DoEvents',
-      'Environ', 'EOF', 'Error', 'Exp', 'FileAttr', 'FileCopy', 'FileDateTime',
-      'FileLen', 'Filter', 'Fix', 'Format', 'FreeFile', 'FV', 'GetAllSettings',
-      'GetAttr', 'GetObject', 'GetSetting', 'Hex', 'Hour', 'IIf', 'IMEStatus',
-      'Input', 'InputBox', 'InStr', 'InStrRev', 'Int', 'IPmt', 'IRR', 'IsArray',
-      'IsDate', 'IsEmpty', 'IsError', 'IsMissing', 'IsNull', 'IsNumeric', 'IsObject',
-      'Join', 'Kill', 'LBound', 'LCase', 'Left', 'Len', 'Load', 'LoadPicture',
-      'Loc', 'LOF', 'Log', 'LTrim', 'Mid', 'Minute', 'MIRR', 'MkDir', 'Month',
-      'MonthName', 'MsgBox', 'Name', 'Now', 'NPer', 'NPV', 'Oct', 'ObjPtr',
-      'Open', 'Partition', 'Pmt', 'PPmt', 'Print', 'Put', 'PV', 'QBColor',
-      'Randomize', 'Rate', 'Replace', 'Reset', 'RGB', 'Right', 'RmDir', 'Rnd',
-      'Round', 'RTrim', 'SavePicture', 'SaveSetting', 'Second', 'Seek', 'Sgn',
-      'Shell', 'Sin', 'SLN', 'Space', 'Spc', 'Split', 'Sqr', 'Str', 'StrComp',
-      'StrConv', 'String', 'StrPtr', 'StrReverse', 'Switch', 'SYD', 'Tab', 'Tan',
-      'Time', 'Timer', 'TimeSerial', 'TimeValue', 'Trim', 'TypeName', 'UBound',
-      'UCase', 'Unload', 'Val', 'VarPtr', 'VarType', 'Weekday', 'WeekdayName',
-      'Write', 'Year'
+      'Abs',
+      'Array',
+      'Asc',
+      'Atn',
+      'Beep',
+      'CallByName',
+      'CBool',
+      'CByte',
+      'CCur',
+      'CDate',
+      'CDbl',
+      'CDec',
+      'ChDir',
+      'ChDrive',
+      'Choose',
+      'Chr',
+      'CInt',
+      'CLng',
+      'Close',
+      'Command',
+      'Cos',
+      'CreateObject',
+      'CSng',
+      'CStr',
+      'CurDir',
+      'CVar',
+      'CVErr',
+      'Date',
+      'DateAdd',
+      'DateDiff',
+      'DatePart',
+      'DateSerial',
+      'DateValue',
+      'Day',
+      'DDB',
+      'DeleteSetting',
+      'Dir',
+      'DoEvents',
+      'Environ',
+      'EOF',
+      'Error',
+      'Exp',
+      'FileAttr',
+      'FileCopy',
+      'FileDateTime',
+      'FileLen',
+      'Filter',
+      'Fix',
+      'Format',
+      'FreeFile',
+      'FV',
+      'GetAllSettings',
+      'GetAttr',
+      'GetObject',
+      'GetSetting',
+      'Hex',
+      'Hour',
+      'IIf',
+      'IMEStatus',
+      'Input',
+      'InputBox',
+      'InStr',
+      'InStrRev',
+      'Int',
+      'IPmt',
+      'IRR',
+      'IsArray',
+      'IsDate',
+      'IsEmpty',
+      'IsError',
+      'IsMissing',
+      'IsNull',
+      'IsNumeric',
+      'IsObject',
+      'Join',
+      'Kill',
+      'LBound',
+      'LCase',
+      'Left',
+      'Len',
+      'Load',
+      'LoadPicture',
+      'Loc',
+      'LOF',
+      'Log',
+      'LTrim',
+      'Mid',
+      'Minute',
+      'MIRR',
+      'MkDir',
+      'Month',
+      'MonthName',
+      'MsgBox',
+      'Name',
+      'Now',
+      'NPer',
+      'NPV',
+      'Oct',
+      'ObjPtr',
+      'Open',
+      'Partition',
+      'Pmt',
+      'PPmt',
+      'Print',
+      'Put',
+      'PV',
+      'QBColor',
+      'Randomize',
+      'Rate',
+      'Replace',
+      'Reset',
+      'RGB',
+      'Right',
+      'RmDir',
+      'Rnd',
+      'Round',
+      'RTrim',
+      'SavePicture',
+      'SaveSetting',
+      'Second',
+      'Seek',
+      'Sgn',
+      'Shell',
+      'Sin',
+      'SLN',
+      'Space',
+      'Spc',
+      'Split',
+      'Sqr',
+      'Str',
+      'StrComp',
+      'StrConv',
+      'String',
+      'StrPtr',
+      'StrReverse',
+      'Switch',
+      'SYD',
+      'Tab',
+      'Tan',
+      'Time',
+      'Timer',
+      'TimeSerial',
+      'TimeValue',
+      'Trim',
+      'TypeName',
+      'UBound',
+      'UCase',
+      'Unload',
+      'Val',
+      'VarPtr',
+      'VarType',
+      'Weekday',
+      'WeekdayName',
+      'Write',
+      'Year',
     ];
-    
+
     vb6Functions.forEach(func => {
       if (this.isFeatureAvailable(func)) {
         functions.push(func);
       }
     });
-    
+
     return functions;
   },
-  
+
   // Statistics
   getStatistics(): object {
     return {
@@ -274,9 +389,9 @@ export const VB6Runtime = {
       version: this.version,
       features: this.features,
       runtime: 'Browser-based',
-      platform: 'Cross-platform'
+      platform: 'Cross-platform',
     };
-  }
+  },
 };
 
 // Export as default

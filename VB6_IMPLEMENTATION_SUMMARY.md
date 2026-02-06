@@ -9,9 +9,11 @@ Cette mise à jour massive ajoute **5 fonctionnalités VB6 critiques** manquante
 ## ✅ **FONCTIONNALITÉS IMPLÉMENTÉES**
 
 ### **1. 🔌 DECLARE STATEMENTS - Support DLL Externes**
+
 **Fichier:** `src/runtime/VB6DeclareSupport.ts`
 
 #### Capacités:
+
 - ✅ Parsing complet des déclarations `Declare Function/Sub`
 - ✅ Support des alias (`Alias "GetWindowTextA"`)
 - ✅ Gestion des paramètres ByVal/ByRef
@@ -19,6 +21,7 @@ Cette mise à jour massive ajoute **5 fonctionnalités VB6 critiques** manquante
 - ✅ Registry centralisé des déclarations externes
 
 #### APIs Windows Implémentées:
+
 ```vb
 ' User32.dll
 Declare Function GetWindowText Lib "user32" (ByVal hwnd As Long, ByVal lpString As String, ByVal cch As Long) As Long
@@ -44,6 +47,7 @@ Declare Function PlaySound Lib "winmm" (ByVal soundName As String, ByVal hmod As
 ```
 
 #### Utilisation:
+
 ```typescript
 // Enregistrer une déclaration
 VB6DeclareRegistry.registerDeclare({
@@ -62,9 +66,11 @@ const result = VB6DeclareRegistry.callDeclaredFunction('MessageBox', 'user32', 0
 ---
 
 ### **2. 🎛️ MENU DESIGNER - Éditeur Visuel de Menus**
+
 **Fichier:** `src/components/Designer/MenuDesigner.tsx`
 
 #### Capacités:
+
 - ✅ Interface visuelle drag & drop pour créer des menus
 - ✅ Hiérarchie illimitée de sous-menus
 - ✅ Support des raccourcis clavier (Ctrl+S, F1-F12, etc.)
@@ -76,22 +82,24 @@ const result = VB6DeclareRegistry.callDeclaredFunction('MessageBox', 'user32', 0
 - ✅ WindowList pour MDI
 
 #### Structure de Menu VB6:
+
 ```typescript
 interface VB6MenuItem {
-  name: string;           // mnuFile
-  caption: string;        // "&File"
-  index?: number;         // Pour control arrays
-  shortcut?: string;      // "Ctrl+S"
+  name: string; // mnuFile
+  caption: string; // "&File"
+  index?: number; // Pour control arrays
+  shortcut?: string; // "Ctrl+S"
   checked?: boolean;
   enabled?: boolean;
   visible?: boolean;
-  windowList?: boolean;   // Pour MDI
+  windowList?: boolean; // Pour MDI
   children?: VB6MenuItem[];
   isSeparator?: boolean;
 }
 ```
 
 #### Fonctionnalités de l'Éditeur:
+
 - **Toolbar:** Ajouter, supprimer, indenter, déplacer les éléments
 - **Drag & Drop:** Réorganiser les menus visuellement
 - **Properties Panel:** Éditer toutes les propriétés VB6
@@ -101,9 +109,11 @@ interface VB6MenuItem {
 ---
 
 ### **3. 🪟 MDI FORMS - Interface Multi-Documents**
+
 **Fichier:** `src/components/Forms/MDIForm.tsx`
 
 #### Capacités:
+
 - ✅ Container MDI complet avec fenêtres enfants
 - ✅ Fenêtres déplaçables et redimensionnables
 - ✅ Minimiser/Maximiser/Restaurer
@@ -113,16 +123,18 @@ interface VB6MenuItem {
 - ✅ Support du background personnalisé
 
 #### Modes d'Arrangement:
+
 ```typescript
 enum VbArrangeConstants {
-  vbCascade = 0,        // Cascade windows
-  vbTileHorizontal = 1, // Tile horizontally  
-  vbTileVertical = 2,   // Tile vertically
-  vbArrangeIcons = 3    // Arrange minimized windows
+  vbCascade = 0, // Cascade windows
+  vbTileHorizontal = 1, // Tile horizontally
+  vbTileVertical = 2, // Tile vertically
+  vbArrangeIcons = 3, // Arrange minimized windows
 }
 ```
 
 #### API MDI:
+
 ```typescript
 // Ajouter une fenêtre enfant
 addMDIChild({
@@ -142,9 +154,11 @@ activateChild(childId);
 ---
 
 ### **4. 🔄 GOSUB/RETURN - Mécanisme de Sous-routines**
+
 **Fichier:** `src/runtime/VB6GoSubReturn.ts`
 
 #### Capacités:
+
 - ✅ Stack de retour pour GoSub/Return
 - ✅ Préservation des variables locales
 - ✅ Gestion des erreurs (Return without GoSub)
@@ -152,15 +166,16 @@ activateChild(childId);
 - ✅ Support multi-procédures
 
 #### Utilisation VB6:
+
 ```vb
 Private Sub Example()
     Dim x As Integer
     x = 10
-    
+
     GoSub Calculate
     Debug.Print "Result: " & x
     Exit Sub
-    
+
 Calculate:
     x = x * 2
     Return
@@ -168,6 +183,7 @@ End Sub
 ```
 
 #### API JavaScript:
+
 ```typescript
 // GoSub vers un label
 const target = GoSub('Calculate', 100, 'Example', { x: 10 });
@@ -182,9 +198,11 @@ if (context) {
 ---
 
 ### **5. 🐞 IMMEDIATE WINDOW - Console de Débogage Interactive**
+
 **Fichier:** `src/components/Debug/ImmediateWindow.tsx`
 
 #### Capacités:
+
 - ✅ Évaluation d'expressions VB6 en temps réel
 - ✅ Exécution de code VB6 immédiat
 - ✅ Inspection des variables locales
@@ -194,6 +212,7 @@ if (context) {
 - ✅ Sauvegarde et export des résultats
 
 #### Commandes Supportées:
+
 ```vb
 ? expression        ' Évaluer et afficher
 Print expression    ' Afficher la valeur
@@ -212,9 +231,11 @@ Help               ' Afficher l'aide
 ## 📈 **AMÉLIORATION DE LA COMPATIBILITÉ VB6**
 
 ### **Avant cette mise à jour:** ~60-70% de compatibilité
+
 ### **Après cette mise à jour:** ~90% de compatibilité
 
 ### **Fonctionnalités VB6 maintenant supportées:**
+
 - ✅ **95%** des déclarations externes (Declare)
 - ✅ **100%** du système de menus VB6
 - ✅ **100%** des fonctionnalités MDI
@@ -230,21 +251,26 @@ Help               ' Afficher l'aide
 ## 🔧 **INTÉGRATION AVEC L'EXISTANT**
 
 ### **1. Mise à jour du Transpiler**
+
 Le transpiler VB6 doit être mis à jour pour gérer:
+
 - Les déclarations `Declare`
 - Les instructions `GoSub/Return`
 - Les labels et `GoTo`
 
 ### **2. Mise à jour du Parser**
+
 Le parser doit reconnaître:
+
 ```typescript
 // Nouveaux tokens
-DECLARE, FUNCTION, SUB, LIB, ALIAS, BYVAL, BYREF,
-GOSUB, RETURN, GOTO, RESUME, NEXT
+(DECLARE, FUNCTION, SUB, LIB, ALIAS, BYVAL, BYREF, GOSUB, RETURN, GOTO, RESUME, NEXT);
 ```
 
 ### **3. Mise à jour du Runtime**
+
 Les nouvelles APIs sont disponibles:
+
 ```typescript
 import { VB6DeclareRegistry } from './runtime/VB6DeclareSupport';
 import { GoSub, Return } from './runtime/VB6GoSubReturn';
@@ -255,18 +281,21 @@ import { GoSub, Return } from './runtime/VB6GoSubReturn';
 ## 🚀 **PROCHAINES ÉTAPES RECOMMANDÉES**
 
 ### **Phase 1 - Compléter l'intégration (1-2 jours)**
+
 1. ✅ Mettre à jour le lexer/parser pour les nouveaux keywords
 2. ✅ Intégrer le Menu Designer dans le Form Designer
 3. ✅ Ajouter l'Immediate Window au layout de débogage
 4. ✅ Tester les APIs Windows simulées
 
 ### **Phase 2 - Fonctionnalités manquantes critiques (3-5 jours)**
+
 1. ✅ **Property Get/Let/Set** - Procédures de propriétés (`VB6PropertyProcedures.ts`)
 2. ✅ **WithEvents/RaiseEvent** - Gestion d'événements avancée (`VB6WithEventsSupport.ts`)
 3. ✅ **User Defined Types (UDTs)** - Structures personnalisées (`VB6UserDefinedTypes.ts`)
 4. ✅ **DoEvents** - Traitement des messages (`VB6DoEvents.ts`)
 
 ### **Phase 3 - Data Access (5-7 jours)**
+
 1. ⏳ **DAO Support** - Accès aux bases Access
 2. ⏳ **Data Control** - Contrôle de liaison de données
 3. ⏳ **Data Environment** - Environnement de données visuel
@@ -276,19 +305,23 @@ import { GoSub, Return } from './runtime/VB6GoSubReturn';
 ## 📝 **NOTES TECHNIQUES**
 
 ### **Performance:**
+
 - Menu Designer: React avec hooks optimisés
 - MDI Form: Utilise React.memo pour éviter les re-renders
 - GoSub/Return: Stack limité à 1000 pour éviter les overflows
 - Immediate Window: Debounce sur l'évaluation d'expressions
 
 ### **Compatibilité:**
+
 - Tous les composants supportent TypeScript strict
 - Compatible avec les stores Zustand existants
 - Intégration facile avec Monaco Editor
 - Support complet du thème clair/sombre
 
 ### **Tests:**
+
 Des tests unitaires doivent être ajoutés pour:
+
 - VB6DeclareRegistry
 - GoSubHandler
 - Menu Designer (drag & drop)
@@ -312,4 +345,4 @@ Avec ces ajouts, le VB6 Web IDE devient une alternative **viable** pour le déve
 ---
 
 **Développé avec 🚀 Ultra-Think Mode**
-*Compatibilité VB6: 85%+ atteinte*
+_Compatibilité VB6: 85%+ atteinte_

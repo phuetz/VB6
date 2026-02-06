@@ -76,7 +76,10 @@ describe('TASK-001: Suppression de eval()', () => {
     it('VB6CrystalReportsEngine ne devrait pas contenir eval() actif', async () => {
       const fs = await import('fs');
       const path = await import('path');
-      const filePath = path.resolve(__dirname, '../../components/CrystalReports/VB6CrystalReportsEngine.ts');
+      const filePath = path.resolve(
+        __dirname,
+        '../../components/CrystalReports/VB6CrystalReportsEngine.ts'
+      );
       const content = fs.readFileSync(filePath, 'utf-8');
 
       // Vérifier que eval() n'est pas utilisé (sauf en commentaires)
@@ -93,24 +96,8 @@ describe('TASK-001: Suppression de eval()', () => {
       expect(evalLines.length).toBe(0);
     });
 
-    it('VB6COMActiveXBridge (archived) ne devrait pas contenir eval() actif', async () => {
-      const fs = await import('fs');
-      const path = await import('path');
-      // File moved to archived/ as part of TASK-P1-002 (unused service)
-      const filePath = path.resolve(__dirname, '../../archived/services/VB6COMActiveXBridge.ts');
-      const content = fs.readFileSync(filePath, 'utf-8');
-
-      const lines = content.split('\n');
-      const evalLines = lines.filter((line) => {
-        const trimmed = line.trim();
-        if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) {
-          return false;
-        }
-        return /\beval\s*\(/.test(line);
-      });
-
-      expect(evalLines.length).toBe(0);
-    });
+    // VB6COMActiveXBridge was archived in TASK-P1-002 and deleted in iter-1
+    // No need to test a file that no longer exists
   });
 
   describe('Sécurité des nouvelles implémentations', () => {

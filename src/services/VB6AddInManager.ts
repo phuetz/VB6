@@ -4,7 +4,12 @@
  * Provides add-in loading, unloading, event handling, and menu integration
  */
 
-import { AddInSettingValue, AddInEventPayload, IDEObjectReference, IDEControlReference } from './types/VB6ServiceTypes';
+import {
+  AddInSettingValue,
+  AddInEventPayload,
+  IDEObjectReference,
+  IDEControlReference,
+} from './types/VB6ServiceTypes';
 
 export enum VB6AddInType {
   TOOLBAR = 'toolbar',
@@ -16,7 +21,7 @@ export enum VB6AddInType {
   PROJECT_TEMPLATE = 'project_template',
   CODE_ANALYZER = 'code_analyzer',
   DESIGNER_EXTENSION = 'designer_extension',
-  CUSTOM = 'custom'
+  CUSTOM = 'custom',
 }
 
 export enum VB6AddInState {
@@ -25,7 +30,7 @@ export enum VB6AddInState {
   DISABLED = 'disabled',
   ERROR = 'error',
   LOADING = 'loading',
-  UNLOADING = 'unloading'
+  UNLOADING = 'unloading',
 }
 
 export enum VB6AddInEvent {
@@ -47,7 +52,7 @@ export enum VB6AddInEvent {
   DEBUG_STOP = 'debug_stop',
   BREAKPOINT_HIT = 'breakpoint_hit',
   MENU_CLICK = 'menu_click',
-  TOOLBAR_CLICK = 'toolbar_click'
+  TOOLBAR_CLICK = 'toolbar_click',
 }
 
 export interface VB6AddInInfo {
@@ -59,47 +64,47 @@ export interface VB6AddInInfo {
   author: string;
   type: VB6AddInType;
   state: VB6AddInState;
-  
+
   // Add-in files
   dllPath?: string;
   configPath?: string;
   helpPath?: string;
   iconPath?: string;
-  
+
   // Registration info
   clsid?: string;
   progId?: string;
   connectClass?: string;
-  
+
   // Capabilities
   supportsEvents: VB6AddInEvent[];
   providesCommands: VB6AddInCommand[];
   providesMenus: VB6AddInMenu[];
   providesToolbars: VB6AddInToolbar[];
   providesWindows: VB6AddInWindow[];
-  
+
   // Configuration
   settings: Map<string, AddInSettingValue>;
   enabled: boolean;
   autoLoad: boolean;
   loadOnStartup: boolean;
-  
+
   // Metadata
   created: Date;
   modified: Date;
   lastLoaded?: Date;
   loadCount: number;
-  
+
   // Dependencies
   requiredVBVersion: string;
   requiredAddIns: string[];
   conflictingAddIns: string[];
-  
+
   // Security
   trusted: boolean;
   signed: boolean;
   certificate?: string;
-  
+
   // Error handling
   lastError?: string;
   errorCount: number;
@@ -257,7 +262,7 @@ export class VB6AddInManager {
 
       addComponent: (_path: string): boolean => {
         return true;
-      }
+      },
     };
   }
 
@@ -281,8 +286,8 @@ export class VB6AddInManager {
           description: 'Show the API Text Viewer window',
           enabled: true,
           visible: true,
-          callback: 'ShowAPITextViewer'
-        }
+          callback: 'ShowAPITextViewer',
+        },
       ],
       providesMenus: [
         {
@@ -292,8 +297,8 @@ export class VB6AddInManager {
           position: 1,
           separator: false,
           commands: [],
-          submenus: []
-        }
+          submenus: [],
+        },
       ],
       providesToolbars: [],
       providesWindows: [
@@ -303,8 +308,8 @@ export class VB6AddInManager {
           type: 'modeless',
           visible: false,
           position: { x: 100, y: 100, width: 600, height: 400 },
-          content: 'api-text-viewer-component'
-        }
+          content: 'api-text-viewer-component',
+        },
       ],
       settings: new Map(),
       enabled: true,
@@ -318,7 +323,7 @@ export class VB6AddInManager {
       conflictingAddIns: [],
       trusted: true,
       signed: true,
-      errorCount: 0
+      errorCount: 0,
     });
 
     // Application Wizard
@@ -340,8 +345,8 @@ export class VB6AddInManager {
           description: 'Create a new application using the wizard',
           enabled: true,
           visible: true,
-          callback: 'RunApplicationWizard'
-        }
+          callback: 'RunApplicationWizard',
+        },
       ],
       providesMenus: [
         {
@@ -351,15 +356,15 @@ export class VB6AddInManager {
           position: 2,
           separator: false,
           commands: [],
-          submenus: []
-        }
+          submenus: [],
+        },
       ],
       providesToolbars: [],
       providesWindows: [],
       settings: new Map([
         ['DefaultProjectPath', 'C:\\VB6Projects'],
         ['ShowWelcome', true],
-        ['CreateBackup', true]
+        ['CreateBackup', true],
       ]),
       enabled: true,
       autoLoad: false,
@@ -372,7 +377,7 @@ export class VB6AddInManager {
       conflictingAddIns: [],
       trusted: true,
       signed: true,
-      errorCount: 0
+      errorCount: 0,
     });
 
     // Class Builder Utility
@@ -394,8 +399,8 @@ export class VB6AddInManager {
           description: 'Create class modules with the Class Builder',
           enabled: true,
           visible: true,
-          callback: 'RunClassBuilder'
-        }
+          callback: 'RunClassBuilder',
+        },
       ],
       providesMenus: [
         {
@@ -405,8 +410,8 @@ export class VB6AddInManager {
           position: 3,
           separator: false,
           commands: [],
-          submenus: []
-        }
+          submenus: [],
+        },
       ],
       providesToolbars: [],
       providesWindows: [
@@ -416,13 +421,13 @@ export class VB6AddInManager {
           type: 'modal',
           visible: false,
           position: { x: 50, y: 50, width: 800, height: 600 },
-          content: 'class-builder-component'
-        }
+          content: 'class-builder-component',
+        },
       ],
       settings: new Map([
         ['GenerateComments', true],
         ['UseErrorHandling', true],
-        ['CreateGetSet', true]
+        ['CreateGetSet', true],
       ]),
       enabled: true,
       autoLoad: false,
@@ -435,7 +440,7 @@ export class VB6AddInManager {
       conflictingAddIns: [],
       trusted: true,
       signed: true,
-      errorCount: 0
+      errorCount: 0,
     });
 
     // Data Form Wizard
@@ -457,8 +462,8 @@ export class VB6AddInManager {
           description: 'Create data-bound forms with the wizard',
           enabled: true,
           visible: true,
-          callback: 'RunDataFormWizard'
-        }
+          callback: 'RunDataFormWizard',
+        },
       ],
       providesMenus: [
         {
@@ -468,15 +473,15 @@ export class VB6AddInManager {
           position: 4,
           separator: true,
           commands: [],
-          submenus: []
-        }
+          submenus: [],
+        },
       ],
       providesToolbars: [],
       providesWindows: [],
       settings: new Map([
         ['DefaultDataSource', 'ADO'],
         ['CreateNavigation', true],
-        ['AddValidation', true]
+        ['AddValidation', true],
       ]),
       enabled: true,
       autoLoad: false,
@@ -489,7 +494,7 @@ export class VB6AddInManager {
       conflictingAddIns: [],
       trusted: true,
       signed: true,
-      errorCount: 0
+      errorCount: 0,
     });
 
     // Resource Editor
@@ -502,7 +507,11 @@ export class VB6AddInManager {
       author: 'Microsoft Corporation',
       type: VB6AddInType.DESIGNER_EXTENSION,
       state: VB6AddInState.UNLOADED,
-      supportsEvents: [VB6AddInEvent.IDE_STARTUP, VB6AddInEvent.FILE_OPEN, VB6AddInEvent.MENU_CLICK],
+      supportsEvents: [
+        VB6AddInEvent.IDE_STARTUP,
+        VB6AddInEvent.FILE_OPEN,
+        VB6AddInEvent.MENU_CLICK,
+      ],
       providesCommands: [
         {
           id: 'open-resource-editor',
@@ -511,8 +520,8 @@ export class VB6AddInManager {
           description: 'Open the Resource Editor',
           enabled: true,
           visible: true,
-          callback: 'OpenResourceEditor'
-        }
+          callback: 'OpenResourceEditor',
+        },
       ],
       providesMenus: [
         {
@@ -522,8 +531,8 @@ export class VB6AddInManager {
           position: 5,
           separator: false,
           commands: [],
-          submenus: []
-        }
+          submenus: [],
+        },
       ],
       providesToolbars: [
         {
@@ -541,7 +550,7 @@ export class VB6AddInManager {
               command: 'NewResource',
               enabled: true,
               visible: true,
-              style: 'button'
+              style: 'button',
             },
             {
               id: 'sep1',
@@ -550,7 +559,7 @@ export class VB6AddInManager {
               command: '',
               enabled: false,
               visible: true,
-              style: 'separator'
+              style: 'separator',
             },
             {
               id: 'edit-resource',
@@ -559,10 +568,10 @@ export class VB6AddInManager {
               command: 'EditResource',
               enabled: true,
               visible: true,
-              style: 'button'
-            }
-          ]
-        }
+              style: 'button',
+            },
+          ],
+        },
       ],
       providesWindows: [
         {
@@ -571,13 +580,13 @@ export class VB6AddInManager {
           type: 'dockable',
           visible: false,
           position: { x: 300, y: 100, width: 500, height: 400 },
-          content: 'resource-editor-component'
-        }
+          content: 'resource-editor-component',
+        },
       ],
       settings: new Map([
         ['ShowBinary', false],
         ['AutoSave', true],
-        ['BackupResources', true]
+        ['BackupResources', true],
       ]),
       enabled: true,
       autoLoad: false,
@@ -590,7 +599,7 @@ export class VB6AddInManager {
       conflictingAddIns: [],
       trusted: true,
       signed: true,
-      errorCount: 0
+      errorCount: 0,
     });
 
     this.isInitialized = true;
@@ -599,7 +608,7 @@ export class VB6AddInManager {
   // Add-in Registration
   registerAddIn(addIn: VB6AddInInfo): void {
     this.addIns.set(addIn.id, addIn);
-    
+
     // Register event handlers
     for (const eventType of addIn.supportsEvents) {
       if (!this.eventHandlers.has(eventType)) {
@@ -646,7 +655,7 @@ export class VB6AddInManager {
 
     try {
       addIn.state = VB6AddInState.LOADING;
-      
+
       // Check dependencies
       for (const requiredAddIn of addIn.requiredAddIns) {
         if (!this.loadedAddIns.has(requiredAddIn)) {
@@ -663,7 +672,7 @@ export class VB6AddInManager {
 
       // Simulate loading
       await this.simulateAddInLoad(addIn);
-      
+
       addIn.state = VB6AddInState.LOADED;
       addIn.lastLoaded = new Date();
       addIn.loadCount++;
@@ -675,7 +684,7 @@ export class VB6AddInManager {
         source: addInId,
         data: { addIn },
         timestamp: new Date(),
-        handled: false
+        handled: false,
       });
 
       return true;
@@ -695,7 +704,7 @@ export class VB6AddInManager {
 
     try {
       addIn.state = VB6AddInState.UNLOADING;
-      
+
       // Check if other add-ins depend on this one
       const dependentAddIns: string[] = [];
       for (const [id, otherAddIn] of this.loadedAddIns) {
@@ -703,14 +712,16 @@ export class VB6AddInManager {
           dependentAddIns.push(id);
         }
       }
-      
+
       if (dependentAddIns.length > 0) {
-        throw new Error(`Cannot unload ${addIn.name} because it is required by: ${dependentAddIns.join(', ')}`);
+        throw new Error(
+          `Cannot unload ${addIn.name} because it is required by: ${dependentAddIns.join(', ')}`
+        );
       }
 
       // Simulate unloading
       await this.simulateAddInUnload(addIn);
-      
+
       addIn.state = VB6AddInState.UNLOADED;
       this.loadedAddIns.delete(addInId);
 
@@ -742,7 +753,6 @@ export class VB6AddInManager {
   }
 
   private handleAddInEvent(addIn: VB6AddInInfo, eventData: VB6AddInEventData): void {
-    
     switch (eventData.eventType) {
       case VB6AddInEvent.MENU_CLICK:
         this.handleMenuClick(addIn, eventData);
@@ -781,11 +791,13 @@ export class VB6AddInManager {
   }
 
   private executeAddInCommand(addIn: VB6AddInInfo, command: VB6AddInCommand): void {
-    
     // Simulate command execution
     switch (command.callback) {
       case 'ShowAPITextViewer':
-        this.ideContext.showMessage('API Text Viewer functionality would be shown here', 'API Text Viewer');
+        this.ideContext.showMessage(
+          'API Text Viewer functionality would be shown here',
+          'API Text Viewer'
+        );
         break;
       case 'RunApplicationWizard':
         this.ideContext.showMessage('Application Wizard would start here', 'Application Wizard');
@@ -850,16 +862,16 @@ export class VB6AddInManager {
       loaded: this.loadedAddIns.size,
       enabled: 0,
       byType: new Map<VB6AddInType, number>(),
-      byState: new Map<VB6AddInState, number>()
+      byState: new Map<VB6AddInState, number>(),
     };
 
     for (const addIn of this.addIns.values()) {
       if (addIn.enabled) stats.enabled++;
-      
+
       // Count by type
       const typeCount = stats.byType.get(addIn.type) || 0;
       stats.byType.set(addIn.type, typeCount + 1);
-      
+
       // Count by state
       const stateCount = stats.byState.get(addIn.state) || 0;
       stats.byState.set(addIn.state, stateCount + 1);
@@ -927,8 +939,9 @@ export class VB6AddInManager {
 
   // Auto-loading
   async loadAutoStartAddIns(): Promise<void> {
-    const autoStartAddIns = Array.from(this.addIns.values())
-      .filter(addIn => addIn.loadOnStartup && addIn.enabled);
+    const autoStartAddIns = Array.from(this.addIns.values()).filter(
+      addIn => addIn.loadOnStartup && addIn.enabled
+    );
 
     for (const addIn of autoStartAddIns) {
       try {
@@ -942,4 +955,3 @@ export class VB6AddInManager {
 
 // Global instance
 export const VB6AddInManagerInstance = VB6AddInManager.getInstance();
-

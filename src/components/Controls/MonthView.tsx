@@ -16,7 +16,7 @@ const MonthView: React.FC<MonthViewProps> = ({
   onSelect,
   onDoubleClick,
   onMove,
-  onResize
+  onResize,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -38,8 +38,8 @@ const MonthView: React.FC<MonthViewProps> = ({
   const showWeekNumbers = properties.ShowWeekNumbers === true;
   const weekDayFormat = properties.StartOfWeek || 0; // 0=Sunday, 1=Monday, etc.
   const titleBackColor = properties.TitleBackColor || 0x800000; // Dark red
-  const titleForeColor = properties.TitleForeColor || 0xFFFFFF; // White
-  const monthBackColor = properties.MonthBackColor || 0xFFFFFF; // White
+  const titleForeColor = properties.TitleForeColor || 0xffffff; // White
+  const monthBackColor = properties.MonthBackColor || 0xffffff; // White
   const trailingForeColor = properties.TrailingForeColor || 0x808080; // Gray
 
   const [currentMonth, setCurrentMonth] = useState(value.getMonth());
@@ -48,9 +48,9 @@ const MonthView: React.FC<MonthViewProps> = ({
 
   // Convert VB6 color format to CSS
   const vb6ColorToCss = useCallback((vb6Color: number): string => {
-    const r = vb6Color & 0xFF;
-    const g = (vb6Color >> 8) & 0xFF;
-    const b = (vb6Color >> 16) & 0xFF;
+    const r = vb6Color & 0xff;
+    const g = (vb6Color >> 8) & 0xff;
+    const b = (vb6Color >> 16) & 0xff;
     return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
   }, []);
 
@@ -62,87 +62,102 @@ const MonthView: React.FC<MonthViewProps> = ({
     const firstThursday = target.valueOf();
     target.setMonth(0, 1);
     if (target.getDay() !== 4) {
-      target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+      target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7));
     }
     return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
   }, []);
 
   // Generate calendar days for a month
-  const generateCalendarDays = useCallback((year: number, month: number) => {
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const startOfWeek = weekDayFormat; // 0=Sunday, 1=Monday
-    
-    // Calculate start date (may be from previous month)
-    const startDate = new Date(firstDay);
-    const dayOfWeek = (firstDay.getDay() - startOfWeek + 7) % 7;
-    startDate.setDate(startDate.getDate() - dayOfWeek);
-    
-    // Generate 42 days (6 weeks)
-    const days: Date[] = [];
-    for (let i = 0; i < 42; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
-      days.push(date);
-    }
-    
-    return days;
-  }, [weekDayFormat]);
+  const generateCalendarDays = useCallback(
+    (year: number, month: number) => {
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const startOfWeek = weekDayFormat; // 0=Sunday, 1=Monday
+
+      // Calculate start date (may be from previous month)
+      const startDate = new Date(firstDay);
+      const dayOfWeek = (firstDay.getDay() - startOfWeek + 7) % 7;
+      startDate.setDate(startDate.getDate() - dayOfWeek);
+
+      // Generate 42 days (6 weeks)
+      const days: Date[] = [];
+      for (let i = 0; i < 42; i++) {
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + i);
+        days.push(date);
+      }
+
+      return days;
+    },
+    [weekDayFormat]
+  );
 
   // Handle date selection
-  const handleDateClick = useCallback((date: Date) => {
-    if (date < minDate || date > maxDate) return;
+  const handleDateClick = useCallback(
+    (date: Date) => {
+      if (date < minDate || date > maxDate) return;
 
-    if (maxSelectionCount === 1) {
-      setSelectedDates([date]);
-    } else {
-      // Multiple selection logic
-      const isSelected = selectedDates.some(d => 
-        d.getFullYear() === date.getFullYear() &&
-        d.getMonth() === date.getMonth() &&
-        d.getDate() === date.getDate()
-      );
-
-      if (isSelected) {
-        setSelectedDates(selectedDates.filter(d => 
-          !(d.getFullYear() === date.getFullYear() &&
+      if (maxSelectionCount === 1) {
+        setSelectedDates([date]);
+      } else {
+        // Multiple selection logic
+        const isSelected = selectedDates.some(
+          d =>
+            d.getFullYear() === date.getFullYear() &&
             d.getMonth() === date.getMonth() &&
-            d.getDate() === date.getDate())
-        ));
-      } else if (selectedDates.length < maxSelectionCount) {
-        setSelectedDates([...selectedDates, date]);
+            d.getDate() === date.getDate()
+        );
+
+        if (isSelected) {
+          setSelectedDates(
+            selectedDates.filter(
+              d =>
+                !(
+                  d.getFullYear() === date.getFullYear() &&
+                  d.getMonth() === date.getMonth() &&
+                  d.getDate() === date.getDate()
+                )
+            )
+          );
+        } else if (selectedDates.length < maxSelectionCount) {
+          setSelectedDates([...selectedDates, date]);
+        }
       }
-    }
 
-    // Update control value
-    if (control.events?.onChange) {
-      control.events.onChange('Value', date.toISOString());
-    }
+      // Update control value
+      if (control.events?.onChange) {
+        control.events.onChange('Value', date.toISOString());
+      }
 
-    // Trigger VB6 events
-    if (control.events?.DateClick) {
-      control.events.DateClick(date);
-    }
-  }, [minDate, maxDate, maxSelectionCount, selectedDates, control.events]);
+      // Trigger VB6 events
+      if (control.events?.DateClick) {
+        control.events.DateClick(date);
+      }
+    },
+    [minDate, maxDate, maxSelectionCount, selectedDates, control.events]
+  );
 
   // Navigate months
-  const navigateMonth = useCallback((direction: 'prev' | 'next') => {
-    if (direction === 'prev') {
-      if (currentMonth === 0) {
-        setCurrentMonth(11);
-        setCurrentYear(currentYear - 1);
+  const navigateMonth = useCallback(
+    (direction: 'prev' | 'next') => {
+      if (direction === 'prev') {
+        if (currentMonth === 0) {
+          setCurrentMonth(11);
+          setCurrentYear(currentYear - 1);
+        } else {
+          setCurrentMonth(currentMonth - 1);
+        }
       } else {
-        setCurrentMonth(currentMonth - 1);
+        if (currentMonth === 11) {
+          setCurrentMonth(0);
+          setCurrentYear(currentYear + 1);
+        } else {
+          setCurrentMonth(currentMonth + 1);
+        }
       }
-    } else {
-      if (currentMonth === 11) {
-        setCurrentMonth(0);
-        setCurrentYear(currentYear + 1);
-      } else {
-        setCurrentMonth(currentMonth + 1);
-      }
-    }
-  }, [currentMonth, currentYear]);
+    },
+    [currentMonth, currentYear]
+  );
 
   // Mouse event handlers
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -182,7 +197,7 @@ const MonthView: React.FC<MonthViewProps> = ({
     } else {
       setIsDragging(true);
     }
-    
+
     setDragStart({ x: e.clientX, y: e.clientY });
   };
 
@@ -220,8 +235,8 @@ const MonthView: React.FC<MonthViewProps> = ({
   }, [isDragging, isResizing, dragStart, resizeCorner, onMove, onResize]);
 
   // Generate days for current month
-  const calendarDays = useMemo(() => 
-    generateCalendarDays(currentYear, currentMonth), 
+  const calendarDays = useMemo(
+    () => generateCalendarDays(currentYear, currentMonth),
     [currentYear, currentMonth, generateCalendarDays]
   );
 
@@ -240,7 +255,7 @@ const MonthView: React.FC<MonthViewProps> = ({
     cursor: isDragging ? 'move' : 'default',
     fontFamily: 'MS Sans Serif',
     fontSize: '8pt',
-    overflow: 'hidden'
+    overflow: 'hidden',
   };
 
   const titleStyle: React.CSSProperties = {
@@ -251,7 +266,7 @@ const MonthView: React.FC<MonthViewProps> = ({
     alignItems: 'center',
     justifyContent: 'space-between',
     fontWeight: 'bold',
-    fontSize: '8pt'
+    fontSize: '8pt',
   };
 
   const dayHeaderStyle: React.CSSProperties = {
@@ -260,7 +275,7 @@ const MonthView: React.FC<MonthViewProps> = ({
     backgroundColor: '#e0e0e0',
     borderBottom: '1px solid #808080',
     fontSize: '7pt',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   };
 
   const dayGridStyle: React.CSSProperties = {
@@ -268,12 +283,22 @@ const MonthView: React.FC<MonthViewProps> = ({
     gridTemplateColumns: showWeekNumbers ? 'auto repeat(7, 1fr)' : 'repeat(7, 1fr)',
     gridTemplateRows: 'repeat(6, 1fr)',
     flex: 1,
-    fontSize: '8pt'
+    fontSize: '8pt',
   };
 
   const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
@@ -298,16 +323,16 @@ const MonthView: React.FC<MonthViewProps> = ({
             fontSize: '12pt',
             padding: 0,
             width: 16,
-            height: 16
+            height: 16,
           }}
         >
           ◀
         </button>
-        
+
         <span>
           {monthNames[currentMonth]} {currentYear}
         </span>
-        
+
         <button
           onClick={() => navigateMonth('next')}
           style={{
@@ -318,7 +343,7 @@ const MonthView: React.FC<MonthViewProps> = ({
             fontSize: '12pt',
             padding: 0,
             width: 16,
-            height: 16
+            height: 16,
           }}
         >
           ▶
@@ -328,7 +353,9 @@ const MonthView: React.FC<MonthViewProps> = ({
       {/* Day headers */}
       <div style={dayHeaderStyle}>
         {showWeekNumbers && (
-          <div style={{ padding: '2px 4px', textAlign: 'center', borderRight: '1px solid #808080' }}>
+          <div
+            style={{ padding: '2px 4px', textAlign: 'center', borderRight: '1px solid #808080' }}
+          >
             Wk
           </div>
         )}
@@ -343,10 +370,11 @@ const MonthView: React.FC<MonthViewProps> = ({
       <div style={dayGridStyle}>
         {calendarDays.map((date, index) => {
           const isCurrentMonth = date.getMonth() === currentMonth;
-          const isSelected = selectedDates.some(d => 
-            d.getFullYear() === date.getFullYear() &&
-            d.getMonth() === date.getMonth() &&
-            d.getDate() === date.getDate()
+          const isSelected = selectedDates.some(
+            d =>
+              d.getFullYear() === date.getFullYear() &&
+              d.getMonth() === date.getMonth() &&
+              d.getDate() === date.getDate()
           );
           const isToday = date.getTime() === today.getTime();
           const isWeekNumber = showWeekNumbers && index % 7 === 0;
@@ -361,7 +389,7 @@ const MonthView: React.FC<MonthViewProps> = ({
                   backgroundColor: '#f0f0f0',
                   borderRight: '1px solid #808080',
                   fontSize: '7pt',
-                  color: '#666'
+                  color: '#666',
                 }}
               >
                 {getWeekNumber(date)}
@@ -374,14 +402,17 @@ const MonthView: React.FC<MonthViewProps> = ({
             textAlign: 'center',
             cursor: 'pointer',
             backgroundColor: isSelected ? '#316AC5' : 'transparent',
-            color: isSelected ? 'white' : 
-                   !isCurrentMonth ? vb6ColorToCss(trailingForeColor) : 'black',
+            color: isSelected
+              ? 'white'
+              : !isCurrentMonth
+                ? vb6ColorToCss(trailingForeColor)
+                : 'black',
             border: isToday && showTodayCircle ? '1px solid red' : '1px solid transparent',
             fontSize: '8pt',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            minHeight: '16px'
+            minHeight: '16px',
           };
 
           return (
@@ -389,12 +420,12 @@ const MonthView: React.FC<MonthViewProps> = ({
               key={date.toISOString()}
               style={dayStyle}
               onClick={() => handleDateClick(date)}
-              onMouseEnter={(e) => {
+              onMouseEnter={e => {
                 if (!isSelected) {
                   e.currentTarget.style.backgroundColor = '#E0E0E0';
                 }
               }}
-              onMouseLeave={(e) => {
+              onMouseLeave={e => {
                 if (!isSelected) {
                   e.currentTarget.style.backgroundColor = 'transparent';
                 }
@@ -415,7 +446,7 @@ const MonthView: React.FC<MonthViewProps> = ({
             backgroundColor: '#f0f0f0',
             fontSize: '7pt',
             textAlign: 'center',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
           onClick={() => {
             setCurrentMonth(today.getMonth());
@@ -430,14 +461,106 @@ const MonthView: React.FC<MonthViewProps> = ({
       {/* Resize handles */}
       {selected && (
         <>
-          <div className="vb6-resize-handle nw" style={{ position: 'absolute', top: -4, left: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'nw-resize' }} />
-          <div className="vb6-resize-handle ne" style={{ position: 'absolute', top: -4, right: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'ne-resize' }} />
-          <div className="vb6-resize-handle sw" style={{ position: 'absolute', bottom: -4, left: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'sw-resize' }} />
-          <div className="vb6-resize-handle se" style={{ position: 'absolute', bottom: -4, right: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'se-resize' }} />
-          <div className="vb6-resize-handle n" style={{ position: 'absolute', top: -4, left: '50%', marginLeft: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'n-resize' }} />
-          <div className="vb6-resize-handle s" style={{ position: 'absolute', bottom: -4, left: '50%', marginLeft: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 's-resize' }} />
-          <div className="vb6-resize-handle w" style={{ position: 'absolute', top: '50%', left: -4, marginTop: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'w-resize' }} />
-          <div className="vb6-resize-handle e" style={{ position: 'absolute', top: '50%', right: -4, marginTop: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'e-resize' }} />
+          <div
+            className="vb6-resize-handle nw"
+            style={{
+              position: 'absolute',
+              top: -4,
+              left: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'nw-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle ne"
+            style={{
+              position: 'absolute',
+              top: -4,
+              right: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'ne-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle sw"
+            style={{
+              position: 'absolute',
+              bottom: -4,
+              left: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'sw-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle se"
+            style={{
+              position: 'absolute',
+              bottom: -4,
+              right: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'se-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle n"
+            style={{
+              position: 'absolute',
+              top: -4,
+              left: '50%',
+              marginLeft: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'n-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle s"
+            style={{
+              position: 'absolute',
+              bottom: -4,
+              left: '50%',
+              marginLeft: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 's-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle w"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: -4,
+              marginTop: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'w-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle e"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              right: -4,
+              marginTop: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'e-resize',
+            }}
+          />
         </>
       )}
     </div>

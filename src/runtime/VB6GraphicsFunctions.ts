@@ -1,6 +1,6 @@
 /**
  * VB6 Graphics Functions
- * 
+ *
  * Graphics drawing functions for VB6 runtime
  */
 
@@ -38,11 +38,11 @@ export class VB6GraphicsFunctions {
       currentY: 0,
       drawWidth: 1,
       drawStyle: 0, // vbSolid
-      fillColor: 0xFFFFFF, // White
+      fillColor: 0xffffff, // White
       fillStyle: 0, // vbFSSolid
       foreColor: 0x000000, // Black
       scaleMode: 1, // vbTwips
-      autoRedraw: false
+      autoRedraw: false,
     };
 
     if (!this.defaultContext) {
@@ -79,14 +79,7 @@ export class VB6GraphicsFunctions {
    * @param color Line color
    * @param bf B for box, F for filled, BF for filled box
    */
-  static Line(
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-    color?: number,
-    bf?: string
-  ): void {
+  static Line(x1: number, y1: number, x2: number, y2: number, color?: number, bf?: string): void {
     const context = this.getContext();
     const { ctx } = context;
 
@@ -115,7 +108,7 @@ export class VB6GraphicsFunctions {
         // Filled rectangle
         ctx.fillRect(x1, y1, width, height);
       }
-      
+
       if (bf.toUpperCase().includes('B')) {
         // Rectangle outline
         ctx.strokeRect(x1, y1, width, height);
@@ -176,7 +169,7 @@ export class VB6GraphicsFunctions {
       ctx.save();
       ctx.translate(x, y);
       ctx.scale(1, aspect);
-      
+
       if (start !== undefined && end !== undefined) {
         // Arc
         ctx.arc(0, 0, radius, -start, -end, true);
@@ -184,7 +177,7 @@ export class VB6GraphicsFunctions {
         // Full ellipse
         ctx.arc(0, 0, radius, 0, 2 * Math.PI);
       }
-      
+
       ctx.restore();
     } else {
       // Draw circle
@@ -338,7 +331,7 @@ export class VB6GraphicsFunctions {
     }
 
     const metrics = ctx.measureText(text);
-    
+
     if (font) {
       ctx.restore();
     }
@@ -363,7 +356,7 @@ export class VB6GraphicsFunctions {
 
     // Approximate text height from font size
     const fontSize = parseInt(ctx.font) || 12;
-    
+
     if (font) {
       ctx.restore();
     }
@@ -481,7 +474,7 @@ export class VB6GraphicsFunctions {
       x1: this.convertUnits(context, x1),
       y1: this.convertUnits(context, y1),
       x2: x2 !== undefined ? this.convertUnits(context, x2) : 0,
-      y2: y2 !== undefined ? this.convertUnits(context, y2) : 0
+      y2: y2 !== undefined ? this.convertUnits(context, y2) : 0,
     };
   }
 
@@ -531,9 +524,9 @@ export class VB6GraphicsFunctions {
 
   private static colorToRGB(color: number): string {
     // Convert VB6 color (0x00BBGGRR) to CSS RGB
-    const r = color & 0xFF;
-    const g = (color >> 8) & 0xFF;
-    const b = (color >> 16) & 0xFF;
+    const r = color & 0xff;
+    const g = (color >> 8) & 0xff;
+    const b = (color >> 16) & 0xff;
     return `rgb(${r}, ${g}, ${b})`;
   }
 
@@ -566,21 +559,21 @@ export class VB6GraphicsFunctions {
   private static applyRasterOp(ctx: CanvasRenderingContext2D, opcode: number): void {
     // Map VB6 raster operations to Canvas composite operations
     const rasterOps: { [key: number]: string } = {
-      0x00CC0020: 'source-over',      // vbSrcCopy
-      0x00EE0086: 'source-in',        // vbSrcPaint
-      0x008800C6: 'source-atop',      // vbSrcAnd
-      0x00660046: 'xor',              // vbSrcInvert
-      0x00440328: 'destination-out',  // vbSrcErase
-      0x00330008: 'copy',             // vbNotSrcCopy
-      0x001100A6: 'destination-over', // vbNotSrcErase
-      0x00C000CA: 'source-over',      // vbMergeCopy
-      0x00BB0226: 'multiply',         // vbMergePaint
-      0x00F00021: 'screen',           // vbPatCopy
-      0x00FB0A09: 'overlay',          // vbPatPaint
-      0x005A0049: 'difference',       // vbPatInvert
-      0x00550009: 'destination-in',   // vbDstInvert
-      0x00000042: 'clear',            // vbBlackness
-      0x00FF0062: 'source-over'       // vbWhiteness
+      0x00cc0020: 'source-over', // vbSrcCopy
+      0x00ee0086: 'source-in', // vbSrcPaint
+      0x008800c6: 'source-atop', // vbSrcAnd
+      0x00660046: 'xor', // vbSrcInvert
+      0x00440328: 'destination-out', // vbSrcErase
+      0x00330008: 'copy', // vbNotSrcCopy
+      0x001100a6: 'destination-over', // vbNotSrcErase
+      0x00c000ca: 'source-over', // vbMergeCopy
+      0x00bb0226: 'multiply', // vbMergePaint
+      0x00f00021: 'screen', // vbPatCopy
+      0x00fb0a09: 'overlay', // vbPatPaint
+      0x005a0049: 'difference', // vbPatInvert
+      0x00550009: 'destination-in', // vbDstInvert
+      0x00000042: 'clear', // vbBlackness
+      0x00ff0062: 'source-over', // vbWhiteness
     };
 
     ctx.globalCompositeOperation = rasterOps[opcode] || 'source-over';
@@ -592,23 +585,14 @@ export class VB6GraphicsFunctions {
     const family = font.Name || 'Arial';
     const bold = font.Bold ? 'bold' : 'normal';
     const italic = font.Italic ? 'italic' : 'normal';
-    
+
     ctx.font = `${italic} ${bold} ${size}px ${family}`;
   }
 }
 
 // Export individual functions for easier use
-export const {
-  Line,
-  Circle,
-  PSet,
-  Point,
-  Cls,
-  PaintPicture,
-  TextWidth,
-  TextHeight,
-  Print
-} = VB6GraphicsFunctions;
+export const { Line, Circle, PSet, Point, Cls, PaintPicture, TextWidth, TextHeight, Print } =
+  VB6GraphicsFunctions;
 
 // VB6 Graphics Constants
 export const VB6GraphicsConstants = {
@@ -621,7 +605,7 @@ export const VB6GraphicsConstants = {
   vbInches: 5,
   vbMillimeters: 6,
   vbCentimeters: 7,
-  
+
   // Draw styles
   vbSolid: 0,
   vbDash: 1,
@@ -630,7 +614,7 @@ export const VB6GraphicsConstants = {
   vbDashDotDot: 4,
   vbInvisible: 5,
   vbInsideSolid: 6,
-  
+
   // Fill styles
   vbFSSolid: 0,
   vbFSTransparent: 1,
@@ -640,21 +624,21 @@ export const VB6GraphicsConstants = {
   vbDownwardDiagonal: 5,
   vbCross: 6,
   vbDiagonalCross: 7,
-  
+
   // Raster operations
-  vbSrcCopy: 0x00CC0020,
-  vbSrcPaint: 0x00EE0086,
-  vbSrcAnd: 0x008800C6,
+  vbSrcCopy: 0x00cc0020,
+  vbSrcPaint: 0x00ee0086,
+  vbSrcAnd: 0x008800c6,
   vbSrcInvert: 0x00660046,
   vbSrcErase: 0x00440328,
   vbNotSrcCopy: 0x00330008,
-  vbNotSrcErase: 0x001100A6,
-  vbMergeCopy: 0x00C000CA,
-  vbMergePaint: 0x00BB0226,
-  vbPatCopy: 0x00F00021,
-  vbPatPaint: 0x00FB0A09,
-  vbPatInvert: 0x005A0049,
+  vbNotSrcErase: 0x001100a6,
+  vbMergeCopy: 0x00c000ca,
+  vbMergePaint: 0x00bb0226,
+  vbPatCopy: 0x00f00021,
+  vbPatPaint: 0x00fb0a09,
+  vbPatInvert: 0x005a0049,
   vbDstInvert: 0x00550009,
   vbBlackness: 0x00000042,
-  vbWhiteness: 0x00FF0062
+  vbWhiteness: 0x00ff0062,
 };

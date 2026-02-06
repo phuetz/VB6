@@ -11,7 +11,7 @@ import { useVB6Store } from '../../stores/vb6Store';
 export enum InetAccessType {
   icUseDefault = 0,
   icDirect = 1,
-  icNamedProxy = 3
+  icNamedProxy = 3,
 }
 
 export enum InetProtocol {
@@ -20,7 +20,7 @@ export enum InetProtocol {
   icFTP = 1,
   icGopher = 2,
   icHTTP = 3,
-  icHTTPS = 4
+  icHTTPS = 4,
 }
 
 export enum InetState {
@@ -36,7 +36,7 @@ export enum InetState {
   icDisconnecting = 9,
   icDisconnected = 10,
   icError = 11,
-  icResponseCompleted = 12
+  icResponseCompleted = 12,
 }
 
 export enum InetResponseCode {
@@ -77,7 +77,7 @@ export enum InetResponseCode {
   icBadGateway = 502,
   icServiceUnavailable = 503,
   icGatewayTimeout = 504,
-  icHTTPVersionNotSupported = 505
+  icHTTPVersionNotSupported = 505,
 }
 
 export interface InetProps extends VB6ControlPropsEnhanced {
@@ -88,25 +88,25 @@ export interface InetProps extends VB6ControlPropsEnhanced {
   remoteHost?: string;
   remotePort?: number;
   requestTimeout?: number;
-  
+
   // Authentication
   userName?: string;
   password?: string;
-  
+
   // HTTP specific
   document?: string;
   hWndParent?: number;
   responseCode?: InetResponseCode;
   responseInfo?: string;
-  
+
   // State
   stillExecuting?: boolean;
   state?: InetState;
-  
+
   // Data
   tag?: string;
   url?: string;
-  
+
   // Events
   onStateChanged?: (state: InetState) => void;
   onDataArrival?: (bytesTotal: number) => void;
@@ -140,12 +140,14 @@ export const InetControl = forwardRef<HTMLDivElement, InetProps>((props, ref) =>
   } = props;
 
   const [currentState, setCurrentState] = useState<InetState>(InetState.icNone);
-  const [currentResponseCode, setCurrentResponseCode] = useState<InetResponseCode>(InetResponseCode.icDefault);
+  const [currentResponseCode, setCurrentResponseCode] = useState<InetResponseCode>(
+    InetResponseCode.icDefault
+  );
   const [currentResponseInfo, setCurrentResponseInfo] = useState('');
   const [isExecuting, setIsExecuting] = useState(false);
   const [downloadedData, setDownloadedData] = useState<string>('');
   const [progress, setProgress] = useState({ loaded: 0, total: 0 });
-  
+
   const abortControllerRef = useRef<AbortController | null>(null);
   const { fireEvent, updateControl } = useVB6Store();
 
@@ -156,7 +158,7 @@ export const InetControl = forwardRef<HTMLDivElement, InetProps>((props, ref) =>
         abortControllerRef.current.abort();
         abortControllerRef.current = null;
       }
-      
+
       setCurrentState(InetState.icDisconnected);
       setIsExecuting(false);
       fireEvent(name, 'StateChanged', { state: InetState.icDisconnected });
@@ -176,7 +178,7 @@ export const InetControl = forwardRef<HTMLDivElement, InetProps>((props, ref) =>
       setIsExecuting(true);
       setDownloadedData('');
       setProgress({ loaded: 0, total: 0 });
-      
+
       executeRequest(targetUrl, operation || 'GET', data, requestHeaders);
     },
 
@@ -191,7 +193,7 @@ export const InetControl = forwardRef<HTMLDivElement, InetProps>((props, ref) =>
       if (!headerName) {
         return currentResponseInfo;
       }
-      
+
       // Parse response headers
       const headers = currentResponseInfo.split('\r\n');
       for (const header of headers) {
@@ -205,38 +207,48 @@ export const InetControl = forwardRef<HTMLDivElement, InetProps>((props, ref) =>
 
     OpenURL: (url: string, dataType?: number) => {
       return new Promise((resolve, reject) => {
-        executeRequest(url, 'GET').then(() => {
-          resolve(downloadedData);
-        }).catch(reject);
+        executeRequest(url, 'GET')
+          .then(() => {
+            resolve(downloadedData);
+          })
+          .catch(reject);
       });
     },
 
     PeekData: (size?: number, dataType?: number) => {
       const peekSize = size || downloadedData.length;
       return downloadedData.substring(0, peekSize);
-    }
+    },
   };
 
-  const setState = useCallback((newState: InetState) => {
-    setCurrentState(newState);
-    fireEvent(name, 'StateChanged', { state: newState });
-    onStateChanged?.(newState);
-  }, [name, fireEvent, onStateChanged]);
+  const setState = useCallback(
+    (newState: InetState) => {
+      setCurrentState(newState);
+      fireEvent(name, 'StateChanged', { state: newState });
+      onStateChanged?.(newState);
+    },
+    [name, fireEvent, onStateChanged]
+  );
 
-  const executeRequest = async (targetUrl: string, method: string = 'GET', data?: string, requestHeaders?: string) => {
+  const executeRequest = async (
+    targetUrl: string,
+    method: string = 'GET',
+    data?: string,
+    requestHeaders?: string
+  ) => {
     try {
       // State progression
       setState(InetState.icHostResolvingHost);
-      
+
       await new Promise(resolve => setTimeout(resolve, 100));
       setState(InetState.icHostResolved);
-      
+
       await new Promise(resolve => setTimeout(resolve, 50));
       setState(InetState.icConnecting);
-      
+
       await new Promise(resolve => setTimeout(resolve, 100));
       setState(InetState.icConnected);
-      
+
       setState(InetState.icRequesting);
 
       // Create abort controller
@@ -248,9 +260,9 @@ export const InetControl = forwardRef<HTMLDivElement, InetProps>((props, ref) =>
         signal: abortControllerRef.current.signal,
         headers: {
           'User-Agent': 'VB6 Inet Control',
-          'Accept': '*/*',
-          ...parseHeaders(requestHeaders)
-        }
+          Accept: '*/*',
+          ...parseHeaders(requestHeaders),
+        },
       };
 
       // Add authentication if provided
@@ -258,7 +270,7 @@ export const InetControl = forwardRef<HTMLDivElement, InetProps>((props, ref) =>
         const credentials = btoa(`${userName}:${password}`);
         fetchOptions.headers = {
           ...fetchOptions.headers,
-          'Authorization': `Basic ${credentials}`
+          Authorization: `Basic ${credentials}`,
         };
       }
 
@@ -267,7 +279,7 @@ export const InetControl = forwardRef<HTMLDivElement, InetProps>((props, ref) =>
         fetchOptions.body = data;
         fetchOptions.headers = {
           ...fetchOptions.headers,
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/x-www-form-urlencoded',
         };
       }
 
@@ -275,45 +287,45 @@ export const InetControl = forwardRef<HTMLDivElement, InetProps>((props, ref) =>
       setState(InetState.icReceivingResponse);
 
       const response = await fetch(targetUrl, fetchOptions);
-      
+
       setCurrentResponseCode(response.status as InetResponseCode);
-      
+
       // Build response info string
       let responseInfo = `HTTP/1.1 ${response.status} ${response.statusText}\r\n`;
       response.headers.forEach((value, key) => {
         responseInfo += `${key}: ${value}\r\n`;
       });
       setCurrentResponseInfo(responseInfo);
-      
+
       setState(InetState.icResponseReceived);
 
       // Handle response body
       const reader = response.body?.getReader();
       const contentLength = response.headers.get('content-length');
       const total = contentLength ? parseInt(contentLength) : 0;
-      
+
       let loaded = 0;
       let result = '';
 
       if (reader) {
         const decoder = new TextDecoder();
-        
+
         while (true) {
           const { done, value } = await reader.read();
-          
+
           if (done) break;
-          
+
           const chunk = decoder.decode(value, { stream: true });
           result += chunk;
           loaded += value.length;
-          
+
           setProgress({ loaded, total });
           setDownloadedData(result);
-          
+
           // Fire data arrival event
           fireEvent(name, 'DataArrival', { bytesTotal: loaded });
           onDataArrival?.(loaded);
-          
+
           // Small delay to show progress
           await new Promise(resolve => setTimeout(resolve, 10));
         }
@@ -321,7 +333,6 @@ export const InetControl = forwardRef<HTMLDivElement, InetProps>((props, ref) =>
 
       setState(InetState.icResponseCompleted);
       setIsExecuting(false);
-      
     } catch (error: any) {
       if (error.name === 'AbortError') {
         setState(InetState.icDisconnected);
@@ -337,10 +348,10 @@ export const InetControl = forwardRef<HTMLDivElement, InetProps>((props, ref) =>
 
   const parseHeaders = (headerString?: string): Record<string, string> => {
     if (!headerString) return {};
-    
+
     const headers: Record<string, string> = {};
     const lines = headerString.split('\r\n');
-    
+
     for (const line of lines) {
       const colonIndex = line.indexOf(':');
       if (colonIndex > 0) {
@@ -349,7 +360,7 @@ export const InetControl = forwardRef<HTMLDivElement, InetProps>((props, ref) =>
         headers[key] = value;
       }
     }
-    
+
     return headers;
   };
 
@@ -378,10 +389,18 @@ export const InetControl = forwardRef<HTMLDivElement, InetProps>((props, ref) =>
         GetChunk: vb6Methods.GetChunk,
         GetHeader: vb6Methods.GetHeader,
         PeekData: vb6Methods.PeekData,
-        get State() { return currentState; },
-        get StillExecuting() { return isExecuting; },
-        get ResponseCode() { return currentResponseCode; },
-        get ResponseInfo() { return currentResponseInfo; }
+        get State() {
+          return currentState;
+        },
+        get StillExecuting() {
+          return isExecuting;
+        },
+        get ResponseCode() {
+          return currentResponseCode;
+        },
+        get ResponseInfo() {
+          return currentResponseInfo;
+        },
       };
     }
   }, [name, vb6Methods, currentState, isExecuting, currentResponseCode, currentResponseInfo]);
@@ -428,7 +447,7 @@ export const InetControl = forwardRef<HTMLDivElement, InetProps>((props, ref) =>
       [InetState.icDisconnecting]: 'Disconnecting',
       [InetState.icDisconnected]: 'Disconnected',
       [InetState.icError]: 'Error',
-      [InetState.icResponseCompleted]: 'Complete'
+      [InetState.icResponseCompleted]: 'Complete',
     };
     return stateNames[currentState] || 'Unknown';
   };
@@ -452,21 +471,21 @@ export const InetControl = forwardRef<HTMLDivElement, InetProps>((props, ref) =>
         fontFamily: 'MS Sans Serif',
         opacity: enabled ? 1 : 0.5,
         cursor: enabled ? 'default' : 'not-allowed',
-        overflow: 'hidden'
+        overflow: 'hidden',
       }}
       title={`Inet Control - ${getStateText()}${currentResponseCode ? ` (${currentResponseCode})` : ''}`}
       {...rest}
     >
-      <div style={{ fontSize: '14px', marginBottom: '2px' }}>
-        {getStateIcon()}
-      </div>
-      
-      <div style={{ 
-        fontSize: '8px', 
-        textAlign: 'center', 
-        lineHeight: '1.1',
-        color: currentState === InetState.icError ? '#cc0000' : '#000000'
-      }}>
+      <div style={{ fontSize: '14px', marginBottom: '2px' }}>{getStateIcon()}</div>
+
+      <div
+        style={{
+          fontSize: '8px',
+          textAlign: 'center',
+          lineHeight: '1.1',
+          color: currentState === InetState.icError ? '#cc0000' : '#000000',
+        }}
+      >
         <div>Inet</div>
         <div>{getStateText()}</div>
         {currentResponseCode !== InetResponseCode.icDefault && (
@@ -478,21 +497,25 @@ export const InetControl = forwardRef<HTMLDivElement, InetProps>((props, ref) =>
 
       {/* Progress indicator */}
       {isExecuting && progress.total > 0 && (
-        <div style={{
-          position: 'absolute',
-          bottom: '2px',
-          left: '2px',
-          right: '2px',
-          height: '2px',
-          backgroundColor: '#ffffff',
-          border: '1px inset #c0c0c0'
-        }}>
-          <div style={{
-            height: '100%',
-            backgroundColor: '#0000ff',
-            width: `${(progress.loaded / progress.total) * 100}%`,
-            transition: 'width 0.1s ease'
-          }} />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '2px',
+            left: '2px',
+            right: '2px',
+            height: '2px',
+            backgroundColor: '#ffffff',
+            border: '1px inset #c0c0c0',
+          }}
+        >
+          <div
+            style={{
+              height: '100%',
+              backgroundColor: '#0000ff',
+              width: `${(progress.loaded / progress.total) * 100}%`,
+              transition: 'width 0.1s ease',
+            }}
+          />
         </div>
       )}
     </div>

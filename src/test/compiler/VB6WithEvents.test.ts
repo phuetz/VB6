@@ -82,7 +82,10 @@ describe('VB6 WithEvents - WithEvents Declarations', () => {
   describe('Parsing Event Handlers', () => {
     beforeEach(() => {
       // Register a WithEvents variable first so handlers can be parsed
-      const withEventsDecl = processor.parseWithEventsDeclaration('WithEvents btn As CommandButton', 1);
+      const withEventsDecl = processor.parseWithEventsDeclaration(
+        'WithEvents btn As CommandButton',
+        1
+      );
       processor.registerWithEventsVariable(withEventsDecl!);
 
       const txtDecl = processor.parseWithEventsDeclaration('WithEvents txt As TextBox', 2);
@@ -116,7 +119,8 @@ describe('VB6 WithEvents - WithEvents Declarations', () => {
     });
 
     it('should parse MouseMove event with multiple parameters', () => {
-      const code = 'Private Sub frm_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)';
+      const code =
+        'Private Sub frm_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)';
       const result = processor.parseEventHandler(code, 30);
 
       expect(result).not.toBeNull();
@@ -338,16 +342,16 @@ describe('VB6 WithEvents - WithEvents Declarations', () => {
     it('should import WithEvents data', () => {
       const data = {
         variables: {
-          'btn': {
+          btn: {
             variableName: 'btn',
             className: 'CommandButton',
             public: false,
             module: 'TestModule',
             line: 1,
-            eventHandlers: []
-          }
+            eventHandlers: [],
+          },
         },
-        events: {}
+        events: {},
       };
 
       processor.import(data);
@@ -405,7 +409,8 @@ describe('VB6 WithEvents - Custom Events', () => {
     });
 
     it('should parse Event with multiple parameters', () => {
-      const code = 'Event ProgressChanged(ByVal Current As Long, ByVal Total As Long, Cancel As Boolean)';
+      const code =
+        'Event ProgressChanged(ByVal Current As Long, ByVal Total As Long, Cancel As Boolean)';
       const result = processor.parseEventDeclaration(code, 10);
 
       expect(result).not.toBeNull();
@@ -661,12 +666,12 @@ describe('VB6 WithEvents - Custom Events', () => {
             public: true,
             module: 'TestModule',
             className: 'TestClass',
-            line: 1
-          }
+            line: 1,
+          },
         },
         handlers: {},
         bindings: {},
-        raiseEvents: []
+        raiseEvents: [],
       };
 
       processor.import(data);
@@ -717,7 +722,8 @@ describe('VB6 WithEvents - Real-World Scenarios', () => {
 
       const event1 = 'Public Event ProcessStarted()';
       const event2 = 'Public Event ProgressChanged(ByVal Percent As Integer)';
-      const event3 = 'Public Event ProcessCompleted(ByVal Success As Boolean, ByVal Message As String)';
+      const event3 =
+        'Public Event ProcessCompleted(ByVal Success As Boolean, ByVal Message As String)';
 
       const evt1 = eventsProcessor.parseEventDeclaration(event1, 1);
       const evt2 = eventsProcessor.parseEventDeclaration(event2, 2);
@@ -751,7 +757,10 @@ describe('VB6 WithEvents - Real-World Scenarios', () => {
 
       // Create custom class with events
       eventsProc.setCurrentClass('Worker');
-      const customEvent = eventsProc.parseEventDeclaration('Event WorkComplete(Result As String)', 1);
+      const customEvent = eventsProc.parseEventDeclaration(
+        'Event WorkComplete(Result As String)',
+        1
+      );
       eventsProc.registerEvent(customEvent!);
 
       // Use WithEvents for the custom class

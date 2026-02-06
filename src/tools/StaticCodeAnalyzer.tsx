@@ -11,7 +11,7 @@ export enum IssueType {
   Performance = 'Performance',
   Security = 'Security',
   Style = 'Style',
-  Maintainability = 'Maintainability'
+  Maintainability = 'Maintainability',
 }
 
 export enum IssueSeverity {
@@ -19,7 +19,7 @@ export enum IssueSeverity {
   High = 'High',
   Medium = 'Medium',
   Low = 'Low',
-  Info = 'Info'
+  Info = 'Info',
 }
 
 export enum RuleCategory {
@@ -32,7 +32,7 @@ export enum RuleCategory {
   Logic = 'Logic',
   Memory = 'Memory',
   ErrorHandling = 'ErrorHandling',
-  Documentation = 'Documentation'
+  Documentation = 'Documentation',
 }
 
 export interface CodeIssue {
@@ -149,7 +149,7 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
   onSuppressIssue,
   onFixIssue,
   onNavigateToCode,
-  onGenerateReport
+  onGenerateReport,
 }) => {
   const [analysisSessions, setAnalysisSessions] = useState<AnalysisSession[]>([]);
   const [currentSession, setCurrentSession] = useState<AnalysisSession | null>(null);
@@ -171,9 +171,11 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
     parallelAnalysis: true,
     maxComplexityThreshold: 10,
     minMaintainabilityThreshold: 60,
-    duplicateThreshold: 5
+    duplicateThreshold: 5,
   });
-  const [activeTab, setActiveTab] = useState<'issues' | 'metrics' | 'rules' | 'settings' | 'reports'>('issues');
+  const [activeTab, setActiveTab] = useState<
+    'issues' | 'metrics' | 'rules' | 'settings' | 'reports'
+  >('issues');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [filterType, setFilterType] = useState<IssueType | 'All'>('All');
@@ -203,9 +205,9 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
             title: 'Unused Variable',
             badCode: 'Dim intUnused As Integer\nDim intUsed As Integer\nintUsed = 42',
             goodCode: 'Dim intUsed As Integer\nintUsed = 42',
-            explanation: 'Remove unused variable declarations to improve code clarity'
-          }
-        ]
+            explanation: 'Remove unused variable declarations to improve code clarity',
+          },
+        ],
       },
       {
         id: 'VB002',
@@ -219,11 +221,13 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
         examples: [
           {
             title: 'Complex Function',
-            badCode: 'Function ComplexFunction() As Integer\n  If condition1 Then\n    If condition2 Then\n      If condition3 Then\n        Return 1\n      End If\n    End If\n  End If\nEnd Function',
-            goodCode: 'Function SimpleFunction() As Integer\n  Return CalculateResult()\nEnd Function',
-            explanation: 'Break down complex functions into smaller, more manageable pieces'
-          }
-        ]
+            badCode:
+              'Function ComplexFunction() As Integer\n  If condition1 Then\n    If condition2 Then\n      If condition3 Then\n        Return 1\n      End If\n    End If\n  End If\nEnd Function',
+            goodCode:
+              'Function SimpleFunction() As Integer\n  Return CalculateResult()\nEnd Function',
+            explanation: 'Break down complex functions into smaller, more manageable pieces',
+          },
+        ],
       },
       {
         id: 'VB003',
@@ -237,11 +241,13 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
         examples: [
           {
             title: 'Missing Error Handling',
-            badCode: 'Sub ProcessFile(fileName As String)\n  Open fileName For Input As #1\n  \'... processing\n  Close #1\nEnd Sub',
-            goodCode: 'Sub ProcessFile(fileName As String)\n  On Error GoTo ErrorHandler\n  Open fileName For Input As #1\n  \'... processing\n  Close #1\n  Exit Sub\nErrorHandler:\n  \'Handle error\nEnd Sub',
-            explanation: 'Add proper error handling to prevent application crashes'
-          }
-        ]
+            badCode:
+              "Sub ProcessFile(fileName As String)\n  Open fileName For Input As #1\n  '... processing\n  Close #1\nEnd Sub",
+            goodCode:
+              "Sub ProcessFile(fileName As String)\n  On Error GoTo ErrorHandler\n  Open fileName For Input As #1\n  '... processing\n  Close #1\n  Exit Sub\nErrorHandler:\n  'Handle error\nEnd Sub",
+            explanation: 'Add proper error handling to prevent application crashes',
+          },
+        ],
       },
       {
         id: 'VB004',
@@ -256,10 +262,11 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
           {
             title: 'String Concatenation in Loop',
             badCode: 'For i = 1 To 1000\n  strResult = strResult & "item" & i\nNext',
-            goodCode: 'Dim items() As String\nReDim items(1000)\nFor i = 1 To 1000\n  items(i) = "item" & i\nNext\nstrResult = Join(items, "")',
-            explanation: 'Use arrays and Join function for efficient string concatenation'
-          }
-        ]
+            goodCode:
+              'Dim items() As String\nReDim items(1000)\nFor i = 1 To 1000\n  items(i) = "item" & i\nNext\nstrResult = Join(items, "")',
+            explanation: 'Use arrays and Join function for efficient string concatenation',
+          },
+        ],
       },
       {
         id: 'VB005',
@@ -273,11 +280,12 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
         examples: [
           {
             title: 'Hard-coded Connection String',
-            badCode: 'strConnection = "Provider=SQLOLEDB;Server=localhost;Database=MyDB;UID=sa;PWD=password123;"',
+            badCode:
+              'strConnection = "Provider=SQLOLEDB;Server=localhost;Database=MyDB;UID=sa;PWD=password123;"',
             goodCode: 'strConnection = GetConnectionString()',
-            explanation: 'Store connection strings in configuration files, not in source code'
-          }
-        ]
+            explanation: 'Store connection strings in configuration files, not in source code',
+          },
+        ],
       },
       {
         id: 'VB006',
@@ -293,10 +301,10 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
             title: 'Magic Number',
             badCode: 'If intStatus = 42 Then',
             goodCode: 'Const STATUS_SUCCESS = 42\nIf intStatus = STATUS_SUCCESS Then',
-            explanation: 'Use named constants instead of magic numbers for better readability'
-          }
-        ]
-      }
+            explanation: 'Use named constants instead of magic numbers for better readability',
+          },
+        ],
+      },
     ];
 
     const sampleIssues: CodeIssue[] = [
@@ -318,7 +326,7 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
         suppressed: false,
         relatedIssues: [],
         metrics: { complexity: 1 },
-        detectedAt: new Date(Date.now() - 3600000)
+        detectedAt: new Date(Date.now() - 3600000),
       },
       {
         id: 'issue2',
@@ -339,7 +347,7 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
         suppressed: false,
         relatedIssues: [],
         metrics: { complexity: 15, linesOfCode: 40 },
-        detectedAt: new Date(Date.now() - 1800000)
+        detectedAt: new Date(Date.now() - 1800000),
       },
       {
         id: 'issue3',
@@ -358,7 +366,7 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
         fixable: false,
         suppressed: false,
         relatedIssues: [],
-        detectedAt: new Date(Date.now() - 900000)
+        detectedAt: new Date(Date.now() - 900000),
       },
       {
         id: 'issue4',
@@ -377,7 +385,7 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
         fixable: false,
         suppressed: false,
         relatedIssues: [],
-        detectedAt: new Date(Date.now() - 600000)
+        detectedAt: new Date(Date.now() - 600000),
       },
       {
         id: 'issue5',
@@ -397,8 +405,8 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
         suppressed: false,
         relatedIssues: [],
         metrics: { loopIterations: 500 },
-        detectedAt: new Date(Date.now() - 300000)
-      }
+        detectedAt: new Date(Date.now() - 300000),
+      },
     ];
 
     const sampleMetrics: CodeMetrics[] = [
@@ -417,7 +425,7 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
         classCount: 1,
         duplicatedLines: 15,
         duplicatedBlocks: 2,
-        techDebtMinutes: 45
+        techDebtMinutes: 45,
       },
       {
         fileName: 'Module1.bas',
@@ -434,7 +442,7 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
         classCount: 0,
         duplicatedLines: 8,
         duplicatedBlocks: 1,
-        techDebtMinutes: 120
+        techDebtMinutes: 120,
       },
       {
         fileName: 'DataClass.cls',
@@ -451,8 +459,8 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
         classCount: 1,
         duplicatedLines: 0,
         duplicatedBlocks: 0,
-        techDebtMinutes: 15
-      }
+        techDebtMinutes: 15,
+      },
     ];
 
     const sampleSession: AnalysisSession = {
@@ -463,7 +471,14 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
       endTime: new Date(Date.now() - 1200000),
       duration: 600,
       status: 'Completed',
-      filesAnalyzed: ['Form1.frm', 'Module1.bas', 'DataClass.cls', 'FileUtils.bas', 'DatabaseModule.bas', 'ReportGenerator.bas'],
+      filesAnalyzed: [
+        'Form1.frm',
+        'Module1.bas',
+        'DataClass.cls',
+        'FileUtils.bas',
+        'DatabaseModule.bas',
+        'ReportGenerator.bas',
+      ],
       totalIssues: sampleIssues.length,
       issuesByType: {
         [IssueType.Error]: 1,
@@ -474,19 +489,19 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
         [IssueType.Performance]: 1,
         [IssueType.Security]: 1,
         [IssueType.Style]: 0,
-        [IssueType.Maintainability]: 0
+        [IssueType.Maintainability]: 0,
       },
       issuesBySeverity: {
         [IssueSeverity.Critical]: 1,
         [IssueSeverity.High]: 2,
         [IssueSeverity.Medium]: 2,
         [IssueSeverity.Low]: 0,
-        [IssueSeverity.Info]: 0
+        [IssueSeverity.Info]: 0,
       },
       rules: sampleRules,
       issues: sampleIssues,
       metrics: sampleMetrics,
-      settings
+      settings,
     };
 
     setAvailableRules(sampleRules);
@@ -494,7 +509,7 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
     setCurrentSession(sampleSession);
     setSettings(prev => ({
       ...prev,
-      enabledRules: sampleRules.filter(r => r.enabled).map(r => r.id)
+      enabledRules: sampleRules.filter(r => r.enabled).map(r => r.id),
     }));
   }, []);
 
@@ -506,10 +521,14 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
       // Search filter
       if (searchText) {
         const searchLower = searchText.toLowerCase();
-        if (!(issue.title.toLowerCase().includes(searchLower) ||
-              issue.description.toLowerCase().includes(searchLower) ||
-              issue.fileName.toLowerCase().includes(searchLower) ||
-              issue.message.toLowerCase().includes(searchLower))) {
+        if (
+          !(
+            issue.title.toLowerCase().includes(searchLower) ||
+            issue.description.toLowerCase().includes(searchLower) ||
+            issue.fileName.toLowerCase().includes(searchLower) ||
+            issue.message.toLowerCase().includes(searchLower)
+          )
+        ) {
           return false;
         }
       }
@@ -532,7 +551,7 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
     // Sort issues
     filtered.sort((a, b) => {
       let comparison = 0;
-      
+
       switch (sortBy) {
         case 'severity': {
           const severityOrder = { Critical: 5, High: 4, Medium: 3, Low: 2, Info: 1 };
@@ -557,20 +576,23 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
   }, [currentSession, searchText, filterType, filterSeverity, filterCategory, sortBy, sortOrder]);
 
   // Start analysis
-  const startAnalysis = useCallback(async (files: string[]) => {
-    if (!onAnalyzeFiles) return;
+  const startAnalysis = useCallback(
+    async (files: string[]) => {
+      if (!onAnalyzeFiles) return;
 
-    setIsAnalyzing(true);
-    try {
-      const session = await onAnalyzeFiles(files, settings);
-      setAnalysisSessions(prev => [session, ...prev]);
-      setCurrentSession(session);
-    } catch (error) {
-      console.error('Analysis failed:', error);
-    } finally {
-      setIsAnalyzing(false);
-    }
-  }, [settings, onAnalyzeFiles]);
+      setIsAnalyzing(true);
+      try {
+        const session = await onAnalyzeFiles(files, settings);
+        setAnalysisSessions(prev => [session, ...prev]);
+        setCurrentSession(session);
+      } catch (error) {
+        console.error('Analysis failed:', error);
+      } finally {
+        setIsAnalyzing(false);
+      }
+    },
+    [settings, onAnalyzeFiles]
+  );
 
   // Get severity color
   const getSeverityColor = (severity: IssueSeverity): string => {
@@ -626,18 +648,21 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-medium text-gray-800">Static Code Analyzer</h3>
           {currentSession && (
-            <span className={`px-2 py-1 text-xs rounded ${
-              currentSession.status === 'Running' ? 'bg-blue-100 text-blue-800' :
-              currentSession.status === 'Completed' ? 'bg-green-100 text-green-800' :
-              currentSession.status === 'Failed' ? 'bg-red-100 text-red-800' :
-              'bg-gray-100 text-gray-800'
-            }`}>
+            <span
+              className={`px-2 py-1 text-xs rounded ${
+                currentSession.status === 'Running'
+                  ? 'bg-blue-100 text-blue-800'
+                  : currentSession.status === 'Completed'
+                    ? 'bg-green-100 text-green-800'
+                    : currentSession.status === 'Failed'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-gray-100 text-gray-800'
+              }`}
+            >
               {currentSession.status}
             </span>
           )}
-          {isAnalyzing && (
-            <div className="text-xs text-blue-600 animate-pulse">Analyzing...</div>
-          )}
+          {isAnalyzing && <div className="text-xs text-blue-600 animate-pulse">Analyzing...</div>}
         </div>
 
         <div className="flex items-center gap-1">
@@ -649,7 +674,7 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
           >
             🔍
           </button>
-          
+
           <button
             onClick={() => onGenerateReport?.(currentSession!)}
             disabled={!currentSession || currentSession.status !== 'Completed'}
@@ -658,7 +683,7 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
           >
             📊
           </button>
-          
+
           <button
             onClick={() => setShowRuleDialog(true)}
             className="px-2 py-1 text-xs bg-purple-500 text-white rounded hover:bg-purple-600"
@@ -666,7 +691,7 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
           >
             📋
           </button>
-          
+
           <button
             onClick={() => setShowSettings(!showSettings)}
             className="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
@@ -681,7 +706,7 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
       <div className="flex items-center gap-2 p-2 bg-gray-50 border-b border-gray-200">
         <select
           value={currentSession?.id || ''}
-          onChange={(e) => {
+          onChange={e => {
             const session = analysisSessions.find(s => s.id === e.target.value);
             setCurrentSession(session || null);
             setSelectedIssue(null);
@@ -700,35 +725,39 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
           type="text"
           placeholder="Search issues..."
           value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
+          onChange={e => setSearchText(e.target.value)}
           className="px-2 py-1 text-xs border border-gray-300 rounded w-32"
         />
 
         <select
           value={filterType}
-          onChange={(e) => setFilterType(e.target.value as IssueType | 'All')}
+          onChange={e => setFilterType(e.target.value as IssueType | 'All')}
           className="px-2 py-1 text-xs border border-gray-300 rounded"
         >
           <option value="All">All Types</option>
           {Object.values(IssueType).map(type => (
-            <option key={type} value={type}>{type}</option>
+            <option key={type} value={type}>
+              {type}
+            </option>
           ))}
         </select>
 
         <select
           value={filterSeverity}
-          onChange={(e) => setFilterSeverity(e.target.value as IssueSeverity | 'All')}
+          onChange={e => setFilterSeverity(e.target.value as IssueSeverity | 'All')}
           className="px-2 py-1 text-xs border border-gray-300 rounded"
         >
           <option value="All">All Severities</option>
           {Object.values(IssueSeverity).map(severity => (
-            <option key={severity} value={severity}>{severity}</option>
+            <option key={severity} value={severity}>
+              {severity}
+            </option>
           ))}
         </select>
 
         <select
           value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as any)}
+          onChange={e => setSortBy(e.target.value as any)}
           className="px-2 py-1 text-xs border border-gray-300 rounded"
         >
           <option value="severity">Severity</option>
@@ -738,7 +767,7 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
         </select>
 
         <button
-          onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+          onClick={() => setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'))}
           className="px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100"
           title={`Sort ${sortOrder === 'asc' ? 'Descending' : 'Ascending'}`}
         >
@@ -754,34 +783,42 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
               <input
                 type="checkbox"
                 checked={settings.realTimeAnalysis}
-                onChange={(e) => setSettings(prev => ({ ...prev, realTimeAnalysis: e.target.checked }))}
+                onChange={e =>
+                  setSettings(prev => ({ ...prev, realTimeAnalysis: e.target.checked }))
+                }
               />
               Real-time Analysis
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={settings.analyzeGeneratedCode}
-                onChange={(e) => setSettings(prev => ({ ...prev, analyzeGeneratedCode: e.target.checked }))}
+                onChange={e =>
+                  setSettings(prev => ({ ...prev, analyzeGeneratedCode: e.target.checked }))
+                }
               />
               Include Generated Code
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={settings.analyzeTestCode}
-                onChange={(e) => setSettings(prev => ({ ...prev, analyzeTestCode: e.target.checked }))}
+                onChange={e =>
+                  setSettings(prev => ({ ...prev, analyzeTestCode: e.target.checked }))
+                }
               />
               Include Test Code
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={settings.parallelAnalysis}
-                onChange={(e) => setSettings(prev => ({ ...prev, parallelAnalysis: e.target.checked }))}
+                onChange={e =>
+                  setSettings(prev => ({ ...prev, parallelAnalysis: e.target.checked }))
+                }
               />
               Parallel Analysis
             </label>
@@ -796,7 +833,7 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
           { key: 'metrics', label: 'Metrics', icon: '📊' },
           { key: 'rules', label: 'Rules', icon: '📋' },
           { key: 'settings', label: 'Settings', icon: '⚙️' },
-          { key: 'reports', label: 'Reports', icon: '📄' }
+          { key: 'reports', label: 'Reports', icon: '📄' },
         ].map(tab => (
           <button
             key={tab.key}
@@ -831,47 +868,52 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
                     className={`flex items-start py-3 px-4 cursor-pointer hover:bg-gray-50 border-l-4 ${
                       selectedIssue?.id === issue.id ? 'bg-blue-50' : ''
                     } ${
-                      issue.severity === IssueSeverity.Critical ? 'border-red-600' :
-                      issue.severity === IssueSeverity.High ? 'border-red-400' :
-                      issue.severity === IssueSeverity.Medium ? 'border-yellow-400' :
-                      issue.severity === IssueSeverity.Low ? 'border-blue-400' : 'border-gray-400'
+                      issue.severity === IssueSeverity.Critical
+                        ? 'border-red-600'
+                        : issue.severity === IssueSeverity.High
+                          ? 'border-red-400'
+                          : issue.severity === IssueSeverity.Medium
+                            ? 'border-yellow-400'
+                            : issue.severity === IssueSeverity.Low
+                              ? 'border-blue-400'
+                              : 'border-gray-400'
                     }`}
                     onClick={() => setSelectedIssue(issue)}
                   >
                     <span className="w-6 text-center">{getTypeIcon(issue.type)}</span>
-                    
+
                     <div className="flex-1 min-w-0 mx-3">
                       <div className="flex items-center gap-2 mb-1">
                         <div className="font-medium text-gray-800">{issue.title}</div>
-                        <span className={`px-2 py-0.5 text-xs rounded ${getSeverityColor(issue.severity)}`}>
+                        <span
+                          className={`px-2 py-0.5 text-xs rounded ${getSeverityColor(issue.severity)}`}
+                        >
                           {issue.severity}
                         </span>
                         <span className="text-xs text-gray-500">{issue.ruleId}</span>
                       </div>
-                      
+
                       <div className="text-sm text-gray-600 mb-1">{issue.message}</div>
-                      
+
                       <div className="text-xs text-gray-500">
                         {issue.fileName}:{issue.lineNumber}:{issue.columnNumber}
                       </div>
-                      
+
                       {issue.sourceCode && (
                         <div className="mt-2 p-2 bg-gray-100 rounded text-xs font-mono">
                           {issue.sourceCode}
                         </div>
                       )}
-                      
+
                       {issue.suggestion && (
-                        <div className="mt-2 text-xs text-blue-600">
-                          💡 {issue.suggestion}
-                        </div>
+                        <div className="mt-2 text-xs text-blue-600">💡 {issue.suggestion}</div>
                       )}
                     </div>
 
                     <div className="flex flex-col items-end gap-1">
                       {issue.fixable && (
                         <button
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             onFixIssue?.(issue.id);
                           }}
@@ -881,9 +923,9 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
                           🔧
                         </button>
                       )}
-                      
+
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           onNavigateToCode?.(issue.fileName, issue.lineNumber, issue.columnNumber);
                         }}
@@ -892,9 +934,9 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
                       >
                         📝
                       </button>
-                      
+
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           const reason = prompt('Suppression reason:');
                           if (reason) onSuppressIssue?.(issue.id, reason);
@@ -914,10 +956,9 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
                   <div className="text-4xl mb-4">🎉</div>
                   <p className="text-lg">No Issues Found</p>
                   <p className="text-sm mt-2">
-                    {currentSession 
-                      ? 'All filters applied or no issues detected' 
-                      : 'Run analysis to detect code issues'
-                    }
+                    {currentSession
+                      ? 'All filters applied or no issues detected'
+                      : 'Run analysis to detect code issues'}
                   </p>
                 </div>
               </div>
@@ -945,13 +986,25 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
                         </div>
                         <div className="flex justify-between">
                           <span>Complexity:</span>
-                          <span className={metrics.cyclomaticComplexity > settings.maxComplexityThreshold ? 'text-red-600' : 'text-green-600'}>
+                          <span
+                            className={
+                              metrics.cyclomaticComplexity > settings.maxComplexityThreshold
+                                ? 'text-red-600'
+                                : 'text-green-600'
+                            }
+                          >
                             {metrics.cyclomaticComplexity}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span>Maintainability:</span>
-                          <span className={metrics.maintainabilityIndex < settings.minMaintainabilityThreshold ? 'text-red-600' : 'text-green-600'}>
+                          <span
+                            className={
+                              metrics.maintainabilityIndex < settings.minMaintainabilityThreshold
+                                ? 'text-red-600'
+                                : 'text-green-600'
+                            }
+                          >
                             {metrics.maintainabilityIndex}
                           </span>
                         </div>
@@ -995,18 +1048,20 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
                   <input
                     type="checkbox"
                     checked={rule.enabled}
-                    onChange={(e) => {
+                    onChange={e => {
                       e.stopPropagation();
                       onUpdateRule?.(rule.id, { enabled: e.target.checked });
                     }}
                     className="mr-3"
                   />
-                  
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <div className="font-medium">{rule.name}</div>
                       <span className="text-xs text-gray-500">{rule.id}</span>
-                      <span className={`px-2 py-0.5 text-xs rounded ${getSeverityColor(rule.severity)}`}>
+                      <span
+                        className={`px-2 py-0.5 text-xs rounded ${getSeverityColor(rule.severity)}`}
+                      >
                         {rule.severity}
                       </span>
                       <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
@@ -1015,7 +1070,7 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
                     </div>
                     <div className="text-sm text-gray-600">{rule.description}</div>
                   </div>
-                  
+
                   {rule.configurable && (
                     <span className="text-xs text-blue-600">⚙️ Configurable</span>
                   )}
@@ -1036,7 +1091,9 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
                     <input
                       type="checkbox"
                       checked={settings.realTimeAnalysis}
-                      onChange={(e) => setSettings(prev => ({ ...prev, realTimeAnalysis: e.target.checked }))}
+                      onChange={e =>
+                        setSettings(prev => ({ ...prev, realTimeAnalysis: e.target.checked }))
+                      }
                     />
                     Real-time Analysis
                   </label>
@@ -1044,7 +1101,9 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
                     <input
                       type="checkbox"
                       checked={settings.parallelAnalysis}
-                      onChange={(e) => setSettings(prev => ({ ...prev, parallelAnalysis: e.target.checked }))}
+                      onChange={e =>
+                        setSettings(prev => ({ ...prev, parallelAnalysis: e.target.checked }))
+                      }
                     />
                     Parallel Analysis
                   </label>
@@ -1052,7 +1111,9 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
                     <input
                       type="checkbox"
                       checked={settings.analyzeGeneratedCode}
-                      onChange={(e) => setSettings(prev => ({ ...prev, analyzeGeneratedCode: e.target.checked }))}
+                      onChange={e =>
+                        setSettings(prev => ({ ...prev, analyzeGeneratedCode: e.target.checked }))
+                      }
                     />
                     Analyze Generated Code
                   </label>
@@ -1060,7 +1121,9 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
                     <input
                       type="checkbox"
                       checked={settings.analyzeTestCode}
-                      onChange={(e) => setSettings(prev => ({ ...prev, analyzeTestCode: e.target.checked }))}
+                      onChange={e =>
+                        setSettings(prev => ({ ...prev, analyzeTestCode: e.target.checked }))
+                      }
                     />
                     Analyze Test Code
                   </label>
@@ -1079,11 +1142,16 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
                       min="1"
                       max="50"
                       value={settings.maxComplexityThreshold}
-                      onChange={(e) => setSettings(prev => ({ ...prev, maxComplexityThreshold: parseInt(e.target.value) }))}
+                      onChange={e =>
+                        setSettings(prev => ({
+                          ...prev,
+                          maxComplexityThreshold: parseInt(e.target.value),
+                        }))
+                      }
                       className="w-full"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium mb-1">
                       Minimum Maintainability: {settings.minMaintainabilityThreshold}
@@ -1093,7 +1161,12 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
                       min="0"
                       max="100"
                       value={settings.minMaintainabilityThreshold}
-                      onChange={(e) => setSettings(prev => ({ ...prev, minMaintainabilityThreshold: parseInt(e.target.value) }))}
+                      onChange={e =>
+                        setSettings(prev => ({
+                          ...prev,
+                          minMaintainabilityThreshold: parseInt(e.target.value),
+                        }))
+                      }
                       className="w-full"
                     />
                   </div>
@@ -1104,7 +1177,9 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
                 <h3 className="text-lg font-medium mb-4">Report Format</h3>
                 <select
                   value={settings.reportFormat}
-                  onChange={(e) => setSettings(prev => ({ ...prev, reportFormat: e.target.value as any }))}
+                  onChange={e =>
+                    setSettings(prev => ({ ...prev, reportFormat: e.target.value as any }))
+                  }
                   className="px-3 py-2 border border-gray-300 rounded w-48"
                 >
                   <option value="HTML">HTML</option>
@@ -1143,9 +1218,13 @@ export const StaticCodeAnalyzer: React.FC<StaticCodeAnalyzerProps> = ({
           <span>Sessions: {analysisSessions.length}</span>
           {currentSession && (
             <>
-              <span>Issues: {processedIssues.length}/{currentSession.totalIssues}</span>
+              <span>
+                Issues: {processedIssues.length}/{currentSession.totalIssues}
+              </span>
               <span>Files: {currentSession.filesAnalyzed.length}</span>
-              <span>Rules: {availableRules.filter(r => r.enabled).length}/{availableRules.length}</span>
+              <span>
+                Rules: {availableRules.filter(r => r.enabled).length}/{availableRules.length}
+              </span>
             </>
           )}
         </div>

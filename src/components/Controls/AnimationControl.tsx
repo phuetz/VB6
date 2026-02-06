@@ -12,12 +12,12 @@ import { useVB6Store } from '../../stores/vb6Store';
 export enum AnimationAlign {
   aniLeft = 0,
   aniCenter = 1,
-  aniRight = 2
+  aniRight = 2,
 }
 
 export enum AnimationBackStyle {
   aniTransparent = 0,
-  aniOpaque = 1
+  aniOpaque = 1,
 }
 
 export enum AnimationState {
@@ -25,7 +25,7 @@ export enum AnimationState {
   aniOpen = 1,
   aniPlaying = 2,
   aniPaused = 3,
-  aniStopped = 4
+  aniStopped = 4,
 }
 
 export interface AnimationControlProps extends VB6ControlPropsEnhanced {
@@ -35,11 +35,11 @@ export interface AnimationControlProps extends VB6ControlPropsEnhanced {
   backStyle?: AnimationBackStyle;
   autoPlay?: boolean;
   center?: boolean;
-  
+
   // Visual properties
   backColor?: string;
   borderStyle?: number;
-  
+
   // Events
   onClick?: () => void;
   onDblClick?: () => void;
@@ -98,10 +98,10 @@ export const AnimationControl = forwardRef<HTMLDivElement, AnimationControlProps
     try {
       setError(null);
       setIsLoaded(false);
-      
+
       if (videoRef.current) {
         videoRef.current.src = path;
-        
+
         // For modern browsers, we'll use video element to handle various formats
         videoRef.current.addEventListener('loadedmetadata', () => {
           const duration = videoRef.current?.duration || 0;
@@ -109,7 +109,7 @@ export const AnimationControl = forwardRef<HTMLDivElement, AnimationControlProps
           setFrameCount(Math.floor(duration * fps));
           setIsLoaded(true);
         });
-        
+
         videoRef.current.addEventListener('error', () => {
           setError('Failed to load animation file');
         });
@@ -121,25 +121,25 @@ export const AnimationControl = forwardRef<HTMLDivElement, AnimationControlProps
 
   const play = useCallback(() => {
     if (!isLoaded || isPlaying) return;
-    
+
     setIsPlaying(true);
     setCurrentRepetition(0);
-    
+
     if (videoRef.current) {
       const startTime = start > 0 ? start / 30 : 0; // Convert frame to seconds
       const endTime = stop > 0 ? stop / 30 : videoRef.current.duration;
-      
+
       videoRef.current.currentTime = startTime;
       videoRef.current.play();
-      
+
       // Monitor playback
       const checkPlayback = () => {
         if (!videoRef.current || !isPlaying) return;
-        
+
         const currentTime = videoRef.current.currentTime;
         const currentFrameNum = Math.floor(currentTime * 30);
         setCurrentFrame(currentFrameNum);
-        
+
         // Check if we've reached the end frame
         if (endTime > 0 && currentTime >= endTime) {
           if (repetitions === 0 || currentRepetition < repetitions - 1) {
@@ -152,12 +152,12 @@ export const AnimationControl = forwardRef<HTMLDivElement, AnimationControlProps
             return;
           }
         }
-        
+
         if (timers) {
           animationIdRef.current = requestAnimationFrame(checkPlayback);
         }
       };
-      
+
       if (timers) {
         checkPlayback();
       }
@@ -168,35 +168,44 @@ export const AnimationControl = forwardRef<HTMLDivElement, AnimationControlProps
     setIsPlaying(false);
     setCurrentFrame(0);
     setCurrentRepetition(0);
-    
+
     if (videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = start > 0 ? start / 30 : 0;
     }
-    
+
     if (animationIdRef.current) {
       cancelAnimationFrame(animationIdRef.current);
       animationIdRef.current = null;
     }
   }, []);
 
-  const seek = useCallback((frame: number) => {
-    if (!isLoaded || !videoRef.current) return;
-    
-    const time = frame / 30; // Convert frame to seconds
-    videoRef.current.currentTime = Math.max(0, Math.min(time, videoRef.current.duration));
-    setCurrentFrame(frame);
-  }, [isLoaded]);
+  const seek = useCallback(
+    (frame: number) => {
+      if (!isLoaded || !videoRef.current) return;
 
-  const handleClick = useCallback((event: React.MouseEvent) => {
-    if (!enabled) return;
-    onEvent?.('Click', { x: event.clientX, y: event.clientY });
-  }, [enabled]);
+      const time = frame / 30; // Convert frame to seconds
+      videoRef.current.currentTime = Math.max(0, Math.min(time, videoRef.current.duration));
+      setCurrentFrame(frame);
+    },
+    [isLoaded]
+  );
 
-  const handleDoubleClick = useCallback((event: React.MouseEvent) => {
-    if (!enabled) return;
-    onEvent?.('DblClick', { x: event.clientX, y: event.clientY });
-  }, [enabled]);
+  const handleClick = useCallback(
+    (event: React.MouseEvent) => {
+      if (!enabled) return;
+      onEvent?.('Click', { x: event.clientX, y: event.clientY });
+    },
+    [enabled]
+  );
+
+  const handleDoubleClick = useCallback(
+    (event: React.MouseEvent) => {
+      if (!enabled) return;
+      onEvent?.('DblClick', { x: event.clientX, y: event.clientY });
+    },
+    [enabled]
+  );
 
   // Cleanup on unmount
   useEffect(() => {
@@ -218,9 +227,21 @@ export const AnimationControl = forwardRef<HTMLDivElement, AnimationControlProps
 
   const getCursorStyle = () => {
     const cursors = [
-      'default', 'auto', 'crosshair', 'text', 'wait', 'help',
-      'pointer', 'not-allowed', 'move', 'col-resize', 'row-resize',
-      'n-resize', 's-resize', 'e-resize', 'w-resize'
+      'default',
+      'auto',
+      'crosshair',
+      'text',
+      'wait',
+      'help',
+      'pointer',
+      'not-allowed',
+      'move',
+      'col-resize',
+      'row-resize',
+      'n-resize',
+      's-resize',
+      'e-resize',
+      'w-resize',
     ];
     return cursors[mousePointer] || 'default';
   };
@@ -239,14 +260,14 @@ export const AnimationControl = forwardRef<HTMLDivElement, AnimationControlProps
     overflow: 'hidden',
     display: 'flex',
     alignItems: center ? 'center' : 'flex-start',
-    justifyContent: center ? 'center' : 'flex-start'
+    justifyContent: center ? 'center' : 'flex-start',
   };
 
   const videoStyle = {
     width: '100%',
     height: '100%',
-    objectFit: center ? 'contain' : 'cover' as const,
-    display: isDesignMode ? 'none' : 'block'
+    objectFit: center ? 'contain' : ('cover' as const),
+    display: isDesignMode ? 'none' : 'block',
   };
 
   return (
@@ -274,12 +295,7 @@ export const AnimationControl = forwardRef<HTMLDivElement, AnimationControlProps
       />
 
       {/* Canvas for frame-by-frame control (if needed) */}
-      <canvas
-        ref={canvasRef}
-        style={{ display: 'none' }}
-        width={width}
-        height={height}
-      />
+      <canvas ref={canvasRef} style={{ display: 'none' }} width={width} height={height} />
 
       {/* Design mode placeholder */}
       {isDesignMode && (
@@ -295,15 +311,13 @@ export const AnimationControl = forwardRef<HTMLDivElement, AnimationControlProps
             fontSize: '12px',
             color: '#666',
             textAlign: 'center',
-            padding: '4px'
+            padding: '4px',
           }}
         >
           <div style={{ fontSize: '16px', marginBottom: '4px' }}>🎬</div>
           <div>Animation</div>
           {filename && (
-            <div style={{ fontSize: '10px', marginTop: '2px' }}>
-              {filename.split('/').pop()}
-            </div>
+            <div style={{ fontSize: '10px', marginTop: '2px' }}>{filename.split('/').pop()}</div>
           )}
         </div>
       )}
@@ -324,7 +338,7 @@ export const AnimationControl = forwardRef<HTMLDivElement, AnimationControlProps
             fontSize: '10px',
             color: '#800000',
             textAlign: 'center',
-            padding: '4px'
+            padding: '4px',
           }}
         >
           {error}
@@ -346,11 +360,13 @@ export const AnimationControl = forwardRef<HTMLDivElement, AnimationControlProps
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '0 4px'
+            padding: '0 4px',
           }}
         >
           <span>{isPlaying ? '▶️' : '⏸️'}</span>
-          <span>{currentFrame}/{frameCount}</span>
+          <span>
+            {currentFrame}/{frameCount}
+          </span>
         </div>
       )}
 
@@ -367,7 +383,7 @@ export const AnimationControl = forwardRef<HTMLDivElement, AnimationControlProps
             padding: '2px',
             border: '1px solid #ccc',
             whiteSpace: 'nowrap',
-            zIndex: 1000
+            zIndex: 1000,
           }}
         >
           {name} - Animation
@@ -418,7 +434,7 @@ export const AnimationHelpers = {
    */
   timeToFrame: (time: number, fps: number = 30): number => {
     return Math.floor(time * fps);
-  }
+  },
 };
 
 // VB6 Animation methods simulation
@@ -429,7 +445,7 @@ export const AnimationMethods = {
   open: (control: AnimationControl, filename: string) => {
     return {
       ...control,
-      filename: AnimationHelpers.convertPath(filename)
+      filename: AnimationHelpers.convertPath(filename),
     };
   },
 
@@ -441,7 +457,7 @@ export const AnimationMethods = {
       ...control,
       repetitions: repeat,
       start: start !== undefined ? start : control.start,
-      stop: stop !== undefined ? stop : control.stop
+      stop: stop !== undefined ? stop : control.stop,
     };
   },
 
@@ -459,9 +475,9 @@ export const AnimationMethods = {
   close: (control: AnimationControl) => {
     return {
       ...control,
-      filename: ''
+      filename: '',
     };
-  }
+  },
 };
 
 export default AnimationControl;

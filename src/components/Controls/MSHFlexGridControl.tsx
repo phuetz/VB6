@@ -1,6 +1,6 @@
 /**
  * VB6 MSHFlexGrid Control Implementation
- * 
+ *
  * Hierarchical FlexGrid with full VB6 compatibility
  */
 
@@ -51,28 +51,28 @@ export interface MSHFlexGridControl {
   top: number;
   width: number;
   height: number;
-  
+
   // Grid Structure
   rows: number;
   cols: number;
   fixedRows: number;
   fixedCols: number;
-  
+
   // Data
   gridRows: MSHFlexGridRow[];
   gridCols: MSHFlexGridColumn[];
-  
+
   // Current Selection
   row: number;
   col: number;
   rowSel: number;
   colSel: number;
-  
+
   // Hierarchy
   outlineBar: number; // 0=None, 1=Simple, 2=PlusMinus
   outlineCol: number; // Column with hierarchy
   treeLines: boolean;
-  
+
   // Appearance
   gridLines: number; // 0=None, 1=Horizontal, 2=Vertical, 3=Both
   gridColor: string;
@@ -82,30 +82,30 @@ export interface MSHFlexGridControl {
   foreColorFixed: string;
   backColorSel: string;
   foreColorSel: string;
-  
+
   // Behavior
   allowUserResizing: number; // 0=None, 1=Columns, 2=Rows, 3=Both
   allowBigSelection: boolean;
   editable: boolean;
   focusRect: number; // 0=None, 1=Light, 2=Heavy
   highlightRow: number; // 0=Never, 1=Always, 2=With Focus
-  
+
   // Scrolling
   scrollBars: number; // 0=None, 1=Horizontal, 2=Vertical, 3=Both
   scrollTrack: boolean;
-  
+
   // Sorting
   sort: number; // 0=None, 1=Generic, 2=Numeric, 3=String, 4=Date
-  
+
   // Data Binding
   dataSource: string;
-  
+
   // Behavior
   enabled: boolean;
   visible: boolean;
   mousePointer: number;
   tag: string;
-  
+
   // Events
   onClick?: string;
   onDblClick?: string;
@@ -133,7 +133,7 @@ export const MSHFlexGridControl: React.FC<MSHFlexGridControlProps> = ({
   control,
   isDesignMode = false,
   onPropertyChange,
-  onEvent
+  onEvent,
 }) => {
   const {
     name,
@@ -174,7 +174,7 @@ export const MSHFlexGridControl: React.FC<MSHFlexGridControlProps> = ({
     enabled = true,
     visible = true,
     mousePointer = 0,
-    tag = ''
+    tag = '',
   } = control;
 
   const [currentRow, setCurrentRow] = useState(row);
@@ -185,7 +185,11 @@ export const MSHFlexGridControl: React.FC<MSHFlexGridControlProps> = ({
   const [scrollLeft, setScrollLeft] = useState(0);
   const [editingCell, setEditingCell] = useState<{ row: number; col: number } | null>(null);
   const [editValue, setEditValue] = useState('');
-  const [resizing, setResizing] = useState<{ type: 'row' | 'col'; index: number; start: number } | null>(null);
+  const [resizing, setResizing] = useState<{
+    type: 'row' | 'col';
+    index: number;
+    start: number;
+  } | null>(null);
 
   const gridRef = useRef<HTMLDivElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
@@ -193,7 +197,7 @@ export const MSHFlexGridControl: React.FC<MSHFlexGridControlProps> = ({
   // Initialize grid data if empty
   const [actualRows, setActualRows] = useState<MSHFlexGridRow[]>(() => {
     if (gridRows.length > 0) return gridRows;
-    
+
     return Array.from({ length: rows }, (_, i) => ({
       index: i,
       height: 20,
@@ -212,16 +216,16 @@ export const MSHFlexGridControl: React.FC<MSHFlexGridControlProps> = ({
         fontItalic: false,
         picture: '',
         cellType: 0,
-        tag: ''
+        tag: '',
       })),
       data: null,
-      tag: ''
+      tag: '',
     }));
   });
 
   const [actualCols, setActualCols] = useState<MSHFlexGridColumn[]>(() => {
     if (gridCols.length > 0) return gridCols;
-    
+
     return Array.from({ length: cols }, (_, i) => ({
       index: i,
       width: 80,
@@ -231,152 +235,184 @@ export const MSHFlexGridControl: React.FC<MSHFlexGridControlProps> = ({
       sort: 0,
       dataField: `field${i}`,
       format: '',
-      tag: ''
+      tag: '',
     }));
   });
 
-  const handleCellClick = useCallback((rowIndex: number, colIndex: number, event: React.MouseEvent) => {
-    if (!enabled) return;
-    
-    event.preventDefault();
-    
-    const oldRow = currentRow;
-    const oldCol = currentCol;
-    
-    setCurrentRow(rowIndex);
-    setCurrentCol(colIndex);
-    
-    if (!allowBigSelection) {
-      setSelectedRows([rowIndex]);
-      setSelectedCols([colIndex]);
-    }
-    
-    onPropertyChange?.('row', rowIndex);
-    onPropertyChange?.('col', colIndex);
-    
-    if (oldRow !== rowIndex || oldCol !== colIndex) {
-      onEvent?.('RowColChange');
-    }
-    
-    onEvent?.('Click', { row: rowIndex, col: colIndex });
-    onEvent?.('EnterCell');
-  }, [enabled, currentRow, currentCol, allowBigSelection, onPropertyChange, onEvent]);
+  const handleCellClick = useCallback(
+    (rowIndex: number, colIndex: number, event: React.MouseEvent) => {
+      if (!enabled) return;
 
-  const handleCellDoubleClick = useCallback((rowIndex: number, colIndex: number, event: React.MouseEvent) => {
-    if (!enabled) return;
-    
-    event.preventDefault();
-    onEvent?.('DblClick', { row: rowIndex, col: colIndex });
-    
-    // Start editing if editable
-    if (editable && rowIndex >= fixedRows && colIndex >= fixedCols) {
-      startEditing(rowIndex, colIndex);
-    }
-  }, [enabled, editable, fixedRows, fixedCols, onEvent]);
+      event.preventDefault();
 
-  const startEditing = useCallback((rowIndex: number, colIndex: number) => {
-    const cell = actualRows[rowIndex]?.cells[colIndex];
-    if (!cell) return;
-    
-    onEvent?.('BeforeEdit', { row: rowIndex, col: colIndex });
-    
-    setEditingCell({ row: rowIndex, col: colIndex });
-    setEditValue(cell.text);
-    
-    // Focus input after state update
-    setTimeout(() => {
-      editInputRef.current?.focus();
-      editInputRef.current?.select();
-    }, 0);
-  }, [actualRows, onEvent]);
+      const oldRow = currentRow;
+      const oldCol = currentCol;
 
-  const finishEditing = useCallback((save: boolean = true) => {
-    if (!editingCell) return;
-    
-    if (save && editValue !== actualRows[editingCell.row]?.cells[editingCell.col]?.text) {
+      setCurrentRow(rowIndex);
+      setCurrentCol(colIndex);
+
+      if (!allowBigSelection) {
+        setSelectedRows([rowIndex]);
+        setSelectedCols([colIndex]);
+      }
+
+      onPropertyChange?.('row', rowIndex);
+      onPropertyChange?.('col', colIndex);
+
+      if (oldRow !== rowIndex || oldCol !== colIndex) {
+        onEvent?.('RowColChange');
+      }
+
+      onEvent?.('Click', { row: rowIndex, col: colIndex });
+      onEvent?.('EnterCell');
+    },
+    [enabled, currentRow, currentCol, allowBigSelection, onPropertyChange, onEvent]
+  );
+
+  const handleCellDoubleClick = useCallback(
+    (rowIndex: number, colIndex: number, event: React.MouseEvent) => {
+      if (!enabled) return;
+
+      event.preventDefault();
+      onEvent?.('DblClick', { row: rowIndex, col: colIndex });
+
+      // Start editing if editable
+      if (editable && rowIndex >= fixedRows && colIndex >= fixedCols) {
+        startEditing(rowIndex, colIndex);
+      }
+    },
+    [enabled, editable, fixedRows, fixedCols, onEvent]
+  );
+
+  const startEditing = useCallback(
+    (rowIndex: number, colIndex: number) => {
+      const cell = actualRows[rowIndex]?.cells[colIndex];
+      if (!cell) return;
+
+      onEvent?.('BeforeEdit', { row: rowIndex, col: colIndex });
+
+      setEditingCell({ row: rowIndex, col: colIndex });
+      setEditValue(cell.text);
+
+      // Focus input after state update
+      setTimeout(() => {
+        editInputRef.current?.focus();
+        editInputRef.current?.select();
+      }, 0);
+    },
+    [actualRows, onEvent]
+  );
+
+  const finishEditing = useCallback(
+    (save: boolean = true) => {
+      if (!editingCell) return;
+
+      if (save && editValue !== actualRows[editingCell.row]?.cells[editingCell.col]?.text) {
+        const newRows = [...actualRows];
+        newRows[editingCell.row].cells[editingCell.col].text = editValue;
+        setActualRows(newRows);
+
+        onEvent?.('AfterEdit', {
+          row: editingCell.row,
+          col: editingCell.col,
+          value: editValue,
+        });
+      }
+
+      setEditingCell(null);
+      setEditValue('');
+    },
+    [editingCell, editValue, actualRows, onEvent]
+  );
+
+  const handleKeyPress = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (!enabled) return;
+
+      onEvent?.('KeyPress', { keyCode: event.keyCode, key: event.key });
+
+      switch (event.key) {
+        case 'Enter':
+          if (editingCell) {
+            event.preventDefault();
+            finishEditing(true);
+          } else if (editable && currentRow >= fixedRows && currentCol >= fixedCols) {
+            startEditing(currentRow, currentCol);
+          }
+          break;
+        case 'Escape':
+          if (editingCell) {
+            event.preventDefault();
+            finishEditing(false);
+          }
+          break;
+        case 'F2':
+          if (editable && currentRow >= fixedRows && currentCol >= fixedCols) {
+            event.preventDefault();
+            startEditing(currentRow, currentCol);
+          }
+          break;
+        case 'ArrowUp':
+          if (!editingCell && currentRow > 0) {
+            event.preventDefault();
+            handleCellClick(currentRow - 1, currentCol, event as any);
+          }
+          break;
+        case 'ArrowDown':
+          if (!editingCell && currentRow < actualRows.length - 1) {
+            event.preventDefault();
+            handleCellClick(currentRow + 1, currentCol, event as any);
+          }
+          break;
+        case 'ArrowLeft':
+          if (!editingCell && currentCol > 0) {
+            event.preventDefault();
+            handleCellClick(currentRow, currentCol - 1, event as any);
+          }
+          break;
+        case 'ArrowRight':
+          if (!editingCell && currentCol < actualCols.length - 1) {
+            event.preventDefault();
+            handleCellClick(currentRow, currentCol + 1, event as any);
+          }
+          break;
+      }
+    },
+    [
+      enabled,
+      editingCell,
+      currentRow,
+      currentCol,
+      fixedRows,
+      fixedCols,
+      editable,
+      actualRows.length,
+      actualCols.length,
+      finishEditing,
+      startEditing,
+      handleCellClick,
+      onEvent,
+    ]
+  );
+
+  const handleNodeToggle = useCallback(
+    (rowIndex: number) => {
+      if (rowIndex >= actualRows.length || !actualRows[rowIndex].isNode) return;
+
       const newRows = [...actualRows];
-      newRows[editingCell.row].cells[editingCell.col].text = editValue;
+      const row = newRows[rowIndex];
+      row.expanded = !row.expanded;
+
       setActualRows(newRows);
-      
-      onEvent?.('AfterEdit', { 
-        row: editingCell.row, 
-        col: editingCell.col, 
-        value: editValue 
-      });
-    }
-    
-    setEditingCell(null);
-    setEditValue('');
-  }, [editingCell, editValue, actualRows, onEvent]);
 
-  const handleKeyPress = useCallback((event: React.KeyboardEvent) => {
-    if (!enabled) return;
-    
-    onEvent?.('KeyPress', { keyCode: event.keyCode, key: event.key });
-    
-    switch (event.key) {
-      case 'Enter':
-        if (editingCell) {
-          event.preventDefault();
-          finishEditing(true);
-        } else if (editable && currentRow >= fixedRows && currentCol >= fixedCols) {
-          startEditing(currentRow, currentCol);
-        }
-        break;
-      case 'Escape':
-        if (editingCell) {
-          event.preventDefault();
-          finishEditing(false);
-        }
-        break;
-      case 'F2':
-        if (editable && currentRow >= fixedRows && currentCol >= fixedCols) {
-          event.preventDefault();
-          startEditing(currentRow, currentCol);
-        }
-        break;
-      case 'ArrowUp':
-        if (!editingCell && currentRow > 0) {
-          event.preventDefault();
-          handleCellClick(currentRow - 1, currentCol, event as any);
-        }
-        break;
-      case 'ArrowDown':
-        if (!editingCell && currentRow < actualRows.length - 1) {
-          event.preventDefault();
-          handleCellClick(currentRow + 1, currentCol, event as any);
-        }
-        break;
-      case 'ArrowLeft':
-        if (!editingCell && currentCol > 0) {
-          event.preventDefault();
-          handleCellClick(currentRow, currentCol - 1, event as any);
-        }
-        break;
-      case 'ArrowRight':
-        if (!editingCell && currentCol < actualCols.length - 1) {
-          event.preventDefault();
-          handleCellClick(currentRow, currentCol + 1, event as any);
-        }
-        break;
-    }
-  }, [enabled, editingCell, currentRow, currentCol, fixedRows, fixedCols, editable, actualRows.length, actualCols.length, finishEditing, startEditing, handleCellClick, onEvent]);
-
-  const handleNodeToggle = useCallback((rowIndex: number) => {
-    if (rowIndex >= actualRows.length || !actualRows[rowIndex].isNode) return;
-    
-    const newRows = [...actualRows];
-    const row = newRows[rowIndex];
-    row.expanded = !row.expanded;
-    
-    setActualRows(newRows);
-    
-    if (row.expanded) {
-      onEvent?.('Expand', { row: rowIndex });
-    } else {
-      onEvent?.('Collapse', { row: rowIndex });
-    }
-  }, [actualRows, onEvent]);
+      if (row.expanded) {
+        onEvent?.('Expand', { row: rowIndex });
+      } else {
+        onEvent?.('Collapse', { row: rowIndex });
+      }
+    },
+    [actualRows, onEvent]
+  );
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
     const target = event.target as HTMLDivElement;
@@ -390,9 +426,21 @@ export const MSHFlexGridControl: React.FC<MSHFlexGridControlProps> = ({
 
   const getCursorStyle = () => {
     const cursors = [
-      'default', 'auto', 'crosshair', 'text', 'wait', 'help',
-      'pointer', 'not-allowed', 'move', 'col-resize', 'row-resize',
-      'n-resize', 's-resize', 'e-resize', 'w-resize'
+      'default',
+      'auto',
+      'crosshair',
+      'text',
+      'wait',
+      'help',
+      'pointer',
+      'not-allowed',
+      'move',
+      'col-resize',
+      'row-resize',
+      'n-resize',
+      's-resize',
+      'e-resize',
+      'w-resize',
     ];
     return cursors[mousePointer] || 'default';
   };
@@ -400,10 +448,10 @@ export const MSHFlexGridControl: React.FC<MSHFlexGridControlProps> = ({
   const getScrollStyle = () => {
     let overflowX = 'hidden';
     let overflowY = 'hidden';
-    
+
     if (scrollBars === 1 || scrollBars === 3) overflowX = 'auto';
     if (scrollBars === 2 || scrollBars === 3) overflowY = 'auto';
-    
+
     return { overflowX, overflowY };
   };
 
@@ -411,31 +459,31 @@ export const MSHFlexGridControl: React.FC<MSHFlexGridControlProps> = ({
     const isFixed = rowIndex < fixedRows || colIndex < fixedCols;
     const isSelected = selectedRows.includes(rowIndex) && selectedCols.includes(colIndex);
     const isCurrent = rowIndex === currentRow && colIndex === currentCol;
-    
+
     let background = cell.backColor;
     let color = cell.foreColor;
     let border = 'none';
-    
+
     if (isSelected) {
       background = backColorSel;
       color = foreColorSel;
     }
-    
+
     if (isCurrent && focusRect > 0) {
       border = focusRect === 1 ? '1px dotted #000' : '2px solid #000';
     }
-    
+
     // Grid lines
     let borderRight = 'none';
     let borderBottom = 'none';
-    
+
     if (gridLines === 2 || gridLines === 3) {
       borderRight = colIndex < actualCols.length - 1 ? `1px solid ${gridColor}` : 'none';
     }
     if (gridLines === 1 || gridLines === 3) {
       borderBottom = rowIndex < actualRows.length - 1 ? `1px solid ${gridColor}` : 'none';
     }
-    
+
     return {
       background,
       color,
@@ -449,7 +497,7 @@ export const MSHFlexGridControl: React.FC<MSHFlexGridControlProps> = ({
       whiteSpace: 'nowrap' as const,
       overflow: 'hidden',
       textOverflow: 'ellipsis',
-      cursor: enabled ? 'cell' : 'not-allowed'
+      cursor: enabled ? 'cell' : 'not-allowed',
     };
   };
 
@@ -464,7 +512,7 @@ export const MSHFlexGridControl: React.FC<MSHFlexGridControlProps> = ({
     cursor: getCursorStyle(),
     opacity: enabled ? 1 : 0.5,
     outline: isDesignMode ? '1px dotted #333' : 'none',
-    ...getScrollStyle()
+    ...getScrollStyle(),
   };
 
   return (
@@ -485,9 +533,9 @@ export const MSHFlexGridControl: React.FC<MSHFlexGridControlProps> = ({
               {actualCols.map((gridCol, colIndex) => {
                 const cell = gridRow.cells[colIndex];
                 if (!cell || !gridCol.visible) return null;
-                
+
                 const isOutlineCol = colIndex === outlineCol && outlineBar > 0;
-                
+
                 return (
                   <td
                     key={colIndex}
@@ -496,21 +544,23 @@ export const MSHFlexGridControl: React.FC<MSHFlexGridControlProps> = ({
                       width: `${gridCol.width}px`,
                       minWidth: `${gridCol.width}px`,
                       maxWidth: `${gridCol.width}px`,
-                      position: 'relative'
+                      position: 'relative',
                     }}
-                    onClick={(e) => handleCellClick(rowIndex, colIndex, e)}
-                    onDoubleClick={(e) => handleCellDoubleClick(rowIndex, colIndex, e)}
+                    onClick={e => handleCellClick(rowIndex, colIndex, e)}
+                    onDoubleClick={e => handleCellDoubleClick(rowIndex, colIndex, e)}
                   >
                     {/* Hierarchy indicators */}
                     {isOutlineCol && gridRow.level > 0 && (
-                      <span style={{ 
-                        marginRight: `${gridRow.level * 16}px`,
-                        color: 'transparent'
-                      }}>
+                      <span
+                        style={{
+                          marginRight: `${gridRow.level * 16}px`,
+                          color: 'transparent',
+                        }}
+                      >
                         •
                       </span>
                     )}
-                    
+
                     {/* Node expand/collapse button */}
                     {isOutlineCol && gridRow.isNode && outlineBar === 2 && (
                       <button
@@ -521,9 +571,9 @@ export const MSHFlexGridControl: React.FC<MSHFlexGridControlProps> = ({
                           border: '1px solid #808080',
                           fontSize: '8px',
                           cursor: 'pointer',
-                          marginRight: '4px'
+                          marginRight: '4px',
                         }}
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           handleNodeToggle(rowIndex);
                         }}
@@ -531,16 +581,16 @@ export const MSHFlexGridControl: React.FC<MSHFlexGridControlProps> = ({
                         {gridRow.expanded ? '−' : '+'}
                       </button>
                     )}
-                    
+
                     {/* Cell content */}
                     {editingCell && editingCell.row === rowIndex && editingCell.col === colIndex ? (
                       <input
                         ref={editInputRef}
                         type="text"
                         value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
+                        onChange={e => setEditValue(e.target.value)}
                         onBlur={() => finishEditing(true)}
-                        onKeyDown={(e) => {
+                        onKeyDown={e => {
                           if (e.key === 'Enter') {
                             finishEditing(true);
                           } else if (e.key === 'Escape') {
@@ -552,7 +602,7 @@ export const MSHFlexGridControl: React.FC<MSHFlexGridControlProps> = ({
                           border: 'none',
                           background: 'transparent',
                           font: 'inherit',
-                          color: 'inherit'
+                          color: 'inherit',
                         }}
                       />
                     ) : (
@@ -579,7 +629,7 @@ export const MSHFlexGridControl: React.FC<MSHFlexGridControlProps> = ({
             padding: '2px',
             border: '1px solid #ccc',
             whiteSpace: 'nowrap',
-            zIndex: 1000
+            zIndex: 1000,
           }}
         >
           {name} - MSHFlexGrid ({actualRows.length}×{actualCols.length})
@@ -604,7 +654,7 @@ export const MSHFlexGridHelpers = {
     fontItalic: false,
     picture: '',
     cellType: 0,
-    tag: ''
+    tag: '',
   }),
 
   /**
@@ -612,11 +662,11 @@ export const MSHFlexGridHelpers = {
    */
   createHierarchicalData: (data: any[], childrenField: string = 'children'): MSHFlexGridRow[] => {
     const rows: MSHFlexGridRow[] = [];
-    
+
     const processNode = (item: any, level: number, index: number) => {
       const children = item[childrenField] || [];
       const hasChildren = children.length > 0;
-      
+
       rows.push({
         index,
         height: 20,
@@ -626,20 +676,20 @@ export const MSHFlexGridHelpers = {
         isNode: hasChildren,
         expanded: true,
         level,
-        cells: Object.keys(item).filter(key => key !== childrenField).map(key => 
-          MSHFlexGridHelpers.createCell(String(item[key]))
-        ),
+        cells: Object.keys(item)
+          .filter(key => key !== childrenField)
+          .map(key => MSHFlexGridHelpers.createCell(String(item[key]))),
         data: item,
-        tag: ''
+        tag: '',
       });
-      
+
       if (hasChildren) {
         children.forEach((child: any, childIndex: number) => {
           processNode(child, level + 1, rows.length);
         });
       }
     };
-    
+
     data.forEach((item, index) => processNode(item, 0, index));
     return rows;
   },
@@ -647,19 +697,23 @@ export const MSHFlexGridHelpers = {
   /**
    * Sort grid by column
    */
-  sortByColumn: (rows: MSHFlexGridRow[], colIndex: number, ascending: boolean = true): MSHFlexGridRow[] => {
+  sortByColumn: (
+    rows: MSHFlexGridRow[],
+    colIndex: number,
+    ascending: boolean = true
+  ): MSHFlexGridRow[] => {
     return [...rows].sort((a, b) => {
       const aText = a.cells[colIndex]?.text || '';
       const bText = b.cells[colIndex]?.text || '';
-      
+
       // Try numeric comparison first
       const aNum = parseFloat(aText);
       const bNum = parseFloat(bText);
-      
+
       if (!isNaN(aNum) && !isNaN(bNum)) {
         return ascending ? aNum - bNum : bNum - aNum;
       }
-      
+
       // Fall back to string comparison
       return ascending ? aText.localeCompare(bText) : bText.localeCompare(aText);
     });
@@ -670,8 +724,8 @@ export const MSHFlexGridHelpers = {
    */
   filterRows: (rows: MSHFlexGridRow[], colIndex: number, filterText: string): MSHFlexGridRow[] => {
     if (!filterText) return rows;
-    
-    return rows.filter(row => 
+
+    return rows.filter(row =>
       row.cells[colIndex]?.text.toLowerCase().includes(filterText.toLowerCase())
     );
   },
@@ -684,9 +738,9 @@ export const MSHFlexGridHelpers = {
       rowStart: Math.min(startRow, endRow),
       rowEnd: Math.max(startRow, endRow),
       colStart: Math.min(startCol, endCol),
-      colEnd: Math.max(startCol, endCol)
+      colEnd: Math.max(startCol, endCol),
     };
-  }
+  },
 };
 
 export default MSHFlexGridControl;

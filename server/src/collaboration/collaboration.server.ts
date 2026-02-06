@@ -66,32 +66,34 @@ const io = new Server(server, {
   },
 });
 
-// CONFIGURATION VULNERABILITY BUG FIX: Secure CORS configuration  
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or Postman)
-    if (!origin) return callback(null, true);
-    
-    // CONFIGURATION VULNERABILITY BUG FIX: Whitelist allowed origins only
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001', 
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:3001',
-      // Add production domains here when deploying
-      // 'https://your-production-domain.com'
-    ];
-    
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      console.warn(`CORS blocked collaboration request from unauthorized origin: ${origin}`);
-      return callback(new Error('CORS policy violation: Origin not allowed'), false);
-    }
-  },
-  credentials: true, // Allow cookies/auth headers
-  optionsSuccessStatus: 200 // Support legacy browsers
-}));
+// CONFIGURATION VULNERABILITY BUG FIX: Secure CORS configuration
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or Postman)
+      if (!origin) return callback(null, true);
+
+      // CONFIGURATION VULNERABILITY BUG FIX: Whitelist allowed origins only
+      const allowedOrigins = [
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:3001',
+        // Add production domains here when deploying
+        // 'https://your-production-domain.com'
+      ];
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        console.warn(`CORS blocked collaboration request from unauthorized origin: ${origin}`);
+        return callback(new Error('CORS policy violation: Origin not allowed'), false);
+      }
+    },
+    credentials: true, // Allow cookies/auth headers
+    optionsSuccessStatus: 200, // Support legacy browsers
+  })
+);
 
 app.use(express.json());
 
@@ -103,8 +105,16 @@ const comments = new Map<string, Comment[]>();
 
 // User colors
 const userColors = [
-  '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',
-  '#48C9B0', '#F368E0', '#00D2D3', '#6C5CE7', '#FDA7DF',
+  '#FF6B6B',
+  '#4ECDC4',
+  '#45B7D1',
+  '#96CEB4',
+  '#FECA57',
+  '#48C9B0',
+  '#F368E0',
+  '#00D2D3',
+  '#6C5CE7',
+  '#FDA7DF',
 ];
 
 // Socket handlers
@@ -235,9 +245,12 @@ io.on('connection', (socket: Socket) => {
   });
 
   // Handle control changes
-  socket.on('control:change', (data: { sessionId: string; controlId: string; updates: any; userId: string }) => {
-    socket.to(data.sessionId).emit('control:change', data);
-  });
+  socket.on(
+    'control:change',
+    (data: { sessionId: string; controlId: string; updates: any; userId: string }) => {
+      socket.to(data.sessionId).emit('control:change', data);
+    }
+  );
 
   // Handle typing indicators
   socket.on('typing:start', (data: { sessionId: string }) => {
@@ -281,7 +294,10 @@ io.on('connection', (socket: Socket) => {
     const comment = sessionComments.find(c => c.id === data.commentId);
     if (comment) {
       comment.replies.push(data.reply);
-      io.to(data.sessionId).emit('comment:replied', { commentId: data.commentId, reply: data.reply });
+      io.to(data.sessionId).emit('comment:replied', {
+        commentId: data.commentId,
+        reply: data.reply,
+      });
     }
   });
 
@@ -289,7 +305,7 @@ io.on('connection', (socket: Socket) => {
   socket.on('session:invite', (data: { sessionId: string; email: string; invitedBy: User }) => {
     // In a real implementation, send email invitation
     console.log(`Invitation sent to ${data.email} for session ${data.sessionId}`);
-    
+
     socket.emit('session:invited', {
       email: data.email,
       sessionId: data.sessionId,

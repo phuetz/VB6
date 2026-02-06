@@ -1,12 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Play, Pause, Square, FileCode, Database, Settings, Users, Clock, BookOpen, Eye, Code, AlertTriangle, TrendingUp, FileText, Copy, Download, Upload, RefreshCw, Bug, Zap } from 'lucide-react';
+import {
+  X,
+  Save,
+  Play,
+  Pause,
+  Square,
+  FileCode,
+  Database,
+  Settings,
+  Users,
+  Clock,
+  BookOpen,
+  Eye,
+  Code,
+  AlertTriangle,
+  TrendingUp,
+  FileText,
+  Copy,
+  Download,
+  Upload,
+  RefreshCw,
+  Bug,
+  Zap,
+} from 'lucide-react';
 
 // Types
 export enum ParameterDirection {
   IN = 'IN',
   OUT = 'OUT',
   INOUT = 'INOUT',
-  RETURN = 'RETURN'
+  RETURN = 'RETURN',
 }
 
 export enum DataType {
@@ -22,7 +45,7 @@ export enum DataType {
   SMALLMONEY = 'smallmoney',
   FLOAT = 'float',
   REAL = 'real',
-  
+
   // Character types
   CHAR = 'char',
   VARCHAR = 'varchar',
@@ -30,7 +53,7 @@ export enum DataType {
   NCHAR = 'nchar',
   NVARCHAR = 'nvarchar',
   NTEXT = 'ntext',
-  
+
   // Date/Time types
   DATE = 'date',
   TIME = 'time',
@@ -39,19 +62,19 @@ export enum DataType {
   SMALLDATETIME = 'smalldatetime',
   DATETIMEOFFSET = 'datetimeoffset',
   TIMESTAMP = 'timestamp',
-  
+
   // Binary types
   BINARY = 'binary',
   VARBINARY = 'varbinary',
   IMAGE = 'image',
-  
+
   // Other types
   UNIQUEIDENTIFIER = 'uniqueidentifier',
   XML = 'xml',
   JSON = 'json',
   TABLE = 'table',
   CURSOR = 'cursor',
-  SQL_VARIANT = 'sql_variant'
+  SQL_VARIANT = 'sql_variant',
 }
 
 export enum ExecutionStatus {
@@ -59,7 +82,7 @@ export enum ExecutionStatus {
   RUNNING = 'running',
   CANCELLED = 'cancelled',
   COMPLETED = 'completed',
-  ERROR = 'error'
+  ERROR = 'error',
 }
 
 export interface StoredProcParameter {
@@ -150,24 +173,36 @@ export const StoredProcedureEditor: React.FC<StoredProcedureEditorProps> = ({
   isOpen,
   onClose,
   procedure,
-  onSave
+  onSave,
 }) => {
-  const [activeTab, setActiveTab] = useState<'editor' | 'parameters' | 'execute' | 'results' | 'plan' | 'versions' | 'permissions' | 'dependencies'>('editor');
-  const [editedProcedure, setEditedProcedure] = useState<StoredProcedure>(() => procedure || {
-    id: `proc-${Date.now()}`,
-    name: 'NewProcedure',
-    schema: 'dbo',
-    body: `-- Stored Procedure Template\nCREATE PROCEDURE [dbo].[NewProcedure]\n    @Parameter1 INT = NULL,\n    @Parameter2 NVARCHAR(50) = NULL\nAS\nBEGIN\n    SET NOCOUNT ON;\n    \n    -- Your procedure logic here\n    SELECT 'Hello World' AS Message;\n    \nEND`,
-    parameters: [],
-    createdDate: new Date(),
-    modifiedDate: new Date(),
-    createdBy: 'current_user',
-    modifiedBy: 'current_user',
-    versions: [],
-    permissions: [],
-    dependencies: []
-  });
-  
+  const [activeTab, setActiveTab] = useState<
+    | 'editor'
+    | 'parameters'
+    | 'execute'
+    | 'results'
+    | 'plan'
+    | 'versions'
+    | 'permissions'
+    | 'dependencies'
+  >('editor');
+  const [editedProcedure, setEditedProcedure] = useState<StoredProcedure>(
+    () =>
+      procedure || {
+        id: `proc-${Date.now()}`,
+        name: 'NewProcedure',
+        schema: 'dbo',
+        body: `-- Stored Procedure Template\nCREATE PROCEDURE [dbo].[NewProcedure]\n    @Parameter1 INT = NULL,\n    @Parameter2 NVARCHAR(50) = NULL\nAS\nBEGIN\n    SET NOCOUNT ON;\n    \n    -- Your procedure logic here\n    SELECT 'Hello World' AS Message;\n    \nEND`,
+        parameters: [],
+        createdDate: new Date(),
+        modifiedDate: new Date(),
+        createdBy: 'current_user',
+        modifiedBy: 'current_user',
+        versions: [],
+        permissions: [],
+        dependencies: [],
+      }
+  );
+
   const [executionResults, setExecutionResults] = useState<ExecutionResult[]>([]);
   const [executionStatus, setExecutionStatus] = useState<ExecutionStatus>(ExecutionStatus.IDLE);
   const [showTemplates, setShowTemplates] = useState(false);
@@ -193,8 +228,14 @@ BEGIN
 END`,
       parameters: [
         { id: '1', name: '@ID', direction: ParameterDirection.IN, dataType: DataType.INT },
-        { id: '2', name: '@Status', direction: ParameterDirection.IN, dataType: DataType.NVARCHAR, length: 20 }
-      ]
+        {
+          id: '2',
+          name: '@Status',
+          direction: ParameterDirection.IN,
+          dataType: DataType.NVARCHAR,
+          length: 20,
+        },
+      ],
     },
     {
       id: 'crud-insert',
@@ -215,10 +256,22 @@ BEGIN
     SET @NewID = SCOPE_IDENTITY();
 END`,
       parameters: [
-        { id: '1', name: '@Name', direction: ParameterDirection.IN, dataType: DataType.NVARCHAR, length: 100 },
-        { id: '2', name: '@Email', direction: ParameterDirection.IN, dataType: DataType.NVARCHAR, length: 255 },
-        { id: '3', name: '@NewID', direction: ParameterDirection.OUT, dataType: DataType.INT }
-      ]
+        {
+          id: '1',
+          name: '@Name',
+          direction: ParameterDirection.IN,
+          dataType: DataType.NVARCHAR,
+          length: 100,
+        },
+        {
+          id: '2',
+          name: '@Email',
+          direction: ParameterDirection.IN,
+          dataType: DataType.NVARCHAR,
+          length: 255,
+        },
+        { id: '3', name: '@NewID', direction: ParameterDirection.OUT, dataType: DataType.INT },
+      ],
     },
     {
       id: 'error-handling',
@@ -256,8 +309,14 @@ BEGIN
 END`,
       parameters: [
         { id: '1', name: '@Parameter1', direction: ParameterDirection.IN, dataType: DataType.INT },
-        { id: '2', name: '@Parameter2', direction: ParameterDirection.IN, dataType: DataType.NVARCHAR, length: 50 }
-      ]
+        {
+          id: '2',
+          name: '@Parameter2',
+          direction: ParameterDirection.IN,
+          dataType: DataType.NVARCHAR,
+          length: 50,
+        },
+      ],
     },
     {
       id: 'dynamic-sql',
@@ -288,10 +347,21 @@ BEGIN
     EXEC sp_executesql @SQL;
 END`,
       parameters: [
-        { id: '1', name: '@TableName', direction: ParameterDirection.IN, dataType: DataType.NVARCHAR, length: 128 },
-        { id: '2', name: '@WhereClause', direction: ParameterDirection.IN, dataType: DataType.NVARCHAR }
-      ]
-    }
+        {
+          id: '1',
+          name: '@TableName',
+          direction: ParameterDirection.IN,
+          dataType: DataType.NVARCHAR,
+          length: 128,
+        },
+        {
+          id: '2',
+          name: '@WhereClause',
+          direction: ParameterDirection.IN,
+          dataType: DataType.NVARCHAR,
+        },
+      ],
+    },
   ];
 
   useEffect(() => {
@@ -306,12 +376,12 @@ END`,
       name: `@Parameter${editedProcedure.parameters.length + 1}`,
       direction: ParameterDirection.IN,
       dataType: DataType.VARCHAR,
-      length: 50
+      length: 50,
     };
-    
+
     setEditedProcedure({
       ...editedProcedure,
-      parameters: [...editedProcedure.parameters, newParameter]
+      parameters: [...editedProcedure.parameters, newParameter],
     });
   };
 
@@ -320,20 +390,20 @@ END`,
       ...editedProcedure,
       parameters: editedProcedure.parameters.map(param =>
         param.id === parameterId ? { ...param, ...updates } : param
-      )
+      ),
     });
   };
 
   const deleteParameter = (parameterId: string) => {
     setEditedProcedure({
       ...editedProcedure,
-      parameters: editedProcedure.parameters.filter(p => p.id !== parameterId)
+      parameters: editedProcedure.parameters.filter(p => p.id !== parameterId),
     });
   };
 
   const executeProcedure = async () => {
     setExecutionStatus(ExecutionStatus.RUNNING);
-    
+
     // Simulate execution
     setTimeout(() => {
       const result: ExecutionResult = {
@@ -347,10 +417,10 @@ END`,
             rows: [
               [1, 'John Doe', 'john@example.com', '2024-01-15'],
               [2, 'Jane Smith', 'jane@example.com', '2024-01-16'],
-              [3, 'Bob Johnson', 'bob@example.com', '2024-01-17']
+              [3, 'Bob Johnson', 'bob@example.com', '2024-01-17'],
             ],
-            rowCount: 3
-          }
+            rowCount: 3,
+          },
         ],
         outputParameters: editedProcedure.parameters
           .filter(p => p.direction === ParameterDirection.OUT)
@@ -388,10 +458,10 @@ END`,
           cpuTime: Math.floor(Math.random() * 100),
           logicalReads: Math.floor(Math.random() * 1000),
           physicalReads: Math.floor(Math.random() * 100),
-          duration: Math.floor(Math.random() * 1000 + 100)
-        }
+          duration: Math.floor(Math.random() * 1000 + 100),
+        },
       };
-      
+
       setExecutionResults(prev => [result, ...prev]);
       setExecutionStatus(ExecutionStatus.IDLE);
     }, 2000);
@@ -405,7 +475,7 @@ END`,
     const updatedProcedure = {
       ...editedProcedure,
       body: template.template,
-      parameters: template.parameters.map(p => ({ ...p, id: `param-${Date.now()}-${p.id}` }))
+      parameters: template.parameters.map(p => ({ ...p, id: `param-${Date.now()}-${p.id}` })),
     };
     setEditedProcedure(updatedProcedure);
     setShowTemplates(false);
@@ -416,9 +486,9 @@ END`,
     const savedProcedure = {
       ...editedProcedure,
       modifiedDate: new Date(),
-      modifiedBy: 'current_user'
+      modifiedBy: 'current_user',
     };
-    
+
     if (onSave) {
       onSave(savedProcedure);
     }
@@ -448,7 +518,7 @@ END`,
                 .replace(/OR/gi, '\n   OR')
                 .replace(/ORDER BY/gi, '\nORDER BY')
                 .replace(/GROUP BY/gi, '\nGROUP BY');
-              
+
               setEditedProcedure({ ...editedProcedure, body: formatted });
             }}
             className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200 flex items-center gap-1"
@@ -462,17 +532,17 @@ END`,
           <span>Characters: {editedProcedure.body.length}</span>
         </div>
       </div>
-      
+
       <div className="flex-1 p-4">
         <textarea
           value={editedProcedure.body}
-          onChange={(e) => setEditedProcedure({ ...editedProcedure, body: e.target.value })}
+          onChange={e => setEditedProcedure({ ...editedProcedure, body: e.target.value })}
           className="w-full h-full font-mono text-sm border rounded p-3 resize-none bg-gray-900 text-gray-100"
           style={{ tabSize: 4 }}
           placeholder="-- Enter your stored procedure code here..."
         />
       </div>
-      
+
       <div className="p-3 border-t bg-gray-50 text-xs text-gray-600">
         <div className="flex justify-between">
           <span>Schema: {editedProcedure.schema}</span>
@@ -492,7 +562,9 @@ END`,
           <Settings className="w-4 h-4" />
           Add Parameter
         </button>
-        <span className="text-sm text-gray-600">{editedProcedure.parameters.length} parameters</span>
+        <span className="text-sm text-gray-600">
+          {editedProcedure.parameters.length} parameters
+        </span>
       </div>
 
       <div className="overflow-x-auto">
@@ -515,7 +587,7 @@ END`,
                   <input
                     type="text"
                     value={param.name}
-                    onChange={(e) => updateParameter(param.id, { name: e.target.value })}
+                    onChange={e => updateParameter(param.id, { name: e.target.value })}
                     className="w-full px-1 py-0.5 border-0 bg-transparent font-mono"
                     placeholder="@ParameterName"
                   />
@@ -523,7 +595,9 @@ END`,
                 <td className="border px-2 py-1">
                   <select
                     value={param.direction}
-                    onChange={(e) => updateParameter(param.id, { direction: e.target.value as ParameterDirection })}
+                    onChange={e =>
+                      updateParameter(param.id, { direction: e.target.value as ParameterDirection })
+                    }
                     className="w-full px-1 py-0.5 border-0 bg-transparent text-sm"
                   >
                     <option value={ParameterDirection.IN}>IN</option>
@@ -535,7 +609,9 @@ END`,
                 <td className="border px-2 py-1">
                   <select
                     value={param.dataType}
-                    onChange={(e) => updateParameter(param.id, { dataType: e.target.value as DataType })}
+                    onChange={e =>
+                      updateParameter(param.id, { dataType: e.target.value as DataType })
+                    }
                     className="w-full px-1 py-0.5 border-0 bg-transparent text-sm"
                   >
                     <optgroup label="Numeric">
@@ -569,12 +645,16 @@ END`,
                   </select>
                 </td>
                 <td className="border px-2 py-1">
-                  {(param.dataType === DataType.VARCHAR || param.dataType === DataType.CHAR || 
-                    param.dataType === DataType.NVARCHAR || param.dataType === DataType.NCHAR) && (
+                  {(param.dataType === DataType.VARCHAR ||
+                    param.dataType === DataType.CHAR ||
+                    param.dataType === DataType.NVARCHAR ||
+                    param.dataType === DataType.NCHAR) && (
                     <input
                       type="number"
                       value={param.length || ''}
-                      onChange={(e) => updateParameter(param.id, { length: parseInt(e.target.value) || undefined })}
+                      onChange={e =>
+                        updateParameter(param.id, { length: parseInt(e.target.value) || undefined })
+                      }
                       className="w-full px-1 py-0.5 border-0 bg-transparent"
                     />
                   )}
@@ -583,7 +663,11 @@ END`,
                       <input
                         type="number"
                         value={param.precision || ''}
-                        onChange={(e) => updateParameter(param.id, { precision: parseInt(e.target.value) || undefined })}
+                        onChange={e =>
+                          updateParameter(param.id, {
+                            precision: parseInt(e.target.value) || undefined,
+                          })
+                        }
                         className="w-12 px-1 py-0.5 border-0 bg-transparent"
                         placeholder="p"
                       />
@@ -591,7 +675,11 @@ END`,
                       <input
                         type="number"
                         value={param.scale || ''}
-                        onChange={(e) => updateParameter(param.id, { scale: parseInt(e.target.value) || undefined })}
+                        onChange={e =>
+                          updateParameter(param.id, {
+                            scale: parseInt(e.target.value) || undefined,
+                          })
+                        }
                         className="w-12 px-1 py-0.5 border-0 bg-transparent"
                         placeholder="s"
                       />
@@ -602,7 +690,9 @@ END`,
                   <input
                     type="text"
                     value={param.defaultValue || ''}
-                    onChange={(e) => updateParameter(param.id, { defaultValue: e.target.value || undefined })}
+                    onChange={e =>
+                      updateParameter(param.id, { defaultValue: e.target.value || undefined })
+                    }
                     className="w-full px-1 py-0.5 border-0 bg-transparent text-sm"
                     placeholder="NULL"
                   />
@@ -611,7 +701,9 @@ END`,
                   <input
                     type="text"
                     value={param.testValue || ''}
-                    onChange={(e) => updateParameter(param.id, { testValue: e.target.value || undefined })}
+                    onChange={e =>
+                      updateParameter(param.id, { testValue: e.target.value || undefined })
+                    }
                     className="w-full px-1 py-0.5 border-0 bg-transparent text-sm"
                     placeholder="Test value..."
                   />
@@ -629,7 +721,7 @@ END`,
           </tbody>
         </table>
       </div>
-      
+
       {editedProcedure.parameters.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           <Settings className="w-12 h-12 mx-auto mb-2 opacity-50" />
@@ -661,7 +753,7 @@ END`,
               </>
             )}
           </button>
-          
+
           {executionStatus === ExecutionStatus.RUNNING && (
             <button
               onClick={stopExecution}
@@ -671,49 +763,58 @@ END`,
               Stop
             </button>
           )}
-          
-          <button
-            className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-1"
-          >
+
+          <button className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-1">
             <Bug className="w-4 h-4" />
             Debug
           </button>
         </div>
-        
+
         <div className="text-sm text-gray-600">
-          Status: <span className={`font-semibold ${
-            executionStatus === ExecutionStatus.RUNNING ? 'text-blue-600' :
-            executionStatus === ExecutionStatus.COMPLETED ? 'text-green-600' :
-            executionStatus === ExecutionStatus.ERROR ? 'text-red-600' :
-            'text-gray-600'
-          }`}>
+          Status:{' '}
+          <span
+            className={`font-semibold ${
+              executionStatus === ExecutionStatus.RUNNING
+                ? 'text-blue-600'
+                : executionStatus === ExecutionStatus.COMPLETED
+                  ? 'text-green-600'
+                  : executionStatus === ExecutionStatus.ERROR
+                    ? 'text-red-600'
+                    : 'text-gray-600'
+            }`}
+          >
             {executionStatus.toUpperCase()}
           </span>
         </div>
       </div>
-      
-      {editedProcedure.parameters.filter(p => p.direction === ParameterDirection.IN || p.direction === ParameterDirection.INOUT).length > 0 && (
+
+      {editedProcedure.parameters.filter(
+        p => p.direction === ParameterDirection.IN || p.direction === ParameterDirection.INOUT
+      ).length > 0 && (
         <div className="mb-6 p-4 border rounded bg-gray-50">
           <h4 className="font-semibold mb-3">Input Parameters</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {editedProcedure.parameters
-              .filter(p => p.direction === ParameterDirection.IN || p.direction === ParameterDirection.INOUT)
+              .filter(
+                p =>
+                  p.direction === ParameterDirection.IN || p.direction === ParameterDirection.INOUT
+              )
               .map(param => (
-              <div key={param.id} className="flex items-center gap-2">
-                <label className="w-24 text-sm font-mono">{param.name}:</label>
-                <input
-                  type="text"
-                  value={param.testValue || ''}
-                  onChange={(e) => updateParameter(param.id, { testValue: e.target.value })}
-                  className="flex-1 px-2 py-1 border rounded text-sm"
-                  placeholder={`Enter ${param.dataType} value...`}
-                />
-              </div>
-            ))}
+                <div key={param.id} className="flex items-center gap-2">
+                  <label className="w-24 text-sm font-mono">{param.name}:</label>
+                  <input
+                    type="text"
+                    value={param.testValue || ''}
+                    onChange={e => updateParameter(param.id, { testValue: e.target.value })}
+                    className="flex-1 px-2 py-1 border rounded text-sm"
+                    placeholder={`Enter ${param.dataType} value...`}
+                  />
+                </div>
+              ))}
           </div>
         </div>
       )}
-      
+
       <div className="mb-4 p-3 border rounded bg-gray-50">
         <h4 className="font-semibold mb-2">Execution Options</h4>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
@@ -735,7 +836,7 @@ END`,
           </label>
         </div>
       </div>
-      
+
       <div className="border rounded bg-white">
         <div className="p-3 border-b bg-gray-100">
           <h4 className="font-semibold flex items-center gap-2">
@@ -745,17 +846,34 @@ END`,
         </div>
         <div className="p-3">
           <pre className="text-sm font-mono bg-gray-900 text-gray-100 p-3 rounded overflow-x-auto">
-{`EXEC [${editedProcedure.schema}].[${editedProcedure.name}]${
-  editedProcedure.parameters.length > 0 ? '\n' + editedProcedure.parameters
-    .filter(p => p.direction === ParameterDirection.IN || p.direction === ParameterDirection.INOUT)
-    .map(p => `    ${p.name} = ${p.testValue || 'NULL'}`)
-    .join(',\n') : ''
-}${editedProcedure.parameters.filter(p => p.direction === ParameterDirection.OUT || p.direction === ParameterDirection.INOUT).length > 0 ? 
-  ',\n' + editedProcedure.parameters
-    .filter(p => p.direction === ParameterDirection.OUT || p.direction === ParameterDirection.INOUT)
-    .map(p => `    ${p.name} = ${p.name} OUTPUT`)
-    .join(',\n') : ''
-};`}
+            {`EXEC [${editedProcedure.schema}].[${editedProcedure.name}]${
+              editedProcedure.parameters.length > 0
+                ? '\n' +
+                  editedProcedure.parameters
+                    .filter(
+                      p =>
+                        p.direction === ParameterDirection.IN ||
+                        p.direction === ParameterDirection.INOUT
+                    )
+                    .map(p => `    ${p.name} = ${p.testValue || 'NULL'}`)
+                    .join(',\n')
+                : ''
+            }${
+              editedProcedure.parameters.filter(
+                p =>
+                  p.direction === ParameterDirection.OUT || p.direction === ParameterDirection.INOUT
+              ).length > 0
+                ? ',\n' +
+                  editedProcedure.parameters
+                    .filter(
+                      p =>
+                        p.direction === ParameterDirection.OUT ||
+                        p.direction === ParameterDirection.INOUT
+                    )
+                    .map(p => `    ${p.name} = ${p.name} OUTPUT`)
+                    .join(',\n')
+                : ''
+            };`}
           </pre>
         </div>
       </div>
@@ -768,19 +886,25 @@ END`,
         <h3 className="font-semibold">Execution Results</h3>
         <span className="text-sm text-gray-600">{executionResults.length} executions</span>
       </div>
-      
+
       <div className="space-y-4">
         {executionResults.map((result, index) => (
           <div key={result.id} className="border rounded">
             <div className="p-3 border-b bg-gray-50 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <span className="text-sm font-semibold">Execution #{executionResults.length - index}</span>
+                <span className="text-sm font-semibold">
+                  Execution #{executionResults.length - index}
+                </span>
                 <span className="text-xs text-gray-600">{result.timestamp.toLocaleString()}</span>
-                <span className={`text-xs px-2 py-1 rounded ${
-                  result.status === ExecutionStatus.COMPLETED ? 'bg-green-100 text-green-800' :
-                  result.status === ExecutionStatus.ERROR ? 'bg-red-100 text-red-800' :
-                  'bg-gray-100 text-gray-800'
-                }`}>
+                <span
+                  className={`text-xs px-2 py-1 rounded ${
+                    result.status === ExecutionStatus.COMPLETED
+                      ? 'bg-green-100 text-green-800'
+                      : result.status === ExecutionStatus.ERROR
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-gray-100 text-gray-800'
+                  }`}
+                >
                   {result.status.toUpperCase()}
                 </span>
                 <span className="text-xs text-gray-600">
@@ -788,13 +912,15 @@ END`,
                 </span>
               </div>
               <button
-                onClick={() => navigator.clipboard.writeText(JSON.stringify(result.resultSets, null, 2))}
+                onClick={() =>
+                  navigator.clipboard.writeText(JSON.stringify(result.resultSets, null, 2))
+                }
                 className="text-gray-600 hover:text-gray-800"
               >
                 <Copy className="w-4 h-4" />
               </button>
             </div>
-            
+
             {result.errorMessage ? (
               <div className="p-3 bg-red-50 border-l-4 border-red-400">
                 <div className="flex items-center gap-2 mb-2">
@@ -815,7 +941,9 @@ END`,
                         <thead>
                           <tr className="bg-gray-100">
                             {resultSet.columnNames.map((col, colIndex) => (
-                              <th key={colIndex} className="border px-2 py-1 text-left">{col}</th>
+                              <th key={colIndex} className="border px-2 py-1 text-left">
+                                {col}
+                              </th>
                             ))}
                           </tr>
                         </thead>
@@ -823,7 +951,9 @@ END`,
                           {resultSet.rows.map((row, rowIndex) => (
                             <tr key={rowIndex} className="hover:bg-gray-50">
                               {row.map((cell, cellIndex) => (
-                                <td key={cellIndex} className="border px-2 py-1">{cell}</td>
+                                <td key={cellIndex} className="border px-2 py-1">
+                                  {cell}
+                                </td>
                               ))}
                             </tr>
                           ))}
@@ -832,7 +962,7 @@ END`,
                     </div>
                   </div>
                 ))}
-                
+
                 {result.outputParameters && Object.keys(result.outputParameters).length > 0 && (
                   <div className="mt-4 p-3 bg-blue-50 border rounded">
                     <h5 className="font-semibold mb-2">Output Parameters</h5>
@@ -848,7 +978,7 @@ END`,
                     </table>
                   </div>
                 )}
-                
+
                 {result.statistics && (
                   <div className="mt-4 p-3 bg-gray-50 border rounded">
                     <h5 className="font-semibold mb-2">Execution Statistics</h5>
@@ -877,7 +1007,7 @@ END`,
           </div>
         ))}
       </div>
-      
+
       {executionResults.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           <Play className="w-12 h-12 mx-auto mb-2 opacity-50" />
@@ -890,7 +1020,7 @@ END`,
 
   const renderExecutionPlanTab = () => {
     const latestResult = executionResults.find(r => r.executionPlan);
-    
+
     return (
       <div className="p-4">
         <div className="mb-4 flex justify-between items-center">
@@ -908,7 +1038,7 @@ END`,
             </button>
           )}
         </div>
-        
+
         {latestResult?.executionPlan ? (
           <div className="space-y-4">
             <div className="p-4 bg-blue-50 border border-blue-200 rounded">
@@ -932,7 +1062,7 @@ END`,
                 </div>
               </div>
             </div>
-            
+
             <div className="border rounded">
               <div className="p-3 border-b bg-gray-100">
                 <h4 className="font-semibold">Visual Plan</h4>
@@ -959,7 +1089,7 @@ END`,
                 </div>
               </div>
             </div>
-            
+
             <div className="border rounded">
               <div className="p-3 border-b bg-gray-100">
                 <h4 className="font-semibold">XML Plan</h4>
@@ -993,7 +1123,7 @@ END`,
           Create Version
         </button>
       </div>
-      
+
       <div className="space-y-3">
         {editedProcedure.versions.length === 0 && (
           <div className="p-4 border border-dashed border-gray-300 rounded text-center">
@@ -1003,7 +1133,7 @@ END`,
             </div>
           </div>
         )}
-        
+
         {editedProcedure.versions.map((version, index) => (
           <div key={version.id} className="border rounded p-3">
             <div className="flex justify-between items-start mb-2">
@@ -1018,9 +1148,7 @@ END`,
                 <button className="text-green-600 hover:text-green-800 text-sm">Restore</button>
               </div>
             </div>
-            {version.comment && (
-              <div className="text-sm text-gray-700 mb-2">{version.comment}</div>
-            )}
+            {version.comment && <div className="text-sm text-gray-700 mb-2">{version.comment}</div>}
             <div className="text-xs text-gray-500">
               {version.parameters.length} parameters • {version.body.split('\n').length} lines
             </div>
@@ -1041,7 +1169,7 @@ END`,
           Grant Permission
         </button>
       </div>
-      
+
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
@@ -1057,20 +1185,16 @@ END`,
               <tr key={index} className="hover:bg-gray-50">
                 <td className="border px-3 py-2">{perm.principal}</td>
                 <td className="border px-3 py-2">{perm.permission}</td>
+                <td className="border px-3 py-2">{perm.grantOption ? '✓' : '✗'}</td>
                 <td className="border px-3 py-2">
-                  {perm.grantOption ? '✓' : '✗'}
-                </td>
-                <td className="border px-3 py-2">
-                  <button className="text-red-600 hover:text-red-800 text-sm">
-                    Revoke
-                  </button>
+                  <button className="text-red-600 hover:text-red-800 text-sm">Revoke</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      
+
       {editedProcedure.permissions.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
@@ -1089,7 +1213,7 @@ END`,
           Dependencies
         </h3>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <h4 className="font-semibold mb-3">Objects Used By This Procedure</h4>
@@ -1097,18 +1221,18 @@ END`,
             {editedProcedure.dependencies.map((dep, index) => (
               <div key={index} className="flex items-center gap-2 p-2 border rounded">
                 <Database className="w-4 h-4 text-blue-600" />
-                <span className="font-mono text-sm">{dep.schema}.{dep.name}</span>
+                <span className="font-mono text-sm">
+                  {dep.schema}.{dep.name}
+                </span>
                 <span className="text-xs bg-gray-100 px-2 py-1 rounded">{dep.type}</span>
               </div>
             ))}
           </div>
           {editedProcedure.dependencies.length === 0 && (
-            <div className="text-center py-4 text-gray-500 text-sm">
-              No dependencies found
-            </div>
+            <div className="text-center py-4 text-gray-500 text-sm">No dependencies found</div>
           )}
         </div>
-        
+
         <div>
           <h4 className="font-semibold mb-3">Objects That Use This Procedure</h4>
           <div className="space-y-2">
@@ -1141,7 +1265,7 @@ END`,
               <input
                 type="text"
                 value={editedProcedure.name}
-                onChange={(e) => setEditedProcedure({ ...editedProcedure, name: e.target.value })}
+                onChange={e => setEditedProcedure({ ...editedProcedure, name: e.target.value })}
                 className="px-2 py-1 border rounded font-mono"
               />
             </div>
@@ -1153,10 +1277,7 @@ END`,
                 <Save className="w-4 h-4" />
                 Save
               </button>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-              >
+              <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1296,7 +1417,7 @@ END`,
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="flex-1 flex">
               <div className="w-1/3 border-r">
                 <div className="p-4">
@@ -1312,7 +1433,7 @@ END`,
                     ))}
                   </div>
                 </div>
-                
+
                 <div className="p-4 border-t">
                   <h4 className="font-semibold mb-3">Templates</h4>
                   <div className="space-y-2">
@@ -1331,7 +1452,7 @@ END`,
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex-1 p-4">
                 {selectedTemplate ? (
                   <div className="h-full flex flex-col">
@@ -1342,13 +1463,13 @@ END`,
                         {selectedTemplate.category}
                       </span>
                     </div>
-                    
+
                     <div className="flex-1 border rounded">
                       <pre className="h-full p-4 text-sm font-mono overflow-auto bg-gray-900 text-gray-100 rounded">
                         {selectedTemplate.template}
                       </pre>
                     </div>
-                    
+
                     <div className="mt-4 flex justify-end gap-2">
                       <button
                         onClick={() => setShowTemplates(false)}

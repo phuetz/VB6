@@ -115,18 +115,14 @@ const SHORTCUT_OPTIONS = [
   'Shift+Ins',
   'Del',
   'Shift+Del',
-  'Alt+Bksp'
+  'Alt+Bksp',
 ];
 
 // ============================================================================
 // VB6 Menu Editor Component
 // ============================================================================
 
-export const VB6MenuEditor: React.FC<VB6MenuEditorProps> = ({
-  menus,
-  onChange,
-  onClose
-}) => {
+export const VB6MenuEditor: React.FC<VB6MenuEditorProps> = ({ menus, onChange, onClose }) => {
   const [menuItems, setMenuItems] = useState<VB6MenuItem[]>(menus);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<VB6MenuItem | null>(null);
@@ -184,7 +180,7 @@ export const VB6MenuEditor: React.FC<VB6MenuEditorProps> = ({
       enabled: true,
       visible: true,
       checked: false,
-      level: 0
+      level: 0,
     };
   }, []);
 
@@ -237,7 +233,7 @@ export const VB6MenuEditor: React.FC<VB6MenuEditorProps> = ({
       const newMenus = [...menuItems];
       [newMenus[topLevelIndex - 1], newMenus[topLevelIndex]] = [
         newMenus[topLevelIndex],
-        newMenus[topLevelIndex - 1]
+        newMenus[topLevelIndex - 1],
       ];
       setMenuItems(newMenus);
     }
@@ -251,7 +247,7 @@ export const VB6MenuEditor: React.FC<VB6MenuEditorProps> = ({
       const newMenus = [...menuItems];
       [newMenus[topLevelIndex], newMenus[topLevelIndex + 1]] = [
         newMenus[topLevelIndex + 1],
-        newMenus[topLevelIndex]
+        newMenus[topLevelIndex],
       ];
       setMenuItems(newMenus);
     }
@@ -347,7 +343,7 @@ export const VB6MenuEditor: React.FC<VB6MenuEditorProps> = ({
     cursor: 'pointer',
     fontFamily: 'MS Sans Serif',
     fontSize: '11px',
-    minWidth: '75px'
+    minWidth: '75px',
   };
 
   const inputStyle: React.CSSProperties = {
@@ -356,13 +352,13 @@ export const VB6MenuEditor: React.FC<VB6MenuEditorProps> = ({
     fontFamily: 'MS Sans Serif',
     fontSize: '11px',
     width: '100%',
-    boxSizing: 'border-box'
+    boxSizing: 'border-box',
   };
 
   const labelStyle: React.CSSProperties = {
     fontFamily: 'MS Sans Serif',
     fontSize: '11px',
-    marginBottom: '2px'
+    marginBottom: '2px',
   };
 
   return (
@@ -377,7 +373,7 @@ export const VB6MenuEditor: React.FC<VB6MenuEditorProps> = ({
         border: '2px outset #ffffff',
         fontFamily: 'MS Sans Serif',
         fontSize: '11px',
-        zIndex: 10000
+        zIndex: 10000,
       }}
     >
       {/* Title Bar */}
@@ -386,7 +382,7 @@ export const VB6MenuEditor: React.FC<VB6MenuEditorProps> = ({
           backgroundColor: '#000080',
           color: 'white',
           padding: '2px 4px',
-          fontWeight: 'bold'
+          fontWeight: 'bold',
         }}
       >
         Menu Editor
@@ -427,10 +423,7 @@ export const VB6MenuEditor: React.FC<VB6MenuEditorProps> = ({
               style={inputStyle}
               value={editingItem?.index ?? ''}
               onChange={e =>
-                handlePropertyChange(
-                  'index',
-                  e.target.value ? parseInt(e.target.value) : undefined
-                )
+                handlePropertyChange('index', e.target.value ? parseInt(e.target.value) : undefined)
               }
             />
           </div>
@@ -459,9 +452,7 @@ export const VB6MenuEditor: React.FC<VB6MenuEditorProps> = ({
               type="text"
               style={inputStyle}
               value={editingItem?.helpContextId ?? '0'}
-              onChange={e =>
-                handlePropertyChange('helpContextId', parseInt(e.target.value) || 0)
-              }
+              onChange={e => handlePropertyChange('helpContextId', parseInt(e.target.value) || 0)}
             />
           </div>
         </div>
@@ -525,7 +516,7 @@ export const VB6MenuEditor: React.FC<VB6MenuEditorProps> = ({
             height: '150px',
             overflow: 'auto',
             backgroundColor: 'white',
-            marginBottom: '8px'
+            marginBottom: '8px',
           }}
         >
           {flatMenus.map(item => (
@@ -536,7 +527,7 @@ export const VB6MenuEditor: React.FC<VB6MenuEditorProps> = ({
                 paddingLeft: `${8 + item.level * 20}px`,
                 backgroundColor: selectedId === item.id ? '#000080' : 'transparent',
                 color: selectedId === item.id ? 'white' : 'black',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
               onClick={() => handleSelectItem(item)}
             >
@@ -587,14 +578,17 @@ export const VB6MenuBar: React.FC<VB6MenuBarProps> = ({ menus, onMenuClick }) =>
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
 
-  const handleMenuClick = useCallback((item: VB6MenuItem) => {
-    if (item.children && item.children.length > 0) {
-      setOpenMenu(prev => (prev === item.id ? null : item.id));
-    } else {
-      onMenuClick?.(item);
-      setOpenMenu(null);
-    }
-  }, [onMenuClick]);
+  const handleMenuClick = useCallback(
+    (item: VB6MenuItem) => {
+      if (item.children && item.children.length > 0) {
+        setOpenMenu(prev => (prev === item.id ? null : item.id));
+      } else {
+        onMenuClick?.(item);
+        setOpenMenu(null);
+      }
+    },
+    [onMenuClick]
+  );
 
   const handleItemClick = useCallback(
     (item: VB6MenuItem) => {
@@ -638,7 +632,7 @@ export const VB6MenuBar: React.FC<VB6MenuBarProps> = ({ menus, onMenuClick }) =>
           backgroundColor: openSubmenu === item.id ? '#000080' : 'transparent',
           color: openSubmenu === item.id ? 'white' : item.enabled === false ? '#808080' : 'black',
           cursor: item.enabled === false ? 'default' : 'pointer',
-          position: 'relative'
+          position: 'relative',
         }}
         onClick={() => item.enabled !== false && handleItemClick(item)}
       >
@@ -659,7 +653,7 @@ export const VB6MenuBar: React.FC<VB6MenuBarProps> = ({ menus, onMenuClick }) =>
               backgroundColor: '#c0c0c0',
               border: '2px outset #ffffff',
               minWidth: '150px',
-              zIndex: 1001
+              zIndex: 1001,
             }}
           >
             {item.children.map(child => renderMenuItem(child))}
@@ -675,7 +669,7 @@ export const VB6MenuBar: React.FC<VB6MenuBarProps> = ({ menus, onMenuClick }) =>
         display: 'flex',
         backgroundColor: '#c0c0c0',
         fontFamily: 'MS Sans Serif',
-        fontSize: '11px'
+        fontSize: '11px',
       }}
     >
       {menus
@@ -687,7 +681,7 @@ export const VB6MenuBar: React.FC<VB6MenuBarProps> = ({ menus, onMenuClick }) =>
                 padding: '2px 8px',
                 backgroundColor: openMenu === menu.id ? '#000080' : 'transparent',
                 color: openMenu === menu.id ? 'white' : 'black',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
               onClick={() => handleMenuClick(menu)}
             >
@@ -702,7 +696,7 @@ export const VB6MenuBar: React.FC<VB6MenuBarProps> = ({ menus, onMenuClick }) =>
                   backgroundColor: '#c0c0c0',
                   border: '2px outset #ffffff',
                   minWidth: '150px',
-                  zIndex: 1000
+                  zIndex: 1000,
                 }}
               >
                 {menu.children.map(item => renderMenuItem(item))}
@@ -720,5 +714,5 @@ export const VB6MenuBar: React.FC<VB6MenuBarProps> = ({ menus, onMenuClick }) =>
 
 export default {
   VB6MenuEditor,
-  VB6MenuBar
+  VB6MenuBar,
 };

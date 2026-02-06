@@ -295,7 +295,9 @@
 }
 
 /* Loading and Error States */
-.loading, .error, .no-data {
+.loading,
+.error,
+.no-data {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -309,9 +311,15 @@
 }
 
 @keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .error {
@@ -328,16 +336,16 @@
     flex-wrap: wrap;
     gap: 8px;
   }
-  
+
   .toolbar-group {
     flex-wrap: wrap;
     gap: 4px;
   }
-  
+
   .crystal-report-group-tree {
     width: 200px;
   }
-  
+
   .report-page {
     min-width: auto;
     max-width: 100%;
@@ -401,7 +409,9 @@
   background: rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  transition: width 0.3s, height 0.3s;
+  transition:
+    width 0.3s,
+    height 0.3s;
 }
 
 .toolbar-group button:active::before {
@@ -448,9 +458,15 @@
 }
 
 @keyframes progressLoad {
-  0% { transform: scaleX(0); }
-  50% { transform: scaleX(0.7); }
-  100% { transform: scaleX(1); }
+  0% {
+    transform: scaleX(0);
+  }
+  50% {
+    transform: scaleX(0.7);
+  }
+  100% {
+    transform: scaleX(1);
+  }
 }
 
 /* Print Styles */
@@ -460,7 +476,7 @@
     border-radius: 0;
     box-shadow: none;
   }
-  
+
   .viewer-header,
   .crystal-report-toolbar,
   .crystal-report-group-tree,
@@ -468,27 +484,27 @@
   .progress-indicator {
     display: none !important;
   }
-  
+
   .viewer-body {
     background: white;
   }
-  
+
   .report-container {
     padding: 0;
     background: white;
   }
-  
+
   .report-page {
     box-shadow: none;
     padding: 0;
     transform: none !important;
     page-break-inside: avoid;
   }
-  
+
   .detail-record:hover {
     background-color: transparent;
   }
-  
+
   .report-section {
     page-break-inside: avoid;
   }

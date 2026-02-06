@@ -12,7 +12,7 @@ export enum RecordsetTypeEnum {
   dbOpenDynaset = 2,
   dbOpenSnapshot = 4,
   dbOpenForwardOnly = 8,
-  dbOpenDynamic = 16
+  dbOpenDynamic = 16,
 }
 
 export enum LockTypeEnum {
@@ -20,13 +20,13 @@ export enum LockTypeEnum {
   dbPessimistic = 2,
   dbOptimistic = 3,
   dbOptimisticValue = 1,
-  dbOptimisticBatch = 5
+  dbOptimisticBatch = 5,
 }
 
 export enum EditModeEnum {
   dbEditNone = 0,
   dbEditInProgress = 1,
-  dbEditAdd = 2
+  dbEditAdd = 2,
 }
 
 export enum FieldAttributeEnum {
@@ -36,7 +36,7 @@ export enum FieldAttributeEnum {
   dbUpdatableField = 32,
   dbSystemField = 8192,
   dbHyperlinkField = 32768,
-  dbDescending = 3
+  dbDescending = 3,
 }
 
 export enum DataTypeEnum {
@@ -60,7 +60,7 @@ export enum DataTypeEnum {
   dbDecimal = 20,
   dbFloat = 21,
   dbTime = 22,
-  dbTimeStamp = 23
+  dbTimeStamp = 23,
 }
 
 // DAO Interfaces
@@ -189,57 +189,117 @@ export class DAOFieldObject extends COMObject implements DAOField {
   }
 
   // Property getters/setters
-  get Name(): string { return this._name; }
-  set Name(value: string) { this._name = value; }
+  get Name(): string {
+    return this._name;
+  }
+  set Name(value: string) {
+    this._name = value;
+  }
 
-  get Type(): DataTypeEnum { return this._type; }
-  set Type(value: DataTypeEnum) { this._type = value; }
+  get Type(): DataTypeEnum {
+    return this._type;
+  }
+  set Type(value: DataTypeEnum) {
+    this._type = value;
+  }
 
-  get Size(): number { return this._size; }
-  set Size(value: number) { this._size = value; }
+  get Size(): number {
+    return this._size;
+  }
+  set Size(value: number) {
+    this._size = value;
+  }
 
-  get Value(): any { return this._value; }
-  set Value(value: any) { 
+  get Value(): any {
+    return this._value;
+  }
+  set Value(value: any) {
     this._originalValue = this._value;
     this._value = value;
     this._visibleValue = value;
   }
 
-  get Required(): boolean { return this._required; }
-  set Required(value: boolean) { this._required = value; }
+  get Required(): boolean {
+    return this._required;
+  }
+  set Required(value: boolean) {
+    this._required = value;
+  }
 
-  get AllowZeroLength(): boolean { return this._allowZeroLength; }
-  set AllowZeroLength(value: boolean) { this._allowZeroLength = value; }
+  get AllowZeroLength(): boolean {
+    return this._allowZeroLength;
+  }
+  set AllowZeroLength(value: boolean) {
+    this._allowZeroLength = value;
+  }
 
-  get Attributes(): number { return this._attributes; }
-  set Attributes(value: number) { this._attributes = value; }
+  get Attributes(): number {
+    return this._attributes;
+  }
+  set Attributes(value: number) {
+    this._attributes = value;
+  }
 
-  get DefaultValue(): any { return this._defaultValue; }
-  set DefaultValue(value: any) { this._defaultValue = value; }
+  get DefaultValue(): any {
+    return this._defaultValue;
+  }
+  set DefaultValue(value: any) {
+    this._defaultValue = value;
+  }
 
-  get ValidationRule(): string { return this._validationRule; }
-  set ValidationRule(value: string) { this._validationRule = value; }
+  get ValidationRule(): string {
+    return this._validationRule;
+  }
+  set ValidationRule(value: string) {
+    this._validationRule = value;
+  }
 
-  get ValidationText(): string { return this._validationText; }
-  set ValidationText(value: string) { this._validationText = value; }
+  get ValidationText(): string {
+    return this._validationText;
+  }
+  set ValidationText(value: string) {
+    this._validationText = value;
+  }
 
-  get SourceField(): string { return this._sourceField; }
-  set SourceField(value: string) { this._sourceField = value; }
+  get SourceField(): string {
+    return this._sourceField;
+  }
+  set SourceField(value: string) {
+    this._sourceField = value;
+  }
 
-  get SourceTable(): string { return this._sourceTable; }
-  set SourceTable(value: string) { this._sourceTable = value; }
+  get SourceTable(): string {
+    return this._sourceTable;
+  }
+  set SourceTable(value: string) {
+    this._sourceTable = value;
+  }
 
-  get OrdinalPosition(): number { return this._ordinalPosition; }
-  set OrdinalPosition(value: number) { this._ordinalPosition = value; }
+  get OrdinalPosition(): number {
+    return this._ordinalPosition;
+  }
+  set OrdinalPosition(value: number) {
+    this._ordinalPosition = value;
+  }
 
-  get FieldSize(): number { return this._fieldSize; }
+  get FieldSize(): number {
+    return this._fieldSize;
+  }
 
-  get OriginalValue(): any { return this._originalValue; }
+  get OriginalValue(): any {
+    return this._originalValue;
+  }
 
-  get VisibleValue(): any { return this._visibleValue; }
+  get VisibleValue(): any {
+    return this._visibleValue;
+  }
 
-  get CollatingOrder(): number { return this._collatingOrder; }
-  set CollatingOrder(value: number) { this._collatingOrder = value; }
+  get CollatingOrder(): number {
+    return this._collatingOrder;
+  }
+  set CollatingOrder(value: number) {
+    this._collatingOrder = value;
+  }
 }
 
 // DAO Property Implementation
@@ -256,11 +316,21 @@ export class DAOPropertyObject extends COMObject {
     this._value = value;
   }
 
-  get Name(): string { return this._name; }
-  get Type(): DataTypeEnum { return this._type; }
-  get Value(): any { return this._value; }
-  set Value(value: any) { this._value = value; }
-  get Inherited(): boolean { return this._inherited; }
+  get Name(): string {
+    return this._name;
+  }
+  get Type(): DataTypeEnum {
+    return this._type;
+  }
+  get Value(): any {
+    return this._value;
+  }
+  set Value(value: any) {
+    this._value = value;
+  }
+  get Inherited(): boolean {
+    return this._inherited;
+  }
 }
 
 // DAO Recordset Implementation
@@ -296,7 +366,12 @@ export class DAORecordset extends COMObject {
   private _validationRule: string = '';
   private _validationText: string = '';
 
-  constructor(source?: string, type?: RecordsetTypeEnum, options?: number, lockEdit?: LockTypeEnum) {
+  constructor(
+    source?: string,
+    type?: RecordsetTypeEnum,
+    options?: number,
+    lockEdit?: LockTypeEnum
+  ) {
     super('{DAO-RECORDSET-CLSID}', 'DAO.Recordset');
     if (source) this._source = source;
     if (type !== undefined) this._type = type;
@@ -512,7 +587,9 @@ export class DAORecordset extends COMObject {
 
     this.addMethod('GetRows', (numRows?: number) => {
       const startPos = Math.max(0, this._currentPosition);
-      const endPos = numRows ? Math.min(startPos + numRows, this._records.length) : this._records.length;
+      const endPos = numRows
+        ? Math.min(startPos + numRows, this._records.length)
+        : this._records.length;
       return this._records.slice(startPos, endPos);
     });
 
@@ -614,46 +691,126 @@ export class DAORecordset extends COMObject {
   }
 
   // Properties
-  get BOF(): boolean { return this._bof; }
-  get EOF(): boolean { return this._eof; }
-  get RecordCount(): number { return this._recordCount; }
-  get EditMode(): EditModeEnum { return this._editMode; }
-  get Type(): RecordsetTypeEnum { return this._type; }
-  get LockEdits(): boolean { return this._lockEdits; }
-  set LockEdits(value: boolean) { this._lockEdits = value; }
-  get Updatable(): boolean { return this._updatable; }
-  get Bookmarkable(): boolean { return this._bookmarkable; }
-  get Name(): string { return this._name; }
-  set Name(value: string) { this._name = value; }
-  get Source(): string { return this._source; }
-  set Source(value: string) { this._source = value; }
-  get Filter(): string { return this._filter; }
-  set Filter(value: string) { this._filter = value; }
-  get Sort(): string { return this._sort; }
-  set Sort(value: string) { this._sort = value; }
-  get Index(): string { return this._index; }
-  set Index(value: string) { this._index = value; }
-  get Fields(): Map<string, DAOFieldObject> { return this._fields; }
-  get CacheSize(): number { return this._cacheSize; }
-  set CacheSize(value: number) { this._cacheSize = value; }
-  get CacheStart(): number { return this._cacheStart; }
-  get MaxRecords(): number { return this._maxRecords; }
-  set MaxRecords(value: number) { this._maxRecords = value; }
-  get PercentPosition(): number { return this._percentPosition; }
-  get AbsolutePosition(): number { return this._absolutePosition; }
-  get DateCreated(): Date { return this._dateCreated; }
-  get LastUpdated(): Date { return this._lastUpdated; }
-  get Restartable(): boolean { return this._restartable; }
-  get Transactions(): boolean { return this._transactions; }
-  get StillExecuting(): boolean { return this._stillExecuting; }
-  get Connect(): string { return this._connect; }
-  set Connect(value: string) { this._connect = value; }
-  get ReplicaFilter(): string { return this._replicaFilter; }
-  set ReplicaFilter(value: string) { this._replicaFilter = value; }
-  get ValidationRule(): string { return this._validationRule; }
-  set ValidationRule(value: string) { this._validationRule = value; }
-  get ValidationText(): string { return this._validationText; }
-  set ValidationText(value: string) { this._validationText = value; }
+  get BOF(): boolean {
+    return this._bof;
+  }
+  get EOF(): boolean {
+    return this._eof;
+  }
+  get RecordCount(): number {
+    return this._recordCount;
+  }
+  get EditMode(): EditModeEnum {
+    return this._editMode;
+  }
+  get Type(): RecordsetTypeEnum {
+    return this._type;
+  }
+  get LockEdits(): boolean {
+    return this._lockEdits;
+  }
+  set LockEdits(value: boolean) {
+    this._lockEdits = value;
+  }
+  get Updatable(): boolean {
+    return this._updatable;
+  }
+  get Bookmarkable(): boolean {
+    return this._bookmarkable;
+  }
+  get Name(): string {
+    return this._name;
+  }
+  set Name(value: string) {
+    this._name = value;
+  }
+  get Source(): string {
+    return this._source;
+  }
+  set Source(value: string) {
+    this._source = value;
+  }
+  get Filter(): string {
+    return this._filter;
+  }
+  set Filter(value: string) {
+    this._filter = value;
+  }
+  get Sort(): string {
+    return this._sort;
+  }
+  set Sort(value: string) {
+    this._sort = value;
+  }
+  get Index(): string {
+    return this._index;
+  }
+  set Index(value: string) {
+    this._index = value;
+  }
+  get Fields(): Map<string, DAOFieldObject> {
+    return this._fields;
+  }
+  get CacheSize(): number {
+    return this._cacheSize;
+  }
+  set CacheSize(value: number) {
+    this._cacheSize = value;
+  }
+  get CacheStart(): number {
+    return this._cacheStart;
+  }
+  get MaxRecords(): number {
+    return this._maxRecords;
+  }
+  set MaxRecords(value: number) {
+    this._maxRecords = value;
+  }
+  get PercentPosition(): number {
+    return this._percentPosition;
+  }
+  get AbsolutePosition(): number {
+    return this._absolutePosition;
+  }
+  get DateCreated(): Date {
+    return this._dateCreated;
+  }
+  get LastUpdated(): Date {
+    return this._lastUpdated;
+  }
+  get Restartable(): boolean {
+    return this._restartable;
+  }
+  get Transactions(): boolean {
+    return this._transactions;
+  }
+  get StillExecuting(): boolean {
+    return this._stillExecuting;
+  }
+  get Connect(): string {
+    return this._connect;
+  }
+  set Connect(value: string) {
+    this._connect = value;
+  }
+  get ReplicaFilter(): string {
+    return this._replicaFilter;
+  }
+  set ReplicaFilter(value: string) {
+    this._replicaFilter = value;
+  }
+  get ValidationRule(): string {
+    return this._validationRule;
+  }
+  set ValidationRule(value: string) {
+    this._validationRule = value;
+  }
+  get ValidationText(): string {
+    return this._validationText;
+  }
+  set ValidationText(value: string) {
+    this._validationText = value;
+  }
 }
 
 // DAO QueryDef Implementation
@@ -687,7 +844,7 @@ export class DAOQueryDefObject extends COMObject implements DAOQueryDef {
     this.addMethod('Execute', (options?: number) => {
       this._stillExecuting = true;
       this._recordsAffected = 0;
-      
+
       // Simulate query execution
       setTimeout(() => {
         this._stillExecuting = false;
@@ -697,22 +854,25 @@ export class DAOQueryDefObject extends COMObject implements DAOQueryDef {
       }, 100);
     });
 
-    this.addMethod('OpenRecordset', (type?: RecordsetTypeEnum, options?: number, lockEdit?: LockTypeEnum) => {
-      const rs = new DAORecordset(this._name, type, options, lockEdit);
-      
-      // Simulate creating fields based on query
-      rs.addField(new DAOFieldObject('ID', DataTypeEnum.dbLong, 4));
-      rs.addField(new DAOFieldObject('Name', DataTypeEnum.dbText, 50));
-      rs.addField(new DAOFieldObject('Description', DataTypeEnum.dbMemo, 0));
-      rs.addField(new DAOFieldObject('DateCreated', DataTypeEnum.dbDate, 8));
-      
-      // Add sample data
-      rs.addRecord([1, 'Sample Record 1', 'This is a sample description', new Date()]);
-      rs.addRecord([2, 'Sample Record 2', 'Another sample description', new Date()]);
-      rs.addRecord([3, 'Sample Record 3', 'Yet another description', new Date()]);
-      
-      return rs;
-    });
+    this.addMethod(
+      'OpenRecordset',
+      (type?: RecordsetTypeEnum, options?: number, lockEdit?: LockTypeEnum) => {
+        const rs = new DAORecordset(this._name, type, options, lockEdit);
+
+        // Simulate creating fields based on query
+        rs.addField(new DAOFieldObject('ID', DataTypeEnum.dbLong, 4));
+        rs.addField(new DAOFieldObject('Name', DataTypeEnum.dbText, 50));
+        rs.addField(new DAOFieldObject('Description', DataTypeEnum.dbMemo, 0));
+        rs.addField(new DAOFieldObject('DateCreated', DataTypeEnum.dbDate, 8));
+
+        // Add sample data
+        rs.addRecord([1, 'Sample Record 1', 'This is a sample description', new Date()]);
+        rs.addRecord([2, 'Sample Record 2', 'Another sample description', new Date()]);
+        rs.addRecord([3, 'Sample Record 3', 'Yet another description', new Date()]);
+
+        return rs;
+      }
+    );
 
     this.addMethod('CreateProperty', (name: string, type: DataTypeEnum, value: any) => {
       return new DAOPropertyObject(name, type, value);
@@ -729,49 +889,95 @@ export class DAOQueryDefObject extends COMObject implements DAOQueryDef {
   }
 
   // Properties
-  get Name(): string { return this._name; }
-  set Name(value: string) { this._name = value; }
+  get Name(): string {
+    return this._name;
+  }
+  set Name(value: string) {
+    this._name = value;
+  }
 
-  get SQL(): string { return this._sql; }
-  set SQL(value: string) { 
+  get SQL(): string {
+    return this._sql;
+  }
+  set SQL(value: string) {
     this._sql = value;
     this._lastUpdated = new Date();
   }
 
-  get Type(): number { return this._type; }
+  get Type(): number {
+    return this._type;
+  }
 
-  get DateCreated(): Date { return this._dateCreated; }
+  get DateCreated(): Date {
+    return this._dateCreated;
+  }
 
-  get LastUpdated(): Date { return this._lastUpdated; }
+  get LastUpdated(): Date {
+    return this._lastUpdated;
+  }
 
-  get Updatable(): boolean { return this._updatable; }
+  get Updatable(): boolean {
+    return this._updatable;
+  }
 
-  get Connect(): string { return this._connect; }
-  set Connect(value: string) { this._connect = value; }
+  get Connect(): string {
+    return this._connect;
+  }
+  set Connect(value: string) {
+    this._connect = value;
+  }
 
-  get ODBCTimeout(): number { return this._odbcTimeout; }
-  set ODBCTimeout(value: number) { this._odbcTimeout = value; }
+  get ODBCTimeout(): number {
+    return this._odbcTimeout;
+  }
+  set ODBCTimeout(value: number) {
+    this._odbcTimeout = value;
+  }
 
-  get RecordsAffected(): number { return this._recordsAffected; }
+  get RecordsAffected(): number {
+    return this._recordsAffected;
+  }
 
-  get ReturnsRecords(): boolean { return this._returnsRecords; }
+  get ReturnsRecords(): boolean {
+    return this._returnsRecords;
+  }
 
-  get LogMessages(): string { return this._logMessages; }
+  get LogMessages(): string {
+    return this._logMessages;
+  }
 
-  get MaxRecords(): number { return this._maxRecords; }
-  set MaxRecords(value: number) { this._maxRecords = value; }
+  get MaxRecords(): number {
+    return this._maxRecords;
+  }
+  set MaxRecords(value: number) {
+    this._maxRecords = value;
+  }
 
-  get StillExecuting(): boolean { return this._stillExecuting; }
+  get StillExecuting(): boolean {
+    return this._stillExecuting;
+  }
 
-  get Prepare(): boolean { return this._prepare; }
-  set Prepare(value: boolean) { this._prepare = value; }
+  get Prepare(): boolean {
+    return this._prepare;
+  }
+  set Prepare(value: boolean) {
+    this._prepare = value;
+  }
 
-  get CacheSize(): number { return this._cacheSize; }
-  set CacheSize(value: number) { this._cacheSize = value; }
+  get CacheSize(): number {
+    return this._cacheSize;
+  }
+  set CacheSize(value: number) {
+    this._cacheSize = value;
+  }
 
-  get Parameters(): Map<string, any> { return this._parameters; }
+  get Parameters(): Map<string, any> {
+    return this._parameters;
+  }
 
-  get Fields(): Map<string, DAOFieldObject> { return this._fields; }
+  get Fields(): Map<string, DAOFieldObject> {
+    return this._fields;
+  }
 }
 
 // DAO TableDef Implementation
@@ -806,16 +1012,19 @@ export class DAOTableDefObject extends COMObject implements DAOTableDef {
       return new DAOIndexObject(name);
     });
 
-    this.addMethod('OpenRecordset', (type?: RecordsetTypeEnum, options?: number, lockEdit?: LockTypeEnum) => {
-      const rs = new DAORecordset(this._name, type, options, lockEdit);
-      
-      // Copy fields from table definition
-      for (const [name, field] of this._fields) {
-        rs.addField(field);
+    this.addMethod(
+      'OpenRecordset',
+      (type?: RecordsetTypeEnum, options?: number, lockEdit?: LockTypeEnum) => {
+        const rs = new DAORecordset(this._name, type, options, lockEdit);
+
+        // Copy fields from table definition
+        for (const [name, field] of this._fields) {
+          rs.addField(field);
+        }
+
+        return rs;
       }
-      
-      return rs;
-    });
+    );
 
     this.addMethod('RefreshLink', () => {
       this._lastUpdated = new Date();
@@ -831,40 +1040,82 @@ export class DAOTableDefObject extends COMObject implements DAOTableDef {
   }
 
   // Properties
-  get Name(): string { return this._name; }
-  set Name(value: string) { this._name = value; }
+  get Name(): string {
+    return this._name;
+  }
+  set Name(value: string) {
+    this._name = value;
+  }
 
-  get SourceTableName(): string { return this._sourceTableName; }
-  set SourceTableName(value: string) { this._sourceTableName = value; }
+  get SourceTableName(): string {
+    return this._sourceTableName;
+  }
+  set SourceTableName(value: string) {
+    this._sourceTableName = value;
+  }
 
-  get Connect(): string { return this._connect; }
-  set Connect(value: string) { this._connect = value; }
+  get Connect(): string {
+    return this._connect;
+  }
+  set Connect(value: string) {
+    this._connect = value;
+  }
 
-  get RecordCount(): number { return this._recordCount; }
+  get RecordCount(): number {
+    return this._recordCount;
+  }
 
-  get Updatable(): boolean { return this._updatable; }
+  get Updatable(): boolean {
+    return this._updatable;
+  }
 
-  get DateCreated(): Date { return this._dateCreated; }
+  get DateCreated(): Date {
+    return this._dateCreated;
+  }
 
-  get LastUpdated(): Date { return this._lastUpdated; }
+  get LastUpdated(): Date {
+    return this._lastUpdated;
+  }
 
-  get Attributes(): number { return this._attributes; }
-  set Attributes(value: number) { this._attributes = value; }
+  get Attributes(): number {
+    return this._attributes;
+  }
+  set Attributes(value: number) {
+    this._attributes = value;
+  }
 
-  get ValidationRule(): string { return this._validationRule; }
-  set ValidationRule(value: string) { this._validationRule = value; }
+  get ValidationRule(): string {
+    return this._validationRule;
+  }
+  set ValidationRule(value: string) {
+    this._validationRule = value;
+  }
 
-  get ValidationText(): string { return this._validationText; }
-  set ValidationText(value: string) { this._validationText = value; }
+  get ValidationText(): string {
+    return this._validationText;
+  }
+  set ValidationText(value: string) {
+    this._validationText = value;
+  }
 
-  get ConflictTable(): string { return this._conflictTable; }
+  get ConflictTable(): string {
+    return this._conflictTable;
+  }
 
-  get ReplicaFilter(): string { return this._replicaFilter; }
-  set ReplicaFilter(value: string) { this._replicaFilter = value; }
+  get ReplicaFilter(): string {
+    return this._replicaFilter;
+  }
+  set ReplicaFilter(value: string) {
+    this._replicaFilter = value;
+  }
 
-  get Fields(): Map<string, DAOFieldObject> { return this._fields; }
+  get Fields(): Map<string, DAOFieldObject> {
+    return this._fields;
+  }
 
-  get Indexes(): Map<string, DAOIndexObject> { return this._indexes; }
+  get Indexes(): Map<string, DAOIndexObject> {
+    return this._indexes;
+  }
 }
 
 // DAO Index Implementation
@@ -896,31 +1147,65 @@ export class DAOIndexObject extends COMObject implements DAOIndex {
   }
 
   // Properties
-  get Name(): string { return this._name; }
-  set Name(value: string) { this._name = value; }
+  get Name(): string {
+    return this._name;
+  }
+  set Name(value: string) {
+    this._name = value;
+  }
 
-  get Fields(): string { return this._fields; }
-  set Fields(value: string) { this._fields = value; }
+  get Fields(): string {
+    return this._fields;
+  }
+  set Fields(value: string) {
+    this._fields = value;
+  }
 
-  get Primary(): boolean { return this._primary; }
-  set Primary(value: boolean) { this._primary = value; }
+  get Primary(): boolean {
+    return this._primary;
+  }
+  set Primary(value: boolean) {
+    this._primary = value;
+  }
 
-  get Unique(): boolean { return this._unique; }
-  set Unique(value: boolean) { this._unique = value; }
+  get Unique(): boolean {
+    return this._unique;
+  }
+  set Unique(value: boolean) {
+    this._unique = value;
+  }
 
-  get Required(): boolean { return this._required; }
-  set Required(value: boolean) { this._required = value; }
+  get Required(): boolean {
+    return this._required;
+  }
+  set Required(value: boolean) {
+    this._required = value;
+  }
 
-  get IgnoreNulls(): boolean { return this._ignoreNulls; }
-  set IgnoreNulls(value: boolean) { this._ignoreNulls = value; }
+  get IgnoreNulls(): boolean {
+    return this._ignoreNulls;
+  }
+  set IgnoreNulls(value: boolean) {
+    this._ignoreNulls = value;
+  }
 
-  get Foreign(): boolean { return this._foreign; }
-  set Foreign(value: boolean) { this._foreign = value; }
+  get Foreign(): boolean {
+    return this._foreign;
+  }
+  set Foreign(value: boolean) {
+    this._foreign = value;
+  }
 
-  get Clustered(): boolean { return this._clustered; }
-  set Clustered(value: boolean) { this._clustered = value; }
+  get Clustered(): boolean {
+    return this._clustered;
+  }
+  set Clustered(value: boolean) {
+    this._clustered = value;
+  }
 
-  get DistinctCount(): number { return this._distinctCount; }
+  get DistinctCount(): number {
+    return this._distinctCount;
+  }
 }
 
 // DAO Database Implementation
@@ -947,11 +1232,14 @@ export class DAODatabase extends COMObject {
   }
 
   private setupDatabaseMethods(): void {
-    this.addMethod('OpenRecordset', (source: string, type?: RecordsetTypeEnum, options?: number, lockEdit?: LockTypeEnum) => {
-      const rs = new DAORecordset(source, type, options, lockEdit);
-      this._recordsets.set(source, rs);
-      return rs;
-    });
+    this.addMethod(
+      'OpenRecordset',
+      (source: string, type?: RecordsetTypeEnum, options?: number, lockEdit?: LockTypeEnum) => {
+        const rs = new DAORecordset(source, type, options, lockEdit);
+        this._recordsets.set(source, rs);
+        return rs;
+      }
+    );
 
     this.addMethod('Execute', (query: string, options?: number) => {
       const queryDef = new DAOQueryDefObject('TempQuery', query);
@@ -967,27 +1255,33 @@ export class DAODatabase extends COMObject {
       return queryDef;
     });
 
-    this.addMethod('CreateTableDef', (name?: string, attributes?: number, sourceTableName?: string, connect?: string) => {
-      const tableDef = new DAOTableDefObject(name);
-      if (attributes !== undefined) tableDef.Attributes = attributes;
-      if (sourceTableName) tableDef.SourceTableName = sourceTableName;
-      if (connect) tableDef.Connect = connect;
-      
-      if (name) {
-        this._tableDefs.set(name, tableDef);
-      }
-      return tableDef;
-    });
+    this.addMethod(
+      'CreateTableDef',
+      (name?: string, attributes?: number, sourceTableName?: string, connect?: string) => {
+        const tableDef = new DAOTableDefObject(name);
+        if (attributes !== undefined) tableDef.Attributes = attributes;
+        if (sourceTableName) tableDef.SourceTableName = sourceTableName;
+        if (connect) tableDef.Connect = connect;
 
-    this.addMethod('CreateRelation', (name?: string, table?: string, foreignTable?: string, attributes?: number) => {
-      const relation = new DAORelationObject(name, table, foreignTable);
-      if (attributes !== undefined) relation.Attributes = attributes;
-      
-      if (name) {
-        this._relations.set(name, relation);
+        if (name) {
+          this._tableDefs.set(name, tableDef);
+        }
+        return tableDef;
       }
-      return relation;
-    });
+    );
+
+    this.addMethod(
+      'CreateRelation',
+      (name?: string, table?: string, foreignTable?: string, attributes?: number) => {
+        const relation = new DAORelationObject(name, table, foreignTable);
+        if (attributes !== undefined) relation.Attributes = attributes;
+
+        if (name) {
+          this._relations.set(name, relation);
+        }
+        return relation;
+      }
+    );
 
     this.addMethod('BeginTrans', () => {
       // Begin transaction (simplified)
@@ -1048,38 +1342,70 @@ export class DAODatabase extends COMObject {
     ordersTable.addField(new DAOFieldObject('TotalAmount', DataTypeEnum.dbCurrency, 8));
 
     // Create a sample query
-    const customerOrdersQuery = this.getMethod('CreateQueryDef')('CustomerOrders',
-      'SELECT c.CompanyName, o.OrderDate, o.TotalAmount FROM Customers c INNER JOIN Orders o ON c.CustomerID = o.CustomerID');
+    const customerOrdersQuery = this.getMethod('CreateQueryDef')(
+      'CustomerOrders',
+      'SELECT c.CompanyName, o.OrderDate, o.TotalAmount FROM Customers c INNER JOIN Orders o ON c.CustomerID = o.CustomerID'
+    );
   }
 
   // Properties
-  get Name(): string { return this._name; }
-  set Name(value: string) { this._name = value; }
+  get Name(): string {
+    return this._name;
+  }
+  set Name(value: string) {
+    this._name = value;
+  }
 
-  get Connect(): string { return this._connect; }
+  get Connect(): string {
+    return this._connect;
+  }
 
-  get QueryTimeout(): number { return this._queryTimeout; }
-  set QueryTimeout(value: number) { this._queryTimeout = value; }
+  get QueryTimeout(): number {
+    return this._queryTimeout;
+  }
+  set QueryTimeout(value: number) {
+    this._queryTimeout = value;
+  }
 
-  get Transactions(): boolean { return this._transactions; }
+  get Transactions(): boolean {
+    return this._transactions;
+  }
 
-  get Updatable(): boolean { return this._updatable; }
+  get Updatable(): boolean {
+    return this._updatable;
+  }
 
-  get CollatingOrder(): number { return this._collatingOrder; }
+  get CollatingOrder(): number {
+    return this._collatingOrder;
+  }
 
-  get QueryDefs(): Map<string, DAOQueryDefObject> { return this._queryDefs; }
+  get QueryDefs(): Map<string, DAOQueryDefObject> {
+    return this._queryDefs;
+  }
 
-  get TableDefs(): Map<string, DAOTableDefObject> { return this._tableDefs; }
+  get TableDefs(): Map<string, DAOTableDefObject> {
+    return this._tableDefs;
+  }
 
-  get Recordsets(): Map<string, DAORecordset> { return this._recordsets; }
+  get Recordsets(): Map<string, DAORecordset> {
+    return this._recordsets;
+  }
 
-  get Relations(): Map<string, DAORelationObject> { return this._relations; }
+  get Relations(): Map<string, DAORelationObject> {
+    return this._relations;
+  }
 
-  get Version(): string { return this._version; }
+  get Version(): string {
+    return this._version;
+  }
 
-  get DesignMasterID(): string { return this._designMasterID; }
+  get DesignMasterID(): string {
+    return this._designMasterID;
+  }
 
-  get ReplicaID(): string { return this._replicaID; }
+  get ReplicaID(): string {
+    return this._replicaID;
+  }
 }
 
 // DAO Relation Implementation
@@ -1106,22 +1432,44 @@ export class DAORelationObject extends COMObject implements DAORelation {
   }
 
   // Properties
-  get Name(): string { return this._name; }
-  set Name(value: string) { this._name = value; }
+  get Name(): string {
+    return this._name;
+  }
+  set Name(value: string) {
+    this._name = value;
+  }
 
-  get Table(): string { return this._table; }
-  set Table(value: string) { this._table = value; }
+  get Table(): string {
+    return this._table;
+  }
+  set Table(value: string) {
+    this._table = value;
+  }
 
-  get ForeignTable(): string { return this._foreignTable; }
-  set ForeignTable(value: string) { this._foreignTable = value; }
+  get ForeignTable(): string {
+    return this._foreignTable;
+  }
+  set ForeignTable(value: string) {
+    this._foreignTable = value;
+  }
 
-  get Attributes(): number { return this._attributes; }
-  set Attributes(value: number) { this._attributes = value; }
+  get Attributes(): number {
+    return this._attributes;
+  }
+  set Attributes(value: number) {
+    this._attributes = value;
+  }
 
-  get PartialReplica(): boolean { return this._partialReplica; }
-  set PartialReplica(value: boolean) { this._partialReplica = value; }
+  get PartialReplica(): boolean {
+    return this._partialReplica;
+  }
+  set PartialReplica(value: boolean) {
+    this._partialReplica = value;
+  }
 
-  get Fields(): Map<string, DAOFieldObject> { return this._fields; }
+  get Fields(): Map<string, DAOFieldObject> {
+    return this._fields;
+  }
 }
 
 // DAO DBEngine Implementation
@@ -1141,30 +1489,48 @@ export class DAODBEngine extends COMObject {
   }
 
   private setupDBEngineMethods(): void {
-    this.addMethod('CreateWorkspace', (name: string, user?: string, password?: string, useType?: number) => {
-      const workspace = new DAOWorkspace(name, user, password);
-      this._workspaces.set(name, workspace);
-      return workspace;
-    });
+    this.addMethod(
+      'CreateWorkspace',
+      (name: string, user?: string, password?: string, useType?: number) => {
+        const workspace = new DAOWorkspace(name, user, password);
+        this._workspaces.set(name, workspace);
+        return workspace;
+      }
+    );
 
-    this.addMethod('OpenDatabase', (name: string, exclusive?: boolean, readOnly?: boolean, connect?: string) => {
-      return new DAODatabase(name);
-    });
+    this.addMethod(
+      'OpenDatabase',
+      (name: string, exclusive?: boolean, readOnly?: boolean, connect?: string) => {
+        return new DAODatabase(name);
+      }
+    );
 
-    this.addMethod('CompactDatabase', (oldDatabase: string, newDatabase: string, locale?: string, options?: number, password?: string) => {
-      // Database compaction (simplified)
-      return true;
-    });
+    this.addMethod(
+      'CompactDatabase',
+      (
+        oldDatabase: string,
+        newDatabase: string,
+        locale?: string,
+        options?: number,
+        password?: string
+      ) => {
+        // Database compaction (simplified)
+        return true;
+      }
+    );
 
     this.addMethod('RepairDatabase', (name: string) => {
       // Database repair (simplified)
       return true;
     });
 
-    this.addMethod('RegisterDatabase', (name: string, driver: string, silent: boolean, attributes: string) => {
-      // Register ODBC database (simplified)
-      return true;
-    });
+    this.addMethod(
+      'RegisterDatabase',
+      (name: string, driver: string, silent: boolean, attributes: string) => {
+        // Register ODBC database (simplified)
+        return true;
+      }
+    );
 
     this.addMethod('CreateDatabase', (name: string, locale: string, options?: number) => {
       return new DAODatabase(name);
@@ -1199,24 +1565,48 @@ export class DAODBEngine extends COMObject {
   }
 
   // Properties
-  get Version(): string { return this._version; }
+  get Version(): string {
+    return this._version;
+  }
 
-  get DefaultPassword(): string { return this._defaultPassword; }
-  set DefaultPassword(value: string) { this._defaultPassword = value; }
+  get DefaultPassword(): string {
+    return this._defaultPassword;
+  }
+  set DefaultPassword(value: string) {
+    this._defaultPassword = value;
+  }
 
-  get DefaultUser(): string { return this._defaultUser; }
-  set DefaultUser(value: string) { this._defaultUser = value; }
+  get DefaultUser(): string {
+    return this._defaultUser;
+  }
+  set DefaultUser(value: string) {
+    this._defaultUser = value;
+  }
 
-  get IniPath(): string { return this._iniPath; }
-  set IniPath(value: string) { this._iniPath = value; }
+  get IniPath(): string {
+    return this._iniPath;
+  }
+  set IniPath(value: string) {
+    this._iniPath = value;
+  }
 
-  get LoginTimeout(): number { return this._loginTimeout; }
-  set LoginTimeout(value: number) { this._loginTimeout = value; }
+  get LoginTimeout(): number {
+    return this._loginTimeout;
+  }
+  set LoginTimeout(value: number) {
+    this._loginTimeout = value;
+  }
 
-  get SystemDB(): string { return this._systemDB; }
-  set SystemDB(value: string) { this._systemDB = value; }
+  get SystemDB(): string {
+    return this._systemDB;
+  }
+  set SystemDB(value: string) {
+    this._systemDB = value;
+  }
 
-  get Workspaces(): Map<string, DAOWorkspace> { return this._workspaces; }
+  get Workspaces(): Map<string, DAOWorkspace> {
+    return this._workspaces;
+  }
 }
 
 // DAO Workspace Implementation
@@ -1240,11 +1630,14 @@ export class DAOWorkspace extends COMObject {
   }
 
   private setupWorkspaceMethods(): void {
-    this.addMethod('OpenDatabase', (name: string, exclusive?: boolean, readOnly?: boolean, connect?: string) => {
-      const database = new DAODatabase(name);
-      this._databases.set(name, database);
-      return database;
-    });
+    this.addMethod(
+      'OpenDatabase',
+      (name: string, exclusive?: boolean, readOnly?: boolean, connect?: string) => {
+        const database = new DAODatabase(name);
+        this._databases.set(name, database);
+        return database;
+      }
+    );
 
     this.addMethod('CreateDatabase', (name: string, locale: string, options?: number) => {
       const database = new DAODatabase(name);
@@ -1284,29 +1677,57 @@ export class DAOWorkspace extends COMObject {
   }
 
   // Properties
-  get Name(): string { return this._name; }
-  set Name(value: string) { this._name = value; }
+  get Name(): string {
+    return this._name;
+  }
+  set Name(value: string) {
+    this._name = value;
+  }
 
-  get UserName(): string { return this._userName; }
+  get UserName(): string {
+    return this._userName;
+  }
 
-  get IsolateODBCTrans(): number { return this._isolateODBCTrans; }
-  set IsolateODBCTrans(value: number) { this._isolateODBCTrans = value; }
+  get IsolateODBCTrans(): number {
+    return this._isolateODBCTrans;
+  }
+  set IsolateODBCTrans(value: number) {
+    this._isolateODBCTrans = value;
+  }
 
-  get LoginTimeout(): number { return this._loginTimeout; }
-  set LoginTimeout(value: number) { this._loginTimeout = value; }
+  get LoginTimeout(): number {
+    return this._loginTimeout;
+  }
+  set LoginTimeout(value: number) {
+    this._loginTimeout = value;
+  }
 
-  get DefaultCursorDriver(): number { return this._defaultCursorDriver; }
-  set DefaultCursorDriver(value: number) { this._defaultCursorDriver = value; }
+  get DefaultCursorDriver(): number {
+    return this._defaultCursorDriver;
+  }
+  set DefaultCursorDriver(value: number) {
+    this._defaultCursorDriver = value;
+  }
 
-  get hEnv(): number { return this._hEnv; }
+  get hEnv(): number {
+    return this._hEnv;
+  }
 
-  get Type(): number { return this._type; }
+  get Type(): number {
+    return this._type;
+  }
 
-  get Databases(): Map<string, DAODatabase> { return this._databases; }
+  get Databases(): Map<string, DAODatabase> {
+    return this._databases;
+  }
 
-  get Groups(): Map<string, any> { return this._groups; }
+  get Groups(): Map<string, any> {
+    return this._groups;
+  }
 
-  get Users(): Map<string, any> { return this._users; }
+  get Users(): Map<string, any> {
+    return this._users;
+  }
 }
 
 // Register DAO classes with COM registry

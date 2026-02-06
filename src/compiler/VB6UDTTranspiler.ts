@@ -1,6 +1,6 @@
 /**
  * VB6 User Defined Type (UDT) Transpiler - Ultra-Complete Implementation
- * 
+ *
  * Features:
  * - Complete UDT to JavaScript class generation
  * - Support for arrays within UDT
@@ -64,7 +64,7 @@ export class VB6UDTTranspiler {
       optimizeMemoryLayout: options.optimizeMemoryLayout ?? true,
       generateComments: options.generateComments ?? true,
       strictTypeChecking: options.strictTypeChecking ?? true,
-      enableCloning: options.enableCloning ?? true
+      enableCloning: options.enableCloning ?? true,
     };
 
     this.metrics = {
@@ -73,7 +73,7 @@ export class VB6UDTTranspiler {
       methodsGenerated: 0,
       linesOfCode: 0,
       compilationTime: 0,
-      memoryFootprint: 0
+      memoryFootprint: 0,
     };
 
     this.typeMap = new Map([
@@ -88,7 +88,7 @@ export class VB6UDTTranspiler {
       ['Currency', 'number'],
       ['Decimal', 'number'],
       ['Object', 'any'],
-      ['Variant', 'any']
+      ['Variant', 'any'],
     ]);
 
     this.udtRegistry = new Map();
@@ -120,7 +120,7 @@ export class VB6UDTTranspiler {
    */
   public generateAllUDTs(): string {
     const startTime = performance.now();
-    
+
     // Sort UDTs by dependency order
     const sortedUDTs = this.topologicalSort();
 
@@ -218,11 +218,11 @@ export class VB6UDTTranspiler {
     for (const field of udt.fields) {
       const tsType = this.mapFieldToTypeScriptType(field);
       const optional = field.defaultValue !== undefined ? '?' : '';
-      
+
       if (this.options.generateComments && field.size) {
         output += `  /** Size: ${field.size} bytes */\n`;
       }
-      
+
       output += `  ${field.name}${optional}: ${tsType};\n`;
       this.metrics.fieldsGenerated++;
     }
@@ -296,15 +296,19 @@ export class VB6UDTTranspiler {
       }
 
       // Getter
-      const tsReturnType = this.options.generateTypeScript ? `: ${this.mapFieldToTypeScriptType(field)}` : '';
+      const tsReturnType = this.options.generateTypeScript
+        ? `: ${this.mapFieldToTypeScriptType(field)}`
+        : '';
       output += `  get${this.capitalize(field.name)}()${tsReturnType} {\n`;
       output += `    return this.${field.name};\n`;
       output += '  }\n\n';
 
       // Setter with validation
-      const tsParamType = this.options.generateTypeScript ? `: ${this.mapFieldToTypeScriptType(field)}` : '';
+      const tsParamType = this.options.generateTypeScript
+        ? `: ${this.mapFieldToTypeScriptType(field)}`
+        : '';
       output += `  set${this.capitalize(field.name)}(value${tsParamType})${this.options.generateTypeScript ? ': void' : ''} {\n`;
-      
+
       if (this.options.enableValidation) {
         output += `    this.validateField('${field.name}', value);\n`;
       }
@@ -338,11 +342,11 @@ export class VB6UDTTranspiler {
     output += '   * Validate all fields in the UDT\n';
     output += '   */\n';
     output += `  validate()${this.options.generateTypeScript ? ': boolean' : ''} {\n`;
-    
+
     for (const field of udt.fields) {
       output += `    this.validateField('${field.name}', this.${field.name});\n`;
     }
-    
+
     output += '    return true;\n';
     output += '  }\n\n';
 
@@ -427,7 +431,7 @@ export class VB6UDTTranspiler {
     output += '   */\n';
     output += `  toJSON()${this.options.generateTypeScript ? ': any' : ''} {\n`;
     output += '    return {\n';
-    
+
     for (const field of udt.fields) {
       if (field.isArray) {
         output += `      ${field.name}: this.${field.name} ? [...this.${field.name}] : null,\n`;
@@ -435,7 +439,7 @@ export class VB6UDTTranspiler {
         output += `      ${field.name}: this.${field.name},\n`;
       }
     }
-    
+
     output += '    };\n';
     output += '  }\n\n';
 
@@ -445,23 +449,23 @@ export class VB6UDTTranspiler {
     output += '   */\n';
     const jsonType = this.options.generateTypeScript ? ': any' : '';
     output += `  fromJSON(json${jsonType})${this.options.generateTypeScript ? ': void' : ''} {\n`;
-    
+
     for (const field of udt.fields) {
       output += `    if (json.${field.name} !== undefined) {\n`;
-      
+
       if (field.isArray) {
         output += `      this.${field.name} = Array.isArray(json.${field.name}) ? [...json.${field.name}] : null;\n`;
       } else {
         output += `      this.${field.name} = json.${field.name};\n`;
       }
-      
+
       output += '    }\n';
     }
 
     if (this.options.enableValidation) {
       output += '\n    this.validate();\n';
     }
-    
+
     output += '  }\n\n';
 
     // toBinary method for efficient serialization
@@ -511,11 +515,11 @@ export class VB6UDTTranspiler {
     output += '   */\n';
     output += `  clone()${this.options.generateTypeScript ? `: ${udt.name}` : ''} {\n`;
     output += `    const copy = new ${udt.name}();\n`;
-    
+
     for (const field of udt.fields) {
       output += `    copy.${field.name} = this.${field.name};\n`;
     }
-    
+
     output += '    return copy;\n';
     output += '  }\n\n';
 
@@ -525,7 +529,7 @@ export class VB6UDTTranspiler {
     output += '   */\n';
     output += `  deepClone()${this.options.generateTypeScript ? `: ${udt.name}` : ''} {\n`;
     output += `    const copy = new ${udt.name}();\n`;
-    
+
     for (const field of udt.fields) {
       if (field.isArray) {
         output += `    copy.${field.name} = this.${field.name} ? [...this.${field.name}] : null;\n`;
@@ -535,7 +539,7 @@ export class VB6UDTTranspiler {
         output += `    copy.${field.name} = this.${field.name};\n`;
       }
     }
-    
+
     output += '    return copy;\n';
     output += '  }\n\n';
 
@@ -556,7 +560,7 @@ export class VB6UDTTranspiler {
     const otherType = this.options.generateTypeScript ? `: ${udt.name}` : '';
     output += `  equals(other${otherType})${this.options.generateTypeScript ? ': boolean' : ''} {\n`;
     output += `    if (!(other instanceof ${udt.name})) return false;\n\n`;
-    
+
     for (const field of udt.fields) {
       if (field.isArray) {
         output += `    if (!this.arrayEquals(this.${field.name}, other.${field.name})) return false;\n`;
@@ -564,7 +568,7 @@ export class VB6UDTTranspiler {
         output += `    if (this.${field.name} !== other.${field.name}) return false;\n`;
       }
     }
-    
+
     output += '    return true;\n';
     output += '  }\n\n';
 
@@ -761,7 +765,7 @@ export class VB6UDTTranspiler {
   private optimizeMemoryLayout(udt: VB6UDTDefinition): VB6UDTDefinition {
     // Sort fields by size (largest first) for better memory alignment
     const optimizedUDT = { ...udt };
-    
+
     optimizedUDT.fields = [...udt.fields].sort((a, b) => {
       const sizeA = this.getFieldSize(a);
       const sizeB = this.getFieldSize(b);
@@ -773,7 +777,7 @@ export class VB6UDTTranspiler {
     for (const field of optimizedUDT.fields) {
       const fieldSize = this.getFieldSize(field);
       const alignment = Math.min(fieldSize, udt.alignment || 4);
-      
+
       // Add padding for alignment
       const padding = (alignment - (totalSize % alignment)) % alignment;
       totalSize += padding + fieldSize;
@@ -799,7 +803,7 @@ export class VB6UDTTranspiler {
       case 'currency':
         return 8;
       case 'string':
-        return field.isFixedLength ? (field.size || 0) : 4; // Pointer size for variable strings
+        return field.isFixedLength ? field.size || 0 : 4; // Pointer size for variable strings
       default:
         return 4; // Default pointer/reference size
     }
@@ -807,14 +811,14 @@ export class VB6UDTTranspiler {
 
   private buildDependencyGraph(udt: VB6UDTDefinition): void {
     const dependencies = new Set<string>();
-    
+
     for (const field of udt.fields) {
       // Check if field type is another UDT
       if (this.udtRegistry.has(field.type)) {
         dependencies.add(field.type);
       }
     }
-    
+
     this.dependencyGraph.set(udt.name, dependencies);
   }
 
@@ -833,12 +837,12 @@ export class VB6UDTTranspiler {
       }
 
       visiting.add(udtName);
-      
+
       const dependencies = this.dependencyGraph.get(udtName) || new Set();
       for (const dep of dependencies) {
         visit(dep);
       }
-      
+
       visiting.delete(udtName);
       visited.add(udtName);
       result.push(udtName);
@@ -855,17 +859,18 @@ export class VB6UDTTranspiler {
 
   private mapFieldToTypeScriptType(field: VB6UDTField): string {
     const baseType = this.typeMap.get(field.type) || field.type;
-    
+
     if (field.isArray) {
       return `${baseType}[]`;
     }
-    
+
     return baseType;
   }
 
   private getJavaScriptType(vb6Type: string): string {
     switch (vb6Type.toLowerCase()) {
-      case 'string': return 'string';
+      case 'string':
+        return 'string';
       case 'integer':
       case 'long':
       case 'single':
@@ -873,8 +878,10 @@ export class VB6UDTTranspiler {
       case 'byte':
       case 'currency':
         return 'number';
-      case 'boolean': return 'boolean';
-      default: return 'object';
+      case 'boolean':
+        return 'boolean';
+      default:
+        return 'object';
     }
   }
 
@@ -888,7 +895,8 @@ export class VB6UDTTranspiler {
     }
 
     switch (field.type.toLowerCase()) {
-      case 'string': return '""';
+      case 'string':
+        return '""';
       case 'integer':
       case 'long':
       case 'single':
@@ -896,9 +904,12 @@ export class VB6UDTTranspiler {
       case 'byte':
       case 'currency':
         return '0';
-      case 'boolean': return 'false';
-      case 'date': return 'new Date()';
-      default: return 'null';
+      case 'boolean':
+        return 'false';
+      case 'date':
+        return 'new Date()';
+      default:
+        return 'null';
     }
   }
 
@@ -962,7 +973,7 @@ export class VB6UDTTranspiler {
       methodsGenerated: 0,
       linesOfCode: 0,
       compilationTime: 0,
-      memoryFootprint: 0
+      memoryFootprint: 0,
     };
   }
 }

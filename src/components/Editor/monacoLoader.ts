@@ -8,16 +8,12 @@ let isMonacoConfigured = false;
 
 export async function loadMonaco() {
   if (!monacoPromise) {
-    console.log('🔧 ULTRA-OPTIMIZE: Loading Monaco Editor (4.7MB)...');
-
     monacoPromise = import('monaco-editor').then(monaco => {
       if (!isMonacoConfigured) {
         configureMonaco(monaco);
         registerVB6Language(monaco);
         isMonacoConfigured = true;
       }
-
-      console.log('✅ ULTRA-OPTIMIZE: Monaco Editor loaded successfully');
       return monaco;
     });
   }
@@ -44,15 +40,15 @@ function configureMonaco(monaco: typeof import('monaco-editor')) {
           return '/monaco-editor/esm/vs/language/typescript/ts.worker.js';
         }
         return '/monaco-editor/esm/vs/editor/editor.worker.js';
-      }
+      },
     };
   }
-  
+
   // Register VB6 language if not already registered
   if (!monaco.languages.getLanguages().some(lang => lang.id === 'vb')) {
     // VB6 Language Configuration
     monaco.languages.register({ id: 'vb' });
-    
+
     monaco.languages.setLanguageConfiguration('vb', {
       comments: {
         lineComment: "'",
@@ -74,7 +70,9 @@ function configureMonaco(monaco: typeof import('monaco-editor')) {
       folding: {
         markers: {
           start: new RegExp('^\\s*(Sub|Function|If|For|While|Do|With|Select)\\b'),
-          end: new RegExp('^\\s*(End\\s+(Sub|Function|If|For|While|Do|With|Select)|Loop|Wend|Next)\\b'),
+          end: new RegExp(
+            '^\\s*(End\\s+(Sub|Function|If|For|While|Do|With|Select)|Loop|Wend|Next)\\b'
+          ),
         },
       },
     });
@@ -87,7 +85,6 @@ export function preloadMonaco() {
     // Delay preload to not affect initial render
     setTimeout(() => {
       if (!monacoPromise) {
-        console.log('🔧 ULTRA-OPTIMIZE: Preloading Monaco Editor in background...');
         loadMonaco();
       }
     }, 5000); // 5 seconds after initial render

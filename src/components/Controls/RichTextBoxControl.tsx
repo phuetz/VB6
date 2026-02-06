@@ -11,18 +11,18 @@ import { sanitizeRichText } from '../../utils/htmlSanitizer';
 // RichTextBox Constants
 export enum RtfSelectionType {
   rtfSelectionText = 0,
-  rtfSelectionObject = 1
+  rtfSelectionObject = 1,
 }
 
 export enum RtfSelectionAlignment {
   rtfLeft = 0,
   rtfRight = 1,
-  rtfCenter = 2
+  rtfCenter = 2,
 }
 
 export enum RtfSaveConstants {
   rtfRTF = 0,
-  rtfText = 1
+  rtfText = 1,
 }
 
 export interface RichTextBoxProps extends VB6ControlPropsEnhanced {
@@ -30,7 +30,7 @@ export interface RichTextBoxProps extends VB6ControlPropsEnhanced {
   text?: string;
   textRTF?: string;
   fileName?: string;
-  
+
   // Selection properties
   selStart?: number;
   selLength?: number;
@@ -43,14 +43,14 @@ export interface RichTextBoxProps extends VB6ControlPropsEnhanced {
   selItalic?: boolean;
   selUnderline?: boolean;
   selStrikeThru?: boolean;
-  
+
   // Formatting properties
   selAlignment?: RtfSelectionAlignment;
   selBullet?: boolean;
   selIndent?: number;
   selRightIndent?: number;
   selHangingIndent?: number;
-  
+
   // Control properties
   locked?: boolean;
   multiLine?: boolean;
@@ -59,7 +59,7 @@ export interface RichTextBoxProps extends VB6ControlPropsEnhanced {
   maxLength?: number;
   disableNoScroll?: boolean;
   autoVerbMenu?: boolean;
-  
+
   // Events
   onSelectionChange?: () => void;
   onChange?: () => void;
@@ -115,7 +115,7 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
     bullet: false,
     indent: 0,
     rightIndent: 0,
-    hangingIndent: 0
+    hangingIndent: 0,
   });
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const [redoStack, setRedoStack] = useState<string[]>([]);
@@ -131,12 +131,12 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = fileType === RtfSaveConstants.rtfText ? '.txt' : '.rtf';
-      
-      input.onchange = (e) => {
+
+      input.onchange = e => {
         const file = (e.target as HTMLInputElement).files?.[0];
         if (file) {
           const reader = new FileReader();
-          reader.onload = (event) => {
+          reader.onload = event => {
             const content = event.target?.result as string;
             if (file.name.toLowerCase().endsWith('.rtf')) {
               setCurrentRTF(content);
@@ -152,7 +152,7 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
           reader.readAsText(file);
         }
       };
-      
+
       input.click();
     },
 
@@ -162,10 +162,11 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = fileName || (fileType === RtfSaveConstants.rtfText ? 'document.txt' : 'document.rtf');
+      link.download =
+        fileName || (fileType === RtfSaveConstants.rtfText ? 'document.txt' : 'document.rtf');
       link.click();
       URL.revokeObjectURL(url);
-      
+
       setIsModified(false);
       fireEvent(name, 'SaveFile', { fileName: link.download });
     },
@@ -174,7 +175,7 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
       const text = currentText.toLowerCase();
       const search = searchText.toLowerCase();
       const startPos = start || selection.start + selection.length;
-      
+
       const index = text.indexOf(search, startPos);
       if (index >= 0) {
         setSelection({ start: index, length: searchText.length });
@@ -264,7 +265,7 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
           </body>
         </html>
       `;
-      
+
       const printWindow = window.open('', '_blank');
       if (printWindow) {
         printWindow.document.write(printContent);
@@ -275,16 +276,22 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
       }
     },
 
-    SelChange: (fontName?: string, fontSize?: number, fontBold?: boolean, fontItalic?: boolean, fontUnderline?: boolean) => {
+    SelChange: (
+      fontName?: string,
+      fontSize?: number,
+      fontBold?: boolean,
+      fontItalic?: boolean,
+      fontUnderline?: boolean
+    ) => {
       setSelectionFormat(prev => ({
         ...prev,
         ...(fontName && { fontName }),
         ...(fontSize && { fontSize }),
         ...(fontBold !== undefined && { bold: fontBold }),
         ...(fontItalic !== undefined && { italic: fontItalic }),
-        ...(fontUnderline !== undefined && { underline: fontUnderline })
+        ...(fontUnderline !== undefined && { underline: fontUnderline }),
       }));
-      
+
       applyFormatting();
       fireEvent(name, 'SelChange', {});
     },
@@ -292,7 +299,7 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
     OLEDrag: () => {
       // OLE Drag functionality (simplified)
       fireEvent(name, 'OLEDrag', {});
-    }
+    },
   };
 
   const addToUndoStack = () => {
@@ -308,13 +315,13 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
     const before = currentText.substring(0, selection.start);
     const after = currentText.substring(selection.start + selection.length);
     const newFullText = before + newText + after;
-    
+
     addToUndoStack();
     setCurrentText(newFullText);
     setCurrentRTF(generateRTF(newFullText));
     setSelection({ start: selection.start, length: newText.length });
     setIsModified(true);
-    
+
     onChange?.();
     fireEvent(name, 'Change', {});
   };
@@ -327,7 +334,7 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
       if (textNode) {
         range.setStart(textNode, selection.start);
         range.setEnd(textNode, selection.start + selection.length);
-        
+
         const span = document.createElement('span');
         span.style.fontFamily = selectionFormat.fontName;
         span.style.fontSize = `${selectionFormat.fontSize}pt`;
@@ -335,7 +342,7 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
         span.style.fontStyle = selectionFormat.italic ? 'italic' : 'normal';
         span.style.textDecoration = selectionFormat.underline ? 'underline' : 'none';
         span.style.color = selectionFormat.color;
-        
+
         try {
           range.surroundContents(span);
         } catch (e) {
@@ -371,12 +378,12 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
     if (maxLength > 0 && newText.length > maxLength) {
       return;
     }
-    
+
     addToUndoStack();
     setCurrentText(newText);
     setCurrentRTF(generateRTF(newText));
     setIsModified(true);
-    
+
     onChange?.();
     fireEvent(name, 'Change', {});
   };
@@ -386,7 +393,7 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
       const start = textAreaRef.current.selectionStart;
       const end = textAreaRef.current.selectionEnd;
       setSelection({ start, length: end - start });
-      
+
       onSelectionChange?.();
       fireEvent(name, 'SelChange', { selStart: start, selLength: end - start });
     }
@@ -400,7 +407,7 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
 
     const keyCode = e.keyCode;
     const shift = e.shiftKey ? 1 : 0;
-    
+
     // Handle special key combinations
     if (e.ctrlKey) {
       switch (keyCode) {
@@ -430,7 +437,7 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
           break;
       }
     }
-    
+
     onKeyDown?.(keyCode, shift);
     fireEvent(name, 'KeyDown', { keyCode, shift });
   };
@@ -449,7 +456,7 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
   const handleKeyUp = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const keyCode = e.keyCode;
     const shift = e.shiftKey ? 1 : 0;
-    
+
     onKeyUp?.(keyCode, shift);
     fireEvent(name, 'KeyUp', { keyCode, shift });
   };
@@ -472,11 +479,16 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
   if (!visible) return null;
 
   const scrollBarStyle = {
-    overflow: scrollBars === 0 ? 'hidden' : 
-              scrollBars === 1 ? 'scroll' :
-              scrollBars === 2 ? 'scroll' : 'auto',
+    overflow:
+      scrollBars === 0
+        ? 'hidden'
+        : scrollBars === 1
+          ? 'scroll'
+          : scrollBars === 2
+            ? 'scroll'
+            : 'auto',
     overflowX: scrollBars === 1 || scrollBars === 3 ? 'scroll' : 'hidden',
-    overflowY: scrollBars === 2 || scrollBars === 3 ? 'scroll' : 'hidden'
+    overflowY: scrollBars === 2 || scrollBars === 3 ? 'scroll' : 'hidden',
   };
 
   return (
@@ -492,7 +504,7 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
         backgroundColor: enabled ? 'white' : '#f0f0f0',
         fontFamily: 'MS Sans Serif',
         fontSize: '8pt',
-        opacity: enabled ? 1 : 0.5
+        opacity: enabled ? 1 : 0.5,
       }}
       {...rest}
     >
@@ -523,11 +535,11 @@ export const RichTextBoxControl = forwardRef<HTMLDivElement, RichTextBoxProps>((
           padding: '2px',
           whiteSpace: multiLine ? 'pre-wrap' : 'nowrap',
           wordWrap: multiLine ? 'break-word' : 'normal',
-          ...scrollBarStyle
+          ...scrollBarStyle,
         }}
         placeholder={!enabled ? '' : 'Enter rich text...'}
       />
-      
+
       {/* Hidden div for RTF rendering support */}
       {/* SECURITY: HTML sanitizé via DOMPurify (TASK-004) */}
       <div

@@ -52,8 +52,6 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>((props, ref) => {
       // Ensure minimum position
       x = Math.max(0, x);
       y = Math.max(0, y);
-
-      console.log('Creating control:', controlType, 'at position:', x, y);
       createControl(controlType, x, y);
 
       // Reset drag state

@@ -62,7 +62,7 @@ describe('Security Validation - Input Sanitization', () => {
 
     maliciousInputs.forEach(input => {
       const sanitized = securityValidator.sanitizeHTML(input);
-      
+
       expect(sanitized).not.toContain('<script>');
       expect(sanitized).not.toContain('javascript:');
       expect(sanitized).not.toContain('vbscript:');
@@ -89,7 +89,7 @@ describe('Security Validation - Input Sanitization', () => {
 
     dangerousVB6Inputs.forEach(code => {
       const validation = securityValidator.validateVB6Code(code);
-      
+
       expect(validation.isSafe).toBe(false);
       expect(validation.violations).toContainEqual(
         expect.objectContaining({
@@ -113,7 +113,7 @@ describe('Security Validation - Input Sanitization', () => {
 
     safeVB6Inputs.forEach(code => {
       const validation = securityValidator.validateVB6Code(code);
-      
+
       expect(validation.isSafe).toBe(true);
       expect(validation.violations).toHaveLength(0);
     });
@@ -148,7 +148,7 @@ describe('Security Validation - Input Sanitization', () => {
 
     maliciousPaths.forEach(path => {
       const validation = securityValidator.validateFilePath(path);
-      
+
       expect(validation.isSafe).toBe(false);
       expect(validation.violation).toMatchObject({
         type: 'unauthorized',
@@ -168,7 +168,7 @@ describe('Security Validation - Input Sanitization', () => {
 
     safePaths.forEach(path => {
       const validation = securityValidator.validateFilePath(path);
-      
+
       expect(validation.isSafe).toBe(true);
       expect(validation.violation).toBeNull();
     });
@@ -193,7 +193,7 @@ describe('Security Validation - XSS Prevention', () => {
       '<script>fetch("/api/steal-data")</script>',
       '<img src="x" onerror="document.location=\'http://evil.com\'">',
       '"><script>alert(document.cookie)</script>',
-      '\'><script>alert(String.fromCharCode(88,83,83))</script>',
+      "'><script>alert(String.fromCharCode(88,83,83))</script>",
       '<svg/onload=alert("XSS")>',
       '<iframe src="data:text/html,<script>alert(\'XSS\')</script>">',
       '<details open ontoggle=alert("XSS")>',
@@ -201,7 +201,7 @@ describe('Security Validation - XSS Prevention', () => {
 
     xssPayloads.forEach(payload => {
       const result = securityValidator.checkXSS(payload);
-      
+
       expect(result.isBlocked).toBe(true);
       expect(result.violation).toMatchObject({
         type: 'xss',
@@ -254,7 +254,7 @@ describe('Security Validation - XSS Prevention', () => {
 
     safeUrls.forEach(url => {
       const validation = securityValidator.validateURL(url);
-      
+
       expect(validation.isSafe).toBe(true);
     });
   });
@@ -295,7 +295,7 @@ describe('Security Validation - Code Injection Prevention', () => {
       "'; DROP TABLE users; --",
       "1' OR '1'='1",
       "1; UPDATE users SET password='hacked'",
-      "UNION SELECT * FROM passwords",
+      'UNION SELECT * FROM passwords',
       "' OR 1=1--",
       "; EXEC xp_cmdshell('format c:') --",
     ];
@@ -338,7 +338,7 @@ describe('Security Validation - Code Injection Prevention', () => {
 
     dangerousCalls.forEach(call => {
       const result = securityValidator.validateDynamicExecution(call);
-      
+
       expect(result.isSafe).toBe(false);
       expect(result.reason).toContain('dynamic code execution');
     });
@@ -399,7 +399,7 @@ describe('Security Validation - Access Control', () => {
 
     restrictedOperations.forEach(op => {
       const result = securityValidator.checkFileAccess(op.operation, op.path);
-      
+
       expect(result.allowed).toBe(false);
       expect(result.reason).toContain('access denied');
     });
@@ -414,7 +414,7 @@ describe('Security Validation - Access Control', () => {
 
     allowedOperations.forEach(op => {
       const result = securityValidator.checkFileAccess(op.operation, op.path);
-      
+
       expect(result.allowed).toBe(true);
     });
   });
@@ -429,7 +429,7 @@ describe('Security Validation - Access Control', () => {
 
     networkRequests.forEach(req => {
       const result = securityValidator.checkNetworkAccess(req.url, req.method);
-      
+
       expect(result.allowed).toBe(false);
       expect(result.reason).toContain('blocked');
     });
@@ -458,7 +458,6 @@ describe('Security Validation - Access Control', () => {
         localStorage.setItem('stolen', 'data');
         fetch('/api/sensitive');
       } catch (e) {
-        console.log('Blocked:', e.message);
       }
     `;
 
@@ -504,25 +503,18 @@ describe('Security Validation - Input Validation & Sanitization', () => {
 
     unsafeNames.forEach(name => {
       const result = securityValidator.validateControlName(name);
-      
+
       expect(result.isValid).toBe(false);
       expect(result.reason).toContain('reserved');
     });
   });
 
   it('should allow safe control names', () => {
-    const safeNames = [
-      'Text1',
-      'Command1',
-      'Form1',
-      'MyButton',
-      'DataGrid1',
-      'UserControl1',
-    ];
+    const safeNames = ['Text1', 'Command1', 'Form1', 'MyButton', 'DataGrid1', 'UserControl1'];
 
     safeNames.forEach(name => {
       const result = securityValidator.validateControlName(name);
-      
+
       expect(result.isValid).toBe(true);
     });
   });
@@ -537,7 +529,7 @@ describe('Security Validation - Input Validation & Sanitization', () => {
 
     unsafeHandlers.forEach(handler => {
       const sanitized = securityValidator.sanitizeEventHandler(handler);
-      
+
       expect(sanitized).not.toContain('document.');
       expect(sanitized).not.toContain('window.');
       expect(sanitized).not.toContain('eval(');
@@ -556,7 +548,7 @@ describe('Security Validation - Input Validation & Sanitization', () => {
 
     overflowInputs.forEach(input => {
       const result = securityValidator.validateNumericInput(input.value, input.type);
-      
+
       expect(result.isValid).toBe(false);
       expect(result.error).toContain('overflow');
     });
@@ -581,7 +573,7 @@ describe('Security Validation - Logging & Monitoring', () => {
 
   beforeEach(() => {
     violations = [];
-    
+
     securityValidator = createSecurityValidator({
       strictMode: true,
       validateInputs: true,
@@ -668,7 +660,7 @@ describe('Security Validation - Logging & Monitoring', () => {
   it('should alert on suspicious patterns', () => {
     const suspiciousActivities = [
       'Multiple XSS attempts from same source',
-      'Rapid fire input validation failures', 
+      'Rapid fire input validation failures',
       'Repeated file access violations',
       'Unusual network request patterns',
     ];
@@ -700,7 +692,10 @@ function createSecurityValidator(config: SecurityConfig) {
     violations,
 
     sanitizeHTML: (input: string) => {
-      const dangerous = /<script|javascript:|vbscript:|onerror=|onclick=|<iframe|<object|<img[^>]*onerror/i.test(input);
+      const dangerous =
+        /<script|javascript:|vbscript:|onerror=|onclick=|<iframe|<object|<img[^>]*onerror/i.test(
+          input
+        );
 
       if (dangerous) {
         violations.push({
@@ -723,7 +718,7 @@ function createSecurityValidator(config: SecurityConfig) {
         .replace(/onclick\s*=/gi, '')
         .replace(/<iframe[^>]*>/gi, '')
         .replace(/<object[^>]*>/gi, '')
-        .replace(/<img[^>]*>/gi, '');  // Remove all img tags for safety
+        .replace(/<img[^>]*>/gi, ''); // Remove all img tags for safety
     },
 
     validateVB6Code: (code: string) => {
@@ -766,7 +761,7 @@ function createSecurityValidator(config: SecurityConfig) {
       };
     },
 
-    sanitizeProperties: function(properties: Record<string, any>) {
+    sanitizeProperties: function (properties: Record<string, any>) {
       const sanitized: Record<string, any> = {};
       const self = this;
 
@@ -782,7 +777,8 @@ function createSecurityValidator(config: SecurityConfig) {
     },
 
     validateFilePath: (path: string) => {
-      const dangerous = /\.\.|\/etc\/|\\Windows\\|C:\\|file:\/\/|\\\\|http:\/\/|https:\/\/|\/proc\//.test(path);
+      const dangerous =
+        /\.\.|\/etc\/|\\Windows\\|C:\\|file:\/\/|\\\\|http:\/\/|https:\/\/|\/proc\//.test(path);
 
       if (dangerous) {
         const violation = {
@@ -793,10 +789,10 @@ function createSecurityValidator(config: SecurityConfig) {
           blocked: true,
           timestamp: Date.now(),
         };
-        
+
         violations.push(violation);
         triggerEvent('violation', violation);
-        
+
         return {
           isSafe: false,
           violation,
@@ -810,9 +806,10 @@ function createSecurityValidator(config: SecurityConfig) {
     },
 
     checkXSS: (input: string) => {
-      const xssPattern = /<script|javascript:|vbscript:|<img[^>]*onerror|<svg[^>]*onload|<iframe[^>]*src|<details[^>]*ontoggle|on\w+\s*=/i;
+      const xssPattern =
+        /<script|javascript:|vbscript:|<img[^>]*onerror|<svg[^>]*onload|<iframe[^>]*src|<details[^>]*ontoggle|on\w+\s*=/i;
       const isXSS = xssPattern.test(input);
-      
+
       if (isXSS) {
         const violation = {
           type: 'xss' as const,
@@ -822,10 +819,10 @@ function createSecurityValidator(config: SecurityConfig) {
           blocked: true,
           timestamp: Date.now(),
         };
-        
+
         violations.push(violation);
         triggerEvent('violation', violation);
-        
+
         return {
           isBlocked: true,
           violation,
@@ -855,7 +852,7 @@ function createSecurityValidator(config: SecurityConfig) {
     validateURL: (url: string) => {
       const scheme = url.split(':')[0].toLowerCase();
       const dangerousSchemes = ['javascript', 'vbscript', 'data', 'file'];
-      
+
       if (dangerousSchemes.includes(scheme)) {
         return {
           isSafe: false,
@@ -1009,9 +1006,9 @@ function createSecurityValidator(config: SecurityConfig) {
       // Also check for path traversal
       const hasPathTraversal = path.includes('..') || path.includes('/../');
 
-      const isRestricted = restrictedPaths.some(restricted =>
-        path.toLowerCase().includes(restricted.toLowerCase())
-      ) || hasPathTraversal;
+      const isRestricted =
+        restrictedPaths.some(restricted => path.toLowerCase().includes(restricted.toLowerCase())) ||
+        hasPathTraversal;
 
       if (isRestricted) {
         return {
@@ -1034,9 +1031,10 @@ function createSecurityValidator(config: SecurityConfig) {
         'https://127.0.0.1',
       ];
 
-      const isAllowed = allowedOrigins.some(origin => 
-        url.startsWith(origin)
-      ) || url.startsWith('/') || url.startsWith('./');
+      const isAllowed =
+        allowedOrigins.some(origin => url.startsWith(origin)) ||
+        url.startsWith('/') ||
+        url.startsWith('./');
 
       if (!isAllowed) {
         return {
@@ -1087,7 +1085,7 @@ function createSecurityValidator(config: SecurityConfig) {
 
       try {
         // Mock safe execution
-        const output = "Safe calculation: 4";
+        const output = 'Safe calculation: 4';
         return {
           success: true,
           output,
@@ -1097,22 +1095,32 @@ function createSecurityValidator(config: SecurityConfig) {
         return {
           success: false,
           output: null,
-          violations: [{
-            type: 'malicious' as const,
-            severity: 'medium' as const,
-            description: `Execution error: ${error.message}`,
-            payload: code,
-            blocked: true,
-            timestamp: Date.now(),
-          }],
+          violations: [
+            {
+              type: 'malicious' as const,
+              severity: 'medium' as const,
+              description: `Execution error: ${error.message}`,
+              payload: code,
+              blocked: true,
+              timestamp: Date.now(),
+            },
+          ],
         };
       }
     },
 
     validateControlName: (name: string) => {
       const reservedNames = [
-        'eval', 'constructor', 'prototype', '__proto__',
-        'document', 'window', 'location', 'alert', 'confirm', 'prompt',
+        'eval',
+        'constructor',
+        'prototype',
+        '__proto__',
+        'document',
+        'window',
+        'location',
+        'alert',
+        'confirm',
+        'prompt',
       ];
 
       if (reservedNames.includes(name.toLowerCase())) {
@@ -1138,10 +1146,10 @@ function createSecurityValidator(config: SecurityConfig) {
 
     validateNumericInput: (value: string, type: string) => {
       const ranges: Record<string, { min: number; max: number }> = {
-        'Integer': { min: -32768, max: 32767 },
-        'Long': { min: -2147483648, max: 2147483647 },
-        'Single': { min: -3.4E38, max: 3.4E38 },
-        'Double': { min: -1.7E308, max: 1.7E308 },
+        Integer: { min: -32768, max: 32767 },
+        Long: { min: -2147483648, max: 2147483647 },
+        Single: { min: -3.4e38, max: 3.4e38 },
+        Double: { min: -1.7e308, max: 1.7e308 },
       };
 
       if (value === 'Infinity' || value === 'NaN') {
@@ -1169,7 +1177,7 @@ function createSecurityValidator(config: SecurityConfig) {
 
     validateStringInput: (input: string) => {
       const maxLength = 100000; // 100KB limit
-      
+
       if (input.length > maxLength) {
         return {
           isValid: false,
@@ -1190,15 +1198,21 @@ function createSecurityValidator(config: SecurityConfig) {
     },
 
     generateSecurityReport: () => {
-      const categoryCounts = violations.reduce((acc, v) => {
-        acc[v.type] = (acc[v.type] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
+      const categoryCounts = violations.reduce(
+        (acc, v) => {
+          acc[v.type] = (acc[v.type] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
 
-      const severityCounts = violations.reduce((acc, v) => {
-        acc[v.severity] = (acc[v.severity] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
+      const severityCounts = violations.reduce(
+        (acc, v) => {
+          acc[v.severity] = (acc[v.severity] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
 
       return {
         summary: {

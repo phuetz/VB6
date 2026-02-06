@@ -9,11 +9,11 @@ import { useVB6Store } from '../../stores/vb6Store';
 import { useTheme } from '../../context/ThemeContext';
 
 // Composants UI révolutionnaires
-export const HolographicWindow: React.FC<{ children: React.ReactNode; title: string; onClose?: () => void }> = ({ 
-  children, 
-  title, 
-  onClose 
-}) => {
+export const HolographicWindow: React.FC<{
+  children: React.ReactNode;
+  title: string;
+  onClose?: () => void;
+}> = ({ children, title, onClose }) => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const { theme } = useTheme();
@@ -24,27 +24,30 @@ export const HolographicWindow: React.FC<{ children: React.ReactNode; title: str
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.8 }}
-      transition={{ duration: 0.4, ease: "easeInOut" }}
+      transition={{ duration: 0.4, ease: 'easeInOut' }}
     >
       {/* Effet holographique de fond */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-cyan-900/20 backdrop-blur-3xl" />
-      
+
       {/* Particules flottantes */}
       <div className="absolute inset-0 overflow-hidden">
         {Array.from({ length: 50 }, (_, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 bg-blue-400 rounded-full"
-            initial={{ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight }}
+            initial={{
+              x: Math.random() * window.innerWidth,
+              y: Math.random() * window.innerHeight,
+            }}
             animate={{
               x: Math.random() * window.innerWidth,
               y: Math.random() * window.innerHeight,
-              opacity: [0.2, 0.8, 0.2]
+              opacity: [0.2, 0.8, 0.2],
             }}
             transition={{
               duration: 3 + Math.random() * 2,
               repeat: Infinity,
-              ease: "easeInOut"
+              ease: 'easeInOut',
             }}
           />
         ))}
@@ -59,7 +62,7 @@ export const HolographicWindow: React.FC<{ children: React.ReactNode; title: str
         shadow-cyan-500/20 overflow-hidden`}
         layout
         transition={{ duration: 0.3 }}
-        whileHover={{ boxShadow: "0 0 50px rgba(6, 182, 212, 0.4)" }}
+        whileHover={{ boxShadow: '0 0 50px rgba(6, 182, 212, 0.4)' }}
       >
         {/* Barre de titre futuriste */}
         <motion.div
@@ -74,7 +77,7 @@ export const HolographicWindow: React.FC<{ children: React.ReactNode; title: str
             animate={{ x: ['-100%', '100%'] }}
             transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
           />
-          
+
           <div className="flex items-center space-x-4">
             <motion.div
               className="w-3 h-3 bg-cyan-400 rounded-full"
@@ -94,7 +97,7 @@ export const HolographicWindow: React.FC<{ children: React.ReactNode; title: str
             >
               <span className="text-yellow-400">□</span>
             </motion.button>
-            
+
             {onClose && (
               <motion.button
                 className="w-8 h-8 bg-red-500/20 hover:bg-red-500/40 rounded-full 
@@ -110,9 +113,7 @@ export const HolographicWindow: React.FC<{ children: React.ReactNode; title: str
         </motion.div>
 
         {/* Contenu de la fenêtre */}
-        <div className="flex-1 overflow-auto p-6">
-          {children}
-        </div>
+        <div className="flex-1 overflow-auto p-6">{children}</div>
       </motion.div>
     </motion.div>
   );
@@ -131,7 +132,7 @@ export const QuantumButton: React.FC<{
     primary: 'from-blue-600 to-purple-600 border-blue-400/50',
     secondary: 'from-gray-600 to-gray-700 border-gray-400/50',
     danger: 'from-red-600 to-pink-600 border-red-400/50',
-    quantum: 'from-cyan-600 via-blue-600 to-purple-600 border-cyan-400/50'
+    quantum: 'from-cyan-600 via-blue-600 to-purple-600 border-cyan-400/50',
   };
 
   return (
@@ -145,7 +146,7 @@ export const QuantumButton: React.FC<{
       onMouseLeave={() => setIsHovered(false)}
       onMouseDown={() => setIsPressed(true)}
       onMouseUp={() => setIsPressed(false)}
-      whileHover={!disabled ? { scale: 1.05, boxShadow: "0 0 30px rgba(6, 182, 212, 0.5)" } : {}}
+      whileHover={!disabled ? { scale: 1.05, boxShadow: '0 0 30px rgba(6, 182, 212, 0.5)' } : {}}
       whileTap={!disabled ? { scale: 0.95 } : {}}
     >
       {/* Effet de vague quantique */}
@@ -168,11 +169,15 @@ export const QuantumButton: React.FC<{
             key={i}
             className="absolute w-1 h-1 bg-white rounded-full"
             initial={{ x: Math.random() * 100, y: Math.random() * 100, opacity: 0 }}
-            animate={isPressed ? {
-              x: Math.random() * 100,
-              y: Math.random() * 100,
-              opacity: [0, 1, 0]
-            } : {}}
+            animate={
+              isPressed
+                ? {
+                    x: Math.random() * 100,
+                    y: Math.random() * 100,
+                    opacity: [0, 1, 0],
+                  }
+                : {}
+            }
             transition={{ duration: 0.3, delay: i * 0.1 }}
           />
         ))}
@@ -184,26 +189,28 @@ export const QuantumButton: React.FC<{
 };
 
 export const NeuralNetworkBG: React.FC = () => {
-  const nodes = useMemo(() => 
-    Array.from({ length: 20 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      connections: Array.from({ length: Math.floor(Math.random() * 4) + 1 }, () => 
-        Math.floor(Math.random() * 20)
-      ).filter(c => c !== i)
-    }))
-  , []);
+  const nodes = useMemo(
+    () =>
+      Array.from({ length: 20 }, (_, i) => ({
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        connections: Array.from({ length: Math.floor(Math.random() * 4) + 1 }, () =>
+          Math.floor(Math.random() * 20)
+        ).filter(c => c !== i),
+      })),
+    []
+  );
 
   return (
     <div className="absolute inset-0 overflow-hidden opacity-20">
       <svg className="w-full h-full">
         {/* Connexions */}
-        {nodes.map(node => 
+        {nodes.map(node =>
           node.connections.map(connectionId => {
             const targetNode = nodes[connectionId];
             if (!targetNode) return null;
-            
+
             return (
               <motion.line
                 key={`${node.id}-${connectionId}`}
@@ -258,12 +265,12 @@ export const AIAssistant: React.FC = () => {
   const [currentSuggestion, setCurrentSuggestion] = useState('');
 
   const aiSuggestions = [
-    "Créer un nouveau formulaire avec validation",
-    "Optimiser la performance du code",
-    "Ajouter des contrôles de données",
-    "Générer un rapport Crystal",
-    "Déboguer les erreurs de compilation",
-    "Améliorer l'interface utilisateur"
+    'Créer un nouveau formulaire avec validation',
+    'Optimiser la performance du code',
+    'Ajouter des contrôles de données',
+    'Générer un rapport Crystal',
+    'Déboguer les erreurs de compilation',
+    "Améliorer l'interface utilisateur",
   ];
 
   useEffect(() => {
@@ -288,15 +295,19 @@ export const AIAssistant: React.FC = () => {
         <motion.div
           className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full
           flex items-center justify-center text-white font-bold text-lg relative overflow-hidden"
-          animate={{ 
-            boxShadow: isListening 
-              ? ["0 0 20px rgba(6, 182, 212, 0.5)", "0 0 40px rgba(6, 182, 212, 0.8)", "0 0 20px rgba(6, 182, 212, 0.5)"]
-              : "0 0 20px rgba(6, 182, 212, 0.3)"
+          animate={{
+            boxShadow: isListening
+              ? [
+                  '0 0 20px rgba(6, 182, 212, 0.5)',
+                  '0 0 40px rgba(6, 182, 212, 0.8)',
+                  '0 0 20px rgba(6, 182, 212, 0.5)',
+                ]
+              : '0 0 20px rgba(6, 182, 212, 0.3)',
           }}
           transition={{ duration: 2, repeat: Infinity }}
         >
           <span>🤖</span>
-          
+
           {/* Effet de scan */}
           <motion.div
             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
@@ -304,7 +315,7 @@ export const AIAssistant: React.FC = () => {
             transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
           />
         </motion.div>
-        
+
         <div>
           <h3 className="text-lg font-semibold text-cyan-100">Assistant IA</h3>
           <p className="text-sm text-gray-400">VB6 Studio AI</p>
@@ -326,13 +337,10 @@ export const AIAssistant: React.FC = () => {
 
       {/* Contrôles */}
       <div className="flex items-center justify-between">
-        <QuantumButton
-          variant="quantum"
-          onClick={() => setIsListening(!isListening)}
-        >
+        <QuantumButton variant="quantum" onClick={() => setIsListening(!isListening)}>
           {isListening ? '🎤 Écoute...' : '🎙️ Parler'}
         </QuantumButton>
-        
+
         <motion.button
           className="w-10 h-10 bg-gray-700/50 hover:bg-gray-600/50 rounded-full
           flex items-center justify-center transition-colors"
@@ -350,14 +358,14 @@ export const AIAssistant: React.FC = () => {
             <motion.div
               key={i}
               className="w-1 bg-cyan-400 rounded-full"
-              animate={{ 
+              animate={{
                 height: [4, 20, 4],
-                opacity: [0.5, 1, 0.5] 
+                opacity: [0.5, 1, 0.5],
               }}
-              transition={{ 
-                duration: 0.5, 
+              transition={{
+                duration: 0.5,
                 repeat: Infinity,
-                delay: i * 0.1 
+                delay: i * 0.1,
               }}
             />
           ))}
@@ -372,8 +380,10 @@ export const DataFlowVisualization: React.FC<{ data: any[] }> = ({ data }) => {
   const [animationSpeed, setAnimationSpeed] = useState(1);
 
   return (
-    <div className="relative w-full h-64 bg-gradient-to-br from-gray-900/50 to-gray-800/50 
-    rounded-2xl overflow-hidden border border-cyan-500/20">
+    <div
+      className="relative w-full h-64 bg-gradient-to-br from-gray-900/50 to-gray-800/50 
+    rounded-2xl overflow-hidden border border-cyan-500/20"
+    >
       {/* Flux de données */}
       <div className="absolute inset-0 flex items-center justify-center">
         <svg className="w-full h-full">
@@ -381,9 +391,10 @@ export const DataFlowVisualization: React.FC<{ data: any[] }> = ({ data }) => {
           {Array.from({ length: 5 }, (_, i) => (
             <motion.path
               key={i}
-              d={flowDirection === 'horizontal' 
-                ? `M 0,${20 + i * 40} Q ${window.innerWidth / 2},${20 + i * 40 + (i % 2 === 0 ? -20 : 20)} ${window.innerWidth},${20 + i * 40}`
-                : `M ${20 + i * 40},0 Q ${20 + i * 40 + (i % 2 === 0 ? -20 : 20)},${window.innerHeight / 2} ${20 + i * 40},${window.innerHeight}`
+              d={
+                flowDirection === 'horizontal'
+                  ? `M 0,${20 + i * 40} Q ${window.innerWidth / 2},${20 + i * 40 + (i % 2 === 0 ? -20 : 20)} ${window.innerWidth},${20 + i * 40}`
+                  : `M ${20 + i * 40},0 Q ${20 + i * 40 + (i % 2 === 0 ? -20 : 20)},${window.innerHeight / 2} ${20 + i * 40},${window.innerHeight}`
               }
               stroke="url(#flowGradient)"
               strokeWidth="2"
@@ -400,18 +411,18 @@ export const DataFlowVisualization: React.FC<{ data: any[] }> = ({ data }) => {
               key={index}
               r="3"
               fill="url(#particleGradient)"
-              initial={{ 
+              initial={{
                 x: flowDirection === 'horizontal' ? 0 : 20 + (index % 5) * 40,
-                y: flowDirection === 'horizontal' ? 20 + (index % 5) * 40 : 0 
+                y: flowDirection === 'horizontal' ? 20 + (index % 5) * 40 : 0,
               }}
               animate={{
                 x: flowDirection === 'horizontal' ? window.innerWidth : 20 + (index % 5) * 40,
-                y: flowDirection === 'horizontal' ? 20 + (index % 5) * 40 : window.innerHeight
+                y: flowDirection === 'horizontal' ? 20 + (index % 5) * 40 : window.innerHeight,
               }}
-              transition={{ 
+              transition={{
                 duration: 3 / animationSpeed,
                 repeat: Infinity,
-                delay: index * 0.1 
+                delay: index * 0.1,
               }}
             />
           ))}
@@ -437,18 +448,20 @@ export const DataFlowVisualization: React.FC<{ data: any[] }> = ({ data }) => {
           flex items-center justify-center transition-colors"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          onClick={() => setFlowDirection(prev => prev === 'horizontal' ? 'vertical' : 'horizontal')}
+          onClick={() =>
+            setFlowDirection(prev => (prev === 'horizontal' ? 'vertical' : 'horizontal'))
+          }
         >
           <span className="text-cyan-400">↔</span>
         </motion.button>
-        
+
         <input
           type="range"
           min="0.5"
           max="2"
           step="0.1"
           value={animationSpeed}
-          onChange={(e) => setAnimationSpeed(parseFloat(e.target.value))}
+          onChange={e => setAnimationSpeed(parseFloat(e.target.value))}
           className="w-16 h-2 bg-gray-700 rounded-lg appearance-none slider"
         />
       </div>
@@ -461,7 +474,7 @@ export const PerformanceMonitor: React.FC = () => {
     cpu: 0,
     memory: 0,
     renderTime: 0,
-    fps: 60
+    fps: 60,
   });
 
   useEffect(() => {
@@ -470,7 +483,7 @@ export const PerformanceMonitor: React.FC = () => {
         cpu: Math.random() * 100,
         memory: Math.random() * 100,
         renderTime: Math.random() * 16.67,
-        fps: 60 - Math.random() * 5
+        fps: 60 - Math.random() * 5,
       });
     }, 1000);
 
@@ -493,7 +506,7 @@ export const PerformanceMonitor: React.FC = () => {
               {key === 'cpu' || key === 'memory' ? '%' : key === 'renderTime' ? 'ms' : ''}
             </span>
           </div>
-          
+
           <div className="w-full bg-gray-700 rounded-full h-2">
             <motion.div
               className="h-2 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500"
@@ -518,7 +531,7 @@ export const RevolutionaryInterface: React.FC = () => {
     { id: 'code', name: 'Code', icon: '💻', color: 'from-blue-600 to-cyan-600' },
     { id: 'design', name: 'Design', icon: '🎨', color: 'from-purple-600 to-pink-600' },
     { id: 'debug', name: 'Debug', icon: '🐛', color: 'from-red-600 to-orange-600' },
-    { id: 'ai', name: 'IA', icon: '🤖', color: 'from-green-600 to-emerald-600' }
+    { id: 'ai', name: 'IA', icon: '🤖', color: 'from-green-600 to-emerald-600' },
   ];
 
   return (
@@ -537,22 +550,20 @@ export const RevolutionaryInterface: React.FC = () => {
           transition={{ duration: 0.5 }}
         >
           <div className="flex items-center space-x-8">
-            <motion.div
-              className="text-2xl font-bold text-cyan-100"
-              whileHover={{ scale: 1.05 }}
-            >
+            <motion.div className="text-2xl font-bold text-cyan-100" whileHover={{ scale: 1.05 }}>
               VB6 Studio 🚀
             </motion.div>
-            
+
             {/* Modes de navigation */}
             <div className="flex space-x-2">
               {modes.map(mode => (
                 <motion.button
                   key={mode.id}
                   className={`px-6 py-3 rounded-2xl text-white font-medium transition-all
-                  ${activeMode === mode.id 
-                    ? `bg-gradient-to-r ${mode.color} shadow-lg shadow-cyan-500/20` 
-                    : 'bg-gray-700/50 hover:bg-gray-600/50'
+                  ${
+                    activeMode === mode.id
+                      ? `bg-gradient-to-r ${mode.color} shadow-lg shadow-cyan-500/20`
+                      : 'bg-gray-700/50 hover:bg-gray-600/50'
                   }`}
                   onClick={() => setActiveMode(mode.id as any)}
                   whileHover={{ scale: 1.05 }}
@@ -568,8 +579,8 @@ export const RevolutionaryInterface: React.FC = () => {
             {/* Contrôles avancés */}
             <motion.button
               className={`px-4 py-2 rounded-xl transition-all ${
-                isVRMode 
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' 
+                isVRMode
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
                   : 'bg-gray-700/50 text-gray-300 hover:text-white'
               }`}
               onClick={() => setIsVRMode(!isVRMode)}
@@ -578,11 +589,11 @@ export const RevolutionaryInterface: React.FC = () => {
             >
               🥽 VR
             </motion.button>
-            
+
             <motion.button
               className={`px-4 py-2 rounded-xl transition-all ${
-                voiceEnabled 
-                  ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white' 
+                voiceEnabled
+                  ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white'
                   : 'bg-gray-700/50 text-gray-300 hover:text-white'
               }`}
               onClick={() => setVoiceEnabled(!voiceEnabled)}
@@ -655,29 +666,30 @@ export const RevolutionaryInterface: React.FC = () => {
             transition={{ duration: 0.5, delay: 0.4 }}
           >
             {/* Contenu principal basé sur le mode */}
-            <div className="h-full bg-gradient-to-br from-gray-900/50 to-gray-800/50 
-            backdrop-blur-2xl rounded-3xl border border-cyan-500/20 p-8 relative overflow-hidden">
-              
+            <div
+              className="h-full bg-gradient-to-br from-gray-900/50 to-gray-800/50 
+            backdrop-blur-2xl rounded-3xl border border-cyan-500/20 p-8 relative overflow-hidden"
+            >
               {/* Effet de particules */}
               <div className="absolute inset-0 overflow-hidden">
                 {Array.from({ length: 30 }, (_, i) => (
                   <motion.div
                     key={i}
                     className="absolute w-2 h-2 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full"
-                    initial={{ 
+                    initial={{
                       x: Math.random() * window.innerWidth,
                       y: Math.random() * window.innerHeight,
-                      scale: 0
+                      scale: 0,
                     }}
-                    animate={{ 
+                    animate={{
                       x: Math.random() * window.innerWidth,
                       y: Math.random() * window.innerHeight,
-                      scale: [0, 1, 0]
+                      scale: [0, 1, 0],
                     }}
-                    transition={{ 
+                    transition={{
                       duration: 4,
                       repeat: Infinity,
-                      delay: Math.random() * 4
+                      delay: Math.random() * 4,
                     }}
                   />
                 ))}
@@ -697,18 +709,14 @@ export const RevolutionaryInterface: React.FC = () => {
                     {activeMode === 'debug' && 'Débogueur Intelligent'}
                     {activeMode === 'ai' && 'Assistant IA Avancé'}
                   </h1>
-                  
+
                   <p className="text-xl text-gray-300 mb-8">
                     Interface révolutionnaire avec IA intégrée
                   </p>
-                  
+
                   <div className="flex justify-center space-x-4">
-                    <QuantumButton variant="quantum">
-                      Commencer
-                    </QuantumButton>
-                    <QuantumButton variant="primary">
-                      Découvrir
-                    </QuantumButton>
+                    <QuantumButton variant="quantum">Commencer</QuantumButton>
+                    <QuantumButton variant="primary">Découvrir</QuantumButton>
                   </div>
                 </motion.div>
               </div>
@@ -738,7 +746,9 @@ export const RevolutionaryInterface: React.FC = () => {
             >
               <div className="text-6xl mb-4">🥽</div>
               <h2 className="text-3xl font-bold text-cyan-100 mb-2">Mode VR Activé</h2>
-              <p className="text-lg text-gray-300">Expérience immersive en cours de chargement...</p>
+              <p className="text-lg text-gray-300">
+                Expérience immersive en cours de chargement...
+              </p>
             </motion.div>
           </motion.div>
         )}

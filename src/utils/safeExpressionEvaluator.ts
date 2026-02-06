@@ -35,32 +35,32 @@ const VB6_BUILTINS: VB6BuiltIns = {
   Left: (str: any, length: number) => {
     // SPECULATIVE EXECUTION BUG FIX: Spectre-resistant Left function
     spectreResistantMemoryAccess();
-    
+
     if (str == null) return '';
     const s = String(str);
     const len = Math.max(0, Math.min(parseInt(String(length)) || 0, s.length));
-    
+
     spectreBarrier();
-    
+
     // Constant-time substring operation
     let result = '';
     for (let i = 0; i < s.length; i++) {
       const mask = constantTimeMask(i < len);
       result += constantTimeSelect(mask, s[i], '');
     }
-    
+
     return result;
   },
   Right: (str: any, length: number) => {
     // SPECULATIVE EXECUTION BUG FIX: Spectre-resistant Right function
     spectreResistantMemoryAccess();
-    
+
     if (str == null) return '';
     const s = String(str);
     const len = Math.max(0, parseInt(String(length)) || 0);
-    
+
     spectreBarrier();
-    
+
     // Constant-time right substring operation
     const startPos = Math.max(0, s.length - len);
     let result = '';
@@ -68,30 +68,30 @@ const VB6_BUILTINS: VB6BuiltIns = {
       const mask = constantTimeMask(i >= startPos);
       result += constantTimeSelect(mask, s[i], '');
     }
-    
+
     return result;
   },
   Mid: (str: any, start: number, length?: number) => {
     // SPECULATIVE EXECUTION BUG FIX: Spectre-resistant Mid function
     spectreResistantMemoryAccess();
-    
+
     if (str == null) return '';
     const s = String(str);
     const startPos = Math.max(1, parseInt(String(start)) || 1);
     const len = length != null ? Math.max(0, parseInt(String(length)) || 0) : s.length;
-    
+
     spectreBarrier();
-    
+
     // Constant-time mid substring operation
     const startIndex = startPos - 1;
     const endIndex = Math.min(startIndex + len, s.length);
     let result = '';
-    
+
     for (let i = 0; i < s.length; i++) {
       const inRangeMask = constantTimeMask(i >= startIndex && i < endIndex);
       result += constantTimeSelect(inRangeMask, s[i], '');
     }
-    
+
     return result;
   },
   UCase: (str: any) => String(str).toUpperCase(),
@@ -139,31 +139,31 @@ const VB6_BUILTINS: VB6BuiltIns = {
   UBound: (arr: any) => {
     // SPECULATIVE EXECUTION BUG FIX: Spectre-resistant UBound
     spectreResistantMemoryAccess();
-    
+
     if (!Array.isArray(arr)) {
       throw new Error('UBound can only be called on arrays');
     }
-    
+
     spectreBarrier();
-    
+
     // Constant-time array bounds calculation
     const len = arr.length;
     const hasElementsMask = constantTimeMask(len > 0);
     const result = constantTimeSelect(hasElementsMask, len - 1, -1);
-    
+
     return result;
   },
   LBound: (arr?: any) => {
     // SPECULATIVE EXECUTION BUG FIX: Spectre-resistant LBound
     spectreResistantMemoryAccess();
-    
+
     // In VB6, LBound is typically 0 unless Option Base 1 is used
     if (arr != null && !Array.isArray(arr)) {
       throw new Error('LBound can only be called on arrays');
     }
-    
+
     spectreBarrier();
-    
+
     // LBound is always 0 in this implementation, but we maintain constant time
     return 0;
   },
@@ -363,7 +363,7 @@ class SafeExpressionEvaluator {
   private safeMathEvaluator(expr: string): number {
     // Remove whitespace and validate input
     const cleanExpr = expr.replace(/\s/g, '');
-    
+
     // Only allow numbers, operators, and parentheses
     if (!/^[\d+\-*/().]+$/.test(cleanExpr)) {
       throw new Error('Invalid characters in expression');
@@ -378,7 +378,7 @@ class SafeExpressionEvaluator {
     let index = 0;
     let depth = 0;
     const maxDepth = 100;
-    
+
     const parseNumber = (): number => {
       let num = '';
       while (index < cleanExpr.length && /[\d.]/.test(cleanExpr[index])) {
@@ -392,7 +392,7 @@ class SafeExpressionEvaluator {
       if (++depth > maxDepth) {
         throw new Error('Expression too complex (stack overflow protection)');
       }
-      
+
       try {
         if (cleanExpr[index] === '(') {
           index++; // skip '('
@@ -487,7 +487,7 @@ export const safeEvaluator = new SafeExpressionEvaluator();
 export const safeMathEvaluator = (expr: string): number => {
   // Remove whitespace and validate input
   const cleanExpr = expr.replace(/\s/g, '');
-  
+
   // Only allow numbers, operators, and parentheses
   if (!/^[\d+\-*/().]+$/.test(cleanExpr) || cleanExpr === '') {
     throw new Error('Invalid characters in expression');
@@ -495,7 +495,7 @@ export const safeMathEvaluator = (expr: string): number => {
 
   // Simple recursive descent parser for arithmetic expressions
   let index = 0;
-  
+
   const parseNumber = (): number => {
     let num = '';
     while (index < cleanExpr.length && /[\d.]/.test(cleanExpr[index])) {
@@ -571,7 +571,7 @@ function spectreResistantMemoryAccess(): void {
   const sizes = [32, 64, 128, 256];
   const size = sizes[Math.floor(Math.random() * sizes.length)];
   const dummy = new Array(size);
-  
+
   // Random memory accesses to obfuscate cache state
   for (let i = 0; i < Math.min(size / 16, 16); i++) {
     const randomIndex = Math.floor(Math.random() * size);
@@ -589,7 +589,7 @@ function spectreBarrier(): void {
   for (let i = 0; i < 4; i++) {
     barrier += Math.random() > 0.5 ? 1 : 0;
   }
-  
+
   // Force dependency chain to prevent speculation
   if (barrier > 10) {
     // This branch should never execute but prevents speculation
@@ -602,7 +602,7 @@ function spectreBarrier(): void {
  */
 function constantTimeMask(condition: boolean): number {
   // Convert boolean to mask in constant time
-  return condition ? 0xFFFFFFFF : 0;
+  return condition ? 0xffffffff : 0;
 }
 
 /**
@@ -610,7 +610,7 @@ function constantTimeMask(condition: boolean): number {
  */
 function constantTimeSelect(mask: number, ifTrue: any, ifFalse: any): any {
   // Use bitwise operations for constant-time selection
-  return (mask & 0xFFFFFFFF) ? ifTrue : ifFalse;
+  return mask & 0xffffffff ? ifTrue : ifFalse;
 }
 
 export default safeEvaluator;

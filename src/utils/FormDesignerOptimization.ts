@@ -122,7 +122,7 @@ export class Quadtree<T> {
       x: point.x,
       y: point.y,
       width: 1,
-      height: 1
+      height: 1,
     }).filter(item => this.containsPoint(item.bounds, point));
   }
 
@@ -171,10 +171,30 @@ export class Quadtree<T> {
     const halfHeight = height / 2;
 
     this.children = [
-      new Quadtree<T>({ x, y, width: halfWidth, height: halfHeight }, this.maxItems, this.maxDepth, this.depth + 1),
-      new Quadtree<T>({ x: x + halfWidth, y, width: halfWidth, height: halfHeight }, this.maxItems, this.maxDepth, this.depth + 1),
-      new Quadtree<T>({ x, y: y + halfHeight, width: halfWidth, height: halfHeight }, this.maxItems, this.maxDepth, this.depth + 1),
-      new Quadtree<T>({ x: x + halfWidth, y: y + halfHeight, width: halfWidth, height: halfHeight }, this.maxItems, this.maxDepth, this.depth + 1)
+      new Quadtree<T>(
+        { x, y, width: halfWidth, height: halfHeight },
+        this.maxItems,
+        this.maxDepth,
+        this.depth + 1
+      ),
+      new Quadtree<T>(
+        { x: x + halfWidth, y, width: halfWidth, height: halfHeight },
+        this.maxItems,
+        this.maxDepth,
+        this.depth + 1
+      ),
+      new Quadtree<T>(
+        { x, y: y + halfHeight, width: halfWidth, height: halfHeight },
+        this.maxItems,
+        this.maxDepth,
+        this.depth + 1
+      ),
+      new Quadtree<T>(
+        { x: x + halfWidth, y: y + halfHeight, width: halfWidth, height: halfHeight },
+        this.maxItems,
+        this.maxDepth,
+        this.depth + 1
+      ),
     ];
 
     for (const item of this.items) {
@@ -446,7 +466,7 @@ export function calculateVirtualList(
     startIndex,
     endIndex,
     offsetY,
-    visibleCount
+    visibleCount,
   };
 }
 
@@ -481,8 +501,10 @@ export class DirtyRectTracker {
     if (this.fullRedraw || this.dirtyRects.length === 0) return null;
 
     // Calculate bounding box of all dirty rects
-    let minX = Infinity, minY = Infinity;
-    let maxX = -Infinity, maxY = -Infinity;
+    let minX = Infinity,
+      minY = Infinity;
+    let maxX = -Infinity,
+      maxY = -Infinity;
 
     for (const rect of this.dirtyRects) {
       minX = Math.min(minX, rect.x);
@@ -495,7 +517,7 @@ export class DirtyRectTracker {
       x: minX,
       y: minY,
       width: maxX - minX,
-      height: maxY - minY
+      height: maxY - minY,
     };
   }
 
@@ -585,8 +607,14 @@ export class OffscreenCanvasRenderer {
     if (region) {
       targetCtx.drawImage(
         this.canvas as any,
-        region.x, region.y, region.width, region.height,
-        region.x, region.y, region.width, region.height
+        region.x,
+        region.y,
+        region.width,
+        region.height,
+        region.x,
+        region.y,
+        region.width,
+        region.height
       );
     } else {
       targetCtx.drawImage(this.canvas as any, 0, 0);
@@ -642,7 +670,7 @@ export function calculateAlignmentGuides(
         start: Math.min(movingRect.y, bounds.y),
         end: Math.max(movingBottom, bottom),
         sourceId: id,
-        alignType: 'edge'
+        alignType: 'edge',
       });
     }
 
@@ -654,7 +682,7 @@ export function calculateAlignmentGuides(
         start: Math.min(movingRect.y, bounds.y),
         end: Math.max(movingBottom, bottom),
         sourceId: id,
-        alignType: 'edge'
+        alignType: 'edge',
       });
     }
 
@@ -666,7 +694,7 @@ export function calculateAlignmentGuides(
         start: Math.min(movingRect.y, bounds.y),
         end: Math.max(movingBottom, bottom),
         sourceId: id,
-        alignType: 'edge'
+        alignType: 'edge',
       });
     }
 
@@ -678,7 +706,7 @@ export function calculateAlignmentGuides(
         start: Math.min(movingRect.y, bounds.y),
         end: Math.max(movingBottom, bottom),
         sourceId: id,
-        alignType: 'edge'
+        alignType: 'edge',
       });
     }
 
@@ -690,7 +718,7 @@ export function calculateAlignmentGuides(
         start: Math.min(movingRect.y, bounds.y),
         end: Math.max(movingBottom, bottom),
         sourceId: id,
-        alignType: 'center'
+        alignType: 'center',
       });
     }
 
@@ -702,7 +730,7 @@ export function calculateAlignmentGuides(
         start: Math.min(movingRect.x, bounds.x),
         end: Math.max(movingRight, right),
         sourceId: id,
-        alignType: 'edge'
+        alignType: 'edge',
       });
     }
 
@@ -714,7 +742,7 @@ export function calculateAlignmentGuides(
         start: Math.min(movingRect.x, bounds.x),
         end: Math.max(movingRight, right),
         sourceId: id,
-        alignType: 'edge'
+        alignType: 'edge',
       });
     }
 
@@ -726,7 +754,7 @@ export function calculateAlignmentGuides(
         start: Math.min(movingRect.x, bounds.x),
         end: Math.max(movingRight, right),
         sourceId: id,
-        alignType: 'edge'
+        alignType: 'edge',
       });
     }
 
@@ -738,7 +766,7 @@ export function calculateAlignmentGuides(
         start: Math.min(movingRect.x, bounds.x),
         end: Math.max(movingRight, right),
         sourceId: id,
-        alignType: 'edge'
+        alignType: 'edge',
       });
     }
 
@@ -750,7 +778,7 @@ export function calculateAlignmentGuides(
         start: Math.min(movingRect.x, bounds.x),
         end: Math.max(movingRight, right),
         sourceId: id,
-        alignType: 'center'
+        alignType: 'center',
       });
     }
   }
@@ -877,7 +905,7 @@ export class PerformanceMonitor {
       fps: avgFrameTime > 0 ? 1000 / avgFrameTime : 0,
       avgFrameTime,
       minFrameTime,
-      maxFrameTime
+      maxFrameTime,
     };
   }
 
@@ -916,5 +944,5 @@ export default {
   OffscreenCanvasRenderer,
   calculateAlignmentGuides,
   calculateSnappedPosition,
-  PerformanceMonitor
+  PerformanceMonitor,
 };

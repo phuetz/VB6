@@ -236,7 +236,7 @@ export const DebugToolbar: React.FC = () => {
 
   const handleStep = useCallback((type: 'into' | 'over' | 'out') => {
     if (process.env.NODE_ENV === 'development') {
-      console.log(`Debug step: ${type}`);
+      // noop
     }
   }, []);
 

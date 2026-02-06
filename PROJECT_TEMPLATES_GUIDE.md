@@ -7,15 +7,18 @@ The VB6 Web IDE now includes a comprehensive Project Template system that allows
 ## 🚀 How to Access
 
 ### 1. **Menu Bar**
+
 - Go to `File → New from Template...`
 - Shortcut: `Ctrl+Shift+N`
 
 ### 2. **Keyboard Shortcut**
+
 - Press `Ctrl+Shift+N` anywhere in the IDE
 
 ## 📁 Available Templates
 
 ### Standard Templates
+
 1. **Blank Project** 🆕
    - Empty form ready for your code
    - Perfect for starting from scratch
@@ -27,6 +30,7 @@ The VB6 Web IDE now includes a comprehensive Project Template system that allows
    - **Difficulty**: Beginner
 
 ### Utilities
+
 3. **Calculator** 🧮
    - Fully functional calculator
    - Basic arithmetic operations
@@ -46,6 +50,7 @@ The VB6 Web IDE now includes a comprehensive Project Template system that allows
    - **Difficulty**: Advanced
 
 ### Database
+
 6. **Database CRUD Application** 🗄️
    - Complete customer management system
    - MSFlexGrid for data display
@@ -54,6 +59,7 @@ The VB6 Web IDE now includes a comprehensive Project Template system that allows
    - **Difficulty**: Advanced
 
 ### Graphics
+
 7. **Drawing Application** 🎨
    - Paint program with tools
    - Pencil, Line, Rectangle, Circle tools
@@ -64,6 +70,7 @@ The VB6 Web IDE now includes a comprehensive Project Template system that allows
 ## 🎯 Template Features
 
 Each template includes:
+
 - **Pre-configured Forms**: Properly sized with all controls placed
 - **Working Code**: Fully functional VB6 code
 - **Event Handlers**: All necessary event procedures
@@ -73,14 +80,17 @@ Each template includes:
 ## 🔧 Using the Template Wizard
 
 ### Step 1: Open the Wizard
+
 - Press `Ctrl+Shift+N` or use the menu
 
 ### Step 2: Browse Templates
+
 - **Search**: Use the search box to find templates
 - **Filter by Category**: Standard, Database, Graphics, Utilities
 - **Filter by Difficulty**: Beginner, Intermediate, Advanced
 
 ### Step 3: Select a Template
+
 - Click on a template to select it
 - View template details:
   - Description
@@ -89,6 +99,7 @@ Each template includes:
   - Tags for easy searching
 
 ### Step 4: Create Project
+
 - Click "Create Project" button
 - The template will be loaded instantly
 - All controls and code are ready to use
@@ -96,21 +107,27 @@ Each template includes:
 ## 🏷️ Template Categories
 
 ### Standard 📘
+
 Basic templates for common scenarios
 
 ### Database 🗄️
+
 Templates with data management features
 
 ### Graphics 🎨
+
 Templates for drawing and visual applications
 
 ### Utilities 🔧
+
 Productivity and tool applications
 
 ### Games 🎮
+
 Game templates (coming soon)
 
 ### Business 💼
+
 Business application templates (coming soon)
 
 ## ⚡ Template Benefits
@@ -133,6 +150,7 @@ After creating a project from a template:
 ## 📝 Template Code Structure
 
 Each template follows this structure:
+
 ```vb
 Option Explicit
 
@@ -158,16 +176,19 @@ End Sub
 ## 🎓 Learning Path
 
 ### For Beginners
+
 1. Start with **Hello World**
 2. Move to **Notepad Clone**
 3. Try the **Calculator**
 
 ### For Intermediate Users
+
 1. Explore **Drawing Application**
 2. Study **File Explorer**
 3. Customize existing templates
 
 ### For Advanced Users
+
 1. Master **Database CRUD**
 2. Combine template features
 3. Create complex applications
@@ -175,16 +196,19 @@ End Sub
 ## 🔍 Template Details
 
 ### Calculator Template
+
 - **Features**: Number buttons, operation buttons, clear function
 - **Concepts**: Event handling, state management, calculations
 - **Customization**: Add scientific functions, memory operations
 
 ### Database CRUD Template
+
 - **Features**: Grid display, CRUD operations, search
 - **Concepts**: Data management, user input validation
 - **Customization**: Add sorting, filtering, export features
 
 ### Drawing Application Template
+
 - **Features**: Multiple tools, color selection, canvas operations
 - **Concepts**: Graphics programming, mouse events
 - **Customization**: Add more tools, save/load drawings

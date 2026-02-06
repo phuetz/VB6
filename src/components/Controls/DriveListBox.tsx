@@ -7,10 +7,10 @@ interface DriveListBoxProps {
   onPropertyChange?: (property: string, value: any) => void;
 }
 
-export const DriveListBox: React.FC<DriveListBoxProps> = ({ 
-  control, 
+export const DriveListBox: React.FC<DriveListBoxProps> = ({
+  control,
   isDesignMode = false,
-  onPropertyChange 
+  onPropertyChange,
 }) => {
   // VB6 DriveListBox properties
   const {
@@ -38,26 +38,29 @@ export const DriveListBox: React.FC<DriveListBoxProps> = ({
     // For web simulation, we'll provide mock drives
     const mockDrives = ['C:', 'D:', 'E:', 'F:'];
     setAvailableDrives(mockDrives);
-    
+
     // Add some realistic drive labels
     const driveLabels: { [key: string]: string } = {
       'C:': 'System (C:)',
       'D:': 'Data (D:)',
       'E:': 'Backup (E:)',
-      'F:': 'USB Drive (F:)'
+      'F:': 'USB Drive (F:)',
     };
   }, []);
 
-  const handleDriveChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newDrive = e.target.value;
-    setSelectedDrive(newDrive);
-    onPropertyChange?.('drive', newDrive);
-    
-    // Fire VB6 Change event
-    if (window.VB6Runtime?.fireEvent) {
-      window.VB6Runtime.fireEvent(control.name, 'Change');
-    }
-  }, [control.name, onPropertyChange]);
+  const handleDriveChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const newDrive = e.target.value;
+      setSelectedDrive(newDrive);
+      onPropertyChange?.('drive', newDrive);
+
+      // Fire VB6 Change event
+      if (window.VB6Runtime?.fireEvent) {
+        window.VB6Runtime.fireEvent(control.name, 'Change');
+      }
+    },
+    [control.name, onPropertyChange]
+  );
 
   if (!visible) return null;
 
@@ -98,7 +101,7 @@ export const DriveListBox: React.FC<DriveListBoxProps> = ({
           </option>
         ))}
       </select>
-      
+
       {/* Design mode indicator */}
       {isDesignMode && (
         <div

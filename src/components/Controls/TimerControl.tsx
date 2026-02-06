@@ -24,7 +24,7 @@ export const TimerControl = forwardRef<HTMLDivElement, TimerControlProps>(
     const [name, setName] = useState<string>(control.name || 'Timer1');
     const [tag, setTag] = useState<string>(control.tag || '');
     const [index, setIndex] = useState<number | undefined>(control.index);
-    
+
     // Référence pour le timer
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const startTimeRef = useRef<number>(0);
@@ -41,31 +41,30 @@ export const TimerControl = forwardRef<HTMLDivElement, TimerControlProps>(
       // Démarrer le nouveau timer si activé et interval > 0
       if (enabled && interval > 0 && !isDesignMode) {
         startTimeRef.current = Date.now();
-        
+
         timerRef.current = setInterval(() => {
           elapsedTimeRef.current = Date.now() - startTimeRef.current;
-          
+
           // Déclencher l'événement Timer
           if (onTimer) {
             onTimer();
           }
-          
+
           // Déclencher l'événement VB6 global
           if (typeof window !== 'undefined' && (window as any).VB6Runtime?.fireEvent) {
             (window as any).VB6Runtime.fireEvent(name, 'Timer', {
               elapsed: elapsedTimeRef.current,
-              interval: interval
+              interval: interval,
             });
           }
-          
+
           // Notifier le changement
           onChange?.({
             event: 'Timer',
             elapsed: elapsedTimeRef.current,
             interval: interval,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           });
-          
         }, interval);
       }
 
@@ -81,32 +80,42 @@ export const TimerControl = forwardRef<HTMLDivElement, TimerControlProps>(
     // Méthodes VB6 exposées
     const vb6Methods = {
       // Propriétés
-      get Name() { return name; },
-      set Name(value: string) { 
+      get Name() {
+        return name;
+      },
+      set Name(value: string) {
         setName(value);
         if (control) control.name = value;
       },
 
-      get Interval() { return interval; },
+      get Interval() {
+        return interval;
+      },
       set Interval(value: number) {
         const newInterval = Math.max(0, Math.min(65535, Math.floor(value))); // VB6 limits: 0-65535 ms
         setInterval(newInterval);
         if (control) control.interval = newInterval;
       },
 
-      get Enabled() { return enabled; },
+      get Enabled() {
+        return enabled;
+      },
       set Enabled(value: boolean) {
         setEnabled(Boolean(value));
         if (control) control.enabled = Boolean(value);
       },
 
-      get Tag() { return tag; },
+      get Tag() {
+        return tag;
+      },
       set Tag(value: string) {
         setTag(String(value));
         if (control) control.tag = String(value);
       },
 
-      get Index() { return index; },
+      get Index() {
+        return index;
+      },
       set Index(value: number | undefined) {
         setIndex(value);
         if (control) control.index = value;
@@ -145,7 +154,7 @@ export const TimerControl = forwardRef<HTMLDivElement, TimerControlProps>(
       GetTickCount(): number {
         if (!this.IsRunning || interval === 0) return 0;
         return Math.floor(elapsedTimeRef.current / interval);
-      }
+      },
     };
 
     // Exposer les méthodes au parent
@@ -171,7 +180,7 @@ export const TimerControl = forwardRef<HTMLDivElement, TimerControlProps>(
       fontFamily: 'MS Sans Serif, sans-serif',
       fontSize: '20px',
       opacity: control.visible !== false ? 1 : 0.5,
-      zIndex: control.zIndex || 'auto'
+      zIndex: control.zIndex || 'auto',
     };
 
     const infoStyle: React.CSSProperties = {
@@ -182,7 +191,7 @@ export const TimerControl = forwardRef<HTMLDivElement, TimerControlProps>(
       fontSize: '8px',
       color: '#666',
       whiteSpace: 'nowrap',
-      pointerEvents: 'none'
+      pointerEvents: 'none',
     };
 
     // Le Timer est invisible au runtime (comme en VB6)
@@ -202,12 +211,8 @@ export const TimerControl = forwardRef<HTMLDivElement, TimerControlProps>(
       >
         {/* Icône de timer */}
         🕐
-        
         {/* Informations en mode design */}
-        <div style={infoStyle}>
-          {interval}ms
-        </div>
-        
+        <div style={infoStyle}>{interval}ms</div>
         {/* Indicateur d'état */}
         {enabled && interval > 0 && (
           <div
@@ -219,7 +224,7 @@ export const TimerControl = forwardRef<HTMLDivElement, TimerControlProps>(
               height: '8px',
               borderRadius: '50%',
               backgroundColor: '#00FF00',
-              border: '1px solid #008000'
+              border: '1px solid #008000',
             }}
             title="Timer actif"
           />
@@ -247,7 +252,7 @@ export const TimerUtils = {
       enabled: true,
       visible: false, // Invisible au runtime comme en VB6
       tag: '',
-      index: undefined
+      index: undefined,
     };
   },
 
@@ -263,36 +268,36 @@ export const TimerUtils = {
     hoursToMs: (hours: number) => hours * 60 * 60 * 1000,
     msToSeconds: (ms: number) => ms / 1000,
     msToMinutes: (ms: number) => ms / (60 * 1000),
-    msToHours: (ms: number) => ms / (60 * 60 * 1000)
+    msToHours: (ms: number) => ms / (60 * 60 * 1000),
   },
 
   // Créer des intervalles prédéfinis courants
   commonIntervals: {
     // Intervalles très courts
-    VERY_FAST: 50,        // 20 fois par seconde
-    FAST: 100,           // 10 fois par seconde
-    ANIMATION: 16,       // ~60 FPS
-    
+    VERY_FAST: 50, // 20 fois par seconde
+    FAST: 100, // 10 fois par seconde
+    ANIMATION: 16, // ~60 FPS
+
     // Intervalles courts
-    TENTH_SECOND: 100,   // 1/10 seconde
+    TENTH_SECOND: 100, // 1/10 seconde
     QUARTER_SECOND: 250, // 1/4 seconde
-    HALF_SECOND: 500,    // 1/2 seconde
-    
+    HALF_SECOND: 500, // 1/2 seconde
+
     // Intervalles standards
-    ONE_SECOND: 1000,    // 1 seconde
-    TWO_SECONDS: 2000,   // 2 secondes
-    FIVE_SECONDS: 5000,  // 5 secondes
-    TEN_SECONDS: 10000,  // 10 secondes
-    
+    ONE_SECOND: 1000, // 1 seconde
+    TWO_SECONDS: 2000, // 2 secondes
+    FIVE_SECONDS: 5000, // 5 secondes
+    TEN_SECONDS: 10000, // 10 secondes
+
     // Intervalles longs
-    THIRTY_SECONDS: 30000,  // 30 secondes
-    ONE_MINUTE: 60000,      // 1 minute
-    FIVE_MINUTES: 300000,   // 5 minutes
-    TEN_MINUTES: 600000,    // 10 minutes
-    
+    THIRTY_SECONDS: 30000, // 30 secondes
+    ONE_MINUTE: 60000, // 1 minute
+    FIVE_MINUTES: 300000, // 5 minutes
+    TEN_MINUTES: 600000, // 10 minutes
+
     // Intervalles très longs
     THIRTY_MINUTES: 1800000, // 30 minutes
-    ONE_HOUR: 3600000       // 1 heure
+    ONE_HOUR: 3600000, // 1 heure
   },
 
   // Formater l'intervalle pour l'affichage
@@ -310,7 +315,10 @@ export const TimerUtils = {
   },
 
   // Créer un timer haute précision (utilise requestAnimationFrame si disponible)
-  createHighPrecisionTimer(callback: () => void, interval: number): {
+  createHighPrecisionTimer(
+    callback: () => void,
+    interval: number
+  ): {
     start: () => void;
     stop: () => void;
     isRunning: () => boolean;
@@ -348,9 +356,9 @@ export const TimerUtils = {
 
       isRunning() {
         return isRunning;
-      }
+      },
     };
-  }
+  },
 };
 
 export default TimerControl;

@@ -3,7 +3,7 @@ import {
   VB6AdvancedLanguageProcessor,
   VB6OptionalParameter,
   VB6ParamArray,
-  IsMissing
+  IsMissing,
 } from '../../compiler/VB6AdvancedLanguageFeatures';
 
 describe('VB6 Optional Parameters', () => {
@@ -22,8 +22,8 @@ describe('VB6 Optional Parameters', () => {
       const param = processor.processOptionalParameter(
         'taxRate',
         'Double',
-        0.1,           // Provided value
-        0.08           // Default value
+        0.1, // Provided value
+        0.08 // Default value
       );
 
       expect(param.name).toBe('taxRate');
@@ -36,8 +36,8 @@ describe('VB6 Optional Parameters', () => {
       const param = processor.processOptionalParameter(
         'taxRate',
         'Double',
-        undefined,     // Not provided
-        0.08           // Default value
+        undefined, // Not provided
+        0.08 // Default value
       );
 
       expect(param.name).toBe('taxRate');
@@ -47,24 +47,14 @@ describe('VB6 Optional Parameters', () => {
     });
 
     it('should use default value when parameter is missing', () => {
-      const param = processor.processOptionalParameter(
-        'message',
-        'String',
-        undefined,
-        'Hello'
-      );
+      const param = processor.processOptionalParameter('message', 'String', undefined, 'Hello');
 
       expect(param.defaultValue).toBe('Hello');
       expect(param.isMissing).toBe(true);
     });
 
     it('should use provided value when parameter is present', () => {
-      const param = processor.processOptionalParameter(
-        'count',
-        'Integer',
-        42,
-        10
-      );
+      const param = processor.processOptionalParameter('count', 'Integer', 42, 10);
 
       expect(param.defaultValue).toBe(10);
       expect(param.isMissing).toBe(false);
@@ -85,8 +75,8 @@ describe('VB6 Optional Parameters', () => {
       const param = processor.processOptionalParameter(
         'value',
         'Integer',
-        0,      // Provided (zero is valid value)
-        10      // Default
+        0, // Provided (zero is valid value)
+        10 // Default
       );
 
       expect(param.isMissing).toBe(false);
@@ -96,7 +86,7 @@ describe('VB6 Optional Parameters', () => {
       const param = processor.processOptionalParameter(
         'text',
         'String',
-        '',     // Provided (empty string is valid)
+        '', // Provided (empty string is valid)
         'default'
       );
 
@@ -107,8 +97,8 @@ describe('VB6 Optional Parameters', () => {
       const param = processor.processOptionalParameter(
         'enabled',
         'Boolean',
-        false,  // Provided (false is valid)
-        true    // Default
+        false, // Provided (false is valid)
+        true // Default
       );
 
       expect(param.isMissing).toBe(false);
@@ -430,19 +420,14 @@ describe('VB6 ParamArray and Optional - Real-World Scenarios', () => {
   it('should implement function with optional tax calculation', () => {
     // Function CalculateTotal(amount As Currency, Optional taxRate As Double = 0.08) As Currency
     function CalculateTotal(amount: number, taxRate?: number): number {
-      const taxParam = processor.processOptionalParameter(
-        'taxRate',
-        'Double',
-        taxRate,
-        0.08
-      );
+      const taxParam = processor.processOptionalParameter('taxRate', 'Double', taxRate, 0.08);
 
       const rate = processor.isMissing(taxParam) ? taxParam.defaultValue : taxRate!;
       return amount * (1 + rate);
     }
 
-    expect(CalculateTotal(100)).toBeCloseTo(108, 2);       // Uses default 0.08
-    expect(CalculateTotal(100, 0.1)).toBeCloseTo(110, 2);  // Uses provided 0.1
+    expect(CalculateTotal(100)).toBeCloseTo(108, 2); // Uses default 0.08
+    expect(CalculateTotal(100, 0.1)).toBeCloseTo(110, 2); // Uses provided 0.1
   });
 
   it('should implement logging function with optional level', () => {
@@ -450,12 +435,7 @@ describe('VB6 ParamArray and Optional - Real-World Scenarios', () => {
     const logs: string[] = [];
 
     function Log(message: string, level?: string): void {
-      const levelParam = processor.processOptionalParameter(
-        'level',
-        'String',
-        level,
-        'INFO'
-      );
+      const levelParam = processor.processOptionalParameter('level', 'String', level, 'INFO');
 
       const logLevel = processor.isMissing(levelParam) ? levelParam.defaultValue : level!;
       logs.push(`[${logLevel}] ${message}`);
@@ -468,7 +448,7 @@ describe('VB6 ParamArray and Optional - Real-World Scenarios', () => {
     expect(logs).toEqual([
       '[INFO] Application started',
       '[ERROR] Error occurred',
-      '[WARN] Warning message'
+      '[WARN] Warning message',
     ]);
   });
 
@@ -528,7 +508,12 @@ describe('VB6 ParamArray and Optional - Real-World Scenarios', () => {
 
   it('should implement validation with optional custom message', () => {
     // Function ValidateRange(value As Integer, min As Integer, max As Integer, Optional errorMsg As String = "Value out of range") As Boolean
-    function ValidateRange(value: number, min: number, max: number, errorMsg?: string): { valid: boolean, message: string } {
+    function ValidateRange(
+      value: number,
+      min: number,
+      max: number,
+      errorMsg?: string
+    ): { valid: boolean; message: string } {
       const msgParam = processor.processOptionalParameter(
         'errorMsg',
         'String',
@@ -541,7 +526,7 @@ describe('VB6 ParamArray and Optional - Real-World Scenarios', () => {
 
       return {
         valid,
-        message: valid ? 'OK' : message
+        message: valid ? 'OK' : message,
       };
     }
 

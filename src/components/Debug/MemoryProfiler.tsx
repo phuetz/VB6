@@ -1,17 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { 
-  memoryManager, 
-  MemoryMetrics, 
-  MemoryLeak 
-} from '../../services/MemoryManagementService';
-import { 
-  Activity, 
-  AlertTriangle, 
-  Trash2, 
+import { memoryManager, MemoryMetrics, MemoryLeak } from '../../services/MemoryManagementService';
+import {
+  Activity,
+  AlertTriangle,
+  Trash2,
   RefreshCw,
   TrendingUp,
   Database,
-  Zap
+  Zap,
 } from 'lucide-react';
 
 interface MemoryProfilerProps {
@@ -32,11 +28,11 @@ const MemoryProfiler: React.FC<MemoryProfilerProps> = ({ className = '' }) => {
     const updateMetrics = () => {
       const currentMetrics = memoryManager.getMemoryUsage();
       setMetrics(currentMetrics);
-      
+
       memoryManager.trackMemoryUsage();
       const historyData = memoryManager.getMemoryHistory();
       setHistory(historyData);
-      
+
       // Update suggestions periodically
       const newSuggestions = memoryManager.getOptimizationSuggestions();
       setSuggestions(newSuggestions);
@@ -119,7 +115,7 @@ const MemoryProfiler: React.FC<MemoryProfilerProps> = ({ className = '' }) => {
       history.forEach((metric, index) => {
         const x = padding + (width * index) / (history.length - 1);
         const y = padding + height - ((metric.heapUsed - minHeap) / (maxHeap - minHeap)) * height;
-        
+
         ctx.beginPath();
         ctx.arc(x, y, 3, 0, Math.PI * 2);
         ctx.fill();
@@ -130,7 +126,7 @@ const MemoryProfiler: React.FC<MemoryProfilerProps> = ({ className = '' }) => {
     ctx.fillStyle = '#666';
     ctx.font = '10px sans-serif';
     ctx.textAlign = 'right';
-    
+
     // Y-axis labels
     for (let i = 0; i <= 5; i++) {
       const value = minHeap + ((maxHeap - minHeap) * (5 - i)) / 5;
@@ -148,19 +144,19 @@ const MemoryProfiler: React.FC<MemoryProfilerProps> = ({ className = '' }) => {
   // Optimize memory
   const handleOptimize = useCallback(async () => {
     setIsOptimizing(true);
-    
+
     // Run optimization
     const freedBytes = memoryManager.optimizeMemory();
-    
+
     // Simulate delay for visual feedback
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     setIsOptimizing(false);
-    
+
     // Update metrics
     const newMetrics = memoryManager.getMemoryUsage();
     setMetrics(newMetrics);
-    
+
     // Show result
     if (freedBytes > 0) {
       alert(`Freed ${formatBytes(freedBytes)} of memory`);
@@ -170,7 +166,7 @@ const MemoryProfiler: React.FC<MemoryProfilerProps> = ({ className = '' }) => {
   // Force garbage collection
   const handleForceGC = useCallback(() => {
     memoryManager.forceGarbageCollection();
-    
+
     // Update metrics after a short delay
     setTimeout(() => {
       const newMetrics = memoryManager.getMemoryUsage();
@@ -215,11 +211,7 @@ const MemoryProfiler: React.FC<MemoryProfilerProps> = ({ className = '' }) => {
             className="p-1 hover:bg-blue-700 rounded disabled:opacity-50"
             title="Optimize Memory"
           >
-            {isOptimizing ? (
-              <RefreshCw size={14} className="animate-spin" />
-            ) : (
-              <Zap size={14} />
-            )}
+            {isOptimizing ? <RefreshCw size={14} className="animate-spin" /> : <Zap size={14} />}
           </button>
           <button
             onClick={handleForceGC}
@@ -249,7 +241,7 @@ const MemoryProfiler: React.FC<MemoryProfilerProps> = ({ className = '' }) => {
                   />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="bg-gray-100 p-2 rounded">
                   <div className="text-gray-600">Total Heap</div>
@@ -283,8 +275,11 @@ const MemoryProfiler: React.FC<MemoryProfilerProps> = ({ className = '' }) => {
               Potential Memory Leaks
             </h3>
             <div className="space-y-2">
-              {leaks.map((leak) => (
-                <div key={leak.id} className="bg-yellow-50 border border-yellow-200 p-2 rounded text-xs">
+              {leaks.map(leak => (
+                <div
+                  key={leak.id}
+                  className="bg-yellow-50 border border-yellow-200 p-2 rounded text-xs"
+                >
                   <div className="font-semibold">{leak.type}</div>
                   <div className="text-gray-600">
                     {leak.count} items • {formatBytes(leak.size)} retained

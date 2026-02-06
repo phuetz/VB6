@@ -1,17 +1,17 @@
 /**
  * Advanced Debug Panel Component
- * 
+ *
  * Enhanced debugging interface with conditional breakpoints, tracepoints, and more
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { useVB6Store } from '../../stores/vb6Store';
-import { 
-  VB6AdvancedDebugger, 
-  Breakpoint, 
-  DebugVariable, 
+import {
+  VB6AdvancedDebugger,
+  Breakpoint,
+  DebugVariable,
   DebugConsoleMessage,
-  createAdvancedDebugger 
+  createAdvancedDebugger,
 } from '../../services/VB6AdvancedDebugger';
 import { DebugState } from '../../types/extended';
 
@@ -21,24 +21,23 @@ interface AdvancedDebugPanelProps {
 
 export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ className = '' }) => {
   const { debugState, setDebugState } = useVB6Store();
-  const [activeTab, setActiveTab] = useState<'breakpoints' | 'watch' | 'callstack' | 'console' | 'profiler'>('breakpoints');
+  const [activeTab, setActiveTab] = useState<
+    'breakpoints' | 'watch' | 'callstack' | 'console' | 'profiler'
+  >('breakpoints');
   const [showBreakpointDialog, setShowBreakpointDialog] = useState(false);
   const [editingBreakpoint, setEditingBreakpoint] = useState<Partial<Breakpoint> | null>(null);
   const [consoleFilter, setConsoleFilter] = useState<DebugConsoleMessage['type'] | 'all'>('all');
   const [profileData, setProfileData] = useState<any>(null);
-  
+
   // Create debugger instance
   const debuggerInstance = useMemo(() => {
-    return createAdvancedDebugger(
-      (state: DebugState) => setDebugState(state),
-      {
-        enableSourceMaps: true,
-        enableExceptionBreaking: true,
-        enableJustMyCode: true,
-        maxCallStackDepth: 1000,
-        evaluationTimeout: 5000
-      }
-    );
+    return createAdvancedDebugger((state: DebugState) => setDebugState(state), {
+      enableSourceMaps: true,
+      enableExceptionBreaking: true,
+      enableJustMyCode: true,
+      maxCallStackDepth: 1000,
+      evaluationTimeout: 5000,
+    });
   }, [setDebugState]);
 
   // Filter console messages
@@ -54,7 +53,7 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
       file: '',
       line: 1,
       condition: '',
-      type: 'conditional'
+      type: 'conditional',
     });
     setShowBreakpointDialog(true);
   }, []);
@@ -65,7 +64,7 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
       file: '',
       line: 1,
       logMessage: 'Line {currentLine}: {variableName}',
-      type: 'tracepoint'
+      type: 'tracepoint',
     });
     setShowBreakpointDialog(true);
   }, []);
@@ -73,11 +72,11 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
   // Save breakpoint
   const handleSaveBreakpoint = useCallback(() => {
     if (!editingBreakpoint) return;
-    
+
     const { file, line, type, condition, logMessage, hitCount } = editingBreakpoint;
-    
+
     if (!file || !line) return;
-    
+
     if (type === 'conditional' && condition) {
       debuggerInstance.setConditionalBreakpoint(file, line, condition, hitCount);
     } else if (type === 'tracepoint' && logMessage) {
@@ -85,7 +84,7 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
     } else {
       debuggerInstance.setBreakpoint(file, line);
     }
-    
+
     setShowBreakpointDialog(false);
     setEditingBreakpoint(null);
   }, [editingBreakpoint, debuggerInstance]);
@@ -122,7 +121,7 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
         >
           ▶ Run
         </button>
-        
+
         <button
           onClick={() => debuggerInstance.pause()}
           disabled={debugState.mode !== 'run'}
@@ -131,7 +130,7 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
         >
           ⏸ Pause
         </button>
-        
+
         <button
           onClick={() => debuggerInstance.stop()}
           disabled={debugState.mode === 'design'}
@@ -140,9 +139,9 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
         >
           ⏹ Stop
         </button>
-        
+
         <div className="border-l mx-2 h-6" />
-        
+
         <button
           onClick={() => debuggerInstance.step()}
           disabled={debugState.mode !== 'break'}
@@ -151,7 +150,7 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
         >
           ↓ Step Into
         </button>
-        
+
         <button
           onClick={() => debuggerInstance.stepOver()}
           disabled={debugState.mode !== 'break'}
@@ -160,7 +159,7 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
         >
           → Step Over
         </button>
-        
+
         <button
           onClick={() => debuggerInstance.stepOut()}
           disabled={debugState.mode !== 'break'}
@@ -169,9 +168,9 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
         >
           ↑ Step Out
         </button>
-        
+
         <div className="border-l mx-2 h-6" />
-        
+
         <button
           onClick={handleTakeSnapshot}
           className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600"
@@ -246,7 +245,7 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
                 + Data Breakpoint
               </button>
             </div>
-            
+
             <div className="breakpoint-list">
               {Array.from(debugState.breakpoints).map((bp, index) => {
                 const [file, line] = bp.split(':');
@@ -254,7 +253,9 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
                   <div key={index} className="flex items-center gap-2 py-1 hover:bg-gray-100">
                     <input type="checkbox" checked={true} readOnly />
                     <span className="text-red-600">●</span>
-                    <span className="flex-1">{file}:{line}</span>
+                    <span className="flex-1">
+                      {file}:{line}
+                    </span>
                     <button
                       onClick={() => debuggerInstance.removeBreakpoint(file, parseInt(line))}
                       className="text-red-500 hover:text-red-700"
@@ -264,7 +265,7 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
                   </div>
                 );
               })}
-              
+
               {/* Show conditional breakpoints */}
               {(debugState as any).conditionalBreakpoints?.map((bp: Breakpoint) => (
                 <div key={bp.id} className="flex items-center gap-2 py-1 hover:bg-gray-100">
@@ -272,7 +273,9 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
                   <span className="text-orange-600">●</span>
                   <span className="flex-1">
                     {bp.file}:{bp.line}
-                    {bp.condition && <span className="text-gray-500 text-xs ml-2">[{bp.condition}]</span>}
+                    {bp.condition && (
+                      <span className="text-gray-500 text-xs ml-2">[{bp.condition}]</span>
+                    )}
                   </span>
                   <button
                     onClick={() => debuggerInstance.removeBreakpoint(bp.file, bp.line)}
@@ -282,7 +285,7 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
                   </button>
                 </div>
               ))}
-              
+
               {/* Show tracepoints */}
               {(debugState as any).tracepoints?.map((tp: Breakpoint) => (
                 <div key={tp.id} className="flex items-center gap-2 py-1 hover:bg-gray-100">
@@ -318,10 +321,13 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
                 + Add Watch
               </button>
             </div>
-            
+
             <div className="watch-list">
               {debugState.watchExpressions.map((watch, index) => (
-                <div key={index} className="flex items-center gap-2 py-1 hover:bg-gray-100 font-mono text-sm">
+                <div
+                  key={index}
+                  className="flex items-center gap-2 py-1 hover:bg-gray-100 font-mono text-sm"
+                >
                   <span className="flex-1">{watch.expression}</span>
                   <span className="text-gray-600">=</span>
                   <span className={watch.error ? 'text-red-500' : 'text-green-600'}>
@@ -371,7 +377,7 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
             <div className="mb-2 flex gap-2">
               <select
                 value={consoleFilter}
-                onChange={(e) => setConsoleFilter(e.target.value as any)}
+                onChange={e => setConsoleFilter(e.target.value as any)}
                 className="px-2 py-1 border rounded text-sm"
               >
                 <option value="all">All Messages</option>
@@ -388,17 +394,21 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
                 Clear
               </button>
             </div>
-            
+
             <div className="console-messages font-mono text-sm">
               {filteredConsoleMessages.map((msg: DebugConsoleMessage, index: number) => (
                 <div
                   key={index}
                   className={`py-1 ${
-                    msg.type === 'error' ? 'text-red-600' :
-                    msg.type === 'warning' ? 'text-yellow-600' :
-                    msg.type === 'info' ? 'text-blue-600' :
-                    msg.type === 'debug' ? 'text-gray-600' :
-                    'text-black'
+                    msg.type === 'error'
+                      ? 'text-red-600'
+                      : msg.type === 'warning'
+                        ? 'text-yellow-600'
+                        : msg.type === 'info'
+                          ? 'text-blue-600'
+                          : msg.type === 'debug'
+                            ? 'text-gray-600'
+                            : 'text-black'
                   }`}
                 >
                   <span className="text-gray-500">
@@ -429,14 +439,14 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
                 Stop Profiling
               </button>
             </div>
-            
+
             {profileData && (
               <div className="profile-results">
                 <h4 className="font-bold mb-2">Profile Results</h4>
                 <div className="mb-4">
                   <div>Total Time: {profileData.totalTime}ms</div>
                 </div>
-                
+
                 <h5 className="font-semibold mb-1">Function Calls</h5>
                 <table className="w-full text-sm">
                   <thead>
@@ -458,13 +468,14 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
                     ))}
                   </tbody>
                 </table>
-                
+
                 {profileData.hotspots && profileData.hotspots.length > 0 && (
                   <div className="mt-4">
                     <h5 className="font-semibold mb-1">Hotspots</h5>
                     {profileData.hotspots.map((hotspot: any, index: number) => (
                       <div key={index} className="text-sm">
-                        {hotspot.location}: {hotspot.executionCount} executions ({hotspot.percentageOfTotal.toFixed(1)}%)
+                        {hotspot.location}: {hotspot.executionCount} executions (
+                        {hotspot.percentageOfTotal.toFixed(1)}%)
                       </div>
                     ))}
                   </div>
@@ -480,32 +491,37 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-4 w-96">
             <h3 className="text-lg font-bold mb-4">
-              {editingBreakpoint.type === 'conditional' ? 'Conditional Breakpoint' :
-               editingBreakpoint.type === 'tracepoint' ? 'Tracepoint' : 'Breakpoint'}
+              {editingBreakpoint.type === 'conditional'
+                ? 'Conditional Breakpoint'
+                : editingBreakpoint.type === 'tracepoint'
+                  ? 'Tracepoint'
+                  : 'Breakpoint'}
             </h3>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">File</label>
               <input
                 type="text"
                 value={editingBreakpoint.file || ''}
-                onChange={(e) => setEditingBreakpoint({ ...editingBreakpoint, file: e.target.value })}
+                onChange={e => setEditingBreakpoint({ ...editingBreakpoint, file: e.target.value })}
                 className="w-full px-2 py-1 border rounded"
                 placeholder="Form1.vb"
               />
             </div>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">Line</label>
               <input
                 type="number"
                 value={editingBreakpoint.line || 1}
-                onChange={(e) => setEditingBreakpoint({ ...editingBreakpoint, line: parseInt(e.target.value) })}
+                onChange={e =>
+                  setEditingBreakpoint({ ...editingBreakpoint, line: parseInt(e.target.value) })
+                }
                 className="w-full px-2 py-1 border rounded"
                 min="1"
               />
             </div>
-            
+
             {editingBreakpoint.type === 'conditional' && (
               <>
                 <div className="mb-4">
@@ -513,18 +529,25 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
                   <input
                     type="text"
                     value={editingBreakpoint.condition || ''}
-                    onChange={(e) => setEditingBreakpoint({ ...editingBreakpoint, condition: e.target.value })}
+                    onChange={e =>
+                      setEditingBreakpoint({ ...editingBreakpoint, condition: e.target.value })
+                    }
                     className="w-full px-2 py-1 border rounded font-mono text-sm"
                     placeholder="i > 10 And x < 100"
                   />
                 </div>
-                
+
                 <div className="mb-4">
                   <label className="block text-sm font-medium mb-1">Hit Count (optional)</label>
                   <input
                     type="number"
                     value={editingBreakpoint.hitCount || ''}
-                    onChange={(e) => setEditingBreakpoint({ ...editingBreakpoint, hitCount: parseInt(e.target.value) || undefined })}
+                    onChange={e =>
+                      setEditingBreakpoint({
+                        ...editingBreakpoint,
+                        hitCount: parseInt(e.target.value) || undefined,
+                      })
+                    }
                     className="w-full px-2 py-1 border rounded"
                     placeholder="Break when hit count >= this value"
                     min="1"
@@ -532,14 +555,16 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
                 </div>
               </>
             )}
-            
+
             {editingBreakpoint.type === 'tracepoint' && (
               <>
                 <div className="mb-4">
                   <label className="block text-sm font-medium mb-1">Log Message</label>
                   <textarea
                     value={editingBreakpoint.logMessage || ''}
-                    onChange={(e) => setEditingBreakpoint({ ...editingBreakpoint, logMessage: e.target.value })}
+                    onChange={e =>
+                      setEditingBreakpoint({ ...editingBreakpoint, logMessage: e.target.value })
+                    }
                     className="w-full px-2 py-1 border rounded font-mono text-sm"
                     placeholder="Line {currentLine}: Variable x = {x}, y = {y}"
                     rows={3}
@@ -548,20 +573,22 @@ export const AdvancedDebugPanel: React.FC<AdvancedDebugPanelProps> = ({ classNam
                     Use {'{expression}'} to log values
                   </div>
                 </div>
-                
+
                 <div className="mb-4">
                   <label className="block text-sm font-medium mb-1">Condition (optional)</label>
                   <input
                     type="text"
                     value={editingBreakpoint.condition || ''}
-                    onChange={(e) => setEditingBreakpoint({ ...editingBreakpoint, condition: e.target.value })}
+                    onChange={e =>
+                      setEditingBreakpoint({ ...editingBreakpoint, condition: e.target.value })
+                    }
                     className="w-full px-2 py-1 border rounded font-mono text-sm"
                     placeholder="Only log when condition is true"
                   />
                 </div>
               </>
             )}
-            
+
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => {

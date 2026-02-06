@@ -29,7 +29,8 @@ dotenv.config();
 
 const app: Application = express();
 const httpServer = createServer(app);
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || process.env.CORS_ORIGIN || 'http://localhost:5173';
+const CLIENT_ORIGIN =
+  process.env.CLIENT_ORIGIN || process.env.CORS_ORIGIN || 'http://localhost:5173';
 const io = new SocketIOServer(httpServer, {
   cors: {
     origin: CLIENT_ORIGIN,
@@ -49,14 +50,8 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         // Use a concrete nonce string, not a JS expression
-        styleSrc: [
-          "'self'",
-          `nonce-${process.env.CSP_NONCE || 'development-only-nonce'}`,
-        ],
-        scriptSrc: [
-          "'self'",
-          `nonce-${process.env.CSP_NONCE || 'development-only-nonce'}`,
-        ],
+        styleSrc: ["'self'", `nonce-${process.env.CSP_NONCE || 'development-only-nonce'}`],
+        scriptSrc: ["'self'", `nonce-${process.env.CSP_NONCE || 'development-only-nonce'}`],
         imgSrc: ["'self'", 'data:', 'https:'],
         connectSrc: ["'self'", CLIENT_ORIGIN, 'ws:', 'wss:'],
         fontSrc: ["'self'"],
@@ -71,7 +66,7 @@ app.use(cors({ origin: CLIENT_ORIGIN, credentials: true }));
 app.use(compression());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
+app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
 
 // Rate limiting
 app.use('/api', rateLimiter);
@@ -95,13 +90,13 @@ app.use('/api/rdo', rdoRouter);
 app.use('/api/reports', reportRouter);
 
 // WebSocket connections for real-time data
-io.on('connection', (socket) => {
+io.on('connection', socket => {
   logger.info(`Client connected: ${socket.id}`);
 
-  socket.on('subscribe', async (params) => {
+  socket.on('subscribe', async params => {
     const { database, table, query } = params;
     socket.join(`${database}:${table}`);
-    
+
     // Send initial data
     try {
       const data = await databasePool.executeQuery(database, query);
@@ -111,12 +106,12 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('unsubscribe', (params) => {
+  socket.on('unsubscribe', params => {
     const { database, table } = params;
     socket.leave(`${database}:${table}`);
   });
 
-  socket.on('execute', async (params) => {
+  socket.on('execute', async params => {
     const { connectionId, query, parameters } = params;
     try {
       const result = await databasePool.execute(connectionId, query, parameters);
@@ -140,10 +135,10 @@ process.on('SIGTERM', async () => {
   httpServer.close(() => {
     logger.info('HTTP server closed');
   });
-  
+
   await databasePool.closeAll();
   await cacheService.close();
-  
+
   process.exit(0);
 });
 

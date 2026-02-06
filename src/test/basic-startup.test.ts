@@ -83,7 +83,7 @@ describe('Basic Startup Tests', () => {
         'zustand',
         '@dnd-kit/core',
         'framer-motion',
-        'lucide-react'
+        'lucide-react',
       ];
 
       for (const dep of deps) {
@@ -146,7 +146,7 @@ describe('Basic Startup Tests', () => {
     it('should create and use mock functions', () => {
       const mockFn = vi.fn();
       mockFn('test');
-      
+
       expect(mockFn).toHaveBeenCalled();
       expect(mockFn).toHaveBeenCalledWith('test');
       expect(mockFn).toHaveBeenCalledTimes(1);
@@ -154,11 +154,9 @@ describe('Basic Startup Tests', () => {
 
     it('should spy on existing functions', () => {
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      
-      console.log('test message');
-      
+
       expect(consoleSpy).toHaveBeenCalledWith('test message');
-      
+
       consoleSpy.mockRestore();
     });
   });
@@ -167,7 +165,7 @@ describe('Basic Startup Tests', () => {
     it('should handle promises', async () => {
       const promise = Promise.resolve('resolved');
       const result = await promise;
-      
+
       expect(result).toBe('resolved');
     });
 
@@ -175,7 +173,7 @@ describe('Basic Startup Tests', () => {
       const result = await new Promise(resolve => {
         setTimeout(() => resolve('timeout'), 10);
       });
-      
+
       expect(result).toBe('timeout');
     });
   });
@@ -183,14 +181,14 @@ describe('Basic Startup Tests', () => {
   describe('Memory and Performance', () => {
     it('should not leak memory in simple operations', () => {
       const beforeMemory = performance.memory?.usedJSHeapSize || 0;
-      
+
       // Perform some operations
       const arr = new Array(1000).fill(0).map((_, i) => i);
       const sum = arr.reduce((a, b) => a + b, 0);
-      
+
       expect(sum).toBe(499500); // Sum of 0 to 999
       expect(arr.length).toBe(1000);
-      
+
       // Memory check is informational
       const afterMemory = performance.memory?.usedJSHeapSize || 0;
       expect(afterMemory).toBeGreaterThanOrEqual(beforeMemory);
@@ -198,15 +196,15 @@ describe('Basic Startup Tests', () => {
 
     it('should complete tests in reasonable time', () => {
       const start = performance.now();
-      
+
       // Simulate some work
       for (let i = 0; i < 10000; i++) {
         void (Math.random() * 100);
       }
-      
+
       const end = performance.now();
       const duration = end - start;
-      
+
       // Should complete quickly (less than 100ms)
       expect(duration).toBeLessThan(100);
     });

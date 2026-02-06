@@ -1,6 +1,6 @@
 /**
  * VB6 IDE Complete Showcase - Comprehensive Demonstration
- * 
+ *
  * This component provides a complete demonstration of all VB6 Web IDE capabilities
  * including form designer, code editor, compiler, debugger, and ActiveX support.
  */
@@ -23,7 +23,7 @@ export const VB6IDEShowcase: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(false);
   const [demoSpeed, setDemoSpeed] = useState(1.0);
-  
+
   const showcaseSteps: ShowcaseStep[] = [
     {
       id: 'welcome',
@@ -31,7 +31,7 @@ export const VB6IDEShowcase: React.FC = () => {
       description: 'A fully functional Visual Basic 6 IDE running in your browser',
       component: WelcomeDemo,
       duration: 3000,
-      category: 'designer'
+      category: 'designer',
     },
     {
       id: 'form-designer',
@@ -39,7 +39,7 @@ export const VB6IDEShowcase: React.FC = () => {
       description: 'Drag & drop controls with precision alignment guides',
       component: FormDesignerDemo,
       duration: 8000,
-      category: 'designer'
+      category: 'designer',
     },
     {
       id: 'controls-gallery',
@@ -47,7 +47,7 @@ export const VB6IDEShowcase: React.FC = () => {
       description: 'Complete implementation of VB6 control library',
       component: ControlsGalleryDemo,
       duration: 10000,
-      category: 'controls'
+      category: 'controls',
     },
     {
       id: 'code-editor',
@@ -55,7 +55,7 @@ export const VB6IDEShowcase: React.FC = () => {
       description: 'Full VB6 syntax highlighting and IntelliSense',
       component: CodeEditorDemo,
       duration: 6000,
-      category: 'editor'
+      category: 'editor',
     },
     {
       id: 'compiler',
@@ -63,7 +63,7 @@ export const VB6IDEShowcase: React.FC = () => {
       description: 'Compile to JavaScript, WebAssembly, or native binaries',
       component: CompilerDemo,
       duration: 8000,
-      category: 'compiler'
+      category: 'compiler',
     },
     {
       id: 'activex',
@@ -71,7 +71,7 @@ export const VB6IDEShowcase: React.FC = () => {
       description: 'WebAssembly bridge for legacy ActiveX controls',
       component: ActiveXDemo,
       duration: 7000,
-      category: 'activex'
+      category: 'activex',
     },
     {
       id: 'debugger',
@@ -79,7 +79,7 @@ export const VB6IDEShowcase: React.FC = () => {
       description: 'Breakpoints, step execution, and variable inspection',
       component: DebuggerDemo,
       duration: 6000,
-      category: 'editor'
+      category: 'editor',
     },
     {
       id: 'compatibility',
@@ -87,16 +87,16 @@ export const VB6IDEShowcase: React.FC = () => {
       description: 'Comprehensive compatibility analysis and metrics',
       component: CompatibilityDemo,
       duration: 5000,
-      category: 'compiler'
-    }
+      category: 'compiler',
+    },
   ];
 
   const nextStep = useCallback(() => {
-    setCurrentStep((prev) => (prev + 1) % showcaseSteps.length);
+    setCurrentStep(prev => (prev + 1) % showcaseSteps.length);
   }, [showcaseSteps.length]);
 
   const prevStep = useCallback(() => {
-    setCurrentStep((prev) => (prev - 1 + showcaseSteps.length) % showcaseSteps.length);
+    setCurrentStep(prev => (prev - 1 + showcaseSteps.length) % showcaseSteps.length);
   }, [showcaseSteps.length]);
 
   useEffect(() => {
@@ -104,7 +104,7 @@ export const VB6IDEShowcase: React.FC = () => {
       const interval = setInterval(() => {
         nextStep();
       }, showcaseSteps[currentStep].duration / demoSpeed);
-      
+
       return () => clearInterval(interval);
     }
   }, [isAutoPlay, currentStep, demoSpeed, nextStep, showcaseSteps]);
@@ -120,7 +120,7 @@ export const VB6IDEShowcase: React.FC = () => {
           <div className="text-2xl font-bold">VB6 Web IDE</div>
           <div className="text-sm text-blue-300">Complete Showcase</div>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           <div className="text-sm">
             Step {currentStep + 1} of {showcaseSteps.length}
@@ -152,7 +152,7 @@ export const VB6IDEShowcase: React.FC = () => {
 
       {/* Progress Bar */}
       <div className="h-1 bg-black bg-opacity-30">
-        <div 
+        <div
           className="h-full bg-blue-400 transition-all duration-300"
           style={{ width: `${((currentStep + 1) / showcaseSteps.length) * 100}%` }}
         />
@@ -175,7 +175,7 @@ export const VB6IDEShowcase: React.FC = () => {
               max="3"
               step="0.1"
               value={demoSpeed}
-              onChange={(e) => setDemoSpeed(parseFloat(e.target.value))}
+              onChange={e => setDemoSpeed(parseFloat(e.target.value))}
               className="w-full"
             />
             <div className="text-xs text-gray-400 mt-1">{demoSpeed}x speed</div>
@@ -216,9 +216,7 @@ const WelcomeDemo: React.FC = () => (
       <div className="text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
         VB6 Web IDE
       </div>
-      <div className="text-2xl mb-8 text-blue-200">
-        Complete Visual Basic 6 Implementation
-      </div>
+      <div className="text-2xl mb-8 text-blue-200">Complete Visual Basic 6 Implementation</div>
       <div className="grid grid-cols-2 gap-6 text-lg">
         <div className="bg-black bg-opacity-30 p-4 rounded">
           <div className="text-green-400 font-bold">✓ 36+ Controls</div>
@@ -248,11 +246,38 @@ const FormDesignerDemo: React.FC = () => {
   useEffect(() => {
     // Simulate adding controls to designer
     const controls = [
-      { id: 1, type: 'Label', name: 'Label1', x: 50, y: 50, width: 120, height: 25, text: 'Hello VB6!' },
-      { id: 2, type: 'TextBox', name: 'Text1', x: 50, y: 90, width: 200, height: 25, text: 'Enter text here' },
-      { id: 3, type: 'CommandButton', name: 'Command1', x: 50, y: 130, width: 100, height: 30, caption: 'Click Me' },
+      {
+        id: 1,
+        type: 'Label',
+        name: 'Label1',
+        x: 50,
+        y: 50,
+        width: 120,
+        height: 25,
+        text: 'Hello VB6!',
+      },
+      {
+        id: 2,
+        type: 'TextBox',
+        name: 'Text1',
+        x: 50,
+        y: 90,
+        width: 200,
+        height: 25,
+        text: 'Enter text here',
+      },
+      {
+        id: 3,
+        type: 'CommandButton',
+        name: 'Command1',
+        x: 50,
+        y: 130,
+        width: 100,
+        height: 30,
+        caption: 'Click Me',
+      },
     ];
-    
+
     let index = 0;
     const addControlsSequentially = () => {
       if (index < controls.length) {
@@ -261,7 +286,7 @@ const FormDesignerDemo: React.FC = () => {
         setTimeout(addControlsSequentially, 1500);
       }
     };
-    
+
     setTimeout(addControlsSequentially, 1000);
   }, []);
 
@@ -282,11 +307,11 @@ const FormDesignerDemo: React.FC = () => {
           ))}
         </div>
       </div>
-      
+
       <div className="flex-1 relative bg-gray-200 m-4 rounded">
         <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
         <div className="absolute top-2 left-2 text-xs text-gray-600">Form1 - Designer</div>
-        
+
         {designerControls.map((control, index) => (
           <div
             key={control.id}
@@ -296,7 +321,7 @@ const FormDesignerDemo: React.FC = () => {
               top: control.y,
               width: control.width,
               height: control.height,
-              animationDelay: `${index * 0.3}s`
+              animationDelay: `${index * 0.3}s`,
             }}
           >
             <div className="w-full h-full bg-white border border-gray-400 flex items-center justify-center text-black text-sm">
@@ -304,7 +329,7 @@ const FormDesignerDemo: React.FC = () => {
             </div>
           </div>
         ))}
-        
+
         {/* Alignment Guides */}
         <div className="absolute left-50 top-0 bottom-0 w-px bg-red-400 opacity-50"></div>
         <div className="absolute top-50 left-0 right-0 h-px bg-red-400 opacity-50"></div>
@@ -315,12 +340,43 @@ const FormDesignerDemo: React.FC = () => {
 
 const ControlsGalleryDemo: React.FC = () => {
   const controls = [
-    'Label', 'TextBox', 'CommandButton', 'CheckBox', 'OptionButton', 'ListBox',
-    'ComboBox', 'Frame', 'PictureBox', 'Image', 'Timer', 'ScrollBar',
-    'Slider', 'ProgressBar', 'ListView', 'TreeView', 'TabStrip', 'Toolbar',
-    'StatusBar', 'CommonDialog', 'DriveListBox', 'DirListBox', 'FileListBox',
-    'Shape', 'Line', 'Data', 'ADOData', 'Winsock', 'Inet', 'OLE', 'MMControl',
-    'MSFlexGrid', 'MSChart', 'WebBrowser', 'Calendar', 'DatePicker', 'MonthView'
+    'Label',
+    'TextBox',
+    'CommandButton',
+    'CheckBox',
+    'OptionButton',
+    'ListBox',
+    'ComboBox',
+    'Frame',
+    'PictureBox',
+    'Image',
+    'Timer',
+    'ScrollBar',
+    'Slider',
+    'ProgressBar',
+    'ListView',
+    'TreeView',
+    'TabStrip',
+    'Toolbar',
+    'StatusBar',
+    'CommonDialog',
+    'DriveListBox',
+    'DirListBox',
+    'FileListBox',
+    'Shape',
+    'Line',
+    'Data',
+    'ADOData',
+    'Winsock',
+    'Inet',
+    'OLE',
+    'MMControl',
+    'MSFlexGrid',
+    'MSChart',
+    'WebBrowser',
+    'Calendar',
+    'DatePicker',
+    'MonthView',
   ];
 
   return (
@@ -329,7 +385,7 @@ const ControlsGalleryDemo: React.FC = () => {
         <h2 className="text-3xl font-bold mb-2">Complete VB6 Control Library</h2>
         <p className="text-blue-200">36 controls implemented with full VB6 compatibility</p>
       </div>
-      
+
       <div className="grid grid-cols-6 gap-4 max-h-96 overflow-y-auto">
         {controls.map((control, index) => (
           <div
@@ -344,7 +400,7 @@ const ControlsGalleryDemo: React.FC = () => {
           </div>
         ))}
       </div>
-      
+
       <div className="mt-8 grid grid-cols-3 gap-6 text-sm">
         <div className="bg-black bg-opacity-30 p-4 rounded">
           <div className="text-green-400 font-bold mb-2">Standard Controls</div>
@@ -365,7 +421,7 @@ const ControlsGalleryDemo: React.FC = () => {
 
 const CodeEditorDemo: React.FC = () => {
   const [code, setCode] = useState('');
-  
+
   useEffect(() => {
     const vb6Code = `Private Sub Command1_Click()
     Dim message As String
@@ -387,7 +443,7 @@ Private Sub Form_Load()
     Command1.Caption = "Click Me!"
     Label1.Caption = "Ready..."
 End Sub`;
-    
+
     let index = 0;
     const typeCode = () => {
       if (index < vb6Code.length) {
@@ -396,7 +452,7 @@ End Sub`;
         setTimeout(typeCode, 50);
       }
     };
-    
+
     setTimeout(typeCode, 1000);
   }, []);
 
@@ -407,14 +463,14 @@ End Sub`;
           <h3 className="font-bold">Code Editor - Form1.frm</h3>
           <div className="text-sm text-green-400">✓ VB6 Syntax Highlighting</div>
         </div>
-        
+
         <div className="bg-gray-900 p-4 rounded h-96 overflow-y-auto font-mono text-sm">
           <pre className="text-gray-300">
             {/* SECURITY: HTML sanitizé via DOMPurify (TASK-004) */}
             <code dangerouslySetInnerHTML={{ __html: sanitizeCode(highlightVB6Code(code)) }} />
           </pre>
         </div>
-        
+
         <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
           <div className="bg-black bg-opacity-30 p-3 rounded">
             <div className="text-blue-400 font-bold">Features</div>
@@ -442,7 +498,7 @@ End Sub`;
 
 const CompilerDemo: React.FC = () => {
   const [compilationStep, setCompilationStep] = useState(0);
-  
+
   const steps = [
     { name: 'Lexical Analysis', status: 'complete', time: '0.1s' },
     { name: 'Parsing', status: 'complete', time: '0.2s' },
@@ -450,14 +506,14 @@ const CompilerDemo: React.FC = () => {
     { name: 'IR Generation', status: 'in-progress', time: '0.3s' },
     { name: 'Optimization', status: 'pending', time: '0.2s' },
     { name: 'Code Generation', status: 'pending', time: '0.4s' },
-    { name: 'Linking', status: 'pending', time: '0.1s' }
+    { name: 'Linking', status: 'pending', time: '0.1s' },
   ];
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCompilationStep(prev => (prev + 1) % (steps.length + 1));
     }, 1000);
-    
+
     return () => clearInterval(interval);
   }, [steps.length]);
 
@@ -467,25 +523,39 @@ const CompilerDemo: React.FC = () => {
         <h2 className="text-3xl font-bold mb-2">VB6 Native Compiler</h2>
         <p className="text-blue-200">Multi-target compilation: JavaScript, WebAssembly, Native</p>
       </div>
-      
+
       <div className="grid grid-cols-2 gap-8">
         <div className="bg-black bg-opacity-30 p-6 rounded">
           <h3 className="font-bold mb-4">Compilation Pipeline</h3>
           <div className="space-y-3">
             {steps.map((step, index) => {
-              const status = index < compilationStep ? 'complete' : 
-                           index === compilationStep ? 'in-progress' : 'pending';
+              const status =
+                index < compilationStep
+                  ? 'complete'
+                  : index === compilationStep
+                    ? 'in-progress'
+                    : 'pending';
               return (
                 <div key={step.name} className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className={`w-3 h-3 rounded-full ${
-                      status === 'complete' ? 'bg-green-500' :
-                      status === 'in-progress' ? 'bg-yellow-500 animate-pulse' :
-                      'bg-gray-500'
-                    }`} />
-                    <span className={status === 'complete' ? 'text-green-400' : 
-                                   status === 'in-progress' ? 'text-yellow-400' : 
-                                   'text-gray-400'}>
+                    <div
+                      className={`w-3 h-3 rounded-full ${
+                        status === 'complete'
+                          ? 'bg-green-500'
+                          : status === 'in-progress'
+                            ? 'bg-yellow-500 animate-pulse'
+                            : 'bg-gray-500'
+                      }`}
+                    />
+                    <span
+                      className={
+                        status === 'complete'
+                          ? 'text-green-400'
+                          : status === 'in-progress'
+                            ? 'text-yellow-400'
+                            : 'text-gray-400'
+                      }
+                    >
                       {step.name}
                     </span>
                   </div>
@@ -495,7 +565,7 @@ const CompilerDemo: React.FC = () => {
             })}
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <div className="bg-black bg-opacity-30 p-4 rounded">
             <h4 className="font-bold text-blue-400 mb-2">Target Platforms</h4>
@@ -506,7 +576,7 @@ const CompilerDemo: React.FC = () => {
               <div className="p-2 bg-gray-700 rounded text-center">LLVM IR</div>
             </div>
           </div>
-          
+
           <div className="bg-black bg-opacity-30 p-4 rounded">
             <h4 className="font-bold text-green-400 mb-2">Optimizations</h4>
             <ul className="text-sm space-y-1">
@@ -516,7 +586,7 @@ const CompilerDemo: React.FC = () => {
               <li>• Loop optimization</li>
             </ul>
           </div>
-          
+
           <div className="bg-black bg-opacity-30 p-4 rounded">
             <h4 className="font-bold text-purple-400 mb-2">Performance</h4>
             <div className="text-sm">
@@ -536,7 +606,7 @@ const ActiveXDemo: React.FC = () => (
       <h2 className="text-3xl font-bold mb-2">ActiveX WebAssembly Bridge</h2>
       <p className="text-blue-200">Run legacy ActiveX controls securely in the browser</p>
     </div>
-    
+
     <div className="grid grid-cols-3 gap-6">
       <div className="bg-black bg-opacity-30 p-6 rounded">
         <h3 className="font-bold text-blue-400 mb-4">MSFlexGrid</h3>
@@ -555,7 +625,7 @@ const ActiveXDemo: React.FC = () => (
         </div>
         <div className="text-xs text-gray-400">Fully compatible data grid</div>
       </div>
-      
+
       <div className="bg-black bg-opacity-30 p-6 rounded">
         <h3 className="font-bold text-green-400 mb-4">MSChart</h3>
         <div className="bg-white p-2 rounded mb-4 h-24 flex items-center justify-center">
@@ -568,7 +638,7 @@ const ActiveXDemo: React.FC = () => (
         </div>
         <div className="text-xs text-gray-400">Interactive charts and graphs</div>
       </div>
-      
+
       <div className="bg-black bg-opacity-30 p-6 rounded">
         <h3 className="font-bold text-purple-400 mb-4">WebBrowser</h3>
         <div className="bg-white p-2 rounded mb-4">
@@ -582,22 +652,28 @@ const ActiveXDemo: React.FC = () => (
         <div className="text-xs text-gray-400">Embedded browser functionality</div>
       </div>
     </div>
-    
+
     <div className="mt-8 bg-black bg-opacity-30 p-6 rounded">
       <h3 className="font-bold mb-4">WebAssembly COM Bridge Architecture</h3>
       <div className="flex items-center justify-between text-sm">
         <div className="text-center">
-          <div className="w-20 h-12 bg-blue-600 rounded mb-2 flex items-center justify-center">VB6</div>
+          <div className="w-20 h-12 bg-blue-600 rounded mb-2 flex items-center justify-center">
+            VB6
+          </div>
           <div>VB6 Code</div>
         </div>
         <div className="text-2xl">→</div>
         <div className="text-center">
-          <div className="w-20 h-12 bg-green-600 rounded mb-2 flex items-center justify-center">WASM</div>
+          <div className="w-20 h-12 bg-green-600 rounded mb-2 flex items-center justify-center">
+            WASM
+          </div>
           <div>COM Bridge</div>
         </div>
         <div className="text-2xl">→</div>
         <div className="text-center">
-          <div className="w-20 h-12 bg-purple-600 rounded mb-2 flex items-center justify-center">JS</div>
+          <div className="w-20 h-12 bg-purple-600 rounded mb-2 flex items-center justify-center">
+            JS
+          </div>
           <div>Control Impl</div>
         </div>
       </div>
@@ -611,7 +687,7 @@ const DebuggerDemo: React.FC = () => (
       <h2 className="text-3xl font-bold mb-2">Interactive Debugger</h2>
       <p className="text-blue-200">Full debugging capabilities with breakpoints and inspection</p>
     </div>
-    
+
     <div className="grid grid-cols-2 gap-6">
       <div className="bg-black bg-opacity-30 p-4 rounded">
         <h3 className="font-bold mb-4">Debug Features</h3>
@@ -638,7 +714,7 @@ const DebuggerDemo: React.FC = () => (
           </div>
         </div>
       </div>
-      
+
       <div className="bg-black bg-opacity-30 p-4 rounded">
         <h3 className="font-bold mb-4">Variables</h3>
         <div className="font-mono text-xs space-y-1">
@@ -658,7 +734,7 @@ const CompatibilityDemo: React.FC = () => (
       <h2 className="text-3xl font-bold mb-2">VB6 Compatibility Analysis</h2>
       <p className="text-blue-200">Comprehensive compatibility metrics and analysis</p>
     </div>
-    
+
     <div className="grid grid-cols-2 gap-8">
       <div>
         <h3 className="font-bold mb-4">Compatibility Breakdown</h3>
@@ -671,9 +747,7 @@ const CompatibilityDemo: React.FC = () => (
           </div>
           <div className="bg-yellow-600 bg-opacity-30 p-4 rounded">
             <div className="text-yellow-400 font-bold">Partial Support (50-80%)</div>
-            <div className="text-sm mt-2">
-              ActiveX controls, file access, printing, graphics
-            </div>
+            <div className="text-sm mt-2">ActiveX controls, file access, printing, graphics</div>
           </div>
           <div className="bg-red-600 bg-opacity-30 p-4 rounded">
             <div className="text-red-400 font-bold">Not Supported</div>
@@ -683,7 +757,7 @@ const CompatibilityDemo: React.FC = () => (
           </div>
         </div>
       </div>
-      
+
       <div>
         <h3 className="font-bold mb-4">Performance Metrics</h3>
         <div className="space-y-4">
@@ -729,9 +803,12 @@ function highlightVB6Code(code: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
-    
+
   return escapedCode
-    .replace(/(Private|Public|Sub|Function|End|Dim|As|String|Integer|Boolean)/g, '<span class="text-blue-400">$1</span>')
+    .replace(
+      /(Private|Public|Sub|Function|End|Dim|As|String|Integer|Boolean)/g,
+      '<span class="text-blue-400">$1</span>'
+    )
     .replace(/(Me\.|Command1\.|Label1\.)/g, '<span class="text-green-400">$1</span>')
     .replace(/&quot;([^&]*)&quot;/g, '<span class="text-yellow-400">&quot;$1&quot;</span>')
     .replace(/&#39;([^&]*)/g, '<span class="text-gray-500">&#39;$1</span>')

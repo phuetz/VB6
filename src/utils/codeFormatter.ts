@@ -328,8 +328,10 @@ function alignDeclarations(lines: string[]): string[] {
 
   // Find the maximum positions for alignment
   // BUFFER OVERFLOW FIX: Avoid spread operator with large arrays that could cause stack overflow
-  const maxDimPos = dimPositions.length > 0 ? dimPositions.reduce((max, pos) => Math.max(max, pos), 0) : 0;
-  const maxAsPos = asPositions.length > 0 ? asPositions.reduce((max, pos) => Math.max(max, pos), 0) : 0;
+  const maxDimPos =
+    dimPositions.length > 0 ? dimPositions.reduce((max, pos) => Math.max(max, pos), 0) : 0;
+  const maxAsPos =
+    asPositions.length > 0 ? asPositions.reduce((max, pos) => Math.max(max, pos), 0) : 0;
 
   // Apply alignment to declaration lines
   declarationLines.forEach((lineIndex, i) => {

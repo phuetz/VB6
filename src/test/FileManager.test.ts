@@ -21,13 +21,13 @@ vi.mock('jszip', () => {
       loadAsync: vi.fn().mockResolvedValue({
         files: {
           'project.json': {
-            async: vi.fn().mockResolvedValue('{"test": "data"}')
-          }
-        }
+            async: vi.fn().mockResolvedValue('{"test": "data"}'),
+          },
+        },
       }),
       file: vi.fn().mockReturnThis(),
-      generateAsync: vi.fn().mockResolvedValue(new Blob(['test zip content']))
-    }))
+      generateAsync: vi.fn().mockResolvedValue(new Blob(['test zip content'])),
+    })),
   };
 });
 
@@ -36,14 +36,14 @@ describe('FileManager', () => {
     // Reset DOM and global mocks
     global.URL = {
       createObjectURL: vi.fn().mockReturnValue('blob:test-url'),
-      revokeObjectURL: vi.fn()
+      revokeObjectURL: vi.fn(),
     } as any;
-    
+
     global.window = {
       ...global.window,
-      location: { origin: 'http://localhost:3000' }
+      location: { origin: 'http://localhost:3000' },
     } as any;
-    
+
     // Mock console to suppress warnings in tests
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -56,7 +56,7 @@ describe('FileManager', () => {
   describe('Security Tests', () => {
     it('should validate archive paths to prevent zip slip attacks', () => {
       const FileManagerClass = FileManager as any;
-      
+
       // Test dangerous paths
       expect(FileManagerClass.isValidArchivePath('../../../etc/passwd')).toBe(false);
       expect(FileManagerClass.isValidArchivePath('..\\..\\windows\\system32')).toBe(false);
@@ -65,7 +65,7 @@ describe('FileManager', () => {
       expect(FileManagerClass.isValidArchivePath('\\\\server\\share\\file')).toBe(false);
       expect(FileManagerClass.isValidArchivePath('file<script>alert(1)</script>.json')).toBe(false);
       expect(FileManagerClass.isValidArchivePath('file\0.json')).toBe(false);
-      
+
       // Test valid paths
       expect(FileManagerClass.isValidArchivePath('project.json')).toBe(true);
       expect(FileManagerClass.isValidArchivePath('forms/form1.json')).toBe(true);
@@ -96,13 +96,13 @@ describe('FileManager', () => {
     it('should handle project loading with modern File System Access API', async () => {
       // Mock showOpenFilePicker
       const mockFileHandle = {
-        getFile: vi.fn().mockResolvedValue(mockFile('test.vb6', '{"name": "TestProject"}'))
+        getFile: vi.fn().mockResolvedValue(mockFile('test.vb6', '{"name": "TestProject"}')),
       };
-      
+
       global.window.showOpenFilePicker = vi.fn().mockResolvedValue(mockFileHandle);
-      
+
       const result = await FileManager.openProject();
-      
+
       expect(global.window.showOpenFilePicker).toHaveBeenCalled();
       expect(mockFileHandle.getFile).toHaveBeenCalled();
       expect(result).toEqual({ name: 'TestProject' });
@@ -111,7 +111,7 @@ describe('FileManager', () => {
     it('should fallback to input element when File System Access API fails', async () => {
       // Mock failed showOpenFilePicker
       global.window.showOpenFilePicker = vi.fn().mockRejectedValue(new Error('User cancelled'));
-      
+
       // Mock document.createElement and event handling
       const mockInput = {
         type: '',
@@ -120,31 +120,33 @@ describe('FileManager', () => {
         click: vi.fn(),
         onchange: null,
         oncancel: null,
-        files: [mockFile('test.vb6', '{"name": "FallbackProject"}')]
+        files: [mockFile('test.vb6', '{"name": "FallbackProject"}')],
       };
-      
+
       const mockAppendChild = vi.fn();
       const mockRemoveChild = vi.fn();
-      
+
       global.document = {
         createElement: vi.fn().mockReturnValue(mockInput),
         body: {
           appendChild: mockAppendChild,
-          removeChild: mockRemoveChild
-        }
+          removeChild: mockRemoveChild,
+        },
       } as any;
-      
+
       // Start the async operation
       const resultPromise = FileManager.openProject();
-      
+
       // Simulate user selecting a file
       if (mockInput.onchange) {
         mockInput.onchange({ target: mockInput } as any);
       }
-      
+
       const result = await resultPromise;
-      
-      expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('File System Access API failed'));
+
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('File System Access API failed')
+      );
       expect(mockInput.click).toHaveBeenCalled();
       expect(result).toEqual({ name: 'FallbackProject' });
     });
@@ -161,13 +163,13 @@ HelpFile=""
 Title="TestApp"`;
 
       const mockFileHandle = {
-        getFile: vi.fn().mockResolvedValue(mockFile('test.vbp', vbpContent, 'text/plain'))
+        getFile: vi.fn().mockResolvedValue(mockFile('test.vbp', vbpContent, 'text/plain')),
       };
-      
+
       global.window.showOpenFilePicker = vi.fn().mockResolvedValue(mockFileHandle);
-      
+
       const result = await FileManager.openProject();
-      
+
       expect(result).toBeDefined();
       expect(result?.name).toBe('test');
       expect(result?.forms).toHaveLength(1);
@@ -177,31 +179,33 @@ Title="TestApp"`;
 
     it('should handle ZIP archive extraction with security validation', async () => {
       const mockFileHandle = {
-        getFile: vi.fn().mockResolvedValue(mockFile('test.vb6z', 'zip content', 'application/zip'))
+        getFile: vi.fn().mockResolvedValue(mockFile('test.vb6z', 'zip content', 'application/zip')),
       };
-      
+
       global.window.showOpenFilePicker = vi.fn().mockResolvedValue(mockFileHandle);
-      
+
       const result = await FileManager.openProject();
-      
+
       expect(result).toEqual({ test: 'data' });
     });
 
     it('should reject invalid project archives', async () => {
       vi.mocked(JSZip).mockImplementation(() => ({
         loadAsync: vi.fn().mockResolvedValue({
-          files: {}  // No project.json file
-        })
+          files: {}, // No project.json file
+        }),
       }));
 
       const mockFileHandle = {
-        getFile: vi.fn().mockResolvedValue(mockFile('invalid.vb6z', 'zip content', 'application/zip'))
+        getFile: vi
+          .fn()
+          .mockResolvedValue(mockFile('invalid.vb6z', 'zip content', 'application/zip')),
       };
-      
+
       global.window.showOpenFilePicker = vi.fn().mockResolvedValue(mockFileHandle);
-      
+
       const result = await FileManager.openProject();
-      
+
       expect(result).toBeNull();
       expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Error opening project'));
     });
@@ -228,26 +232,26 @@ Title="TestApp"`;
         startupObject: 'Form1',
         icon: '',
         helpFile: '',
-        threadingModel: 'apartment' as const
+        threadingModel: 'apartment' as const,
       },
       references: [],
-      components: []
+      components: [],
     };
 
     it('should save project with File System Access API', async () => {
       const mockWritable = {
         write: vi.fn(),
-        close: vi.fn()
+        close: vi.fn(),
       };
-      
+
       const mockFileHandle = {
-        createWritable: vi.fn().mockResolvedValue(mockWritable)
+        createWritable: vi.fn().mockResolvedValue(mockWritable),
       };
-      
+
       global.window.showSaveFilePicker = vi.fn().mockResolvedValue(mockFileHandle);
-      
+
       const result = await FileManager.saveProject(mockProject);
-      
+
       expect(global.window.showSaveFilePicker).toHaveBeenCalled();
       expect(mockWritable.write).toHaveBeenCalled();
       expect(mockWritable.close).toHaveBeenCalled();
@@ -256,20 +260,22 @@ Title="TestApp"`;
 
     it('should fallback to download when File System Access API fails', async () => {
       global.window.showSaveFilePicker = vi.fn().mockRejectedValue(new Error('API not supported'));
-      
+
       const mockAnchor = {
         href: '',
         download: '',
-        click: vi.fn()
+        click: vi.fn(),
       };
-      
+
       global.document = {
-        createElement: vi.fn().mockReturnValue(mockAnchor)
+        createElement: vi.fn().mockReturnValue(mockAnchor),
       } as any;
-      
+
       const result = await FileManager.saveProject(mockProject);
-      
-      expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('File System Access API failed'));
+
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('File System Access API failed')
+      );
       expect(mockAnchor.click).toHaveBeenCalled();
       expect(global.URL.createObjectURL).toHaveBeenCalled();
       expect(global.URL.revokeObjectURL).toHaveBeenCalled();
@@ -279,17 +285,17 @@ Title="TestApp"`;
     it('should save project as ZIP archive', async () => {
       const mockWritable = {
         write: vi.fn(),
-        close: vi.fn()
+        close: vi.fn(),
       };
-      
+
       const mockFileHandle = {
-        createWritable: vi.fn().mockResolvedValue(mockWritable)
+        createWritable: vi.fn().mockResolvedValue(mockWritable),
       };
-      
+
       global.window.showSaveFilePicker = vi.fn().mockResolvedValue(mockFileHandle);
-      
+
       const result = await FileManager.saveProject(mockProject, true);
-      
+
       expect(result).toBe(true);
       expect(mockWritable.write).toHaveBeenCalled();
     });
@@ -298,41 +304,41 @@ Title="TestApp"`;
   describe('Error Handling', () => {
     it('should handle file reading errors gracefully', async () => {
       const mockFileHandle = {
-        getFile: vi.fn().mockRejectedValue(new Error('File access denied'))
+        getFile: vi.fn().mockRejectedValue(new Error('File access denied')),
       };
-      
+
       global.window.showOpenFilePicker = vi.fn().mockResolvedValue(mockFileHandle);
-      
+
       const result = await FileManager.openProject();
-      
+
       expect(result).toBeNull();
       expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Error opening project'));
     });
 
     it('should handle JSON parsing errors', async () => {
       const mockFileHandle = {
-        getFile: vi.fn().mockResolvedValue(mockFile('invalid.vb6', 'invalid json content'))
+        getFile: vi.fn().mockResolvedValue(mockFile('invalid.vb6', 'invalid json content')),
       };
-      
+
       global.window.showOpenFilePicker = vi.fn().mockResolvedValue(mockFileHandle);
-      
+
       const result = await FileManager.openProject();
-      
+
       expect(result).toBeNull();
     });
 
     it('should handle save errors gracefully', async () => {
       global.window.showSaveFilePicker = vi.fn().mockRejectedValue(new Error('Save failed'));
-      
+
       // Mock failed download fallback
       global.document = {
         createElement: vi.fn().mockImplementation(() => {
           throw new Error('DOM error');
-        })
+        }),
       } as any;
-      
+
       const result = await FileManager.saveProject({} as any);
-      
+
       expect(result).toBe(false);
       expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Error saving project'));
     });
@@ -341,19 +347,21 @@ Title="TestApp"`;
   describe('Edge Cases', () => {
     it('should handle empty file selection', async () => {
       const mockFileHandle = {
-        getFile: vi.fn().mockResolvedValue(null)
+        getFile: vi.fn().mockResolvedValue(null),
       };
-      
+
       global.window.showOpenFilePicker = vi.fn().mockResolvedValue(mockFileHandle);
-      
+
       const result = await FileManager.openProject();
-      
+
       expect(result).toBeNull();
     });
 
     it('should handle user cancellation', async () => {
-      global.window.showOpenFilePicker = vi.fn().mockRejectedValue(new DOMException('User cancelled', 'AbortError'));
-      
+      global.window.showOpenFilePicker = vi
+        .fn()
+        .mockRejectedValue(new DOMException('User cancelled', 'AbortError'));
+
       // Simulate no file selected in fallback
       const mockInput = {
         type: '',
@@ -361,36 +369,36 @@ Title="TestApp"`;
         style: { display: '' },
         click: vi.fn(),
         onchange: null,
-        files: null
+        files: null,
       };
-      
+
       global.document = {
         createElement: vi.fn().mockReturnValue(mockInput),
-        body: { appendChild: vi.fn(), removeChild: vi.fn() }
+        body: { appendChild: vi.fn(), removeChild: vi.fn() },
       } as any;
-      
+
       const resultPromise = FileManager.openProject();
-      
+
       // Simulate no file selected
       if (mockInput.onchange) {
         mockInput.onchange({ target: mockInput } as any);
       }
-      
+
       const result = await resultPromise;
-      
+
       expect(result).toBeNull();
     });
 
     it('should handle very large files', async () => {
       const largeContent = 'x'.repeat(10 * 1024 * 1024); // 10MB
       const mockFileHandle = {
-        getFile: vi.fn().mockResolvedValue(mockFile('large.vb6', largeContent))
+        getFile: vi.fn().mockResolvedValue(mockFile('large.vb6', largeContent)),
       };
-      
+
       global.window.showOpenFilePicker = vi.fn().mockResolvedValue(mockFileHandle);
-      
+
       const result = await FileManager.openProject();
-      
+
       // Should handle large files gracefully (either succeed or fail cleanly)
       expect(typeof result === 'object' || result === null).toBe(true);
     });

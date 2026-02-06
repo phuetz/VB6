@@ -28,7 +28,7 @@ describe('Package Scripts', () => {
         'test',
         'test:ui',
         'format',
-        'format:check'
+        'format:check',
       ];
 
       requiredScripts.forEach(script => {
@@ -44,7 +44,7 @@ describe('Package Scripts', () => {
         '@monaco-editor/react',
         'react',
         'react-dom',
-        'zustand'
+        'zustand',
       ];
 
       requiredDependencies.forEach(dep => {
@@ -61,7 +61,7 @@ describe('Package Scripts', () => {
         '@types/react-dom',
         'vitest',
         'jsdom',
-        'typescript'
+        'typescript',
       ];
 
       requiredDevDependencies.forEach(dep => {
@@ -147,12 +147,12 @@ describe('Package Scripts', () => {
         'flatmap-stream',
         'ua-parser-js@0.7.29',
         'ua-parser-js@0.7.30',
-        'ua-parser-js@0.7.31'
+        'ua-parser-js@0.7.31',
       ];
 
       const allDependencies = {
         ...packageJson.dependencies,
-        ...packageJson.devDependencies
+        ...packageJson.devDependencies,
       };
 
       vulnerablePackages.forEach(vuln => {
@@ -163,12 +163,7 @@ describe('Package Scripts', () => {
 
     it('should use specific versions for security-critical packages', () => {
       // Certains packages doivent avoir des versions spécifiques pour la sécurité
-      const securityCriticalPackages = [
-        'typescript',
-        'vite',
-        'react',
-        'react-dom'
-      ];
+      const securityCriticalPackages = ['typescript', 'vite', 'react', 'react-dom'];
 
       securityCriticalPackages.forEach(pkg => {
         if (packageJson.dependencies[pkg]) {
@@ -189,7 +184,7 @@ describe('Package Scripts', () => {
         'stream-browserify',
         'events',
         'util',
-        'process'
+        'process',
       ];
 
       browserPolyfills.forEach(polyfill => {
@@ -206,7 +201,7 @@ describe('Package Scripts', () => {
         'typescript',
         'postcss',
         'tailwindcss',
-        'autoprefixer'
+        'autoprefixer',
       ];
 
       buildTools.forEach(tool => {
@@ -215,11 +210,7 @@ describe('Package Scripts', () => {
     });
 
     it('should have linting and formatting tools', () => {
-      const lintingTools = [
-        'eslint',
-        'prettier',
-        'typescript-eslint'
-      ];
+      const lintingTools = ['eslint', 'prettier', 'typescript-eslint'];
 
       lintingTools.forEach(tool => {
         expect(packageJson.devDependencies).toHaveProperty(tool);
@@ -233,7 +224,7 @@ describe('Package Scripts', () => {
         'vitest',
         '@testing-library/react',
         '@testing-library/jest-dom',
-        'jsdom'
+        'jsdom',
       ];
 
       testingDeps.forEach(dep => {
@@ -245,7 +236,7 @@ describe('Package Scripts', () => {
   describe('Collaboration Dependencies', () => {
     it('should have collaboration-related dependencies', () => {
       const collaborationDeps = [
-        'socket.io-client' // pour la collaboration temps réel
+        'socket.io-client', // pour la collaboration temps réel
       ];
 
       collaborationDeps.forEach(dep => {
@@ -258,7 +249,7 @@ describe('Package Scripts', () => {
     it('should have UI framework dependencies', () => {
       const uiDeps = [
         'framer-motion', // pour les animations
-        'lucide-react'   // pour les icônes
+        'lucide-react', // pour les icônes
       ];
 
       uiDeps.forEach(dep => {
@@ -267,9 +258,7 @@ describe('Package Scripts', () => {
     });
 
     it('should have drag and drop dependencies', () => {
-      const dndDeps = [
-        '@dnd-kit/core'
-      ];
+      const dndDeps = ['@dnd-kit/core'];
 
       dndDeps.forEach(dep => {
         expect(packageJson.dependencies).toHaveProperty(dep);
@@ -279,10 +268,7 @@ describe('Package Scripts', () => {
 
   describe('Monaco Editor Integration', () => {
     it('should have Monaco Editor dependencies', () => {
-      const monacoDepsa = [
-        '@monaco-editor/react',
-        'monaco-editor'
-      ];
+      const monacoDepsa = ['@monaco-editor/react', 'monaco-editor'];
 
       monacoDepsa.forEach(dep => {
         expect(packageJson.dependencies).toHaveProperty(dep);
@@ -293,7 +279,7 @@ describe('Package Scripts', () => {
   describe('State Management', () => {
     it('should have state management dependencies', () => {
       const stateDeps = [
-        'zustand' // pour la gestion d'état
+        'zustand', // pour la gestion d'état
       ];
 
       stateDeps.forEach(dep => {
@@ -305,7 +291,7 @@ describe('Package Scripts', () => {
   describe('File Processing', () => {
     it('should have file processing dependencies', () => {
       const fileDeps = [
-        'jszip' // pour la gestion de fichiers ZIP
+        'jszip', // pour la gestion de fichiers ZIP
       ];
 
       fileDeps.forEach(dep => {
@@ -341,7 +327,7 @@ describe('Package Scripts', () => {
     it('should have proper package configuration', () => {
       expect(packageJson.private).toBe(true); // Doit être privé
       expect(packageJson.type).toBe('module'); // Doit être ESM
-      
+
       // Vérifier la structure des scripts
       expect(typeof packageJson.scripts).toBe('object');
       expect(Object.keys(packageJson.scripts).length).toBeGreaterThan(0);

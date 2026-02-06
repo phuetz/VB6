@@ -8,12 +8,12 @@ import { authService, AuthState, User } from '../services/AuthService';
 
 export function useAuth() {
   if (process.env.NODE_ENV === 'development') {
-    console.log('🔐 useAuth hook initializing...');
+    // noop
   }
   const [authState, setAuthState] = useState<AuthState>(() => {
     const state = authService.getState();
     if (process.env.NODE_ENV === 'development') {
-      console.log('🔐 Initial auth state:', state);
+      // noop
     }
     return state;
   });
@@ -22,19 +22,19 @@ export function useAuth() {
 
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
-      console.log('🔐 Setting up auth state subscription...');
+      // noop
     }
     // Subscribe to auth state changes
-    const unsubscribe = authService.subscribe((state) => {
+    const unsubscribe = authService.subscribe(state => {
       if (process.env.NODE_ENV === 'development') {
-        console.log('🔐 Auth state changed:', state);
+        // noop
       }
       setAuthState(state);
     });
 
     return () => {
       if (process.env.NODE_ENV === 'development') {
-        console.log('🔐 Cleaning up auth subscription');
+        // noop
       }
       unsubscribe();
     };
@@ -107,11 +107,11 @@ export function useAuth() {
     user,
     loading: authState.loading,
     error: authState.error,
-    
+
     // Modal state
     showAuthModal,
     requiredFeature,
-    
+
     // Actions
     login,
     register,

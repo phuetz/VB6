@@ -1,6 +1,6 @@
 /**
  * VB6 Printer Object Implementation
- * 
+ *
  * Web-compatible implementation of VB6 Printer object and printing functions
  * Supports Print, EndDoc, NewPage, and various printer properties
  */
@@ -41,7 +41,7 @@ export const VB6PrinterConstants = {
   // Duplex
   vbPRDPSimplex: 1,
   vbPRDPHorizontal: 2,
-  vbPRDPVertical: 3
+  vbPRDPVertical: 3,
 } as const;
 
 // Font Constants
@@ -50,7 +50,7 @@ export const VB6FontConstants = {
   vbFSBold: 700,
   vbFSItalic: 2,
   vbFSUnderline: 4,
-  vbFSStrikethrough: 8
+  vbFSStrikethrough: 8,
 } as const;
 
 // Printer Font Object
@@ -62,23 +62,47 @@ export class VB6PrinterFont {
   private _underline: boolean = false;
   private _strikethrough: boolean = false;
 
-  get Name(): string { return this._name; }
-  set Name(value: string) { this._name = value; }
+  get Name(): string {
+    return this._name;
+  }
+  set Name(value: string) {
+    this._name = value;
+  }
 
-  get Size(): number { return this._size; }
-  set Size(value: number) { this._size = Math.max(1, value); }
+  get Size(): number {
+    return this._size;
+  }
+  set Size(value: number) {
+    this._size = Math.max(1, value);
+  }
 
-  get Bold(): boolean { return this._bold; }
-  set Bold(value: boolean) { this._bold = value; }
+  get Bold(): boolean {
+    return this._bold;
+  }
+  set Bold(value: boolean) {
+    this._bold = value;
+  }
 
-  get Italic(): boolean { return this._italic; }
-  set Italic(value: boolean) { this._italic = value; }
+  get Italic(): boolean {
+    return this._italic;
+  }
+  set Italic(value: boolean) {
+    this._italic = value;
+  }
 
-  get Underline(): boolean { return this._underline; }
-  set Underline(value: boolean) { this._underline = value; }
+  get Underline(): boolean {
+    return this._underline;
+  }
+  set Underline(value: boolean) {
+    this._underline = value;
+  }
 
-  get Strikethrough(): boolean { return this._strikethrough; }
-  set Strikethrough(value: boolean) { this._strikethrough = value; }
+  get Strikethrough(): boolean {
+    return this._strikethrough;
+  }
+  set Strikethrough(value: boolean) {
+    this._strikethrough = value;
+  }
 
   toString(): string {
     let style = '';
@@ -119,7 +143,7 @@ export class VB6Printer {
 
   // Color Properties
   public ForeColor: number = 0x000000; // Black
-  public BackColor: number = 0xFFFFFF; // White
+  public BackColor: number = 0xffffff; // White
 
   // Private state
   private _printContent: string[] = [];
@@ -144,11 +168,11 @@ export class VB6Printer {
       this._canvas.width = 1056; // 11 inches at 96 DPI
       this._canvas.height = 816; // 8.5 inches at 96 DPI
     }
-    
+
     // Set white background
     this._context.fillStyle = 'white';
     this._context.fillRect(0, 0, this._canvas.width, this._canvas.height);
-    
+
     // Set default text properties
     this._updateCanvasFont();
   }
@@ -160,9 +184,9 @@ export class VB6Printer {
   }
 
   private _colorToCSS(vb6Color: number): string {
-    const r = vb6Color & 0xFF;
-    const g = (vb6Color >> 8) & 0xFF;
-    const b = (vb6Color >> 16) & 0xFF;
+    const r = vb6Color & 0xff;
+    const g = (vb6Color >> 8) & 0xff;
+    const b = (vb6Color >> 16) & 0xff;
     return `rgb(${r}, ${g}, ${b})`;
   }
 
@@ -188,7 +212,7 @@ export class VB6Printer {
       }
 
       const printText = String(text);
-      
+
       // Convert current position to pixels
       const pixelX = this._twipsToPixels(this.CurrentX);
       const pixelY = this._twipsToPixels(this.CurrentY);
@@ -214,8 +238,6 @@ export class VB6Printer {
 
       // Store text for final output
       this._printContent.push(printText + (includeNewLine ? '\n' : ''));
-
-      console.log(`[VB6 Printer] Printed: "${printText}" at (${pixelX}, ${pixelY})`);
     } catch (error) {
       errorHandler.raiseError(482, 'Printer error', 'Printer.Print');
     }
@@ -237,8 +259,6 @@ export class VB6Printer {
 
       // Clear canvas for new page
       this._setupCanvas();
-
-      console.log(`[VB6 Printer] New page started: ${this.Page}`);
     } catch (error) {
       errorHandler.raiseError(482, 'Printer error', 'Printer.NewPage');
     }
@@ -263,8 +283,6 @@ export class VB6Printer {
       this.CurrentX = this.ScaleLeft;
       this.CurrentY = this.ScaleTop;
       this._printContent = [];
-
-      console.log(`[VB6 Printer] Document ended and sent to printer`);
     } catch (error) {
       errorHandler.raiseError(482, 'Printer error', 'Printer.EndDoc');
     }
@@ -282,8 +300,6 @@ export class VB6Printer {
         this.CurrentX = this.ScaleLeft;
         this.CurrentY = this.ScaleTop;
         this._printContent = [];
-
-        console.log(`[VB6 Printer] Document cancelled`);
       }
     } catch (error) {
       errorHandler.raiseError(482, 'Printer error', 'Printer.KillDoc');
@@ -324,8 +340,6 @@ export class VB6Printer {
       // Update current position
       this.CurrentX = endX;
       this.CurrentY = endY;
-
-      console.log(`[VB6 Printer] Line drawn from (${startX}, ${startY}) to (${endX}, ${endY})`);
     } catch (error) {
       errorHandler.raiseError(482, 'Printer error', 'Printer.Line');
     }
@@ -353,8 +367,6 @@ export class VB6Printer {
       this._context.beginPath();
       this._context.arc(pixelX, pixelY, pixelRadius, 0, Math.PI * 2);
       this._context.stroke();
-
-      console.log(`[VB6 Printer] Circle drawn at (${x}, ${y}) with radius ${radius}`);
     } catch (error) {
       errorHandler.raiseError(482, 'Printer error', 'Printer.Circle');
     }
@@ -376,8 +388,6 @@ export class VB6Printer {
       // Set pixel color
       this._context.fillStyle = this._colorToCSS(color || this.ForeColor);
       this._context.fillRect(Math.floor(pixelX), Math.floor(pixelY), 1, 1);
-
-      console.log(`[VB6 Printer] Pixel set at (${x}, ${y})`);
     } catch (error) {
       errorHandler.raiseError(482, 'Printer error', 'Printer.PSet');
     }
@@ -429,18 +439,15 @@ export class VB6Printer {
     this.CurrentY = this.ScaleTop;
     this._printContent = [];
     this._setupCanvas();
-    
-    console.log(`[VB6 Printer] New document started`);
   }
 
   private _generatePrintOutput(): void {
     try {
       // Create HTML content for printing
       const htmlContent = this._generateHTML();
-      
+
       // Open print preview/dialog
       this._showPrintPreview(htmlContent);
-      
     } catch (error) {
       console.error('[VB6 Printer] Error generating print output:', error);
     }
@@ -448,7 +455,7 @@ export class VB6Printer {
 
   private _generateHTML(): string {
     const content = this._printContent.join('');
-    
+
     return `
       <!DOCTYPE html>
       <html>
@@ -487,10 +494,10 @@ export class VB6Printer {
     // Create blob with HTML content
     const blob = new Blob([htmlContent], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
-    
+
     // Open in new window for printing
     this._printWindow = window.open(url, '_blank', 'width=800,height=600,scrollbars=yes');
-    
+
     if (this._printWindow) {
       this._printWindow.onload = () => {
         // Auto-trigger print dialog after a short delay
@@ -501,7 +508,7 @@ export class VB6Printer {
         }, 500);
       };
     }
-    
+
     // Clean up URL after a delay
     setTimeout(() => {
       URL.revokeObjectURL(url);
@@ -512,12 +519,7 @@ export class VB6Printer {
    * Get available printer names (simulated)
    */
   static get Printers(): string[] {
-    return [
-      'Default Printer',
-      'PDF Printer',
-      'Microsoft Print to PDF',
-      'Web Browser Printer'
-    ];
+    return ['Default Printer', 'PDF Printer', 'Microsoft Print to PDF', 'Web Browser Printer'];
   }
 }
 
@@ -531,7 +533,7 @@ export function PrintForm(formElement?: HTMLElement): void {
       // Try to find the active form
       formElement = document.querySelector('.vb6-form') as HTMLElement;
     }
-    
+
     if (!formElement) {
       errorHandler.raiseError(482, 'No form to print', 'PrintForm');
       return;
@@ -546,7 +548,7 @@ export function PrintForm(formElement?: HTMLElement): void {
 
     // Clone the form for printing
     const formClone = formElement.cloneNode(true) as HTMLElement;
-    
+
     // Create HTML document for printing
     const htmlContent = `
       <!DOCTYPE html>
@@ -578,8 +580,6 @@ export function PrintForm(formElement?: HTMLElement): void {
         printWindow.print();
       }, 500);
     };
-
-    console.log('[VB6 Printer] Form printed');
   } catch (error) {
     errorHandler.raiseError(482, 'Error printing form', 'PrintForm');
   }
@@ -590,14 +590,14 @@ export const VB6PrinterAPI = {
   // Classes
   VB6Printer,
   VB6PrinterFont,
-  
+
   // Constants
   VB6PrinterConstants,
   VB6FontConstants,
-  
+
   // Global objects
   Printer,
-  
+
   // Functions
-  PrintForm
+  PrintForm,
 };

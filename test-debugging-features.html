@@ -1,326 +1,366 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>VB6 IDE Debug Features Test</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: #f0f2f5;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        h1 {
-            color: #1a73e8;
-            margin-bottom: 30px;
-        }
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .feature-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .feature-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-        }
-        .feature-card h3 {
-            margin-top: 0;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .feature-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-        .status {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 10px;
-        }
-        .status.active { background: #d4f4dd; color: #1e7e34; }
-        .status.inactive { background: #f8d7da; color: #721c24; }
-        .status.ready { background: #d1ecf1; color: #0c5460; }
-        
-        button {
-            background: #1a73e8;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.2s;
-            margin: 5px;
-        }
-        button:hover { background: #1557b0; }
-        button.secondary { background: #5f6368; }
-        button.secondary:hover { background: #484a4d; }
-        button.success { background: #34a853; }
-        button.success:hover { background: #2d8e47; }
-        button.warning { background: #fbbc04; color: #333; }
-        button.warning:hover { background: #e0a800; }
-        button.danger { background: #ea4335; }
-        button.danger:hover { background: #d33b2c; }
-        
-        .test-output {
-            background: #f8f9fa;
-            border: 1px solid #dadce0;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
-            font-family: 'Monaco', 'Consolas', monospace;
-            font-size: 13px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .metrics {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .metric {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
-        }
-        .metric-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #1a73e8;
-        }
-        .metric-label {
-            font-size: 12px;
-            color: #5f6368;
-            margin-top: 4px;
-        }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f0f2f5;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      h1 {
+        color: #1a73e8;
+        margin-bottom: 30px;
+      }
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+      .feature-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+      .feature-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      }
+      .feature-card h3 {
+        margin-top: 0;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .feature-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+      }
+      .status {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: 10px;
+      }
+      .status.active {
+        background: #d4f4dd;
+        color: #1e7e34;
+      }
+      .status.inactive {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      .status.ready {
+        background: #d1ecf1;
+        color: #0c5460;
+      }
+
+      button {
+        background: #1a73e8;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.2s;
+        margin: 5px;
+      }
+      button:hover {
+        background: #1557b0;
+      }
+      button.secondary {
+        background: #5f6368;
+      }
+      button.secondary:hover {
+        background: #484a4d;
+      }
+      button.success {
+        background: #34a853;
+      }
+      button.success:hover {
+        background: #2d8e47;
+      }
+      button.warning {
+        background: #fbbc04;
+        color: #333;
+      }
+      button.warning:hover {
+        background: #e0a800;
+      }
+      button.danger {
+        background: #ea4335;
+      }
+      button.danger:hover {
+        background: #d33b2c;
+      }
+
+      .test-output {
+        background: #f8f9fa;
+        border: 1px solid #dadce0;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+        font-family: 'Monaco', 'Consolas', monospace;
+        font-size: 13px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-top: 15px;
+      }
+      .metric {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 6px;
+        text-align: center;
+      }
+      .metric-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #1a73e8;
+      }
+      .metric-label {
+        font-size: 12px;
+        color: #5f6368;
+        margin-top: 4px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>🔧 VB6 IDE Debug Features Test Suite</h1>
-        
-        <div class="feature-grid">
-            <!-- Visual Debugger -->
-            <div class="feature-card">
-                <h3>
-                    <div class="feature-icon" style="background: #e3f2fd;">👁️</div>
-                    Visual Debugger
-                    <span class="status ready">Ready</span>
-                </h3>
-                <p>Advanced visual debugging overlays for real-time insights.</p>
-                <div class="buttons">
-                    <button onclick="openWithDebugger()">Open with Debugger</button>
-                    <button class="secondary" onclick="testVisualDebugger()">Test Features</button>
-                </div>
-                <div class="test-output" id="visual-output" style="display:none;"></div>
-            </div>
+      <h1>🔧 VB6 IDE Debug Features Test Suite</h1>
 
-            <!-- Diagnostic Dashboard -->
-            <div class="feature-card">
-                <h3>
-                    <div class="feature-icon" style="background: #e8f5e9;">📊</div>
-                    Diagnostic Dashboard
-                    <span class="status active">Active</span>
-                </h3>
-                <p>Real-time performance metrics and system health monitoring.</p>
-                <div class="metrics">
-                    <div class="metric">
-                        <div class="metric-value" id="fps">60</div>
-                        <div class="metric-label">FPS</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value" id="memory">--</div>
-                        <div class="metric-label">Memory (MB)</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value" id="errors">0</div>
-                        <div class="metric-label">Errors</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value" id="components">--</div>
-                        <div class="metric-label">Components</div>
-                    </div>
-                </div>
-                <div style="margin-top: 15px;">
-                    <button class="success" onclick="simulateActivity()">Simulate Activity</button>
-                    <button class="warning" onclick="simulateSlowRender()">Slow Render</button>
-                    <button class="danger" onclick="simulateError()">Trigger Error</button>
-                </div>
-            </div>
-
-            <!-- Recovery System -->
-            <div class="feature-card">
-                <h3>
-                    <div class="feature-icon" style="background: #f3e5f5;">💾</div>
-                    Recovery System
-                    <span class="status active">Active</span>
-                </h3>
-                <p>Automatic state saving and recovery points.</p>
-                <div class="test-output" id="recovery-status">
-                    <div>Auto-save: <strong id="autosave-status">Enabled</strong></div>
-                    <div>Recovery Points: <strong id="recovery-count">0</strong></div>
-                    <div>Last Save: <strong id="last-save">Never</strong></div>
-                </div>
-                <div style="margin-top: 15px;">
-                    <button onclick="createTestRecovery()">Create Recovery Point</button>
-                    <button class="secondary" onclick="listRecoveryPoints()">List Points</button>
-                    <button class="danger" onclick="clearAllRecovery()">Clear All</button>
-                </div>
-            </div>
-
-            <!-- Performance Monitor -->
-            <div class="feature-card">
-                <h3>
-                    <div class="feature-icon" style="background: #fff3e0;">⚡</div>
-                    Performance Monitor
-                    <span class="status active">Active</span>
-                </h3>
-                <p>Track render times and detect performance bottlenecks.</p>
-                <div class="test-output" id="perf-output">
-                    <div>Monitoring performance metrics...</div>
-                </div>
-                <div style="margin-top: 15px;">
-                    <button onclick="runPerfTest()">Run Performance Test</button>
-                    <button class="secondary" onclick="checkRenderLoops()">Check Render Loops</button>
-                </div>
-            </div>
-
-            <!-- Debug Overlays -->
-            <div class="feature-card">
-                <h3>
-                    <div class="feature-icon" style="background: #e0f2f1;">🎯</div>
-                    Debug Overlays
-                    <span class="status ready">Ready</span>
-                </h3>
-                <p>Visual overlays for grid, bounds, events, and state tracking.</p>
-                <ul style="margin: 10px 0; padding-left: 20px;">
-                    <li>Grid Lines (Blue)</li>
-                    <li>Control Bounds (Green)</li>
-                    <li>Mouse Tracking (Orange)</li>
-                    <li>Event Flow (Purple)</li>
-                    <li>State Updates (Cyan)</li>
-                </ul>
-                <button onclick="openWithAllOverlays()">Open with All Overlays</button>
-            </div>
-
-            <!-- Test Scenarios -->
-            <div class="feature-card">
-                <h3>
-                    <div class="feature-icon" style="background: #fce4ec;">🧪</div>
-                    Test Scenarios
-                    <span class="status ready">Ready</span>
-                </h3>
-                <p>Pre-configured test scenarios for debugging features.</p>
-                <div style="margin-top: 15px;">
-                    <button onclick="testScenario('stress')">Stress Test</button>
-                    <button onclick="testScenario('memory')">Memory Leak Test</button>
-                    <button onclick="testScenario('events')">Event Flood Test</button>
-                    <button onclick="testScenario('state')">State Thrash Test</button>
-                </div>
-                <div class="test-output" id="scenario-output" style="display:none; margin-top: 15px;"></div>
-            </div>
+      <div class="feature-grid">
+        <!-- Visual Debugger -->
+        <div class="feature-card">
+          <h3>
+            <div class="feature-icon" style="background: #e3f2fd">👁️</div>
+            Visual Debugger
+            <span class="status ready">Ready</span>
+          </h3>
+          <p>Advanced visual debugging overlays for real-time insights.</p>
+          <div class="buttons">
+            <button onclick="openWithDebugger()">Open with Debugger</button>
+            <button class="secondary" onclick="testVisualDebugger()">Test Features</button>
+          </div>
+          <div class="test-output" id="visual-output" style="display: none"></div>
         </div>
 
-        <div style="margin-top: 40px; text-align: center;">
-            <button onclick="openNormalApp()" style="padding: 15px 30px; font-size: 16px;">
-                🚀 Open VB6 IDE (Normal Mode)
-            </button>
-            <button onclick="openSafeMode()" class="secondary" style="padding: 15px 30px; font-size: 16px;">
-                🛡️ Open VB6 IDE (Safe Mode)
-            </button>
+        <!-- Diagnostic Dashboard -->
+        <div class="feature-card">
+          <h3>
+            <div class="feature-icon" style="background: #e8f5e9">📊</div>
+            Diagnostic Dashboard
+            <span class="status active">Active</span>
+          </h3>
+          <p>Real-time performance metrics and system health monitoring.</p>
+          <div class="metrics">
+            <div class="metric">
+              <div class="metric-value" id="fps">60</div>
+              <div class="metric-label">FPS</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value" id="memory">--</div>
+              <div class="metric-label">Memory (MB)</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value" id="errors">0</div>
+              <div class="metric-label">Errors</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value" id="components">--</div>
+              <div class="metric-label">Components</div>
+            </div>
+          </div>
+          <div style="margin-top: 15px">
+            <button class="success" onclick="simulateActivity()">Simulate Activity</button>
+            <button class="warning" onclick="simulateSlowRender()">Slow Render</button>
+            <button class="danger" onclick="simulateError()">Trigger Error</button>
+          </div>
         </div>
+
+        <!-- Recovery System -->
+        <div class="feature-card">
+          <h3>
+            <div class="feature-icon" style="background: #f3e5f5">💾</div>
+            Recovery System
+            <span class="status active">Active</span>
+          </h3>
+          <p>Automatic state saving and recovery points.</p>
+          <div class="test-output" id="recovery-status">
+            <div>Auto-save: <strong id="autosave-status">Enabled</strong></div>
+            <div>Recovery Points: <strong id="recovery-count">0</strong></div>
+            <div>Last Save: <strong id="last-save">Never</strong></div>
+          </div>
+          <div style="margin-top: 15px">
+            <button onclick="createTestRecovery()">Create Recovery Point</button>
+            <button class="secondary" onclick="listRecoveryPoints()">List Points</button>
+            <button class="danger" onclick="clearAllRecovery()">Clear All</button>
+          </div>
+        </div>
+
+        <!-- Performance Monitor -->
+        <div class="feature-card">
+          <h3>
+            <div class="feature-icon" style="background: #fff3e0">⚡</div>
+            Performance Monitor
+            <span class="status active">Active</span>
+          </h3>
+          <p>Track render times and detect performance bottlenecks.</p>
+          <div class="test-output" id="perf-output">
+            <div>Monitoring performance metrics...</div>
+          </div>
+          <div style="margin-top: 15px">
+            <button onclick="runPerfTest()">Run Performance Test</button>
+            <button class="secondary" onclick="checkRenderLoops()">Check Render Loops</button>
+          </div>
+        </div>
+
+        <!-- Debug Overlays -->
+        <div class="feature-card">
+          <h3>
+            <div class="feature-icon" style="background: #e0f2f1">🎯</div>
+            Debug Overlays
+            <span class="status ready">Ready</span>
+          </h3>
+          <p>Visual overlays for grid, bounds, events, and state tracking.</p>
+          <ul style="margin: 10px 0; padding-left: 20px">
+            <li>Grid Lines (Blue)</li>
+            <li>Control Bounds (Green)</li>
+            <li>Mouse Tracking (Orange)</li>
+            <li>Event Flow (Purple)</li>
+            <li>State Updates (Cyan)</li>
+          </ul>
+          <button onclick="openWithAllOverlays()">Open with All Overlays</button>
+        </div>
+
+        <!-- Test Scenarios -->
+        <div class="feature-card">
+          <h3>
+            <div class="feature-icon" style="background: #fce4ec">🧪</div>
+            Test Scenarios
+            <span class="status ready">Ready</span>
+          </h3>
+          <p>Pre-configured test scenarios for debugging features.</p>
+          <div style="margin-top: 15px">
+            <button onclick="testScenario('stress')">Stress Test</button>
+            <button onclick="testScenario('memory')">Memory Leak Test</button>
+            <button onclick="testScenario('events')">Event Flood Test</button>
+            <button onclick="testScenario('state')">State Thrash Test</button>
+          </div>
+          <div
+            class="test-output"
+            id="scenario-output"
+            style="display: none; margin-top: 15px"
+          ></div>
+        </div>
+      </div>
+
+      <div style="margin-top: 40px; text-align: center">
+        <button onclick="openNormalApp()" style="padding: 15px 30px; font-size: 16px">
+          🚀 Open VB6 IDE (Normal Mode)
+        </button>
+        <button
+          onclick="openSafeMode()"
+          class="secondary"
+          style="padding: 15px 30px; font-size: 16px"
+        >
+          🛡️ Open VB6 IDE (Safe Mode)
+        </button>
+      </div>
     </div>
 
     <script>
-        // Update metrics periodically
-        let fpsFrames = 0;
-        let fpsTime = performance.now();
-        
-        function updateFPS() {
-            fpsFrames++;
-            const now = performance.now();
-            if (now - fpsTime >= 1000) {
-                document.getElementById('fps').textContent = Math.round(fpsFrames * 1000 / (now - fpsTime));
-                fpsFrames = 0;
-                fpsTime = now;
+      // Update metrics periodically
+      let fpsFrames = 0;
+      let fpsTime = performance.now();
+
+      function updateFPS() {
+        fpsFrames++;
+        const now = performance.now();
+        if (now - fpsTime >= 1000) {
+          document.getElementById('fps').textContent = Math.round(
+            (fpsFrames * 1000) / (now - fpsTime)
+          );
+          fpsFrames = 0;
+          fpsTime = now;
+        }
+        requestAnimationFrame(updateFPS);
+      }
+      updateFPS();
+
+      // Update recovery status
+      function updateRecoveryStatus() {
+        const points = localStorage.getItem('vb6-recovery-points');
+        if (points) {
+          try {
+            const parsed = JSON.parse(points);
+            document.getElementById('recovery-count').textContent = parsed.length;
+            if (parsed.length > 0) {
+              const lastPoint = parsed[parsed.length - 1];
+              const date = new Date(lastPoint.timestamp);
+              document.getElementById('last-save').textContent = date.toLocaleTimeString();
             }
-            requestAnimationFrame(updateFPS);
+          } catch (e) {
+            console.error('Error parsing recovery points:', e);
+          }
         }
-        updateFPS();
+      }
+      setInterval(updateRecoveryStatus, 5000);
+      updateRecoveryStatus();
 
-        // Update recovery status
-        function updateRecoveryStatus() {
-            const points = localStorage.getItem('vb6-recovery-points');
-            if (points) {
-                try {
-                    const parsed = JSON.parse(points);
-                    document.getElementById('recovery-count').textContent = parsed.length;
-                    if (parsed.length > 0) {
-                        const lastPoint = parsed[parsed.length - 1];
-                        const date = new Date(lastPoint.timestamp);
-                        document.getElementById('last-save').textContent = date.toLocaleTimeString();
-                    }
-                } catch (e) {
-                    console.error('Error parsing recovery points:', e);
-                }
-            }
-        }
-        setInterval(updateRecoveryStatus, 5000);
-        updateRecoveryStatus();
+      // Test functions
+      function openNormalApp() {
+        window.open('http://localhost:5183/', '_blank');
+      }
 
-        // Test functions
-        function openNormalApp() {
-            window.open('http://localhost:5183/', '_blank');
-        }
+      function openSafeMode() {
+        window.open('http://localhost:5183/?safe=true', '_blank');
+      }
 
-        function openSafeMode() {
-            window.open('http://localhost:5183/?safe=true', '_blank');
-        }
+      function openWithDebugger() {
+        // Open app and simulate enabling debugger
+        const win = window.open('http://localhost:5183/', '_blank');
+        setTimeout(() => {
+          console.log('Visual debugger should be activated manually');
+        }, 2000);
+      }
 
-        function openWithDebugger() {
-            // Open app and simulate enabling debugger
-            const win = window.open('http://localhost:5183/', '_blank');
-            setTimeout(() => {
-                console.log('Visual debugger should be activated manually');
-            }, 2000);
-        }
+      function openWithAllOverlays() {
+        const win = window.open('http://localhost:5183/', '_blank');
+        setTimeout(() => {
+          console.log('Enable all overlays manually in the Visual Debugger');
+        }, 2000);
+      }
 
-        function openWithAllOverlays() {
-            const win = window.open('http://localhost:5183/', '_blank');
-            setTimeout(() => {
-                console.log('Enable all overlays manually in the Visual Debugger');
-            }, 2000);
-        }
-
-        function testVisualDebugger() {
-            const output = document.getElementById('visual-output');
-            output.style.display = 'block';
-            output.innerHTML = `
+      function testVisualDebugger() {
+        const output = document.getElementById('visual-output');
+        output.style.display = 'block';
+        output.innerHTML = `
                 <strong>Visual Debugger Features:</strong><br>
                 ✅ Grid overlay for alignment<br>
                 ✅ Control bounds visualization<br>
@@ -331,125 +371,129 @@
                 <br>
                 <em>Open the app and click the eye icon to activate.</em>
             `;
+      }
+
+      function simulateActivity() {
+        console.log('Simulating activity...');
+        // This would interact with the actual app if embedded
+        alert('Activity simulation - check the app window');
+      }
+
+      function simulateSlowRender() {
+        console.log('Simulating slow render...');
+        // Simulate heavy computation
+        const start = performance.now();
+        while (performance.now() - start < 100) {
+          // Busy loop
+        }
+        alert('Slow render simulated - check performance metrics');
+      }
+
+      function simulateError() {
+        document.getElementById('errors').textContent =
+          parseInt(document.getElementById('errors').textContent) + 1;
+        console.error('Test error triggered');
+        alert('Error simulated - check diagnostic dashboard');
+      }
+
+      function createTestRecovery() {
+        const points = localStorage.getItem('vb6-recovery-points') || '[]';
+        const parsed = JSON.parse(points);
+        parsed.push({
+          timestamp: Date.now(),
+          description: 'Test recovery point',
+          state: { test: true },
+        });
+        localStorage.setItem('vb6-recovery-points', JSON.stringify(parsed));
+        updateRecoveryStatus();
+        alert('Recovery point created');
+      }
+
+      function listRecoveryPoints() {
+        const points = localStorage.getItem('vb6-recovery-points');
+        if (points) {
+          const parsed = JSON.parse(points);
+          let list = 'Recovery Points:\\n\\n';
+          parsed.forEach((p, i) => {
+            const date = new Date(p.timestamp);
+            list += `${i + 1}. ${p.description} - ${date.toLocaleString()}\\n`;
+          });
+          alert(list);
+        } else {
+          alert('No recovery points found');
+        }
+      }
+
+      function clearAllRecovery() {
+        if (confirm('Clear all recovery points?')) {
+          localStorage.removeItem('vb6-recovery-points');
+          updateRecoveryStatus();
+          alert('Recovery points cleared');
+        }
+      }
+
+      function runPerfTest() {
+        const output = document.getElementById('perf-output');
+        output.innerHTML = '<strong>Running performance test...</strong><br>';
+
+        // Simulate performance measurements
+        const tests = [
+          { name: 'Component Mount', time: Math.random() * 50 },
+          { name: 'State Update', time: Math.random() * 20 },
+          { name: 'Render Cycle', time: Math.random() * 30 },
+          { name: 'Event Handler', time: Math.random() * 10 },
+        ];
+
+        tests.forEach(test => {
+          const status = test.time < 16 ? '🟢' : test.time < 50 ? '🟡' : '🔴';
+          output.innerHTML += `${status} ${test.name}: ${test.time.toFixed(2)}ms<br>`;
+        });
+      }
+
+      function checkRenderLoops() {
+        const output = document.getElementById('perf-output');
+        output.innerHTML = '<strong>Checking for render loops...</strong><br>';
+        setTimeout(() => {
+          output.innerHTML += '✅ No render loops detected<br>';
+          output.innerHTML += 'All components rendering within normal limits';
+        }, 1000);
+      }
+
+      function testScenario(type) {
+        const output = document.getElementById('scenario-output');
+        output.style.display = 'block';
+
+        switch (type) {
+          case 'stress':
+            output.innerHTML =
+              '<strong>Running stress test...</strong><br>Creating 100 controls rapidly...';
+            break;
+          case 'memory':
+            output.innerHTML =
+              '<strong>Running memory leak test...</strong><br>Monitoring memory allocation...';
+            break;
+          case 'events':
+            output.innerHTML =
+              '<strong>Running event flood test...</strong><br>Generating 1000 events/second...';
+            break;
+          case 'state':
+            output.innerHTML =
+              '<strong>Running state thrash test...</strong><br>Rapid state updates in progress...';
+            break;
         }
 
-        function simulateActivity() {
-            console.log('Simulating activity...');
-            // This would interact with the actual app if embedded
-            alert('Activity simulation - check the app window');
-        }
+        setTimeout(() => {
+          output.innerHTML += '<br>✅ Test completed. Check the diagnostic dashboard for results.';
+        }, 2000);
+      }
 
-        function simulateSlowRender() {
-            console.log('Simulating slow render...');
-            // Simulate heavy computation
-            const start = performance.now();
-            while (performance.now() - start < 100) {
-                // Busy loop
-            }
-            alert('Slow render simulated - check performance metrics');
-        }
-
-        function simulateError() {
-            document.getElementById('errors').textContent = 
-                parseInt(document.getElementById('errors').textContent) + 1;
-            console.error('Test error triggered');
-            alert('Error simulated - check diagnostic dashboard');
-        }
-
-        function createTestRecovery() {
-            const points = localStorage.getItem('vb6-recovery-points') || '[]';
-            const parsed = JSON.parse(points);
-            parsed.push({
-                timestamp: Date.now(),
-                description: 'Test recovery point',
-                state: { test: true }
-            });
-            localStorage.setItem('vb6-recovery-points', JSON.stringify(parsed));
-            updateRecoveryStatus();
-            alert('Recovery point created');
-        }
-
-        function listRecoveryPoints() {
-            const points = localStorage.getItem('vb6-recovery-points');
-            if (points) {
-                const parsed = JSON.parse(points);
-                let list = 'Recovery Points:\\n\\n';
-                parsed.forEach((p, i) => {
-                    const date = new Date(p.timestamp);
-                    list += `${i + 1}. ${p.description} - ${date.toLocaleString()}\\n`;
-                });
-                alert(list);
-            } else {
-                alert('No recovery points found');
-            }
-        }
-
-        function clearAllRecovery() {
-            if (confirm('Clear all recovery points?')) {
-                localStorage.removeItem('vb6-recovery-points');
-                updateRecoveryStatus();
-                alert('Recovery points cleared');
-            }
-        }
-
-        function runPerfTest() {
-            const output = document.getElementById('perf-output');
-            output.innerHTML = '<strong>Running performance test...</strong><br>';
-            
-            // Simulate performance measurements
-            const tests = [
-                { name: 'Component Mount', time: Math.random() * 50 },
-                { name: 'State Update', time: Math.random() * 20 },
-                { name: 'Render Cycle', time: Math.random() * 30 },
-                { name: 'Event Handler', time: Math.random() * 10 }
-            ];
-            
-            tests.forEach(test => {
-                const status = test.time < 16 ? '🟢' : test.time < 50 ? '🟡' : '🔴';
-                output.innerHTML += `${status} ${test.name}: ${test.time.toFixed(2)}ms<br>`;
-            });
-        }
-
-        function checkRenderLoops() {
-            const output = document.getElementById('perf-output');
-            output.innerHTML = '<strong>Checking for render loops...</strong><br>';
-            setTimeout(() => {
-                output.innerHTML += '✅ No render loops detected<br>';
-                output.innerHTML += 'All components rendering within normal limits';
-            }, 1000);
-        }
-
-        function testScenario(type) {
-            const output = document.getElementById('scenario-output');
-            output.style.display = 'block';
-            
-            switch(type) {
-                case 'stress':
-                    output.innerHTML = '<strong>Running stress test...</strong><br>Creating 100 controls rapidly...';
-                    break;
-                case 'memory':
-                    output.innerHTML = '<strong>Running memory leak test...</strong><br>Monitoring memory allocation...';
-                    break;
-                case 'events':
-                    output.innerHTML = '<strong>Running event flood test...</strong><br>Generating 1000 events/second...';
-                    break;
-                case 'state':
-                    output.innerHTML = '<strong>Running state thrash test...</strong><br>Rapid state updates in progress...';
-                    break;
-            }
-            
-            setTimeout(() => {
-                output.innerHTML += '<br>✅ Test completed. Check the diagnostic dashboard for results.';
-            }, 2000);
-        }
-
-        // Simulate memory usage
-        if (performance.memory) {
-            setInterval(() => {
-                const mb = Math.round(performance.memory.usedJSHeapSize / 1048576);
-                document.getElementById('memory').textContent = mb;
-            }, 1000);
-        }
+      // Simulate memory usage
+      if (performance.memory) {
+        setInterval(() => {
+          const mb = Math.round(performance.memory.usedJSHeapSize / 1048576);
+          document.getElementById('memory').textContent = mb;
+        }, 1000);
+      }
     </script>
-</body>
+  </body>
 </html>

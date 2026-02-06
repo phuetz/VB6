@@ -55,14 +55,13 @@ export const useDragDrop = () => {
 };
 
 export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  console.log('🔄 DragDropProvider initializing...');
   perfMonitor.startMeasure('DragDropProvider-render');
-  
+
   // Check for render loops
   if (perfMonitor.checkRenderLoop('DragDropProvider')) {
     console.error('🔴 Render loop detected in DragDropProvider!');
   }
-  
+
   const [isDragging, setIsDragging] = useState(false);
   const [dragData, setDragData] = useState<any>(null);
   const [dropZones, setDropZones] = useState<DropZone[]>([]);
@@ -72,11 +71,11 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isCtrlPressed, setIsCtrlPressed] = useState(false);
 
   const audioContextRef = useRef<AudioContext | null>(null);
-  
+
   // Fix: Use separate selectors to avoid infinite loop
   const snapToGrid = useVB6Store(state => state.snapToGrid);
   const gridSize = useVB6Store(state => state.gridSize);
-  
+
   const { saveState } = useUndoRedo();
   const addLog = useVB6Store(state => state.addLog);
 
@@ -255,8 +254,7 @@ export const DragDropProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   );
 
   useEffect(() => {
-    console.log(`DragDrop: DragDropProvider initialized with ${dropZones.length} drop zones`);
-    return () => console.log('DragDrop: DragDropProvider unmounted');
+    return () => {};
   }, [dropZones.length]);
 
   const handleDragEnd = useCallback(
@@ -493,8 +491,8 @@ const ConstraintsOverlay: React.FC<{
               <div
                 className={`absolute bottom-2 right-2 text-xs px-2 py-1 rounded bg-blue-200 text-blue-800`}
               >
-                x: {Math.round(rect.left)}, y: {Math.round(rect.top)}, w: {Math.round(rect.width)}
-                , h: {Math.round(rect.height)}
+                x: {Math.round(rect.left)}, y: {Math.round(rect.top)}, w: {Math.round(rect.width)},
+                h: {Math.round(rect.height)}
               </div>
 
               {/* Grille si contrainte de grille active */}

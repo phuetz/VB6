@@ -10,11 +10,11 @@ const path = require('path');
 
 function compareBenchmarks(currentFile, baselineFile) {
   console.log('Comparing performance benchmarks...');
-  
+
   try {
     let currentResults = {};
     let baselineResults = {};
-    
+
     // Charger les résultats actuels
     if (fs.existsSync(currentFile)) {
       const currentData = fs.readFileSync(currentFile, 'utf8');
@@ -23,7 +23,7 @@ function compareBenchmarks(currentFile, baselineFile) {
       console.error(`❌ Current benchmark file not found: ${currentFile}`);
       process.exit(1);
     }
-    
+
     // Charger les résultats de référence
     if (fs.existsSync(baselineFile)) {
       const baselineData = fs.readFileSync(baselineFile, 'utf8');
@@ -33,7 +33,7 @@ function compareBenchmarks(currentFile, baselineFile) {
       console.log('Creating baseline from current results...');
       baselineResults = currentResults;
     }
-    
+
     const comparison = {
       timestamp: new Date().toISOString(),
       summary: {
@@ -41,37 +41,37 @@ function compareBenchmarks(currentFile, baselineFile) {
         improvements: 0,
         regressions: 0,
         unchanged: 0,
-        significantChanges: 0
+        significantChanges: 0,
       },
       categories: {},
       details: [],
       regressions: [],
       improvements: [],
-      recommendations: []
+      recommendations: [],
     };
-    
+
     // Comparer les benchmarks par catégorie
     const categories = extractBenchmarkCategories(currentResults, baselineResults);
-    
+
     for (const category of categories) {
       comparison.categories[category] = {
         totalTests: 0,
         improvements: 0,
         regressions: 0,
         averageChange: 0,
-        significantChanges: 0
+        significantChanges: 0,
       };
-      
+
       const currentCategoryResults = filterByCategory(currentResults, category);
       const baselineCategoryResults = filterByCategory(baselineResults, category);
-      
+
       for (const benchmarkName of Object.keys(currentCategoryResults)) {
         comparison.summary.totalBenchmarks++;
         comparison.categories[category].totalTests++;
-        
+
         const current = currentCategoryResults[benchmarkName];
         const baseline = baselineCategoryResults[benchmarkName];
-        
+
         if (!baseline) {
           // Nouveau benchmark
           comparison.details.push({
@@ -81,21 +81,21 @@ function compareBenchmarks(currentFile, baselineFile) {
             current: current,
             baseline: null,
             change: null,
-            changePercent: null
+            changePercent: null,
           });
           continue;
         }
-        
+
         const change = current - baseline;
         const changePercent = baseline !== 0 ? (change / baseline) * 100 : 0;
         const isSignificant = Math.abs(changePercent) > 5; // 5% threshold
-        
+
         let status = 'unchanged';
         if (changePercent > 2) {
           status = 'regression';
           comparison.summary.regressions++;
           comparison.categories[category].regressions++;
-          
+
           if (isSignificant) {
             comparison.regressions.push({
               name: benchmarkName,
@@ -103,14 +103,14 @@ function compareBenchmarks(currentFile, baselineFile) {
               current: current,
               baseline: baseline,
               change: change,
-              changePercent: changePercent
+              changePercent: changePercent,
             });
           }
         } else if (changePercent < -2) {
           status = 'improvement';
           comparison.summary.improvements++;
           comparison.categories[category].improvements++;
-          
+
           if (isSignificant) {
             comparison.improvements.push({
               name: benchmarkName,
@@ -118,18 +118,18 @@ function compareBenchmarks(currentFile, baselineFile) {
               current: current,
               baseline: baseline,
               change: change,
-              changePercent: changePercent
+              changePercent: changePercent,
             });
           }
         } else {
           comparison.summary.unchanged++;
         }
-        
+
         if (isSignificant) {
           comparison.summary.significantChanges++;
           comparison.categories[category].significantChanges++;
         }
-        
+
         comparison.details.push({
           name: benchmarkName,
           category: category,
@@ -138,55 +138,58 @@ function compareBenchmarks(currentFile, baselineFile) {
           baseline: baseline,
           change: change,
           changePercent: changePercent,
-          isSignificant: isSignificant
+          isSignificant: isSignificant,
         });
-        
+
         comparison.categories[category].averageChange += changePercent;
       }
-      
+
       // Calculer la moyenne des changements pour la catégorie
       if (comparison.categories[category].totalTests > 0) {
         comparison.categories[category].averageChange /= comparison.categories[category].totalTests;
       }
     }
-    
+
     // Générer des recommandations
     generateRecommendations(comparison);
-    
+
     // Sauvegarder le rapport
     const reportFile = 'performance-regression-report.json';
     fs.writeFileSync(reportFile, JSON.stringify(comparison, null, 2));
-    
+
     // Générer le rapport HTML
     generateHTMLComparisonReport(comparison, 'performance-comparison.html');
-    
+
     // Afficher le résumé
     console.log(`\n📊 Performance Comparison Summary:`);
     console.log(`📈 Improvements: ${comparison.summary.improvements}`);
     console.log(`📉 Regressions: ${comparison.summary.regressions}`);
     console.log(`➡️ Unchanged: ${comparison.summary.unchanged}`);
     console.log(`⚠️ Significant Changes: ${comparison.summary.significantChanges}`);
-    
+
     if (comparison.regressions.length > 0) {
       console.log(`\n🚨 Performance Regressions Detected:`);
       comparison.regressions.slice(0, 5).forEach(regression => {
         console.log(`  - ${regression.name}: ${regression.changePercent.toFixed(1)}% slower`);
       });
     }
-    
+
     if (comparison.improvements.length > 0) {
       console.log(`\n🎉 Performance Improvements:`);
       comparison.improvements.slice(0, 5).forEach(improvement => {
-        console.log(`  - ${improvement.name}: ${Math.abs(improvement.changePercent).toFixed(1)}% faster`);
+        console.log(
+          `  - ${improvement.name}: ${Math.abs(improvement.changePercent).toFixed(1)}% faster`
+        );
       });
     }
-    
+
     // Exit avec code d'erreur si trop de régressions
     if (comparison.summary.regressions > comparison.summary.totalBenchmarks * 0.1) {
-      console.error(`\n🚨 Too many performance regressions detected (${comparison.summary.regressions}/${comparison.summary.totalBenchmarks})`);
+      console.error(
+        `\n🚨 Too many performance regressions detected (${comparison.summary.regressions}/${comparison.summary.totalBenchmarks})`
+      );
       process.exit(1);
     }
-    
   } catch (error) {
     console.error('❌ Error comparing benchmarks:', error.message);
     process.exit(1);
@@ -195,7 +198,7 @@ function compareBenchmarks(currentFile, baselineFile) {
 
 function extractBenchmarkCategories(current, baseline) {
   const categories = new Set();
-  
+
   // Extraire catégories des résultats actuels et de référence
   [current, baseline].forEach(results => {
     if (results.tests) {
@@ -205,13 +208,13 @@ function extractBenchmarkCategories(current, baseline) {
       });
     }
   });
-  
+
   return Array.from(categories);
 }
 
 function filterByCategory(results, category) {
   const filtered = {};
-  
+
   if (results.tests) {
     results.tests.forEach(test => {
       const testCategory = extractCategoryFromTestName(test.title || test.name);
@@ -220,7 +223,7 @@ function filterByCategory(results, category) {
       }
     });
   }
-  
+
   return filtered;
 }
 
@@ -232,63 +235,63 @@ function extractCategoryFromTestName(testName) {
     'Object Operations': /object|creation|method|property/i,
     'Control Flow': /loop|conditional|conversion/i,
     'Specialized Operations': /date|variant/i,
-    'Memory Management': /memory|allocation/i
+    'Memory Management': /memory|allocation/i,
   };
-  
+
   for (const [category, pattern] of Object.entries(categories)) {
     if (pattern.test(testName)) {
       return category;
     }
   }
-  
+
   return 'Other';
 }
 
 function generateRecommendations(comparison) {
   comparison.recommendations = [];
-  
+
   // Recommandations basées sur les régressions
   if (comparison.summary.regressions > 5) {
     comparison.recommendations.push({
       type: 'critical',
-      message: `Critical: ${comparison.summary.regressions} performance regressions detected. Immediate investigation required.`
+      message: `Critical: ${comparison.summary.regressions} performance regressions detected. Immediate investigation required.`,
     });
   }
-  
+
   // Recommandations par catégorie
   Object.entries(comparison.categories).forEach(([category, data]) => {
     if (data.regressions > data.totalTests * 0.3) {
       comparison.recommendations.push({
         type: 'warning',
-        message: `Warning: ${category} shows significant performance degradation (${data.regressions}/${data.totalTests} tests affected).`
+        message: `Warning: ${category} shows significant performance degradation (${data.regressions}/${data.totalTests} tests affected).`,
       });
     }
-    
+
     if (data.averageChange > 10) {
       comparison.recommendations.push({
         type: 'optimization',
-        message: `Optimization needed: ${category} is ${data.averageChange.toFixed(1)}% slower on average. Consider optimizing this area.`
+        message: `Optimization needed: ${category} is ${data.averageChange.toFixed(1)}% slower on average. Consider optimizing this area.`,
       });
     }
   });
-  
+
   // Recommandations positives
   if (comparison.summary.improvements > comparison.summary.regressions * 2) {
     comparison.recommendations.push({
       type: 'positive',
-      message: `Excellent: More performance improvements (${comparison.summary.improvements}) than regressions (${comparison.summary.regressions}).`
+      message: `Excellent: More performance improvements (${comparison.summary.improvements}) than regressions (${comparison.summary.regressions}).`,
     });
   }
-  
+
   // Recommandations spécifiques
   const slowestRegressions = comparison.regressions
     .sort((a, b) => b.changePercent - a.changePercent)
     .slice(0, 3);
-  
+
   slowestRegressions.forEach(regression => {
     comparison.recommendations.push({
       type: 'specific',
-      message: `Focus on: "${regression.name}" is ${regression.changePercent.toFixed(1)}% slower - high impact optimization target.`
+      message: `Focus on: "${regression.name}" is ${regression.changePercent.toFixed(1)}% slower - high impact optimization target.`,
     });
   });
 }
@@ -426,16 +429,24 @@ function generateHTMLComparisonReport(comparison, outputFile) {
         </div>
         
         <div class="content">
-            ${comparison.recommendations.length > 0 ? `
+            ${
+              comparison.recommendations.length > 0
+                ? `
             <div class="section">
                 <h2>💡 Recommendations</h2>
-                ${comparison.recommendations.map(rec => `
+                ${comparison.recommendations
+                  .map(
+                    rec => `
                     <div class="recommendation ${rec.type}">
                         ${rec.message}
                     </div>
-                `).join('')}
+                `
+                  )
+                  .join('')}
             </div>
-            ` : ''}
+            `
+                : ''
+            }
             
             <div class="section">
                 <h2>📊 Category Overview</h2>
@@ -450,7 +461,9 @@ function generateHTMLComparisonReport(comparison, outputFile) {
                         </tr>
                     </thead>
                     <tbody>
-                        ${Object.entries(comparison.categories).map(([category, data]) => `
+                        ${Object.entries(comparison.categories)
+                          .map(
+                            ([category, data]) => `
                             <tr>
                                 <td><strong>${category}</strong></td>
                                 <td>${data.totalTests}</td>
@@ -460,12 +473,16 @@ function generateHTMLComparisonReport(comparison, outputFile) {
                                     ${data.averageChange > 0 ? '+' : ''}${data.averageChange.toFixed(1)}%
                                 </td>
                             </tr>
-                        `).join('')}
+                        `
+                          )
+                          .join('')}
                     </tbody>
                 </table>
             </div>
             
-            ${comparison.regressions.length > 0 ? `
+            ${
+              comparison.regressions.length > 0
+                ? `
             <div class="section">
                 <h2>🚨 Significant Regressions</h2>
                 <table>
@@ -479,7 +496,10 @@ function generateHTMLComparisonReport(comparison, outputFile) {
                         </tr>
                     </thead>
                     <tbody>
-                        ${comparison.regressions.slice(0, 10).map(reg => `
+                        ${comparison.regressions
+                          .slice(0, 10)
+                          .map(
+                            reg => `
                             <tr>
                                 <td>${reg.name}</td>
                                 <td>${reg.category}</td>
@@ -487,13 +507,19 @@ function generateHTMLComparisonReport(comparison, outputFile) {
                                 <td>${reg.baseline.toFixed(2)}</td>
                                 <td class="change-negative">+${reg.changePercent.toFixed(1)}%</td>
                             </tr>
-                        `).join('')}
+                        `
+                          )
+                          .join('')}
                     </tbody>
                 </table>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
             
-            ${comparison.improvements.length > 0 ? `
+            ${
+              comparison.improvements.length > 0
+                ? `
             <div class="section">
                 <h2>🎉 Significant Improvements</h2>
                 <table>
@@ -507,7 +533,10 @@ function generateHTMLComparisonReport(comparison, outputFile) {
                         </tr>
                     </thead>
                     <tbody>
-                        ${comparison.improvements.slice(0, 10).map(imp => `
+                        ${comparison.improvements
+                          .slice(0, 10)
+                          .map(
+                            imp => `
                             <tr>
                                 <td>${imp.name}</td>
                                 <td>${imp.category}</td>
@@ -515,11 +544,15 @@ function generateHTMLComparisonReport(comparison, outputFile) {
                                 <td>${imp.baseline.toFixed(2)}</td>
                                 <td class="change-positive">${imp.changePercent.toFixed(1)}%</td>
                             </tr>
-                        `).join('')}
+                        `
+                          )
+                          .join('')}
                     </tbody>
                 </table>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
         </div>
         
         <div class="footer" style="text-align: center; padding: 20px; background: #f8f9fa; color: #666;">
@@ -529,7 +562,7 @@ function generateHTMLComparisonReport(comparison, outputFile) {
 </body>
 </html>
   `;
-  
+
   fs.writeFileSync(outputFile, html);
 }
 
@@ -537,12 +570,14 @@ function generateHTMLComparisonReport(comparison, outputFile) {
 if (require.main === module) {
   const currentFile = process.argv[2];
   const baselineFile = process.argv[3];
-  
+
   if (!currentFile || !baselineFile) {
-    console.error('Usage: node compare-benchmarks.js <current-results.json> <baseline-results.json>');
+    console.error(
+      'Usage: node compare-benchmarks.js <current-results.json> <baseline-results.json>'
+    );
     process.exit(1);
   }
-  
+
   compareBenchmarks(currentFile, baselineFile);
 }
 

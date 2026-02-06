@@ -1,8 +1,5 @@
 // Browser Polyfills for Node.js modules - SIMPLIFIED VERSION
 // Minimal polyfills to ensure startup compatibility
-
-console.log('Loading browser polyfills...');
-
 // Buffer polyfill - returns proper Uint8Array instances
 if (typeof globalThis !== 'undefined' && !globalThis.Buffer) {
   const BufferPolyfill = {
@@ -82,11 +79,10 @@ if (typeof globalThis !== 'undefined' && !globalThis.Buffer) {
       }
 
       return result;
-    }
+    },
   };
 
   globalThis.Buffer = BufferPolyfill as any;
-  console.log('Buffer polyfill loaded');
 }
 
 // Process polyfill - minimal implementation
@@ -98,9 +94,8 @@ if (typeof globalThis !== 'undefined' && !globalThis.process) {
     browser: true,
     nextTick: (callback: () => void) => setTimeout(callback, 0),
     cwd: () => '/',
-    exit: () => {}
+    exit: () => {},
   };
-  console.log('Process polyfill loaded');
 }
 
 // Util polyfill - minimal implementation
@@ -113,9 +108,8 @@ if (typeof globalThis !== 'undefined' && !globalThis.util) {
         return String(obj);
       }
     },
-    format: (f: string, ...args: any[]) => f // Simplified format
+    format: (f: string, ...args: any[]) => f, // Simplified format
   };
-  console.log('Util polyfill loaded');
 }
 
 // Safe utility functions required by tests
@@ -123,31 +117,31 @@ if (typeof globalThis !== 'undefined') {
   // Safe property access with fallback
   globalThis.safeAccess = (obj: any, path: string, fallback?: any): any => {
     if (!obj || typeof path !== 'string') return fallback;
-    
+
     const keys = path.split('.');
     let current = obj;
-    
+
     for (const key of keys) {
       if (current == null || typeof current !== 'object') {
         return fallback;
       }
       current = current[key];
     }
-    
+
     return current !== undefined ? current : fallback;
   };
-  
+
   // Safe JSON parsing with fallback
   globalThis.safeJSONParse = (json: string, fallback?: any): any => {
     if (typeof json !== 'string') return fallback;
-    
+
     try {
       return JSON.parse(json);
     } catch {
       return fallback;
     }
   };
-  
+
   // Safe JSON stringifying with fallback
   globalThis.safeJSONStringify = (obj: any, fallback?: string): string => {
     try {
@@ -156,26 +150,21 @@ if (typeof globalThis !== 'undefined') {
       return fallback !== undefined ? fallback : '{}';
     }
   };
-  
+
   // Deep freeze object for immutability
   globalThis.deepFreeze = <T>(obj: T): T => {
     if (obj == null || typeof obj !== 'object') return obj;
-    
+
     Object.freeze(obj);
-    
+
     Object.getOwnPropertyNames(obj).forEach(prop => {
       const value = (obj as any)[prop];
       if (value != null && typeof value === 'object' && !Object.isFrozen(value)) {
         globalThis.deepFreeze(value);
       }
     });
-    
+
     return obj;
   };
-  
-  console.log('Safe utility functions loaded');
 }
-
-console.log('Browser polyfills loaded successfully');
-
 export {};

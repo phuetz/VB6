@@ -9,7 +9,7 @@ export enum ErrorCategory {
   COM = 'COM/ActiveX Errors',
   Database = 'Database Errors',
   Network = 'Network Errors',
-  Custom = 'Custom Application Errors'
+  Custom = 'Custom Application Errors',
 }
 
 // Error Source
@@ -19,7 +19,7 @@ export enum ErrorSource {
   COM = 'COM/OLE',
   ADO = 'ADO/Database',
   Winsock = 'Winsock',
-  Custom = 'Custom'
+  Custom = 'Custom',
 }
 
 // Error Information
@@ -58,10 +58,7 @@ interface ErrorLookupToolProps {
   onExport?: (errors: ErrorInfo[]) => void;
 }
 
-export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
-  onErrorSelect,
-  onExport
-}) => {
+export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({ onErrorSelect, onExport }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [selectedError, setSelectedError] = useState<ErrorInfo | null>(null);
@@ -79,7 +76,7 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
     category: ErrorCategory.Custom,
     source: ErrorSource.Custom,
     commonCauses: '',
-    solutions: ''
+    solutions: '',
   });
 
   const eventEmitter = useRef(new EventEmitter());
@@ -98,16 +95,16 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
         'Passing invalid parameters to a function',
         'Calling a method on a null object',
         'Invalid property values',
-        'API calls with incorrect parameters'
+        'API calls with incorrect parameters',
       ],
       solutions: [
         'Check all parameters passed to the procedure',
         'Verify object is properly initialized',
         'Validate input data before processing',
-        'Review API documentation for correct usage'
+        'Review API documentation for correct usage',
       ],
       relatedErrors: [13, 91, 424],
-      example: 'Left("Hello", -1) \' Negative length parameter'
+      example: 'Left("Hello", -1) \' Negative length parameter',
     },
     {
       code: 6,
@@ -120,16 +117,16 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
         'Integer division by zero',
         'Calculation exceeds data type limits',
         'Type conversion with incompatible values',
-        'Loop counter overflow'
+        'Loop counter overflow',
       ],
       solutions: [
         'Use larger data types (Long instead of Integer)',
         'Add overflow checking',
         'Implement error handling for calculations',
-        'Use Decimal type for large numbers'
+        'Use Decimal type for large numbers',
       ],
       relatedErrors: [11, 7],
-      example: 'Dim i As Integer\ni = 40000 \' Exceeds Integer range'
+      example: "Dim i As Integer\ni = 40000 ' Exceeds Integer range",
     },
     {
       code: 7,
@@ -142,17 +139,17 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
         'Large arrays or collections',
         'Memory leaks from unreleased objects',
         'Recursive calls without exit condition',
-        'Loading large files into memory'
+        'Loading large files into memory',
       ],
       solutions: [
         'Release objects with Set obj = Nothing',
         'Process data in chunks',
         'Clear collections when done',
         'Increase virtual memory',
-        'Use streaming for large files'
+        'Use streaming for large files',
       ],
       relatedErrors: [14, 31001],
-      notes: 'Common in applications processing large datasets'
+      notes: 'Common in applications processing large datasets',
     },
     {
       code: 9,
@@ -165,16 +162,16 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
         'Accessing array element beyond bounds',
         'Using non-existent collection key',
         'Zero-based vs one-based indexing confusion',
-        'Dynamic array not initialized'
+        'Dynamic array not initialized',
       ],
       solutions: [
         'Check array bounds with UBound/LBound',
         'Verify collection keys exist',
         'Initialize arrays before use',
-        'Use error handling when accessing collections'
+        'Use error handling when accessing collections',
       ],
       relatedErrors: [5, 13],
-      example: 'Dim arr(5) As Integer\nDebug.Print arr(10) \' Index 10 out of range'
+      example: "Dim arr(5) As Integer\nDebug.Print arr(10) ' Index 10 out of range",
     },
     {
       code: 13,
@@ -187,16 +184,16 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
         'Assigning incompatible data types',
         'Invalid type conversion',
         'Passing wrong parameter types',
-        'Variant type conflicts'
+        'Variant type conflicts',
       ],
       solutions: [
         'Use explicit type conversion functions',
         'Validate data types before operations',
         'Declare variables with specific types',
-        'Use IsNumeric, IsDate for validation'
+        'Use IsNumeric, IsDate for validation',
       ],
       relatedErrors: [5, 94],
-      example: 'Dim i As Integer\ni = "Hello" \' String cannot convert to Integer'
+      example: 'Dim i As Integer\ni = "Hello" \' String cannot convert to Integer',
     },
     {
       code: 53,
@@ -209,16 +206,16 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
         'Incorrect file path',
         'File deleted or moved',
         'Missing file extension',
-        'Case sensitivity on some systems'
+        'Case sensitivity on some systems',
       ],
       solutions: [
         'Verify file exists with Dir() function',
         'Use absolute paths',
         'Check file permissions',
-        'Handle missing files gracefully'
+        'Handle missing files gracefully',
       ],
       relatedErrors: [76, 75, 52],
-      example: 'Open "C:\\NonExistent.txt" For Input As #1'
+      example: 'Open "C:\\NonExistent.txt" For Input As #1',
     },
     {
       code: 70,
@@ -231,16 +228,16 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
         'File in use by another process',
         'Insufficient user permissions',
         'Read-only file attributes',
-        'Network share permissions'
+        'Network share permissions',
       ],
       solutions: [
         'Close file in other applications',
         'Run as administrator',
         'Check file attributes',
-        'Verify network permissions'
+        'Verify network permissions',
       ],
       relatedErrors: [75, 76],
-      notes: 'Common when accessing system files or locked resources'
+      notes: 'Common when accessing system files or locked resources',
     },
     {
       code: 91,
@@ -253,16 +250,16 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
         'Using object before Set statement',
         'Object destroyed but still referenced',
         'Failed object creation',
-        'Null object from function return'
+        'Null object from function return',
       ],
       solutions: [
         'Initialize objects with Set statement',
         'Check if object Is Nothing',
         'Verify CreateObject success',
-        'Handle null returns from functions'
+        'Handle null returns from functions',
       ],
       relatedErrors: [424, 429],
-      example: 'Dim obj As Object\nobj.Method \' obj not initialized'
+      example: "Dim obj As Object\nobj.Method ' obj not initialized",
     },
     {
       code: 424,
@@ -275,21 +272,21 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
         'Missing Set keyword for object assignment',
         'Using non-object where object expected',
         'Property returns non-object',
-        'Control not properly referenced'
+        'Control not properly referenced',
       ],
       solutions: [
         'Use Set for object assignments',
         'Verify variable is object type',
         'Check property return types',
-        'Ensure controls exist on form'
+        'Ensure controls exist on form',
       ],
       relatedErrors: [91, 438],
-      example: 'Dim obj As Object\nobj = CreateObject("...") \' Missing Set'
+      example: 'Dim obj As Object\nobj = CreateObject("...") \' Missing Set',
     },
     {
       code: 429,
       hexCode: '0x000001AD',
-      name: 'ActiveX component can\'t create object',
+      name: "ActiveX component can't create object",
       description: 'The ActiveX component is not properly registered or cannot be instantiated.',
       category: ErrorCategory.COM,
       source: ErrorSource.COM,
@@ -297,16 +294,16 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
         'Component not registered',
         'Missing dependency DLLs',
         'Incorrect ProgID',
-        '32/64-bit compatibility issues'
+        '32/64-bit compatibility issues',
       ],
       solutions: [
         'Register component with regsvr32',
         'Install required dependencies',
         'Verify correct ProgID',
-        'Check platform compatibility'
+        'Check platform compatibility',
       ],
       relatedErrors: [430, 432],
-      msdn: 'https://docs.microsoft.com/en-us/office/vba/language/reference/user-interface-help/activex-component-cant-create-object-error-429'
+      msdn: 'https://docs.microsoft.com/en-us/office/vba/language/reference/user-interface-help/activex-component-cant-create-object-error-429',
     },
     {
       code: 3021,
@@ -319,16 +316,16 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
         'Recordset is empty',
         'Moved past last record',
         'Moved before first record',
-        'Record deleted by another user'
+        'Record deleted by another user',
       ],
       solutions: [
         'Check EOF and BOF properties',
         'Verify recordset has records',
         'Use MoveFirst after opening',
-        'Handle empty recordsets'
+        'Handle empty recordsets',
       ],
       relatedErrors: [3219, 3251],
-      example: 'rs.MoveNext\nDebug.Print rs!Field \' If rs.EOF = True'
+      example: "rs.MoveNext\nDebug.Print rs!Field ' If rs.EOF = True",
     },
     {
       code: 3704,
@@ -341,16 +338,16 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
         'Connection or recordset closed',
         'Object not opened properly',
         'Connection lost',
-        'Timeout occurred'
+        'Timeout occurred',
       ],
       solutions: [
         'Check State property before use',
         'Reopen connection if needed',
         'Implement connection pooling',
-        'Handle connection timeouts'
+        'Handle connection timeouts',
       ],
       relatedErrors: [3705, 3709],
-      example: 'conn.Close\nrs.Open "SELECT...", conn \' conn is closed'
+      example: 'conn.Close\nrs.Open "SELECT...", conn \' conn is closed',
     },
     // Windows System Errors
     {
@@ -364,16 +361,16 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
         'Invalid file path',
         'File does not exist',
         'Incorrect working directory',
-        'Path too long'
+        'Path too long',
       ],
       solutions: [
         'Verify file path',
         'Check working directory',
         'Use short path names',
-        'Create file if missing'
+        'Create file if missing',
       ],
       relatedErrors: [3, 5],
-      notes: 'Common Windows API error'
+      notes: 'Common Windows API error',
     },
     {
       code: 5,
@@ -386,15 +383,15 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
         'Insufficient permissions',
         'File locked by another process',
         'UAC restrictions',
-        'Network share permissions'
+        'Network share permissions',
       ],
       solutions: [
         'Run as administrator',
         'Check file permissions',
         'Close other applications',
-        'Verify user rights'
+        'Verify user rights',
       ],
-      relatedErrors: [32, 1326]
+      relatedErrors: [32, 1326],
     },
     // Winsock Errors
     {
@@ -408,108 +405,114 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
         'Server not running',
         'Wrong port number',
         'Firewall blocking connection',
-        'Server rejecting connections'
+        'Server rejecting connections',
       ],
       solutions: [
         'Verify server is running',
         'Check port number',
         'Configure firewall',
-        'Check server logs'
+        'Check server logs',
       ],
-      relatedErrors: [10060, 10065]
-    }
+      relatedErrors: [10060, 10065],
+    },
   ];
 
   // Search errors
-  const searchErrors = useCallback((term: string) => {
-    if (!term) {
-      setSearchResults([]);
-      return;
-    }
-
-    const results: SearchResult[] = [];
-    const searchLower = term.toLowerCase();
-    const allErrors = [...errorDatabase, ...customErrors];
-
-    // Try to parse as number for error code search
-    const errorCode = parseInt(term);
-    const isNumericSearch = !isNaN(errorCode);
-
-    allErrors.forEach(error => {
-      // Filter by category and source
-      if (selectedCategory !== 'All' && error.category !== selectedCategory) return;
-      if (selectedSource !== 'All' && error.source !== selectedSource) return;
-
-      // Exact code match
-      if (isNumericSearch && error.code === errorCode) {
-        results.push({ error, relevance: 100, matchType: 'exact' });
+  const searchErrors = useCallback(
+    (term: string) => {
+      if (!term) {
+        setSearchResults([]);
         return;
       }
 
-      // Hex code match
-      if (error.hexCode.toLowerCase().includes(searchLower)) {
-        results.push({ error, relevance: 90, matchType: 'exact' });
-        return;
-      }
+      const results: SearchResult[] = [];
+      const searchLower = term.toLowerCase();
+      const allErrors = [...errorDatabase, ...customErrors];
 
-      // Name match
-      if (error.name.toLowerCase().includes(searchLower)) {
-        results.push({ error, relevance: 80, matchType: 'partial' });
-        return;
-      }
+      // Try to parse as number for error code search
+      const errorCode = parseInt(term);
+      const isNumericSearch = !isNaN(errorCode);
 
-      // Description match
-      if (error.description.toLowerCase().includes(searchLower)) {
-        results.push({ error, relevance: 70, matchType: 'partial' });
-        return;
-      }
+      allErrors.forEach(error => {
+        // Filter by category and source
+        if (selectedCategory !== 'All' && error.category !== selectedCategory) return;
+        if (selectedSource !== 'All' && error.source !== selectedSource) return;
 
-      // Common causes match
-      const causeMatch = error.commonCauses.some(cause => 
-        cause.toLowerCase().includes(searchLower)
-      );
-      if (causeMatch) {
-        results.push({ error, relevance: 60, matchType: 'partial' });
-        return;
-      }
+        // Exact code match
+        if (isNumericSearch && error.code === errorCode) {
+          results.push({ error, relevance: 100, matchType: 'exact' });
+          return;
+        }
 
-      // Solutions match
-      const solutionMatch = error.solutions.some(solution => 
-        solution.toLowerCase().includes(searchLower)
-      );
-      if (solutionMatch) {
-        results.push({ error, relevance: 50, matchType: 'partial' });
-        return;
-      }
+        // Hex code match
+        if (error.hexCode.toLowerCase().includes(searchLower)) {
+          results.push({ error, relevance: 90, matchType: 'exact' });
+          return;
+        }
 
-      // Related errors
-      if (isNumericSearch && error.relatedErrors.includes(errorCode)) {
-        results.push({ error, relevance: 40, matchType: 'related' });
-      }
-    });
+        // Name match
+        if (error.name.toLowerCase().includes(searchLower)) {
+          results.push({ error, relevance: 80, matchType: 'partial' });
+          return;
+        }
 
-    // Sort by relevance
-    results.sort((a, b) => b.relevance - a.relevance);
-    setSearchResults(results);
+        // Description match
+        if (error.description.toLowerCase().includes(searchLower)) {
+          results.push({ error, relevance: 70, matchType: 'partial' });
+          return;
+        }
 
-    eventEmitter.current.emit('search', term, results);
-  }, [selectedCategory, selectedSource, customErrors]);
+        // Common causes match
+        const causeMatch = error.commonCauses.some(cause =>
+          cause.toLowerCase().includes(searchLower)
+        );
+        if (causeMatch) {
+          results.push({ error, relevance: 60, matchType: 'partial' });
+          return;
+        }
+
+        // Solutions match
+        const solutionMatch = error.solutions.some(solution =>
+          solution.toLowerCase().includes(searchLower)
+        );
+        if (solutionMatch) {
+          results.push({ error, relevance: 50, matchType: 'partial' });
+          return;
+        }
+
+        // Related errors
+        if (isNumericSearch && error.relatedErrors.includes(errorCode)) {
+          results.push({ error, relevance: 40, matchType: 'related' });
+        }
+      });
+
+      // Sort by relevance
+      results.sort((a, b) => b.relevance - a.relevance);
+      setSearchResults(results);
+
+      eventEmitter.current.emit('search', term, results);
+    },
+    [selectedCategory, selectedSource, customErrors]
+  );
 
   // Select error
-  const selectError = useCallback((error: ErrorInfo) => {
-    setSelectedError(error);
-    
-    // Add to history
-    const historyEntry: ErrorHistoryEntry = {
-      timestamp: new Date(),
-      error: error,
-      searchTerm: searchTerm
-    };
-    setHistory(prev => [historyEntry, ...prev].slice(0, 50));
+  const selectError = useCallback(
+    (error: ErrorInfo) => {
+      setSelectedError(error);
 
-    onErrorSelect?.(error);
-    eventEmitter.current.emit('errorSelected', error);
-  }, [searchTerm, onErrorSelect]);
+      // Add to history
+      const historyEntry: ErrorHistoryEntry = {
+        timestamp: new Date(),
+        error: error,
+        searchTerm: searchTerm,
+      };
+      setHistory(prev => [historyEntry, ...prev].slice(0, 50));
+
+      onErrorSelect?.(error);
+      eventEmitter.current.emit('errorSelected', error);
+    },
+    [searchTerm, onErrorSelect]
+  );
 
   // Add custom error
   const addCustomError = useCallback(() => {
@@ -524,7 +527,7 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
       source: errorForm.source,
       commonCauses: errorForm.commonCauses.split('\n').filter(c => c.trim()),
       solutions: errorForm.solutions.split('\n').filter(s => s.trim()),
-      relatedErrors: []
+      relatedErrors: [],
     };
 
     setCustomErrors(prev => [...prev, newError]);
@@ -536,7 +539,7 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
       category: ErrorCategory.Custom,
       source: ErrorSource.Custom,
       commonCauses: '',
-      solutions: ''
+      solutions: '',
     });
 
     eventEmitter.current.emit('customErrorAdded', newError);
@@ -555,10 +558,11 @@ export const ErrorLookupTool: React.FC<ErrorLookupToolProps> = ({
 
   // Export errors
   const exportErrors = useCallback(() => {
-    const errors = searchResults.length > 0 
-      ? searchResults.map(r => r.error)
-      : [...errorDatabase, ...customErrors];
-    
+    const errors =
+      searchResults.length > 0
+        ? searchResults.map(r => r.error)
+        : [...errorDatabase, ...customErrors];
+
     onExport?.(errors);
     eventEmitter.current.emit('export', errors);
   }, [searchResults, customErrors, onExport]);
@@ -626,7 +630,7 @@ ${error.solutions.map(s => `- ${s}`).join('\n')}`;
             <input
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               placeholder="Enter error code, hex code, or description..."
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -643,32 +647,32 @@ ${error.solutions.map(s => `- ${s}`).join('\n')}`;
           <div className="mt-4 p-4 bg-gray-50 rounded-lg">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                 <select
                   value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value as any)}
+                  onChange={e => setSelectedCategory(e.target.value as any)}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 >
                   <option value="All">All Categories</option>
                   {Object.values(ErrorCategory).map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Source
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Source</label>
                 <select
                   value={selectedSource}
-                  onChange={(e) => setSelectedSource(e.target.value as any)}
+                  onChange={e => setSelectedSource(e.target.value as any)}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 >
                   <option value="All">All Sources</option>
                   {Object.values(ErrorSource).map(src => (
-                    <option key={src} value={src}>{src}</option>
+                    <option key={src} value={src}>
+                      {src}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -683,14 +687,14 @@ ${error.solutions.map(s => `- ${s}`).join('\n')}`;
         <div className="w-1/3 border-r border-gray-200 overflow-y-auto">
           <div className="p-2 bg-gray-50 border-b border-gray-200">
             <div className="text-sm text-gray-600">
-              {searchResults.length > 0 
+              {searchResults.length > 0
                 ? `Found ${searchResults.length} result(s)`
-                : searchTerm 
+                : searchTerm
                   ? 'No results found'
                   : 'Enter a search term'}
             </div>
           </div>
-          
+
           <div className="p-2">
             {searchResults.map((result, index) => (
               <div
@@ -703,12 +707,8 @@ ${error.solutions.map(s => `- ${s}`).join('\n')}`;
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-blue-600">
-                        {result.error.code}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {result.error.hexCode}
-                      </span>
+                      <span className="font-mono font-bold text-blue-600">{result.error.code}</span>
+                      <span className="text-xs text-gray-500">{result.error.hexCode}</span>
                       {result.matchType === 'related' && (
                         <span className="text-xs bg-yellow-100 text-yellow-800 px-1 rounded">
                           Related
@@ -721,7 +721,7 @@ ${error.solutions.map(s => `- ${s}`).join('\n')}`;
                     </div>
                   </div>
                   <button
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       toggleFavorite(result.error.code);
                     }}
@@ -733,9 +733,7 @@ ${error.solutions.map(s => `- ${s}`).join('\n')}`;
                 <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                   <span>{result.error.category}</span>
                   <span>{result.error.source}</span>
-                  <span className="ml-auto">
-                    {result.relevance}% match
-                  </span>
+                  <span className="ml-auto">{result.relevance}% match</span>
                 </div>
               </div>
             ))}
@@ -752,9 +750,7 @@ ${error.solutions.map(s => `- ${s}`).join('\n')}`;
                     <span className="text-3xl font-mono font-bold text-blue-600">
                       {selectedError.code}
                     </span>
-                    <span className="text-lg text-gray-500">
-                      {selectedError.hexCode}
-                    </span>
+                    <span className="text-lg text-gray-500">{selectedError.hexCode}</span>
                     <button
                       onClick={() => toggleFavorite(selectedError.code)}
                       className="text-2xl text-gray-400 hover:text-yellow-500"
@@ -762,9 +758,7 @@ ${error.solutions.map(s => `- ${s}`).join('\n')}`;
                       {favorites.includes(selectedError.code) ? '★' : '☆'}
                     </button>
                   </div>
-                  <h2 className="text-xl font-medium text-gray-800">
-                    {selectedError.name}
-                  </h2>
+                  <h2 className="text-xl font-medium text-gray-800">{selectedError.name}</h2>
                 </div>
                 <button
                   onClick={() => copyErrorInfo(selectedError)}
@@ -802,7 +796,9 @@ ${error.solutions.map(s => `- ${s}`).join('\n')}`;
                   <h3 className="font-medium text-gray-700 mb-2">Common Causes</h3>
                   <ul className="list-disc list-inside space-y-1">
                     {selectedError.commonCauses.map((cause, index) => (
-                      <li key={index} className="text-gray-600">{cause}</li>
+                      <li key={index} className="text-gray-600">
+                        {cause}
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -812,7 +808,9 @@ ${error.solutions.map(s => `- ${s}`).join('\n')}`;
                   <h3 className="font-medium text-gray-700 mb-2">Solutions</h3>
                   <ul className="list-disc list-inside space-y-1">
                     {selectedError.solutions.map((solution, index) => (
-                      <li key={index} className="text-gray-600">{solution}</li>
+                      <li key={index} className="text-gray-600">
+                        {solution}
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -876,9 +874,7 @@ ${error.solutions.map(s => `- ${s}`).join('\n')}`;
               <div className="text-center">
                 <div className="text-4xl mb-4">🔍</div>
                 <p className="text-lg">Search for an error code to view details</p>
-                <p className="text-sm mt-2">
-                  Enter a numeric code, hex code, or description
-                </p>
+                <p className="text-sm mt-2">Enter a numeric code, hex code, or description</p>
               </div>
             </div>
           )}
@@ -902,15 +898,11 @@ ${error.solutions.map(s => `- ${s}`).join('\n')}`;
                     {entry.timestamp.toLocaleTimeString()}
                   </span>
                 </div>
-                <div className="text-xs text-gray-600 truncate">
-                  {entry.error.name}
-                </div>
+                <div className="text-xs text-gray-600 truncate">{entry.error.name}</div>
               </div>
             ))}
             {history.length === 0 && (
-              <p className="text-center text-sm text-gray-500 py-4">
-                No recent searches
-              </p>
+              <p className="text-center text-sm text-gray-500 py-4">No recent searches</p>
             )}
           </div>
 
@@ -930,7 +922,7 @@ ${error.solutions.map(s => `- ${s}`).join('\n')}`;
                   <div className="flex items-center justify-between">
                     <span className="font-mono font-medium">{error.code}</span>
                     <button
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation();
                         toggleFavorite(code);
                       }}
@@ -939,16 +931,12 @@ ${error.solutions.map(s => `- ${s}`).join('\n')}`;
                       ★
                     </button>
                   </div>
-                  <div className="text-xs text-gray-600 truncate">
-                    {error.name}
-                  </div>
+                  <div className="text-xs text-gray-600 truncate">{error.name}</div>
                 </div>
               );
             })}
             {favorites.length === 0 && (
-              <p className="text-center text-sm text-gray-500 py-4">
-                No favorites yet
-              </p>
+              <p className="text-center text-sm text-gray-500 py-4">No favorites yet</p>
             )}
           </div>
         </div>
@@ -959,56 +947,54 @@ ${error.solutions.map(s => `- ${s}`).join('\n')}`;
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[600px] max-h-[80vh] overflow-y-auto">
             <h2 className="text-lg font-medium mb-4">Add Custom Error</h2>
-            
+
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Error Code
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Error Code</label>
                   <input
                     type="number"
                     value={errorForm.code}
-                    onChange={(e) => setErrorForm(prev => ({ ...prev, code: parseInt(e.target.value) || 0 }))}
+                    onChange={e =>
+                      setErrorForm(prev => ({ ...prev, code: parseInt(e.target.value) || 0 }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Category
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                   <select
                     value={errorForm.category}
-                    onChange={(e) => setErrorForm(prev => ({ ...prev, category: e.target.value as ErrorCategory }))}
+                    onChange={e =>
+                      setErrorForm(prev => ({ ...prev, category: e.target.value as ErrorCategory }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   >
                     {Object.values(ErrorCategory).map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Error Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Error Name</label>
                 <input
                   type="text"
                   value={errorForm.name}
-                  onChange={(e) => setErrorForm(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => setErrorForm(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="e.g., Custom Application Error"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
                   value={errorForm.description}
-                  onChange={(e) => setErrorForm(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={e => setErrorForm(prev => ({ ...prev, description: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   rows={3}
                   placeholder="Detailed description of the error"
@@ -1021,7 +1007,7 @@ ${error.solutions.map(s => `- ${s}`).join('\n')}`;
                 </label>
                 <textarea
                   value={errorForm.commonCauses}
-                  onChange={(e) => setErrorForm(prev => ({ ...prev, commonCauses: e.target.value }))}
+                  onChange={e => setErrorForm(prev => ({ ...prev, commonCauses: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   rows={3}
                   placeholder="List common causes..."
@@ -1034,7 +1020,7 @@ ${error.solutions.map(s => `- ${s}`).join('\n')}`;
                 </label>
                 <textarea
                   value={errorForm.solutions}
-                  onChange={(e) => setErrorForm(prev => ({ ...prev, solutions: e.target.value }))}
+                  onChange={e => setErrorForm(prev => ({ ...prev, solutions: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   rows={3}
                   placeholder="List possible solutions..."

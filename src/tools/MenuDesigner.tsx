@@ -69,7 +69,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
   onMenuChange,
   onGenerateCode,
   onPreviewMenu,
-  onSaveTemplate
+  onSaveTemplate,
 }) => {
   const [menuStructure, setMenuStructure] = useState<MenuStructure>({
     id: 'menu1',
@@ -77,7 +77,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
     formName,
     items: [],
     version: '1.0',
-    lastModified: new Date()
+    lastModified: new Date(),
   });
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [draggedItem, setDraggedItem] = useState<MenuItem | null>(null);
@@ -93,7 +93,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
     validateNames: true,
     showPreview: true,
     gridSize: 8,
-    fontSize: 12
+    fontSize: 12,
   });
   const [templates, setTemplates] = useState<MenuTemplate[]>([]);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
@@ -103,12 +103,17 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
     name: '',
     caption: '',
     shortcutKey: '',
-    accessKey: ''
+    accessKey: '',
   });
-  const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number; item?: MenuItem }>({
+  const [contextMenu, setContextMenu] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    item?: MenuItem;
+  }>({
     visible: false,
     x: 0,
-    y: 0
+    y: 0,
   });
 
   const eventEmitter = useRef(new EventEmitter());
@@ -153,7 +158,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 children: [],
                 index: 0,
                 windowList: false,
-                negotiatePosition: 'None'
+                negotiatePosition: 'None',
               },
               {
                 id: 'file_open',
@@ -170,7 +175,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 children: [],
                 index: 1,
                 windowList: false,
-                negotiatePosition: 'None'
+                negotiatePosition: 'None',
               },
               {
                 id: 'file_sep1',
@@ -185,7 +190,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 children: [],
                 index: 2,
                 windowList: false,
-                negotiatePosition: 'None'
+                negotiatePosition: 'None',
               },
               {
                 id: 'file_save',
@@ -202,7 +207,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 children: [],
                 index: 3,
                 windowList: false,
-                negotiatePosition: 'None'
+                negotiatePosition: 'None',
               },
               {
                 id: 'file_saveas',
@@ -218,7 +223,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 children: [],
                 index: 4,
                 windowList: false,
-                negotiatePosition: 'None'
+                negotiatePosition: 'None',
               },
               {
                 id: 'file_sep2',
@@ -233,7 +238,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 children: [],
                 index: 5,
                 windowList: false,
-                negotiatePosition: 'None'
+                negotiatePosition: 'None',
               },
               {
                 id: 'file_exit',
@@ -250,12 +255,12 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 children: [],
                 index: 6,
                 windowList: false,
-                negotiatePosition: 'None'
-              }
+                negotiatePosition: 'None',
+              },
             ],
             index: 0,
             windowList: false,
-            negotiatePosition: 'Left'
+            negotiatePosition: 'Left',
           },
           {
             id: 'edit',
@@ -283,7 +288,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 children: [],
                 index: 0,
                 windowList: false,
-                negotiatePosition: 'None'
+                negotiatePosition: 'None',
               },
               {
                 id: 'edit_redo',
@@ -300,7 +305,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 children: [],
                 index: 1,
                 windowList: false,
-                negotiatePosition: 'None'
+                negotiatePosition: 'None',
               },
               {
                 id: 'edit_sep1',
@@ -315,7 +320,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 children: [],
                 index: 2,
                 windowList: false,
-                negotiatePosition: 'None'
+                negotiatePosition: 'None',
               },
               {
                 id: 'edit_cut',
@@ -332,7 +337,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 children: [],
                 index: 3,
                 windowList: false,
-                negotiatePosition: 'None'
+                negotiatePosition: 'None',
               },
               {
                 id: 'edit_copy',
@@ -349,7 +354,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 children: [],
                 index: 4,
                 windowList: false,
-                negotiatePosition: 'None'
+                negotiatePosition: 'None',
               },
               {
                 id: 'edit_paste',
@@ -366,12 +371,12 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 children: [],
                 index: 5,
                 windowList: false,
-                negotiatePosition: 'None'
-              }
+                negotiatePosition: 'None',
+              },
             ],
             index: 1,
             windowList: false,
-            negotiatePosition: 'Left'
+            negotiatePosition: 'Left',
           },
           {
             id: 'help',
@@ -399,14 +404,14 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 children: [],
                 index: 0,
                 windowList: false,
-                negotiatePosition: 'None'
-              }
+                negotiatePosition: 'None',
+              },
             ],
             index: 2,
             windowList: false,
-            negotiatePosition: 'Right'
-          }
-        ]
+            negotiatePosition: 'Right',
+          },
+        ],
       };
       setMenuStructure(defaultMenu);
     }
@@ -419,7 +424,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
         description: 'File, Edit, View, Help menu structure',
         category: 'Application',
         isBuiltIn: true,
-        structure: [] // Would contain template structure
+        structure: [], // Would contain template structure
       },
       {
         id: 'mdi',
@@ -427,7 +432,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
         description: 'MDI application with Window menu',
         category: 'Application',
         isBuiltIn: true,
-        structure: []
+        structure: [],
       },
       {
         id: 'simple',
@@ -435,8 +440,8 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
         description: 'Basic File and Help menus',
         category: 'Basic',
         isBuiltIn: true,
-        structure: []
-      }
+        structure: [],
+      },
     ];
     setTemplates(builtInTemplates);
   }, [initialMenu, formName]);
@@ -447,134 +452,151 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
   }, [menuStructure, onMenuChange]);
 
   // Generate unique name for menu item
-  const generateItemName = useCallback((caption: string, parentName?: string): string => {
-    if (!settings.autoGenerateNames) return '';
-    
-    // Remove special characters and convert to camel case
-    const cleanCaption = caption
-      .replace(/[&\-\s.]/g, '')
-      .replace(/\w+/g, (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
-    
-    const prefix = parentName ? parentName.replace('mnu', '') : 'mnu';
-    return `mnu${prefix}${cleanCaption}`;
-  }, [settings.autoGenerateNames]);
+  const generateItemName = useCallback(
+    (caption: string, parentName?: string): string => {
+      if (!settings.autoGenerateNames) return '';
+
+      // Remove special characters and convert to camel case
+      const cleanCaption = caption
+        .replace(/[&\-\s.]/g, '')
+        .replace(/\w+/g, word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+
+      const prefix = parentName ? parentName.replace('mnu', '') : 'mnu';
+      return `mnu${prefix}${cleanCaption}`;
+    },
+    [settings.autoGenerateNames]
+  );
 
   // Add new menu item
-  const addMenuItem = useCallback((parentId?: string, insertIndex?: number) => {
-    const newItem: MenuItem = {
-      id: `item_${Date.now()}`,
-      name: settings.autoGenerateNames ? generateItemName(newItemProperties.caption || 'New Item') : newItemProperties.name,
-      caption: newItemProperties.caption || 'New Item',
-      enabled: true,
-      visible: true,
-      checked: false,
-      shortcutKey: newItemProperties.shortcutKey,
-      accessKey: newItemProperties.accessKey,
-      isSeparator: newItemType === 'separator',
-      level: parentId ? 1 : 0,
-      parentId,
-      children: [],
-      index: insertIndex ?? 0,
-      windowList: false,
-      negotiatePosition: 'None'
-    };
+  const addMenuItem = useCallback(
+    (parentId?: string, insertIndex?: number) => {
+      const newItem: MenuItem = {
+        id: `item_${Date.now()}`,
+        name: settings.autoGenerateNames
+          ? generateItemName(newItemProperties.caption || 'New Item')
+          : newItemProperties.name,
+        caption: newItemProperties.caption || 'New Item',
+        enabled: true,
+        visible: true,
+        checked: false,
+        shortcutKey: newItemProperties.shortcutKey,
+        accessKey: newItemProperties.accessKey,
+        isSeparator: newItemType === 'separator',
+        level: parentId ? 1 : 0,
+        parentId,
+        children: [],
+        index: insertIndex ?? 0,
+        windowList: false,
+        negotiatePosition: 'None',
+      };
 
-    setMenuStructure(prev => {
-      const updated = { ...prev };
-      
-      if (parentId) {
-        // Add to parent's children
-        const addToParent = (items: MenuItem[]): MenuItem[] => {
-          return items.map(item => {
-            if (item.id === parentId) {
-              const newChildren = [...item.children];
-              if (insertIndex !== undefined) {
-                newChildren.splice(insertIndex, 0, newItem);
-              } else {
-                newChildren.push(newItem);
+      setMenuStructure(prev => {
+        const updated = { ...prev };
+
+        if (parentId) {
+          // Add to parent's children
+          const addToParent = (items: MenuItem[]): MenuItem[] => {
+            return items.map(item => {
+              if (item.id === parentId) {
+                const newChildren = [...item.children];
+                if (insertIndex !== undefined) {
+                  newChildren.splice(insertIndex, 0, newItem);
+                } else {
+                  newChildren.push(newItem);
+                }
+                return { ...item, children: newChildren };
+              } else if (item.children.length > 0) {
+                return { ...item, children: addToParent(item.children) };
               }
-              return { ...item, children: newChildren };
+              return item;
+            });
+          };
+          updated.items = addToParent(updated.items);
+        } else {
+          // Add to root level
+          if (insertIndex !== undefined) {
+            updated.items.splice(insertIndex, 0, newItem);
+          } else {
+            updated.items.push(newItem);
+          }
+        }
+
+        updated.lastModified = new Date();
+        return updated;
+      });
+
+      setSelectedItem(newItem);
+      setNewItemDialog(false);
+      setNewItemProperties({ name: '', caption: '', shortcutKey: '', accessKey: '' });
+    },
+    [newItemType, newItemProperties, generateItemName, settings.autoGenerateNames]
+  );
+
+  // Update menu item
+  const updateMenuItem = useCallback(
+    (itemId: string, updates: Partial<MenuItem>) => {
+      setMenuStructure(prev => {
+        const updateInItems = (items: MenuItem[]): MenuItem[] => {
+          return items.map(item => {
+            if (item.id === itemId) {
+              const updatedItem = { ...item, ...updates };
+              // Auto-generate name if enabled
+              if (settings.autoGenerateNames && updates.caption) {
+                updatedItem.name = generateItemName(updates.caption, item.parentId);
+              }
+              return updatedItem;
             } else if (item.children.length > 0) {
-              return { ...item, children: addToParent(item.children) };
+              return { ...item, children: updateInItems(item.children) };
             }
             return item;
           });
         };
-        updated.items = addToParent(updated.items);
-      } else {
-        // Add to root level
-        if (insertIndex !== undefined) {
-          updated.items.splice(insertIndex, 0, newItem);
-        } else {
-          updated.items.push(newItem);
-        }
-      }
-      
-      updated.lastModified = new Date();
-      return updated;
-    });
 
-    setSelectedItem(newItem);
-    setNewItemDialog(false);
-    setNewItemProperties({ name: '', caption: '', shortcutKey: '', accessKey: '' });
-  }, [newItemType, newItemProperties, generateItemName, settings.autoGenerateNames]);
-
-  // Update menu item
-  const updateMenuItem = useCallback((itemId: string, updates: Partial<MenuItem>) => {
-    setMenuStructure(prev => {
-      const updateInItems = (items: MenuItem[]): MenuItem[] => {
-        return items.map(item => {
-          if (item.id === itemId) {
-            const updatedItem = { ...item, ...updates };
-            // Auto-generate name if enabled
-            if (settings.autoGenerateNames && updates.caption) {
-              updatedItem.name = generateItemName(updates.caption, item.parentId);
-            }
-            return updatedItem;
-          } else if (item.children.length > 0) {
-            return { ...item, children: updateInItems(item.children) };
-          }
-          return item;
-        });
-      };
-
-      return {
-        ...prev,
-        items: updateInItems(prev.items),
-        lastModified: new Date()
-      };
-    });
-  }, [settings.autoGenerateNames, generateItemName]);
+        return {
+          ...prev,
+          items: updateInItems(prev.items),
+          lastModified: new Date(),
+        };
+      });
+    },
+    [settings.autoGenerateNames, generateItemName]
+  );
 
   // Delete menu item
-  const deleteMenuItem = useCallback((itemId: string) => {
-    setMenuStructure(prev => {
-      const deleteFromItems = (items: MenuItem[]): MenuItem[] => {
-        return items
-          .filter(item => item.id !== itemId)
-          .map(item => ({
-            ...item,
-            children: deleteFromItems(item.children)
-          }));
-      };
+  const deleteMenuItem = useCallback(
+    (itemId: string) => {
+      setMenuStructure(prev => {
+        const deleteFromItems = (items: MenuItem[]): MenuItem[] => {
+          return items
+            .filter(item => item.id !== itemId)
+            .map(item => ({
+              ...item,
+              children: deleteFromItems(item.children),
+            }));
+        };
 
-      return {
-        ...prev,
-        items: deleteFromItems(prev.items),
-        lastModified: new Date()
-      };
-    });
+        return {
+          ...prev,
+          items: deleteFromItems(prev.items),
+          lastModified: new Date(),
+        };
+      });
 
-    if (selectedItem?.id === itemId) {
-      setSelectedItem(null);
-    }
-  }, [selectedItem]);
+      if (selectedItem?.id === itemId) {
+        setSelectedItem(null);
+      }
+    },
+    [selectedItem]
+  );
 
   // Move menu item
-  const moveMenuItem = useCallback((itemId: string, targetParentId?: string, targetIndex?: number) => {
-    // Implementation for drag & drop reordering
-    // This would involve removing the item from its current location and inserting it at the new location
-  }, []);
+  const moveMenuItem = useCallback(
+    (itemId: string, targetParentId?: string, targetIndex?: number) => {
+      // Implementation for drag & drop reordering
+      // This would involve removing the item from its current location and inserting it at the new location
+    },
+    []
+  );
 
   // Toggle item expansion
   const toggleExpanded = useCallback((itemId: string) => {
@@ -590,101 +612,104 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
   }, []);
 
   // Render menu tree
-  const renderMenuTree = useCallback((items: MenuItem[], level: number = 0): React.ReactNode => {
-    return items.map((item, index) => {
-      const isSelected = selectedItem?.id === item.id;
-      const isExpanded = expandedItems.has(item.id);
-      const hasChildren = item.children.length > 0;
+  const renderMenuTree = useCallback(
+    (items: MenuItem[], level: number = 0): React.ReactNode => {
+      return items.map((item, index) => {
+        const isSelected = selectedItem?.id === item.id;
+        const isExpanded = expandedItems.has(item.id);
+        const hasChildren = item.children.length > 0;
 
-      return (
-        <div key={item.id}>
-          <div
-            className={`flex items-center py-1 px-2 hover:bg-gray-100 cursor-pointer ${
-              isSelected ? 'bg-blue-100' : ''
-            }`}
-            style={{ 
-              paddingLeft: `${8 + level * 20}px`,
-              fontSize: `${settings.fontSize}px` 
-            }}
-            onClick={() => setSelectedItem(item)}
-            onContextMenu={(e) => {
-              e.preventDefault();
-              setContextMenu({
-                visible: true,
-                x: e.clientX,
-                y: e.clientY,
-                item
-              });
-            }}
-            draggable={settings.enableDragDrop}
-            onDragStart={(e) => {
-              setDraggedItem(item);
-              e.dataTransfer.effectAllowed = 'move';
-            }}
-            onDragOver={(e) => {
-              if (draggedItem && draggedItem.id !== item.id) {
+        return (
+          <div key={item.id}>
+            <div
+              className={`flex items-center py-1 px-2 hover:bg-gray-100 cursor-pointer ${
+                isSelected ? 'bg-blue-100' : ''
+              }`}
+              style={{
+                paddingLeft: `${8 + level * 20}px`,
+                fontSize: `${settings.fontSize}px`,
+              }}
+              onClick={() => setSelectedItem(item)}
+              onContextMenu={e => {
                 e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-              }
-            }}
-            onDrop={(e) => {
-              e.preventDefault();
-              if (draggedItem && draggedItem.id !== item.id) {
-                moveMenuItem(draggedItem.id, item.parentId, index);
-                setDraggedItem(null);
-              }
-            }}
-          >
-            {/* Expand/Collapse Button */}
-            <div className="w-4">
-              {hasChildren && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleExpanded(item.id);
-                  }}
-                  className="text-gray-600 hover:text-gray-800"
-                >
-                  {isExpanded ? '▼' : '▶'}
-                </button>
-              )}
+                setContextMenu({
+                  visible: true,
+                  x: e.clientX,
+                  y: e.clientY,
+                  item,
+                });
+              }}
+              draggable={settings.enableDragDrop}
+              onDragStart={e => {
+                setDraggedItem(item);
+                e.dataTransfer.effectAllowed = 'move';
+              }}
+              onDragOver={e => {
+                if (draggedItem && draggedItem.id !== item.id) {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = 'move';
+                }
+              }}
+              onDrop={e => {
+                e.preventDefault();
+                if (draggedItem && draggedItem.id !== item.id) {
+                  moveMenuItem(draggedItem.id, item.parentId, index);
+                  setDraggedItem(null);
+                }
+              }}
+            >
+              {/* Expand/Collapse Button */}
+              <div className="w-4">
+                {hasChildren && (
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      toggleExpanded(item.id);
+                    }}
+                    className="text-gray-600 hover:text-gray-800"
+                  >
+                    {isExpanded ? '▼' : '▶'}
+                  </button>
+                )}
+              </div>
+
+              {/* Icon */}
+              <div className="w-6 text-center">
+                {item.isSeparator ? (
+                  <span className="text-gray-400">━</span>
+                ) : settings.showIcons && item.icon ? (
+                  <span>{item.icon}</span>
+                ) : (
+                  <span className="text-gray-400">□</span>
+                )}
+              </div>
+
+              {/* Caption */}
+              <div className="flex-1">
+                <span className={`${!item.enabled ? 'text-gray-400' : 'text-gray-800'}`}>
+                  {item.caption}
+                </span>
+                {settings.showShortcuts && item.shortcutKey && (
+                  <span className="text-xs text-gray-500 ml-2">({item.shortcutKey})</span>
+                )}
+              </div>
+
+              {/* Status indicators */}
+              <div className="flex items-center gap-1">
+                {item.checked && <span className="text-green-600">✓</span>}
+                {!item.visible && <span className="text-red-600">👁️</span>}
+                {!item.enabled && <span className="text-gray-400">🚫</span>}
+              </div>
             </div>
 
-            {/* Icon */}
-            <div className="w-6 text-center">
-              {item.isSeparator ? (
-                <span className="text-gray-400">━</span>
-              ) : settings.showIcons && item.icon ? (
-                <span>{item.icon}</span>
-              ) : (
-                <span className="text-gray-400">□</span>
-              )}
-            </div>
-
-            {/* Caption */}
-            <div className="flex-1">
-              <span className={`${!item.enabled ? 'text-gray-400' : 'text-gray-800'}`}>
-                {item.caption}
-              </span>
-              {settings.showShortcuts && item.shortcutKey && (
-                <span className="text-xs text-gray-500 ml-2">({item.shortcutKey})</span>
-              )}
-            </div>
-
-            {/* Status indicators */}
-            <div className="flex items-center gap-1">
-              {item.checked && <span className="text-green-600">✓</span>}
-              {!item.visible && <span className="text-red-600">👁️</span>}
-              {!item.enabled && <span className="text-gray-400">🚫</span>}
-            </div>
+            {/* Children */}
+            {isExpanded && hasChildren && renderMenuTree(item.children, level + 1)}
           </div>
-
-          {/* Children */}
-          {isExpanded && hasChildren && renderMenuTree(item.children, level + 1)}
-        </div>
-      );
-    });
-  }, [selectedItem, expandedItems, settings, draggedItem, toggleExpanded, moveMenuItem]);
+        );
+      });
+    },
+    [selectedItem, expandedItems, settings, draggedItem, toggleExpanded, moveMenuItem]
+  );
 
   // Render menu preview
   const renderMenuPreview = useCallback(() => {
@@ -718,9 +743,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
           <div className="flex gap-4">
             {menuStructure.items.map(item => (
               <div key={item.id} className="relative group">
-                <button className="px-2 py-1 hover:bg-gray-200 rounded">
-                  {item.caption}
-                </button>
+                <button className="px-2 py-1 hover:bg-gray-200 rounded">{item.caption}</button>
                 <div className="absolute top-full left-0 hidden group-hover:block z-10">
                   {renderPreviewItems(item.children)}
                 </div>
@@ -747,7 +770,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
         if (contextMenu.item) {
           // Implementation for adding item above
         }
-      }
+      },
     },
     {
       label: 'Add Item Below',
@@ -755,7 +778,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
         if (contextMenu.item) {
           // Implementation for adding item below
         }
-      }
+      },
     },
     {
       label: 'Add Submenu',
@@ -763,7 +786,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
         if (contextMenu.item) {
           // Implementation for adding submenu
         }
-      }
+      },
     },
     {
       label: 'Add Separator',
@@ -771,7 +794,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
         if (contextMenu.item) {
           // Implementation for adding separator
         }
-      }
+      },
     },
     {
       label: 'Delete',
@@ -779,8 +802,8 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
         if (contextMenu.item) {
           deleteMenuItem(contextMenu.item.id);
         }
-      }
-    }
+      },
+    },
   ];
 
   return (
@@ -800,7 +823,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
           >
             ➕
           </button>
-          
+
           <button
             onClick={() => setShowTemplateDialog(true)}
             className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -808,7 +831,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
           >
             📋
           </button>
-          
+
           <button
             onClick={() => setShowPreview(!showPreview)}
             className={`px-2 py-1 text-xs rounded ${
@@ -818,7 +841,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
           >
             👁️
           </button>
-          
+
           <button
             onClick={() => setShowProperties(!showProperties)}
             className={`px-2 py-1 text-xs rounded ${
@@ -838,15 +861,14 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
           <div className="p-2 bg-gray-50 border-b border-gray-200">
             <h4 className="font-medium text-gray-700">Menu Structure</h4>
           </div>
-          
+
           <div ref={treeRef} className="flex-1 overflow-y-auto">
             {renderMenuTree(menuStructure.items)}
           </div>
-          
+
           <div className="p-2 border-t border-gray-200 bg-gray-50">
             <div className="text-xs text-gray-600">
-              Items: {menuStructure.items.length} | 
-              Selected: {selectedItem?.name || 'None'}
+              Items: {menuStructure.items.length} | Selected: {selectedItem?.name || 'None'}
             </div>
           </div>
         </div>
@@ -857,7 +879,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
             <div className="p-2 bg-gray-50 border-b border-gray-200">
               <h4 className="font-medium text-gray-700">Properties</h4>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-2">
               <div className="space-y-3">
                 <div>
@@ -865,88 +887,94 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
                   <input
                     type="text"
                     value={selectedItem.name}
-                    onChange={(e) => updateMenuItem(selectedItem.id, { name: e.target.value })}
+                    onChange={e => updateMenuItem(selectedItem.id, { name: e.target.value })}
                     className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Caption</label>
                   <input
                     type="text"
                     value={selectedItem.caption}
-                    onChange={(e) => updateMenuItem(selectedItem.id, { caption: e.target.value })}
+                    onChange={e => updateMenuItem(selectedItem.id, { caption: e.target.value })}
                     className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Shortcut Key</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Shortcut Key
+                  </label>
                   <input
                     type="text"
                     value={selectedItem.shortcutKey || ''}
-                    onChange={(e) => updateMenuItem(selectedItem.id, { shortcutKey: e.target.value })}
+                    onChange={e => updateMenuItem(selectedItem.id, { shortcutKey: e.target.value })}
                     placeholder="e.g., Ctrl+S"
                     className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Access Key</label>
                   <input
                     type="text"
                     value={selectedItem.accessKey || ''}
-                    onChange={(e) => updateMenuItem(selectedItem.id, { accessKey: e.target.value })}
+                    onChange={e => updateMenuItem(selectedItem.id, { accessKey: e.target.value })}
                     maxLength={1}
                     className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Icon</label>
                   <input
                     type="text"
                     value={selectedItem.icon || ''}
-                    onChange={(e) => updateMenuItem(selectedItem.id, { icon: e.target.value })}
+                    onChange={e => updateMenuItem(selectedItem.id, { icon: e.target.value })}
                     placeholder="🔍"
                     className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 text-xs">
                     <input
                       type="checkbox"
                       checked={selectedItem.enabled}
-                      onChange={(e) => updateMenuItem(selectedItem.id, { enabled: e.target.checked })}
+                      onChange={e => updateMenuItem(selectedItem.id, { enabled: e.target.checked })}
                     />
                     Enabled
                   </label>
-                  
+
                   <label className="flex items-center gap-2 text-xs">
                     <input
                       type="checkbox"
                       checked={selectedItem.visible}
-                      onChange={(e) => updateMenuItem(selectedItem.id, { visible: e.target.checked })}
+                      onChange={e => updateMenuItem(selectedItem.id, { visible: e.target.checked })}
                     />
                     Visible
                   </label>
-                  
+
                   <label className="flex items-center gap-2 text-xs">
                     <input
                       type="checkbox"
                       checked={selectedItem.checked}
-                      onChange={(e) => updateMenuItem(selectedItem.id, { checked: e.target.checked })}
+                      onChange={e => updateMenuItem(selectedItem.id, { checked: e.target.checked })}
                     />
                     Checked
                   </label>
                 </div>
-                
+
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Negotiate Position</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Negotiate Position
+                  </label>
                   <select
                     value={selectedItem.negotiatePosition}
-                    onChange={(e) => updateMenuItem(selectedItem.id, { negotiatePosition: e.target.value as any })}
+                    onChange={e =>
+                      updateMenuItem(selectedItem.id, { negotiatePosition: e.target.value as any })
+                    }
                     className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                   >
                     <option value="None">None</option>
@@ -987,20 +1015,20 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96">
             <h3 className="text-lg font-medium mb-4">Add Menu Item</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
                 <select
                   value={newItemType}
-                  onChange={(e) => setNewItemType(e.target.value as 'item' | 'separator')}
+                  onChange={e => setNewItemType(e.target.value as 'item' | 'separator')}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 >
                   <option value="item">Menu Item</option>
                   <option value="separator">Separator</option>
                 </select>
               </div>
-              
+
               {newItemType === 'item' && (
                 <>
                   <div>
@@ -1008,29 +1036,37 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
                     <input
                       type="text"
                       value={newItemProperties.caption}
-                      onChange={(e) => setNewItemProperties(prev => ({ ...prev, caption: e.target.value }))}
+                      onChange={e =>
+                        setNewItemProperties(prev => ({ ...prev, caption: e.target.value }))
+                      }
                       placeholder="&File"
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                     <input
                       type="text"
                       value={newItemProperties.name}
-                      onChange={(e) => setNewItemProperties(prev => ({ ...prev, name: e.target.value }))}
+                      onChange={e =>
+                        setNewItemProperties(prev => ({ ...prev, name: e.target.value }))
+                      }
                       placeholder="mnuFile"
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Shortcut Key</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Shortcut Key
+                    </label>
                     <input
                       type="text"
                       value={newItemProperties.shortcutKey}
-                      onChange={(e) => setNewItemProperties(prev => ({ ...prev, shortcutKey: e.target.value }))}
+                      onChange={e =>
+                        setNewItemProperties(prev => ({ ...prev, shortcutKey: e.target.value }))
+                      }
                       placeholder="Ctrl+N"
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
@@ -1038,7 +1074,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 </>
               )}
             </div>
-            
+
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => setNewItemDialog(false)}
@@ -1063,7 +1099,7 @@ export const MenuDesigner: React.FC<MenuDesignerProps> = ({
           className="fixed bg-white border border-gray-300 shadow-lg z-50 py-1"
           style={{
             left: contextMenu.x,
-            top: contextMenu.y
+            top: contextMenu.y,
           }}
           onMouseLeave={() => setContextMenu(prev => ({ ...prev, visible: false }))}
         >

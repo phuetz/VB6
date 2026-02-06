@@ -21,7 +21,7 @@ export enum VB6ErrorCode {
   INVALID_OBJECT_USE = 425,
   COMPONENT_NOT_AVAILABLE = 429,
   AUTOMATION_ERROR = 440,
-  CONNECTION_BROKEN = 460
+  CONNECTION_BROKEN = 460,
 }
 
 export interface VB6Error {
@@ -65,7 +65,6 @@ export class VB6ErrorHandler extends EventEmitter {
     source?: string,
     context?: ErrorContext
   ): void {
-    
     const error: VB6Error = {
       code,
       description: description || this.getDefaultErrorDescription(code),
@@ -74,7 +73,7 @@ export class VB6ErrorHandler extends EventEmitter {
       procedure: context?.procedure || this.currentContext?.procedure || 'Unknown',
       line: context?.line || this.currentContext?.line || 0,
       timestamp: new Date(),
-      stack: this.captureStack()
+      stack: this.captureStack(),
     };
 
     // Add to error history
@@ -169,16 +168,13 @@ export class VB6ErrorHandler extends EventEmitter {
 
   validateDivisionByZero(divisor: number): void {
     if (divisor === 0) {
-      this.raiseError(
-        VB6ErrorCode.DIVISION_BY_ZERO,
-        'Division by zero'
-      );
+      this.raiseError(VB6ErrorCode.DIVISION_BY_ZERO, 'Division by zero');
     }
   }
 
   validateIntegerOverflow(value: number, typeName: string): void {
     let min: number, max: number;
-    
+
     switch (typeName.toLowerCase()) {
       case 'integer':
         min = -32768;
@@ -272,7 +268,7 @@ export class VB6ErrorHandler extends EventEmitter {
       case VB6ErrorCode.INVALID_OBJECT_USE:
         return 'Invalid object use';
       case VB6ErrorCode.COMPONENT_NOT_AVAILABLE:
-        return 'ActiveX component can\'t create object';
+        return "ActiveX component can't create object";
       case VB6ErrorCode.AUTOMATION_ERROR:
         return 'Automation error';
       case VB6ErrorCode.CONNECTION_BROKEN:
@@ -290,7 +286,7 @@ export class VB6ErrorHandler extends EventEmitter {
       throw new Error('Max error history must be at least 1');
     }
     this.maxErrorHistory = max;
-    
+
     // Trim existing history if needed
     while (this.errorStack.length > max) {
       this.errorStack.shift();

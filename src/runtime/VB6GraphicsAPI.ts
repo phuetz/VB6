@@ -1,6 +1,6 @@
 /**
  * VB6 Graphics API Implementation
- * 
+ *
  * Complete implementation of VB6 graphics methods: Line, Circle, PSet, Cls
  * DrawMode, FillStyle, ScaleMode and other graphics properties
  */
@@ -48,22 +48,22 @@ export const VB6DrawingConstants = {
   vbCentimeters: 7,
 
   // Colors (VB6 uses BGR format: 0x00BBGGRR)
-  vbBlack: 0x000000,      // Black (R:0, G:0, B:0)
-  vbRed: 0x0000FF,        // Red (R:255, G:0, B:0)
-  vbGreen: 0x00FF00,      // Green (R:0, G:255, B:0)
-  vbYellow: 0x00FFFF,     // Yellow (R:255, G:255, B:0)
-  vbBlue: 0xFF0000,       // Blue (R:0, G:0, B:255)
-  vbMagenta: 0xFF00FF,    // Magenta (R:255, G:0, B:255)
-  vbCyan: 0xFFFF00,       // Cyan (R:0, G:255, B:255)
-  vbWhite: 0xFFFFFF,      // White (R:255, G:255, B:255)
+  vbBlack: 0x000000, // Black (R:0, G:0, B:0)
+  vbRed: 0x0000ff, // Red (R:255, G:0, B:0)
+  vbGreen: 0x00ff00, // Green (R:0, G:255, B:0)
+  vbYellow: 0x00ffff, // Yellow (R:255, G:255, B:0)
+  vbBlue: 0xff0000, // Blue (R:0, G:0, B:255)
+  vbMagenta: 0xff00ff, // Magenta (R:255, G:0, B:255)
+  vbCyan: 0xffff00, // Cyan (R:0, G:255, B:255)
+  vbWhite: 0xffffff, // White (R:255, G:255, B:255)
 
   // System colors
-  vbButtonFace: 0x8000000F,
+  vbButtonFace: 0x8000000f,
   vbButtonShadow: 0x80000010,
   vbButtonText: 0x80000012,
   vbTitleBarText: 0x80000009,
-  vbHighlight: 0x8000000D,
-  vbHighlightText: 0x8000000E,
+  vbHighlight: 0x8000000d,
+  vbHighlightText: 0x8000000e,
   vbActiveTitleBar: 0x80000002,
   vbInactiveTitleBar: 0x80000003,
   vbMenuBar: 0x80000004,
@@ -71,17 +71,17 @@ export const VB6DrawingConstants = {
   vbWindowFrame: 0x80000006,
   vbMenuText: 0x80000007,
   vbWindowText: 0x80000008,
-  vbActiveBorder: 0x8000000A,
-  vbInactiveBorder: 0x8000000B,
-  vbApplicationWorkspace: 0x8000000C,
-  vbScrollBars: 0x80000001
+  vbActiveBorder: 0x8000000a,
+  vbInactiveBorder: 0x8000000b,
+  vbApplicationWorkspace: 0x8000000c,
+  vbScrollBars: 0x80000001,
 } as const;
 
-// Line style constants  
+// Line style constants
 export const VB6LineConstants = {
   vbDrawModeCopy: 13,
   vbDrawModeXor: 7,
-  vbDrawModeInvert: 6
+  vbDrawModeInvert: 6,
 } as const;
 
 // Graphics Context Interface
@@ -103,6 +103,12 @@ export interface VB6GraphicsContext {
   ScaleWidth: number;
   ScaleHeight: number;
   AutoRedraw: boolean;
+  // Font properties (set by SetFont)
+  FontName?: string;
+  FontSize?: number;
+  FontBold?: boolean;
+  FontItalic?: boolean;
+  FontUnderline?: boolean;
 }
 
 // VB6 Graphics Engine
@@ -121,7 +127,7 @@ export class VB6GraphicsEngine {
     // Create canvas for graphics operations
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
-    
+
     if (!context) {
       throw new Error('Could not create 2D rendering context');
     }
@@ -160,13 +166,13 @@ export class VB6GraphicsEngine {
       ScaleTop: 0,
       ScaleWidth: canvas.width * 15, // Convert pixels to twips (15 twips per pixel)
       ScaleHeight: canvas.height * 15,
-      AutoRedraw: true
+      AutoRedraw: true,
     };
 
     this.contexts.set(elementId, graphicsContext);
     this.activeContext = graphicsContext;
     this.applyContextSettings(graphicsContext);
-    
+
     return graphicsContext;
   }
 
@@ -185,7 +191,7 @@ export class VB6GraphicsEngine {
     ctx.context.lineWidth = ctx.DrawWidth;
     ctx.context.strokeStyle = this.colorToCSS(ctx.ForeColor);
     ctx.context.fillStyle = this.colorToCSS(ctx.FillColor);
-    
+
     // Set line style
     if (ctx.context.setLineDash) {
       if (ctx.DrawStyle === 0) {
@@ -230,12 +236,12 @@ export class VB6GraphicsEngine {
       // System color
       return this.getSystemColor(vb6Color);
     }
-    
+
     // Regular RGB color (VB6 uses BGR format)
-    const r = vb6Color & 0xFF;
-    const g = (vb6Color >> 8) & 0xFF;
-    const b = (vb6Color >> 16) & 0xFF;
-    
+    const r = vb6Color & 0xff;
+    const g = (vb6Color >> 8) & 0xff;
+    const b = (vb6Color >> 16) & 0xff;
+
     return `rgb(${r}, ${g}, ${b})`;
   }
 
@@ -251,9 +257,9 @@ export class VB6GraphicsEngine {
       [VB6DrawingConstants.vbWindowBackground]: '#ffffff',
       [VB6DrawingConstants.vbWindowText]: '#000000',
       [VB6DrawingConstants.vbHighlight]: '#0078d4',
-      [VB6DrawingConstants.vbHighlightText]: '#ffffff'
+      [VB6DrawingConstants.vbHighlightText]: '#ffffff',
     };
-    
+
     return systemColors[systemColor] || '#000000';
   }
 
@@ -264,12 +270,12 @@ export class VB6GraphicsEngine {
     if (ctx.ScaleMode === VB6DrawingConstants.vbPixels) {
       return value;
     }
-    
+
     // Convert from current scale mode to pixels
     const scaleRange = isX ? ctx.ScaleWidth : ctx.ScaleHeight;
     const canvasSize = isX ? ctx.canvas.width : ctx.canvas.height;
     const scaleOffset = isX ? ctx.ScaleLeft : ctx.ScaleTop;
-    
+
     return ((value - scaleOffset) / scaleRange) * canvasSize;
   }
 
@@ -277,7 +283,15 @@ export class VB6GraphicsEngine {
    * VB6 Line Method
    * Draws a line from (x1, y1) to (x2, y2)
    */
-  Line(elementId: string, x1?: number, y1?: number, x2?: number, y2?: number, color?: number, drawFlag?: string): void {
+  Line(
+    elementId: string,
+    x1?: number,
+    y1?: number,
+    x2?: number,
+    y2?: number,
+    color?: number,
+    drawFlag?: string
+  ): void {
     try {
       const ctx = this.getContext(elementId);
       this.applyContextSettings(ctx);
@@ -320,7 +334,7 @@ export class VB6GraphicsEngine {
         // Draw box (rectangle)
         const width = pixelEndX - pixelStartX;
         const height = pixelEndY - pixelStartY;
-        
+
         if (drawFlag === 'BF') {
           // Filled box
           ctx.context.fillRect(pixelStartX, pixelStartY, width, height);
@@ -339,8 +353,6 @@ export class VB6GraphicsEngine {
       // Update current position
       ctx.CurrentX = endX;
       ctx.CurrentY = endY;
-
-      console.log(`[VB6 Graphics] Line drawn from (${startX}, ${startY}) to (${endX}, ${endY})`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Line');
     }
@@ -350,7 +362,16 @@ export class VB6GraphicsEngine {
    * VB6 Circle Method
    * Draws a circle or arc
    */
-  Circle(elementId: string, x: number, y: number, radius: number, color?: number, start?: number, end?: number, aspect?: number): void {
+  Circle(
+    elementId: string,
+    x: number,
+    y: number,
+    radius: number,
+    color?: number,
+    start?: number,
+    end?: number,
+    aspect?: number
+  ): void {
     try {
       const ctx = this.getContext(elementId);
       this.applyContextSettings(ctx);
@@ -400,8 +421,6 @@ export class VB6GraphicsEngine {
       ctx.context.stroke();
 
       ctx.context.restore();
-
-      console.log(`[VB6 Graphics] Circle drawn at (${x}, ${y}) with radius ${radius}`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Circle');
     }
@@ -414,13 +433,14 @@ export class VB6GraphicsEngine {
   PSet(elementId: string, x: number, y: number, color?: number): void {
     try {
       const ctx = this.getContext(elementId);
-      
+
       // Convert coordinates
       const pixelX = this.scaleToPixels(x, true, ctx);
       const pixelY = this.scaleToPixels(y, false, ctx);
 
       // Set color
-      const pixelColor = color !== undefined ? this.colorToCSS(color) : this.colorToCSS(ctx.ForeColor);
+      const pixelColor =
+        color !== undefined ? this.colorToCSS(color) : this.colorToCSS(ctx.ForeColor);
       ctx.context.fillStyle = pixelColor;
 
       // Draw a 1x1 pixel rectangle
@@ -429,8 +449,6 @@ export class VB6GraphicsEngine {
       // Update current position
       ctx.CurrentX = x;
       ctx.CurrentY = y;
-
-      console.log(`[VB6 Graphics] Pixel set at (${x}, ${y})`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'PSet');
     }
@@ -443,7 +461,7 @@ export class VB6GraphicsEngine {
   Point(elementId: string, x: number, y: number): number {
     try {
       const ctx = this.getContext(elementId);
-      
+
       // Convert coordinates
       const pixelX = Math.floor(this.scaleToPixels(x, true, ctx));
       const pixelY = Math.floor(this.scaleToPixels(y, false, ctx));
@@ -456,7 +474,7 @@ export class VB6GraphicsEngine {
       const r = data[0];
       const g = data[1];
       const b = data[2];
-      
+
       return r | (g << 8) | (b << 16);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Point');
@@ -471,15 +489,13 @@ export class VB6GraphicsEngine {
   Cls(elementId: string): void {
     try {
       const ctx = this.getContext(elementId);
-      
+
       // Clear the entire canvas
       ctx.context.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      
+
       // Reset current position
       ctx.CurrentX = 0;
       ctx.CurrentY = 0;
-
-      console.log(`[VB6 Graphics] Graphics cleared for ${elementId}`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Cls');
     }
@@ -488,9 +504,9 @@ export class VB6GraphicsEngine {
   /**
    * Set graphics property
    */
-  setProperty(elementId: string, property: string, value: any): void {
+  setProperty(elementId: string, property: string, value: number | boolean): void {
     const ctx = this.getContext(elementId);
-    
+
     switch (property.toLowerCase()) {
       case 'drawmode':
         ctx.DrawMode = value;
@@ -535,32 +551,47 @@ export class VB6GraphicsEngine {
         ctx.AutoRedraw = value;
         break;
     }
-    
+
     this.applyContextSettings(ctx);
   }
 
   /**
    * Get graphics property
    */
-  getProperty(elementId: string, property: string): any {
+  getProperty(elementId: string, property: string): number | boolean | null {
     const ctx = this.getContext(elementId);
-    
+
     switch (property.toLowerCase()) {
-      case 'drawmode': return ctx.DrawMode;
-      case 'drawstyle': return ctx.DrawStyle;
-      case 'drawwidth': return ctx.DrawWidth;
-      case 'fillcolor': return ctx.FillColor;
-      case 'fillstyle': return ctx.FillStyle;
-      case 'forecolor': return ctx.ForeColor;
-      case 'scalemode': return ctx.ScaleMode;
-      case 'scaleleft': return ctx.ScaleLeft;
-      case 'scaletop': return ctx.ScaleTop;
-      case 'scalewidth': return ctx.ScaleWidth;
-      case 'scaleheight': return ctx.ScaleHeight;
-      case 'currentx': return ctx.CurrentX;
-      case 'currenty': return ctx.CurrentY;
-      case 'autoredraw': return ctx.AutoRedraw;
-      default: return null;
+      case 'drawmode':
+        return ctx.DrawMode;
+      case 'drawstyle':
+        return ctx.DrawStyle;
+      case 'drawwidth':
+        return ctx.DrawWidth;
+      case 'fillcolor':
+        return ctx.FillColor;
+      case 'fillstyle':
+        return ctx.FillStyle;
+      case 'forecolor':
+        return ctx.ForeColor;
+      case 'scalemode':
+        return ctx.ScaleMode;
+      case 'scaleleft':
+        return ctx.ScaleLeft;
+      case 'scaletop':
+        return ctx.ScaleTop;
+      case 'scalewidth':
+        return ctx.ScaleWidth;
+      case 'scaleheight':
+        return ctx.ScaleHeight;
+      case 'currentx':
+        return ctx.CurrentX;
+      case 'currenty':
+        return ctx.CurrentY;
+      case 'autoredraw':
+        return ctx.AutoRedraw;
+      default:
+        return null;
     }
   }
 
@@ -569,7 +600,7 @@ export class VB6GraphicsEngine {
    */
   Scale(elementId: string, x1?: number, y1?: number, x2?: number, y2?: number): void {
     const ctx = this.getContext(elementId);
-    
+
     if (x1 !== undefined && y1 !== undefined && x2 !== undefined && y2 !== undefined) {
       ctx.ScaleLeft = x1;
       ctx.ScaleTop = y1;
@@ -589,14 +620,21 @@ export class VB6GraphicsEngine {
   /**
    * Paint picture at specified location
    */
-  PaintPicture(elementId: string, picture: any, x: number, y: number, width?: number, height?: number): void {
+  PaintPicture(
+    elementId: string,
+    picture: HTMLImageElement | HTMLCanvasElement,
+    x: number,
+    y: number,
+    width?: number,
+    height?: number
+  ): void {
     try {
       const ctx = this.getContext(elementId);
-      
+
       if (picture instanceof HTMLImageElement) {
         const pixelX = this.scaleToPixels(x, true, ctx);
         const pixelY = this.scaleToPixels(y, false, ctx);
-        
+
         if (width !== undefined && height !== undefined) {
           const pixelWidth = this.scaleToPixels(width, true, ctx);
           const pixelHeight = this.scaleToPixels(height, false, ctx);
@@ -605,8 +643,6 @@ export class VB6GraphicsEngine {
           ctx.context.drawImage(picture, pixelX, pixelY);
         }
       }
-
-      console.log(`[VB6 Graphics] Picture painted at (${x}, ${y})`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'PaintPicture');
     }
@@ -615,7 +651,12 @@ export class VB6GraphicsEngine {
   /**
    * Apply fill pattern for hatched fills
    */
-  private applyFillPattern(ctx: CanvasRenderingContext2D, fillColor: number, fillStyle: number, size: number): void {
+  private applyFillPattern(
+    ctx: CanvasRenderingContext2D,
+    fillColor: number,
+    fillStyle: number,
+    size: number
+  ): void {
     switch (fillStyle) {
       case VB6DrawingConstants.vbHorizontalLine:
         this.drawHorizontalLinePattern(ctx, fillColor);
@@ -641,7 +682,7 @@ export class VB6GraphicsEngine {
   }
 
   private drawHorizontalLinePattern(ctx: CanvasRenderingContext2D, fillColor: number): void {
-    const pattern = this.createPatternCanvas(4, 4, (patternCtx) => {
+    const pattern = this.createPatternCanvas(4, 4, patternCtx => {
       patternCtx.fillStyle = '#ffffff';
       patternCtx.fillRect(0, 0, 4, 4);
       patternCtx.strokeStyle = this.colorToCSS(fillColor);
@@ -655,7 +696,7 @@ export class VB6GraphicsEngine {
   }
 
   private drawVerticalLinePattern(ctx: CanvasRenderingContext2D, fillColor: number): void {
-    const pattern = this.createPatternCanvas(4, 4, (patternCtx) => {
+    const pattern = this.createPatternCanvas(4, 4, patternCtx => {
       patternCtx.fillStyle = '#ffffff';
       patternCtx.fillRect(0, 0, 4, 4);
       patternCtx.strokeStyle = this.colorToCSS(fillColor);
@@ -669,7 +710,7 @@ export class VB6GraphicsEngine {
   }
 
   private drawUpwardDiagonalPattern(ctx: CanvasRenderingContext2D, fillColor: number): void {
-    const pattern = this.createPatternCanvas(4, 4, (patternCtx) => {
+    const pattern = this.createPatternCanvas(4, 4, patternCtx => {
       patternCtx.fillStyle = '#ffffff';
       patternCtx.fillRect(0, 0, 4, 4);
       patternCtx.strokeStyle = this.colorToCSS(fillColor);
@@ -683,7 +724,7 @@ export class VB6GraphicsEngine {
   }
 
   private drawDownwardDiagonalPattern(ctx: CanvasRenderingContext2D, fillColor: number): void {
-    const pattern = this.createPatternCanvas(4, 4, (patternCtx) => {
+    const pattern = this.createPatternCanvas(4, 4, patternCtx => {
       patternCtx.fillStyle = '#ffffff';
       patternCtx.fillRect(0, 0, 4, 4);
       patternCtx.strokeStyle = this.colorToCSS(fillColor);
@@ -697,7 +738,7 @@ export class VB6GraphicsEngine {
   }
 
   private drawCrossPattern(ctx: CanvasRenderingContext2D, fillColor: number): void {
-    const pattern = this.createPatternCanvas(4, 4, (patternCtx) => {
+    const pattern = this.createPatternCanvas(4, 4, patternCtx => {
       patternCtx.fillStyle = '#ffffff';
       patternCtx.fillRect(0, 0, 4, 4);
       patternCtx.strokeStyle = this.colorToCSS(fillColor);
@@ -717,7 +758,7 @@ export class VB6GraphicsEngine {
   }
 
   private drawDiagonalCrossPattern(ctx: CanvasRenderingContext2D, fillColor: number): void {
-    const pattern = this.createPatternCanvas(4, 4, (patternCtx) => {
+    const pattern = this.createPatternCanvas(4, 4, patternCtx => {
       patternCtx.fillStyle = '#ffffff';
       patternCtx.fillRect(0, 0, 4, 4);
       patternCtx.strokeStyle = this.colorToCSS(fillColor);
@@ -736,7 +777,11 @@ export class VB6GraphicsEngine {
     ctx.fillStyle = ctx.createPattern(pattern, 'repeat') || this.colorToCSS(fillColor);
   }
 
-  private createPatternCanvas(width: number, height: number, drawFn: (ctx: CanvasRenderingContext2D) => void): HTMLCanvasElement {
+  private createPatternCanvas(
+    width: number,
+    height: number,
+    drawFn: (ctx: CanvasRenderingContext2D) => void
+  ): HTMLCanvasElement {
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -756,12 +801,14 @@ export class VB6GraphicsEngine {
       const ctx = this.getContext(elementId);
 
       // Format output
-      const output = args.map(arg => {
-        if (arg === null) return 'Null';
-        if (arg === undefined) return '';
-        if (typeof arg === 'boolean') return arg ? 'True' : 'False';
-        return String(arg);
-      }).join('');
+      const output = args
+        .map(arg => {
+          if (arg === null) return 'Null';
+          if (arg === undefined) return '';
+          if (typeof arg === 'boolean') return arg ? 'True' : 'False';
+          return String(arg);
+        })
+        .join('');
 
       // Convert coordinates
       const pixelX = this.scaleToPixels(ctx.CurrentX, true, ctx);
@@ -783,8 +830,6 @@ export class VB6GraphicsEngine {
         ctx
       );
       ctx.CurrentX = 0; // Reset X to start of line
-
-      console.log(`[VB6 Graphics] Print: "${output}"`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Print');
     }
@@ -824,7 +869,8 @@ export class VB6GraphicsEngine {
     const ctx = this.getContext(elementId);
     ctx.context.font = `${ctx.DrawWidth * 10 || 12}px Arial`;
     const metrics = ctx.context.measureText(text);
-    const height = (metrics.actualBoundingBoxAscent || 12) + (metrics.actualBoundingBoxDescent || 4);
+    const height =
+      (metrics.actualBoundingBoxAscent || 12) + (metrics.actualBoundingBoxDescent || 4);
     return this.pixelsToScale(height, false, ctx);
   }
 
@@ -852,15 +898,15 @@ export class VB6GraphicsEngine {
       0x000080, // 4 - Red
       0x800080, // 5 - Magenta
       0x008080, // 6 - Brown/Yellow
-      0xC0C0C0, // 7 - White/Light Gray
+      0xc0c0c0, // 7 - White/Light Gray
       0x808080, // 8 - Gray
-      0xFF0000, // 9 - Light Blue
-      0x00FF00, // 10 - Light Green
-      0xFFFF00, // 11 - Light Cyan
-      0x0000FF, // 12 - Light Red
-      0xFF00FF, // 13 - Light Magenta
-      0x00FFFF, // 14 - Yellow
-      0xFFFFFF  // 15 - Bright White
+      0xff0000, // 9 - Light Blue
+      0x00ff00, // 10 - Light Green
+      0xffff00, // 11 - Light Cyan
+      0x0000ff, // 12 - Light Red
+      0xff00ff, // 13 - Light Magenta
+      0x00ffff, // 14 - Yellow
+      0xffffff, // 15 - Bright White
     ];
     return qbColors[Math.max(0, Math.min(15, Math.floor(color)))] || 0;
   }
@@ -878,7 +924,15 @@ export class VB6GraphicsEngine {
   /**
    * Draw arc (part of circle)
    */
-  Arc(elementId: string, x: number, y: number, radius: number, startAngle: number, endAngle: number, color?: number): void {
+  Arc(
+    elementId: string,
+    x: number,
+    y: number,
+    radius: number,
+    startAngle: number,
+    endAngle: number,
+    color?: number
+  ): void {
     try {
       const ctx = this.getContext(elementId);
       this.applyContextSettings(ctx);
@@ -894,8 +948,6 @@ export class VB6GraphicsEngine {
       ctx.context.strokeStyle = this.colorToCSS(drawColor);
       ctx.context.lineWidth = ctx.DrawWidth;
       ctx.context.stroke();
-
-      console.log(`[VB6 Graphics] Arc drawn at (${x}, ${y})`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Arc');
     }
@@ -904,7 +956,16 @@ export class VB6GraphicsEngine {
   /**
    * Draw pie slice (filled arc)
    */
-  Pie(elementId: string, x: number, y: number, radius: number, startAngle: number, endAngle: number, color?: number, fillColor?: number): void {
+  Pie(
+    elementId: string,
+    x: number,
+    y: number,
+    radius: number,
+    startAngle: number,
+    endAngle: number,
+    color?: number,
+    fillColor?: number
+  ): void {
     try {
       const ctx = this.getContext(elementId);
       this.applyContextSettings(ctx);
@@ -929,8 +990,6 @@ export class VB6GraphicsEngine {
       ctx.context.strokeStyle = this.colorToCSS(drawColor);
       ctx.context.lineWidth = ctx.DrawWidth;
       ctx.context.stroke();
-
-      console.log(`[VB6 Graphics] Pie drawn at (${x}, ${y})`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Pie');
     }
@@ -939,7 +998,13 @@ export class VB6GraphicsEngine {
   /**
    * Draw polygon
    */
-  Polygon(elementId: string, points: Array<{x: number, y: number}>, color?: number, fillColor?: number, filled: boolean = false): void {
+  Polygon(
+    elementId: string,
+    points: Array<{ x: number; y: number }>,
+    color?: number,
+    fillColor?: number,
+    filled: boolean = false
+  ): void {
     try {
       const ctx = this.getContext(elementId);
       this.applyContextSettings(ctx);
@@ -978,8 +1043,6 @@ export class VB6GraphicsEngine {
       ctx.context.strokeStyle = this.colorToCSS(drawColor);
       ctx.context.lineWidth = ctx.DrawWidth;
       ctx.context.stroke();
-
-      console.log(`[VB6 Graphics] Polygon drawn with ${points.length} points`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Polygon');
     }
@@ -988,7 +1051,17 @@ export class VB6GraphicsEngine {
   /**
    * Draw rounded rectangle
    */
-  RoundRect(elementId: string, x1: number, y1: number, x2: number, y2: number, cornerRadius: number, color?: number, fillColor?: number, filled: boolean = false): void {
+  RoundRect(
+    elementId: string,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    cornerRadius: number,
+    color?: number,
+    fillColor?: number,
+    filled: boolean = false
+  ): void {
     try {
       const ctx = this.getContext(elementId);
       this.applyContextSettings(ctx);
@@ -1024,8 +1097,6 @@ export class VB6GraphicsEngine {
       ctx.context.strokeStyle = this.colorToCSS(drawColor);
       ctx.context.lineWidth = ctx.DrawWidth;
       ctx.context.stroke();
-
-      console.log(`[VB6 Graphics] Rounded rectangle drawn from (${x1}, ${y1}) to (${x2}, ${y2})`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'RoundRect');
     }
@@ -1034,7 +1105,16 @@ export class VB6GraphicsEngine {
   /**
    * Draw ellipse
    */
-  Ellipse(elementId: string, x: number, y: number, radiusX: number, radiusY: number, color?: number, fillColor?: number, filled: boolean = false): void {
+  Ellipse(
+    elementId: string,
+    x: number,
+    y: number,
+    radiusX: number,
+    radiusY: number,
+    color?: number,
+    fillColor?: number,
+    filled: boolean = false
+  ): void {
     try {
       const ctx = this.getContext(elementId);
       this.applyContextSettings(ctx);
@@ -1060,8 +1140,6 @@ export class VB6GraphicsEngine {
       ctx.context.strokeStyle = this.colorToCSS(drawColor);
       ctx.context.lineWidth = ctx.DrawWidth;
       ctx.context.stroke();
-
-      console.log(`[VB6 Graphics] Ellipse drawn at (${x}, ${y})`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Ellipse');
     }
@@ -1070,7 +1148,16 @@ export class VB6GraphicsEngine {
   /**
    * Draw gradient fill (extended feature)
    */
-  GradientFill(elementId: string, x1: number, y1: number, x2: number, y2: number, color1: number, color2: number, direction: 'horizontal' | 'vertical' | 'diagonal' = 'vertical'): void {
+  GradientFill(
+    elementId: string,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    color1: number,
+    color2: number,
+    direction: 'horizontal' | 'vertical' | 'diagonal' = 'vertical'
+  ): void {
     try {
       const ctx = this.getContext(elementId);
 
@@ -1099,8 +1186,6 @@ export class VB6GraphicsEngine {
 
       ctx.context.fillStyle = gradient;
       ctx.context.fillRect(pixelX1, pixelY1, pixelX2 - pixelX1, pixelY2 - pixelY1);
-
-      console.log(`[VB6 Graphics] Gradient fill from (${x1}, ${y1}) to (${x2}, ${y2})`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'GradientFill');
     }
@@ -1109,7 +1194,11 @@ export class VB6GraphicsEngine {
   /**
    * Save canvas to image
    */
-  SavePicture(elementId: string, format: 'png' | 'jpeg' | 'webp' = 'png', quality: number = 0.92): string {
+  SavePicture(
+    elementId: string,
+    format: 'png' | 'jpeg' | 'webp' = 'png',
+    quality: number = 0.92
+  ): string {
     try {
       const ctx = this.getContext(elementId);
       return ctx.canvas.toDataURL(`image/${format}`, quality);
@@ -1122,7 +1211,14 @@ export class VB6GraphicsEngine {
   /**
    * Set font properties
    */
-  SetFont(elementId: string, fontName: string, fontSize: number, bold: boolean = false, italic: boolean = false, underline: boolean = false): void {
+  SetFont(
+    elementId: string,
+    fontName: string,
+    fontSize: number,
+    bold: boolean = false,
+    italic: boolean = false,
+    underline: boolean = false
+  ): void {
     const ctx = this.getContext(elementId);
 
     let fontStyle = '';
@@ -1132,11 +1228,11 @@ export class VB6GraphicsEngine {
     ctx.context.font = `${fontStyle}${fontSize}px ${fontName}`;
 
     // Store for later use
-    (ctx as any).FontName = fontName;
-    (ctx as any).FontSize = fontSize;
-    (ctx as any).FontBold = bold;
-    (ctx as any).FontItalic = italic;
-    (ctx as any).FontUnderline = underline;
+    ctx.FontName = fontName;
+    ctx.FontSize = fontSize;
+    ctx.FontBold = bold;
+    ctx.FontItalic = italic;
+    ctx.FontUnderline = underline;
   }
 
   /**
@@ -1149,13 +1245,22 @@ export class VB6GraphicsEngine {
     ctx.canvas.style.display = 'none';
     ctx.canvas.offsetHeight; // Force reflow
     ctx.canvas.style.display = '';
-    console.log(`[VB6 Graphics] Refreshed ${elementId}`);
   }
 
   /**
    * Copy image from one location to another
    */
-  BitBlt(destElementId: string, destX: number, destY: number, width: number, height: number, srcElementId: string, srcX: number, srcY: number, operation: number = VB6DrawingConstants.vbCopyPen): void {
+  BitBlt(
+    destElementId: string,
+    destX: number,
+    destY: number,
+    width: number,
+    height: number,
+    srcElementId: string,
+    srcX: number,
+    srcY: number,
+    operation: number = VB6DrawingConstants.vbCopyPen
+  ): void {
     try {
       const destCtx = this.getContext(destElementId);
       const srcCtx = this.getContext(srcElementId);
@@ -1201,8 +1306,6 @@ export class VB6GraphicsEngine {
 
       // Put to destination
       destCtx.context.putImageData(imageData, destPixelX, destPixelY);
-
-      console.log(`[VB6 Graphics] BitBlt from ${srcElementId} to ${destElementId}`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'BitBlt');
     }
@@ -1211,7 +1314,13 @@ export class VB6GraphicsEngine {
   /**
    * Flood fill from a point
    */
-  FloodFill(elementId: string, x: number, y: number, color: number, fillType: 'border' | 'surface' = 'surface'): void {
+  FloodFill(
+    elementId: string,
+    x: number,
+    y: number,
+    color: number,
+    fillType: 'border' | 'surface' = 'surface'
+  ): void {
     try {
       const ctx = this.getContext(elementId);
 
@@ -1232,9 +1341,9 @@ export class VB6GraphicsEngine {
       const targetA = data[startIdx + 3];
 
       // Get fill color
-      const fillR = color & 0xFF;
-      const fillG = (color >> 8) & 0xFF;
-      const fillB = (color >> 16) & 0xFF;
+      const fillR = color & 0xff;
+      const fillG = (color >> 8) & 0xff;
+      const fillB = (color >> 16) & 0xff;
 
       // Don't fill if already the same color
       if (targetR === fillR && targetG === fillG && targetB === fillB) {
@@ -1259,9 +1368,10 @@ export class VB6GraphicsEngine {
         const b = data[idx + 2];
 
         // Check if this pixel should be filled
-        const shouldFill = fillType === 'surface'
-          ? (r === targetR && g === targetG && b === targetB)
-          : !(r === fillR && g === fillG && b === fillB);
+        const shouldFill =
+          fillType === 'surface'
+            ? r === targetR && g === targetG && b === targetB
+            : !(r === fillR && g === fillG && b === fillB);
 
         if (!shouldFill) {
           continue;
@@ -1283,8 +1393,6 @@ export class VB6GraphicsEngine {
       }
 
       ctx.context.putImageData(imageData, 0, 0);
-
-      console.log(`[VB6 Graphics] FloodFill at (${x}, ${y})`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'FloodFill');
     }
@@ -1295,7 +1403,15 @@ export class VB6GraphicsEngine {
 const graphicsEngine = new VB6GraphicsEngine();
 
 // Global VB6 Graphics Functions
-export function Line(elementId: string, x1?: number, y1?: number, x2?: number, y2?: number, color?: number, drawFlag?: string): void {
+export function Line(
+  elementId: string,
+  x1?: number,
+  y1?: number,
+  x2?: number,
+  y2?: number,
+  color?: number,
+  drawFlag?: string
+): void {
   graphicsEngine.Line(elementId, x1, y1, x2, y2, color, drawFlag);
 }
 
@@ -1308,7 +1424,16 @@ export function QBColor(color: number): number {
   return VB6GraphicsEngine.QBColor(color);
 }
 
-export function Circle(elementId: string, x: number, y: number, radius: number, color?: number, start?: number, end?: number, aspect?: number): void {
+export function Circle(
+  elementId: string,
+  x: number,
+  y: number,
+  radius: number,
+  color?: number,
+  start?: number,
+  end?: number,
+  aspect?: number
+): void {
   graphicsEngine.Circle(elementId, x, y, radius, color, start, end, aspect);
 }
 
@@ -1328,16 +1453,27 @@ export function Scale(elementId: string, x1?: number, y1?: number, x2?: number, 
   graphicsEngine.Scale(elementId, x1, y1, x2, y2);
 }
 
-export function PaintPicture(elementId: string, picture: any, x: number, y: number, width?: number, height?: number): void {
+export function PaintPicture(
+  elementId: string,
+  picture: HTMLImageElement | HTMLCanvasElement,
+  x: number,
+  y: number,
+  width?: number,
+  height?: number
+): void {
   graphicsEngine.PaintPicture(elementId, picture, x, y, width, height);
 }
 
 // Property accessor functions
-export function SetGraphicsProperty(elementId: string, property: string, value: any): void {
+export function SetGraphicsProperty(
+  elementId: string,
+  property: string,
+  value: number | boolean
+): void {
   graphicsEngine.setProperty(elementId, property, value);
 }
 
-export function GetGraphicsProperty(elementId: string, property: string): any {
+export function GetGraphicsProperty(elementId: string, property: string): number | boolean | null {
   return graphicsEngine.getProperty(elementId, property);
 }
 
@@ -1360,45 +1496,133 @@ export function Move(elementId: string, x: number, y: number): void {
 }
 
 // Shape drawing functions
-export function Arc(elementId: string, x: number, y: number, radius: number, startAngle: number, endAngle: number, color?: number): void {
+export function Arc(
+  elementId: string,
+  x: number,
+  y: number,
+  radius: number,
+  startAngle: number,
+  endAngle: number,
+  color?: number
+): void {
   graphicsEngine.Arc(elementId, x, y, radius, startAngle, endAngle, color);
 }
 
-export function Pie(elementId: string, x: number, y: number, radius: number, startAngle: number, endAngle: number, color?: number, fillColor?: number): void {
+export function Pie(
+  elementId: string,
+  x: number,
+  y: number,
+  radius: number,
+  startAngle: number,
+  endAngle: number,
+  color?: number,
+  fillColor?: number
+): void {
   graphicsEngine.Pie(elementId, x, y, radius, startAngle, endAngle, color, fillColor);
 }
 
-export function Polygon(elementId: string, points: Array<{x: number, y: number}>, color?: number, fillColor?: number, filled?: boolean): void {
+export function Polygon(
+  elementId: string,
+  points: Array<{ x: number; y: number }>,
+  color?: number,
+  fillColor?: number,
+  filled?: boolean
+): void {
   graphicsEngine.Polygon(elementId, points, color, fillColor, filled);
 }
 
-export function RoundRect(elementId: string, x1: number, y1: number, x2: number, y2: number, cornerRadius: number, color?: number, fillColor?: number, filled?: boolean): void {
+export function RoundRect(
+  elementId: string,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  cornerRadius: number,
+  color?: number,
+  fillColor?: number,
+  filled?: boolean
+): void {
   graphicsEngine.RoundRect(elementId, x1, y1, x2, y2, cornerRadius, color, fillColor, filled);
 }
 
-export function Ellipse(elementId: string, x: number, y: number, radiusX: number, radiusY: number, color?: number, fillColor?: number, filled?: boolean): void {
+export function Ellipse(
+  elementId: string,
+  x: number,
+  y: number,
+  radiusX: number,
+  radiusY: number,
+  color?: number,
+  fillColor?: number,
+  filled?: boolean
+): void {
   graphicsEngine.Ellipse(elementId, x, y, radiusX, radiusY, color, fillColor, filled);
 }
 
-export function GradientFill(elementId: string, x1: number, y1: number, x2: number, y2: number, color1: number, color2: number, direction?: 'horizontal' | 'vertical' | 'diagonal'): void {
+export function GradientFill(
+  elementId: string,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  color1: number,
+  color2: number,
+  direction?: 'horizontal' | 'vertical' | 'diagonal'
+): void {
   graphicsEngine.GradientFill(elementId, x1, y1, x2, y2, color1, color2, direction);
 }
 
 // Image functions
-export function SavePicture(elementId: string, format?: 'png' | 'jpeg' | 'webp', quality?: number): string {
+export function SavePicture(
+  elementId: string,
+  format?: 'png' | 'jpeg' | 'webp',
+  quality?: number
+): string {
   return graphicsEngine.SavePicture(elementId, format, quality);
 }
 
-export function BitBlt(destElementId: string, destX: number, destY: number, width: number, height: number, srcElementId: string, srcX: number, srcY: number, operation?: number): void {
-  graphicsEngine.BitBlt(destElementId, destX, destY, width, height, srcElementId, srcX, srcY, operation);
+export function BitBlt(
+  destElementId: string,
+  destX: number,
+  destY: number,
+  width: number,
+  height: number,
+  srcElementId: string,
+  srcX: number,
+  srcY: number,
+  operation?: number
+): void {
+  graphicsEngine.BitBlt(
+    destElementId,
+    destX,
+    destY,
+    width,
+    height,
+    srcElementId,
+    srcX,
+    srcY,
+    operation
+  );
 }
 
-export function FloodFill(elementId: string, x: number, y: number, color: number, fillType?: 'border' | 'surface'): void {
+export function FloodFill(
+  elementId: string,
+  x: number,
+  y: number,
+  color: number,
+  fillType?: 'border' | 'surface'
+): void {
   graphicsEngine.FloodFill(elementId, x, y, color, fillType);
 }
 
 // Font and display functions
-export function SetFont(elementId: string, fontName: string, fontSize: number, bold?: boolean, italic?: boolean, underline?: boolean): void {
+export function SetFont(
+  elementId: string,
+  fontName: string,
+  fontSize: number,
+  bold?: boolean,
+  italic?: boolean,
+  underline?: boolean
+): void {
   graphicsEngine.SetFont(elementId, fontName, fontSize, bold, italic, underline);
 }
 
@@ -1458,5 +1682,5 @@ export const VB6GraphicsAPI = {
   GetGraphicsProperty,
 
   // Global engine instance
-  engine: graphicsEngine
+  engine: graphicsEngine,
 };

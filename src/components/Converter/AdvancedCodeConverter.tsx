@@ -62,7 +62,7 @@ export const AdvancedCodeConverter: React.FC = () => {
   const [result, setResult] = useState<ConversionResult | null>(null);
   const [showDiff, setShowDiff] = useState(false);
   const [compareMode, setCompareMode] = useState<'side-by-side' | 'inline'>('side-by-side');
-  
+
   const { currentCode } = useVB6Store();
 
   // Available conversion targets
@@ -156,7 +156,7 @@ export const AdvancedCodeConverter: React.FC = () => {
       const converted = performConversion(sourceCode, targetLanguage, options);
       setConvertedCode(converted.code);
       setResult(converted);
-      
+
       eventSystem.fire('CodeConverter', 'ConversionComplete', {
         target: targetLanguage.id,
         linesConverted: converted.statistics.linesConverted,
@@ -237,7 +237,7 @@ export const AdvancedCodeConverter: React.FC = () => {
     // Convert VB6 declarations and code
     lines.forEach(line => {
       const trimmed = line.trim();
-      
+
       if (trimmed.startsWith('Dim ')) {
         // Convert variable declarations
         const varMatch = trimmed.match(/Dim\s+(\w+)\s+As\s+(\w+)/);
@@ -259,10 +259,7 @@ export const AdvancedCodeConverter: React.FC = () => {
         converted.push('');
       } else if (trimmed.includes('MsgBox')) {
         // Convert MsgBox to MessageBox.Show
-        const msgBoxConverted = trimmed.replace(
-          /MsgBox\s*\(([^)]*)\)/g,
-          'MessageBox.Show($1)'
-        );
+        const msgBoxConverted = trimmed.replace(/MsgBox\s*\(([^)]*)\)/g, 'MessageBox.Show($1)');
         converted.push(`            ${msgBoxConverted};`);
         warnings.push('MsgBox modernized to MessageBox.Show');
       } else if (trimmed) {
@@ -299,22 +296,22 @@ export const AdvancedCodeConverter: React.FC = () => {
         'export const Form1: React.FC<Form1Props> = (props) => {'
       );
     } else {
-      converted.push(
-        'export class Form1 {'
-      );
+      converted.push('export class Form1 {');
     }
 
     // Convert VB6 code
     lines.forEach(line => {
       const trimmed = line.trim();
-      
+
       if (trimmed.startsWith('Dim ')) {
         const varMatch = trimmed.match(/Dim\s+(\w+)\s+As\s+(\w+)/);
         if (varMatch) {
           const [, varName, varType] = varMatch;
           const tsType = mapVB6TypeToTypeScript(varType);
           if (options.targetFramework === 'React') {
-            converted.push(`  const [${varName}, set${capitalize(varName)}] = useState<${tsType}>();`);
+            converted.push(
+              `  const [${varName}, set${capitalize(varName)}] = useState<${tsType}>();`
+            );
           } else {
             converted.push(`  private ${varName}: ${tsType};`);
           }
@@ -364,7 +361,7 @@ export const AdvancedCodeConverter: React.FC = () => {
 
     lines.forEach(line => {
       const trimmed = line.trim();
-      
+
       if (trimmed.startsWith('Dim ')) {
         const varMatch = trimmed.match(/Dim\s+(\w+)\s+As\s+(\w+)/);
         if (varMatch) {
@@ -380,12 +377,7 @@ export const AdvancedCodeConverter: React.FC = () => {
       }
     });
 
-    converted.push(
-      '',
-      'if __name__ == "__main__":',
-      '    app = Form1()',
-      '    app.mainloop()'
-    );
+    converted.push('', 'if __name__ == "__main__":', '    app = Form1()', '    app.mainloop()');
 
     warnings.push('Using Tkinter for GUI (consider PyQt for more features)');
 
@@ -394,30 +386,30 @@ export const AdvancedCodeConverter: React.FC = () => {
 
   const mapVB6TypeToCSharp = (vb6Type: string): string => {
     const typeMap: Record<string, string> = {
-      'Integer': 'int',
-      'Long': 'long',
-      'Single': 'float',
-      'Double': 'double',
-      'String': 'string',
-      'Boolean': 'bool',
-      'Date': 'DateTime',
-      'Variant': 'object',
-      'Object': 'object',
+      Integer: 'int',
+      Long: 'long',
+      Single: 'float',
+      Double: 'double',
+      String: 'string',
+      Boolean: 'bool',
+      Date: 'DateTime',
+      Variant: 'object',
+      Object: 'object',
     };
     return typeMap[vb6Type] || 'object';
   };
 
   const mapVB6TypeToTypeScript = (vb6Type: string): string => {
     const typeMap: Record<string, string> = {
-      'Integer': 'number',
-      'Long': 'number',
-      'Single': 'number',
-      'Double': 'number',
-      'String': 'string',
-      'Boolean': 'boolean',
-      'Date': 'Date',
-      'Variant': 'any',
-      'Object': 'any',
+      Integer: 'number',
+      Long: 'number',
+      Single: 'number',
+      Double: 'number',
+      String: 'string',
+      Boolean: 'boolean',
+      Date: 'Date',
+      Variant: 'any',
+      Object: 'any',
     };
     return typeMap[vb6Type] || 'any';
   };
@@ -483,14 +475,16 @@ export const AdvancedCodeConverter: React.FC = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col"
-              onClick={(e) => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}
             >
               {/* Header */}
               <div className="p-6 border-b dark:border-gray-800">
                 <div className="flex justify-between items-center">
                   <div>
                     <h2 className="text-2xl font-bold">Advanced Code Converter</h2>
-                    <p className="text-gray-600 dark:text-gray-400">Convert VB6 to modern languages with AI optimization</p>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Convert VB6 to modern languages with AI optimization
+                    </p>
                   </div>
                   <button
                     onClick={() => setIsOpen(false)}
@@ -519,7 +513,9 @@ export const AdvancedCodeConverter: React.FC = () => {
                     >
                       <div className="text-3xl mb-2">{target.icon}</div>
                       <div className="font-semibold">{target.name}</div>
-                      <div className="text-xs text-gray-600 dark:text-gray-400">{target.framework}</div>
+                      <div className="text-xs text-gray-600 dark:text-gray-400">
+                        {target.framework}
+                      </div>
                     </motion.button>
                   ))}
                 </div>
@@ -534,7 +530,9 @@ export const AdvancedCodeConverter: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={options.modernizeSyntax}
-                        onChange={(e) => setOptions({ ...options, modernizeSyntax: e.target.checked })}
+                        onChange={e =>
+                          setOptions({ ...options, modernizeSyntax: e.target.checked })
+                        }
                         className="rounded"
                       />
                       <span>Modernize syntax</span>
@@ -543,7 +541,7 @@ export const AdvancedCodeConverter: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={options.useAsync}
-                        onChange={(e) => setOptions({ ...options, useAsync: e.target.checked })}
+                        onChange={e => setOptions({ ...options, useAsync: e.target.checked })}
                         className="rounded"
                       />
                       <span>Use async/await</span>
@@ -552,7 +550,9 @@ export const AdvancedCodeConverter: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={options.addTypeAnnotations}
-                        onChange={(e) => setOptions({ ...options, addTypeAnnotations: e.target.checked })}
+                        onChange={e =>
+                          setOptions({ ...options, addTypeAnnotations: e.target.checked })
+                        }
                         className="rounded"
                       />
                       <span>Add type annotations</span>
@@ -561,7 +561,9 @@ export const AdvancedCodeConverter: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={options.optimizePerformance}
-                        onChange={(e) => setOptions({ ...options, optimizePerformance: e.target.checked })}
+                        onChange={e =>
+                          setOptions({ ...options, optimizePerformance: e.target.checked })
+                        }
                         className="rounded"
                       />
                       <span>Optimize performance</span>
@@ -570,7 +572,9 @@ export const AdvancedCodeConverter: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={options.includeComments}
-                        onChange={(e) => setOptions({ ...options, includeComments: e.target.checked })}
+                        onChange={e =>
+                          setOptions({ ...options, includeComments: e.target.checked })
+                        }
                         className="rounded"
                       />
                       <span>Include comments</span>
@@ -579,20 +583,24 @@ export const AdvancedCodeConverter: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={options.preserveStructure}
-                        onChange={(e) => setOptions({ ...options, preserveStructure: e.target.checked })}
+                        onChange={e =>
+                          setOptions({ ...options, preserveStructure: e.target.checked })
+                        }
                         className="rounded"
                       />
                       <span>Preserve structure</span>
                     </label>
                   </div>
-                  
+
                   {targetLanguage.framework && (
                     <div className="mt-4">
                       <label className="block">
                         <span className="text-sm font-medium">Target Framework</span>
                         <select
                           value={options.targetFramework}
-                          onChange={(e) => setOptions({ ...options, targetFramework: e.target.value })}
+                          onChange={e =>
+                            setOptions({ ...options, targetFramework: e.target.value })
+                          }
                           className="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700"
                         >
                           <option value="">Default</option>
@@ -627,7 +635,7 @@ export const AdvancedCodeConverter: React.FC = () => {
                   <div className="flex-1">
                     <MonacoEditor
                       value={sourceCode}
-                      onChange={(value) => setSourceCode(value || '')}
+                      onChange={value => setSourceCode(value || '')}
                       language="vb"
                       theme="vs-dark"
                       options={{
@@ -642,7 +650,9 @@ export const AdvancedCodeConverter: React.FC = () => {
                 <div className="w-1/2 flex flex-col">
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
                     <h4 className="font-semibold">
-                      {targetLanguage ? `${targetLanguage.name} Output` : 'Select a target language'}
+                      {targetLanguage
+                        ? `${targetLanguage.name} Output`
+                        : 'Select a target language'}
                     </h4>
                     {convertedCode && (
                       <div className="flex gap-2">
@@ -682,7 +692,9 @@ export const AdvancedCodeConverter: React.FC = () => {
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full text-gray-500">
-                        {targetLanguage ? 'Click Convert to see the result' : 'Select a target language first'}
+                        {targetLanguage
+                          ? 'Click Convert to see the result'
+                          : 'Select a target language first'}
                       </div>
                     )}
                   </div>
@@ -695,11 +707,13 @@ export const AdvancedCodeConverter: React.FC = () => {
                   <div>
                     {result && (
                       <div className="flex items-center gap-4">
-                        <div className={`px-3 py-1 rounded-full text-sm ${
-                          result.success
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                            : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                        }`}>
+                        <div
+                          className={`px-3 py-1 rounded-full text-sm ${
+                            result.success
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                              : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                          }`}
+                        >
                           {result.success ? 'Conversion Successful' : 'Conversion Failed'}
                         </div>
                         {result.statistics && (
@@ -728,7 +742,7 @@ export const AdvancedCodeConverter: React.FC = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 {/* Warnings and Errors */}
                 {result && (result.warnings.length > 0 || result.errors.length > 0) && (
                   <div className="mt-4 space-y-2">

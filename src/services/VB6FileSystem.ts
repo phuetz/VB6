@@ -8,24 +8,24 @@ import { createLogger } from './LoggingService';
 const logger = createLogger('FileSystem');
 
 export enum VB6FileMode {
-  Input = 1,      // For Input
-  Output = 2,     // For Output  
-  Random = 4,     // For Random
-  Append = 8,     // For Append
-  Binary = 32     // For Binary
+  Input = 1, // For Input
+  Output = 2, // For Output
+  Random = 4, // For Random
+  Append = 8, // For Append
+  Binary = 32, // For Binary
 }
 
 export enum VB6FileAccess {
-  Read = 1,       // Read
-  Write = 2,      // Write
-  ReadWrite = 3   // Read Write
+  Read = 1, // Read
+  Write = 2, // Write
+  ReadWrite = 3, // Read Write
 }
 
 export enum VB6LockType {
-  Shared = 0,     // Shared
-  LockRead = 1,   // Lock Read
-  LockWrite = 2,  // Lock Write
-  LockReadWrite = 3 // Lock Read Write
+  Shared = 0, // Shared
+  LockRead = 1, // Lock Read
+  LockWrite = 2, // Lock Write
+  LockReadWrite = 3, // Lock Read Write
 }
 
 export interface VB6FileHandle {
@@ -58,7 +58,7 @@ export class VB6FileSystem {
   private openFiles: Map<number, VB6FileHandle> = new Map();
   private virtualFiles: Map<string, ArrayBuffer> = new Map();
   private nextFileNumber: number = 1;
-  
+
   // VB6 File attribute constants
   static readonly vbNormal = 0;
   static readonly vbReadOnly = 1;
@@ -77,34 +77,39 @@ export class VB6FileSystem {
    */
   private initializeVirtualFiles(): void {
     // Create some sample files
-    const sampleText = new TextEncoder().encode("Hello VB6 World!\r\nThis is a test file.\r\n");
-    this.virtualFiles.set("C:\\TEST.TXT", sampleText.buffer);
-    
+    const sampleText = new TextEncoder().encode('Hello VB6 World!\r\nThis is a test file.\r\n');
+    this.virtualFiles.set('C:\\TEST.TXT', sampleText.buffer);
+
     const sampleData = new ArrayBuffer(100);
     new Uint8Array(sampleData).fill(65); // Fill with 'A'
-    this.virtualFiles.set("C:\\DATA.DAT", sampleData);
+    this.virtualFiles.set('C:\\DATA.DAT', sampleData);
   }
 
   /**
    * VB6 Open statement
    * Open pathname For mode [Access access] [lock] As [#]filenumber [Len=reclength]
    */
-  open(pathname: string, mode: VB6FileMode, access: VB6FileAccess = VB6FileAccess.ReadWrite, 
-       lock: VB6LockType = VB6LockType.Shared, fileNumber?: number, recordLength: number = 128): number {
-    
+  open(
+    pathname: string,
+    mode: VB6FileMode,
+    access: VB6FileAccess = VB6FileAccess.ReadWrite,
+    lock: VB6LockType = VB6LockType.Shared,
+    fileNumber?: number,
+    recordLength: number = 128
+  ): number {
     const fileNum = fileNumber || this.getFreeFileNumber();
-    
+
     if (this.openFiles.has(fileNum)) {
       throw new Error(`File number ${fileNum} already in use`);
     }
 
     // Normalize path
     const normalizedPath = this.normalizePath(pathname);
-    
+
     // Create or get file buffer
     let buffer: ArrayBuffer;
     let textContent: string | undefined;
-    
+
     if (mode === VB6FileMode.Output || mode === VB6FileMode.Append) {
       // Create new file or truncate existing
       if (mode === VB6FileMode.Output || !this.virtualFiles.has(normalizedPath)) {
@@ -136,7 +141,7 @@ export class VB6FileSystem {
       isOpen: true,
       buffer,
       textContent,
-      encoding: 'windows-1252'
+      encoding: 'windows-1252',
     };
 
     this.openFiles.set(fileNum, handle);
@@ -167,8 +172,12 @@ export class VB6FileSystem {
    * Close individual file and save changes
    */
   private closeFile(handle: VB6FileHandle): void {
-    if (handle.mode === VB6FileMode.Output || handle.mode === VB6FileMode.Append || 
-        handle.mode === VB6FileMode.Random || handle.mode === VB6FileMode.Binary) {
+    if (
+      handle.mode === VB6FileMode.Output ||
+      handle.mode === VB6FileMode.Append ||
+      handle.mode === VB6FileMode.Random ||
+      handle.mode === VB6FileMode.Binary
+    ) {
       // Save changes back to virtual file system
       this.virtualFiles.set(handle.filename, handle.buffer.slice(0));
     }
@@ -232,7 +241,7 @@ export class VB6FileSystem {
       // Read until delimiter or EOF
       const remaining = handle.textContent.substring(handle.position);
       const delimiterIndex = remaining.search(/[,\r\n]/);
-      
+
       if (delimiterIndex === -1) {
         handle.position = handle.textContent.length;
         return remaining.trim();
@@ -240,8 +249,10 @@ export class VB6FileSystem {
         const result = remaining.substring(0, delimiterIndex).trim();
         handle.position += delimiterIndex + 1;
         // Skip additional whitespace
-        while (handle.position < handle.textContent.length && 
-               /[\s,]/.test(handle.textContent[handle.position])) {
+        while (
+          handle.position < handle.textContent.length &&
+          /[\s,]/.test(handle.textContent[handle.position])
+        ) {
           handle.position++;
         }
         return result;
@@ -273,7 +284,7 @@ export class VB6FileSystem {
 
     const remaining = handle.textContent.substring(handle.position);
     const lineEndIndex = remaining.search(/\r?\n/);
-    
+
     if (lineEndIndex === -1) {
       handle.position = handle.textContent.length;
       return remaining;
@@ -320,7 +331,7 @@ export class VB6FileSystem {
       }
       return v?.toString() ?? '';
     });
-    
+
     const text = formattedValues.join(',') + '\r\n';
     this.writeText(handle, text);
   }
@@ -393,7 +404,8 @@ export class VB6FileSystem {
   getFreeFileNumber(): number {
     while (this.openFiles.has(this.nextFileNumber)) {
       this.nextFileNumber++;
-      if (this.nextFileNumber > 511) { // VB6 limit
+      if (this.nextFileNumber > 511) {
+        // VB6 limit
         this.nextFileNumber = 1;
       }
     }
@@ -472,12 +484,12 @@ export class VB6FileSystem {
   fileCopy(source: string, destination: string): void {
     const srcPath = this.normalizePath(source);
     const destPath = this.normalizePath(destination);
-    
+
     const buffer = this.virtualFiles.get(srcPath);
     if (!buffer) {
       throw new Error(`File not found: ${source}`);
     }
-    
+
     this.virtualFiles.set(destPath, buffer.slice(0));
   }
 
@@ -498,12 +510,12 @@ export class VB6FileSystem {
   name(oldPathname: string, newPathname: string): void {
     const oldPath = this.normalizePath(oldPathname);
     const newPath = this.normalizePath(newPathname);
-    
+
     const buffer = this.virtualFiles.get(oldPath);
     if (!buffer) {
       throw new Error(`File not found: ${oldPathname}`);
     }
-    
+
     this.virtualFiles.set(newPath, buffer);
     this.virtualFiles.delete(oldPath);
   }
@@ -531,7 +543,7 @@ export class VB6FileSystem {
     }
 
     const view = new DataView(handle.buffer, handle.position);
-    view.setUint8(0, variable & 0xFF);
+    view.setUint8(0, variable & 0xff);
     handle.position += 1;
   }
 
@@ -545,10 +557,13 @@ export class VB6FileSystem {
     }
 
     // Simplified - read one record
-    const recordData = new Uint8Array(handle.buffer, handle.position, 
-                                     Math.min(handle.recordLength, handle.buffer.byteLength - handle.position));
+    const recordData = new Uint8Array(
+      handle.buffer,
+      handle.position,
+      Math.min(handle.recordLength, handle.buffer.byteLength - handle.position)
+    );
     handle.position += handle.recordLength;
-    
+
     return recordData;
   }
 
@@ -568,12 +583,12 @@ export class VB6FileSystem {
     // Simplified - write variable as bytes
     const recordData = new Uint8Array(handle.buffer, handle.position, handle.recordLength);
     recordData.fill(0); // Clear record
-    
+
     if (variable !== undefined) {
       const bytes = new TextEncoder().encode(variable.toString());
       recordData.set(bytes.slice(0, Math.min(bytes.length, handle.recordLength)));
     }
-    
+
     handle.position += handle.recordLength;
   }
 
@@ -586,13 +601,14 @@ export class VB6FileSystem {
       handle.textContent += text;
     } else {
       // Insert at current position
-      handle.textContent = handle.textContent.substring(0, handle.position) + 
-                           text + 
-                           handle.textContent.substring(handle.position);
+      handle.textContent =
+        handle.textContent.substring(0, handle.position) +
+        text +
+        handle.textContent.substring(handle.position);
     }
 
     handle.position += text.length;
-    
+
     // Update buffer
     const encoder = new TextEncoder();
     const encoded = encoder.encode(handle.textContent);
@@ -602,15 +618,15 @@ export class VB6FileSystem {
   private normalizePath(pathname: string): string {
     // Convert to uppercase and ensure proper format
     let normalized = pathname.toUpperCase();
-    
+
     // Add C:\ if no drive specified
     if (!normalized.match(/^[A-Z]:/)) {
       normalized = 'C:\\' + normalized;
     }
-    
+
     // Convert forward slashes to backslashes
     normalized = normalized.replace(/\//g, '\\');
-    
+
     return normalized;
   }
 

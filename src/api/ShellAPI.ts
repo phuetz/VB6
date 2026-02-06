@@ -49,7 +49,7 @@ export enum ShellSpecialFolder {
   CSIDL_COMMON_TEMPLATES = 0x002d,
   CSIDL_COMMON_DOCUMENTS = 0x002e,
   CSIDL_COMMON_ADMINTOOLS = 0x002f,
-  CSIDL_ADMINTOOLS = 0x0030
+  CSIDL_ADMINTOOLS = 0x0030,
 }
 
 export enum ShellExecuteShow {
@@ -66,7 +66,7 @@ export enum ShellExecuteShow {
   SW_SHOWNA = 8,
   SW_RESTORE = 9,
   SW_SHOWDEFAULT = 10,
-  SW_FORCEMINIMIZE = 11
+  SW_FORCEMINIMIZE = 11,
 }
 
 export enum ShellExecuteError {
@@ -80,7 +80,7 @@ export enum ShellExecuteError {
   SE_ERR_DDETIMEOUT = 28,
   SE_ERR_DDEFAIL = 29,
   SE_ERR_DDEBUSY = 30,
-  SE_ERR_NOASSOC = 31
+  SE_ERR_NOASSOC = 31,
 }
 
 export enum BrowseInfoFlags {
@@ -96,7 +96,7 @@ export enum BrowseInfoFlags {
   BIF_BROWSEFORCOMPUTER = 0x1000,
   BIF_BROWSEFORPRINTER = 0x2000,
   BIF_BROWSEINCLUDEFILES = 0x4000,
-  BIF_SHAREABLE = 0x8000
+  BIF_SHAREABLE = 0x8000,
 }
 
 export enum FileOperationFlags {
@@ -111,14 +111,14 @@ export enum FileOperationFlags {
   FOF_SIMPLEPROGRESS = 0x0100,
   FOF_NOCONFIRMMKDIR = 0x0200,
   FOF_NOERRORUI = 0x0400,
-  FOF_NOCOPYSECURITYATTRIBS = 0x0800
+  FOF_NOCOPYSECURITYATTRIBS = 0x0800,
 }
 
 export enum FileOperationType {
   FO_MOVE = 0x0001,
   FO_COPY = 0x0002,
   FO_DELETE = 0x0003,
-  FO_RENAME = 0x0004
+  FO_RENAME = 0x0004,
 }
 
 // Shell Structures
@@ -215,19 +215,43 @@ class ShellLink implements IShellLink {
   private showCmd = ShellExecuteShow.SW_SHOWNORMAL;
   private iconPath = '';
   private iconIndex = 0;
-  
-  GetPath(): string { return this.path; }
-  SetPath(path: string): void { this.path = path; }
-  GetDescription(): string { return this.description; }
-  SetDescription(description: string): void { this.description = description; }
-  GetWorkingDirectory(): string { return this.workingDirectory; }
-  SetWorkingDirectory(directory: string): void { this.workingDirectory = directory; }
-  GetArguments(): string { return this.arguments; }
-  SetArguments(args: string): void { this.arguments = args; }
-  GetHotkey(): number { return this.hotkey; }
-  SetHotkey(hotkey: number): void { this.hotkey = hotkey; }
-  GetShowCmd(): number { return this.showCmd; }
-  SetShowCmd(showCmd: number): void { this.showCmd = showCmd; }
+
+  GetPath(): string {
+    return this.path;
+  }
+  SetPath(path: string): void {
+    this.path = path;
+  }
+  GetDescription(): string {
+    return this.description;
+  }
+  SetDescription(description: string): void {
+    this.description = description;
+  }
+  GetWorkingDirectory(): string {
+    return this.workingDirectory;
+  }
+  SetWorkingDirectory(directory: string): void {
+    this.workingDirectory = directory;
+  }
+  GetArguments(): string {
+    return this.arguments;
+  }
+  SetArguments(args: string): void {
+    this.arguments = args;
+  }
+  GetHotkey(): number {
+    return this.hotkey;
+  }
+  SetHotkey(hotkey: number): void {
+    this.hotkey = hotkey;
+  }
+  GetShowCmd(): number {
+    return this.showCmd;
+  }
+  SetShowCmd(showCmd: number): void {
+    this.showCmd = showCmd;
+  }
   GetIconLocation(): { path: string; index: number } {
     return { path: this.iconPath, index: this.iconIndex };
   }
@@ -235,7 +259,7 @@ class ShellLink implements IShellLink {
     this.iconPath = path;
     this.iconIndex = index;
   }
-  
+
   Save(filename: string): void {
     // In browser, we can create a .url file
     const urlContent = [
@@ -243,9 +267,9 @@ class ShellLink implements IShellLink {
       `URL=file:///${this.path.replace(/\\/g, '/')}`,
       `WorkingDirectory=${this.workingDirectory}`,
       `IconFile=${this.iconPath}`,
-      `IconIndex=${this.iconIndex}`
+      `IconIndex=${this.iconIndex}`,
     ].join('\n');
-    
+
     const blob = new Blob([urlContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -256,7 +280,7 @@ class ShellLink implements IShellLink {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
-  
+
   Load(filename: string): void {
     // Cannot load files in browser
     throw new Error('Loading shortcuts not supported in browser');
@@ -267,18 +291,18 @@ export class ShellAPI extends EventEmitter {
   private static instance: ShellAPI;
   private trayIcons: Map<number, NOTIFYICONDATA> = new Map();
   private nextIconId = 1;
-  
+
   private constructor() {
     super();
   }
-  
+
   public static getInstance(): ShellAPI {
     if (!ShellAPI.instance) {
       ShellAPI.instance = new ShellAPI();
     }
     return ShellAPI.instance;
   }
-  
+
   // ShellExecute - Execute a file or URL
   public ShellExecute(
     hwnd: number,
@@ -290,14 +314,14 @@ export class ShellAPI extends EventEmitter {
   ): number {
     try {
       const operation = lpOperation?.toLowerCase() || 'open';
-      
+
       // Handle URLs
       if (lpFile.match(/^https?:\/\//i) || lpFile.match(/^mailto:/i)) {
         window.open(lpFile, '_blank');
         this.emit('shellExecute', { operation, file: lpFile, parameters: lpParameters });
         return 33; // Success
       }
-      
+
       // Handle file operations
       switch (operation) {
         case 'open':
@@ -310,7 +334,7 @@ export class ShellAPI extends EventEmitter {
             return ShellExecuteError.SE_ERR_NOASSOC;
           }
           break;
-          
+
         case 'print':
           if (lpFile.match(/\.(txt|html|htm|pdf)$/i)) {
             const printWindow = window.open(lpFile, '_blank');
@@ -319,16 +343,16 @@ export class ShellAPI extends EventEmitter {
             }
           }
           break;
-          
+
         case 'edit':
           console.warn('Edit operation not supported in browser');
           return ShellExecuteError.SE_ERR_NOASSOC;
-          
+
         default:
           console.warn(`Unknown operation: ${operation}`);
           return ShellExecuteError.SE_ERR_NOASSOC;
       }
-      
+
       this.emit('shellExecute', { operation, file: lpFile, parameters: lpParameters });
       return 33; // Success
     } catch (error) {
@@ -336,7 +360,7 @@ export class ShellAPI extends EventEmitter {
       return ShellExecuteError.SE_ERR_ACCESSDENIED;
     }
   }
-  
+
   // ShellExecuteEx - Extended shell execute
   public ShellExecuteEx(params: {
     lpFile: string;
@@ -356,14 +380,14 @@ export class ShellAPI extends EventEmitter {
       params.lpDirectory || null,
       params.nShow || ShellExecuteShow.SW_SHOWNORMAL
     );
-    
+
     return {
       success: result > 32,
       hInstApp: result,
-      hProcess: result > 32 ? Date.now() : undefined
+      hProcess: result > 32 ? Date.now() : undefined,
     };
   }
-  
+
   // SHGetSpecialFolderPath - Get special folder path
   public SHGetSpecialFolderPath(hwnd: number, nFolder: ShellSpecialFolder): string | null {
     try {
@@ -416,7 +440,7 @@ export class ShellAPI extends EventEmitter {
       return null;
     }
   }
-  
+
   // SHBrowseForFolder - Browse for folder dialog
   public SHBrowseForFolder(lpbi: BROWSEINFO): string | null {
     try {
@@ -426,9 +450,9 @@ export class ShellAPI extends EventEmitter {
       input.webkitdirectory = true;
       input.directory = true;
       input.multiple = false;
-      
-      return new Promise<string | null>((resolve) => {
-        input.onchange = (e) => {
+
+      return new Promise<string | null>(resolve => {
+        input.onchange = e => {
           const files = (e.target as HTMLInputElement).files;
           if (files && files.length > 0) {
             // Extract directory path from first file
@@ -439,7 +463,7 @@ export class ShellAPI extends EventEmitter {
             resolve(null);
           }
         };
-        
+
         input.oncancel = () => resolve(null);
         input.click();
       });
@@ -448,7 +472,7 @@ export class ShellAPI extends EventEmitter {
       return null;
     }
   }
-  
+
   // SHFileOperation - File operations
   public async SHFileOperation(lpFileOp: SHFILEOPSTRUCT): Promise<number> {
     try {
@@ -463,17 +487,19 @@ export class ShellAPI extends EventEmitter {
               return 1; // User cancelled
             }
           }
-          
+
           this.emit('fileOperation', { type: 'delete', files: lpFileOp.pFrom });
           return 0; // Success
-          
+
         case FileOperationType.FO_COPY:
         case FileOperationType.FO_MOVE:
         case FileOperationType.FO_RENAME:
           // These operations cannot be performed in browser
-          console.warn(`File operation ${FileOperationType[lpFileOp.wFunc]} not supported in browser`);
+          console.warn(
+            `File operation ${FileOperationType[lpFileOp.wFunc]} not supported in browser`
+          );
           return ShellExecuteError.SE_ERR_ACCESSDENIED;
-          
+
         default:
           return ShellExecuteError.SE_ERR_NOASSOC;
       }
@@ -482,7 +508,7 @@ export class ShellAPI extends EventEmitter {
       return ShellExecuteError.SE_ERR_ACCESSDENIED;
     }
   }
-  
+
   // SHGetFileInfo - Get file information
   public SHGetFileInfo(
     pszPath: string,
@@ -492,43 +518,43 @@ export class ShellAPI extends EventEmitter {
     try {
       const extension = pszPath.substring(pszPath.lastIndexOf('.') + 1).toLowerCase();
       const filename = pszPath.substring(pszPath.lastIndexOf('/') + 1);
-      
+
       // Map common file extensions to types
       const typeMap: { [key: string]: string } = {
-        'txt': 'Text Document',
-        'doc': 'Microsoft Word Document',
-        'docx': 'Microsoft Word Document',
-        'xls': 'Microsoft Excel Spreadsheet',
-        'xlsx': 'Microsoft Excel Spreadsheet',
-        'pdf': 'PDF Document',
-        'jpg': 'JPEG Image',
-        'jpeg': 'JPEG Image',
-        'png': 'PNG Image',
-        'gif': 'GIF Image',
-        'exe': 'Application',
-        'dll': 'Dynamic Link Library',
-        'zip': 'Compressed Folder',
-        'mp3': 'MP3 Audio File',
-        'mp4': 'MP4 Video File',
-        'html': 'HTML Document',
-        'js': 'JavaScript File',
-        'ts': 'TypeScript File',
-        'css': 'Cascading Style Sheet'
+        txt: 'Text Document',
+        doc: 'Microsoft Word Document',
+        docx: 'Microsoft Word Document',
+        xls: 'Microsoft Excel Spreadsheet',
+        xlsx: 'Microsoft Excel Spreadsheet',
+        pdf: 'PDF Document',
+        jpg: 'JPEG Image',
+        jpeg: 'JPEG Image',
+        png: 'PNG Image',
+        gif: 'GIF Image',
+        exe: 'Application',
+        dll: 'Dynamic Link Library',
+        zip: 'Compressed Folder',
+        mp3: 'MP3 Audio File',
+        mp4: 'MP4 Video File',
+        html: 'HTML Document',
+        js: 'JavaScript File',
+        ts: 'TypeScript File',
+        css: 'Cascading Style Sheet',
       };
-      
+
       return {
         hIcon: 0, // Icon handle not available in browser
         iIcon: 0,
         dwAttributes: 0,
         szDisplayName: filename,
-        szTypeName: typeMap[extension] || `${extension.toUpperCase()} File`
+        szTypeName: typeMap[extension] || `${extension.toUpperCase()} File`,
       };
     } catch (error) {
       this.emit('error', error);
       return null;
     }
   }
-  
+
   // Shell_NotifyIcon - System tray icon operations
   public Shell_NotifyIcon(dwMessage: number, lpData: NOTIFYICONDATA): boolean {
     try {
@@ -536,21 +562,22 @@ export class ShellAPI extends EventEmitter {
         case 0: // NIM_ADD
           this.trayIcons.set(lpData.uID, { ...lpData });
           this.emit('trayIconAdded', lpData);
-          
+
           // Create notification if info provided
           if (lpData.szInfo && 'Notification' in window) {
             Notification.requestPermission().then(permission => {
               if (permission === 'granted') {
                 new Notification(lpData.szInfoTitle || 'Notification', {
                   body: lpData.szInfo,
-                  icon: '/favicon.ico' // Default icon
+                  icon: '/favicon.ico', // Default icon
                 });
               }
             });
           }
           return true;
-          
-        case 1: { // NIM_MODIFY
+
+        case 1: {
+          // NIM_MODIFY
           const existing = this.trayIcons.get(lpData.uID);
           if (existing) {
             this.trayIcons.set(lpData.uID, { ...existing, ...lpData });
@@ -559,15 +586,16 @@ export class ShellAPI extends EventEmitter {
           }
           return false;
         }
-          
-        case 2: { // NIM_DELETE
+
+        case 2: {
+          // NIM_DELETE
           const deleted = this.trayIcons.delete(lpData.uID);
           if (deleted) {
             this.emit('trayIconDeleted', lpData.uID);
           }
           return deleted;
         }
-          
+
         default:
           return false;
       }
@@ -576,12 +604,12 @@ export class ShellAPI extends EventEmitter {
       return false;
     }
   }
-  
+
   // CreateShellLink - Create shell link
   public CreateShellLink(): IShellLink {
     return new ShellLink();
   }
-  
+
   // GetShellApplication - Get shell application interface
   public GetShellApplication(): IShellApplication {
     return {
@@ -589,98 +617,98 @@ export class ShellAPI extends EventEmitter {
         // Return open windows (limited in browser)
         return [];
       },
-      
+
       Open: (directory: string): void => {
         this.ShellExecute(0, 'open', directory, null, null, ShellExecuteShow.SW_SHOWNORMAL);
       },
-      
+
       Explore(directory: string): void {
         self.ShellExecute(0, 'explore', directory, null, null, ShellExecuteShow.SW_SHOWNORMAL);
       },
-      
+
       MinimizeAll(): void {
         self.emit('minimizeAll');
       },
-      
+
       UndoMinimizeAll(): void {
         self.emit('undoMinimizeAll');
       },
-      
+
       FileRun(): void {
         self.emit('fileRun');
       },
-      
+
       CascadeWindows(): void {
         self.emit('cascadeWindows');
       },
-      
+
       TileVertically(): void {
         self.emit('tileVertically');
       },
-      
+
       TileHorizontally(): void {
         self.emit('tileHorizontally');
       },
-      
+
       ShutdownWindows(): void {
         if (confirm('Simulate Windows shutdown?')) {
           self.emit('shutdownWindows');
         }
       },
-      
+
       FindFiles(): void {
         self.emit('findFiles');
       },
-      
+
       FindComputer(): void {
         self.emit('findComputer');
       },
-      
+
       SetTime(): void {
         self.emit('setTime');
       },
-      
+
       ControlPanelItem(item: string): void {
         self.emit('controlPanelItem', item);
-      }
+      },
     };
   }
-  
+
   // ExtractIcon - Extract icon from file
   public ExtractIcon(hInst: number, lpszFile: string, nIconIndex: number): number {
     // Icons cannot be extracted in browser
     return 0;
   }
-  
+
   // FindExecutable - Find executable for file
   public FindExecutable(lpFile: string, lpDirectory: string | null): string | null {
     const extension = lpFile.substring(lpFile.lastIndexOf('.') + 1).toLowerCase();
-    
+
     // Map common file extensions to applications
     const appMap: { [key: string]: string } = {
-      'txt': 'notepad.exe',
-      'doc': 'winword.exe',
-      'docx': 'winword.exe',
-      'xls': 'excel.exe',
-      'xlsx': 'excel.exe',
-      'pdf': 'AcroRd32.exe',
-      'html': 'iexplore.exe',
-      'htm': 'iexplore.exe',
-      'jpg': 'mspaint.exe',
-      'jpeg': 'mspaint.exe',
-      'png': 'mspaint.exe',
-      'gif': 'mspaint.exe',
-      'bmp': 'mspaint.exe'
+      txt: 'notepad.exe',
+      doc: 'winword.exe',
+      docx: 'winword.exe',
+      xls: 'excel.exe',
+      xlsx: 'excel.exe',
+      pdf: 'AcroRd32.exe',
+      html: 'iexplore.exe',
+      htm: 'iexplore.exe',
+      jpg: 'mspaint.exe',
+      jpeg: 'mspaint.exe',
+      png: 'mspaint.exe',
+      gif: 'mspaint.exe',
+      bmp: 'mspaint.exe',
     };
-    
+
     return appMap[extension] || null;
   }
-  
+
   // GetOpenFileName - File open dialog
   public async GetOpenFileName(filter?: string, defaultExt?: string): Promise<string | null> {
     const input = document.createElement('input');
     input.type = 'file';
-    
+
     if (filter) {
       // Convert VB6 filter format to HTML accept attribute
       const extensions = filter.match(/\*\.(\w+)/g);
@@ -688,18 +716,18 @@ export class ShellAPI extends EventEmitter {
         input.accept = extensions.map(ext => ext.replace('*', '')).join(',');
       }
     }
-    
-    return new Promise<string | null>((resolve) => {
-      input.onchange = (e) => {
+
+    return new Promise<string | null>(resolve => {
+      input.onchange = e => {
         const file = (e.target as HTMLInputElement).files?.[0];
         resolve(file ? file.name : null);
       };
-      
+
       input.oncancel = () => resolve(null);
       input.click();
     });
   }
-  
+
   // GetSaveFileName - File save dialog
   public async GetSaveFileName(
     defaultName?: string,
@@ -710,12 +738,12 @@ export class ShellAPI extends EventEmitter {
     const filename = prompt('Save as:', defaultName || 'untitled' + (defaultExt || '.txt'));
     return filename;
   }
-  
+
   // DragAcceptFiles - Enable drag and drop
   public DragAcceptFiles(hwnd: number, fAccept: boolean): void {
     this.emit('dragAcceptFiles', { hwnd, accept: fAccept });
   }
-  
+
   // DragQueryFile - Query dropped files
   public DragQueryFile(hDrop: number, iFile: number): string[] {
     // This would be implemented with HTML5 drag and drop
@@ -726,7 +754,7 @@ export class ShellAPI extends EventEmitter {
 // VB6-compatible Shell functions
 export class Shell {
   private static api = ShellAPI.getInstance();
-  
+
   // Execute a program or document
   public static Execute(
     path: string,
@@ -744,17 +772,17 @@ export class Shell {
       show || ShellExecuteShow.SW_SHOWNORMAL
     );
   }
-  
+
   // Open a URL
   public static OpenURL(url: string): void {
     this.Execute(url);
   }
-  
+
   // Get special folder path
   public static GetSpecialFolder(folder: ShellSpecialFolder): string {
     return this.api.SHGetSpecialFolderPath(0, folder) || '';
   }
-  
+
   // Browse for folder
   public static async BrowseForFolder(
     title?: string,
@@ -768,12 +796,12 @@ export class Shell {
       ulFlags: BrowseInfoFlags.BIF_RETURNONLYFSDIRS | BrowseInfoFlags.BIF_NEWDIALOGSTYLE,
       lpfn: null,
       lParam: 0,
-      iImage: 0
+      iImage: 0,
     };
-    
+
     return await this.api.SHBrowseForFolder(browseInfo);
   }
-  
+
   // Create shortcut
   public static CreateShortcut(
     targetPath: string,
@@ -789,13 +817,9 @@ export class Shell {
     if (args) link.SetArguments(args);
     link.Save(shortcutPath);
   }
-  
+
   // Show notification
-  public static ShowNotification(
-    title: string,
-    message: string,
-    timeout?: number
-  ): boolean {
+  public static ShowNotification(title: string, message: string, timeout?: number): boolean {
     const iconData: NOTIFYICONDATA = {
       cbSize: 0,
       hWnd: 0,
@@ -809,18 +833,18 @@ export class Shell {
       szInfo: message,
       uTimeout: timeout || 5000,
       szInfoTitle: title,
-      dwInfoFlags: 0
+      dwInfoFlags: 0,
     };
-    
+
     return this.api.Shell_NotifyIcon(0, iconData);
   }
-  
+
   // Get file type
   public static GetFileType(filename: string): string {
     const info = this.api.SHGetFileInfo(filename, 0, 0);
     return info?.szTypeName || 'Unknown';
   }
-  
+
   // Find associated program
   public static FindAssociatedProgram(filename: string): string | null {
     return this.api.FindExecutable(filename, null);

@@ -1,6 +1,6 @@
 /**
  * Collaboration Cursors - Real-time cursor and selection visualization
- * 
+ *
  * Features:
  * - Live cursor positions from all collaborators
  * - Selection ranges with user colors
@@ -38,7 +38,7 @@ const CollaborationCursors: React.FC<CollaborationCursorsProps> = ({
   collaborators,
   currentUserId,
   editorElement,
-  documentId
+  documentId,
 }) => {
   const [cursors, setCursors] = useState<CursorElement[]>([]);
   const [selections, setSelections] = useState<SelectionElement[]>([]);
@@ -55,10 +55,13 @@ const CollaborationCursors: React.FC<CollaborationCursorsProps> = ({
       for (const collaborator of collaborators) {
         // Skip current user
         if (collaborator.id === currentUserId) continue;
-        
+
         // Skip if not in current document
-        if (collaborator.cursor?.documentId !== documentId && 
-            collaborator.selection?.documentId !== documentId) continue;
+        if (
+          collaborator.cursor?.documentId !== documentId &&
+          collaborator.selection?.documentId !== documentId
+        )
+          continue;
 
         // Handle cursor
         if (collaborator.cursor && collaborator.cursor.documentId === documentId) {
@@ -74,7 +77,7 @@ const CollaborationCursors: React.FC<CollaborationCursorsProps> = ({
               position,
               color: collaborator.color,
               name: collaborator.name,
-              isVisible: collaborator.isOnline
+              isVisible: collaborator.isOnline,
             });
           }
         }
@@ -94,7 +97,7 @@ const CollaborationCursors: React.FC<CollaborationCursorsProps> = ({
               id: collaborator.id,
               bounds,
               color: collaborator.color,
-              name: collaborator.name
+              name: collaborator.name,
             });
           }
         }
@@ -108,7 +111,7 @@ const CollaborationCursors: React.FC<CollaborationCursorsProps> = ({
 
     // Update positions on scroll or resize
     const handleUpdate = () => updatePositions();
-    
+
     editorElement.addEventListener('scroll', handleUpdate);
     window.addEventListener('resize', handleUpdate);
 
@@ -131,18 +134,18 @@ const CollaborationCursors: React.FC<CollaborationCursorsProps> = ({
     try {
       // Try to access Monaco editor instance
       const monacoEditor = (editor as any)?._monacoEditor;
-      
+
       if (monacoEditor && monacoEditor.getScrolledVisiblePosition) {
         const position = monacoEditor.getScrolledVisiblePosition({
           lineNumber: line + 1, // Monaco uses 1-based line numbers
-          column: column + 1
+          column: column + 1,
         });
 
         if (position) {
           const editorRect = editor.getBoundingClientRect();
           return {
             x: position.left - editorRect.left,
-            y: position.top - editorRect.top
+            y: position.top - editorRect.top,
           };
         }
       }
@@ -150,14 +153,14 @@ const CollaborationCursors: React.FC<CollaborationCursorsProps> = ({
       // Fallback: estimate position based on font metrics
       const lineHeight = 18; // Approximate line height
       const charWidth = 7.2; // Approximate character width
-      
+
       const editorRect = editor.getBoundingClientRect();
       const scrollTop = editor.scrollTop || 0;
       const scrollLeft = editor.scrollLeft || 0;
 
       return {
-        x: (column * charWidth) - scrollLeft,
-        y: (line * lineHeight) - scrollTop
+        x: column * charWidth - scrollLeft,
+        y: line * lineHeight - scrollTop,
       };
     } catch (error) {
       console.warn('Failed to get cursor position:', error);
@@ -177,38 +180,38 @@ const CollaborationCursors: React.FC<CollaborationCursorsProps> = ({
       const bounds: DOMRect[] = [];
       const lineHeight = 18;
       const charWidth = 7.2;
-      
+
       const editorRect = editor.getBoundingClientRect();
       const scrollTop = editor.scrollTop || 0;
       const scrollLeft = editor.scrollLeft || 0;
 
       if (startLine === endLine) {
         // Single line selection
-        const x = (startColumn * charWidth) - scrollLeft;
-        const y = (startLine * lineHeight) - scrollTop;
+        const x = startColumn * charWidth - scrollLeft;
+        const y = startLine * lineHeight - scrollTop;
         const width = (endColumn - startColumn) * charWidth;
-        
+
         bounds.push(new DOMRect(x, y, width, lineHeight));
       } else {
         // Multi-line selection
         // First line
-        const firstLineX = (startColumn * charWidth) - scrollLeft;
-        const firstLineY = (startLine * lineHeight) - scrollTop;
+        const firstLineX = startColumn * charWidth - scrollLeft;
+        const firstLineY = startLine * lineHeight - scrollTop;
         const firstLineWidth = (100 - startColumn) * charWidth; // Estimate to end of line
-        
+
         bounds.push(new DOMRect(firstLineX, firstLineY, firstLineWidth, lineHeight));
 
         // Middle lines
         for (let line = startLine + 1; line < endLine; line++) {
-          const lineY = (line * lineHeight) - scrollTop;
+          const lineY = line * lineHeight - scrollTop;
           bounds.push(new DOMRect(-scrollLeft, lineY, 1000, lineHeight)); // Full line width
         }
 
         // Last line
         const lastLineX = -scrollLeft;
-        const lastLineY = (endLine * lineHeight) - scrollTop;
+        const lastLineY = endLine * lineHeight - scrollTop;
         const lastLineWidth = endColumn * charWidth;
-        
+
         bounds.push(new DOMRect(lastLineX, lastLineY, lastLineWidth, lineHeight));
       }
 
@@ -228,7 +231,7 @@ const CollaborationCursors: React.FC<CollaborationCursorsProps> = ({
       style={{ overflow: 'hidden' }}
     >
       {/* Selection highlights */}
-      {selections.map((selection) =>
+      {selections.map(selection =>
         selection.bounds.map((bound, index) => (
           <div
             key={`${selection.id}-selection-${index}`}
@@ -240,7 +243,7 @@ const CollaborationCursors: React.FC<CollaborationCursorsProps> = ({
               height: bound.height,
               backgroundColor: selection.color,
               pointerEvents: 'none',
-              transition: 'all 0.1s ease-out'
+              transition: 'all 0.1s ease-out',
             }}
           />
         ))
@@ -249,7 +252,7 @@ const CollaborationCursors: React.FC<CollaborationCursorsProps> = ({
       {/* Cursors */}
       {cursors
         .filter(cursor => cursor.isVisible)
-        .map((cursor) => (
+        .map(cursor => (
           <div
             key={`${cursor.id}-cursor`}
             className="absolute"
@@ -258,7 +261,7 @@ const CollaborationCursors: React.FC<CollaborationCursorsProps> = ({
               top: cursor.position.y,
               pointerEvents: 'none',
               transition: 'all 0.1s ease-out',
-              zIndex: 1000
+              zIndex: 1000,
             }}
           >
             {/* Cursor line */}
@@ -266,10 +269,10 @@ const CollaborationCursors: React.FC<CollaborationCursorsProps> = ({
               className="absolute w-0.5 h-5 animate-pulse"
               style={{
                 backgroundColor: cursor.color,
-                boxShadow: `0 0 4px ${cursor.color}40`
+                boxShadow: `0 0 4px ${cursor.color}40`,
               }}
             />
-            
+
             {/* User name label */}
             <div
               className="absolute top-0 left-1 px-2 py-1 rounded text-xs font-medium text-white whitespace-nowrap opacity-90 transform -translate-y-full"
@@ -278,7 +281,7 @@ const CollaborationCursors: React.FC<CollaborationCursorsProps> = ({
                 fontSize: '11px',
                 maxWidth: '120px',
                 overflow: 'hidden',
-                textOverflow: 'ellipsis'
+                textOverflow: 'ellipsis',
               }}
             >
               {cursor.name}
@@ -291,14 +294,14 @@ const CollaborationCursors: React.FC<CollaborationCursorsProps> = ({
                 borderLeft: `4px solid ${cursor.color}`,
                 borderTop: '4px solid transparent',
                 borderBottom: '4px solid transparent',
-                transform: 'translateX(-2px)'
+                transform: 'translateX(-2px)',
               }}
             />
           </div>
         ))}
 
       {/* Selection name labels */}
-      {selections.map((selection) => {
+      {selections.map(selection => {
         const firstBound = selection.bounds[0];
         if (!firstBound) return null;
 
@@ -315,7 +318,7 @@ const CollaborationCursors: React.FC<CollaborationCursorsProps> = ({
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               pointerEvents: 'none',
-              transition: 'all 0.1s ease-out'
+              transition: 'all 0.1s ease-out',
             }}
           >
             {selection.name} selected

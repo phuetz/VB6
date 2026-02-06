@@ -8,7 +8,7 @@ export enum DebugEventType {
   Stop = 'stop',
   Exception = 'exception',
   VariableChanged = 'variableChanged',
-  CallStackChanged = 'callStackChanged'
+  CallStackChanged = 'callStackChanged',
 }
 
 // Debug States
@@ -17,7 +17,7 @@ export enum DebugState {
   Running = 'running',
   Paused = 'paused',
   Stopped = 'stopped',
-  Error = 'error'
+  Error = 'error',
 }
 
 // Variable Types
@@ -33,7 +33,7 @@ export enum VariableType {
   Object = 'Object',
   Variant = 'Variant',
   Array = 'Array',
-  UserDefined = 'UserDefined'
+  UserDefined = 'UserDefined',
 }
 
 // Variable Scope
@@ -41,7 +41,7 @@ export enum VariableScope {
   Local = 'Local',
   Module = 'Module',
   Global = 'Global',
-  Static = 'Static'
+  Static = 'Static',
 }
 
 // Breakpoint
@@ -121,7 +121,7 @@ export class VB6DebugEngine extends EventEmitter {
   private activeSessionId: string | null = null;
   private breakpointCounter = 0;
   private watchCounter = 0;
-  
+
   // Runtime execution context
   private executionContext: {
     variables: Map<string, any>;
@@ -134,7 +134,7 @@ export class VB6DebugEngine extends EventEmitter {
     callStack: [],
     currentLine: 0,
     currentFile: '',
-    isRunning: false
+    isRunning: false,
   };
 
   public static getInstance(): VB6DebugEngine {
@@ -155,12 +155,12 @@ export class VB6DebugEngine extends EventEmitter {
       variables: new Map(),
       watchExpressions: [],
       breakpoints: new Map(),
-      startTime: new Date()
+      startTime: new Date(),
     };
-    
+
     this.sessions.set(sessionId, session);
     this.activeSessionId = sessionId;
-    
+
     this.emit('sessionCreated', session);
     return sessionId;
   }
@@ -202,7 +202,7 @@ export class VB6DebugEngine extends EventEmitter {
       enabled: true,
       condition,
       hitCount: 0,
-      temporary: false
+      temporary: false,
     };
 
     session.breakpoints.set(breakpoint.id, breakpoint);
@@ -250,12 +250,12 @@ export class VB6DebugEngine extends EventEmitter {
       expression,
       value: null,
       type: VariableType.Variant,
-      isValid: false
+      isValid: false,
     };
 
     // Try to evaluate immediately
     this.evaluateWatchExpression(watch);
-    
+
     session.watchExpressions.push(watch);
     this.emit('watchAdded', watch);
     return watch;
@@ -306,7 +306,7 @@ export class VB6DebugEngine extends EventEmitter {
   private evaluateExpression(expression: string): any {
     // Simple expression evaluator for VB6 syntax
     const trimmed = expression.trim();
-    
+
     // Handle literals
     if (trimmed === 'True') return true;
     if (trimmed === 'False') return false;
@@ -320,18 +320,18 @@ export class VB6DebugEngine extends EventEmitter {
     if (/^\d*\.\d+$/.test(trimmed)) {
       return parseFloat(trimmed);
     }
-    
+
     // Handle variables
     if (this.executionContext.variables.has(trimmed)) {
       return this.executionContext.variables.get(trimmed);
     }
-    
+
     // Handle simple expressions
     if (trimmed.includes('+')) {
       const parts = trimmed.split('+').map(p => this.evaluateExpression(p.trim()));
       return parts.reduce((a, b) => a + b);
     }
-    
+
     throw new Error(`Cannot evaluate expression: ${expression}`);
   }
 
@@ -354,7 +354,7 @@ export class VB6DebugEngine extends EventEmitter {
     if (!session) return [];
 
     const variables: VB6Variable[] = [];
-    
+
     // Get variables from current context
     this.executionContext.variables.forEach((value, name) => {
       const variable: VB6Variable = {
@@ -362,13 +362,13 @@ export class VB6DebugEngine extends EventEmitter {
         type: this.inferType(value),
         value,
         scope: VariableScope.Local, // Simplified
-        isArray: Array.isArray(value)
+        isArray: Array.isArray(value),
       };
-      
+
       if (variable.isArray) {
         variable.arrayBounds = [{ lower: 0, upper: (value as any[]).length - 1 }];
       }
-      
+
       variables.push(variable);
     });
 
@@ -394,7 +394,7 @@ export class VB6DebugEngine extends EventEmitter {
 
     // Build call stack from execution context
     const frames: VB6CallStackFrame[] = [];
-    
+
     this.executionContext.callStack.forEach((functionName, index) => {
       const frame: VB6CallStackFrame = {
         functionName,
@@ -404,7 +404,7 @@ export class VB6DebugEngine extends EventEmitter {
         module: 'Module1', // Simplified
         level: index,
         parameters: [],
-        locals: this.getVariables(VariableScope.Local)
+        locals: this.getVariables(VariableScope.Local),
       };
       frames.push(frame);
     });
@@ -423,7 +423,7 @@ export class VB6DebugEngine extends EventEmitter {
     this.executionContext.isRunning = true;
     this.executionContext.currentFile = filename;
     this.executionContext.currentLine = 1;
-    
+
     this.emit('debugStarted', session);
     return true;
   }
@@ -435,10 +435,10 @@ export class VB6DebugEngine extends EventEmitter {
     session.state = DebugState.Paused;
     session.pauseTime = new Date();
     this.executionContext.isRunning = false;
-    
+
     this.updateCallStack();
     this.updateWatchExpressions();
-    
+
     this.emit('debugPaused', session);
     return true;
   }
@@ -450,7 +450,7 @@ export class VB6DebugEngine extends EventEmitter {
     session.state = DebugState.Running;
     session.pauseTime = undefined;
     this.executionContext.isRunning = true;
-    
+
     this.emit('debugContinued', session);
     return true;
   }
@@ -463,7 +463,7 @@ export class VB6DebugEngine extends EventEmitter {
     this.executionContext.isRunning = false;
     this.executionContext.callStack = [];
     this.executionContext.variables.clear();
-    
+
     this.emit('debugStopped', session);
     return true;
   }
@@ -475,7 +475,7 @@ export class VB6DebugEngine extends EventEmitter {
     this.executionContext.currentLine++;
     this.updateCallStack();
     this.updateWatchExpressions();
-    
+
     this.emit('stepOver', this.executionContext.currentLine);
     return true;
   }
@@ -489,7 +489,7 @@ export class VB6DebugEngine extends EventEmitter {
     this.executionContext.currentLine++;
     this.updateCallStack();
     this.updateWatchExpressions();
-    
+
     this.emit('stepInto', this.executionContext.currentLine);
     return true;
   }
@@ -504,7 +504,7 @@ export class VB6DebugEngine extends EventEmitter {
     this.executionContext.currentLine++;
     this.updateCallStack();
     this.updateWatchExpressions();
-    
+
     this.emit('stepOut', this.executionContext.currentLine);
     return true;
   }
@@ -520,12 +520,12 @@ export class VB6DebugEngine extends EventEmitter {
       source: exception.source || 'VB6Runtime',
       helpFile: exception.helpFile,
       helpContext: exception.helpContext,
-      stack: session.callStack
+      stack: session.callStack,
     };
 
     session.exception = fullException;
     session.state = DebugState.Error;
-    
+
     this.emit('exception', fullException);
   }
 
@@ -536,7 +536,7 @@ export class VB6DebugEngine extends EventEmitter {
     session.watchExpressions.forEach(watch => {
       this.evaluateWatchExpression(watch);
     });
-    
+
     this.emit('watchExpressionsUpdated', session.watchExpressions);
   }
 
@@ -556,17 +556,17 @@ export class VB6DebugEngine extends EventEmitter {
   public simulateExecution(filename: string, lineNumber: number): void {
     this.executionContext.currentFile = filename;
     this.executionContext.currentLine = lineNumber;
-    
+
     // Check for breakpoints
     const session = this.getActiveSession();
     if (session) {
       const breakpoint = Array.from(session.breakpoints.values()).find(
         bp => bp.enabled && bp.filename === filename && bp.line === lineNumber
       );
-      
+
       if (breakpoint) {
         breakpoint.hitCount++;
-        
+
         // Check condition if present
         if (breakpoint.condition) {
           try {
@@ -576,7 +576,7 @@ export class VB6DebugEngine extends EventEmitter {
             // Condition evaluation failed, break anyway
           }
         }
-        
+
         this.pauseDebug();
         this.emit('breakpointHit', breakpoint);
       }
@@ -590,7 +590,7 @@ export class VB6DebugEngine extends EventEmitter {
     this.setVariable('blnFlag', true);
     this.setVariable('arrNumbers', [1, 2, 3, 4, 5]);
     this.setVariable('objForm', { Name: 'Form1', Caption: 'My Form' });
-    
+
     this.executionContext.callStack = ['Main', 'Form_Load', 'cmdButton_Click'];
     this.updateCallStack();
   }

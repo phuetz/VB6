@@ -7,6 +7,7 @@ Ce guide explique comment utiliser Docker et Docker Compose pour déployer VB6 W
 ## 🚀 Démarrage Rapide
 
 ### 1. Prérequis
+
 - Docker 20.10+
 - Docker Compose 2.0+
 - 4GB RAM minimum
@@ -28,13 +29,16 @@ chmod +x scripts/docker-start.sh
 ```
 
 L'application sera accessible sur:
+
 - 🌐 http://localhost:8080
 - 🔒 https://localhost:8443
 
 ## 📦 Configurations Disponibles
 
 ### 1. **Production** (`docker-compose.yml`)
+
 Configuration complète avec tous les services:
+
 - ✅ Application VB6 IDE
 - ✅ Nginx avec SSL
 - ✅ Monitoring (Prometheus + Grafana)
@@ -53,7 +57,9 @@ docker-compose down
 ```
 
 ### 2. **Production Haute Disponibilité** (`docker-compose.prod.yml`)
+
 Configuration pour déploiement à grande échelle:
+
 - ✅ Load balancing avec HAProxy
 - ✅ Multiple replicas
 - ✅ Cache Redis
@@ -69,7 +75,9 @@ docker-compose -f docker-compose.prod.yml up -d --scale vb6-ide=3
 ```
 
 ### 3. **Développement** (`docker-compose.dev.yml`)
+
 Configuration pour développeurs:
+
 - ✅ Hot-reload activé
 - ✅ Debugging Node.js
 - ✅ PostgreSQL + Adminer
@@ -300,17 +308,17 @@ spec:
         app: vb6-ide
     spec:
       containers:
-      - name: vb6-ide
-        image: registry.company.com/vb6-ide:latest
-        ports:
-        - containerPort: 80
-        resources:
-          limits:
-            memory: "2Gi"
-            cpu: "2"
-          requests:
-            memory: "1Gi"
-            cpu: "1"
+        - name: vb6-ide
+          image: registry.company.com/vb6-ide:latest
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              memory: '2Gi'
+              cpu: '2'
+            requests:
+              memory: '1Gi'
+              cpu: '1'
 ```
 
 ## 📈 Optimisations
@@ -318,6 +326,7 @@ spec:
 ### 1. Build Multi-Stage
 
 Notre Dockerfile utilise un build multi-stage pour réduire la taille:
+
 - Stage 1: Dépendances (200MB)
 - Stage 2: Build (500MB)
 - Stage 3: Runtime (50MB)
@@ -335,6 +344,7 @@ docker build --build-arg BUILDKIT_INLINE_CACHE=1 .
 ### 3. Compression
 
 Les assets sont automatiquement compressés:
+
 - Gzip pour HTML/CSS/JS
 - Brotli pour les navigateurs modernes
 - Images optimisées
@@ -362,6 +372,7 @@ trivy image vb6-ide:latest
 ## 📞 Support
 
 Pour toute question ou problème:
+
 - 📚 [Documentation](./docs/)
 - 🐛 [Issues GitHub](https://github.com/your-org/vb6-web-ide/issues)
 - 💬 [Discussions](https://github.com/your-org/vb6-web-ide/discussions)

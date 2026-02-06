@@ -1,5 +1,16 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Code, FileText, Function, Variable, Database, Zap, Package, Repeat, GitBranch, AlertCircle } from 'lucide-react';
+import {
+  Code,
+  FileText,
+  Function,
+  Variable,
+  Database,
+  Zap,
+  Package,
+  Repeat,
+  GitBranch,
+  AlertCircle,
+} from 'lucide-react';
 import { vb6Keywords, vb6Functions, vb6Properties, vb6Events } from '../../data/vb6Syntax';
 import { vb6Snippets, VB6Snippet, expandSnippet } from '../../data/vb6Snippets';
 import { useVB6Store } from '../../stores/vb6Store';
@@ -16,7 +27,15 @@ interface IntelliSenseProps {
 
 interface IntelliSenseItem {
   label: string;
-  kind: 'keyword' | 'function' | 'property' | 'event' | 'variable' | 'snippet' | 'object' | 'method';
+  kind:
+    | 'keyword'
+    | 'function'
+    | 'property'
+    | 'event'
+    | 'variable'
+    | 'snippet'
+    | 'object'
+    | 'method';
   detail?: string;
   documentation?: string;
   insertText?: string;
@@ -31,7 +50,7 @@ const kindIcons = {
   variable: <Variable size={16} className="text-cyan-500" />,
   snippet: <FileText size={16} className="text-pink-500" />,
   object: <Database size={16} className="text-indigo-500" />,
-  method: <GitBranch size={16} className="text-teal-500" />
+  method: <GitBranch size={16} className="text-teal-500" />,
 };
 
 const kindColors = {
@@ -42,7 +61,7 @@ const kindColors = {
   variable: 'bg-cyan-50 text-cyan-700',
   snippet: 'bg-pink-50 text-pink-700',
   object: 'bg-indigo-50 text-indigo-700',
-  method: 'bg-teal-50 text-teal-700'
+  method: 'bg-teal-50 text-teal-700',
 };
 
 export const VB6IntelliSense: React.FC<IntelliSenseProps> = ({
@@ -52,7 +71,7 @@ export const VB6IntelliSense: React.FC<IntelliSenseProps> = ({
   onSelect,
   onClose,
   context = 'general',
-  targetObject
+  targetObject,
 }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [showDetails, setShowDetails] = useState(true);
@@ -78,7 +97,7 @@ export const VB6IntelliSense: React.FC<IntelliSenseProps> = ({
               label: prop,
               kind: 'property',
               detail: `${control.type}.${prop}`,
-              documentation: `Property of ${control.type} control`
+              documentation: `Property of ${control.type} control`,
             });
           }
         });
@@ -91,7 +110,7 @@ export const VB6IntelliSense: React.FC<IntelliSenseProps> = ({
               label: method,
               kind: 'method',
               detail: `${control.type}.${method}`,
-              documentation: `Method of ${control.type} control`
+              documentation: `Method of ${control.type} control`,
             });
           }
         });
@@ -104,24 +123,26 @@ export const VB6IntelliSense: React.FC<IntelliSenseProps> = ({
             label: event,
             kind: 'event',
             detail: 'Event',
-            documentation: `${event} event handler`
+            documentation: `${event} event handler`,
           });
         }
       });
     } else {
       // General context
-      
+
       // Add snippets first (highest priority)
       vb6Snippets.forEach(snippet => {
-        if (snippet.prefix.toLowerCase().startsWith(word) || 
-            snippet.name.toLowerCase().includes(word)) {
+        if (
+          snippet.prefix.toLowerCase().startsWith(word) ||
+          snippet.name.toLowerCase().includes(word)
+        ) {
           items.push({
             label: snippet.prefix,
             kind: 'snippet',
             detail: snippet.name,
             documentation: snippet.description,
             insertText: snippet.body,
-            snippet: snippet
+            snippet: snippet,
           });
         }
       });
@@ -133,7 +154,7 @@ export const VB6IntelliSense: React.FC<IntelliSenseProps> = ({
             label: keyword,
             kind: 'keyword',
             detail: 'Keyword',
-            documentation: `VB6 keyword: ${keyword}`
+            documentation: `VB6 keyword: ${keyword}`,
           });
         }
       });
@@ -145,7 +166,7 @@ export const VB6IntelliSense: React.FC<IntelliSenseProps> = ({
             label: func.name,
             kind: 'function',
             detail: func.syntax,
-            documentation: func.description
+            documentation: func.description,
           });
         }
       });
@@ -157,7 +178,7 @@ export const VB6IntelliSense: React.FC<IntelliSenseProps> = ({
             label: control.Name,
             kind: 'object',
             detail: control.type,
-            documentation: `${control.type} control`
+            documentation: `${control.type} control`,
           });
         }
       });
@@ -170,7 +191,7 @@ export const VB6IntelliSense: React.FC<IntelliSenseProps> = ({
             label: obj,
             kind: 'object',
             detail: 'Built-in Object',
-            documentation: `VB6 built-in object: ${obj}`
+            documentation: `VB6 built-in object: ${obj}`,
           });
         }
       });
@@ -191,7 +212,16 @@ export const VB6IntelliSense: React.FC<IntelliSenseProps> = ({
       if (!aStarts && bStarts) return 1;
 
       // Then by kind priority
-      const kindPriority = ['snippet', 'object', 'function', 'property', 'method', 'keyword', 'event', 'variable'];
+      const kindPriority = [
+        'snippet',
+        'object',
+        'function',
+        'property',
+        'method',
+        'keyword',
+        'event',
+        'variable',
+      ];
       const aPriority = kindPriority.indexOf(a.kind);
       const bPriority = kindPriority.indexOf(b.kind);
       if (aPriority !== bPriority) return aPriority - bPriority;
@@ -220,11 +250,7 @@ export const VB6IntelliSense: React.FC<IntelliSenseProps> = ({
           e.preventDefault();
           if (suggestions[selectedIndex]) {
             const item = suggestions[selectedIndex];
-            onSelect(
-              item.insertText || item.label, 
-              item.kind === 'snippet',
-              item.snippet
-            );
+            onSelect(item.insertText || item.label, item.kind === 'snippet', item.snippet);
           }
           break;
         case 'Escape':
@@ -275,11 +301,11 @@ export const VB6IntelliSense: React.FC<IntelliSenseProps> = ({
         top: position.y,
         maxHeight: '400px',
         width: showDetails ? '600px' : '300px',
-        display: 'flex'
+        display: 'flex',
       }}
     >
       {/* Suggestions List */}
-      <div 
+      <div
         ref={listRef}
         className="flex-1 overflow-y-auto"
         style={{ maxWidth: showDetails ? '300px' : '100%' }}
@@ -293,19 +319,13 @@ export const VB6IntelliSense: React.FC<IntelliSenseProps> = ({
             }`}
             onClick={() => {
               setSelectedIndex(index);
-              onSelect(
-                item.insertText || item.label,
-                item.kind === 'snippet',
-                item.snippet
-              );
+              onSelect(item.insertText || item.label, item.kind === 'snippet', item.snippet);
             }}
           >
             {kindIcons[item.kind]}
             <span className="flex-1 font-mono text-sm">{item.label}</span>
             {item.kind === 'snippet' && (
-              <span className="text-xs bg-pink-100 text-pink-700 px-2 py-0.5 rounded">
-                snippet
-              </span>
+              <span className="text-xs bg-pink-100 text-pink-700 px-2 py-0.5 rounded">snippet</span>
             )}
           </div>
         ))}
@@ -333,9 +353,7 @@ export const VB6IntelliSense: React.FC<IntelliSenseProps> = ({
 
             {/* Documentation */}
             {selectedItem.documentation && (
-              <div className="text-sm text-gray-700">
-                {selectedItem.documentation}
-              </div>
+              <div className="text-sm text-gray-700">{selectedItem.documentation}</div>
             )}
 
             {/* Snippet Preview */}

@@ -135,13 +135,13 @@ export const vbFalse = 0;
 // ============================================================================
 
 export const vbBlack = 0x000000;
-export const vbRed = 0x0000FF;       // VB6 uses BGR format
-export const vbGreen = 0x00FF00;
-export const vbYellow = 0x00FFFF;
-export const vbBlue = 0xFF0000;       // VB6 uses BGR format
-export const vbMagenta = 0xFF00FF;
-export const vbCyan = 0xFFFF00;
-export const vbWhite = 0xFFFFFF;
+export const vbRed = 0x0000ff; // VB6 uses BGR format
+export const vbGreen = 0x00ff00;
+export const vbYellow = 0x00ffff;
+export const vbBlue = 0xff0000; // VB6 uses BGR format
+export const vbMagenta = 0xff00ff;
+export const vbCyan = 0xffff00;
+export const vbWhite = 0xffffff;
 
 // System Colors
 export const vbScrollBars = 0x80000000;
@@ -154,13 +154,13 @@ export const vbWindowFrame = 0x80000006;
 export const vbMenuText = 0x80000007;
 export const vbWindowText = 0x80000008;
 export const vbTitleBarText = 0x80000009;
-export const vbActiveBorder = 0x8000000A;
-export const vbInactiveBorder = 0x8000000B;
-export const vbApplicationWorkspace = 0x8000000C;
-export const vbHighlight = 0x8000000D;
-export const vbHighlightText = 0x8000000E;
-export const vbButtonFace = 0x8000000F;
-export const vb3DFace = 0x8000000F;
+export const vbActiveBorder = 0x8000000a;
+export const vbInactiveBorder = 0x8000000b;
+export const vbApplicationWorkspace = 0x8000000c;
+export const vbHighlight = 0x8000000d;
+export const vbHighlightText = 0x8000000e;
+export const vbButtonFace = 0x8000000f;
+export const vb3DFace = 0x8000000f;
 export const vbButtonShadow = 0x80000010;
 export const vb3DShadow = 0x80000010;
 export const vbGrayText = 0x80000011;
@@ -196,14 +196,14 @@ export const vbKeyCancel = 0x3;
 export const vbKeyMButton = 0x4;
 export const vbKeyBack = 0x8;
 export const vbKeyTab = 0x9;
-export const vbKeyClear = 0xC;
-export const vbKeyReturn = 0xD;
+export const vbKeyClear = 0xc;
+export const vbKeyReturn = 0xd;
 export const vbKeyShift = 0x10;
 export const vbKeyControl = 0x11;
 export const vbKeyMenu = 0x12;
 export const vbKeyPause = 0x13;
 export const vbKeyCapital = 0x14;
-export const vbKeyEscape = 0x1B;
+export const vbKeyEscape = 0x1b;
 export const vbKeySpace = 0x20;
 export const vbKeyPageUp = 0x21;
 export const vbKeyPageDown = 0x22;
@@ -214,12 +214,12 @@ export const vbKeyUp = 0x26;
 export const vbKeyRight = 0x27;
 export const vbKeyDown = 0x28;
 export const vbKeySelect = 0x29;
-export const vbKeyPrint = 0x2A;
-export const vbKeyExecute = 0x2B;
-export const vbKeySnapshot = 0x2C;
-export const vbKeyInsert = 0x2D;
-export const vbKeyDelete = 0x2E;
-export const vbKeyHelp = 0x2F;
+export const vbKeyPrint = 0x2a;
+export const vbKeyExecute = 0x2b;
+export const vbKeySnapshot = 0x2c;
+export const vbKeyInsert = 0x2d;
+export const vbKeyDelete = 0x2e;
+export const vbKeyHelp = 0x2f;
 
 // Numbers
 export const vbKey0 = 0x30;
@@ -243,12 +243,12 @@ export const vbKeyF = 0x46;
 export const vbKeyG = 0x47;
 export const vbKeyH = 0x48;
 export const vbKeyI = 0x49;
-export const vbKeyJ = 0x4A;
-export const vbKeyK = 0x4B;
-export const vbKeyL = 0x4C;
-export const vbKeyM = 0x4D;
-export const vbKeyN = 0x4E;
-export const vbKeyO = 0x4F;
+export const vbKeyJ = 0x4a;
+export const vbKeyK = 0x4b;
+export const vbKeyL = 0x4c;
+export const vbKeyM = 0x4d;
+export const vbKeyN = 0x4e;
+export const vbKeyO = 0x4f;
 export const vbKeyP = 0x50;
 export const vbKeyQ = 0x51;
 export const vbKeyR = 0x52;
@@ -259,7 +259,7 @@ export const vbKeyV = 0x56;
 export const vbKeyW = 0x57;
 export const vbKeyX = 0x58;
 export const vbKeyY = 0x59;
-export const vbKeyZ = 0x5A;
+export const vbKeyZ = 0x5a;
 
 // Numpad
 export const vbKeyNumpad0 = 0x60;
@@ -272,12 +272,12 @@ export const vbKeyNumpad6 = 0x66;
 export const vbKeyNumpad7 = 0x67;
 export const vbKeyNumpad8 = 0x68;
 export const vbKeyNumpad9 = 0x69;
-export const vbKeyMultiply = 0x6A;
-export const vbKeyAdd = 0x6B;
-export const vbKeySeparator = 0x6C;
-export const vbKeySubtract = 0x6D;
-export const vbKeyDecimal = 0x6E;
-export const vbKeyDivide = 0x6F;
+export const vbKeyMultiply = 0x6a;
+export const vbKeyAdd = 0x6b;
+export const vbKeySeparator = 0x6c;
+export const vbKeySubtract = 0x6d;
+export const vbKeyDecimal = 0x6e;
+export const vbKeyDivide = 0x6f;
 
 // Function keys
 export const vbKeyF1 = 0x70;
@@ -290,12 +290,12 @@ export const vbKeyF7 = 0x76;
 export const vbKeyF8 = 0x77;
 export const vbKeyF9 = 0x78;
 export const vbKeyF10 = 0x79;
-export const vbKeyF11 = 0x7A;
-export const vbKeyF12 = 0x7B;
-export const vbKeyF13 = 0x7C;
-export const vbKeyF14 = 0x7D;
-export const vbKeyF15 = 0x7E;
-export const vbKeyF16 = 0x7F;
+export const vbKeyF11 = 0x7a;
+export const vbKeyF12 = 0x7b;
+export const vbKeyF13 = 0x7c;
+export const vbKeyF14 = 0x7d;
+export const vbKeyF15 = 0x7e;
+export const vbKeyF16 = 0x7f;
 
 export const vbKeyNumlock = 0x90;
 export const vbKeyScrollLock = 0x91;
@@ -768,7 +768,7 @@ export const VB6ExtendedConstants = {
   vbCFText,
   vbCFBitmap,
   vbCFMetafile,
-  vbCFDIB
+  vbCFDIB,
 };
 
 export default VB6ExtendedConstants;

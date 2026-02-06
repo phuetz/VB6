@@ -1,6 +1,6 @@
 /**
  * VB6 Custom Events Support Implementation
- * 
+ *
  * Complete support for VB6 Event declarations and RaiseEvent statements
  */
 
@@ -72,7 +72,7 @@ export class VB6CustomEventsProcessor {
   parseEventDeclaration(code: string, line: number): VB6EventDeclaration | null {
     const eventRegex = /^(Public\s+|Private\s+)?Event\s+(\w+)\s*\(([^)]*)\)$/i;
     const match = code.match(eventRegex);
-    
+
     if (!match) return null;
 
     const scope = match[1] ? match[1].trim().toLowerCase() : 'public';
@@ -87,7 +87,7 @@ export class VB6CustomEventsProcessor {
       public: scope === 'public',
       module: this.currentModule,
       className: this.currentClass || undefined,
-      line
+      line,
     };
   }
 
@@ -101,7 +101,7 @@ export class VB6CustomEventsProcessor {
   parseRaiseEventStatement(code: string, line: number): VB6RaiseEventStatement | null {
     const raiseEventRegex = /^RaiseEvent\s+(\w+)\s*\(([^)]*)\)$/i;
     const match = code.match(raiseEventRegex);
-    
+
     if (!match) return null;
 
     const eventName = match[1];
@@ -113,7 +113,7 @@ export class VB6CustomEventsProcessor {
       arguments: args,
       line,
       module: this.currentModule,
-      className: this.currentClass || undefined
+      className: this.currentClass || undefined,
     };
   }
 
@@ -124,7 +124,7 @@ export class VB6CustomEventsProcessor {
   parseEventHandler(code: string, line: number): VB6EventHandler | null {
     const handlerRegex = /^(Private\s+|Public\s+)?Sub\s+(\w+)_(\w+)\s*\(([^)]*)\)$/i;
     const match = code.match(handlerRegex);
-    
+
     if (!match) return null;
 
     const objectName = match[2];
@@ -140,7 +140,7 @@ export class VB6CustomEventsProcessor {
       handlerName,
       parameters,
       body: [],
-      line
+      line,
     };
   }
 
@@ -157,7 +157,8 @@ export class VB6CustomEventsProcessor {
       const trimmed = param.trim();
       if (!trimmed) continue;
 
-      const paramRegex = /^(Optional\s+)?(ByRef\s+|ByVal\s+)?(\w+)(?:\s+As\s+(.+?))?(?:\s*=\s*(.+))?$/i;
+      const paramRegex =
+        /^(Optional\s+)?(ByRef\s+|ByVal\s+)?(\w+)(?:\s+As\s+(.+?))?(?:\s*=\s*(.+))?$/i;
       const match = trimmed.match(paramRegex);
 
       if (match) {
@@ -172,7 +173,7 @@ export class VB6CustomEventsProcessor {
           type: paramType,
           byRef,
           optional: isOptional,
-          defaultValue: defaultValue ? this.parseDefaultValue(defaultValue) : undefined
+          defaultValue: defaultValue ? this.parseDefaultValue(defaultValue) : undefined,
         });
       }
     }
@@ -185,7 +186,7 @@ export class VB6CustomEventsProcessor {
    */
   private parseArgumentList(argumentList: string): string[] {
     if (!argumentList.trim()) return [];
-    
+
     const args: string[] = [];
     let current = '';
     let parenCount = 0;
@@ -193,11 +194,11 @@ export class VB6CustomEventsProcessor {
 
     for (let i = 0; i < argumentList.length; i++) {
       const char = argumentList[i];
-      
+
       if (char === '"' && (i === 0 || argumentList[i - 1] !== '\\')) {
         inQuotes = !inQuotes;
       }
-      
+
       if (!inQuotes) {
         if (char === '(') parenCount++;
         else if (char === ')') parenCount--;
@@ -207,14 +208,14 @@ export class VB6CustomEventsProcessor {
           continue;
         }
       }
-      
+
       current += char;
     }
-    
+
     if (current.trim()) {
       args.push(current.trim());
     }
-    
+
     return args;
   }
 
@@ -223,19 +224,19 @@ export class VB6CustomEventsProcessor {
    */
   private parseDefaultValue(value: string): any {
     const trimmed = value.trim();
-    
+
     if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
       return trimmed.substring(1, trimmed.length - 1);
     }
-    
+
     if (!isNaN(Number(trimmed))) {
       return Number(trimmed);
     }
-    
+
     if (trimmed.toLowerCase() === 'true') return true;
     if (trimmed.toLowerCase() === 'false') return false;
     if (trimmed.toLowerCase() === 'nothing') return null;
-    
+
     return trimmed;
   }
 
@@ -260,7 +261,7 @@ export class VB6CustomEventsProcessor {
   registerEventHandler(handler: VB6EventHandler) {
     const key = `${this.currentModule}.${handler.handlerName}`;
     this.eventHandlers.set(key, handler);
-    
+
     // Also register the binding
     this.registerEventBinding(handler.eventSource, handler.eventName, handler.handlerName);
   }
@@ -270,18 +271,18 @@ export class VB6CustomEventsProcessor {
    */
   registerEventBinding(objectName: string, eventName: string, handlerName: string) {
     const key = `${this.currentModule}.${objectName}`;
-    
+
     if (!this.eventBindings.has(key)) {
       this.eventBindings.set(key, []);
     }
-    
+
     const bindings = this.eventBindings.get(key)!;
     bindings.push({
       objectName,
       className: '', // Will be resolved later
       eventName,
       handlerName,
-      module: this.currentModule
+      module: this.currentModule,
     });
   }
 
@@ -309,12 +310,12 @@ export class VB6CustomEventsProcessor {
   generateEventSystemJS(): string {
     let jsCode = `// VB6 Custom Events System\n`;
     jsCode += `// Event emitter base class\n\n`;
-    
+
     jsCode += `class VB6EventEmitter {\n`;
     jsCode += `  constructor() {\n`;
     jsCode += `    this._eventHandlers = new Map();\n`;
     jsCode += `  }\n\n`;
-    
+
     jsCode += `  // Add event listener\n`;
     jsCode += `  addEventListener(eventName, handler) {\n`;
     jsCode += `    if (!this._eventHandlers.has(eventName)) {\n`;
@@ -322,7 +323,7 @@ export class VB6CustomEventsProcessor {
     jsCode += `    }\n`;
     jsCode += `    this._eventHandlers.get(eventName).push(handler);\n`;
     jsCode += `  }\n\n`;
-    
+
     jsCode += `  // Remove event listener\n`;
     jsCode += `  removeEventListener(eventName, handler) {\n`;
     jsCode += `    const handlers = this._eventHandlers.get(eventName);\n`;
@@ -331,7 +332,7 @@ export class VB6CustomEventsProcessor {
     jsCode += `      if (index >= 0) handlers.splice(index, 1);\n`;
     jsCode += `    }\n`;
     jsCode += `  }\n\n`;
-    
+
     jsCode += `  // Raise event (VB6 RaiseEvent equivalent)\n`;
     jsCode += `  raiseEvent(eventName, ...args) {\n`;
     jsCode += `    const handlers = this._eventHandlers.get(eventName);\n`;
@@ -346,7 +347,7 @@ export class VB6CustomEventsProcessor {
     jsCode += `    }\n`;
     jsCode += `  }\n`;
     jsCode += `}\n\n`;
-    
+
     return jsCode;
   }
 
@@ -356,12 +357,12 @@ export class VB6CustomEventsProcessor {
   generateEventDeclarationJS(eventDecl: VB6EventDeclaration): string {
     let jsCode = `// Event: ${eventDecl.name}\n`;
     jsCode += `// Parameters: ${eventDecl.parameters.map(p => `${p.name}: ${p.type}`).join(', ')}\n`;
-    
+
     jsCode += `${eventDecl.name}: function(`;
     const paramNames = eventDecl.parameters.map(p => p.name);
     jsCode += paramNames.join(', ');
     jsCode += `) {\n`;
-    
+
     // Add parameter validation
     for (const param of eventDecl.parameters) {
       if (!param.optional) {
@@ -370,7 +371,7 @@ export class VB6CustomEventsProcessor {
         jsCode += `  }\n`;
       }
     }
-    
+
     // Handle ByRef parameters (create wrapper objects)
     const byRefParams = eventDecl.parameters.filter(p => p.byRef);
     if (byRefParams.length > 0) {
@@ -379,21 +380,19 @@ export class VB6CustomEventsProcessor {
         jsCode += `  const ${param.name}_ref = { value: ${param.name} };\n`;
       }
     }
-    
+
     jsCode += `  // Raise the event\n`;
     jsCode += `  this.raiseEvent('${eventDecl.name}'`;
-    
+
     if (paramNames.length > 0) {
       jsCode += ', ';
       // Use ref objects for ByRef parameters
-      const eventArgs = eventDecl.parameters.map(p => 
-        p.byRef ? `${p.name}_ref` : p.name
-      );
+      const eventArgs = eventDecl.parameters.map(p => (p.byRef ? `${p.name}_ref` : p.name));
       jsCode += eventArgs.join(', ');
     }
-    
+
     jsCode += `);\n`;
-    
+
     // Update original variables with ByRef values
     if (byRefParams.length > 0) {
       jsCode += `  // Update ByRef parameters\n`;
@@ -401,9 +400,9 @@ export class VB6CustomEventsProcessor {
         jsCode += `  ${param.name} = ${param.name}_ref.value;\n`;
       }
     }
-    
+
     jsCode += `},\n\n`;
-    
+
     return jsCode;
   }
 
@@ -412,23 +411,23 @@ export class VB6CustomEventsProcessor {
    */
   generateRaiseEventJS(raiseEvent: VB6RaiseEventStatement): string {
     const eventDecl = this.getEvent(raiseEvent.eventName, raiseEvent.className);
-    
+
     if (!eventDecl) {
       return `// Error: Event ${raiseEvent.eventName} not declared\n`;
     }
-    
+
     let jsCode = `// RaiseEvent ${raiseEvent.eventName}\n`;
-    
+
     // Validate argument count
     const requiredParams = eventDecl.parameters.filter(p => !p.optional).length;
     if (raiseEvent.arguments.length < requiredParams) {
       jsCode += `// Warning: Not enough arguments for event ${raiseEvent.eventName}\n`;
     }
-    
+
     jsCode += `this.${raiseEvent.eventName}(`;
     jsCode += raiseEvent.arguments.join(', ');
     jsCode += `);\n`;
-    
+
     return jsCode;
   }
 
@@ -438,11 +437,11 @@ export class VB6CustomEventsProcessor {
   generateEventHandlerJS(handler: VB6EventHandler): string {
     let jsCode = `// Event handler: ${handler.handlerName}\n`;
     jsCode += `${handler.handlerName}: function(`;
-    
+
     const paramNames = handler.parameters.map(p => p.name);
     jsCode += paramNames.join(', ');
     jsCode += `) {\n`;
-    
+
     // Generate handler body
     if (handler.body.length > 0) {
       for (const line of handler.body) {
@@ -452,9 +451,9 @@ export class VB6CustomEventsProcessor {
       jsCode += `  // Event handler implementation\n`;
       jsCode += `  console.log('Event ${handler.eventName} fired on ${handler.eventSource}', arguments);\n`;
     }
-    
+
     jsCode += `},\n\n`;
-    
+
     return jsCode;
   }
 
@@ -464,40 +463,40 @@ export class VB6CustomEventsProcessor {
   generateEventBindingJS(): string {
     let jsCode = `// Event binding setup\n`;
     jsCode += `setupEventBindings: function() {\n`;
-    
+
     for (const [objectKey, bindings] of this.eventBindings.entries()) {
       const objectName = objectKey.split('.').pop();
-      
+
       jsCode += `  // Bind events for ${objectName}\n`;
       jsCode += `  if (this.${objectName}) {\n`;
-      
+
       for (const binding of bindings) {
         jsCode += `    this.${objectName}.addEventListener('${binding.eventName}', this.${binding.handlerName}.bind(this));\n`;
       }
-      
+
       jsCode += `  }\n\n`;
     }
-    
+
     jsCode += `},\n\n`;
-    
+
     // Generate cleanup method
     jsCode += `cleanupEventBindings: function() {\n`;
-    
+
     for (const [objectKey, bindings] of this.eventBindings.entries()) {
       const objectName = objectKey.split('.').pop();
-      
+
       jsCode += `  // Cleanup events for ${objectName}\n`;
       jsCode += `  if (this.${objectName}) {\n`;
-      
+
       for (const binding of bindings) {
         jsCode += `    this.${objectName}.removeEventListener('${binding.eventName}', this.${binding.handlerName}.bind(this));\n`;
       }
-      
+
       jsCode += `  }\n\n`;
     }
-    
+
     jsCode += `},\n\n`;
-    
+
     return jsCode;
   }
 
@@ -506,7 +505,7 @@ export class VB6CustomEventsProcessor {
    */
   private transpileVB6Line(line: string): string {
     let jsLine = line;
-    
+
     // Basic VB6 to JavaScript conversions
     jsLine = jsLine.replace(/\bMe\b/g, 'this');
     jsLine = jsLine.replace(/\bNothing\b/g, 'null');
@@ -515,7 +514,7 @@ export class VB6CustomEventsProcessor {
     jsLine = jsLine.replace(/\bAnd\b/g, '&&');
     jsLine = jsLine.replace(/\bOr\b/g, '||');
     jsLine = jsLine.replace(/\bNot\b/g, '!');
-    
+
     return jsLine;
   }
 
@@ -524,41 +523,41 @@ export class VB6CustomEventsProcessor {
    */
   generateTypeScript(): string {
     let tsCode = `// VB6 Custom Events TypeScript Definitions\n\n`;
-    
+
     // Generate event emitter interface
     tsCode += `interface VB6EventEmitter {\n`;
     tsCode += `  addEventListener(eventName: string, handler: (...args: any[]) => any): void;\n`;
     tsCode += `  removeEventListener(eventName: string, handler: (...args: any[]) => any): void;\n`;
     tsCode += `  raiseEvent(eventName: string, ...args: any[]): void;\n`;
     tsCode += `}\n\n`;
-    
+
     // Generate event interfaces
     for (const [key, eventDecl] of this.eventDeclarations.entries()) {
       tsCode += `// Event: ${eventDecl.name}\n`;
       tsCode += `interface ${eventDecl.name}EventArgs {\n`;
-      
+
       for (const param of eventDecl.parameters) {
         const tsType = this.mapVB6TypeToTypeScript(param.type);
         const optional = param.optional ? '?' : '';
         tsCode += `  ${param.name}${optional}: ${tsType};\n`;
       }
-      
+
       tsCode += `}\n\n`;
-      
+
       tsCode += `interface ${eventDecl.name}Event {\n`;
       tsCode += `  (`;
-      
+
       const paramSignatures = eventDecl.parameters.map(param => {
         const tsType = this.mapVB6TypeToTypeScript(param.type);
         const optional = param.optional ? '?' : '';
         return `${param.name}${optional}: ${tsType}`;
       });
-      
+
       tsCode += paramSignatures.join(', ');
       tsCode += `): void;\n`;
       tsCode += `}\n\n`;
     }
-    
+
     return tsCode;
   }
 
@@ -594,27 +593,31 @@ export class VB6CustomEventsProcessor {
    */
   validateEventUsage(): string[] {
     const errors: string[] = [];
-    
+
     // Check all RaiseEvent statements have corresponding Event declarations
     for (const raiseEvent of this.raiseEventStatements) {
       const eventDecl = this.getEvent(raiseEvent.eventName, raiseEvent.className);
-      
+
       if (!eventDecl) {
         errors.push(`Event ${raiseEvent.eventName} is not declared (line ${raiseEvent.line})`);
         continue;
       }
-      
+
       // Check argument count
       const requiredParams = eventDecl.parameters.filter(p => !p.optional).length;
       if (raiseEvent.arguments.length < requiredParams) {
-        errors.push(`RaiseEvent ${raiseEvent.eventName} has insufficient arguments. Expected at least ${requiredParams}, got ${raiseEvent.arguments.length} (line ${raiseEvent.line})`);
+        errors.push(
+          `RaiseEvent ${raiseEvent.eventName} has insufficient arguments. Expected at least ${requiredParams}, got ${raiseEvent.arguments.length} (line ${raiseEvent.line})`
+        );
       }
-      
+
       if (raiseEvent.arguments.length > eventDecl.parameters.length) {
-        errors.push(`RaiseEvent ${raiseEvent.eventName} has too many arguments. Expected at most ${eventDecl.parameters.length}, got ${raiseEvent.arguments.length} (line ${raiseEvent.line})`);
+        errors.push(
+          `RaiseEvent ${raiseEvent.eventName} has too many arguments. Expected at most ${eventDecl.parameters.length}, got ${raiseEvent.arguments.length} (line ${raiseEvent.line})`
+        );
       }
     }
-    
+
     return errors;
   }
 
@@ -632,77 +635,79 @@ export class VB6CustomEventsProcessor {
    * Get all events in current module
    */
   getModuleEvents(): VB6EventDeclaration[] {
-    return Array.from(this.eventDeclarations.values())
-      .filter(event => event.module === this.currentModule);
+    return Array.from(this.eventDeclarations.values()).filter(
+      event => event.module === this.currentModule
+    );
   }
 
   /**
    * Get all event handlers in current module
    */
   getModuleEventHandlers(): VB6EventHandler[] {
-    return Array.from(this.eventHandlers.values())
-      .filter(handler => handler.handlerName.startsWith(this.currentModule));
+    return Array.from(this.eventHandlers.values()).filter(handler =>
+      handler.handlerName.startsWith(this.currentModule)
+    );
   }
 
   /**
    * Export event data for serialization
    */
-  export(): { 
-    events: { [key: string]: VB6EventDeclaration }, 
-    handlers: { [key: string]: VB6EventHandler },
-    bindings: { [key: string]: VB6EventBinding[] },
-    raiseEvents: VB6RaiseEventStatement[]
+  export(): {
+    events: { [key: string]: VB6EventDeclaration };
+    handlers: { [key: string]: VB6EventHandler };
+    bindings: { [key: string]: VB6EventBinding[] };
+    raiseEvents: VB6RaiseEventStatement[];
   } {
     const events: { [key: string]: VB6EventDeclaration } = {};
     const handlers: { [key: string]: VB6EventHandler } = {};
     const bindings: { [key: string]: VB6EventBinding[] } = {};
-    
+
     for (const [key, value] of this.eventDeclarations.entries()) {
       events[key] = value;
     }
-    
+
     for (const [key, value] of this.eventHandlers.entries()) {
       handlers[key] = value;
     }
-    
+
     for (const [key, value] of this.eventBindings.entries()) {
       bindings[key] = value;
     }
-    
-    return { 
-      events, 
-      handlers, 
-      bindings, 
-      raiseEvents: this.raiseEventStatements 
+
+    return {
+      events,
+      handlers,
+      bindings,
+      raiseEvents: this.raiseEventStatements,
     };
   }
 
   /**
    * Import event data from serialization
    */
-  import(data: { 
-    events: { [key: string]: VB6EventDeclaration }, 
-    handlers: { [key: string]: VB6EventHandler },
-    bindings: { [key: string]: VB6EventBinding[] },
-    raiseEvents: VB6RaiseEventStatement[]
+  import(data: {
+    events: { [key: string]: VB6EventDeclaration };
+    handlers: { [key: string]: VB6EventHandler };
+    bindings: { [key: string]: VB6EventBinding[] };
+    raiseEvents: VB6RaiseEventStatement[];
   }) {
     this.eventDeclarations.clear();
     this.eventHandlers.clear();
     this.eventBindings.clear();
     this.raiseEventStatements = [];
-    
+
     for (const [key, value] of Object.entries(data.events)) {
       this.eventDeclarations.set(key, value);
     }
-    
+
     for (const [key, value] of Object.entries(data.handlers)) {
       this.eventHandlers.set(key, value);
     }
-    
+
     for (const [key, value] of Object.entries(data.bindings)) {
       this.eventBindings.set(key, value);
     }
-    
+
     this.raiseEventStatements = data.raiseEvents || [];
   }
 }
@@ -780,7 +785,7 @@ Public Class FileProcessor
         ProcessSingleFile = True
     End Function
 End Class
-`
+`,
 };
 
 // Global custom events processor instance

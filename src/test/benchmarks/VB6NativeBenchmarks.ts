@@ -4,7 +4,7 @@ import { VB6Runtime } from '../../runtime/VB6Runtime';
 
 /**
  * Benchmarks de Performance vs VB6 Natif
- * 
+ *
  * OBJECTIFS CRITIQUES:
  * - Comparer performance avec VB6 natif
  * - Tests sur string manipulation, math, arrays, objects
@@ -46,7 +46,7 @@ describe('VB6 Native Performance Benchmarks - Phase 3', () => {
     categories: {},
     results: [],
     overallGrade: 'F',
-    recommendations: []
+    recommendations: [],
   };
 
   // Temps de référence VB6 natif (en millisecondes, mesurés empiriquement)
@@ -56,7 +56,7 @@ describe('VB6 Native Performance Benchmarks - Phase 3', () => {
     'String Replace': 12,
     'String Parsing': 25,
     'Math Calculations': 5,
-    'Trigonometry': 10,
+    Trigonometry: 10,
     'Random Numbers': 3,
     'Array Operations': 20,
     'Array Sorting': 150,
@@ -70,7 +70,7 @@ describe('VB6 Native Performance Benchmarks - Phase 3', () => {
     'Conditional Logic': 5,
     'Type Conversions': 12,
     'Date Operations': 18,
-    'Variant Operations': 35
+    'Variant Operations': 35,
   };
 
   beforeAll(() => {
@@ -89,12 +89,12 @@ describe('VB6 Native Performance Benchmarks - Phase 3', () => {
     iterations: number = 1000
   ): BenchmarkResult {
     const memoryBefore = (performance as any).memory?.usedJSHeapSize || 0;
-    
+
     // Compiler le code
     const compileStart = performance.now();
     const compileResult = compiler.compile(vb6Code);
     const compileEnd = performance.now();
-    
+
     if (!compileResult.success) {
       return {
         name,
@@ -104,13 +104,13 @@ describe('VB6 Native Performance Benchmarks - Phase 3', () => {
         ratio: -1,
         memoryUsage: -1,
         iterations,
-        passed: false
+        passed: false,
       };
     }
 
     // Exécuter le benchmark
     const executionStart = performance.now();
-    
+
     try {
       // Simuler l'exécution (normalement on exécuterait le code transpilé)
       let result = 0;
@@ -122,11 +122,11 @@ describe('VB6 Native Performance Benchmarks - Phase 3', () => {
     } catch (error) {
       console.error(`Benchmark ${name} failed:`, error);
     }
-    
+
     const executionEnd = performance.now();
     const memoryAfter = (performance as any).memory?.usedJSHeapSize || 0;
 
-    const totalTime = (compileEnd - compileStart) + (executionEnd - executionStart);
+    const totalTime = compileEnd - compileStart + (executionEnd - executionStart);
     const nativeTime = nativeVB6References[name] || 50;
     const ratio = totalTime / nativeTime;
     const memoryUsage = memoryAfter - memoryBefore;
@@ -140,7 +140,7 @@ describe('VB6 Native Performance Benchmarks - Phase 3', () => {
       ratio,
       memoryUsage,
       iterations,
-      passed
+      passed,
     };
 
     benchmarkReport.results.push(result);
@@ -154,7 +154,7 @@ describe('VB6 Native Performance Benchmarks - Phase 3', () => {
   function generateFinalReport() {
     // Calculer moyennes par catégorie
     const categories: { [key: string]: { ratios: number[]; count: number } } = {};
-    
+
     benchmarkReport.results.forEach(result => {
       if (result.passed) {
         if (!categories[result.category]) {
@@ -166,10 +166,11 @@ describe('VB6 Native Performance Benchmarks - Phase 3', () => {
     });
 
     Object.keys(categories).forEach(category => {
-      const avgRatio = categories[category].ratios.reduce((a, b) => a + b, 0) / categories[category].ratios.length;
+      const avgRatio =
+        categories[category].ratios.reduce((a, b) => a + b, 0) / categories[category].ratios.length;
       benchmarkReport.categories[category] = {
         avgRatio,
-        benchmarks: categories[category].count
+        benchmarks: categories[category].count,
       };
     });
 
@@ -187,31 +188,25 @@ describe('VB6 Native Performance Benchmarks - Phase 3', () => {
     // Générer recommandations
     generateRecommendations();
 
-    console.log('\n=== VB6 PERFORMANCE BENCHMARK REPORT ===');
-    console.log(`Total Benchmarks: ${benchmarkReport.totalBenchmarks}`);
-    console.log(`Passed: ${benchmarkReport.passedBenchmarks}`);
-    console.log(`Failed: ${benchmarkReport.failedBenchmarks}`);
-    console.log(`Average Ratio: ${benchmarkReport.averageRatio.toFixed(2)}x`);
-    console.log(`Overall Grade: ${benchmarkReport.overallGrade}`);
-    console.log('\nCategory Performance:');
-    Object.keys(benchmarkReport.categories).forEach(category => {
-      console.log(`  ${category}: ${benchmarkReport.categories[category].avgRatio.toFixed(2)}x`);
-    });
-    console.log('\nRecommendations:');
-    benchmarkReport.recommendations.forEach(rec => console.log(`  - ${rec}`));
+    Object.keys(benchmarkReport.categories).forEach(category => {});
+    benchmarkReport.recommendations.forEach(rec => {});
   }
 
   function generateRecommendations() {
     benchmarkReport.recommendations = [];
 
     if (benchmarkReport.averageRatio > 2.0) {
-      benchmarkReport.recommendations.push('CRITIQUE: Performance globale insuffisante - optimisation majeure requise');
+      benchmarkReport.recommendations.push(
+        'CRITIQUE: Performance globale insuffisante - optimisation majeure requise'
+      );
     }
 
     Object.keys(benchmarkReport.categories).forEach(category => {
       const avgRatio = benchmarkReport.categories[category].avgRatio;
       if (avgRatio > 2.5) {
-        benchmarkReport.recommendations.push(`Optimiser ${category}: ${avgRatio.toFixed(2)}x plus lent que VB6 natif`);
+        benchmarkReport.recommendations.push(
+          `Optimiser ${category}: ${avgRatio.toFixed(2)}x plus lent que VB6 natif`
+        );
       }
     });
 
@@ -220,7 +215,9 @@ describe('VB6 Native Performance Benchmarks - Phase 3', () => {
     }
 
     if (benchmarkReport.categories['Math Operations']?.avgRatio > 1.8) {
-      benchmarkReport.recommendations.push('Utiliser WebAssembly pour calculs mathématiques intensifs');
+      benchmarkReport.recommendations.push(
+        'Utiliser WebAssembly pour calculs mathématiques intensifs'
+      );
     }
 
     if (benchmarkReport.categories['Array Operations']?.avgRatio > 2.2) {
@@ -228,7 +225,9 @@ describe('VB6 Native Performance Benchmarks - Phase 3', () => {
     }
 
     if (benchmarkReport.passedBenchmarks / benchmarkReport.totalBenchmarks < 0.8) {
-      benchmarkReport.recommendations.push('URGENT: Taux de réussite < 80% - révision architecture nécessaire');
+      benchmarkReport.recommendations.push(
+        'URGENT: Taux de réussite < 80% - révision architecture nécessaire'
+      );
     }
   }
 
@@ -244,7 +243,7 @@ Function StringConcatBenchmark() As String
     StringConcatBenchmark = result
 End Function
 `;
-      
+
       const result = runBenchmark('String Concatenation', 'String Operations', code, 100);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(2.0);
@@ -266,7 +265,7 @@ Function StringSearchBenchmark() As Integer
     StringSearchBenchmark = count
 End Function
 `;
-      
+
       const result = runBenchmark('String Search', 'String Operations', code, 50);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(2.0);
@@ -286,7 +285,7 @@ Function StringReplaceBenchmark() As String
     StringReplaceBenchmark = result
 End Function
 `;
-      
+
       const result = runBenchmark('String Replace', 'String Operations', code, 50);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(2.0);
@@ -317,7 +316,7 @@ Function StringParsingBenchmark() As Integer
     StringParsingBenchmark = count
 End Function
 `;
-      
+
       const result = runBenchmark('String Parsing', 'String Operations', code, 50);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(2.5);
@@ -339,7 +338,7 @@ Function MathCalculationsBenchmark() As Double
     MathCalculationsBenchmark = result
 End Function
 `;
-      
+
       const result = runBenchmark('Math Calculations', 'Math Operations', code, 10);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(2.0);
@@ -361,7 +360,7 @@ Function TrigonometryBenchmark() As Double
     TrigonometryBenchmark = result
 End Function
 `;
-      
+
       const result = runBenchmark('Trigonometry', 'Math Operations', code, 10);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(2.0);
@@ -382,7 +381,7 @@ Function RandomNumbersBenchmark() As Double
     RandomNumbersBenchmark = result
 End Function
 `;
-      
+
       const result = runBenchmark('Random Numbers', 'Math Operations', code, 10);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(1.5);
@@ -411,7 +410,7 @@ Function ArrayOperationsBenchmark() As Long
     ArrayOperationsBenchmark = sum
 End Function
 `;
-      
+
       const result = runBenchmark('Array Operations', 'Array Operations', code, 100);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(2.0);
@@ -446,7 +445,7 @@ Function ArraySortingBenchmark() As Integer
     ArraySortingBenchmark = swaps
 End Function
 `;
-      
+
       const result = runBenchmark('Array Sorting', 'Array Operations', code, 10);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(2.5);
@@ -477,7 +476,7 @@ Function ArraySearchingBenchmark() As Integer
     ArraySearchingBenchmark = found
 End Function
 `;
-      
+
       const result = runBenchmark('Array Searching', 'Array Operations', code, 10);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(2.0);
@@ -503,7 +502,7 @@ Function ObjectCreationBenchmark() As Integer
     ObjectCreationBenchmark = count
 End Function
 `;
-      
+
       const result = runBenchmark('Object Creation', 'Object Operations', code, 10);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(3.0);
@@ -526,7 +525,7 @@ Function MethodCallsBenchmark() As Integer
     MethodCallsBenchmark = count
 End Function
 `;
-      
+
       const result = runBenchmark('Method Calls', 'Object Operations', code, 50);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(2.0);
@@ -547,7 +546,7 @@ Function PropertyAccessBenchmark() As Integer
     PropertyAccessBenchmark = count / 10000
 End Function
 `;
-      
+
       const result = runBenchmark('Property Access', 'Object Operations', code, 10);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(1.5);
@@ -570,7 +569,7 @@ Function LoopPerformanceBenchmark() As Long
     LoopPerformanceBenchmark = sum
 End Function
 `;
-      
+
       const result = runBenchmark('Loop Performance', 'Control Flow', code, 50);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(2.0);
@@ -599,7 +598,7 @@ Function ConditionalLogicBenchmark() As Integer
     ConditionalLogicBenchmark = count
 End Function
 `;
-      
+
       const result = runBenchmark('Conditional Logic', 'Control Flow', code, 100);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(1.5);
@@ -620,7 +619,7 @@ Function TypeConversionsBenchmark() As String
     TypeConversionsBenchmark = Left(result, 100)
 End Function
 `;
-      
+
       const result = runBenchmark('Type Conversions', 'Control Flow', code, 50);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(2.0);
@@ -648,7 +647,7 @@ Function DateOperationsBenchmark() As Long
     DateOperationsBenchmark = daysDiff
 End Function
 `;
-      
+
       const result = runBenchmark('Date Operations', 'Specialized Operations', code, 10);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(2.5);
@@ -687,7 +686,7 @@ Function VariantOperationsBenchmark() As Integer
     VariantOperationsBenchmark = count
 End Function
 `;
-      
+
       const result = runBenchmark('Variant Operations', 'Specialized Operations', code, 50);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(3.0); // Les variants sont naturellement plus lents
@@ -721,7 +720,7 @@ Function MemoryAllocationBenchmark() As Integer
     MemoryAllocationBenchmark = count
 End Function
 `;
-      
+
       const result = runBenchmark('Memory Allocation', 'Memory Management', code, 10);
       expect(result.passed).toBe(true);
       expect(result.ratio).toBeLessThan(2.5);
@@ -731,13 +730,15 @@ End Function
   describe('Overall Performance Validation', () => {
     it('should meet overall performance target', () => {
       expect(benchmarkReport.averageRatio).toBeLessThan(2.0);
-      expect(benchmarkReport.passedBenchmarks / benchmarkReport.totalBenchmarks).toBeGreaterThan(0.8);
+      expect(benchmarkReport.passedBenchmarks / benchmarkReport.totalBenchmarks).toBeGreaterThan(
+        0.8
+      );
       expect(benchmarkReport.overallGrade).not.toBe('F');
     });
 
     it('should have acceptable performance in critical categories', () => {
       const criticalCategories = ['String Operations', 'Math Operations', 'Array Operations'];
-      
+
       criticalCategories.forEach(category => {
         if (benchmarkReport.categories[category]) {
           expect(benchmarkReport.categories[category].avgRatio).toBeLessThan(2.5);

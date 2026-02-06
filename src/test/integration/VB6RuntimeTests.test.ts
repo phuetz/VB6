@@ -46,7 +46,7 @@ End Sub
       expect(() => {
         if (result.javascript.includes('async ') || result.javascript.includes('await ')) {
           // AsyncFunction constructor for async code
-          const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+          const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
           new AsyncFunction(result.javascript);
         } else {
           new Function(result.javascript);

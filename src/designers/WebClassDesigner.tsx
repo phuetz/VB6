@@ -8,7 +8,7 @@ export enum WebItemType {
   CustomWebItem = 'CustomWebItem',
   DatabasePage = 'DatabasePage',
   FormHandler = 'FormHandler',
-  FileUpload = 'FileUpload'
+  FileUpload = 'FileUpload',
 }
 
 export enum ResponseFormat {
@@ -16,21 +16,21 @@ export enum ResponseFormat {
   XML = 'XML',
   JSON = 'JSON',
   PlainText = 'PlainText',
-  Binary = 'Binary'
+  Binary = 'Binary',
 }
 
 export enum SessionManagement {
   None = 'None',
   Cookies = 'Cookies',
   URLRewriting = 'URLRewriting',
-  HiddenFields = 'HiddenFields'
+  HiddenFields = 'HiddenFields',
 }
 
 export enum StateManagement {
   None = 'None',
   InProcess = 'InProcess',
   StateServer = 'StateServer',
-  Database = 'Database'
+  Database = 'Database',
 }
 
 // WebItem Event Types
@@ -40,7 +40,7 @@ export enum WebItemEventType {
   UserEvent = 'UserEvent',
   Start = 'Start',
   End = 'End',
-  Error = 'Error'
+  Error = 'Error',
 }
 
 // Template Tag
@@ -140,7 +140,7 @@ export enum HTMLElementType {
   A = 'a',
   Ul = 'ul',
   Ol = 'ol',
-  Li = 'li'
+  Li = 'li',
 }
 
 // HTML Element
@@ -163,50 +163,56 @@ interface WebClassDesignerProps {
 export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
   initialWebClass,
   onSave,
-  onPreview
+  onPreview,
 }) => {
-  const [webClass, setWebClass] = useState<WebClassDefinition>(initialWebClass || {
-    name: 'WebClass1',
-    description: 'Web Application',
-    version: '1.0',
-    author: '',
-    namespace: 'WebApp',
-    sessionManagement: SessionManagement.Cookies,
-    stateManagement: StateManagement.InProcess,
-    sessionTimeout: 20,
-    maxRequestSize: 4096,
-    enableDebugging: true,
-    enableTracing: false,
-    defaultResponseFormat: ResponseFormat.HTML,
-    templatePath: 'templates/',
-    imageBasePath: 'images/',
-    stylesheetPath: 'css/',
-    scriptPath: 'scripts/',
-    webItems: [{
-      id: 'home',
-      type: WebItemType.HTMLPage,
-      name: 'Home',
-      tagPrefix: 'WC',
-      htmlContent: '<html><body><h1>Welcome</h1></body></html>',
-      responseFormat: ResponseFormat.HTML,
-      cacheTimeout: 0,
-      requiresAuth: false,
-      events: [],
-      tags: [],
-      customProperties: {}
-    }],
-    databaseConnections: [],
-    globalEvents: [],
-    customClasses: [],
-    configuration: {}
-  });
+  const [webClass, setWebClass] = useState<WebClassDefinition>(
+    initialWebClass || {
+      name: 'WebClass1',
+      description: 'Web Application',
+      version: '1.0',
+      author: '',
+      namespace: 'WebApp',
+      sessionManagement: SessionManagement.Cookies,
+      stateManagement: StateManagement.InProcess,
+      sessionTimeout: 20,
+      maxRequestSize: 4096,
+      enableDebugging: true,
+      enableTracing: false,
+      defaultResponseFormat: ResponseFormat.HTML,
+      templatePath: 'templates/',
+      imageBasePath: 'images/',
+      stylesheetPath: 'css/',
+      scriptPath: 'scripts/',
+      webItems: [
+        {
+          id: 'home',
+          type: WebItemType.HTMLPage,
+          name: 'Home',
+          tagPrefix: 'WC',
+          htmlContent: '<html><body><h1>Welcome</h1></body></html>',
+          responseFormat: ResponseFormat.HTML,
+          cacheTimeout: 0,
+          requiresAuth: false,
+          events: [],
+          tags: [],
+          customProperties: {},
+        },
+      ],
+      databaseConnections: [],
+      globalEvents: [],
+      customClasses: [],
+      configuration: {},
+    }
+  );
 
-  const [selectedWebItem, setSelectedWebItem] = useState<WebItem | null>(webClass.webItems[0] || null);
+  const [selectedWebItem, setSelectedWebItem] = useState<WebItem | null>(
+    webClass.webItems[0] || null
+  );
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null);
   const [activeTab, setActiveTab] = useState<'design' | 'html' | 'events' | 'config'>('design');
   const [htmlContent, setHtmlContent] = useState(selectedWebItem?.htmlContent || '');
   const [previewMode, setPreviewMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
-  
+
   const designerRef = useRef<HTMLDivElement>(null);
   const eventEmitter = useRef(new EventEmitter());
 
@@ -228,7 +234,7 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
     { type: HTMLElementType.A, icon: '🔗', name: 'Link', category: 'Navigation' },
     { type: HTMLElementType.Ul, icon: '• • •', name: 'Unordered List', category: 'Lists' },
     { type: HTMLElementType.Ol, icon: '1 2 3', name: 'Ordered List', category: 'Lists' },
-    { type: HTMLElementType.Li, icon: '•', name: 'List Item', category: 'Lists' }
+    { type: HTMLElementType.Li, icon: '•', name: 'List Item', category: 'Lists' },
   ];
 
   const addWebItem = useCallback(() => {
@@ -237,66 +243,76 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
       type: WebItemType.HTMLPage,
       name: `WebItem${webClass.webItems.length + 1}`,
       tagPrefix: 'WC',
-      htmlContent: '<html><head><title>New Page</title></head><body><h1>New Page</h1></body></html>',
+      htmlContent:
+        '<html><head><title>New Page</title></head><body><h1>New Page</h1></body></html>',
       responseFormat: ResponseFormat.HTML,
       cacheTimeout: 0,
       requiresAuth: false,
       events: [],
       tags: [],
-      customProperties: {}
+      customProperties: {},
     };
-    
+
     setWebClass(prev => ({
       ...prev,
-      webItems: [...prev.webItems, newWebItem]
+      webItems: [...prev.webItems, newWebItem],
     }));
-    
+
     setSelectedWebItem(newWebItem);
   }, [webClass.webItems.length]);
 
-  const updateWebItem = useCallback((webItemId: string, updates: Partial<WebItem>) => {
-    setWebClass(prev => {
-      const updated = { ...prev };
-      const itemIndex = updated.webItems.findIndex(item => item.id === webItemId);
-      if (itemIndex >= 0) {
-        updated.webItems[itemIndex] = { ...updated.webItems[itemIndex], ...updates };
-        
-        if (selectedWebItem?.id === webItemId) {
-          setSelectedWebItem(updated.webItems[itemIndex]);
+  const updateWebItem = useCallback(
+    (webItemId: string, updates: Partial<WebItem>) => {
+      setWebClass(prev => {
+        const updated = { ...prev };
+        const itemIndex = updated.webItems.findIndex(item => item.id === webItemId);
+        if (itemIndex >= 0) {
+          updated.webItems[itemIndex] = { ...updated.webItems[itemIndex], ...updates };
+
+          if (selectedWebItem?.id === webItemId) {
+            setSelectedWebItem(updated.webItems[itemIndex]);
+          }
         }
+        return updated;
+      });
+
+      eventEmitter.current.emit('webItemUpdated', { webItemId, updates });
+    },
+    [selectedWebItem]
+  );
+
+  const deleteWebItem = useCallback(
+    (webItemId: string) => {
+      setWebClass(prev => ({
+        ...prev,
+        webItems: prev.webItems.filter(item => item.id !== webItemId),
+      }));
+
+      if (selectedWebItem?.id === webItemId) {
+        setSelectedWebItem(webClass.webItems[0] || null);
       }
-      return updated;
-    });
-    
-    eventEmitter.current.emit('webItemUpdated', { webItemId, updates });
-  }, [selectedWebItem]);
 
-  const deleteWebItem = useCallback((webItemId: string) => {
-    setWebClass(prev => ({
-      ...prev,
-      webItems: prev.webItems.filter(item => item.id !== webItemId)
-    }));
-    
-    if (selectedWebItem?.id === webItemId) {
-      setSelectedWebItem(webClass.webItems[0] || null);
-    }
-    
-    eventEmitter.current.emit('webItemDeleted', { webItemId });
-  }, [selectedWebItem, webClass.webItems]);
+      eventEmitter.current.emit('webItemDeleted', { webItemId });
+    },
+    [selectedWebItem, webClass.webItems]
+  );
 
-  const addTemplateTag = useCallback((webItemId: string) => {
-    const newTag: TemplateTag = {
-      id: `tag_${Date.now()}`,
-      name: `Tag${(selectedWebItem?.tags.length || 0) + 1}`,
-      replacement: '',
-      htmlContent: '<p>Template content</p>',
-      attributes: {}
-    };
-    
-    updateWebItem(webItemId, {
-      tags: [...(selectedWebItem?.tags || []), newTag]
-    });
-  }, [selectedWebItem, updateWebItem]);
+  const addTemplateTag = useCallback(
+    (webItemId: string) => {
+      const newTag: TemplateTag = {
+        id: `tag_${Date.now()}`,
+        name: `Tag${(selectedWebItem?.tags.length || 0) + 1}`,
+        replacement: '',
+        htmlContent: '<p>Template content</p>',
+        attributes: {},
+      };
+
+      updateWebItem(webItemId, {
+        tags: [...(selectedWebItem?.tags || []), newTag],
+      });
+    },
+    [selectedWebItem, updateWebItem]
+  );
 
   const addDatabaseConnection = useCallback(() => {
     const newConnection: DatabaseConnection = {
@@ -304,12 +320,12 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
       connectionString: 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=database.mdb',
       provider: 'Microsoft.Jet.OLEDB.4.0',
       timeout: 30,
-      pooling: true
+      pooling: true,
     };
-    
+
     setWebClass(prev => ({
       ...prev,
-      databaseConnections: [...prev.databaseConnections, newConnection]
+      databaseConnections: [...prev.databaseConnections, newConnection],
     }));
   }, [webClass.databaseConnections.length]);
 
@@ -325,7 +341,7 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
 
   const generateVBCode = useCallback((): string => {
     const lines: string[] = [];
-    
+
     // Header
     lines.push(`VERSION 1.0 CLASS`);
     lines.push(`BEGIN`);
@@ -341,7 +357,7 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
     lines.push(`Attribute VB_PredeclaredId = False`);
     lines.push(`Attribute VB_Exposed = True`);
     lines.push('');
-    
+
     // WebClass declaration
     lines.push(`Option Explicit`);
     lines.push(`Option Compare Text`);
@@ -349,47 +365,51 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
     lines.push(`'Local variable to hold reference to the WebClass`);
     lines.push(`Private WithEvents m_${webClass.name} As WebClass`);
     lines.push('');
-    
+
     // Initialize event
     lines.push(`Private Sub Class_Initialize()`);
     lines.push(`    Set m_${webClass.name} = New WebClass`);
     lines.push(`    Set m_${webClass.name}.Application = App`);
     lines.push(`    m_${webClass.name}.Name = "${webClass.name}"`);
-    lines.push(`    m_${webClass.name}.StateManagement = ${webClass.stateManagement === StateManagement.InProcess ? 'wcStateManagementInProcess' : '0'}`);
+    lines.push(
+      `    m_${webClass.name}.StateManagement = ${webClass.stateManagement === StateManagement.InProcess ? 'wcStateManagementInProcess' : '0'}`
+    );
     lines.push(`    m_${webClass.name}.SessionTimeout = ${webClass.sessionTimeout}`);
     lines.push(`End Sub`);
     lines.push('');
-    
+
     // Web Items
     webClass.webItems.forEach(webItem => {
       lines.push(`'${webItem.name} WebItem`);
       lines.push(`Private Sub m_${webClass.name}_${webItem.name}_Respond()`);
       lines.push(`    Dim strHTML As String`);
       lines.push('');
-      
+
       if (webItem.type === WebItemType.HTMLTemplate) {
         lines.push(`    'Process template tags`);
         webItem.tags.forEach(tag => {
           lines.push(`    strHTML = Replace(strHTML, "<!--${tag.name}-->", "${tag.replacement}")`);
         });
       }
-      
+
       lines.push(`    'Set content type`);
-      lines.push(`    Response.ContentType = "${webItem.responseFormat === ResponseFormat.HTML ? 'text/html' : webItem.responseFormat === ResponseFormat.XML ? 'text/xml' : webItem.responseFormat === ResponseFormat.JSON ? 'application/json' : 'text/plain'}"`);
+      lines.push(
+        `    Response.ContentType = "${webItem.responseFormat === ResponseFormat.HTML ? 'text/html' : webItem.responseFormat === ResponseFormat.XML ? 'text/xml' : webItem.responseFormat === ResponseFormat.JSON ? 'application/json' : 'text/plain'}"`
+      );
       lines.push('');
-      
+
       if (webItem.cacheTimeout > 0) {
         lines.push(`    'Set cache timeout`);
         lines.push(`    Response.Expires = ${webItem.cacheTimeout}`);
         lines.push('');
       }
-      
+
       lines.push(`    'Write HTML content`);
       lines.push(`    strHTML = "${webItem.htmlContent.replace(/"/g, '""')}"`);
       lines.push(`    Response.Write strHTML`);
       lines.push(`End Sub`);
       lines.push('');
-      
+
       // Event handlers for the web item
       webItem.events.forEach(event => {
         lines.push(`Private Sub m_${webClass.name}_${webItem.name}_${event.type}()`);
@@ -398,7 +418,7 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
         lines.push('');
       });
     });
-    
+
     // Global events
     webClass.globalEvents.forEach(event => {
       lines.push(`Private Sub m_${webClass.name}_${event.name}()`);
@@ -406,7 +426,7 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
       lines.push(`End Sub`);
       lines.push('');
     });
-    
+
     // Database connection methods
     if (webClass.databaseConnections.length > 0) {
       lines.push(`'Database connection methods`);
@@ -421,7 +441,7 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
         lines.push('');
       });
     }
-    
+
     // Utility methods
     lines.push(`'Utility methods`);
     lines.push(`Private Function HTMLEncode(ByVal strText As String) As String`);
@@ -432,32 +452,32 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
     lines.push(`    HTMLEncode = strText`);
     lines.push(`End Function`);
     lines.push('');
-    
+
     lines.push(`Private Function URLEncode(ByVal strText As String) As String`);
     lines.push(`    'URL encoding implementation`);
     lines.push(`    URLEncode = Server.URLEncode(strText)`);
     lines.push(`End Function`);
     lines.push('');
-    
+
     // Session management helpers
     if (webClass.sessionManagement !== SessionManagement.None) {
       lines.push(`Private Function GetSessionValue(ByVal strKey As String) As Variant`);
       lines.push(`    GetSessionValue = Session(strKey)`);
       lines.push(`End Function`);
       lines.push('');
-      
+
       lines.push(`Private Sub SetSessionValue(ByVal strKey As String, ByVal varValue As Variant)`);
       lines.push(`    Session(strKey) = varValue`);
       lines.push(`End Sub`);
       lines.push('');
     }
-    
+
     return lines.join('\n');
   }, [webClass]);
 
   const generateHTML = useCallback((webItem: WebItem): string => {
     let html = webItem.htmlContent;
-    
+
     // Process template tags - pre-compile regex for better performance
     webItem.tags.forEach(tag => {
       // Escape regex special characters in tag name
@@ -465,32 +485,37 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
       const tagRegex = new RegExp(`<!--${escapedTagName}-->`, 'g');
       html = html.replace(tagRegex, tag.htmlContent || '');
     });
-    
+
     return html;
   }, []);
 
-  const renderWebItemPreview = useCallback((webItem: WebItem): React.ReactNode => {
-    const html = generateHTML(webItem);
-    
-    return (
-      <div
-        className="w-full h-full bg-white border"
-        style={{
-          width: previewMode === 'desktop' ? '100%' : previewMode === 'tablet' ? '768px' : '375px',
-          height: previewMode === 'desktop' ? '100%' : previewMode === 'tablet' ? '1024px' : '667px',
-          maxWidth: '100%',
-          margin: '0 auto'
-        }}
-      >
-        <iframe
-          srcDoc={html}
-          className="w-full h-full"
-          style={{ border: 'none' }}
-          title={`${webItem.name} Preview`}
-        />
-      </div>
-    );
-  }, [generateHTML, previewMode]);
+  const renderWebItemPreview = useCallback(
+    (webItem: WebItem): React.ReactNode => {
+      const html = generateHTML(webItem);
+
+      return (
+        <div
+          className="w-full h-full bg-white border"
+          style={{
+            width:
+              previewMode === 'desktop' ? '100%' : previewMode === 'tablet' ? '768px' : '375px',
+            height:
+              previewMode === 'desktop' ? '100%' : previewMode === 'tablet' ? '1024px' : '667px',
+            maxWidth: '100%',
+            margin: '0 auto',
+          }}
+        >
+          <iframe
+            srcDoc={html}
+            className="w-full h-full"
+            style={{ border: 'none' }}
+            title={`${webItem.name} Preview`}
+          />
+        </div>
+      );
+    },
+    [generateHTML, previewMode]
+  );
 
   return (
     <div className="flex flex-col h-full bg-gray-100">
@@ -502,14 +527,14 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
             <input
               type="text"
               value={webClass.name}
-              onChange={(e) => setWebClass(prev => ({ ...prev, name: e.target.value }))}
+              onChange={e => setWebClass(prev => ({ ...prev, name: e.target.value }))}
               className="px-2 py-1 border border-gray-300 rounded"
             />
           </div>
           <div className="flex gap-2">
             <select
               value={previewMode}
-              onChange={(e) => setPreviewMode(e.target.value as 'desktop' | 'tablet' | 'mobile')}
+              onChange={e => setPreviewMode(e.target.value as 'desktop' | 'tablet' | 'mobile')}
               className="px-2 py-1 border border-gray-300 rounded text-sm"
             >
               <option value="desktop">Desktop</option>
@@ -570,7 +595,9 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
                       key={item.id}
                       onClick={() => setSelectedWebItem(item)}
                       className={`p-2 rounded cursor-pointer text-sm ${
-                        selectedWebItem?.id === item.id ? 'bg-blue-100 text-blue-700' : 'bg-gray-50 hover:bg-gray-100'
+                        selectedWebItem?.id === item.id
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-gray-50 hover:bg-gray-100'
                       }`}
                     >
                       <div className="font-medium">{item.name}</div>
@@ -579,31 +606,33 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
                   ))}
                 </div>
               </div>
-              
+
               <div className="mb-6">
                 <h3 className="font-medium text-gray-700 mb-2">HTML Elements</h3>
-                {['Layout', 'Text', 'Forms', 'Data', 'Media', 'Navigation', 'Lists'].map(category => (
-                  <div key={category} className="mb-3">
-                    <h4 className="text-sm font-medium text-gray-600 mb-1">{category}</h4>
-                    <div className="space-y-1">
-                      {htmlElements
-                        .filter(el => el.category === category)
-                        .map(element => (
-                          <div
-                            key={element.type}
-                            className="p-2 bg-gray-100 rounded cursor-move hover:bg-gray-200 flex items-center gap-2 text-xs"
-                          >
-                            <span>{element.icon}</span>
-                            <span>{element.name}</span>
-                          </div>
-                        ))}
+                {['Layout', 'Text', 'Forms', 'Data', 'Media', 'Navigation', 'Lists'].map(
+                  category => (
+                    <div key={category} className="mb-3">
+                      <h4 className="text-sm font-medium text-gray-600 mb-1">{category}</h4>
+                      <div className="space-y-1">
+                        {htmlElements
+                          .filter(el => el.category === category)
+                          .map(element => (
+                            <div
+                              key={element.type}
+                              className="p-2 bg-gray-100 rounded cursor-move hover:bg-gray-200 flex items-center gap-2 text-xs"
+                            >
+                              <span>{element.icon}</span>
+                              <span>{element.name}</span>
+                            </div>
+                          ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
             </div>
           )}
-          
+
           {activeTab === 'html' && (
             <div className="p-4">
               <h3 className="font-medium text-gray-700 mb-2">Template Tags</h3>
@@ -621,7 +650,7 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
                         <input
                           type="text"
                           value={tag.name}
-                          onChange={(e) => {
+                          onChange={e => {
                             const updatedTags = selectedWebItem.tags.map(t =>
                               t.id === tag.id ? { ...t, name: e.target.value } : t
                             );
@@ -632,7 +661,7 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
                         />
                         <textarea
                           value={tag.htmlContent}
-                          onChange={(e) => {
+                          onChange={e => {
                             const updatedTags = selectedWebItem.tags.map(t =>
                               t.id === tag.id ? { ...t, htmlContent: e.target.value } : t
                             );
@@ -649,7 +678,7 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
               )}
             </div>
           )}
-          
+
           {activeTab === 'events' && (
             <div className="p-4">
               <h3 className="font-medium text-gray-700 mb-2">Event Handlers</h3>
@@ -660,16 +689,18 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
                       <div className="text-sm font-medium mb-1">{eventType}</div>
                       <textarea
                         value={selectedWebItem.events.find(e => e.type === eventType)?.code || ''}
-                        onChange={(e) => {
+                        onChange={e => {
                           const updatedEvents = [...selectedWebItem.events];
-                          const existingIndex = updatedEvents.findIndex(ev => ev.type === eventType);
-                          
+                          const existingIndex = updatedEvents.findIndex(
+                            ev => ev.type === eventType
+                          );
+
                           if (existingIndex >= 0) {
                             updatedEvents[existingIndex].code = e.target.value;
                           } else {
                             updatedEvents.push({ type: eventType, code: e.target.value });
                           }
-                          
+
                           updateWebItem(selectedWebItem.id, { events: updatedEvents });
                         }}
                         className="w-full px-1 py-1 text-xs font-mono border border-gray-300 rounded"
@@ -682,7 +713,7 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
               )}
             </div>
           )}
-          
+
           {activeTab === 'config' && (
             <div className="p-4">
               <div className="mb-4">
@@ -701,7 +732,7 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
                       <input
                         type="text"
                         value={conn.name}
-                        onChange={(e) => {
+                        onChange={e => {
                           const updated = [...webClass.databaseConnections];
                           updated[index] = { ...updated[index], name: e.target.value };
                           setWebClass(prev => ({ ...prev, databaseConnections: updated }));
@@ -711,7 +742,7 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
                       />
                       <textarea
                         value={conn.connectionString}
-                        onChange={(e) => {
+                        onChange={e => {
                           const updated = [...webClass.databaseConnections];
                           updated[index] = { ...updated[index], connectionString: e.target.value };
                           setWebClass(prev => ({ ...prev, databaseConnections: updated }));
@@ -724,7 +755,7 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
                   ))}
                 </div>
               </div>
-              
+
               <div>
                 <h3 className="font-medium text-gray-700 mb-2">Configuration</h3>
                 <div className="space-y-2 text-sm">
@@ -732,34 +763,50 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
                     <label className="block text-xs font-medium">Session Management</label>
                     <select
                       value={webClass.sessionManagement}
-                      onChange={(e) => setWebClass(prev => ({ ...prev, sessionManagement: e.target.value as SessionManagement }))}
+                      onChange={e =>
+                        setWebClass(prev => ({
+                          ...prev,
+                          sessionManagement: e.target.value as SessionManagement,
+                        }))
+                      }
                       className="w-full px-1 py-1 text-xs border border-gray-300 rounded"
                     >
                       {Object.values(SessionManagement).map(mode => (
-                        <option key={mode} value={mode}>{mode}</option>
+                        <option key={mode} value={mode}>
+                          {mode}
+                        </option>
                       ))}
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="block text-xs font-medium">State Management</label>
                     <select
                       value={webClass.stateManagement}
-                      onChange={(e) => setWebClass(prev => ({ ...prev, stateManagement: e.target.value as StateManagement }))}
+                      onChange={e =>
+                        setWebClass(prev => ({
+                          ...prev,
+                          stateManagement: e.target.value as StateManagement,
+                        }))
+                      }
                       className="w-full px-1 py-1 text-xs border border-gray-300 rounded"
                     >
                       {Object.values(StateManagement).map(mode => (
-                        <option key={mode} value={mode}>{mode}</option>
+                        <option key={mode} value={mode}>
+                          {mode}
+                        </option>
                       ))}
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="block text-xs font-medium">Session Timeout (minutes)</label>
                     <input
                       type="number"
                       value={webClass.sessionTimeout}
-                      onChange={(e) => setWebClass(prev => ({ ...prev, sessionTimeout: Number(e.target.value) }))}
+                      onChange={e =>
+                        setWebClass(prev => ({ ...prev, sessionTimeout: Number(e.target.value) }))
+                      }
                       className="w-full px-1 py-1 text-xs border border-gray-300 rounded"
                     />
                   </div>
@@ -776,7 +823,7 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
               {renderWebItemPreview(selectedWebItem)}
             </div>
           )}
-          
+
           {activeTab === 'html' && selectedWebItem && (
             <div className="w-full h-full p-4">
               <div className="flex items-center justify-between mb-4">
@@ -784,28 +831,38 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
                 <div className="flex gap-2">
                   <select
                     value={selectedWebItem.type}
-                    onChange={(e) => updateWebItem(selectedWebItem.id, { type: e.target.value as WebItemType })}
+                    onChange={e =>
+                      updateWebItem(selectedWebItem.id, { type: e.target.value as WebItemType })
+                    }
                     className="px-2 py-1 border border-gray-300 rounded text-sm"
                   >
                     {Object.values(WebItemType).map(type => (
-                      <option key={type} value={type}>{type}</option>
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
                     ))}
                   </select>
                   <select
                     value={selectedWebItem.responseFormat}
-                    onChange={(e) => updateWebItem(selectedWebItem.id, { responseFormat: e.target.value as ResponseFormat })}
+                    onChange={e =>
+                      updateWebItem(selectedWebItem.id, {
+                        responseFormat: e.target.value as ResponseFormat,
+                      })
+                    }
                     className="px-2 py-1 border border-gray-300 rounded text-sm"
                   >
                     {Object.values(ResponseFormat).map(format => (
-                      <option key={format} value={format}>{format}</option>
+                      <option key={format} value={format}>
+                        {format}
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
-              
+
               <textarea
                 value={selectedWebItem.htmlContent}
-                onChange={(e) => {
+                onChange={e => {
                   updateWebItem(selectedWebItem.id, { htmlContent: e.target.value });
                   setHtmlContent(e.target.value);
                 }}
@@ -815,34 +872,34 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
               />
             </div>
           )}
-          
+
           {activeTab === 'events' && (
             <div className="p-4">
               <h3 className="text-lg font-medium mb-4">Global Events</h3>
-              
+
               <button
                 onClick={() => {
                   const newEvent = {
                     name: `Event${webClass.globalEvents.length + 1}`,
-                    code: "'Event handler code"
+                    code: "'Event handler code",
                   };
                   setWebClass(prev => ({
                     ...prev,
-                    globalEvents: [...prev.globalEvents, newEvent]
+                    globalEvents: [...prev.globalEvents, newEvent],
                   }));
                 }}
                 className="mb-4 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
               >
                 Add Global Event
               </button>
-              
+
               <div className="space-y-4">
                 {webClass.globalEvents.map((event, index) => (
                   <div key={index} className="p-4 border border-gray-300 rounded">
                     <input
                       type="text"
                       value={event.name}
-                      onChange={(e) => {
+                      onChange={e => {
                         const updated = [...webClass.globalEvents];
                         updated[index] = { ...updated[index], name: e.target.value };
                         setWebClass(prev => ({ ...prev, globalEvents: updated }));
@@ -852,7 +909,7 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
                     />
                     <textarea
                       value={event.code}
-                      onChange={(e) => {
+                      onChange={e => {
                         const updated = [...webClass.globalEvents];
                         updated[index] = { ...updated[index], code: e.target.value };
                         setWebClass(prev => ({ ...prev, globalEvents: updated }));
@@ -866,11 +923,11 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
               </div>
             </div>
           )}
-          
+
           {activeTab === 'config' && (
             <div className="p-4">
               <h3 className="text-lg font-medium mb-4">WebClass Configuration</h3>
-              
+
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <h4 className="font-medium mb-2">General Settings</h4>
@@ -880,7 +937,9 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
                       <input
                         type="text"
                         value={webClass.description}
-                        onChange={(e) => setWebClass(prev => ({ ...prev, description: e.target.value }))}
+                        onChange={e =>
+                          setWebClass(prev => ({ ...prev, description: e.target.value }))
+                        }
                         className="w-full px-2 py-1 border border-gray-300 rounded"
                       />
                     </div>
@@ -889,7 +948,7 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
                       <input
                         type="text"
                         value={webClass.author}
-                        onChange={(e) => setWebClass(prev => ({ ...prev, author: e.target.value }))}
+                        onChange={e => setWebClass(prev => ({ ...prev, author: e.target.value }))}
                         className="w-full px-2 py-1 border border-gray-300 rounded"
                       />
                     </div>
@@ -898,13 +957,13 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
                       <input
                         type="text"
                         value={webClass.version}
-                        onChange={(e) => setWebClass(prev => ({ ...prev, version: e.target.value }))}
+                        onChange={e => setWebClass(prev => ({ ...prev, version: e.target.value }))}
                         className="w-full px-2 py-1 border border-gray-300 rounded"
                       />
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="font-medium mb-2">Resource Paths</h4>
                   <div className="space-y-3">
@@ -913,7 +972,9 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
                       <input
                         type="text"
                         value={webClass.templatePath}
-                        onChange={(e) => setWebClass(prev => ({ ...prev, templatePath: e.target.value }))}
+                        onChange={e =>
+                          setWebClass(prev => ({ ...prev, templatePath: e.target.value }))
+                        }
                         className="w-full px-2 py-1 border border-gray-300 rounded"
                       />
                     </div>
@@ -922,7 +983,9 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
                       <input
                         type="text"
                         value={webClass.imageBasePath}
-                        onChange={(e) => setWebClass(prev => ({ ...prev, imageBasePath: e.target.value }))}
+                        onChange={e =>
+                          setWebClass(prev => ({ ...prev, imageBasePath: e.target.value }))
+                        }
                         className="w-full px-2 py-1 border border-gray-300 rounded"
                       />
                     </div>
@@ -931,14 +994,16 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
                       <input
                         type="text"
                         value={webClass.stylesheetPath}
-                        onChange={(e) => setWebClass(prev => ({ ...prev, stylesheetPath: e.target.value }))}
+                        onChange={e =>
+                          setWebClass(prev => ({ ...prev, stylesheetPath: e.target.value }))
+                        }
                         className="w-full px-2 py-1 border border-gray-300 rounded"
                       />
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-6">
                 <h4 className="font-medium mb-2">Generated VB6 Code Preview</h4>
                 <textarea
@@ -957,60 +1022,68 @@ export const WebClassDesigner: React.FC<WebClassDesignerProps> = ({
           <div className="w-80 bg-white border-l border-gray-200 overflow-y-auto">
             <div className="p-4">
               <h3 className="font-medium text-gray-700 mb-3">WebItem Properties</h3>
-              
+
               <div className="space-y-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-600">Name</label>
                   <input
                     type="text"
                     value={selectedWebItem.name}
-                    onChange={(e) => updateWebItem(selectedWebItem.id, { name: e.target.value })}
+                    onChange={e => updateWebItem(selectedWebItem.id, { name: e.target.value })}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-600">Tag Prefix</label>
                   <input
                     type="text"
                     value={selectedWebItem.tagPrefix}
-                    onChange={(e) => updateWebItem(selectedWebItem.id, { tagPrefix: e.target.value })}
+                    onChange={e => updateWebItem(selectedWebItem.id, { tagPrefix: e.target.value })}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-600">Cache Timeout (seconds)</label>
+                  <label className="block text-sm font-medium text-gray-600">
+                    Cache Timeout (seconds)
+                  </label>
                   <input
                     type="number"
                     value={selectedWebItem.cacheTimeout}
-                    onChange={(e) => updateWebItem(selectedWebItem.id, { cacheTimeout: Number(e.target.value) })}
+                    onChange={e =>
+                      updateWebItem(selectedWebItem.id, { cacheTimeout: Number(e.target.value) })
+                    }
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                   />
                 </div>
-                
+
                 <div>
                   <label className="flex items-center gap-2 text-sm">
                     <input
                       type="checkbox"
                       checked={selectedWebItem.requiresAuth}
-                      onChange={(e) => updateWebItem(selectedWebItem.id, { requiresAuth: e.target.checked })}
+                      onChange={e =>
+                        updateWebItem(selectedWebItem.id, { requiresAuth: e.target.checked })
+                      }
                     />
                     Requires Authentication
                   </label>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-600">Template File</label>
                   <input
                     type="text"
                     value={selectedWebItem.templateFile || ''}
-                    onChange={(e) => updateWebItem(selectedWebItem.id, { templateFile: e.target.value })}
+                    onChange={e =>
+                      updateWebItem(selectedWebItem.id, { templateFile: e.target.value })
+                    }
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     placeholder="template.html"
                   />
                 </div>
-                
+
                 <div className="pt-2">
                   <button
                     onClick={() => deleteWebItem(selectedWebItem.id)}

@@ -126,8 +126,8 @@ export class VB6Collection<T = any> implements Iterable<T> {
         if (index < items.length) {
           return { value: items[index++], done: false };
         }
-        return { value: undefined as any, done: true };
-      }
+        return { value: undefined, done: true } as IteratorReturnResult<undefined>;
+      },
     };
   }
 
@@ -208,7 +208,7 @@ export class VB6Dictionary<TKey = string, TValue = any> implements Iterable<TKey
 
     // Get mode - creates empty entry if doesn't exist
     if (!this.items.has(normalizedKey)) {
-      this.items.set(normalizedKey, undefined as any);
+      this.items.set(normalizedKey, undefined as unknown as TValue);
       this.originalKeys.set(normalizedKey, key);
     }
     return this.items.get(normalizedKey)!;
@@ -648,8 +648,8 @@ export class VB6ArrayList<T = any> implements Iterable<T> {
         if (index < items.length) {
           return { value: items[index++], done: false };
         }
-        return { value: undefined as any, done: true };
-      }
+        return { value: undefined, done: true } as IteratorReturnResult<undefined>;
+      },
     };
   }
 }
@@ -664,11 +664,13 @@ export class VB6SortedList<TKey = string, TValue = any> {
   private comparer: (a: TKey, b: TKey) => number;
 
   constructor(comparer?: (a: TKey, b: TKey) => number) {
-    this.comparer = comparer || ((a, b) => {
-      if (a < b) return -1;
-      if (a > b) return 1;
-      return 0;
-    });
+    this.comparer =
+      comparer ||
+      ((a, b) => {
+        if (a < b) return -1;
+        if (a > b) return 1;
+        return 0;
+      });
   }
 
   /**
@@ -916,7 +918,7 @@ export const VB6EnhancedCollections = {
   CreateStack,
   CreateQueue,
   CreateArrayList,
-  CreateSortedList
+  CreateSortedList,
 };
 
 export default VB6EnhancedCollections;

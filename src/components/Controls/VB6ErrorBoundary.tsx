@@ -34,7 +34,7 @@ export class VB6ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundar
       hasError: false,
       error: null,
       errorInfo: null,
-      isExpanded: false
+      isExpanded: false,
     };
   }
 
@@ -48,9 +48,9 @@ export class VB6ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundar
     // Log error to console with VB6-style formatting
     console.error(
       `[VB6 Runtime Error] Control: ${this.props.controlName || 'Unknown'}\n` +
-      `Type: ${this.props.controlType || 'Unknown'}\n` +
-      `Error: ${error.message}\n` +
-      `Stack: ${errorInfo.componentStack}`
+        `Type: ${this.props.controlType || 'Unknown'}\n` +
+        `Error: ${error.message}\n` +
+        `Stack: ${errorInfo.componentStack}`
     );
 
     // Call custom error handler if provided
@@ -64,7 +64,7 @@ export class VB6ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundar
       hasError: false,
       error: null,
       errorInfo: null,
-      isExpanded: false
+      isExpanded: false,
     });
   };
 
@@ -90,14 +90,12 @@ export class VB6ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundar
             fontFamily: 'MS Sans Serif, Arial, sans-serif',
             fontSize: '11px',
             minWidth: '100px',
-            minHeight: '40px'
+            minHeight: '40px',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <span style={{ color: '#CC0000', fontWeight: 'bold' }}>!</span>
-            <span style={{ color: '#CC0000' }}>
-              Error in {this.props.controlName || 'Control'}
-            </span>
+            <span style={{ color: '#CC0000' }}>Error in {this.props.controlName || 'Control'}</span>
           </div>
 
           {this.props.showDetails && (
@@ -111,7 +109,7 @@ export class VB6ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundar
                     padding: '2px 6px',
                     fontSize: '10px',
                     cursor: 'pointer',
-                    marginRight: '4px'
+                    marginRight: '4px',
                   }}
                 >
                   {this.state.isExpanded ? 'Hide Details' : 'Show Details'}
@@ -123,7 +121,7 @@ export class VB6ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundar
                     border: '1px solid #808080',
                     padding: '2px 6px',
                     fontSize: '10px',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
                   }}
                 >
                   Retry
@@ -140,12 +138,10 @@ export class VB6ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundar
                     maxHeight: '100px',
                     overflow: 'auto',
                     fontSize: '10px',
-                    fontFamily: 'Consolas, monospace'
+                    fontFamily: 'Consolas, monospace',
                   }}
                 >
-                  <div style={{ color: '#CC0000' }}>
-                    {this.state.error?.message}
-                  </div>
+                  <div style={{ color: '#CC0000' }}>{this.state.error?.message}</div>
                   {this.state.error?.stack && (
                     <pre style={{ margin: '4px 0', whiteSpace: 'pre-wrap' }}>
                       {this.state.error.stack}

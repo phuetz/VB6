@@ -1,6 +1,6 @@
 /**
  * VB6 SysInfo Control Implementation
- * 
+ *
  * System information control with web-compatible system data
  */
 
@@ -13,36 +13,36 @@ export interface SysInfoControl {
   top: number;
   width: number;
   height: number;
-  
+
   // System Properties (read-only)
   acStatus: number; // AC power status
   batteryFullTime: number; // Battery full time in seconds
   batteryLifePercent: number; // Battery life percentage
   batteryLifeTime: number; // Battery life time in seconds
   batteryStatus: number; // Battery status
-  
+
   // OS Properties
   osVersion: string; // Operating system version
   osBuild: string; // OS build number
   osCompatible: string; // Compatible OS
   osPlatform: number; // Platform ID
-  
+
   // Computer Properties
   computerName: string; // Computer name
   userName: string; // Current user name
   workingArea: { left: number; top: number; width: number; height: number }; // Working area
-  
+
   // Screen Properties
   screenWidth: number; // Screen width in pixels
   screenHeight: number; // Screen height in pixels
   screenColorDepth: number; // Color depth
-  
+
   // Input Properties
   mouseButtons: number; // Number of mouse buttons
   mousePresent: boolean; // Mouse present
   mouseWheelPresent: boolean; // Mouse wheel present
   keyboardType: number; // Keyboard type
-  
+
   // Behavior
   enabled: boolean;
   visible: boolean;
@@ -56,7 +56,7 @@ export const SysInfoConstants = {
   AC_LINE_ONLINE: 1,
   AC_LINE_BACKUP_POWER: 2,
   AC_LINE_UNKNOWN: 255,
-  
+
   // Battery Status
   BATTERY_HIGH: 1,
   BATTERY_LOW: 2,
@@ -64,18 +64,18 @@ export const SysInfoConstants = {
   BATTERY_CHARGING: 8,
   BATTERY_NO_SYSTEM: 128,
   BATTERY_UNKNOWN: 255,
-  
+
   // Platform IDs
   VER_PLATFORM_WIN32s: 0,
   VER_PLATFORM_WIN32_WINDOWS: 1,
   VER_PLATFORM_WIN32_NT: 2,
-  
+
   // Keyboard Types
   KB_84KEY: 1,
   KB_102KEY: 2,
   KB_106KEY: 3,
   KB_ENHANCED: 4,
-  KB_UNKNOWN: 0
+  KB_UNKNOWN: 0,
 };
 
 interface SysInfoControlProps {
@@ -89,7 +89,7 @@ export const SysInfoControl: React.FC<SysInfoControlProps> = ({
   control,
   isDesignMode = false,
   onPropertyChange,
-  onEvent
+  onEvent,
 }) => {
   const {
     name,
@@ -118,7 +118,7 @@ export const SysInfoControl: React.FC<SysInfoControlProps> = ({
     keyboardType = SysInfoConstants.KB_ENHANCED,
     enabled = true,
     visible = true,
-    tag = ''
+    tag = '',
   } = control;
 
   const [systemInfo, setSystemInfo] = useState({
@@ -140,7 +140,7 @@ export const SysInfoControl: React.FC<SysInfoControlProps> = ({
     mouseButtons,
     mousePresent,
     mouseWheelPresent,
-    keyboardType
+    keyboardType,
   });
 
   // Get system information using modern web APIs
@@ -158,7 +158,7 @@ export const SysInfoControl: React.FC<SysInfoControlProps> = ({
         left: window.screen.availLeft || 0,
         top: window.screen.availTop || 0,
         width: window.screen.availWidth,
-        height: window.screen.availHeight
+        height: window.screen.availHeight,
       };
 
       // User agent parsing for OS information
@@ -216,13 +216,13 @@ export const SysInfoControl: React.FC<SysInfoControlProps> = ({
           info.batteryLifePercent = Math.round(battery.level * 100);
           info.batteryLifeTime = battery.dischargingTime === Infinity ? 0 : battery.dischargingTime;
           info.batteryFullTime = battery.chargingTime === Infinity ? 0 : battery.chargingTime;
-          
+
           if (battery.charging) {
             info.batteryStatus = SysInfoConstants.BATTERY_CHARGING;
             info.acStatus = SysInfoConstants.AC_LINE_ONLINE;
           } else {
             info.acStatus = SysInfoConstants.AC_LINE_OFFLINE;
-            
+
             if (battery.level > 0.5) {
               info.batteryStatus = SysInfoConstants.BATTERY_HIGH;
             } else if (battery.level > 0.2) {
@@ -241,7 +241,6 @@ export const SysInfoControl: React.FC<SysInfoControlProps> = ({
         info.batteryStatus = SysInfoConstants.BATTERY_NO_SYSTEM;
         info.acStatus = SysInfoConstants.AC_LINE_ONLINE;
       }
-
     } catch (error) {
       console.warn('Error getting system information:', error);
     }
@@ -252,7 +251,6 @@ export const SysInfoControl: React.FC<SysInfoControlProps> = ({
     Object.entries(info).forEach(([key, value]) => {
       onPropertyChange?.(key, value);
     });
-
   }, [systemInfo, onPropertyChange]);
 
   // Helper function to get Windows version name
@@ -265,7 +263,7 @@ export const SysInfoControl: React.FC<SysInfoControlProps> = ({
       '6.0': 'Vista',
       '5.2': 'XP x64',
       '5.1': 'XP',
-      '5.0': '2000'
+      '5.0': '2000',
     };
     return versionMap[version] || version;
   };
@@ -318,7 +316,7 @@ export const SysInfoControl: React.FC<SysInfoControlProps> = ({
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '10px',
-    fontFamily: 'Tahoma, Arial, sans-serif'
+    fontFamily: 'Tahoma, Arial, sans-serif',
   };
 
   return (
@@ -331,9 +329,7 @@ export const SysInfoControl: React.FC<SysInfoControlProps> = ({
       title={`SysInfo - ${systemInfo.osVersion} - ${systemInfo.screenWidth}x${systemInfo.screenHeight}`}
     >
       <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: '12px', marginBottom: '2px' }}>
-          💻
-        </div>
+        <div style={{ fontSize: '12px', marginBottom: '2px' }}>💻</div>
         <div>SysInfo</div>
         <div style={{ fontSize: '8px' }}>
           {systemInfo.screenWidth}x{systemInfo.screenHeight}
@@ -352,7 +348,7 @@ export const SysInfoControl: React.FC<SysInfoControlProps> = ({
             padding: '2px',
             border: '1px solid #ccc',
             whiteSpace: 'nowrap',
-            zIndex: 1000
+            zIndex: 1000,
           }}
         >
           {name} - {systemInfo.osVersion}
@@ -396,7 +392,7 @@ export const SysInfoHelpers = {
       keyboardType: SysInfoConstants.KB_ENHANCED,
       enabled: true,
       visible: true,
-      tag: ''
+      tag: '',
     };
   },
 
@@ -408,7 +404,7 @@ export const SysInfoHelpers = {
       [SysInfoConstants.AC_LINE_OFFLINE]: 'Offline',
       [SysInfoConstants.AC_LINE_ONLINE]: 'Online',
       [SysInfoConstants.AC_LINE_BACKUP_POWER]: 'Backup Power',
-      [SysInfoConstants.AC_LINE_UNKNOWN]: 'Unknown'
+      [SysInfoConstants.AC_LINE_UNKNOWN]: 'Unknown',
     };
     return descriptions[status] || 'Unknown';
   },
@@ -423,7 +419,7 @@ export const SysInfoHelpers = {
       [SysInfoConstants.BATTERY_CRITICAL]: 'Critical',
       [SysInfoConstants.BATTERY_CHARGING]: 'Charging',
       [SysInfoConstants.BATTERY_NO_SYSTEM]: 'No Battery',
-      [SysInfoConstants.BATTERY_UNKNOWN]: 'Unknown'
+      [SysInfoConstants.BATTERY_UNKNOWN]: 'Unknown',
     };
     return descriptions[status] || 'Unknown';
   },
@@ -435,7 +431,7 @@ export const SysInfoHelpers = {
     const descriptions: { [key: number]: string } = {
       [SysInfoConstants.VER_PLATFORM_WIN32s]: 'Win32s',
       [SysInfoConstants.VER_PLATFORM_WIN32_WINDOWS]: 'Windows 9x',
-      [SysInfoConstants.VER_PLATFORM_WIN32_NT]: 'Windows NT'
+      [SysInfoConstants.VER_PLATFORM_WIN32_NT]: 'Windows NT',
     };
     return descriptions[platform] || 'Unknown';
   },
@@ -449,7 +445,7 @@ export const SysInfoHelpers = {
       [SysInfoConstants.KB_102KEY]: '102-key',
       [SysInfoConstants.KB_106KEY]: '106-key',
       [SysInfoConstants.KB_ENHANCED]: 'Enhanced',
-      [SysInfoConstants.KB_UNKNOWN]: 'Unknown'
+      [SysInfoConstants.KB_UNKNOWN]: 'Unknown',
     };
     return descriptions[type] || 'Unknown';
   },
@@ -459,10 +455,10 @@ export const SysInfoHelpers = {
    */
   formatTime: (seconds: number): string => {
     if (seconds === 0 || seconds === Infinity) return 'Unknown';
-    
+
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}m`;
     } else {
@@ -480,9 +476,9 @@ export const SysInfoHelpers = {
       isPortable: sysInfo.batteryStatus !== SysInfoConstants.BATTERY_NO_SYSTEM,
       colorDepth: sysInfo.screenColorDepth,
       resolution: `${sysInfo.screenWidth}x${sysInfo.screenHeight}`,
-      workingAreaSize: `${sysInfo.workingArea.width}x${sysInfo.workingArea.height}`
+      workingAreaSize: `${sysInfo.workingArea.width}x${sysInfo.workingArea.height}`,
     };
-  }
+  },
 };
 
 // VB6 SysInfo Methods simulation
@@ -537,15 +533,15 @@ export const SysInfoMethods = {
   getEnvironmentVariable: (name: string): string => {
     // Browser environment variables are limited
     const mockEnvVars: { [key: string]: string } = {
-      'COMPUTERNAME': 'WEB-CLIENT',
-      'USERNAME': 'WebUser',
-      'OS': 'Web Browser',
-      'PROCESSOR_ARCHITECTURE': navigator.platform,
-      'USERDOMAIN': 'LOCAL'
+      COMPUTERNAME: 'WEB-CLIENT',
+      USERNAME: 'WebUser',
+      OS: 'Web Browser',
+      PROCESSOR_ARCHITECTURE: navigator.platform,
+      USERDOMAIN: 'LOCAL',
     };
-    
+
     return mockEnvVars[name.toUpperCase()] || '';
-  }
+  },
 };
 
 export default SysInfoControl;

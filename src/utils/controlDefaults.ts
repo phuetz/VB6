@@ -1,5 +1,4 @@
 export const getDefaultProperties = (type: string, id: number) => {
-
   const baseProps = {
     id,
     type,
@@ -14,7 +13,7 @@ export const getDefaultProperties = (type: string, id: number) => {
     toolTipText: '',
   };
 
-  const typeSpecificProps: { [key: string]: any } = {
+  const typeSpecificProps: Record<string, Record<string, unknown>> = {
     CommandButton: {
       width: 89,
       height: 25,
@@ -526,9 +525,13 @@ export const getDefaultProperties = (type: string, id: number) => {
       data: {
         columnCount: 4,
         rowCount: 3,
-        values: [[10, 20, 30, 40], [15, 25, 35, 45], [12, 22, 32, 42]],
+        values: [
+          [10, 20, 30, 40],
+          [15, 25, 35, 45],
+          [12, 22, 32, 42],
+        ],
         columnLabels: ['Q1', 'Q2', 'Q3', 'Q4'],
-        rowLabels: ['Series 1', 'Series 2', 'Series 3']
+        rowLabels: ['Series 1', 'Series 2', 'Series 3'],
       },
       autoIncrement: true,
       allowSeriesSelection: true,

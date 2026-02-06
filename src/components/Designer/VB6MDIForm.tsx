@@ -3,14 +3,7 @@
  * Implements Multiple Document Interface forms for VB6 compatibility
  */
 
-import React, {
-  useState,
-  useCallback,
-  useRef,
-  useEffect,
-  createContext,
-  useContext
-} from 'react';
+import React, { useState, useCallback, useRef, useEffect, createContext, useContext } from 'react';
 
 // ============================================================================
 // Types
@@ -75,18 +68,15 @@ export const MDIProvider: React.FC<MDIProviderProps> = ({ children }) => {
   const [activeChild, setActiveChild] = useState<string | null>(null);
   const nextIdRef = useRef(1);
 
-  const addChild = useCallback(
-    (child: Omit<MDIChildWindow, 'id' | 'active'>): string => {
-      const id = `mdi-child-${nextIdRef.current++}`;
-      setMDIChildren(prev => [
-        ...prev.map(c => ({ ...c, active: false })),
-        { ...child, id, active: true }
-      ]);
-      setActiveChild(id);
-      return id;
-    },
-    []
-  );
+  const addChild = useCallback((child: Omit<MDIChildWindow, 'id' | 'active'>): string => {
+    const id = `mdi-child-${nextIdRef.current++}`;
+    setMDIChildren(prev => [
+      ...prev.map(c => ({ ...c, active: false })),
+      { ...child, id, active: true },
+    ]);
+    setActiveChild(id);
+    return id;
+  }, []);
 
   const removeChild = useCallback((id: string) => {
     setMDIChildren(prev => {
@@ -95,7 +85,7 @@ export const MDIProvider: React.FC<MDIProviderProps> = ({ children }) => {
         const last = newChildren[newChildren.length - 1];
         return newChildren.map(c => ({
           ...c,
-          active: c.id === last.id
+          active: c.id === last.id,
         }));
       }
       return newChildren;
@@ -107,7 +97,7 @@ export const MDIProvider: React.FC<MDIProviderProps> = ({ children }) => {
     setMDIChildren(prev =>
       prev.map(c => ({
         ...c,
-        active: c.id === id
+        active: c.id === id,
       }))
     );
     setActiveChild(id);
@@ -148,7 +138,7 @@ export const MDIProvider: React.FC<MDIProviderProps> = ({ children }) => {
             ...c,
             x: 20 + offset,
             y: 20 + offset,
-            maximized: false
+            maximized: false,
           };
           offset += 30;
           return result;
@@ -175,7 +165,7 @@ export const MDIProvider: React.FC<MDIProviderProps> = ({ children }) => {
             y: y,
             width: 100,
             height,
-            maximized: false
+            maximized: false,
           };
           y += height;
           return result;
@@ -202,7 +192,7 @@ export const MDIProvider: React.FC<MDIProviderProps> = ({ children }) => {
             y: 0,
             width,
             height: 100,
-            maximized: false
+            maximized: false,
           };
           x += width;
           return result;
@@ -248,7 +238,7 @@ export const MDIProvider: React.FC<MDIProviderProps> = ({ children }) => {
     cascadeWindows,
     tileHorizontal,
     tileVertical,
-    arrangeIcons
+    arrangeIcons,
   };
 
   return <MDIContext.Provider value={value}>{children}</MDIContext.Provider>;
@@ -271,7 +261,10 @@ const MDIChild: React.FC<MDIChildProps> = ({ window }) => {
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      if (e.target === e.currentTarget || (e.target as HTMLElement).classList.contains('mdi-title-bar')) {
+      if (
+        e.target === e.currentTarget ||
+        (e.target as HTMLElement).classList.contains('mdi-title-bar')
+      ) {
         e.preventDefault();
         mdi.activateChild(window.id);
         setIsDragging(true);
@@ -281,15 +274,12 @@ const MDIChild: React.FC<MDIChildProps> = ({ window }) => {
     [mdi, window.id, window.x, window.y]
   );
 
-  const handleResizeMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsResizing(true);
-      setDragStart({ x: e.clientX, y: e.clientY });
-    },
-    []
-  );
+  const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsResizing(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+  }, []);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -341,7 +331,7 @@ const MDIChild: React.FC<MDIChildProps> = ({ window }) => {
           display: 'flex',
           alignItems: 'center',
           padding: '0 4px',
-          cursor: 'pointer'
+          cursor: 'pointer',
         }}
         onDoubleClick={() => mdi.restoreChild(window.id)}
         onClick={() => mdi.activateChild(window.id)}
@@ -353,7 +343,7 @@ const MDIChild: React.FC<MDIChildProps> = ({ window }) => {
             fontFamily: 'MS Sans Serif',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap'
+            whiteSpace: 'nowrap',
           }}
         >
           {window.title}
@@ -369,7 +359,7 @@ const MDIChild: React.FC<MDIChildProps> = ({ window }) => {
         top: 0,
         right: 0,
         bottom: 0,
-        zIndex: window.active ? 100 : 1
+        zIndex: window.active ? 100 : 1,
       }
     : {
         position: 'absolute',
@@ -377,7 +367,7 @@ const MDIChild: React.FC<MDIChildProps> = ({ window }) => {
         top: window.y,
         width: window.width,
         height: window.height,
-        zIndex: window.active ? 100 : 1
+        zIndex: window.active ? 100 : 1,
       };
 
   return (
@@ -390,7 +380,7 @@ const MDIChild: React.FC<MDIChildProps> = ({ window }) => {
         border: '2px outset #ffffff',
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: window.active ? '2px 2px 8px rgba(0,0,0,0.3)' : 'none'
+        boxShadow: window.active ? '2px 2px 8px rgba(0,0,0,0.3)' : 'none',
       }}
       onMouseDown={handleMouseDown}
     >
@@ -406,7 +396,7 @@ const MDIChild: React.FC<MDIChildProps> = ({ window }) => {
           justifyContent: 'space-between',
           cursor: 'move',
           userSelect: 'none',
-          height: '20px'
+          height: '20px',
         }}
         onDoubleClick={() =>
           window.maximized ? mdi.restoreChild(window.id) : mdi.maximizeChild(window.id)
@@ -416,7 +406,7 @@ const MDIChild: React.FC<MDIChildProps> = ({ window }) => {
           style={{
             fontSize: '11px',
             fontFamily: 'MS Sans Serif',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
           }}
         >
           {window.title}
@@ -432,9 +422,9 @@ const MDIChild: React.FC<MDIChildProps> = ({ window }) => {
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
             }}
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               mdi.minimizeChild(window.id);
             }}
@@ -451,9 +441,9 @@ const MDIChild: React.FC<MDIChildProps> = ({ window }) => {
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
             }}
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               window.maximized ? mdi.restoreChild(window.id) : mdi.maximizeChild(window.id);
             }}
@@ -470,9 +460,9 @@ const MDIChild: React.FC<MDIChildProps> = ({ window }) => {
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
             }}
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               mdi.removeChild(window.id);
             }}
@@ -488,7 +478,7 @@ const MDIChild: React.FC<MDIChildProps> = ({ window }) => {
           flex: 1,
           overflow: 'auto',
           position: 'relative',
-          backgroundColor: '#ffffff'
+          backgroundColor: '#ffffff',
         }}
       >
         {window.component}
@@ -505,7 +495,7 @@ const MDIChild: React.FC<MDIChildProps> = ({ window }) => {
             height: 16,
             cursor: 'se-resize',
             background:
-              'linear-gradient(135deg, transparent 50%, #808080 50%, #808080 60%, transparent 60%, transparent 70%, #808080 70%)'
+              'linear-gradient(135deg, transparent 50%, #808080 50%, #808080 60%, transparent 60%, transparent 70%, #808080 70%)',
           }}
           onMouseDown={handleResizeMouseDown}
         />
@@ -539,7 +529,7 @@ export const VB6MDIForm: React.FC<VB6MDIFormProps> = ({
   statusBar,
   width = 800,
   height = 600,
-  children
+  children,
 }) => {
   const mdi = useMDI();
 
@@ -555,7 +545,7 @@ export const VB6MDIForm: React.FC<VB6MDIFormProps> = ({
         backgroundColor: '#c0c0c0',
         border: '2px outset #ffffff',
         fontFamily: 'MS Sans Serif',
-        fontSize: '11px'
+        fontSize: '11px',
       }}
     >
       {/* Title Bar */}
@@ -567,7 +557,7 @@ export const VB6MDIForm: React.FC<VB6MDIFormProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          height: '20px'
+          height: '20px',
         }}
       >
         <span style={{ fontWeight: 'bold' }}>{caption}</span>
@@ -579,7 +569,7 @@ export const VB6MDIForm: React.FC<VB6MDIFormProps> = ({
               border: '1px outset #c0c0c0',
               backgroundColor: '#c0c0c0',
               fontSize: '8px',
-              cursor: 'pointer'
+              cursor: 'pointer',
             }}
           >
             _
@@ -591,7 +581,7 @@ export const VB6MDIForm: React.FC<VB6MDIFormProps> = ({
               border: '1px outset #c0c0c0',
               backgroundColor: '#c0c0c0',
               fontSize: '8px',
-              cursor: 'pointer'
+              cursor: 'pointer',
             }}
           >
             □
@@ -603,7 +593,7 @@ export const VB6MDIForm: React.FC<VB6MDIFormProps> = ({
               border: '1px outset #c0c0c0',
               backgroundColor: '#c0c0c0',
               fontSize: '10px',
-              cursor: 'pointer'
+              cursor: 'pointer',
             }}
           >
             ×
@@ -616,7 +606,7 @@ export const VB6MDIForm: React.FC<VB6MDIFormProps> = ({
         <div
           style={{
             backgroundColor: '#c0c0c0',
-            borderBottom: '1px solid #808080'
+            borderBottom: '1px solid #808080',
           }}
         >
           {menuBar}
@@ -629,7 +619,7 @@ export const VB6MDIForm: React.FC<VB6MDIFormProps> = ({
           style={{
             backgroundColor: '#c0c0c0',
             borderBottom: '1px solid #808080',
-            padding: '2px'
+            padding: '2px',
           }}
         >
           {toolBar}
@@ -643,7 +633,7 @@ export const VB6MDIForm: React.FC<VB6MDIFormProps> = ({
           flex: 1,
           backgroundColor: backColor,
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden',
         }}
       >
         {mdi.children.map(child => (
@@ -659,7 +649,7 @@ export const VB6MDIForm: React.FC<VB6MDIFormProps> = ({
             backgroundColor: '#c0c0c0',
             borderTop: '1px solid #ffffff',
             padding: '2px 4px',
-            height: '20px'
+            height: '20px',
           }}
         >
           {statusBar}
@@ -689,7 +679,7 @@ export const MDIWindowMenu: React.FC<MDIWindowMenuProps> = ({ className }) => {
           backgroundColor: '#c0c0c0',
           border: '1px outset #ffffff',
           cursor: 'pointer',
-          fontSize: '11px'
+          fontSize: '11px',
         }}
       >
         Cascade
@@ -701,7 +691,7 @@ export const MDIWindowMenu: React.FC<MDIWindowMenuProps> = ({ className }) => {
           backgroundColor: '#c0c0c0',
           border: '1px outset #ffffff',
           cursor: 'pointer',
-          fontSize: '11px'
+          fontSize: '11px',
         }}
       >
         Tile Horizontal
@@ -713,7 +703,7 @@ export const MDIWindowMenu: React.FC<MDIWindowMenuProps> = ({ className }) => {
           backgroundColor: '#c0c0c0',
           border: '1px outset #ffffff',
           cursor: 'pointer',
-          fontSize: '11px'
+          fontSize: '11px',
         }}
       >
         Tile Vertical
@@ -725,7 +715,7 @@ export const MDIWindowMenu: React.FC<MDIWindowMenuProps> = ({ className }) => {
           backgroundColor: '#c0c0c0',
           border: '1px outset #ffffff',
           cursor: 'pointer',
-          fontSize: '11px'
+          fontSize: '11px',
         }}
       >
         Arrange Icons
@@ -743,5 +733,5 @@ export default {
   VB6MDIForm,
   MDIChild,
   MDIWindowMenu,
-  useMDI
+  useMDI,
 };

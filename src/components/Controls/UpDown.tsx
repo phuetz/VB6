@@ -16,7 +16,7 @@ const UpDown: React.FC<UpDownProps> = ({
   onSelect,
   onDoubleClick,
   onMove,
-  onResize
+  onResize,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -46,43 +46,44 @@ const UpDown: React.FC<UpDownProps> = ({
   const hotTracking = properties.HotTracking === true;
 
   // Handle value change
-  const handleValueChange = useCallback((newValue: number, direction: 'up' | 'down') => {
-    let clampedValue = newValue;
+  const handleValueChange = useCallback(
+    (newValue: number, direction: 'up' | 'down') => {
+      let clampedValue = newValue;
 
-    if (wrap) {
-      if (newValue > max) {
-        clampedValue = min;
-      } else if (newValue < min) {
-        clampedValue = max;
+      if (wrap) {
+        if (newValue > max) {
+          clampedValue = min;
+        } else if (newValue < min) {
+          clampedValue = max;
+        }
+      } else {
+        clampedValue = Math.max(min, Math.min(max, newValue));
       }
-    } else {
-      clampedValue = Math.max(min, Math.min(max, newValue));
-    }
 
-    // Update control value
-    if (control.events?.onChange) {
-      control.events.onChange('Value', clampedValue);
-    }
+      // Update control value
+      if (control.events?.onChange) {
+        control.events.onChange('Value', clampedValue);
+      }
 
-    // Update buddy control if specified
-    if (buddyControl && syncBuddy && control.events?.onUpdateBuddy) {
-      const displayValue = thousands 
-        ? clampedValue.toLocaleString()
-        : clampedValue.toString();
-      control.events.onUpdateBuddy(buddyControl, buddyProperty, displayValue);
-    }
+      // Update buddy control if specified
+      if (buddyControl && syncBuddy && control.events?.onUpdateBuddy) {
+        const displayValue = thousands ? clampedValue.toLocaleString() : clampedValue.toString();
+        control.events.onUpdateBuddy(buddyControl, buddyProperty, displayValue);
+      }
 
-    // Trigger VB6 events
-    if (control.events?.Change) {
-      control.events.Change();
-    }
+      // Trigger VB6 events
+      if (control.events?.Change) {
+        control.events.Change();
+      }
 
-    if (direction === 'up' && control.events?.UpClick) {
-      control.events.UpClick();
-    } else if (direction === 'down' && control.events?.DownClick) {
-      control.events.DownClick();
-    }
-  }, [min, max, wrap, buddyControl, syncBuddy, buddyProperty, thousands, control.events]);
+      if (direction === 'up' && control.events?.UpClick) {
+        control.events.UpClick();
+      } else if (direction === 'down' && control.events?.DownClick) {
+        control.events.DownClick();
+      }
+    },
+    [min, max, wrap, buddyControl, syncBuddy, buddyProperty, thousands, control.events]
+  );
 
   // Handle up button
   const handleUp = useCallback(() => {
@@ -95,34 +96,37 @@ const UpDown: React.FC<UpDownProps> = ({
   }, [value, increment, handleValueChange]);
 
   // Start auto-repeat
-  const startAutoRepeat = useCallback((action: 'up' | 'down') => {
-    if (!autoRepeat) return;
+  const startAutoRepeat = useCallback(
+    (action: 'up' | 'down') => {
+      if (!autoRepeat) return;
 
-    // Clear existing timer
-    if (autoRepeatTimer) {
-      clearTimeout(autoRepeatTimer);
-    }
+      // Clear existing timer
+      if (autoRepeatTimer) {
+        clearTimeout(autoRepeatTimer);
+      }
 
-    // Initial delay
-    const timer = setTimeout(() => {
-      // Start repeating
-      const repeatAction = () => {
-        if (action === 'up') {
-          handleUp();
-        } else {
-          handleDown();
-        }
-      };
+      // Initial delay
+      const timer = setTimeout(() => {
+        // Start repeating
+        const repeatAction = () => {
+          if (action === 'up') {
+            handleUp();
+          } else {
+            handleDown();
+          }
+        };
 
-      // Repeat interval
-      const interval = setInterval(repeatAction, autoRepeatInterval);
-      
-      // Store interval for cleanup
-      setAutoRepeatTimer(interval as any);
-    }, autoRepeatDelay);
+        // Repeat interval
+        const interval = setInterval(repeatAction, autoRepeatInterval);
 
-    setAutoRepeatTimer(timer);
-  }, [autoRepeat, autoRepeatTimer, autoRepeatDelay, autoRepeatInterval, handleUp, handleDown]);
+        // Store interval for cleanup
+        setAutoRepeatTimer(interval as any);
+      }, autoRepeatDelay);
+
+      setAutoRepeatTimer(timer);
+    },
+    [autoRepeat, autoRepeatTimer, autoRepeatDelay, autoRepeatInterval, handleUp, handleDown]
+  );
 
   // Stop auto-repeat
   const stopAutoRepeat = useCallback(() => {
@@ -134,23 +138,29 @@ const UpDown: React.FC<UpDownProps> = ({
   }, [autoRepeatTimer]);
 
   // Mouse event handlers for buttons
-  const handleUpMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    setIsUpPressed(true);
-    handleUp();
-    startAutoRepeat('up');
-  }, [handleUp, startAutoRepeat]);
+  const handleUpMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-  const handleDownMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    setIsDownPressed(true);
-    handleDown();
-    startAutoRepeat('down');
-  }, [handleDown, startAutoRepeat]);
+      setIsUpPressed(true);
+      handleUp();
+      startAutoRepeat('up');
+    },
+    [handleUp, startAutoRepeat]
+  );
+
+  const handleDownMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      setIsDownPressed(true);
+      handleDown();
+      startAutoRepeat('down');
+    },
+    [handleDown, startAutoRepeat]
+  );
 
   const handleButtonMouseUp = useCallback(() => {
     setIsUpPressed(false);
@@ -196,39 +206,42 @@ const UpDown: React.FC<UpDownProps> = ({
     } else {
       setIsDragging(true);
     }
-    
+
     setDragStart({ x: e.clientX, y: e.clientY });
   };
 
   // Keyboard support
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    switch (e.key) {
-      case 'ArrowUp':
-        e.preventDefault();
-        handleUp();
-        break;
-      case 'ArrowDown':
-        e.preventDefault();
-        handleDown();
-        break;
-      case 'Home':
-        e.preventDefault();
-        handleValueChange(min, value < min ? 'up' : 'down');
-        break;
-      case 'End':
-        e.preventDefault();
-        handleValueChange(max, value > max ? 'down' : 'up');
-        break;
-      case 'PageUp':
-        e.preventDefault();
-        handleValueChange(value + increment * 10, 'up');
-        break;
-      case 'PageDown':
-        e.preventDefault();
-        handleValueChange(value - increment * 10, 'down');
-        break;
-    }
-  }, [handleUp, handleDown, handleValueChange, min, max, value, increment]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      switch (e.key) {
+        case 'ArrowUp':
+          e.preventDefault();
+          handleUp();
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          handleDown();
+          break;
+        case 'Home':
+          e.preventDefault();
+          handleValueChange(min, value < min ? 'up' : 'down');
+          break;
+        case 'End':
+          e.preventDefault();
+          handleValueChange(max, value > max ? 'down' : 'up');
+          break;
+        case 'PageUp':
+          e.preventDefault();
+          handleValueChange(value + increment * 10, 'up');
+          break;
+        case 'PageDown':
+          e.preventDefault();
+          handleValueChange(value - increment * 10, 'down');
+          break;
+      }
+    },
+    [handleUp, handleDown, handleValueChange, min, max, value, increment]
+  );
 
   // Global mouse event handlers
   useEffect(() => {
@@ -263,7 +276,17 @@ const UpDown: React.FC<UpDownProps> = ({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, isUpPressed, isDownPressed, dragStart, resizeCorner, onMove, onResize, handleButtonMouseUp]);
+  }, [
+    isDragging,
+    isResizing,
+    isUpPressed,
+    isDownPressed,
+    dragStart,
+    resizeCorner,
+    onMove,
+    onResize,
+    handleButtonMouseUp,
+  ]);
 
   // Cleanup auto-repeat on unmount
   useEffect(() => {
@@ -285,7 +308,7 @@ const UpDown: React.FC<UpDownProps> = ({
     flexDirection: orientation === 0 ? 'column' : 'row',
     fontFamily: 'MS Sans Serif',
     fontSize: '8pt',
-    overflow: 'hidden'
+    overflow: 'hidden',
   };
 
   const buttonStyle: React.CSSProperties = {
@@ -298,19 +321,19 @@ const UpDown: React.FC<UpDownProps> = ({
     justifyContent: 'center',
     fontSize: '8px',
     userSelect: 'none',
-    opacity: properties.Enabled !== false ? 1 : 0.5
+    opacity: properties.Enabled !== false ? 1 : 0.5,
   };
 
   const upButtonStyle: React.CSSProperties = {
     ...buttonStyle,
     border: isUpPressed ? '1px inset #c0c0c0' : '1px outset #c0c0c0',
-    backgroundColor: isUpPressed ? '#a0a0a0' : '#c0c0c0'
+    backgroundColor: isUpPressed ? '#a0a0a0' : '#c0c0c0',
   };
 
   const downButtonStyle: React.CSSProperties = {
     ...buttonStyle,
     border: isDownPressed ? '1px inset #c0c0c0' : '1px outset #c0c0c0',
-    backgroundColor: isDownPressed ? '#a0a0a0' : '#c0c0c0'
+    backgroundColor: isDownPressed ? '#a0a0a0' : '#c0c0c0',
   };
 
   return (
@@ -327,16 +350,24 @@ const UpDown: React.FC<UpDownProps> = ({
       <div
         style={upButtonStyle}
         onMouseDown={handleUpMouseDown}
-        onMouseEnter={hotTracking ? (e) => {
-          if (!isUpPressed) {
-            e.currentTarget.style.backgroundColor = '#d0d0d0';
-          }
-        } : undefined}
-        onMouseLeave={hotTracking ? (e) => {
-          if (!isUpPressed) {
-            e.currentTarget.style.backgroundColor = '#c0c0c0';
-          }
-        } : undefined}
+        onMouseEnter={
+          hotTracking
+            ? e => {
+                if (!isUpPressed) {
+                  e.currentTarget.style.backgroundColor = '#d0d0d0';
+                }
+              }
+            : undefined
+        }
+        onMouseLeave={
+          hotTracking
+            ? e => {
+                if (!isUpPressed) {
+                  e.currentTarget.style.backgroundColor = '#c0c0c0';
+                }
+              }
+            : undefined
+        }
       >
         {orientation === 0 ? '▲' : '◀'}
       </div>
@@ -345,16 +376,24 @@ const UpDown: React.FC<UpDownProps> = ({
       <div
         style={downButtonStyle}
         onMouseDown={handleDownMouseDown}
-        onMouseEnter={hotTracking ? (e) => {
-          if (!isDownPressed) {
-            e.currentTarget.style.backgroundColor = '#d0d0d0';
-          }
-        } : undefined}
-        onMouseLeave={hotTracking ? (e) => {
-          if (!isDownPressed) {
-            e.currentTarget.style.backgroundColor = '#c0c0c0';
-          }
-        } : undefined}
+        onMouseEnter={
+          hotTracking
+            ? e => {
+                if (!isDownPressed) {
+                  e.currentTarget.style.backgroundColor = '#d0d0d0';
+                }
+              }
+            : undefined
+        }
+        onMouseLeave={
+          hotTracking
+            ? e => {
+                if (!isDownPressed) {
+                  e.currentTarget.style.backgroundColor = '#c0c0c0';
+                }
+              }
+            : undefined
+        }
       >
         {orientation === 0 ? '▼' : '▶'}
       </div>
@@ -371,7 +410,7 @@ const UpDown: React.FC<UpDownProps> = ({
             padding: '1px 4px',
             fontSize: '8px',
             whiteSpace: 'nowrap',
-            zIndex: 1000
+            zIndex: 1000,
           }}
         >
           {thousands ? value.toLocaleString() : value}
@@ -381,14 +420,106 @@ const UpDown: React.FC<UpDownProps> = ({
       {/* Resize handles */}
       {selected && (
         <>
-          <div className="vb6-resize-handle nw" style={{ position: 'absolute', top: -4, left: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'nw-resize' }} />
-          <div className="vb6-resize-handle ne" style={{ position: 'absolute', top: -4, right: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'ne-resize' }} />
-          <div className="vb6-resize-handle sw" style={{ position: 'absolute', bottom: -4, left: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'sw-resize' }} />
-          <div className="vb6-resize-handle se" style={{ position: 'absolute', bottom: -4, right: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'se-resize' }} />
-          <div className="vb6-resize-handle n" style={{ position: 'absolute', top: -4, left: '50%', marginLeft: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'n-resize' }} />
-          <div className="vb6-resize-handle s" style={{ position: 'absolute', bottom: -4, left: '50%', marginLeft: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 's-resize' }} />
-          <div className="vb6-resize-handle w" style={{ position: 'absolute', top: '50%', left: -4, marginTop: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'w-resize' }} />
-          <div className="vb6-resize-handle e" style={{ position: 'absolute', top: '50%', right: -4, marginTop: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'e-resize' }} />
+          <div
+            className="vb6-resize-handle nw"
+            style={{
+              position: 'absolute',
+              top: -4,
+              left: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'nw-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle ne"
+            style={{
+              position: 'absolute',
+              top: -4,
+              right: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'ne-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle sw"
+            style={{
+              position: 'absolute',
+              bottom: -4,
+              left: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'sw-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle se"
+            style={{
+              position: 'absolute',
+              bottom: -4,
+              right: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'se-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle n"
+            style={{
+              position: 'absolute',
+              top: -4,
+              left: '50%',
+              marginLeft: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'n-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle s"
+            style={{
+              position: 'absolute',
+              bottom: -4,
+              left: '50%',
+              marginLeft: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 's-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle w"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: -4,
+              marginTop: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'w-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle e"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              right: -4,
+              marginTop: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'e-resize',
+            }}
+          />
         </>
       )}
     </div>

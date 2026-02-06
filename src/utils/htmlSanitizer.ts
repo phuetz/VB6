@@ -17,19 +17,55 @@ import DOMPurify from 'dompurify';
 const DEFAULT_CONFIG: DOMPurify.Config = {
   ALLOWED_TAGS: [
     // Structure
-    'div', 'span', 'p', 'br', 'hr',
+    'div',
+    'span',
+    'p',
+    'br',
+    'hr',
     // Formatage texte
-    'b', 'i', 'u', 's', 'strong', 'em', 'mark', 'small', 'sub', 'sup',
+    'b',
+    'i',
+    'u',
+    's',
+    'strong',
+    'em',
+    'mark',
+    'small',
+    'sub',
+    'sup',
     // Listes
-    'ul', 'ol', 'li',
+    'ul',
+    'ol',
+    'li',
     // Tableaux
-    'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'colgroup', 'col',
+    'table',
+    'thead',
+    'tbody',
+    'tfoot',
+    'tr',
+    'th',
+    'td',
+    'caption',
+    'colgroup',
+    'col',
     // Code
-    'pre', 'code', 'kbd', 'samp',
+    'pre',
+    'code',
+    'kbd',
+    'samp',
     // Autres
-    'blockquote', 'q', 'cite', 'abbr', 'address',
+    'blockquote',
+    'q',
+    'cite',
+    'abbr',
+    'address',
     // Headers
-    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
     // Media (avec restrictions)
     'img',
     // Links (avec restrictions)
@@ -37,13 +73,23 @@ const DEFAULT_CONFIG: DOMPurify.Config = {
   ],
   ALLOWED_ATTR: [
     // Attributs généraux
-    'class', 'id', 'style', 'title',
+    'class',
+    'id',
+    'style',
+    'title',
     // Pour les images
-    'src', 'alt', 'width', 'height',
+    'src',
+    'alt',
+    'width',
+    'height',
     // Pour les liens
-    'href', 'target', 'rel',
+    'href',
+    'target',
+    'rel',
     // Pour les tableaux
-    'colspan', 'rowspan', 'scope',
+    'colspan',
+    'rowspan',
+    'scope',
     // Data attributes
     'data-*',
   ],
@@ -74,8 +120,14 @@ const REPORT_CONFIG: DOMPurify.Config = {
   ALLOWED_TAGS: [
     ...(DEFAULT_CONFIG.ALLOWED_TAGS as string[]),
     // Éléments supplémentaires pour rapports
-    'header', 'footer', 'section', 'article', 'aside', 'nav',
-    'figure', 'figcaption',
+    'header',
+    'footer',
+    'section',
+    'article',
+    'aside',
+    'nav',
+    'figure',
+    'figcaption',
   ],
 };
 
@@ -85,11 +137,26 @@ const REPORT_CONFIG: DOMPurify.Config = {
  */
 const RICH_TEXT_CONFIG: DOMPurify.Config = {
   ALLOWED_TAGS: [
-    'div', 'span', 'p', 'br',
-    'b', 'i', 'u', 's', 'strong', 'em',
-    'ul', 'ol', 'li',
-    'font', 'sup', 'sub',
-    'table', 'tr', 'td', 'th',
+    'div',
+    'span',
+    'p',
+    'br',
+    'b',
+    'i',
+    'u',
+    's',
+    'strong',
+    'em',
+    'ul',
+    'ol',
+    'li',
+    'font',
+    'sup',
+    'sub',
+    'table',
+    'tr',
+    'td',
+    'th',
   ],
   ALLOWED_ATTR: ['class', 'style', 'color', 'size', 'face', 'align'],
   FORBID_TAGS: ['script', 'style', 'iframe'],
@@ -172,10 +239,7 @@ export function sanitizeRichText(html: string): string {
  * <div dangerouslySetInnerHTML={createSafeHTML(content, 'report')} />
  * ```
  */
-export function createSafeHTML(
-  html: string,
-  type: SanitizeType = 'default'
-): { __html: string } {
+export function createSafeHTML(html: string, type: SanitizeType = 'default'): { __html: string } {
   return { __html: sanitizeHTML(html, type) };
 }
 

@@ -3,11 +3,11 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Control } from '../context/types';
-import { 
-  viewportGuideVirtualizer, 
-  ViewportBounds, 
-  AlignmentGuide, 
-  GuideCalculationResult 
+import {
+  viewportGuideVirtualizer,
+  ViewportBounds,
+  AlignmentGuide,
+  GuideCalculationResult,
 } from '../services/ViewportGuideVirtualizer';
 
 export interface UseVirtualizedGuidesOptions {
@@ -22,7 +22,7 @@ export interface UseVirtualizedGuidesReturn {
   // Guide data
   horizontalGuides: AlignmentGuide[];
   verticalGuides: AlignmentGuide[];
-  
+
   // Performance metrics
   performanceMetrics: {
     totalControls: number;
@@ -32,12 +32,12 @@ export interface UseVirtualizedGuidesReturn {
     averageCalculationTime: number;
     memoryUsage: number;
   };
-  
+
   // Control methods
   updateViewport: (bounds: ViewportBounds) => void;
   invalidateCache: () => void;
   setEnabled: (enabled: boolean) => void;
-  
+
   // State
   isCalculating: boolean;
   isEnabled: boolean;
@@ -48,7 +48,7 @@ const DEFAULT_OPTIONS: Required<UseVirtualizedGuidesOptions> = {
   debounceMs: 16, // ~60fps
   maxGuides: 50,
   minStrength: 0.1,
-  showPerformanceMetrics: false
+  showPerformanceMetrics: false,
 };
 
 export const useVirtualizedGuides = (
@@ -56,9 +56,8 @@ export const useVirtualizedGuides = (
   selectedControlIds: string[] = [],
   options: UseVirtualizedGuidesOptions = {}
 ): UseVirtualizedGuidesReturn => {
-  
   const config = useMemo(() => ({ ...DEFAULT_OPTIONS, ...options }), [options]);
-  
+
   // State management
   const [horizontalGuides, setHorizontalGuides] = useState<AlignmentGuide[]>([]);
   const [verticalGuides, setVerticalGuides] = useState<AlignmentGuide[]>([]);
@@ -70,7 +69,7 @@ export const useVirtualizedGuides = (
     cacheHitRate: 0,
     calculationTimeMs: 0,
     averageCalculationTime: 0,
-    memoryUsage: 0
+    memoryUsage: 0,
   });
 
   // Refs for optimization
@@ -93,97 +92,109 @@ export const useVirtualizedGuides = (
   }, [selectedControlIds]);
 
   // Ultra-optimized calculation function
-  const calculateGuides = useCallback(async (
-    viewport: ViewportBounds,
-    immediate = false
-  ) => {
-    if (!isEnabled || controls.length === 0) {
-      setHorizontalGuides([]);
-      setVerticalGuides([]);
-      return;
-    }
-
-    // Skip calculation if nothing changed
-    const currentHash = `${controlsHash}_${selectedHash}_${JSON.stringify(viewport)}`;
-    if (currentHash === lastControlsHashRef.current && !immediate) {
-      return;
-    }
-    lastControlsHashRef.current = currentHash;
-
-    const calculationId = ++calculationIdRef.current;
-    
-    if (!immediate && config.debounceMs > 0) {
-      // Clear existing timer
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
+  const calculateGuides = useCallback(
+    async (viewport: ViewportBounds, immediate = false) => {
+      if (!isEnabled || controls.length === 0) {
+        setHorizontalGuides([]);
+        setVerticalGuides([]);
+        return;
       }
 
-      // Debounce the calculation
-      debounceTimerRef.current = setTimeout(() => {
+      // Skip calculation if nothing changed
+      const currentHash = `${controlsHash}_${selectedHash}_${JSON.stringify(viewport)}`;
+      if (currentHash === lastControlsHashRef.current && !immediate) {
+        return;
+      }
+      lastControlsHashRef.current = currentHash;
+
+      const calculationId = ++calculationIdRef.current;
+
+      if (!immediate && config.debounceMs > 0) {
+        // Clear existing timer
+        if (debounceTimerRef.current) {
+          clearTimeout(debounceTimerRef.current);
+        }
+
+        // Debounce the calculation
+        debounceTimerRef.current = setTimeout(() => {
+          performCalculation(viewport, calculationId);
+        }, config.debounceMs);
+      } else {
         performCalculation(viewport, calculationId);
-      }, config.debounceMs);
-    } else {
-      performCalculation(viewport, calculationId);
-    }
-  }, [isEnabled, controls, controlsHash, selectedHash, config.debounceMs]);
+      }
+    },
+    [isEnabled, controls, controlsHash, selectedHash, config.debounceMs]
+  );
 
   // Internal calculation performer
-  const performCalculation = useCallback((viewport: ViewportBounds, calculationId: number) => {
-    if (calculationId !== calculationIdRef.current) {
-      return; // Stale calculation, ignore
-    }
-
-    setIsCalculating(true);
-
-    // Use RAF for smooth performance
-    viewportGuideVirtualizer.scheduleCalculation(() => {
-      try {
-        const result: GuideCalculationResult = viewportGuideVirtualizer.calculateVisibleGuides(
-          controls,
-          viewport,
-          selectedControlIds
-        );
-
-        // Check if this is still the current calculation
-        if (calculationId === calculationIdRef.current) {
-          // Apply limits from configuration
-          const limitedHorizontal = result.horizontalGuides
-            .filter(g => g.strength >= config.minStrength)
-            .slice(0, config.maxGuides);
-            
-          const limitedVertical = result.verticalGuides
-            .filter(g => g.strength >= config.minStrength)
-            .slice(0, config.maxGuides);
-
-          setHorizontalGuides(limitedHorizontal);
-          setVerticalGuides(limitedVertical);
-
-          // Update performance metrics
-          if (config.showPerformanceMetrics) {
-            const serviceMetrics = viewportGuideVirtualizer.getPerformanceMetrics();
-            setPerformanceMetrics({
-              totalControls: result.totalControls,
-              visibleControls: result.visibleControls,
-              cacheHitRate: result.cacheHitRate,
-              calculationTimeMs: result.calculationTimeMs,
-              averageCalculationTime: serviceMetrics.averageCalculationTime,
-              memoryUsage: serviceMetrics.memoryUsage
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Guide calculation error:', error);
-      } finally {
-        setIsCalculating(false);
+  const performCalculation = useCallback(
+    (viewport: ViewportBounds, calculationId: number) => {
+      if (calculationId !== calculationIdRef.current) {
+        return; // Stale calculation, ignore
       }
-    });
-  }, [controls, selectedControlIds, config.minStrength, config.maxGuides, config.showPerformanceMetrics]);
+
+      setIsCalculating(true);
+
+      // Use RAF for smooth performance
+      viewportGuideVirtualizer.scheduleCalculation(() => {
+        try {
+          const result: GuideCalculationResult = viewportGuideVirtualizer.calculateVisibleGuides(
+            controls,
+            viewport,
+            selectedControlIds
+          );
+
+          // Check if this is still the current calculation
+          if (calculationId === calculationIdRef.current) {
+            // Apply limits from configuration
+            const limitedHorizontal = result.horizontalGuides
+              .filter(g => g.strength >= config.minStrength)
+              .slice(0, config.maxGuides);
+
+            const limitedVertical = result.verticalGuides
+              .filter(g => g.strength >= config.minStrength)
+              .slice(0, config.maxGuides);
+
+            setHorizontalGuides(limitedHorizontal);
+            setVerticalGuides(limitedVertical);
+
+            // Update performance metrics
+            if (config.showPerformanceMetrics) {
+              const serviceMetrics = viewportGuideVirtualizer.getPerformanceMetrics();
+              setPerformanceMetrics({
+                totalControls: result.totalControls,
+                visibleControls: result.visibleControls,
+                cacheHitRate: result.cacheHitRate,
+                calculationTimeMs: result.calculationTimeMs,
+                averageCalculationTime: serviceMetrics.averageCalculationTime,
+                memoryUsage: serviceMetrics.memoryUsage,
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Guide calculation error:', error);
+        } finally {
+          setIsCalculating(false);
+        }
+      });
+    },
+    [
+      controls,
+      selectedControlIds,
+      config.minStrength,
+      config.maxGuides,
+      config.showPerformanceMetrics,
+    ]
+  );
 
   // Viewport update handler
-  const updateViewport = useCallback((bounds: ViewportBounds) => {
-    lastViewportRef.current = bounds;
-    calculateGuides(bounds);
-  }, [calculateGuides]);
+  const updateViewport = useCallback(
+    (bounds: ViewportBounds) => {
+      lastViewportRef.current = bounds;
+      calculateGuides(bounds);
+    },
+    [calculateGuides]
+  );
 
   // Cache invalidation
   const invalidateCache = useCallback(() => {
@@ -194,15 +205,18 @@ export const useVirtualizedGuides = (
   }, [calculateGuides]);
 
   // Enable/disable toggle
-  const setEnabledHandler = useCallback((enabled: boolean) => {
-    setIsEnabled(enabled);
-    if (!enabled) {
-      setHorizontalGuides([]);
-      setVerticalGuides([]);
-    } else if (lastViewportRef.current) {
-      calculateGuides(lastViewportRef.current, true);
-    }
-  }, [calculateGuides]);
+  const setEnabledHandler = useCallback(
+    (enabled: boolean) => {
+      setIsEnabled(enabled);
+      if (!enabled) {
+        setHorizontalGuides([]);
+        setVerticalGuides([]);
+      } else if (lastViewportRef.current) {
+        calculateGuides(lastViewportRef.current, true);
+      }
+    },
+    [calculateGuides]
+  );
 
   // Effect to handle controls changes
   useEffect(() => {
@@ -235,26 +249,24 @@ export const useVirtualizedGuides = (
     // Guide data
     horizontalGuides,
     verticalGuides,
-    
+
     // Performance metrics
     performanceMetrics,
-    
+
     // Control methods
     updateViewport,
     invalidateCache,
     setEnabled: setEnabledHandler,
-    
+
     // State
     isCalculating,
-    isEnabled
+    isEnabled,
   };
 };
 
 // Performance monitoring hook
 export const useGuidePerformanceMonitor = () => {
-  const [metrics, setMetrics] = useState(() => 
-    viewportGuideVirtualizer.getPerformanceMetrics()
-  );
+  const [metrics, setMetrics] = useState(() => viewportGuideVirtualizer.getPerformanceMetrics());
 
   useEffect(() => {
     const interval = setInterval(() => {

@@ -7,7 +7,7 @@
 export const WindowsAPI = {
   // GetWindowsDirectory
   MAX_PATH: 260,
-  
+
   // MessageBox constants
   MB_OK: 0x00000000,
   MB_OKCANCEL: 0x00000001,
@@ -24,7 +24,7 @@ export const WindowsAPI = {
   MB_ICONERROR: 0x00000010,
   MB_ICONINFORMATION: 0x00000040,
   MB_ICONSTOP: 0x00000010,
-  
+
   // Registry constants
   HKEY_CLASSES_ROOT: 0x80000000,
   HKEY_CURRENT_USER: 0x80000001,
@@ -32,23 +32,23 @@ export const WindowsAPI = {
   HKEY_USERS: 0x80000003,
   HKEY_PERFORMANCE_DATA: 0x80000004,
   HKEY_CURRENT_CONFIG: 0x80000005,
-  
+
   REG_SZ: 1,
   REG_EXPAND_SZ: 2,
   REG_BINARY: 3,
   REG_DWORD: 4,
-  
+
   KEY_READ: 0x20019,
   KEY_WRITE: 0x20006,
-  KEY_ALL_ACCESS: 0xF003F,
-  
+  KEY_ALL_ACCESS: 0xf003f,
+
   // File attributes
   FILE_ATTRIBUTE_NORMAL: 0x80,
   FILE_ATTRIBUTE_DIRECTORY: 0x10,
   FILE_ATTRIBUTE_HIDDEN: 0x02,
   FILE_ATTRIBUTE_READONLY: 0x01,
   FILE_ATTRIBUTE_SYSTEM: 0x04,
-  
+
   // System metrics
   SM_CXSCREEN: 0,
   SM_CYSCREEN: 1,
@@ -61,19 +61,19 @@ export const WindowsAPI = {
   SM_CYFIXEDFRAME: 8,
   SM_CYVTHUMB: 9,
   SM_CXHTHUMB: 10,
-  
+
   // GetPrivateProfileString
   ERROR_SUCCESS: 0,
   ERROR_FILE_NOT_FOUND: 2,
   ERROR_ACCESS_DENIED: 5,
-  
+
   // FindWindow constants
   HWND_DESKTOP: 0,
   HWND_TOP: 0,
   HWND_BOTTOM: 1,
   HWND_TOPMOST: -1,
   HWND_NOTOPMOST: -2,
-  
+
   // ShowWindow constants
   SW_HIDE: 0,
   SW_SHOWNORMAL: 1,
@@ -85,7 +85,7 @@ export const WindowsAPI = {
   SW_SHOWMINNOACTIVE: 7,
   SW_SHOWNA: 8,
   SW_RESTORE: 9,
-  SW_SHOWDEFAULT: 10
+  SW_SHOWDEFAULT: 10,
 };
 
 /**
@@ -108,7 +108,10 @@ export class VB6WindowsAPISimulator {
     // Simulate some registry entries
     const hklm = new Map<string, any>();
     hklm.set('SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ProgramFilesDir', 'C:\\Program Files');
-    hklm.set('SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\CommonFilesDir', 'C:\\Program Files\\Common Files');
+    hklm.set(
+      'SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\CommonFilesDir',
+      'C:\\Program Files\\Common Files'
+    );
     hklm.set('SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRoot', 'C:\\Windows');
     this.registryData.set('HKEY_LOCAL_MACHINE', hklm);
 
@@ -123,7 +126,7 @@ export class VB6WindowsAPISimulator {
     bootSection.set('shell', 'explorer.exe');
     systemIni.set('boot', bootSection);
     this.iniData.set('C:\\WINDOWS\\SYSTEM.INI', systemIni);
-    
+
     const winIni = new Map<string, Map<string, string>>();
     const windowsSection = new Map<string, string>();
     windowsSection.set('device', 'PRN');
@@ -137,7 +140,6 @@ export class VB6WindowsAPISimulator {
   GetWindowsDirectory(lpBuffer: string, uSize: number): number {
     const windowsDir = 'C:\\Windows';
     if (uSize >= windowsDir.length + 1) {
-      console.log(`📂 GetWindowsDirectory: ${windowsDir}`);
       return windowsDir.length;
     }
     return 0;
@@ -149,7 +151,6 @@ export class VB6WindowsAPISimulator {
   GetSystemDirectory(lpBuffer: string, uSize: number): number {
     const systemDir = 'C:\\Windows\\System32';
     if (uSize >= systemDir.length + 1) {
-      console.log(`🔧 GetSystemDirectory: ${systemDir}`);
       return systemDir.length;
     }
     return 0;
@@ -161,7 +162,6 @@ export class VB6WindowsAPISimulator {
   GetTempPath(nBufferLength: number, lpBuffer: string): number {
     const tempPath = 'C:\\Windows\\Temp\\';
     if (nBufferLength >= tempPath.length + 1) {
-      console.log(`📁 GetTempPath: ${tempPath}`);
       return tempPath.length;
     }
     return tempPath.length + 1; // Required buffer size
@@ -171,13 +171,11 @@ export class VB6WindowsAPISimulator {
    * GetCurrentDirectory API - Enhanced with persistence
    */
   GetCurrentDirectory(nBufferLength: number, lpBuffer: string): number {
-    const storedDir = typeof localStorage !== 'undefined'
-      ? localStorage.getItem('vb6_current_dir')
-      : null;
+    const storedDir =
+      typeof localStorage !== 'undefined' ? localStorage.getItem('vb6_current_dir') : null;
     const currentDir = storedDir || 'C:\\';
 
     if (nBufferLength >= currentDir.length + 1) {
-      console.log(`📁 GetCurrentDirectory: ${currentDir}`);
       return currentDir.length;
     }
     return currentDir.length + 1;
@@ -191,7 +189,6 @@ export class VB6WindowsAPISimulator {
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem('vb6_current_dir', lpPathName);
       }
-      console.log(`📁 SetCurrentDirectory: ${lpPathName}`);
       return true;
     } catch {
       return false;
@@ -202,13 +199,11 @@ export class VB6WindowsAPISimulator {
    * GetComputerName API - Enhanced
    */
   GetComputerName(lpBuffer: string, nSize: number): boolean {
-    const stored = typeof localStorage !== 'undefined'
-      ? localStorage.getItem('vb6_computer_name')
-      : null;
+    const stored =
+      typeof localStorage !== 'undefined' ? localStorage.getItem('vb6_computer_name') : null;
     const computerName = stored || this.getDefaultComputerName();
 
     if (nSize >= computerName.length + 1) {
-      console.log(`💻 GetComputerName: ${computerName}`);
       return true;
     }
     return false;
@@ -222,7 +217,6 @@ export class VB6WindowsAPISimulator {
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem('vb6_computer_name', lpComputerName);
       }
-      console.log(`💻 SetComputerName: ${lpComputerName}`);
       return true;
     } catch {
       return false;
@@ -233,13 +227,11 @@ export class VB6WindowsAPISimulator {
    * GetUserName API - Enhanced
    */
   GetUserName(lpBuffer: string, nSize: number): boolean {
-    const stored = typeof localStorage !== 'undefined'
-      ? localStorage.getItem('vb6_user_name')
-      : null;
+    const stored =
+      typeof localStorage !== 'undefined' ? localStorage.getItem('vb6_user_name') : null;
     const userName = stored || 'VB6User';
 
     if (nSize >= userName.length + 1) {
-      console.log(`👤 GetUserName: ${userName}`);
       return true;
     }
     return false;
@@ -253,7 +245,6 @@ export class VB6WindowsAPISimulator {
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem('vb6_user_name', lpUserName);
       }
-      console.log(`👤 SetUserName: ${lpUserName}`);
       return true;
     } catch {
       return false;
@@ -281,8 +272,8 @@ export class VB6WindowsAPISimulator {
    * MessageBox API - Enhanced with icon support
    */
   MessageBox(hWnd: number, lpText: string, lpCaption: string, uType: number): number {
-    const icon = (uType >> 4) & 0x0F;
-    const buttons = uType & 0x0F;
+    const icon = (uType >> 4) & 0x0f;
+    const buttons = uType & 0x0f;
 
     const fullCaption = lpCaption || 'VB6 Application';
     let iconEmoji = '';
@@ -308,17 +299,14 @@ export class VB6WindowsAPISimulator {
     switch (buttons) {
       case WindowsAPI.MB_OK:
         alert(fullMessage);
-        console.log(`📢 MessageBox OK: ${fullCaption}`);
         return 1; // IDOK
 
       case WindowsAPI.MB_OKCANCEL: {
         const okCancel = confirm(fullMessage);
-        console.log(`📢 MessageBox OKCANCEL: ${fullCaption} - ${okCancel ? 'OK' : 'CANCEL'}`);
         return okCancel ? 1 : 2; // IDOK : IDCANCEL
       }
       case WindowsAPI.MB_YESNO: {
         const yesno = confirm(fullMessage);
-        console.log(`📢 MessageBox YESNO: ${fullCaption} - ${yesno ? 'YES' : 'NO'}`);
         return yesno ? 6 : 7; // IDYES : IDNO
       }
 
@@ -326,7 +314,6 @@ export class VB6WindowsAPISimulator {
         const result = prompt(`${fullMessage}\n\nEnter: Y=Yes, N=No, C=Cancel`, 'Y');
         if (result === null) return 2; // IDCANCEL
         const response = result.toUpperCase().charAt(0);
-        console.log(`📢 MessageBox YNC: ${fullCaption} - ${response}`);
         if (response === 'Y') return 6; // IDYES
         if (response === 'N') return 7; // IDNO
         return 2; // IDCANCEL
@@ -334,7 +321,6 @@ export class VB6WindowsAPISimulator {
 
       case WindowsAPI.MB_RETRYCANCEL: {
         const result = confirm(fullMessage + '\n\nOK=Retry, Cancel=Cancel');
-        console.log(`📢 MessageBox RETRYCANCEL: ${fullCaption} - ${result ? 'RETRY' : 'CANCEL'}`);
         return result ? 4 : 2; // IDRETRY : IDCANCEL
       }
 
@@ -342,7 +328,6 @@ export class VB6WindowsAPISimulator {
         const result = prompt(`${fullMessage}\n\nEnter: A=Abort, R=Retry, I=Ignore`, 'R');
         if (result === null) return 3; // IDABORT
         const response = result.toUpperCase().charAt(0);
-        console.log(`📢 MessageBox ARI: ${fullCaption} - ${response}`);
         if (response === 'A') return 3; // IDABORT
         if (response === 'R') return 4; // IDRETRY
         return 5; // IDIGNORE
@@ -350,7 +335,6 @@ export class VB6WindowsAPISimulator {
 
       default:
         alert(fullMessage);
-        console.log(`📢 MessageBox (default): ${fullCaption}`);
         return 1; // IDOK
     }
   }
@@ -384,12 +368,15 @@ export class VB6WindowsAPISimulator {
   /**
    * RegOpenKeyEx API
    */
-  RegOpenKeyEx(hKey: number, lpSubKey: string, ulOptions: number, samDesired: number, phkResult: any): number {
+  RegOpenKeyEx(
+    hKey: number,
+    lpSubKey: string,
+    ulOptions: number,
+    samDesired: number,
+    phkResult: any
+  ): number {
     const keyName = this.getRegistryKeyName(hKey);
     const fullPath = `${keyName}\\${lpSubKey}`;
-    
-    console.log(`RegOpenKeyEx: ${fullPath}`);
-    
     // Simulate success
     return WindowsAPI.ERROR_SUCCESS;
   }
@@ -397,28 +384,37 @@ export class VB6WindowsAPISimulator {
   /**
    * RegQueryValueEx API
    */
-  RegQueryValueEx(hKey: number, lpValueName: string, lpReserved: any, lpType: any, 
-                  lpData: string, lpcbData: number): number {
+  RegQueryValueEx(
+    hKey: number,
+    lpValueName: string,
+    lpReserved: any,
+    lpType: any,
+    lpData: string,
+    lpcbData: number
+  ): number {
     // Simulate registry lookup
-    const registryKey = this.registryData.get('HKEY_LOCAL_MACHINE') || 
-                       this.registryData.get('HKEY_CURRENT_USER');
-    
+    const registryKey =
+      this.registryData.get('HKEY_LOCAL_MACHINE') || this.registryData.get('HKEY_CURRENT_USER');
+
     if (registryKey && registryKey.has(lpValueName)) {
       const value = registryKey.get(lpValueName);
-      console.log(`RegQueryValueEx: ${lpValueName} = ${value}`);
       return WindowsAPI.ERROR_SUCCESS;
     }
-    
+
     return WindowsAPI.ERROR_FILE_NOT_FOUND;
   }
 
   /**
    * RegSetValueEx API
    */
-  RegSetValueEx(hKey: number, lpValueName: string, reserved: number, dwType: number, 
-                lpData: any, cbData: number): number {
-    console.log(`RegSetValueEx: ${lpValueName} = ${lpData} (type: ${dwType})`);
-    
+  RegSetValueEx(
+    hKey: number,
+    lpValueName: string,
+    reserved: number,
+    dwType: number,
+    lpData: any,
+    cbData: number
+  ): number {
     // Store in simulated registry
     const keyName = this.getRegistryKeyName(hKey);
     let registryKey = this.registryData.get(keyName);
@@ -426,7 +422,7 @@ export class VB6WindowsAPISimulator {
       registryKey = new Map<string, any>();
       this.registryData.set(keyName, registryKey);
     }
-    
+
     registryKey.set(lpValueName, lpData);
     return WindowsAPI.ERROR_SUCCESS;
   }
@@ -441,43 +437,48 @@ export class VB6WindowsAPISimulator {
   /**
    * GetPrivateProfileString API
    */
-  GetPrivateProfileString(lpAppName: string, lpKeyName: string, lpDefault: string, 
-                         lpReturnedString: string, nSize: number, lpFileName: string): number {
+  GetPrivateProfileString(
+    lpAppName: string,
+    lpKeyName: string,
+    lpDefault: string,
+    lpReturnedString: string,
+    nSize: number,
+    lpFileName: string
+  ): number {
     const fileName = lpFileName.toUpperCase();
     const iniFile = this.iniData.get(fileName);
-    
+
     if (iniFile && iniFile.has(lpAppName) && iniFile.get(lpAppName)!.has(lpKeyName)) {
       const value = iniFile.get(lpAppName)!.get(lpKeyName)!;
-      console.log(`GetPrivateProfileString: [${lpAppName}] ${lpKeyName} = ${value}`);
       return Math.min(value.length, nSize - 1);
     }
-    
-    console.log(`GetPrivateProfileString: [${lpAppName}] ${lpKeyName} = ${lpDefault} (default)`);
     return Math.min(lpDefault.length, nSize - 1);
   }
 
   /**
    * WritePrivateProfileString API
    */
-  WritePrivateProfileString(lpAppName: string, lpKeyName: string, lpString: string, 
-                           lpFileName: string): boolean {
+  WritePrivateProfileString(
+    lpAppName: string,
+    lpKeyName: string,
+    lpString: string,
+    lpFileName: string
+  ): boolean {
     const fileName = lpFileName.toUpperCase();
     let iniFile = this.iniData.get(fileName);
-    
+
     if (!iniFile) {
       iniFile = new Map<string, Map<string, string>>();
       this.iniData.set(fileName, iniFile);
     }
-    
+
     let section = iniFile.get(lpAppName);
     if (!section) {
       section = new Map<string, string>();
       iniFile.set(lpAppName, section);
     }
-    
+
     section.set(lpKeyName, lpString);
-    console.log(`WritePrivateProfileString: [${lpAppName}] ${lpKeyName} = ${lpString}`);
-    
     return true;
   }
 
@@ -486,12 +487,10 @@ export class VB6WindowsAPISimulator {
    */
   FindWindow(lpClassName: string | null, lpWindowName: string | null): number {
     // Simulate finding a window
-    console.log(`FindWindow: className=${lpClassName}, windowName=${lpWindowName}`);
-    
     if (lpWindowName === 'Calculator' || lpWindowName === 'Notepad') {
       return this.nextHwnd++;
     }
-    
+
     return 0; // Window not found
   }
 
@@ -499,8 +498,6 @@ export class VB6WindowsAPISimulator {
    * GetWindowText API
    */
   GetWindowText(hWnd: number, lpString: string, nMaxCount: number): number {
-    console.log(`GetWindowText: hWnd=${hWnd}`);
-    
     // Simulate window title
     const title = 'Simulated Window';
     return Math.min(title.length, nMaxCount - 1);
@@ -510,7 +507,6 @@ export class VB6WindowsAPISimulator {
    * SetWindowText API
    */
   SetWindowText(hWnd: number, lpString: string): boolean {
-    console.log(`SetWindowText: hWnd=${hWnd}, text=${lpString}`);
     return true;
   }
 
@@ -518,7 +514,6 @@ export class VB6WindowsAPISimulator {
    * ShowWindow API
    */
   ShowWindow(hWnd: number, nCmdShow: number): boolean {
-    console.log(`ShowWindow: hWnd=${hWnd}, nCmdShow=${nCmdShow}`);
     return true;
   }
 
@@ -533,19 +528,15 @@ export class VB6WindowsAPISimulator {
     } else {
       tickCount = Date.now();
     }
-
-    console.log(`⏱️ GetTickCount: ${tickCount}ms`);
-    return tickCount & 0xFFFFFFFF; // 32-bit value like Windows
+    return tickCount & 0xffffffff; // 32-bit value like Windows
   }
 
   /**
    * Sleep API - Async sleep function
    */
   async Sleep(dwMilliseconds: number): Promise<void> {
-    console.log(`😴 Sleep: ${dwMilliseconds}ms`);
     return new Promise(resolve => {
       setTimeout(() => {
-        console.log(`😴 Sleep completed: ${dwMilliseconds}ms`);
         resolve();
       }, dwMilliseconds);
     });
@@ -555,33 +546,34 @@ export class VB6WindowsAPISimulator {
    * Sleep API - Synchronous version (blocks execution)
    */
   SleepSync(dwMilliseconds: number): void {
-    console.log(`😴 SleepSync: ${dwMilliseconds}ms`);
     const start = Date.now();
     while (Date.now() - start < dwMilliseconds) {
       // Busy wait
     }
-    console.log(`😴 SleepSync completed: ${dwMilliseconds}ms`);
   }
 
   /**
    * ShellExecute API
    */
-  ShellExecute(hWnd: number, lpOperation: string, lpFile: string, lpParameters: string,
-               lpDirectory: string, nShowCmd: number): number {
-    console.log(`ShellExecute: ${lpOperation} ${lpFile} ${lpParameters}`);
-    
+  ShellExecute(
+    hWnd: number,
+    lpOperation: string,
+    lpFile: string,
+    lpParameters: string,
+    lpDirectory: string,
+    nShowCmd: number
+  ): number {
     // Simulate opening files/URLs
     if (lpFile.startsWith('http://') || lpFile.startsWith('https://')) {
       window.open(lpFile, '_blank');
       return 42; // Success (> 32)
     }
-    
+
     // Simulate opening files
     if (lpFile.endsWith('.txt') || lpFile.endsWith('.html')) {
-      console.log(`Opening file: ${lpFile}`);
       return 42; // Success
     }
-    
+
     return 2; // File not found
   }
 
@@ -589,7 +581,6 @@ export class VB6WindowsAPISimulator {
    * GetVersionEx API (simplified)
    */
   GetVersionEx(lpVersionInfo: any): boolean {
-    console.log('GetVersionEx called');
     // Simulate Windows version info
     return true;
   }
@@ -617,14 +608,12 @@ export class VB6WindowsAPISimulator {
    */
   SaveSetting(appname: string, section: string, key: string, setting: string): void {
     const regPath = `SOFTWARE\\VB and VBA Program Settings\\${appname}\\${section}\\${key}`;
-    console.log(`SaveSetting: ${regPath} = ${setting}`);
-    
     let hkcu = this.registryData.get('HKEY_CURRENT_USER');
     if (!hkcu) {
       hkcu = new Map<string, any>();
       this.registryData.set('HKEY_CURRENT_USER', hkcu);
     }
-    
+
     hkcu.set(regPath, setting);
   }
 
@@ -633,13 +622,11 @@ export class VB6WindowsAPISimulator {
    */
   GetSetting(appname: string, section: string, key: string, defaultValue?: string): string {
     const regPath = `SOFTWARE\\VB and VBA Program Settings\\${appname}\\${section}\\${key}`;
-    console.log(`GetSetting: ${regPath}`);
-    
     const hkcu = this.registryData.get('HKEY_CURRENT_USER');
     if (hkcu && hkcu.has(regPath)) {
       return hkcu.get(regPath);
     }
-    
+
     return defaultValue || '';
   }
 
@@ -649,15 +636,12 @@ export class VB6WindowsAPISimulator {
   DeleteSetting(appname: string, section?: string, key?: string): void {
     if (key) {
       const regPath = `SOFTWARE\\VB and VBA Program Settings\\${appname}\\${section}\\${key}`;
-      console.log(`DeleteSetting: ${regPath}`);
-      
       const hkcu = this.registryData.get('HKEY_CURRENT_USER');
       if (hkcu) {
         hkcu.delete(regPath);
       }
     } else {
       // Delete entire section or app
-      console.log(`DeleteSetting: ${appname}${section ? '\\' + section : ''}`);
     }
   }
 
@@ -665,14 +649,12 @@ export class VB6WindowsAPISimulator {
    * VB6 GetAllSettings function
    */
   GetAllSettings(appname: string, section: string): any[] {
-    console.log(`GetAllSettings: ${appname}\\${section}`);
-    
     const hkcu = this.registryData.get('HKEY_CURRENT_USER');
     const settings: any[] = [];
-    
+
     if (hkcu) {
       const prefix = `SOFTWARE\\VB and VBA Program Settings\\${appname}\\${section}\\`;
-      
+
       for (const [key, value] of hkcu.entries()) {
         if (key.startsWith(prefix)) {
           const settingKey = key.substring(prefix.length);
@@ -680,7 +662,7 @@ export class VB6WindowsAPISimulator {
         }
       }
     }
-    
+
     return settings;
   }
 }
@@ -709,7 +691,12 @@ export function SaveSetting(appname: string, section: string, key: string, setti
   return vb6WindowsAPI.SaveSetting(appname, section, key, setting);
 }
 
-export function GetSetting(appname: string, section: string, key: string, defaultValue?: string): string {
+export function GetSetting(
+  appname: string,
+  section: string,
+  key: string,
+  defaultValue?: string
+): string {
   return vb6WindowsAPI.GetSetting(appname, section, key, defaultValue);
 }
 

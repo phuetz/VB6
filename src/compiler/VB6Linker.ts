@@ -1,6 +1,6 @@
 /**
  * VB6 Native Linker
- * 
+ *
  * Links compiled VB6 modules with runtime libraries to create executables
  */
 
@@ -17,10 +17,10 @@ export interface LinkOptions {
 }
 
 export enum OutputFormat {
-  ELF = 'elf',        // Linux
-  PE = 'pe',          // Windows
-  MACHO = 'mach-o',   // macOS
-  WASM = 'wasm',      // WebAssembly
+  ELF = 'elf', // Linux
+  PE = 'pe', // Windows
+  MACHO = 'mach-o', // macOS
+  WASM = 'wasm', // WebAssembly
 }
 
 export enum Platform {
@@ -94,7 +94,7 @@ export class VB6Linker {
   private sections: Section[] = [];
   private imports: Map<string, string[]> = new Map();
   private exports: string[] = [];
-  
+
   /**
    * Link multiple modules into an executable
    */
@@ -103,41 +103,39 @@ export class VB6Linker {
     objectFiles: Uint8Array[],
     options: LinkOptions
   ): Promise<Uint8Array> {
-    console.log('Linking VB6 executable...');
-    
     // Reset state
     this.symbols.clear();
     this.sections = [];
     this.imports.clear();
     this.exports = [];
-    
+
     // Phase 1: Collect symbols from all modules
     this.collectSymbols(modules);
-    
+
     // Phase 2: Process object files
     this.processObjectFiles(objectFiles);
-    
+
     // Phase 3: Resolve imports
     await this.resolveImports(options);
-    
+
     // Phase 4: Perform relocations
     this.performRelocations();
-    
+
     // Phase 5: Layout sections
     const layout = this.layoutSections(options);
-    
+
     // Phase 6: Generate executable
     const executable = this.generateExecutable(layout, options);
-    
+
     return executable;
   }
-  
+
   /**
    * Collect symbols from IR modules
    */
   private collectSymbols(modules: IRModule[]): void {
     let address = 0x1000; // Start after headers
-    
+
     for (const module of modules) {
       // Add functions
       for (const func of module.functions) {
@@ -152,7 +150,7 @@ export class VB6Linker {
         });
         address += size;
       }
-      
+
       // Add globals
       for (const global of module.globals) {
         this.symbols.set(global.name, {
@@ -165,21 +163,21 @@ export class VB6Linker {
         });
         address += 4;
       }
-      
+
       // Collect imports
       if (module.imports.length > 0) {
         this.imports.set(module.name, module.imports);
       }
     }
   }
-  
+
   /**
    * Process assembled object files
    */
   private processObjectFiles(objectFiles: Uint8Array[]): void {
     // In a real implementation, this would parse object file formats
     // (ELF, COFF, Mach-O) and extract sections and symbols
-    
+
     // For now, create basic sections
     const codeSection: Section = {
       name: '.text',
@@ -190,7 +188,7 @@ export class VB6Linker {
       data: new Uint8Array(0),
       relocations: [],
     };
-    
+
     const dataSection: Section = {
       name: '.data',
       type: SectionType.DATA,
@@ -200,7 +198,7 @@ export class VB6Linker {
       data: new Uint8Array(0),
       relocations: [],
     };
-    
+
     const bssSection: Section = {
       name: '.bss',
       type: SectionType.BSS,
@@ -210,7 +208,7 @@ export class VB6Linker {
       data: new Uint8Array(0),
       relocations: [],
     };
-    
+
     // Concatenate object file data
     for (const objFile of objectFiles) {
       // Simple concatenation - real implementation would parse properly
@@ -220,10 +218,10 @@ export class VB6Linker {
       codeSection.data = newCode;
       codeSection.size = newCode.length;
     }
-    
+
     this.sections.push(codeSection, dataSection, bssSection);
   }
-  
+
   /**
    * Resolve imports from runtime and libraries
    */
@@ -255,7 +253,7 @@ export class VB6Linker {
       'vb6_date',
       'vb6_time',
     ];
-    
+
     // Add runtime symbols
     let importAddress = 0x4000;
     for (const symbol of runtimeSymbols) {
@@ -268,14 +266,13 @@ export class VB6Linker {
       });
       importAddress += 8;
     }
-    
+
     // Process library imports
     for (const lib of options.libraries) {
       // In real implementation, would load library and extract symbols
-      console.log(`Loading library: ${lib}`);
     }
   }
-  
+
   /**
    * Perform relocations
    */
@@ -286,7 +283,7 @@ export class VB6Linker {
         if (!symbol) {
           throw new Error(`Undefined symbol: ${reloc.symbol}`);
         }
-        
+
         // Apply relocation based on type
         switch (reloc.type) {
           case RelocationType.ABSOLUTE:
@@ -304,24 +301,24 @@ export class VB6Linker {
       }
     }
   }
-  
+
   private applyAbsoluteRelocation(section: Section, reloc: Relocation, symbol: Symbol): void {
     const view = new DataView(section.data.buffer);
     view.setUint32(reloc.offset, symbol.address + reloc.addend, true);
   }
-  
+
   private applyRelativeRelocation(section: Section, reloc: Relocation, symbol: Symbol): void {
     const view = new DataView(section.data.buffer);
     const pc = section.address + reloc.offset + 4; // PC after instruction
     const target = symbol.address + reloc.addend;
     view.setInt32(reloc.offset, target - pc, true);
   }
-  
+
   private applyCallRelocation(section: Section, reloc: Relocation, symbol: Symbol): void {
     // x86 CALL instruction uses relative addressing
     this.applyRelativeRelocation(section, reloc, symbol);
   }
-  
+
   /**
    * Layout sections in memory
    */
@@ -331,14 +328,14 @@ export class VB6Linker {
       sections: [],
       totalSize: 0,
     };
-    
+
     // Find entry point
     const entrySymbol = this.symbols.get(options.entryPoint);
     if (!entrySymbol) {
       throw new Error(`Entry point not found: ${options.entryPoint}`);
     }
     layout.entryPoint = entrySymbol.address;
-    
+
     // Arrange sections
     let currentAddress = 0x1000; // Start after headers
     for (const section of this.sections) {
@@ -351,11 +348,11 @@ export class VB6Linker {
       });
       currentAddress += Math.ceil(section.size / 0x1000) * 0x1000; // Page align
     }
-    
+
     layout.totalSize = currentAddress;
     return layout;
   }
-  
+
   /**
    * Generate final executable
    */
@@ -371,19 +368,19 @@ export class VB6Linker {
         throw new Error(`Unsupported output format: ${options.outputFormat}`);
     }
   }
-  
+
   /**
    * Generate PE (Windows) executable
    */
   private generatePE(layout: MemoryLayout, options: LinkOptions): Uint8Array {
     const pe = new PEBuilder();
-    
+
     // DOS header
     pe.writeDOSHeader();
-    
+
     // PE signature
     pe.write32(0x00004550); // "PE\0\0"
-    
+
     // COFF header
     pe.write16(0x014c); // Machine (i386)
     pe.write16(layout.sections.length); // Number of sections
@@ -392,7 +389,7 @@ export class VB6Linker {
     pe.write32(0); // Number of symbols
     pe.write16(224); // Size of optional header
     pe.write16(0x0102); // Characteristics
-    
+
     // Optional header
     pe.write16(0x010b); // Magic (PE32)
     pe.write8(14); // Linker version major
@@ -424,33 +421,33 @@ export class VB6Linker {
     pe.write32(0x1000); // Size of heap commit
     pe.write32(0); // Loader flags
     pe.write32(16); // Number of data directories
-    
+
     // Data directories
     for (let i = 0; i < 16; i++) {
       pe.write32(0); // RVA
       pe.write32(0); // Size
     }
-    
+
     // Section headers
     for (const section of layout.sections) {
       pe.writeSectionHeader(section);
     }
-    
+
     // Section data
     for (const section of layout.sections) {
       pe.alignTo(0x200);
       pe.writeBytes(section.data);
     }
-    
+
     return pe.build();
   }
-  
+
   /**
    * Generate ELF (Linux) executable
    */
   private generateELF(layout: MemoryLayout, options: LinkOptions): Uint8Array {
     const elf = new ELFBuilder();
-    
+
     // ELF header
     elf.write32(0x464c457f); // Magic "\x7fELF"
     elf.write8(1); // 32-bit
@@ -459,7 +456,7 @@ export class VB6Linker {
     elf.write8(0); // System V ABI
     elf.write8(0); // ABI version
     elf.writeBytes(new Uint8Array(7)); // Padding
-    
+
     elf.write16(2); // Executable file
     elf.write16(3); // x86
     elf.write32(1); // Current version
@@ -473,7 +470,7 @@ export class VB6Linker {
     elf.write16(40); // Section header size
     elf.write16(0); // Section header count
     elf.write16(0); // Section name string table
-    
+
     // Program headers
     // LOAD segment for code
     elf.write32(1); // Type: LOAD
@@ -484,7 +481,7 @@ export class VB6Linker {
     elf.write32(layout.totalSize); // Memory size
     elf.write32(5); // Flags: R+X
     elf.write32(0x1000); // Alignment
-    
+
     // LOAD segment for data
     elf.write32(1); // Type: LOAD
     elf.write32(0x2000); // Offset
@@ -494,25 +491,25 @@ export class VB6Linker {
     elf.write32(0x1000); // Memory size
     elf.write32(6); // Flags: R+W
     elf.write32(0x1000); // Alignment
-    
+
     // Section data
     for (const section of layout.sections) {
       elf.writeBytes(section.data);
     }
-    
+
     return elf.build();
   }
-  
+
   /**
    * Generate WebAssembly module
    */
   private generateWASM(layout: MemoryLayout, options: LinkOptions): Uint8Array {
     const wasm = new WASMBuilder();
-    
+
     // WASM magic and version
     wasm.write32(0x6d736100); // "\0asm"
     wasm.write32(1); // Version
-    
+
     // Type section
     wasm.writeSection(1, () => {
       wasm.writeVarUint(1); // Number of types
@@ -520,19 +517,19 @@ export class VB6Linker {
       wasm.writeVarUint(0); // No parameters
       wasm.writeVarUint(0); // No results
     });
-    
+
     // Import section
     if (options.embedRuntime) {
       wasm.writeSection(2, () => {
         wasm.writeVarUint(4); // Number of imports
-        
+
         // Memory
         wasm.writeString('env');
         wasm.writeString('memory');
         wasm.write8(2); // Memory import
         wasm.writeVarUint(1); // Initial pages
         wasm.writeVarUint(10); // Maximum pages
-        
+
         // Runtime functions
         const imports = ['print', 'input', 'allocate'];
         for (const imp of imports) {
@@ -543,7 +540,7 @@ export class VB6Linker {
         }
       });
     }
-    
+
     // Function section
     wasm.writeSection(3, () => {
       const funcCount = this.symbols.size;
@@ -552,7 +549,7 @@ export class VB6Linker {
         wasm.writeVarUint(0); // Type index
       }
     });
-    
+
     // Export section
     wasm.writeSection(7, () => {
       wasm.writeVarUint(1); // Number of exports
@@ -560,7 +557,7 @@ export class VB6Linker {
       wasm.write8(0); // Function export
       wasm.writeVarUint(0); // Function index
     });
-    
+
     // Code section
     wasm.writeSection(10, () => {
       wasm.writeVarUint(layout.sections.length);
@@ -571,16 +568,14 @@ export class VB6Linker {
         wasm.write8(0x0b); // End
       }
     });
-    
+
     return wasm.build();
   }
-  
+
   private getCodeSize(layout: MemoryLayout): number {
-    return layout.sections
-      .filter(s => s.name === '.text')
-      .reduce((sum, s) => sum + s.size, 0);
+    return layout.sections.filter(s => s.name === '.text').reduce((sum, s) => sum + s.size, 0);
   }
-  
+
   private getDataSize(layout: MemoryLayout): number {
     return layout.sections
       .filter(s => s.name === '.data' || s.name === '.rodata')
@@ -603,33 +598,33 @@ interface MemoryLayout {
 // Binary builders
 class BinaryBuilder {
   protected buffer: number[] = [];
-  
+
   write8(value: number): void {
     this.buffer.push(value & 0xff);
   }
-  
+
   write16(value: number): void {
     this.write8(value);
     this.write8(value >> 8);
   }
-  
+
   write32(value: number): void {
     this.write16(value);
     this.write16(value >> 16);
   }
-  
+
   writeBytes(bytes: Uint8Array): void {
     for (const byte of bytes) {
       this.write8(byte);
     }
   }
-  
+
   writeString(str: string): void {
     const bytes = new TextEncoder().encode(str);
     this.writeVarUint(bytes.length);
     this.writeBytes(bytes);
   }
-  
+
   writeVarUint(value: number): void {
     while (value >= 0x80) {
       this.write8((value & 0x7f) | 0x80);
@@ -637,13 +632,13 @@ class BinaryBuilder {
     }
     this.write8(value);
   }
-  
+
   alignTo(alignment: number): void {
     while (this.buffer.length % alignment !== 0) {
       this.write8(0);
     }
   }
-  
+
   build(): Uint8Array {
     return new Uint8Array(this.buffer);
   }
@@ -667,26 +662,23 @@ class PEBuilder extends BinaryBuilder {
     this.write16(0); // Overlay number
     this.writeBytes(new Uint8Array(32)); // Reserved
     this.write32(0x80); // PE header offset
-    
+
     // DOS stub
     const stub = [
-      0x0e, 0x1f, 0xba, 0x0e, 0x00, 0xb4, 0x09, 0xcd,
-      0x21, 0xb8, 0x01, 0x4c, 0xcd, 0x21, 0x54, 0x68,
-      0x69, 0x73, 0x20, 0x70, 0x72, 0x6f, 0x67, 0x72,
-      0x61, 0x6d, 0x20, 0x63, 0x61, 0x6e, 0x6e, 0x6f,
-      0x74, 0x20, 0x62, 0x65, 0x20, 0x72, 0x75, 0x6e,
-      0x20, 0x69, 0x6e, 0x20, 0x44, 0x4f, 0x53, 0x20,
-      0x6d, 0x6f, 0x64, 0x65, 0x2e, 0x0d, 0x0d, 0x0a,
-      0x24, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x0e, 0x1f, 0xba, 0x0e, 0x00, 0xb4, 0x09, 0xcd, 0x21, 0xb8, 0x01, 0x4c, 0xcd, 0x21, 0x54,
+      0x68, 0x69, 0x73, 0x20, 0x70, 0x72, 0x6f, 0x67, 0x72, 0x61, 0x6d, 0x20, 0x63, 0x61, 0x6e,
+      0x6e, 0x6f, 0x74, 0x20, 0x62, 0x65, 0x20, 0x72, 0x75, 0x6e, 0x20, 0x69, 0x6e, 0x20, 0x44,
+      0x4f, 0x53, 0x20, 0x6d, 0x6f, 0x64, 0x65, 0x2e, 0x0d, 0x0d, 0x0a, 0x24, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00,
     ];
     this.writeBytes(new Uint8Array(stub));
   }
-  
+
   writeSectionHeader(section: { name: string; address: number; size: number }): void {
     // Name (8 bytes)
     const name = section.name.padEnd(8, '\0').substring(0, 8);
     this.writeBytes(new TextEncoder().encode(name));
-    
+
     this.write32(section.size); // Virtual size
     this.write32(section.address); // Virtual address
     this.write32(section.size); // Raw size
@@ -706,11 +698,11 @@ class WASMBuilder extends BinaryBuilder {
     this.write8(id);
     const sizePos = this.buffer.length;
     this.writeVarUint(0); // Placeholder for size
-    
+
     const startPos = this.buffer.length;
     writer();
     const size = this.buffer.length - startPos;
-    
+
     // Update size
     const sizeBytes: number[] = [];
     let sizeValue = size;
@@ -719,7 +711,7 @@ class WASMBuilder extends BinaryBuilder {
       sizeValue >>= 7;
     }
     sizeBytes.push(sizeValue);
-    
+
     this.buffer.splice(sizePos, 1, ...sizeBytes);
   }
 }

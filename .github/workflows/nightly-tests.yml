@@ -28,14 +28,14 @@ jobs:
     name: 🔬 Full VB6 Compatibility Suite
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    
+
     strategy:
       fail-fast: false
       matrix:
-        test-category: 
+        test-category:
           - string-functions
           - math-functions
-          - datetime-functions  
+          - datetime-functions
           - array-functions
           - file-operations
           - type-conversions
@@ -43,20 +43,20 @@ jobs:
           - object-operations
           - error-handling
           - advanced-features
-    
+
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-      
+
       - name: 📥 Install dependencies
         run: npm ci
-      
+
       - name: 🔬 Run compatibility tests for ${{ matrix.test-category }}
         run: |
           npm test -- src/test/compatibility/VB6CompatibilityTests.ts \
@@ -67,12 +67,12 @@ jobs:
           COMPATIBILITY_TEST_MODE: extensive
           TEST_TIMEOUT: 30000
         continue-on-error: true
-      
+
       - name: 📊 Process test results
         run: |
           node scripts/process-compatibility-results.js test-results-${{ matrix.test-category }}.json
         continue-on-error: true
-      
+
       - name: 📤 Upload detailed results
         uses: actions/upload-artifact@v4
         if: always()
@@ -90,20 +90,20 @@ jobs:
     name: 🔄 VB6 Program Migration Tests
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    
+
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-      
+
       - name: 📥 Install dependencies
         run: npm ci
-      
+
       - name: 📥 Download VB6 test programs
         run: |
           mkdir -p test-programs/vb6-samples
@@ -114,7 +114,7 @@ jobs:
             echo "No sample VB6 programs found, creating test cases..."
             node scripts/create-test-programs.js
           fi
-      
+
       - name: 🔄 Test program migration
         run: |
           for program in test-programs/vb6-samples/*.vbp; do
@@ -123,11 +123,11 @@ jobs:
               npm run migrate-test "$program" || echo "Migration failed for $program"
             fi
           done
-      
+
       - name: 📊 Generate migration report
         run: |
           npm run generate-migration-report
-      
+
       - name: 📤 Upload migration results
         uses: actions/upload-artifact@v4
         with:
@@ -145,22 +145,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     if: github.event_name == 'schedule' || inputs.performance_regression
-    
+
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 50 # Get more history for comparison
-      
+
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-      
+
       - name: 📥 Install dependencies
         run: npm ci
-      
+
       - name: 📈 Run current performance benchmarks
         run: |
           npm test -- src/test/benchmarks/VB6NativeBenchmarks.ts \
@@ -168,7 +168,7 @@ jobs:
         env:
           BENCHMARK_MODE: true
           NODE_ENV: production
-      
+
       - name: 📥 Get baseline benchmarks
         run: |
           # Get benchmarks from main branch or last successful run
@@ -178,12 +178,12 @@ jobs:
             --reporter json --outputFile baseline-benchmarks.json || echo "Baseline not available"
           git checkout HEAD -- package.json package-lock.json
         continue-on-error: true
-      
+
       - name: 📊 Compare performance
         run: |
           node scripts/compare-benchmarks.js current-benchmarks.json baseline-benchmarks.json
         continue-on-error: true
-      
+
       - name: 📤 Upload performance comparison
         uses: actions/upload-artifact@v4
         with:
@@ -194,7 +194,7 @@ jobs:
             performance-comparison.html
             performance-regression-report.json
           retention-days: 90
-      
+
       - name: 🚨 Check for performance regressions
         run: |
           if [ -f "performance-regression-report.json" ]; then
@@ -211,20 +211,20 @@ jobs:
     name: 🧠 Memory Leak Detection
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    
+
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-      
+
       - name: 📥 Install dependencies
         run: npm ci
-      
+
       - name: 🧠 Run memory leak tests
         run: |
           # Run tests with memory profiling
@@ -235,12 +235,12 @@ jobs:
           NODE_ENV: test
           MEMORY_TEST_MODE: true
         continue-on-error: true
-      
+
       - name: 📊 Analyze memory usage
         run: |
           node scripts/analyze-memory-usage.js memory-test-results.json
         continue-on-error: true
-      
+
       - name: 📤 Upload memory analysis
         uses: actions/upload-artifact@v4
         with:
@@ -258,37 +258,37 @@ jobs:
     name: 🌐 Browser Compatibility Tests
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    
+
     strategy:
       matrix:
         browser: [chrome, firefox, safari, edge]
-    
+
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-      
+
       - name: 📥 Install dependencies
         run: npm ci
-      
+
       - name: 🏗️ Build for testing
         run: npm run build:test
-      
+
       - name: 🎭 Setup Playwright
         run: npx playwright install ${{ matrix.browser }}
-      
+
       - name: 🌐 Run browser compatibility tests
         run: |
           npx playwright test --project=${{ matrix.browser }} tests/browser-compatibility/
         env:
           BROWSER: ${{ matrix.browser }}
         continue-on-error: true
-      
+
       - name: 📤 Upload browser test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -305,22 +305,29 @@ jobs:
   generate-nightly-report:
     name: 📋 Generate Nightly Report
     runs-on: ubuntu-latest
-    needs: [compatibility-full, migration-tests, performance-regression, memory-leak-tests, browser-compatibility]
+    needs:
+      [
+        compatibility-full,
+        migration-tests,
+        performance-regression,
+        memory-leak-tests,
+        browser-compatibility,
+      ]
     if: always()
-    
+
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: 📥 Download all test results
         uses: actions/download-artifact@v4
         with:
           path: nightly-results/
-      
+
       - name: 📊 Generate comprehensive report
         run: |
           node scripts/generate-nightly-report.js nightly-results/
-      
+
       - name: 📤 Upload nightly report
         uses: actions/upload-artifact@v4
         with:
@@ -329,7 +336,7 @@ jobs:
             nightly-report.html
             nightly-summary.json
           retention-days: 365 # Keep for a year
-      
+
       - name: 📢 Create issue for failures
         if: failure()
         uses: actions/github-script@v7
@@ -338,24 +345,24 @@ jobs:
             const title = `Nightly Tests Failed - ${new Date().toISOString().split('T')[0]}`;
             const body = `
             ## 🚨 Nightly Test Failures
-            
+
             The nightly compatibility and regression tests have detected issues:
-            
+
             ### Failed Jobs:
             ${context.payload.jobs ? Object.entries(context.payload.jobs)
               .filter(([name, job]) => job.conclusion === 'failure')
               .map(([name]) => `- ${name}`)
               .join('\n') : 'Check workflow run for details'}
-            
+
             ### Actions Required:
             1. Review the test results in the workflow artifacts
             2. Investigate any performance regressions
             3. Fix compatibility issues
             4. Update tests if needed
-            
+
             **Workflow Run**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
             `;
-            
+
             // Check if issue already exists
             const existingIssues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
@@ -363,7 +370,7 @@ jobs:
               labels: 'nightly-test-failure',
               state: 'open'
             });
-            
+
             if (existingIssues.data.length === 0) {
               await github.rest.issues.create({
                 owner: context.repo.owner,
@@ -382,7 +389,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [generate-nightly-report]
     if: always()
-    
+
     steps:
       - name: 📊 Calculate success rate
         id: calc-success
@@ -391,7 +398,7 @@ jobs:
           echo "success_rate=85" >> $GITHUB_OUTPUT
           echo "total_tests=1250" >> $GITHUB_OUTPUT
           echo "failed_tests=187" >> $GITHUB_OUTPUT
-      
+
       - name: 📢 Slack notification
         if: env.SLACK_WEBHOOK_URL != ''
         uses: 8398a7/action-slack@v3

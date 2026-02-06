@@ -1,6 +1,23 @@
 import React, { useState, useMemo } from 'react';
-import { X, Search, Code, FileText, Repeat, GitBranch, AlertCircle, Database, Wrench, Copy, ChevronRight } from 'lucide-react';
-import { vb6Snippets, VB6Snippet, getSnippetsByCategory, searchSnippets } from '../../data/vb6Snippets';
+import {
+  X,
+  Search,
+  Code,
+  FileText,
+  Repeat,
+  GitBranch,
+  AlertCircle,
+  Database,
+  Wrench,
+  Copy,
+  ChevronRight,
+} from 'lucide-react';
+import {
+  vb6Snippets,
+  VB6Snippet,
+  getSnippetsByCategory,
+  searchSnippets,
+} from '../../data/vb6Snippets';
 
 interface SnippetManagerProps {
   visible: boolean;
@@ -17,7 +34,7 @@ const categoryIcons = {
   error: <AlertCircle size={16} className="text-yellow-500" />,
   file: <FileText size={16} className="text-indigo-500" />,
   database: <Database size={16} className="text-teal-500" />,
-  api: <Code size={16} className="text-pink-500" />
+  api: <Code size={16} className="text-pink-500" />,
 };
 
 const categoryNames = {
@@ -29,13 +46,13 @@ const categoryNames = {
   error: 'Error Handling',
   file: 'File Operations',
   database: 'Database',
-  api: 'Windows API'
+  api: 'Windows API',
 };
 
 export const VB6SnippetManager: React.FC<SnippetManagerProps> = ({
   visible,
   onClose,
-  onInsertSnippet
+  onInsertSnippet,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -87,10 +104,7 @@ export const VB6SnippetManager: React.FC<SnippetManagerProps> = ({
             <h2 className="text-xl font-semibold text-gray-800">Code Snippets</h2>
             <span className="text-sm text-gray-500">({vb6Snippets.length} snippets)</span>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -101,12 +115,15 @@ export const VB6SnippetManager: React.FC<SnippetManagerProps> = ({
             {/* Search */}
             <div className="p-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <Search
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  size={18}
+                />
                 <input
                   type="text"
                   placeholder="Search snippets..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
                 />
               </div>
@@ -121,9 +138,7 @@ export const VB6SnippetManager: React.FC<SnippetManagerProps> = ({
                 <button
                   onClick={() => setSelectedCategory('all')}
                   className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                    selectedCategory === 'all'
-                      ? 'bg-pink-100 text-pink-700'
-                      : 'hover:bg-gray-100'
+                    selectedCategory === 'all' ? 'bg-pink-100 text-pink-700' : 'hover:bg-gray-100'
                   }`}
                 >
                   All Categories
@@ -180,7 +195,7 @@ export const VB6SnippetManager: React.FC<SnippetManagerProps> = ({
                           <p className="text-sm text-gray-600">{snippet.description}</p>
                         </div>
                         <button
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             handleCopySnippet(snippet);
                           }}
@@ -256,8 +271,9 @@ export const VB6SnippetManager: React.FC<SnippetManagerProps> = ({
 
                   <div className="pt-4 border-t border-gray-200">
                     <p className="text-xs text-gray-500">
-                      <strong>How to use:</strong> Type <code className="bg-gray-100 px-1">{selectedSnippet.prefix}</code> in
-                      the code editor and press Tab or select from IntelliSense.
+                      <strong>How to use:</strong> Type{' '}
+                      <code className="bg-gray-100 px-1">{selectedSnippet.prefix}</code> in the code
+                      editor and press Tab or select from IntelliSense.
                     </p>
                   </div>
                 </div>
@@ -277,7 +293,9 @@ export const VB6SnippetManager: React.FC<SnippetManagerProps> = ({
         <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-gray-50">
           <div className="text-sm text-gray-600">
             {selectedSnippet ? (
-              <span>Selected: <strong>{selectedSnippet.name}</strong></span>
+              <span>
+                Selected: <strong>{selectedSnippet.name}</strong>
+              </span>
             ) : (
               <span>Select a snippet to insert</span>
             )}

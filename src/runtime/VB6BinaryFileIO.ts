@@ -34,11 +34,7 @@ class VB6BinaryFileManager {
   /**
    * Open file for binary access
    */
-  openBinary(
-    fileName: string,
-    fileNumber: number,
-    recordLength: number = 1
-  ): void {
+  openBinary(fileName: string, fileNumber: number, recordLength: number = 1): void {
     if (this.openFiles.has(fileNumber)) {
       throw new Error(`File number ${fileNumber} is already open`);
     }
@@ -57,7 +53,7 @@ class VB6BinaryFileManager {
       dataView: new DataView(data),
       position: 0,
       fileName,
-      isOpen: true
+      isOpen: true,
     };
 
     this.openFiles.set(fileNumber, handle);
@@ -66,11 +62,7 @@ class VB6BinaryFileManager {
   /**
    * Open file for random access
    */
-  openRandom(
-    fileName: string,
-    fileNumber: number,
-    recordLength: number
-  ): void {
+  openRandom(fileName: string, fileNumber: number, recordLength: number): void {
     if (this.openFiles.has(fileNumber)) {
       throw new Error(`File number ${fileNumber} is already open`);
     }
@@ -88,7 +80,7 @@ class VB6BinaryFileManager {
       dataView: new DataView(data),
       position: 0,
       fileName,
-      isOpen: true
+      isOpen: true,
     };
 
     this.openFiles.set(fileNumber, handle);
@@ -374,12 +366,7 @@ class VB6BinaryFileManager {
   /**
    * Put fixed-length string
    */
-  putFixedString(
-    fileNumber: number,
-    value: string,
-    length: number,
-    recordNumber?: number
-  ): void {
+  putFixedString(fileNumber: number, value: string, length: number, recordNumber?: number): void {
     const handle = this.getHandle(fileNumber);
     let position = handle.position;
     if (recordNumber !== undefined) {
@@ -403,11 +390,7 @@ class VB6BinaryFileManager {
   /**
    * Get fixed-length string
    */
-  getFixedString(
-    fileNumber: number,
-    length: number,
-    recordNumber?: number
-  ): string {
+  getFixedString(fileNumber: number, length: number, recordNumber?: number): string {
     const handle = this.getHandle(fileNumber);
     let position = handle.position;
     if (recordNumber !== undefined) {
@@ -566,11 +549,7 @@ class VB6BinaryFileManager {
   /**
    * Get user-defined type (record)
    */
-  getRecord(
-    fileNumber: number,
-    schema: RecordSchema,
-    recordNumber?: number
-  ): UserDefinedType {
+  getRecord(fileNumber: number, schema: RecordSchema, recordNumber?: number): UserDefinedType {
     const record: UserDefinedType = {};
 
     if (recordNumber !== undefined) {
@@ -679,10 +658,7 @@ export interface RecordSchema {
 /**
  * Create a record schema from field definitions
  */
-export function CreateRecordSchema(
-  name: string,
-  fields: RecordField[]
-): RecordSchema {
+export function CreateRecordSchema(name: string, fields: RecordField[]): RecordSchema {
   let totalLength = 0;
 
   for (const field of fields) {
@@ -728,22 +704,14 @@ export const binaryFileManager = new VB6BinaryFileManager();
 /**
  * Open file for binary access
  */
-export function OpenBinary(
-  fileName: string,
-  fileNumber: number,
-  recordLength: number = 1
-): void {
+export function OpenBinary(fileName: string, fileNumber: number, recordLength: number = 1): void {
   binaryFileManager.openBinary(fileName, fileNumber, recordLength);
 }
 
 /**
  * Open file for random access
  */
-export function OpenRandom(
-  fileName: string,
-  fileNumber: number,
-  recordLength: number
-): void {
+export function OpenRandom(fileName: string, fileNumber: number, recordLength: number): void {
   binaryFileManager.openRandom(fileName, fileNumber, recordLength);
 }
 
@@ -785,11 +753,7 @@ export function LOFBinary(fileNumber: number): number {
 /**
  * Put integer
  */
-export function PutInteger(
-  fileNumber: number,
-  value: number,
-  recordNumber?: number
-): void {
+export function PutInteger(fileNumber: number, value: number, recordNumber?: number): void {
   binaryFileManager.putInteger(fileNumber, value, recordNumber);
 }
 
@@ -803,11 +767,7 @@ export function GetInteger(fileNumber: number, recordNumber?: number): number {
 /**
  * Put long
  */
-export function PutLong(
-  fileNumber: number,
-  value: number,
-  recordNumber?: number
-): void {
+export function PutLong(fileNumber: number, value: number, recordNumber?: number): void {
   binaryFileManager.putLong(fileNumber, value, recordNumber);
 }
 
@@ -821,11 +781,7 @@ export function GetLong(fileNumber: number, recordNumber?: number): number {
 /**
  * Put single
  */
-export function PutSingle(
-  fileNumber: number,
-  value: number,
-  recordNumber?: number
-): void {
+export function PutSingle(fileNumber: number, value: number, recordNumber?: number): void {
   binaryFileManager.putSingle(fileNumber, value, recordNumber);
 }
 
@@ -839,11 +795,7 @@ export function GetSingle(fileNumber: number, recordNumber?: number): number {
 /**
  * Put double
  */
-export function PutDouble(
-  fileNumber: number,
-  value: number,
-  recordNumber?: number
-): void {
+export function PutDouble(fileNumber: number, value: number, recordNumber?: number): void {
   binaryFileManager.putDouble(fileNumber, value, recordNumber);
 }
 
@@ -949,7 +901,7 @@ export const VB6BinaryFileIO = {
   GetRecord,
   CreateRecordSchema,
   LoadBinaryFile,
-  ExportBinaryFile
+  ExportBinaryFile,
 };
 
 export default VB6BinaryFileIO;

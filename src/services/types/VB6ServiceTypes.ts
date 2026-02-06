@@ -486,7 +486,7 @@ export interface ConstantDefinition {
 export type ConversionPattern = [RegExp, string | ((...args: string[]) => string)];
 
 /** Default values map */
-export type DefaultValuesMap = Record<string, VB6Scalar | Date | null>
+export type DefaultValuesMap = Record<string, VB6Scalar | Date | null>;
 
 // ============================================================================
 // LOGGING SERVICE TYPES
@@ -588,4 +588,4 @@ export interface ReportDataGroup {
 }
 
 /** Formula evaluation result */
-export type FormulaResult = VB6Value | '#ERROR'
+export type FormulaResult = VB6Value | '#ERROR';

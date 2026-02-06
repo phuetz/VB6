@@ -23,18 +23,18 @@ export interface VB6APIParameter {
 
 // API Type mappings from VB6 to JavaScript
 export const VB6TypeMap: { [key: string]: string } = {
-  'Long': 'number',
-  'Integer': 'number', 
-  'String': 'string',
-  'Boolean': 'boolean',
-  'Byte': 'number',
-  'Double': 'number',
-  'Single': 'number',
-  'Currency': 'number',
-  'Date': 'Date',
-  'Variant': 'any',
-  'Object': 'object',
-  'Any': 'any'
+  Long: 'number',
+  Integer: 'number',
+  String: 'string',
+  Boolean: 'boolean',
+  Byte: 'number',
+  Double: 'number',
+  Single: 'number',
+  Currency: 'number',
+  Date: 'Date',
+  Variant: 'any',
+  Object: 'object',
+  Any: 'any',
 };
 
 // Global API Registry
@@ -56,20 +56,23 @@ export class VB6APIRegistry {
     try {
       // Example: Declare Function GetTickCount Lib "kernel32" () As Long
       // Example: Declare Function MessageBox Lib "user32" Alias "MessageBoxA" (ByVal hwnd As Long, ByVal lpText As String, ByVal lpCaption As String, ByVal wType As Long) As Long
-      
-      const declareRegex = /Declare\s+(Function|Sub)\s+(\w+)\s+Lib\s+"([^"]+)"(?:\s+Alias\s+"([^"]+)")?\s*\(([^)]*)\)(?:\s+As\s+(\w+))?/i;
+
+      const declareRegex =
+        /Declare\s+(Function|Sub)\s+(\w+)\s+Lib\s+"([^"]+)"(?:\s+Alias\s+"([^"]+)")?\s*\(([^)]*)\)(?:\s+As\s+(\w+))?/i;
       const match = declaration.match(declareRegex);
-      
+
       if (!match) return null;
-      
+
       const [, funcType, funcName, library, alias, paramStr, returnType] = match;
-      
+
       // Parse parameters
       const parameters: VB6APIParameter[] = [];
       if (paramStr.trim()) {
         const paramParts = paramStr.split(',');
         for (const param of paramParts) {
-          const paramMatch = param.trim().match(/(ByVal|ByRef)?\s*(\w+)\s+As\s+(\w+)(?:\s*=\s*(.+))?/i);
+          const paramMatch = param
+            .trim()
+            .match(/(ByVal|ByRef)?\s*(\w+)\s+As\s+(\w+)(?:\s*=\s*(.+))?/i);
           if (paramMatch) {
             const [, byRefVal, paramName, paramType, defaultVal] = paramMatch;
             parameters.push({
@@ -77,31 +80,31 @@ export class VB6APIRegistry {
               type: paramType,
               byRef: byRefVal?.toLowerCase() === 'byref',
               optional: !!defaultVal,
-              defaultValue: defaultVal
+              defaultValue: defaultVal,
             });
           }
         }
       }
-      
+
       // Find implementation
       const apiKey = `${library.toLowerCase()}.${(alias || funcName).toLowerCase()}`;
       const existingAPI = this.apis.get(apiKey);
-      
+
       const apiFunction: VB6APIFunction = {
         name: funcName,
         library: library.toLowerCase(),
         alias: alias,
         returnType: returnType || 'void',
         parameters,
-        implementation: existingAPI?.implementation || this.createStubImplementation(funcName, library)
+        implementation:
+          existingAPI?.implementation || this.createStubImplementation(funcName, library),
       };
-      
+
       // Register the API
       this.apis.set(apiKey, apiFunction);
       this.declarations.set(funcName.toLowerCase(), declaration);
-      
+
       return apiFunction;
-      
     } catch (error) {
       console.error('Error parsing Declare Function:', error);
       return null;
@@ -133,7 +136,7 @@ export class VB6APIRegistry {
         }
       }
     }
-    
+
     console.warn(`API function ${functionName} not found`);
     return null;
   }
@@ -142,7 +145,7 @@ export class VB6APIRegistry {
   private createStubImplementation(funcName: string, library: string): (...args: any[]) => any {
     return (...args: any[]) => {
       console.warn(`Stub implementation called for ${library}.${funcName} with args:`, args);
-      
+
       // Return appropriate default based on common function patterns
       if (funcName.toLowerCase().includes('get') || funcName.toLowerCase().includes('find')) {
         return 0; // Handle/ID not found
@@ -169,15 +172,18 @@ export class VB6APIRegistry {
         { name: 'hwnd', type: 'Long', byRef: false },
         { name: 'lpText', type: 'String', byRef: false },
         { name: 'lpCaption', type: 'String', byRef: false },
-        { name: 'wType', type: 'Long', byRef: false }
+        { name: 'wType', type: 'Long', byRef: false },
       ],
       implementation: (hwnd: number, text: string, caption: string, type: number) => {
-        const buttons = ['OK', 'OK|Cancel', 'Abort|Retry|Ignore', 'Yes|No|Cancel', 'Yes|No', 'Retry|Cancel'][type & 0x7] || 'OK';
-        const icon = ['', '❌', '❓', '⚠️', 'ℹ️'][((type & 0x70) >> 4)] || '';
-        
+        const buttons =
+          ['OK', 'OK|Cancel', 'Abort|Retry|Ignore', 'Yes|No|Cancel', 'Yes|No', 'Retry|Cancel'][
+            type & 0x7
+          ] || 'OK';
+        const icon = ['', '❌', '❓', '⚠️', 'ℹ️'][(type & 0x70) >> 4] || '';
+
         const result = window.confirm(`${icon} ${caption}\n\n${text}`);
         return result ? 1 : 2; // IDOK : IDCANCEL
-      }
+      },
     });
 
     this.registerAPI('user32', 'FindWindow', {
@@ -187,7 +193,7 @@ export class VB6APIRegistry {
       returnType: 'Long',
       parameters: [
         { name: 'lpClassName', type: 'String', byRef: false },
-        { name: 'lpWindowName', type: 'String', byRef: false }
+        { name: 'lpWindowName', type: 'String', byRef: false },
       ],
       implementation: (className: string, windowName: string) => {
         // In web environment, simulate finding windows
@@ -195,7 +201,7 @@ export class VB6APIRegistry {
           return Math.floor(Math.random() * 1000) + 1000; // Fake window handle
         }
         return 0; // Window not found
-      }
+      },
     });
 
     this.registerAPI('user32', 'GetWindowText', {
@@ -206,22 +212,20 @@ export class VB6APIRegistry {
       parameters: [
         { name: 'hwnd', type: 'Long', byRef: false },
         { name: 'lpString', type: 'String', byRef: true },
-        { name: 'nMaxCount', type: 'Long', byRef: false }
+        { name: 'nMaxCount', type: 'Long', byRef: false },
       ],
       implementation: (hwnd: number, buffer: { value: string }, maxCount: number) => {
         const title = document.title || 'VB6 Web Application';
         buffer.value = title.substring(0, maxCount - 1);
         return buffer.value.length;
-      }
+      },
     });
 
     this.registerAPI('user32', 'GetCursorPos', {
       name: 'GetCursorPos',
       library: 'user32',
       returnType: 'Long',
-      parameters: [
-        { name: 'lpPoint', type: 'Object', byRef: true }
-      ],
+      parameters: [{ name: 'lpPoint', type: 'Object', byRef: true }],
       implementation: (point: { x: number; y: number }) => {
         // Get last known mouse position
         const lastMouseEvent = (window as any).__lastMouseEvent;
@@ -233,7 +237,7 @@ export class VB6APIRegistry {
           point.y = 0;
         }
         return 1;
-      }
+      },
     });
 
     // KERNEL32.DLL APIs
@@ -244,19 +248,17 @@ export class VB6APIRegistry {
       parameters: [],
       implementation: () => {
         return performance.now();
-      }
+      },
     });
 
     this.registerAPI('kernel32', 'Sleep', {
       name: 'Sleep',
       library: 'kernel32',
       returnType: 'void',
-      parameters: [
-        { name: 'dwMilliseconds', type: 'Long', byRef: false }
-      ],
+      parameters: [{ name: 'dwMilliseconds', type: 'Long', byRef: false }],
       implementation: async (milliseconds: number) => {
         await new Promise(resolve => setTimeout(resolve, milliseconds));
-      }
+      },
     });
 
     this.registerAPI('kernel32', 'GetComputerName', {
@@ -266,14 +268,14 @@ export class VB6APIRegistry {
       returnType: 'Long',
       parameters: [
         { name: 'lpBuffer', type: 'String', byRef: true },
-        { name: 'nSize', type: 'Long', byRef: true }
+        { name: 'nSize', type: 'Long', byRef: true },
       ],
       implementation: (buffer: { value: string }, size: { value: number }) => {
         const computerName = navigator.userAgent.includes('Windows') ? 'WEBPC' : 'WEBBROWSER';
         buffer.value = computerName;
         size.value = computerName.length;
         return 1;
-      }
+      },
     });
 
     this.registerAPI('kernel32', 'GetUserName', {
@@ -283,14 +285,14 @@ export class VB6APIRegistry {
       returnType: 'Long',
       parameters: [
         { name: 'lpBuffer', type: 'String', byRef: true },
-        { name: 'nSize', type: 'Long', byRef: true }
+        { name: 'nSize', type: 'Long', byRef: true },
       ],
       implementation: (buffer: { value: string }, size: { value: number }) => {
         const userName = 'WebUser';
         buffer.value = userName;
         size.value = userName.length;
         return 1;
-      }
+      },
     });
 
     this.registerAPI('kernel32', 'GetTempPath', {
@@ -300,13 +302,13 @@ export class VB6APIRegistry {
       returnType: 'Long',
       parameters: [
         { name: 'nBufferLength', type: 'Long', byRef: false },
-        { name: 'lpBuffer', type: 'String', byRef: true }
+        { name: 'lpBuffer', type: 'String', byRef: true },
       ],
       implementation: (bufferLength: number, buffer: { value: string }) => {
         const tempPath = '/tmp/';
         buffer.value = tempPath;
         return tempPath.length;
-      }
+      },
     });
 
     // SHELL32.DLL APIs
@@ -321,18 +323,28 @@ export class VB6APIRegistry {
         { name: 'lpFile', type: 'String', byRef: false },
         { name: 'lpParameters', type: 'String', byRef: false },
         { name: 'lpDirectory', type: 'String', byRef: false },
-        { name: 'nShowCmd', type: 'Long', byRef: false }
+        { name: 'nShowCmd', type: 'Long', byRef: false },
       ],
-      implementation: (hwnd: number, operation: string, file: string, parameters: string, directory: string, showCmd: number) => {
+      implementation: (
+        hwnd: number,
+        operation: string,
+        file: string,
+        parameters: string,
+        directory: string,
+        showCmd: number
+      ) => {
         try {
           if (operation.toLowerCase() === 'open') {
-            if (file.startsWith('http://') || file.startsWith('https://') || file.startsWith('mailto:')) {
+            if (
+              file.startsWith('http://') ||
+              file.startsWith('https://') ||
+              file.startsWith('mailto:')
+            ) {
               window.open(file, '_blank');
               return 42; // Success (instance handle > 32)
             }
             if (file.endsWith('.txt') || file.endsWith('.html')) {
               // Simulate opening file
-              console.log(`Opening file: ${file}`);
               return 42;
             }
           }
@@ -340,7 +352,7 @@ export class VB6APIRegistry {
         } catch (error) {
           return 0; // Out of memory
         }
-      }
+      },
     });
 
     // GDI32.DLL APIs
@@ -351,12 +363,12 @@ export class VB6APIRegistry {
       parameters: [
         { name: 'hdc', type: 'Long', byRef: false },
         { name: 'x', type: 'Long', byRef: false },
-        { name: 'y', type: 'Long', byRef: false }
+        { name: 'y', type: 'Long', byRef: false },
       ],
       implementation: (hdc: number, x: number, y: number) => {
         // Simulate getting pixel color
-        return 0xFFFFFF; // White pixel
-      }
+        return 0xffffff; // White pixel
+      },
     });
 
     this.registerAPI('gdi32', 'SetPixel', {
@@ -367,12 +379,12 @@ export class VB6APIRegistry {
         { name: 'hdc', type: 'Long', byRef: false },
         { name: 'x', type: 'Long', byRef: false },
         { name: 'y', type: 'Long', byRef: false },
-        { name: 'color', type: 'Long', byRef: false }
+        { name: 'color', type: 'Long', byRef: false },
       ],
       implementation: (hdc: number, x: number, y: number, color: number) => {
         // Simulate setting pixel color
         return color;
-      }
+      },
     });
 
     // ADVAPI32.DLL APIs (Registry)
@@ -386,13 +398,19 @@ export class VB6APIRegistry {
         { name: 'lpSubKey', type: 'String', byRef: false },
         { name: 'ulOptions', type: 'Long', byRef: false },
         { name: 'samDesired', type: 'Long', byRef: false },
-        { name: 'phkResult', type: 'Long', byRef: true }
+        { name: 'phkResult', type: 'Long', byRef: true },
       ],
-      implementation: (hKey: number, subKey: string, options: number, desired: number, result: { value: number }) => {
+      implementation: (
+        hKey: number,
+        subKey: string,
+        options: number,
+        desired: number,
+        result: { value: number }
+      ) => {
         // Simulate registry access using localStorage
         result.value = Math.floor(Math.random() * 1000) + 1000;
         return 0; // ERROR_SUCCESS
-      }
+      },
     });
 
     this.registerAPI('advapi32', 'RegQueryValueEx', {
@@ -406,9 +424,16 @@ export class VB6APIRegistry {
         { name: 'lpReserved', type: 'Long', byRef: false },
         { name: 'lpType', type: 'Long', byRef: true },
         { name: 'lpData', type: 'String', byRef: true },
-        { name: 'lpcbData', type: 'Long', byRef: true }
+        { name: 'lpcbData', type: 'Long', byRef: true },
       ],
-      implementation: (hKey: number, valueName: string, reserved: number, type: { value: number }, data: { value: string }, dataSize: { value: number }) => {
+      implementation: (
+        hKey: number,
+        valueName: string,
+        reserved: number,
+        type: { value: number },
+        data: { value: string },
+        dataSize: { value: number }
+      ) => {
         // Simulate reading from registry using localStorage
         const key = `vb6_registry_${hKey}_${valueName}`;
         const value = localStorage.getItem(key) || '';
@@ -416,7 +441,7 @@ export class VB6APIRegistry {
         dataSize.value = value.length;
         type.value = 1; // REG_SZ
         return 0; // ERROR_SUCCESS
-      }
+      },
     });
 
     this.registerAPI('advapi32', 'RegSetValueEx', {
@@ -430,26 +455,31 @@ export class VB6APIRegistry {
         { name: 'Reserved', type: 'Long', byRef: false },
         { name: 'dwType', type: 'Long', byRef: false },
         { name: 'lpData', type: 'String', byRef: false },
-        { name: 'cbData', type: 'Long', byRef: false }
+        { name: 'cbData', type: 'Long', byRef: false },
       ],
-      implementation: (hKey: number, valueName: string, reserved: number, type: number, data: string, dataSize: number) => {
+      implementation: (
+        hKey: number,
+        valueName: string,
+        reserved: number,
+        type: number,
+        data: string,
+        dataSize: number
+      ) => {
         // Simulate writing to registry using localStorage
         const key = `vb6_registry_${hKey}_${valueName}`;
         localStorage.setItem(key, data);
         return 0; // ERROR_SUCCESS
-      }
+      },
     });
 
     this.registerAPI('advapi32', 'RegCloseKey', {
       name: 'RegCloseKey',
       library: 'advapi32',
       returnType: 'Long',
-      parameters: [
-        { name: 'hKey', type: 'Long', byRef: false }
-      ],
+      parameters: [{ name: 'hKey', type: 'Long', byRef: false }],
       implementation: (hKey: number) => {
         return 0; // ERROR_SUCCESS
-      }
+      },
     });
   }
 }
@@ -471,7 +501,7 @@ export const DeclareFunction = (declaration: string): boolean => {
 
 // Track mouse position for API calls
 if (typeof window !== 'undefined') {
-  document.addEventListener('mousemove', (e) => {
+  document.addEventListener('mousemove', e => {
     (window as any).__lastMouseEvent = e;
   });
 }
@@ -489,7 +519,7 @@ export const VB6Constants = {
   MB_ICONQUESTION: 32,
   MB_ICONEXCLAMATION: 48,
   MB_ICONINFORMATION: 64,
-  
+
   // Return values
   IDOK: 1,
   IDCANCEL: 2,
@@ -498,19 +528,19 @@ export const VB6Constants = {
   IDIGNORE: 5,
   IDYES: 6,
   IDNO: 7,
-  
+
   // Registry keys
   HKEY_CLASSES_ROOT: 0x80000000,
   HKEY_CURRENT_USER: 0x80000001,
   HKEY_LOCAL_MACHINE: 0x80000002,
   HKEY_USERS: 0x80000003,
   HKEY_CURRENT_CONFIG: 0x80000005,
-  
+
   // Registry access rights
   KEY_READ: 0x20019,
   KEY_WRITE: 0x20006,
-  KEY_ALL_ACCESS: 0xF003F,
-  
+  KEY_ALL_ACCESS: 0xf003f,
+
   // ShowWindow constants
   SW_HIDE: 0,
   SW_SHOWNORMAL: 1,
@@ -521,7 +551,7 @@ export const VB6Constants = {
   SW_MINIMIZE: 6,
   SW_SHOWMINNOACTIVE: 7,
   SW_SHOWNA: 8,
-  SW_RESTORE: 9
+  SW_RESTORE: 9,
 };
 
 export default VB6API;

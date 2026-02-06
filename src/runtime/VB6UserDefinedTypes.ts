@@ -8,8 +8,8 @@
 export interface UDTFieldDescriptor {
   name: string;
   type: string;
-  size?: number;           // For fixed-length strings
-  dimensions?: number[];    // For arrays
+  size?: number; // For fixed-length strings
+  dimensions?: number[]; // For arrays
   isArray?: boolean;
   isFixedString?: boolean;
   isUDT?: boolean;
@@ -21,8 +21,8 @@ export interface UDTFieldDescriptor {
 export interface UDTDefinition {
   name: string;
   fields: UDTFieldDescriptor[];
-  size?: number;            // Total size in bytes
-  alignment?: number;       // Memory alignment
+  size?: number; // Total size in bytes
+  alignment?: number; // Memory alignment
   isPublic?: boolean;
 }
 
@@ -30,24 +30,24 @@ export interface UDTDefinition {
 export class VB6FixedString {
   private _value: string;
   private _length: number;
-  
+
   constructor(length: number, initialValue: string = '') {
     this._length = length;
     this._value = this.padOrTruncate(initialValue);
   }
-  
+
   get value(): string {
     return this._value;
   }
-  
+
   set value(newValue: string) {
     this._value = this.padOrTruncate(newValue);
   }
-  
+
   get length(): number {
     return this._length;
   }
-  
+
   private padOrTruncate(str: string): string {
     if (str.length > this._length) {
       return str.substring(0, this._length);
@@ -56,11 +56,11 @@ export class VB6FixedString {
     }
     return str;
   }
-  
+
   toString(): string {
     return this._value;
   }
-  
+
   trimmed(): string {
     return this._value.trimEnd();
   }
@@ -74,31 +74,29 @@ export class VB6UDTRegistry {
   private static instance: VB6UDTRegistry;
   private typeDefinitions = new Map<string, UDTDefinition>();
   private typeConstructors = new Map<string, Function>();
-  
+
   private constructor() {
     this.registerBuiltInTypes();
   }
-  
+
   static getInstance(): VB6UDTRegistry {
     if (!VB6UDTRegistry.instance) {
       VB6UDTRegistry.instance = new VB6UDTRegistry();
     }
     return VB6UDTRegistry.instance;
   }
-  
+
   /**
    * Register a User Defined Type
    */
   registerType(definition: UDTDefinition): void {
     this.typeDefinitions.set(definition.name, definition);
-    
+
     // Create constructor function
     const constructor = this.createTypeConstructor(definition);
     this.typeConstructors.set(definition.name, constructor);
-    
-    console.log(`[VB6 UDT] Registered type: ${definition.name}`);
   }
-  
+
   /**
    * Create an instance of a UDT
    */
@@ -107,17 +105,17 @@ export class VB6UDTRegistry {
     if (!constructor) {
       throw new Error(`Type '${typeName}' is not defined`);
     }
-    
+
     const instance = new (constructor as any)();
-    
+
     // Set initial values if provided
     if (initialValues) {
       Object.assign(instance, initialValues);
     }
-    
+
     return instance;
   }
-  
+
   /**
    * Create an array of UDT instances
    */
@@ -126,26 +124,26 @@ export class VB6UDTRegistry {
     if (!definition) {
       throw new Error(`Type '${typeName}' is not defined`);
     }
-    
+
     return this.createMultiDimensionalArray(dimensions, () => {
       return this.createInstance(typeName);
     });
   }
-  
+
   /**
    * Get type definition
    */
   getTypeDefinition(typeName: string): UDTDefinition | undefined {
     return this.typeDefinitions.get(typeName);
   }
-  
+
   /**
    * Check if type exists
    */
   hasType(typeName: string): boolean {
     return this.typeDefinitions.has(typeName);
   }
-  
+
   /**
    * Copy UDT instance (deep copy)
    */
@@ -153,14 +151,14 @@ export class VB6UDTRegistry {
     if (!typeName) {
       typeName = source.constructor.name;
     }
-    
+
     const definition = this.typeDefinitions.get(typeName);
     if (!definition) {
       throw new Error(`Type '${typeName}' is not defined`);
     }
-    
+
     const copy = this.createInstance(typeName);
-    
+
     definition.fields.forEach(field => {
       if (field.isArray) {
         copy[field.name] = this.copyArray(source[field.name]);
@@ -172,10 +170,10 @@ export class VB6UDTRegistry {
         copy[field.name] = source[field.name];
       }
     });
-    
+
     return copy;
   }
-  
+
   /**
    * Compare two UDT instances
    */
@@ -183,12 +181,12 @@ export class VB6UDTRegistry {
     if (!typeName) {
       typeName = a.constructor.name;
     }
-    
+
     const definition = this.typeDefinitions.get(typeName);
     if (!definition) {
       return false;
     }
-    
+
     for (const field of definition.fields) {
       if (field.isArray) {
         if (!this.compareArrays(a[field.name], b[field.name])) {
@@ -208,10 +206,10 @@ export class VB6UDTRegistry {
         }
       }
     }
-    
+
     return true;
   }
-  
+
   /**
    * Calculate size of UDT in bytes
    */
@@ -220,19 +218,19 @@ export class VB6UDTRegistry {
     if (!definition) {
       return 0;
     }
-    
+
     let size = 0;
-    
+
     definition.fields.forEach(field => {
       size += this.getFieldSize(field);
     });
-    
+
     return size;
   }
-  
+
   private createTypeConstructor(definition: UDTDefinition): Function {
     const fields = definition.fields;
-    
+
     // Create constructor function
     function UDTConstructor(this: any) {
       // Initialize each field
@@ -250,32 +248,32 @@ export class VB6UDTRegistry {
           this[field.name] = VB6UDTRegistry.getInstance().getDefaultValue(field);
         }
       });
-      
+
       // Add type metadata
       Object.defineProperty(this, '__typeName', {
         value: definition.name,
         writable: false,
-        enumerable: false
+        enumerable: false,
       });
     }
-    
+
     // Set constructor name
     Object.defineProperty(UDTConstructor, 'name', {
       value: definition.name,
-      writable: false
+      writable: false,
     });
-    
+
     return UDTConstructor;
   }
-  
+
   private createMultiDimensionalArray(dimensions: number[], creator: () => any): any {
     if (dimensions.length === 0) {
       return creator();
     }
-    
+
     const [size, ...rest] = dimensions;
     const array = new Array(size);
-    
+
     for (let i = 0; i < size; i++) {
       if (rest.length > 0) {
         array[i] = this.createMultiDimensionalArray(rest, creator);
@@ -283,15 +281,15 @@ export class VB6UDTRegistry {
         array[i] = creator();
       }
     }
-    
+
     return array;
   }
-  
+
   private copyArray(source: any[]): any[] {
     if (!Array.isArray(source)) {
       return source;
     }
-    
+
     return source.map(item => {
       if (Array.isArray(item)) {
         return this.copyArray(item);
@@ -305,16 +303,16 @@ export class VB6UDTRegistry {
       return item;
     });
   }
-  
+
   private compareArrays(a: any[], b: any[]): boolean {
     if (!Array.isArray(a) || !Array.isArray(b)) {
       return a === b;
     }
-    
+
     if (a.length !== b.length) {
       return false;
     }
-    
+
     for (let i = 0; i < a.length; i++) {
       if (Array.isArray(a[i])) {
         if (!this.compareArrays(a[i], b[i])) {
@@ -334,15 +332,15 @@ export class VB6UDTRegistry {
         return false;
       }
     }
-    
+
     return true;
   }
-  
+
   private getDefaultValue(field: UDTFieldDescriptor): any {
     if (field.defaultValue !== undefined) {
       return field.defaultValue;
     }
-    
+
     switch (field.type.toLowerCase()) {
       case 'boolean':
         return false;
@@ -364,10 +362,10 @@ export class VB6UDTRegistry {
         return null;
     }
   }
-  
+
   private getFieldSize(field: UDTFieldDescriptor): number {
     let baseSize = 0;
-    
+
     switch (field.type.toLowerCase()) {
       case 'boolean':
       case 'byte':
@@ -403,16 +401,16 @@ export class VB6UDTRegistry {
           baseSize = this.calculateSize(field.udtTypeName);
         }
     }
-    
+
     // Calculate array size
     if (field.isArray && field.dimensions) {
       const totalElements = field.dimensions.reduce((a, b) => a * b, 1);
       baseSize *= totalElements;
     }
-    
+
     return baseSize;
   }
-  
+
   private registerBuiltInTypes(): void {
     // Register SYSTEMTIME (Windows API)
     this.registerType({
@@ -425,10 +423,10 @@ export class VB6UDTRegistry {
         { name: 'wHour', type: 'Integer' },
         { name: 'wMinute', type: 'Integer' },
         { name: 'wSecond', type: 'Integer' },
-        { name: 'wMilliseconds', type: 'Integer' }
-      ]
+        { name: 'wMilliseconds', type: 'Integer' },
+      ],
     });
-    
+
     // Register RECT (Windows API)
     this.registerType({
       name: 'RECT',
@@ -436,35 +434,35 @@ export class VB6UDTRegistry {
         { name: 'Left', type: 'Long' },
         { name: 'Top', type: 'Long' },
         { name: 'Right', type: 'Long' },
-        { name: 'Bottom', type: 'Long' }
-      ]
+        { name: 'Bottom', type: 'Long' },
+      ],
     });
-    
+
     // Register POINT (Windows API)
     this.registerType({
       name: 'POINT',
       fields: [
         { name: 'X', type: 'Long' },
-        { name: 'Y', type: 'Long' }
-      ]
+        { name: 'Y', type: 'Long' },
+      ],
     });
-    
+
     // Register SIZE (Windows API)
     this.registerType({
       name: 'SIZE',
       fields: [
         { name: 'cx', type: 'Long' },
-        { name: 'cy', type: 'Long' }
-      ]
+        { name: 'cy', type: 'Long' },
+      ],
     });
-    
+
     // Register FILETIME (Windows API)
     this.registerType({
       name: 'FILETIME',
       fields: [
         { name: 'dwLowDateTime', type: 'Long' },
-        { name: 'dwHighDateTime', type: 'Long' }
-      ]
+        { name: 'dwHighDateTime', type: 'Long' },
+      ],
     });
   }
 }
@@ -483,7 +481,7 @@ export function DefineType(
   UDTRegistry.registerType({
     name,
     fields,
-    isPublic
+    isPublic,
   });
 }
 
@@ -519,7 +517,7 @@ DefineType('Employee', [
   { name: 'Department', type: 'String', isFixedString: true, size: 30 },
   { name: 'Salary', type: 'Currency' },
   { name: 'HireDate', type: 'Date' },
-  { name: 'IsActive', type: 'Boolean' }
+  { name: 'IsActive', type: 'Boolean' },
 ]);
 
 // Example: Customer Type with nested Address
@@ -528,7 +526,7 @@ DefineType('Address', [
   { name: 'City', type: 'String', isFixedString: true, size: 50 },
   { name: 'State', type: 'String', isFixedString: true, size: 2 },
   { name: 'ZipCode', type: 'String', isFixedString: true, size: 10 },
-  { name: 'Country', type: 'String', isFixedString: true, size: 50 }
+  { name: 'Country', type: 'String', isFixedString: true, size: 50 },
 ]);
 
 DefineType('Customer', [
@@ -538,13 +536,13 @@ DefineType('Customer', [
   { name: 'BillingAddress', type: 'Address', isUDT: true, udtTypeName: 'Address' },
   { name: 'ShippingAddress', type: 'Address', isUDT: true, udtTypeName: 'Address' },
   { name: 'CreditLimit', type: 'Currency' },
-  { name: 'Orders', type: 'Long', isArray: true, dimensions: [100] }
+  { name: 'Orders', type: 'Long', isArray: true, dimensions: [100] },
 ]);
 
 // Example: Matrix Type with 2D array
 DefineType('Matrix3x3', [
   { name: 'Values', type: 'Double', isArray: true, dimensions: [3, 3] },
-  { name: 'Determinant', type: 'Double' }
+  { name: 'Determinant', type: 'Double' },
 ]);
 
 // Example: File Record Type
@@ -555,7 +553,7 @@ DefineType('FileRecord', [
   { name: 'CreatedDate', type: 'Date' },
   { name: 'ModifiedDate', type: 'Date' },
   { name: 'Attributes', type: 'Byte', isArray: true, dimensions: [16] },
-  { name: 'Checksum', type: 'Long' }
+  { name: 'Checksum', type: 'Long' },
 ]);
 
 /**
@@ -567,7 +565,7 @@ export class VB6TypeExample {
   private employees: any[];
   private customer: any;
   private matrix: any;
-  
+
   constructor() {
     // Create instances
     this.employee = CreateUDT('Employee', {
@@ -576,19 +574,19 @@ export class VB6TypeExample {
       Department: new VB6FixedString(30, 'Engineering'),
       Salary: 75000,
       HireDate: new Date('2020-01-15'),
-      IsActive: true
+      IsActive: true,
     });
-    
+
     // Create array of employees
     this.employees = CreateUDTArray('Employee', 10);
-    
+
     // Create customer with nested address
     this.customer = CreateUDT('Customer');
     this.customer.CustomerID = 5001;
     this.customer.CompanyName = new VB6FixedString(100, 'Acme Corp');
     this.customer.BillingAddress.Street = new VB6FixedString(100, '123 Main St');
     this.customer.BillingAddress.City = new VB6FixedString(50, 'New York');
-    
+
     // Create matrix
     this.matrix = CreateUDT('Matrix3x3');
     for (let i = 0; i < 3; i++) {
@@ -597,16 +595,16 @@ export class VB6TypeExample {
       }
     }
   }
-  
+
   // Example methods using UDTs
   getEmployeeInfo(): string {
     return `Employee: ${this.employee.Name.trimmed()} (ID: ${this.employee.ID})`;
   }
-  
+
   copyEmployee(): any {
     return UDTRegistry.copyInstance(this.employee, 'Employee');
   }
-  
+
   compareEmployees(emp1: any, emp2: any): boolean {
     return UDTRegistry.compareInstances(emp1, emp2, 'Employee');
   }
@@ -621,5 +619,5 @@ export const VB6UDT = {
   CreateUDT,
   CreateUDTArray,
   FixedString,
-  VB6TypeExample
+  VB6TypeExample,
 };

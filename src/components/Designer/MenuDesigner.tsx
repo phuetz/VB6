@@ -4,34 +4,34 @@
  */
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { 
-  ChevronRight, 
-  Plus, 
-  Minus, 
-  MoveUp, 
-  MoveDown, 
+import {
+  ChevronRight,
+  Plus,
+  Minus,
+  MoveUp,
+  MoveDown,
   Settings,
   Check,
   X,
   MoreHorizontal,
-  Keyboard
+  Keyboard,
 } from 'lucide-react';
 
 // Menu item structure matching VB6
 export interface VB6MenuItem {
-  name: string;           // Internal name (e.g., mnuFile)
-  caption: string;        // Display text (e.g., "&File")
-  index?: number;         // For control arrays
-  shortcut?: string;      // Keyboard shortcut (e.g., "Ctrl+S")
-  checked?: boolean;      // Checkmark state
-  enabled?: boolean;      // Enabled/disabled state
-  visible?: boolean;      // Visibility
-  windowList?: boolean;   // MDI window list
+  name: string; // Internal name (e.g., mnuFile)
+  caption: string; // Display text (e.g., "&File")
+  index?: number; // For control arrays
+  shortcut?: string; // Keyboard shortcut (e.g., "Ctrl+S")
+  checked?: boolean; // Checkmark state
+  enabled?: boolean; // Enabled/disabled state
+  visible?: boolean; // Visibility
+  windowList?: boolean; // MDI window list
   negotiatePosition?: number; // OLE menu negotiation
   helpContextID?: number; // Help context
-  tag?: string;          // User data
+  tag?: string; // User data
   children?: VB6MenuItem[]; // Submenu items
-  level?: number;        // Indentation level (0-4)
+  level?: number; // Indentation level (0-4)
   isSeparator?: boolean; // Separator line
 }
 
@@ -46,7 +46,7 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
   menuItems,
   onMenuItemsChange,
   onClose,
-  selectedForm = 'Form1'
+  selectedForm = 'Form1',
 }) => {
   const [items, setItems] = useState<VB6MenuItem[]>(menuItems);
   const [selectedItem, setSelectedItem] = useState<VB6MenuItem | null>(null);
@@ -77,7 +77,7 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
       caption: 'New Item',
       enabled: true,
       visible: true,
-      level: selectedItem?.level ?? 0
+      level: selectedItem?.level ?? 0,
     };
 
     if (selectedIndex >= 0) {
@@ -121,7 +121,8 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
         parent.children.push(newItem);
       }
 
-      if (level < 4) { // Max indentation level in VB6
+      if (level < 4) {
+        // Max indentation level in VB6
         stack.push({ item: newItem, level });
       }
     });
@@ -130,35 +131,42 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
   }, []);
 
   // Move item up/down
-  const moveItem = useCallback((direction: 'up' | 'down') => {
-    if (selectedIndex < 0) return;
-    
-    const newIndex = direction === 'up' ? selectedIndex - 1 : selectedIndex + 1;
-    if (newIndex < 0 || newIndex >= flatItems.length) return;
+  const moveItem = useCallback(
+    (direction: 'up' | 'down') => {
+      if (selectedIndex < 0) return;
 
-    const newFlat = [...flatItems];
-    [newFlat[selectedIndex], newFlat[newIndex]] = [newFlat[newIndex], newFlat[selectedIndex]];
-    
-    setItems(unflattenMenuItems(newFlat));
-    setSelectedIndex(newIndex);
-  }, [selectedIndex, flatItems]);
+      const newIndex = direction === 'up' ? selectedIndex - 1 : selectedIndex + 1;
+      if (newIndex < 0 || newIndex >= flatItems.length) return;
+
+      const newFlat = [...flatItems];
+      [newFlat[selectedIndex], newFlat[newIndex]] = [newFlat[newIndex], newFlat[selectedIndex]];
+
+      setItems(unflattenMenuItems(newFlat));
+      setSelectedIndex(newIndex);
+    },
+    [selectedIndex, flatItems]
+  );
 
   // Indent/Outdent item
-  const indentItem = useCallback((direction: 'indent' | 'outdent') => {
-    if (selectedIndex < 0 || !selectedItem) return;
-    
-    const currentLevel = selectedItem.level || 0;
-    const newLevel = direction === 'indent' 
-      ? Math.min(currentLevel + 1, 4)  // Max level 4 in VB6
-      : Math.max(currentLevel - 1, 0);
-    
-    if (newLevel === currentLevel) return;
+  const indentItem = useCallback(
+    (direction: 'indent' | 'outdent') => {
+      if (selectedIndex < 0 || !selectedItem) return;
 
-    const newFlat = [...flatItems];
-    newFlat[selectedIndex] = { ...newFlat[selectedIndex], level: newLevel };
-    
-    setItems(unflattenMenuItems(newFlat));
-  }, [selectedIndex, selectedItem, flatItems]);
+      const currentLevel = selectedItem.level || 0;
+      const newLevel =
+        direction === 'indent'
+          ? Math.min(currentLevel + 1, 4) // Max level 4 in VB6
+          : Math.max(currentLevel - 1, 0);
+
+      if (newLevel === currentLevel) return;
+
+      const newFlat = [...flatItems];
+      newFlat[selectedIndex] = { ...newFlat[selectedIndex], level: newLevel };
+
+      setItems(unflattenMenuItems(newFlat));
+    },
+    [selectedIndex, selectedItem, flatItems]
+  );
 
   // Insert separator
   const insertSeparator = useCallback(() => {
@@ -168,7 +176,7 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
       isSeparator: true,
       enabled: false,
       visible: true,
-      level: selectedItem?.level ?? 0
+      level: selectedItem?.level ?? 0,
     };
 
     if (selectedIndex >= 0) {
@@ -190,8 +198,11 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
   };
 
   const handleDragEnd = () => {
-    if (dragItem.current !== null && dragOverItem.current !== null && 
-        dragItem.current !== dragOverItem.current) {
+    if (
+      dragItem.current !== null &&
+      dragOverItem.current !== null &&
+      dragItem.current !== dragOverItem.current
+    ) {
       const newFlat = [...flatItems];
       const draggedItem = newFlat.splice(dragItem.current, 1)[0];
       newFlat.splice(dragOverItem.current, 0, draggedItem);
@@ -208,14 +219,62 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
 
   // Keyboard shortcuts
   const shortcuts = [
-    'None', 'Ctrl+A', 'Ctrl+B', 'Ctrl+C', 'Ctrl+D', 'Ctrl+E', 'Ctrl+F', 
-    'Ctrl+G', 'Ctrl+H', 'Ctrl+I', 'Ctrl+J', 'Ctrl+K', 'Ctrl+L', 'Ctrl+M',
-    'Ctrl+N', 'Ctrl+O', 'Ctrl+P', 'Ctrl+Q', 'Ctrl+R', 'Ctrl+S', 'Ctrl+T',
-    'Ctrl+U', 'Ctrl+V', 'Ctrl+W', 'Ctrl+X', 'Ctrl+Y', 'Ctrl+Z',
-    'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12',
-    'Ctrl+F1', 'Ctrl+F2', 'Ctrl+F3', 'Ctrl+F4', 'Ctrl+F5', 'Ctrl+F6',
-    'Shift+F1', 'Shift+F2', 'Shift+F3', 'Shift+F4', 'Shift+F5', 'Shift+F6',
-    'Ctrl+Ins', 'Shift+Ins', 'Del', 'Shift+Del', 'Alt+Backspace'
+    'None',
+    'Ctrl+A',
+    'Ctrl+B',
+    'Ctrl+C',
+    'Ctrl+D',
+    'Ctrl+E',
+    'Ctrl+F',
+    'Ctrl+G',
+    'Ctrl+H',
+    'Ctrl+I',
+    'Ctrl+J',
+    'Ctrl+K',
+    'Ctrl+L',
+    'Ctrl+M',
+    'Ctrl+N',
+    'Ctrl+O',
+    'Ctrl+P',
+    'Ctrl+Q',
+    'Ctrl+R',
+    'Ctrl+S',
+    'Ctrl+T',
+    'Ctrl+U',
+    'Ctrl+V',
+    'Ctrl+W',
+    'Ctrl+X',
+    'Ctrl+Y',
+    'Ctrl+Z',
+    'F1',
+    'F2',
+    'F3',
+    'F4',
+    'F5',
+    'F6',
+    'F7',
+    'F8',
+    'F9',
+    'F10',
+    'F11',
+    'F12',
+    'Ctrl+F1',
+    'Ctrl+F2',
+    'Ctrl+F3',
+    'Ctrl+F4',
+    'Ctrl+F5',
+    'Ctrl+F6',
+    'Shift+F1',
+    'Shift+F2',
+    'Shift+F3',
+    'Shift+F4',
+    'Shift+F5',
+    'Shift+F6',
+    'Ctrl+Ins',
+    'Shift+Ins',
+    'Del',
+    'Shift+Del',
+    'Alt+Backspace',
   ];
 
   return (
@@ -230,10 +289,7 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
           >
             {showPreview ? 'Hide' : 'Show'} Preview
           </button>
-          <button
-            onClick={onClose}
-            className="hover:bg-blue-500 p-1 rounded"
-          >
+          <button onClick={onClose} className="hover:bg-blue-500 p-1 rounded">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -342,7 +398,7 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
         {selectedItem && (
           <div className="w-80 p-4 bg-white border-l">
             <h3 className="font-semibold mb-4">Properties</h3>
-            
+
             <div className="space-y-3">
               {/* Caption */}
               <div>
@@ -350,7 +406,7 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 <input
                   type="text"
                   value={selectedItem.caption}
-                  onChange={(e) => {
+                  onChange={e => {
                     const newFlat = [...flatItems];
                     newFlat[selectedIndex] = { ...newFlat[selectedIndex], caption: e.target.value };
                     setItems(unflattenMenuItems(newFlat));
@@ -367,7 +423,7 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 <input
                   type="text"
                   value={selectedItem.name}
-                  onChange={(e) => {
+                  onChange={e => {
                     const newFlat = [...flatItems];
                     newFlat[selectedIndex] = { ...newFlat[selectedIndex], name: e.target.value };
                     setItems(unflattenMenuItems(newFlat));
@@ -383,7 +439,7 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 <input
                   type="number"
                   value={selectedItem.index ?? ''}
-                  onChange={(e) => {
+                  onChange={e => {
                     const value = e.target.value ? parseInt(e.target.value) : undefined;
                     const newFlat = [...flatItems];
                     newFlat[selectedIndex] = { ...newFlat[selectedIndex], index: value };
@@ -400,7 +456,7 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 <label className="block text-sm font-medium mb-1">Shortcut:</label>
                 <select
                   value={selectedItem.shortcut || 'None'}
-                  onChange={(e) => {
+                  onChange={e => {
                     const value = e.target.value === 'None' ? undefined : e.target.value;
                     const newFlat = [...flatItems];
                     newFlat[selectedIndex] = { ...newFlat[selectedIndex], shortcut: value };
@@ -411,7 +467,9 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
                   disabled={selectedItem.isSeparator}
                 >
                   {shortcuts.map(shortcut => (
-                    <option key={shortcut} value={shortcut}>{shortcut}</option>
+                    <option key={shortcut} value={shortcut}>
+                      {shortcut}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -422,9 +480,12 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
                   <input
                     type="checkbox"
                     checked={selectedItem.checked || false}
-                    onChange={(e) => {
+                    onChange={e => {
                       const newFlat = [...flatItems];
-                      newFlat[selectedIndex] = { ...newFlat[selectedIndex], checked: e.target.checked };
+                      newFlat[selectedIndex] = {
+                        ...newFlat[selectedIndex],
+                        checked: e.target.checked,
+                      };
                       setItems(unflattenMenuItems(newFlat));
                       setSelectedItem({ ...selectedItem, checked: e.target.checked });
                     }}
@@ -438,9 +499,12 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
                   <input
                     type="checkbox"
                     checked={selectedItem.enabled !== false}
-                    onChange={(e) => {
+                    onChange={e => {
                       const newFlat = [...flatItems];
-                      newFlat[selectedIndex] = { ...newFlat[selectedIndex], enabled: e.target.checked };
+                      newFlat[selectedIndex] = {
+                        ...newFlat[selectedIndex],
+                        enabled: e.target.checked,
+                      };
                       setItems(unflattenMenuItems(newFlat));
                       setSelectedItem({ ...selectedItem, enabled: e.target.checked });
                     }}
@@ -454,9 +518,12 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
                   <input
                     type="checkbox"
                     checked={selectedItem.visible !== false}
-                    onChange={(e) => {
+                    onChange={e => {
                       const newFlat = [...flatItems];
-                      newFlat[selectedIndex] = { ...newFlat[selectedIndex], visible: e.target.checked };
+                      newFlat[selectedIndex] = {
+                        ...newFlat[selectedIndex],
+                        visible: e.target.checked,
+                      };
                       setItems(unflattenMenuItems(newFlat));
                       setSelectedItem({ ...selectedItem, visible: e.target.checked });
                     }}
@@ -469,9 +536,12 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
                   <input
                     type="checkbox"
                     checked={selectedItem.windowList || false}
-                    onChange={(e) => {
+                    onChange={e => {
                       const newFlat = [...flatItems];
-                      newFlat[selectedIndex] = { ...newFlat[selectedIndex], windowList: e.target.checked };
+                      newFlat[selectedIndex] = {
+                        ...newFlat[selectedIndex],
+                        windowList: e.target.checked,
+                      };
                       setItems(unflattenMenuItems(newFlat));
                       setSelectedItem({ ...selectedItem, windowList: e.target.checked });
                     }}
@@ -488,7 +558,7 @@ const MenuDesigner: React.FC<MenuDesignerProps> = ({
                 <input
                   type="number"
                   value={selectedItem.helpContextID ?? 0}
-                  onChange={(e) => {
+                  onChange={e => {
                     const value = parseInt(e.target.value) || 0;
                     const newFlat = [...flatItems];
                     newFlat[selectedIndex] = { ...newFlat[selectedIndex], helpContextID: value };
@@ -558,12 +628,14 @@ const MenuPreview: React.FC<{ items: VB6MenuItem[] }> = ({ items }) => {
             <span className="text-xs ml-4 opacity-75">{item.shortcut}</span>
           )}
         </div>
-        
+
         {hasChildren && (depth === 0 ? isOpen : true) && (
-          <div className={`
+          <div
+            className={`
             ${depth === 0 ? 'absolute bg-white border shadow-lg mt-1' : 'relative'}
             ${depth > 0 ? 'ml-4' : ''}
-          `}>
+          `}
+          >
             {item.children!.map(child => renderMenuItem(child, depth + 1))}
           </div>
         )}

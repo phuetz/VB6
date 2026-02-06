@@ -61,7 +61,7 @@ const transports = [
       })
     ),
   }),
-  
+
   // File transport for errors
   new winston.transports.File({
     filename: path.join(logDir, 'error.log'),
@@ -70,7 +70,7 @@ const transports = [
     maxsize: 5242880, // 5MB
     maxFiles: 5,
   }),
-  
+
   // File transport for all logs
   new winston.transports.File({
     filename: path.join(logDir, 'combined.log'),
@@ -101,7 +101,7 @@ if (process.env.NODE_ENV !== 'test') {
   process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
     logger.error('Unhandled Rejection:', { reason, promise });
   });
-  
+
   process.on('uncaughtException', (error: Error) => {
     logger.error('Uncaught Exception:', error);
     process.exit(1);

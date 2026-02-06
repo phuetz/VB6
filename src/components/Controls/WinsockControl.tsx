@@ -10,7 +10,7 @@ import { useVB6Store } from '../../stores/vb6Store';
 // Winsock Constants
 export enum WinsockProtocol {
   sckTCPProtocol = 0,
-  sckUDPProtocol = 1
+  sckUDPProtocol = 1,
 }
 
 export enum WinsockState {
@@ -23,7 +23,7 @@ export enum WinsockState {
   sckConnecting = 6,
   sckConnected = 7,
   sckClosing = 8,
-  sckError = 9
+  sckError = 9,
 }
 
 export interface WinsockProps extends VB6ControlPropsEnhanced {
@@ -32,15 +32,23 @@ export interface WinsockProps extends VB6ControlPropsEnhanced {
   remoteHost?: string;
   remotePort?: number;
   localPort?: number;
-  
+
   // Connection properties
   backlog?: number; // For server mode
-  
+
   // Events
   onConnect?: () => void;
   onDataArrival?: (bytesTotal: number) => void;
   onClose?: () => void;
-  onError?: (number: number, description: string, scode: number, source: string, helpFile: string, helpContext: number, cancelDisplay: boolean) => void;
+  onError?: (
+    number: number,
+    description: string,
+    scode: number,
+    source: string,
+    helpFile: string,
+    helpContext: number,
+    cancelDisplay: boolean
+  ) => void;
   onConnectionRequest?: (requestId: number) => void;
   onSendComplete?: () => void;
   onSendProgress?: (bytesSent: number, bytesRemaining: number) => void;
@@ -79,7 +87,7 @@ export const WinsockControl = forwardRef<HTMLDivElement, WinsockProps>((props, r
   const [isServer, setIsServer] = useState(false);
   const [connections, setConnections] = useState<Map<number, WebSocket>>(new Map());
   const [nextRequestId, setNextRequestId] = useState(1);
-  
+
   const winsockRef = useRef<HTMLDivElement>(null);
   const { fireEvent, updateControl } = useVB6Store();
 
@@ -89,7 +97,7 @@ export const WinsockControl = forwardRef<HTMLDivElement, WinsockProps>((props, r
     Connect: (remoteHostParam?: string, remotePortParam?: number) => {
       const host = remoteHostParam || remoteHost;
       const port = remotePortParam || remotePort;
-      
+
       if (!host) {
         fireError(10060, 'Host not specified', 0, name, '', 0, false);
         return;
@@ -103,16 +111,16 @@ export const WinsockControl = forwardRef<HTMLDivElement, WinsockProps>((props, r
       try {
         setCurrentState(WinsockState.sckResolvingHost);
         fireEvent(name, 'StateChange', { state: WinsockState.sckResolvingHost });
-        
+
         // Use WebSocket for TCP-like connections
         const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${wsProtocol}//${host}:${port}`;
-        
+
         setCurrentState(WinsockState.sckConnecting);
         fireEvent(name, 'StateChange', { state: WinsockState.sckConnecting });
-        
+
         const ws = new WebSocket(wsUrl);
-        
+
         ws.onopen = () => {
           setCurrentState(WinsockState.sckConnected);
           setSocket(ws);
@@ -121,15 +129,15 @@ export const WinsockControl = forwardRef<HTMLDivElement, WinsockProps>((props, r
           fireEvent(name, 'Connect', {});
           fireEvent(name, 'StateChange', { state: WinsockState.sckConnected });
         };
-        
-        ws.onmessage = (event) => {
+
+        ws.onmessage = event => {
           const data = event.data;
           setDataBuffer(prev => prev + data);
           setBytesTotal(prev => prev + data.length);
           onDataArrival?.(data.length);
           fireEvent(name, 'DataArrival', { bytesTotal: data.length });
         };
-        
+
         ws.onclose = () => {
           setCurrentState(WinsockState.sckClosed);
           setSocket(null);
@@ -138,12 +146,11 @@ export const WinsockControl = forwardRef<HTMLDivElement, WinsockProps>((props, r
           fireEvent(name, 'Close', {});
           fireEvent(name, 'StateChange', { state: WinsockState.sckClosed });
         };
-        
-        ws.onerror = (error) => {
+
+        ws.onerror = error => {
           setCurrentState(WinsockState.sckError);
           fireError(10061, 'Connection failed', 0, name, '', 0, false);
         };
-        
       } catch (error) {
         fireError(10061, `Connection error: ${error}`, 0, name, '', 0, false);
       }
@@ -152,7 +159,7 @@ export const WinsockControl = forwardRef<HTMLDivElement, WinsockProps>((props, r
     // Server methods
     Listen: (port?: number) => {
       const listenPort = port || localPort || 8080;
-      
+
       if (currentState !== WinsockState.sckClosed) {
         fireError(10056, 'Socket not closed', 0, name, '', 0, false);
         return;
@@ -165,7 +172,7 @@ export const WinsockControl = forwardRef<HTMLDivElement, WinsockProps>((props, r
       updateControl(id, 'State', WinsockState.sckListening);
       updateControl(id, 'LocalPort', listenPort);
       fireEvent(name, 'StateChange', { state: WinsockState.sckListening });
-      
+
       // Simulate incoming connection requests
       setTimeout(() => {
         if (currentState === WinsockState.sckListening) {
@@ -189,20 +196,17 @@ export const WinsockControl = forwardRef<HTMLDivElement, WinsockProps>((props, r
         // For simulation, create a mock connection
         const mockConnection = {
           readyState: WebSocket.OPEN,
-          send: (data: string) => {
-            console.log(`Mock connection ${requestId} sent:`, data);
-          },
+          send: (data: string) => {},
           close: () => {
             connections.delete(requestId);
             setConnections(new Map(connections));
-          }
+          },
         } as WebSocket;
-        
+
         connections.set(requestId, mockConnection);
         setConnections(new Map(connections));
-        
+
         fireEvent(name, 'Accept', { requestId });
-        
       } catch (error) {
         fireError(10061, `Accept error: ${error}`, 0, name, '', 0, false);
       }
@@ -250,8 +254,8 @@ export const WinsockControl = forwardRef<HTMLDivElement, WinsockProps>((props, r
           method: 'POST',
           body: data,
           headers: {
-            'Content-Type': 'application/octet-stream'
-          }
+            'Content-Type': 'application/octet-stream',
+          },
         });
 
         if (response.ok) {
@@ -265,7 +269,15 @@ export const WinsockControl = forwardRef<HTMLDivElement, WinsockProps>((props, r
           onSendComplete?.();
           fireEvent(name, 'SendComplete', {});
         } else {
-          fireError(10061, `HTTP ${response.status}: ${response.statusText}`, 0, name, '', 0, false);
+          fireError(
+            10061,
+            `HTTP ${response.status}: ${response.statusText}`,
+            0,
+            name,
+            '',
+            0,
+            false
+          );
         }
       } catch (error) {
         fireError(10061, `UDP send error: ${error}`, 0, name, '', 0, false);
@@ -274,7 +286,7 @@ export const WinsockControl = forwardRef<HTMLDivElement, WinsockProps>((props, r
 
     GetData: (dataType?: number, maxLen?: number): string | ArrayBuffer => {
       const data = maxLen ? dataBuffer.substring(0, maxLen) : dataBuffer;
-      
+
       // Remove retrieved data from buffer
       if (maxLen && maxLen < dataBuffer.length) {
         setDataBuffer(dataBuffer.substring(maxLen));
@@ -283,7 +295,7 @@ export const WinsockControl = forwardRef<HTMLDivElement, WinsockProps>((props, r
         setDataBuffer('');
         setBytesTotal(0);
       }
-      
+
       return data;
     },
 
@@ -320,7 +332,6 @@ export const WinsockControl = forwardRef<HTMLDivElement, WinsockProps>((props, r
       const port = localPortParam || localPort;
       updateControl(id, 'LocalPort', port);
       // In browser environment, binding is limited
-      console.log(`Winsock bound to port ${port}`);
     },
 
     Resolve: async (hostName: string): Promise<string> => {
@@ -334,44 +345,86 @@ export const WinsockControl = forwardRef<HTMLDivElement, WinsockProps>((props, r
         fireError(11001, 'Host not found', 0, name, '', 0, false);
         return '';
       }
-    }
+    },
   };
 
-  const fireError = (number: number, description: string, scode: number, source: string, helpFile: string, helpContext: number, cancelDisplay: boolean) => {
+  const fireError = (
+    number: number,
+    description: string,
+    scode: number,
+    source: string,
+    helpFile: string,
+    helpContext: number,
+    cancelDisplay: boolean
+  ) => {
     setCurrentState(WinsockState.sckError);
     updateControl(id, 'State', WinsockState.sckError);
     onError?.(number, description, scode, source, helpFile, helpContext, cancelDisplay);
-    fireEvent(name, 'Error', { number, description, scode, source, helpFile, helpContext, cancelDisplay });
+    fireEvent(name, 'Error', {
+      number,
+      description,
+      scode,
+      source,
+      helpFile,
+      helpContext,
+      cancelDisplay,
+    });
     fireEvent(name, 'StateChange', { state: WinsockState.sckError });
   };
 
   // Properties
   const winsockProperties = {
-    get State() { return currentState; },
-    get Protocol() { return protocol; },
-    set Protocol(value: WinsockProtocol) { updateControl(id, 'protocol', value); },
-    
-    get RemoteHost() { return remoteHost; },
-    set RemoteHost(value: string) { updateControl(id, 'remoteHost', value); },
-    
-    get RemotePort() { return remotePort; },
-    set RemotePort(value: number) { updateControl(id, 'remotePort', value); },
-    
-    get LocalPort() { return localPort; },
-    set LocalPort(value: number) { updateControl(id, 'localPort', value); },
-    
-    get BytesReceived() { return bytesTotal; },
-    
-    get SocketHandle() { return socket ? 1 : 0; }, // Simulated handle
-    
-    get Tag() { return props.tag || ''; },
-    set Tag(value: string) { updateControl(id, 'tag', value); }
+    get State() {
+      return currentState;
+    },
+    get Protocol() {
+      return protocol;
+    },
+    set Protocol(value: WinsockProtocol) {
+      updateControl(id, 'protocol', value);
+    },
+
+    get RemoteHost() {
+      return remoteHost;
+    },
+    set RemoteHost(value: string) {
+      updateControl(id, 'remoteHost', value);
+    },
+
+    get RemotePort() {
+      return remotePort;
+    },
+    set RemotePort(value: number) {
+      updateControl(id, 'remotePort', value);
+    },
+
+    get LocalPort() {
+      return localPort;
+    },
+    set LocalPort(value: number) {
+      updateControl(id, 'localPort', value);
+    },
+
+    get BytesReceived() {
+      return bytesTotal;
+    },
+
+    get SocketHandle() {
+      return socket ? 1 : 0;
+    }, // Simulated handle
+
+    get Tag() {
+      return props.tag || '';
+    },
+    set Tag(value: string) {
+      updateControl(id, 'tag', value);
+    },
   };
 
   // Combine methods and properties
   const winsockAPI = {
     ...winsockProperties,
-    ...vb6Methods
+    ...vb6Methods,
   };
 
   // Update control properties
@@ -412,12 +465,18 @@ export const WinsockControl = forwardRef<HTMLDivElement, WinsockProps>((props, r
 
   const getStateColor = (state: WinsockState): string => {
     switch (state) {
-      case WinsockState.sckClosed: return '#808080';
-      case WinsockState.sckListening: return '#0000FF';
-      case WinsockState.sckConnected: return '#00FF00';
-      case WinsockState.sckConnecting: return '#FFFF00';
-      case WinsockState.sckError: return '#FF0000';
-      default: return '#C0C0C0';
+      case WinsockState.sckClosed:
+        return '#808080';
+      case WinsockState.sckListening:
+        return '#0000FF';
+      case WinsockState.sckConnected:
+        return '#00FF00';
+      case WinsockState.sckConnecting:
+        return '#FFFF00';
+      case WinsockState.sckError:
+        return '#FF0000';
+      default:
+        return '#C0C0C0';
     }
   };
 
@@ -444,80 +503,93 @@ export const WinsockControl = forwardRef<HTMLDivElement, WinsockProps>((props, r
         fontSize: '8pt',
         opacity: enabled ? 1 : 0.5,
         cursor: 'default',
-        overflow: 'hidden'
+        overflow: 'hidden',
       }}
       title={`Winsock: ${WinsockState[currentState]} (${protocol === WinsockProtocol.sckTCPProtocol ? 'TCP' : 'UDP'})`}
       {...rest}
     >
       {/* Protocol and state indicator */}
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        textAlign: 'center'
-      }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
+        }}
+      >
         {/* Network icon */}
-        <div style={{
-          fontSize: '16px',
-          marginBottom: '2px',
-          filter: enabled ? 'none' : 'grayscale(100%)'
-        }}>
+        <div
+          style={{
+            fontSize: '16px',
+            marginBottom: '2px',
+            filter: enabled ? 'none' : 'grayscale(100%)',
+          }}
+        >
           {getProtocolIcon()}
         </div>
-        
+
         {/* State indicator */}
-        <div style={{
-          width: '8px',
-          height: '8px',
-          borderRadius: '50%',
-          backgroundColor: getStateColor(currentState),
-          marginBottom: '2px',
-          border: '1px solid #000000'
-        }} />
-        
+        <div
+          style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            backgroundColor: getStateColor(currentState),
+            marginBottom: '2px',
+            border: '1px solid #000000',
+          }}
+        />
+
         {/* Control info */}
-        <div style={{
-          fontSize: '6pt',
-          color: '#666666',
-          lineHeight: '1.0',
-          textAlign: 'center'
-        }}>
+        <div
+          style={{
+            fontSize: '6pt',
+            color: '#666666',
+            lineHeight: '1.0',
+            textAlign: 'center',
+          }}
+        >
           <div>Winsock</div>
           <div>{protocol === WinsockProtocol.sckTCPProtocol ? 'TCP' : 'UDP'}</div>
           <div>{WinsockState[currentState]}</div>
         </div>
       </div>
-      
+
       {/* Connection indicator */}
-      {(currentState === WinsockState.sckConnected || currentState === WinsockState.sckListening) && (
-        <div style={{
-          position: 'absolute',
-          top: '2px',
-          right: '2px',
-          width: '6px',
-          height: '6px',
-          borderRadius: '50%',
-          backgroundColor: '#00FF00',
-          animation: 'blink 1s infinite'
-        }} />
+      {(currentState === WinsockState.sckConnected ||
+        currentState === WinsockState.sckListening) && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '2px',
+            right: '2px',
+            width: '6px',
+            height: '6px',
+            borderRadius: '50%',
+            backgroundColor: '#00FF00',
+            animation: 'blink 1s infinite',
+          }}
+        />
       )}
-      
+
       {/* Data indicator */}
       {bytesTotal > 0 && (
-        <div style={{
-          position: 'absolute',
-          bottom: '2px',
-          left: '2px',
-          fontSize: '5pt',
-          color: '#000080',
-          backgroundColor: 'rgba(255,255,255,0.8)',
-          padding: '1px 2px',
-          borderRadius: '2px'
-        }}>
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '2px',
+            left: '2px',
+            fontSize: '5pt',
+            color: '#000080',
+            backgroundColor: 'rgba(255,255,255,0.8)',
+            padding: '1px 2px',
+            borderRadius: '2px',
+          }}
+        >
           {bytesTotal}B
         </div>
       )}
-      
+
       <style>
         {`
           @keyframes blink {

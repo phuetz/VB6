@@ -1,9 +1,9 @@
 /**
  * VB6 Native Compiler - Proof of Concept
- * 
+ *
  * This compiler transforms VB6 code into native executable formats
  * through an intermediate representation (IR) and platform-specific backends.
- * 
+ *
  * WEBASSEMBLY SANDBOX ESCAPE BUG FIX: Native compilation security restrictions
  */
 
@@ -16,14 +16,14 @@ class NativeCompilerSecurityManager {
   private compilationAttempts: number = 0;
   private static readonly MAX_COMPILATION_ATTEMPTS = 5;
   private static readonly MAX_SOURCE_SIZE = 100 * 1024; // 100KB limit
-  
+
   static getInstance(): NativeCompilerSecurityManager {
     if (!this.instance) {
       this.instance = new NativeCompilerSecurityManager();
     }
     return this.instance;
   }
-  
+
   /**
    * WEBASSEMBLY SANDBOX ESCAPE BUG FIX: Validate compilation target
    */
@@ -35,13 +35,13 @@ class NativeCompilerSecurityManager {
     }
     return true;
   }
-  
+
   /**
    * WEBASSEMBLY SANDBOX ESCAPE BUG FIX: Validate source code for dangerous patterns
    */
   validateSourceCode(sourceFiles: { [filename: string]: string }): boolean {
     let totalSize = 0;
-    
+
     for (const [filename, content] of Object.entries(sourceFiles)) {
       // Size validation
       totalSize += content.length;
@@ -49,16 +49,16 @@ class NativeCompilerSecurityManager {
         console.warn('Source code too large for compilation');
         return false;
       }
-      
+
       // Check for dangerous patterns
       if (!this.validateSourceContent(content, filename)) {
         return false;
       }
     }
-    
+
     return true;
   }
-  
+
   /**
    * WEBASSEMBLY SANDBOX ESCAPE BUG FIX: Validate individual source file content
    */
@@ -83,17 +83,17 @@ class NativeCompilerSecurityManager {
       /WriteProcessMemory/i, // Memory writing
       /Eval\s*\(/i, // Dynamic code execution
     ];
-    
+
     for (const pattern of dangerousPatterns) {
       if (pattern.test(content)) {
         console.warn(`Dangerous pattern detected in ${filename}: ${pattern.source}`);
         return false;
       }
     }
-    
+
     return true;
   }
-  
+
   /**
    * WEBASSEMBLY SANDBOX ESCAPE BUG FIX: Rate limit compilation attempts
    */
@@ -102,11 +102,11 @@ class NativeCompilerSecurityManager {
       console.warn('Maximum compilation attempts exceeded');
       return false;
     }
-    
+
     this.compilationAttempts++;
     return true;
   }
-  
+
   /**
    * WEBASSEMBLY SANDBOX ESCAPE BUG FIX: Sanitize compiler options
    */
@@ -117,7 +117,7 @@ class NativeCompilerSecurityManager {
       debugInfo: false, // Disable debug info for security
       outputPath: '/tmp/vb6_output', // Restrict output path
       linkLibraries: [], // No external libraries
-      entryPoint: options.entryPoint
+      entryPoint: options.entryPoint,
     };
   }
 }
@@ -197,14 +197,14 @@ export class VB6NativeCompiler {
   private analyzer: VB6SemanticAnalyzer;
   private irModules: Map<string, IRModule> = new Map();
   private securityManager: NativeCompilerSecurityManager;
-  
+
   constructor() {
     this.parser = new VB6Parser();
     this.analyzer = new VB6SemanticAnalyzer();
     // WEBASSEMBLY SANDBOX ESCAPE BUG FIX: Initialize security manager
     this.securityManager = NativeCompilerSecurityManager.getInstance();
   }
-  
+
   // WEBASSEMBLY SANDBOX ESCAPE BUG FIX: Add security manager
   private securityManager: NativeCompilerSecurityManager;
 
@@ -212,57 +212,59 @@ export class VB6NativeCompiler {
    * Main compilation pipeline
    * WEBASSEMBLY SANDBOX ESCAPE BUG FIX: Add comprehensive security validation
    */
-  async compile(sourceFiles: { [filename: string]: string }, options: CompilerOptions): Promise<CompilationResult> {
+  async compile(
+    sourceFiles: { [filename: string]: string },
+    options: CompilerOptions
+  ): Promise<CompilationResult> {
     try {
-      console.log('Starting VB6 native compilation with security validation...');
-      
       // WEBASSEMBLY SANDBOX ESCAPE BUG FIX: Security validation
       if (!this.securityManager.checkCompilationLimit()) {
         throw new Error('Compilation rate limit exceeded');
       }
-      
+
       if (!this.securityManager.validateCompilationTarget(options.target)) {
         throw new Error('Compilation target not allowed for security reasons');
       }
-      
+
       if (!this.securityManager.validateSourceCode(sourceFiles)) {
         throw new Error('Source code contains dangerous patterns');
       }
-      
+
       // Sanitize compiler options
       const safeOptions = this.securityManager.sanitizeCompilerOptions(options);
-      console.log('Using sanitized compiler options:', safeOptions);
-      
+
       // Phase 1: Parse all source files with timeout
       const astModules = await this.parseSourceFilesWithTimeout(sourceFiles, 10000);
-      
+
       // Phase 2: Semantic analysis with timeout
       const analyzedModules = await this.performSemanticAnalysisWithTimeout(astModules, 10000);
-      
+
       // Phase 3: Generate Intermediate Representation
       const irModules = this.generateIR(analyzedModules);
-      
+
       // Phase 4: Optimize IR (limited)
       const optimizedIR = this.optimizeIR(irModules, safeOptions.optimizationLevel);
-      
+
       // Phase 5: Generate target code (WebAssembly only)
       const targetCode = await this.generateSecureTargetCode(optimizedIR, safeOptions);
-      
+
       // Phase 6: Create secure output
       const result = await this.createSecureOutput(targetCode, safeOptions);
-      
-      console.log('VB6 native compilation completed securely');
+
       return result;
     } catch (error) {
       console.error('Secure compilation failed:', error);
       throw new Error(`Compilation failed: ${error.message}`);
     }
   }
-  
+
   /**
    * WEBASSEMBLY SANDBOX ESCAPE BUG FIX: Parse source files with timeout
    */
-  private async parseSourceFilesWithTimeout(sourceFiles: { [filename: string]: string }, timeoutMs: number): Promise<{ [filename: string]: ASTNode }> {
+  private async parseSourceFilesWithTimeout(
+    sourceFiles: { [filename: string]: string },
+    timeoutMs: number
+  ): Promise<{ [filename: string]: ASTNode }> {
     const parsePromise = new Promise<{ [filename: string]: ASTNode }>((resolve, reject) => {
       try {
         const result = this.parseSourceFiles(sourceFiles);
@@ -271,18 +273,21 @@ export class VB6NativeCompiler {
         reject(error);
       }
     });
-    
+
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => reject(new Error('Parsing timeout')), timeoutMs);
     });
-    
+
     return Promise.race([parsePromise, timeoutPromise]);
   }
-  
+
   /**
    * WEBASSEMBLY SANDBOX ESCAPE BUG FIX: Semantic analysis with timeout
    */
-  private async performSemanticAnalysisWithTimeout(astModules: { [filename: string]: ASTNode }, timeoutMs: number): Promise<{ [filename: string]: ASTNode }> {
+  private async performSemanticAnalysisWithTimeout(
+    astModules: { [filename: string]: ASTNode },
+    timeoutMs: number
+  ): Promise<{ [filename: string]: ASTNode }> {
     const analysisPromise = new Promise<{ [filename: string]: ASTNode }>((resolve, reject) => {
       try {
         const result = this.performSemanticAnalysis(astModules);
@@ -291,71 +296,80 @@ export class VB6NativeCompiler {
         reject(error);
       }
     });
-    
+
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => reject(new Error('Semantic analysis timeout')), timeoutMs);
     });
-    
+
     return Promise.race([analysisPromise, timeoutPromise]);
   }
-  
+
   /**
    * WEBASSEMBLY SANDBOX ESCAPE BUG FIX: Generate secure target code (WebAssembly only)
    */
-  private async generateSecureTargetCode(irModules: Map<string, IRModule>, options: CompilerOptions): Promise<any> {
+  private async generateSecureTargetCode(
+    irModules: Map<string, IRModule>,
+    options: CompilerOptions
+  ): Promise<any> {
     if (options.target !== CompilationTarget.WASM) {
       throw new Error('Only WebAssembly compilation is allowed');
     }
-    
+
     try {
       // Generate WebAssembly with security restrictions
       const wasmCode = this.generateWebAssemblyCode(irModules, options);
-      
+
       // Validate generated WebAssembly
       if (!this.validateGeneratedWasm(wasmCode)) {
         throw new Error('Generated WebAssembly failed security validation');
       }
-      
+
       return wasmCode;
     } catch (error) {
       console.error('Secure target code generation failed:', error);
       throw error;
     }
   }
-  
+
   /**
    * WEBASSEMBLY SANDBOX ESCAPE BUG FIX: Generate WebAssembly with restrictions
    */
-  private generateWebAssemblyCode(irModules: Map<string, IRModule>, options: CompilerOptions): Uint8Array {
+  private generateWebAssemblyCode(
+    irModules: Map<string, IRModule>,
+    options: CompilerOptions
+  ): Uint8Array {
     // This is a simplified WebAssembly generation
     // In a real implementation, this would generate actual WASM bytecode
     const wasmHeader = new Uint8Array([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]); // WASM magic + version
-    
+
     // Add basic sections with security constraints
     const restrictedWasm = new Uint8Array(64); // Minimal WASM module
     restrictedWasm.set(wasmHeader, 0);
-    
+
     return restrictedWasm;
   }
-  
+
   /**
    * WEBASSEMBLY SANDBOX ESCAPE BUG FIX: Validate generated WebAssembly
    */
   private validateGeneratedWasm(wasmCode: Uint8Array): boolean {
     // Basic validation
     if (wasmCode.length < 8) return false;
-    
+
     // Check WASM magic number
     const magic = new Uint32Array(wasmCode.buffer.slice(0, 4))[0];
     const version = new Uint32Array(wasmCode.buffer.slice(4, 8))[0];
-    
+
     return magic === 0x6d736100 && version === 0x1;
   }
-  
+
   /**
    * WEBASSEMBLY SANDBOX ESCAPE BUG FIX: Create secure output
    */
-  private async createSecureOutput(targetCode: any, options: CompilerOptions): Promise<CompilationResult> {
+  private async createSecureOutput(
+    targetCode: any,
+    options: CompilerOptions
+  ): Promise<CompilationResult> {
     return {
       success: true,
       outputPath: '/tmp/secure_vb6_output.wasm',
@@ -363,7 +377,7 @@ export class VB6NativeCompiler {
       size: targetCode.length,
       executionTime: 0,
       warnings: ['Compilation restricted to WebAssembly for security'],
-      errors: []
+      errors: [],
     };
   }
 
@@ -372,13 +386,12 @@ export class VB6NativeCompiler {
    */
   private parseSourceFiles(sourceFiles: { [filename: string]: string }): Map<string, ASTNode> {
     const modules = new Map<string, ASTNode>();
-    
+
     for (const [filename, source] of Object.entries(sourceFiles)) {
-      console.log(`Parsing ${filename}...`);
       const ast = this.parser.parse(source);
       modules.set(filename, ast);
     }
-    
+
     return modules;
   }
 
@@ -387,16 +400,15 @@ export class VB6NativeCompiler {
    */
   private performSemanticAnalysis(modules: Map<string, ASTNode>): Map<string, ASTNode> {
     const analyzed = new Map<string, ASTNode>();
-    
+
     for (const [filename, ast] of modules) {
-      console.log(`Analyzing ${filename}...`);
       const result = this.analyzer.analyze(ast);
       if (result.errors.length > 0) {
         throw new Error(`Semantic errors in ${filename}: ${result.errors.join(', ')}`);
       }
       analyzed.set(filename, ast);
     }
-    
+
     return analyzed;
   }
 
@@ -405,14 +417,13 @@ export class VB6NativeCompiler {
    */
   private generateIR(modules: Map<string, ASTNode>): IRModule[] {
     const irModules: IRModule[] = [];
-    
+
     for (const [filename, ast] of modules) {
-      console.log(`Generating IR for ${filename}...`);
       const irModule = this.astToIR(ast, filename);
       irModules.push(irModule);
       this.irModules.set(filename, irModule);
     }
-    
+
     return irModules;
   }
 
@@ -430,7 +441,7 @@ export class VB6NativeCompiler {
 
     // Walk AST and generate IR
     this.walkAST(ast, module);
-    
+
     return module;
   }
 
@@ -442,7 +453,7 @@ export class VB6NativeCompiler {
       case 'Program':
         node.children?.forEach(child => this.walkAST(child, module));
         break;
-        
+
       case 'SubDeclaration':
       case 'FunctionDeclaration': {
         const func = this.generateFunction(node);
@@ -450,7 +461,7 @@ export class VB6NativeCompiler {
         node.children?.forEach(child => this.walkAST(child, module, func));
         break;
       }
-        
+
       case 'VariableDeclaration':
         if (currentFunction) {
           const local = this.generateLocalVariable(node, currentFunction);
@@ -460,28 +471,28 @@ export class VB6NativeCompiler {
           module.globals.push(global);
         }
         break;
-        
+
       case 'Assignment':
         if (currentFunction) {
           const instructions = this.generateAssignment(node);
           currentFunction.body.push(...instructions);
         }
         break;
-        
+
       case 'IfStatement':
         if (currentFunction) {
           const instructions = this.generateIfStatement(node);
           currentFunction.body.push(...instructions);
         }
         break;
-        
+
       case 'ForLoop':
         if (currentFunction) {
           const instructions = this.generateForLoop(node);
           currentFunction.body.push(...instructions);
         }
         break;
-        
+
       default:
         node.children?.forEach(child => this.walkAST(child, module, currentFunction));
     }
@@ -525,7 +536,7 @@ export class VB6NativeCompiler {
    */
   private generateAssignment(node: ASTNode): IRInstruction[] {
     const instructions: IRInstruction[] = [];
-    
+
     // Generate code to evaluate RHS
     if (node.value) {
       instructions.push({
@@ -533,13 +544,13 @@ export class VB6NativeCompiler {
         operands: [node.value],
       });
     }
-    
+
     // Store to LHS
     instructions.push({
       opcode: 'store',
       operands: [node.name],
     });
-    
+
     return instructions;
   }
 
@@ -550,38 +561,38 @@ export class VB6NativeCompiler {
     const instructions: IRInstruction[] = [];
     const elseLabel = `else_${Math.random().toString(36).substr(2, 9)}`;
     const endLabel = `endif_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     // Evaluate condition
     instructions.push({
       opcode: 'compare',
       operands: [node.condition],
     });
-    
+
     // Jump to else if false
     instructions.push({
       opcode: 'jump_if_false',
       operands: [elseLabel],
     });
-    
+
     // Then block would be added here
-    
+
     instructions.push({
       opcode: 'jump',
       operands: [endLabel],
     });
-    
+
     instructions.push({
       opcode: 'label',
       operands: [elseLabel],
     });
-    
+
     // Else block would be added here
-    
+
     instructions.push({
       opcode: 'label',
       operands: [endLabel],
     });
-    
+
     return instructions;
   }
 
@@ -592,47 +603,47 @@ export class VB6NativeCompiler {
     const instructions: IRInstruction[] = [];
     const loopLabel = `loop_${Math.random().toString(36).substr(2, 9)}`;
     const endLabel = `endloop_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     // Initialize loop variable
     instructions.push({
       opcode: 'store',
       operands: [node.variable, node.start],
     });
-    
+
     instructions.push({
       opcode: 'label',
       operands: [loopLabel],
     });
-    
+
     // Check loop condition
     instructions.push({
       opcode: 'compare',
       operands: [node.variable, node.end],
     });
-    
+
     instructions.push({
       opcode: 'jump_if_greater',
       operands: [endLabel],
     });
-    
+
     // Loop body would be added here
-    
+
     // Increment loop variable
     instructions.push({
       opcode: 'increment',
       operands: [node.variable, node.step || 1],
     });
-    
+
     instructions.push({
       opcode: 'jump',
       operands: [loopLabel],
     });
-    
+
     instructions.push({
       opcode: 'label',
       operands: [endLabel],
     });
-    
+
     return instructions;
   }
 
@@ -641,7 +652,7 @@ export class VB6NativeCompiler {
    */
   private extractParameters(node: ASTNode): IRParameter[] {
     const params: IRParameter[] = [];
-    
+
     if (node.parameters) {
       for (const param of node.parameters) {
         params.push({
@@ -651,7 +662,7 @@ export class VB6NativeCompiler {
         });
       }
     }
-    
+
     return params;
   }
 
@@ -660,26 +671,24 @@ export class VB6NativeCompiler {
    */
   private optimizeIR(modules: IRModule[], level: number): IRModule[] {
     if (level === 0) return modules;
-    
-    console.log(`Optimizing IR (level ${level})...`);
-    
+
     for (const module of modules) {
       // Dead code elimination
       if (level >= 1) {
         this.eliminateDeadCode(module);
       }
-      
+
       // Constant folding
       if (level >= 2) {
         this.foldConstants(module);
       }
-      
+
       // Function inlining
       if (level >= 3) {
         this.inlineFunctions(module);
       }
     }
-    
+
     return modules;
   }
 
@@ -690,31 +699,31 @@ export class VB6NativeCompiler {
     for (const func of module.functions) {
       const reachable = new Set<number>();
       const queue = [0];
-      
+
       // Mark reachable instructions
       while (queue.length > 0) {
         const index = queue.shift()!;
         if (reachable.has(index)) continue;
         reachable.add(index);
-        
+
         const inst = func.body[index];
         if (!inst) continue;
-        
+
         // Add jump targets to queue
         if (inst.opcode.startsWith('jump')) {
           const targetLabel = inst.operands[0];
-          const targetIndex = func.body.findIndex(i => 
-            i.opcode === 'label' && i.operands[0] === targetLabel
+          const targetIndex = func.body.findIndex(
+            i => i.opcode === 'label' && i.operands[0] === targetLabel
           );
           if (targetIndex >= 0) queue.push(targetIndex);
         }
-        
+
         // Add next instruction
         if (!inst.opcode.startsWith('jump') || inst.opcode === 'jump_if_false') {
           queue.push(index + 1);
         }
       }
-      
+
       // Remove unreachable instructions
       func.body = func.body.filter((_, index) => reachable.has(index));
     }
@@ -726,10 +735,10 @@ export class VB6NativeCompiler {
   private foldConstants(module: IRModule): void {
     for (const func of module.functions) {
       const constants = new Map<string, any>();
-      
+
       for (let i = 0; i < func.body.length; i++) {
         const inst = func.body[i];
-        
+
         if (inst.opcode === 'store' && typeof inst.operands[1] === 'number') {
           constants.set(inst.operands[0], inst.operands[1]);
         } else if (inst.opcode === 'load' && constants.has(inst.operands[0])) {
@@ -748,15 +757,15 @@ export class VB6NativeCompiler {
    */
   private inlineFunctions(module: IRModule): void {
     // Find small functions suitable for inlining
-    const inlineCandidates = module.functions.filter(f => 
-      f.body.length < 10 && !f.name.startsWith('Main')
+    const inlineCandidates = module.functions.filter(
+      f => f.body.length < 10 && !f.name.startsWith('Main')
     );
-    
+
     // Inline function calls
     for (const func of module.functions) {
       for (let i = 0; i < func.body.length; i++) {
         const inst = func.body[i];
-        
+
         if (inst.opcode === 'call') {
           const callee = inlineCandidates.find(f => f.name === inst.operands[0]);
           if (callee) {
@@ -783,9 +792,10 @@ export class VB6NativeCompiler {
   /**
    * Generate target-specific code
    */
-  private async generateTargetCode(modules: IRModule[], options: CompilerOptions): Promise<TargetCode> {
-    console.log(`Generating ${options.target} code...`);
-    
+  private async generateTargetCode(
+    modules: IRModule[],
+    options: CompilerOptions
+  ): Promise<TargetCode> {
     switch (options.target) {
       case CompilationTarget.X86_32:
         return this.generateX86Code(modules, false);
@@ -806,12 +816,12 @@ export class VB6NativeCompiler {
   private generateX86Code(modules: IRModule[], is64bit: boolean): TargetCode {
     const assembly: string[] = [];
     const prefix = is64bit ? 'r' : 'e';
-    
+
     // File header
     assembly.push('; VB6 Native Compiler Output');
     assembly.push(is64bit ? 'bits 64' : 'bits 32');
     assembly.push('');
-    
+
     // Data section
     assembly.push('section .data');
     for (const module of modules) {
@@ -820,31 +830,31 @@ export class VB6NativeCompiler {
       }
     }
     assembly.push('');
-    
+
     // Code section
     assembly.push('section .text');
     assembly.push('global _start');
     assembly.push('');
-    
+
     // Generate functions
     for (const module of modules) {
       for (const func of module.functions) {
         assembly.push(`${func.name}:`);
         assembly.push(`    push ${prefix}bp`);
         assembly.push(`    mov ${prefix}bp, ${prefix}sp`);
-        
+
         // Allocate space for locals
         if (func.locals.length > 0) {
           const stackSize = func.locals.length * (is64bit ? 8 : 4);
           assembly.push(`    sub ${prefix}sp, ${stackSize}`);
         }
-        
+
         // Generate instructions
         for (const inst of func.body) {
           const asmInst = this.irToX86(inst, is64bit);
           if (asmInst) assembly.push(`    ${asmInst}`);
         }
-        
+
         // Function epilogue
         assembly.push(`    mov ${prefix}sp, ${prefix}bp`);
         assembly.push(`    pop ${prefix}bp`);
@@ -852,21 +862,23 @@ export class VB6NativeCompiler {
         assembly.push('');
       }
     }
-    
+
     // Entry point
     assembly.push('_start:');
     assembly.push(`    call ${options.entryPoint || 'Main'}`);
     assembly.push('    mov eax, 1  ; sys_exit');
     assembly.push('    xor ebx, ebx');
     assembly.push('    int 0x80');
-    
+
     return {
       type: 'assembly',
       content: assembly.join('\n'),
-      files: [{
-        name: 'output.asm',
-        content: assembly.join('\n'),
-      }],
+      files: [
+        {
+          name: 'output.asm',
+          content: assembly.join('\n'),
+        },
+      ],
     };
   }
 
@@ -875,7 +887,7 @@ export class VB6NativeCompiler {
    */
   private irToX86(inst: IRInstruction, is64bit: boolean): string {
     const prefix = is64bit ? 'r' : 'e';
-    
+
     switch (inst.opcode) {
       case 'load':
         return `mov ${prefix}ax, [${inst.operands[0]}]`;
@@ -913,56 +925,58 @@ export class VB6NativeCompiler {
    */
   private generateWASMCode(modules: IRModule[]): TargetCode {
     const wat: string[] = [];
-    
+
     wat.push('(module');
     wat.push('  ;; VB6 Native Compiler WASM Output');
-    
+
     // Memory
     wat.push('  (memory 1)');
     wat.push('  (export "memory" (memory 0))');
-    
+
     // Globals
     for (const module of modules) {
       for (const global of module.globals) {
         wat.push(`  (global $${global.name} (mut i32) (i32.const 0))`);
       }
     }
-    
+
     // Functions
     for (const module of modules) {
       for (const func of module.functions) {
         const params = func.params.map(p => '(param i32)').join(' ');
         const result = func.returnType === 'void' ? '' : '(result i32)';
-        
+
         wat.push(`  (func $${func.name} ${params} ${result}`);
-        
+
         // Locals
         for (const local of func.locals) {
           wat.push(`    (local $${local.name} i32)`);
         }
-        
+
         // Instructions
         for (const inst of func.body) {
           const watInst = this.irToWAT(inst);
           if (watInst) wat.push(`    ${watInst}`);
         }
-        
+
         wat.push('  )');
       }
     }
-    
+
     // Export main function
     wat.push('  (export "main" (func $Main))');
-    
+
     wat.push(')');
-    
+
     return {
       type: 'wasm',
       content: wat.join('\n'),
-      files: [{
-        name: 'output.wat',
-        content: wat.join('\n'),
-      }],
+      files: [
+        {
+          name: 'output.wat',
+          content: wat.join('\n'),
+        },
+      ],
     };
   }
 
@@ -999,10 +1013,10 @@ export class VB6NativeCompiler {
    */
   private generateLLVMCode(modules: IRModule[]): TargetCode {
     const llvm: string[] = [];
-    
+
     llvm.push('; VB6 Native Compiler LLVM IR Output');
     llvm.push('');
-    
+
     // Globals
     for (const module of modules) {
       for (const global of module.globals) {
@@ -1010,16 +1024,16 @@ export class VB6NativeCompiler {
       }
     }
     llvm.push('');
-    
+
     // Functions
     for (const module of modules) {
       for (const func of module.functions) {
         const params = func.params.map((p, i) => `i32 %${i}`).join(', ');
         const retType = func.returnType === 'void' ? 'void' : 'i32';
-        
+
         llvm.push(`define ${retType} @${func.name}(${params}) {`);
         llvm.push('entry:');
-        
+
         // Generate instructions
         let tempCounter = 0;
         for (const inst of func.body) {
@@ -1029,25 +1043,27 @@ export class VB6NativeCompiler {
             tempCounter++;
           }
         }
-        
+
         if (func.returnType === 'void') {
           llvm.push('  ret void');
         } else {
           llvm.push('  ret i32 0');
         }
-        
+
         llvm.push('}');
         llvm.push('');
       }
     }
-    
+
     return {
       type: 'llvm',
       content: llvm.join('\n'),
-      files: [{
-        name: 'output.ll',
-        content: llvm.join('\n'),
-      }],
+      files: [
+        {
+          name: 'output.ll',
+          content: llvm.join('\n'),
+        },
+      ],
     };
   }
 
@@ -1072,14 +1088,15 @@ export class VB6NativeCompiler {
   /**
    * Link object files into executable
    */
-  private async linkExecutable(targetCode: TargetCode, options: CompilerOptions): Promise<ExecutableData> {
-    console.log('Linking executable...');
-    
+  private async linkExecutable(
+    targetCode: TargetCode,
+    options: CompilerOptions
+  ): Promise<ExecutableData> {
     // In a real implementation, this would:
     // 1. Assemble the code (for assembly targets)
     // 2. Link with runtime libraries
     // 3. Create the final executable
-    
+
     return {
       format: options.target === CompilationTarget.WASM ? 'wasm' : 'elf',
       data: new Uint8Array(Buffer.from(targetCode.content)),

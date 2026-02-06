@@ -1,9 +1,11 @@
 import React, { useState, useCallback } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useVB6 } from '../../../context/VB6Context';
+import { useWindowStore } from '../../../stores/windowStore';
 
 const ControlTree: React.FC = () => {
   const { state, selectControls, dispatch } = useVB6();
+  const toggleWindow = useWindowStore(state => state.toggleWindow);
   const [expandedForms, setExpandedForms] = useState<Set<number>>(new Set([state.activeFormId]));
 
   const toggleForm = useCallback((formId: number) => {
@@ -22,12 +24,7 @@ const ControlTree: React.FC = () => {
     <div className="flex-1 border-b border-gray-400 flex flex-col max-h-64">
       <div className="bg-blue-600 text-white text-xs font-bold p-1 flex items-center justify-between">
         <span>Controls</span>
-        <button
-          onClick={() =>
-            dispatch({ type: 'TOGGLE_WINDOW', payload: { windowName: 'showControlTree' } })
-          }
-          className="hover:bg-blue-700 px-1"
-        >
+        <button onClick={() => toggleWindow('showControlTree')} className="hover:bg-blue-700 px-1">
           ×
         </button>
       </div>

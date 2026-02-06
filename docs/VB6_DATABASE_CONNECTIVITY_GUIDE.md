@@ -73,6 +73,7 @@ If rs.EOF Then Debug.Print "At end"
 ```
 
 **Implementation Details:**
+
 - `MoveFirst()`: Sets current index to 0
 - `MoveLast()`: Sets current index to record count - 1
 - `MoveNext()`: Increments index, sets EOF when at end
@@ -105,6 +106,7 @@ rs.CancelUpdateWithTracking
 ```
 
 **Key Methods:**
+
 - `AddNew()`: Creates new empty record at end of recordset
 - `Edit()`: Prepares current record for editing
 - `EditWithTracking()`: Preserves original record for comparison
@@ -135,6 +137,7 @@ fieldType = rs.Fields("CustomerID").Type
 ```
 
 **Field Types Supported:**
+
 - `dbText` (10): String values
 - `dbInteger` (3): 32-bit integers
 - `dbLong` (4): Long integers
@@ -169,6 +172,7 @@ End If
 ```
 
 **Implementation:**
+
 - `Filter`: Applied at navigation level (O(n) evaluation)
 - `Sort`: Reorders entire recordset by field
 - `Index`: Sets primary sort order for Find operations
@@ -226,6 +230,7 @@ rs.RefreshBoundControls
 ```
 
 **Binding Features:**
+
 - Automatic control value updates on record navigation
 - Manual control value setting with `SetBoundValue()`
 - Control value retrieval with `GetBoundValue()`
@@ -253,6 +258,7 @@ End If
 ```
 
 **IndexedDB Features:**
+
 - Automatic database schema creation
 - Indexed queries by table ID
 - Transactional consistency
@@ -260,6 +266,7 @@ End If
 - Works offline
 
 **Storage Structure:**
+
 ```
 VB6DAOStore
 ├── tables (Object Store)
@@ -360,7 +367,7 @@ dataBindingService.bindControl(recordset, {
   fieldName: 'CompanyName',
   autoUpdate: true,
   validateOnChange: true,
-  validationRule: (value) => value && value.length > 0
+  validationRule: value => value && value.length > 0,
 });
 
 // Get bound value
@@ -387,20 +394,16 @@ import { backendDataService } from './services/VB6BackendDataService';
 await backendDataService.connect('mysql://localhost/northwind');
 
 // Load recordset from backend
-await backendDataService.loadRecordset(
-  recordset,
-  'SELECT * FROM Customers WHERE Country = ?',
-  ['USA']
-);
+await backendDataService.loadRecordset(recordset, 'SELECT * FROM Customers WHERE Country = ?', [
+  'USA',
+]);
 
 // Save recordset changes
 const result = await backendDataService.saveRecordset(recordset, 'Customers');
 console.log(`Saved ${result.recordsAffected} records`);
 
 // Execute arbitrary query
-const data = await backendDataService.executeQuery(
-  'SELECT COUNT(*) as total FROM Customers'
-);
+const data = await backendDataService.executeQuery('SELECT COUNT(*) as total FROM Customers');
 console.log(`Total customers: ${data[0].total}`);
 
 // Transaction control
@@ -517,17 +520,18 @@ await backendConn.connect('mysql://localhost/myapp_db');
 recordset.ConnectToBackend(backendConn);
 
 // Load data from MySQL
-await recordset.LoadFromBackend(
-  'SELECT * FROM Orders WHERE Status = ? ORDER BY OrderDate DESC',
-  ['Pending']
-);
+await recordset.LoadFromBackend('SELECT * FROM Orders WHERE Status = ? ORDER BY OrderDate DESC', [
+  'Pending',
+]);
 
 console.log(`Loaded ${recordset.RecordCount} pending orders`);
 
 // Iterate and display
 recordset.MoveFirst();
 while (!recordset.EOF) {
-  console.log(`Order #${recordset.Fields('OrderID').Value}: ${recordset.Fields('OrderAmount').Value}`);
+  console.log(
+    `Order #${recordset.Fields('OrderID').Value}: ${recordset.Fields('OrderAmount').Value}`
+  );
   recordset.MoveNext();
 }
 ```
@@ -570,7 +574,6 @@ try {
   // If everything succeeds, commit
   await rs.CommitTransaction();
   console.log('Transaction committed successfully');
-
 } catch (error) {
   // If anything fails, rollback everything
   await rs.RollbackTransaction();
@@ -583,6 +586,7 @@ try {
 The following endpoints are required on the Node.js backend:
 
 ### Connection Management
+
 ```
 POST /api/database/connect
   Body: { connectionString: string }
@@ -593,6 +597,7 @@ POST /api/database/disconnect
 ```
 
 ### Query Execution
+
 ```
 POST /api/database/execute
   Body: {
@@ -608,6 +613,7 @@ POST /api/database/execute
 ```
 
 ### Transactions
+
 ```
 POST /api/database/transaction/begin
   Body: { connectionId: string }
@@ -633,9 +639,9 @@ The `VB6BackendDataService` implements intelligent caching:
 
 const service = new VB6BackendDataService({
   useCache: true,
-  cacheDuration: 10 * 60 * 1000,  // 10 minutes
+  cacheDuration: 10 * 60 * 1000, // 10 minutes
   retryAttempts: 3,
-  retryDelay: 1000
+  retryDelay: 1000,
 });
 
 // Clear specific cache entries
@@ -665,14 +671,11 @@ Use bulk operations for better performance:
 const records = [
   { Name: 'Record 1', Value: 100 },
   { Name: 'Record 2', Value: 200 },
-  { Name: 'Record 3', Value: 300 }
+  { Name: 'Record 3', Value: 300 },
 ];
 
 // Batch insert
-await backendDataService.executeQuery(
-  'INSERT INTO MyTable (Name, Value) VALUES (?, ?)',
-  records
-);
+await backendDataService.executeQuery('INSERT INTO MyTable (Name, Value) VALUES (?, ?)', records);
 ```
 
 ## Error Handling
@@ -730,12 +733,14 @@ try {
 If migrating from legacy DAO code:
 
 ### Before (Pure JavaScript)
+
 ```javascript
 const rs = new DAORecordset();
 // Limited functionality, no persistence
 ```
 
 ### After (Enhanced)
+
 ```javascript
 const rs = new DAORecordset();
 
@@ -798,14 +803,14 @@ describe('DAORecordset', () => {
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| IndexedDB not available | Browser doesn't support IndexedDB (use fallback to memory) |
-| Backend connection timeout | Check server is running, verify connection string |
-| Recordset shows no records | Verify SQL syntax, check database connectivity |
-| Data not persisting | Check IndexedDB storage quota (up to 50MB) |
-| Performance degradation | Enable caching, use connection pooling |
-| Transaction conflicts | Implement retry logic, check locking strategy |
+| Issue                      | Solution                                                   |
+| -------------------------- | ---------------------------------------------------------- |
+| IndexedDB not available    | Browser doesn't support IndexedDB (use fallback to memory) |
+| Backend connection timeout | Check server is running, verify connection string          |
+| Recordset shows no records | Verify SQL syntax, check database connectivity             |
+| Data not persisting        | Check IndexedDB storage quota (up to 50MB)                 |
+| Performance degradation    | Enable caching, use connection pooling                     |
+| Transaction conflicts      | Implement retry logic, check locking strategy              |
 
 ## Summary
 
@@ -821,6 +826,7 @@ This enhancement transforms the VB6 DAO/ADO implementation from a basic simulati
 ✓ 100% VB6 API compatibility
 
 For more information, see the related documentation:
+
 - `/docs/VB6_COMPILER_DOCUMENTATION.md` - Compiler details
 - `/docs/API_REFERENCE.md` - Complete API reference
 - `/server/README.md` - Backend server setup

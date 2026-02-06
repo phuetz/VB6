@@ -44,32 +44,35 @@ interface CachedGuide {
 
 export class ViewportGuideVirtualizer {
   private static instance: ViewportGuideVirtualizer;
-  
+
   // Ultra-optimized caching system
   private guideCache = new Map<string, CachedGuide>();
-  private controlPositionCache = new Map<string, { x: number; y: number; width: number; height: number; timestamp: number }>();
+  private controlPositionCache = new Map<
+    string,
+    { x: number; y: number; width: number; height: number; timestamp: number }
+  >();
   private viewportCache: { bounds: ViewportBounds; timestamp: number } | null = null;
-  
+
   // Performance optimization pools
   private guidePool: AlignmentGuide[] = [];
   private tempArrayPool: number[][] = [];
-  
+
   // Configuration constants
   private readonly CACHE_TTL = 5000; // 5 seconds
   private readonly MAX_GUIDES_PER_TYPE = 50; // Limit for performance
   private readonly MIN_GUIDE_STRENGTH = 0.1; // Minimum 10% of controls must align
   private readonly VIEWPORT_PADDING = 100; // Extra padding for smooth scrolling
   private readonly DEBOUNCE_MS = 16; // ~60fps for calculations
-  
+
   // Performance monitoring
   private performanceMetrics = {
     totalCalculations: 0,
     cacheHits: 0,
     averageCalculationTime: 0,
     peakControlCount: 0,
-    memoryUsage: 0
+    memoryUsage: 0,
   };
-  
+
   private lastCalculationTime = 0;
   private calculationQueue: Array<() => void> = [];
   private rafId: number | null = null;
@@ -93,7 +96,7 @@ export class ViewportGuideVirtualizer {
     selectedControlIds: string[] = []
   ): GuideCalculationResult {
     const startTime = performance.now();
-    
+
     // Early exit for empty controls
     if (controls.length === 0) {
       return this.createEmptyResult(startTime);
@@ -107,11 +110,11 @@ export class ViewportGuideVirtualizer {
 
     // Filter visible controls first (viewport culling)
     const visibleControls = this.getVisibleControls(controls, viewport);
-    
+
     // Check cache validity
     const cacheKey = this.generateCacheKey(visibleControls, viewport, selectedControlIds);
     const cachedResult = this.getCachedResult(cacheKey);
-    
+
     if (cachedResult) {
       this.performanceMetrics.cacheHits++;
       return this.enhanceCachedResult(cachedResult, startTime);
@@ -122,7 +125,11 @@ export class ViewportGuideVirtualizer {
     const verticalGuides = this.calculateVerticalGuides(visibleControls, viewport);
 
     // Apply virtualization filters
-    const filteredHorizontal = this.filterGuidesByViewport(horizontalGuides, viewport, 'horizontal');
+    const filteredHorizontal = this.filterGuidesByViewport(
+      horizontalGuides,
+      viewport,
+      'horizontal'
+    );
     const filteredVertical = this.filterGuidesByViewport(verticalGuides, viewport, 'vertical');
 
     // Create result
@@ -132,15 +139,15 @@ export class ViewportGuideVirtualizer {
       totalControls: controls.length,
       visibleControls: visibleControls.length,
       cacheHitRate: this.calculateCacheHitRate(),
-      calculationTimeMs: performance.now() - startTime
+      calculationTimeMs: performance.now() - startTime,
     };
 
     // Cache the result
     this.cacheResult(cacheKey, result);
-    
+
     // Update performance metrics
     this.updatePerformanceMetrics(result);
-    
+
     return result;
   }
 
@@ -158,24 +165,31 @@ export class ViewportGuideVirtualizer {
       const bottom = control.y + control.height;
 
       // Fast AABB (Axis-Aligned Bounding Box) intersection test
-      return !(right < viewportLeft || left > viewportRight || 
-               bottom < viewportTop || top > viewportBottom);
+      return !(
+        right < viewportLeft ||
+        left > viewportRight ||
+        bottom < viewportTop ||
+        top > viewportBottom
+      );
     });
   }
 
   // 🧮 Optimized horizontal guide calculation - O(n) complexity
-  private calculateHorizontalGuides(controls: Control[], viewport: ViewportBounds): AlignmentGuide[] {
+  private calculateHorizontalGuides(
+    controls: Control[],
+    viewport: ViewportBounds
+  ): AlignmentGuide[] {
     if (controls.length === 0) return [];
 
     // Use Map for O(1) position grouping
     const positionGroups = new Map<number, { controls: string[]; positions: string[] }>();
-    
+
     // Single pass through controls
     controls.forEach(control => {
       const positions = [
-        control.y,                          // Top edge
-        control.y + control.height / 2,     // Center
-        control.y + control.height          // Bottom edge
+        control.y, // Top edge
+        control.y + control.height / 2, // Center
+        control.y + control.height, // Bottom edge
       ];
 
       positions.forEach((pos, index) => {
@@ -196,15 +210,11 @@ export class ViewportGuideVirtualizer {
     positionGroups.forEach((group, position) => {
       const uniqueControls = [...new Set(group.controls)];
       const strength = uniqueControls.length / totalControls;
-      
+
       if (strength >= this.MIN_GUIDE_STRENGTH) {
-        guides.push(this.createGuide(
-          `h_${position}`,
-          'horizontal',
-          position,
-          uniqueControls,
-          strength
-        ));
+        guides.push(
+          this.createGuide(`h_${position}`, 'horizontal', position, uniqueControls, strength)
+        );
       }
     });
 
@@ -217,12 +227,12 @@ export class ViewportGuideVirtualizer {
     if (controls.length === 0) return [];
 
     const positionGroups = new Map<number, { controls: string[]; positions: string[] }>();
-    
+
     controls.forEach(control => {
       const positions = [
-        control.x,                          // Left edge
-        control.x + control.width / 2,      // Center
-        control.x + control.width           // Right edge
+        control.x, // Left edge
+        control.x + control.width / 2, // Center
+        control.x + control.width, // Right edge
       ];
 
       positions.forEach((pos, index) => {
@@ -242,15 +252,11 @@ export class ViewportGuideVirtualizer {
     positionGroups.forEach((group, position) => {
       const uniqueControls = [...new Set(group.controls)];
       const strength = uniqueControls.length / totalControls;
-      
+
       if (strength >= this.MIN_GUIDE_STRENGTH) {
-        guides.push(this.createGuide(
-          `v_${position}`,
-          'vertical',
-          position,
-          uniqueControls,
-          strength
-        ));
+        guides.push(
+          this.createGuide(`v_${position}`, 'vertical', position, uniqueControls, strength)
+        );
       }
     });
 
@@ -264,19 +270,23 @@ export class ViewportGuideVirtualizer {
     type: 'horizontal' | 'vertical'
   ): AlignmentGuide[] {
     const margin = this.VIEWPORT_PADDING;
-    
-    return guides.filter(guide => {
-      if (type === 'horizontal') {
-        return guide.position >= viewport.top - margin && 
-               guide.position <= viewport.bottom + margin;
-      } else {
-        return guide.position >= viewport.left - margin && 
-               guide.position <= viewport.right + margin;
-      }
-    }).map(guide => ({
-      ...guide,
-      visible: true
-    }));
+
+    return guides
+      .filter(guide => {
+        if (type === 'horizontal') {
+          return (
+            guide.position >= viewport.top - margin && guide.position <= viewport.bottom + margin
+          );
+        } else {
+          return (
+            guide.position >= viewport.left - margin && guide.position <= viewport.right + margin
+          );
+        }
+      })
+      .map(guide => ({
+        ...guide,
+        visible: true,
+      }));
   }
 
   // 🏭 Object pooling for memory optimization
@@ -288,8 +298,8 @@ export class ViewportGuideVirtualizer {
     strength: number
   ): AlignmentGuide {
     // Reuse pooled objects when possible
-    const guide = this.guidePool.pop() || {} as AlignmentGuide;
-    
+    const guide = this.guidePool.pop() || ({} as AlignmentGuide);
+
     guide.id = id;
     guide.type = type;
     guide.position = position;
@@ -312,10 +322,10 @@ export class ViewportGuideVirtualizer {
       .map(c => `${c.name}:${c.x},${c.y},${c.width},${c.height}`)
       .sort()
       .join('|');
-    
+
     const viewportHash = `${Math.round(viewport.left)},${Math.round(viewport.top)},${Math.round(viewport.zoom * 100)}`;
     const selectionHash = selectedIds.sort().join(',');
-    
+
     return `${this.simpleHash(controlHash)}_${viewportHash}_${selectionHash}`;
   }
 
@@ -347,7 +357,7 @@ export class ViewportGuideVirtualizer {
       timestamp: Date.now(),
       dependencies,
       accessCount: 1,
-      lastAccess: Date.now()
+      lastAccess: Date.now(),
     });
   }
 
@@ -355,7 +365,7 @@ export class ViewportGuideVirtualizer {
   private cleanupCache(): void {
     const now = Date.now();
     const entries = Array.from(this.guideCache.entries());
-    
+
     // Remove oldest and least used entries
     entries
       .sort((a, b) => {
@@ -377,11 +387,11 @@ export class ViewportGuideVirtualizer {
 
   private updatePerformanceMetrics(result: GuideCalculationResult): void {
     this.performanceMetrics.totalCalculations++;
-    
+
     // Update rolling average
     const currentAvg = this.performanceMetrics.averageCalculationTime;
     const totalCalcs = this.performanceMetrics.totalCalculations;
-    this.performanceMetrics.averageCalculationTime = 
+    this.performanceMetrics.averageCalculationTime =
       (currentAvg * (totalCalcs - 1) + result.calculationTimeMs) / totalCalcs;
   }
 
@@ -395,7 +405,7 @@ export class ViewportGuideVirtualizer {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash).toString(36);
@@ -416,15 +426,18 @@ export class ViewportGuideVirtualizer {
       totalControls: 0,
       visibleControls: 0,
       cacheHitRate: this.calculateCacheHitRate(),
-      calculationTimeMs: performance.now() - startTime
+      calculationTimeMs: performance.now() - startTime,
     };
   }
 
-  private enhanceCachedResult(result: GuideCalculationResult, startTime: number): GuideCalculationResult {
+  private enhanceCachedResult(
+    result: GuideCalculationResult,
+    startTime: number
+  ): GuideCalculationResult {
     return {
       ...result,
       calculationTimeMs: performance.now() - startTime,
-      cacheHitRate: this.calculateCacheHitRate()
+      cacheHitRate: this.calculateCacheHitRate(),
     };
   }
 
@@ -442,13 +455,13 @@ export class ViewportGuideVirtualizer {
   // 🔄 Debounced calculation for smooth performance
   public scheduleCalculation(callback: () => void): void {
     this.calculationQueue.push(callback);
-    
+
     if (this.rafId === null) {
       this.rafId = requestAnimationFrame(() => {
         const callbacks = [...this.calculationQueue];
         this.calculationQueue = [];
         this.rafId = null;
-        
+
         callbacks.forEach(cb => cb());
       });
     }

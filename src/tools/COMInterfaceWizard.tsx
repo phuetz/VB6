@@ -9,21 +9,21 @@ export enum COMComponentType {
   RemoteServer = 'Remote Server',
   Control = 'ActiveX Control',
   Document = 'ActiveX Document',
-  PropertyPage = 'Property Page'
+  PropertyPage = 'Property Page',
 }
 
 export enum InterfaceType {
   Custom = 'Custom Interface',
   Dual = 'Dual Interface',
   Dispatch = 'Dispatch Interface',
-  Event = 'Event Interface'
+  Event = 'Event Interface',
 }
 
 export enum ThreadingModel {
   Apartment = 'Apartment',
   Free = 'Free',
   Both = 'Both',
-  Neutral = 'Neutral'
+  Neutral = 'Neutral',
 }
 
 // Method Parameter
@@ -134,7 +134,7 @@ enum WizardStep {
   Events = 5,
   Options = 6,
   Files = 7,
-  Summary = 8
+  Summary = 8,
 }
 
 interface COMInterfaceWizardProps {
@@ -146,7 +146,7 @@ interface COMInterfaceWizardProps {
 export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
   onComplete,
   onCancel,
-  onPreview
+  onPreview,
 }) => {
   const [currentStep, setCurrentStep] = useState<WizardStep>(WizardStep.ComponentType);
   const [component, setComponent] = useState<Partial<COMComponent>>({
@@ -158,15 +158,15 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
       description: '',
       version: '1.0',
       company: '',
-      filename: ''
+      filename: '',
     },
     files: {
       interface: '',
       implementation: '',
       idl: '',
       typelib: '',
-      registration: ''
-    }
+      registration: '',
+    },
   });
   const [selectedInterface, setSelectedInterface] = useState<COMInterface | null>(null);
   const [showMethodDialog, setShowMethodDialog] = useState(false);
@@ -176,15 +176,15 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
     returnType: 'HRESULT',
     parameters: [],
     attributes: [],
-    isProperty: false
+    isProperty: false,
   });
   const [propertyForm, setPropertyForm] = useState<Partial<COMProperty>>({
     type: 'VARIANT',
     readonly: false,
-    attributes: []
+    attributes: [],
   });
   const [eventForm, setEventForm] = useState<Partial<COMEvent>>({
-    parameters: []
+    parameters: [],
   });
   const [generatedFiles, setGeneratedFiles] = useState<Record<string, string>>({});
 
@@ -196,9 +196,9 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
 
   // Generate GUID
   const generateGUID = useCallback(() => {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
       return v.toString(16).toUpperCase();
     });
   }, []);
@@ -242,12 +242,12 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
       properties: [],
       events: [],
       version: { major: 1, minor: 0 },
-      attributes: ['oleautomation', 'dual']
+      attributes: ['oleautomation', 'dual'],
     };
 
     setComponent(prev => ({
       ...prev,
-      interfaces: [...(prev.interfaces || []), newInterface]
+      interfaces: [...(prev.interfaces || []), newInterface],
     }));
 
     setSelectedInterface(newInterface);
@@ -267,7 +267,7 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
       dispId: methodForm.dispId,
       attributes: methodForm.attributes || [],
       isProperty: methodForm.isProperty || false,
-      propertyType: methodForm.propertyType
+      propertyType: methodForm.propertyType,
     };
 
     setComponent(prev => ({
@@ -276,14 +276,14 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
         iface.id === selectedInterface.id
           ? { ...iface, methods: [...iface.methods, newMethod] }
           : iface
-      )
+      ),
     }));
 
     setMethodForm({
       returnType: 'HRESULT',
       parameters: [],
       attributes: [],
-      isProperty: false
+      isProperty: false,
     });
     setShowMethodDialog(false);
   }, [methodForm, selectedInterface, generateId]);
@@ -301,7 +301,7 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
       defaultValue: propertyForm.defaultValue,
       dispId: propertyForm.dispId,
       helpContext: propertyForm.helpContext,
-      attributes: propertyForm.attributes || []
+      attributes: propertyForm.attributes || [],
     };
 
     setComponent(prev => ({
@@ -310,13 +310,13 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
         iface.id === selectedInterface.id
           ? { ...iface, properties: [...iface.properties, newProperty] }
           : iface
-      )
+      ),
     }));
 
     setPropertyForm({
       type: 'VARIANT',
       readonly: false,
-      attributes: []
+      attributes: [],
     });
     setShowPropertyDialog(false);
   }, [propertyForm, selectedInterface, generateId]);
@@ -329,13 +329,13 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
 
     // Generate IDL file
     files.idl = generateIDL();
-    
+
     // Generate VB6 interface file
     files.interface = generateVB6Interface();
-    
+
     // Generate VB6 implementation file
     files.implementation = generateVB6Implementation();
-    
+
     // Generate registration file
     files.registration = generateRegistration();
 
@@ -375,9 +375,9 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
 
       // Methods
       iface.methods.forEach(method => {
-        const params = method.parameters.map(p => 
-          `[${p.direction}] ${p.type} ${p.name}`
-        ).join(', ');
+        const params = method.parameters
+          .map(p => `[${p.direction}] ${p.type} ${p.name}`)
+          .join(', ');
         idl += `        HRESULT ${method.name}(${params});\n`;
       });
 
@@ -431,7 +431,8 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
               const direction = p.direction === 'out' ? 'ByRef' : 'ByVal';
               const optional = p.optional ? 'Optional ' : '';
               return `${optional}${direction} ${p.name} As ${getVB6Type(p.type)}`;
-            }).join(', ');
+            })
+            .join(', ');
 
           const returnParam = method.parameters.find(p => p.direction === 'retval');
           const returnType = returnParam ? ` As ${getVB6Type(returnParam.type)}` : '';
@@ -512,7 +513,7 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
     // Interface implementations
     component.interfaces?.forEach(iface => {
       vb6 += `' ${iface.name} Implementation\n`;
-      
+
       // Methods
       iface.methods.forEach(method => {
         const params = method.parameters
@@ -521,7 +522,8 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
             const direction = p.direction === 'out' ? 'ByRef' : 'ByVal';
             const optional = p.optional ? 'Optional ' : '';
             return `${optional}${direction} ${p.name} As ${getVB6Type(p.type)}`;
-          }).join(', ');
+          })
+          .join(', ');
 
         const returnParam = method.parameters.find(p => p.direction === 'retval');
         const returnType = returnParam ? ` As ${getVB6Type(returnParam.type)}` : '';
@@ -624,17 +626,17 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
   // Helper function for VB6 type conversion
   const getVB6Type = (comType: string): string => {
     const typeMap: Record<string, string> = {
-      'BSTR': 'String',
-      'VARIANT_BOOL': 'Boolean',
-      'short': 'Integer',
-      'long': 'Long',
-      'float': 'Single',
-      'double': 'Double',
-      'VARIANT': 'Variant',
+      BSTR: 'String',
+      VARIANT_BOOL: 'Boolean',
+      short: 'Integer',
+      long: 'Long',
+      float: 'Single',
+      double: 'Double',
+      VARIANT: 'Variant',
       'IDispatch*': 'Object',
       'IUnknown*': 'Object',
-      'HRESULT': 'Long',
-      'void': 'void'
+      HRESULT: 'Long',
+      void: 'void',
     };
     return typeMap[comType] || comType;
   };
@@ -658,20 +660,20 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
         description: component.description || '',
         version: '1.0',
         company: '',
-        filename: `${component.name}.dll`
+        filename: `${component.name}.dll`,
       },
       files: {
         interface: `${component.name}Interface.bas`,
         implementation: `${component.name}.cls`,
         idl: `${component.name}.idl`,
         typelib: `${component.name}.tlb`,
-        registration: `${component.name}Reg.bas`
-      }
+        registration: `${component.name}Reg.bas`,
+      },
     };
 
     // Generate all files
     const files = generateFiles();
-    
+
     onComplete?.(finalComponent);
     eventEmitter.current.emit('wizardComplete', finalComponent, files);
   }, [component, generateId, generateGUID, generateFiles, onComplete]);
@@ -690,26 +692,36 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
           <div>
             <h2 className="text-xl font-bold text-gray-800 mb-4">Component Type</h2>
             <p className="text-gray-600 mb-6">What type of COM component do you want to create?</p>
-            
+
             <div className="space-y-4">
               {Object.values(COMComponentType).map(type => (
-                <label key={type} className="flex items-start gap-3 p-4 border border-gray-300 rounded hover:bg-gray-50 cursor-pointer">
+                <label
+                  key={type}
+                  className="flex items-start gap-3 p-4 border border-gray-300 rounded hover:bg-gray-50 cursor-pointer"
+                >
                   <input
                     type="radio"
                     name="componentType"
                     value={type}
                     checked={component.type === type}
-                    onChange={(e) => setComponent(prev => ({ ...prev, type: e.target.value as COMComponentType }))}
+                    onChange={e =>
+                      setComponent(prev => ({ ...prev, type: e.target.value as COMComponentType }))
+                    }
                     className="mt-1"
                   />
                   <div>
                     <div className="font-medium text-gray-800">{type}</div>
                     <div className="text-sm text-gray-600">
-                      {type === COMComponentType.InProcessServer && 'Creates a DLL that runs in the client process'}
-                      {type === COMComponentType.OutOfProcessServer && 'Creates an EXE that runs in its own process'}
-                      {type === COMComponentType.Control && 'Creates an ActiveX control for use in forms'}
-                      {type === COMComponentType.Document && 'Creates an ActiveX document for container applications'}
-                      {type === COMComponentType.PropertyPage && 'Creates a property page for ActiveX controls'}
+                      {type === COMComponentType.InProcessServer &&
+                        'Creates a DLL that runs in the client process'}
+                      {type === COMComponentType.OutOfProcessServer &&
+                        'Creates an EXE that runs in its own process'}
+                      {type === COMComponentType.Control &&
+                        'Creates an ActiveX control for use in forms'}
+                      {type === COMComponentType.Document &&
+                        'Creates an ActiveX document for container applications'}
+                      {type === COMComponentType.PropertyPage &&
+                        'Creates a property page for ActiveX controls'}
                     </div>
                   </div>
                 </label>
@@ -723,15 +735,17 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
           <div>
             <h2 className="text-xl font-bold text-gray-800 mb-4">Component Information</h2>
             <p className="text-gray-600 mb-6">Enter basic information about your COM component:</p>
-            
+
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Component Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Component Name
+                  </label>
                   <input
                     type="text"
                     value={component.name || ''}
-                    onChange={(e) => setComponent(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={e => setComponent(prev => ({ ...prev, name: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="MyComponent"
                   />
@@ -741,34 +755,43 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
                   <input
                     type="text"
                     value={component.progId || ''}
-                    onChange={(e) => setComponent(prev => ({ ...prev, progId: e.target.value }))}
+                    onChange={e => setComponent(prev => ({ ...prev, progId: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="MyApp.MyComponent"
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                 <textarea
                   value={component.description || ''}
-                  onChange={(e) => setComponent(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={e => setComponent(prev => ({ ...prev, description: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   rows={3}
                   placeholder="Enter a description for your component"
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Threading Model</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Threading Model
+                  </label>
                   <select
                     value={component.threadingModel}
-                    onChange={(e) => setComponent(prev => ({ ...prev, threadingModel: e.target.value as ThreadingModel }))}
+                    onChange={e =>
+                      setComponent(prev => ({
+                        ...prev,
+                        threadingModel: e.target.value as ThreadingModel,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     {Object.values(ThreadingModel).map(model => (
-                      <option key={model} value={model}>{model}</option>
+                      <option key={model} value={model}>
+                        {model}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -777,10 +800,12 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
                   <input
                     type="text"
                     value={component.registration?.version || '1.0'}
-                    onChange={(e) => setComponent(prev => ({
-                      ...prev,
-                      registration: { ...prev.registration, version: e.target.value }
-                    }))}
+                    onChange={e =>
+                      setComponent(prev => ({
+                        ...prev,
+                        registration: { ...prev.registration, version: e.target.value },
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="1.0"
                   />
@@ -794,8 +819,10 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
         return (
           <div>
             <h2 className="text-xl font-bold text-gray-800 mb-4">COM Interfaces</h2>
-            <p className="text-gray-600 mb-6">Define the interfaces that your component will implement:</p>
-            
+            <p className="text-gray-600 mb-6">
+              Define the interfaces that your component will implement:
+            </p>
+
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-medium">Interfaces ({component.interfaces?.length || 0})</h3>
               <button
@@ -805,13 +832,15 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
                 Add Interface
               </button>
             </div>
-            
+
             <div className="space-y-4">
               {component.interfaces?.map(iface => (
                 <div
                   key={iface.id}
                   className={`border border-gray-300 rounded p-4 cursor-pointer ${
-                    selectedInterface?.id === iface.id ? 'border-blue-500 bg-blue-50' : 'hover:bg-gray-50'
+                    selectedInterface?.id === iface.id
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'hover:bg-gray-50'
                   }`}
                   onClick={() => setSelectedInterface(iface)}
                 >
@@ -823,15 +852,18 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
                   </div>
                   <p className="text-sm text-gray-600 mb-2">{iface.description}</p>
                   <div className="text-xs text-gray-500">
-                    Methods: {iface.methods.length} | Properties: {iface.properties.length} | Events: {iface.events.length}
+                    Methods: {iface.methods.length} | Properties: {iface.properties.length} |
+                    Events: {iface.events.length}
                   </div>
                 </div>
               ))}
-              
+
               {(!component.interfaces || component.interfaces.length === 0) && (
                 <div className="text-center py-8 text-gray-500">
                   <p>No interfaces defined yet.</p>
-                  <p className="text-sm mt-1">Click "Add Interface" to create your first interface.</p>
+                  <p className="text-sm mt-1">
+                    Click "Add Interface" to create your first interface.
+                  </p>
                 </div>
               )}
             </div>
@@ -846,7 +878,9 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <div>
-                    <p className="text-gray-600">Add methods to interface: <strong>{selectedInterface.name}</strong></p>
+                    <p className="text-gray-600">
+                      Add methods to interface: <strong>{selectedInterface.name}</strong>
+                    </p>
                   </div>
                   <button
                     onClick={() => setShowMethodDialog(true)}
@@ -855,7 +889,7 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
                     Add Method
                   </button>
                 </div>
-                
+
                 <div className="space-y-3">
                   {selectedInterface.methods.map(method => (
                     <div key={method.id} className="border border-gray-300 rounded p-3">
@@ -866,12 +900,13 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
                       <p className="text-xs text-gray-600">{method.description}</p>
                       {method.parameters.length > 0 && (
                         <div className="mt-2 text-xs text-gray-500">
-                          Parameters: {method.parameters.map(p => `${p.name}: ${p.type}`).join(', ')}
+                          Parameters:{' '}
+                          {method.parameters.map(p => `${p.name}: ${p.type}`).join(', ')}
                         </div>
                       )}
                     </div>
                   ))}
-                  
+
                   {selectedInterface.methods.length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                       <p>No methods defined yet.</p>
@@ -892,26 +927,40 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
           <div>
             <h2 className="text-xl font-bold text-gray-800 mb-4">Summary</h2>
             <p className="text-gray-600 mb-6">Review your COM component configuration:</p>
-            
+
             <div className="space-y-6">
               <div className="bg-gray-50 border border-gray-200 rounded p-4">
                 <h3 className="font-medium mb-3">Component Information</h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><strong>Name:</strong> {component.name}</div>
-                  <div><strong>Type:</strong> {component.type}</div>
-                  <div><strong>ProgID:</strong> {component.progId}</div>
-                  <div><strong>Threading:</strong> {component.threadingModel}</div>
-                  <div><strong>Interfaces:</strong> {component.interfaces?.length || 0}</div>
-                  <div><strong>Version:</strong> {component.registration?.version}</div>
+                  <div>
+                    <strong>Name:</strong> {component.name}
+                  </div>
+                  <div>
+                    <strong>Type:</strong> {component.type}
+                  </div>
+                  <div>
+                    <strong>ProgID:</strong> {component.progId}
+                  </div>
+                  <div>
+                    <strong>Threading:</strong> {component.threadingModel}
+                  </div>
+                  <div>
+                    <strong>Interfaces:</strong> {component.interfaces?.length || 0}
+                  </div>
+                  <div>
+                    <strong>Version:</strong> {component.registration?.version}
+                  </div>
                 </div>
               </div>
-              
+
               {component.interfaces && component.interfaces.length > 0 && (
                 <div className="bg-gray-50 border border-gray-200 rounded p-4">
                   <h3 className="font-medium mb-3">Interfaces</h3>
                   {component.interfaces.map(iface => (
                     <div key={iface.id} className="mb-3 last:mb-0">
-                      <div className="font-medium">{iface.name} ({iface.type})</div>
+                      <div className="font-medium">
+                        {iface.name} ({iface.type})
+                      </div>
                       <div className="text-sm text-gray-600 ml-4">
                         Methods: {iface.methods.length} | Properties: {iface.properties.length}
                       </div>
@@ -919,7 +968,7 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
                   ))}
                 </div>
               )}
-              
+
               <div className="bg-gray-50 border border-gray-200 rounded p-4">
                 <h3 className="font-medium mb-3">Generated Files</h3>
                 <div className="space-y-2 text-sm">
@@ -963,18 +1012,14 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
                   i < currentStep
                     ? 'bg-green-500 text-white'
                     : i === currentStep
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-300 text-gray-600'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-300 text-gray-600'
                 }`}
               >
                 {i + 1}
               </div>
               {i < Object.keys(WizardStep).length / 2 - 1 && (
-                <div
-                  className={`h-1 w-12 ${
-                    i < currentStep ? 'bg-green-500' : 'bg-gray-300'
-                  }`}
-                />
+                <div className={`h-1 w-12 ${i < currentStep ? 'bg-green-500' : 'bg-gray-300'}`} />
               )}
             </React.Fragment>
           ))}
@@ -982,20 +1027,15 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-6 overflow-y-auto">
-        {renderWizardStep()}
-      </div>
+      <div className="flex-1 p-6 overflow-y-auto">{renderWizardStep()}</div>
 
       {/* Footer */}
       <div className="p-6 border-t border-gray-200 bg-gray-50">
         <div className="flex items-center justify-between">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 text-gray-600 hover:text-gray-800"
-          >
+          <button onClick={onCancel} className="px-4 py-2 text-gray-600 hover:text-gray-800">
             Cancel
           </button>
-          
+
           <div className="flex gap-2">
             <button
               onClick={prevStep}
@@ -1004,7 +1044,7 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
             >
               ← Previous
             </button>
-            
+
             {currentStep < WizardStep.Summary ? (
               <button
                 onClick={nextStep}
@@ -1030,24 +1070,28 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[500px]">
             <h3 className="text-lg font-medium mb-4">Add Method</h3>
-            
+
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Method Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Method Name
+                  </label>
                   <input
                     type="text"
                     value={methodForm.name || ''}
-                    onChange={(e) => setMethodForm(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={e => setMethodForm(prev => ({ ...prev, name: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                     placeholder="DoSomething"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Return Type</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Return Type
+                  </label>
                   <select
                     value={methodForm.returnType}
-                    onChange={(e) => setMethodForm(prev => ({ ...prev, returnType: e.target.value }))}
+                    onChange={e => setMethodForm(prev => ({ ...prev, returnType: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   >
                     <option value="HRESULT">HRESULT</option>
@@ -1059,18 +1103,18 @@ export const COMInterfaceWizard: React.FC<COMInterfaceWizardProps> = ({
                   </select>
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
                   value={methodForm.description || ''}
-                  onChange={(e) => setMethodForm(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={e => setMethodForm(prev => ({ ...prev, description: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   rows={2}
                 />
               </div>
             </div>
-            
+
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => setShowMethodDialog(false)}

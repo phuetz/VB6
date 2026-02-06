@@ -9,7 +9,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 export enum PropertyType {
   ReadWrite = 'ReadWrite',
   ReadOnly = 'ReadOnly',
-  WriteOnly = 'WriteOnly'
+  WriteOnly = 'WriteOnly',
 }
 
 export enum DataType {
@@ -24,18 +24,18 @@ export enum DataType {
   String = 'String',
   Variant = 'Variant',
   Object = 'Object',
-  UserDefined = 'UserDefined'
+  UserDefined = 'UserDefined',
 }
 
 export enum AccessLevel {
   Public = 'Public',
   Private = 'Private',
-  Friend = 'Friend'
+  Friend = 'Friend',
 }
 
 export enum ParameterDirection {
   ByVal = 'ByVal',
-  ByRef = 'ByRef'
+  ByRef = 'ByRef',
 }
 
 // Class Builder Interfaces
@@ -92,7 +92,13 @@ export interface ClassInfo {
   description: string;
   baseClass?: string;
   implements: string[];
-  instancing: 'Private' | 'PublicNotCreatable' | 'MultiUse' | 'GlobalMultiUse' | 'SingleUse' | 'GlobalSingleUse';
+  instancing:
+    | 'Private'
+    | 'PublicNotCreatable'
+    | 'MultiUse'
+    | 'GlobalMultiUse'
+    | 'SingleUse'
+    | 'GlobalSingleUse';
   persistable: boolean;
   properties: ClassProperty[];
   methods: ClassMethod[];
@@ -120,7 +126,7 @@ export interface ClassInfo {
 export class ClassBuilderEngine {
   generateClassCode(classInfo: ClassInfo): string {
     const lines: string[] = [];
-    
+
     // Class header
     lines.push(`'==========================================`);
     lines.push(`' Class: ${classInfo.name}`);
@@ -131,24 +137,24 @@ export class ClassBuilderEngine {
     lines.push(`' Date: ${new Date().toLocaleDateString()}`);
     lines.push(`'==========================================`);
     lines.push('');
-    
+
     // Attributes
     lines.push(`Attribute VB_Name = "${classInfo.name}"`);
     lines.push(`Attribute VB_GlobalNameSpace = False`);
     lines.push(`Attribute VB_Creatable = ${classInfo.instancing !== 'Private'}`);
     lines.push(`Attribute VB_PredeclaredId = False`);
     lines.push(`Attribute VB_Exposed = ${classInfo.instancing.includes('Public')}`);
-    
+
     if (classInfo.persistable) {
       lines.push(`Attribute VB_Persistable = True`);
     }
-    
+
     lines.push('');
-    
+
     // Option statements
     lines.push('Option Explicit');
     lines.push('');
-    
+
     // Events
     if (classInfo.events.length > 0) {
       lines.push("'Events");
@@ -156,14 +162,17 @@ export class ClassBuilderEngine {
         if (event.description) {
           lines.push(`'${event.description}`);
         }
-        const params = event.parameters.map(p => 
-          `${p.direction} ${p.name} As ${p.dataType === DataType.UserDefined ? p.userDefinedType : p.dataType}`
-        ).join(', ');
+        const params = event.parameters
+          .map(
+            p =>
+              `${p.direction} ${p.name} As ${p.dataType === DataType.UserDefined ? p.userDefinedType : p.dataType}`
+          )
+          .join(', ');
         lines.push(`Public Event ${event.name}(${params})`);
       });
       lines.push('');
     }
-    
+
     // Constants
     if (classInfo.constants.length > 0) {
       lines.push("'Constants");
@@ -175,7 +184,7 @@ export class ClassBuilderEngine {
       });
       lines.push('');
     }
-    
+
     // Enums
     if (classInfo.enums.length > 0) {
       classInfo.enums.forEach(enumDef => {
@@ -197,15 +206,16 @@ export class ClassBuilderEngine {
         lines.push('');
       });
     }
-    
+
     // Private variables for properties
     const hasProperties = classInfo.properties.length > 0;
     if (hasProperties) {
       lines.push("'Private member variables");
       classInfo.properties.forEach(prop => {
-        const dataType = prop.dataType === DataType.UserDefined ? prop.userDefinedType : prop.dataType;
+        const dataType =
+          prop.dataType === DataType.UserDefined ? prop.userDefinedType : prop.dataType;
         lines.push(`Private m_${prop.name} As ${dataType}`);
-        
+
         if (prop.hasDataBinding) {
           lines.push(`Private m_${prop.name}_DataSource As Object`);
           lines.push(`Private m_${prop.name}_DataField As String`);
@@ -213,11 +223,11 @@ export class ClassBuilderEngine {
       });
       lines.push('');
     }
-    
+
     // Class events
     lines.push("'Class Events");
     lines.push('Private Sub Class_Initialize()');
-    lines.push('    \'Initialize default values');
+    lines.push("    'Initialize default values");
     classInfo.properties.forEach(prop => {
       if (prop.defaultValue) {
         if (prop.dataType === DataType.String) {
@@ -229,22 +239,22 @@ export class ClassBuilderEngine {
     });
     lines.push('End Sub');
     lines.push('');
-    
+
     lines.push('Private Sub Class_Terminate()');
-    lines.push('    \'Cleanup resources');
+    lines.push("    'Cleanup resources");
     lines.push('End Sub');
     lines.push('');
-    
+
     // Properties
     classInfo.properties.forEach(prop => {
       this.generatePropertyCode(lines, prop);
     });
-    
+
     // Methods
     classInfo.methods.forEach(method => {
       this.generateMethodCode(lines, method);
     });
-    
+
     // Helper methods
     if (classInfo.properties.some(p => p.generatePropertyChanged)) {
       lines.push("'Property change notification helper");
@@ -253,182 +263,126 @@ export class ClassBuilderEngine {
       lines.push('End Sub');
       lines.push('');
     }
-    
+
     return lines.join('\n');
   }
-  
+
   private generatePropertyCode(lines: string[], prop: ClassProperty): void {
     const dataType = prop.dataType === DataType.UserDefined ? prop.userDefinedType : prop.dataType;
-    
+
     // Property header comment
     if (prop.description) {
       lines.push(`'${prop.description}`);
     }
-    
+
     // Property Get
-    if (prop.propertyType === PropertyType.ReadWrite || prop.propertyType === PropertyType.ReadOnly) {
+    if (
+      prop.propertyType === PropertyType.ReadWrite ||
+      prop.propertyType === PropertyType.ReadOnly
+    ) {
       lines.push(`${prop.accessLevel} Property Get ${prop.name}() As ${dataType}`);
-      
+
       if (prop.hasDataBinding && prop.bindingDataSource) {
         lines.push('    If Not m_' + prop.name + '_DataSource Is Nothing Then');
-        lines.push('        ' + prop.name + ' = m_' + prop.name + '_DataSource.Fields("' + prop.bindingDataField + '").Value');
+        lines.push(
+          '        ' +
+            prop.name +
+            ' = m_' +
+            prop.name +
+            '_DataSource.Fields("' +
+            prop.bindingDataField +
+            '").Value'
+        );
         lines.push('    Else');
         lines.push('        ' + prop.name + ' = m_' + prop.name);
         lines.push('    End If');
       } else {
         lines.push(`    ${prop.name} = m_${prop.name}`);
       }
-      
+
       lines.push(`End Property`);
       lines.push('');
     }
-    
+
     // Property Let/Set
-    if (prop.propertyType === PropertyType.ReadWrite || prop.propertyType === PropertyType.WriteOnly) {
+    if (
+      prop.propertyType === PropertyType.ReadWrite ||
+      prop.propertyType === PropertyType.WriteOnly
+    ) {
       const isObject = prop.dataType === DataType.Object || prop.dataType === DataType.UserDefined;
       const propType = isObject ? 'Set' : 'Let';
-      
-      lines.push(`${prop.accessLevel} Property ${propType} ${prop.name}(${propType === 'Set' ? 'ByVal ' : ''}vData As ${dataType})`);
-      
+
+      lines.push(
+        `${prop.accessLevel} Property ${propType} ${prop.name}(${propType === 'Set' ? 'ByVal ' : ''}vData As ${dataType})`
+      );
+
       // Validation
       if (prop.validation) {
-        lines.push('    \'Validation');
+        lines.push("    'Validation");
         lines.push(`    If Not (${prop.validation.replace('{value}', 'vData')}) Then`);
         lines.push('        Err.Raise 380, , "Invalid property value"');
         lines.push('    End If');
         lines.push('');
       }
-      
+
       // Assignment
       if (prop.hasDataBinding && prop.bindingDataSource) {
         lines.push('    If Not m_' + prop.name + '_DataSource Is Nothing Then');
-        lines.push('        m_' + prop.name + '_DataSource.Fields("' + prop.bindingDataField + '").Value = vData');
+        lines.push(
+          '        m_' +
+            prop.name +
+            '_DataSource.Fields("' +
+            prop.bindingDataField +
+            '").Value = vData'
+        );
         lines.push('    End If');
         lines.push('');
       }
-      
+
       if (isObject) {
         lines.push(`    Set m_${prop.name} = vData`);
       } else {
         lines.push(`    m_${prop.name} = vData`);
       }
-      
+
       // Property change notification
       if (prop.generatePropertyChanged) {
         lines.push('');
-        lines.push('    \'Notify property change');
+        lines.push("    'Notify property change");
         lines.push(`    RaisePropertyChanged "${prop.name}"`);
       }
-      
+
       lines.push(`End Property`);
       lines.push('');
     }
-    
+
     // Data binding methods
     if (prop.hasDataBinding) {
-      lines.push(`${prop.accessLevel} Sub Bind${prop.name}(DataSource As Object, DataField As String)`);
+      lines.push(
+        `${prop.accessLevel} Sub Bind${prop.name}(DataSource As Object, DataField As String)`
+      );
       lines.push(`    Set m_${prop.name}_DataSource = DataSource`);
       lines.push(`    m_${prop.name}_DataField = DataField`);
       lines.push('End Sub');
       lines.push('');
     }
   }
-  
+
   private generateMethodCode(lines: string[], method: ClassMethod): void {
     // Method header comment
     if (method.description) {
       lines.push(`'${method.description}`);
     }
-    
+
     // Method signature
     const methodType = method.isFunction ? 'Function' : 'Sub';
-    const returnType = method.isFunction && method.returnType ? 
-      ` As ${method.returnType === DataType.UserDefined ? method.userDefinedReturnType : method.returnType}` : '';
-    
-    const params = method.parameters.map(p => {
-      const dataType = p.dataType === DataType.UserDefined ? p.userDefinedType : p.dataType;
-      let param = `${p.direction} ${p.name} As ${dataType}`;
-      if (p.isOptional) {
-        param = `Optional ${param}`;
-        if (p.defaultValue) {
-          param += ` = ${p.defaultValue}`;
-        }
-      }
-      return param;
-    }).join(', ');
-    
-    lines.push(`${method.accessLevel} ${methodType} ${method.name}(${params})${returnType}`);
-    
-    // Error handling
-    if (method.errorHandling) {
-      lines.push('    On Error GoTo ErrorHandler');
-      lines.push('');
-    }
-    
-    // Method body
-    if (method.implementation) {
-      const implementationLines = method.implementation.split('\n');
-      implementationLines.forEach(line => {
-        lines.push('    ' + line);
-      });
-    } else {
-      lines.push('    \'TODO: Implement method logic');
-      if (method.isFunction) {
-        lines.push(`    '${method.name} = 'Return value`);
-      }
-    }
-    
-    // Error handling
-    if (method.errorHandling) {
-      lines.push('');
-      lines.push('    Exit ' + methodType);
-      lines.push('ErrorHandler:');
-      lines.push('    \'Handle errors appropriately');
-      lines.push('    Err.Raise Err.Number, Err.Source, Err.Description');
-    }
-    
-    lines.push(`End ${methodType}`);
-    lines.push('');
-  }
-  
-  generateInterfaceCode(interfaceName: string, methods: ClassMethod[], events: ClassEvent[]): string {
-    const lines: string[] = [];
-    
-    // Interface header
-    lines.push(`'==========================================`);
-    lines.push(`' Interface: ${interfaceName}`);
-    lines.push(`' Generated by VB6 Class Builder`);
-    lines.push(`' Date: ${new Date().toLocaleDateString()}`);
-    lines.push(`'==========================================`);
-    lines.push('');
-    
-    lines.push('Option Explicit');
-    lines.push('');
-    
-    // Events
-    events.forEach(event => {
-      if (event.description) {
-        lines.push(`'${event.description}`);
-      }
-      const params = event.parameters.map(p => 
-        `${p.direction} ${p.name} As ${p.dataType === DataType.UserDefined ? p.userDefinedType : p.dataType}`
-      ).join(', ');
-      lines.push(`Public Event ${event.name}(${params})`);
-    });
-    
-    if (events.length > 0) lines.push('');
-    
-    // Methods
-    methods.forEach(method => {
-      if (method.description) {
-        lines.push(`'${method.description}`);
-      }
-      
-      const methodType = method.isFunction ? 'Function' : 'Sub';
-      const returnType = method.isFunction && method.returnType ? 
-        ` As ${method.returnType === DataType.UserDefined ? method.userDefinedReturnType : method.returnType}` : '';
-      
-      const params = method.parameters.map(p => {
+    const returnType =
+      method.isFunction && method.returnType
+        ? ` As ${method.returnType === DataType.UserDefined ? method.userDefinedReturnType : method.returnType}`
+        : '';
+
+    const params = method.parameters
+      .map(p => {
         const dataType = p.dataType === DataType.UserDefined ? p.userDefinedType : p.dataType;
         let param = `${p.direction} ${p.name} As ${dataType}`;
         if (p.isOptional) {
@@ -438,87 +392,255 @@ export class ClassBuilderEngine {
           }
         }
         return param;
-      }).join(', ');
-      
+      })
+      .join(', ');
+
+    lines.push(`${method.accessLevel} ${methodType} ${method.name}(${params})${returnType}`);
+
+    // Error handling
+    if (method.errorHandling) {
+      lines.push('    On Error GoTo ErrorHandler');
+      lines.push('');
+    }
+
+    // Method body
+    if (method.implementation) {
+      const implementationLines = method.implementation.split('\n');
+      implementationLines.forEach(line => {
+        lines.push('    ' + line);
+      });
+    } else {
+      lines.push("    'TODO: Implement method logic");
+      if (method.isFunction) {
+        lines.push(`    '${method.name} = 'Return value`);
+      }
+    }
+
+    // Error handling
+    if (method.errorHandling) {
+      lines.push('');
+      lines.push('    Exit ' + methodType);
+      lines.push('ErrorHandler:');
+      lines.push("    'Handle errors appropriately");
+      lines.push('    Err.Raise Err.Number, Err.Source, Err.Description');
+    }
+
+    lines.push(`End ${methodType}`);
+    lines.push('');
+  }
+
+  generateInterfaceCode(
+    interfaceName: string,
+    methods: ClassMethod[],
+    events: ClassEvent[]
+  ): string {
+    const lines: string[] = [];
+
+    // Interface header
+    lines.push(`'==========================================`);
+    lines.push(`' Interface: ${interfaceName}`);
+    lines.push(`' Generated by VB6 Class Builder`);
+    lines.push(`' Date: ${new Date().toLocaleDateString()}`);
+    lines.push(`'==========================================`);
+    lines.push('');
+
+    lines.push('Option Explicit');
+    lines.push('');
+
+    // Events
+    events.forEach(event => {
+      if (event.description) {
+        lines.push(`'${event.description}`);
+      }
+      const params = event.parameters
+        .map(
+          p =>
+            `${p.direction} ${p.name} As ${p.dataType === DataType.UserDefined ? p.userDefinedType : p.dataType}`
+        )
+        .join(', ');
+      lines.push(`Public Event ${event.name}(${params})`);
+    });
+
+    if (events.length > 0) lines.push('');
+
+    // Methods
+    methods.forEach(method => {
+      if (method.description) {
+        lines.push(`'${method.description}`);
+      }
+
+      const methodType = method.isFunction ? 'Function' : 'Sub';
+      const returnType =
+        method.isFunction && method.returnType
+          ? ` As ${method.returnType === DataType.UserDefined ? method.userDefinedReturnType : method.returnType}`
+          : '';
+
+      const params = method.parameters
+        .map(p => {
+          const dataType = p.dataType === DataType.UserDefined ? p.userDefinedType : p.dataType;
+          let param = `${p.direction} ${p.name} As ${dataType}`;
+          if (p.isOptional) {
+            param = `Optional ${param}`;
+            if (p.defaultValue) {
+              param += ` = ${p.defaultValue}`;
+            }
+          }
+          return param;
+        })
+        .join(', ');
+
       lines.push(`Public ${methodType} ${method.name}(${params})${returnType}`);
       lines.push(`End ${methodType}`);
       lines.push('');
     });
-    
+
     return lines.join('\n');
   }
-  
+
   validateClassName(name: string): string[] {
     const errors: string[] = [];
-    
+
     if (!name || name.trim().length === 0) {
       errors.push('Class name is required');
     } else {
       if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(name)) {
-        errors.push('Class name must start with a letter and contain only letters, numbers, and underscores');
+        errors.push(
+          'Class name must start with a letter and contain only letters, numbers, and underscores'
+        );
       }
-      
+
       if (name.length > 40) {
         errors.push('Class name cannot exceed 40 characters');
       }
-      
+
       const reservedWords = [
-        'And', 'As', 'Boolean', 'ByRef', 'Byte', 'ByVal', 'Call', 'Case', 'Class', 'Const',
-        'Currency', 'Date', 'Declare', 'Dim', 'Do', 'Double', 'Each', 'Else', 'ElseIf', 'End',
-        'Enum', 'Eqv', 'Error', 'Exit', 'False', 'For', 'Function', 'Get', 'Global', 'GoSub',
-        'GoTo', 'If', 'Imp', 'In', 'Integer', 'Is', 'Let', 'Like', 'Long', 'Loop', 'Mod',
-        'New', 'Next', 'Not', 'Nothing', 'Object', 'On', 'Option', 'Or', 'ParamArray',
-        'Preserve', 'Private', 'Property', 'Public', 'ReDim', 'Resume', 'Return', 'Select',
-        'Set', 'Single', 'Static', 'Step', 'Stop', 'String', 'Sub', 'Then', 'To', 'True',
-        'Type', 'Until', 'Variant', 'Wend', 'While', 'With', 'Xor'
+        'And',
+        'As',
+        'Boolean',
+        'ByRef',
+        'Byte',
+        'ByVal',
+        'Call',
+        'Case',
+        'Class',
+        'Const',
+        'Currency',
+        'Date',
+        'Declare',
+        'Dim',
+        'Do',
+        'Double',
+        'Each',
+        'Else',
+        'ElseIf',
+        'End',
+        'Enum',
+        'Eqv',
+        'Error',
+        'Exit',
+        'False',
+        'For',
+        'Function',
+        'Get',
+        'Global',
+        'GoSub',
+        'GoTo',
+        'If',
+        'Imp',
+        'In',
+        'Integer',
+        'Is',
+        'Let',
+        'Like',
+        'Long',
+        'Loop',
+        'Mod',
+        'New',
+        'Next',
+        'Not',
+        'Nothing',
+        'Object',
+        'On',
+        'Option',
+        'Or',
+        'ParamArray',
+        'Preserve',
+        'Private',
+        'Property',
+        'Public',
+        'ReDim',
+        'Resume',
+        'Return',
+        'Select',
+        'Set',
+        'Single',
+        'Static',
+        'Step',
+        'Stop',
+        'String',
+        'Sub',
+        'Then',
+        'To',
+        'True',
+        'Type',
+        'Until',
+        'Variant',
+        'Wend',
+        'While',
+        'With',
+        'Xor',
       ];
-      
+
       if (reservedWords.includes(name)) {
         errors.push('Class name cannot be a VB6 reserved word');
       }
     }
-    
+
     return errors;
   }
-  
+
   validatePropertyName(name: string, existingNames: string[]): string[] {
     const errors: string[] = [];
-    
+
     if (!name || name.trim().length === 0) {
       errors.push('Property name is required');
     } else {
       if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(name)) {
-        errors.push('Property name must start with a letter and contain only letters, numbers, and underscores');
+        errors.push(
+          'Property name must start with a letter and contain only letters, numbers, and underscores'
+        );
       }
-      
+
       if (existingNames.some(existing => existing.toLowerCase() === name.toLowerCase())) {
         errors.push('Property name must be unique within the class');
       }
     }
-    
+
     return errors;
   }
-  
+
   validateMethodName(name: string, existingNames: string[]): string[] {
     const errors: string[] = [];
-    
+
     if (!name || name.trim().length === 0) {
       errors.push('Method name is required');
     } else {
       if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(name)) {
-        errors.push('Method name must start with a letter and contain only letters, numbers, and underscores');
+        errors.push(
+          'Method name must start with a letter and contain only letters, numbers, and underscores'
+        );
       }
-      
+
       if (existingNames.some(existing => existing.toLowerCase() === name.toLowerCase())) {
         errors.push('Method name must be unique within the class');
       }
-      
+
       const systemMethods = ['Initialize', 'Terminate', 'ReadProperties', 'WriteProperties'];
       if (systemMethods.some(sys => sys.toLowerCase() === name.toLowerCase())) {
         errors.push('Method name conflicts with system method');
       }
     }
-    
+
     return errors;
   }
 }
@@ -535,7 +657,7 @@ const PropertyDesigner: React.FC<PropertyDesignerProps> = ({
   property,
   onSave,
   onCancel,
-  existingNames
+  existingNames,
 }) => {
   const [formData, setFormData] = useState<ClassProperty>(
     property || {
@@ -546,55 +668,59 @@ const PropertyDesigner: React.FC<PropertyDesignerProps> = ({
       propertyType: PropertyType.ReadWrite,
       description: '',
       hasDataBinding: false,
-      generatePropertyChanged: false
+      generatePropertyChanged: false,
     }
   );
-  
+
   const [errors, setErrors] = useState<string[]>([]);
-  
+
   const engine = useMemo(() => new ClassBuilderEngine(), []);
-  
+
   const validateForm = useCallback(() => {
     const nameErrors = engine.validatePropertyName(
-      formData.name, 
+      formData.name,
       existingNames.filter(name => name !== property?.name)
     );
     setErrors(nameErrors);
     return nameErrors.length === 0;
   }, [formData.name, existingNames, property?.name, engine]);
-  
+
   useEffect(() => {
     validateForm();
   }, [formData.name, validateForm]);
-  
+
   const handleSave = () => {
     if (validateForm()) {
       onSave(formData);
     }
   };
-  
+
   return (
-    <div style={{
-      position: 'fixed',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      width: '500px',
-      backgroundColor: 'white',
-      border: '2px outset #c0c0c0',
-      zIndex: 1000,
-      fontFamily: 'MS Sans Serif',
-      fontSize: '8pt'
-    }}>
-      <div style={{
-        backgroundColor: '#008080',
-        color: 'white',
-        padding: '4px 8px',
-        fontWeight: 'bold',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
+    <div
+      style={{
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '500px',
+        backgroundColor: 'white',
+        border: '2px outset #c0c0c0',
+        zIndex: 1000,
+        fontFamily: 'MS Sans Serif',
+        fontSize: '8pt',
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: '#008080',
+          color: 'white',
+          padding: '4px 8px',
+          fontWeight: 'bold',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <span>{property ? 'Edit Property' : 'Add Property'}</span>
         <button
           onClick={onCancel}
@@ -603,33 +729,31 @@ const PropertyDesigner: React.FC<PropertyDesignerProps> = ({
             border: 'none',
             color: 'white',
             fontSize: '12px',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
         >
           ×
         </button>
       </div>
-      
+
       <div style={{ padding: '16px' }}>
         {/* Name */}
         <div style={{ marginBottom: '12px' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
-            Name:
-          </label>
+          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>Name:</label>
           <input
             type="text"
             value={formData.name}
-            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
             style={{
               width: '100%',
               padding: '2px',
               border: '1px inset #c0c0c0',
               fontFamily: 'MS Sans Serif',
-              fontSize: '8pt'
+              fontSize: '8pt',
             }}
           />
         </div>
-        
+
         {/* Data Type */}
         <div style={{ marginBottom: '12px' }}>
           <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
@@ -637,36 +761,38 @@ const PropertyDesigner: React.FC<PropertyDesignerProps> = ({
           </label>
           <select
             value={formData.dataType}
-            onChange={(e) => setFormData(prev => ({ ...prev, dataType: e.target.value as DataType }))}
+            onChange={e => setFormData(prev => ({ ...prev, dataType: e.target.value as DataType }))}
             style={{
               width: '200px',
               padding: '2px',
               border: '1px inset #c0c0c0',
               fontFamily: 'MS Sans Serif',
-              fontSize: '8pt'
+              fontSize: '8pt',
             }}
           >
             {Object.values(DataType).map(type => (
-              <option key={type} value={type}>{type}</option>
+              <option key={type} value={type}>
+                {type}
+              </option>
             ))}
           </select>
-          
+
           {formData.dataType === DataType.UserDefined && (
             <input
               type="text"
               placeholder="Type name"
               value={formData.userDefinedType || ''}
-              onChange={(e) => setFormData(prev => ({ ...prev, userDefinedType: e.target.value }))}
+              onChange={e => setFormData(prev => ({ ...prev, userDefinedType: e.target.value }))}
               style={{
                 marginLeft: '8px',
                 width: '150px',
                 padding: '2px',
-                border: '1px inset #c0c0c0'
+                border: '1px inset #c0c0c0',
               }}
             />
           )}
         </div>
-        
+
         {/* Access Level */}
         <div style={{ marginBottom: '12px' }}>
           <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
@@ -680,14 +806,16 @@ const PropertyDesigner: React.FC<PropertyDesignerProps> = ({
                   name="accessLevel"
                   value={level}
                   checked={formData.accessLevel === level}
-                  onChange={(e) => setFormData(prev => ({ ...prev, accessLevel: e.target.value as AccessLevel }))}
+                  onChange={e =>
+                    setFormData(prev => ({ ...prev, accessLevel: e.target.value as AccessLevel }))
+                  }
                 />
                 {level}
               </label>
             ))}
           </div>
         </div>
-        
+
         {/* Property Type */}
         <div style={{ marginBottom: '12px' }}>
           <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
@@ -701,14 +829,16 @@ const PropertyDesigner: React.FC<PropertyDesignerProps> = ({
                   name="propertyType"
                   value={type}
                   checked={formData.propertyType === type}
-                  onChange={(e) => setFormData(prev => ({ ...prev, propertyType: e.target.value as PropertyType }))}
+                  onChange={e =>
+                    setFormData(prev => ({ ...prev, propertyType: e.target.value as PropertyType }))
+                  }
                 />
                 {type}
               </label>
             ))}
           </div>
         </div>
-        
+
         {/* Description */}
         <div style={{ marginBottom: '12px' }}>
           <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
@@ -716,7 +846,7 @@ const PropertyDesigner: React.FC<PropertyDesignerProps> = ({
           </label>
           <textarea
             value={formData.description}
-            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+            onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
             rows={3}
             style={{
               width: '100%',
@@ -724,11 +854,11 @@ const PropertyDesigner: React.FC<PropertyDesignerProps> = ({
               border: '1px inset #c0c0c0',
               fontFamily: 'MS Sans Serif',
               fontSize: '8pt',
-              resize: 'vertical'
+              resize: 'vertical',
             }}
           />
         </div>
-        
+
         {/* Default Value */}
         <div style={{ marginBottom: '12px' }}>
           <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
@@ -737,57 +867,65 @@ const PropertyDesigner: React.FC<PropertyDesignerProps> = ({
           <input
             type="text"
             value={formData.defaultValue || ''}
-            onChange={(e) => setFormData(prev => ({ ...prev, defaultValue: e.target.value }))}
+            onChange={e => setFormData(prev => ({ ...prev, defaultValue: e.target.value }))}
             style={{
               width: '100%',
               padding: '2px',
               border: '1px inset #c0c0c0',
               fontFamily: 'MS Sans Serif',
-              fontSize: '8pt'
+              fontSize: '8pt',
             }}
           />
         </div>
-        
+
         {/* Options */}
         <div style={{ marginBottom: '12px' }}>
           <label>
             <input
               type="checkbox"
               checked={formData.hasDataBinding}
-              onChange={(e) => setFormData(prev => ({ ...prev, hasDataBinding: e.target.checked }))}
+              onChange={e => setFormData(prev => ({ ...prev, hasDataBinding: e.target.checked }))}
             />
             Enable Data Binding
           </label>
         </div>
-        
+
         <div style={{ marginBottom: '12px' }}>
           <label>
             <input
               type="checkbox"
               checked={formData.generatePropertyChanged}
-              onChange={(e) => setFormData(prev => ({ ...prev, generatePropertyChanged: e.target.checked }))}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, generatePropertyChanged: e.target.checked }))
+              }
             />
             Generate PropertyChanged Event
           </label>
         </div>
-        
+
         {/* Errors */}
         {errors.length > 0 && (
-          <div style={{
-            backgroundColor: '#ffe0e0',
-            border: '1px solid #ff0000',
-            padding: '8px',
-            marginBottom: '12px',
-            fontSize: '8pt'
-          }}>
+          <div
+            style={{
+              backgroundColor: '#ffe0e0',
+              border: '1px solid #ff0000',
+              padding: '8px',
+              marginBottom: '12px',
+              fontSize: '8pt',
+            }}
+          >
             {errors.map((error, index) => (
-              <div key={index} style={{ color: '#cc0000' }}>{error}</div>
+              <div key={index} style={{ color: '#cc0000' }}>
+                {error}
+              </div>
             ))}
           </div>
         )}
-        
+
         {/* Buttons */}
-        <div style={{ textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+        <div
+          style={{ textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}
+        >
           <button
             onClick={handleSave}
             disabled={errors.length > 0}
@@ -797,7 +935,7 @@ const PropertyDesigner: React.FC<PropertyDesignerProps> = ({
               backgroundColor: errors.length > 0 ? '#f0f0f0' : 'white',
               cursor: errors.length > 0 ? 'not-allowed' : 'pointer',
               fontFamily: 'MS Sans Serif',
-              fontSize: '8pt'
+              fontSize: '8pt',
             }}
           >
             OK
@@ -810,7 +948,7 @@ const PropertyDesigner: React.FC<PropertyDesignerProps> = ({
               backgroundColor: 'white',
               cursor: 'pointer',
               fontFamily: 'MS Sans Serif',
-              fontSize: '8pt'
+              fontSize: '8pt',
             }}
           >
             Cancel
@@ -833,7 +971,7 @@ const MethodDesigner: React.FC<MethodDesignerProps> = ({
   method,
   onSave,
   onCancel,
-  existingNames
+  existingNames,
 }) => {
   const [formData, setFormData] = useState<ClassMethod>(
     method || {
@@ -843,34 +981,34 @@ const MethodDesigner: React.FC<MethodDesignerProps> = ({
       description: '',
       parameters: [],
       isFunction: false,
-      errorHandling: true
+      errorHandling: true,
     }
   );
-  
+
   const [errors, setErrors] = useState<string[]>([]);
   const [editingParameter, setEditingParameter] = useState<MethodParameter | null>(null);
-  
+
   const engine = useMemo(() => new ClassBuilderEngine(), []);
-  
+
   const validateForm = useCallback(() => {
     const nameErrors = engine.validateMethodName(
-      formData.name, 
+      formData.name,
       existingNames.filter(name => name !== method?.name)
     );
     setErrors(nameErrors);
     return nameErrors.length === 0;
   }, [formData.name, existingNames, method?.name, engine]);
-  
+
   useEffect(() => {
     validateForm();
   }, [formData.name, validateForm]);
-  
+
   const handleSave = () => {
     if (validateForm()) {
       onSave(formData);
     }
   };
-  
+
   const addParameter = () => {
     setEditingParameter({
       id: crypto.randomUUID(),
@@ -878,14 +1016,14 @@ const MethodDesigner: React.FC<MethodDesignerProps> = ({
       dataType: DataType.String,
       direction: ParameterDirection.ByVal,
       isOptional: false,
-      description: ''
+      description: '',
     });
   };
-  
+
   const editParameter = (param: MethodParameter) => {
     setEditingParameter({ ...param });
   };
-  
+
   const saveParameter = (param: MethodParameter) => {
     const existingIndex = formData.parameters.findIndex(p => p.id === param.id);
     if (existingIndex >= 0) {
@@ -897,39 +1035,43 @@ const MethodDesigner: React.FC<MethodDesignerProps> = ({
     }
     setEditingParameter(null);
   };
-  
+
   const deleteParameter = (id: string) => {
     setFormData(prev => ({
       ...prev,
-      parameters: prev.parameters.filter(p => p.id !== id)
+      parameters: prev.parameters.filter(p => p.id !== id),
     }));
   };
-  
+
   return (
-    <div style={{
-      position: 'fixed',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      width: '600px',
-      height: '500px',
-      backgroundColor: 'white',
-      border: '2px outset #c0c0c0',
-      zIndex: 1000,
-      fontFamily: 'MS Sans Serif',
-      fontSize: '8pt',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
-      <div style={{
-        backgroundColor: '#008080',
-        color: 'white',
-        padding: '4px 8px',
-        fontWeight: 'bold',
+    <div
+      style={{
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '600px',
+        height: '500px',
+        backgroundColor: 'white',
+        border: '2px outset #c0c0c0',
+        zIndex: 1000,
+        fontFamily: 'MS Sans Serif',
+        fontSize: '8pt',
         display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
+        flexDirection: 'column',
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: '#008080',
+          color: 'white',
+          padding: '4px 8px',
+          fontWeight: 'bold',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <span>{method ? 'Edit Method' : 'Add Method'}</span>
         <button
           onClick={onCancel}
@@ -938,33 +1080,31 @@ const MethodDesigner: React.FC<MethodDesignerProps> = ({
             border: 'none',
             color: 'white',
             fontSize: '12px',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
         >
           ×
         </button>
       </div>
-      
+
       <div style={{ padding: '16px', flex: 1, overflow: 'auto' }}>
         {/* Name */}
         <div style={{ marginBottom: '12px' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
-            Name:
-          </label>
+          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>Name:</label>
           <input
             type="text"
             value={formData.name}
-            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
             style={{
               width: '200px',
               padding: '2px',
               border: '1px inset #c0c0c0',
               fontFamily: 'MS Sans Serif',
-              fontSize: '8pt'
+              fontSize: '8pt',
             }}
           />
         </div>
-        
+
         {/* Method Type */}
         <div style={{ marginBottom: '12px' }}>
           <label style={{ marginRight: '16px' }}>
@@ -972,7 +1112,9 @@ const MethodDesigner: React.FC<MethodDesignerProps> = ({
               type="radio"
               name="methodType"
               checked={!formData.isFunction}
-              onChange={() => setFormData(prev => ({ ...prev, isFunction: false, returnType: undefined }))}
+              onChange={() =>
+                setFormData(prev => ({ ...prev, isFunction: false, returnType: undefined }))
+              }
             />
             Subroutine
           </label>
@@ -981,12 +1123,14 @@ const MethodDesigner: React.FC<MethodDesignerProps> = ({
               type="radio"
               name="methodType"
               checked={formData.isFunction}
-              onChange={() => setFormData(prev => ({ ...prev, isFunction: true, returnType: DataType.String }))}
+              onChange={() =>
+                setFormData(prev => ({ ...prev, isFunction: true, returnType: DataType.String }))
+              }
             />
             Function
           </label>
         </div>
-        
+
         {/* Return Type */}
         {formData.isFunction && (
           <div style={{ marginBottom: '12px' }}>
@@ -995,22 +1139,26 @@ const MethodDesigner: React.FC<MethodDesignerProps> = ({
             </label>
             <select
               value={formData.returnType || DataType.String}
-              onChange={(e) => setFormData(prev => ({ ...prev, returnType: e.target.value as DataType }))}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, returnType: e.target.value as DataType }))
+              }
               style={{
                 width: '200px',
                 padding: '2px',
                 border: '1px inset #c0c0c0',
                 fontFamily: 'MS Sans Serif',
-                fontSize: '8pt'
+                fontSize: '8pt',
               }}
             >
               {Object.values(DataType).map(type => (
-                <option key={type} value={type}>{type}</option>
+                <option key={type} value={type}>
+                  {type}
+                </option>
               ))}
             </select>
           </div>
         )}
-        
+
         {/* Access Level */}
         <div style={{ marginBottom: '12px' }}>
           <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
@@ -1024,14 +1172,16 @@ const MethodDesigner: React.FC<MethodDesignerProps> = ({
                   name="accessLevel"
                   value={level}
                   checked={formData.accessLevel === level}
-                  onChange={(e) => setFormData(prev => ({ ...prev, accessLevel: e.target.value as AccessLevel }))}
+                  onChange={e =>
+                    setFormData(prev => ({ ...prev, accessLevel: e.target.value as AccessLevel }))
+                  }
                 />
                 {level}
               </label>
             ))}
           </div>
         </div>
-        
+
         {/* Description */}
         <div style={{ marginBottom: '12px' }}>
           <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
@@ -1039,7 +1189,7 @@ const MethodDesigner: React.FC<MethodDesignerProps> = ({
           </label>
           <textarea
             value={formData.description}
-            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+            onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
             rows={2}
             style={{
               width: '100%',
@@ -1047,14 +1197,21 @@ const MethodDesigner: React.FC<MethodDesignerProps> = ({
               border: '1px inset #c0c0c0',
               fontFamily: 'MS Sans Serif',
               fontSize: '8pt',
-              resize: 'vertical'
+              resize: 'vertical',
             }}
           />
         </div>
-        
+
         {/* Parameters */}
         <div style={{ marginBottom: '12px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '8px',
+            }}
+          >
             <label style={{ fontWeight: 'bold' }}>Parameters:</label>
             <button
               onClick={addParameter}
@@ -1063,19 +1220,21 @@ const MethodDesigner: React.FC<MethodDesignerProps> = ({
                 border: '1px outset #c0c0c0',
                 backgroundColor: 'white',
                 cursor: 'pointer',
-                fontSize: '8pt'
+                fontSize: '8pt',
               }}
             >
               Add
             </button>
           </div>
-          
-          <div style={{
-            border: '1px inset #c0c0c0',
-            height: '150px',
-            overflow: 'auto',
-            backgroundColor: 'white'
-          }}>
+
+          <div
+            style={{
+              border: '1px inset #c0c0c0',
+              height: '150px',
+              overflow: 'auto',
+              backgroundColor: 'white',
+            }}
+          >
             {formData.parameters.length === 0 ? (
               <div style={{ padding: '8px', color: '#999', textAlign: 'center' }}>
                 No parameters defined
@@ -1084,11 +1243,21 @@ const MethodDesigner: React.FC<MethodDesignerProps> = ({
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '8pt' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#f0f0f0' }}>
-                    <th style={{ border: '1px solid #ccc', padding: '2px', textAlign: 'left' }}>Name</th>
-                    <th style={{ border: '1px solid #ccc', padding: '2px', textAlign: 'left' }}>Type</th>
-                    <th style={{ border: '1px solid #ccc', padding: '2px', textAlign: 'left' }}>Direction</th>
-                    <th style={{ border: '1px solid #ccc', padding: '2px', textAlign: 'left' }}>Optional</th>
-                    <th style={{ border: '1px solid #ccc', padding: '2px', textAlign: 'left' }}>Actions</th>
+                    <th style={{ border: '1px solid #ccc', padding: '2px', textAlign: 'left' }}>
+                      Name
+                    </th>
+                    <th style={{ border: '1px solid #ccc', padding: '2px', textAlign: 'left' }}>
+                      Type
+                    </th>
+                    <th style={{ border: '1px solid #ccc', padding: '2px', textAlign: 'left' }}>
+                      Direction
+                    </th>
+                    <th style={{ border: '1px solid #ccc', padding: '2px', textAlign: 'left' }}>
+                      Optional
+                    </th>
+                    <th style={{ border: '1px solid #ccc', padding: '2px', textAlign: 'left' }}>
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1096,9 +1265,13 @@ const MethodDesigner: React.FC<MethodDesignerProps> = ({
                     <tr key={param.id}>
                       <td style={{ border: '1px solid #ccc', padding: '2px' }}>{param.name}</td>
                       <td style={{ border: '1px solid #ccc', padding: '2px' }}>
-                        {param.dataType === DataType.UserDefined ? param.userDefinedType : param.dataType}
+                        {param.dataType === DataType.UserDefined
+                          ? param.userDefinedType
+                          : param.dataType}
                       </td>
-                      <td style={{ border: '1px solid #ccc', padding: '2px' }}>{param.direction}</td>
+                      <td style={{ border: '1px solid #ccc', padding: '2px' }}>
+                        {param.direction}
+                      </td>
                       <td style={{ border: '1px solid #ccc', padding: '2px' }}>
                         {param.isOptional ? 'Yes' : 'No'}
                       </td>
@@ -1123,44 +1296,50 @@ const MethodDesigner: React.FC<MethodDesignerProps> = ({
             )}
           </div>
         </div>
-        
+
         {/* Options */}
         <div style={{ marginBottom: '12px' }}>
           <label>
             <input
               type="checkbox"
               checked={formData.errorHandling}
-              onChange={(e) => setFormData(prev => ({ ...prev, errorHandling: e.target.checked }))}
+              onChange={e => setFormData(prev => ({ ...prev, errorHandling: e.target.checked }))}
             />
             Generate Error Handling Code
           </label>
         </div>
-        
+
         {/* Errors */}
         {errors.length > 0 && (
-          <div style={{
-            backgroundColor: '#ffe0e0',
-            border: '1px solid #ff0000',
-            padding: '8px',
-            marginBottom: '12px',
-            fontSize: '8pt'
-          }}>
+          <div
+            style={{
+              backgroundColor: '#ffe0e0',
+              border: '1px solid #ff0000',
+              padding: '8px',
+              marginBottom: '12px',
+              fontSize: '8pt',
+            }}
+          >
             {errors.map((error, index) => (
-              <div key={index} style={{ color: '#cc0000' }}>{error}</div>
+              <div key={index} style={{ color: '#cc0000' }}>
+                {error}
+              </div>
             ))}
           </div>
         )}
       </div>
-      
+
       {/* Buttons */}
-      <div style={{
-        padding: '8px 16px',
-        borderTop: '1px solid #ccc',
-        textAlign: 'right',
-        display: 'flex',
-        gap: '8px',
-        justifyContent: 'flex-end'
-      }}>
+      <div
+        style={{
+          padding: '8px 16px',
+          borderTop: '1px solid #ccc',
+          textAlign: 'right',
+          display: 'flex',
+          gap: '8px',
+          justifyContent: 'flex-end',
+        }}
+      >
         <button
           onClick={handleSave}
           disabled={errors.length > 0}
@@ -1170,7 +1349,7 @@ const MethodDesigner: React.FC<MethodDesignerProps> = ({
             backgroundColor: errors.length > 0 ? '#f0f0f0' : 'white',
             cursor: errors.length > 0 ? 'not-allowed' : 'pointer',
             fontFamily: 'MS Sans Serif',
-            fontSize: '8pt'
+            fontSize: '8pt',
           }}
         >
           OK
@@ -1183,13 +1362,13 @@ const MethodDesigner: React.FC<MethodDesignerProps> = ({
             backgroundColor: 'white',
             cursor: 'pointer',
             fontFamily: 'MS Sans Serif',
-            fontSize: '8pt'
+            fontSize: '8pt',
           }}
         >
           Cancel
         </button>
       </div>
-      
+
       {/* Parameter Editor */}
       {editingParameter && (
         <ParameterEditor
@@ -1209,41 +1388,41 @@ interface ParameterEditorProps {
   onCancel: () => void;
 }
 
-const ParameterEditor: React.FC<ParameterEditorProps> = ({
-  parameter,
-  onSave,
-  onCancel
-}) => {
+const ParameterEditor: React.FC<ParameterEditorProps> = ({ parameter, onSave, onCancel }) => {
   const [formData, setFormData] = useState<MethodParameter>(parameter);
-  
+
   const handleSave = () => {
     if (formData.name.trim()) {
       onSave(formData);
     }
   };
-  
+
   return (
-    <div style={{
-      position: 'fixed',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      width: '400px',
-      backgroundColor: 'white',
-      border: '2px outset #c0c0c0',
-      zIndex: 1001,
-      fontFamily: 'MS Sans Serif',
-      fontSize: '8pt'
-    }}>
-      <div style={{
-        backgroundColor: '#008080',
-        color: 'white',
-        padding: '4px 8px',
-        fontWeight: 'bold',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
+    <div
+      style={{
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '400px',
+        backgroundColor: 'white',
+        border: '2px outset #c0c0c0',
+        zIndex: 1001,
+        fontFamily: 'MS Sans Serif',
+        fontSize: '8pt',
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: '#008080',
+          color: 'white',
+          padding: '4px 8px',
+          fontWeight: 'bold',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <span>Parameter Properties</span>
         <button
           onClick={onCancel}
@@ -1252,33 +1431,31 @@ const ParameterEditor: React.FC<ParameterEditorProps> = ({
             border: 'none',
             color: 'white',
             fontSize: '12px',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
         >
           ×
         </button>
       </div>
-      
+
       <div style={{ padding: '16px' }}>
         {/* Name */}
         <div style={{ marginBottom: '12px' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
-            Name:
-          </label>
+          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>Name:</label>
           <input
             type="text"
             value={formData.name}
-            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
             style={{
               width: '100%',
               padding: '2px',
               border: '1px inset #c0c0c0',
               fontFamily: 'MS Sans Serif',
-              fontSize: '8pt'
+              fontSize: '8pt',
             }}
           />
         </div>
-        
+
         {/* Data Type */}
         <div style={{ marginBottom: '12px' }}>
           <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
@@ -1286,21 +1463,23 @@ const ParameterEditor: React.FC<ParameterEditorProps> = ({
           </label>
           <select
             value={formData.dataType}
-            onChange={(e) => setFormData(prev => ({ ...prev, dataType: e.target.value as DataType }))}
+            onChange={e => setFormData(prev => ({ ...prev, dataType: e.target.value as DataType }))}
             style={{
               width: '150px',
               padding: '2px',
               border: '1px inset #c0c0c0',
               fontFamily: 'MS Sans Serif',
-              fontSize: '8pt'
+              fontSize: '8pt',
             }}
           >
             {Object.values(DataType).map(type => (
-              <option key={type} value={type}>{type}</option>
+              <option key={type} value={type}>
+                {type}
+              </option>
             ))}
           </select>
         </div>
-        
+
         {/* Direction */}
         <div style={{ marginBottom: '12px' }}>
           <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
@@ -1314,26 +1493,31 @@ const ParameterEditor: React.FC<ParameterEditorProps> = ({
                   name="direction"
                   value={dir}
                   checked={formData.direction === dir}
-                  onChange={(e) => setFormData(prev => ({ ...prev, direction: e.target.value as ParameterDirection }))}
+                  onChange={e =>
+                    setFormData(prev => ({
+                      ...prev,
+                      direction: e.target.value as ParameterDirection,
+                    }))
+                  }
                 />
                 {dir}
               </label>
             ))}
           </div>
         </div>
-        
+
         {/* Optional */}
         <div style={{ marginBottom: '12px' }}>
           <label>
             <input
               type="checkbox"
               checked={formData.isOptional}
-              onChange={(e) => setFormData(prev => ({ ...prev, isOptional: e.target.checked }))}
+              onChange={e => setFormData(prev => ({ ...prev, isOptional: e.target.checked }))}
             />
             Optional Parameter
           </label>
         </div>
-        
+
         {/* Default Value */}
         {formData.isOptional && (
           <div style={{ marginBottom: '12px' }}>
@@ -1343,18 +1527,18 @@ const ParameterEditor: React.FC<ParameterEditorProps> = ({
             <input
               type="text"
               value={formData.defaultValue || ''}
-              onChange={(e) => setFormData(prev => ({ ...prev, defaultValue: e.target.value }))}
+              onChange={e => setFormData(prev => ({ ...prev, defaultValue: e.target.value }))}
               style={{
                 width: '100%',
                 padding: '2px',
                 border: '1px inset #c0c0c0',
                 fontFamily: 'MS Sans Serif',
-                fontSize: '8pt'
+                fontSize: '8pt',
               }}
             />
           </div>
         )}
-        
+
         {/* Description */}
         <div style={{ marginBottom: '12px' }}>
           <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
@@ -1362,7 +1546,7 @@ const ParameterEditor: React.FC<ParameterEditorProps> = ({
           </label>
           <textarea
             value={formData.description}
-            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+            onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
             rows={3}
             style={{
               width: '100%',
@@ -1370,13 +1554,15 @@ const ParameterEditor: React.FC<ParameterEditorProps> = ({
               border: '1px inset #c0c0c0',
               fontFamily: 'MS Sans Serif',
               fontSize: '8pt',
-              resize: 'vertical'
+              resize: 'vertical',
             }}
           />
         </div>
-        
+
         {/* Buttons */}
-        <div style={{ textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+        <div
+          style={{ textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}
+        >
           <button
             onClick={handleSave}
             disabled={!formData.name.trim()}
@@ -1386,7 +1572,7 @@ const ParameterEditor: React.FC<ParameterEditorProps> = ({
               backgroundColor: !formData.name.trim() ? '#f0f0f0' : 'white',
               cursor: !formData.name.trim() ? 'not-allowed' : 'pointer',
               fontFamily: 'MS Sans Serif',
-              fontSize: '8pt'
+              fontSize: '8pt',
             }}
           >
             OK
@@ -1399,7 +1585,7 @@ const ParameterEditor: React.FC<ParameterEditorProps> = ({
               backgroundColor: 'white',
               cursor: 'pointer',
               fontFamily: 'MS Sans Serif',
-              fontSize: '8pt'
+              fontSize: '8pt',
             }}
           >
             Cancel
@@ -1420,7 +1606,7 @@ export interface ClassBuilderProps {
 export const ClassBuilder: React.FC<ClassBuilderProps> = ({
   onSaveClass,
   onGenerateCode,
-  initialClass
+  initialClass,
 }) => {
   const [classInfo, setClassInfo] = useState<ClassInfo>(
     initialClass || {
@@ -1434,39 +1620,41 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
       methods: [],
       events: [],
       constants: [],
-      enums: []
+      enums: [],
     }
   );
-  
-  const [activeTab, setActiveTab] = useState<'general' | 'properties' | 'methods' | 'events' | 'code'>('general');
+
+  const [activeTab, setActiveTab] = useState<
+    'general' | 'properties' | 'methods' | 'events' | 'code'
+  >('general');
   const [editingProperty, setEditingProperty] = useState<ClassProperty | undefined>();
   const [editingMethod, setEditingMethod] = useState<ClassMethod | undefined>();
   const [showPropertyDesigner, setShowPropertyDesigner] = useState(false);
   const [showMethodDesigner, setShowMethodDesigner] = useState(false);
   const [generatedCode, setGeneratedCode] = useState('');
-  
+
   const engine = useMemo(() => new ClassBuilderEngine(), []);
-  
+
   const generateCode = useCallback(() => {
     const code = engine.generateClassCode(classInfo);
     setGeneratedCode(code);
     onGenerateCode?.(code);
   }, [classInfo, engine, onGenerateCode]);
-  
+
   useEffect(() => {
     generateCode();
   }, [generateCode]);
-  
+
   const addProperty = () => {
     setEditingProperty(undefined);
     setShowPropertyDesigner(true);
   };
-  
+
   const editProperty = (property: ClassProperty) => {
     setEditingProperty(property);
     setShowPropertyDesigner(true);
   };
-  
+
   const saveProperty = (property: ClassProperty) => {
     const existingIndex = classInfo.properties.findIndex(p => p.id === property.id);
     if (existingIndex >= 0) {
@@ -1479,24 +1667,24 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
     setShowPropertyDesigner(false);
     setEditingProperty(undefined);
   };
-  
+
   const deleteProperty = (id: string) => {
     setClassInfo(prev => ({
       ...prev,
-      properties: prev.properties.filter(p => p.id !== id)
+      properties: prev.properties.filter(p => p.id !== id),
     }));
   };
-  
+
   const addMethod = () => {
     setEditingMethod(undefined);
     setShowMethodDesigner(true);
   };
-  
+
   const editMethod = (method: ClassMethod) => {
     setEditingMethod(method);
     setShowMethodDesigner(true);
   };
-  
+
   const saveMethod = (method: ClassMethod) => {
     const existingIndex = classInfo.methods.findIndex(m => m.id === method.id);
     if (existingIndex >= 0) {
@@ -1509,46 +1697,52 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
     setShowMethodDesigner(false);
     setEditingMethod(undefined);
   };
-  
+
   const deleteMethod = (id: string) => {
     setClassInfo(prev => ({
       ...prev,
-      methods: prev.methods.filter(m => m.id !== id)
+      methods: prev.methods.filter(m => m.id !== id),
     }));
   };
-  
+
   const existingPropertyNames = classInfo.properties.map(p => p.name);
   const existingMethodNames = classInfo.methods.map(m => m.name);
-  
+
   return (
-    <div style={{
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      fontFamily: 'MS Sans Serif',
-      fontSize: '8pt',
-      backgroundColor: '#f0f0f0'
-    }}>
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        fontFamily: 'MS Sans Serif',
+        fontSize: '8pt',
+        backgroundColor: '#f0f0f0',
+      }}
+    >
       {/* Title Bar */}
-      <div style={{
-        backgroundColor: '#008080',
-        color: 'white',
-        padding: '4px 8px',
-        fontWeight: 'bold',
-        fontSize: '9pt'
-      }}>
+      <div
+        style={{
+          backgroundColor: '#008080',
+          color: 'white',
+          padding: '4px 8px',
+          fontWeight: 'bold',
+          fontSize: '9pt',
+        }}
+      >
         Class Builder - {classInfo.name}
       </div>
-      
+
       {/* Toolbar */}
-      <div style={{
-        padding: '4px 8px',
-        borderBottom: '1px solid #ccc',
-        backgroundColor: '#e0e0e0',
-        display: 'flex',
-        gap: '8px'
-      }}>
+      <div
+        style={{
+          padding: '4px 8px',
+          borderBottom: '1px solid #ccc',
+          backgroundColor: '#e0e0e0',
+          display: 'flex',
+          gap: '8px',
+        }}
+      >
         <button
           onClick={() => onSaveClass?.(classInfo)}
           style={{
@@ -1556,12 +1750,12 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
             border: '1px outset #c0c0c0',
             backgroundColor: 'white',
             cursor: 'pointer',
-            fontSize: '8pt'
+            fontSize: '8pt',
           }}
         >
           Save Class
         </button>
-        
+
         <button
           onClick={generateCode}
           style={{
@@ -1569,12 +1763,12 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
             border: '1px outset #c0c0c0',
             backgroundColor: 'white',
             cursor: 'pointer',
-            fontSize: '8pt'
+            fontSize: '8pt',
           }}
         >
           Generate Code
         </button>
-        
+
         <button
           onClick={() => {
             navigator.clipboard.writeText(generatedCode);
@@ -1584,25 +1778,27 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
             border: '1px outset #c0c0c0',
             backgroundColor: 'white',
             cursor: 'pointer',
-            fontSize: '8pt'
+            fontSize: '8pt',
           }}
         >
           Copy Code
         </button>
       </div>
-      
+
       {/* Tab Bar */}
-      <div style={{
-        display: 'flex',
-        borderBottom: '1px solid #ccc',
-        backgroundColor: '#e0e0e0'
-      }}>
+      <div
+        style={{
+          display: 'flex',
+          borderBottom: '1px solid #ccc',
+          backgroundColor: '#e0e0e0',
+        }}
+      >
         {[
           { key: 'general', label: 'General' },
           { key: 'properties', label: 'Properties' },
           { key: 'methods', label: 'Methods' },
           { key: 'events', label: 'Events' },
-          { key: 'code', label: 'Generated Code' }
+          { key: 'code', label: 'Generated Code' },
         ].map(tab => (
           <button
             key={tab.key}
@@ -1614,20 +1810,20 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
               borderTop: activeTab === tab.key ? '2px solid #008080' : '2px solid transparent',
               cursor: 'pointer',
               fontSize: '8pt',
-              borderBottom: activeTab === tab.key ? '1px solid white' : '1px solid #ccc'
+              borderBottom: activeTab === tab.key ? '1px solid white' : '1px solid #ccc',
             }}
           >
             {tab.label}
           </button>
         ))}
       </div>
-      
+
       {/* Content Area */}
       <div style={{ flex: 1, padding: '16px', overflow: 'auto', backgroundColor: 'white' }}>
         {activeTab === 'general' && (
           <div>
             <h3 style={{ margin: '0 0 16px 0', color: '#008080' }}>General Settings</h3>
-            
+
             {/* Class Name */}
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
@@ -1636,16 +1832,16 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
               <input
                 type="text"
                 value={classInfo.name}
-                onChange={(e) => setClassInfo(prev => ({ ...prev, name: e.target.value }))}
+                onChange={e => setClassInfo(prev => ({ ...prev, name: e.target.value }))}
                 style={{
                   width: '200px',
                   padding: '4px',
                   border: '1px inset #c0c0c0',
-                  fontSize: '8pt'
+                  fontSize: '8pt',
                 }}
               />
             </div>
-            
+
             {/* Description */}
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
@@ -1653,18 +1849,18 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
               </label>
               <textarea
                 value={classInfo.description}
-                onChange={(e) => setClassInfo(prev => ({ ...prev, description: e.target.value }))}
+                onChange={e => setClassInfo(prev => ({ ...prev, description: e.target.value }))}
                 rows={4}
                 style={{
                   width: '400px',
                   padding: '4px',
                   border: '1px inset #c0c0c0',
                   fontSize: '8pt',
-                  resize: 'vertical'
+                  resize: 'vertical',
                 }}
               />
             </div>
-            
+
             {/* Instancing */}
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
@@ -1672,12 +1868,14 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
               </label>
               <select
                 value={classInfo.instancing}
-                onChange={(e) => setClassInfo(prev => ({ ...prev, instancing: e.target.value as any }))}
+                onChange={e =>
+                  setClassInfo(prev => ({ ...prev, instancing: e.target.value as any }))
+                }
                 style={{
                   width: '200px',
                   padding: '4px',
                   border: '1px inset #c0c0c0',
-                  fontSize: '8pt'
+                  fontSize: '8pt',
                 }}
               >
                 <option value="Private">Private</option>
@@ -1688,26 +1886,28 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
                 <option value="GlobalSingleUse">GlobalSingleUse</option>
               </select>
             </div>
-            
+
             {/* Options */}
             <div style={{ marginBottom: '16px' }}>
               <label>
                 <input
                   type="checkbox"
                   checked={classInfo.persistable}
-                  onChange={(e) => setClassInfo(prev => ({ ...prev, persistable: e.target.checked }))}
+                  onChange={e => setClassInfo(prev => ({ ...prev, persistable: e.target.checked }))}
                 />
                 Persistable
               </label>
             </div>
-            
+
             {/* Summary */}
-            <div style={{
-              border: '1px solid #ccc',
-              padding: '12px',
-              backgroundColor: '#f8f8f8',
-              marginTop: '24px'
-            }}>
+            <div
+              style={{
+                border: '1px solid #ccc',
+                padding: '12px',
+                backgroundColor: '#f8f8f8',
+                marginTop: '24px',
+              }}
+            >
               <h4 style={{ margin: '0 0 8px 0' }}>Class Summary</h4>
               <div>Properties: {classInfo.properties.length}</div>
               <div>Methods: {classInfo.methods.length}</div>
@@ -1717,10 +1917,17 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
             </div>
           </div>
         )}
-        
+
         {activeTab === 'properties' && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '16px',
+              }}
+            >
               <h3 style={{ margin: 0, color: '#008080' }}>Properties</h3>
               <button
                 onClick={addProperty}
@@ -1729,13 +1936,13 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
                   border: '1px outset #c0c0c0',
                   backgroundColor: 'white',
                   cursor: 'pointer',
-                  fontSize: '8pt'
+                  fontSize: '8pt',
                 }}
               >
                 Add Property
               </button>
             </div>
-            
+
             {classInfo.properties.length === 0 ? (
               <div style={{ textAlign: 'center', color: '#999', marginTop: '40px' }}>
                 No properties defined. Click "Add Property" to create one.
@@ -1745,26 +1952,48 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '8pt' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#f0f0f0' }}>
-                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>Name</th>
-                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>Type</th>
-                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>Access</th>
-                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>Property Type</th>
-                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>Description</th>
-                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>Actions</th>
+                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>
+                        Name
+                      </th>
+                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>
+                        Type
+                      </th>
+                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>
+                        Access
+                      </th>
+                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>
+                        Property Type
+                      </th>
+                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>
+                        Description
+                      </th>
+                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {classInfo.properties.map(prop => (
                       <tr key={prop.id}>
-                        <td style={{ border: '1px solid #ccc', padding: '4px', fontWeight: 'bold' }}>
+                        <td
+                          style={{ border: '1px solid #ccc', padding: '4px', fontWeight: 'bold' }}
+                        >
                           {prop.name}
                         </td>
                         <td style={{ border: '1px solid #ccc', padding: '4px' }}>
-                          {prop.dataType === DataType.UserDefined ? prop.userDefinedType : prop.dataType}
+                          {prop.dataType === DataType.UserDefined
+                            ? prop.userDefinedType
+                            : prop.dataType}
                         </td>
-                        <td style={{ border: '1px solid #ccc', padding: '4px' }}>{prop.accessLevel}</td>
-                        <td style={{ border: '1px solid #ccc', padding: '4px' }}>{prop.propertyType}</td>
-                        <td style={{ border: '1px solid #ccc', padding: '4px' }}>{prop.description}</td>
+                        <td style={{ border: '1px solid #ccc', padding: '4px' }}>
+                          {prop.accessLevel}
+                        </td>
+                        <td style={{ border: '1px solid #ccc', padding: '4px' }}>
+                          {prop.propertyType}
+                        </td>
+                        <td style={{ border: '1px solid #ccc', padding: '4px' }}>
+                          {prop.description}
+                        </td>
                         <td style={{ border: '1px solid #ccc', padding: '4px' }}>
                           <button
                             onClick={() => editProperty(prop)}
@@ -1787,10 +2016,17 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
             )}
           </div>
         )}
-        
+
         {activeTab === 'methods' && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '16px',
+              }}
+            >
               <h3 style={{ margin: 0, color: '#008080' }}>Methods</h3>
               <button
                 onClick={addMethod}
@@ -1799,13 +2035,13 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
                   border: '1px outset #c0c0c0',
                   backgroundColor: 'white',
                   cursor: 'pointer',
-                  fontSize: '8pt'
+                  fontSize: '8pt',
                 }}
               >
                 Add Method
               </button>
             </div>
-            
+
             {classInfo.methods.length === 0 ? (
               <div style={{ textAlign: 'center', color: '#999', marginTop: '40px' }}>
                 No methods defined. Click "Add Method" to create one.
@@ -1815,29 +2051,47 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '8pt' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#f0f0f0' }}>
-                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>Name</th>
-                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>Type</th>
-                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>Access</th>
-                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>Parameters</th>
-                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>Description</th>
-                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>Actions</th>
+                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>
+                        Name
+                      </th>
+                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>
+                        Type
+                      </th>
+                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>
+                        Access
+                      </th>
+                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>
+                        Parameters
+                      </th>
+                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>
+                        Description
+                      </th>
+                      <th style={{ border: '1px solid #ccc', padding: '4px', textAlign: 'left' }}>
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {classInfo.methods.map(method => (
                       <tr key={method.id}>
-                        <td style={{ border: '1px solid #ccc', padding: '4px', fontWeight: 'bold' }}>
+                        <td
+                          style={{ border: '1px solid #ccc', padding: '4px', fontWeight: 'bold' }}
+                        >
                           {method.name}
                         </td>
                         <td style={{ border: '1px solid #ccc', padding: '4px' }}>
                           {method.isFunction ? 'Function' : 'Subroutine'}
                           {method.isFunction && method.returnType && ` (${method.returnType})`}
                         </td>
-                        <td style={{ border: '1px solid #ccc', padding: '4px' }}>{method.accessLevel}</td>
+                        <td style={{ border: '1px solid #ccc', padding: '4px' }}>
+                          {method.accessLevel}
+                        </td>
                         <td style={{ border: '1px solid #ccc', padding: '4px' }}>
                           {method.parameters.length}
                         </td>
-                        <td style={{ border: '1px solid #ccc', padding: '4px' }}>{method.description}</td>
+                        <td style={{ border: '1px solid #ccc', padding: '4px' }}>
+                          {method.description}
+                        </td>
                         <td style={{ border: '1px solid #ccc', padding: '4px' }}>
                           <button
                             onClick={() => editMethod(method)}
@@ -1860,10 +2114,17 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
             )}
           </div>
         )}
-        
+
         {activeTab === 'events' && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '16px',
+              }}
+            >
               <h3 style={{ margin: 0, color: '#008080' }}>Events</h3>
               <button
                 style={{
@@ -1871,22 +2132,29 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
                   border: '1px outset #c0c0c0',
                   backgroundColor: 'white',
                   cursor: 'pointer',
-                  fontSize: '8pt'
+                  fontSize: '8pt',
                 }}
               >
                 Add Event
               </button>
             </div>
-            
+
             <div style={{ textAlign: 'center', color: '#999', marginTop: '40px' }}>
               Event designer coming soon...
             </div>
           </div>
         )}
-        
+
         {activeTab === 'code' && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '16px',
+              }}
+            >
               <h3 style={{ margin: 0, color: '#008080' }}>Generated VB6 Code</h3>
               <div>
                 <button
@@ -1897,7 +2165,7 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
                     backgroundColor: 'white',
                     cursor: 'pointer',
                     fontSize: '8pt',
-                    marginRight: '8px'
+                    marginRight: '8px',
                   }}
                 >
                   Refresh
@@ -1909,14 +2177,14 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
                     border: '1px outset #c0c0c0',
                     backgroundColor: 'white',
                     cursor: 'pointer',
-                    fontSize: '8pt'
+                    fontSize: '8pt',
                   }}
                 >
                   Copy to Clipboard
                 </button>
               </div>
             </div>
-            
+
             <textarea
               value={generatedCode}
               readOnly
@@ -1929,13 +2197,13 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
                 padding: '8px',
                 backgroundColor: '#fafafa',
                 whiteSpace: 'pre',
-                overflow: 'auto'
+                overflow: 'auto',
               }}
             />
           </div>
         )}
       </div>
-      
+
       {/* Property Designer Modal */}
       {showPropertyDesigner && (
         <PropertyDesigner
@@ -1948,7 +2216,7 @@ export const ClassBuilder: React.FC<ClassBuilderProps> = ({
           existingNames={existingPropertyNames.filter(name => name !== editingProperty?.name)}
         />
       )}
-      
+
       {/* Method Designer Modal */}
       {showMethodDesigner && (
         <MethodDesigner

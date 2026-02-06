@@ -123,7 +123,6 @@ export class DatabasePool {
 
       logger.info(`Database connection established: ${id} (${config.engine})`);
       return id;
-
     } catch (error) {
       logger.error(`Failed to connect to database: ${error.message}`);
       throw error;
@@ -239,16 +238,19 @@ export class DatabasePool {
       }
 
       return result;
-
     } catch (error) {
       logger.error(`Query execution failed: ${error.message}`);
       throw error;
     }
   }
 
-  private async executeMSSQL(pool: sql.ConnectionPool, query: string, params?: any[]): Promise<QueryResult> {
+  private async executeMSSQL(
+    pool: sql.ConnectionPool,
+    query: string,
+    params?: any[]
+  ): Promise<QueryResult> {
     const request = pool.request();
-    
+
     if (params) {
       params.forEach((param, index) => {
         request.input(`param${index}`, param);
@@ -256,7 +258,7 @@ export class DatabasePool {
     }
 
     const result = await request.query(query);
-    
+
     return {
       rows: result.recordset || [],
       rowCount: result.rowsAffected[0] || 0,
@@ -264,9 +266,13 @@ export class DatabasePool {
     };
   }
 
-  private async executeMySQL(pool: mysql.Pool, query: string, params?: any[]): Promise<QueryResult> {
+  private async executeMySQL(
+    pool: mysql.Pool,
+    query: string,
+    params?: any[]
+  ): Promise<QueryResult> {
     const [rows, fields] = await pool.execute(query, params);
-    
+
     if (Array.isArray(rows)) {
       return {
         rows,
@@ -282,9 +288,13 @@ export class DatabasePool {
     }
   }
 
-  private async executePostgreSQL(pool: PgPool, query: string, params?: any[]): Promise<QueryResult> {
+  private async executePostgreSQL(
+    pool: PgPool,
+    query: string,
+    params?: any[]
+  ): Promise<QueryResult> {
     const result = await pool.query(query, params);
-    
+
     return {
       rows: result.rows,
       fields: result.fields,
@@ -357,7 +367,6 @@ export class DatabasePool {
 
       this.connections.delete(connectionId);
       logger.info(`Database connection closed: ${connectionId}`);
-
     } catch (error) {
       logger.error(`Error closing connection: ${error.message}`);
       throw error;
@@ -384,9 +393,14 @@ export class DatabasePool {
   }
 
   // ADO-specific methods
-  async createADORecordset(connectionId: string, source: string, cursorType: number, lockType: number): Promise<any> {
+  async createADORecordset(
+    connectionId: string,
+    source: string,
+    cursorType: number,
+    lockType: number
+  ): Promise<any> {
     const result = await this.execute(connectionId, source);
-    
+
     return {
       id: `rs_${Date.now()}`,
       connectionId,
@@ -405,7 +419,7 @@ export class DatabasePool {
   // DAO-specific methods
   async createDAORecordset(connectionId: string, sql: string, type: number): Promise<any> {
     const result = await this.execute(connectionId, sql);
-    
+
     return {
       id: `dao_${Date.now()}`,
       connectionId,
@@ -421,7 +435,7 @@ export class DatabasePool {
   // RDO-specific methods
   async createRDOResultset(connectionId: string, sql: string): Promise<any> {
     const result = await this.execute(connectionId, sql);
-    
+
     return {
       id: `rdo_${Date.now()}`,
       connectionId,

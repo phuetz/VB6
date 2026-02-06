@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 /**
  * VB6 Windows API Bridge - Ultra Think V4 Native Integration
- * 
+ *
  * Système ULTIME pour 99.9%+ compatibilité (Impact: 95, Usage: 80%)
  * Critique pour: System Apps, Hardware Control, Native Integration
- * 
+ *
  * Implémente le bridge complet Windows API:
  * - User32.dll functions
- * - Kernel32.dll functions  
+ * - Kernel32.dll functions
  * - Gdi32.dll graphics
  * - Shell32.dll operations
  * - Advapi32.dll security
@@ -16,7 +16,7 @@
  * - Process/Thread control
  * - Memory management
  * - File system native
- * 
+ *
  * Architecture Ultra Think V4:
  * - WebAssembly native calls
  * - Syscall emulation layer
@@ -40,12 +40,12 @@ export enum WindowMessage {
   WM_ACTIVATE = 0x0006,
   WM_SETFOCUS = 0x0007,
   WM_KILLFOCUS = 0x0008,
-  WM_ENABLE = 0x000A,
-  WM_SETREDRAW = 0x000B,
-  WM_SETTEXT = 0x000C,
-  WM_GETTEXT = 0x000D,
-  WM_GETTEXTLENGTH = 0x000E,
-  WM_PAINT = 0x000F,
+  WM_ENABLE = 0x000a,
+  WM_SETREDRAW = 0x000b,
+  WM_SETTEXT = 0x000c,
+  WM_GETTEXT = 0x000d,
+  WM_GETTEXTLENGTH = 0x000e,
+  WM_PAINT = 0x000f,
   WM_CLOSE = 0x0010,
   WM_QUIT = 0x0012,
   WM_ERASEBKGND = 0x0014,
@@ -66,28 +66,28 @@ export enum WindowMessage {
   WM_MBUTTONDOWN = 0x0207,
   WM_MBUTTONUP = 0x0208,
   WM_MBUTTONDBLCLK = 0x0209,
-  WM_MOUSEWHEEL = 0x020A,
+  WM_MOUSEWHEEL = 0x020a,
   WM_KEYDOWN = 0x0100,
   WM_KEYUP = 0x0101,
   WM_CHAR = 0x0102,
   WM_DEADCHAR = 0x0103,
   WM_SYSKEYDOWN = 0x0104,
   WM_SYSKEYUP = 0x0105,
-  WM_SYSCHAR = 0x0106
+  WM_SYSCHAR = 0x0106,
 }
 
 // Virtual Key Codes
 export enum VirtualKey {
   VK_BACK = 0x08,
   VK_TAB = 0x09,
-  VK_CLEAR = 0x0C,
-  VK_RETURN = 0x0D,
+  VK_CLEAR = 0x0c,
+  VK_RETURN = 0x0d,
   VK_SHIFT = 0x10,
   VK_CONTROL = 0x11,
   VK_MENU = 0x12,
   VK_PAUSE = 0x13,
   VK_CAPITAL = 0x14,
-  VK_ESCAPE = 0x1B,
+  VK_ESCAPE = 0x1b,
   VK_SPACE = 0x20,
   VK_PRIOR = 0x21,
   VK_NEXT = 0x22,
@@ -98,12 +98,12 @@ export enum VirtualKey {
   VK_RIGHT = 0x27,
   VK_DOWN = 0x28,
   VK_SELECT = 0x29,
-  VK_PRINT = 0x2A,
-  VK_EXECUTE = 0x2B,
-  VK_SNAPSHOT = 0x2C,
-  VK_INSERT = 0x2D,
-  VK_DELETE = 0x2E,
-  VK_HELP = 0x2F,
+  VK_PRINT = 0x2a,
+  VK_EXECUTE = 0x2b,
+  VK_SNAPSHOT = 0x2c,
+  VK_INSERT = 0x2d,
+  VK_DELETE = 0x2e,
+  VK_HELP = 0x2f,
   VK_F1 = 0x70,
   VK_F2 = 0x71,
   VK_F3 = 0x72,
@@ -114,8 +114,8 @@ export enum VirtualKey {
   VK_F8 = 0x77,
   VK_F9 = 0x78,
   VK_F10 = 0x79,
-  VK_F11 = 0x7A,
-  VK_F12 = 0x7B
+  VK_F11 = 0x7a,
+  VK_F12 = 0x7b,
 }
 
 // Window Styles
@@ -129,7 +129,7 @@ export enum WindowStyle {
   WS_CLIPSIBLINGS = 0x04000000,
   WS_CLIPCHILDREN = 0x02000000,
   WS_MAXIMIZE = 0x01000000,
-  WS_CAPTION = 0x00C00000,
+  WS_CAPTION = 0x00c00000,
   WS_BORDER = 0x00800000,
   WS_DLGFRAME = 0x00400000,
   WS_VSCROLL = 0x00200000,
@@ -137,7 +137,7 @@ export enum WindowStyle {
   WS_SYSMENU = 0x00080000,
   WS_THICKFRAME = 0x00040000,
   WS_GROUP = 0x00020000,
-  WS_TABSTOP = 0x00010000
+  WS_TABSTOP = 0x00010000,
 }
 
 // ShowWindow Commands
@@ -152,7 +152,7 @@ export enum ShowWindowCommand {
   SW_SHOWMINNOACTIVE = 7,
   SW_SHOWNA = 8,
   SW_RESTORE = 9,
-  SW_SHOWDEFAULT = 10
+  SW_SHOWDEFAULT = 10,
 }
 
 // Registry Keys
@@ -163,7 +163,7 @@ export enum RegistryHive {
   HKEY_USERS = 0x80000003,
   HKEY_PERFORMANCE_DATA = 0x80000004,
   HKEY_CURRENT_CONFIG = 0x80000005,
-  HKEY_DYN_DATA = 0x80000006
+  HKEY_DYN_DATA = 0x80000006,
 }
 
 // File Attributes
@@ -181,7 +181,7 @@ export enum FileAttribute {
   FILE_ATTRIBUTE_COMPRESSED = 0x00000800,
   FILE_ATTRIBUTE_OFFLINE = 0x00001000,
   FILE_ATTRIBUTE_NOT_CONTENT_INDEXED = 0x00002000,
-  FILE_ATTRIBUTE_ENCRYPTED = 0x00004000
+  FILE_ATTRIBUTE_ENCRYPTED = 0x00004000,
 }
 
 // ============================================================================
@@ -305,7 +305,7 @@ export class WindowsAPIBridge {
   private timers: Map<number, any> = new Map();
   private hooks: Map<number, Function> = new Map();
   private atoms: Map<number, string> = new Map();
-  private nextAtom: number = 0xC000;
+  private nextAtom: number = 0xc000;
   private clipboard: string = '';
   private messageQueue: MSG[] = [];
   private lastError: number = 0;
@@ -335,13 +335,11 @@ export class WindowsAPIBridge {
       RegisteredOwner: 'User',
       RegisteredOrganization: 'Organization',
       CurrentVersion: '10.0',
-      CurrentBuild: '19043'
+      CurrentBuild: '19043',
     });
 
     // HKEY_CURRENT_USER\SOFTWARE
     this.registry.set('HKEY_CURRENT_USER\\SOFTWARE\\VB and VBA Program Settings', {});
-
-    console.log('📝 Registry initialized');
   }
 
   /**
@@ -349,9 +347,9 @@ export class WindowsAPIBridge {
    */
   private initializeSystemHandles(): void {
     // Standard handles
-    this.handles.set(0xFFFFFFF6, { type: 'stdin', name: 'STDIN' });
-    this.handles.set(0xFFFFFFF5, { type: 'stdout', name: 'STDOUT' });
-    this.handles.set(0xFFFFFFF4, { type: 'stderr', name: 'STDERR' });
+    this.handles.set(0xfffffff6, { type: 'stdin', name: 'STDIN' });
+    this.handles.set(0xfffffff5, { type: 'stdout', name: 'STDOUT' });
+    this.handles.set(0xfffffff4, { type: 'stderr', name: 'STDERR' });
 
     // Desktop window
     this.windows.set(0, {
@@ -360,10 +358,8 @@ export class WindowsAPIBridge {
       style: WindowStyle.WS_OVERLAPPED,
       rect: { left: 0, top: 0, right: screen.width, bottom: screen.height },
       parent: 0,
-      visible: true
+      visible: true,
     });
-
-    console.log('🖥️ System handles initialized');
   }
 
   /**
@@ -377,8 +373,6 @@ export class WindowsAPIBridge {
         this.dispatchMessage(msg);
       }
     }, 10);
-
-    console.log('💬 Message pump started');
   }
 
   // ============================================================================
@@ -403,7 +397,7 @@ export class WindowsAPIBridge {
     lpParam: any
   ): number {
     const hwnd = this.nextHandle++;
-    
+
     const window = {
       hwnd,
       className: lpClassName,
@@ -417,7 +411,7 @@ export class WindowsAPIBridge {
       visible: (dwStyle & WindowStyle.WS_VISIBLE) !== 0,
       enabled: (dwStyle & WindowStyle.WS_DISABLED) === 0,
       children: [],
-      wndProc: null
+      wndProc: null,
     };
 
     this.windows.set(hwnd, window);
@@ -425,7 +419,6 @@ export class WindowsAPIBridge {
     // Send WM_CREATE
     this.postMessage(hwnd, WindowMessage.WM_CREATE, 0, 0);
 
-    console.log(`🪟 Window created: ${lpWindowName} (${hwnd})`);
     return hwnd;
   }
 
@@ -487,7 +480,6 @@ export class WindowsAPIBridge {
     }
 
     this.windows.delete(hWnd);
-    console.log(`🗑️ Window destroyed: ${hWnd}`);
     return true;
   }
 
@@ -500,7 +492,7 @@ export class WindowsAPIBridge {
 
     const text = window.windowName || '';
     const length = Math.min(text.length, nMaxCount - 1);
-    
+
     for (let i = 0; i < length; i++) {
       lpString[i] = text[i];
     }
@@ -565,7 +557,7 @@ export class WindowsAPIBridge {
       left: x,
       top: y,
       right: x + nWidth,
-      bottom: y + nHeight
+      bottom: y + nHeight,
     };
 
     this.postMessage(hWnd, WindowMessage.WM_MOVE, 0, (y << 16) | x);
@@ -607,7 +599,7 @@ export class WindowsAPIBridge {
       wParam,
       lParam,
       time: Date.now(),
-      pt: { x: 0, y: 0 }
+      pt: { x: 0, y: 0 },
     });
     return true;
   }
@@ -615,7 +607,12 @@ export class WindowsAPIBridge {
   /**
    * GetMessage
    */
-  public GetMessage(lpMsg: MSG, hWnd: number, wMsgFilterMin: number, wMsgFilterMax: number): boolean {
+  public GetMessage(
+    lpMsg: MSG,
+    hWnd: number,
+    wMsgFilterMin: number,
+    wMsgFilterMax: number
+  ): boolean {
     if (this.messageQueue.length === 0) return false;
 
     const msg = this.messageQueue.shift()!;
@@ -675,8 +672,8 @@ export class WindowsAPIBridge {
    * MessageBox - Enhanced with proper modal dialog
    */
   public MessageBox(hWnd: number, lpText: string, lpCaption: string, uType: number): number {
-    const buttons = uType & 0x0F;
-    const icon = (uType >> 4) & 0x0F;
+    const buttons = uType & 0x0f;
+    const icon = (uType >> 4) & 0x0f;
 
     // Build full message
     const fullCaption = lpCaption || 'VB6 Application';
@@ -703,60 +700,57 @@ export class WindowsAPIBridge {
       switch (buttons) {
         case 0: // MB_OK
           window.alert(fullCaption + '\n\n' + fullMessage);
-          console.log(`📢 MessageBox OK: ${fullCaption}`);
           return 1; // IDOK
 
-        case 1: { // MB_OKCANCEL
+        case 1: {
+          // MB_OKCANCEL
           const okCancel = window.confirm(fullCaption + '\n\n' + fullMessage);
-          console.log(`📢 MessageBox OKCANCEL: ${fullCaption} - ${okCancel ? 'OK' : 'CANCEL'}`);
           return okCancel ? 1 : 2; // IDOK or IDCANCEL
         }
-        case 2: { // MB_ABORTRETRYIGNORE
+        case 2: {
+          // MB_ABORTRETRYIGNORE
           const ariResult = window.prompt(
             fullCaption + '\n\n' + fullMessage + '\n\nEnter: A=Abort, R=Retry, I=Ignore',
             'R'
           );
           if (ariResult === null) return 3; // IDABORT
           const ariUpper = ariResult.toUpperCase().charAt(0);
-          console.log(`📢 MessageBox ARI: ${fullCaption} - ${ariUpper}`);
           if (ariUpper === 'A') return 3; // IDABORT
           if (ariUpper === 'R') return 4; // IDRETRY
           return 5; // IDIGNORE
         }
-        case 3: { // MB_YESNOCANCEL
+        case 3: {
+          // MB_YESNOCANCEL
           const yncResult = window.prompt(
             fullCaption + '\n\n' + fullMessage + '\n\nEnter: Y=Yes, N=No, C=Cancel',
             'Y'
           );
           if (yncResult === null) return 2; // IDCANCEL
           const yncUpper = yncResult.toUpperCase().charAt(0);
-          console.log(`📢 MessageBox YNC: ${fullCaption} - ${yncUpper}`);
           if (yncUpper === 'Y') return 6; // IDYES
           if (yncUpper === 'N') return 7; // IDNO
           return 2; // IDCANCEL
         }
-        case 4: { // MB_YESNO
+        case 4: {
+          // MB_YESNO
           const yesno = window.confirm(fullCaption + '\n\n' + fullMessage);
-          console.log(`📢 MessageBox YESNO: ${fullCaption} - ${yesno ? 'YES' : 'NO'}`);
           return yesno ? 6 : 7; // IDYES or IDNO
         }
-        case 5: { // MB_RETRYCANCEL
+        case 5: {
+          // MB_RETRYCANCEL
           const retryCancel = window.confirm(
             fullCaption + '\n\n' + fullMessage + '\n\nOK=Retry, Cancel=Cancel'
           );
-          console.log(`📢 MessageBox RETRYCANCEL: ${fullCaption} - ${retryCancel ? 'RETRY' : 'CANCEL'}`);
           return retryCancel ? 4 : 2; // IDRETRY or IDCANCEL
         }
 
         default:
           window.alert(fullCaption + '\n\n' + fullMessage);
-          console.log(`📢 MessageBox (default): ${fullCaption}`);
           return 1; // IDOK
       }
     }
 
     // Fallback for non-browser environments
-    console.log(`📢 MessageBox: ${fullCaption} - ${fullMessage}`);
     return 1; // IDOK
   }
 
@@ -766,8 +760,9 @@ export class WindowsAPIBridge {
   public GetCursorPos(lpPoint: POINT): boolean {
     // Get mouse position relative to window
     if (typeof window !== 'undefined') {
-      lpPoint.x = (window as any).mouseX || 0;
-      lpPoint.y = (window as any).mouseY || 0;
+      const vb6Win = window as unknown as { mouseX?: number; mouseY?: number };
+      lpPoint.x = vb6Win.mouseX || 0;
+      lpPoint.y = vb6Win.mouseY || 0;
       return true;
     }
     return false;
@@ -778,7 +773,6 @@ export class WindowsAPIBridge {
    */
   public SetCursorPos(x: number, y: number): boolean {
     // Cannot set cursor position in browser
-    console.log(`🖱️ SetCursorPos: ${x}, ${y}`);
     return true;
   }
 
@@ -810,7 +804,6 @@ export class WindowsAPIBridge {
   ): number {
     const hookId = this.nextHandle++;
     this.hooks.set(hookId, lpfn);
-    console.log(`🪝 Hook installed: ${hookId}`);
     return hookId;
   }
 
@@ -819,7 +812,6 @@ export class WindowsAPIBridge {
    */
   public UnhookWindowsHookEx(hhk: number): boolean {
     this.hooks.delete(hhk);
-    console.log(`🪝 Hook removed: ${hhk}`);
     return true;
   }
 
@@ -835,7 +827,7 @@ export class WindowsAPIBridge {
       // Return handle to current module
       return 0x400000;
     }
-    
+
     // Return fake handle for module
     return 0x10000000;
   }
@@ -844,15 +836,13 @@ export class WindowsAPIBridge {
    * LoadLibrary
    */
   public LoadLibrary(lpLibFileName: string): number {
-    console.log(`📚 LoadLibrary: ${lpLibFileName}`);
-    
     // Return fake handle
     const handle = this.nextHandle++;
     this.handles.set(handle, {
       type: 'library',
-      name: lpLibFileName
+      name: lpLibFileName,
     });
-    
+
     return handle;
   }
 
@@ -861,7 +851,6 @@ export class WindowsAPIBridge {
    */
   public FreeLibrary(hLibModule: number): boolean {
     this.handles.delete(hLibModule);
-    console.log(`📚 FreeLibrary: ${hLibModule}`);
     return true;
   }
 
@@ -869,11 +858,8 @@ export class WindowsAPIBridge {
    * GetProcAddress
    */
   public GetProcAddress(hModule: number, lpProcName: string | number): number {
-    console.log(`🔍 GetProcAddress: ${lpProcName}`);
-    
     // Return fake function pointer
-    return 0x10000000 + (typeof lpProcName === 'string' ? 
-      lpProcName.charCodeAt(0) : lpProcName);
+    return 0x10000000 + (typeof lpProcName === 'string' ? lpProcName.charCodeAt(0) : lpProcName);
   }
 
   /**
@@ -889,17 +875,16 @@ export class WindowsAPIBridge {
     hTemplateFile: number
   ): number {
     const handle = this.nextHandle++;
-    
+
     this.handles.set(handle, {
       type: 'file',
       name: lpFileName,
       access: dwDesiredAccess,
       shareMode: dwShareMode,
       attributes: dwFlagsAndAttributes,
-      position: 0
+      position: 0,
     });
 
-    console.log(`📄 File opened: ${lpFileName} (${handle})`);
     return handle;
   }
 
@@ -911,7 +896,6 @@ export class WindowsAPIBridge {
     if (!handle) return false;
 
     this.handles.delete(hObject);
-    console.log(`🔒 Handle closed: ${hObject}`);
     return true;
   }
 
@@ -933,11 +917,10 @@ export class WindowsAPIBridge {
     for (let i = 0; i < bytesRead; i++) {
       lpBuffer[i] = Math.floor(Math.random() * 256);
     }
-    
+
     lpNumberOfBytesRead[0] = bytesRead;
     handle.position += bytesRead;
 
-    console.log(`📖 Read ${bytesRead} bytes from handle ${hFile}`);
     return true;
   }
 
@@ -957,7 +940,6 @@ export class WindowsAPIBridge {
     lpNumberOfBytesWritten[0] = nNumberOfBytesToWrite;
     handle.position += nNumberOfBytesToWrite;
 
-    console.log(`✍️ Wrote ${nNumberOfBytesToWrite} bytes to handle ${hFile}`);
     return true;
   }
 
@@ -973,7 +955,6 @@ export class WindowsAPIBridge {
     }
     lpBuffer[length] = '\0';
 
-    console.log(`📁 GetCurrentDirectory: ${currentDir}`);
     return length;
   }
 
@@ -989,7 +970,6 @@ export class WindowsAPIBridge {
     }
     lpBuffer[length] = '\0';
 
-    console.log(`📂 GetWindowsDirectory: ${windowsDir}`);
     return length;
   }
 
@@ -1005,7 +985,6 @@ export class WindowsAPIBridge {
     }
     lpBuffer[length] = '\0';
 
-    console.log(`🔧 GetSystemDirectory: ${systemDir}`);
     return length;
   }
 
@@ -1021,7 +1000,6 @@ export class WindowsAPIBridge {
     }
     lpBuffer[computerName.length] = '\0';
 
-    console.log(`💻 GetComputerName: ${computerName}`);
     return true;
   }
 
@@ -1037,7 +1015,6 @@ export class WindowsAPIBridge {
     }
     lpBuffer[userName.length] = '\0';
 
-    console.log(`👤 GetUserName: ${userName}`);
     return true;
   }
 
@@ -1047,7 +1024,6 @@ export class WindowsAPIBridge {
   public SetComputerName(computerName: string): boolean {
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem('vb6_computer_name', computerName);
-      console.log(`💻 SetComputerName: ${computerName}`);
       return true;
     }
     return false;
@@ -1059,7 +1035,6 @@ export class WindowsAPIBridge {
   public SetUserName(userName: string): boolean {
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem('vb6_user_name', userName);
-      console.log(`👤 SetUserName: ${userName}`);
       return true;
     }
     return false;
@@ -1069,7 +1044,6 @@ export class WindowsAPIBridge {
    * SetCurrentDirectory
    */
   public SetCurrentDirectory(lpPathName: string): boolean {
-    console.log(`📁 SetCurrentDirectory: ${lpPathName}`);
     return true;
   }
 
@@ -1078,7 +1052,7 @@ export class WindowsAPIBridge {
    */
   public GetSystemTime(lpSystemTime: SYSTEMTIME): void {
     const now = new Date();
-    
+
     lpSystemTime.wYear = now.getUTCFullYear();
     lpSystemTime.wMonth = now.getUTCMonth() + 1;
     lpSystemTime.wDayOfWeek = now.getUTCDay();
@@ -1094,7 +1068,7 @@ export class WindowsAPIBridge {
    */
   public GetLocalTime(lpSystemTime: SYSTEMTIME): void {
     const now = new Date();
-    
+
     lpSystemTime.wYear = now.getFullYear();
     lpSystemTime.wMonth = now.getMonth() + 1;
     lpSystemTime.wDayOfWeek = now.getDay();
@@ -1110,12 +1084,12 @@ export class WindowsAPIBridge {
    */
   public GetTickCount(): number {
     // Use performance.now() for better accuracy, fallback to Date.now()
-    const tickCount = typeof performance !== 'undefined' && performance.now
-      ? Math.floor(performance.now())
-      : Date.now();
+    const tickCount =
+      typeof performance !== 'undefined' && performance.now
+        ? Math.floor(performance.now())
+        : Date.now();
 
-    console.log(`⏱️ GetTickCount: ${tickCount}ms`);
-    return tickCount & 0xFFFFFFFF; // Return as 32-bit value like Windows
+    return tickCount & 0xffffffff; // Return as 32-bit value like Windows
   }
 
   /**
@@ -1124,7 +1098,6 @@ export class WindowsAPIBridge {
   public async Sleep(dwMilliseconds: number): Promise<void> {
     return new Promise(resolve => {
       setTimeout(() => {
-        console.log(`😴 Sleep completed: ${dwMilliseconds}ms`);
         resolve();
       }, dwMilliseconds);
     });
@@ -1157,10 +1130,9 @@ export class WindowsAPIBridge {
       id: processId,
       name: lpApplicationName || lpCommandLine,
       threadId,
-      startTime: Date.now()
+      startTime: Date.now(),
     });
 
-    console.log(`🚀 Process created: ${lpApplicationName || lpCommandLine} (${processId})`);
     return true;
   }
 
@@ -1169,7 +1141,6 @@ export class WindowsAPIBridge {
    */
   public TerminateProcess(hProcess: number, uExitCode: number): boolean {
     this.processes.delete(hProcess);
-    console.log(`💀 Process terminated: ${hProcess}`);
     return true;
   }
 
@@ -1202,7 +1173,7 @@ export class WindowsAPIBridge {
     phkResult: number[]
   ): number {
     const fullKey = this.getFullRegistryKey(hKey, lpSubKey);
-    
+
     if (!this.registry.has(fullKey)) {
       return 2; // ERROR_FILE_NOT_FOUND
     }
@@ -1210,11 +1181,10 @@ export class WindowsAPIBridge {
     const handle = this.nextHandle++;
     this.handles.set(handle, {
       type: 'regkey',
-      path: fullKey
+      path: fullKey,
     });
-    
+
     phkResult[0] = handle;
-    console.log(`🔑 Registry key opened: ${fullKey}`);
     return 0; // ERROR_SUCCESS
   }
 
@@ -1251,7 +1221,6 @@ export class WindowsAPIBridge {
     lpType[0] = typeof keyData[lpValueName] === 'string' ? 1 : 4; // REG_SZ or REG_DWORD
     lpcbData[0] = 4;
 
-    console.log(`📖 Registry read: ${handle.path}\\${lpValueName} = ${lpData[0]}`);
     return 0;
   }
 
@@ -1278,7 +1247,6 @@ export class WindowsAPIBridge {
     }
 
     keyData[lpValueName] = lpData;
-    console.log(`✍️ Registry write: ${handle.path}\\${lpValueName} = ${lpData}`);
     return 0;
   }
 
@@ -1297,7 +1265,7 @@ export class WindowsAPIBridge {
     lpdwDisposition: number[]
   ): number {
     const fullKey = this.getFullRegistryKey(hKey, lpSubKey);
-    
+
     if (!this.registry.has(fullKey)) {
       this.registry.set(fullKey, {});
       lpdwDisposition[0] = 1; // REG_CREATED_NEW_KEY
@@ -1308,11 +1276,10 @@ export class WindowsAPIBridge {
     const handle = this.nextHandle++;
     this.handles.set(handle, {
       type: 'regkey',
-      path: fullKey
+      path: fullKey,
     });
-    
+
     phkResult[0] = handle;
-    console.log(`🔑 Registry key created: ${fullKey}`);
     return 0;
   }
 
@@ -1322,7 +1289,6 @@ export class WindowsAPIBridge {
   public RegDeleteKey(hKey: number, lpSubKey: string): number {
     const fullKey = this.getFullRegistryKey(hKey, lpSubKey);
     this.registry.delete(fullKey);
-    console.log(`🗑️ Registry key deleted: ${fullKey}`);
     return 0;
   }
 
@@ -1338,7 +1304,6 @@ export class WindowsAPIBridge {
     const keyData = this.registry.get(handle.path);
     if (keyData) {
       delete keyData[lpValueName];
-      console.log(`🗑️ Registry value deleted: ${handle.path}\\${lpValueName}`);
     }
 
     return 0;
@@ -1359,15 +1324,13 @@ export class WindowsAPIBridge {
     lpDirectory: string,
     nShowCmd: number
   ): number {
-    console.log(`🚀 ShellExecute: ${lpOperation} ${lpFile} ${lpParameters}`);
-    
     // Try to open in browser if possible
     if (typeof window !== 'undefined' && lpOperation === 'open') {
       if (lpFile.startsWith('http://') || lpFile.startsWith('https://')) {
         window.open(lpFile, '_blank');
       }
     }
-    
+
     return 33; // Success (> 32)
   }
 
@@ -1389,9 +1352,9 @@ export class WindowsAPIBridge {
       0x0007: 'C:\\Users\\User\\Start Menu\\Programs\\Startup', // CSIDL_STARTUP
       0x0008: 'C:\\Users\\User\\Recent', // CSIDL_RECENT
       0x0009: 'C:\\Users\\User\\SendTo', // CSIDL_SENDTO
-      0x000B: 'C:\\Users\\User\\Start Menu', // CSIDL_STARTMENU
-      0x000D: 'C:\\Users\\User\\Music', // CSIDL_MYMUSIC
-      0x000E: 'C:\\Users\\User\\Videos', // CSIDL_MYVIDEO
+      0x000b: 'C:\\Users\\User\\Start Menu', // CSIDL_STARTMENU
+      0x000d: 'C:\\Users\\User\\Music', // CSIDL_MYMUSIC
+      0x000e: 'C:\\Users\\User\\Videos', // CSIDL_MYVIDEO
       0x0010: 'C:\\Users\\User\\Desktop', // CSIDL_DESKTOPDIRECTORY
       0x0013: 'C:\\Users\\User\\NetworkPlaces', // CSIDL_NETHOOD
       0x0014: 'C:\\Windows\\Fonts', // CSIDL_FONTS
@@ -1400,9 +1363,9 @@ export class WindowsAPIBridge {
       0x0017: 'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs', // CSIDL_COMMON_PROGRAMS
       0x0018: 'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Startup', // CSIDL_COMMON_STARTUP
       0x0019: 'C:\\Users\\Public\\Desktop', // CSIDL_COMMON_DESKTOPDIRECTORY
-      0x001A: 'C:\\Users\\User\\AppData\\Roaming', // CSIDL_APPDATA
-      0x001B: 'C:\\Users\\User\\PrintHood', // CSIDL_PRINTHOOD
-      0x001C: 'C:\\Users\\User\\AppData\\Local', // CSIDL_LOCAL_APPDATA
+      0x001a: 'C:\\Users\\User\\AppData\\Roaming', // CSIDL_APPDATA
+      0x001b: 'C:\\Users\\User\\PrintHood', // CSIDL_PRINTHOOD
+      0x001c: 'C:\\Users\\User\\AppData\\Local', // CSIDL_LOCAL_APPDATA
       0x0020: 'C:\\Users\\User\\AppData\\Local\\Temp', // CSIDL_INTERNET_CACHE
       0x0021: 'C:\\Users\\User\\Cookies', // CSIDL_COOKIES
       0x0022: 'C:\\Users\\User\\History', // CSIDL_HISTORY
@@ -1413,17 +1376,18 @@ export class WindowsAPIBridge {
       0x0027: 'C:\\Users\\User\\Pictures', // CSIDL_MYPICTURES
       0x0028: 'C:\\Users\\User', // CSIDL_PROFILE
       0x0029: 'C:\\Windows\\System32', // CSIDL_SYSTEMX86
-      0x002A: 'C:\\Program Files (x86)', // CSIDL_PROGRAM_FILESX86
-      0x002B: 'C:\\Program Files\\Common Files', // CSIDL_PROGRAM_FILES_COMMON
-      0x002C: 'C:\\Program Files (x86)\\Common Files', // CSIDL_PROGRAM_FILES_COMMONX86
-      0x002D: 'C:\\ProgramData\\Templates', // CSIDL_COMMON_TEMPLATES
-      0x002E: 'C:\\ProgramData\\Documents', // CSIDL_COMMON_DOCUMENTS
-      0x002F: 'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools', // CSIDL_COMMON_ADMINTOOLS
-      0x0030: 'C:\\Users\\User\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools' // CSIDL_ADMINTOOLS
+      0x002a: 'C:\\Program Files (x86)', // CSIDL_PROGRAM_FILESX86
+      0x002b: 'C:\\Program Files\\Common Files', // CSIDL_PROGRAM_FILES_COMMON
+      0x002c: 'C:\\Program Files (x86)\\Common Files', // CSIDL_PROGRAM_FILES_COMMONX86
+      0x002d: 'C:\\ProgramData\\Templates', // CSIDL_COMMON_TEMPLATES
+      0x002e: 'C:\\ProgramData\\Documents', // CSIDL_COMMON_DOCUMENTS
+      0x002f: 'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools', // CSIDL_COMMON_ADMINTOOLS
+      0x0030:
+        'C:\\Users\\User\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools', // CSIDL_ADMINTOOLS
     };
 
     const path = folders[csidl] || 'C:\\';
-    
+
     for (let i = 0; i < path.length && i < 260; i++) {
       pszPath[i] = path[i];
     }
@@ -1441,7 +1405,7 @@ export class WindowsAPIBridge {
    */
   public GetDC(hWnd: number): number {
     const hdc = this.nextHandle++;
-    
+
     this.handles.set(hdc, {
       type: 'dc',
       window: hWnd,
@@ -1449,11 +1413,10 @@ export class WindowsAPIBridge {
       brush: 0,
       font: 0,
       textColor: 0x000000,
-      bkColor: 0xFFFFFF,
-      bkMode: 2 // OPAQUE
+      bkColor: 0xffffff,
+      bkMode: 2, // OPAQUE
     });
 
-    console.log(`🎨 Device context created: ${hdc}`);
     return hdc;
   }
 
@@ -1462,21 +1425,13 @@ export class WindowsAPIBridge {
    */
   public ReleaseDC(hWnd: number, hDC: number): number {
     this.handles.delete(hDC);
-    console.log(`🎨 Device context released: ${hDC}`);
     return 1;
   }
 
   /**
    * TextOut
    */
-  public TextOut(
-    hdc: number,
-    x: number,
-    y: number,
-    lpString: string,
-    c: number
-  ): boolean {
-    console.log(`✏️ TextOut at (${x}, ${y}): ${lpString.substring(0, c)}`);
+  public TextOut(hdc: number, x: number, y: number, lpString: string, c: number): boolean {
     return true;
   }
 
@@ -1519,28 +1474,14 @@ export class WindowsAPIBridge {
   /**
    * Rectangle
    */
-  public Rectangle(
-    hdc: number,
-    left: number,
-    top: number,
-    right: number,
-    bottom: number
-  ): boolean {
-    console.log(`▭ Rectangle: (${left}, ${top}) to (${right}, ${bottom})`);
+  public Rectangle(hdc: number, left: number, top: number, right: number, bottom: number): boolean {
     return true;
   }
 
   /**
    * Ellipse
    */
-  public Ellipse(
-    hdc: number,
-    left: number,
-    top: number,
-    right: number,
-    bottom: number
-  ): boolean {
-    console.log(`⭕ Ellipse: (${left}, ${top}) to (${right}, ${bottom})`);
+  public Ellipse(hdc: number, left: number, top: number, right: number, bottom: number): boolean {
     return true;
   }
 
@@ -1548,7 +1489,6 @@ export class WindowsAPIBridge {
    * LineTo
    */
   public LineTo(hdc: number, x: number, y: number): boolean {
-    console.log(`📏 LineTo: (${x}, ${y})`);
     return true;
   }
 
@@ -1556,7 +1496,6 @@ export class WindowsAPIBridge {
    * MoveTo
    */
   public MoveTo(hdc: number, x: number, y: number, lpPoint: POINT | null): boolean {
-    console.log(`📍 MoveTo: (${x}, ${y})`);
     return true;
   }
 
@@ -1572,7 +1511,7 @@ export class WindowsAPIBridge {
       [RegistryHive.HKEY_USERS]: 'HKEY_USERS',
       [RegistryHive.HKEY_PERFORMANCE_DATA]: 'HKEY_PERFORMANCE_DATA',
       [RegistryHive.HKEY_CURRENT_CONFIG]: 'HKEY_CURRENT_CONFIG',
-      [RegistryHive.HKEY_DYN_DATA]: 'HKEY_DYN_DATA'
+      [RegistryHive.HKEY_DYN_DATA]: 'HKEY_DYN_DATA',
     };
 
     if (hKey >= 0x80000000) {
@@ -1605,7 +1544,6 @@ export class WindowsAPIBridge {
   public GlobalAddAtom(lpString: string): number {
     const atom = this.nextAtom++;
     this.atoms.set(atom, lpString);
-    console.log(`⚛️ Atom added: ${atom} = ${lpString}`);
     return atom;
   }
 
@@ -1624,7 +1562,6 @@ export class WindowsAPIBridge {
 
   public GlobalDeleteAtom(nAtom: number): number {
     this.atoms.delete(nAtom);
-    console.log(`⚛️ Atom deleted: ${nAtom}`);
     return 0;
   }
 
@@ -1632,29 +1569,24 @@ export class WindowsAPIBridge {
    * Clipboard functions
    */
   public OpenClipboard(hWndNewOwner: number): boolean {
-    console.log(`📋 Clipboard opened`);
     return true;
   }
 
   public CloseClipboard(): boolean {
-    console.log(`📋 Clipboard closed`);
     return true;
   }
 
   public EmptyClipboard(): boolean {
     this.clipboard = '';
-    console.log(`📋 Clipboard emptied`);
     return true;
   }
 
   public SetClipboardData(uFormat: number, hMem: any): number {
     this.clipboard = hMem;
-    console.log(`📋 Clipboard data set`);
     return this.nextHandle++;
   }
 
   public GetClipboardData(uFormat: number): any {
-    console.log(`📋 Clipboard data retrieved`);
     return this.clipboard;
   }
 
@@ -1668,7 +1600,7 @@ export class WindowsAPIBridge {
     lpTimerFunc: Function | null
   ): number {
     const timerId = nIDEvent || this.nextHandle++;
-    
+
     const timer = setInterval(() => {
       if (lpTimerFunc) {
         lpTimerFunc(hWnd, WindowMessage.WM_TIMER, timerId, Date.now());
@@ -1678,7 +1610,6 @@ export class WindowsAPIBridge {
     }, uElapse);
 
     this.timers.set(timerId, timer);
-    console.log(`⏱️ Timer set: ${timerId} (${uElapse}ms)`);
     return timerId;
   }
 
@@ -1687,7 +1618,6 @@ export class WindowsAPIBridge {
     if (timer) {
       clearInterval(timer);
       this.timers.delete(uIDEvent);
-      console.log(`⏱️ Timer killed: ${uIDEvent}`);
       return true;
     }
     return false;
@@ -1735,7 +1665,8 @@ export class WindowsAPIBridge {
 
     // Try to get from navigator
     if (typeof navigator !== 'undefined') {
-      if ((navigator as any).userAgentData?.platform) {
+      const nav = navigator as unknown as { userAgentData?: { platform?: string } };
+      if (nav.userAgentData?.platform) {
         return 'User';
       }
     }
@@ -1867,44 +1798,38 @@ export const GetClipboardData = apiInstance.GetClipboardData.bind(apiInstance);
  * Support pour VB6 Declare Function
  * Example: Declare Function MessageBox Lib "user32" Alias "MessageBoxA" (...)
  */
-export function DeclareFunction(
-  name: string,
-  lib: string,
-  alias?: string
-): Function {
+export function DeclareFunction(name: string, lib: string, alias?: string): Function {
   const funcName = alias || name;
-  
+
   // Map to our implementations
   const apiMap: { [key: string]: Function } = {
-    'MessageBoxA': MessageBox,
-    'MessageBoxW': MessageBox,
-    'CreateWindowExA': CreateWindowEx,
-    'CreateWindowExW': CreateWindowEx,
-    'GetWindowTextA': GetWindowText,
-    'GetWindowTextW': GetWindowText,
-    'SetWindowTextA': SetWindowText,
-    'SetWindowTextW': SetWindowText,
-    'RegOpenKeyExA': RegOpenKeyEx,
-    'RegOpenKeyExW': RegOpenKeyEx,
-    'RegQueryValueExA': RegQueryValueEx,
-    'RegQueryValueExW': RegQueryValueEx,
-    'RegSetValueExA': RegSetValueEx,
-    'RegSetValueExW': RegSetValueEx,
-    'ShellExecuteA': ShellExecute,
-    'ShellExecuteW': ShellExecute,
+    MessageBoxA: MessageBox,
+    MessageBoxW: MessageBox,
+    CreateWindowExA: CreateWindowEx,
+    CreateWindowExW: CreateWindowEx,
+    GetWindowTextA: GetWindowText,
+    GetWindowTextW: GetWindowText,
+    SetWindowTextA: SetWindowText,
+    SetWindowTextW: SetWindowText,
+    RegOpenKeyExA: RegOpenKeyEx,
+    RegOpenKeyExW: RegOpenKeyEx,
+    RegQueryValueExA: RegQueryValueEx,
+    RegQueryValueExW: RegQueryValueEx,
+    RegSetValueExA: RegSetValueEx,
+    RegSetValueExW: RegSetValueEx,
+    ShellExecuteA: ShellExecute,
+    ShellExecuteW: ShellExecute,
     // Add more mappings as needed
   };
 
   const func = apiMap[funcName];
   if (func) {
-    console.log(`🔗 Linked API: ${name} -> ${lib}!${funcName}`);
     return func;
   }
 
   // Return stub for unknown functions
   console.warn(`⚠️ Unknown API: ${lib}!${funcName}`);
   return (...args: any[]) => {
-    console.log(`Called ${lib}!${funcName}(${args.join(', ')})`);
     return 0;
   };
 }
@@ -1922,7 +1847,7 @@ export const VB6WindowsAPIBridge = {
   WindowStyle,
   ShowWindowCommand,
   RegistryHive,
-  FileAttribute
+  FileAttribute,
 };
 
 export default VB6WindowsAPIBridge;

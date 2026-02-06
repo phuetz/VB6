@@ -5,17 +5,17 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { 
-  VB6ResourceManagerInstance, 
-  VB6ResourceType, 
-  VB6LanguageID, 
+import {
+  VB6ResourceManagerInstance,
+  VB6ResourceType,
+  VB6LanguageID,
   VB6ResourceEntry,
   VB6StringResource,
   VB6IconResource,
   VB6MenuResource,
   VB6DialogResource,
   VB6VersionResource,
-  VB6MenuItem
+  VB6MenuItem,
 } from '../../services/VB6ResourceManager';
 
 interface VB6ResourceEditorProps {
@@ -25,40 +25,50 @@ interface VB6ResourceEditorProps {
   onLoad?: (file: File) => void;
 }
 
-type ResourceFilter = 'all' | 'strings' | 'icons' | 'cursors' | 'menus' | 'dialogs' | 'version' | 'custom';
+type ResourceFilter =
+  | 'all'
+  | 'strings'
+  | 'icons'
+  | 'cursors'
+  | 'menus'
+  | 'dialogs'
+  | 'version'
+  | 'custom';
 
 export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
   visible,
   onClose,
   onSave,
-  onLoad
+  onLoad,
 }) => {
   const [resources, setResources] = useState<VB6ResourceEntry[]>([]);
   const [selectedResource, setSelectedResource] = useState<VB6ResourceEntry | null>(null);
   const [filter, setFilter] = useState<ResourceFilter>('all');
   const [editMode, setEditMode] = useState<'view' | 'edit' | 'add'>('view');
   const [isDirty, setIsDirty] = useState(false);
-  
+
   // String editor state
   const [stringResources, setStringResources] = useState<VB6StringResource[]>([]);
   const [editingString, setEditingString] = useState<VB6StringResource | null>(null);
   const [newStringId, setNewStringId] = useState<number>(1000);
   const [newStringValue, setNewStringValue] = useState<string>('');
-  const [selectedLanguage, setSelectedLanguage] = useState<VB6LanguageID>(VB6LanguageID.LANG_NEUTRAL);
-  
+  const [selectedLanguage, setSelectedLanguage] = useState<VB6LanguageID>(
+    VB6LanguageID.LANG_NEUTRAL
+  );
+
   // Icon/Cursor editor state
   const [iconResources, setIconResources] = useState<VB6IconResource[]>([]);
-  
+
   // Menu editor state
   const [menuResources, setMenuResources] = useState<VB6MenuResource[]>([]);
   const [editingMenu, setEditingMenu] = useState<VB6MenuResource | null>(null);
-  
+
   // Dialog editor state
   const [dialogResources, setDialogResources] = useState<VB6DialogResource[]>([]);
-  
+
   // Version editor state
   const [versionResource, setVersionResource] = useState<VB6VersionResource | null>(null);
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize resources
@@ -80,14 +90,22 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
   // Filter resources
   const filteredResources = resources.filter(resource => {
     switch (filter) {
-      case 'strings': return resource.type === VB6ResourceType.RT_STRING;
-      case 'icons': return resource.type === VB6ResourceType.RT_ICON;
-      case 'cursors': return resource.type === VB6ResourceType.RT_CURSOR;
-      case 'menus': return resource.type === VB6ResourceType.RT_MENU;
-      case 'dialogs': return resource.type === VB6ResourceType.RT_DIALOG;
-      case 'version': return resource.type === VB6ResourceType.RT_VERSION;
-      case 'custom': return resource.type >= VB6ResourceType.RT_CUSTOM;
-      default: return true;
+      case 'strings':
+        return resource.type === VB6ResourceType.RT_STRING;
+      case 'icons':
+        return resource.type === VB6ResourceType.RT_ICON;
+      case 'cursors':
+        return resource.type === VB6ResourceType.RT_CURSOR;
+      case 'menus':
+        return resource.type === VB6ResourceType.RT_MENU;
+      case 'dialogs':
+        return resource.type === VB6ResourceType.RT_DIALOG;
+      case 'version':
+        return resource.type === VB6ResourceType.RT_VERSION;
+      case 'custom':
+        return resource.type >= VB6ResourceType.RT_CUSTOM;
+      default:
+        return true;
     }
   });
 
@@ -98,25 +116,28 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
     }
   }, []);
 
-  const handleFileSelected = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleFileSelected = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    try {
-      const arrayBuffer = await file.arrayBuffer();
-      const success = await VB6ResourceManagerInstance.loadResourceFile(arrayBuffer);
-      
-      if (success) {
-        refreshResources();
-        if (onLoad) onLoad(file);
-      } else {
-        alert('Failed to load resource file');
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const success = await VB6ResourceManagerInstance.loadResourceFile(arrayBuffer);
+
+        if (success) {
+          refreshResources();
+          if (onLoad) onLoad(file);
+        } else {
+          alert('Failed to load resource file');
+        }
+      } catch (error) {
+        console.error('Error loading file:', error);
+        alert('Error loading resource file');
       }
-    } catch (error) {
-      console.error('Error loading file:', error);
-      alert('Error loading resource file');
-    }
-  }, [refreshResources, onLoad]);
+    },
+    [refreshResources, onLoad]
+  );
 
   const handleSaveFile = useCallback(async () => {
     try {
@@ -174,19 +195,22 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
     }
   }, [editingString, refreshResources]);
 
-  const handleDeleteString = useCallback((id: number, languageId?: VB6LanguageID) => {
-    if (confirm('Are you sure you want to delete this string resource?')) {
-      VB6ResourceManagerInstance.removeStringResource(id, languageId);
-      refreshResources();
-    }
-  }, [refreshResources]);
+  const handleDeleteString = useCallback(
+    (id: number, languageId?: VB6LanguageID) => {
+      if (confirm('Are you sure you want to delete this string resource?')) {
+        VB6ResourceManagerInstance.removeStringResource(id, languageId);
+        refreshResources();
+      }
+    },
+    [refreshResources]
+  );
 
   // Icon resource operations
   const handleAddIcon = useCallback(() => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*,.ico,.cur';
-    input.onchange = async (e) => {
+    input.onchange = async e => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
 
@@ -194,7 +218,7 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
         const arrayBuffer = await file.arrayBuffer();
         const id = Math.max(...iconResources.map(i => i.id), 0) + 1;
         const isCursor = file.name.toLowerCase().endsWith('.cur');
-        
+
         VB6ResourceManagerInstance.addIconResource(
           id,
           arrayBuffer,
@@ -203,7 +227,7 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
           32, // Default color depth
           isCursor
         );
-        
+
         refreshResources();
       } catch (error) {
         console.error('Error adding icon:', error);
@@ -225,16 +249,37 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
           separator: false,
           popup: true,
           children: [
-            { id: 1002, text: '&New', enabled: true, checked: false, separator: false, popup: false },
-            { id: 1003, text: '&Open', enabled: true, checked: false, separator: false, popup: false },
+            {
+              id: 1002,
+              text: '&New',
+              enabled: true,
+              checked: false,
+              separator: false,
+              popup: false,
+            },
+            {
+              id: 1003,
+              text: '&Open',
+              enabled: true,
+              checked: false,
+              separator: false,
+              popup: false,
+            },
             { id: 0, text: '', enabled: false, checked: false, separator: true, popup: false },
-            { id: 1004, text: 'E&xit', enabled: true, checked: false, separator: false, popup: false }
-          ]
-        }
+            {
+              id: 1004,
+              text: 'E&xit',
+              enabled: true,
+              checked: false,
+              separator: false,
+              popup: false,
+            },
+          ],
+        },
       ],
-      languageId: selectedLanguage
+      languageId: selectedLanguage,
     };
-    
+
     VB6ResourceManagerInstance.addMenuResource(newMenu.id, newMenu.items, newMenu.languageId);
     refreshResources();
   }, [menuResources, selectedLanguage, refreshResources]);
@@ -250,17 +295,17 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
       fileType: 0x1, // VFT_APP
       fileSubtype: 0,
       stringInfo: {
-        'CompanyName': 'Your Company',
-        'FileDescription': 'Your Application',
-        'FileVersion': '1.0.0.0',
-        'InternalName': 'YourApp',
-        'LegalCopyright': 'Copyright © Your Company',
-        'OriginalFilename': 'YourApp.exe',
-        'ProductName': 'Your Product',
-        'ProductVersion': '1.0.0.0'
-      }
+        CompanyName: 'Your Company',
+        FileDescription: 'Your Application',
+        FileVersion: '1.0.0.0',
+        InternalName: 'YourApp',
+        LegalCopyright: 'Copyright © Your Company',
+        OriginalFilename: 'YourApp.exe',
+        ProductName: 'Your Product',
+        ProductVersion: '1.0.0.0',
+      },
     };
-    
+
     VB6ResourceManagerInstance.setVersionResource(newVersion);
     refreshResources();
   }, [refreshResources]);
@@ -268,29 +313,47 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
   // Resource type helpers
   const getResourceTypeName = (type: VB6ResourceType): string => {
     switch (type) {
-      case VB6ResourceType.RT_CURSOR: return 'Cursor';
-      case VB6ResourceType.RT_BITMAP: return 'Bitmap';
-      case VB6ResourceType.RT_ICON: return 'Icon';
-      case VB6ResourceType.RT_MENU: return 'Menu';
-      case VB6ResourceType.RT_DIALOG: return 'Dialog';
-      case VB6ResourceType.RT_STRING: return 'String';
-      case VB6ResourceType.RT_ACCELERATOR: return 'Accelerator';
-      case VB6ResourceType.RT_RCDATA: return 'Raw Data';
-      case VB6ResourceType.RT_VERSION: return 'Version Info';
-      default: return 'Custom';
+      case VB6ResourceType.RT_CURSOR:
+        return 'Cursor';
+      case VB6ResourceType.RT_BITMAP:
+        return 'Bitmap';
+      case VB6ResourceType.RT_ICON:
+        return 'Icon';
+      case VB6ResourceType.RT_MENU:
+        return 'Menu';
+      case VB6ResourceType.RT_DIALOG:
+        return 'Dialog';
+      case VB6ResourceType.RT_STRING:
+        return 'String';
+      case VB6ResourceType.RT_ACCELERATOR:
+        return 'Accelerator';
+      case VB6ResourceType.RT_RCDATA:
+        return 'Raw Data';
+      case VB6ResourceType.RT_VERSION:
+        return 'Version Info';
+      default:
+        return 'Custom';
     }
   };
 
   const getResourceIcon = (type: VB6ResourceType): string => {
     switch (type) {
-      case VB6ResourceType.RT_CURSOR: return '🖱️';
-      case VB6ResourceType.RT_BITMAP: return '🖼️';
-      case VB6ResourceType.RT_ICON: return '🎨';
-      case VB6ResourceType.RT_MENU: return '📋';
-      case VB6ResourceType.RT_DIALOG: return '🪟';
-      case VB6ResourceType.RT_STRING: return '📝';
-      case VB6ResourceType.RT_VERSION: return 'ℹ️';
-      default: return '📄';
+      case VB6ResourceType.RT_CURSOR:
+        return '🖱️';
+      case VB6ResourceType.RT_BITMAP:
+        return '🖼️';
+      case VB6ResourceType.RT_ICON:
+        return '🎨';
+      case VB6ResourceType.RT_MENU:
+        return '📋';
+      case VB6ResourceType.RT_DIALOG:
+        return '🪟';
+      case VB6ResourceType.RT_STRING:
+        return '📝';
+      case VB6ResourceType.RT_VERSION:
+        return 'ℹ️';
+      default:
+        return '📄';
     }
   };
 
@@ -302,14 +365,22 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
 
   const getLanguageName = (langId: VB6LanguageID): string => {
     switch (langId) {
-      case VB6LanguageID.LANG_ENGLISH: return 'English';
-      case VB6LanguageID.LANG_FRENCH: return 'French';
-      case VB6LanguageID.LANG_GERMAN: return 'German';
-      case VB6LanguageID.LANG_SPANISH: return 'Spanish';
-      case VB6LanguageID.LANG_ITALIAN: return 'Italian';
-      case VB6LanguageID.LANG_JAPANESE: return 'Japanese';
-      case VB6LanguageID.LANG_CHINESE: return 'Chinese';
-      default: return 'Neutral';
+      case VB6LanguageID.LANG_ENGLISH:
+        return 'English';
+      case VB6LanguageID.LANG_FRENCH:
+        return 'French';
+      case VB6LanguageID.LANG_GERMAN:
+        return 'German';
+      case VB6LanguageID.LANG_SPANISH:
+        return 'Spanish';
+      case VB6LanguageID.LANG_ITALIAN:
+        return 'Italian';
+      case VB6LanguageID.LANG_JAPANESE:
+        return 'Japanese';
+      case VB6LanguageID.LANG_CHINESE:
+        return 'Chinese';
+      default:
+        return 'Neutral';
     }
   };
 
@@ -322,20 +393,20 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
           <input
             type="number"
             value={newStringId}
-            onChange={(e) => setNewStringId(parseInt(e.target.value) || 1000)}
+            onChange={e => setNewStringId(parseInt(e.target.value) || 1000)}
             className="w-20 px-2 py-1 border text-xs"
             placeholder="ID"
           />
           <input
             type="text"
             value={newStringValue}
-            onChange={(e) => setNewStringValue(e.target.value)}
+            onChange={e => setNewStringValue(e.target.value)}
             className="flex-1 px-2 py-1 border text-xs"
             placeholder="String value"
           />
           <select
             value={selectedLanguage}
-            onChange={(e) => setSelectedLanguage(parseInt(e.target.value))}
+            onChange={e => setSelectedLanguage(parseInt(e.target.value))}
             className="px-2 py-1 border text-xs"
           >
             <option value={VB6LanguageID.LANG_NEUTRAL}>Neutral</option>
@@ -353,7 +424,7 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
           </button>
         </div>
       </div>
-      
+
       <div className="flex-1 overflow-auto">
         <table className="w-full text-xs">
           <thead className="bg-gray-100 sticky top-0">
@@ -369,11 +440,12 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
               <tr key={`${resource.id}_${resource.languageId}`} className="hover:bg-gray-50">
                 <td className="p-2 border-b font-mono">{resource.id}</td>
                 <td className="p-2 border-b">
-                  {editingString?.id === resource.id && editingString?.languageId === resource.languageId ? (
+                  {editingString?.id === resource.id &&
+                  editingString?.languageId === resource.languageId ? (
                     <input
                       type="text"
                       value={editingString.value}
-                      onChange={(e) => setEditingString({ ...editingString, value: e.target.value })}
+                      onChange={e => setEditingString({ ...editingString, value: e.target.value })}
                       className="w-full px-1 py-1 border text-xs"
                       autoFocus
                     />
@@ -386,7 +458,8 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
                 <td className="p-2 border-b">{getLanguageName(resource.languageId)}</td>
                 <td className="p-2 border-b">
                   <div className="flex gap-1">
-                    {editingString?.id === resource.id && editingString?.languageId === resource.languageId ? (
+                    {editingString?.id === resource.id &&
+                    editingString?.languageId === resource.languageId ? (
                       <>
                         <button
                           onClick={handleSaveString}
@@ -395,7 +468,10 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
                           Save
                         </button>
                         <button
-                          onClick={() => { setEditingString(null); setEditMode('view'); }}
+                          onClick={() => {
+                            setEditingString(null);
+                            setEditMode('view');
+                          }}
                           className="px-2 py-1 bg-gray-500 text-white text-xs rounded"
                         >
                           Cancel
@@ -438,14 +514,22 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
           Add Icon/Cursor
         </button>
       </div>
-      
+
       <div className="flex-1 overflow-auto p-3">
         <div className="grid grid-cols-4 gap-4">
-          {iconResources.map((icon) => (
+          {iconResources.map(icon => (
             <div
               key={icon.id}
               className="border rounded p-3 text-center hover:bg-gray-50 cursor-pointer"
-              onClick={() => setSelectedResource(resources.find(r => r.id === icon.id && (r.type === VB6ResourceType.RT_ICON || r.type === VB6ResourceType.RT_CURSOR)) || null)}
+              onClick={() =>
+                setSelectedResource(
+                  resources.find(
+                    r =>
+                      r.id === icon.id &&
+                      (r.type === VB6ResourceType.RT_ICON || r.type === VB6ResourceType.RT_CURSOR)
+                  ) || null
+                )
+              }
             >
               <div className="w-16 h-16 mx-auto mb-2 bg-gray-200 rounded flex items-center justify-center">
                 {icon.isCursor ? '🖱️' : '🎨'}
@@ -454,9 +538,7 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
               <div className="text-xs text-gray-600">
                 {icon.width}×{icon.height} {icon.colorDepth}-bit
               </div>
-              <div className="text-xs text-gray-600">
-                {icon.isCursor ? 'Cursor' : 'Icon'}
-              </div>
+              <div className="text-xs text-gray-600">{icon.isCursor ? 'Cursor' : 'Icon'}</div>
             </div>
           ))}
         </div>
@@ -477,7 +559,7 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
           </button>
         )}
       </div>
-      
+
       {versionResource && (
         <div className="flex-1 overflow-auto p-3">
           <div className="space-y-4">
@@ -485,23 +567,63 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
               <div>
                 <label className="block text-xs font-bold mb-1">File Version</label>
                 <div className="flex gap-1">
-                  <input type="number" className="w-12 px-1 py-1 border text-xs" value={versionResource.fileVersion.major} readOnly />
-                  <input type="number" className="w-12 px-1 py-1 border text-xs" value={versionResource.fileVersion.minor} readOnly />
-                  <input type="number" className="w-12 px-1 py-1 border text-xs" value={versionResource.fileVersion.build} readOnly />
-                  <input type="number" className="w-12 px-1 py-1 border text-xs" value={versionResource.fileVersion.revision} readOnly />
+                  <input
+                    type="number"
+                    className="w-12 px-1 py-1 border text-xs"
+                    value={versionResource.fileVersion.major}
+                    readOnly
+                  />
+                  <input
+                    type="number"
+                    className="w-12 px-1 py-1 border text-xs"
+                    value={versionResource.fileVersion.minor}
+                    readOnly
+                  />
+                  <input
+                    type="number"
+                    className="w-12 px-1 py-1 border text-xs"
+                    value={versionResource.fileVersion.build}
+                    readOnly
+                  />
+                  <input
+                    type="number"
+                    className="w-12 px-1 py-1 border text-xs"
+                    value={versionResource.fileVersion.revision}
+                    readOnly
+                  />
                 </div>
               </div>
               <div>
                 <label className="block text-xs font-bold mb-1">Product Version</label>
                 <div className="flex gap-1">
-                  <input type="number" className="w-12 px-1 py-1 border text-xs" value={versionResource.productVersion.major} readOnly />
-                  <input type="number" className="w-12 px-1 py-1 border text-xs" value={versionResource.productVersion.minor} readOnly />
-                  <input type="number" className="w-12 px-1 py-1 border text-xs" value={versionResource.productVersion.build} readOnly />
-                  <input type="number" className="w-12 px-1 py-1 border text-xs" value={versionResource.productVersion.revision} readOnly />
+                  <input
+                    type="number"
+                    className="w-12 px-1 py-1 border text-xs"
+                    value={versionResource.productVersion.major}
+                    readOnly
+                  />
+                  <input
+                    type="number"
+                    className="w-12 px-1 py-1 border text-xs"
+                    value={versionResource.productVersion.minor}
+                    readOnly
+                  />
+                  <input
+                    type="number"
+                    className="w-12 px-1 py-1 border text-xs"
+                    value={versionResource.productVersion.build}
+                    readOnly
+                  />
+                  <input
+                    type="number"
+                    className="w-12 px-1 py-1 border text-xs"
+                    value={versionResource.productVersion.revision}
+                    readOnly
+                  />
                 </div>
               </div>
             </div>
-            
+
             <div>
               <h4 className="text-xs font-bold mb-2">String Information</h4>
               <div className="space-y-2">
@@ -527,35 +649,41 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
   if (!visible) return null;
 
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000
-    }}>
-      <div style={{
-        width: '1000px',
-        height: '700px',
-        backgroundColor: '#F0F0F0',
-        border: '2px outset #C0C0C0',
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
         display: 'flex',
-        flexDirection: 'column',
-        fontFamily: 'MS Sans Serif',
-        fontSize: '8pt'
-      }}>
-        {/* Title Bar */}
-        <div style={{
-          backgroundColor: '#0080FF',
-          color: 'white',
-          padding: '2px 6px',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+      }}
+    >
+      <div
+        style={{
+          width: '1000px',
+          height: '700px',
+          backgroundColor: '#F0F0F0',
+          border: '2px outset #C0C0C0',
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          fontWeight: 'bold'
-        }}>
+          flexDirection: 'column',
+          fontFamily: 'MS Sans Serif',
+          fontSize: '8pt',
+        }}
+      >
+        {/* Title Bar */}
+        <div
+          style={{
+            backgroundColor: '#0080FF',
+            color: 'white',
+            padding: '2px 6px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            fontWeight: 'bold',
+          }}
+        >
           <span>VB6 Resource Editor</span>
           <button
             onClick={onClose}
@@ -565,7 +693,7 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
               color: 'white',
               cursor: 'pointer',
               padding: '0 4px',
-              fontSize: '12px'
+              fontSize: '12px',
             }}
           >
             ×
@@ -573,13 +701,15 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
         </div>
 
         {/* Menu Bar */}
-        <div style={{
-          backgroundColor: '#E0E0E0',
-          padding: '2px 4px',
-          borderBottom: '1px solid #C0C0C0',
-          display: 'flex',
-          gap: '8px'
-        }}>
+        <div
+          style={{
+            backgroundColor: '#E0E0E0',
+            padding: '2px 4px',
+            borderBottom: '1px solid #C0C0C0',
+            display: 'flex',
+            gap: '8px',
+          }}
+        >
           <button
             onClick={handleLoadFile}
             style={{
@@ -587,7 +717,7 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
               fontSize: '8pt',
               backgroundColor: '#F0F0F0',
               border: '1px outset #C0C0C0',
-              cursor: 'pointer'
+              cursor: 'pointer',
             }}
           >
             Load .res
@@ -600,7 +730,7 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
               fontSize: '8pt',
               backgroundColor: isDirty ? '#F0F0F0' : '#E0E0E0',
               border: '1px outset #C0C0C0',
-              cursor: isDirty ? 'pointer' : 'not-allowed'
+              cursor: isDirty ? 'pointer' : 'not-allowed',
             }}
           >
             Save .res
@@ -608,11 +738,11 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
           <div style={{ borderLeft: '1px solid #C0C0C0', height: '20px', margin: '0 4px' }} />
           <select
             value={filter}
-            onChange={(e) => setFilter(e.target.value as ResourceFilter)}
+            onChange={e => setFilter(e.target.value as ResourceFilter)}
             style={{
               fontSize: '8pt',
               border: '1px inset #C0C0C0',
-              backgroundColor: '#FFFFFF'
+              backgroundColor: '#FFFFFF',
             }}
           >
             <option value="all">All Resources</option>
@@ -627,29 +757,35 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
         </div>
 
         {/* Main Content */}
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          overflow: 'hidden'
-        }}>
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            overflow: 'hidden',
+          }}
+        >
           {/* Resource List */}
-          <div style={{
-            width: '300px',
-            borderRight: '1px solid #C0C0C0',
-            backgroundColor: '#FFFFFF',
-            overflow: 'auto'
-          }}>
-            <div style={{
-              backgroundColor: '#C0C0C0',
-              padding: '2px 4px',
-              borderBottom: '1px solid #808080',
-              fontSize: '8pt',
-              fontWeight: 'bold'
-            }}>
+          <div
+            style={{
+              width: '300px',
+              borderRight: '1px solid #C0C0C0',
+              backgroundColor: '#FFFFFF',
+              overflow: 'auto',
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: '#C0C0C0',
+                padding: '2px 4px',
+                borderBottom: '1px solid #808080',
+                fontSize: '8pt',
+                fontWeight: 'bold',
+              }}
+            >
               Resources ({filteredResources.length})
             </div>
-            
-            {filteredResources.map((resource) => (
+
+            {filteredResources.map(resource => (
               <div
                 key={`${resource.type}_${resource.id}_${resource.languageId}`}
                 style={{
@@ -659,17 +795,25 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px'
+                  gap: '4px',
                 }}
                 onClick={() => setSelectedResource(resource)}
               >
                 <span style={{ fontSize: '12px' }}>{getResourceIcon(resource.type)}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '8pt', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div
+                    style={{
+                      fontSize: '8pt',
+                      fontWeight: 'bold',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
                     {resource.name}
                   </div>
                   <div style={{ fontSize: '8pt', color: '#666666' }}>
-                    {getResourceTypeName(resource.type)} #{resource.id} ({formatFileSize(resource.size)})
+                    {getResourceTypeName(resource.type)} #{resource.id} (
+                    {formatFileSize(resource.size)})
                   </div>
                 </div>
               </div>
@@ -678,45 +822,49 @@ export const VB6ResourceEditor: React.FC<VB6ResourceEditorProps> = ({
 
           {/* Resource Editor */}
           <div style={{ flex: 1, overflow: 'hidden' }}>
-            {filter === 'strings' ? renderStringEditor() :
-             filter === 'icons' || filter === 'cursors' ? renderIconEditor() :
-             filter === 'version' ? renderVersionEditor() :
-             (
-               <div style={{
-                 padding: '20px',
-                 textAlign: 'center',
-                 color: '#666666'
-               }}>
-                 <div style={{ fontSize: '32px', marginBottom: '8px' }}>📄</div>
-                 <div>Select a resource type to begin editing</div>
-                 <div style={{ fontSize: '8pt', marginTop: '8px' }}>
-                   Total: {resources.length} resources, {formatFileSize(resources.reduce((sum, r) => sum + r.size, 0))}
-                 </div>
-               </div>
-             )
-            }
+            {filter === 'strings' ? (
+              renderStringEditor()
+            ) : filter === 'icons' || filter === 'cursors' ? (
+              renderIconEditor()
+            ) : filter === 'version' ? (
+              renderVersionEditor()
+            ) : (
+              <div
+                style={{
+                  padding: '20px',
+                  textAlign: 'center',
+                  color: '#666666',
+                }}
+              >
+                <div style={{ fontSize: '32px', marginBottom: '8px' }}>📄</div>
+                <div>Select a resource type to begin editing</div>
+                <div style={{ fontSize: '8pt', marginTop: '8px' }}>
+                  Total: {resources.length} resources,{' '}
+                  {formatFileSize(resources.reduce((sum, r) => sum + r.size, 0))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Status Bar */}
-        <div style={{
-          backgroundColor: '#E0E0E0',
-          padding: '2px 4px',
-          borderTop: '1px solid #C0C0C0',
-          fontSize: '8pt',
-          color: '#000080',
-          display: 'flex',
-          justifyContent: 'space-between'
-        }}>
+        <div
+          style={{
+            backgroundColor: '#E0E0E0',
+            padding: '2px 4px',
+            borderTop: '1px solid #C0C0C0',
+            fontSize: '8pt',
+            color: '#000080',
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
           <div>
-            {selectedResource ? 
-              `Selected: ${selectedResource.name} (${getResourceTypeName(selectedResource.type)})` : 
-              'Ready'
-            }
+            {selectedResource
+              ? `Selected: ${selectedResource.name} (${getResourceTypeName(selectedResource.type)})`
+              : 'Ready'}
           </div>
-          <div>
-            {isDirty ? 'Modified' : 'Saved'}
-          </div>
+          <div>{isDirty ? 'Modified' : 'Saved'}</div>
         </div>
       </div>
 

@@ -43,7 +43,7 @@ import {
   Bot,
   Workflow,
   Network,
-  Shield
+  Shield,
 } from 'lucide-react';
 
 // Types pour le centre de commande
@@ -105,78 +105,77 @@ interface AIInsight {
 class UltraAIAssistant {
   private static instance: UltraAIAssistant;
   private insights: AIInsight[] = [];
-  
+
   static getInstance(): UltraAIAssistant {
     if (!UltraAIAssistant.instance) {
       UltraAIAssistant.instance = new UltraAIAssistant();
     }
     return UltraAIAssistant.instance;
   }
-  
+
   async analyzeProject(projectData: any): Promise<AIInsight[]> {
-    console.log('🤖 AI Assistant analyzing project...');
-    
     // Simulate advanced AI analysis
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
     const insights: AIInsight[] = [
       {
         id: 'insight_performance_1',
         type: 'optimization',
         title: 'String Concatenation Optimization Opportunity',
-        description: 'Detected 12 inefficient string concatenations that could be optimized using StringBuilder pattern, potentially improving performance by 40%.',
+        description:
+          'Detected 12 inefficient string concatenations that could be optimized using StringBuilder pattern, potentially improving performance by 40%.',
         confidence: 0.87,
         impact: 'high',
         actionable: true,
         relatedTools: ['code-optimizer'],
-        generatedAt: new Date()
+        generatedAt: new Date(),
       },
       {
         id: 'insight_debug_1',
         type: 'suggestion',
         title: 'State Snapshot Recommendation',
-        description: 'Your application has complex state changes. Consider using Time-Travel Debugger to track state evolution during form interactions.',
+        description:
+          'Your application has complex state changes. Consider using Time-Travel Debugger to track state evolution during form interactions.',
         confidence: 0.75,
         impact: 'medium',
         actionable: true,
         relatedTools: ['time-travel-debugger'],
-        generatedAt: new Date()
+        generatedAt: new Date(),
       },
       {
         id: 'insight_test_1',
         type: 'warning',
         title: 'Test Coverage Gap Detected',
-        description: 'Critical business logic in CalculateTotal function lacks unit tests. Auto-generated tests available.',
+        description:
+          'Critical business logic in CalculateTotal function lacks unit tests. Auto-generated tests available.',
         confidence: 0.92,
         impact: 'critical',
         actionable: true,
         relatedTools: ['visual-test-framework'],
-        generatedAt: new Date()
+        generatedAt: new Date(),
       },
       {
         id: 'insight_pattern_1',
         type: 'pattern',
         title: 'Event Handler Pattern Detected',
-        description: 'Consistent event handling pattern found across 8 forms. Consider extracting to base class for better maintainability.',
+        description:
+          'Consistent event handling pattern found across 8 forms. Consider extracting to base class for better maintainability.',
         confidence: 0.68,
         impact: 'medium',
         actionable: false,
         relatedTools: ['code-optimizer'],
-        generatedAt: new Date()
-      }
+        generatedAt: new Date(),
+      },
     ];
-    
+
     this.insights = insights;
-    console.log(`✅ AI Analysis complete: ${insights.length} insights generated`);
     return insights;
   }
-  
+
   async generateCode(prompt: string, context: any): Promise<string> {
-    console.log(`🤖 Generating VB6 code for: ${prompt}`);
-    
     // Simulate advanced code generation
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     // Mock generated code based on prompt
     if (prompt.toLowerCase().includes('button click')) {
       return `
@@ -205,7 +204,7 @@ Private Function ProcessUserInput(input As String) As String
 End Function
       `.trim();
     }
-    
+
     return `
 ' AI-generated VB6 code
 Private Sub GeneratedFunction()
@@ -216,7 +215,7 @@ Private Sub GeneratedFunction()
 End Sub
     `.trim();
   }
-  
+
   getInsights(): AIInsight[] {
     return this.insights;
   }
@@ -226,37 +225,31 @@ End Sub
 class WorkflowEngine {
   private static instance: WorkflowEngine;
   private isExecuting = false;
-  
+
   static getInstance(): WorkflowEngine {
     if (!WorkflowEngine.instance) {
       WorkflowEngine.instance = new WorkflowEngine();
     }
     return WorkflowEngine.instance;
   }
-  
+
   async executeWorkflow(
-    template: WorkflowTemplate, 
+    template: WorkflowTemplate,
     onProgress?: (step: number, total: number) => void
   ): Promise<void> {
     if (this.isExecuting) {
       throw new Error('Another workflow is already running');
     }
-    
+
     this.isExecuting = true;
-    console.log(`🔄 Executing workflow: ${template.name}`);
-    
     try {
       for (let i = 0; i < template.steps.length; i++) {
         const step = template.steps[i];
-        console.log(`📋 Step ${i + 1}/${template.steps.length}: ${step.action}`);
-        
         // Simulate step execution
         await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-        
+
         onProgress?.(i + 1, template.steps.length);
       }
-      
-      console.log(`✅ Workflow completed: ${template.name}`);
     } catch (error) {
       console.error('❌ Workflow failed:', error);
       throw error;
@@ -264,10 +257,9 @@ class WorkflowEngine {
       this.isExecuting = false;
     }
   }
-  
+
   stopExecution() {
     this.isExecuting = false;
-    console.log('⏹️ Workflow execution stopped');
   }
 }
 
@@ -279,173 +271,183 @@ interface AdvancedCommandCenterProps {
 
 export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
   visible,
-  onClose
+  onClose,
 }) => {
-  const [activeView, setActiveView] = useState<'dashboard' | 'tools' | 'workflows' | 'ai' | 'settings'>('dashboard');
+  const [activeView, setActiveView] = useState<
+    'dashboard' | 'tools' | 'workflows' | 'ai' | 'settings'
+  >('dashboard');
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiInsights, setAiInsights] = useState<AIInsight[]>([]);
-  const [workflowProgress, setWorkflowProgress] = useState<{ current: number; total: number } | null>(null);
-  
+  const [workflowProgress, setWorkflowProgress] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
+
   // Tool visibility states
   const [showTimeTravelDebugger, setShowTimeTravelDebugger] = useState(false);
   const [showCodeOptimizer, setShowCodeOptimizer] = useState(false);
   const [showTestFramework, setShowTestFramework] = useState(false);
-  
+
   const projectStore = useProjectStore();
   const designerStore = useDesignerStore();
   const uiStore = useUIStore();
   const debugStore = useDebugStore();
-  
+
   const aiAssistant = UltraAIAssistant.getInstance();
   const workflowEngine = WorkflowEngine.getInstance();
-  
+
   // Advanced tools configuration
-  const advancedTools: AdvancedTool[] = useMemo(() => [
-    {
-      id: 'time-travel-debugger',
-      name: 'Time-Travel Debugger',
-      description: 'Navigate through application state history with visual snapshots',
-      icon: History,
-      category: 'debug',
-      status: 'available',
-      metrics: {
-        executionTime: 0,
-        itemsProcessed: 0,
-        successRate: 0.95
-      },
-      quickActions: [
-        {
-          id: 'create-snapshot',
-          label: 'Create Snapshot',
-          icon: Camera,
-          description: 'Take a snapshot of current application state',
-          execute: async () => {
-            console.log('📸 Creating state snapshot...');
-            setShowTimeTravelDebugger(true);
-          }
+  const advancedTools: AdvancedTool[] = useMemo(
+    () => [
+      {
+        id: 'time-travel-debugger',
+        name: 'Time-Travel Debugger',
+        description: 'Navigate through application state history with visual snapshots',
+        icon: History,
+        category: 'debug',
+        status: 'available',
+        metrics: {
+          executionTime: 0,
+          itemsProcessed: 0,
+          successRate: 0.95,
         },
-        {
-          id: 'view-timeline',
-          label: 'View Timeline',
-          icon: Clock,
-          description: 'Open timeline view of state changes',
-          execute: async () => {
-            setShowTimeTravelDebugger(true);
+        quickActions: [
+          {
+            id: 'create-snapshot',
+            label: 'Create Snapshot',
+            icon: Camera,
+            description: 'Take a snapshot of current application state',
+            execute: async () => {
+              setShowTimeTravelDebugger(true);
+            },
           },
-          shortcut: 'Ctrl+Shift+T'
-        }
-      ]
-    },
-    {
-      id: 'code-optimizer',
-      name: 'VB6 Code Optimizer',
-      description: 'AI-powered code analysis with performance suggestions',
-      icon: TrendingUp,
-      category: 'analyze',
-      status: 'available',
-      metrics: {
-        executionTime: 2340,
-        itemsProcessed: 45,
-        issuesFound: 12,
-        successRate: 0.89
+          {
+            id: 'view-timeline',
+            label: 'View Timeline',
+            icon: Clock,
+            description: 'Open timeline view of state changes',
+            execute: async () => {
+              setShowTimeTravelDebugger(true);
+            },
+            shortcut: 'Ctrl+Shift+T',
+          },
+        ],
       },
-      quickActions: [
-        {
-          id: 'analyze-performance',
-          label: 'Analyze Performance',
-          icon: Zap,
-          description: 'Scan code for performance optimization opportunities',
-          execute: async () => {
-            setShowCodeOptimizer(true);
-          }
+      {
+        id: 'code-optimizer',
+        name: 'VB6 Code Optimizer',
+        description: 'AI-powered code analysis with performance suggestions',
+        icon: TrendingUp,
+        category: 'analyze',
+        status: 'available',
+        metrics: {
+          executionTime: 2340,
+          itemsProcessed: 45,
+          issuesFound: 12,
+          successRate: 0.89,
         },
-        {
-          id: 'security-scan',
-          label: 'Security Scan',
-          icon: Shield,
-          description: 'Check for security vulnerabilities',
-          execute: async () => {
-            setShowCodeOptimizer(true);
+        quickActions: [
+          {
+            id: 'analyze-performance',
+            label: 'Analyze Performance',
+            icon: Zap,
+            description: 'Scan code for performance optimization opportunities',
+            execute: async () => {
+              setShowCodeOptimizer(true);
+            },
           },
-          shortcut: 'Ctrl+Shift+S'
-        }
-      ]
-    },
-    {
-      id: 'visual-test-framework',
-      name: 'Visual Test Framework',
-      description: 'Comprehensive testing suite with automated generation',
-      icon: TestTube,
-      category: 'test',
-      status: 'available',
-      metrics: {
-        executionTime: 15670,
-        itemsProcessed: 23,
-        successRate: 0.91
+          {
+            id: 'security-scan',
+            label: 'Security Scan',
+            icon: Shield,
+            description: 'Check for security vulnerabilities',
+            execute: async () => {
+              setShowCodeOptimizer(true);
+            },
+            shortcut: 'Ctrl+Shift+S',
+          },
+        ],
       },
-      quickActions: [
-        {
-          id: 'run-tests',
-          label: 'Run All Tests',
-          icon: Play,
-          description: 'Execute complete test suite',
-          execute: async () => {
-            setShowTestFramework(true);
-          }
+      {
+        id: 'visual-test-framework',
+        name: 'Visual Test Framework',
+        description: 'Comprehensive testing suite with automated generation',
+        icon: TestTube,
+        category: 'test',
+        status: 'available',
+        metrics: {
+          executionTime: 15670,
+          itemsProcessed: 23,
+          successRate: 0.91,
         },
-        {
-          id: 'generate-tests',
-          label: 'Generate Tests',
-          icon: Sparkles,
-          description: 'Auto-generate tests for current code',
-          execute: async () => {
-            setShowTestFramework(true);
+        quickActions: [
+          {
+            id: 'run-tests',
+            label: 'Run All Tests',
+            icon: Play,
+            description: 'Execute complete test suite',
+            execute: async () => {
+              setShowTestFramework(true);
+            },
           },
-          shortcut: 'Ctrl+Shift+G'
-        }
-      ]
-    }
-  ], []);
-  
+          {
+            id: 'generate-tests',
+            label: 'Generate Tests',
+            icon: Sparkles,
+            description: 'Auto-generate tests for current code',
+            execute: async () => {
+              setShowTestFramework(true);
+            },
+            shortcut: 'Ctrl+Shift+G',
+          },
+        ],
+      },
+    ],
+    []
+  );
+
   // Workflow templates
-  const workflowTemplates: WorkflowTemplate[] = useMemo(() => [
-    {
-      id: 'complete-analysis',
-      name: 'Complete Code Analysis',
-      description: 'Run comprehensive analysis including optimization, testing, and debugging',
-      estimatedTime: 45000,
-      category: 'development',
-      steps: [
-        { toolId: 'code-optimizer', action: 'analyze-performance', waitForCompletion: true },
-        { toolId: 'visual-test-framework', action: 'generate-tests', waitForCompletion: true },
-        { toolId: 'time-travel-debugger', action: 'create-snapshot', waitForCompletion: false }
-      ]
-    },
-    {
-      id: 'debug-session',
-      name: 'Advanced Debug Session',
-      description: 'Comprehensive debugging workflow with state tracking',
-      estimatedTime: 20000,
-      category: 'debugging',
-      steps: [
-        { toolId: 'time-travel-debugger', action: 'create-snapshot', waitForCompletion: true },
-        { toolId: 'code-optimizer', action: 'analyze-errors', waitForCompletion: true }
-      ]
-    },
-    {
-      id: 'performance-optimization',
-      name: 'Performance Optimization Sprint',
-      description: 'Focus on performance improvements and benchmarking',
-      estimatedTime: 30000,
-      category: 'optimization',
-      steps: [
-        { toolId: 'code-optimizer', action: 'analyze-performance', waitForCompletion: true },
-        { toolId: 'visual-test-framework', action: 'performance-tests', waitForCompletion: true }
-      ]
-    }
-  ], []);
-  
+  const workflowTemplates: WorkflowTemplate[] = useMemo(
+    () => [
+      {
+        id: 'complete-analysis',
+        name: 'Complete Code Analysis',
+        description: 'Run comprehensive analysis including optimization, testing, and debugging',
+        estimatedTime: 45000,
+        category: 'development',
+        steps: [
+          { toolId: 'code-optimizer', action: 'analyze-performance', waitForCompletion: true },
+          { toolId: 'visual-test-framework', action: 'generate-tests', waitForCompletion: true },
+          { toolId: 'time-travel-debugger', action: 'create-snapshot', waitForCompletion: false },
+        ],
+      },
+      {
+        id: 'debug-session',
+        name: 'Advanced Debug Session',
+        description: 'Comprehensive debugging workflow with state tracking',
+        estimatedTime: 20000,
+        category: 'debugging',
+        steps: [
+          { toolId: 'time-travel-debugger', action: 'create-snapshot', waitForCompletion: true },
+          { toolId: 'code-optimizer', action: 'analyze-errors', waitForCompletion: true },
+        ],
+      },
+      {
+        id: 'performance-optimization',
+        name: 'Performance Optimization Sprint',
+        description: 'Focus on performance improvements and benchmarking',
+        estimatedTime: 30000,
+        category: 'optimization',
+        steps: [
+          { toolId: 'code-optimizer', action: 'analyze-performance', waitForCompletion: true },
+          { toolId: 'visual-test-framework', action: 'performance-tests', waitForCompletion: true },
+        ],
+      },
+    ],
+    []
+  );
+
   // AI Analysis
   const runAIAnalysis = async () => {
     setIsAnalyzing(true);
@@ -453,7 +455,7 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
       const insights = await aiAssistant.analyzeProject({
         forms: projectStore.forms,
         controls: designerStore.controls,
-        modules: projectStore.modules
+        modules: projectStore.modules,
       });
       setAiInsights(insights);
     } catch (error) {
@@ -462,7 +464,7 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
       setIsAnalyzing(false);
     }
   };
-  
+
   // Execute workflow
   const executeWorkflow = async (template: WorkflowTemplate) => {
     try {
@@ -475,16 +477,16 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
       setWorkflowProgress(null);
     }
   };
-  
+
   // Auto-run AI analysis on mount
   useEffect(() => {
     if (visible && aiInsights.length === 0) {
       setTimeout(runAIAnalysis, 1000);
     }
   }, [visible, aiInsights.length]);
-  
+
   if (!visible) return null;
-  
+
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -493,14 +495,12 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
           <div className="flex items-center justify-between p-4 border-b dark:border-gray-700 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-t-lg">
             <div className="flex items-center space-x-3">
               <Command className="text-white" size={24} />
-              <h2 className="text-xl font-bold">
-                Advanced Command Center
-              </h2>
+              <h2 className="text-xl font-bold">Advanced Command Center</h2>
               <div className="px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm font-medium">
                 ULTRA-INTEGRATION
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               {workflowProgress && (
                 <div className="flex items-center space-x-2 bg-white bg-opacity-20 px-3 py-1 rounded">
@@ -510,15 +510,12 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                   </span>
                 </div>
               )}
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-white hover:bg-opacity-20 rounded"
-              >
+              <button onClick={onClose} className="p-2 hover:bg-white hover:bg-opacity-20 rounded">
                 <X size={20} />
               </button>
             </div>
           </div>
-          
+
           {/* Navigation */}
           <div className="flex border-b dark:border-gray-700">
             {[
@@ -526,7 +523,7 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
               { id: 'tools', label: 'Advanced Tools', icon: Rocket },
               { id: 'workflows', label: 'Workflows', icon: Workflow },
               { id: 'ai', label: 'AI Assistant', icon: Bot },
-              { id: 'settings', label: 'Settings', icon: Settings }
+              { id: 'settings', label: 'Settings', icon: Settings },
             ].map(tab => (
               <button
                 key={tab.id}
@@ -542,7 +539,7 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
               </button>
             ))}
           </div>
-          
+
           {/* Content */}
           <div className="flex-1 overflow-auto">
             {activeView === 'dashboard' && (
@@ -569,7 +566,7 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* AI Insights Summary */}
                   <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
                     <div className="flex items-center justify-between mb-3">
@@ -595,7 +592,7 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Quick Actions */}
                   <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
                     <div className="flex items-center justify-between mb-3">
@@ -603,13 +600,13 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                       <Zap className="text-blue-600" size={20} />
                     </div>
                     <div className="space-y-2">
-                      <button 
+                      <button
                         onClick={() => executeWorkflow(workflowTemplates[0])}
                         className="w-full text-left px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
                       >
                         Complete Analysis
                       </button>
-                      <button 
+                      <button
                         onClick={runAIAnalysis}
                         className="w-full text-left px-3 py-2 bg-purple-600 text-white rounded text-sm hover:bg-purple-700"
                         disabled={isAnalyzing}
@@ -619,7 +616,7 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Recent AI Insights */}
                 <div className="bg-white border rounded-lg p-4">
                   <h3 className="font-semibold text-lg mb-4">Recent AI Insights</h3>
@@ -627,26 +624,38 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                     <div className="text-center py-8">
                       <Brain size={48} className="mx-auto text-gray-400 mb-4" />
                       <p className="text-gray-500">
-                        {isAnalyzing ? 'AI is analyzing your project...' : 'No insights available yet'}
+                        {isAnalyzing
+                          ? 'AI is analyzing your project...'
+                          : 'No insights available yet'}
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-3">
                       {aiInsights.slice(0, 3).map(insight => (
-                        <div key={insight.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded">
-                          <div className={`p-1 rounded ${
-                            insight.impact === 'critical' ? 'bg-red-100 text-red-600' :
-                            insight.impact === 'high' ? 'bg-orange-100 text-orange-600' :
-                            insight.impact === 'medium' ? 'bg-yellow-100 text-yellow-600' :
-                            'bg-blue-100 text-blue-600'
-                          }`}>
+                        <div
+                          key={insight.id}
+                          className="flex items-start space-x-3 p-3 bg-gray-50 rounded"
+                        >
+                          <div
+                            className={`p-1 rounded ${
+                              insight.impact === 'critical'
+                                ? 'bg-red-100 text-red-600'
+                                : insight.impact === 'high'
+                                  ? 'bg-orange-100 text-orange-600'
+                                  : insight.impact === 'medium'
+                                    ? 'bg-yellow-100 text-yellow-600'
+                                    : 'bg-blue-100 text-blue-600'
+                            }`}
+                          >
                             <Lightbulb size={16} />
                           </div>
                           <div className="flex-1">
                             <h4 className="font-medium">{insight.title}</h4>
                             <p className="text-sm text-gray-600 mt-1">{insight.description}</p>
                             <div className="flex items-center mt-2 text-xs">
-                              <span className="text-gray-500">Confidence: {Math.round(insight.confidence * 100)}%</span>
+                              <span className="text-gray-500">
+                                Confidence: {Math.round(insight.confidence * 100)}%
+                              </span>
                               {insight.actionable && (
                                 <span className="ml-2 px-2 py-1 bg-green-100 text-green-700 rounded">
                                   Actionable
@@ -661,13 +670,16 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                 </div>
               </div>
             )}
-            
+
             {activeView === 'tools' && (
               <div className="p-6">
                 <h3 className="font-semibold text-lg mb-4">Advanced Development Tools</h3>
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                   {advancedTools.map(tool => (
-                    <div key={tool.id} className="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div
+                      key={tool.id}
+                      className="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow"
+                    >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center space-x-3">
                           <div className="p-2 bg-purple-100 rounded">
@@ -678,16 +690,21 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                             <p className="text-sm text-gray-600">{tool.description}</p>
                           </div>
                         </div>
-                        <div className={`px-2 py-1 rounded text-xs font-medium ${
-                          tool.status === 'available' ? 'bg-green-100 text-green-800' :
-                          tool.status === 'running' ? 'bg-blue-100 text-blue-800' :
-                          tool.status === 'completed' ? 'bg-purple-100 text-purple-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
+                        <div
+                          className={`px-2 py-1 rounded text-xs font-medium ${
+                            tool.status === 'available'
+                              ? 'bg-green-100 text-green-800'
+                              : tool.status === 'running'
+                                ? 'bg-blue-100 text-blue-800'
+                                : tool.status === 'completed'
+                                  ? 'bg-purple-100 text-purple-800'
+                                  : 'bg-red-100 text-red-800'
+                          }`}
+                        >
                           {tool.status}
                         </div>
                       </div>
-                      
+
                       {tool.metrics && (
                         <div className="mb-3 p-2 bg-gray-50 rounded text-xs">
                           {tool.metrics.issuesFound !== undefined && (
@@ -699,12 +716,14 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                           {tool.metrics.successRate !== undefined && (
                             <div className="flex justify-between">
                               <span>Success Rate:</span>
-                              <span className="font-medium">{Math.round(tool.metrics.successRate * 100)}%</span>
+                              <span className="font-medium">
+                                {Math.round(tool.metrics.successRate * 100)}%
+                              </span>
                             </div>
                           )}
                         </div>
                       )}
-                      
+
                       <div className="space-y-2">
                         {tool.quickActions.map(action => (
                           <button
@@ -727,7 +746,7 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                 </div>
               </div>
             )}
-            
+
             {activeView === 'workflows' && (
               <div className="p-6">
                 <h3 className="font-semibold text-lg mb-4">Automated Workflows</h3>
@@ -745,16 +764,21 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                             <span>{template.steps.length} steps</span>
                           </div>
                         </div>
-                        <div className={`px-2 py-1 rounded text-xs font-medium ${
-                          template.category === 'development' ? 'bg-blue-100 text-blue-800' :
-                          template.category === 'debugging' ? 'bg-red-100 text-red-800' :
-                          template.category === 'optimization' ? 'bg-green-100 text-green-800' :
-                          'bg-purple-100 text-purple-800'
-                        }`}>
+                        <div
+                          className={`px-2 py-1 rounded text-xs font-medium ${
+                            template.category === 'development'
+                              ? 'bg-blue-100 text-blue-800'
+                              : template.category === 'debugging'
+                                ? 'bg-red-100 text-red-800'
+                                : template.category === 'optimization'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-purple-100 text-purple-800'
+                          }`}
+                        >
                           {template.category}
                         </div>
                       </div>
-                      
+
                       <div className="space-y-2 mb-3">
                         {template.steps.map((step, index) => (
                           <div key={index} className="flex items-center space-x-2 text-sm">
@@ -765,7 +789,7 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                           </div>
                         ))}
                       </div>
-                      
+
                       <button
                         onClick={() => executeWorkflow(template)}
                         disabled={workflowProgress !== null}
@@ -779,7 +803,7 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                 </div>
               </div>
             )}
-            
+
             {activeView === 'ai' && (
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
@@ -793,7 +817,7 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                     {isAnalyzing ? 'Analyzing...' : 'Run Analysis'}
                   </button>
                 </div>
-                
+
                 {aiInsights.length === 0 ? (
                   <div className="text-center py-12">
                     <Bot size={64} className="mx-auto text-gray-400 mb-4" />
@@ -808,12 +832,17 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                       <div key={insight.id} className="bg-white border rounded-lg p-4">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex items-start space-x-3">
-                            <div className={`p-2 rounded ${
-                              insight.type === 'suggestion' ? 'bg-blue-100 text-blue-600' :
-                              insight.type === 'warning' ? 'bg-yellow-100 text-yellow-600' :
-                              insight.type === 'optimization' ? 'bg-green-100 text-green-600' :
-                              'bg-purple-100 text-purple-600'
-                            }`}>
+                            <div
+                              className={`p-2 rounded ${
+                                insight.type === 'suggestion'
+                                  ? 'bg-blue-100 text-blue-600'
+                                  : insight.type === 'warning'
+                                    ? 'bg-yellow-100 text-yellow-600'
+                                    : insight.type === 'optimization'
+                                      ? 'bg-green-100 text-green-600'
+                                      : 'bg-purple-100 text-purple-600'
+                              }`}
+                            >
                               <Lightbulb size={16} />
                             </div>
                             <div>
@@ -822,12 +851,17 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                             </div>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <div className={`px-2 py-1 rounded text-xs font-medium ${
-                              insight.impact === 'critical' ? 'bg-red-100 text-red-800' :
-                              insight.impact === 'high' ? 'bg-orange-100 text-orange-800' :
-                              insight.impact === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-blue-100 text-blue-800'
-                            }`}>
+                            <div
+                              className={`px-2 py-1 rounded text-xs font-medium ${
+                                insight.impact === 'critical'
+                                  ? 'bg-red-100 text-red-800'
+                                  : insight.impact === 'high'
+                                    ? 'bg-orange-100 text-orange-800'
+                                    : insight.impact === 'medium'
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-blue-100 text-blue-800'
+                              }`}
+                            >
                               {insight.impact}
                             </div>
                             <div className="text-xs text-gray-500">
@@ -835,7 +869,7 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                             </div>
                           </div>
                         </div>
-                        
+
                         {insight.actionable && (
                           <div className="flex space-x-2">
                             {insight.relatedTools.map(toolId => (
@@ -843,8 +877,10 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                                 key={toolId}
                                 onClick={() => {
                                   if (toolId === 'code-optimizer') setShowCodeOptimizer(true);
-                                  else if (toolId === 'time-travel-debugger') setShowTimeTravelDebugger(true);
-                                  else if (toolId === 'visual-test-framework') setShowTestFramework(true);
+                                  else if (toolId === 'time-travel-debugger')
+                                    setShowTimeTravelDebugger(true);
+                                  else if (toolId === 'visual-test-framework')
+                                    setShowTestFramework(true);
                                 }}
                                 className="px-3 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700"
                               >
@@ -859,11 +895,11 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                 )}
               </div>
             )}
-            
+
             {activeView === 'settings' && (
               <div className="p-6">
                 <h3 className="font-semibold text-lg mb-6">Command Center Settings</h3>
-                
+
                 <div className="space-y-6">
                   <div>
                     <h4 className="font-medium mb-3">AI Assistant</h4>
@@ -882,7 +918,7 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                       </label>
                     </div>
                   </div>
-                  
+
                   <div>
                     <h4 className="font-medium mb-3">Workflows</h4>
                     <div className="space-y-3">
@@ -896,7 +932,7 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
                       </label>
                     </div>
                   </div>
-                  
+
                   <div>
                     <h4 className="font-medium mb-3">Integration</h4>
                     <div className="space-y-3">
@@ -920,7 +956,7 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
           </div>
         </div>
       </div>
-      
+
       {/* Tool Modals */}
       {showTimeTravelDebugger && (
         <TimeTravelDebugger
@@ -928,14 +964,11 @@ export const AdvancedCommandCenter: React.FC<AdvancedCommandCenterProps> = ({
           onClose={() => setShowTimeTravelDebugger(false)}
         />
       )}
-      
+
       {showCodeOptimizer && (
-        <VB6CodeOptimizer
-          visible={showCodeOptimizer}
-          onClose={() => setShowCodeOptimizer(false)}
-        />
+        <VB6CodeOptimizer visible={showCodeOptimizer} onClose={() => setShowCodeOptimizer(false)} />
       )}
-      
+
       {showTestFramework && (
         <VisualTestFramework
           visible={showTestFramework}

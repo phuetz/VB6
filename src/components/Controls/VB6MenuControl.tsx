@@ -1,6 +1,6 @@
 /**
  * VB6 Menu Control - Système de menu natif VB6
- * 
+ *
  * Contrôle critique pour 95%+ compatibilité VB6
  * Implémente le Menu System complet VB6:
  * - Menu Bar avec menus déroulants
@@ -37,19 +37,56 @@ export interface VB6MenuItem {
 
 export enum VB6MenuShortcut {
   None = 0,
-  CtrlA = 1, CtrlB = 2, CtrlC = 3, CtrlD = 4, CtrlE = 5,
-  CtrlF = 6, CtrlG = 7, CtrlH = 8, CtrlI = 9, CtrlJ = 10,
-  CtrlK = 11, CtrlL = 12, CtrlM = 13, CtrlN = 14, CtrlO = 15,
-  CtrlP = 16, CtrlQ = 17, CtrlR = 18, CtrlS = 19, CtrlT = 20,
-  CtrlU = 21, CtrlV = 22, CtrlW = 23, CtrlX = 24, CtrlY = 25,
+  CtrlA = 1,
+  CtrlB = 2,
+  CtrlC = 3,
+  CtrlD = 4,
+  CtrlE = 5,
+  CtrlF = 6,
+  CtrlG = 7,
+  CtrlH = 8,
+  CtrlI = 9,
+  CtrlJ = 10,
+  CtrlK = 11,
+  CtrlL = 12,
+  CtrlM = 13,
+  CtrlN = 14,
+  CtrlO = 15,
+  CtrlP = 16,
+  CtrlQ = 17,
+  CtrlR = 18,
+  CtrlS = 19,
+  CtrlT = 20,
+  CtrlU = 21,
+  CtrlV = 22,
+  CtrlW = 23,
+  CtrlX = 24,
+  CtrlY = 25,
   CtrlZ = 26,
-  F1 = 112, F2 = 113, F3 = 114, F4 = 115, F5 = 116,
-  F6 = 117, F7 = 118, F8 = 119, F9 = 120, F10 = 121,
-  F11 = 122, F12 = 123,
-  CtrlF1 = 124, CtrlF2 = 125, CtrlF3 = 126, CtrlF4 = 127,
-  ShiftF1 = 128, ShiftF2 = 129, ShiftF3 = 130,
-  CtrlIns = 131, ShiftIns = 132, Del = 133, ShiftDel = 134,
-  AltBkSp = 135
+  F1 = 112,
+  F2 = 113,
+  F3 = 114,
+  F4 = 115,
+  F5 = 116,
+  F6 = 117,
+  F7 = 118,
+  F8 = 119,
+  F9 = 120,
+  F10 = 121,
+  F11 = 122,
+  F12 = 123,
+  CtrlF1 = 124,
+  CtrlF2 = 125,
+  CtrlF3 = 126,
+  CtrlF4 = 127,
+  ShiftF1 = 128,
+  ShiftF2 = 129,
+  ShiftF3 = 130,
+  CtrlIns = 131,
+  ShiftIns = 132,
+  Del = 133,
+  ShiftDel = 134,
+  AltBkSp = 135,
 }
 
 export interface VB6MenuProps {
@@ -62,11 +99,7 @@ export interface VB6MenuProps {
 // VB6 MENU BAR COMPONENT
 // ============================================================================
 
-export const VB6MenuBar: React.FC<VB6MenuProps> = ({ 
-  items, 
-  formName = 'Form1', 
-  onMenuClick 
-}) => {
+export const VB6MenuBar: React.FC<VB6MenuProps> = ({ items, formName = 'Form1', onMenuClick }) => {
   const { state, dispatch, runtime } = useContext(VB6Context);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [keyboardMode, setKeyboardMode] = useState<boolean>(false);
@@ -77,29 +110,50 @@ export const VB6MenuBar: React.FC<VB6MenuProps> = ({
    */
   const getShortcutText = (shortcut: VB6MenuShortcut): string => {
     const shortcuts: { [key: number]: string } = {
-      [VB6MenuShortcut.CtrlA]: 'Ctrl+A', [VB6MenuShortcut.CtrlB]: 'Ctrl+B',
-      [VB6MenuShortcut.CtrlC]: 'Ctrl+C', [VB6MenuShortcut.CtrlD]: 'Ctrl+D',
-      [VB6MenuShortcut.CtrlE]: 'Ctrl+E', [VB6MenuShortcut.CtrlF]: 'Ctrl+F',
-      [VB6MenuShortcut.CtrlG]: 'Ctrl+G', [VB6MenuShortcut.CtrlH]: 'Ctrl+H',
-      [VB6MenuShortcut.CtrlI]: 'Ctrl+I', [VB6MenuShortcut.CtrlJ]: 'Ctrl+J',
-      [VB6MenuShortcut.CtrlK]: 'Ctrl+K', [VB6MenuShortcut.CtrlL]: 'Ctrl+L',
-      [VB6MenuShortcut.CtrlM]: 'Ctrl+M', [VB6MenuShortcut.CtrlN]: 'Ctrl+N',
-      [VB6MenuShortcut.CtrlO]: 'Ctrl+O', [VB6MenuShortcut.CtrlP]: 'Ctrl+P',
-      [VB6MenuShortcut.CtrlQ]: 'Ctrl+Q', [VB6MenuShortcut.CtrlR]: 'Ctrl+R',
-      [VB6MenuShortcut.CtrlS]: 'Ctrl+S', [VB6MenuShortcut.CtrlT]: 'Ctrl+T',
-      [VB6MenuShortcut.CtrlU]: 'Ctrl+U', [VB6MenuShortcut.CtrlV]: 'Ctrl+V',
-      [VB6MenuShortcut.CtrlW]: 'Ctrl+W', [VB6MenuShortcut.CtrlX]: 'Ctrl+X',
-      [VB6MenuShortcut.CtrlY]: 'Ctrl+Y', [VB6MenuShortcut.CtrlZ]: 'Ctrl+Z',
-      [VB6MenuShortcut.F1]: 'F1', [VB6MenuShortcut.F2]: 'F2',
-      [VB6MenuShortcut.F3]: 'F3', [VB6MenuShortcut.F4]: 'F4',
-      [VB6MenuShortcut.F5]: 'F5', [VB6MenuShortcut.F6]: 'F6',
-      [VB6MenuShortcut.F7]: 'F7', [VB6MenuShortcut.F8]: 'F8',
-      [VB6MenuShortcut.F9]: 'F9', [VB6MenuShortcut.F10]: 'F10',
-      [VB6MenuShortcut.F11]: 'F11', [VB6MenuShortcut.F12]: 'F12',
-      [VB6MenuShortcut.Del]: 'Del', [VB6MenuShortcut.CtrlIns]: 'Ctrl+Ins',
-      [VB6MenuShortcut.ShiftIns]: 'Shift+Ins', [VB6MenuShortcut.ShiftDel]: 'Shift+Del'
+      [VB6MenuShortcut.CtrlA]: 'Ctrl+A',
+      [VB6MenuShortcut.CtrlB]: 'Ctrl+B',
+      [VB6MenuShortcut.CtrlC]: 'Ctrl+C',
+      [VB6MenuShortcut.CtrlD]: 'Ctrl+D',
+      [VB6MenuShortcut.CtrlE]: 'Ctrl+E',
+      [VB6MenuShortcut.CtrlF]: 'Ctrl+F',
+      [VB6MenuShortcut.CtrlG]: 'Ctrl+G',
+      [VB6MenuShortcut.CtrlH]: 'Ctrl+H',
+      [VB6MenuShortcut.CtrlI]: 'Ctrl+I',
+      [VB6MenuShortcut.CtrlJ]: 'Ctrl+J',
+      [VB6MenuShortcut.CtrlK]: 'Ctrl+K',
+      [VB6MenuShortcut.CtrlL]: 'Ctrl+L',
+      [VB6MenuShortcut.CtrlM]: 'Ctrl+M',
+      [VB6MenuShortcut.CtrlN]: 'Ctrl+N',
+      [VB6MenuShortcut.CtrlO]: 'Ctrl+O',
+      [VB6MenuShortcut.CtrlP]: 'Ctrl+P',
+      [VB6MenuShortcut.CtrlQ]: 'Ctrl+Q',
+      [VB6MenuShortcut.CtrlR]: 'Ctrl+R',
+      [VB6MenuShortcut.CtrlS]: 'Ctrl+S',
+      [VB6MenuShortcut.CtrlT]: 'Ctrl+T',
+      [VB6MenuShortcut.CtrlU]: 'Ctrl+U',
+      [VB6MenuShortcut.CtrlV]: 'Ctrl+V',
+      [VB6MenuShortcut.CtrlW]: 'Ctrl+W',
+      [VB6MenuShortcut.CtrlX]: 'Ctrl+X',
+      [VB6MenuShortcut.CtrlY]: 'Ctrl+Y',
+      [VB6MenuShortcut.CtrlZ]: 'Ctrl+Z',
+      [VB6MenuShortcut.F1]: 'F1',
+      [VB6MenuShortcut.F2]: 'F2',
+      [VB6MenuShortcut.F3]: 'F3',
+      [VB6MenuShortcut.F4]: 'F4',
+      [VB6MenuShortcut.F5]: 'F5',
+      [VB6MenuShortcut.F6]: 'F6',
+      [VB6MenuShortcut.F7]: 'F7',
+      [VB6MenuShortcut.F8]: 'F8',
+      [VB6MenuShortcut.F9]: 'F9',
+      [VB6MenuShortcut.F10]: 'F10',
+      [VB6MenuShortcut.F11]: 'F11',
+      [VB6MenuShortcut.F12]: 'F12',
+      [VB6MenuShortcut.Del]: 'Del',
+      [VB6MenuShortcut.CtrlIns]: 'Ctrl+Ins',
+      [VB6MenuShortcut.ShiftIns]: 'Shift+Ins',
+      [VB6MenuShortcut.ShiftDel]: 'Shift+Del',
     };
-    
+
     return shortcuts[shortcut] || '';
   };
 
@@ -153,8 +207,8 @@ export const VB6MenuBar: React.FC<VB6MenuProps> = ({
             formName,
             itemName: item.name,
             property: 'checked',
-            value: newCheckedState
-          }
+            value: newCheckedState,
+          },
         });
       }
     }
@@ -163,98 +217,103 @@ export const VB6MenuBar: React.FC<VB6MenuProps> = ({
   /**
    * Gestionnaire raccourcis clavier VB6
    */
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    // Alt pour activer keyboard mode
-    if (e.key === 'Alt') {
-      e.preventDefault();
-      setKeyboardMode(true);
-      return;
-    }
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      // Alt pour activer keyboard mode
+      if (e.key === 'Alt') {
+        e.preventDefault();
+        setKeyboardMode(true);
+        return;
+      }
 
-    // Mode keyboard actif
-    if (keyboardMode && e.altKey) {
-      const pressedKey = e.key.toLowerCase();
-      
-      // Chercher menu avec accelerator correspondant
-      const findMenuByAccelerator = (menuItems: VB6MenuItem[], key: string): VB6MenuItem | null => {
-        for (const item of menuItems) {
-          if (!item.visible || !item.enabled) continue;
-          
-          const { accelerator } = parseCaption(item.caption);
-          if (accelerator === key) {
-            return item;
+      // Mode keyboard actif
+      if (keyboardMode && e.altKey) {
+        const pressedKey = e.key.toLowerCase();
+
+        // Chercher menu avec accelerator correspondant
+        const findMenuByAccelerator = (
+          menuItems: VB6MenuItem[],
+          key: string
+        ): VB6MenuItem | null => {
+          for (const item of menuItems) {
+            if (!item.visible || !item.enabled) continue;
+
+            const { accelerator } = parseCaption(item.caption);
+            if (accelerator === key) {
+              return item;
+            }
+
+            if (item.children) {
+              const child = findMenuByAccelerator(item.children, key);
+              if (child) return child;
+            }
           }
-          
-          if (item.children) {
-            const child = findMenuByAccelerator(item.children, key);
-            if (child) return child;
+          return null;
+        };
+
+        const targetMenu = findMenuByAccelerator(items, pressedKey);
+        if (targetMenu) {
+          e.preventDefault();
+
+          if (targetMenu.children && targetMenu.children.length > 0) {
+            // Ouvrir menu déroulant
+            setActiveMenu(targetMenu.name);
+          } else {
+            // Exécuter menu item
+            handleMenuItemClick(targetMenu);
           }
         }
-        return null;
+
+        setKeyboardMode(false);
+      }
+
+      // Raccourcis globaux (Ctrl+X, F1, etc.)
+      const checkShortcuts = (menuItems: VB6MenuItem[]): boolean => {
+        for (const item of menuItems) {
+          if (!item.visible || !item.enabled || !item.shortcut) continue;
+
+          let matches = false;
+
+          // Vérifier raccourcis Ctrl+Lettre
+          if (item.shortcut >= VB6MenuShortcut.CtrlA && item.shortcut <= VB6MenuShortcut.CtrlZ) {
+            const expectedKey = String.fromCharCode(65 + (item.shortcut - VB6MenuShortcut.CtrlA));
+            matches = e.ctrlKey && e.key.toUpperCase() === expectedKey && !e.altKey && !e.shiftKey;
+          }
+
+          // Vérifier touches fonction
+          else if (item.shortcut >= VB6MenuShortcut.F1 && item.shortcut <= VB6MenuShortcut.F12) {
+            const expectedKey = `F${item.shortcut - VB6MenuShortcut.F1 + 1}`;
+            matches = e.key === expectedKey && !e.ctrlKey && !e.altKey && !e.shiftKey;
+          }
+
+          // Autres raccourcis spéciaux
+          else if (item.shortcut === VB6MenuShortcut.Del) {
+            matches = e.key === 'Delete' && !e.ctrlKey && !e.altKey && !e.shiftKey;
+          }
+
+          if (matches) {
+            e.preventDefault();
+            handleMenuItemClick(item);
+            return true;
+          }
+
+          // Chercher dans sous-menus
+          if (item.children && checkShortcuts(item.children)) {
+            return true;
+          }
+        }
+        return false;
       };
 
-      const targetMenu = findMenuByAccelerator(items, pressedKey);
-      if (targetMenu) {
-        e.preventDefault();
-        
-        if (targetMenu.children && targetMenu.children.length > 0) {
-          // Ouvrir menu déroulant
-          setActiveMenu(targetMenu.name);
-        } else {
-          // Exécuter menu item
-          handleMenuItemClick(targetMenu);
-        }
-      }
-      
-      setKeyboardMode(false);
-    }
-
-    // Raccourcis globaux (Ctrl+X, F1, etc.)
-    const checkShortcuts = (menuItems: VB6MenuItem[]): boolean => {
-      for (const item of menuItems) {
-        if (!item.visible || !item.enabled || !item.shortcut) continue;
-
-        let matches = false;
-        
-        // Vérifier raccourcis Ctrl+Lettre
-        if (item.shortcut >= VB6MenuShortcut.CtrlA && item.shortcut <= VB6MenuShortcut.CtrlZ) {
-          const expectedKey = String.fromCharCode(65 + (item.shortcut - VB6MenuShortcut.CtrlA));
-          matches = e.ctrlKey && e.key.toUpperCase() === expectedKey && !e.altKey && !e.shiftKey;
-        }
-        
-        // Vérifier touches fonction
-        else if (item.shortcut >= VB6MenuShortcut.F1 && item.shortcut <= VB6MenuShortcut.F12) {
-          const expectedKey = `F${item.shortcut - VB6MenuShortcut.F1 + 1}`;
-          matches = e.key === expectedKey && !e.ctrlKey && !e.altKey && !e.shiftKey;
-        }
-        
-        // Autres raccourcis spéciaux
-        else if (item.shortcut === VB6MenuShortcut.Del) {
-          matches = e.key === 'Delete' && !e.ctrlKey && !e.altKey && !e.shiftKey;
-        }
-        
-        if (matches) {
-          e.preventDefault();
-          handleMenuItemClick(item);
-          return true;
-        }
-
-        // Chercher dans sous-menus
-        if (item.children && checkShortcuts(item.children)) {
-          return true;
-        }
-      }
-      return false;
-    };
-
-    checkShortcuts(items);
-
-  }, [items, keyboardMode, formName, onMenuClick, dispatch, handleMenuItemClick]);
+      checkShortcuts(items);
+    },
+    [items, keyboardMode, formName, onMenuClick, dispatch, handleMenuItemClick]
+  );
 
   // Écouteurs événements globaux
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
-    
+
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
@@ -288,24 +347,25 @@ export const VB6MenuBar: React.FC<VB6MenuProps> = ({
         fontSize: '8pt',
         userSelect: 'none',
         position: 'relative',
-        zIndex: 1000
+        zIndex: 1000,
       }}
       data-vb6-control="MenuBar"
       data-vb6-form={formName}
     >
-      {items.map((item, index) => (
-        item.visible !== false && (
-          <VB6MenuBarItem
-            key={item.name || index}
-            item={item}
-            isActive={activeMenu === item.name}
-            onOpen={(itemName) => setActiveMenu(itemName)}
-            onClose={() => setActiveMenu(null)}
-            onItemClick={handleMenuItemClick}
-            keyboardMode={keyboardMode}
-          />
-        )
-      ))}
+      {items.map(
+        (item, index) =>
+          item.visible !== false && (
+            <VB6MenuBarItem
+              key={item.name || index}
+              item={item}
+              isActive={activeMenu === item.name}
+              onOpen={itemName => setActiveMenu(itemName)}
+              onClose={() => setActiveMenu(null)}
+              onItemClick={handleMenuItemClick}
+              keyboardMode={keyboardMode}
+            />
+          )
+      )}
     </div>
   );
 };
@@ -329,7 +389,7 @@ const VB6MenuBarItem: React.FC<VB6MenuBarItemProps> = ({
   onOpen,
   onClose,
   onItemClick,
-  keyboardMode
+  keyboardMode,
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const { display, accelerator } = parseCaption(item.caption);
@@ -362,26 +422,26 @@ const VB6MenuBarItem: React.FC<VB6MenuBarItemProps> = ({
     padding: '4px 8px',
     cursor: item.enabled !== false ? 'pointer' : 'default',
     backgroundColor: isActive ? '#0078D4' : 'transparent',
-    color: isActive ? '#FFFFFF' : (item.enabled !== false ? '#000000' : '#808080'),
+    color: isActive ? '#FFFFFF' : item.enabled !== false ? '#000000' : '#808080',
     border: isActive ? '1px solid #0078D4' : '1px solid transparent',
     position: 'relative',
-    whiteSpace: 'nowrap'
+    whiteSpace: 'nowrap',
   };
 
   // Mettre en surbrillance la lettre d'accélération
   const renderCaption = () => {
     if (!accelerator) return display;
-    
+
     const acceleratorIndex = display.toLowerCase().indexOf(accelerator);
     if (acceleratorIndex === -1) return display;
 
     return (
       <span>
         {display.substring(0, acceleratorIndex)}
-        <span 
-          style={{ 
+        <span
+          style={{
             textDecoration: keyboardMode ? 'underline' : 'none',
-            fontWeight: keyboardMode ? 'bold' : 'normal'
+            fontWeight: keyboardMode ? 'bold' : 'normal',
           }}
         >
           {display[acceleratorIndex]}
@@ -400,7 +460,7 @@ const VB6MenuBarItem: React.FC<VB6MenuBarItemProps> = ({
       data-vb6-menu-item={item.name}
     >
       {renderCaption()}
-      
+
       {/* Menu déroulant */}
       {showDropdown && item.children && (
         <VB6DropdownMenu
@@ -423,11 +483,7 @@ interface VB6DropdownMenuProps {
   onClose: () => void;
 }
 
-const VB6DropdownMenu: React.FC<VB6DropdownMenuProps> = ({ 
-  items, 
-  onItemClick, 
-  onClose 
-}) => {
+const VB6DropdownMenu: React.FC<VB6DropdownMenuProps> = ({ items, onItemClick, onClose }) => {
   const dropdownStyle: React.CSSProperties = {
     position: 'absolute',
     top: '100%',
@@ -438,7 +494,7 @@ const VB6DropdownMenu: React.FC<VB6DropdownMenuProps> = ({
     boxShadow: '2px 2px 5px rgba(0,0,0,0.3)',
     zIndex: 1001,
     fontFamily: 'MS Sans Serif',
-    fontSize: '8pt'
+    fontSize: '8pt',
   };
 
   const handleItemClick = (item: VB6MenuItem) => {
@@ -448,15 +504,12 @@ const VB6DropdownMenu: React.FC<VB6DropdownMenuProps> = ({
 
   return (
     <div style={dropdownStyle} data-vb6-dropdown-menu>
-      {items.map((item, index) => (
-        item.visible !== false && (
-          <VB6DropdownMenuItem
-            key={item.name || index}
-            item={item}
-            onClick={handleItemClick}
-          />
-        )
-      ))}
+      {items.map(
+        (item, index) =>
+          item.visible !== false && (
+            <VB6DropdownMenuItem key={item.name || index} item={item} onClick={handleItemClick} />
+          )
+      )}
     </div>
   );
 };
@@ -477,12 +530,12 @@ const VB6DropdownMenuItem: React.FC<VB6DropdownMenuItemProps> = ({ item, onClick
   // Séparateur
   if (item.caption === '-') {
     return (
-      <div 
+      <div
         style={{
           height: '1px',
           backgroundColor: '#808080',
           margin: '3px 0',
-          borderTop: '1px solid #FFFFFF'
+          borderTop: '1px solid #FFFFFF',
         }}
         data-vb6-separator
       />
@@ -503,14 +556,14 @@ const VB6DropdownMenuItem: React.FC<VB6DropdownMenuItemProps> = ({ item, onClick
     position: 'relative',
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
   };
 
   const checkmarkStyle: React.CSSProperties = {
     position: 'absolute',
     left: '4px',
     fontWeight: 'bold',
-    visibility: item.checked ? 'visible' : 'hidden'
+    visibility: item.checked ? 'visible' : 'hidden',
   };
 
   return (
@@ -551,7 +604,7 @@ export const VB6MenuUtils = {
       visible: item.visible !== false,
       shortcut: item.shortcut || VB6MenuShortcut.None,
       onClick: item.onClick,
-      children: item.children ? VB6MenuUtils.createMenu(item.children) : undefined
+      children: item.children ? VB6MenuUtils.createMenu(item.children) : undefined,
     }));
   },
 
@@ -561,7 +614,7 @@ export const VB6MenuUtils = {
   findMenuItem: (items: VB6MenuItem[], name: string): VB6MenuItem | null => {
     for (const item of items) {
       if (item.name === name) return item;
-      
+
       if (item.children) {
         const found = VB6MenuUtils.findMenuItem(item.children, name);
         if (found) return found;
@@ -573,22 +626,27 @@ export const VB6MenuUtils = {
   /**
    * Mettre à jour propriété menu item
    */
-  updateMenuItem: (items: VB6MenuItem[], name: string, property: keyof VB6MenuItem, value: any): VB6MenuItem[] => {
+  updateMenuItem: (
+    items: VB6MenuItem[],
+    name: string,
+    property: keyof VB6MenuItem,
+    value: any
+  ): VB6MenuItem[] => {
     return items.map(item => {
       if (item.name === name) {
         return { ...item, [property]: value };
       }
-      
+
       if (item.children) {
         return {
           ...item,
-          children: VB6MenuUtils.updateMenuItem(item.children, name, property, value)
+          children: VB6MenuUtils.updateMenuItem(item.children, name, property, value),
         };
       }
-      
+
       return item;
     });
-  }
+  },
 };
 
 export default VB6MenuBar;

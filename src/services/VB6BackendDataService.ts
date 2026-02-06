@@ -4,7 +4,11 @@
  * Provides synchronization, caching, and error handling
  */
 
-import { DAORecordset, CreateBackendConnection, DAOBackendConnectionBridge } from '../runtime/VB6DAOSystem';
+import {
+  DAORecordset,
+  CreateBackendConnection,
+  DAOBackendConnectionBridge,
+} from '../runtime/VB6DAOSystem';
 import { createLogger } from './LoggingService';
 
 const logger = createLogger('BackendData');
@@ -332,7 +336,7 @@ export class VB6BackendDataService {
    * Utility delay function for retries
    */
   private delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 

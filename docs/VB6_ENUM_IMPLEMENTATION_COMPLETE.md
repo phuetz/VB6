@@ -59,13 +59,13 @@ End Enum
 
 ### ✅ 2. Valeurs Explicites et Formats
 
-| Format | Exemple | Support |
-|--------|---------|---------|
-| Décimal | `Value = 42` | ✅ Complet |
-| Hexadécimal | `Flag = &HFF` | ✅ Complet |
-| Octal | `Octal = &O77` | ✅ Complet |
-| Binaire | `Binary = &B1010` | ✅ Complet |
-| Négatif | `Error = -1` | ✅ Complet |
+| Format      | Exemple           | Support    |
+| ----------- | ----------------- | ---------- |
+| Décimal     | `Value = 42`      | ✅ Complet |
+| Hexadécimal | `Flag = &HFF`     | ✅ Complet |
+| Octal       | `Octal = &O77`    | ✅ Complet |
+| Binaire     | `Binary = &B1010` | ✅ Complet |
+| Négatif     | `Error = -1`      | ✅ Complet |
 
 ```vb
 Enum FilePermissions
@@ -96,6 +96,7 @@ End Enum
 ```
 
 **Règles d'auto-increment**:
+
 - Sans valeur explicite: valeur précédente + 1
 - Premier membre sans valeur: 0
 - Après valeur explicite: cette valeur + 1
@@ -122,6 +123,7 @@ attrs = ReadOnly Or Hidden  ' Combine bits: 1 | 2 = 3
 ### ✅ 5. Enums VB6 Built-in
 
 #### **VbMsgBoxResult**
+
 ```vb
 ' Valeurs de retour de MsgBox
 Enum VbMsgBoxResult
@@ -136,6 +138,7 @@ End Enum
 ```
 
 #### **VbMsgBoxStyle**
+
 ```vb
 ' Styles de MsgBox
 Enum VbMsgBoxStyle
@@ -156,6 +159,7 @@ End Enum
 ```
 
 #### **VbVarType**
+
 ```vb
 ' Types de données VB6
 Enum VbVarType
@@ -185,35 +189,36 @@ Le transpiler génère du JavaScript idiomatique avec fonctionnalités avancées
 const Colors = {
   Red: 0,
   Green: 1,
-  Blue: 2
+  Blue: 2,
 };
 
 // Reverse mapping (value to name)
 Colors._names = {
-  0: "Red",
-  1: "Green",
-  2: "Blue"
+  0: 'Red',
+  1: 'Green',
+  2: 'Blue',
 };
 
 // Helper methods
-Colors.getName = function(value) {
-  return this._names[value] || "Unknown";
+Colors.getName = function (value) {
+  return this._names[value] || 'Unknown';
 };
 
-Colors.hasValue = function(value) {
+Colors.hasValue = function (value) {
   return value in this._names;
 };
 
-Colors.values = function() {
+Colors.values = function () {
   return Object.values(this).filter(v => typeof v === 'number');
 };
 
-Colors.names = function() {
+Colors.names = function () {
   return Object.keys(this).filter(k => k !== '_names' && typeof this[k] === 'number');
 };
 ```
 
 **Utilisation**:
+
 ```javascript
 // Accès direct
 console.log(Colors.Red); // 0
@@ -249,6 +254,7 @@ TypeScript natif avec valeurs implicites et explicites.
 **38 tests implémentés et passés (100%)**:
 
 ### Suite 1: Parsing (12 tests)
+
 - ✅ Parse simple Enum declaration
 - ✅ Parse Public Enum declaration
 - ✅ Parse Private Enum declaration
@@ -263,6 +269,7 @@ TypeScript natif avec valeurs implicites et explicites.
 - ✅ Handle flag-style enums (powers of 2)
 
 ### Suite 2: Registry & Lookup (5 tests)
+
 - ✅ Register and retrieve public enum
 - ✅ Register and retrieve private enum with module scope
 - ✅ Get enum member value
@@ -270,6 +277,7 @@ TypeScript natif avec valeurs implicites et explicites.
 - ✅ Get all module enums
 
 ### Suite 3: Code Generation (5 tests)
+
 - ✅ Generate JavaScript for simple enum
 - ✅ Generate JavaScript with reverse mapping
 - ✅ Generate JavaScript with helper methods
@@ -277,11 +285,13 @@ TypeScript natif avec valeurs implicites et explicites.
 - ✅ Handle flag-style enum in JavaScript
 
 ### Suite 4: Built-in Enums (3 tests)
+
 - ✅ VbMsgBoxResult enum
 - ✅ VbMsgBoxStyle enum
 - ✅ VbVarType enum
 
 ### Suite 5: Edge Cases (8 tests)
+
 - ✅ Handle empty enum gracefully
 - ✅ Handle large enum values (2^31-1)
 - ✅ Handle negative values
@@ -291,6 +301,7 @@ TypeScript natif avec valeurs implicites et explicites.
 - ✅ Clear all enums
 
 ### Suite 6: Real-World Scenarios (5 tests)
+
 - ✅ HTTP status codes
 - ✅ File attributes with flags
 - ✅ Days of week
@@ -302,11 +313,13 @@ TypeScript natif avec valeurs implicites et explicites.
 ## 📊 Statistiques
 
 ### Fichiers
+
 - ✅ `src/compiler/VB6EnumSupport.ts` - 349 lignes
 - ✅ `src/services/VB6EnumTranspiler.ts` - 542 lignes
 - ✅ `src/test/compiler/VB6Enum.test.ts` - 522 lignes (38 tests)
 
 ### Couverture
+
 - **Parsing**: 100%
 - **Code Generation**: 100%
 - **Built-in Enums**: 100%
@@ -501,11 +514,11 @@ End Sub
 
 ### ⚠️ Différences avec VB6 Natif
 
-| Feature | VB6 Natif | VB6 Web | Impact |
-|---------|-----------|---------|--------|
-| Type Enum stocké | Compilé en 32-bit int | JavaScript Number | Négligeable |
-| Arithmetic dans valeurs | Limited | Limité aux valeurs simples | Faible - rarement utilisé |
-| Out-of-range values | Runtime error | JavaScript permet | Moyen - ajouter validation |
+| Feature                 | VB6 Natif             | VB6 Web                    | Impact                     |
+| ----------------------- | --------------------- | -------------------------- | -------------------------- |
+| Type Enum stocké        | Compilé en 32-bit int | JavaScript Number          | Négligeable                |
+| Arithmetic dans valeurs | Limited               | Limité aux valeurs simples | Faible - rarement utilisé  |
+| Out-of-range values     | Runtime error         | JavaScript permet          | Moyen - ajouter validation |
 
 ---
 
@@ -529,11 +542,13 @@ Enum support est maintenant complet. Phase 1 continue avec:
 ## 📚 Ressources
 
 ### Documentation
+
 - `src/compiler/VB6EnumSupport.ts` - Code source avec documentation inline
 - `src/services/VB6EnumTranspiler.ts` - Transpiler avec exemples
 - `src/test/compiler/VB6Enum.test.ts` - 38 tests avec tous les cas d'usage
 
 ### Références VB6
+
 - Microsoft VB6 Language Reference - Enumerations
 - VB6 Built-in Constants and Enumerations
 

@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { 
-  VB6PropertySystem, 
-  VB6PropertyType, 
-  VB6PropertyDescriptor 
+import {
+  VB6PropertySystem,
+  VB6PropertyType,
+  VB6PropertyDescriptor,
 } from '../services/VB6PropertySystem';
 
 describe('VB6PropertySystem', () => {
@@ -21,11 +21,11 @@ describe('VB6PropertySystem', () => {
         className: 'TestClass',
         propertyType: VB6PropertyType.Get,
         parameters: [],
-        returnType: 'String'
+        returnType: 'String',
       };
 
       propertySystem.registerProperty('TestClass', getProperty);
-      
+
       expect(propertySystem.hasProperty('TestClass', 'Name', VB6PropertyType.Get)).toBe(true);
     });
 
@@ -34,13 +34,11 @@ describe('VB6PropertySystem', () => {
         name: 'Age',
         className: 'TestClass',
         propertyType: VB6PropertyType.Let,
-        parameters: [
-          { name: 'value', type: 'Integer' }
-        ]
+        parameters: [{ name: 'value', type: 'Integer' }],
       };
 
       propertySystem.registerProperty('TestClass', letProperty);
-      
+
       expect(propertySystem.hasProperty('TestClass', 'Age', VB6PropertyType.Let)).toBe(true);
     });
 
@@ -49,13 +47,11 @@ describe('VB6PropertySystem', () => {
         name: 'Owner',
         className: 'TestClass',
         propertyType: VB6PropertyType.Set,
-        parameters: [
-          { name: 'objectRef', type: 'Object' }
-        ]
+        parameters: [{ name: 'objectRef', type: 'Object' }],
       };
 
       propertySystem.registerProperty('TestClass', setProperty);
-      
+
       expect(propertySystem.hasProperty('TestClass', 'Owner', VB6PropertyType.Set)).toBe(true);
     });
   });
@@ -68,14 +64,14 @@ describe('VB6PropertySystem', () => {
         className: 'TestClass',
         propertyType: VB6PropertyType.Get,
         parameters: [],
-        returnType: 'String'
+        returnType: 'String',
       });
 
       propertySystem.registerProperty('TestClass', {
         name: 'Name',
         className: 'TestClass',
         propertyType: VB6PropertyType.Let,
-        parameters: [{ name: 'value', type: 'String' }]
+        parameters: [{ name: 'value', type: 'String' }],
       });
 
       propertySystem.registerProperty('TestClass', {
@@ -83,30 +79,30 @@ describe('VB6PropertySystem', () => {
         className: 'TestClass',
         propertyType: VB6PropertyType.Get,
         parameters: [],
-        returnType: 'Object'
+        returnType: 'Object',
       });
 
       propertySystem.registerProperty('TestClass', {
         name: 'Owner',
         className: 'TestClass',
         propertyType: VB6PropertyType.Set,
-        parameters: [{ name: 'objectRef', type: 'Object' }]
+        parameters: [{ name: 'objectRef', type: 'Object' }],
       });
     });
 
     it('should get and set string properties', () => {
       propertySystem.letProperty(testInstanceId, 'Name', 'John Doe');
       const value = propertySystem.getProperty(testInstanceId, 'Name');
-      
+
       expect(value).toBe('John Doe');
     });
 
     it('should handle object property assignments', () => {
       const testObject = { id: 1, name: 'Test Object' };
-      
+
       propertySystem.setProperty(testInstanceId, 'Owner', testObject);
       const value = propertySystem.getProperty(testInstanceId, 'Owner');
-      
+
       expect(value).toEqual(testObject);
     });
 
@@ -130,7 +126,7 @@ describe('VB6PropertySystem', () => {
         className: 'TestClass',
         propertyType: VB6PropertyType.Get,
         parameters: [{ name: 'index', type: 'Integer' }],
-        returnType: 'String'
+        returnType: 'String',
       });
 
       propertySystem.registerProperty('TestClass', {
@@ -139,18 +135,18 @@ describe('VB6PropertySystem', () => {
         propertyType: VB6PropertyType.Let,
         parameters: [
           { name: 'index', type: 'Integer' },
-          { name: 'value', type: 'String' }
-        ]
+          { name: 'value', type: 'String' },
+        ],
       });
     });
 
     it('should handle parameterized property assignment', () => {
       propertySystem.letProperty(testInstanceId, 'Item', 'First Item', 0);
       propertySystem.letProperty(testInstanceId, 'Item', 'Second Item', 1);
-      
+
       const item0 = propertySystem.getProperty(testInstanceId, 'Item', 0);
       const item1 = propertySystem.getProperty(testInstanceId, 'Item', 1);
-      
+
       expect(item0).toBe('First Item');
       expect(item1).toBe('Second Item');
     });
@@ -163,14 +159,14 @@ describe('VB6PropertySystem', () => {
         className: 'TestClass',
         propertyType: VB6PropertyType.Get,
         parameters: [],
-        returnType: 'Integer'
+        returnType: 'Integer',
       });
 
       // Register custom accessor
       propertySystem.registerPropertyAccessor(
-        testInstanceId, 
-        'ComputedValue', 
-        VB6PropertyType.Get, 
+        testInstanceId,
+        'ComputedValue',
+        VB6PropertyType.Get,
         () => 42 * 2
       );
 
@@ -180,19 +176,19 @@ describe('VB6PropertySystem', () => {
 
     it('should support custom setter functions', () => {
       let storedValue = '';
-      
+
       propertySystem.registerProperty('TestClass', {
         name: 'CustomProp',
         className: 'TestClass',
         propertyType: VB6PropertyType.Let,
-        parameters: [{ name: 'value', type: 'String' }]
+        parameters: [{ name: 'value', type: 'String' }],
       });
 
       // Register custom accessor
       propertySystem.registerPropertyAccessor(
-        testInstanceId, 
-        'CustomProp', 
-        VB6PropertyType.Let, 
+        testInstanceId,
+        'CustomProp',
+        VB6PropertyType.Let,
         (value: string) => {
           storedValue = value.toUpperCase();
         }
@@ -211,17 +207,17 @@ describe('VB6PropertySystem', () => {
         propertyType: VB6PropertyType.Get,
         parameters: [],
         returnType: 'String',
-        isReadOnly: true
+        isReadOnly: true,
       });
     });
 
     it('should validate property assignments', () => {
       const isValid = propertySystem.validatePropertyAssignment(
-        'TestClass', 
-        'ReadOnlyProp', 
+        'TestClass',
+        'ReadOnlyProp',
         'test value'
       );
-      
+
       expect(isValid).toBe(false); // Should be false for read-only property
     });
   });
@@ -230,14 +226,14 @@ describe('VB6PropertySystem', () => {
     it('should create instances with unique IDs', () => {
       const instance1 = propertySystem.createInstance('TestClass');
       const instance2 = propertySystem.createInstance('TestClass');
-      
+
       expect(instance1).not.toBe(instance2);
     });
 
     it('should create instances with custom IDs', () => {
       const customId = 'MyCustomInstance';
       const instanceId = propertySystem.createInstance('TestClass', customId);
-      
+
       expect(instanceId).toBe(customId);
     });
 
@@ -246,19 +242,19 @@ describe('VB6PropertySystem', () => {
         name: 'TestProp',
         className: 'TestClass',
         propertyType: VB6PropertyType.Let,
-        parameters: [{ name: 'value', type: 'String' }]
+        parameters: [{ name: 'value', type: 'String' }],
       });
 
       propertySystem.letProperty(testInstanceId, 'TestProp', 'test');
-      
+
       // Instance should exist and have data
       const stats = propertySystem.getInstanceStats(testInstanceId);
       expect(stats).toBeTruthy();
       expect(stats.propertyCount).toBeGreaterThan(0);
-      
+
       // Destroy instance
       propertySystem.destroyInstance(testInstanceId);
-      
+
       // Instance should no longer exist
       const statsAfterDestroy = propertySystem.getInstanceStats(testInstanceId);
       expect(statsAfterDestroy).toBeNull();
@@ -273,7 +269,7 @@ describe('VB6PropertySystem', () => {
         propertyType: VB6PropertyType.Get,
         parameters: [],
         returnType: 'String',
-        documentation: 'A complex property for testing'
+        documentation: 'A complex property for testing',
       });
 
       propertySystem.registerProperty('TestClass', {
@@ -281,13 +277,13 @@ describe('VB6PropertySystem', () => {
         className: 'TestClass',
         propertyType: VB6PropertyType.Let,
         parameters: [{ name: 'value', type: 'String' }],
-        documentation: 'Sets the complex property value'
+        documentation: 'Sets the complex property value',
       });
     });
 
     it('should retrieve property information', () => {
       const propertyInfo = propertySystem.getPropertyInfo('TestClass', 'ComplexProp');
-      
+
       expect(propertyInfo).toHaveLength(2); // Get and Let
       expect(propertyInfo.some(p => p.propertyType === VB6PropertyType.Get)).toBe(true);
       expect(propertyInfo.some(p => p.propertyType === VB6PropertyType.Let)).toBe(true);
@@ -295,7 +291,7 @@ describe('VB6PropertySystem', () => {
 
     it('should retrieve all class properties', () => {
       const allProperties = propertySystem.getClassProperties('TestClass');
-      
+
       expect(allProperties.length).toBeGreaterThan(0);
       expect(allProperties.some(p => p.name === 'ComplexProp')).toBe(true);
     });
@@ -309,14 +305,14 @@ describe('VB6PropertySystem', () => {
         className: 'TestClass',
         propertyType: VB6PropertyType.Get,
         parameters: [],
-        returnType: 'Integer'
+        returnType: 'Integer',
       });
 
       propertySystem.registerProperty('TestClass', {
         name: 'IntProp',
         className: 'TestClass',
         propertyType: VB6PropertyType.Let,
-        parameters: [{ name: 'value', type: 'Integer' }]
+        parameters: [{ name: 'value', type: 'Integer' }],
       });
 
       propertySystem.letProperty(testInstanceId, 'IntProp', 42);
@@ -329,14 +325,14 @@ describe('VB6PropertySystem', () => {
         className: 'TestClass',
         propertyType: VB6PropertyType.Get,
         parameters: [],
-        returnType: 'Boolean'
+        returnType: 'Boolean',
       });
 
       propertySystem.registerProperty('TestClass', {
         name: 'BoolProp',
         className: 'TestClass',
         propertyType: VB6PropertyType.Let,
-        parameters: [{ name: 'value', type: 'Boolean' }]
+        parameters: [{ name: 'value', type: 'Boolean' }],
       });
 
       propertySystem.letProperty(testInstanceId, 'BoolProp', true);
@@ -349,14 +345,14 @@ describe('VB6PropertySystem', () => {
         className: 'TestClass',
         propertyType: VB6PropertyType.Get,
         parameters: [],
-        returnType: 'Date'
+        returnType: 'Date',
       });
 
       propertySystem.registerProperty('TestClass', {
         name: 'DateProp',
         className: 'TestClass',
         propertyType: VB6PropertyType.Let,
-        parameters: [{ name: 'value', type: 'Date' }]
+        parameters: [{ name: 'value', type: 'Date' }],
       });
 
       const testDate = new Date('2023-12-25');

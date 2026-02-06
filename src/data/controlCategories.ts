@@ -21,7 +21,13 @@ export const controlCategories = {
     { type: 'Data', icon: '💾', name: 'Data', cursor: 'default' },
   ],
   ActiveX: [
-    { type: 'ActiveX', icon: '🔌', name: 'Insert ActiveX Control...', cursor: 'default', special: 'activex-manager' },
+    {
+      type: 'ActiveX',
+      icon: '🔌',
+      name: 'Insert ActiveX Control...',
+      cursor: 'default',
+      special: 'activex-manager',
+    },
     { type: 'ADODataControl', icon: '🗄️', name: 'ADO Data Control', cursor: 'default' },
     { type: 'ListView', icon: '📋', name: 'ListView', cursor: 'default' },
     { type: 'ImageList', icon: '🖼️', name: 'ImageList', cursor: 'default' },
@@ -45,17 +51,11 @@ export const controlCategories = {
     { type: 'DataCombo', icon: '📌', name: 'DataCombo', cursor: 'pointer' },
     { type: 'DataGrid', icon: '▦', name: 'DataGrid', cursor: 'default' },
   ],
-  Charts: [
-    { type: 'MSChart', icon: '📊', name: 'MSChart (Chart)', cursor: 'pointer' },
-  ],
-  Graphics: [
-    { type: 'PictureClip', icon: '🖼️', name: 'PictureClip', cursor: 'pointer' },
-  ],
+  Charts: [{ type: 'MSChart', icon: '📊', name: 'MSChart (Chart)', cursor: 'pointer' }],
+  Graphics: [{ type: 'PictureClip', icon: '🖼️', name: 'PictureClip', cursor: 'pointer' }],
   Internet: [
     { type: 'Winsock', icon: '🌐', name: 'Winsock', cursor: 'default' },
     { type: 'Inet', icon: '🌍', name: 'Internet Transfer', cursor: 'default' },
   ],
-  Insertable: [
-    { type: 'OLE', icon: '📎', name: 'OLE', cursor: 'default' },
-  ],
+  Insertable: [{ type: 'OLE', icon: '📎', name: 'OLE', cursor: 'default' }],
 };

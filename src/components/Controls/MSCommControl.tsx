@@ -1,6 +1,6 @@
 /**
  * VB6 MSComm Control Implementation
- * 
+ *
  * Serial communication control with web-compatible simulation
  */
 
@@ -13,7 +13,7 @@ export interface MSCommControl {
   top: number;
   width: number;
   height: number;
-  
+
   // Communication Properties
   commPort: number; // COM port number (1-16)
   settings: string; // "9600,N,8,1" format
@@ -21,35 +21,35 @@ export interface MSCommControl {
   handshaking: number; // 0=None, 1=XOnXOff, 2=RTS, 3=RTSXOnXOff
   dtREnable: boolean; // Data Terminal Ready
   rtSEnable: boolean; // Request To Send
-  
+
   // Buffer Properties
   inBufferSize: number;
   inBufferCount: number;
   outBufferSize: number;
   outBufferCount: number;
-  
+
   // Input/Output
   input: string;
   output: string;
-  
+
   // Timeouts
   sThreshold: number; // Send threshold
   rThreshold: number; // Receive threshold
-  
+
   // Status Properties
   cdHolding: boolean; // Carrier Detect
   ctsHolding: boolean; // Clear To Send
   dsrHolding: boolean; // Data Set Ready
-  
+
   // Error Properties
   commEvent: number; // Last communication event
   commID: number; // Communication ID
-  
+
   // Behavior
   enabled: boolean;
   visible: boolean;
   tag: string;
-  
+
   // Events
   onComm?: string;
 }
@@ -57,36 +57,36 @@ export interface MSCommControl {
 // MSComm Constants
 export const MSCommConstants = {
   // Communication Events
-  comEvSend: 1,     // Send event
-  comEvReceive: 2,  // Receive event
-  comEvCTS: 3,      // Change in CTS
-  comEvDSR: 4,      // Change in DSR
-  comEvCD: 5,       // Change in CD
-  comEvRing: 6,     // Ring detect
-  comEvEOF: 7,      // EOF detect
-  
-  // Error Events  
-  comBreak: 1001,   // Break signal received
-  comCDTO: 1002,    // Carrier Detect Timeout
-  comCTSTO: 1003,   // Clear To Send Timeout
-  comDSRTO: 1004,   // Data Set Ready Timeout
-  comFrame: 1005,   // Framing Error
+  comEvSend: 1, // Send event
+  comEvReceive: 2, // Receive event
+  comEvCTS: 3, // Change in CTS
+  comEvDSR: 4, // Change in DSR
+  comEvCD: 5, // Change in CD
+  comEvRing: 6, // Ring detect
+  comEvEOF: 7, // EOF detect
+
+  // Error Events
+  comBreak: 1001, // Break signal received
+  comCDTO: 1002, // Carrier Detect Timeout
+  comCTSTO: 1003, // Clear To Send Timeout
+  comDSRTO: 1004, // Data Set Ready Timeout
+  comFrame: 1005, // Framing Error
   comOverrun: 1006, // Data Lost
-  comRxOver: 1007,  // Receive buffer overflow
+  comRxOver: 1007, // Receive buffer overflow
   comRxParity: 1008, // Parity Error
-  comTxFull: 1009,  // Transmit buffer full
-  comDCB: 1010,     // Unexpected error retrieving DCB
-  
+  comTxFull: 1009, // Transmit buffer full
+  comDCB: 1010, // Unexpected error retrieving DCB
+
   // Handshaking Constants
-  comNone: 0,       // No handshaking
-  comXOnXOff: 1,    // XOn/XOff handshaking
-  comRTS: 2,        // Request-to-send handshaking
+  comNone: 0, // No handshaking
+  comXOnXOff: 1, // XOn/XOff handshaking
+  comRTS: 2, // Request-to-send handshaking
   comRTSXOnXOff: 3, // Both RTS and XOn/XOff
-  
+
   // Input Mode Constants
-  comInputModeText: 0,   // Text mode
+  comInputModeText: 0, // Text mode
   comInputModeBinary: 1, // Binary mode
-  
+
   // OnComm Constants
   comEventBreak: 1001,
   comEventFrame: 1004,
@@ -94,7 +94,7 @@ export const MSCommConstants = {
   comEventRxOver: 1007,
   comEventRxParity: 1008,
   comEventTxFull: 1009,
-  comEventDCB: 1010
+  comEventDCB: 1010,
 };
 
 interface MSCommControlProps {
@@ -108,7 +108,7 @@ export const MSCommControl: React.FC<MSCommControlProps> = ({
   control,
   isDesignMode = false,
   onPropertyChange,
-  onEvent
+  onEvent,
 }) => {
   const {
     name,
@@ -117,7 +117,7 @@ export const MSCommControl: React.FC<MSCommControlProps> = ({
     width = 32,
     height = 32,
     commPort = 1,
-    settings = "9600,N,8,1",
+    settings = '9600,N,8,1',
     portOpen = false,
     handshaking = MSCommConstants.comNone,
     dtREnable = true,
@@ -137,7 +137,7 @@ export const MSCommControl: React.FC<MSCommControlProps> = ({
     commID = 0,
     enabled = true,
     visible = true,
-    tag = ''
+    tag = '',
   } = control;
 
   const [isPortOpen, setIsPortOpen] = useState(portOpen);
@@ -146,7 +146,7 @@ export const MSCommControl: React.FC<MSCommControlProps> = ({
   const [lastCommEvent, setLastCommEvent] = useState(commEvent);
   const [currentCommID, setCurrentCommID] = useState(commID);
   const [serialPort, setSerialPort] = useState<any>(null);
-  
+
   const inputBufferRef = useRef<string>('');
   const outputBufferRef = useRef<string>('');
 
@@ -157,7 +157,7 @@ export const MSCommControl: React.FC<MSCommControlProps> = ({
       baudRate: parseInt(parts[0]) || 9600,
       parity: parts[1] || 'N',
       dataBits: parseInt(parts[2]) || 8,
-      stopBits: parseInt(parts[3]) || 1
+      stopBits: parseInt(parts[3]) || 1,
     };
   }, []);
 
@@ -171,25 +171,28 @@ export const MSCommControl: React.FC<MSCommControlProps> = ({
         try {
           const port = await (navigator as any).serial.requestPort();
           const parsedSettings = parseSettings(settings);
-          
+
           await port.open({
             baudRate: parsedSettings.baudRate,
             dataBits: parsedSettings.dataBits,
             stopBits: parsedSettings.stopBits,
-            parity: parsedSettings.parity === 'N' ? 'none' : 
-                   parsedSettings.parity === 'E' ? 'even' : 'odd'
+            parity:
+              parsedSettings.parity === 'N'
+                ? 'none'
+                : parsedSettings.parity === 'E'
+                  ? 'even'
+                  : 'odd',
           });
-          
+
           setSerialPort(port);
           setIsPortOpen(true);
           onPropertyChange?.('portOpen', true);
-          
+
           // Start reading from port
           readFromPort(port);
-          
+
           setLastCommEvent(MSCommConstants.comEvSend);
           onEvent?.('Comm', { event: MSCommConstants.comEvSend });
-          
         } catch (error) {
           console.warn('Serial port access denied or failed:', error);
           // Fallback to simulation mode
@@ -209,15 +212,15 @@ export const MSCommControl: React.FC<MSCommControlProps> = ({
   const simulatePortOpen = useCallback(() => {
     setIsPortOpen(true);
     onPropertyChange?.('portOpen', true);
-    
+
     // Simulate some initial status
     onPropertyChange?.('ctsHolding', true);
     onPropertyChange?.('dsrHolding', true);
     onPropertyChange?.('cdHolding', true);
-    
+
     setLastCommEvent(MSCommConstants.comEvSend);
     onEvent?.('Comm', { event: MSCommConstants.comEvSend });
-    
+
     // Simulate receiving some data after a delay
     setTimeout(() => {
       simulateDataReceived('AT\r\nOK\r\n');
@@ -231,101 +234,108 @@ export const MSCommControl: React.FC<MSCommControlProps> = ({
         await serialPort.close();
         setSerialPort(null);
       }
-      
+
       setIsPortOpen(false);
       onPropertyChange?.('portOpen', false);
-      
+
       // Clear buffers
       setInputBuffer('');
       setOutputBuffer('');
       inputBufferRef.current = '';
       outputBufferRef.current = '';
-      
+
       onPropertyChange?.('inBufferCount', 0);
       onPropertyChange?.('outBufferCount', 0);
-      
     } catch (error) {
       console.error('Error closing port:', error);
     }
   }, [serialPort, onPropertyChange]);
 
   // Read from serial port
-  const readFromPort = useCallback(async (port: any) => {
-    try {
-      const reader = port.readable.getReader();
-      
-      while (port.readable) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        
-        const text = new TextDecoder().decode(value);
-        inputBufferRef.current += text;
-        setInputBuffer(inputBufferRef.current);
-        
-        onPropertyChange?.('inBufferCount', inputBufferRef.current.length);
-        onPropertyChange?.('input', inputBufferRef.current);
-        
-        if (inputBufferRef.current.length >= rThreshold && rThreshold > 0) {
-          setLastCommEvent(MSCommConstants.comEvReceive);
-          onEvent?.('Comm', { event: MSCommConstants.comEvReceive });
+  const readFromPort = useCallback(
+    async (port: any) => {
+      try {
+        const reader = port.readable.getReader();
+
+        while (port.readable) {
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          const text = new TextDecoder().decode(value);
+          inputBufferRef.current += text;
+          setInputBuffer(inputBufferRef.current);
+
+          onPropertyChange?.('inBufferCount', inputBufferRef.current.length);
+          onPropertyChange?.('input', inputBufferRef.current);
+
+          if (inputBufferRef.current.length >= rThreshold && rThreshold > 0) {
+            setLastCommEvent(MSCommConstants.comEvReceive);
+            onEvent?.('Comm', { event: MSCommConstants.comEvReceive });
+          }
         }
+
+        reader.releaseLock();
+      } catch (error) {
+        console.error('Error reading from port:', error);
       }
-      
-      reader.releaseLock();
-    } catch (error) {
-      console.error('Error reading from port:', error);
-    }
-  }, [rThreshold, onPropertyChange, onEvent]);
+    },
+    [rThreshold, onPropertyChange, onEvent]
+  );
 
   // Write to serial port
-  const writeToPort = useCallback(async (data: string) => {
-    if (!isPortOpen) return;
+  const writeToPort = useCallback(
+    async (data: string) => {
+      if (!isPortOpen) return;
 
-    try {
-      if (serialPort) {
-        const writer = serialPort.writable.getWriter();
-        const encoder = new TextEncoder();
-        await writer.write(encoder.encode(data));
-        writer.releaseLock();
-      } else {
-        // Simulation mode - echo data back
-        setTimeout(() => {
-          simulateDataReceived(`ECHO: ${data}`);
-        }, 100);
+      try {
+        if (serialPort) {
+          const writer = serialPort.writable.getWriter();
+          const encoder = new TextEncoder();
+          await writer.write(encoder.encode(data));
+          writer.releaseLock();
+        } else {
+          // Simulation mode - echo data back
+          setTimeout(() => {
+            simulateDataReceived(`ECHO: ${data}`);
+          }, 100);
+        }
+
+        // Update output buffer
+        outputBufferRef.current += data;
+        setOutputBuffer(outputBufferRef.current);
+        onPropertyChange?.('outBufferCount', outputBufferRef.current.length);
+
+        if (outputBufferRef.current.length >= sThreshold && sThreshold > 0) {
+          setLastCommEvent(MSCommConstants.comEvSend);
+          onEvent?.('Comm', { event: MSCommConstants.comEvSend });
+        }
+      } catch (error) {
+        setLastCommEvent(MSCommConstants.comTxFull);
+        onEvent?.('Comm', { event: MSCommConstants.comTxFull, error });
       }
-      
-      // Update output buffer
-      outputBufferRef.current += data;
-      setOutputBuffer(outputBufferRef.current);
-      onPropertyChange?.('outBufferCount', outputBufferRef.current.length);
-      
-      if (outputBufferRef.current.length >= sThreshold && sThreshold > 0) {
-        setLastCommEvent(MSCommConstants.comEvSend);
-        onEvent?.('Comm', { event: MSCommConstants.comEvSend });
-      }
-      
-    } catch (error) {
-      setLastCommEvent(MSCommConstants.comTxFull);
-      onEvent?.('Comm', { event: MSCommConstants.comTxFull, error });
-    }
-  }, [isPortOpen, serialPort, sThreshold, onPropertyChange, onEvent]);
+    },
+    [isPortOpen, serialPort, sThreshold, onPropertyChange, onEvent]
+  );
 
   // Simulate data received (for demo purposes)
-  const simulateDataReceived = useCallback((data: string) => {
-    inputBufferRef.current += data;
-    setInputBuffer(inputBufferRef.current);
-    
-    onPropertyChange?.('inBufferCount', inputBufferRef.current.length);
-    onPropertyChange?.('input', inputBufferRef.current);
-    
-    setLastCommEvent(MSCommConstants.comEvReceive);
-    onEvent?.('Comm', { event: MSCommConstants.comEvReceive });
-  }, [onPropertyChange, onEvent]);
+  const simulateDataReceived = useCallback(
+    (data: string) => {
+      inputBufferRef.current += data;
+      setInputBuffer(inputBufferRef.current);
+
+      onPropertyChange?.('inBufferCount', inputBufferRef.current.length);
+      onPropertyChange?.('input', inputBufferRef.current);
+
+      setLastCommEvent(MSCommConstants.comEvReceive);
+      onEvent?.('Comm', { event: MSCommConstants.comEvReceive });
+    },
+    [onPropertyChange, onEvent]
+  );
 
   // Handle double click to open/close port
   const handleDoubleClick = useCallback(() => {
     if (!enabled) return;
-    
+
     if (isPortOpen) {
       closePort();
     } else {
@@ -334,14 +344,17 @@ export const MSCommControl: React.FC<MSCommControlProps> = ({
   }, [enabled, isPortOpen, openPort, closePort]);
 
   // Send data
-  const sendData = useCallback((data: string) => {
-    if (!isPortOpen) {
-      throw new Error('Port is not open');
-    }
-    
-    writeToPort(data);
-    onPropertyChange?.('output', data);
-  }, [isPortOpen, writeToPort, onPropertyChange]);
+  const sendData = useCallback(
+    (data: string) => {
+      if (!isPortOpen) {
+        throw new Error('Port is not open');
+      }
+
+      writeToPort(data);
+      onPropertyChange?.('output', data);
+    },
+    [isPortOpen, writeToPort, onPropertyChange]
+  );
 
   // Clear input buffer
   const clearInput = useCallback(() => {
@@ -388,7 +401,7 @@ export const MSCommControl: React.FC<MSCommControlProps> = ({
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '10px',
-    fontFamily: 'Tahoma, Arial, sans-serif'
+    fontFamily: 'Tahoma, Arial, sans-serif',
   };
 
   return (
@@ -401,13 +414,9 @@ export const MSCommControl: React.FC<MSCommControlProps> = ({
       title={`MSComm - COM${commPort} ${isPortOpen ? 'Open' : 'Closed'}`}
     >
       <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: '12px', marginBottom: '2px' }}>
-          {isPortOpen ? '🔌' : '📱'}
-        </div>
+        <div style={{ fontSize: '12px', marginBottom: '2px' }}>{isPortOpen ? '🔌' : '📱'}</div>
         <div>COM{commPort}</div>
-        <div style={{ fontSize: '8px' }}>
-          {isPortOpen ? 'Open' : 'Closed'}
-        </div>
+        <div style={{ fontSize: '8px' }}>{isPortOpen ? 'Open' : 'Closed'}</div>
       </div>
 
       {isDesignMode && (
@@ -422,7 +431,7 @@ export const MSCommControl: React.FC<MSCommControlProps> = ({
             padding: '2px',
             border: '1px solid #ccc',
             whiteSpace: 'nowrap',
-            zIndex: 1000
+            zIndex: 1000,
           }}
         >
           {name} - COM{commPort} ({settings})
@@ -437,7 +446,7 @@ export const MSCommHelpers = {
   /**
    * Create default MSComm control
    */
-  createMSComm: (commPort: number = 1, settings: string = "9600,N,8,1"): MSCommControl => {
+  createMSComm: (commPort: number = 1, settings: string = '9600,N,8,1'): MSCommControl => {
     return {
       type: 'MSComm',
       name: 'MSComm1',
@@ -466,7 +475,7 @@ export const MSCommHelpers = {
       commID: 0,
       enabled: true,
       visible: true,
-      tag: ''
+      tag: '',
     };
   },
 
@@ -479,14 +488,19 @@ export const MSCommHelpers = {
       baudRate: parseInt(parts[0]) || 9600,
       parity: parts[1] || 'N', // N=None, E=Even, O=Odd
       dataBits: parseInt(parts[2]) || 8,
-      stopBits: parseInt(parts[3]) || 1
+      stopBits: parseInt(parts[3]) || 1,
     };
   },
 
   /**
    * Format settings string
    */
-  formatSettings: (baudRate: number, parity: string, dataBits: number, stopBits: number): string => {
+  formatSettings: (
+    baudRate: number,
+    parity: string,
+    dataBits: number,
+    stopBits: number
+  ): string => {
     return `${baudRate},${parity},${dataBits},${stopBits}`;
   },
 
@@ -504,21 +518,25 @@ export const MSCommHelpers = {
   validateSettings: (settings: string): boolean => {
     const parts = settings.split(',');
     if (parts.length !== 4) return false;
-    
+
     const baudRate = parseInt(parts[0]);
     const parity = parts[1].toUpperCase();
     const dataBits = parseInt(parts[2]);
     const stopBits = parseInt(parts[3]);
-    
-    const validBaudRates = [110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 56000, 57600, 115200];
+
+    const validBaudRates = [
+      110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 56000, 57600, 115200,
+    ];
     const validParity = ['N', 'E', 'O', 'M', 'S'];
     const validDataBits = [4, 5, 6, 7, 8];
     const validStopBits = [1, 1.5, 2];
-    
-    return validBaudRates.includes(baudRate) &&
-           validParity.includes(parity) &&
-           validDataBits.includes(dataBits) &&
-           validStopBits.includes(stopBits);
+
+    return (
+      validBaudRates.includes(baudRate) &&
+      validParity.includes(parity) &&
+      validDataBits.includes(dataBits) &&
+      validStopBits.includes(stopBits)
+    );
   },
 
   /**
@@ -529,7 +547,7 @@ export const MSCommHelpers = {
       [MSCommConstants.comEvSend]: 'Send',
       [MSCommConstants.comEvReceive]: 'Receive',
       [MSCommConstants.comEvCTS]: 'CTS Changed',
-      [MSCommConstants.comEvDSR]: 'DSR Changed', 
+      [MSCommConstants.comEvDSR]: 'DSR Changed',
       [MSCommConstants.comEvCD]: 'CD Changed',
       [MSCommConstants.comEvRing]: 'Ring Detect',
       [MSCommConstants.comEvEOF]: 'EOF Detect',
@@ -542,11 +560,11 @@ export const MSCommHelpers = {
       [MSCommConstants.comRxOver]: 'RX Buffer Overflow',
       [MSCommConstants.comRxParity]: 'Parity Error',
       [MSCommConstants.comTxFull]: 'TX Buffer Full',
-      [MSCommConstants.comDCB]: 'DCB Error'
+      [MSCommConstants.comDCB]: 'DCB Error',
     };
 
     return eventNames[eventCode] || `Unknown Event ${eventCode}`;
-  }
+  },
 };
 
 // VB6 MSComm Methods simulation
@@ -560,11 +578,11 @@ export const MSCommMethods = {
       if (control.commPort < 1 || control.commPort > 16) {
         throw new Error('Invalid port number');
       }
-      
+
       if (!MSCommHelpers.validateSettings(control.settings)) {
         throw new Error('Invalid settings');
       }
-      
+
       return true;
     } catch (error) {
       return false;
@@ -585,7 +603,7 @@ export const MSCommMethods = {
     if (!control.portOpen) {
       throw new Error('Port is not open');
     }
-    
+
     return true;
   },
 
@@ -596,7 +614,7 @@ export const MSCommMethods = {
     if (!control.portOpen) {
       throw new Error('Port is not open');
     }
-    
+
     return true;
   },
 
@@ -617,11 +635,11 @@ export const MSCommMethods = {
   readBinary: (control: MSCommControl, length: number): number[] => {
     const input = control.input;
     const result: number[] = [];
-    
+
     for (let i = 0; i < Math.min(length, input.length); i++) {
       result.push(input.charCodeAt(i));
     }
-    
+
     return result;
   },
 
@@ -650,9 +668,9 @@ export const MSCommMethods = {
    * Wait for data with timeout
    */
   waitForData: (control: MSCommControl, timeout: number = 1000): Promise<boolean> => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const startTime = Date.now();
-      
+
       const checkData = () => {
         if (control.inBufferCount > 0) {
           resolve(true);
@@ -662,10 +680,10 @@ export const MSCommMethods = {
           setTimeout(checkData, 10);
         }
       };
-      
+
       checkData();
     });
-  }
+  },
 };
 
 export default MSCommControl;

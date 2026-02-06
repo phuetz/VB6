@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { useVB6Store } from '../../stores/vb6Store';
-import { shallow } from 'zustand/shallow';
+import { useWindowStore } from '../../stores/windowStore';
 import { ThemeManager } from '../../services/ThemeManager';
 
 interface OptionsDialogProps {
@@ -11,7 +10,7 @@ interface OptionsDialogProps {
 
 const OptionsDialog: React.FC<OptionsDialogProps> = ({ visible, onClose }) => {
   // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
-  const showDialog = useVB6Store((state) => state.showDialog);
+  const showDialog = useWindowStore(state => state.showDialog);
   const [selectedTheme, setSelectedTheme] = useState<string>(ThemeManager.getCurrentTheme().name);
 
   const themes = Object.keys(ThemeManager.defaultThemes);
@@ -30,7 +29,12 @@ const OptionsDialog: React.FC<OptionsDialogProps> = ({ visible, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-200 border-2 border-gray-400 shadow-lg w-80">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Options"
+        className="bg-gray-200 border-2 border-gray-400 shadow-lg w-80"
+      >
         <div className="bg-blue-600 text-white text-sm font-bold p-2 flex items-center justify-between">
           <span>Options</span>
           <button onClick={handleClose} className="text-white hover:bg-blue-700 px-2">

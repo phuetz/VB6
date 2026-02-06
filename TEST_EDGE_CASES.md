@@ -11,11 +11,12 @@ Ces scénarios testent les limites du système et valident la robustesse des cor
 ### 1. **Zoom Extrême + Multi-Manipulation**
 
 **Scénario**: Tester les performances à des niveaux de zoom limites
+
 ```
 🧪 PROCÉDURE:
 1. Régler zoom à 25% (minimum)
 2. Créer 5 contrôles dispersés
-3. Multi-sélectionner tous les contrôles  
+3. Multi-sélectionner tous les contrôles
 4. Les déplacer vers différentes zones
 5. Changer zoom à 400% (maximum) pendant le drag
 6. Terminer le déplacement
@@ -23,7 +24,7 @@ Ces scénarios testent les limites du système et valident la robustesse des cor
 
 ✅ SUCCÈS SI:
 - Guides d'alignement restent précis à tous les zooms
-- Contraintes boundaries s'adaptent correctement  
+- Contraintes boundaries s'adaptent correctement
 - Performance fluide même à 400%
 - Redimensionnement correctement désactivé en multi-sélection
 
@@ -37,6 +38,7 @@ Ces scénarios testent les limites du système et valident la robustesse des cor
 ### 2. **Memory Stress Test - Création/Suppression Massive**
 
 **Scénario**: Valider qu'il n'y a pas de memory leaks
+
 ```
 🧪 PROCÉDURE:
 1. Ouvrir DevTools → Memory tab
@@ -44,7 +46,7 @@ Ces scénarios testent les limites du système et valident la robustesse des cor
 3. Répéter 50 fois:
    - Créer 5 contrôles depuis toolbox
    - Les sélectionner tous
-   - Les redimensionner individuellement  
+   - Les redimensionner individuellement
    - Les supprimer
 4. Forcer garbage collection (DevTools)
 5. Prendre un snapshot final
@@ -57,20 +59,21 @@ Ces scénarios testent les limites du système et valident la robustesse des cor
 
 ❌ ÉCHEC SI:
 - Memory usage croît continuellement
-- Event listeners s'accumulent  
+- Event listeners s'accumulent
 - Objects orphelins dans les références
 ```
 
 ### 3. **Race Conditions - Interactions Rapides**
 
 **Scénario**: Tester la robustesse lors d'interactions utilisateur chaotiques
+
 ```
 🧪 PROCÉDURE:
 1. Créer 3 contrôles alignés
 2. Très rapidement (< 0.5s entre chaque):
    - Cliquer sur contrôle A
    - Commencer resize sur contrôle A
-   - Cliquer sur contrôle B (sans terminer resize de A)  
+   - Cliquer sur contrôle B (sans terminer resize de A)
    - Drag contrôle C depuis toolbox
    - Cliquer sur zone vide (sélection rubber band)
    - Appuyer sur Ctrl+Z plusieurs fois
@@ -92,6 +95,7 @@ Ces scénarios testent les limites du système et valident la robustesse des cor
 ### 4. **Precision Edge Case - Alignement Sub-Pixel**
 
 **Scénario**: Tester la précision à des positions non-entières
+
 ```
 🧪 PROCÉDURE:
 1. Désactiver snap-to-grid temporairement
@@ -117,6 +121,7 @@ Ces scénarios testent les limites du système et valident la robustesse des cor
 ### 5. **Canvas Boundary Stress Test**
 
 **Scénario**: Tester comportement aux limites exactes du canvas
+
 ```
 🧪 PROCÉDURE:
 1. Créer contrôle de 100x50px
@@ -129,7 +134,7 @@ Ces scénarios testent les limites du système et valident la robustesse des cor
 
 ✅ SUCCÈS SI:
 - Contrôle reste dans boundaries à toutes les positions
-- Redimensionnement bloqué si dépassement  
+- Redimensionnement bloqué si dépassement
 - Zoom n'affecte pas la logique de boundaries
 - Changement taille canvas adapte contraintes
 
@@ -146,6 +151,7 @@ Ces scénarios testent les limites du système et valident la robustesse des cor
 ### 6. **Keyboard Navigation Complexe**
 
 **Scénario**: Navigation clavier dans situations complexes
+
 ```
 🧪 PROCÉDURE:
 1. Créer grille 3x3 de contrôles (9 contrôles)
@@ -173,11 +179,12 @@ Ces scénarios testent les limites du système et valident la robustesse des cor
 ### 7. **State Machine Validation**
 
 **Scénario**: Vérifier que la state machine des curseurs fonctionne dans tous les cas
+
 ```
 🧪 PROCÉDURE:
 1. Tester toutes les transitions possibles:
    - default → toolbox drag → default
-   - default → control selection → default  
+   - default → control selection → default
    - selection → resize → selection
    - selection → drag → selection
    - selection → rubber band → multi-selection
@@ -188,7 +195,7 @@ Ces scénarios testent les limites du système et valident la robustesse des cor
 3. Vérifier cursor à chaque étape
 
 ✅ SUCCÈS SI:
-- Cursor approprié à chaque état  
+- Cursor approprié à chaque état
 - Transitions fluides sans glitches
 - Recovery correct après interruptions
 - Pas d'états incohérents
@@ -202,6 +209,7 @@ Ces scénarios testent les limites du système et valident la robustesse des cor
 ### 8. **Concurrent Operations**
 
 **Scénario**: Plusieurs systèmes actifs simultanément
+
 ```
 🧪 PROCÉDURE:
 1. Démarrer drag nouveau contrôle depuis toolbox
@@ -231,6 +239,7 @@ Ces scénarios testent les limites du système et valident la robustesse des cor
 ### 9. **Error Recovery**
 
 **Scénario**: Recovery après erreurs inattendues
+
 ```
 🧪 PROCÉDURE:
 1. Injecter erreurs artificielles:
@@ -255,6 +264,7 @@ Ces scénarios testent les limites du système et valident la robustesse des cor
 ### 10. **Performance Degradation Test**
 
 **Scénario**: Comportement sous charge système élevée
+
 ```
 🧪 PROCÉDURE:
 1. Créer 100+ contrôles sur canvas
@@ -282,17 +292,20 @@ Ces scénarios testent les limites du système et valident la robustesse des cor
 ### Critères de Passage Global
 
 **🟢 SUCCÈS COMPLET** si tous les edge cases passent avec:
+
 - 0 crash/exception JavaScript
 - Recovery gracieux dans 100% des cas d'erreur
 - Performance acceptable même sous stress
 - UX cohérente dans toutes les situations
 
 **🟡 SUCCÈS PARTIEL** si:
+
 - <5% d'échec sur edge cases non-critiques
 - Recovery fonctionne pour erreurs communes
 - Performance dégradée mais utilisable
 
 **🔴 ÉCHEC** si:
+
 - Crashes fréquents ou corruption d'état
 - Performance inutilisable dans cas normaux
 - UX confuse ou imprévisible
@@ -308,11 +321,11 @@ describe('Edge Cases Regression Suite', () => {
   test('handles extreme zoom with multi-selection', () => {
     // Automated version of Edge Case 1
   });
-  
+
   test('prevents memory leaks during mass operations', () => {
     // Automated version of Edge Case 2
   });
-  
+
   test('maintains consistency during rapid interactions', () => {
     // Automated version of Edge Case 3
   });
@@ -337,4 +350,4 @@ Ces edge cases couvrent les scénarios les plus extrêmes et valident que le sys
 
 ---
 
-*Tests Edge Cases - Conçus pour valider la robustesse après optimisations ultra-think*
+_Tests Edge Cases - Conçus pour valider la robustesse après optimisations ultra-think_

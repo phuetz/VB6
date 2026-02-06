@@ -14,7 +14,7 @@ export enum CrystalReportType {
   CROSSTAB = 'crosstab',
   MAILING_LABELS = 'mailing_labels',
   OLAP = 'olap',
-  DRILL_DOWN = 'drill_down'
+  DRILL_DOWN = 'drill_down',
 }
 
 export enum CrystalFieldType {
@@ -25,7 +25,7 @@ export enum CrystalFieldType {
   SUMMARY = 'summary',
   GROUP_NAME = 'group_name',
   SPECIAL = 'special',
-  BLOB = 'blob'
+  BLOB = 'blob',
 }
 
 export enum CrystalDataType {
@@ -37,7 +37,7 @@ export enum CrystalDataType {
   DATETIME = 'datetime',
   BOOLEAN = 'boolean',
   MEMO = 'memo',
-  BLOB = 'blob'
+  BLOB = 'blob',
 }
 
 export enum CrystalSectionType {
@@ -47,7 +47,7 @@ export enum CrystalSectionType {
   DETAILS = 'details',
   GROUP_FOOTER = 'group_footer',
   REPORT_FOOTER = 'report_footer',
-  PAGE_FOOTER = 'page_footer'
+  PAGE_FOOTER = 'page_footer',
 }
 
 export enum CrystalExportFormat {
@@ -59,7 +59,7 @@ export enum CrystalExportFormat {
   XML = 'xml',
   CSV = 'csv',
   TEXT = 'text',
-  CRYSTAL_REPORTS = 'rpt'
+  CRYSTAL_REPORTS = 'rpt',
 }
 
 export interface CrystalReport {
@@ -70,23 +70,23 @@ export interface CrystalReport {
   version: string;
   created: Date;
   modified: Date;
-  
+
   // Report structure
   sections: CrystalSection[];
   fields: CrystalField[];
   formulas: CrystalFormula[];
   parameters: CrystalParameter[];
   groups: CrystalGroup[];
-  
+
   // Data source
   dataSources: CrystalDataSource[];
-  
+
   // Page setup
   pageSetup: CrystalPageSetup;
-  
+
   // Report options
   options: CrystalReportOptions;
-  
+
   // Subreports
   subreports: CrystalReport[];
 }
@@ -103,11 +103,11 @@ export interface CrystalSection {
   resetPageNAfter: boolean;
   keepTogether: boolean;
   suppressBlankSection: boolean;
-  
+
   // Formatting
   backgroundColor: string;
   conditionalFormatting?: CrystalConditionalFormat[];
-  
+
   // Objects in section
   objects: CrystalObject[];
 }
@@ -121,7 +121,7 @@ export interface CrystalField {
   columnName?: string;
   formula?: string;
   defaultValue?: any;
-  
+
   // Display properties
   displayString: string;
   format: CrystalFieldFormat;
@@ -134,17 +134,17 @@ export interface CrystalFieldFormat {
   color: string;
   backgroundColor: string;
   alignment: 'left' | 'center' | 'right' | 'justified';
-  
+
   // Number formatting
   decimals?: number;
   thousandsSeparator?: boolean;
   currencySymbol?: string;
   negativeFormat?: string;
-  
+
   // Date formatting
   dateFormat?: string;
   timeFormat?: string;
-  
+
   // Conditional formatting
   conditionalFormats?: CrystalConditionalFormat[];
 }
@@ -161,7 +161,7 @@ export interface CrystalFormula {
   text: string;
   syntax: 'crystal' | 'basic';
   dataType: CrystalDataType;
-  
+
   // Dependencies
   fields: string[];
   parameters: string[];
@@ -178,7 +178,7 @@ export interface CrystalParameter {
   defaultValue?: any;
   allowCustomCurrentValue: boolean;
   discreetOrRangeInfo: 'discreet' | 'range' | 'discreet_and_range';
-  
+
   // Value constraints
   minValue?: any;
   maxValue?: any;
@@ -191,14 +191,14 @@ export interface CrystalGroup {
   name: string;
   field: string;
   sortOrder: 'ascending' | 'descending' | 'specified' | 'original';
-  
+
   // Group options
   keepTogether: boolean;
   repeatGroupHeader: boolean;
   newPageAfter: boolean;
   newPageBefore: boolean;
   resetPageNAfter: boolean;
-  
+
   // Group tree
   includeInGroupTree: boolean;
   customizeGroupName: boolean;
@@ -210,18 +210,18 @@ export interface CrystalDataSource {
   name: string;
   type: 'database' | 'stored_procedure' | 'command' | 'xml' | 'web_service';
   connectionString?: string;
-  
+
   // Database specific
   serverName?: string;
   databaseName?: string;
   userId?: string;
   password?: string;
   integratedSecurity?: boolean;
-  
+
   // Tables and relations
   tables: CrystalTable[];
   links: CrystalTableLink[];
-  
+
   // SQL Command
   commandText?: string;
   parameters?: CrystalParameter[];
@@ -259,13 +259,13 @@ export interface CrystalPageSetup {
   width: number;
   height: number;
   orientation: 'portrait' | 'landscape';
-  
+
   // Margins
   topMargin: number;
   bottomMargin: number;
   leftMargin: number;
   rightMargin: number;
-  
+
   // Printer settings
   printerName?: string;
   copies: number;
@@ -280,18 +280,18 @@ export interface CrystalReportOptions {
   saveDataWithReport: boolean;
   savePreviewPicture: boolean;
   verifyWhenDatabaseUpdated: boolean;
-  
+
   // Performance
   caseInsensitiveSQLData: boolean;
   performGroupingOnServer: boolean;
   useIndexesForSpeed: boolean;
-  
+
   // Reporting
   translateDOSStrings: boolean;
   translateDOSMemos: boolean;
   convertDateTimeField: boolean;
   convertNullFieldToDefault: boolean;
-  
+
   // Export options
   defaultExportFormat: CrystalExportFormat;
   exportWithFormatting: boolean;
@@ -301,24 +301,24 @@ export interface CrystalObject {
   id: string;
   type: 'field' | 'text' | 'line' | 'box' | 'picture' | 'chart' | 'subreport' | 'ole';
   name: string;
-  
+
   // Position and size
   left: number;
   top: number;
   width: number;
   height: number;
-  
+
   // Properties
   visible: boolean;
   canGrow: boolean;
   canShrink: boolean;
   suppressIfDuplicated: boolean;
-  
+
   // Content
   content?: any;
   fieldName?: string;
   text?: string;
-  
+
   // Formatting
   format?: CrystalFieldFormat;
   border?: CrystalBorder;
@@ -349,12 +349,12 @@ export interface CrystalReportViewer {
   enableExport: boolean;
   enableSearch: boolean;
   enableZoom: boolean;
-  
+
   // Current state
   currentPageNumber: number;
   totalPageCount: number;
   zoomLevel: number;
-  
+
   // Events
   onLoad?: (report: CrystalReport) => void;
   onPrint?: (report: CrystalReport) => void;
@@ -368,22 +368,26 @@ export interface CrystalReportEngine {
   openReport(fileName: string): Promise<CrystalReport>;
   saveReport(report: CrystalReport, fileName?: string): Promise<boolean>;
   closeReport(report: CrystalReport): boolean;
-  
+
   // Data operations
   setDataSource(report: CrystalReport, dataSource: CrystalDataSource): boolean;
   setParameters(report: CrystalReport, parameters: Map<string, any>): boolean;
   refreshData(report: CrystalReport): Promise<boolean>;
-  
+
   // Preview and print
   printReport(report: CrystalReport, showDialog?: boolean): Promise<boolean>;
   previewReport(report: CrystalReport): Promise<boolean>;
-  exportReport(report: CrystalReport, format: CrystalExportFormat, fileName: string): Promise<boolean>;
-  
+  exportReport(
+    report: CrystalReport,
+    format: CrystalExportFormat,
+    fileName: string
+  ): Promise<boolean>;
+
   // Report manipulation
   addField(report: CrystalReport, section: string, field: CrystalField): boolean;
   removeField(report: CrystalReport, fieldId: string): boolean;
   moveField(report: CrystalReport, fieldId: string, left: number, top: number): boolean;
-  
+
   // Formula operations
   addFormula(report: CrystalReport, formula: CrystalFormula): boolean;
   editFormula(report: CrystalReport, formulaId: string, text: string): boolean;
@@ -422,7 +426,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
       version: '8.5',
       created: new Date('2002-01-01'),
       modified: new Date(),
-      
+
       sections: [
         {
           id: 'report-header',
@@ -457,10 +461,10 @@ export class VB6CrystalReports implements CrystalReportEngine {
                 fontStyle: ['bold'],
                 color: '#000000',
                 backgroundColor: 'transparent',
-                alignment: 'center'
-              }
-            }
-          ]
+                alignment: 'center',
+              },
+            },
+          ],
         },
         {
           id: 'page-header',
@@ -495,8 +499,8 @@ export class VB6CrystalReports implements CrystalReportEngine {
                 fontStyle: ['bold'],
                 color: '#000000',
                 backgroundColor: 'transparent',
-                alignment: 'left'
-              }
+                alignment: 'left',
+              },
             },
             {
               id: 'customer-city-header',
@@ -517,10 +521,10 @@ export class VB6CrystalReports implements CrystalReportEngine {
                 fontStyle: ['bold'],
                 color: '#000000',
                 backgroundColor: 'transparent',
-                alignment: 'left'
-              }
-            }
-          ]
+                alignment: 'left',
+              },
+            },
+          ],
         },
         {
           id: 'details',
@@ -555,8 +559,8 @@ export class VB6CrystalReports implements CrystalReportEngine {
                 fontStyle: [],
                 color: '#000000',
                 backgroundColor: 'transparent',
-                alignment: 'left'
-              }
+                alignment: 'left',
+              },
             },
             {
               id: 'customer-city-field',
@@ -577,10 +581,10 @@ export class VB6CrystalReports implements CrystalReportEngine {
                 fontStyle: [],
                 color: '#000000',
                 backgroundColor: 'transparent',
-                alignment: 'left'
-              }
-            }
-          ]
+                alignment: 'left',
+              },
+            },
+          ],
         },
         {
           id: 'page-footer',
@@ -615,13 +619,13 @@ export class VB6CrystalReports implements CrystalReportEngine {
                 fontStyle: [],
                 color: '#666666',
                 backgroundColor: 'transparent',
-                alignment: 'right'
-              }
-            }
-          ]
-        }
+                alignment: 'right',
+              },
+            },
+          ],
+        },
       ],
-      
+
       fields: [
         {
           id: 'customer-name',
@@ -637,8 +641,8 @@ export class VB6CrystalReports implements CrystalReportEngine {
             fontStyle: [],
             color: '#000000',
             backgroundColor: 'transparent',
-            alignment: 'left'
-          }
+            alignment: 'left',
+          },
         },
         {
           id: 'customer-city',
@@ -654,11 +658,11 @@ export class VB6CrystalReports implements CrystalReportEngine {
             fontStyle: [],
             color: '#000000',
             backgroundColor: 'transparent',
-            alignment: 'left'
-          }
-        }
+            alignment: 'left',
+          },
+        },
       ],
-      
+
       formulas: [
         {
           id: 'full-address',
@@ -668,10 +672,10 @@ export class VB6CrystalReports implements CrystalReportEngine {
           dataType: CrystalDataType.STRING,
           fields: ['Customers.Address', 'Customers.City', 'Customers.State', 'Customers.ZipCode'],
           parameters: [],
-          functions: []
-        }
+          functions: [],
+        },
       ],
-      
+
       parameters: [
         {
           id: 'date-range-start',
@@ -683,12 +687,12 @@ export class VB6CrystalReports implements CrystalReportEngine {
           defaultValue: new Date(),
           allowCustomCurrentValue: true,
           discreetOrRangeInfo: 'discreet',
-          pickListItems: []
-        }
+          pickListItems: [],
+        },
       ],
-      
+
       groups: [],
-      
+
       dataSources: [
         {
           id: 'main-datasource',
@@ -705,18 +709,53 @@ export class VB6CrystalReports implements CrystalReportEngine {
               alias: 'Customers',
               type: 'table',
               columns: [
-                { name: 'CustomerID', dataType: CrystalDataType.STRING, length: 5, nullable: false, primaryKey: true, foreignKey: false },
-                { name: 'CustomerName', dataType: CrystalDataType.STRING, length: 50, nullable: false, primaryKey: false, foreignKey: false },
-                { name: 'City', dataType: CrystalDataType.STRING, length: 25, nullable: true, primaryKey: false, foreignKey: false },
-                { name: 'State', dataType: CrystalDataType.STRING, length: 2, nullable: true, primaryKey: false, foreignKey: false },
-                { name: 'ZipCode', dataType: CrystalDataType.STRING, length: 10, nullable: true, primaryKey: false, foreignKey: false }
-              ]
-            }
+                {
+                  name: 'CustomerID',
+                  dataType: CrystalDataType.STRING,
+                  length: 5,
+                  nullable: false,
+                  primaryKey: true,
+                  foreignKey: false,
+                },
+                {
+                  name: 'CustomerName',
+                  dataType: CrystalDataType.STRING,
+                  length: 50,
+                  nullable: false,
+                  primaryKey: false,
+                  foreignKey: false,
+                },
+                {
+                  name: 'City',
+                  dataType: CrystalDataType.STRING,
+                  length: 25,
+                  nullable: true,
+                  primaryKey: false,
+                  foreignKey: false,
+                },
+                {
+                  name: 'State',
+                  dataType: CrystalDataType.STRING,
+                  length: 2,
+                  nullable: true,
+                  primaryKey: false,
+                  foreignKey: false,
+                },
+                {
+                  name: 'ZipCode',
+                  dataType: CrystalDataType.STRING,
+                  length: 10,
+                  nullable: true,
+                  primaryKey: false,
+                  foreignKey: false,
+                },
+              ],
+            },
           ],
-          links: []
-        }
+          links: [],
+        },
       ],
-      
+
       pageSetup: {
         paperSize: 'Letter',
         width: 8.5,
@@ -728,9 +767,9 @@ export class VB6CrystalReports implements CrystalReportEngine {
         rightMargin: 0.5,
         copies: 1,
         collate: true,
-        printRange: 'all'
+        printRange: 'all',
       },
-      
+
       options: {
         saveDataWithReport: false,
         savePreviewPicture: true,
@@ -743,10 +782,10 @@ export class VB6CrystalReports implements CrystalReportEngine {
         convertDateTimeField: true,
         convertNullFieldToDefault: true,
         defaultExportFormat: CrystalExportFormat.PDF,
-        exportWithFormatting: true
+        exportWithFormatting: true,
       },
-      
-      subreports: []
+
+      subreports: [],
     };
 
     this.reports.set(customerReport.id, customerReport);
@@ -758,9 +797,11 @@ export class VB6CrystalReports implements CrystalReportEngine {
       setTimeout(() => {
         try {
           logger.debug(`Opening Crystal Report: ${fileName}`);
-          
+
           // Check if already loaded
-          const existingReport = Array.from(this.reports.values()).find(r => r.fileName === fileName);
+          const existingReport = Array.from(this.reports.values()).find(
+            r => r.fileName === fileName
+          );
           if (existingReport) {
             resolve(existingReport);
             return;
@@ -793,7 +834,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
               rightMargin: 0.5,
               copies: 1,
               collate: true,
-              printRange: 'all'
+              printRange: 'all',
             },
             options: {
               saveDataWithReport: false,
@@ -807,9 +848,9 @@ export class VB6CrystalReports implements CrystalReportEngine {
               convertDateTimeField: true,
               convertNullFieldToDefault: true,
               defaultExportFormat: CrystalExportFormat.PDF,
-              exportWithFormatting: true
+              exportWithFormatting: true,
             },
-            subreports: []
+            subreports: [],
           };
 
           this.reports.set(reportId, report);
@@ -822,7 +863,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
   }
 
   async saveReport(report: CrystalReport, fileName?: string): Promise<boolean> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => {
         logger.debug(`Saving Crystal Report: ${fileName || report.fileName}`);
         if (fileName) {
@@ -843,7 +884,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
   // Data Operations
   setDataSource(report: CrystalReport, dataSource: CrystalDataSource): boolean {
     logger.debug(`Setting data source for report: ${report.name}`);
-    
+
     // Replace or add data source
     const existingIndex = report.dataSources.findIndex(ds => ds.id === dataSource.id);
     if (existingIndex >= 0) {
@@ -851,26 +892,26 @@ export class VB6CrystalReports implements CrystalReportEngine {
     } else {
       report.dataSources.push(dataSource);
     }
-    
+
     report.modified = new Date();
     return true;
   }
 
   setParameters(report: CrystalReport, parameters: Map<string, any>): boolean {
     logger.debug(`Setting parameters for report: ${report.name}`);
-    
+
     for (const [paramName, value] of parameters) {
       const param = report.parameters.find(p => p.name === paramName);
       if (param) {
         param.defaultValue = value;
       }
     }
-    
+
     return true;
   }
 
   async refreshData(report: CrystalReport): Promise<boolean> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => {
         logger.debug(`Refreshing data for report: ${report.name}`);
         resolve(true);
@@ -880,7 +921,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
 
   // Preview and Print
   async printReport(report: CrystalReport, showDialog: boolean = true): Promise<boolean> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => {
         logger.debug(`Printing report: ${report.name} (Show Dialog: ${showDialog})`);
         if (showDialog) {
@@ -894,7 +935,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
   }
 
   async previewReport(report: CrystalReport): Promise<boolean> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => {
         logger.debug(`Previewing report: ${report.name}`);
         // In a real implementation, would show the report viewer
@@ -907,8 +948,12 @@ export class VB6CrystalReports implements CrystalReportEngine {
     });
   }
 
-  async exportReport(report: CrystalReport, format: CrystalExportFormat, fileName: string): Promise<boolean> {
-    return new Promise((resolve) => {
+  async exportReport(
+    report: CrystalReport,
+    format: CrystalExportFormat,
+    fileName: string
+  ): Promise<boolean> {
+    return new Promise(resolve => {
       setTimeout(() => {
         logger.debug(`Exporting report ${report.name} to ${format.toUpperCase()}: ${fileName}`);
 
@@ -925,13 +970,13 @@ export class VB6CrystalReports implements CrystalReportEngine {
   // Report Manipulation
   addField(report: CrystalReport, sectionId: string, field: CrystalField): boolean {
     logger.debug(`Adding field ${field.name} to section ${sectionId} in report ${report.name}`);
-    
+
     // Add field to report
     const existingField = report.fields.find(f => f.id === field.id);
     if (!existingField) {
       report.fields.push(field);
     }
-    
+
     // Add field object to section
     const section = report.sections.find(s => s.id === sectionId);
     if (section) {
@@ -948,37 +993,37 @@ export class VB6CrystalReports implements CrystalReportEngine {
         canShrink: false,
         suppressIfDuplicated: false,
         fieldName: field.name,
-        format: field.format
+        format: field.format,
       };
-      
+
       section.objects.push(fieldObject);
     }
-    
+
     report.modified = new Date();
     return true;
   }
 
   removeField(report: CrystalReport, fieldId: string): boolean {
     logger.debug(`Removing field ${fieldId} from report ${report.name}`);
-    
+
     // Remove from fields array
     const fieldIndex = report.fields.findIndex(f => f.id === fieldId);
     if (fieldIndex >= 0) {
       report.fields.splice(fieldIndex, 1);
     }
-    
+
     // Remove field objects from all sections
     for (const section of report.sections) {
       section.objects = section.objects.filter(obj => obj.fieldName !== fieldId);
     }
-    
+
     report.modified = new Date();
     return true;
   }
 
   moveField(report: CrystalReport, fieldId: string, left: number, top: number): boolean {
     logger.debug(`Moving field ${fieldId} to position (${left}, ${top}) in report ${report.name}`);
-    
+
     // Find and move field objects in all sections
     for (const section of report.sections) {
       const fieldObject = section.objects.find(obj => obj.fieldName === fieldId);
@@ -987,7 +1032,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
         fieldObject.top = top;
       }
     }
-    
+
     report.modified = new Date();
     return true;
   }
@@ -995,40 +1040,40 @@ export class VB6CrystalReports implements CrystalReportEngine {
   // Formula Operations
   addFormula(report: CrystalReport, formula: CrystalFormula): boolean {
     logger.debug(`Adding formula ${formula.name} to report ${report.name}`);
-    
+
     const existingFormula = report.formulas.find(f => f.id === formula.id);
     if (!existingFormula) {
       report.formulas.push(formula);
       report.modified = new Date();
       return true;
     }
-    
+
     return false;
   }
 
   editFormula(report: CrystalReport, formulaId: string, text: string): boolean {
     logger.debug(`Editing formula ${formulaId} in report ${report.name}`);
-    
+
     const formula = report.formulas.find(f => f.id === formulaId);
     if (formula) {
       formula.text = text;
       report.modified = new Date();
       return true;
     }
-    
+
     return false;
   }
 
   deleteFormula(report: CrystalReport, formulaId: string): boolean {
     logger.debug(`Deleting formula ${formulaId} from report ${report.name}`);
-    
+
     const formulaIndex = report.formulas.findIndex(f => f.id === formulaId);
     if (formulaIndex >= 0) {
       report.formulas.splice(formulaIndex, 1);
       report.modified = new Date();
       return true;
     }
-    
+
     return false;
   }
 
@@ -1056,9 +1101,9 @@ export class VB6CrystalReports implements CrystalReportEngine {
       enableZoom: true,
       currentPageNumber: 1,
       totalPageCount: 1,
-      zoomLevel: 100
+      zoomLevel: 100,
     };
-    
+
     return this.viewer;
   }
 
@@ -1078,7 +1123,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
       totalReports: reports.length,
       reportsByType: new Map<CrystalReportType, number>(),
       averageFields: 0,
-      averageFormulas: 0
+      averageFormulas: 0,
     };
 
     if (reports.length > 0) {
@@ -1089,7 +1134,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
         // Count by type
         const typeCount = stats.reportsByType.get(report.type) || 0;
         stats.reportsByType.set(report.type, typeCount + 1);
-        
+
         totalFields += report.fields.length;
         totalFormulas += report.formulas.length;
       }
@@ -1131,7 +1176,7 @@ export class VB6CrystalReports implements CrystalReportEngine {
             rightMargin: 0.5,
             copies: 1,
             collate: true,
-            printRange: 'all'
+            printRange: 'all',
           },
           options: {
             saveDataWithReport: false,
@@ -1145,14 +1190,14 @@ export class VB6CrystalReports implements CrystalReportEngine {
             convertDateTimeField: true,
             convertNullFieldToDefault: true,
             defaultExportFormat: CrystalExportFormat.PDF,
-            exportWithFormatting: true
+            exportWithFormatting: true,
           },
-          subreports: []
+          subreports: [],
         };
-        
+
         this.reports.set(newReport.id, newReport);
         return newReport;
-      }
+      },
     };
   }
 }

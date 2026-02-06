@@ -7,7 +7,7 @@ import {
   OnErrorGoToZero,
   Resume,
   RaiseError,
-  Err
+  Err,
 } from '../../compiler/VB6AdvancedErrorHandling';
 
 describe('VB6 Error Handling - On Error Statements', () => {
@@ -44,7 +44,7 @@ describe('VB6 Error Handling - On Error Statements', () => {
         procedure: 'TestProc',
         module: 'TestModule',
         timestamp: Date.now(),
-        callStack: []
+        callStack: [],
       };
 
       // Should not throw
@@ -69,7 +69,7 @@ describe('VB6 Error Handling - On Error Statements', () => {
         procedure: 'TestProc',
         module: 'TestModule',
         timestamp: Date.now(),
-        callStack: []
+        callStack: [],
       };
 
       handler.handleError(error);
@@ -94,7 +94,7 @@ describe('VB6 Error Handling - On Error Statements', () => {
         procedure: 'TestProc',
         module: 'TestModule',
         timestamp: Date.now(),
-        callStack: []
+        callStack: [],
       };
 
       handler.handleError(error);
@@ -137,7 +137,7 @@ describe('VB6 Error Handling - On Error Statements', () => {
         procedure: 'OpenFile',
         module: 'FileModule',
         timestamp: Date.now(),
-        callStack: []
+        callStack: [],
       };
 
       handler.handleError(error);
@@ -171,7 +171,7 @@ describe('VB6 Error Handling - On Error Statements', () => {
         procedure: 'Proc1',
         module: 'Module1',
         timestamp: Date.now(),
-        callStack: []
+        callStack: [],
       });
 
       expect(handler1Called).toBe(true);
@@ -197,7 +197,7 @@ describe('VB6 Error Handling - On Error Statements', () => {
         procedure: 'Proc2',
         module: 'Module2',
         timestamp: Date.now(),
-        callStack: []
+        callStack: [],
       });
 
       expect(handler1Called).toBe(false);
@@ -221,7 +221,7 @@ describe('VB6 Error Handling - On Error Statements', () => {
         procedure: 'TestProc',
         module: 'TestModule',
         timestamp: Date.now(),
-        callStack: []
+        callStack: [],
       };
 
       // Should throw because label not found
@@ -252,7 +252,7 @@ describe('VB6 Error Handling - On Error Statements', () => {
         procedure: 'ArrayAccess',
         module: 'TestModule',
         timestamp: Date.now(),
-        callStack: []
+        callStack: [],
       };
 
       expect(() => handler.handleError(error)).toThrow(VB6RuntimeError);
@@ -303,7 +303,7 @@ describe('VB6 Error Handling - Resume Statements', () => {
         procedure: 'Calculate',
         module: 'Math',
         timestamp: Date.now(),
-        callStack: []
+        callStack: [],
       };
 
       handler.handleError(error);
@@ -329,7 +329,7 @@ describe('VB6 Error Handling - Resume Statements', () => {
         procedure: 'TestProc',
         module: 'TestModule',
         timestamp: Date.now(),
-        callStack: []
+        callStack: [],
       };
 
       handler.handleError(error);
@@ -354,7 +354,7 @@ describe('VB6 Error Handling - Resume Statements', () => {
         procedure: 'ReadFile',
         module: 'IO',
         timestamp: Date.now(),
-        callStack: []
+        callStack: [],
       };
 
       handler.handleError(error);
@@ -376,7 +376,7 @@ describe('VB6 Error Handling - Resume Statements', () => {
         procedure: 'Allocate',
         module: 'MemModule',
         timestamp: Date.now(),
-        callStack: []
+        callStack: [],
       };
 
       handler.handleError(error);
@@ -442,7 +442,7 @@ describe('VB6 Error Handling - Err Object', () => {
         procedure: 'OpenFile',
         module: 'FileModule',
         timestamp: Date.now(),
-        callStack: []
+        callStack: [],
       };
 
       handler.handleError(error);
@@ -478,7 +478,7 @@ describe('VB6 Error Handling - Err Object', () => {
         procedure: 'Access',
         module: 'ArrayModule',
         timestamp: Date.now(),
-        callStack: []
+        callStack: [],
       });
 
       handler.Err.Clear();
@@ -530,7 +530,7 @@ describe('VB6 Error Handling - Error Codes', () => {
       procedure: 'Divide',
       module: 'MathModule',
       timestamp: Date.now(),
-      callStack: []
+      callStack: [],
     });
 
     expect(handler.Err.Description).toBe('Division by zero');
@@ -659,7 +659,7 @@ describe('VB6 Error Handling - Execution Context', () => {
         procedure: 'TestProc',
         module: 'TestModule',
         timestamp: Date.now(),
-        callStack: []
+        callStack: [],
       });
       handler.resume('ErrorHandler');
     }).not.toThrow();
@@ -685,7 +685,7 @@ describe('VB6 Error Handling - Execution Context', () => {
       procedure: 'SubFunction',
       module: 'Module2',
       timestamp: Date.now(),
-      callStack: []
+      callStack: [],
     });
 
     // The error should have been processed
@@ -740,7 +740,7 @@ describe('VB6 Error Handling - Global Functions', () => {
       procedure: 'ArrayAccess',
       module: 'ArrayModule',
       timestamp: Date.now(),
-      callStack: []
+      callStack: [],
     });
 
     // Use the instance's Err property, not the global snapshot
@@ -788,7 +788,7 @@ describe('VB6 Error Handling - Real-World Scenarios', () => {
       procedure: 'OpenFile',
       module: 'FileModule',
       timestamp: Date.now(),
-      callStack: []
+      callStack: [],
     });
 
     expect(errorHandled).toBe(true);
@@ -820,8 +820,8 @@ describe('VB6 Error Handling - Real-World Scenarios', () => {
       line: 200,
       procedure: 'ConnectDB',
       module: 'DatabaseModule',
-        timestamp: Date.now(),
-      callStack: []
+      timestamp: Date.now(),
+      callStack: [],
     });
 
     expect(retryCount).toBe(1);
@@ -851,7 +851,7 @@ describe('VB6 Error Handling - Real-World Scenarios', () => {
       procedure: 'Divide',
       module: 'MathModule',
       timestamp: Date.now(),
-      callStack: []
+      callStack: [],
     });
 
     expect(result).toBe(0);
@@ -874,7 +874,7 @@ describe('VB6 Error Handling - Real-World Scenarios', () => {
       procedure: 'AllocateResource',
       module: 'MemoryModule',
       timestamp: Date.now(),
-      callStack: []
+      callStack: [],
     });
 
     // Check error and cleanup
@@ -916,7 +916,7 @@ describe('VB6 Error Handling - Statistics and Debugging', () => {
         procedure: 'TestProc',
         module: 'TestModule',
         timestamp: Date.now(),
-        callStack: []
+        callStack: [],
       });
     }
 
@@ -941,7 +941,7 @@ describe('VB6 Error Handling - Statistics and Debugging', () => {
         procedure: 'Access',
         module: 'ArrayModule',
         timestamp: Date.now(),
-        callStack: []
+        callStack: [],
       });
     } catch (e) {
       // Expected
@@ -972,7 +972,7 @@ describe('VB6 Error Handling - Statistics and Debugging', () => {
       procedure: 'TestProc',
       module: 'TestModule',
       timestamp: Date.now(),
-      callStack: []
+      callStack: [],
     });
 
     // Verify the handler was called and error was registered
@@ -996,7 +996,7 @@ describe('VB6 Error Handling - Statistics and Debugging', () => {
       procedure: 'Allocate',
       module: 'MemModule',
       timestamp: Date.now(),
-      callStack: []
+      callStack: [],
     });
 
     handler.reset();

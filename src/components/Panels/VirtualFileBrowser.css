@@ -394,7 +394,7 @@
   grid-column: auto;
 }
 
-.vfb-checkbox-group input[type="checkbox"] {
+.vfb-checkbox-group input[type='checkbox'] {
   cursor: pointer;
   width: 14px;
   height: 14px;

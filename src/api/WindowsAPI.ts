@@ -11,7 +11,7 @@ export enum HKEY {
   HKEY_USERS = 0x80000003,
   HKEY_PERFORMANCE_DATA = 0x80000004,
   HKEY_CURRENT_CONFIG = 0x80000005,
-  HKEY_DYN_DATA = 0x80000006
+  HKEY_DYN_DATA = 0x80000006,
 }
 
 export enum REG_TYPE {
@@ -28,7 +28,7 @@ export enum REG_TYPE {
   REG_FULL_RESOURCE_DESCRIPTOR = 9,
   REG_RESOURCE_REQUIREMENTS_LIST = 10,
   REG_QWORD = 11,
-  REG_QWORD_LITTLE_ENDIAN = 13
+  REG_QWORD_LITTLE_ENDIAN = 13,
 }
 
 // Shell API Constants
@@ -46,7 +46,7 @@ export enum SW {
   SW_SHOWNA = 8,
   SW_RESTORE = 9,
   SW_SHOWDEFAULT = 10,
-  SW_FORCEMINIMIZE = 11
+  SW_FORCEMINIMIZE = 11,
 }
 
 export enum CSIDL {
@@ -106,7 +106,7 @@ export enum CSIDL {
   CSIDL_RESOURCES_LOCALIZED = 0x0039,
   CSIDL_COMMON_OEM_LINKS = 0x003a,
   CSIDL_CDBURN_AREA = 0x003b,
-  CSIDL_COMPUTERSNEARME = 0x003d
+  CSIDL_COMPUTERSNEARME = 0x003d,
 }
 
 // GDI+ Constants
@@ -131,7 +131,7 @@ export enum GdiplusStartupStatus {
   UnsupportedGdiplusVersion = 17,
   GdiplusNotInitialized = 18,
   PropertyNotFound = 19,
-  PropertyNotSupported = 20
+  PropertyNotSupported = 20,
 }
 
 // Multimedia API Constants
@@ -147,14 +147,19 @@ export enum SND {
   SND_FILENAME = 0x00020000,
   SND_RESOURCE = 0x00040004,
   SND_PURGE = 0x0040,
-  SND_APPLICATION = 0x0080
+  SND_APPLICATION = 0x0080,
 }
 
 // Browser-based Registry Simulation using localStorage
 class RegistryAPI {
   private static readonly PREFIX = 'VB6_REGISTRY_';
 
-  static RegOpenKeyEx(hKey: HKEY, lpSubKey: string, ulOptions: number, samDesired: number): { result: number; phkResult: number } {
+  static RegOpenKeyEx(
+    hKey: HKEY,
+    lpSubKey: string,
+    ulOptions: number,
+    samDesired: number
+  ): { result: number; phkResult: number } {
     try {
       const fullKey = `${RegistryAPI.PREFIX}${hKey}_${lpSubKey}`;
       // Simulate opening a key by checking if it exists
@@ -165,12 +170,17 @@ class RegistryAPI {
     }
   }
 
-  static RegQueryValueEx(hKey: number, lpValueName: string, lpReserved: number, lpType: REG_TYPE): { result: number; data: any; type: REG_TYPE } {
+  static RegQueryValueEx(
+    hKey: number,
+    lpValueName: string,
+    lpReserved: number,
+    lpType: REG_TYPE
+  ): { result: number; data: any; type: REG_TYPE } {
     try {
       const fullKey = `${RegistryAPI.PREFIX}${hKey}_${lpValueName}`;
       const data = localStorage.getItem(fullKey);
       const type = parseInt(localStorage.getItem(fullKey + '_TYPE') || '1', 10) as REG_TYPE;
-      
+
       if (data === null) {
         return { result: 2, data: null, type: REG_TYPE.REG_NONE }; // ERROR_FILE_NOT_FOUND
       }
@@ -194,10 +204,16 @@ class RegistryAPI {
     }
   }
 
-  static RegSetValueEx(hKey: number, lpValueName: string, reserved: number, dwType: REG_TYPE, lpData: any): number {
+  static RegSetValueEx(
+    hKey: number,
+    lpValueName: string,
+    reserved: number,
+    dwType: REG_TYPE,
+    lpData: any
+  ): number {
     try {
       const fullKey = `${RegistryAPI.PREFIX}${hKey}_${lpValueName}`;
-      
+
       let dataToStore: string;
       switch (dwType) {
         case REG_TYPE.REG_DWORD:
@@ -237,16 +253,19 @@ class RegistryAPI {
     return 0; // ERROR_SUCCESS
   }
 
-  static RegCreateKeyEx(hKey: HKEY, lpSubKey: string): { result: number; phkResult: number; lpdwDisposition: number } {
+  static RegCreateKeyEx(
+    hKey: HKEY,
+    lpSubKey: string
+  ): { result: number; phkResult: number; lpdwDisposition: number } {
     try {
       const fullKey = `${RegistryAPI.PREFIX}${hKey}_${lpSubKey}`;
       const existed = localStorage.getItem(fullKey + '_EXISTS') !== null;
       localStorage.setItem(fullKey + '_EXISTS', 'true');
-      
+
       return {
         result: 0, // ERROR_SUCCESS
         phkResult: 1,
-        lpdwDisposition: existed ? 2 : 1 // REG_OPENED_EXISTING_KEY : REG_CREATED_NEW_KEY
+        lpdwDisposition: existed ? 2 : 1, // REG_OPENED_EXISTING_KEY : REG_CREATED_NEW_KEY
       };
     } catch {
       return { result: 1, phkResult: 0, lpdwDisposition: 0 }; // ERROR_INVALID_FUNCTION
@@ -256,7 +275,14 @@ class RegistryAPI {
 
 // Shell API Implementation
 class ShellAPI {
-  static ShellExecute(hwnd: number, lpOperation: string, lpFile: string, lpParameters: string, lpDirectory: string, nShowCmd: SW): number {
+  static ShellExecute(
+    hwnd: number,
+    lpOperation: string,
+    lpFile: string,
+    lpParameters: string,
+    lpDirectory: string,
+    nShowCmd: SW
+  ): number {
     try {
       if (lpOperation === 'open' || lpOperation === '') {
         if (lpFile.startsWith('http') || lpFile.startsWith('mailto:')) {
@@ -264,7 +290,10 @@ class ShellAPI {
           return 32; // Success (> 32)
         } else if (lpFile.endsWith('.txt') || lpFile.endsWith('.html')) {
           // Simulate opening text/html files
-          window.open(`data:text/plain,${encodeURIComponent('File content would be displayed here')}`, '_blank');
+          window.open(
+            `data:text/plain,${encodeURIComponent('File content would be displayed here')}`,
+            '_blank'
+          );
           return 32;
         }
       }
@@ -274,7 +303,12 @@ class ShellAPI {
     }
   }
 
-  static SHGetFolderPath(hwndOwner: number, nFolder: CSIDL, hToken: number, dwFlags: number): string {
+  static SHGetFolderPath(
+    hwndOwner: number,
+    nFolder: CSIDL,
+    hToken: number,
+    dwFlags: number
+  ): string {
     // Map CSIDL values to logical paths in browser environment
     const folderMappings: Record<number, string> = {
       [CSIDL.CSIDL_DESKTOP]: '/Desktop',
@@ -288,7 +322,7 @@ class ShellAPI {
       [CSIDL.CSIDL_PROGRAM_FILES]: '/Program Files',
       [CSIDL.CSIDL_WINDOWS]: '/Windows',
       [CSIDL.CSIDL_SYSTEM]: '/Windows/System32',
-      [CSIDL.CSIDL_TEMP]: '/Temp'
+      [CSIDL.CSIDL_TEMP]: '/Temp',
     };
 
     return folderMappings[nFolder] || '/';
@@ -394,19 +428,19 @@ class ClipboardAPI {
     try {
       if (navigator.clipboard && navigator.clipboard.write) {
         let clipboardItem: ClipboardItem;
-        
+
         if (format === 'text/plain') {
           clipboardItem = new ClipboardItem({
-            'text/plain': new Blob([data], { type: 'text/plain' })
+            'text/plain': new Blob([data], { type: 'text/plain' }),
           });
         } else if (format === 'image/png') {
           clipboardItem = new ClipboardItem({
-            'image/png': data
+            'image/png': data,
           });
         } else {
           return false;
         }
-        
+
         await navigator.clipboard.write([clipboardItem]);
         return true;
       }
@@ -446,7 +480,7 @@ class GdiPlusAPI {
     }
     return {
       status: GdiplusStartupStatus.Ok,
-      token: GdiPlusAPI.token
+      token: GdiPlusAPI.token,
     };
   }
 
@@ -461,7 +495,14 @@ class GdiPlusAPI {
     return canvas.getContext('2d');
   }
 
-  static DrawString(graphics: CanvasRenderingContext2D, text: string, font: string, brush: string, x: number, y: number): GdiplusStartupStatus {
+  static DrawString(
+    graphics: CanvasRenderingContext2D,
+    text: string,
+    font: string,
+    brush: string,
+    x: number,
+    y: number
+  ): GdiplusStartupStatus {
     try {
       graphics.font = font;
       graphics.fillStyle = brush;
@@ -472,7 +513,14 @@ class GdiPlusAPI {
     }
   }
 
-  static DrawRectangle(graphics: CanvasRenderingContext2D, pen: string, x: number, y: number, width: number, height: number): GdiplusStartupStatus {
+  static DrawRectangle(
+    graphics: CanvasRenderingContext2D,
+    pen: string,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ): GdiplusStartupStatus {
     try {
       graphics.strokeStyle = pen;
       graphics.strokeRect(x, y, width, height);
@@ -482,7 +530,14 @@ class GdiPlusAPI {
     }
   }
 
-  static FillRectangle(graphics: CanvasRenderingContext2D, brush: string, x: number, y: number, width: number, height: number): GdiplusStartupStatus {
+  static FillRectangle(
+    graphics: CanvasRenderingContext2D,
+    brush: string,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ): GdiplusStartupStatus {
     try {
       graphics.fillStyle = brush;
       graphics.fillRect(x, y, width, height);
@@ -492,7 +547,14 @@ class GdiPlusAPI {
     }
   }
 
-  static DrawImage(graphics: CanvasRenderingContext2D, image: HTMLImageElement, x: number, y: number, width?: number, height?: number): GdiplusStartupStatus {
+  static DrawImage(
+    graphics: CanvasRenderingContext2D,
+    image: HTMLImageElement,
+    x: number,
+    y: number,
+    width?: number,
+    height?: number
+  ): GdiplusStartupStatus {
     try {
       if (width !== undefined && height !== undefined) {
         graphics.drawImage(image, x, y, width, height);
@@ -505,7 +567,11 @@ class GdiPlusAPI {
     }
   }
 
-  static SaveImageToFile(canvas: HTMLCanvasElement, filename: string, format: string = 'png'): boolean {
+  static SaveImageToFile(
+    canvas: HTMLCanvasElement,
+    filename: string,
+    format: string = 'png'
+  ): boolean {
     try {
       const link = document.createElement('a');
       link.download = filename;
@@ -549,7 +615,7 @@ class MultimediaAPI {
       } else {
         // Play synchronously (wait for completion)
         await audio.play();
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
           audio.addEventListener('ended', () => resolve(true));
           audio.addEventListener('error', () => resolve(false));
         });
@@ -562,7 +628,7 @@ class MultimediaAPI {
   private static getSystemSound(alias: string): HTMLAudioElement {
     // Map system sound aliases to actual sounds or generate tones
     const audio = new Audio();
-    
+
     switch (alias.toLowerCase()) {
       case 'systemhand':
       case 'systemexclamation':
@@ -601,18 +667,15 @@ class MultimediaAPI {
       oscillator.type = 'sine';
 
       gainNode.gain.setValueAtTime(0.3, MultimediaAPI.audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, MultimediaAPI.audioContext.currentTime + duration / 1000);
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.01,
+        MultimediaAPI.audioContext.currentTime + duration / 1000
+      );
 
       oscillator.start(MultimediaAPI.audioContext.currentTime);
       oscillator.stop(MultimediaAPI.audioContext.currentTime + duration / 1000);
     } catch {
       // Fallback to console beep if audio API fails
-      console.log(`\u0007`); // Bell character
-    }
-  }
-
-  static Beep(frequency: number, duration: number): boolean {
-    MultimediaAPI.generateTone(frequency, duration);
     return true;
   }
 
@@ -641,7 +704,7 @@ class FileAPI {
       }
       return 0x20; // FILE_ATTRIBUTE_ARCHIVE
     } catch {
-      return 0xFFFFFFFF; // INVALID_FILE_ATTRIBUTES
+      return 0xffffffff; // INVALID_FILE_ATTRIBUTES
     }
   }
 
@@ -681,22 +744,22 @@ class FileAPI {
 export const WindowsAPI = {
   // Registry API
   Registry: RegistryAPI,
-  
+
   // Shell API
   Shell: ShellAPI,
-  
+
   // Clipboard API
   Clipboard: ClipboardAPI,
-  
+
   // GDI+ API
   GdiPlus: GdiPlusAPI,
-  
+
   // Multimedia API
   Multimedia: MultimediaAPI,
-  
+
   // File API
   File: FileAPI,
-  
+
   // Constants
   HKEY,
   REG_TYPE,
@@ -704,55 +767,66 @@ export const WindowsAPI = {
   CSIDL,
   SND,
   GdiplusStartupStatus,
-  
+
   // Utility functions
   GetTickCount: (): number => Date.now(),
-  
-  Sleep: (milliseconds: number): Promise<void> => 
+
+  Sleep: (milliseconds: number): Promise<void> =>
     new Promise(resolve => setTimeout(resolve, milliseconds)),
-    
+
   GetSystemMetrics: (nIndex: number): number => {
     // Return system metrics (limited in browser)
     switch (nIndex) {
-      case 0: return window.screen.width; // SM_CXSCREEN
-      case 1: return window.screen.height; // SM_CYSCREEN
-      case 78: return window.screen.width; // SM_CXVIRTUALSCREEN
-      case 79: return window.screen.height; // SM_CYVIRTUALSCREEN
-      default: return 0;
+      case 0:
+        return window.screen.width; // SM_CXSCREEN
+      case 1:
+        return window.screen.height; // SM_CYSCREEN
+      case 78:
+        return window.screen.width; // SM_CXVIRTUALSCREEN
+      case 79:
+        return window.screen.height; // SM_CYVIRTUALSCREEN
+      default:
+        return 0;
     }
   },
-  
+
   MessageBox: (hwnd: number, text: string, caption: string, type: number): number => {
     // Map VB6 message box types to browser confirm/alert
-    if (type & 0x1) { // MB_OKCANCEL
+    if (type & 0x1) {
+      // MB_OKCANCEL
       return confirm(`${caption}\n\n${text}`) ? 1 : 2; // IDOK : IDCANCEL
-    } else if (type & 0x3) { // MB_YESNOCANCEL
+    } else if (type & 0x3) {
+      // MB_YESNOCANCEL
       const result = prompt(`${caption}\n\n${text}\n\nEnter 'yes', 'no', or 'cancel':`);
       switch (result?.toLowerCase()) {
-        case 'yes': return 6; // IDYES
-        case 'no': return 7; // IDNO
-        default: return 2; // IDCANCEL
+        case 'yes':
+          return 6; // IDYES
+        case 'no':
+          return 7; // IDNO
+        default:
+          return 2; // IDCANCEL
       }
-    } else if (type & 0x4) { // MB_YESNO
+    } else if (type & 0x4) {
+      // MB_YESNO
       return confirm(`${caption}\n\n${text}`) ? 6 : 7; // IDYES : IDNO
     } else {
       alert(`${caption}\n\n${text}`);
       return 1; // IDOK
     }
   },
-  
+
   GetComputerName: (): string => {
     return navigator.userAgent.includes('Windows') ? 'BROWSER-PC' : 'BROWSER-DEVICE';
   },
-  
+
   GetUserName: (): string => {
     return 'BrowserUser';
   },
-  
+
   GetVersion: (): number => {
     // Return a simulated Windows version
-    return 0x0A000000; // Windows 10
-  }
+    return 0x0a000000; // Windows 10
+  },
 };
 
 export default WindowsAPI;

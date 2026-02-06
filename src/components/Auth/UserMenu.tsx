@@ -52,11 +52,8 @@ export const UserMenu: React.FC = () => {
         {showMenu && (
           <>
             {/* Backdrop */}
-            <div
-              className="fixed inset-0 z-40"
-              onClick={() => setShowMenu(false)}
-            />
-            
+            <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+
             {/* Menu */}
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -83,7 +80,7 @@ export const UserMenu: React.FC = () => {
                   <div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">Current Plan</div>
                     <div className="font-semibold capitalize">
-                      {user?.subscription?.plan || 'Free'} 
+                      {user?.subscription?.plan || 'Free'}
                       {user?.subscription?.plan === 'pro' && ' ⭐'}
                       {user?.subscription?.plan === 'enterprise' && ' 👑'}
                     </div>
@@ -114,7 +111,7 @@ export const UserMenu: React.FC = () => {
                   <span>⚙️</span>
                   <span>Settings</span>
                 </button>
-                
+
                 <button
                   onClick={() => {
                     setShowMenu(false);
@@ -125,7 +122,7 @@ export const UserMenu: React.FC = () => {
                   <span>💳</span>
                   <span>Billing</span>
                 </button>
-                
+
                 <button
                   onClick={() => {
                     setShowMenu(false);
@@ -136,9 +133,9 @@ export const UserMenu: React.FC = () => {
                   <span>❓</span>
                   <span>Help & Support</span>
                 </button>
-                
+
                 <hr className="my-2 dark:border-gray-800" />
-                
+
                 <button
                   onClick={() => {
                     setShowMenu(false);

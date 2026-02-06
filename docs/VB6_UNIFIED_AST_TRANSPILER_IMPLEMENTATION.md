@@ -3,6 +3,7 @@
 ## Phase 2.2 - Générateur JavaScript optimisé avec AST
 
 ### Date: 2025-10-05
+
 ### Status: ✅ Infrastructure Complete (43% tests passing, 65 total tests)
 
 ---
@@ -39,6 +40,7 @@ transpileVB6ToJS(vb6Code: string): string {
 ```
 
 **Problems:**
+
 - ❌ No AST (ignores parser completely)
 - ❌ No Phase 1 features support (0/10)
 - ❌ No source maps
@@ -75,6 +77,7 @@ export class VB6UnifiedASTTranspiler {
 ```
 
 **Benefits:**
+
 - ✅ Uses complete AST from VB6RecursiveDescentParser
 - ✅ Full semantic analysis
 - ✅ Optimizations on AST before code gen
@@ -141,6 +144,7 @@ export class VB6UnifiedASTTranspiler {
 ### Analysis
 
 The **failing tests are all related to code generation**, not architecture. The infrastructure is solid:
+
 - ✅ Lexing works
 - ✅ Parsing works
 - ✅ Optimization infrastructure works
@@ -149,6 +153,7 @@ The **failing tests are all related to code generation**, not architecture. The 
 - ✅ Error handling works
 
 What needs implementation:
+
 - Statement generation (If, For, Select, etc.)
 - Expression generation (Binary ops, function calls, etc.)
 - Variable/declaration generation
@@ -163,6 +168,7 @@ What needs implementation:
 **File:** `src/compiler/VB6UnifiedASTTranspiler.ts` (870 lines)
 
 **Exports:**
+
 ```typescript
 export class VB6UnifiedASTTranspiler {
   transpile(vb6Code: string, fileName?: string): TranspilationResult;
@@ -180,6 +186,7 @@ export const vb6Transpiler: VB6UnifiedASTTranspiler;
 ```
 
 **Key Methods:**
+
 - `transpile()` - Main entry point
 - `tokenize()` - Lexical analysis
 - `parse()` - Syntactic analysis
@@ -193,6 +200,7 @@ export const vb6Transpiler: VB6UnifiedASTTranspiler;
 **File:** `src/test/compiler/VB6UnifiedASTTranspiler.test.ts` (690 lines)
 
 **Test Categories:**
+
 1. Basic Transpilation (6 tests)
 2. Variable Declarations (5 tests)
 3. Control Flow (7 tests)
@@ -225,18 +233,18 @@ private languageProcessor: VB6AdvancedLanguageProcessor; // Tasks 1.8, 1.9, 1.10
 
 ### Phase 1 Features Support
 
-| Feature | Processor | Status |
-|---------|-----------|--------|
-| User-Defined Types (UDT) | VB6UDTProcessor | ✅ Integrated |
-| Enums | VB6EnumProcessor | ✅ Integrated |
-| Declare Function/Sub | VB6DeclareSupport | ✅ Integrated |
-| Property Get/Let/Set | VB6PropertySupport | ✅ Integrated |
-| WithEvents / RaiseEvent | VB6WithEventsSupport | ✅ Integrated |
-| Implements | VB6InterfaceProcessor | ✅ Integrated |
-| On Error / Resume | VB6AdvancedErrorHandler | ✅ Integrated |
-| GoTo / GoSub / Return | VB6LineNumberManager | ✅ Integrated |
-| Static / Friend | VB6AdvancedLanguageProcessor | ✅ Integrated |
-| ParamArray / Optional | VB6OptionalParametersSupport | ✅ Integrated |
+| Feature                  | Processor                    | Status        |
+| ------------------------ | ---------------------------- | ------------- |
+| User-Defined Types (UDT) | VB6UDTProcessor              | ✅ Integrated |
+| Enums                    | VB6EnumProcessor             | ✅ Integrated |
+| Declare Function/Sub     | VB6DeclareSupport            | ✅ Integrated |
+| Property Get/Let/Set     | VB6PropertySupport           | ✅ Integrated |
+| WithEvents / RaiseEvent  | VB6WithEventsSupport         | ✅ Integrated |
+| Implements               | VB6InterfaceProcessor        | ✅ Integrated |
+| On Error / Resume        | VB6AdvancedErrorHandler      | ✅ Integrated |
+| GoTo / GoSub / Return    | VB6LineNumberManager         | ✅ Integrated |
+| Static / Friend          | VB6AdvancedLanguageProcessor | ✅ Integrated |
+| ParamArray / Optional    | VB6OptionalParametersSupport | ✅ Integrated |
 
 ---
 
@@ -247,6 +255,7 @@ private languageProcessor: VB6AdvancedLanguageProcessor; // Tasks 1.8, 1.9, 1.10
 All optimization infrastructure is in place and tracking metrics:
 
 #### 1. Dead Code Elimination
+
 ```typescript
 private eliminateDeadCode(ast: VB6ModuleNode): { ast: VB6ModuleNode; removed: number } {
   // TODO: Implement
@@ -258,6 +267,7 @@ private eliminateDeadCode(ast: VB6ModuleNode): { ast: VB6ModuleNode; removed: nu
 ```
 
 #### 2. Constant Folding
+
 ```typescript
 private foldConstants(ast: VB6ModuleNode): { ast: VB6ModuleNode; folded: number } {
   // TODO: Implement
@@ -268,6 +278,7 @@ private foldConstants(ast: VB6ModuleNode): { ast: VB6ModuleNode; folded: number 
 ```
 
 #### 3. Inline Expansion
+
 ```typescript
 private inlineFunctions(ast: VB6ModuleNode): { ast: VB6ModuleNode; inlined: number } {
   // TODO: Implement
@@ -277,6 +288,7 @@ private inlineFunctions(ast: VB6ModuleNode): { ast: VB6ModuleNode; inlined: numb
 ```
 
 #### 4. Loop Unrolling
+
 ```typescript
 private unrollLoops(ast: VB6ModuleNode): { ast: VB6ModuleNode; unrolled: number } {
   // TODO: Implement
@@ -288,15 +300,24 @@ private unrollLoops(ast: VB6ModuleNode): { ast: VB6ModuleNode; unrolled: number 
 ### Optimization Passes
 
 The transpiler supports multiple optimization passes:
+
 ```typescript
 let passCount = 0;
 while (passCount < this.options.maxOptimizationPasses) {
   let changed = false;
 
-  if (this.options.deadCodeElimination) { /* ... */ }
-  if (this.options.constantFolding) { /* ... */ }
-  if (this.options.inlineExpansion) { /* ... */ }
-  if (this.options.loopUnrolling) { /* ... */ }
+  if (this.options.deadCodeElimination) {
+    /* ... */
+  }
+  if (this.options.constantFolding) {
+    /* ... */
+  }
+  if (this.options.inlineExpansion) {
+    /* ... */
+  }
+  if (this.options.loopUnrolling) {
+    /* ... */
+  }
 
   if (!changed) break;
   passCount++;
@@ -342,26 +363,26 @@ private generateSourceMap(fileName: string): string {
 ```typescript
 interface TranspilationMetrics {
   // Timing
-  lexingTime: number;           // ✅ Measured
-  parsingTime: number;          // ✅ Measured
-  optimizationTime: number;     // ✅ Measured
-  generationTime: number;       // ✅ Measured
-  totalTime: number;            // ✅ Measured
+  lexingTime: number; // ✅ Measured
+  parsingTime: number; // ✅ Measured
+  optimizationTime: number; // ✅ Measured
+  generationTime: number; // ✅ Measured
+  totalTime: number; // ✅ Measured
 
   // Code statistics
-  linesOfCode: number;          // ✅ Tracked
-  procedures: number;           // ✅ Tracked
-  classes: number;              // ✅ Tracked
+  linesOfCode: number; // ✅ Tracked
+  procedures: number; // ✅ Tracked
+  classes: number; // ✅ Tracked
 
   // Optimizations
   optimizationsApplied: number; // ✅ Tracked
-  deadCodeRemoved: number;      // ✅ Tracked
-  constantsFolded: number;      // ✅ Tracked
-  functionsInlined: number;     // ✅ Tracked
-  loopsUnrolled: number;        // ✅ Tracked
+  deadCodeRemoved: number; // ✅ Tracked
+  constantsFolded: number; // ✅ Tracked
+  functionsInlined: number; // ✅ Tracked
+  loopsUnrolled: number; // ✅ Tracked
 
   // Memory
-  memoryUsed: number;           // ✅ Tracked (when available)
+  memoryUsed: number; // ✅ Tracked (when available)
 }
 ```
 
@@ -395,27 +416,27 @@ interface TranspilationMetrics {
 ```typescript
 interface TranspilationOptions {
   // Code generation
-  useES6Classes?: boolean;      // Default: true
-  useStrictMode?: boolean;      // Default: true
+  useES6Classes?: boolean; // Default: true
+  useStrictMode?: boolean; // Default: true
   generateTypeScript?: boolean; // Default: false
 
   // Optimizations
-  enableOptimizations?: boolean;  // Default: true
-  deadCodeElimination?: boolean;  // Default: true
-  constantFolding?: boolean;      // Default: true
-  inlineExpansion?: boolean;      // Default: false
-  loopUnrolling?: boolean;        // Default: false
+  enableOptimizations?: boolean; // Default: true
+  deadCodeElimination?: boolean; // Default: true
+  constantFolding?: boolean; // Default: true
+  inlineExpansion?: boolean; // Default: false
+  loopUnrolling?: boolean; // Default: false
 
   // Source maps
-  generateSourceMaps?: boolean;   // Default: true
-  sourceMapInline?: boolean;      // Default: true
+  generateSourceMaps?: boolean; // Default: true
+  sourceMapInline?: boolean; // Default: true
 
   // Runtime
   targetRuntime?: 'browser' | 'node' | 'universal'; // Default: 'browser'
 
   // Debugging
-  preserveComments?: boolean;     // Default: false
-  generateDebugInfo?: boolean;    // Default: true
+  preserveComments?: boolean; // Default: false
+  generateDebugInfo?: boolean; // Default: true
 
   // Performance
   maxOptimizationPasses?: number; // Default: 3
@@ -460,31 +481,31 @@ const result = transpiler.transpile(vb6Code, 'Module1', {
 
 ### Before (vb6Transpiler.ts)
 
-| Aspect | Status |
-|--------|--------|
-| Architecture | ❌ Regex-based |
-| AST Usage | ❌ None (ignores parser) |
-| Phase 1 Features | ❌ 0/10 supported |
-| Source Maps | ❌ No |
-| Optimizations | ❌ No |
-| Error Handling | ⚠️ Basic (try-catch only) |
-| Performance Metrics | ❌ No |
-| Test Coverage | ⚠️ Minimal |
-| Maintainability | ❌ Very difficult (regex spaghetti) |
+| Aspect              | Status                              |
+| ------------------- | ----------------------------------- |
+| Architecture        | ❌ Regex-based                      |
+| AST Usage           | ❌ None (ignores parser)            |
+| Phase 1 Features    | ❌ 0/10 supported                   |
+| Source Maps         | ❌ No                               |
+| Optimizations       | ❌ No                               |
+| Error Handling      | ⚠️ Basic (try-catch only)           |
+| Performance Metrics | ❌ No                               |
+| Test Coverage       | ⚠️ Minimal                          |
+| Maintainability     | ❌ Very difficult (regex spaghetti) |
 
 ### After (VB6UnifiedASTTranspiler.ts)
 
-| Aspect | Status |
-|--------|--------|
-| Architecture | ✅ AST-based (5-step pipeline) |
-| AST Usage | ✅ Full (VB6RecursiveDescentParser) |
-| Phase 1 Features | ✅ 10/10 integrated |
-| Source Maps | ✅ Yes (source map v3) |
-| Optimizations | ✅ Yes (4 types) |
-| Error Handling | ✅ Comprehensive |
-| Performance Metrics | ✅ 11 metrics tracked |
-| Test Coverage | ✅ 65 tests |
-| Maintainability | ✅ Excellent (clear separation) |
+| Aspect              | Status                              |
+| ------------------- | ----------------------------------- |
+| Architecture        | ✅ AST-based (5-step pipeline)      |
+| AST Usage           | ✅ Full (VB6RecursiveDescentParser) |
+| Phase 1 Features    | ✅ 10/10 integrated                 |
+| Source Maps         | ✅ Yes (source map v3)              |
+| Optimizations       | ✅ Yes (4 types)                    |
+| Error Handling      | ✅ Comprehensive                    |
+| Performance Metrics | ✅ 11 metrics tracked               |
+| Test Coverage       | ✅ 65 tests                         |
+| Maintainability     | ✅ Excellent (clear separation)     |
 
 ---
 
@@ -587,32 +608,32 @@ private generateStatement(stmt: VB6StatementNode): string {
 
 ### Code Quality
 
-| Metric | Old Transpiler | New Transpiler | Improvement |
-|--------|---------------|----------------|-------------|
-| Lines of Code | 261 | 870 | +233% (more features) |
-| Test Coverage | ~10 tests | 65 tests | +550% |
-| Architecture Quality | 2/10 | 9/10 | +350% |
-| Maintainability | 3/10 | 9/10 | +200% |
-| Phase 1 Support | 0/10 | 10/10 | ∞ |
-| Error Handling | 1/10 | 9/10 | +800% |
+| Metric               | Old Transpiler | New Transpiler | Improvement           |
+| -------------------- | -------------- | -------------- | --------------------- |
+| Lines of Code        | 261            | 870            | +233% (more features) |
+| Test Coverage        | ~10 tests      | 65 tests       | +550%                 |
+| Architecture Quality | 2/10           | 9/10           | +350%                 |
+| Maintainability      | 3/10           | 9/10           | +200%                 |
+| Phase 1 Support      | 0/10           | 10/10          | ∞                     |
+| Error Handling       | 1/10           | 9/10           | +800%                 |
 
 ### Performance (Projected)
 
-| Aspect | Old | New | Change |
-|--------|-----|-----|--------|
-| Transpilation Speed | Fast (regex) | Moderate (AST) | -20% (acceptable for quality gain) |
-| Generated Code Quality | Low | High | +400% |
-| Memory Usage | Low | Moderate | +50% (acceptable) |
-| Debugging Support | None | Excellent | ∞ |
+| Aspect                 | Old          | New            | Change                             |
+| ---------------------- | ------------ | -------------- | ---------------------------------- |
+| Transpilation Speed    | Fast (regex) | Moderate (AST) | -20% (acceptable for quality gain) |
+| Generated Code Quality | Low          | High           | +400%                              |
+| Memory Usage           | Low          | Moderate       | +50% (acceptable)                  |
+| Debugging Support      | None         | Excellent      | ∞                                  |
 
 ### Development Velocity
 
-| Task | Old Approach | New Approach | Improvement |
-|------|-------------|--------------|-------------|
-| Add new language feature | 4-8 hours (regex hell) | 1-2 hours (AST node) | +300% |
-| Fix bug | 2-4 hours (cascading regex) | 30 min (isolated fix) | +400% |
-| Add optimization | Impossible | Easy (AST transform) | ∞ |
-| Debug generated code | Very difficult | Easy (source maps) | +800% |
+| Task                     | Old Approach                | New Approach          | Improvement |
+| ------------------------ | --------------------------- | --------------------- | ----------- |
+| Add new language feature | 4-8 hours (regex hell)      | 1-2 hours (AST node)  | +300%       |
+| Fix bug                  | 2-4 hours (cascading regex) | 30 min (isolated fix) | +400%       |
+| Add optimization         | Impossible                  | Easy (AST transform)  | ∞           |
+| Debug generated code     | Very difficult              | Easy (source maps)    | +800%       |
 
 ---
 

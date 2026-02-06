@@ -12,16 +12,16 @@ export class VB6Collection {
   private keys: string[] = [];
   private indexMap: Map<number, string> = new Map();
   private nextAutoKey: number = 1;
-  
+
   constructor() {}
-  
+
   /**
    * Count property - number of items in collection
    */
   get Count(): number {
     return this.items.size;
   }
-  
+
   /**
    * Add method - adds an item to the collection
    * @param item The item to add
@@ -32,15 +32,15 @@ export class VB6Collection {
   Add(item: any, key?: string, before?: string | number, after?: string | number): void {
     // Generate automatic key if not provided
     const itemKey = key || `~AUTO_${this.nextAutoKey++}`;
-    
+
     // Check for duplicate key
     if (this.items.has(itemKey)) {
       throw new Error(`Key '${key}' already exists in collection`);
     }
-    
+
     // Determine insertion position
     let insertIndex = this.keys.length;
-    
+
     if (before !== undefined) {
       if (typeof before === 'string') {
         const beforeIndex = this.keys.indexOf(before);
@@ -70,13 +70,13 @@ export class VB6Collection {
         insertIndex = after;
       }
     }
-    
+
     // Insert the item
     this.keys.splice(insertIndex, 0, itemKey);
     this.items.set(itemKey, item);
     this.rebuildIndexMap();
   }
-  
+
   /**
    * Item method - retrieves an item by key or index
    * @param keyOrIndex Key string or 1-based index
@@ -97,14 +97,14 @@ export class VB6Collection {
       return this.items.get(key);
     }
   }
-  
+
   /**
    * Remove method - removes an item by key or index
    * @param keyOrIndex Key string or 1-based index
    */
   Remove(keyOrIndex: string | number): void {
     let key: string;
-    
+
     if (typeof keyOrIndex === 'string') {
       key = keyOrIndex;
       if (!this.items.has(key)) {
@@ -118,14 +118,14 @@ export class VB6Collection {
       }
       key = this.keys[index];
     }
-    
+
     // Remove the item
     this.items.delete(key);
     const keyIndex = this.keys.indexOf(key);
     this.keys.splice(keyIndex, 1);
     this.rebuildIndexMap();
   }
-  
+
   /**
    * Clear method - removes all items
    */
@@ -135,14 +135,14 @@ export class VB6Collection {
     this.indexMap.clear();
     this.nextAutoKey = 1;
   }
-  
+
   /**
    * Check if a key exists
    */
   Exists(key: string): boolean {
     return this.items.has(key);
   }
-  
+
   /**
    * Get all keys
    */
@@ -150,14 +150,14 @@ export class VB6Collection {
     // Filter out auto-generated keys
     return this.keys.filter(k => !k.startsWith('~AUTO_'));
   }
-  
+
   /**
    * Get all items as array
    */
   Items(): any[] {
     return this.keys.map(key => this.items.get(key));
   }
-  
+
   /**
    * For...Each enumeration support
    */
@@ -165,19 +165,19 @@ export class VB6Collection {
     const items = this.Items();
     return items[Symbol.iterator]();
   }
-  
+
   /**
    * VB6 _NewEnum support
    */
   get _NewEnum(): Iterator<any> {
     return this[Symbol.iterator]();
   }
-  
+
   /**
    * Access by index (for bracket notation)
    */
   [index: number]: any;
-  
+
   private rebuildIndexMap(): void {
     this.indexMap.clear();
     this.keys.forEach((key, index) => {
@@ -194,44 +194,44 @@ export class VB6Dictionary {
   private items: Map<any, any> = new Map();
   private keyArray: any[] = [];
   private _compareMode: CompareMethod = CompareMethod.BinaryCompare;
-  
+
   constructor() {}
-  
+
   /**
    * Count property - number of items
    */
   get Count(): number {
     return this.items.size;
   }
-  
+
   /**
    * CompareMode property - how keys are compared
    */
-  get CompareMode(): CompareMethod { 
-    return this._compareMode; 
+  get CompareMode(): CompareMethod {
+    return this._compareMode;
   }
-  
+
   set CompareMode(value: CompareMethod) {
     if (this.items.size > 0) {
       throw new Error('Cannot change CompareMode when dictionary contains data');
     }
     this._compareMode = value;
   }
-  
+
   /**
    * Add method - adds a key/item pair
    */
   Add(key: any, item: any): void {
     const normalizedKey = this.normalizeKey(key);
-    
+
     if (this.hasKey(normalizedKey)) {
       throw new Error(`Key already exists`);
     }
-    
+
     this.items.set(normalizedKey, item);
     this.keyArray.push(key); // Store original key
   }
-  
+
   /**
    * Exists method - checks if key exists
    */
@@ -239,96 +239,96 @@ export class VB6Dictionary {
     const normalizedKey = this.normalizeKey(key);
     return this.hasKey(normalizedKey);
   }
-  
+
   /**
    * Item property - get/set item by key
    */
   Item(key: any): any {
     const normalizedKey = this.normalizeKey(key);
-    
+
     if (!this.hasKey(normalizedKey)) {
       // VB6 Dictionary auto-adds missing keys
       this.items.set(normalizedKey, undefined);
       this.keyArray.push(key);
     }
-    
+
     return this.items.get(normalizedKey);
   }
-  
+
   /**
    * Set item value
    */
   SetItem(key: any, value: any): void {
     const normalizedKey = this.normalizeKey(key);
-    
+
     if (!this.hasKey(normalizedKey)) {
       this.keyArray.push(key);
     }
-    
+
     this.items.set(normalizedKey, value);
   }
-  
+
   /**
    * Key property - get/set key
    */
   Key(key: any): any {
     const normalizedKey = this.normalizeKey(key);
-    
+
     if (!this.hasKey(normalizedKey)) {
       throw new Error('Key not found');
     }
-    
+
     // Return original key
     const index = this.findKeyIndex(normalizedKey);
     return this.keyArray[index];
   }
-  
+
   /**
    * Change a key
    */
   SetKey(oldKey: any, newKey: any): void {
     const oldNormalized = this.normalizeKey(oldKey);
     const newNormalized = this.normalizeKey(newKey);
-    
+
     if (!this.hasKey(oldNormalized)) {
       throw new Error('Key not found');
     }
-    
+
     if (oldNormalized !== newNormalized && this.hasKey(newNormalized)) {
       throw new Error('New key already exists');
     }
-    
+
     // Get the value
     const value = this.items.get(oldNormalized);
-    
+
     // Update in map
     if (oldNormalized !== newNormalized) {
       this.items.delete(oldNormalized);
       this.items.set(newNormalized, value);
     }
-    
+
     // Update in key array
     const index = this.findKeyIndex(oldNormalized);
     this.keyArray[index] = newKey;
   }
-  
+
   /**
    * Remove method - removes a key/item pair
    */
   Remove(key: any): void {
     const normalizedKey = this.normalizeKey(key);
-    
+
     if (!this.hasKey(normalizedKey)) {
       throw new Error('Key not found');
     }
-    
+
     this.items.delete(normalizedKey);
-    
+
     // Remove from key array
     const index = this.findKeyIndex(normalizedKey);
     this.keyArray.splice(index, 1);
   }
-  
+
   /**
    * RemoveAll method - removes all items
    */
@@ -336,14 +336,14 @@ export class VB6Dictionary {
     this.items.clear();
     this.keyArray = [];
   }
-  
+
   /**
    * Keys method - returns array of keys
    */
   Keys(): any[] {
     return [...this.keyArray];
   }
-  
+
   /**
    * Items method - returns array of items
    */
@@ -353,7 +353,7 @@ export class VB6Dictionary {
       return this.items.get(normalizedKey);
     });
   }
-  
+
   /**
    * For...Each enumeration support (iterates keys)
    */
@@ -361,9 +361,9 @@ export class VB6Dictionary {
     const keys = this.keyArray;
     const items = this.items;
     const normalizeKey = this.normalizeKey.bind(this);
-    
+
     let index = 0;
-    
+
     return {
       next(): IteratorResult<[any, any]> {
         if (index < keys.length) {
@@ -374,39 +374,39 @@ export class VB6Dictionary {
           return { value: [key, value], done: false };
         }
         return { value: undefined as any, done: true };
-      }
+      },
     };
   }
-  
+
   /**
    * VB6 _NewEnum support
    */
   get _NewEnum(): Iterator<[any, any]> {
     return this[Symbol.iterator]();
   }
-  
+
   private normalizeKey(key: any): any {
     if (key === null || key === undefined) {
       return '~NULL~';
     }
-    
+
     if (this._compareMode === CompareMethod.TextCompare && typeof key === 'string') {
       // Case-insensitive comparison
       return key.toUpperCase();
     }
-    
+
     if (this._compareMode === CompareMethod.DatabaseCompare && typeof key === 'string') {
       // Database comparison (case-insensitive, ignore trailing spaces)
       return key.toUpperCase().trimEnd();
     }
-    
+
     return key;
   }
-  
+
   private hasKey(normalizedKey: any): boolean {
     return this.items.has(normalizedKey);
   }
-  
+
   private findKeyIndex(normalizedKey: any): number {
     for (let i = 0; i < this.keyArray.length; i++) {
       if (this.normalizeKey(this.keyArray[i]) === normalizedKey) {
@@ -421,9 +421,9 @@ export class VB6Dictionary {
  * Compare methods for Dictionary
  */
 export enum CompareMethod {
-  BinaryCompare = 0,   // vbBinaryCompare - case sensitive
-  TextCompare = 1,     // vbTextCompare - case insensitive
-  DatabaseCompare = 2  // vbDatabaseCompare - case insensitive, ignore trailing spaces
+  BinaryCompare = 0, // vbBinaryCompare - case sensitive
+  TextCompare = 1, // vbTextCompare - case insensitive
+  DatabaseCompare = 2, // vbDatabaseCompare - case insensitive, ignore trailing spaces
 }
 
 /**
@@ -461,88 +461,76 @@ export class CollectionExample {
   demonstrateCollection(): void {
     // Create a collection
     const col = new VB6Collection();
-    
+
     // Add items with auto-generated keys
     col.Add('First Item');
     col.Add('Second Item');
-    
+
     // Add items with specific keys
     col.Add('Named Item', 'MyKey');
     col.Add('Another Named', 'Key2');
-    
+
     // Add with positioning
     col.Add('Inserted Before', 'InsKey', 2); // Insert before index 2
     col.Add('Inserted After', undefined, undefined, 'MyKey'); // Insert after 'MyKey'
-    
+
     // Access by index (1-based)
-    console.log('Item 1:', col.Item(1));
-    console.log('Item 2:', col.Item(2));
-    
+
     // Access by key
-    console.log('MyKey:', col.Item('MyKey'));
-    
+
     // Check existence
-    console.log('Has MyKey:', col.Exists('MyKey'));
-    console.log('Has BadKey:', col.Exists('BadKey'));
-    
+
     // Iterate with for...of
-    console.log('All items:');
     for (const item of col) {
-      console.log(' -', item);
+      // Demonstrates iteration over VB6 Collection
+      void item;
     }
-    
+
     // Remove by key
     col.Remove('MyKey');
-    
+
     // Remove by index
     col.Remove(1);
-    
-    console.log('Count after removal:', col.Count);
   }
-  
+
   demonstrateDictionary(): void {
     // Create a dictionary
     const dict = new VB6Dictionary();
-    
+
     // Set compare mode before adding items
     dict.CompareMode = CompareMethod.TextCompare;
-    
+
     // Add key/value pairs
     dict.Add('Name', 'John Doe');
     dict.Add('Age', 30);
     dict.Add('City', 'New York');
-    
+
     // Case-insensitive access due to TextCompare
-    console.log('name:', dict.Item('name')); // Works with lowercase
-    console.log('NAME:', dict.Item('NAME')); // Works with uppercase
-    
+
     // Auto-add missing keys
     dict.SetItem('Country', 'USA'); // Adds if not exists
-    
+
     // Check existence
-    console.log('Has Age:', dict.Exists('Age'));
-    console.log('Has Salary:', dict.Exists('Salary'));
-    
+
     // Change a key
     dict.SetKey('City', 'Location');
-    
+
     // Get all keys
-    console.log('Keys:', dict.Keys());
-    
+
     // Get all items
-    console.log('Items:', dict.Items());
-    
+
     // Iterate key/value pairs
     for (const [key, value] of dict) {
-      console.log(`${key} = ${value}`);
+      // Demonstrates iteration over VB6 Dictionary
+      void key;
+      void value;
     }
-    
+
     // Remove item
     dict.Remove('Age');
-    
+
     // Clear all
     dict.RemoveAll();
-    console.log('Count after clear:', dict.Count);
   }
 }
 
@@ -555,5 +543,5 @@ export const VB6Collections = {
   CreateDictionary,
   IsCollection,
   IsDictionary,
-  CollectionExample
+  CollectionExample,
 };

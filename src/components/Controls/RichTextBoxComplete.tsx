@@ -1,9 +1,9 @@
 /**
  * RichTextBox Complete - Full VB6 RTF Implementation
- * 
+ *
  * Contrôle CRITIQUE pour 98%+ compatibilité (Impact: 70, Usage: 35%)
  * Bloque: Document Editors, Help Systems, Rich Content Apps
- * 
+ *
  * Implémente l'API complète RichTextBox VB6:
  * - Full RTF (Rich Text Format) support
  * - OLE Object embedding (images, objects)
@@ -14,7 +14,7 @@
  * - Drag & Drop support
  * - Spell checking integration
  * - Mail merge capabilities
- * 
+ *
  * Extensions Ultra Think V3:
  * - Modern contentEditable implementation
  * - HTML to RTF conversion
@@ -34,14 +34,14 @@ export enum RTFSelectionType {
   rtfSelObject = 1,
   rtfSelMultiChar = 2,
   rtfSelMultiObject = 3,
-  rtfSelNone = 4
+  rtfSelNone = 4,
 }
 
 export enum RTFAlignment {
   rtfLeft = 0,
   rtfRight = 1,
   rtfCenter = 2,
-  rtfJustify = 3
+  rtfJustify = 3,
 }
 
 export enum RTFBulletStyle {
@@ -49,19 +49,19 @@ export enum RTFBulletStyle {
   rtfBulletBullet = 1,
   rtfBulletNumber = 2,
   rtfBulletLetter = 3,
-  rtfBulletRoman = 4
+  rtfBulletRoman = 4,
 }
 
 export enum RTFProtected {
   rtfProtectedNo = 0,
-  rtfProtectedYes = 1
+  rtfProtectedYes = 1,
 }
 
 export enum RTFFind {
   rtfWholeWord = 1,
   rtfMatchCase = 2,
   rtfNoHighlight = 4,
-  rtfReverse = 8
+  rtfReverse = 8,
 }
 
 export interface RTFFont {
@@ -108,8 +108,23 @@ export interface RTFEvents {
   MouseMove?: (button: number, shift: number, x: number, y: number) => void;
   MouseUp?: (button: number, shift: number, x: number, y: number) => void;
   OLEStartDrag?: (data: any, allowedEffects: number) => void;
-  OLEDragOver?: (data: any, effect: number, button: number, shift: number, x: number, y: number, state: number) => void;
-  OLEDragDrop?: (data: any, effect: number, button: number, shift: number, x: number, y: number) => void;
+  OLEDragOver?: (
+    data: any,
+    effect: number,
+    button: number,
+    shift: number,
+    x: number,
+    y: number,
+    state: number
+  ) => void;
+  OLEDragDrop?: (
+    data: any,
+    effect: number,
+    button: number,
+    shift: number,
+    x: number,
+    y: number
+  ) => void;
 }
 
 export interface RichTextBoxCompleteProps extends VB6ControlProps {
@@ -142,17 +157,17 @@ class RTFParser {
    */
   static rtfToHtml(rtf: string): string {
     let html = rtf;
-    
+
     // RTF headers
     html = html.replace(/^{\\rtf\d.*?\\deff\d+.*?(?=\\)/i, '');
     html = html.replace(/}$/, '');
-    
+
     // Font table
     html = html.replace(/{\\fonttbl.*?}/gi, '');
-    
+
     // Color table
     html = html.replace(/{\\colortbl.*?}/gi, '');
-    
+
     // Styles
     html = html.replace(/\\b\s?/gi, '<strong>');
     html = html.replace(/\\b0\s?/gi, '</strong>');
@@ -162,34 +177,34 @@ class RTFParser {
     html = html.replace(/\\ul0\s?/gi, '</u>');
     html = html.replace(/\\strike\s?/gi, '<strike>');
     html = html.replace(/\\strike0\s?/gi, '</strike>');
-    
+
     // Font size
     html = html.replace(/\\fs(\d+)\s?/gi, (match, size) => {
       const pxSize = Math.round(parseInt(size) / 2);
       return `<span style="font-size: ${pxSize}px;">`;
     });
-    
+
     // Colors
     html = html.replace(/\\cf(\d+)\s?/gi, (match, colorIndex) => {
       const colors = ['#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
       const color = colors[parseInt(colorIndex)] || '#000000';
       return `<span style="color: ${color};">`;
     });
-    
+
     // Paragraphs
     html = html.replace(/\\par\s?/gi, '</p><p>');
     html = html.replace(/\\pard\s?/gi, '</p><p>');
-    
+
     // Line breaks
     html = html.replace(/\\line\s?/gi, '<br>');
-    
+
     // Tabs
     html = html.replace(/\\tab\s?/gi, '&nbsp;&nbsp;&nbsp;&nbsp;');
-    
+
     // Remove remaining RTF commands
     html = html.replace(/\\[a-zA-Z]+\d*\s?/gi, '');
     html = html.replace(/{|}/gi, '');
-    
+
     // Clean up
     html = html.trim();
     if (!html.startsWith('<p>')) {
@@ -198,7 +213,7 @@ class RTFParser {
     if (!html.endsWith('</p>')) {
       html = html + '</p>';
     }
-    
+
     return html;
   }
 
@@ -206,8 +221,9 @@ class RTFParser {
    * Convertir HTML vers RTF
    */
   static htmlToRtf(html: string): string {
-    let rtf = '{\\rtf1\\ansi\\deff0 {\\fonttbl \\f0 Times New Roman;} {\\colortbl;\\red0\\green0\\blue0;\\red255\\green0\\blue0;\\red0\\green255\\blue0;\\red0\\green0\\blue255;}}';
-    
+    let rtf =
+      '{\\rtf1\\ansi\\deff0 {\\fonttbl \\f0 Times New Roman;} {\\colortbl;\\red0\\green0\\blue0;\\red255\\green0\\blue0;\\red0\\green255\\blue0;\\red0\\green0\\blue255;}}';
+
     // Replace HTML tags with RTF equivalents
     rtf += html
       .replace(/<strong>/gi, '\\b ')
@@ -223,7 +239,7 @@ class RTFParser {
       .replace(/<p>/gi, '\\pard ')
       .replace(/&nbsp;/gi, ' ')
       .replace(/<.*?>/gi, ''); // Remove any remaining HTML tags
-    
+
     rtf += '}';
     return rtf;
   }
@@ -274,7 +290,7 @@ export const RichTextBoxComplete: React.FC<RichTextBoxCompleteProps> = ({
     strikethrough: false,
     color: '#000000',
     charset: 0,
-    offset: 0
+    offset: 0,
   });
   const [hasFocus, setHasFocus] = useState<boolean>(false);
 
@@ -290,11 +306,11 @@ export const RichTextBoxComplete: React.FC<RichTextBoxCompleteProps> = ({
   const getSelection = useCallback((): RTFSelectionInfo => {
     const selection = window.getSelection();
     const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
-    
+
     let selStart = 0;
     let selLength = 0;
     let selText = '';
-    
+
     if (range && editorRef.current) {
       // Calculate selection position in text content
       const preRange = range.cloneRange();
@@ -321,309 +337,345 @@ export const RichTextBoxComplete: React.FC<RichTextBoxCompleteProps> = ({
         rightIndent: 0,
         spaceAfter: 0,
         spaceBefore: 0,
-        tabStops: []
-      }
+        tabStops: [],
+      },
     };
   }, [currentFont, bulletIndent]);
 
   /**
    * API RichTextBox VB6 complète
    */
-  const richTextBoxAPI = useMemo(() => ({
-    // Propriétés texte
-    get Text() { return content; },
-    set Text(value: string) { 
-      setContent(value);
-      if (editorRef.current) {
-        editorRef.current.textContent = value;
-      }
-    },
-
-    get RTFText() { return rtfContent; },
-    set RTFText(value: string) {
-      setRtfContent(value);
-      if (editorRef.current && richTextBox) {
-        const html = RTFParser.rtfToHtml(value);
-        editorRef.current.innerHTML = html;
-        setContent(editorRef.current.textContent || '');
-      }
-    },
-
-    get TextRTF() { return rtfContent; }, // Alias
-    set TextRTF(value: string) { this.RTFText = value; },
-
-    // Propriétés sélection
-    get SelStart() { return getSelection().start; },
-    set SelStart(value: number) {
-      if (editorRef.current) {
-        const range = document.createRange();
-        const walker = document.createTreeWalker(
-          editorRef.current,
-          NodeFilter.SHOW_TEXT,
-          null
-        );
-        
-        let currentOffset = 0;
-        let targetNode: Node | null = null;
-        let targetOffset = 0;
-        
-        while (walker.nextNode()) {
-          const node = walker.currentNode;
-          const nodeLength = node.textContent?.length || 0;
-          
-          if (currentOffset + nodeLength >= value) {
-            targetNode = node;
-            targetOffset = value - currentOffset;
-            break;
-          }
-          currentOffset += nodeLength;
+  const richTextBoxAPI = useMemo(
+    () => ({
+      // Propriétés texte
+      get Text() {
+        return content;
+      },
+      set Text(value: string) {
+        setContent(value);
+        if (editorRef.current) {
+          editorRef.current.textContent = value;
         }
-        
-        if (targetNode) {
-          range.setStart(targetNode, targetOffset);
-          range.setEnd(targetNode, targetOffset);
-          
-          const selection = window.getSelection();
-          selection?.removeAllRanges();
-          selection?.addRange(range);
-          
-          setSelectionStart(value);
-          setSelectionLength(0);
+      },
+
+      get RTFText() {
+        return rtfContent;
+      },
+      set RTFText(value: string) {
+        setRtfContent(value);
+        if (editorRef.current && richTextBox) {
+          const html = RTFParser.rtfToHtml(value);
+          editorRef.current.innerHTML = html;
+          setContent(editorRef.current.textContent || '');
         }
-      }
-    },
+      },
 
-    get SelLength() { return getSelection().length; },
-    set SelLength(value: number) {
-      // Extend selection by value
-      const currentSel = getSelection();
-      // Implementation would select from current start to start + value
-      setSelectionLength(value);
-    },
+      get TextRTF() {
+        return rtfContent;
+      }, // Alias
+      set TextRTF(value: string) {
+        this.RTFText = value;
+      },
 
-    get SelText() { return getSelection().text; },
-    set SelText(value: string) {
-      document.execCommand('insertText', false, value);
-      if (events.Change) events.Change();
-    },
+      // Propriétés sélection
+      get SelStart() {
+        return getSelection().start;
+      },
+      set SelStart(value: number) {
+        if (editorRef.current) {
+          const range = document.createRange();
+          const walker = document.createTreeWalker(editorRef.current, NodeFilter.SHOW_TEXT, null);
 
-    get SelRTF() { return getSelection().rtf; },
-    set SelRTF(value: string) {
-      const html = RTFParser.rtfToHtml(value);
-      document.execCommand('insertHTML', false, html);
-      if (events.Change) events.Change();
-    },
+          let currentOffset = 0;
+          let targetNode: Node | null = null;
+          let targetOffset = 0;
 
-    // Font properties pour sélection
-    get SelBold() { return currentFont.bold; },
-    set SelBold(value: boolean) {
-      document.execCommand('bold', false);
-      setCurrentFont(prev => ({ ...prev, bold: value }));
-    },
+          while (walker.nextNode()) {
+            const node = walker.currentNode;
+            const nodeLength = node.textContent?.length || 0;
 
-    get SelItalic() { return currentFont.italic; },
-    set SelItalic(value: boolean) {
-      document.execCommand('italic', false);
-      setCurrentFont(prev => ({ ...prev, italic: value }));
-    },
-
-    get SelUnderline() { return currentFont.underline; },
-    set SelUnderline(value: boolean) {
-      document.execCommand('underline', false);
-      setCurrentFont(prev => ({ ...prev, underline: value }));
-    },
-
-    get SelStrikeThru() { return currentFont.strikethrough; },
-    set SelStrikeThru(value: boolean) {
-      document.execCommand('strikeThrough', false);
-      setCurrentFont(prev => ({ ...prev, strikethrough: value }));
-    },
-
-    get SelColor() { return currentFont.color; },
-    set SelColor(value: string) {
-      document.execCommand('foreColor', false, value);
-      setCurrentFont(prev => ({ ...prev, color: value }));
-    },
-
-    get SelFontName() { return currentFont.name; },
-    set SelFontName(value: string) {
-      document.execCommand('fontName', false, value);
-      setCurrentFont(prev => ({ ...prev, name: value }));
-    },
-
-    get SelFontSize() { return currentFont.size; },
-    set SelFontSize(value: number) {
-      document.execCommand('fontSize', false, Math.min(7, Math.max(1, Math.round(value / 2))).toString());
-      setCurrentFont(prev => ({ ...prev, size: value }));
-    },
-
-    // Méthodes d'édition
-    LoadFile: (fileName: string, fileType: number = 0) => {
-      // fileType: 0=text, 1=RTF
-      // En environnement web, utiliser input file
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = fileType === 1 ? '.rtf' : '.txt';
-      input.onchange = (e) => {
-        const file = (e.target as HTMLInputElement).files?.[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const content = e.target?.result as string;
-            if (fileType === 1) {
-              richTextBoxAPI.RTFText = content;
-            } else {
-              richTextBoxAPI.Text = content;
+            if (currentOffset + nodeLength >= value) {
+              targetNode = node;
+              targetOffset = value - currentOffset;
+              break;
             }
-          };
-          reader.readAsText(file);
-        }
-      };
-      input.click();
-    },
+            currentOffset += nodeLength;
+          }
 
-    SaveFile: (fileName: string, fileType: number = 0) => {
-      const content = fileType === 1 ? rtfContent : this.Text;
-      const mimeType = fileType === 1 ? 'application/rtf' : 'text/plain';
-      
-      const blob = new Blob([content], { type: mimeType });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      a.click();
-      URL.revokeObjectURL(url);
-    },
+          if (targetNode) {
+            range.setStart(targetNode, targetOffset);
+            range.setEnd(targetNode, targetOffset);
 
-    Find: (searchString: string, start?: number, options?: number): number => {
-      if (!editorRef.current) return -1;
-      
-      const text = editorRef.current.textContent || '';
-      const searchStart = start || 0;
-      const wholeWord = !!(options & RTFFind.rtfWholeWord);
-      const matchCase = !!(options & RTFFind.rtfMatchCase);
-      const reverse = !!(options & RTFFind.rtfReverse);
-      
-      let searchText = searchString;
-      let targetText = text;
-      
-      if (!matchCase) {
-        searchText = searchText.toLowerCase();
-        targetText = targetText.toLowerCase();
-      }
-      
-      let foundIndex = -1;
-      
-      if (reverse) {
-        foundIndex = targetText.lastIndexOf(searchText, searchStart);
-      } else {
-        foundIndex = targetText.indexOf(searchText, searchStart);
-      }
-      
-      if (foundIndex !== -1 && wholeWord) {
-        // Verify word boundaries
-        const before = foundIndex === 0 ? ' ' : targetText[foundIndex - 1];
-        const after = foundIndex + searchText.length >= targetText.length ? ' ' : targetText[foundIndex + searchText.length];
-        
-        if (!/\\W/.test(before) || !/\\W/.test(after)) {
-          // Not a whole word, continue searching
-          return this.Find(searchString, reverse ? foundIndex - 1 : foundIndex + 1, options);
-        }
-      }
-      
-      if (foundIndex !== -1) {
-        // Select found text
-        this.SelStart = foundIndex;
-        this.SelLength = searchString.length;
-      }
-      
-      return foundIndex;
-    },
+            const selection = window.getSelection();
+            selection?.removeAllRanges();
+            selection?.addRange(range);
 
-    Span: (characterSet: string, forward: boolean = true): number => {
-      // Move cursor while characters match the set
-      const selection = getSelection();
-      const text = content;
-      let position = selection.start;
-      let count = 0;
-      
-      if (forward) {
-        while (position < text.length && characterSet.includes(text[position])) {
-          position++;
-          count++;
+            setSelectionStart(value);
+            setSelectionLength(0);
+          }
         }
-      } else {
-        while (position > 0 && characterSet.includes(text[position - 1])) {
-          position--;
-          count++;
-        }
-      }
-      
-      this.SelStart = position;
-      return count;
-    },
+      },
 
-    UpTo: (characterSet: string, forward: boolean = true): number => {
-      // Move cursor until character in set is found
-      const selection = getSelection();
-      const text = content;
-      let position = selection.start;
-      let count = 0;
-      
-      if (forward) {
-        while (position < text.length && !characterSet.includes(text[position])) {
-          position++;
-          count++;
-        }
-      } else {
-        while (position > 0 && !characterSet.includes(text[position - 1])) {
-          position--;
-          count++;
-        }
-      }
-      
-      this.SelStart = position;
-      return count;
-    },
+      get SelLength() {
+        return getSelection().length;
+      },
+      set SelLength(value: number) {
+        // Extend selection by value
+        const currentSel = getSelection();
+        // Implementation would select from current start to start + value
+        setSelectionLength(value);
+      },
 
-    GetLineFromChar: (charIndex: number): number => {
-      const text = content.substring(0, charIndex);
-      return text.split('\\n').length - 1;
-    },
+      get SelText() {
+        return getSelection().text;
+      },
+      set SelText(value: string) {
+        document.execCommand('insertText', false, value);
+        if (events.Change) events.Change();
+      },
 
-    OLEObjects: {
-      // Collection of embedded OLE objects
-      Count: 0,
-      // Add, Remove methods would be implemented here
-    }
-  }), [
-    content, rtfContent, getSelection, currentFont, bulletIndent,
-    richTextBox, events
-  ]);
+      get SelRTF() {
+        return getSelection().rtf;
+      },
+      set SelRTF(value: string) {
+        const html = RTFParser.rtfToHtml(value);
+        document.execCommand('insertHTML', false, html);
+        if (events.Change) events.Change();
+      },
+
+      // Font properties pour sélection
+      get SelBold() {
+        return currentFont.bold;
+      },
+      set SelBold(value: boolean) {
+        document.execCommand('bold', false);
+        setCurrentFont(prev => ({ ...prev, bold: value }));
+      },
+
+      get SelItalic() {
+        return currentFont.italic;
+      },
+      set SelItalic(value: boolean) {
+        document.execCommand('italic', false);
+        setCurrentFont(prev => ({ ...prev, italic: value }));
+      },
+
+      get SelUnderline() {
+        return currentFont.underline;
+      },
+      set SelUnderline(value: boolean) {
+        document.execCommand('underline', false);
+        setCurrentFont(prev => ({ ...prev, underline: value }));
+      },
+
+      get SelStrikeThru() {
+        return currentFont.strikethrough;
+      },
+      set SelStrikeThru(value: boolean) {
+        document.execCommand('strikeThrough', false);
+        setCurrentFont(prev => ({ ...prev, strikethrough: value }));
+      },
+
+      get SelColor() {
+        return currentFont.color;
+      },
+      set SelColor(value: string) {
+        document.execCommand('foreColor', false, value);
+        setCurrentFont(prev => ({ ...prev, color: value }));
+      },
+
+      get SelFontName() {
+        return currentFont.name;
+      },
+      set SelFontName(value: string) {
+        document.execCommand('fontName', false, value);
+        setCurrentFont(prev => ({ ...prev, name: value }));
+      },
+
+      get SelFontSize() {
+        return currentFont.size;
+      },
+      set SelFontSize(value: number) {
+        document.execCommand(
+          'fontSize',
+          false,
+          Math.min(7, Math.max(1, Math.round(value / 2))).toString()
+        );
+        setCurrentFont(prev => ({ ...prev, size: value }));
+      },
+
+      // Méthodes d'édition
+      LoadFile: (fileName: string, fileType: number = 0) => {
+        // fileType: 0=text, 1=RTF
+        // En environnement web, utiliser input file
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = fileType === 1 ? '.rtf' : '.txt';
+        input.onchange = e => {
+          const file = (e.target as HTMLInputElement).files?.[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+              const content = e.target?.result as string;
+              if (fileType === 1) {
+                richTextBoxAPI.RTFText = content;
+              } else {
+                richTextBoxAPI.Text = content;
+              }
+            };
+            reader.readAsText(file);
+          }
+        };
+        input.click();
+      },
+
+      SaveFile: (fileName: string, fileType: number = 0) => {
+        const content = fileType === 1 ? rtfContent : this.Text;
+        const mimeType = fileType === 1 ? 'application/rtf' : 'text/plain';
+
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+
+      Find: (searchString: string, start?: number, options?: number): number => {
+        if (!editorRef.current) return -1;
+
+        const text = editorRef.current.textContent || '';
+        const searchStart = start || 0;
+        const wholeWord = !!(options & RTFFind.rtfWholeWord);
+        const matchCase = !!(options & RTFFind.rtfMatchCase);
+        const reverse = !!(options & RTFFind.rtfReverse);
+
+        let searchText = searchString;
+        let targetText = text;
+
+        if (!matchCase) {
+          searchText = searchText.toLowerCase();
+          targetText = targetText.toLowerCase();
+        }
+
+        let foundIndex = -1;
+
+        if (reverse) {
+          foundIndex = targetText.lastIndexOf(searchText, searchStart);
+        } else {
+          foundIndex = targetText.indexOf(searchText, searchStart);
+        }
+
+        if (foundIndex !== -1 && wholeWord) {
+          // Verify word boundaries
+          const before = foundIndex === 0 ? ' ' : targetText[foundIndex - 1];
+          const after =
+            foundIndex + searchText.length >= targetText.length
+              ? ' '
+              : targetText[foundIndex + searchText.length];
+
+          if (!/\\W/.test(before) || !/\\W/.test(after)) {
+            // Not a whole word, continue searching
+            return this.Find(searchString, reverse ? foundIndex - 1 : foundIndex + 1, options);
+          }
+        }
+
+        if (foundIndex !== -1) {
+          // Select found text
+          this.SelStart = foundIndex;
+          this.SelLength = searchString.length;
+        }
+
+        return foundIndex;
+      },
+
+      Span: (characterSet: string, forward: boolean = true): number => {
+        // Move cursor while characters match the set
+        const selection = getSelection();
+        const text = content;
+        let position = selection.start;
+        let count = 0;
+
+        if (forward) {
+          while (position < text.length && characterSet.includes(text[position])) {
+            position++;
+            count++;
+          }
+        } else {
+          while (position > 0 && characterSet.includes(text[position - 1])) {
+            position--;
+            count++;
+          }
+        }
+
+        this.SelStart = position;
+        return count;
+      },
+
+      UpTo: (characterSet: string, forward: boolean = true): number => {
+        // Move cursor until character in set is found
+        const selection = getSelection();
+        const text = content;
+        let position = selection.start;
+        let count = 0;
+
+        if (forward) {
+          while (position < text.length && !characterSet.includes(text[position])) {
+            position++;
+            count++;
+          }
+        } else {
+          while (position > 0 && !characterSet.includes(text[position - 1])) {
+            position--;
+            count++;
+          }
+        }
+
+        this.SelStart = position;
+        return count;
+      },
+
+      GetLineFromChar: (charIndex: number): number => {
+        const text = content.substring(0, charIndex);
+        return text.split('\\n').length - 1;
+      },
+
+      OLEObjects: {
+        // Collection of embedded OLE objects
+        Count: 0,
+        // Add, Remove methods would be implemented here
+      },
+    }),
+    [content, rtfContent, getSelection, currentFont, bulletIndent, richTextBox, events]
+  );
 
   /**
    * Gestionnaires d'événements
    */
-  const handleInput = useCallback((e: React.FormEvent<HTMLDivElement>) => {
-    const newContent = e.currentTarget.textContent || '';
-    const newRtf = RTFParser.htmlToRtf(e.currentTarget.innerHTML);
-    
-    // Add to undo stack
-    if (content !== newContent) {
-      setUndoStack(prev => [...prev, content]);
-      if (undoStack.length > 100) {
-        setUndoStack(prev => prev.slice(-100));
+  const handleInput = useCallback(
+    (e: React.FormEvent<HTMLDivElement>) => {
+      const newContent = e.currentTarget.textContent || '';
+      const newRtf = RTFParser.htmlToRtf(e.currentTarget.innerHTML);
+
+      // Add to undo stack
+      if (content !== newContent) {
+        setUndoStack(prev => [...prev, content]);
+        if (undoStack.length > 100) {
+          setUndoStack(prev => prev.slice(-100));
+        }
+        setRedoStack([]);
       }
-      setRedoStack([]);
-    }
-    
-    setContent(newContent);
-    setRtfContent(newRtf);
-    
-    if (events.Change) {
-      events.Change();
-    }
-  }, [content, events, undoStack]);
+
+      setContent(newContent);
+      setRtfContent(newRtf);
+
+      if (events.Change) {
+        events.Change();
+      }
+    },
+    [content, events, undoStack]
+  );
 
   const handleSelectionChange = useCallback(() => {
     if (events.SelChange) {
@@ -631,49 +683,52 @@ export const RichTextBoxComplete: React.FC<RichTextBoxCompleteProps> = ({
     }
   }, [events]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
-    // Detect font changes from keyboard shortcuts
-    if (e.ctrlKey) {
-      switch (e.key) {
-        case 'b':
-          e.preventDefault();
-          richTextBoxAPI.SelBold = !richTextBoxAPI.SelBold;
-          break;
-        case 'i':
-          e.preventDefault();
-          richTextBoxAPI.SelItalic = !richTextBoxAPI.SelItalic;
-          break;
-        case 'u':
-          e.preventDefault();
-          richTextBoxAPI.SelUnderline = !richTextBoxAPI.SelUnderline;
-          break;
-        case 'z':
-          e.preventDefault();
-          // Undo
-          if (undoStack.length > 0) {
-            const lastState = undoStack[undoStack.length - 1];
-            setRedoStack(prev => [...prev, content]);
-            setUndoStack(prev => prev.slice(0, -1));
-            richTextBoxAPI.Text = lastState;
-          }
-          break;
-        case 'y':
-          e.preventDefault();
-          // Redo
-          if (redoStack.length > 0) {
-            const nextState = redoStack[redoStack.length - 1];
-            setUndoStack(prev => [...prev, content]);
-            setRedoStack(prev => prev.slice(0, -1));
-            richTextBoxAPI.Text = nextState;
-          }
-          break;
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      // Detect font changes from keyboard shortcuts
+      if (e.ctrlKey) {
+        switch (e.key) {
+          case 'b':
+            e.preventDefault();
+            richTextBoxAPI.SelBold = !richTextBoxAPI.SelBold;
+            break;
+          case 'i':
+            e.preventDefault();
+            richTextBoxAPI.SelItalic = !richTextBoxAPI.SelItalic;
+            break;
+          case 'u':
+            e.preventDefault();
+            richTextBoxAPI.SelUnderline = !richTextBoxAPI.SelUnderline;
+            break;
+          case 'z':
+            e.preventDefault();
+            // Undo
+            if (undoStack.length > 0) {
+              const lastState = undoStack[undoStack.length - 1];
+              setRedoStack(prev => [...prev, content]);
+              setUndoStack(prev => prev.slice(0, -1));
+              richTextBoxAPI.Text = lastState;
+            }
+            break;
+          case 'y':
+            e.preventDefault();
+            // Redo
+            if (redoStack.length > 0) {
+              const nextState = redoStack[redoStack.length - 1];
+              setUndoStack(prev => [...prev, content]);
+              setRedoStack(prev => prev.slice(0, -1));
+              richTextBoxAPI.Text = nextState;
+            }
+            break;
+        }
       }
-    }
 
-    if (events.KeyDown) {
-      events.KeyDown(e.keyCode, (e.shiftKey ? 1 : 0) + (e.ctrlKey ? 2 : 0) + (e.altKey ? 4 : 0));
-    }
-  }, [events, richTextBoxAPI, undoStack, redoStack, content]);
+      if (events.KeyDown) {
+        events.KeyDown(e.keyCode, (e.shiftKey ? 1 : 0) + (e.ctrlKey ? 2 : 0) + (e.altKey ? 4 : 0));
+      }
+    },
+    [events, richTextBoxAPI, undoStack, redoStack, content]
+  );
 
   // Initialize content
   useEffect(() => {
@@ -693,7 +748,7 @@ export const RichTextBoxComplete: React.FC<RichTextBoxCompleteProps> = ({
     if (name) {
       (window as any)[name] = richTextBoxAPI;
     }
-    
+
     return () => {
       if (name && (window as any)[name] === richTextBoxAPI) {
         delete (window as any)[name];
@@ -716,12 +771,17 @@ export const RichTextBoxComplete: React.FC<RichTextBoxCompleteProps> = ({
     fontStyle: currentFont.italic ? 'italic' : 'normal',
     color: currentFont.color,
     padding: '4px',
-    overflow: scrollBars === 0 ? 'hidden' : 
-              scrollBars === 1 ? 'scroll hidden' : 
-              scrollBars === 2 ? 'hidden scroll' : 'auto',
+    overflow:
+      scrollBars === 0
+        ? 'hidden'
+        : scrollBars === 1
+          ? 'scroll hidden'
+          : scrollBars === 2
+            ? 'hidden scroll'
+            : 'auto',
     whiteSpace: wordWrap ? 'pre-wrap' : 'pre',
     outline: hasFocus ? '1px solid #0078D4' : 'none',
-    resize: 'none'
+    resize: 'none',
   };
 
   return (
@@ -741,12 +801,12 @@ export const RichTextBoxComplete: React.FC<RichTextBoxCompleteProps> = ({
             width: 12,
             backgroundColor: '#F0F0F0',
             borderRight: '1px solid #C0C0C0',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
           title="Selection Bar"
         />
       )}
-      
+
       <div
         ref={editorRef}
         contentEditable={!locked}
@@ -761,7 +821,7 @@ export const RichTextBoxComplete: React.FC<RichTextBoxCompleteProps> = ({
           height: '100%',
           outline: 'none',
           whiteSpace: wordWrap ? 'pre-wrap' : 'pre',
-          overflowWrap: wordWrap ? 'break-word' : 'normal'
+          overflowWrap: wordWrap ? 'break-word' : 'normal',
         }}
       />
     </div>
@@ -790,7 +850,7 @@ export const RichTextBoxUtils = {
       wordWrap: true,
       selectionBar: true,
       detectUrls: true,
-      autoVerbMenu: true
+      autoVerbMenu: true,
     });
   },
 
@@ -803,7 +863,7 @@ export const RichTextBoxUtils = {
       richTextBox: false,
       plainText: true,
       scrollBars: 3,
-      wordWrap: true
+      wordWrap: true,
     });
   },
 
@@ -816,7 +876,7 @@ export const RichTextBoxUtils = {
 
   convertTextToRtf: (text: string): string => {
     return RTFParser.htmlToRtf(text.replace(/\n/g, '<br>'));
-  }
+  },
 };
 
 export default RichTextBoxComplete;

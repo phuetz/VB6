@@ -42,7 +42,7 @@ export class PerformanceOptimizer {
    */
   getCurrentMetrics(): PerformanceMetrics {
     const memory = (performance as any).memory;
-    
+
     return {
       memoryUsage: memory ? memory.usedJSHeapSize / 1024 / 1024 : 0, // MB
       renderTime: this.getAverageRenderTime(),
@@ -50,7 +50,7 @@ export class PerformanceOptimizer {
       eventListenerCount: this.getEventListenerCount(),
       bundleSize: this.getBundleSize(),
       loadTime: performance.timing?.loadEventEnd - performance.timing?.navigationStart || 0,
-      fps: this.getCurrentFPS()
+      fps: this.getCurrentFPS(),
     };
   }
 
@@ -230,16 +230,22 @@ export class PerformanceOptimizer {
     const recommendations: string[] = [];
     const metrics = this.getCurrentMetrics();
 
-    if (metrics.memoryUsage > 100) { // 100MB
+    if (metrics.memoryUsage > 100) {
+      // 100MB
       recommendations.push('High memory usage detected. Consider implementing object pooling.');
     }
 
     if (metrics.fps < 30) {
-      recommendations.push('Low FPS detected. Reduce animation complexity or implement frame throttling.');
+      recommendations.push(
+        'Low FPS detected. Reduce animation complexity or implement frame throttling.'
+      );
     }
 
-    if (metrics.renderTime > 16) { // 16ms = 60fps
-      recommendations.push('Slow rendering detected. Consider virtual scrolling or component memoization.');
+    if (metrics.renderTime > 16) {
+      // 16ms = 60fps
+      recommendations.push(
+        'Slow rendering detected. Consider virtual scrolling or component memoization.'
+      );
     }
 
     if (metrics.componentCount > 200) {
@@ -272,7 +278,7 @@ export class PerformanceOptimizer {
 
   private setupPerformanceObserver(): void {
     if ('PerformanceObserver' in window) {
-      this.observer = new PerformanceObserver((list) => {
+      this.observer = new PerformanceObserver(list => {
         const entries = list.getEntries();
         // Process performance entries
         entries.forEach(entry => {
@@ -290,7 +296,7 @@ export class PerformanceOptimizer {
     const updateFPS = () => {
       this.frameCount++;
       const now = performance.now();
-      
+
       if (now >= this.lastFrameTime + 1000) {
         const fps = Math.round((this.frameCount * 1000) / (now - this.lastFrameTime));
         this.frameCount = 0;
@@ -306,9 +312,9 @@ export class PerformanceOptimizer {
   private getAverageRenderTime(): number {
     const entries = performance.getEntriesByType('measure');
     const renderEntries = entries.filter(entry => entry.name.includes('render'));
-    
+
     if (renderEntries.length === 0) return 0;
-    
+
     const totalTime = renderEntries.reduce((sum, entry) => sum + entry.duration, 0);
     return totalTime / renderEntries.length;
   }
@@ -322,7 +328,7 @@ export class PerformanceOptimizer {
     // Approximation - count elements with common event attributes
     const eventAttributes = ['onclick', 'onchange', 'onmouseover', 'onkeydown'];
     let count = 0;
-    
+
     eventAttributes.forEach(attr => {
       count += document.querySelectorAll(`[${attr}]`).length;
     });
@@ -350,8 +356,8 @@ export class PerformanceOptimizer {
     // Implement intersection observer for lazy loading
     if ('IntersectionObserver' in window) {
       const lazyElements = document.querySelectorAll('[data-lazy="true"]');
-      
-      this.lazyLoadingObserver = new IntersectionObserver((entries) => {
+
+      this.lazyLoadingObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             const element = entry.target as HTMLElement;
@@ -368,15 +374,15 @@ export class PerformanceOptimizer {
 
   private optimizeEventListeners(): number {
     let optimized = 0;
-    
+
     // Convert multiple similar event listeners to event delegation
     const containers = document.querySelectorAll('[data-event-container="true"]');
-    
+
     containers.forEach(container => {
       const buttons = container.querySelectorAll('button');
       if (buttons.length > 5) {
         // Remove individual listeners and add single delegated listener
-        container.addEventListener('click', (e) => {
+        container.addEventListener('click', e => {
           const target = e.target as HTMLElement;
           if (target.tagName === 'BUTTON') {
             // Handle button click
@@ -401,19 +407,19 @@ export class PerformanceOptimizer {
 
   private optimizeImageLoading(): void {
     const images = document.querySelectorAll('img[data-optimize="true"]');
-    
+
     images.forEach(img => {
       const image = img as HTMLImageElement;
-      
+
       // Convert to WebP if supported
       if ('WebPSupportCheck' in window) {
         const webpSrc = image.src.replace(/\.(jpg|jpeg|png)$/, '.webp');
         image.src = webpSrc;
       }
-      
+
       // Add lazy loading
       image.loading = 'lazy';
-      
+
       // Add srcset for responsive images
       if (!image.srcset && image.dataset.srcset) {
         image.srcset = image.dataset.srcset;
@@ -438,11 +444,13 @@ export class PerformanceOptimizer {
 
     if (warnings.length > 0) {
       logger.warn('Performance warnings:', warnings);
-      
+
       // Dispatch performance warning event
-      window.dispatchEvent(new CustomEvent('performance-warning', {
-        detail: { warnings, metrics }
-      }));
+      window.dispatchEvent(
+        new CustomEvent('performance-warning', {
+          detail: { warnings, metrics },
+        })
+      );
     }
   }
 

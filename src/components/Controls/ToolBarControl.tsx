@@ -10,7 +10,7 @@ import { useVB6Store } from '../../stores/vb6Store';
 // ToolBar Constants
 export enum TbrStyle {
   tbrStandard = 0,
-  tbrFlat = 1
+  tbrFlat = 1,
 }
 
 export enum TbrButtonStyle {
@@ -19,7 +19,7 @@ export enum TbrButtonStyle {
   tbrButtonGroup = 2,
   tbrSeparator = 3,
   tbrPlaceholder = 4,
-  tbrDropdown = 5
+  tbrDropdown = 5,
 }
 
 export enum TbrButtonState {
@@ -28,7 +28,7 @@ export enum TbrButtonState {
   tbrEnabled = 2,
   tbrHidden = 3,
   tbrIndeterminate = 4,
-  tbrDisabled = 5
+  tbrDisabled = 5,
 }
 
 export interface ToolBarButton {
@@ -53,19 +53,19 @@ export interface ToolBarProps extends VB6ControlPropsEnhanced {
   style?: TbrStyle;
   appearance?: number; // 0-Flat, 1-3D
   borderStyle?: number; // 0-None, 1-Fixed Single
-  
+
   // Button properties
   buttons?: ToolBarButton[];
   buttonWidth?: number;
   buttonHeight?: number;
   allowCustomize?: boolean;
   wrappable?: boolean;
-  
+
   // Image properties
   imageList?: string[];
   disabledImageList?: string[];
   hotImageList?: string[];
-  
+
   // Events
   onButtonClick?: (button: ToolBarButton) => void;
   onButtonMenuClick?: (button: ToolBarButton, menuIndex: number) => void;
@@ -124,7 +124,7 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
           visible: true,
           width: buttonWidth,
           mixedState: false,
-          tag: ''
+          tag: '',
         },
         {
           index: 1,
@@ -139,7 +139,7 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
           visible: true,
           width: buttonWidth,
           mixedState: false,
-          tag: ''
+          tag: '',
         },
         {
           index: 2,
@@ -154,7 +154,7 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
           visible: true,
           width: buttonWidth,
           mixedState: false,
-          tag: ''
+          tag: '',
         },
         {
           index: 3,
@@ -169,7 +169,7 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
           visible: true,
           width: 8,
           mixedState: false,
-          tag: ''
+          tag: '',
         },
         {
           index: 4,
@@ -184,7 +184,7 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
           visible: true,
           width: buttonWidth,
           mixedState: false,
-          tag: ''
+          tag: '',
         },
         {
           index: 5,
@@ -199,7 +199,7 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
           visible: true,
           width: buttonWidth,
           mixedState: false,
-          tag: ''
+          tag: '',
         },
         {
           index: 6,
@@ -214,8 +214,8 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
           visible: true,
           width: buttonWidth,
           mixedState: false,
-          tag: ''
-        }
+          tag: '',
+        },
       ];
       setCurrentButtons(defaultButtons);
     } else {
@@ -230,7 +230,13 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
       setCurrentButtons(prev => [...prev]);
     },
 
-    AddButton: (index?: number, key?: string, caption?: string, style?: TbrButtonStyle, imageIndex?: number) => {
+    AddButton: (
+      index?: number,
+      key?: string,
+      caption?: string,
+      style?: TbrButtonStyle,
+      imageIndex?: number
+    ) => {
       const newButton: ToolBarButton = {
         index: index || currentButtons.length,
         key: key || `Button${currentButtons.length}`,
@@ -244,7 +250,7 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
         visible: true,
         width: style === TbrButtonStyle.tbrSeparator ? 8 : buttonWidth,
         mixedState: false,
-        tag: ''
+        tag: '',
       };
 
       const newButtons = [...currentButtons];
@@ -263,10 +269,10 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
     },
 
     RemoveButton: (indexOrKey: number | string) => {
-      const newButtons = currentButtons.filter(button => 
+      const newButtons = currentButtons.filter(button =>
         typeof indexOrKey === 'number' ? button.index !== indexOrKey : button.key !== indexOrKey
       );
-      
+
       // Update indices
       newButtons.forEach((button, i) => {
         button.index = i;
@@ -277,15 +283,23 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
     },
 
     GetButton: (indexOrKey: number | string): ToolBarButton | null => {
-      return currentButtons.find(button => 
-        typeof indexOrKey === 'number' ? button.index === indexOrKey : button.key === indexOrKey
-      ) || null;
+      return (
+        currentButtons.find(button =>
+          typeof indexOrKey === 'number' ? button.index === indexOrKey : button.key === indexOrKey
+        ) || null
+      );
     },
 
     SetButtonEnabled: (indexOrKey: number | string, enabled: boolean) => {
       const newButtons = currentButtons.map(button => {
-        if (typeof indexOrKey === 'number' ? button.index === indexOrKey : button.key === indexOrKey) {
-          return { ...button, enabled, value: enabled ? TbrButtonState.tbrEnabled : TbrButtonState.tbrDisabled };
+        if (
+          typeof indexOrKey === 'number' ? button.index === indexOrKey : button.key === indexOrKey
+        ) {
+          return {
+            ...button,
+            enabled,
+            value: enabled ? TbrButtonState.tbrEnabled : TbrButtonState.tbrDisabled,
+          };
         }
         return button;
       });
@@ -294,8 +308,14 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
 
     SetButtonVisible: (indexOrKey: number | string, visible: boolean) => {
       const newButtons = currentButtons.map(button => {
-        if (typeof indexOrKey === 'number' ? button.index === indexOrKey : button.key === indexOrKey) {
-          return { ...button, visible, value: visible ? TbrButtonState.tbrEnabled : TbrButtonState.tbrHidden };
+        if (
+          typeof indexOrKey === 'number' ? button.index === indexOrKey : button.key === indexOrKey
+        ) {
+          return {
+            ...button,
+            visible,
+            value: visible ? TbrButtonState.tbrEnabled : TbrButtonState.tbrHidden,
+          };
         }
         return button;
       });
@@ -304,9 +324,17 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
 
     SetButtonPressed: (indexOrKey: number | string, pressed: boolean) => {
       const newButtons = currentButtons.map(button => {
-        if (typeof indexOrKey === 'number' ? button.index === indexOrKey : button.key === indexOrKey) {
-          if (button.style === TbrButtonStyle.tbrCheck || button.style === TbrButtonStyle.tbrButtonGroup) {
-            return { ...button, value: pressed ? TbrButtonState.tbrPressed : TbrButtonState.tbrUnpressed };
+        if (
+          typeof indexOrKey === 'number' ? button.index === indexOrKey : button.key === indexOrKey
+        ) {
+          if (
+            button.style === TbrButtonStyle.tbrCheck ||
+            button.style === TbrButtonStyle.tbrButtonGroup
+          ) {
+            return {
+              ...button,
+              value: pressed ? TbrButtonState.tbrPressed : TbrButtonState.tbrUnpressed,
+            };
           }
         }
         return button;
@@ -316,7 +344,9 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
 
     SetButtonCaption: (indexOrKey: number | string, caption: string) => {
       const newButtons = currentButtons.map(button => {
-        if (typeof indexOrKey === 'number' ? button.index === indexOrKey : button.key === indexOrKey) {
+        if (
+          typeof indexOrKey === 'number' ? button.index === indexOrKey : button.key === indexOrKey
+        ) {
           return { ...button, caption, description: caption, tooltipText: caption };
         }
         return button;
@@ -326,7 +356,9 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
 
     SetButtonImage: (indexOrKey: number | string, imageIndex: number) => {
       const newButtons = currentButtons.map(button => {
-        if (typeof indexOrKey === 'number' ? button.index === indexOrKey : button.key === indexOrKey) {
+        if (
+          typeof indexOrKey === 'number' ? button.index === indexOrKey : button.key === indexOrKey
+        ) {
           return { ...button, imageIndex };
         }
         return button;
@@ -346,7 +378,7 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
         buttons: currentButtons,
         style,
         buttonWidth,
-        buttonHeight
+        buttonHeight,
       };
       localStorage.setItem(`${name}_toolbar_config`, JSON.stringify(config));
       fireEvent(name, 'ToolbarSaved', { config });
@@ -366,7 +398,7 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
           console.warn('Failed to restore toolbar configuration:', error);
         }
       }
-    }
+    },
   };
 
   const handleButtonClick = (button: ToolBarButton, event: React.MouseEvent) => {
@@ -375,10 +407,12 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
     // Handle different button styles
     if (button.style === TbrButtonStyle.tbrCheck) {
       // Toggle check button
-      const newValue = button.value === TbrButtonState.tbrPressed ? 
-                      TbrButtonState.tbrUnpressed : TbrButtonState.tbrPressed;
+      const newValue =
+        button.value === TbrButtonState.tbrPressed
+          ? TbrButtonState.tbrUnpressed
+          : TbrButtonState.tbrPressed;
       vb6Methods.SetButtonPressed(button.index, newValue === TbrButtonState.tbrPressed);
-      
+
       onChange?.(button);
       fireEvent(name, 'Change', { button });
     } else if (button.style === TbrButtonStyle.tbrButtonGroup) {
@@ -392,7 +426,7 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
         return btn;
       });
       setCurrentButtons(newButtons);
-      
+
       onChange?.(button);
       fireEvent(name, 'Change', { button });
     } else if (button.style === TbrButtonStyle.tbrDropdown) {
@@ -424,26 +458,26 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
         return imageList[button.imageIndex];
       }
     }
-    
+
     if (button.image) {
       return button.image;
     }
 
     // Default icons based on common button names
     const defaultIcons: { [key: string]: string } = {
-      'New': '📄',
-      'Open': '📂',
-      'Save': '💾',
-      'Cut': '✂️',
-      'Copy': '📋',
-      'Paste': '📄',
-      'Undo': '↶',
-      'Redo': '↷',
-      'Print': '🖨️',
-      'Find': '🔍',
-      'Bold': 'B',
-      'Italic': 'I',
-      'Underline': 'U'
+      New: '📄',
+      Open: '📂',
+      Save: '💾',
+      Cut: '✂️',
+      Copy: '📋',
+      Paste: '📄',
+      Undo: '↶',
+      Redo: '↷',
+      Print: '🖨️',
+      Find: '🔍',
+      Bold: 'B',
+      Italic: 'I',
+      Underline: 'U',
     };
 
     return defaultIcons[button.key] || defaultIcons[button.caption] || '⚬';
@@ -463,7 +497,7 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
       backgroundColor: 'transparent',
       border: 'none',
       fontSize: '12px',
-      fontFamily: 'MS Sans Serif'
+      fontFamily: 'MS Sans Serif',
     };
 
     if (button.style === TbrButtonStyle.tbrSeparator) {
@@ -471,43 +505,51 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
         ...baseStyle,
         width: `${button.width}px`,
         borderLeft: '1px solid #c0c0c0',
-        cursor: 'default'
+        cursor: 'default',
       };
     }
 
     // Button appearance based on style
     if (style === TbrStyle.tbrFlat) {
-      if (isPressed || pressedButton === button.index || button.value === TbrButtonState.tbrPressed) {
+      if (
+        isPressed ||
+        pressedButton === button.index ||
+        button.value === TbrButtonState.tbrPressed
+      ) {
         return {
           ...baseStyle,
           border: '1px inset #c0c0c0',
-          backgroundColor: '#e0e0e0'
+          backgroundColor: '#e0e0e0',
         };
       } else if (isHovered) {
         return {
           ...baseStyle,
           border: '1px outset #c0c0c0',
-          backgroundColor: '#f0f0f0'
+          backgroundColor: '#f0f0f0',
         };
       } else {
         return {
           ...baseStyle,
-          border: '1px solid transparent'
+          border: '1px solid transparent',
         };
       }
     } else {
       // 3D style
-      if (isPressed || pressedButton === button.index || button.value === TbrButtonState.tbrPressed) {
+      if (
+        isPressed ||
+        pressedButton === button.index ||
+        button.value === TbrButtonState.tbrPressed
+      ) {
         return {
           ...baseStyle,
           border: '1px inset #c0c0c0',
-          backgroundColor: '#e0e0e0'
+          backgroundColor: '#e0e0e0',
         };
       } else {
         return {
           ...baseStyle,
           border: '1px outset #c0c0c0',
-          backgroundColor: '#f0f0f0'
+          backgroundColor: '#f0f0f0',
         };
       }
     }
@@ -522,13 +564,7 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
     const buttonImage = getButtonImage(button, isHovered, isPressed);
 
     if (button.style === TbrButtonStyle.tbrSeparator) {
-      return (
-        <div
-          key={button.key}
-          style={buttonStyle}
-          title={button.tooltipText}
-        />
-      );
+      return <div key={button.key} style={buttonStyle} title={button.tooltipText} />;
     }
 
     return (
@@ -537,20 +573,16 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
         style={buttonStyle}
         title={button.tooltipText}
         disabled={!button.enabled}
-        onClick={(e) => handleButtonClick(button, e)}
+        onClick={e => handleButtonClick(button, e)}
         onMouseDown={() => handleButtonMouseDown(button)}
         onMouseUp={handleButtonMouseUp}
         onMouseEnter={() => setHoveredButton(button.index)}
         onMouseLeave={() => setHoveredButton(null)}
       >
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <span style={{ fontSize: '14px', lineHeight: 1 }}>
-            {buttonImage}
-          </span>
+          <span style={{ fontSize: '14px', lineHeight: 1 }}>{buttonImage}</span>
           {button.caption && (
-            <span style={{ fontSize: '8px', marginTop: '1px' }}>
-              {button.caption}
-            </span>
+            <span style={{ fontSize: '8px', marginTop: '1px' }}>{button.caption}</span>
           )}
         </div>
         {button.style === TbrButtonStyle.tbrDropdown && (
@@ -590,17 +622,13 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
     fontFamily: 'MS Sans Serif',
     fontSize: '8pt',
     opacity: enabled ? 1 : 0.5,
-    flexWrap: wrappable ? 'wrap' : 'nowrap'
+    flexWrap: wrappable ? 'wrap' : 'nowrap',
   };
 
   return (
-    <div
-      ref={ref}
-      style={containerStyle}
-      {...rest}
-    >
+    <div ref={ref} style={containerStyle} {...rest}>
       {currentButtons.map(button => renderButton(button))}
-      
+
       {/* Customize Dialog (simplified) */}
       {showCustomizeDialog && (
         <div
@@ -614,7 +642,7 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
             backgroundColor: 'white',
             border: '2px outset #c0c0c0',
             zIndex: 1000,
-            padding: '16px'
+            padding: '16px',
           }}
         >
           <h3>Customize Toolbar</h3>
@@ -626,7 +654,7 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
                 padding: '4px 12px',
                 border: '1px outset #c0c0c0',
                 backgroundColor: '#f0f0f0',
-                marginRight: '8px'
+                marginRight: '8px',
               }}
             >
               OK
@@ -636,7 +664,7 @@ export const ToolBarControl = forwardRef<HTMLDivElement, ToolBarProps>((props, r
               style={{
                 padding: '4px 12px',
                 border: '1px outset #c0c0c0',
-                backgroundColor: '#f0f0f0'
+                backgroundColor: '#f0f0f0',
               }}
             >
               Cancel

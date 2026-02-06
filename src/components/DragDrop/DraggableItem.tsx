@@ -12,11 +12,30 @@ interface DraggableItemProps {
   style?: React.CSSProperties;
   onDragStart?: () => void;
   onDragEnd?: () => void;
+  onClick?: () => void;
+  role?: string;
+  'aria-selected'?: boolean;
+  'aria-label'?: string;
+  tabIndex?: number;
 }
 
 export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(
   (
-    { id, data, disabled = false, children, className = '', style = {}, onDragStart, onDragEnd },
+    {
+      id,
+      data,
+      disabled = false,
+      children,
+      className = '',
+      style = {},
+      onDragStart,
+      onDragEnd,
+      onClick,
+      role,
+      'aria-selected': ariaSelected,
+      'aria-label': ariaLabel,
+      tabIndex,
+    },
     ref
   ) => {
     const addLog = useVB6Store(state => state.addLog);
@@ -68,6 +87,11 @@ export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(
         className={`${className} ${isDragging ? 'dragging' : ''} ${disabled ? 'opacity-50' : ''}`}
         {...listeners}
         {...attributes}
+        role={role}
+        aria-selected={ariaSelected}
+        aria-label={ariaLabel}
+        tabIndex={tabIndex}
+        onClick={onClick}
         data-dragging={isDragging}
         data-draggable-id={id}
       >

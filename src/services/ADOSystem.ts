@@ -19,7 +19,7 @@ export enum CursorTypeEnum {
   adOpenKeyset = 1,
   adOpenDynamic = 2,
   adOpenStatic = 3,
-  adOpenUnspecified = -1
+  adOpenUnspecified = -1,
 }
 
 export enum LockTypeEnum {
@@ -27,7 +27,7 @@ export enum LockTypeEnum {
   adLockPessimistic = 2,
   adLockOptimistic = 3,
   adLockBatchOptimistic = 4,
-  adLockUnspecified = -1
+  adLockUnspecified = -1,
 }
 
 export enum CommandTypeEnum {
@@ -36,7 +36,7 @@ export enum CommandTypeEnum {
   adCmdTable = 2,
   adCmdStoredProc = 4,
   adCmdFile = 256,
-  adCmdTableDirect = 512
+  adCmdTableDirect = 512,
 }
 
 export enum ParameterDirectionEnum {
@@ -44,7 +44,7 @@ export enum ParameterDirectionEnum {
   adParamInput = 1,
   adParamOutput = 2,
   adParamInputOutput = 3,
-  adParamReturnValue = 4
+  adParamReturnValue = 4,
 }
 
 export enum DataTypeEnum {
@@ -87,7 +87,7 @@ export enum DataTypeEnum {
   adFileTime = 64,
   adPropVariant = 138,
   adVarNumeric = 139,
-  adArray = 0x2000
+  adArray = 0x2000,
 }
 
 export enum ObjectStateEnum {
@@ -95,7 +95,7 @@ export enum ObjectStateEnum {
   adStateOpen = 1,
   adStateConnecting = 2,
   adStateExecuting = 4,
-  adStateFetching = 8
+  adStateFetching = 8,
 }
 
 export enum ConnectModeEnum {
@@ -107,11 +107,11 @@ export enum ConnectModeEnum {
   adModeShareDenyWrite = 8,
   adModeShareExclusive = 12,
   adModeShareDenyNone = 16,
-  adModeRecursive = 0x400000
+  adModeRecursive = 0x400000,
 }
 
 export enum IsolationLevelEnum {
-  adXactUnspecified = 0xFFFFFFFF,
+  adXactUnspecified = 0xffffffff,
   adXactChaos = 0x00000010,
   adXactReadUncommitted = 0x00000100,
   // adXactBrowse = 0x00000100, // Same as adXactReadUncommitted (commented to avoid duplicate)
@@ -126,7 +126,7 @@ export enum EditModeEnum {
   adEditNone = 0,
   adEditInProgress = 1,
   adEditAdd = 2,
-  adEditDelete = 4
+  adEditDelete = 4,
 }
 
 export enum RecordStatusEnum {
@@ -147,7 +147,7 @@ export enum RecordStatusEnum {
   adRecOutOfMemory = 32768,
   adRecPermissionDenied = 65536,
   adRecSchemaViolation = 131072,
-  adRecDBDeleted = 262144
+  adRecDBDeleted = 262144,
 }
 
 export enum FieldAttributeEnum {
@@ -167,7 +167,7 @@ export enum FieldAttributeEnum {
   adFldKeyColumn = 32768,
   adFldIsRowURL = 65536,
   adFldIsDefaultStream = 131072,
-  adFldIsCollection = 262144
+  adFldIsCollection = 262144,
 }
 
 // Interfaces ADO
@@ -213,13 +213,23 @@ export class ADOField extends EventEmitter {
   }
 
   // Propriétés Field
-  get name(): string { return this._name; }
-  set name(value: string) { this._name = value; }
+  get name(): string {
+    return this._name;
+  }
+  set name(value: string) {
+    this._name = value;
+  }
 
-  get type(): DataTypeEnum { return this._type; }
-  set type(value: DataTypeEnum) { this._type = value; }
+  get type(): DataTypeEnum {
+    return this._type;
+  }
+  set type(value: DataTypeEnum) {
+    this._type = value;
+  }
 
-  get value(): ADOValue { return this._value; }
+  get value(): ADOValue {
+    return this._value;
+  }
   set value(val: ADOValue) {
     if (this._value !== val) {
       this._value = val;
@@ -228,33 +238,69 @@ export class ADOField extends EventEmitter {
     }
   }
 
-  get originalValue(): ADOValue { return this._originalValue; }
-  set originalValue(value: ADOValue) { this._originalValue = value; }
+  get originalValue(): ADOValue {
+    return this._originalValue;
+  }
+  set originalValue(value: ADOValue) {
+    this._originalValue = value;
+  }
 
-  get underlyingValue(): ADOValue { return this._underlyingValue; }
-  set underlyingValue(value: ADOValue) { this._underlyingValue = value; }
+  get underlyingValue(): ADOValue {
+    return this._underlyingValue;
+  }
+  set underlyingValue(value: ADOValue) {
+    this._underlyingValue = value;
+  }
 
-  get definedSize(): number { return this._definedSize; }
-  set definedSize(value: number) { this._definedSize = value; }
+  get definedSize(): number {
+    return this._definedSize;
+  }
+  set definedSize(value: number) {
+    this._definedSize = value;
+  }
 
-  get actualSize(): number { return this._actualSize; }
+  get actualSize(): number {
+    return this._actualSize;
+  }
 
-  get attributes(): FieldAttributeEnum { return this._attributes; }
-  set attributes(value: FieldAttributeEnum) { this._attributes = value; }
+  get attributes(): FieldAttributeEnum {
+    return this._attributes;
+  }
+  set attributes(value: FieldAttributeEnum) {
+    this._attributes = value;
+  }
 
-  get precision(): number { return this._precision; }
-  set precision(value: number) { this._precision = value; }
+  get precision(): number {
+    return this._precision;
+  }
+  set precision(value: number) {
+    this._precision = value;
+  }
 
-  get numericScale(): number { return this._numericScale; }
-  set numericScale(value: number) { this._numericScale = value; }
+  get numericScale(): number {
+    return this._numericScale;
+  }
+  set numericScale(value: number) {
+    this._numericScale = value;
+  }
 
-  get status(): RecordStatusEnum { return this._status; }
-  set status(value: RecordStatusEnum) { this._status = value; }
+  get status(): RecordStatusEnum {
+    return this._status;
+  }
+  set status(value: RecordStatusEnum) {
+    this._status = value;
+  }
 
-  get dataFormat(): ADODataFormat | null { return this._dataFormat; }
-  set dataFormat(value: ADODataFormat | null) { this._dataFormat = value; }
+  get dataFormat(): ADODataFormat | null {
+    return this._dataFormat;
+  }
+  set dataFormat(value: ADODataFormat | null) {
+    this._dataFormat = value;
+  }
 
-  get properties(): Map<string, ADOProperty> { return this._properties; }
+  get properties(): Map<string, ADOProperty> {
+    return this._properties;
+  }
 
   // Méthodes Field
   appendChunk(data: string | ArrayBuffer): void {
@@ -288,7 +334,9 @@ export class ADOField extends EventEmitter {
 export class ADOFields extends EventEmitter {
   private _fields: ADOField[] = [];
 
-  get count(): number { return this._fields.length; }
+  get count(): number {
+    return this._fields.length;
+  }
 
   item(index: number | string): ADOField | null {
     if (typeof index === 'number') {
@@ -298,7 +346,12 @@ export class ADOFields extends EventEmitter {
     }
   }
 
-  append(name: string, type: DataTypeEnum, definedSize: number = 0, attrib: FieldAttributeEnum = FieldAttributeEnum.adFldUnspecified): void {
+  append(
+    name: string,
+    type: DataTypeEnum,
+    definedSize: number = 0,
+    attrib: FieldAttributeEnum = FieldAttributeEnum.adFldUnspecified
+  ): void {
     const field = new ADOField(name, type, definedSize);
     field.attributes = attrib;
     this._fields.push(field);
@@ -331,7 +384,7 @@ export class ADOFields extends EventEmitter {
         } else {
           return { done: true, value: undefined };
         }
-      }
+      },
     };
   }
 }
@@ -348,7 +401,13 @@ export class ADOParameter extends EventEmitter {
   private _attributes: number = 0;
   private _properties: Map<string, ADOProperty> = new Map();
 
-  constructor(name: string = '', type: DataTypeEnum = DataTypeEnum.adEmpty, direction: ParameterDirectionEnum = ParameterDirectionEnum.adParamInput, size: number = 0, value: ADOValue = null) {
+  constructor(
+    name: string = '',
+    type: DataTypeEnum = DataTypeEnum.adEmpty,
+    direction: ParameterDirectionEnum = ParameterDirectionEnum.adParamInput,
+    size: number = 0,
+    value: ADOValue = null
+  ) {
     super();
     this._name = name;
     this._type = type;
@@ -358,19 +417,37 @@ export class ADOParameter extends EventEmitter {
   }
 
   // Propriétés Parameter
-  get name(): string { return this._name; }
-  set name(value: string) { this._name = value; }
+  get name(): string {
+    return this._name;
+  }
+  set name(value: string) {
+    this._name = value;
+  }
 
-  get type(): DataTypeEnum { return this._type; }
-  set type(value: DataTypeEnum) { this._type = value; }
+  get type(): DataTypeEnum {
+    return this._type;
+  }
+  set type(value: DataTypeEnum) {
+    this._type = value;
+  }
 
-  get direction(): ParameterDirectionEnum { return this._direction; }
-  set direction(value: ParameterDirectionEnum) { this._direction = value; }
+  get direction(): ParameterDirectionEnum {
+    return this._direction;
+  }
+  set direction(value: ParameterDirectionEnum) {
+    this._direction = value;
+  }
 
-  get size(): number { return this._size; }
-  set size(value: number) { this._size = value; }
+  get size(): number {
+    return this._size;
+  }
+  set size(value: number) {
+    this._size = value;
+  }
 
-  get value(): ADOValue { return this._value; }
+  get value(): ADOValue {
+    return this._value;
+  }
   set value(val: ADOValue) {
     if (this._value !== val) {
       this._value = val;
@@ -378,16 +455,30 @@ export class ADOParameter extends EventEmitter {
     }
   }
 
-  get precision(): number { return this._precision; }
-  set precision(value: number) { this._precision = value; }
+  get precision(): number {
+    return this._precision;
+  }
+  set precision(value: number) {
+    this._precision = value;
+  }
 
-  get numericScale(): number { return this._numericScale; }
-  set numericScale(value: number) { this._numericScale = value; }
+  get numericScale(): number {
+    return this._numericScale;
+  }
+  set numericScale(value: number) {
+    this._numericScale = value;
+  }
 
-  get attributes(): number { return this._attributes; }
-  set attributes(value: number) { this._attributes = value; }
+  get attributes(): number {
+    return this._attributes;
+  }
+  set attributes(value: number) {
+    this._attributes = value;
+  }
 
-  get properties(): Map<string, ADOProperty> { return this._properties; }
+  get properties(): Map<string, ADOProperty> {
+    return this._properties;
+  }
 
   // Méthodes Parameter
   appendChunk(data: string | ArrayBuffer): void {
@@ -403,7 +494,9 @@ export class ADOParameter extends EventEmitter {
 export class ADOParameters extends EventEmitter {
   private _parameters: ADOParameter[] = [];
 
-  get count(): number { return this._parameters.length; }
+  get count(): number {
+    return this._parameters.length;
+  }
 
   item(index: number | string): ADOParameter | null {
     if (typeof index === 'number') {
@@ -414,8 +507,20 @@ export class ADOParameters extends EventEmitter {
   }
 
   append(param: ADOParameter): void;
-  append(name: string, type: DataTypeEnum, direction?: ParameterDirectionEnum, size?: number, value?: ADOValue): void;
-  append(paramOrName: ADOParameter | string, type?: DataTypeEnum, direction?: ParameterDirectionEnum, size?: number, value?: ADOValue): void {
+  append(
+    name: string,
+    type: DataTypeEnum,
+    direction?: ParameterDirectionEnum,
+    size?: number,
+    value?: ADOValue
+  ): void;
+  append(
+    paramOrName: ADOParameter | string,
+    type?: DataTypeEnum,
+    direction?: ParameterDirectionEnum,
+    size?: number,
+    value?: ADOValue
+  ): void {
     if (paramOrName instanceof ADOParameter) {
       this._parameters.push(paramOrName);
       this.emit('parameterAdded', paramOrName);
@@ -452,7 +557,7 @@ export class ADOParameters extends EventEmitter {
         } else {
           return { done: true, value: undefined };
         }
-      }
+      },
     };
   }
 }
@@ -473,40 +578,85 @@ export class ADOConnection extends EventEmitter {
   private _properties: Map<string, ADOProperty> = new Map();
 
   // Propriétés Connection
-  get connectionString(): string { return this._connectionString; }
-  set connectionString(value: string) { this._connectionString = value; }
+  get connectionString(): string {
+    return this._connectionString;
+  }
+  set connectionString(value: string) {
+    this._connectionString = value;
+  }
 
-  get connectionTimeout(): number { return this._connectionTimeout; }
-  set connectionTimeout(value: number) { this._connectionTimeout = value; }
+  get connectionTimeout(): number {
+    return this._connectionTimeout;
+  }
+  set connectionTimeout(value: number) {
+    this._connectionTimeout = value;
+  }
 
-  get commandTimeout(): number { return this._commandTimeout; }
-  set commandTimeout(value: number) { this._commandTimeout = value; }
+  get commandTimeout(): number {
+    return this._commandTimeout;
+  }
+  set commandTimeout(value: number) {
+    this._commandTimeout = value;
+  }
 
-  get mode(): ConnectModeEnum { return this._mode; }
-  set mode(value: ConnectModeEnum) { this._mode = value; }
+  get mode(): ConnectModeEnum {
+    return this._mode;
+  }
+  set mode(value: ConnectModeEnum) {
+    this._mode = value;
+  }
 
-  get isolationLevel(): IsolationLevelEnum { return this._isolationLevel; }
-  set isolationLevel(value: IsolationLevelEnum) { this._isolationLevel = value; }
+  get isolationLevel(): IsolationLevelEnum {
+    return this._isolationLevel;
+  }
+  set isolationLevel(value: IsolationLevelEnum) {
+    this._isolationLevel = value;
+  }
 
-  get state(): ObjectStateEnum { return this._state; }
+  get state(): ObjectStateEnum {
+    return this._state;
+  }
 
-  get version(): string { return this._version; }
+  get version(): string {
+    return this._version;
+  }
 
-  get provider(): string { return this._provider; }
-  set provider(value: string) { this._provider = value; }
+  get provider(): string {
+    return this._provider;
+  }
+  set provider(value: string) {
+    this._provider = value;
+  }
 
-  get defaultDatabase(): string { return this._defaultDatabase; }
-  set defaultDatabase(value: string) { this._defaultDatabase = value; }
+  get defaultDatabase(): string {
+    return this._defaultDatabase;
+  }
+  set defaultDatabase(value: string) {
+    this._defaultDatabase = value;
+  }
 
-  get cursorLocation(): number { return this._cursorLocation; }
-  set cursorLocation(value: number) { this._cursorLocation = value; }
+  get cursorLocation(): number {
+    return this._cursorLocation;
+  }
+  set cursorLocation(value: number) {
+    this._cursorLocation = value;
+  }
 
-  get errors(): ADOError[] { return this._errors; }
+  get errors(): ADOError[] {
+    return this._errors;
+  }
 
-  get properties(): Map<string, ADOProperty> { return this._properties; }
+  get properties(): Map<string, ADOProperty> {
+    return this._properties;
+  }
 
   // Méthodes Connection
-  async open(connectionString?: string, userId?: string, password?: string, options?: number): Promise<void> {
+  async open(
+    connectionString?: string,
+    userId?: string,
+    password?: string,
+    options?: number
+  ): Promise<void> {
     if (connectionString) {
       this._connectionString = connectionString;
     }
@@ -538,7 +688,11 @@ export class ADOConnection extends EventEmitter {
     }
   }
 
-  async execute(commandText: string, recordsAffected?: { value: number }, options?: number): Promise<ADORecordset> {
+  async execute(
+    commandText: string,
+    recordsAffected?: { value: number },
+    options?: number
+  ): Promise<ADORecordset> {
     if (this._state !== ObjectStateEnum.adStateOpen) {
       throw new Error('Connection is not open');
     }
@@ -576,7 +730,11 @@ export class ADOConnection extends EventEmitter {
     this.emit('rollbackTransComplete');
   }
 
-  openSchema(schema: number, restrictions?: ADOSchemaRestrictions, schemaID?: string): ADORecordset {
+  openSchema(
+    schema: number,
+    restrictions?: ADOSchemaRestrictions,
+    schemaID?: string
+  ): ADORecordset {
     if (this._state !== ObjectStateEnum.adStateOpen) {
       throw new Error('Connection is not open');
     }
@@ -609,37 +767,71 @@ export class ADOCommand extends EventEmitter {
 
   constructor() {
     super();
-    this._parameters.on('parameterAdded', (param) => this.emit('parameterAdded', param));
-    this._parameters.on('parameterDeleted', (param) => this.emit('parameterDeleted', param));
+    this._parameters.on('parameterAdded', param => this.emit('parameterAdded', param));
+    this._parameters.on('parameterDeleted', param => this.emit('parameterDeleted', param));
   }
 
   // Propriétés Command
-  get activeConnection(): ADOConnection | null { return this._activeConnection; }
-  set activeConnection(value: ADOConnection | null) { this._activeConnection = value; }
+  get activeConnection(): ADOConnection | null {
+    return this._activeConnection;
+  }
+  set activeConnection(value: ADOConnection | null) {
+    this._activeConnection = value;
+  }
 
-  get commandText(): string { return this._commandText; }
-  set commandText(value: string) { this._commandText = value; }
+  get commandText(): string {
+    return this._commandText;
+  }
+  set commandText(value: string) {
+    this._commandText = value;
+  }
 
-  get commandTimeout(): number { return this._commandTimeout; }
-  set commandTimeout(value: number) { this._commandTimeout = value; }
+  get commandTimeout(): number {
+    return this._commandTimeout;
+  }
+  set commandTimeout(value: number) {
+    this._commandTimeout = value;
+  }
 
-  get commandType(): CommandTypeEnum { return this._commandType; }
-  set commandType(value: CommandTypeEnum) { this._commandType = value; }
+  get commandType(): CommandTypeEnum {
+    return this._commandType;
+  }
+  set commandType(value: CommandTypeEnum) {
+    this._commandType = value;
+  }
 
-  get prepared(): boolean { return this._prepared; }
-  set prepared(value: boolean) { this._prepared = value; }
+  get prepared(): boolean {
+    return this._prepared;
+  }
+  set prepared(value: boolean) {
+    this._prepared = value;
+  }
 
-  get parameters(): ADOParameters { return this._parameters; }
+  get parameters(): ADOParameters {
+    return this._parameters;
+  }
 
-  get state(): ObjectStateEnum { return this._state; }
+  get state(): ObjectStateEnum {
+    return this._state;
+  }
 
-  get name(): string { return this._name; }
-  set name(value: string) { this._name = value; }
+  get name(): string {
+    return this._name;
+  }
+  set name(value: string) {
+    this._name = value;
+  }
 
-  get properties(): Map<string, ADOProperty> { return this._properties; }
+  get properties(): Map<string, ADOProperty> {
+    return this._properties;
+  }
 
   // Méthodes Command
-  async execute(recordsAffected?: { value: number }, parameters?: ADOValue[], options?: number): Promise<ADORecordset> {
+  async execute(
+    recordsAffected?: { value: number },
+    parameters?: ADOValue[],
+    options?: number
+  ): Promise<ADORecordset> {
     if (!this._activeConnection || this._activeConnection.state !== ObjectStateEnum.adStateOpen) {
       throw new Error('Connection is not open');
     }
@@ -656,14 +848,19 @@ export class ADOCommand extends EventEmitter {
       await new Promise(resolve => setTimeout(resolve, 50));
 
       const recordset = new ADORecordset();
-      
+
       // Créer des champs de test
       recordset.fields.append('ID', DataTypeEnum.adInteger);
       recordset.fields.append('Name', DataTypeEnum.adVarChar, 50);
       recordset.fields.append('Email', DataTypeEnum.adVarChar, 100);
-      
+
       // Ouvrir le recordset
-      recordset.open(null, this._activeConnection, CursorTypeEnum.adOpenStatic, LockTypeEnum.adLockReadOnly);
+      recordset.open(
+        null,
+        this._activeConnection,
+        CursorTypeEnum.adOpenStatic,
+        LockTypeEnum.adLockReadOnly
+      );
 
       // Ajouter des données de test
       recordset.addNew();
@@ -696,7 +893,13 @@ export class ADOCommand extends EventEmitter {
     }
   }
 
-  createParameter(name?: string, type?: DataTypeEnum, direction?: ParameterDirectionEnum, size?: number, value?: ADOValue): ADOParameter {
+  createParameter(
+    name?: string,
+    type?: DataTypeEnum,
+    direction?: ParameterDirectionEnum,
+    size?: number,
+    value?: ADOValue
+  ): ADOParameter {
     return new ADOParameter(name, type, direction, size, value);
   }
 }
@@ -732,72 +935,148 @@ export class ADORecordset extends EventEmitter {
 
   constructor() {
     super();
-    this._fields.on('fieldAdded', (field) => this.emit('fieldAdded', field));
-    this._fields.on('fieldDeleted', (field) => this.emit('fieldDeleted', field));
+    this._fields.on('fieldAdded', field => this.emit('fieldAdded', field));
+    this._fields.on('fieldDeleted', field => this.emit('fieldDeleted', field));
   }
 
   // Propriétés Recordset
-  get activeConnection(): ADOConnection | null { return this._activeConnection; }
-  set activeConnection(value: ADOConnection | null) { this._activeConnection = value; }
+  get activeConnection(): ADOConnection | null {
+    return this._activeConnection;
+  }
+  set activeConnection(value: ADOConnection | null) {
+    this._activeConnection = value;
+  }
 
-  get activeCommand(): ADOCommand | null { return this._activeCommand; }
+  get activeCommand(): ADOCommand | null {
+    return this._activeCommand;
+  }
 
-  get source(): string | ADOCommand | null { return this._source; }
-  set source(value: string | ADOCommand | null) { this._source = value; }
+  get source(): string | ADOCommand | null {
+    return this._source;
+  }
+  set source(value: string | ADOCommand | null) {
+    this._source = value;
+  }
 
-  get state(): ObjectStateEnum { return this._state; }
+  get state(): ObjectStateEnum {
+    return this._state;
+  }
 
-  get cursorType(): CursorTypeEnum { return this._cursorType; }
-  set cursorType(value: CursorTypeEnum) { this._cursorType = value; }
+  get cursorType(): CursorTypeEnum {
+    return this._cursorType;
+  }
+  set cursorType(value: CursorTypeEnum) {
+    this._cursorType = value;
+  }
 
-  get lockType(): LockTypeEnum { return this._lockType; }
-  set lockType(value: LockTypeEnum) { this._lockType = value; }
+  get lockType(): LockTypeEnum {
+    return this._lockType;
+  }
+  set lockType(value: LockTypeEnum) {
+    this._lockType = value;
+  }
 
-  get maxRecords(): number { return this._maxRecords; }
-  set maxRecords(value: number) { this._maxRecords = value; }
+  get maxRecords(): number {
+    return this._maxRecords;
+  }
+  set maxRecords(value: number) {
+    this._maxRecords = value;
+  }
 
-  get pageCount(): number { return this._pageCount; }
+  get pageCount(): number {
+    return this._pageCount;
+  }
 
-  get pageSize(): number { return this._pageSize; }
-  set pageSize(value: number) { this._pageSize = value; }
+  get pageSize(): number {
+    return this._pageSize;
+  }
+  set pageSize(value: number) {
+    this._pageSize = value;
+  }
 
-  get absolutePage(): number { return this._absolutePage; }
-  set absolutePage(value: number) { this._absolutePage = value; }
+  get absolutePage(): number {
+    return this._absolutePage;
+  }
+  set absolutePage(value: number) {
+    this._absolutePage = value;
+  }
 
-  get absolutePosition(): number { return this._absolutePosition; }
-  set absolutePosition(value: number) { this._absolutePosition = value; }
+  get absolutePosition(): number {
+    return this._absolutePosition;
+  }
+  set absolutePosition(value: number) {
+    this._absolutePosition = value;
+  }
 
-  get recordCount(): number { return this._recordCount; }
+  get recordCount(): number {
+    return this._recordCount;
+  }
 
-  get bof(): boolean { return this._bof; }
+  get bof(): boolean {
+    return this._bof;
+  }
 
-  get eof(): boolean { return this._eof; }
+  get eof(): boolean {
+    return this._eof;
+  }
 
-  get editMode(): EditModeEnum { return this._editMode; }
+  get editMode(): EditModeEnum {
+    return this._editMode;
+  }
 
-  get marshalOptions(): number { return this._marshalOptions; }
-  set marshalOptions(value: number) { this._marshalOptions = value; }
+  get marshalOptions(): number {
+    return this._marshalOptions;
+  }
+  set marshalOptions(value: number) {
+    this._marshalOptions = value;
+  }
 
-  get cacheSize(): number { return this._cacheSize; }
-  set cacheSize(value: number) { this._cacheSize = value; }
+  get cacheSize(): number {
+    return this._cacheSize;
+  }
+  set cacheSize(value: number) {
+    this._cacheSize = value;
+  }
 
-  get cursorLocation(): number { return this._cursorLocation; }
-  set cursorLocation(value: number) { this._cursorLocation = value; }
+  get cursorLocation(): number {
+    return this._cursorLocation;
+  }
+  set cursorLocation(value: number) {
+    this._cursorLocation = value;
+  }
 
-  get dataSource(): ADODataSource | null { return this._dataSource; }
-  set dataSource(value: ADODataSource | null) { this._dataSource = value; }
+  get dataSource(): ADODataSource | null {
+    return this._dataSource;
+  }
+  set dataSource(value: ADODataSource | null) {
+    this._dataSource = value;
+  }
 
-  get dataMember(): string { return this._dataMember; }
-  set dataMember(value: string) { this._dataMember = value; }
+  get dataMember(): string {
+    return this._dataMember;
+  }
+  set dataMember(value: string) {
+    this._dataMember = value;
+  }
 
-  get fields(): ADOFields { return this._fields; }
+  get fields(): ADOFields {
+    return this._fields;
+  }
 
-  get properties(): Map<string, ADOProperty> { return this._properties; }
+  get properties(): Map<string, ADOProperty> {
+    return this._properties;
+  }
 
-  get status(): RecordStatusEnum { return this._status; }
+  get status(): RecordStatusEnum {
+    return this._status;
+  }
 
-  get bookmark(): ADOBookmark | null { return this._bookmark; }
-  set bookmark(value: ADOBookmark | null) { this._bookmark = value; }
+  get bookmark(): ADOBookmark | null {
+    return this._bookmark;
+  }
+  set bookmark(value: ADOBookmark | null) {
+    this._bookmark = value;
+  }
 
   // Méthodes de navigation
   moveFirst(): void {
@@ -888,7 +1167,7 @@ export class ADORecordset extends EventEmitter {
     }
 
     const newPosition = this._currentRecord + numRecords;
-    
+
     if (newPosition < 0) {
       this._bof = true;
       this._currentRecord = -1;
@@ -928,7 +1207,8 @@ export class ADORecordset extends EventEmitter {
     if (fieldList && values) {
       if (Array.isArray(fieldList) && Array.isArray(values)) {
         for (let i = 0; i < fieldList.length && i < values.length; i++) {
-          const fieldName = typeof fieldList[i] === 'string' ? fieldList[i] : (fieldList[i] as ADOField).name;
+          const fieldName =
+            typeof fieldList[i] === 'string' ? fieldList[i] : (fieldList[i] as ADOField).name;
           newRecord[fieldName] = values[i];
         }
       }
@@ -963,7 +1243,8 @@ export class ADORecordset extends EventEmitter {
     if (fields && values) {
       if (Array.isArray(fields) && Array.isArray(values)) {
         for (let i = 0; i < fields.length && i < values.length; i++) {
-          const fieldName = typeof fields[i] === 'string' ? fields[i] : (fields[i] as ADOField).name;
+          const fieldName =
+            typeof fields[i] === 'string' ? fields[i] : (fields[i] as ADOField).name;
           this._records[this._currentRecord][fieldName] = values[i];
           const field = this._fields.item(fieldName);
           if (field) {
@@ -1041,7 +1322,13 @@ export class ADORecordset extends EventEmitter {
   }
 
   // Méthodes de gestion
-  async open(source?: string | ADOCommand, activeConnection?: ADOConnection, cursorType?: CursorTypeEnum, lockType?: LockTypeEnum, options?: number): Promise<void> {
+  async open(
+    source?: string | ADOCommand,
+    activeConnection?: ADOConnection,
+    cursorType?: CursorTypeEnum,
+    lockType?: LockTypeEnum,
+    options?: number
+  ): Promise<void> {
     if (this._state === ObjectStateEnum.adStateOpen) {
       throw new Error('Recordset is already open');
     }
@@ -1068,7 +1355,7 @@ export class ADORecordset extends EventEmitter {
 
     this._state = ObjectStateEnum.adStateOpen;
     this._recordCount = this._records.length;
-    
+
     if (this._records.length > 0) {
       this._currentRecord = 0;
       this._absolutePosition = 1;
@@ -1127,7 +1414,7 @@ export class ADORecordset extends EventEmitter {
     clonedRecordset._lockType = lockType || this._lockType;
     clonedRecordset._records = [...this._records];
     clonedRecordset._recordCount = this._recordCount;
-    
+
     // Cloner les champs
     for (const field of this._fields) {
       clonedRecordset._fields.append(field.name, field.type, field.definedSize, field.attributes);
@@ -1147,7 +1434,12 @@ export class ADORecordset extends EventEmitter {
     this.emit('recordsetChangeComplete', null);
   }
 
-  find(criteria: string, skipRecords?: number, searchDirection?: number, start?: ADOBookmark): void {
+  find(
+    criteria: string,
+    skipRecords?: number,
+    searchDirection?: number,
+    start?: ADOBookmark
+  ): void {
     if (this._state !== ObjectStateEnum.adStateOpen) {
       throw new Error('Recordset is not open');
     }
@@ -1161,7 +1453,11 @@ export class ADORecordset extends EventEmitter {
     // Recherche simple par nom (pour l'exemple)
     for (let i = startPos; i < this._records.length; i++) {
       const record = this._records[i];
-      if (criteria.includes('Name') && record.Name && record.Name.includes(criteria.split('=')[1]?.trim().replace(/'/g, ''))) {
+      if (
+        criteria.includes('Name') &&
+        record.Name &&
+        record.Name.includes(criteria.split('=')[1]?.trim().replace(/'/g, ''))
+      ) {
         this._currentRecord = i;
         this._absolutePosition = i + 1;
         this._bof = false;
@@ -1202,7 +1498,13 @@ export class ADORecordset extends EventEmitter {
     return result;
   }
 
-  getString(stringFormat?: number, numRows?: number, columnDelimiter?: string, rowDelimiter?: string, nullExpr?: string): string {
+  getString(
+    stringFormat?: number,
+    numRows?: number,
+    columnDelimiter?: string,
+    rowDelimiter?: string,
+    nullExpr?: string
+  ): string {
     if (this._state !== ObjectStateEnum.adStateOpen) {
       throw new Error('Recordset is not open');
     }
@@ -1213,17 +1515,19 @@ export class ADORecordset extends EventEmitter {
 
     let result = '';
     const startPos = this._currentRecord;
-    const endPos = numRows ? Math.min(startPos + numRows, this._records.length) : this._records.length;
+    const endPos = numRows
+      ? Math.min(startPos + numRows, this._records.length)
+      : this._records.length;
 
     for (let i = startPos; i < endPos; i++) {
       const record = this._records[i];
       const values: string[] = [];
-      
+
       for (const field of this._fields) {
         const value = record[field.name];
         values.push(value === null || value === undefined ? nullExpression : String(value));
       }
-      
+
       result += values.join(colDelim);
       if (i < endPos - 1) {
         result += rowDelim;
@@ -1244,7 +1548,15 @@ export class ADORecordset extends EventEmitter {
 }
 
 // Exportation des classes principales
-export { ADOConnection, ADOCommand, ADORecordset, ADOField, ADOFields, ADOParameter, ADOParameters };
+export {
+  ADOConnection,
+  ADOCommand,
+  ADORecordset,
+  ADOField,
+  ADOFields,
+  ADOParameter,
+  ADOParameters,
+};
 
 // Fonction utilitaire pour créer une connexion ADO
 export function createADOConnection(connectionString?: string): ADOConnection {

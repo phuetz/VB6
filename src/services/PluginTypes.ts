@@ -4,14 +4,14 @@
  */
 
 import React from 'react';
-import { 
-  DialogOptions, 
-  DialogResult, 
-  MenuItemConfig, 
-  ToolbarButtonConfig, 
-  PanelConfig, 
+import {
+  DialogOptions,
+  DialogResult,
+  MenuItemConfig,
+  ToolbarButtonConfig,
+  PanelConfig,
   VB6StoreState,
-  StorageValue
+  StorageValue,
 } from './PluginSystem';
 
 export interface PluginModule {

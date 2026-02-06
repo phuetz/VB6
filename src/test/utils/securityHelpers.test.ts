@@ -24,7 +24,7 @@ import {
   safeMemoryUsage,
   isValidLength,
   isValidObject,
-  createErrorBoundary
+  createErrorBoundary,
 } from '../../utils/securityHelpers';
 
 describe('Security Helpers', () => {
@@ -38,9 +38,9 @@ describe('Security Helpers', () => {
         level1: {
           level2: {
             value: 'found',
-            number: 42
-          }
-        }
+            number: 42,
+          },
+        },
       };
 
       expect(safeGet(obj, 'level1.level2.value', 'default')).toBe('found');
@@ -63,14 +63,14 @@ describe('Security Helpers', () => {
       const obj = {
         get badProperty() {
           throw new Error('Property access error');
-        }
+        },
       };
 
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      
+
       expect(safeGet(obj, 'badProperty', 'safe')).toBe('safe');
       expect(consoleSpy).toHaveBeenCalled();
-      
+
       consoleSpy.mockRestore();
     });
   });
@@ -78,7 +78,7 @@ describe('Security Helpers', () => {
   describe('safeArrayAccess', () => {
     it('should safely access array elements', () => {
       const arr = ['a', 'b', 'c'];
-      
+
       expect(safeArrayAccess(arr, 0, 'default')).toBe('a');
       expect(safeArrayAccess(arr, 2, 'default')).toBe('c');
       expect(safeArrayAccess(arr, 5, 'default')).toBe('default');
@@ -94,7 +94,7 @@ describe('Security Helpers', () => {
     it('should handle undefined array elements', () => {
       const sparseArray = new Array(5);
       sparseArray[2] = 'defined';
-      
+
       expect(safeArrayAccess(sparseArray, 2, 'default')).toBe('defined');
       expect(safeArrayAccess(sparseArray, 0, 'default')).toBe('default');
     });
@@ -103,18 +103,22 @@ describe('Security Helpers', () => {
   describe('safeExecute', () => {
     it('should execute function safely', () => {
       const successFn = () => 'success';
-      const errorFn = () => { throw new Error('Function error'); };
-      
+      const errorFn = () => {
+        throw new Error('Function error');
+      };
+
       expect(safeExecute(successFn, 'fallback')).toBe('success');
       expect(safeExecute(errorFn, 'fallback')).toBe('fallback');
     });
 
     it('should log errors to console', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      const errorFn = () => { throw new Error('Test error'); };
-      
+      const errorFn = () => {
+        throw new Error('Test error');
+      };
+
       safeExecute(errorFn, 'fallback');
-      
+
       expect(consoleSpy).toHaveBeenCalledWith('Safe execute error:', expect.any(Error));
       consoleSpy.mockRestore();
     });
@@ -123,8 +127,10 @@ describe('Security Helpers', () => {
   describe('safeExecuteAsync', () => {
     it('should execute async function safely', async () => {
       const successFn = async () => 'async success';
-      const errorFn = async () => { throw new Error('Async error'); };
-      
+      const errorFn = async () => {
+        throw new Error('Async error');
+      };
+
       expect(await safeExecuteAsync(successFn, 'fallback')).toBe('async success');
       expect(await safeExecuteAsync(errorFn, 'fallback')).toBe('fallback');
     });
@@ -132,9 +138,9 @@ describe('Security Helpers', () => {
     it('should handle promise rejections', async () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       const rejectFn = async () => Promise.reject(new Error('Promise rejected'));
-      
+
       const result = await safeExecuteAsync(rejectFn, 'safe');
-      
+
       expect(result).toBe('safe');
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
@@ -158,8 +164,12 @@ describe('Security Helpers', () => {
 
     it('should handle objects that throw in toString', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      const badObj = { toString: () => { throw new Error('toString error'); } };
-      
+      const badObj = {
+        toString: () => {
+          throw new Error('toString error');
+        },
+      };
+
       expect(safeString(badObj, 'safe')).toBe('safe');
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
@@ -216,7 +226,7 @@ describe('Security Helpers', () => {
       it('should safely query DOM elements', () => {
         const mockElement = document.createElement('div');
         (document.querySelector as any).mockReturnValue(mockElement);
-        
+
         const result = safeQuerySelector('.test-class');
         expect(result).toBe(mockElement);
         expect(document.querySelector).toHaveBeenCalledWith('.test-class');
@@ -227,7 +237,7 @@ describe('Security Helpers', () => {
         (document.querySelector as any).mockImplementation(() => {
           throw new Error('Invalid selector');
         });
-        
+
         const result = safeQuerySelector('invalid[selector');
         expect(result).toBeNull();
         expect(consoleSpy).toHaveBeenCalled();
@@ -239,7 +249,7 @@ describe('Security Helpers', () => {
       it('should safely query multiple DOM elements', () => {
         const mockElements = [document.createElement('div'), document.createElement('span')];
         (document.querySelectorAll as any).mockReturnValue(mockElements);
-        
+
         const result = safeQuerySelectorAll('.test-class');
         expect(result).toEqual(mockElements);
       });
@@ -249,7 +259,7 @@ describe('Security Helpers', () => {
         (document.querySelectorAll as any).mockImplementation(() => {
           throw new Error('Invalid selector');
         });
-        
+
         const result = safeQuerySelectorAll('invalid[selector');
         expect(result).toEqual([]);
         expect(consoleSpy).toHaveBeenCalled();
@@ -266,14 +276,14 @@ describe('Security Helpers', () => {
           getItem: vi.fn(),
           setItem: vi.fn(),
         },
-        writable: true
+        writable: true,
       });
     });
 
     describe('safeLocalStorageGet', () => {
       it('should safely get localStorage values', () => {
         (localStorage.getItem as any).mockReturnValue('stored value');
-        
+
         const result = safeLocalStorageGet('test-key', 'default');
         expect(result).toBe('stored value');
         expect(localStorage.getItem).toHaveBeenCalledWith('test-key');
@@ -281,7 +291,7 @@ describe('Security Helpers', () => {
 
       it('should return fallback for null values', () => {
         (localStorage.getItem as any).mockReturnValue(null);
-        
+
         const result = safeLocalStorageGet('non-existent', 'fallback');
         expect(result).toBe('fallback');
       });
@@ -291,7 +301,7 @@ describe('Security Helpers', () => {
         (localStorage.getItem as any).mockImplementation(() => {
           throw new Error('localStorage access denied');
         });
-        
+
         const result = safeLocalStorageGet('test-key', 'safe');
         expect(result).toBe('safe');
         expect(consoleSpy).toHaveBeenCalled();
@@ -311,7 +321,7 @@ describe('Security Helpers', () => {
         (localStorage.setItem as any).mockImplementation(() => {
           throw new Error('Storage quota exceeded');
         });
-        
+
         const result = safeLocalStorageSet('test-key', 'test-value');
         expect(result).toBe(false);
         expect(consoleSpy).toHaveBeenCalled();
@@ -323,10 +333,10 @@ describe('Security Helpers', () => {
   describe('safeAddEventListener', () => {
     it('should safely add event listeners', () => {
       const mockElement = {
-        addEventListener: vi.fn()
+        addEventListener: vi.fn(),
       };
       const mockHandler = vi.fn();
-      
+
       const result = safeAddEventListener(mockElement as any, 'click', mockHandler);
       expect(result).toBe(true);
       expect(mockElement.addEventListener).toHaveBeenCalledWith('click', mockHandler, undefined);
@@ -335,9 +345,11 @@ describe('Security Helpers', () => {
     it('should handle event listener errors', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       const mockElement = {
-        addEventListener: vi.fn(() => { throw new Error('Event listener error'); })
+        addEventListener: vi.fn(() => {
+          throw new Error('Event listener error');
+        }),
       };
-      
+
       const result = safeAddEventListener(mockElement as any, 'click', vi.fn());
       expect(result).toBe(false);
       expect(consoleSpy).toHaveBeenCalled();
@@ -354,7 +366,7 @@ describe('Security Helpers', () => {
 
     it('should handle invalid URLs', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      
+
       const result = safeURL('invalid-url');
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalled();
@@ -367,25 +379,25 @@ describe('Security Helpers', () => {
       global.fetch = vi.fn();
       global.AbortController = vi.fn().mockImplementation(() => ({
         signal: {},
-        abort: vi.fn()
+        abort: vi.fn(),
       }));
     });
 
     it('should safely perform fetch requests', async () => {
       const mockResponse = new Response('test data');
       (global.fetch as any).mockResolvedValue(mockResponse);
-      
+
       const result = await safeFetch('https://api.example.com/data');
       expect(result).toBe(mockResponse);
       expect(global.fetch).toHaveBeenCalledWith('https://api.example.com/data', {
-        signal: expect.any(Object)
+        signal: expect.any(Object),
       });
     });
 
     it('should handle fetch errors', async () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       (global.fetch as any).mockRejectedValue(new Error('Network error'));
-      
+
       const result = await safeFetch('https://api.example.com/data');
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalled();
@@ -394,7 +406,7 @@ describe('Security Helpers', () => {
 
     it('should handle timeout', async () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      
+
       // Mock a fetch that respects AbortController
       (global.fetch as any).mockImplementation((url: string, options?: RequestInit) => {
         return new Promise((resolve, reject) => {
@@ -407,11 +419,11 @@ describe('Security Helpers', () => {
           // Never resolve normally to simulate slow request
         });
       });
-      
+
       const result = await safeFetch('https://slow-api.example.com/data', {}, 100);
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalledWith('Safe fetch error:', expect.any(Error));
-      
+
       consoleSpy.mockRestore();
     }, 1000); // Reduced timeout since it should abort quickly
   });
@@ -421,9 +433,9 @@ describe('Security Helpers', () => {
       it('should generate UUID using crypto.randomUUID when available', () => {
         const mockUUID = '123e4567-e89b-12d3-a456-426614174000';
         global.crypto = {
-          randomUUID: vi.fn().mockReturnValue(mockUUID)
+          randomUUID: vi.fn().mockReturnValue(mockUUID),
         } as any;
-        
+
         const result = safeRandomUUID();
         expect(result).toBe(mockUUID);
         expect(global.crypto.randomUUID).toHaveBeenCalled();
@@ -431,7 +443,7 @@ describe('Security Helpers', () => {
 
       it('should generate fallback UUID when crypto.randomUUID unavailable', () => {
         global.crypto = {} as any;
-        
+
         const result = safeRandomUUID();
         expect(typeof result).toBe('string');
         expect(result.length).toBeGreaterThan(0);
@@ -441,9 +453,11 @@ describe('Security Helpers', () => {
       it('should handle crypto errors', () => {
         const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
         global.crypto = {
-          randomUUID: vi.fn(() => { throw new Error('Crypto error'); })
+          randomUUID: vi.fn(() => {
+            throw new Error('Crypto error');
+          }),
         } as any;
-        
+
         const result = safeRandomUUID();
         expect(typeof result).toBe('string');
         expect(result.length).toBeGreaterThan(0);
@@ -458,9 +472,9 @@ describe('Security Helpers', () => {
       it('should use performance.now when available', () => {
         const mockTime = 123.456;
         global.performance = {
-          now: vi.fn().mockReturnValue(mockTime)
+          now: vi.fn().mockReturnValue(mockTime),
         } as any;
-        
+
         const result = safePerformanceNow();
         expect(result).toBe(mockTime);
         expect(global.performance.now).toHaveBeenCalled();
@@ -469,11 +483,11 @@ describe('Security Helpers', () => {
       it('should fallback to Date.now when performance.now unavailable', () => {
         global.performance = {} as any;
         const dateSpy = vi.spyOn(Date, 'now').mockReturnValue(1234567890);
-        
+
         const result = safePerformanceNow();
         expect(result).toBe(1234567890);
         expect(dateSpy).toHaveBeenCalled();
-        
+
         dateSpy.mockRestore();
       });
     });
@@ -483,24 +497,24 @@ describe('Security Helpers', () => {
         global.performance = {
           memory: {
             usedJSHeapSize: 1024000,
-            totalJSHeapSize: 2048000
-          }
+            totalJSHeapSize: 2048000,
+          },
         } as any;
-        
+
         const result = safeMemoryUsage();
         expect(result).toEqual({
           used: 1024000,
-          total: 2048000
+          total: 2048000,
         });
       });
 
       it('should return zero values when memory info unavailable', () => {
         global.performance = {} as any;
-        
+
         const result = safeMemoryUsage();
         expect(result).toEqual({
           used: 0,
-          total: 0
+          total: 0,
         });
       });
     });
@@ -536,23 +550,25 @@ describe('Security Helpers', () => {
     it('should create error boundary wrapper', () => {
       const fallbackFn = vi.fn();
       const errorBoundary = createErrorBoundary(fallbackFn);
-      
+
       const successFn = vi.fn().mockReturnValue('success');
-      const errorFn = vi.fn().mockImplementation(() => { throw new Error('Test error'); });
-      
+      const errorFn = vi.fn().mockImplementation(() => {
+        throw new Error('Test error');
+      });
+
       const wrappedSuccess = errorBoundary(successFn);
       const wrappedError = errorBoundary(errorFn);
-      
+
       expect(wrappedSuccess('arg1', 'arg2')).toBe('success');
       expect(successFn).toHaveBeenCalledWith('arg1', 'arg2');
-      
+
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      
+
       expect(wrappedError('arg1', 'arg2')).toBeUndefined();
       expect(errorFn).toHaveBeenCalledWith('arg1', 'arg2');
       expect(fallbackFn).toHaveBeenCalled();
       expect(consoleSpy).toHaveBeenCalled();
-      
+
       consoleSpy.mockRestore();
     });
   });

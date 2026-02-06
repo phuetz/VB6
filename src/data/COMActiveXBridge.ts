@@ -28,7 +28,7 @@ export enum VarType {
   VT_UI4 = 19,
   VT_I8 = 20,
   VT_UI8 = 21,
-  VT_ARRAY = 0x2000
+  VT_ARRAY = 0x2000,
 }
 
 export enum HRESULT {
@@ -39,11 +39,11 @@ export enum HRESULT {
   E_POINTER = 0x80004003,
   E_ABORT = 0x80004004,
   E_FAIL = 0x80004005,
-  E_UNEXPECTED = 0x8000FFFF,
+  E_UNEXPECTED = 0x8000ffff,
   E_ACCESSDENIED = 0x80070005,
   E_HANDLE = 0x80070006,
-  E_OUTOFMEMORY = 0x8007000E,
-  E_INVALIDARG = 0x80070057
+  E_OUTOFMEMORY = 0x8007000e,
+  E_INVALIDARG = 0x80070057,
 }
 
 export interface IUnknown {
@@ -81,7 +81,14 @@ export interface IOleObject extends IUnknown {
   GetMoniker(dwAssign: number, dwWhichMoniker: number): any;
   InitFromData(pDataObject: any, fCreation: boolean, dwReserved: number): HRESULT;
   GetClipboardData(dwReserved: number): any;
-  DoVerb(iVerb: number, lpmsg: any, pActiveSite: IOleClientSite, lindex: number, hwndParent: number, lprcPosRect: any): HRESULT;
+  DoVerb(
+    iVerb: number,
+    lpmsg: any,
+    pActiveSite: IOleClientSite,
+    lindex: number,
+    hwndParent: number,
+    lprcPosRect: any
+  ): HRESULT;
   EnumVerbs(): any;
   Update(): HRESULT;
   IsUpToDate(): HRESULT;
@@ -155,7 +162,7 @@ export class COMObject extends EventEmitter implements IDispatch {
     return {
       name: this._progId,
       methods: Array.from(this._methods.keys()),
-      properties: Array.from(this._properties.keys())
+      properties: Array.from(this._properties.keys()),
     };
   }
 
@@ -171,7 +178,13 @@ export class COMObject extends EventEmitter implements IDispatch {
     return dispIds;
   }
 
-  Invoke(dispIdMember: number, riid: string, lcid: number, wFlags: number, pDispParams: any[]): any {
+  Invoke(
+    dispIdMember: number,
+    riid: string,
+    lcid: number,
+    wFlags: number,
+    pDispParams: any[]
+  ): any {
     // Find method or property by dispId
     for (const [name, method] of this._methods) {
       const id = name.toLowerCase().charCodeAt(0) + name.length;
@@ -187,9 +200,11 @@ export class COMObject extends EventEmitter implements IDispatch {
     for (const [name, value] of this._properties) {
       const id = name.toLowerCase().charCodeAt(0) + name.length;
       if (id === dispIdMember) {
-        if (wFlags & 0x1) { // DISPATCH_METHOD
+        if (wFlags & 0x1) {
+          // DISPATCH_METHOD
           return value;
-        } else if (wFlags & 0x4) { // DISPATCH_PROPERTYPUT
+        } else if (wFlags & 0x4) {
+          // DISPATCH_PROPERTYPUT
           this._properties.set(name, pDispParams[0]);
           this.emit('PropertyChanged', { property: name, value: pDispParams[0] });
           return HRESULT.S_OK;
@@ -325,10 +340,17 @@ export class ActiveXControl extends COMObject implements IOleObject {
     return null;
   }
 
-  DoVerb(iVerb: number, lpmsg: any, pActiveSite: IOleClientSite, lindex: number, hwndParent: number, lprcPosRect: any): HRESULT {
+  DoVerb(
+    iVerb: number,
+    lpmsg: any,
+    pActiveSite: IOleClientSite,
+    lindex: number,
+    hwndParent: number,
+    lprcPosRect: any
+  ): HRESULT {
     switch (iVerb) {
       case -1: // OLEIVERB_PRIMARY
-      case 0:  // OLEIVERB_SHOW
+      case 0: // OLEIVERB_SHOW
         return this.activate();
       case -2: // OLEIVERB_OPEN
         return this.activate();
@@ -344,7 +366,7 @@ export class ActiveXControl extends COMObject implements IOleObject {
       { iVerb: -1, lpszVerbName: 'Primary', fuFlags: 0, grfAttribs: 0 },
       { iVerb: 0, lpszVerbName: 'Show', fuFlags: 0, grfAttribs: 0 },
       { iVerb: -2, lpszVerbName: 'Open', fuFlags: 0, grfAttribs: 0 },
-      { iVerb: -3, lpszVerbName: 'Hide', fuFlags: 0, grfAttribs: 0 }
+      { iVerb: -3, lpszVerbName: 'Hide', fuFlags: 0, grfAttribs: 0 },
     ];
   }
 
@@ -374,7 +396,7 @@ export class ActiveXControl extends COMObject implements IOleObject {
   GetExtent(dwDrawAspect: number): any {
     return {
       cx: this.getProperty('Width') || 100,
-      cy: this.getProperty('Height') || 100
+      cy: this.getProperty('Height') || 100,
     };
   }
 
@@ -449,7 +471,7 @@ export class ActiveXControl extends COMObject implements IOleObject {
 
 export class COMRegistry {
   private static _instance: COMRegistry;
-  private _classes: Map<string, new() => COMObject> = new Map();
+  private _classes: Map<string, new () => COMObject> = new Map();
   private _progIds: Map<string, string> = new Map();
   private _typeLibs: Map<string, any> = new Map();
 
@@ -464,14 +486,14 @@ export class COMRegistry {
     return COMRegistry._instance;
   }
 
-  registerClass(classId: string, progId: string, constructor: new() => COMObject): void {
+  registerClass(classId: string, progId: string, constructor: new () => COMObject): void {
     this._classes.set(classId, constructor);
     this._progIds.set(progId, classId);
   }
 
   createObject(classIdOrProgId: string): COMObject | null {
     let classId = classIdOrProgId;
-    
+
     // Check if it's a ProgID
     if (this._progIds.has(classIdOrProgId)) {
       classId = this._progIds.get(classIdOrProgId)!;
@@ -500,7 +522,7 @@ export class COMRegistry {
 
   private registerBuiltinClasses(): void {
     // Register common COM classes that VB6 applications might use
-    
+
     // Scripting objects
     this.registerClass(
       '{0D43FE01-F093-11CF-8940-00A0C9054228}',
@@ -552,7 +574,6 @@ export class COMRegistry {
 
         private setupShellMethods(): void {
           this.addMethod('Run', (command: string, windowStyle?: number, waitOnReturn?: boolean) => {
-            console.log(`Shell.Run: ${command}`);
             if (command.startsWith('http')) {
               window.open(command, '_blank');
             }
@@ -560,12 +581,11 @@ export class COMRegistry {
           });
 
           this.addMethod('Exec', (command: string) => {
-            console.log(`Shell.Exec: ${command}`);
             return {
               Status: 0,
               ExitCode: 0,
               StdOut: { ReadAll: () => 'Command output' },
-              StdErr: { ReadAll: () => '' }
+              StdErr: { ReadAll: () => '' },
             };
           });
 
@@ -621,7 +641,6 @@ class TextFile extends COMObject {
 
     this.addMethod('Close', () => {
       // In a real implementation, would save to filesystem
-      console.log(`Closing file: ${this._filename}`);
     });
 
     this.setProperty('AtEndOfStream', false);
@@ -651,7 +670,6 @@ export class COMActiveXBridge {
     try {
       const obj = this._registry.createObject(classIdOrProgId);
       if (obj) {
-        console.log(`Created COM object: ${classIdOrProgId}`);
         return obj;
       } else {
         console.warn(`COM class not registered: ${classIdOrProgId}`);
@@ -665,12 +683,10 @@ export class COMActiveXBridge {
 
   GetObject(pathName: string, className?: string): COMObject | null {
     // Simplified GetObject implementation
-    console.log(`GetObject: ${pathName}, class: ${className}`);
-    
     if (className) {
       return this.CreateObject(className);
     }
-    
+
     // For pathName, would typically parse the moniker
     return null;
   }
@@ -692,7 +708,7 @@ export class COMActiveXBridge {
     }
   }
 
-  RegisterClass(classId: string, progId: string, constructor: new() => COMObject): void {
+  RegisterClass(classId: string, progId: string, constructor: new () => COMObject): void {
     this._registry.registerClass(classId, progId, constructor);
   }
 

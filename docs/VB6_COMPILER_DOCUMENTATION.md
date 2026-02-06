@@ -1,7 +1,9 @@
 # VB6 Compiler - Documentation Complète
 
 ## Version: 2.0 (AST-Based)
+
 ## Date: 2025-10-05
+
 ## Status: ✅ Production Ready (Infrastructure)
 
 ---
@@ -110,6 +112,7 @@ Le VB6 Compiler est un transpilateur moderne qui convertit du code Visual Basic 
 **Fichier:** `src/compiler/VB6UnifiedASTTranspiler.ts`
 
 **Interface:**
+
 ```typescript
 class VB6UnifiedASTTranspiler {
   constructor(options?: Partial<TranspilationOptions>);
@@ -124,15 +127,17 @@ class VB6UnifiedASTTranspiler {
 **Fichier:** `src/utils/vb6Lexer.ts`
 
 **Fonction principale:**
+
 ```typescript
-function tokenizeVB6(code: string): Token[]
+function tokenizeVB6(code: string): Token[];
 ```
 
 **Tokens générés:**
+
 - Keywords (If, For, Sub, Function, etc.)
 - Identifiers (noms de variables, fonctions)
 - Literals (nombres, chaînes, dates)
-- Operators (+, -, *, /, And, Or, etc.)
+- Operators (+, -, \*, /, And, Or, etc.)
 - Delimiters (parenthèses, virgules)
 
 #### 3. Parser
@@ -142,11 +147,13 @@ function tokenizeVB6(code: string): Token[]
 **Fichier:** `src/utils/vb6Parser.ts`
 
 **Fonction principale:**
+
 ```typescript
-function parseVB6(tokens: Token[]): ASTNode
+function parseVB6(tokens: Token[]): ASTNode;
 ```
 
 **AST Node Types:**
+
 - Module
 - Procedure (Sub/Function)
 - Statement (If, For, Select, etc.)
@@ -160,6 +167,7 @@ function parseVB6(tokens: Token[]): ASTNode
 **Fichier:** `src/utils/vb6SemanticAnalyzer.ts`
 
 **Validations:**
+
 - Type checking
 - Variable resolution
 - Scope validation
@@ -192,6 +200,7 @@ function parseVB6(tokens: Token[]): ASTNode
 **Responsabilité:** Génération de code JavaScript/TypeScript
 
 **Méthodes principales:**
+
 ```typescript
 private generateStatement(node: ASTNode): string
 private generateExpression(node: ASTNode): string
@@ -203,6 +212,7 @@ private generateDeclaration(node: ASTNode): string
 **Responsabilité:** Génération de source maps v3
 
 **Format:**
+
 ```json
 {
   "version": 3,
@@ -280,7 +290,7 @@ const transpiler = new VB6UnifiedASTTranspiler({
   generateTypeScript: true,
   generateSourceMaps: true,
   optimize: true,
-  runtimeTarget: 'es2020'
+  runtimeTarget: 'es2020',
 });
 
 const result = transpiler.transpile(vb6Code, 'MyModule');
@@ -299,9 +309,11 @@ constructor(options?: Partial<TranspilationOptions>)
 ```
 
 **Parameters:**
+
 - `options` (optional): Options de transpilation
 
 **Default Options:**
+
 ```typescript
 {
   strict: false,
@@ -319,6 +331,7 @@ transpile(vb6Code: string, fileName?: string): TranspilationResult
 ```
 
 **Parameters:**
+
 - `vb6Code`: Code VB6 source à compiler
 - `fileName` (optional): Nom du fichier source (pour source maps)
 
@@ -337,6 +350,7 @@ interface TranspilationResult {
 ```
 
 **Example:**
+
 ```typescript
 const result = transpiler.transpile('Sub Test()\nEnd Sub', 'Test.vb6');
 ```
@@ -473,11 +487,13 @@ interface CompilerError {
 **Description:** Active le mode strict pour des vérifications plus strictes
 
 **Effets:**
+
 - Erreurs sur variables non déclarées
 - Erreurs sur types incompatibles
 - Erreurs sur code mort
 
 **Exemple:**
+
 ```typescript
 const transpiler = new VB6UnifiedASTTranspiler({ strict: true });
 
@@ -496,9 +512,10 @@ End Sub
 **Description:** Génère TypeScript au lieu de JavaScript
 
 **Exemple:**
+
 ```typescript
 const transpiler = new VB6UnifiedASTTranspiler({
-  generateTypeScript: true
+  generateTypeScript: true,
 });
 
 const result = transpiler.transpile(`
@@ -520,9 +537,10 @@ End Function
 **Description:** Génère source maps v3 pour debugging
 
 **Exemple:**
+
 ```typescript
 const transpiler = new VB6UnifiedASTTranspiler({
-  generateSourceMaps: true
+  generateSourceMaps: true,
 });
 
 const result = transpiler.transpile(vb6Code, 'Module1.vb6');
@@ -544,15 +562,17 @@ const result = transpiler.transpile(vb6Code, 'Module1.vb6');
 **Description:** Active toutes les optimisations
 
 **Optimisations appliquées:**
+
 1. Dead code elimination
 2. Constant folding
 3. Inline expansion
 4. Loop unrolling
 
 **Exemple:**
+
 ```typescript
 const transpiler = new VB6UnifiedASTTranspiler({
-  optimize: true
+  optimize: true,
 });
 
 const result = transpiler.transpile(`
@@ -576,25 +596,26 @@ console.log(result.metrics.optimizationsApplied);
 **Description:** Version ECMAScript cible
 
 **Exemple:**
+
 ```typescript
 // ES5 - Compatible IE11
 const transpiler1 = new VB6UnifiedASTTranspiler({
-  runtimeTarget: 'es5'
+  runtimeTarget: 'es5',
 });
 
 // ES2015 - const/let, arrow functions
 const transpiler2 = new VB6UnifiedASTTranspiler({
-  runtimeTarget: 'es2015'
+  runtimeTarget: 'es2015',
 });
 
 // ES2020 - Optional chaining, nullish coalescing
 const transpiler3 = new VB6UnifiedASTTranspiler({
-  runtimeTarget: 'es2020'
+  runtimeTarget: 'es2020',
 });
 
 // ESNext - Features les plus récentes
 const transpiler4 = new VB6UnifiedASTTranspiler({
-  runtimeTarget: 'esnext'
+  runtimeTarget: 'esnext',
 });
 ```
 
@@ -609,6 +630,7 @@ const transpiler4 = new VB6UnifiedASTTranspiler({
 **Output:** Array de tokens
 
 **Exemple:**
+
 ```vb6
 Sub HelloWorld()
     MsgBox "Hello"
@@ -616,6 +638,7 @@ End Sub
 ```
 
 **Tokens générés:**
+
 ```typescript
 [
   { type: 'KEYWORD', value: 'Sub', line: 1, column: 1 },
@@ -628,7 +651,7 @@ End Sub
   { type: 'NEWLINE', value: '\n', line: 2, column: 19 },
   { type: 'KEYWORD', value: 'End', line: 3, column: 1 },
   { type: 'KEYWORD', value: 'Sub', line: 3, column: 5 },
-]
+];
 ```
 
 **Temps typique:** 1-5ms pour 100 lignes
@@ -640,6 +663,7 @@ End Sub
 **Output:** AST (Abstract Syntax Tree)
 
 **AST généré:**
+
 ```typescript
 {
   type: 'Module',
@@ -671,6 +695,7 @@ End Sub
 **Output:** AST annoté avec types et symboles
 
 **Validations:**
+
 - ✅ Variables déclarées avant utilisation
 - ✅ Types compatibles dans assignments
 - ✅ Fonctions appelées avec bons arguments
@@ -687,6 +712,7 @@ End Sub
 **Optimisations appliquées:**
 
 1. **Dead Code Elimination**
+
    ```vb6
    ' Avant:
    If False Then
@@ -698,6 +724,7 @@ End Sub
    ```
 
 2. **Constant Folding**
+
    ```vb6
    ' Avant:
    x = 2 + 3 * 4
@@ -707,6 +734,7 @@ End Sub
    ```
 
 3. **Inline Expansion**
+
    ```vb6
    ' Avant:
    Function Double(x)
@@ -719,6 +747,7 @@ End Sub
    ```
 
 4. **Loop Unrolling**
+
    ```vb6
    ' Avant:
    For i = 1 To 3
@@ -740,15 +769,16 @@ End Sub
 **Output:** JavaScript/TypeScript
 
 **JavaScript généré:**
+
 ```javascript
-"use strict";
+'use strict';
 
 // VB6 Runtime
-import { VB6Runtime } from "../runtime/VB6UltraRuntime";
+import { VB6Runtime } from '../runtime/VB6UltraRuntime';
 const VB6 = new VB6Runtime();
 
 function HelloWorld() {
-  VB6.MsgBox("Hello");
+  VB6.MsgBox('Hello');
 }
 ```
 
@@ -761,6 +791,7 @@ function HelloWorld() {
 **Output:** Source map v3
 
 **Source map généré:**
+
 ```json
 {
   "version": 3,
@@ -782,6 +813,7 @@ function HelloWorld() {
 #### Control Flow
 
 - ✅ **If...Then...Else**
+
   ```vb6
   If x > 10 Then
       MsgBox "Greater"
@@ -793,6 +825,7 @@ function HelloWorld() {
   ```
 
 - ✅ **Select Case**
+
   ```vb6
   Select Case dayNumber
       Case 1
@@ -805,6 +838,7 @@ function HelloWorld() {
   ```
 
 - ✅ **For...Next**
+
   ```vb6
   For i = 1 To 10 Step 2
       Debug.Print i
@@ -812,6 +846,7 @@ function HelloWorld() {
   ```
 
 - ✅ **For Each**
+
   ```vb6
   For Each item In collection
       ProcessItem item
@@ -819,6 +854,7 @@ function HelloWorld() {
   ```
 
 - ✅ **While...Wend**
+
   ```vb6
   While x < 100
       x = x * 2
@@ -826,6 +862,7 @@ function HelloWorld() {
   ```
 
 - ✅ **Do...Loop**
+
   ```vb6
   Do While x < 100
       x = x + 1
@@ -843,6 +880,7 @@ function HelloWorld() {
 #### Procedures
 
 - ✅ **Sub**
+
   ```vb6
   Sub MySub(x As Integer)
       MsgBox x
@@ -850,6 +888,7 @@ function HelloWorld() {
   ```
 
 - ✅ **Function**
+
   ```vb6
   Function Add(a As Integer, b As Integer) As Integer
       Add = a + b
@@ -857,6 +896,7 @@ function HelloWorld() {
   ```
 
 - ✅ **Property Get/Let/Set**
+
   ```vb6
   Private m_Value As Integer
 
@@ -870,6 +910,7 @@ function HelloWorld() {
   ```
 
 - ✅ **ByVal/ByRef**
+
   ```vb6
   Sub ModifyValue(ByVal x As Integer, ByRef y As Integer)
       x = x + 1  ' Ne modifie pas l'original
@@ -878,6 +919,7 @@ function HelloWorld() {
   ```
 
 - ✅ **Optional Parameters**
+
   ```vb6
   Function Greet(name As String, Optional title As String = "Mr.") As String
       Greet = title & " " & name
@@ -903,6 +945,7 @@ function HelloWorld() {
 - ✅ **Variant**
 - ✅ **Object**
 - ✅ **User-Defined Types (UDT)**
+
   ```vb6
   Type Person
       FirstName As String
@@ -923,11 +966,13 @@ function HelloWorld() {
 #### Arrays
 
 - ✅ **Fixed Arrays**
+
   ```vb6
   Dim arr(10) As Integer
   ```
 
 - ✅ **Dynamic Arrays**
+
   ```vb6
   Dim arr() As Integer
   ReDim arr(10)
@@ -942,6 +987,7 @@ function HelloWorld() {
 #### Error Handling
 
 - ✅ **On Error Resume Next**
+
   ```vb6
   On Error Resume Next
   x = 1 / 0
@@ -952,6 +998,7 @@ function HelloWorld() {
   ```
 
 - ✅ **On Error GoTo**
+
   ```vb6
   On Error GoTo ErrorHandler
   ' Code...
@@ -972,33 +1019,41 @@ function HelloWorld() {
 #### Built-in Functions (100+)
 
 **String Functions:**
+
 - Left, Right, Mid, Len, Trim, LTrim, RTrim
 - UCase, LCase, InStr, Replace, Split, Join
 - Chr, Asc, String, Space
 
 **Math Functions:**
+
 - Abs, Sgn, Sqr, Sin, Cos, Tan, Atn
 - Exp, Log, Int, Fix, Round, Rnd
 
 **Date/Time Functions:**
+
 - Now, Date, Time, Year, Month, Day
 - DateAdd, DateDiff, DatePart, DateSerial
 
 **Conversion Functions:**
+
 - CInt, CLng, CSng, CDbl, CStr, CBool
 - Val, Hex, Oct
 
 **Array Functions:**
+
 - UBound, LBound, Array, IsArray
 
 **Information Functions:**
+
 - IsNumeric, IsDate, IsEmpty, IsNull
 - VarType, TypeName
 
 **Format Functions:**
+
 - Format, FormatNumber, FormatCurrency
 
 **File I/O Functions:**
+
 - Dir, FileLen, FileDateTime, EOF, LOF
 
 ### Optimizations
@@ -1006,6 +1061,7 @@ function HelloWorld() {
 #### 1. Dead Code Elimination
 
 **Avant:**
+
 ```vb6
 Sub Test()
     Dim x As Integer
@@ -1018,6 +1074,7 @@ End Sub
 ```
 
 **Après:**
+
 ```javascript
 function Test() {
   let x = 10;
@@ -1028,6 +1085,7 @@ function Test() {
 #### 2. Constant Folding
 
 **Avant:**
+
 ```vb6
 Function Calculate() As Integer
     Dim result As Integer
@@ -1037,6 +1095,7 @@ End Function
 ```
 
 **Après:**
+
 ```javascript
 function Calculate() {
   let result = 13;
@@ -1047,6 +1106,7 @@ function Calculate() {
 #### 3. Inline Expansion
 
 **Avant:**
+
 ```vb6
 Function Square(x As Integer) As Integer
     Square = x * x
@@ -1058,6 +1118,7 @@ End Function
 ```
 
 **Après:**
+
 ```javascript
 function Test() {
   return 5 * 5;
@@ -1067,6 +1128,7 @@ function Test() {
 #### 4. Loop Unrolling
 
 **Avant:**
+
 ```vb6
 Sub PrintNumbers()
     Dim i As Integer
@@ -1077,6 +1139,7 @@ End Sub
 ```
 
 **Après:**
+
 ```javascript
 function PrintNumbers() {
   console.log(1);
@@ -1092,6 +1155,7 @@ function PrintNumbers() {
 ### Exemple 1: Hello World
 
 **VB6:**
+
 ```vb6
 Sub Main()
     MsgBox "Hello, World!"
@@ -1099,20 +1163,22 @@ End Sub
 ```
 
 **JavaScript généré:**
-```javascript
-"use strict";
 
-import { VB6Runtime } from "../runtime/VB6UltraRuntime";
+```javascript
+'use strict';
+
+import { VB6Runtime } from '../runtime/VB6UltraRuntime';
 const VB6 = new VB6Runtime();
 
 function Main() {
-  VB6.MsgBox("Hello, World!");
+  VB6.MsgBox('Hello, World!');
 }
 ```
 
 ### Exemple 2: Calculator
 
 **VB6:**
+
 ```vb6
 Function Add(a As Double, b As Double) As Double
     Add = a + b
@@ -1137,10 +1203,11 @@ End Function
 ```
 
 **JavaScript généré:**
-```javascript
-"use strict";
 
-import { VB6Runtime } from "../runtime/VB6UltraRuntime";
+```javascript
+'use strict';
+
+import { VB6Runtime } from '../runtime/VB6UltraRuntime';
 const VB6 = new VB6Runtime();
 
 function Add(a, b) {
@@ -1157,7 +1224,7 @@ function Multiply(a, b) {
 
 function Divide(a, b) {
   if (b === 0) {
-    VB6.MsgBox("Error: Division by zero");
+    VB6.MsgBox('Error: Division by zero');
     return 0;
   } else {
     return a / b;
@@ -1168,6 +1235,7 @@ function Divide(a, b) {
 ### Exemple 3: User-Defined Type
 
 **VB6:**
+
 ```vb6
 Type Person
     FirstName As String
@@ -1189,28 +1257,29 @@ End Sub
 ```
 
 **JavaScript généré:**
-```javascript
-"use strict";
 
-import { VB6Runtime } from "../runtime/VB6UltraRuntime";
+```javascript
+'use strict';
+
+import { VB6Runtime } from '../runtime/VB6UltraRuntime';
 const VB6 = new VB6Runtime();
 
 class Person {
   constructor() {
-    this.FirstName = "";
-    this.LastName = "";
+    this.FirstName = '';
+    this.LastName = '';
     this.Age = 0;
   }
 }
 
 function GetFullName(p) {
-  return p.FirstName + " " + p.LastName;
+  return p.FirstName + ' ' + p.LastName;
 }
 
 function Test() {
   let person = new Person();
-  person.FirstName = "John";
-  person.LastName = "Doe";
+  person.FirstName = 'John';
+  person.LastName = 'Doe';
   person.Age = 30;
   VB6.MsgBox(GetFullName(person));
 }
@@ -1219,6 +1288,7 @@ function Test() {
 ### Exemple 4: Error Handling
 
 **VB6:**
+
 ```vb6
 Sub ReadFile(fileName As String)
     On Error GoTo ErrorHandler
@@ -1241,24 +1311,25 @@ End Sub
 ```
 
 **JavaScript généré:**
-```javascript
-"use strict";
 
-import { VB6Runtime } from "../runtime/VB6UltraRuntime";
+```javascript
+'use strict';
+
+import { VB6Runtime } from '../runtime/VB6UltraRuntime';
 const VB6 = new VB6Runtime();
 
 function ReadFile(fileName) {
   try {
     let fileNum = VB6.FreeFile();
-    let content = "";
+    let content = '';
 
     VB6.Open(fileName, VB6.ForInput, fileNum);
     content = VB6.Input(VB6.LOF(fileNum), fileNum);
     VB6.Close(fileNum);
 
-    VB6.MsgBox("File content: " + content);
+    VB6.MsgBox('File content: ' + content);
   } catch (e) {
-    VB6.MsgBox("Error: " + e.message);
+    VB6.MsgBox('Error: ' + e.message);
     if (fileNum !== 0) VB6.Close(fileNum);
   }
 }
@@ -1271,42 +1342,44 @@ function ReadFile(fileName) {
 ### Benchmarks
 
 **Test Environment:**
+
 - CPU: Intel i7
 - RAM: 16GB
 - Node.js: v18.x
 
 **Results:**
 
-| Program Size | Lines | Time | Rate |
-|--------------|-------|------|------|
-| Small | 10 | 15ms | 667 lines/sec |
-| Medium | 100 | 50ms | 2000 lines/sec |
-| Large | 1000 | 200ms | 5000 lines/sec |
-| Very Large | 10000 | 1500ms | 6667 lines/sec |
+| Program Size | Lines | Time   | Rate           |
+| ------------ | ----- | ------ | -------------- |
+| Small        | 10    | 15ms   | 667 lines/sec  |
+| Medium       | 100   | 50ms   | 2000 lines/sec |
+| Large        | 1000  | 200ms  | 5000 lines/sec |
+| Very Large   | 10000 | 1500ms | 6667 lines/sec |
 
 **Observations:**
+
 - ✅ Performance linéaire avec la taille du code
 - ✅ Pas de fuites mémoire
 - ✅ Scalable jusqu'à 100k+ lignes
 
 ### Memory Usage
 
-| Program Size | Memory (Peak) |
-|--------------|---------------|
-| Small (10 lines) | 5 MB |
-| Medium (100 lines) | 15 MB |
-| Large (1000 lines) | 45 MB |
-| Very Large (10000 lines) | 200 MB |
+| Program Size             | Memory (Peak) |
+| ------------------------ | ------------- |
+| Small (10 lines)         | 5 MB          |
+| Medium (100 lines)       | 15 MB         |
+| Large (1000 lines)       | 45 MB         |
+| Very Large (10000 lines) | 200 MB        |
 
 ### Optimization Impact
 
-| Optimization | Time Overhead | Code Size Reduction |
-|--------------|---------------|---------------------|
-| Dead Code Elimination | +5% | -10% |
-| Constant Folding | +3% | -5% |
-| Inline Expansion | +8% | -15% |
-| Loop Unrolling | +4% | +5% (mais plus rapide) |
-| **All Enabled** | **+15%** | **-20%** |
+| Optimization          | Time Overhead | Code Size Reduction    |
+| --------------------- | ------------- | ---------------------- |
+| Dead Code Elimination | +5%           | -10%                   |
+| Constant Folding      | +3%           | -5%                    |
+| Inline Expansion      | +8%           | -15%                   |
+| Loop Unrolling        | +4%           | +5% (mais plus rapide) |
+| **All Enabled**       | **+15%**      | **-20%**               |
 
 **Conclusion:** Les optimisations valent le coût de +15% de temps de compilation pour un code -20% plus petit et significativement plus rapide.
 
@@ -1319,13 +1392,15 @@ function ReadFile(fileName) {
 Le compilateur génère des source maps v3 qui permettent de debugger le code VB6 original dans le browser.
 
 **Activation:**
+
 ```typescript
 const transpiler = new VB6UnifiedASTTranspiler({
-  generateSourceMaps: true
+  generateSourceMaps: true,
 });
 ```
 
 **Utilisation dans le browser:**
+
 ```javascript
 // Code JavaScript généré inclut:
 //# sourceMappingURL=Module1.js.map
@@ -1337,6 +1412,7 @@ const transpiler = new VB6UnifiedASTTranspiler({
 **Exemple de debugging:**
 
 1. Code VB6 original (ligne 5):
+
    ```vb6
    x = x + 1
    ```
@@ -1350,6 +1426,7 @@ const transpiler = new VB6UnifiedASTTranspiler({
 Le compilateur fournit des messages d'erreur détaillés:
 
 **Exemple:**
+
 ```typescript
 const result = transpiler.transpile(`
 Sub Test()
@@ -1384,6 +1461,7 @@ End Sub
 **Solution:** Vérifier que la feature est supportée, ou implémenter le parser
 
 **Exemple:**
+
 ```
 Error: Unexpected token 'RaiseEvent' at line 5
 ```
@@ -1397,6 +1475,7 @@ Error: Unexpected token 'RaiseEvent' at line 5
 **Solution:** Utiliser conversion explicite
 
 **Exemple:**
+
 ```vb6
 ' Erreur:
 Dim x As Integer
@@ -1416,6 +1495,7 @@ x = CInt("123")
 **Solution:** Déclarer la variable ou désactiver strict mode
 
 **Exemple:**
+
 ```vb6
 ' Erreur (strict mode):
 x = 10
@@ -1434,9 +1514,10 @@ x = 10
 **Solution:** Désactiver optimisations
 
 **Exemple:**
+
 ```typescript
 const transpiler = new VB6UnifiedASTTranspiler({
-  optimize: false  // Désactive optimisations
+  optimize: false, // Désactive optimisations
 });
 ```
 
@@ -1448,19 +1529,20 @@ const transpiler = new VB6UnifiedASTTranspiler({
 
 #### Différences Principales
 
-| Feature | Old (Regex) | New (AST) |
-|---------|-------------|-----------|
-| Architecture | Regex-based | AST-based |
-| Source Maps | ❌ | ✅ |
-| Optimizations | ❌ | ✅ |
-| Error Messages | Basic | Detailed |
-| Performance | Fast | Slightly slower (+50%) |
-| Features | 10% VB6 | 100% VB6 |
-| Maintenability | Low | High |
+| Feature        | Old (Regex) | New (AST)              |
+| -------------- | ----------- | ---------------------- |
+| Architecture   | Regex-based | AST-based              |
+| Source Maps    | ❌          | ✅                     |
+| Optimizations  | ❌          | ✅                     |
+| Error Messages | Basic       | Detailed               |
+| Performance    | Fast        | Slightly slower (+50%) |
+| Features       | 10% VB6     | 100% VB6               |
+| Maintenability | Low         | High                   |
 
 #### Migration Steps
 
 **1. Update Import:**
+
 ```typescript
 // Old:
 import { transpileVB6 } from './utils/vb6Transpiler';
@@ -1470,6 +1552,7 @@ import { VB6UnifiedASTTranspiler } from './compiler/VB6UnifiedASTTranspiler';
 ```
 
 **2. Update API:**
+
 ```typescript
 // Old:
 const javascript = transpileVB6(vb6Code);
@@ -1481,6 +1564,7 @@ const javascript = result.javascript;
 ```
 
 **3. Handle Errors:**
+
 ```typescript
 // Old:
 const javascript = transpileVB6(vb6Code);
@@ -1494,13 +1578,14 @@ if (!result.success) {
 ```
 
 **4. Use Options:**
+
 ```typescript
 // New features available:
 const transpiler = new VB6UnifiedASTTranspiler({
   strict: true,
   generateTypeScript: true,
   generateSourceMaps: true,
-  optimize: true
+  optimize: true,
 });
 ```
 
@@ -1560,8 +1645,8 @@ const transpiler = new VB6UnifiedASTTranspiler({
     deadCodeElimination: true,
     constantFolding: true,
     inlineExpansion: false,
-    loopUnrolling: false
-  }
+    loopUnrolling: false,
+  },
 });
 ```
 
@@ -1574,25 +1659,31 @@ const transpiler = new VB6UnifiedASTTranspiler({
 **GitHub Issues:** https://github.com/your-org/vb6-compiler/issues
 
 **Template:**
-```markdown
+
+````markdown
 **VB6 Code:**
+
 ```vb6
 Sub Test()
     ' Your code here
 End Sub
 ```
+````
 
 **Expected Output:**
+
 ```javascript
 // Expected JavaScript
 ```
 
 **Actual Output:**
+
 ```javascript
 // Actual JavaScript or error message
 ```
 
 **Options Used:**
+
 ```typescript
 {
   strict: true,
@@ -1600,6 +1691,7 @@ End Sub
   ...
 }
 ```
+
 ```
 
 ### Contributing
@@ -1616,3 +1708,4 @@ MIT License - See LICENSE file for details
 **Version:** 2.0
 **Date:** 2025-10-05
 **Status:** ✅ Production Ready (Infrastructure)
+```

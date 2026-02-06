@@ -1,5 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { X, Play, Pause, Square, RefreshCw, Cpu, Clock, AlertTriangle, Activity, Eye, Code, Settings, Filter, Search, Target, Zap, Lock, Unlock, ArrowRight, ChevronDown, ChevronRight, Bug, Info, AlertCircle } from 'lucide-react';
+import {
+  X,
+  Play,
+  Pause,
+  Square,
+  RefreshCw,
+  Cpu,
+  Clock,
+  AlertTriangle,
+  Activity,
+  Eye,
+  Code,
+  Settings,
+  Filter,
+  Search,
+  Target,
+  Zap,
+  Lock,
+  Unlock,
+  ArrowRight,
+  ChevronDown,
+  ChevronRight,
+  Bug,
+  Info,
+  AlertCircle,
+} from 'lucide-react';
 
 // Types
 export enum ThreadState {
@@ -10,7 +35,7 @@ export enum ThreadState {
   TERMINATED = 'Terminated',
   INITIALIZING = 'Initializing',
   READY = 'Ready',
-  STANDBY = 'Standby'
+  STANDBY = 'Standby',
 }
 
 export enum ThreadPriority {
@@ -20,7 +45,7 @@ export enum ThreadPriority {
   NORMAL = 'Normal',
   ABOVE_NORMAL = 'Above Normal',
   HIGHEST = 'Highest',
-  TIME_CRITICAL = 'Time Critical'
+  TIME_CRITICAL = 'Time Critical',
 }
 
 export enum SynchronizationObjectType {
@@ -28,7 +53,7 @@ export enum SynchronizationObjectType {
   SEMAPHORE = 'Semaphore',
   EVENT = 'Event',
   CRITICAL_SECTION = 'Critical Section',
-  CONDITION_VARIABLE = 'Condition Variable'
+  CONDITION_VARIABLE = 'Condition Variable',
 }
 
 export interface StackFrame {
@@ -106,7 +131,7 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
   isOpen,
   onClose,
   processName = 'MyVB6App.exe',
-  processId = 1234
+  processId = 1234,
 }) => {
   const [threads, setThreads] = useState<DebugThread[]>([
     {
@@ -130,13 +155,11 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
           fileName: 'C:\\MyProject\\Form1.frm',
           lineNumber: 45,
           address: '0x004012A0',
-          parameters: [
-            { name: 'sender', type: 'Object', value: 'CommandButton1' }
-          ],
+          parameters: [{ name: 'sender', type: 'Object', value: 'CommandButton1' }],
           locals: [
             { name: 'result', type: 'Double', value: '123.45' },
-            { name: 'i', type: 'Integer', value: '10' }
-          ]
+            { name: 'i', type: 'Integer', value: '10' },
+          ],
         },
         {
           id: 'frame-2',
@@ -147,11 +170,9 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
           address: '0x00401850',
           parameters: [
             { name: 'value1', type: 'Double', value: '100.0' },
-            { name: 'value2', type: 'Double', value: '23.45' }
+            { name: 'value2', type: 'Double', value: '23.45' },
           ],
-          locals: [
-            { name: 'temp', type: 'Double', value: '77.55' }
-          ]
+          locals: [{ name: 'temp', type: 'Double', value: '77.55' }],
         },
         {
           id: 'frame-3',
@@ -159,9 +180,9 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
           moduleName: 'vba6.dll',
           address: '0x10002340',
           parameters: [],
-          locals: []
-        }
-      ]
+          locals: [],
+        },
+      ],
     },
     {
       id: 'thread-2',
@@ -184,13 +205,11 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
           fileName: 'C:\\MyProject\\Worker.cls',
           lineNumber: 125,
           address: '0x00402100',
-          parameters: [
-            { name: 'data', type: 'Variant', value: 'Array(0 to 99)' }
-          ],
+          parameters: [{ name: 'data', type: 'Variant', value: 'Array(0 to 99)' }],
           locals: [
             { name: 'index', type: 'Long', value: '45' },
-            { name: 'processed', type: 'Boolean', value: 'False' }
-          ]
+            { name: 'processed', type: 'Boolean', value: 'False' },
+          ],
         },
         {
           id: 'frame-5',
@@ -199,10 +218,10 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
           address: '0x77E61D70',
           parameters: [
             { name: 'hHandle', type: 'HANDLE', value: '0x000001BC' },
-            { name: 'dwMilliseconds', type: 'DWORD', value: 'INFINITE' }
+            { name: 'dwMilliseconds', type: 'DWORD', value: 'INFINITE' },
           ],
-          locals: []
-        }
+          locals: [],
+        },
       ],
       lastException: {
         id: 'ex-1',
@@ -210,8 +229,8 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
         message: 'Not enough memory to complete operation',
         timestamp: new Date(Date.now() - 60000),
         handled: true,
-        stackTrace: []
-      }
+        stackTrace: [],
+      },
     },
     {
       id: 'thread-3',
@@ -236,15 +255,15 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
           address: '0x00403200',
           parameters: [
             { name: 'sql', type: 'String', value: '"SELECT * FROM Users"' },
-            { name: 'timeout', type: 'Long', value: '30' }
+            { name: 'timeout', type: 'Long', value: '30' },
           ],
           locals: [
             { name: 'recordset', type: 'ADODB.Recordset', value: 'Object' },
-            { name: 'connectionString', type: 'String', value: '"Provider=SQLOLEDB..."' }
-          ]
-        }
-      ]
-    }
+            { name: 'connectionString', type: 'String', value: '"Provider=SQLOLEDB..."' },
+          ],
+        },
+      ],
+    },
   ]);
 
   const [syncObjects, setSyncObjects] = useState<SynchronizationObject[]>([
@@ -254,14 +273,14 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
       type: SynchronizationObjectType.MUTEX,
       owner: 'thread-1',
       waitingThreads: ['thread-3'],
-      isSignaled: false
+      isSignaled: false,
     },
     {
       id: 'event-1',
       name: 'DataProcessedEvent',
       type: SynchronizationObjectType.EVENT,
       waitingThreads: ['thread-2'],
-      isSignaled: false
+      isSignaled: false,
     },
     {
       id: 'semaphore-1',
@@ -270,7 +289,7 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
       waitingThreads: [],
       isSignaled: true,
       maxCount: 10,
-      currentCount: 7
+      currentCount: 7,
     },
     {
       id: 'critical-section-1',
@@ -278,8 +297,8 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
       type: SynchronizationObjectType.CRITICAL_SECTION,
       owner: 'thread-1',
       waitingThreads: ['thread-3'],
-      isSignaled: false
-    }
+      isSignaled: false,
+    },
   ]);
 
   const [deadlocks, setDeadlocks] = useState<DeadlockInfo[]>([
@@ -288,12 +307,14 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
       threadIds: ['thread-1', 'thread-3'],
       syncObjects: ['mutex-1', 'critical-section-1'],
       detected: new Date(Date.now() - 30000),
-      resolved: false
-    }
+      resolved: false,
+    },
   ]);
 
   const [selectedThread, setSelectedThread] = useState<string | null>('thread-1');
-  const [activeTab, setActiveTab] = useState<'threads' | 'callstack' | 'sync' | 'deadlocks' | 'exceptions'>('threads');
+  const [activeTab, setActiveTab] = useState<
+    'threads' | 'callstack' | 'sync' | 'deadlocks' | 'exceptions'
+  >('threads');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterState, setFilterState] = useState<ThreadState | 'all'>('all');
@@ -305,14 +326,19 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
 
     // Simulate real-time updates
     const interval = setInterval(() => {
-      setThreads(prev => prev.map(thread => ({
-        ...thread,
-        cpuUsage: Math.max(0, Math.min(100, thread.cpuUsage + (Math.random() - 0.5) * 10)),
-        runTime: thread.runTime + 1000,
-        state: Math.random() > 0.95 ? 
-          (thread.state === ThreadState.RUNNING ? ThreadState.WAITING : ThreadState.RUNNING) : 
-          thread.state
-      })));
+      setThreads(prev =>
+        prev.map(thread => ({
+          ...thread,
+          cpuUsage: Math.max(0, Math.min(100, thread.cpuUsage + (Math.random() - 0.5) * 10)),
+          runTime: thread.runTime + 1000,
+          state:
+            Math.random() > 0.95
+              ? thread.state === ThreadState.RUNNING
+                ? ThreadState.WAITING
+                : ThreadState.RUNNING
+              : thread.state,
+        }))
+      );
     }, 1000);
 
     return () => clearInterval(interval);
@@ -327,21 +353,27 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
   };
 
   const suspendThread = (threadId: string) => {
-    setThreads(prev => prev.map(thread =>
-      thread.id === threadId ? { ...thread, state: ThreadState.SUSPENDED } : thread
-    ));
+    setThreads(prev =>
+      prev.map(thread =>
+        thread.id === threadId ? { ...thread, state: ThreadState.SUSPENDED } : thread
+      )
+    );
   };
 
   const resumeThread = (threadId: string) => {
-    setThreads(prev => prev.map(thread =>
-      thread.id === threadId ? { ...thread, state: ThreadState.RUNNING } : thread
-    ));
+    setThreads(prev =>
+      prev.map(thread =>
+        thread.id === threadId ? { ...thread, state: ThreadState.RUNNING } : thread
+      )
+    );
   };
 
   const terminateThread = (threadId: string) => {
-    setThreads(prev => prev.map(thread =>
-      thread.id === threadId ? { ...thread, state: ThreadState.TERMINATED } : thread
-    ));
+    setThreads(prev =>
+      prev.map(thread =>
+        thread.id === threadId ? { ...thread, state: ThreadState.TERMINATED } : thread
+      )
+    );
   };
 
   const getStateColor = (state: ThreadState) => {
@@ -379,11 +411,12 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
   };
 
   const filteredThreads = threads.filter(thread => {
-    const matchesSearch = thread.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         thread.id.includes(searchTerm);
+    const matchesSearch =
+      thread.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      thread.id.includes(searchTerm);
     const matchesFilter = filterState === 'all' || thread.state === filterState;
     const matchesSystemFilter = showSystemThreads || !thread.name.includes('System');
-    
+
     return matchesSearch && matchesFilter && matchesSystemFilter;
   });
 
@@ -408,14 +441,14 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
             <input
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               placeholder="Search threads..."
               className="pl-8 pr-3 py-1.5 border rounded text-sm w-48"
             />
           </div>
           <select
             value={filterState}
-            onChange={(e) => setFilterState(e.target.value as ThreadState | 'all')}
+            onChange={e => setFilterState(e.target.value as ThreadState | 'all')}
             className="px-3 py-1.5 border rounded text-sm"
           >
             <option value="all">All States</option>
@@ -429,7 +462,7 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
             <input
               type="checkbox"
               checked={showSystemThreads}
-              onChange={(e) => setShowSystemThreads(e.target.checked)}
+              onChange={e => setShowSystemThreads(e.target.checked)}
             />
             Show system threads
           </label>
@@ -443,7 +476,7 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
           Refresh
         </button>
       </div>
-      
+
       <div className="flex-1 overflow-auto">
         <table className="w-full border-collapse text-sm">
           <thead className="sticky top-0 bg-gray-100 border-b">
@@ -473,7 +506,9 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
                       <div className="font-medium">
                         {thread.name}
                         {thread.isMainThread && (
-                          <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-1 rounded">Main</span>
+                          <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-1 rounded">
+                            Main
+                          </span>
                         )}
                       </div>
                       <div className="text-xs text-gray-600">
@@ -497,15 +532,13 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
                     <span className="text-xs">{thread.cpuUsage.toFixed(1)}%</span>
                   </div>
                 </td>
-                <td className="p-2 border-r">
-                  {Math.floor(thread.runTime / 1000)}s
-                </td>
+                <td className="p-2 border-r">{Math.floor(thread.runTime / 1000)}s</td>
                 <td className="p-2 border-r">{thread.apartment}</td>
                 <td className="p-2">
                   <div className="flex gap-1">
                     {thread.state === ThreadState.RUNNING ? (
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           suspendThread(thread.id);
                         }}
@@ -516,7 +549,7 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
                       </button>
                     ) : thread.state === ThreadState.SUSPENDED ? (
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           resumeThread(thread.id);
                         }}
@@ -528,7 +561,7 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
                     ) : null}
                     {!thread.isMainThread && thread.state !== ThreadState.TERMINATED && (
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           terminateThread(thread.id);
                         }}
@@ -568,7 +601,7 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
             {selectedThreadData.stackFrames.length} frames
           </div>
         </div>
-        
+
         <div className="flex-1 overflow-auto">
           <div className="space-y-1 p-2">
             {selectedThreadData.stackFrames.map((frame, index) => (
@@ -598,7 +631,7 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
                   </div>
                   <div className="text-xs text-gray-500 font-mono">{frame.address}</div>
                 </div>
-                
+
                 {expandedFrames.has(frame.id) && (
                   <div className="p-3 border-t bg-gray-50">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -616,7 +649,7 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
                           </div>
                         </div>
                       )}
-                      
+
                       {frame.locals.length > 0 && (
                         <div>
                           <h5 className="font-semibold mb-2 text-sm">Local Variables</h5>
@@ -632,7 +665,7 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
                         </div>
                       )}
                     </div>
-                    
+
                     {frame.fileName && (
                       <div className="mt-3 pt-3 border-t">
                         <button className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1">
@@ -656,10 +689,11 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
       <div className="p-3 border-b bg-gray-50">
         <h4 className="font-semibold">Synchronization Objects</h4>
         <div className="text-sm text-gray-600">
-          {syncObjects.length} objects • {syncObjects.filter(obj => obj.waitingThreads.length > 0).length} contended
+          {syncObjects.length} objects •{' '}
+          {syncObjects.filter(obj => obj.waitingThreads.length > 0).length} contended
         </div>
       </div>
-      
+
       <div className="flex-1 overflow-auto p-4">
         <div className="space-y-3">
           {syncObjects.map(obj => (
@@ -678,28 +712,32 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
                   {obj.isSignaled ? 'Signaled' : 'Not Signaled'}
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 {obj.owner && (
                   <div>
                     <span className="text-gray-600">Owner:</span>
-                    <span className="ml-2 font-mono">{threads.find(t => t.id === obj.owner)?.name || obj.owner}</span>
+                    <span className="ml-2 font-mono">
+                      {threads.find(t => t.id === obj.owner)?.name || obj.owner}
+                    </span>
                   </div>
                 )}
-                
+
                 {obj.type === SynchronizationObjectType.SEMAPHORE && obj.maxCount && (
                   <div>
                     <span className="text-gray-600">Count:</span>
-                    <span className="ml-2 font-mono">{obj.currentCount} / {obj.maxCount}</span>
+                    <span className="ml-2 font-mono">
+                      {obj.currentCount} / {obj.maxCount}
+                    </span>
                   </div>
                 )}
-                
+
                 <div>
                   <span className="text-gray-600">Waiting Threads:</span>
                   <span className="ml-2 font-mono">{obj.waitingThreads.length}</span>
                 </div>
               </div>
-              
+
               {obj.waitingThreads.length > 0 && (
                 <div className="mt-3 pt-3 border-t">
                   <h5 className="font-medium mb-2 text-sm">Waiting Threads:</h5>
@@ -735,7 +773,7 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
           {deadlocks.length} detected • {deadlocks.filter(d => !d.resolved).length} unresolved
         </div>
       </div>
-      
+
       <div className="flex-1 overflow-auto p-4">
         {deadlocks.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
@@ -745,18 +783,27 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
         ) : (
           <div className="space-y-3">
             {deadlocks.map(deadlock => (
-              <div key={deadlock.id} className={`border rounded p-3 ${
-                deadlock.resolved ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-              }`}>
+              <div
+                key={deadlock.id}
+                className={`border rounded p-3 ${
+                  deadlock.resolved ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                }`}
+              >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <AlertTriangle className={`w-4 h-4 ${deadlock.resolved ? 'text-green-600' : 'text-red-600'}`} />
+                    <AlertTriangle
+                      className={`w-4 h-4 ${deadlock.resolved ? 'text-green-600' : 'text-red-600'}`}
+                    />
                     <span className="font-medium">Deadlock #{deadlock.id}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`text-xs px-2 py-1 rounded ${
-                      deadlock.resolved ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span
+                      className={`text-xs px-2 py-1 rounded ${
+                        deadlock.resolved
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}
+                    >
                       {deadlock.resolved ? 'Resolved' : 'Active'}
                     </span>
                     <span className="text-xs text-gray-600">
@@ -764,7 +811,7 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
                     <h5 className="font-medium mb-2">Involved Threads:</h5>
@@ -780,7 +827,7 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
                       })}
                     </div>
                   </div>
-                  
+
                   <div>
                     <h5 className="font-medium mb-2">Synchronization Objects:</h5>
                     <div className="space-y-1">
@@ -797,13 +844,15 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
                     </div>
                   </div>
                 </div>
-                
+
                 {!deadlock.resolved && (
                   <div className="mt-3 pt-3 border-t">
                     <button
-                      onClick={() => setDeadlocks(prev => prev.map(d =>
-                        d.id === deadlock.id ? { ...d, resolved: true } : d
-                      ))}
+                      onClick={() =>
+                        setDeadlocks(prev =>
+                          prev.map(d => (d.id === deadlock.id ? { ...d, resolved: true } : d))
+                        )
+                      }
                       className="px-3 py-1.5 bg-red-600 text-white rounded text-sm hover:bg-red-700"
                     >
                       Force Resolution
@@ -820,7 +869,7 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
 
   const renderExceptionsTab = () => {
     const threadsWithExceptions = threads.filter(t => t.lastException);
-    
+
     return (
       <div className="flex flex-col h-full">
         <div className="p-3 border-b bg-gray-50">
@@ -832,7 +881,7 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
             {threadsWithExceptions.length} threads with exceptions
           </div>
         </div>
-        
+
         <div className="flex-1 overflow-auto p-4">
           {threadsWithExceptions.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
@@ -848,17 +897,23 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
                       <Bug className="w-4 h-4 text-red-600" />
                       <span className="font-medium">{thread.name}</span>
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded ${
-                      thread.lastException?.handled ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span
+                      className={`text-xs px-2 py-1 rounded ${
+                        thread.lastException?.handled
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}
+                    >
                       {thread.lastException?.handled ? 'Handled' : 'Unhandled'}
                     </span>
                   </div>
-                  
+
                   {thread.lastException && (
                     <div className="space-y-2 text-sm">
                       <div>
-                        <span className="font-medium text-red-600">{thread.lastException.type}</span>
+                        <span className="font-medium text-red-600">
+                          {thread.lastException.type}
+                        </span>
                       </div>
                       <div className="text-gray-700">{thread.lastException.message}</div>
                       <div className="text-xs text-gray-600">
@@ -897,17 +952,16 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                <span>{threads.filter(t => t.state === ThreadState.SUSPENDED).length} Suspended</span>
+                <span>
+                  {threads.filter(t => t.state === ThreadState.SUSPENDED).length} Suspended
+                </span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                 <span>{threads.filter(t => t.state === ThreadState.BLOCKED).length} Blocked</span>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg"
-            >
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -985,7 +1039,9 @@ export const ThreadsWindow: React.FC<ThreadsWindowProps> = ({
         <div className="p-3 border-t bg-gray-50 flex justify-between items-center text-xs text-gray-600">
           <div className="flex items-center gap-4">
             <span>Total CPU: {threads.reduce((sum, t) => sum + t.cpuUsage, 0).toFixed(1)}%</span>
-            <span>Active Threads: {threads.filter(t => t.state === ThreadState.RUNNING).length}</span>
+            <span>
+              Active Threads: {threads.filter(t => t.state === ThreadState.RUNNING).length}
+            </span>
             <span>Sync Objects: {syncObjects.length}</span>
           </div>
           <div className="flex items-center gap-4">

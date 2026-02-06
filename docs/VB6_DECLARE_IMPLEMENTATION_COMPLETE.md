@@ -82,11 +82,11 @@ Declare Function GetTickCount Lib "kernel32" () As Long
 
 #### Types de passage
 
-| Mode | Syntaxe | Description | Support |
-|------|---------|-------------|---------|
-| ByVal | `ByVal x As Long` | Passage par valeur | ✅ Complet |
-| ByRef | `ByRef x As Long` | Passage par référence | ✅ Complet |
-| Défaut | `x As Long` | ByRef par défaut | ✅ Complet |
+| Mode   | Syntaxe           | Description           | Support    |
+| ------ | ----------------- | --------------------- | ---------- |
+| ByVal  | `ByVal x As Long` | Passage par valeur    | ✅ Complet |
+| ByRef  | `ByRef x As Long` | Passage par référence | ✅ Complet |
+| Défaut | `x As Long`       | ByRef par défaut      | ✅ Complet |
 
 ```vb
 ' ByVal - passage par valeur
@@ -111,18 +111,18 @@ Declare Function GetPrivateProfileInt Lib "kernel32" Alias "GetPrivateProfileInt
 
 #### Types de paramètres
 
-| Type VB6 | Taille | Support |
-|----------|--------|---------|
-| Byte | 1 byte | ✅ Complet |
-| Boolean | 2 bytes | ✅ Complet |
-| Integer | 2 bytes | ✅ Complet |
-| Long | 4 bytes | ✅ Complet |
-| Single | 4 bytes | ✅ Complet |
-| Double | 8 bytes | ✅ Complet |
-| Currency | 8 bytes | ✅ Complet |
-| String | Variable | ✅ Complet |
-| Variant | 16 bytes | ✅ Complet |
-| Any | Variable | ✅ Complet |
+| Type VB6 | Taille   | Support    |
+| -------- | -------- | ---------- |
+| Byte     | 1 byte   | ✅ Complet |
+| Boolean  | 2 bytes  | ✅ Complet |
+| Integer  | 2 bytes  | ✅ Complet |
+| Long     | 4 bytes  | ✅ Complet |
+| Single   | 4 bytes  | ✅ Complet |
+| Double   | 8 bytes  | ✅ Complet |
+| Currency | 8 bytes  | ✅ Complet |
+| String   | Variable | ✅ Complet |
+| Variant  | 16 bytes | ✅ Complet |
+| Any      | Variable | ✅ Complet |
 
 ### ✅ 5. JavaScript Shim Generation
 
@@ -149,6 +149,7 @@ const MB_OKCANCEL = 1;
 ```
 
 **Caractéristiques des shims**:
+
 - Validation automatique des paramètres requis
 - Avertissements pour APIs non supportées en web
 - Valeurs par défaut appropriées pour chaque type de retour
@@ -163,12 +164,7 @@ Génération automatique de définitions TypeScript pour IntelliSense:
 declare function GetTickCount(): number;
 
 // Declared in: MainModule (user32)
-declare function MessageBox(
-  hWnd: number,
-  lpText: string,
-  lpCaption: string,
-  wType: number
-): number;
+declare function MessageBox(hWnd: number, lpText: string, lpCaption: string, wType: number): number;
 
 // Avec paramètres optionnels
 declare function GetPrivateProfileInt(
@@ -268,54 +264,54 @@ Le runtime fournit toutes les constantes Windows API courantes:
 
 ```typescript
 // MessageBox constants
-MB_OK = 0x00000000
-MB_OKCANCEL = 0x00000001
-MB_ABORTRETRYIGNORE = 0x00000002
-MB_YESNOCANCEL = 0x00000003
-MB_YESNO = 0x00000004
-MB_RETRYCANCEL = 0x00000005
-MB_ICONHAND = 0x00000010
-MB_ICONQUESTION = 0x00000020
-MB_ICONEXCLAMATION = 0x00000030
-MB_ICONASTERISK = 0x00000040
+MB_OK = 0x00000000;
+MB_OKCANCEL = 0x00000001;
+MB_ABORTRETRYIGNORE = 0x00000002;
+MB_YESNOCANCEL = 0x00000003;
+MB_YESNO = 0x00000004;
+MB_RETRYCANCEL = 0x00000005;
+MB_ICONHAND = 0x00000010;
+MB_ICONQUESTION = 0x00000020;
+MB_ICONEXCLAMATION = 0x00000030;
+MB_ICONASTERISK = 0x00000040;
 
 // ShowWindow constants
-SW_HIDE = 0
-SW_SHOWNORMAL = 1
-SW_SHOWMINIMIZED = 2
-SW_SHOWMAXIMIZED = 3
-SW_SHOW = 5
-SW_MINIMIZE = 6
-SW_RESTORE = 9
-SW_SHOWDEFAULT = 10
+SW_HIDE = 0;
+SW_SHOWNORMAL = 1;
+SW_SHOWMINIMIZED = 2;
+SW_SHOWMAXIMIZED = 3;
+SW_SHOW = 5;
+SW_MINIMIZE = 6;
+SW_RESTORE = 9;
+SW_SHOWDEFAULT = 10;
 
 // GetSystemMetrics constants
-SM_CXSCREEN = 0
-SM_CYSCREEN = 1
-SM_CXVSCROLL = 2
-SM_CYHSCROLL = 3
-SM_CYCAPTION = 4
+SM_CXSCREEN = 0;
+SM_CYSCREEN = 1;
+SM_CXVSCROLL = 2;
+SM_CYHSCROLL = 3;
+SM_CYCAPTION = 4;
 
 // Virtual Key Codes
-VK_BACK = 0x08
-VK_TAB = 0x09
-VK_RETURN = 0x0D
-VK_SHIFT = 0x10
-VK_CONTROL = 0x11
-VK_ESCAPE = 0x1B
-VK_SPACE = 0x20
-VK_LEFT = 0x25
-VK_UP = 0x26
-VK_RIGHT = 0x27
-VK_DOWN = 0x28
+VK_BACK = 0x08;
+VK_TAB = 0x09;
+VK_RETURN = 0x0d;
+VK_SHIFT = 0x10;
+VK_CONTROL = 0x11;
+VK_ESCAPE = 0x1b;
+VK_SPACE = 0x20;
+VK_LEFT = 0x25;
+VK_UP = 0x26;
+VK_RIGHT = 0x27;
+VK_DOWN = 0x28;
 
 // File attributes
-FILE_ATTRIBUTE_NORMAL = 0x80
-FILE_ATTRIBUTE_HIDDEN = 0x02
-FILE_ATTRIBUTE_READONLY = 0x01
-FILE_ATTRIBUTE_SYSTEM = 0x04
-FILE_ATTRIBUTE_DIRECTORY = 0x10
-FILE_ATTRIBUTE_ARCHIVE = 0x20
+FILE_ATTRIBUTE_NORMAL = 0x80;
+FILE_ATTRIBUTE_HIDDEN = 0x02;
+FILE_ATTRIBUTE_READONLY = 0x01;
+FILE_ATTRIBUTE_SYSTEM = 0x04;
+FILE_ATTRIBUTE_DIRECTORY = 0x10;
+FILE_ATTRIBUTE_ARCHIVE = 0x20;
 ```
 
 ### ✅ 9. Validation de Paramètres
@@ -339,6 +335,7 @@ processor.validateDeclareCall('GetWindowsDirectory', []);
 **49 tests implémentés et passés (100%)**:
 
 ### Suite 1: Declare Processor - Parsing (13 tests)
+
 - ✅ Parse simple Declare Function
 - ✅ Parse Declare Sub
 - ✅ Parse Declare with Alias
@@ -353,17 +350,20 @@ processor.validateDeclareCall('GetWindowsDirectory', []);
 - ✅ Validate Sub cannot have return type
 
 ### Suite 2: Declare Processor - Registry (3 tests)
+
 - ✅ Register and retrieve public declare
 - ✅ Register and retrieve private declare with module scope
 - ✅ Get module declared functions
 
 ### Suite 3: Declare Processor - Code Generation (4 tests)
+
 - ✅ Generate JavaScript shim for simple function
 - ✅ Generate parameter validation in shim
 - ✅ Generate TypeScript definitions
 - ✅ Generate TypeScript with optional parameters
 
 ### Suite 4: Declare Processor - Specific API Implementations (5 tests)
+
 - ✅ Generate Kernel32 Sleep implementation
 - ✅ Generate Kernel32 GetTickCount implementation
 - ✅ Generate User32 MessageBox implementation
@@ -371,6 +371,7 @@ processor.validateDeclareCall('GetWindowsDirectory', []);
 - ✅ Generate utility functions
 
 ### Suite 5: Declare Processor - Validation (5 tests)
+
 - ✅ Validate declare call with correct arguments
 - ✅ Validate too few arguments
 - ✅ Validate too many arguments
@@ -378,10 +379,12 @@ processor.validateDeclareCall('GetWindowsDirectory', []);
 - ✅ Allow optional parameters to be omitted
 
 ### Suite 6: Declare Processor - Export/Import (2 tests)
+
 - ✅ Export and import declare data
 - ✅ Clear all declarations
 
 ### Suite 7: Runtime Declare Registry (6 tests)
+
 - ✅ Parse Declare statement
 - ✅ Parse Declare with alias
 - ✅ Parse parameters with ByVal
@@ -390,6 +393,7 @@ processor.validateDeclareCall('GetWindowsDirectory', []);
 - ✅ Parse array parameters
 
 ### Suite 8: Real-World VB6 API Scenarios (5 tests)
+
 - ✅ Handle Windows GetWindowsDirectory API
 - ✅ Handle complex GetPrivateProfileString API
 - ✅ Handle FindWindow API
@@ -397,6 +401,7 @@ processor.validateDeclareCall('GetWindowsDirectory', []);
 - ✅ Handle multimedia PlaySound API
 
 ### Suite 9: Edge Cases (6 tests)
+
 - ✅ Handle Declare with no parameters
 - ✅ Handle Declare with many parameters
 - ✅ Handle library names with .dll extension
@@ -410,11 +415,13 @@ processor.validateDeclareCall('GetWindowsDirectory', []);
 ## 📊 Statistiques
 
 ### Fichiers Créés/Modifiés
+
 - ✅ `src/compiler/VB6DeclareSupport.ts` - 723 lignes
 - ✅ `src/runtime/VB6DeclareSupport.ts` - 402 lignes
 - ✅ `src/test/compiler/VB6Declare.test.ts` - 702 lignes (49 tests)
 
 ### Couverture Fonctionnelle
+
 - **Parsing**: 100%
 - **Code Generation**: 100%
 - **Runtime Operations**: 100%
@@ -476,10 +483,7 @@ const declare = VB6DeclareRegistry.parseDeclareStatement(code);
 VB6DeclareRegistry.registerDeclare(declare!);
 
 // Call declared function
-const result = VB6DeclareRegistry.callDeclaredFunction(
-  'GetTickCount',
-  'kernel32'
-);
+const result = VB6DeclareRegistry.callDeclaredFunction('GetTickCount', 'kernel32');
 ```
 
 ---
@@ -675,28 +679,28 @@ End Sub
 
 ### ⚠️ Différences avec VB6 Natif
 
-| Feature | VB6 Natif | VB6 Web | Impact |
-|---------|-----------|---------|--------|
-| Appels DLL natifs | Supporté | Émulé via shims JavaScript | **Moyen** - La plupart des APIs ne peuvent pas fonctionner en web |
-| Windows APIs | Accès direct au système | Simulations limitées | **Moyen** - Fonctionnalités de base simulées |
-| Pointeurs | Supporté | Non supporté | **Faible** - Rarement utilisé directement |
-| Callbacks | Supporté | Émulé | **Moyen** - Peut nécessiter adaptation |
+| Feature           | VB6 Natif               | VB6 Web                    | Impact                                                            |
+| ----------------- | ----------------------- | -------------------------- | ----------------------------------------------------------------- |
+| Appels DLL natifs | Supporté                | Émulé via shims JavaScript | **Moyen** - La plupart des APIs ne peuvent pas fonctionner en web |
+| Windows APIs      | Accès direct au système | Simulations limitées       | **Moyen** - Fonctionnalités de base simulées                      |
+| Pointeurs         | Supporté                | Non supporté               | **Faible** - Rarement utilisé directement                         |
+| Callbacks         | Supporté                | Émulé                      | **Moyen** - Peut nécessiter adaptation                            |
 
 ### 🔄 APIs avec Équivalents Web
 
 Certaines APIs ont des équivalents web fonctionnels:
 
-| API Windows | Équivalent Web | Status |
-|-------------|----------------|--------|
-| `Sleep` | `setTimeout` / Promises | ✅ Supporté |
-| `GetTickCount` | `Date.now()` / `performance.now()` | ✅ Supporté |
-| `MessageBox` | `alert()` / `confirm()` | ✅ Supporté |
-| `ShellExecute` (URLs) | `window.open()` | ✅ Supporté |
-| `InternetOpen/Read` | `fetch()` API | ✅ Supporté |
-| `GetSystemMetrics` | `window.screen.*` | ⚠️ Partiel |
-| Registry APIs | `localStorage` | ⚠️ Limité |
-| File System APIs | FileSystem API / Backend | ⚠️ Limité |
-| GDI/Graphics APIs | Canvas API | ⚠️ Adaptation requise |
+| API Windows           | Équivalent Web                     | Status                |
+| --------------------- | ---------------------------------- | --------------------- |
+| `Sleep`               | `setTimeout` / Promises            | ✅ Supporté           |
+| `GetTickCount`        | `Date.now()` / `performance.now()` | ✅ Supporté           |
+| `MessageBox`          | `alert()` / `confirm()`            | ✅ Supporté           |
+| `ShellExecute` (URLs) | `window.open()`                    | ✅ Supporté           |
+| `InternetOpen/Read`   | `fetch()` API                      | ✅ Supporté           |
+| `GetSystemMetrics`    | `window.screen.*`                  | ⚠️ Partiel            |
+| Registry APIs         | `localStorage`                     | ⚠️ Limité             |
+| File System APIs      | FileSystem API / Backend           | ⚠️ Limité             |
+| GDI/Graphics APIs     | Canvas API                         | ⚠️ Adaptation requise |
 
 ### ❌ APIs Non Supportées
 
@@ -730,11 +734,13 @@ Declare support est maintenant complet. Phase 1 continue avec:
 ## 📚 Ressources
 
 ### Documentation
+
 - `src/compiler/VB6DeclareSupport.ts` - Compiler avec documentation inline
 - `src/runtime/VB6DeclareSupport.ts` - Runtime avec implémentations API
 - `src/test/compiler/VB6Declare.test.ts` - 49 tests avec exemples d'usage
 
 ### Références VB6
+
 - Microsoft VB6 Language Reference - Declare Statement
 - Windows API Guide for Visual Basic
 - Platform SDK API Reference
@@ -744,12 +750,14 @@ Declare support est maintenant complet. Phase 1 continue avec:
 **Limitation**: Windows APIs natives non disponibles en web
 
 **Workarounds**:
+
 - Utiliser backend Node.js pour APIs systèmes nécessaires
 - Adapter code VB6 pour utiliser équivalents web modernes
 - Utiliser WebAssembly pour certaines bibliothèques compilables
 - Implémenter API gateway côté serveur pour fonctionnalités systèmes
 
 **Exemple - File System via Backend**:
+
 ```vb
 ' Au lieu de API Windows directe
 Declare Function CreateFile Lib "kernel32" ...

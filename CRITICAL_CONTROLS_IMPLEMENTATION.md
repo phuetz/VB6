@@ -11,6 +11,7 @@ This document outlines the implementation of four critical missing VB6 controls 
 **Purpose**: Displays data from a recordset in a list box format with full data binding support.
 
 **Key Features**:
+
 - **Data Binding**:
   - `DataSource`: Name of data source
   - `DataField`: Field to display
@@ -37,16 +38,19 @@ This document outlines the implementation of four critical missing VB6 controls 
   - `Change`: Fires when selection changes
 
 **Mock Data Sources**:
+
 - `Customers`: CustomerID, CompanyName, Country
 - `Products`: ProductID, ProductName, CategoryID, Price
 
 **API Methods**:
+
 - `findItem(searchText, startIndex)`: Find item by text
 - `addItem(item, index)`: Add item to list
 - `removeItem(index)`: Remove item from list
 - `clear()`: Clear all items
 
 **Example Usage**:
+
 ```vb6
 DBList1.RowSource = "Customers"
 DBList1.ListField = "CompanyName"
@@ -63,6 +67,7 @@ DBList1.BoundColumn = 0
 **Purpose**: Dropdown/combo box control with full data binding support. Extends DBList functionality.
 
 **Key Features**:
+
 - **All DBList features plus**:
   - `Style`: 0=Dropdown Combo, 1=Simple Combo, 2=Dropdown List
   - `MaxLength`: Maximum text length
@@ -76,11 +81,13 @@ DBList1.BoundColumn = 0
   - `KeyDown`, `KeyPress`, `KeyUp`: Keyboard events
 
 **Style Modes**:
+
 1. **Dropdown Combo (0)**: Text is editable, dropdown list below
 2. **Simple Combo (1)**: Text is editable with list always visible
 3. **Dropdown List (2)**: Text is NOT editable, behaves like select element
 
 **Example Usage**:
+
 ```vb6
 DBCombo1.Style = 0 ' Dropdown Combo
 DBCombo1.RowSource = "Products"
@@ -98,6 +105,7 @@ DBCombo1.MatchEntry = 1 ' Standard matching (auto-complete)
 **Purpose**: Repeats a template for each data row, useful for displaying record collections with scrolling.
 
 **Key Features**:
+
 - **Data Properties**:
   - `DataSource`: Data source name
   - `DataMember`: Table/recordset name
@@ -129,6 +137,7 @@ DBCombo1.MatchEntry = 1 ' Standard matching (auto-complete)
 **Virtual Scrolling**: Built-in virtualization for efficient rendering of large datasets
 
 **Example Usage**:
+
 ```vb6
 DataRepeater1.DataSource = "Products"
 DataRepeater1.RecordSource = "SELECT * FROM Products"
@@ -139,6 +148,7 @@ DataRepeater1.AllowDelete = True
 ```
 
 **Methods**:
+
 - `MoveFirst()`: Go to first record
 - `MoveLast()`: Go to last record
 - `MoveNext()`: Go to next record
@@ -154,6 +164,7 @@ DataRepeater1.AllowDelete = True
 **Purpose**: Professional charting control supporting multiple chart types with full VB6 API compatibility.
 
 **Key Features**:
+
 - **Chart Types** (VtChChartType):
   - Bar: 2D (1), 3D (0)
   - Line: 2D (3), 3D (2)
@@ -170,6 +181,7 @@ DataRepeater1.AllowDelete = True
   - 0=None, 1=Top, 2=Bottom, 3=Left, 4=Right
 
 - **Data Structure**:
+
   ```typescript
   {
     columnCount: 4,
@@ -202,6 +214,7 @@ DataRepeater1.AllowDelete = True
   - `ChartActivated`: Fires when chart is activated
 
 **Methods**:
+
 - `EditCopy()`: Copy chart to clipboard
 - `EditPaste()`: Paste chart data from clipboard
 - `PrintChart()`: Print the chart
@@ -212,6 +225,7 @@ DataRepeater1.AllowDelete = True
 - `TwipsToChartPart(x, y)`: Get chart element at coordinates
 
 **Example Usage**:
+
 ```vb6
 MSChart1.ChartType = VtChChartType.vtChChartType2dBar
 MSChart1.ShowLegend = True
@@ -232,6 +246,7 @@ MSChart1.Refresh()
 **Purpose**: Image clipping and sprite sheet handling for game development and sprite animations.
 
 **Key Features**:
+
 - **Picture Properties**:
   - `Picture`: Image source URL
   - `Stretch`: Stretch clip to fill control
@@ -251,9 +266,11 @@ MSChart1.Refresh()
   - `MousePointer`: Cursor style
 
 **Events**:
+
 - `Click`: Fires when clicked
 
 **VB6-Compatible Methods** (exposed globally):
+
 - `nextCell()`: Move to next cell
 - `prevCell()`: Move to previous cell
 - `gotoCell(index)`: Go to specific cell
@@ -264,6 +281,7 @@ MSChart1.Refresh()
 - `pointInClip(x, y)`: Test point in clip
 
 **Helper Functions**:
+
 - `cellFromRowCol(row, col, cols)`: Calculate cell index
 - `rowColFromCell(cell, cols)`: Get row/col from cell index
 - `getClipCoords(...)`: Get clip coordinates
@@ -273,6 +291,7 @@ MSChart1.Refresh()
 - `generateSpriteCSS(...)`: Generate CSS sprites
 
 **Example Usage**:
+
 ```vb6
 ' Setup sprite sheet (16x16 grid, 256x256 image)
 PictureClip1.Picture = "sprites.png"
@@ -297,6 +316,7 @@ End If
 ### 1. Control Registration
 
 All four controls are registered in:
+
 - **`/src/data/controlCategories.ts`**: Added to new categories:
   - `DataBound`: DBList, DBCombo, DataRepeater, DataList, DataCombo, DataGrid
   - `Charts`: MSChart
@@ -305,11 +325,13 @@ All four controls are registered in:
 ### 2. Default Properties
 
 All controls have default properties in:
+
 - **`/src/utils/controlDefaults.ts`**: Complete property definitions with VB6-compatible defaults
 
 ### 3. Control Rendering
 
 Controls are rendered in:
+
 - **`/src/components/Designer/ControlRenderer.tsx`**: Added case statements for:
   - `DBList`: Renders with full data-binding UI
   - `DBCombo`: Renders with dropdown styles
@@ -320,6 +342,7 @@ Controls are rendered in:
 ### 4. Designer Canvas
 
 All controls are ready to:
+
 - Drag from toolbox to form
 - Resize and reposition
 - Configure properties
@@ -333,21 +356,25 @@ All controls are ready to:
 All control properties are configurable via the Properties Window:
 
 ### DBList/DBCombo Properties
+
 - Data Binding group: DataSource, DataField, RowSource, ListField
 - List group: ListCount, ListIndex, Text, BoundText
 - Behavior group: MatchEntry, Sorted
 
 ### DataRepeater Properties
+
 - Data group: DataSource, RecordSource, CurrentRecord
 - Layout group: ReaderHeight, ScrollBars
 - Behavior group: AllowAddNew, AllowDelete, AllowUpdate
 
 ### MSChart Properties
+
 - Chart group: ChartType, ShowLegend, TitleText
 - Data group: Data, AutoIncrement
 - Appearance group: ChartBackColor, PlotBackColor, GridLineColor
 
 ### PictureClip Properties
+
 - Picture group: Picture, Stretch
 - Grid group: Rows, Cols, GraphicCell
 - Clipping group: ClipX, ClipY, ClipWidth, ClipHeight
@@ -368,21 +395,25 @@ All controls properly integrate with the VB6 event system:
 ## VB6 Compatibility Notes
 
 ### Data Binding
+
 - Controls accept mock data sources for development/testing
 - Real applications would connect to actual database
 - Compatible with ADO, DAO, RDO connections
 
 ### Event Model
+
 - All events follow VB6 naming conventions
 - Event parameters match VB6 specifications
 - Change events fire appropriately
 
 ### Properties
+
 - All read/write properties work in design and runtime mode
 - Read-only properties (like ListCount) update automatically
 - Property types match VB6 (Integer, String, Boolean, etc.)
 
 ### Methods
+
 - VB6-compatible methods are accessible
 - Methods work in both design and runtime modes
 - Return values match VB6 specifications
@@ -392,6 +423,7 @@ All controls properly integrate with the VB6 event system:
 ## Testing the Implementation
 
 ### In Design Mode
+
 1. Open Toolbox > DataBound, Charts, or Graphics categories
 2. Drag controls to form
 3. Resize and position controls
@@ -400,6 +432,7 @@ All controls properly integrate with the VB6 event system:
 6. Double-click to add event handlers
 
 ### In Runtime Mode
+
 1. Press F5 or click Run button
 2. Interact with controls:
    - DBList/DBCombo: Select items, trigger events

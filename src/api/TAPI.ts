@@ -8,7 +8,7 @@ export enum TAPIVersion {
   TAPI_VERSION_2_1 = 0x00020001,
   TAPI_VERSION_2_2 = 0x00020002,
   TAPI_VERSION_3_0 = 0x00030000,
-  TAPI_VERSION_3_1 = 0x00030001
+  TAPI_VERSION_3_1 = 0x00030001,
 }
 
 export enum TAPILineState {
@@ -22,7 +22,7 @@ export enum TAPILineState {
   LINEDEVSTATE_OUTOFSERVICE = 0x00000080,
   LINEDEVSTATE_MAINTENANCE = 0x00000100,
   LINEDEVSTATE_OPEN = 0x00000200,
-  LINEDEVSTATE_CLOSE = 0x00000400
+  LINEDEVSTATE_CLOSE = 0x00000400,
 }
 
 export enum TAPICallState {
@@ -41,7 +41,7 @@ export enum TAPICallState {
   LINECALLSTATE_ONHOLDPENDCONF = 0x00001000,
   LINECALLSTATE_ONHOLDPENDTRANSFER = 0x00002000,
   LINECALLSTATE_DISCONNECTED = 0x00004000,
-  LINECALLSTATE_UNKNOWN = 0x00008000
+  LINECALLSTATE_UNKNOWN = 0x00008000,
 }
 
 export enum TAPIMediaMode {
@@ -58,7 +58,7 @@ export enum TAPIMediaMode {
   LINEMEDIAMODE_TELEX = 0x00000400,
   LINEMEDIAMODE_MIXED = 0x00000800,
   LINEMEDIAMODE_ADSI = 0x00001000,
-  LINEMEDIAMODE_VOICEVIEW = 0x00002000
+  LINEMEDIAMODE_VOICEVIEW = 0x00002000,
 }
 
 export enum TAPIBearerMode {
@@ -68,7 +68,7 @@ export enum TAPIBearerMode {
   LINEBEARERMODE_DATA = 0x00000008,
   LINEBEARERMODE_ALTSPEECHDATA = 0x00000010,
   LINEBEARERMODE_NONCALLSIGNALING = 0x00000020,
-  LINEBEARERMODE_PASSTHROUGH = 0x00000040
+  LINEBEARERMODE_PASSTHROUGH = 0x00000040,
 }
 
 export enum TAPIErrorCode {
@@ -82,12 +82,12 @@ export enum TAPIErrorCode {
   LINEERR_OPERATIONFAILED = 0x80000007,
   LINEERR_NOMEM = 0x80000008,
   LINEERR_NOTOWNER = 0x80000009,
-  LINEERR_INVALRATE = 0x8000000A,
-  LINEERR_INVALMEDIAMODE = 0x8000000B,
-  LINEERR_INUSE = 0x8000000C,
-  LINEERR_INVALLINESTATE = 0x8000000D,
-  LINEERR_INVALCALLSTATE = 0x8000000E,
-  LINEERR_LINEMAPPERFAILED = 0x8000000F
+  LINEERR_INVALRATE = 0x8000000a,
+  LINEERR_INVALMEDIAMODE = 0x8000000b,
+  LINEERR_INUSE = 0x8000000c,
+  LINEERR_INVALLINESTATE = 0x8000000d,
+  LINEERR_INVALCALLSTATE = 0x8000000e,
+  LINEERR_LINEMAPPERFAILED = 0x8000000f,
 }
 
 // TAPI Structures
@@ -209,22 +209,22 @@ export class TAPI extends EventEmitter {
   private nextLineHandle = 1;
   private nextPhoneHandle = 1;
   private nextCallHandle = 1;
-  
+
   // WebRTC support for modern telephony
   private peerConnections: Map<number, RTCPeerConnection> = new Map();
   private localStream: MediaStream | null = null;
-  
+
   private constructor() {
     super();
   }
-  
+
   public static getInstance(): TAPI {
     if (!TAPI.instance) {
       TAPI.instance = new TAPI();
     }
     return TAPI.instance;
   }
-  
+
   // lineInitialize - Initialize TAPI line devices
   public lineInitialize(
     appName: string,
@@ -235,15 +235,15 @@ export class TAPI extends EventEmitter {
       if (this.initialized) {
         return TAPIErrorCode.TAPI_SUCCESS;
       }
-      
+
       this.hLineApp = Date.now();
       this.initialized = true;
-      
+
       // Simulate available line devices
       this.createSimulatedDevices();
-      
+
       dwNumDevs.value = this.lines.size;
-      
+
       this.emit('lineInitialize', { appName, version: dwAPIVersion, numDevices: dwNumDevs.value });
       return TAPIErrorCode.TAPI_SUCCESS;
     } catch (error) {
@@ -251,32 +251,32 @@ export class TAPI extends EventEmitter {
       return TAPIErrorCode.LINEERR_OPERATIONFAILED;
     }
   }
-  
+
   // lineShutdown - Shutdown TAPI
   public lineShutdown(): TAPIErrorCode {
     try {
       if (!this.initialized) {
         return TAPIErrorCode.LINEERR_INVALAPPHANDLE;
       }
-      
+
       // Close all open lines
       this.lines.forEach(line => {
         this.lineClose(line.hLine);
       });
-      
+
       // Close all peer connections
       this.peerConnections.forEach(pc => pc.close());
       this.peerConnections.clear();
-      
+
       // Stop local stream
       if (this.localStream) {
         this.localStream.getTracks().forEach(track => track.stop());
         this.localStream = null;
       }
-      
+
       this.initialized = false;
       this.hLineApp = 0;
-      
+
       this.emit('lineShutdown');
       return TAPIErrorCode.TAPI_SUCCESS;
     } catch (error) {
@@ -284,7 +284,7 @@ export class TAPI extends EventEmitter {
       return TAPIErrorCode.LINEERR_OPERATIONFAILED;
     }
   }
-  
+
   // lineOpen - Open a line device
   public lineOpen(
     dwDeviceID: number,
@@ -295,7 +295,7 @@ export class TAPI extends EventEmitter {
       if (!this.initialized) {
         return { hLine: 0, errorCode: TAPIErrorCode.LINEERR_INVALAPPHANDLE };
       }
-      
+
       const hLine = this.nextLineHandle++;
       const line: TAPILine = {
         hLine,
@@ -304,11 +304,11 @@ export class TAPI extends EventEmitter {
         state: TAPILineState.LINEDEVSTATE_OPEN,
         caps: this.getLineDevCaps(dwDeviceID),
         info: this.createLineInfo(hLine, dwDeviceID),
-        calls: new Map()
+        calls: new Map(),
       };
-      
+
       this.lines.set(hLine, line);
-      
+
       this.emit('lineOpen', { hLine, deviceID: dwDeviceID });
       return { hLine, errorCode: TAPIErrorCode.TAPI_SUCCESS };
     } catch (error) {
@@ -316,7 +316,7 @@ export class TAPI extends EventEmitter {
       return { hLine: 0, errorCode: TAPIErrorCode.LINEERR_OPERATIONFAILED };
     }
   }
-  
+
   // lineClose - Close a line device
   public lineClose(hLine: number): TAPIErrorCode {
     try {
@@ -324,15 +324,15 @@ export class TAPI extends EventEmitter {
       if (!line) {
         return TAPIErrorCode.LINEERR_INVALHANDLE;
       }
-      
+
       // Drop all calls on this line
       line.calls.forEach(call => {
         this.lineDrop(call.hCall, null, 0);
       });
-      
+
       line.state = TAPILineState.LINEDEVSTATE_CLOSE;
       this.lines.delete(hLine);
-      
+
       this.emit('lineClose', { hLine });
       return TAPIErrorCode.TAPI_SUCCESS;
     } catch (error) {
@@ -340,7 +340,7 @@ export class TAPI extends EventEmitter {
       return TAPIErrorCode.LINEERR_OPERATIONFAILED;
     }
   }
-  
+
   // lineMakeCall - Make an outgoing call
   public async lineMakeCall(
     hLine: number,
@@ -352,7 +352,7 @@ export class TAPI extends EventEmitter {
       if (!line) {
         return { hCall: 0, errorCode: TAPIErrorCode.LINEERR_INVALHANDLE };
       }
-      
+
       const hCall = this.nextCallHandle++;
       const call: TAPICall = {
         hCall,
@@ -360,28 +360,28 @@ export class TAPI extends EventEmitter {
         dwCallID: hCall,
         state: TAPICallState.LINECALLSTATE_DIALING,
         info: this.createCallInfo(hCall, hLine, dwDestAddress),
-        startTime: new Date()
+        startTime: new Date(),
       };
-      
+
       this.calls.set(hCall, call);
       line.calls.set(hCall, call);
-      
+
       // Simulate call progress
       setTimeout(() => {
         call.state = TAPICallState.LINECALLSTATE_RINGBACK;
         this.emit('callStateChange', { hCall, state: call.state });
       }, 1000);
-      
+
       setTimeout(() => {
         call.state = TAPICallState.LINECALLSTATE_CONNECTED;
         this.emit('callStateChange', { hCall, state: call.state });
       }, 3000);
-      
+
       // Try to establish WebRTC connection if supported
       if (this.isWebRTCSupported()) {
         await this.establishWebRTCCall(hCall, dwDestAddress);
       }
-      
+
       this.emit('lineMakeCall', { hCall, hLine, destination: dwDestAddress });
       return { hCall, errorCode: TAPIErrorCode.TAPI_SUCCESS };
     } catch (error) {
@@ -389,37 +389,41 @@ export class TAPI extends EventEmitter {
       return { hCall: 0, errorCode: TAPIErrorCode.LINEERR_OPERATIONFAILED };
     }
   }
-  
+
   // lineAnswer - Answer an incoming call
-  public async lineAnswer(hCall: number, userInfo: string | null, dwSize: number): Promise<TAPIErrorCode> {
+  public async lineAnswer(
+    hCall: number,
+    userInfo: string | null,
+    dwSize: number
+  ): Promise<TAPIErrorCode> {
     try {
       const call = this.calls.get(hCall);
       if (!call) {
         return TAPIErrorCode.LINEERR_INVALCALLHANDLE;
       }
-      
+
       if (call.state !== TAPICallState.LINECALLSTATE_OFFERING) {
         return TAPIErrorCode.LINEERR_INVALCALLSTATE;
       }
-      
+
       call.state = TAPICallState.LINECALLSTATE_CONNECTED;
       call.startTime = new Date();
-      
+
       // Get user media if WebRTC is supported
       if (this.isWebRTCSupported()) {
         await this.getUserMedia();
       }
-      
+
       this.emit('lineAnswer', { hCall });
       this.emit('callStateChange', { hCall, state: call.state });
-      
+
       return TAPIErrorCode.TAPI_SUCCESS;
     } catch (error) {
       this.emit('error', error);
       return TAPIErrorCode.LINEERR_OPERATIONFAILED;
     }
   }
-  
+
   // lineDrop - Drop a call
   public lineDrop(hCall: number, userInfo: string | null, dwSize: number): TAPIErrorCode {
     try {
@@ -427,42 +431,46 @@ export class TAPI extends EventEmitter {
       if (!call) {
         return TAPIErrorCode.LINEERR_INVALCALLHANDLE;
       }
-      
+
       call.state = TAPICallState.LINECALLSTATE_DISCONNECTED;
       call.endTime = new Date();
-      call.duration = call.startTime ? 
-        (call.endTime.getTime() - call.startTime.getTime()) / 1000 : 0;
-      
+      call.duration = call.startTime
+        ? (call.endTime.getTime() - call.startTime.getTime()) / 1000
+        : 0;
+
       // Close WebRTC connection if exists
       const pc = this.peerConnections.get(hCall);
       if (pc) {
         pc.close();
         this.peerConnections.delete(hCall);
       }
-      
+
       // Remove from line
       const line = this.lines.get(call.hLine);
       if (line) {
         line.calls.delete(hCall);
       }
-      
+
       this.emit('lineDrop', { hCall, duration: call.duration });
       this.emit('callStateChange', { hCall, state: call.state });
-      
+
       // Clean up after a delay
       setTimeout(() => {
         this.calls.delete(hCall);
       }, 5000);
-      
+
       return TAPIErrorCode.TAPI_SUCCESS;
     } catch (error) {
       this.emit('error', error);
       return TAPIErrorCode.LINEERR_OPERATIONFAILED;
     }
   }
-  
+
   // lineGetDevCaps - Get device capabilities
-  public lineGetDevCaps(dwDeviceID: number): { caps: TAPILineDevCaps | null; errorCode: TAPIErrorCode } {
+  public lineGetDevCaps(dwDeviceID: number): {
+    caps: TAPILineDevCaps | null;
+    errorCode: TAPIErrorCode;
+  } {
     try {
       const caps = this.getLineDevCaps(dwDeviceID);
       return { caps, errorCode: TAPIErrorCode.TAPI_SUCCESS };
@@ -471,7 +479,7 @@ export class TAPI extends EventEmitter {
       return { caps: null, errorCode: TAPIErrorCode.LINEERR_OPERATIONFAILED };
     }
   }
-  
+
   // lineGetCallInfo - Get call information
   public lineGetCallInfo(hCall: number): { info: TAPICallInfo | null; errorCode: TAPIErrorCode } {
     try {
@@ -479,29 +487,35 @@ export class TAPI extends EventEmitter {
       if (!call) {
         return { info: null, errorCode: TAPIErrorCode.LINEERR_INVALCALLHANDLE };
       }
-      
+
       return { info: call.info, errorCode: TAPIErrorCode.TAPI_SUCCESS };
     } catch (error) {
       this.emit('error', error);
       return { info: null, errorCode: TAPIErrorCode.LINEERR_OPERATIONFAILED };
     }
   }
-  
+
   // lineGetCallStatus - Get call status
   public lineGetCallStatus(hCall: number): { state: TAPICallState; errorCode: TAPIErrorCode } {
     try {
       const call = this.calls.get(hCall);
       if (!call) {
-        return { state: TAPICallState.LINECALLSTATE_UNKNOWN, errorCode: TAPIErrorCode.LINEERR_INVALCALLHANDLE };
+        return {
+          state: TAPICallState.LINECALLSTATE_UNKNOWN,
+          errorCode: TAPIErrorCode.LINEERR_INVALCALLHANDLE,
+        };
       }
-      
+
       return { state: call.state, errorCode: TAPIErrorCode.TAPI_SUCCESS };
     } catch (error) {
       this.emit('error', error);
-      return { state: TAPICallState.LINECALLSTATE_UNKNOWN, errorCode: TAPIErrorCode.LINEERR_OPERATIONFAILED };
+      return {
+        state: TAPICallState.LINECALLSTATE_UNKNOWN,
+        errorCode: TAPIErrorCode.LINEERR_OPERATIONFAILED,
+      };
     }
   }
-  
+
   // lineDial - Dial additional digits
   public lineDial(hCall: number, dwDestAddress: string): TAPIErrorCode {
     try {
@@ -509,23 +523,23 @@ export class TAPI extends EventEmitter {
       if (!call) {
         return TAPIErrorCode.LINEERR_INVALCALLHANDLE;
       }
-      
+
       if (call.state !== TAPICallState.LINECALLSTATE_CONNECTED) {
         return TAPIErrorCode.LINEERR_INVALCALLSTATE;
       }
-      
+
       // Send DTMF tones if WebRTC is available
       const pc = this.peerConnections.get(hCall);
       if (pc && pc.getSenders) {
-        const audioSender = pc.getSenders().find(sender => 
-          sender.track && sender.track.kind === 'audio'
-        );
-        
+        const audioSender = pc
+          .getSenders()
+          .find(sender => sender.track && sender.track.kind === 'audio');
+
         if (audioSender && audioSender.dtmf) {
           audioSender.dtmf.insertDTMF(dwDestAddress, 100, 50);
         }
       }
-      
+
       this.emit('lineDial', { hCall, digits: dwDestAddress });
       return TAPIErrorCode.TAPI_SUCCESS;
     } catch (error) {
@@ -533,7 +547,7 @@ export class TAPI extends EventEmitter {
       return TAPIErrorCode.LINEERR_OPERATIONFAILED;
     }
   }
-  
+
   // lineHold - Place call on hold
   public lineHold(hCall: number): TAPIErrorCode {
     try {
@@ -541,13 +555,13 @@ export class TAPI extends EventEmitter {
       if (!call) {
         return TAPIErrorCode.LINEERR_INVALCALLHANDLE;
       }
-      
+
       if (call.state !== TAPICallState.LINECALLSTATE_CONNECTED) {
         return TAPIErrorCode.LINEERR_INVALCALLSTATE;
       }
-      
+
       call.state = TAPICallState.LINECALLSTATE_ONHOLD;
-      
+
       // Mute audio if WebRTC
       const pc = this.peerConnections.get(hCall);
       if (pc && this.localStream) {
@@ -555,17 +569,17 @@ export class TAPI extends EventEmitter {
           track.enabled = false;
         });
       }
-      
+
       this.emit('lineHold', { hCall });
       this.emit('callStateChange', { hCall, state: call.state });
-      
+
       return TAPIErrorCode.TAPI_SUCCESS;
     } catch (error) {
       this.emit('error', error);
       return TAPIErrorCode.LINEERR_OPERATIONFAILED;
     }
   }
-  
+
   // lineUnhold - Resume held call
   public lineUnhold(hCall: number): TAPIErrorCode {
     try {
@@ -573,13 +587,13 @@ export class TAPI extends EventEmitter {
       if (!call) {
         return TAPIErrorCode.LINEERR_INVALCALLHANDLE;
       }
-      
+
       if (call.state !== TAPICallState.LINECALLSTATE_ONHOLD) {
         return TAPIErrorCode.LINEERR_INVALCALLSTATE;
       }
-      
+
       call.state = TAPICallState.LINECALLSTATE_CONNECTED;
-      
+
       // Unmute audio if WebRTC
       const pc = this.peerConnections.get(hCall);
       if (pc && this.localStream) {
@@ -587,26 +601,30 @@ export class TAPI extends EventEmitter {
           track.enabled = true;
         });
       }
-      
+
       this.emit('lineUnhold', { hCall });
       this.emit('callStateChange', { hCall, state: call.state });
-      
+
       return TAPIErrorCode.TAPI_SUCCESS;
     } catch (error) {
       this.emit('error', error);
       return TAPIErrorCode.LINEERR_OPERATIONFAILED;
     }
   }
-  
+
   // Helper methods
   private createSimulatedDevices(): void {
     // Create simulated line devices
     const devices = [
       { id: 0, name: 'Primary Line', bearerModes: TAPIBearerMode.LINEBEARERMODE_VOICE },
       { id: 1, name: 'Data/Fax Line', bearerModes: TAPIBearerMode.LINEBEARERMODE_DATA },
-      { id: 2, name: 'VoIP Line', bearerModes: TAPIBearerMode.LINEBEARERMODE_VOICE | TAPIBearerMode.LINEBEARERMODE_DATA }
+      {
+        id: 2,
+        name: 'VoIP Line',
+        bearerModes: TAPIBearerMode.LINEBEARERMODE_VOICE | TAPIBearerMode.LINEBEARERMODE_DATA,
+      },
     ];
-    
+
     devices.forEach(device => {
       const line: TAPILine = {
         hLine: 0, // Not opened yet
@@ -631,38 +649,40 @@ export class TAPI extends EventEmitter {
           dwMaxRate: 64000,
           dwMediaModes: TAPIMediaMode.LINEMEDIAMODE_INTERACTIVEVOICE,
           LineName: device.name,
-          ProviderInfo: 'VB6 TAPI Provider'
+          ProviderInfo: 'VB6 TAPI Provider',
         },
         info: this.createLineInfo(0, device.id),
-        calls: new Map()
+        calls: new Map(),
       };
-      
+
       this.lines.set(device.id, line);
     });
   }
-  
+
   private getLineDevCaps(dwDeviceID: number): TAPILineDevCaps {
     const line = this.lines.get(dwDeviceID);
-    return line ? line.caps : {
-      dwTotalSize: 0,
-      dwNeededSize: 0,
-      dwUsedSize: 0,
-      dwProviderInfoSize: 0,
-      dwProviderInfoOffset: 0,
-      dwSwitchInfoSize: 0,
-      dwSwitchInfoOffset: 0,
-      dwPermanentLineID: dwDeviceID,
-      dwLineNameSize: 0,
-      dwLineNameOffset: 0,
-      dwStringFormat: 0,
-      dwAddressModes: 0,
-      dwNumAddresses: 0,
-      dwBearerModes: 0,
-      dwMaxRate: 0,
-      dwMediaModes: 0
-    };
+    return line
+      ? line.caps
+      : {
+          dwTotalSize: 0,
+          dwNeededSize: 0,
+          dwUsedSize: 0,
+          dwProviderInfoSize: 0,
+          dwProviderInfoOffset: 0,
+          dwSwitchInfoSize: 0,
+          dwSwitchInfoOffset: 0,
+          dwPermanentLineID: dwDeviceID,
+          dwLineNameSize: 0,
+          dwLineNameOffset: 0,
+          dwStringFormat: 0,
+          dwAddressModes: 0,
+          dwNumAddresses: 0,
+          dwBearerModes: 0,
+          dwMaxRate: 0,
+          dwMediaModes: 0,
+        };
   }
-  
+
   private createLineInfo(hLine: number, dwDeviceID: number): TAPILineInfo {
     return {
       dwTotalSize: 256,
@@ -674,7 +694,7 @@ export class TAPI extends EventEmitter {
       dwBearerMode: TAPIBearerMode.LINEBEARERMODE_VOICE,
       dwRate: 64000,
       dwMediaMode: TAPIMediaMode.LINEMEDIAMODE_INTERACTIVEVOICE,
-      dwCallStates: 0xFFFFFFFF, // All call states supported
+      dwCallStates: 0xffffffff, // All call states supported
       dwNumActiveCalls: 0,
       dwNumOnHoldCalls: 0,
       dwNumOnHoldPendingCalls: 0,
@@ -682,10 +702,10 @@ export class TAPI extends EventEmitter {
       dwRingMode: 0,
       dwSignalLevel: 100,
       dwBatteryLevel: 100,
-      dwRoamMode: 0
+      dwRoamMode: 0,
     };
   }
-  
+
   private createCallInfo(hCall: number, hLine: number, destAddress: string): TAPICallInfo {
     return {
       dwTotalSize: 512,
@@ -715,10 +735,10 @@ export class TAPI extends EventEmitter {
       dwConnectedIDOffset: 0,
       dwConnectedIDNameSize: 0,
       dwConnectedIDNameOffset: 0,
-      ConnectedID: destAddress
+      ConnectedID: destAddress,
     };
   }
-  
+
   // WebRTC support
   private isWebRTCSupported(): boolean {
     return !!(
@@ -728,14 +748,14 @@ export class TAPI extends EventEmitter {
       navigator.mediaDevices.getUserMedia
     );
   }
-  
+
   private async getUserMedia(): Promise<MediaStream | null> {
     if (!this.isWebRTCSupported()) return null;
-    
+
     try {
       this.localStream = await navigator.mediaDevices.getUserMedia({
         audio: true,
-        video: false
+        video: false,
       });
       return this.localStream;
     } catch (error) {
@@ -743,17 +763,17 @@ export class TAPI extends EventEmitter {
       return null;
     }
   }
-  
+
   private async establishWebRTCCall(hCall: number, remoteAddress: string): Promise<void> {
     if (!this.isWebRTCSupported()) return;
-    
+
     try {
       const pc = new RTCPeerConnection({
-        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
       });
-      
+
       this.peerConnections.set(hCall, pc);
-      
+
       // Get user media
       const stream = await this.getUserMedia();
       if (stream) {
@@ -761,36 +781,36 @@ export class TAPI extends EventEmitter {
           pc.addTrack(track, stream);
         });
       }
-      
+
       // Set up event handlers
-      pc.onicecandidate = (event) => {
+      pc.onicecandidate = event => {
         if (event.candidate) {
           this.emit('iceCandidate', { hCall, candidate: event.candidate });
         }
       };
-      
-      pc.ontrack = (event) => {
+
+      pc.ontrack = event => {
         this.emit('remoteStream', { hCall, stream: event.streams[0] });
       };
-      
+
       // Create offer
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
-      
+
       this.emit('webRTCOffer', { hCall, offer, remoteAddress });
     } catch (error) {
       console.error('Failed to establish WebRTC call:', error);
     }
   }
-  
+
   // Simulate incoming call
   public simulateIncomingCall(callerID: string, callerName?: string): number {
     if (!this.initialized) return 0;
-    
+
     // Find an available line
     const line = Array.from(this.lines.values()).find(l => l.hLine !== 0);
     if (!line) return 0;
-    
+
     const hCall = this.nextCallHandle++;
     const call: TAPICall = {
       hCall,
@@ -801,16 +821,16 @@ export class TAPI extends EventEmitter {
         ...this.createCallInfo(hCall, line.hLine, ''),
         dwOrigin: 2, // Inbound
         CallerID: callerID,
-        CallerIDName: callerName || callerID
-      }
+        CallerIDName: callerName || callerID,
+      },
     };
-    
+
     this.calls.set(hCall, call);
     line.calls.set(hCall, call);
-    
+
     this.emit('incomingCall', { hCall, callerID, callerName });
     this.emit('callStateChange', { hCall, state: call.state });
-    
+
     return hCall;
   }
 }
@@ -819,7 +839,7 @@ export class TAPI extends EventEmitter {
 export class SimpleTAPI {
   private static tapi = TAPI.getInstance();
   private static currentLine = 0;
-  
+
   // Initialize TAPI
   public static Initialize(): number {
     const numDevices = { value: 0 };
@@ -828,81 +848,77 @@ export class SimpleTAPI {
       TAPIVersion.TAPI_VERSION_2_0,
       numDevices
     );
-    
+
     if (result !== TAPIErrorCode.TAPI_SUCCESS) {
       throw new Error(`TAPI initialization failed: ${result}`);
     }
-    
+
     return numDevices.value;
   }
-  
+
   // Shutdown TAPI
   public static Shutdown(): void {
     this.tapi.lineShutdown();
     this.currentLine = 0;
   }
-  
+
   // Open line
   public static OpenLine(deviceID: number): number {
-    const result = this.tapi.lineOpen(
-      deviceID,
-      TAPIMediaMode.LINEMEDIAMODE_INTERACTIVEVOICE,
-      0
-    );
-    
+    const result = this.tapi.lineOpen(deviceID, TAPIMediaMode.LINEMEDIAMODE_INTERACTIVEVOICE, 0);
+
     if (result.errorCode !== TAPIErrorCode.TAPI_SUCCESS) {
       throw new Error(`Failed to open line: ${result.errorCode}`);
     }
-    
+
     this.currentLine = result.hLine;
     return result.hLine;
   }
-  
+
   // Make call
   public static async MakeCall(phoneNumber: string): Promise<number> {
     if (!this.currentLine) {
       throw new Error('No line open');
     }
-    
+
     const result = await this.tapi.lineMakeCall(
       this.currentLine,
       phoneNumber,
       1 // US country code
     );
-    
+
     if (result.errorCode !== TAPIErrorCode.TAPI_SUCCESS) {
       throw new Error(`Failed to make call: ${result.errorCode}`);
     }
-    
+
     return result.hCall;
   }
-  
+
   // Answer call
   public static async AnswerCall(hCall: number): Promise<void> {
     const result = await this.tapi.lineAnswer(hCall, null, 0);
-    
+
     if (result !== TAPIErrorCode.TAPI_SUCCESS) {
       throw new Error(`Failed to answer call: ${result}`);
     }
   }
-  
+
   // Drop call
   public static DropCall(hCall: number): void {
     const result = this.tapi.lineDrop(hCall, null, 0);
-    
+
     if (result !== TAPIErrorCode.TAPI_SUCCESS) {
       throw new Error(`Failed to drop call: ${result}`);
     }
   }
-  
+
   // Get call status
   public static GetCallStatus(hCall: number): TAPICallState {
     const result = this.tapi.lineGetCallStatus(hCall);
-    
+
     if (result.errorCode !== TAPIErrorCode.TAPI_SUCCESS) {
       throw new Error(`Failed to get call status: ${result.errorCode}`);
     }
-    
+
     return result.state;
   }
 }

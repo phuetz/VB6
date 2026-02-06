@@ -8,7 +8,7 @@ export enum ButtonStyle {
   ButtonGroup = 'ButtonGroup',
   Separator = 'Separator',
   Placeholder = 'Placeholder',
-  DropDown = 'DropDown'
+  DropDown = 'DropDown',
 }
 
 export enum ButtonState {
@@ -17,13 +17,13 @@ export enum ButtonState {
   Enabled = 'Enabled',
   Disabled = 'Disabled',
   Hidden = 'Hidden',
-  Indeterminate = 'Indeterminate'
+  Indeterminate = 'Indeterminate',
 }
 
 export enum ImageListType {
   Normal = 'Normal',
   Hot = 'Hot',
-  Disabled = 'Disabled'
+  Disabled = 'Disabled',
 }
 
 export interface ToolbarButton {
@@ -119,7 +119,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
   onToolbarChange,
   onGenerateCode,
   onPreviewToolbar,
-  onSaveTemplate
+  onSaveTemplate,
 }) => {
   const [toolbarStructure, setToolbarStructure] = useState<ToolbarStructure>({
     id: 'toolbar1',
@@ -142,10 +142,10 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
       hoverSelection: true,
       hotTracking: true,
       textAlign: 'Right',
-      style: 'Standard'
+      style: 'Standard',
     },
     version: '1.0',
-    lastModified: new Date()
+    lastModified: new Date(),
   });
   const [selectedButton, setSelectedButton] = useState<ToolbarButton | null>(null);
   const [draggedButton, setDraggedButton] = useState<ToolbarButton | null>(null);
@@ -161,12 +161,17 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
     key: '',
     caption: '',
     tooltipText: '',
-    description: ''
+    description: '',
   });
-  const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number; button?: ToolbarButton }>({
+  const [contextMenu, setContextMenu] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    button?: ToolbarButton;
+  }>({
     visible: false,
     x: 0,
-    y: 0
+    y: 0,
   });
 
   const eventEmitter = useRef(new EventEmitter());
@@ -194,8 +199,8 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
           { index: 5, key: 'paste', filename: 'paste.bmp' },
           { index: 6, key: 'print', filename: 'print.bmp' },
           { index: 7, key: 'find', filename: 'find.bmp' },
-          { index: 8, key: 'help', filename: 'help.bmp' }
-        ]
+          { index: 8, key: 'help', filename: 'help.bmp' },
+        ],
       };
 
       const defaultButtons: ToolbarButton[] = [
@@ -220,7 +225,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
           group: 0,
           mixedState: false,
           useMaskColor: true,
-          maskColor: '#FF00FF'
+          maskColor: '#FF00FF',
         },
         {
           id: 'btn2',
@@ -243,7 +248,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
           group: 0,
           mixedState: false,
           useMaskColor: true,
-          maskColor: '#FF00FF'
+          maskColor: '#FF00FF',
         },
         {
           id: 'btn3',
@@ -266,7 +271,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
           group: 0,
           mixedState: false,
           useMaskColor: true,
-          maskColor: '#FF00FF'
+          maskColor: '#FF00FF',
         },
         {
           id: 'sep1',
@@ -289,7 +294,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
           group: 0,
           mixedState: false,
           useMaskColor: false,
-          maskColor: ''
+          maskColor: '',
         },
         {
           id: 'btn4',
@@ -312,7 +317,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
           group: 1,
           mixedState: false,
           useMaskColor: true,
-          maskColor: '#FF00FF'
+          maskColor: '#FF00FF',
         },
         {
           id: 'btn5',
@@ -335,7 +340,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
           group: 1,
           mixedState: false,
           useMaskColor: true,
-          maskColor: '#FF00FF'
+          maskColor: '#FF00FF',
         },
         {
           id: 'btn6',
@@ -358,8 +363,8 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
           group: 1,
           mixedState: false,
           useMaskColor: true,
-          maskColor: '#FF00FF'
-        }
+          maskColor: '#FF00FF',
+        },
       ];
 
       const defaultToolbar: ToolbarStructure = {
@@ -370,7 +375,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
         imageLists: [defaultImageList],
         settings: toolbarStructure.settings,
         version: '1.0',
-        lastModified: new Date()
+        lastModified: new Date(),
       };
 
       setToolbarStructure(defaultToolbar);
@@ -384,7 +389,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
         description: 'New, Open, Save, Cut, Copy, Paste buttons',
         category: 'Standard',
         isBuiltIn: true,
-        structure: []
+        structure: [],
       },
       {
         id: 'formatting',
@@ -392,7 +397,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
         description: 'Font formatting buttons',
         category: 'Text',
         isBuiltIn: true,
-        structure: []
+        structure: [],
       },
       {
         id: 'debug',
@@ -400,8 +405,8 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
         description: 'Debug control buttons',
         category: 'Development',
         isBuiltIn: true,
-        structure: []
-      }
+        structure: [],
+      },
     ];
     setTemplates(builtInTemplates);
   }, [initialToolbar, formName, toolbarStructure.settings]);
@@ -415,60 +420,65 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
   const generateButtonKey = useCallback((caption: string): string => {
     const cleanCaption = caption
       .replace(/[&\-\s.]/g, '')
-      .replace(/\w+/g, (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
-    
+      .replace(/\w+/g, word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+
     return `btn${cleanCaption || 'Button'}`;
   }, []);
 
   // Add new toolbar button
-  const addToolbarButton = useCallback((insertIndex?: number) => {
-    const newButton: ToolbarButton = {
-      id: `btn_${Date.now()}`,
-      key: newButtonProperties.key || generateButtonKey(newButtonProperties.caption || 'Button'),
-      index: insertIndex ?? toolbarStructure.buttons.length,
-      caption: newButtonProperties.caption || (newButtonType === ButtonStyle.Separator ? '' : 'Button'),
-      description: newButtonProperties.description || '',
-      tooltipText: newButtonProperties.tooltipText || newButtonProperties.caption || '',
-      enabled: true,
-      visible: true,
-      style: newButtonType,
-      state: newButtonType === ButtonStyle.Separator ? ButtonState.Enabled : ButtonState.Unpressed,
-      value: 0,
-      tag: '',
-      image: newButtonType === ButtonStyle.Separator ? -1 : 0,
-      width: newButtonType === ButtonStyle.Separator ? 8 : 23,
-      minWidth: newButtonType === ButtonStyle.Separator ? 8 : 23,
-      maxWidth: newButtonType === ButtonStyle.Separator ? 8 : 100,
-      allowCustomize: true,
-      group: 0,
-      mixedState: false,
-      useMaskColor: newButtonType !== ButtonStyle.Separator,
-      maskColor: '#FF00FF'
-    };
-
-    setToolbarStructure(prev => {
-      const newButtons = [...prev.buttons];
-      if (insertIndex !== undefined) {
-        newButtons.splice(insertIndex, 0, newButton);
-        // Update indices of subsequent buttons
-        for (let i = insertIndex + 1; i < newButtons.length; i++) {
-          newButtons[i].index = i;
-        }
-      } else {
-        newButtons.push(newButton);
-      }
-
-      return {
-        ...prev,
-        buttons: newButtons,
-        lastModified: new Date()
+  const addToolbarButton = useCallback(
+    (insertIndex?: number) => {
+      const newButton: ToolbarButton = {
+        id: `btn_${Date.now()}`,
+        key: newButtonProperties.key || generateButtonKey(newButtonProperties.caption || 'Button'),
+        index: insertIndex ?? toolbarStructure.buttons.length,
+        caption:
+          newButtonProperties.caption || (newButtonType === ButtonStyle.Separator ? '' : 'Button'),
+        description: newButtonProperties.description || '',
+        tooltipText: newButtonProperties.tooltipText || newButtonProperties.caption || '',
+        enabled: true,
+        visible: true,
+        style: newButtonType,
+        state:
+          newButtonType === ButtonStyle.Separator ? ButtonState.Enabled : ButtonState.Unpressed,
+        value: 0,
+        tag: '',
+        image: newButtonType === ButtonStyle.Separator ? -1 : 0,
+        width: newButtonType === ButtonStyle.Separator ? 8 : 23,
+        minWidth: newButtonType === ButtonStyle.Separator ? 8 : 23,
+        maxWidth: newButtonType === ButtonStyle.Separator ? 8 : 100,
+        allowCustomize: true,
+        group: 0,
+        mixedState: false,
+        useMaskColor: newButtonType !== ButtonStyle.Separator,
+        maskColor: '#FF00FF',
       };
-    });
 
-    setSelectedButton(newButton);
-    setNewButtonDialog(false);
-    setNewButtonProperties({ key: '', caption: '', tooltipText: '', description: '' });
-  }, [newButtonType, newButtonProperties, generateButtonKey, toolbarStructure.buttons.length]);
+      setToolbarStructure(prev => {
+        const newButtons = [...prev.buttons];
+        if (insertIndex !== undefined) {
+          newButtons.splice(insertIndex, 0, newButton);
+          // Update indices of subsequent buttons
+          for (let i = insertIndex + 1; i < newButtons.length; i++) {
+            newButtons[i].index = i;
+          }
+        } else {
+          newButtons.push(newButton);
+        }
+
+        return {
+          ...prev,
+          buttons: newButtons,
+          lastModified: new Date(),
+        };
+      });
+
+      setSelectedButton(newButton);
+      setNewButtonDialog(false);
+      setNewButtonProperties({ key: '', caption: '', tooltipText: '', description: '' });
+    },
+    [newButtonType, newButtonProperties, generateButtonKey, toolbarStructure.buttons.length]
+  );
 
   // Update toolbar button
   const updateToolbarButton = useCallback((buttonId: string, updates: Partial<ToolbarButton>) => {
@@ -477,40 +487,43 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
       buttons: prev.buttons.map(button =>
         button.id === buttonId ? { ...button, ...updates } : button
       ),
-      lastModified: new Date()
+      lastModified: new Date(),
     }));
   }, []);
 
   // Delete toolbar button
-  const deleteToolbarButton = useCallback((buttonId: string) => {
-    setToolbarStructure(prev => {
-      const newButtons = prev.buttons
-        .filter(button => button.id !== buttonId)
-        .map((button, index) => ({ ...button, index }));
+  const deleteToolbarButton = useCallback(
+    (buttonId: string) => {
+      setToolbarStructure(prev => {
+        const newButtons = prev.buttons
+          .filter(button => button.id !== buttonId)
+          .map((button, index) => ({ ...button, index }));
 
-      return {
-        ...prev,
-        buttons: newButtons,
-        lastModified: new Date()
-      };
-    });
+        return {
+          ...prev,
+          buttons: newButtons,
+          lastModified: new Date(),
+        };
+      });
 
-    if (selectedButton?.id === buttonId) {
-      setSelectedButton(null);
-    }
-  }, [selectedButton]);
+      if (selectedButton?.id === buttonId) {
+        setSelectedButton(null);
+      }
+    },
+    [selectedButton]
+  );
 
   // Move toolbar button
   const moveToolbarButton = useCallback((buttonId: string, targetIndex: number) => {
     setToolbarStructure(prev => {
       const buttons = [...prev.buttons];
       const buttonIndex = buttons.findIndex(b => b.id === buttonId);
-      
+
       if (buttonIndex === -1) return prev;
-      
+
       const [movedButton] = buttons.splice(buttonIndex, 1);
       buttons.splice(targetIndex, 0, movedButton);
-      
+
       // Update all indices
       buttons.forEach((button, index) => {
         button.index = index;
@@ -519,7 +532,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
       return {
         ...prev,
         buttons,
-        lastModified: new Date()
+        lastModified: new Date(),
       };
     });
   }, []);
@@ -560,13 +573,15 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
   const renderToolbarPreview = useCallback(() => {
     return (
       <div className="p-4">
-        <div 
+        <div
           className={`flex items-center gap-1 p-1 ${
-            toolbarStructure.settings.appearance === 'Flat' ? 'bg-gray-100' : 'bg-gray-200 border border-gray-400'
+            toolbarStructure.settings.appearance === 'Flat'
+              ? 'bg-gray-100'
+              : 'bg-gray-200 border border-gray-400'
           }`}
-          style={{ 
+          style={{
             height: `${toolbarStructure.settings.buttonHeight + 4}px`,
-            flexWrap: toolbarStructure.settings.wrappable ? 'wrap' : 'nowrap'
+            flexWrap: toolbarStructure.settings.wrappable ? 'wrap' : 'nowrap',
           }}
         >
           {toolbarStructure.buttons
@@ -581,7 +596,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
                   width: button.style === ButtonStyle.Separator ? '2px' : `${button.width}px`,
                   height: `${toolbarStructure.settings.buttonHeight}px`,
                   minWidth: `${button.minWidth}px`,
-                  maxWidth: `${button.maxWidth}px`
+                  maxWidth: `${button.maxWidth}px`,
                 }}
                 title={button.tooltipText}
               >
@@ -597,9 +612,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
                     {button.caption && (
                       <span className="truncate max-w-full">{button.caption}</span>
                     )}
-                    {button.style === ButtonStyle.DropDown && (
-                      <span className="ml-1">▼</span>
-                    )}
+                    {button.style === ButtonStyle.DropDown && <span className="ml-1">▼</span>}
                   </div>
                 )}
               </div>
@@ -623,7 +636,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
         if (contextMenu.button) {
           setNewButtonDialog(true);
         }
-      }
+      },
     },
     {
       label: 'Insert Button After',
@@ -631,7 +644,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
         if (contextMenu.button) {
           setNewButtonDialog(true);
         }
-      }
+      },
     },
     {
       label: 'Insert Separator',
@@ -658,13 +671,13 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
             group: 0,
             mixedState: false,
             useMaskColor: false,
-            maskColor: ''
+            maskColor: '',
           };
 
           setToolbarStructure(prev => {
             const newButtons = [...prev.buttons];
             newButtons.splice(contextMenu.button!.index + 1, 0, separatorButton);
-            
+
             // Update indices
             for (let i = contextMenu.button!.index + 1; i < newButtons.length; i++) {
               newButtons[i].index = i;
@@ -673,11 +686,11 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
             return {
               ...prev,
               buttons: newButtons,
-              lastModified: new Date()
+              lastModified: new Date(),
             };
           });
         }
-      }
+      },
     },
     {
       label: 'Delete Button',
@@ -685,7 +698,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
         if (contextMenu.button) {
           deleteToolbarButton(contextMenu.button.id);
         }
-      }
+      },
     },
     {
       label: 'Button Properties',
@@ -694,8 +707,8 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
           setSelectedButton(contextMenu.button);
           setShowProperties(true);
         }
-      }
-    }
+      },
+    },
   ];
 
   return (
@@ -715,7 +728,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
           >
             ➕
           </button>
-          
+
           <button
             onClick={() => setShowImageEditor(true)}
             className="px-2 py-1 text-xs bg-purple-500 text-white rounded hover:bg-purple-600"
@@ -723,7 +736,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
           >
             🖼️
           </button>
-          
+
           <button
             onClick={() => setShowTemplateDialog(true)}
             className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -731,7 +744,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
           >
             📋
           </button>
-          
+
           <button
             onClick={() => setShowPreview(!showPreview)}
             className={`px-2 py-1 text-xs rounded ${
@@ -741,7 +754,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
           >
             👁️
           </button>
-          
+
           <button
             onClick={() => setShowProperties(!showProperties)}
             className={`px-2 py-1 text-xs rounded ${
@@ -761,7 +774,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
           <div className="p-2 bg-gray-50 border-b border-gray-200">
             <h4 className="font-medium text-gray-700">Toolbar Buttons</h4>
           </div>
-          
+
           <div ref={toolbarRef} className="flex-1 overflow-y-auto">
             {toolbarStructure.buttons.map((button, index) => {
               const isSelected = selectedButton?.id === button.id;
@@ -773,27 +786,27 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
                     isSelected ? 'bg-blue-100' : ''
                   }`}
                   onClick={() => setSelectedButton(button)}
-                  onContextMenu={(e) => {
+                  onContextMenu={e => {
                     e.preventDefault();
                     setContextMenu({
                       visible: true,
                       x: e.clientX,
                       y: e.clientY,
-                      button
+                      button,
                     });
                   }}
                   draggable
-                  onDragStart={(e) => {
+                  onDragStart={e => {
                     setDraggedButton(button);
                     e.dataTransfer.effectAllowed = 'move';
                   }}
-                  onDragOver={(e) => {
+                  onDragOver={e => {
                     if (draggedButton && draggedButton.id !== button.id) {
                       e.preventDefault();
                       e.dataTransfer.dropEffect = 'move';
                     }
                   }}
-                  onDrop={(e) => {
+                  onDrop={e => {
                     e.preventDefault();
                     if (draggedButton && draggedButton.id !== button.id) {
                       moveToolbarButton(draggedButton.id, index);
@@ -802,47 +815,40 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
                   }}
                 >
                   {/* Index */}
-                  <div className="w-8 text-xs text-gray-500 text-center">
-                    {button.index}
-                  </div>
+                  <div className="w-8 text-xs text-gray-500 text-center">{button.index}</div>
 
                   {/* Style Icon */}
                   <span className="w-6 text-center">{getButtonStyleIcon(button.style)}</span>
 
                   {/* Key/Caption */}
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-gray-800 truncate">
-                      {button.key}
-                    </div>
+                    <div className="font-medium text-gray-800 truncate">{button.key}</div>
                     {button.caption && (
-                      <div className="text-xs text-gray-600 truncate">
-                        {button.caption}
-                      </div>
+                      <div className="text-xs text-gray-600 truncate">{button.caption}</div>
                     )}
                   </div>
 
                   {/* Image Index */}
                   {button.image >= 0 && (
-                    <div className="w-8 text-xs text-gray-500 text-center">
-                      #{button.image}
-                    </div>
+                    <div className="w-8 text-xs text-gray-500 text-center">#{button.image}</div>
                   )}
 
                   {/* Status indicators */}
                   <div className="flex items-center gap-1">
                     {!button.enabled && <span className="text-gray-400">🚫</span>}
                     {!button.visible && <span className="text-red-600">👁️</span>}
-                    {button.state === ButtonState.Pressed && <span className="text-blue-600">📌</span>}
+                    {button.state === ButtonState.Pressed && (
+                      <span className="text-blue-600">📌</span>
+                    )}
                   </div>
                 </div>
               );
             })}
           </div>
-          
+
           <div className="p-2 border-t border-gray-200 bg-gray-50">
             <div className="text-xs text-gray-600">
-              Buttons: {toolbarStructure.buttons.length} | 
-              Selected: {selectedButton?.key || 'None'}
+              Buttons: {toolbarStructure.buttons.length} | Selected: {selectedButton?.key || 'None'}
             </div>
           </div>
         </div>
@@ -853,7 +859,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
             <div className="p-2 bg-gray-50 border-b border-gray-200">
               <h4 className="font-medium text-gray-700">Button Properties</h4>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-2">
               <div className="space-y-3">
                 <div>
@@ -861,131 +867,163 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
                   <input
                     type="text"
                     value={selectedButton.key}
-                    onChange={(e) => updateToolbarButton(selectedButton.id, { key: e.target.value })}
+                    onChange={e => updateToolbarButton(selectedButton.id, { key: e.target.value })}
                     className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Caption</label>
                   <input
                     type="text"
                     value={selectedButton.caption}
-                    onChange={(e) => updateToolbarButton(selectedButton.id, { caption: e.target.value })}
+                    onChange={e =>
+                      updateToolbarButton(selectedButton.id, { caption: e.target.value })
+                    }
                     className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
                   <input
                     type="text"
                     value={selectedButton.description}
-                    onChange={(e) => updateToolbarButton(selectedButton.id, { description: e.target.value })}
+                    onChange={e =>
+                      updateToolbarButton(selectedButton.id, { description: e.target.value })
+                    }
                     className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">ToolTip Text</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    ToolTip Text
+                  </label>
                   <input
                     type="text"
                     value={selectedButton.tooltipText}
-                    onChange={(e) => updateToolbarButton(selectedButton.id, { tooltipText: e.target.value })}
+                    onChange={e =>
+                      updateToolbarButton(selectedButton.id, { tooltipText: e.target.value })
+                    }
                     className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Style</label>
                   <select
                     value={selectedButton.style}
-                    onChange={(e) => updateToolbarButton(selectedButton.id, { style: e.target.value as ButtonStyle })}
+                    onChange={e =>
+                      updateToolbarButton(selectedButton.id, {
+                        style: e.target.value as ButtonStyle,
+                      })
+                    }
                     className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                   >
                     {Object.values(ButtonStyle).map(style => (
-                      <option key={style} value={style}>{style}</option>
+                      <option key={style} value={style}>
+                        {style}
+                      </option>
                     ))}
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Image</label>
                   <input
                     type="number"
                     min="-1"
                     value={selectedButton.image}
-                    onChange={(e) => updateToolbarButton(selectedButton.id, { image: parseInt(e.target.value) })}
+                    onChange={e =>
+                      updateToolbarButton(selectedButton.id, { image: parseInt(e.target.value) })
+                    }
                     className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Width</label>
                   <input
                     type="number"
                     min="8"
                     value={selectedButton.width}
-                    onChange={(e) => updateToolbarButton(selectedButton.id, { width: parseInt(e.target.value) })}
+                    onChange={e =>
+                      updateToolbarButton(selectedButton.id, { width: parseInt(e.target.value) })
+                    }
                     className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Tag</label>
                   <input
                     type="text"
                     value={selectedButton.tag}
-                    onChange={(e) => updateToolbarButton(selectedButton.id, { tag: e.target.value })}
+                    onChange={e => updateToolbarButton(selectedButton.id, { tag: e.target.value })}
                     className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 text-xs">
                     <input
                       type="checkbox"
                       checked={selectedButton.enabled}
-                      onChange={(e) => updateToolbarButton(selectedButton.id, { enabled: e.target.checked })}
+                      onChange={e =>
+                        updateToolbarButton(selectedButton.id, { enabled: e.target.checked })
+                      }
                     />
                     Enabled
                   </label>
-                  
+
                   <label className="flex items-center gap-2 text-xs">
                     <input
                       type="checkbox"
                       checked={selectedButton.visible}
-                      onChange={(e) => updateToolbarButton(selectedButton.id, { visible: e.target.checked })}
+                      onChange={e =>
+                        updateToolbarButton(selectedButton.id, { visible: e.target.checked })
+                      }
                     />
                     Visible
                   </label>
-                  
+
                   <label className="flex items-center gap-2 text-xs">
                     <input
                       type="checkbox"
                       checked={selectedButton.allowCustomize}
-                      onChange={(e) => updateToolbarButton(selectedButton.id, { allowCustomize: e.target.checked })}
+                      onChange={e =>
+                        updateToolbarButton(selectedButton.id, { allowCustomize: e.target.checked })
+                      }
                     />
                     Allow Customize
                   </label>
-                  
+
                   <label className="flex items-center gap-2 text-xs">
                     <input
                       type="checkbox"
                       checked={selectedButton.useMaskColor}
-                      onChange={(e) => updateToolbarButton(selectedButton.id, { useMaskColor: e.target.checked })}
+                      onChange={e =>
+                        updateToolbarButton(selectedButton.id, { useMaskColor: e.target.checked })
+                      }
                     />
                     Use Mask Color
                   </label>
                 </div>
-                
+
                 {selectedButton.useMaskColor && (
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Mask Color</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Mask Color
+                    </label>
                     <input
                       type="color"
                       value={selectedButton.maskColor}
-                      onChange={(e) => updateToolbarButton(selectedButton.id, { maskColor: e.target.value })}
+                      onChange={e =>
+                        updateToolbarButton(selectedButton.id, { maskColor: e.target.value })
+                      }
                       className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                     />
                   </div>
@@ -1022,21 +1060,23 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96">
             <h3 className="text-lg font-medium mb-4">Add Toolbar Button</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Button Type</label>
                 <select
                   value={newButtonType}
-                  onChange={(e) => setNewButtonType(e.target.value as ButtonStyle)}
+                  onChange={e => setNewButtonType(e.target.value as ButtonStyle)}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 >
                   {Object.values(ButtonStyle).map(style => (
-                    <option key={style} value={style}>{style}</option>
+                    <option key={style} value={style}>
+                      {style}
+                    </option>
                   ))}
                 </select>
               </div>
-              
+
               {newButtonType !== ButtonStyle.Separator && (
                 <>
                   <div>
@@ -1044,29 +1084,37 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
                     <input
                       type="text"
                       value={newButtonProperties.key}
-                      onChange={(e) => setNewButtonProperties(prev => ({ ...prev, key: e.target.value }))}
+                      onChange={e =>
+                        setNewButtonProperties(prev => ({ ...prev, key: e.target.value }))
+                      }
                       placeholder="btnButton"
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Caption</label>
                     <input
                       type="text"
                       value={newButtonProperties.caption}
-                      onChange={(e) => setNewButtonProperties(prev => ({ ...prev, caption: e.target.value }))}
+                      onChange={e =>
+                        setNewButtonProperties(prev => ({ ...prev, caption: e.target.value }))
+                      }
                       placeholder="Button"
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">ToolTip Text</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      ToolTip Text
+                    </label>
                     <input
                       type="text"
                       value={newButtonProperties.tooltipText}
-                      onChange={(e) => setNewButtonProperties(prev => ({ ...prev, tooltipText: e.target.value }))}
+                      onChange={e =>
+                        setNewButtonProperties(prev => ({ ...prev, tooltipText: e.target.value }))
+                      }
                       placeholder="Button tooltip"
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
@@ -1074,7 +1122,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
                 </>
               )}
             </div>
-            
+
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => setNewButtonDialog(false)}
@@ -1099,7 +1147,7 @@ export const ToolbarDesigner: React.FC<ToolbarDesignerProps> = ({
           className="fixed bg-white border border-gray-300 shadow-lg z-50 py-1"
           style={{
             left: contextMenu.x,
-            top: contextMenu.y
+            top: contextMenu.y,
           }}
           onMouseLeave={() => setContextMenu(prev => ({ ...prev, visible: false }))}
         >

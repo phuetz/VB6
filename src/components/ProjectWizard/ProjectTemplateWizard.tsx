@@ -1,5 +1,17 @@
 import React, { useState, useMemo } from 'react';
-import { X, Search, Filter, Star, Clock, Code, Database, Palette, Wrench, Gamepad2, Briefcase } from 'lucide-react';
+import {
+  X,
+  Search,
+  Filter,
+  Star,
+  Clock,
+  Code,
+  Database,
+  Palette,
+  Wrench,
+  Gamepad2,
+  Briefcase,
+} from 'lucide-react';
 import { projectTemplates, ProjectTemplate } from '../../data/projectTemplates';
 import { useVB6Store } from '../../stores/vb6Store';
 import { VB6Control } from '../../types/vb6';
@@ -16,7 +28,7 @@ const categoryIcons = {
   graphics: <Palette size={20} />,
   utilities: <Wrench size={20} />,
   games: <Gamepad2 size={20} />,
-  business: <Briefcase size={20} />
+  business: <Briefcase size={20} />,
 };
 
 const categoryColors = {
@@ -25,13 +37,13 @@ const categoryColors = {
   graphics: '#FF9800',
   utilities: '#9C27B0',
   games: '#F44336',
-  business: '#00BCD4'
+  business: '#00BCD4',
 };
 
 export const ProjectTemplateWizard: React.FC<ProjectTemplateWizardProps> = ({
   visible,
   onClose,
-  onCreateProject
+  onCreateProject,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
@@ -57,10 +69,11 @@ export const ProjectTemplateWizard: React.FC<ProjectTemplateWizardProps> = ({
     // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      templates = templates.filter(t =>
-        t.name.toLowerCase().includes(query) ||
-        t.description.toLowerCase().includes(query) ||
-        t.tags.some(tag => tag.toLowerCase().includes(query))
+      templates = templates.filter(
+        t =>
+          t.name.toLowerCase().includes(query) ||
+          t.description.toLowerCase().includes(query) ||
+          t.tags.some(tag => tag.toLowerCase().includes(query))
       );
     }
 
@@ -80,7 +93,7 @@ export const ProjectTemplateWizard: React.FC<ProjectTemplateWizardProps> = ({
       updateFormProperties({
         Caption: firstForm.caption,
         Width: firstForm.width,
-        Height: firstForm.height
+        Height: firstForm.height,
       });
 
       // Add controls from template
@@ -104,8 +117,10 @@ export const ProjectTemplateWizard: React.FC<ProjectTemplateWizardProps> = ({
           FontItalic: false,
           FontUnderline: false,
           ForeColor: controlData.ForeColor || '#000000',
-          BackColor: controlData.BackColor !== undefined ? 
-            `#${controlData.BackColor.toString(16).padStart(6, '0')}` : '#F0F0F0',
+          BackColor:
+            controlData.BackColor !== undefined
+              ? `#${controlData.BackColor.toString(16).padStart(6, '0')}`
+              : '#F0F0F0',
           BorderStyle: controlData.BorderStyle || 0,
           Value: controlData.Value || false,
           Min: 0,
@@ -115,7 +130,7 @@ export const ProjectTemplateWizard: React.FC<ProjectTemplateWizardProps> = ({
           Orientation: 0,
           TickStyle: 0,
           TickFrequency: 1,
-          ...controlData
+          ...controlData,
         };
         addControl(control);
       });
@@ -131,10 +146,14 @@ export const ProjectTemplateWizard: React.FC<ProjectTemplateWizardProps> = ({
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return '#4CAF50';
-      case 'intermediate': return '#FF9800';
-      case 'advanced': return '#F44336';
-      default: return '#757575';
+      case 'beginner':
+        return '#4CAF50';
+      case 'intermediate':
+        return '#FF9800';
+      case 'advanced':
+        return '#F44336';
+      default:
+        return '#757575';
     }
   };
 
@@ -146,10 +165,7 @@ export const ProjectTemplateWizard: React.FC<ProjectTemplateWizardProps> = ({
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-800">Project Templates</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -158,12 +174,15 @@ export const ProjectTemplateWizard: React.FC<ProjectTemplateWizardProps> = ({
         <div className="px-6 py-4 border-b border-gray-200 space-y-4">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <Search
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              size={20}
+            />
             <input
               type="text"
               placeholder="Search templates..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -175,7 +194,7 @@ export const ProjectTemplateWizard: React.FC<ProjectTemplateWizardProps> = ({
               <span className="text-sm text-gray-600">Category:</span>
               <select
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
+                onChange={e => setSelectedCategory(e.target.value)}
                 className="text-sm border border-gray-300 rounded px-2 py-1"
               >
                 <option value="all">All Categories</option>
@@ -192,7 +211,7 @@ export const ProjectTemplateWizard: React.FC<ProjectTemplateWizardProps> = ({
               <span className="text-sm text-gray-600">Difficulty:</span>
               <select
                 value={selectedDifficulty}
-                onChange={(e) => setSelectedDifficulty(e.target.value)}
+                onChange={e => setSelectedDifficulty(e.target.value)}
                 className="text-sm border border-gray-300 rounded px-2 py-1"
               >
                 <option value="all">All Levels</option>
@@ -213,7 +232,7 @@ export const ProjectTemplateWizard: React.FC<ProjectTemplateWizardProps> = ({
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4">
-              {filteredTemplates.map((template) => (
+              {filteredTemplates.map(template => (
                 <div
                   key={template.id}
                   className={`border rounded-lg p-4 cursor-pointer transition-all ${
@@ -225,31 +244,30 @@ export const ProjectTemplateWizard: React.FC<ProjectTemplateWizardProps> = ({
                   onDoubleClick={handleCreateProject}
                 >
                   <div className="flex items-start gap-3">
-                    <div 
-                      className="text-3xl"
-                      style={{ color: categoryColors[template.category] }}
-                    >
+                    <div className="text-3xl" style={{ color: categoryColors[template.category] }}>
                       {template.icon}
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold text-gray-800">{template.name}</h3>
                       <p className="text-sm text-gray-600 mt-1">{template.description}</p>
-                      
+
                       <div className="flex items-center gap-4 mt-3">
                         <div className="flex items-center gap-1">
                           <span style={{ color: categoryColors[template.category] }}>
                             {categoryIcons[template.category]}
                           </span>
-                          <span className="text-xs text-gray-500 capitalize">{template.category}</span>
+                          <span className="text-xs text-gray-500 capitalize">
+                            {template.category}
+                          </span>
                         </div>
-                        
+
                         <div className="flex items-center gap-1">
-                          <Star 
-                            size={14} 
+                          <Star
+                            size={14}
                             style={{ color: getDifficultyColor(template.difficulty) }}
                             fill={getDifficultyColor(template.difficulty)}
                           />
-                          <span 
+                          <span
                             className="text-xs capitalize"
                             style={{ color: getDifficultyColor(template.difficulty) }}
                           >
@@ -287,7 +305,9 @@ export const ProjectTemplateWizard: React.FC<ProjectTemplateWizardProps> = ({
         <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
           <div className="text-sm text-gray-600">
             {selectedTemplate ? (
-              <span>Selected: <strong>{selectedTemplate.name}</strong></span>
+              <span>
+                Selected: <strong>{selectedTemplate.name}</strong>
+              </span>
             ) : (
               <span>Select a template to get started</span>
             )}

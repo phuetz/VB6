@@ -18,20 +18,20 @@ const servers = [
     name: 'Main Server',
     script: 'src/index.ts',
     port: 3011,
-    env: { PORT: 3011 }
+    env: { PORT: 3011 },
   },
   {
     name: 'Collaboration Server',
     script: 'src/collaboration/collaboration.server.ts',
     port: 3012,
-    env: { COLLAB_PORT: 3012 }
+    env: { COLLAB_PORT: 3012 },
   },
   {
     name: 'AI Server',
     script: 'src/ai/ai.server.ts',
     port: 3013,
-    env: { AI_PORT: 3013 }
-  }
+    env: { AI_PORT: 3013 },
+  },
 ];
 
 // Color codes for console output
@@ -43,39 +43,47 @@ const colors = {
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
   magenta: '\x1b[35m',
-  cyan: '\x1b[36m'
+  cyan: '\x1b[36m',
 };
 
 // Start a server
 function startServer(config, colorIndex) {
   const color = Object.values(colors)[colorIndex + 2]; // Skip reset and bright
-  
-  console.log(`${color}${colors.bright}Starting ${config.name} on port ${config.port}...${colors.reset}`);
-  
+
+  console.log(
+    `${color}${colors.bright}Starting ${config.name} on port ${config.port}...${colors.reset}`
+  );
+
   const child = spawn('npx', ['ts-node', config.script], {
     cwd: __dirname,
     env: { ...process.env, ...config.env },
-    stdio: ['inherit', 'pipe', 'pipe']
+    stdio: ['inherit', 'pipe', 'pipe'],
   });
 
   // Handle stdout
-  child.stdout.on('data', (data) => {
-    const lines = data.toString().split('\n').filter(line => line.trim());
+  child.stdout.on('data', data => {
+    const lines = data
+      .toString()
+      .split('\n')
+      .filter(line => line.trim());
     lines.forEach(line => {
       console.log(`${color}[${config.name}]${colors.reset} ${line}`);
     });
   });
 
   // Handle stderr
-  child.stderr.on('data', (data) => {
-    const lines = data.toString().split('\n').filter(line => line.trim());
+  child.stderr.on('data', data => {
+    const lines = data
+      .toString()
+      .split('\n')
+      .filter(line => line.trim());
     lines.forEach(line => {
       console.error(`${colors.red}[${config.name} ERROR]${colors.reset} ${line}`);
     });
   });
 
   // Handle process exit
-  child.on('exit', (code) => {
+  child.on('exit', code => {
     console.log(`${color}[${config.name}]${colors.reset} Process exited with code ${code}`);
     if (code !== 0) {
       console.log(`${colors.yellow}Restarting ${config.name} in 5 seconds...${colors.reset}`);

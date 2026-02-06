@@ -8,10 +8,10 @@ interface MMControlProps {
 }
 
 // Microsoft Multimedia Control (MMControl) - VB6 Compatible
-export const MMControl: React.FC<MMControlProps> = ({ 
-  control, 
+export const MMControl: React.FC<MMControlProps> = ({
+  control,
   isDesignMode = false,
-  onPropertyChange 
+  onPropertyChange,
 }) => {
   // VB6 MMControl properties
   const {
@@ -59,7 +59,7 @@ export const MMControl: React.FC<MMControlProps> = ({
   const [isPaused, setIsPaused] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState<string>('');
-  
+
   // HTML5 Audio/Video refs
   const audioRef = useRef<HTMLAudioElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -68,8 +68,10 @@ export const MMControl: React.FC<MMControlProps> = ({
 
   // Determine media type from device type or file extension
   const getMediaType = useCallback(() => {
-    if (deviceType.toLowerCase().includes('video') || 
-        fileName.match(/\.(mp4|avi|wmv|mov|flv|webm|ogg)$/i)) {
+    if (
+      deviceType.toLowerCase().includes('video') ||
+      fileName.match(/\.(mp4|avi|wmv|mov|flv|webm|ogg)$/i)
+    ) {
       return 'video';
     }
     return 'audio';
@@ -96,7 +98,7 @@ export const MMControl: React.FC<MMControlProps> = ({
         mediaRef.current.src = fileName;
         setCurrentMode(MMControlModes.mmOpen);
         onPropertyChange?.('mode', MMControlModes.mmOpen);
-        
+
         // Fire VB6 events
         if (window.VB6Runtime?.fireEvent) {
           window.VB6Runtime.fireEvent(control.name, 'StatusUpdate');
@@ -145,7 +147,7 @@ export const MMControl: React.FC<MMControlProps> = ({
       const duration = Math.floor(mediaRef.current.duration * 1000);
       setCurrentLength(duration);
       onPropertyChange?.('length', duration);
-      
+
       if (window.VB6Runtime?.fireEvent) {
         window.VB6Runtime.fireEvent(control.name, 'StatusUpdate');
       }
@@ -157,7 +159,7 @@ export const MMControl: React.FC<MMControlProps> = ({
     setIsPaused(false);
     setCurrentMode(MMControlModes.mmPlaying);
     onPropertyChange?.('mode', MMControlModes.mmPlaying);
-    
+
     if (window.VB6Runtime?.fireEvent) {
       window.VB6Runtime.fireEvent(control.name, 'StatusUpdate');
     }
@@ -168,7 +170,7 @@ export const MMControl: React.FC<MMControlProps> = ({
     setIsPaused(true);
     setCurrentMode(MMControlModes.mmPaused);
     onPropertyChange?.('mode', MMControlModes.mmPaused);
-    
+
     if (window.VB6Runtime?.fireEvent) {
       window.VB6Runtime.fireEvent(control.name, 'StatusUpdate');
     }
@@ -179,104 +181,108 @@ export const MMControl: React.FC<MMControlProps> = ({
     setIsPaused(false);
     setCurrentMode(MMControlModes.mmStopped);
     onPropertyChange?.('mode', MMControlModes.mmStopped);
-    
+
     if (window.VB6Runtime?.fireEvent) {
       window.VB6Runtime.fireEvent(control.name, 'Done', currentPosition);
     }
   }, [control.name, currentPosition, onPropertyChange]);
 
-  const handleError = useCallback((e: any) => {
-    const errorMsg = `Media error: ${e.target.error?.message || 'Unknown error'}`;
-    setError(errorMsg);
-    setCurrentMode(MMControlModes.mmStopped);
-    
-    if (window.VB6Runtime?.fireEvent) {
-      window.VB6Runtime.fireEvent(control.name, 'StatusUpdate');
-    }
-  }, [control.name]);
+  const handleError = useCallback(
+    (e: any) => {
+      const errorMsg = `Media error: ${e.target.error?.message || 'Unknown error'}`;
+      setError(errorMsg);
+      setCurrentMode(MMControlModes.mmStopped);
 
-  // VB6 MMControl command processing
-  const executeCommand = useCallback((cmd: string) => {
-    if (!mediaRef.current) return;
-    
-    const commands = cmd.toLowerCase().split(' ');
-    const primaryCommand = commands[0];
-    
-    try {
-      switch (primaryCommand) {
-        case 'open':
-          if (fileName) {
-            mediaRef.current.src = fileName;
-            mediaRef.current.load();
-          }
-          break;
-          
-        case 'close':
-          mediaRef.current.src = '';
-          setCurrentMode(MMControlModes.mmNotOpen);
-          break;
-          
-        case 'play':
-          if (from > 0) {
-            mediaRef.current.currentTime = from / 1000;
-          }
-          mediaRef.current.play();
-          break;
-          
-        case 'stop':
-          mediaRef.current.pause();
-          mediaRef.current.currentTime = 0;
-          setCurrentPosition(0);
-          setCurrentMode(MMControlModes.mmStopped);
-          break;
-          
-        case 'pause':
-          mediaRef.current.pause();
-          break;
-          
-        case 'resume':
-          mediaRef.current.play();
-          break;
-          
-        case 'seek':
-          if (to > 0) {
-            mediaRef.current.currentTime = to / 1000;
-          } else if (position > 0) {
-            mediaRef.current.currentTime = position / 1000;
-          }
-          setCurrentMode(MMControlModes.mmSeeking);
-          break;
-          
-        case 'step': {
-          // Step forward/backward by frames (approximate)
-          const stepAmount = 1000 / 30; // Assume 30fps
-          mediaRef.current.currentTime += stepAmount / 1000;
-          break;
-        }
-          
-        case 'record':
-          // Recording not supported in browser, simulate
-          setIsRecording(true);
-          setCurrentMode(MMControlModes.mmRecording);
-          console.log('MMControl: Record command (simulated)');
-          break;
-          
-        case 'save':
-          console.log('MMControl: Save command (not supported in browser)');
-          break;
-          
-        default:
-          console.warn(`MMControl: Unknown command '${primaryCommand}'`);
-      }
-      
-      // Fire command complete event
       if (window.VB6Runtime?.fireEvent) {
         window.VB6Runtime.fireEvent(control.name, 'StatusUpdate');
       }
-    } catch (err: any) {
-      setError(`Command error: ${err.message}`);
-    }
-  }, [fileName, from, mediaRef, position, to, control.name]);
+    },
+    [control.name]
+  );
+
+  // VB6 MMControl command processing
+  const executeCommand = useCallback(
+    (cmd: string) => {
+      if (!mediaRef.current) return;
+
+      const commands = cmd.toLowerCase().split(' ');
+      const primaryCommand = commands[0];
+
+      try {
+        switch (primaryCommand) {
+          case 'open':
+            if (fileName) {
+              mediaRef.current.src = fileName;
+              mediaRef.current.load();
+            }
+            break;
+
+          case 'close':
+            mediaRef.current.src = '';
+            setCurrentMode(MMControlModes.mmNotOpen);
+            break;
+
+          case 'play':
+            if (from > 0) {
+              mediaRef.current.currentTime = from / 1000;
+            }
+            mediaRef.current.play();
+            break;
+
+          case 'stop':
+            mediaRef.current.pause();
+            mediaRef.current.currentTime = 0;
+            setCurrentPosition(0);
+            setCurrentMode(MMControlModes.mmStopped);
+            break;
+
+          case 'pause':
+            mediaRef.current.pause();
+            break;
+
+          case 'resume':
+            mediaRef.current.play();
+            break;
+
+          case 'seek':
+            if (to > 0) {
+              mediaRef.current.currentTime = to / 1000;
+            } else if (position > 0) {
+              mediaRef.current.currentTime = position / 1000;
+            }
+            setCurrentMode(MMControlModes.mmSeeking);
+            break;
+
+          case 'step': {
+            // Step forward/backward by frames (approximate)
+            const stepAmount = 1000 / 30; // Assume 30fps
+            mediaRef.current.currentTime += stepAmount / 1000;
+            break;
+          }
+
+          case 'record':
+            // Recording not supported in browser, simulate
+            setIsRecording(true);
+            setCurrentMode(MMControlModes.mmRecording);
+            break;
+
+          case 'save':
+            break;
+
+          default:
+            console.warn(`MMControl: Unknown command '${primaryCommand}'`);
+        }
+
+        // Fire command complete event
+        if (window.VB6Runtime?.fireEvent) {
+          window.VB6Runtime.fireEvent(control.name, 'StatusUpdate');
+        }
+      } catch (err: any) {
+        setError(`Command error: ${err.message}`);
+      }
+    },
+    [fileName, from, mediaRef, position, to, control.name]
+  );
 
   // Execute command when command property changes
   useEffect(() => {
@@ -286,43 +292,51 @@ export const MMControl: React.FC<MMControlProps> = ({
   }, [command, executeCommand, isDesignMode]);
 
   // Format time display
-  const formatTime = useCallback((milliseconds: number): string => {
-    switch (timeFormat) {
-      case 1: { // HMS
-        const hours = Math.floor(milliseconds / 3600000);
-        const minutes = Math.floor((milliseconds % 3600000) / 60000);
-        const seconds = Math.floor((milliseconds % 60000) / 1000);
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  const formatTime = useCallback(
+    (milliseconds: number): string => {
+      switch (timeFormat) {
+        case 1: {
+          // HMS
+          const hours = Math.floor(milliseconds / 3600000);
+          const minutes = Math.floor((milliseconds % 3600000) / 60000);
+          const seconds = Math.floor((milliseconds % 60000) / 1000);
+          return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        case 2: {
+          // MSFT (Minutes:Seconds:Frames:Tenths)
+          const mins = Math.floor(milliseconds / 60000);
+          const secs = Math.floor((milliseconds % 60000) / 1000);
+          const frames = Math.floor((milliseconds % 1000) / 33.33); // Assume 30fps
+          const tenths = Math.floor((milliseconds % 33.33) / 3.333);
+          return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}:${frames.toString().padStart(2, '0')}:${tenths}`;
+        }
+
+        case 3: // Frames
+          return Math.floor(milliseconds / 33.33).toString(); // Assume 30fps
+
+        default: // Milliseconds
+          return milliseconds.toString();
       }
-      
-      case 2: { // MSFT (Minutes:Seconds:Frames:Tenths)
-        const mins = Math.floor(milliseconds / 60000);
-        const secs = Math.floor((milliseconds % 60000) / 1000);
-        const frames = Math.floor((milliseconds % 1000) / 33.33); // Assume 30fps
-        const tenths = Math.floor((milliseconds % 33.33) / 3.333);
-        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}:${frames.toString().padStart(2, '0')}:${tenths}`;
-      }
-      
-      case 3: // Frames
-        return Math.floor(milliseconds / 33.33).toString(); // Assume 30fps
-      
-      default: // Milliseconds
-        return milliseconds.toString();
-    }
-  }, [timeFormat]);
+    },
+    [timeFormat]
+  );
 
   // Handle progress bar click
-  const handleProgressClick = useCallback((e: React.MouseEvent) => {
-    if (!mediaRef.current || !progressRef.current) return;
-    
-    const rect = progressRef.current.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const percentage = clickX / rect.width;
-    const newTime = percentage * mediaRef.current.duration;
-    
-    mediaRef.current.currentTime = newTime;
-    setCurrentPosition(Math.floor(newTime * 1000));
-  }, [mediaRef]);
+  const handleProgressClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (!mediaRef.current || !progressRef.current) return;
+
+      const rect = progressRef.current.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const percentage = clickX / rect.width;
+      const newTime = percentage * mediaRef.current.duration;
+
+      mediaRef.current.currentTime = newTime;
+      setCurrentPosition(Math.floor(newTime * 1000));
+    },
+    [mediaRef]
+  );
 
   if (!visible) return null;
 
@@ -409,7 +423,7 @@ export const MMControl: React.FC<MMControlProps> = ({
           />
         </>
       )}
-      
+
       {/* MMControl UI */}
       <div
         style={containerStyle}
@@ -427,7 +441,7 @@ export const MMControl: React.FC<MMControlProps> = ({
         >
           ▶
         </button>
-        
+
         <button
           style={buttonStyle}
           onClick={() => executeCommand('pause')}
@@ -436,7 +450,7 @@ export const MMControl: React.FC<MMControlProps> = ({
         >
           ⏸
         </button>
-        
+
         <button
           style={buttonStyle}
           onClick={() => executeCommand('stop')}
@@ -445,7 +459,7 @@ export const MMControl: React.FC<MMControlProps> = ({
         >
           ⏹
         </button>
-        
+
         <button
           style={buttonStyle}
           onClick={() => executeCommand('seek')}
@@ -454,7 +468,7 @@ export const MMControl: React.FC<MMControlProps> = ({
         >
           ⏮
         </button>
-        
+
         <button
           style={buttonStyle}
           onClick={() => executeCommand('seek')}
@@ -463,7 +477,7 @@ export const MMControl: React.FC<MMControlProps> = ({
         >
           ⏭
         </button>
-        
+
         {/* Progress Bar */}
         <div
           ref={progressRef}
@@ -473,12 +487,10 @@ export const MMControl: React.FC<MMControlProps> = ({
         >
           <div style={progressBarStyle} />
         </div>
-        
+
         {/* Time Display */}
-        <div style={timeDisplayStyle}>
-          {formatTime(currentPosition)}
-        </div>
-        
+        <div style={timeDisplayStyle}>{formatTime(currentPosition)}</div>
+
         {/* Error Display */}
         {error && (
           <div
@@ -498,7 +510,7 @@ export const MMControl: React.FC<MMControlProps> = ({
           </div>
         )}
       </div>
-      
+
       {/* Design mode indicator */}
       {isDesignMode && (
         <div
@@ -547,7 +559,7 @@ export const MMControlConstants = {
   mmPaused: 528,
   mmRecording: 529,
   mmSeeking: 530,
-  
+
   // Time format constants
   mmTimeFormatMs: 0,
   mmTimeFormatHms: 1,
@@ -557,10 +569,10 @@ export const MMControlConstants = {
   mmTimeFormatSmpte25: 5,
   mmTimeFormatSmpte30: 6,
   mmTimeFormatSmpte30Drop: 7,
-  
+
   // Device type constants
   mmDeviceTypeAnimation: 'Animation',
-  mmDeviceTypeAudioCD: 'CDAudio', 
+  mmDeviceTypeAudioCD: 'CDAudio',
   mmDeviceTypeDAT: 'DAT',
   mmDeviceTypeDigitalVideo: 'DigitalVideo',
   mmDeviceTypeMMMovie: 'MMMovie',

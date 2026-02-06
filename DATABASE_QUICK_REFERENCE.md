@@ -14,11 +14,11 @@ const db = CreateDatabase('MyDatabase', 'English');
 const rs = db.OpenRecordset('Customers');
 
 // Navigate
-rs.MoveFirst();           // First record
-rs.MoveLast();            // Last record
-rs.MoveNext();            // Next record
-rs.MovePrevious();        // Previous record
-rs.Move(5);               // Move 5 records
+rs.MoveFirst(); // First record
+rs.MoveLast(); // Last record
+rs.MoveNext(); // Next record
+rs.MovePrevious(); // Previous record
+rs.Move(5); // Move 5 records
 
 // Check position
 if (rs.BOF) console.log('At beginning');
@@ -32,90 +32,100 @@ rs.Fields('City').Value = 'New York';
 ## Key Methods Reference
 
 ### Navigation
-| Method | Purpose |
-|--------|---------|
-| `MoveFirst()` | Go to first record |
-| `MoveLast()` | Go to last record |
-| `MoveNext()` | Go to next record |
+
+| Method           | Purpose               |
+| ---------------- | --------------------- |
+| `MoveFirst()`    | Go to first record    |
+| `MoveLast()`     | Go to last record     |
+| `MoveNext()`     | Go to next record     |
 | `MovePrevious()` | Go to previous record |
-| `Move(n)` | Move n records |
+| `Move(n)`        | Move n records        |
 
 ### Modification
-| Method | Purpose |
-|--------|---------|
-| `AddNew()` | Create new record |
-| `Edit()` | Edit current record |
-| `Update()` | Save changes |
-| `Delete()` | Delete current record |
-| `CancelUpdate()` | Discard changes |
+
+| Method           | Purpose               |
+| ---------------- | --------------------- |
+| `AddNew()`       | Create new record     |
+| `Edit()`         | Edit current record   |
+| `Update()`       | Save changes          |
+| `Delete()`       | Delete current record |
+| `CancelUpdate()` | Discard changes       |
 
 ### Searching
-| Method | Purpose |
-|--------|---------|
-| `FindFirst(criteria)` | Find first match |
-| `FindLast(criteria)` | Find last match |
-| `FindNext(criteria)` | Find next match |
+
+| Method                   | Purpose             |
+| ------------------------ | ------------------- |
+| `FindFirst(criteria)`    | Find first match    |
+| `FindLast(criteria)`     | Find last match     |
+| `FindNext(criteria)`     | Find next match     |
 | `FindPrevious(criteria)` | Find previous match |
 
 ### Data Binding
-| Method | Purpose |
-|--------|---------|
-| `BindControl(name, field)` | Bind control to field |
-| `UnbindControl(name)` | Unbind control |
-| `SetBoundValue(name, value)` | Update bound control |
-| `GetBoundValue(name)` | Get bound value |
-| `RefreshBoundControls()` | Refresh all controls |
+
+| Method                       | Purpose               |
+| ---------------------------- | --------------------- |
+| `BindControl(name, field)`   | Bind control to field |
+| `UnbindControl(name)`        | Unbind control        |
+| `SetBoundValue(name, value)` | Update bound control  |
+| `GetBoundValue(name)`        | Get bound value       |
+| `RefreshBoundControls()`     | Refresh all controls  |
 
 ### Persistence
-| Method | Purpose |
-|--------|---------|
-| `SaveToPersistence()` | Save to IndexedDB |
-| `LoadFromPersistence()` | Load from IndexedDB |
+
+| Method                    | Purpose               |
+| ------------------------- | --------------------- |
+| `SaveToPersistence()`     | Save to IndexedDB     |
+| `LoadFromPersistence()`   | Load from IndexedDB   |
 | `DeleteFromPersistence()` | Delete from IndexedDB |
-| `IsDirty()` | Has unsaved changes? |
+| `IsDirty()`               | Has unsaved changes?  |
 
 ### Backend
-| Method | Purpose |
-|--------|---------|
-| `ConnectToBackend(conn)` | Connect to backend |
-| `LoadFromBackend(sql)` | Load from database |
-| `SaveToBackend(sql)` | Save to database |
-| `BeginTransaction()` | Start transaction |
-| `CommitTransaction()` | Commit transaction |
-| `RollbackTransaction()` | Rollback transaction |
+
+| Method                   | Purpose              |
+| ------------------------ | -------------------- |
+| `ConnectToBackend(conn)` | Connect to backend   |
+| `LoadFromBackend(sql)`   | Load from database   |
+| `SaveToBackend(sql)`     | Save to database     |
+| `BeginTransaction()`     | Start transaction    |
+| `CommitTransaction()`    | Commit transaction   |
+| `RollbackTransaction()`  | Rollback transaction |
 
 ## Property Reference
 
 ### Status Properties
+
 ```typescript
-rs.BOF                    // At beginning?
-rs.EOF                    // At end?
-rs.RecordCount            // Total records
-rs.AbsolutePosition       // Current position
-rs.PercentPosition        // Position percentage
-rs.NoMatch                // Find failed?
-rs.IsDirty()              // Has changes?
+rs.BOF; // At beginning?
+rs.EOF; // At end?
+rs.RecordCount; // Total records
+rs.AbsolutePosition; // Current position
+rs.PercentPosition; // Position percentage
+rs.NoMatch; // Find failed?
+rs.IsDirty(); // Has changes?
 ```
 
 ### Data Properties
+
 ```typescript
-rs.Filter = "City='NY'"   // Apply filter
-rs.Sort = "Name ASC"      // Apply sort
-rs.Index = "PrimaryKey"   // Set index
+rs.Filter = "City='NY'"; // Apply filter
+rs.Sort = 'Name ASC'; // Apply sort
+rs.Index = 'PrimaryKey'; // Set index
 ```
 
 ### Field Properties
+
 ```typescript
-rs.Fields(index)          // Get field by index
-rs.Fields(name)           // Get field by name
-rs.Fields(name).Value     // Get value
-rs.Fields(name).Type      // Get type
-rs.Fields(name).Size      // Get size
+rs.Fields(index); // Get field by index
+rs.Fields(name); // Get field by name
+rs.Fields(name).Value; // Get value
+rs.Fields(name).Type; // Get type
+rs.Fields(name).Size; // Get size
 ```
 
 ## Common Patterns
 
 ### Pattern 1: Loop Through All Records
+
 ```typescript
 rs.MoveFirst();
 while (!rs.EOF) {
@@ -125,6 +135,7 @@ while (!rs.EOF) {
 ```
 
 ### Pattern 2: Find and Update
+
 ```typescript
 rs.FindFirst("City = 'Boston'");
 if (!rs.NoMatch) {
@@ -135,6 +146,7 @@ if (!rs.NoMatch) {
 ```
 
 ### Pattern 3: Add Multiple Records
+
 ```typescript
 const customers = ['John', 'Jane', 'Bob'];
 for (const name of customers) {
@@ -145,10 +157,11 @@ for (const name of customers) {
 ```
 
 ### Pattern 4: Bind Form Controls
+
 ```typescript
 dataBindingService.bindControl(rs, {
   controlName: 'txtName',
-  fieldName: 'Name'
+  fieldName: 'Name',
 });
 
 rs.MoveFirst();
@@ -156,6 +169,7 @@ rs.RefreshBoundControls();
 ```
 
 ### Pattern 5: Save to IndexedDB
+
 ```typescript
 // Make changes
 rs.MoveFirst();
@@ -168,6 +182,7 @@ await rs.SaveToPersistence();
 ```
 
 ### Pattern 6: Load from Backend
+
 ```typescript
 const backendConn = CreateBackendConnection();
 await backendConn.connect('mysql://localhost/mydb');
@@ -180,6 +195,7 @@ console.log(`Loaded ${rs.RecordCount} records`);
 ```
 
 ### Pattern 7: Transaction with Rollback
+
 ```typescript
 try {
   await rs.BeginTransaction();
@@ -197,16 +213,16 @@ try {
 ## Field Types
 
 ```typescript
-DAO_CONSTANTS.dbText        // String (10)
-DAO_CONSTANTS.dbInteger     // 32-bit integer (3)
-DAO_CONSTANTS.dbLong        // Long integer (4)
-DAO_CONSTANTS.dbSingle      // Float (6)
-DAO_CONSTANTS.dbDouble      // Double (7)
-DAO_CONSTANTS.dbCurrency    // Currency (5)
-DAO_CONSTANTS.dbDate        // Date/Time (8)
-DAO_CONSTANTS.dbBoolean     // Boolean (1)
-DAO_CONSTANTS.dbMemo        // Memo/Text (12)
-DAO_CONSTANTS.dbBinary      // Binary (9)
+DAO_CONSTANTS.dbText; // String (10)
+DAO_CONSTANTS.dbInteger; // 32-bit integer (3)
+DAO_CONSTANTS.dbLong; // Long integer (4)
+DAO_CONSTANTS.dbSingle; // Float (6)
+DAO_CONSTANTS.dbDouble; // Double (7)
+DAO_CONSTANTS.dbCurrency; // Currency (5)
+DAO_CONSTANTS.dbDate; // Date/Time (8)
+DAO_CONSTANTS.dbBoolean; // Boolean (1)
+DAO_CONSTANTS.dbMemo; // Memo/Text (12)
+DAO_CONSTANTS.dbBinary; // Binary (9)
 ```
 
 ## Error Handling
@@ -247,13 +263,14 @@ const store = (window as any).IndexedDBStore;
 ## Services
 
 ### Data Binding Service
+
 ```typescript
 import { dataBindingService } from './services/VB6DataBindingService';
 
 // Bind control
 dataBindingService.bindControl(rs, {
   controlName: 'txtField',
-  fieldName: 'FieldName'
+  fieldName: 'FieldName',
 });
 
 // Get control value
@@ -264,6 +281,7 @@ dataBindingService.collectFromControls(rs);
 ```
 
 ### Backend Data Service
+
 ```typescript
 import { backendDataService } from './services/VB6BackendDataService';
 
@@ -282,14 +300,14 @@ backendDataService.clearCache();
 
 ## Keyboard Shortcuts (in Data Controls)
 
-| Key | Action |
-|-----|--------|
-| `Ctrl+Home` | First record |
-| `Ctrl+End` | Last record |
-| `Page Down` | Next record |
-| `Page Up` | Previous record |
-| `F7` | Filter |
-| `F8` | Sort |
+| Key         | Action          |
+| ----------- | --------------- |
+| `Ctrl+Home` | First record    |
+| `Ctrl+End`  | Last record     |
+| `Page Down` | Next record     |
+| `Page Up`   | Previous record |
+| `F7`        | Filter          |
+| `F8`        | Sort            |
 
 ## Tips & Tricks
 
@@ -301,13 +319,13 @@ backendDataService.clearCache();
 
 ## Troubleshooting
 
-| Problem | Solution |
-|---------|----------|
-| Recordset is empty | Check filter, check database connection |
-| Controls don't update | Call RefreshBoundControls() |
-| Data not persisting | Check IndexedDB quota, verify SaveToPersistence() |
+| Problem                  | Solution                                          |
+| ------------------------ | ------------------------------------------------- |
+| Recordset is empty       | Check filter, check database connection           |
+| Controls don't update    | Call RefreshBoundControls()                       |
+| Data not persisting      | Check IndexedDB quota, verify SaveToPersistence() |
 | Backend connection fails | Verify server is running, check connection string |
-| Transaction fails | Check database constraints, verify field values |
+| Transaction fails        | Check database constraints, verify field values   |
 
 ## See Also
 

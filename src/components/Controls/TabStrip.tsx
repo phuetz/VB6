@@ -27,7 +27,7 @@ const TabStrip: React.FC<TabStripProps> = ({
   onSelect,
   onDoubleClick,
   onMove,
-  onResize
+  onResize,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -39,11 +39,38 @@ const TabStrip: React.FC<TabStripProps> = ({
 
   // VB6 TabStrip Properties
   const tabs: VB6Tab[] = properties.Tabs || [
-    { index: 1, caption: 'Tab 1', key: 'Tab1', tag: '', image: 0, enabled: true, visible: true, tooltipText: '' },
-    { index: 2, caption: 'Tab 2', key: 'Tab2', tag: '', image: 0, enabled: true, visible: true, tooltipText: '' },
-    { index: 3, caption: 'Tab 3', key: 'Tab3', tag: '', image: 0, enabled: true, visible: true, tooltipText: '' }
+    {
+      index: 1,
+      caption: 'Tab 1',
+      key: 'Tab1',
+      tag: '',
+      image: 0,
+      enabled: true,
+      visible: true,
+      tooltipText: '',
+    },
+    {
+      index: 2,
+      caption: 'Tab 2',
+      key: 'Tab2',
+      tag: '',
+      image: 0,
+      enabled: true,
+      visible: true,
+      tooltipText: '',
+    },
+    {
+      index: 3,
+      caption: 'Tab 3',
+      key: 'Tab3',
+      tag: '',
+      image: 0,
+      enabled: true,
+      visible: true,
+      tooltipText: '',
+    },
   ];
-  
+
   const selectedTab = properties.SelectedItem || 1;
   const style = properties.Style || 0; // 0=tabTabs, 1=tabButtons, 2=tabFlatButtons
   const tabOrientation = properties.TabOrientation || 0; // 0=tabOrientationTop, 1=tabOrientationBottom, 2=tabOrientationLeft, 3=tabOrientationRight
@@ -57,20 +84,23 @@ const TabStrip: React.FC<TabStripProps> = ({
   const imageList = properties.ImageList || null;
 
   // Handle tab click
-  const handleTabClick = useCallback((tabIndex: number) => {
-    const tab = tabs.find(t => t.index === tabIndex);
-    if (!tab || !tab.enabled) return;
+  const handleTabClick = useCallback(
+    (tabIndex: number) => {
+      const tab = tabs.find(t => t.index === tabIndex);
+      if (!tab || !tab.enabled) return;
 
-    // Update selected item
-    if (control.events?.onChange) {
-      control.events.onChange('SelectedItem', tabIndex);
-    }
+      // Update selected item
+      if (control.events?.onChange) {
+        control.events.onChange('SelectedItem', tabIndex);
+      }
 
-    // Trigger VB6 events
-    if (control.events?.Click) {
-      control.events.Click();
-    }
-  }, [tabs, control.events]);
+      // Trigger VB6 events
+      if (control.events?.Click) {
+        control.events.Click();
+      }
+    },
+    [tabs, control.events]
+  );
 
   // Mouse event handlers for control dragging
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -110,7 +140,7 @@ const TabStrip: React.FC<TabStripProps> = ({
     } else {
       setIsDragging(true);
     }
-    
+
     setDragStart({ x: e.clientX, y: e.clientY });
   };
 
@@ -122,18 +152,23 @@ const TabStrip: React.FC<TabStripProps> = ({
 
     let tabWidth, tabHeight;
 
-    if (tabOrientation === 0 || tabOrientation === 1) { // Top or Bottom
+    if (tabOrientation === 0 || tabOrientation === 1) {
+      // Top or Bottom
       tabHeight = tabFixedHeight || 20;
       if (tabFixedWidth > 0) {
         tabWidth = tabFixedWidth;
-      } else if (tabWidthStyle === 2) { // Fixed
+      } else if (tabWidthStyle === 2) {
+        // Fixed
         tabWidth = 80;
-      } else if (tabWidthStyle === 0) { // Justified
+      } else if (tabWidthStyle === 0) {
+        // Justified
         tabWidth = Math.floor((control.width - 4) / tabCount);
-      } else { // Non-justified
+      } else {
+        // Non-justified
         tabWidth = 80;
       }
-    } else { // Left or Right
+    } else {
+      // Left or Right
       tabWidth = tabFixedWidth || 80;
       if (tabFixedHeight > 0) {
         tabHeight = tabFixedHeight;
@@ -143,117 +178,148 @@ const TabStrip: React.FC<TabStripProps> = ({
     }
 
     return { tabWidth, tabHeight };
-  }, [tabs, tabOrientation, tabFixedWidth, tabFixedHeight, tabWidthStyle, control.width, control.height]);
+  }, [
+    tabs,
+    tabOrientation,
+    tabFixedWidth,
+    tabFixedHeight,
+    tabWidthStyle,
+    control.width,
+    control.height,
+  ]);
 
   const { tabWidth, tabHeight } = calculateTabDimensions();
 
   // Render individual tab
-  const renderTab = useCallback((tab: VB6Tab, index: number) => {
-    const isSelected = tab.index === selectedTab;
-    const isHorizontal = tabOrientation === 0 || tabOrientation === 1;
-    
-    const tabStyle: React.CSSProperties = {
-      position: 'absolute',
-      width: isHorizontal ? tabWidth : tabHeight,
-      height: isHorizontal ? tabHeight : tabWidth,
-      backgroundColor: isSelected ? '#c0c0c0' : '#e0e0e0',
-      border: style === 0 ? (isSelected ? '2px inset #c0c0c0' : '1px outset #c0c0c0') : '1px outset #c0c0c0',
-      cursor: tab.enabled ? 'pointer' : 'default',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '8pt',
-      fontFamily: 'MS Sans Serif',
-      color: tab.enabled ? '#000000' : '#808080',
-      userSelect: 'none',
-      opacity: tab.enabled ? 1 : 0.5,
-      zIndex: isSelected ? 10 : 1
-    };
+  const renderTab = useCallback(
+    (tab: VB6Tab, index: number) => {
+      const isSelected = tab.index === selectedTab;
+      const isHorizontal = tabOrientation === 0 || tabOrientation === 1;
 
-    // Position tabs based on orientation
-    switch (tabOrientation) {
-      case 0: // Top
-        tabStyle.left = index * tabWidth + 2;
-        tabStyle.top = 0;
-        if (isSelected) {
-          tabStyle.height = tabHeight + 2;
-          tabStyle.borderBottom = 'none';
-        }
-        break;
-      case 1: // Bottom
-        tabStyle.left = index * tabWidth + 2;
-        tabStyle.bottom = 0;
-        if (isSelected) {
-          tabStyle.height = tabHeight + 2;
-          tabStyle.borderTop = 'none';
-        }
-        break;
-      case 2: // Left
-        tabStyle.left = 0;
-        tabStyle.top = index * tabHeight + 2;
-        if (isSelected) {
-          tabStyle.width = tabWidth + 2;
-          tabStyle.borderRight = 'none';
-        }
-        break;
-      case 3: // Right
-        tabStyle.right = 0;
-        tabStyle.top = index * tabHeight + 2;
-        if (isSelected) {
-          tabStyle.width = tabWidth + 2;
-          tabStyle.borderLeft = 'none';
-        }
-        break;
-    }
+      const tabStyle: React.CSSProperties = {
+        position: 'absolute',
+        width: isHorizontal ? tabWidth : tabHeight,
+        height: isHorizontal ? tabHeight : tabWidth,
+        backgroundColor: isSelected ? '#c0c0c0' : '#e0e0e0',
+        border:
+          style === 0
+            ? isSelected
+              ? '2px inset #c0c0c0'
+              : '1px outset #c0c0c0'
+            : '1px outset #c0c0c0',
+        cursor: tab.enabled ? 'pointer' : 'default',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '8pt',
+        fontFamily: 'MS Sans Serif',
+        color: tab.enabled ? '#000000' : '#808080',
+        userSelect: 'none',
+        opacity: tab.enabled ? 1 : 0.5,
+        zIndex: isSelected ? 10 : 1,
+      };
 
-    // Apply style variations
-    if (style === 1) { // Buttons
-      tabStyle.border = '1px outset #c0c0c0';
-      tabStyle.backgroundColor = isSelected ? '#a0a0a0' : '#c0c0c0';
-    } else if (style === 2) { // Flat buttons
-      tabStyle.border = isSelected ? '1px inset #c0c0c0' : '1px solid #e0e0e0';
-      tabStyle.backgroundColor = isSelected ? '#a0a0a0' : '#f0f0f0';
-    }
+      // Position tabs based on orientation
+      switch (tabOrientation) {
+        case 0: // Top
+          tabStyle.left = index * tabWidth + 2;
+          tabStyle.top = 0;
+          if (isSelected) {
+            tabStyle.height = tabHeight + 2;
+            tabStyle.borderBottom = 'none';
+          }
+          break;
+        case 1: // Bottom
+          tabStyle.left = index * tabWidth + 2;
+          tabStyle.bottom = 0;
+          if (isSelected) {
+            tabStyle.height = tabHeight + 2;
+            tabStyle.borderTop = 'none';
+          }
+          break;
+        case 2: // Left
+          tabStyle.left = 0;
+          tabStyle.top = index * tabHeight + 2;
+          if (isSelected) {
+            tabStyle.width = tabWidth + 2;
+            tabStyle.borderRight = 'none';
+          }
+          break;
+        case 3: // Right
+          tabStyle.right = 0;
+          tabStyle.top = index * tabHeight + 2;
+          if (isSelected) {
+            tabStyle.width = tabWidth + 2;
+            tabStyle.borderLeft = 'none';
+          }
+          break;
+      }
 
-    return (
-      <div
-        key={tab.key}
-        style={tabStyle}
-        onClick={(e) => {
-          e.stopPropagation();
-          handleTabClick(tab.index);
-        }}
-        title={showTips ? tab.tooltipText || tab.caption : undefined}
-        onMouseEnter={hotTracking ? undefined : undefined} // Hot tracking would highlight on hover
-      >
-        {/* Tab image if ImageList is set */}
-        {imageList && tab.image > 0 && (
-          <span style={{ marginRight: 4 }}>🖼</span>
-        )}
-        
-        {/* Tab caption */}
-        <span>{tab.caption}</span>
-        
-        {/* Separator */}
-        {separators && index < tabs.length - 1 && (
-          <div
-            style={{
-              position: 'absolute',
-              right: -1,
-              top: 2,
-              bottom: 2,
-              width: 1,
-              backgroundColor: '#808080'
-            }}
-          />
-        )}
-      </div>
-    );
-  }, [selectedTab, tabOrientation, tabWidth, tabHeight, style, tabs.length, imageList, showTips, separators, hotTracking, handleTabClick]);
+      // Apply style variations
+      if (style === 1) {
+        // Buttons
+        tabStyle.border = '1px outset #c0c0c0';
+        tabStyle.backgroundColor = isSelected ? '#a0a0a0' : '#c0c0c0';
+      } else if (style === 2) {
+        // Flat buttons
+        tabStyle.border = isSelected ? '1px inset #c0c0c0' : '1px solid #e0e0e0';
+        tabStyle.backgroundColor = isSelected ? '#a0a0a0' : '#f0f0f0';
+      }
+
+      return (
+        <div
+          key={tab.key}
+          style={tabStyle}
+          onClick={e => {
+            e.stopPropagation();
+            handleTabClick(tab.index);
+          }}
+          title={showTips ? tab.tooltipText || tab.caption : undefined}
+          onMouseEnter={hotTracking ? undefined : undefined} // Hot tracking would highlight on hover
+        >
+          {/* Tab image if ImageList is set */}
+          {imageList && tab.image > 0 && <span style={{ marginRight: 4 }}>🖼</span>}
+
+          {/* Tab caption */}
+          <span>{tab.caption}</span>
+
+          {/* Separator */}
+          {separators && index < tabs.length - 1 && (
+            <div
+              style={{
+                position: 'absolute',
+                right: -1,
+                top: 2,
+                bottom: 2,
+                width: 1,
+                backgroundColor: '#808080',
+              }}
+            />
+          )}
+        </div>
+      );
+    },
+    [
+      selectedTab,
+      tabOrientation,
+      tabWidth,
+      tabHeight,
+      style,
+      tabs.length,
+      imageList,
+      showTips,
+      separators,
+      hotTracking,
+      handleTabClick,
+    ]
+  );
 
   // Calculate client area (content area)
   const getClientArea = useCallback(() => {
-    let clientLeft = 2, clientTop = 2, clientWidth = control.width - 4, clientHeight = control.height - 4;
+    let clientLeft = 2,
+      clientTop = 2,
+      clientWidth = control.width - 4,
+      clientHeight = control.height - 4;
 
     switch (tabOrientation) {
       case 0: // Top
@@ -286,7 +352,7 @@ const TabStrip: React.FC<TabStripProps> = ({
     border: selected ? '2px dashed #0066cc' : '1px solid #808080',
     backgroundColor: properties.BackColor || '#c0c0c0',
     cursor: isDragging ? 'move' : 'default',
-    overflow: 'hidden'
+    overflow: 'hidden',
   };
 
   const clientAreaStyle: React.CSSProperties = {
@@ -296,7 +362,7 @@ const TabStrip: React.FC<TabStripProps> = ({
     width: clientWidth,
     height: clientHeight,
     backgroundColor: '#c0c0c0',
-    border: '1px inset #c0c0c0'
+    border: '1px inset #c0c0c0',
   };
 
   return (
@@ -322,7 +388,7 @@ const TabStrip: React.FC<TabStripProps> = ({
             fontSize: '8pt',
             fontFamily: 'MS Sans Serif',
             pointerEvents: 'none',
-            userSelect: 'none'
+            userSelect: 'none',
           }}
         >
           Client Area
@@ -332,14 +398,114 @@ const TabStrip: React.FC<TabStripProps> = ({
       {/* Resize handles */}
       {selected && (
         <>
-          <div className="vb6-resize-handle nw" style={{ position: 'absolute', top: -4, left: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'nw-resize', zIndex: 20 }} />
-          <div className="vb6-resize-handle ne" style={{ position: 'absolute', top: -4, right: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'ne-resize', zIndex: 20 }} />
-          <div className="vb6-resize-handle sw" style={{ position: 'absolute', bottom: -4, left: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'sw-resize', zIndex: 20 }} />
-          <div className="vb6-resize-handle se" style={{ position: 'absolute', bottom: -4, right: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'se-resize', zIndex: 20 }} />
-          <div className="vb6-resize-handle n" style={{ position: 'absolute', top: -4, left: '50%', marginLeft: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'n-resize', zIndex: 20 }} />
-          <div className="vb6-resize-handle s" style={{ position: 'absolute', bottom: -4, left: '50%', marginLeft: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 's-resize', zIndex: 20 }} />
-          <div className="vb6-resize-handle w" style={{ position: 'absolute', top: '50%', left: -4, marginTop: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'w-resize', zIndex: 20 }} />
-          <div className="vb6-resize-handle e" style={{ position: 'absolute', top: '50%', right: -4, marginTop: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'e-resize', zIndex: 20 }} />
+          <div
+            className="vb6-resize-handle nw"
+            style={{
+              position: 'absolute',
+              top: -4,
+              left: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'nw-resize',
+              zIndex: 20,
+            }}
+          />
+          <div
+            className="vb6-resize-handle ne"
+            style={{
+              position: 'absolute',
+              top: -4,
+              right: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'ne-resize',
+              zIndex: 20,
+            }}
+          />
+          <div
+            className="vb6-resize-handle sw"
+            style={{
+              position: 'absolute',
+              bottom: -4,
+              left: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'sw-resize',
+              zIndex: 20,
+            }}
+          />
+          <div
+            className="vb6-resize-handle se"
+            style={{
+              position: 'absolute',
+              bottom: -4,
+              right: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'se-resize',
+              zIndex: 20,
+            }}
+          />
+          <div
+            className="vb6-resize-handle n"
+            style={{
+              position: 'absolute',
+              top: -4,
+              left: '50%',
+              marginLeft: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'n-resize',
+              zIndex: 20,
+            }}
+          />
+          <div
+            className="vb6-resize-handle s"
+            style={{
+              position: 'absolute',
+              bottom: -4,
+              left: '50%',
+              marginLeft: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 's-resize',
+              zIndex: 20,
+            }}
+          />
+          <div
+            className="vb6-resize-handle w"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: -4,
+              marginTop: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'w-resize',
+              zIndex: 20,
+            }}
+          />
+          <div
+            className="vb6-resize-handle e"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              right: -4,
+              marginTop: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'e-resize',
+              zIndex: 20,
+            }}
+          />
         </>
       )}
     </div>

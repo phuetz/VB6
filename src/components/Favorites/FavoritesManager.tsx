@@ -2,19 +2,19 @@
 // Interface complète pour gérer les favoris avec toutes les fonctionnalités
 
 import React, { useState } from 'react';
-import { 
-  Star, 
-  StarOff, 
-  Edit2, 
-  Trash2, 
-  ChevronUp, 
-  ChevronDown, 
-  FolderOpen, 
-  Download, 
+import {
+  Star,
+  StarOff,
+  Edit2,
+  Trash2,
+  ChevronUp,
+  ChevronDown,
+  FolderOpen,
+  Download,
   Upload,
   BarChart3,
   Clock,
-  X
+  X,
 } from 'lucide-react';
 import { useFavorites } from '../../hooks/useFavorites';
 import { FavoriteDirectory } from '../../services/FavoritesService';
@@ -28,7 +28,7 @@ interface FavoritesManagerProps {
 export const FavoritesManager: React.FC<FavoritesManagerProps> = ({
   visible,
   onClose,
-  onSelectPath
+  onSelectPath,
 }) => {
   const {
     favorites,
@@ -41,7 +41,7 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = ({
     cleanupFavorites,
     exportFavorites,
     importFavorites,
-    getStats
+    getStats,
   } = useFavorites();
 
   const [activeTab, setActiveTab] = useState<'all' | 'vb6' | 'recent' | 'stats'>('all');
@@ -91,16 +91,16 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = ({
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
-    input.onchange = (e) => {
+    input.onchange = e => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = e => {
           const data = e.target?.result as string;
           if (importFavorites(data)) {
             alert('Favoris importés avec succès !');
           } else {
-            alert('Erreur lors de l\'importation des favoris.');
+            alert("Erreur lors de l'importation des favoris.");
           }
         };
         reader.readAsText(file);
@@ -111,22 +111,22 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = ({
 
   const renderFavoritesList = (favoritesToShow: FavoriteDirectory[]) => (
     <div className="space-y-1">
-      {favoritesToShow.map((favorite) => (
+      {favoritesToShow.map(favorite => (
         <div
           key={favorite.id}
           className="group flex items-center gap-2 p-2 hover:bg-gray-50 rounded-lg border border-transparent hover:border-gray-200"
         >
           <Star className="text-yellow-500 flex-shrink-0" size={16} />
-          
+
           <div className="flex-1 min-w-0">
             {editingId === favorite.id ? (
               <div className="flex items-center gap-2">
                 <input
                   type="text"
                   value={editingName}
-                  onChange={(e) => setEditingName(e.target.value)}
+                  onChange={e => setEditingName(e.target.value)}
                   className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onKeyPress={(e) => {
+                  onKeyPress={e => {
                     if (e.key === 'Enter') saveEdit(favorite.path);
                     if (e.key === 'Escape') cancelEdit();
                   }}
@@ -147,7 +147,7 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = ({
               </div>
             ) : (
               <div>
-                <div 
+                <div
                   className="font-medium text-gray-800 cursor-pointer hover:text-blue-600 truncate"
                   onClick={() => handleSelectPath(favorite.path)}
                   title={favorite.path}
@@ -214,14 +214,9 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = ({
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Star className="text-yellow-500" size={24} />
-            <h2 className="text-xl font-semibold text-gray-800">
-              Gestionnaire des Favoris
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-800">Gestionnaire des Favoris</h2>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -232,7 +227,7 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = ({
             { id: 'all', label: 'Tous', count: favorites.length },
             { id: 'vb6', label: 'VB6', count: getFavoritesByType('vb6').length },
             { id: 'recent', label: 'Récents', count: getRecentlyAccessed().length },
-            { id: 'stats', label: 'Statistiques', icon: BarChart3 }
+            { id: 'stats', label: 'Statistiques', icon: BarChart3 },
           ].map(tab => (
             <button
               key={tab.id}
@@ -259,7 +254,9 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = ({
           {activeTab === 'all' && (
             <div className="h-full p-4 overflow-y-auto">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="font-semibold text-gray-800">Tous les favoris ({favorites.length})</h3>
+                <h3 className="font-semibold text-gray-800">
+                  Tous les favoris ({favorites.length})
+                </h3>
                 <div className="flex gap-2">
                   <button
                     onClick={() => {
@@ -324,14 +321,16 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = ({
                 </div>
                 <div className="bg-orange-50 p-4 rounded-lg">
                   <div className="text-2xl font-bold text-orange-600">
-                    {stats.oldestFavorite ? 
-                      Math.floor((Date.now() - stats.oldestFavorite.getTime()) / (1000 * 60 * 60 * 24)) : 0
-                    }
+                    {stats.oldestFavorite
+                      ? Math.floor(
+                          (Date.now() - stats.oldestFavorite.getTime()) / (1000 * 60 * 60 * 24)
+                        )
+                      : 0}
                   </div>
                   <div className="text-sm text-orange-800">Jours (plus ancien)</div>
                 </div>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <h4 className="font-medium text-gray-700 mb-2">Plus ancien favori:</h4>

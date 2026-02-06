@@ -12,7 +12,7 @@ import * as XLSX from 'xlsx';
 export enum CrystalReportDestination {
   crptToWindow = 0,
   crptToPrinter = 1,
-  crptToFile = 2
+  crptToFile = 2,
 }
 
 export enum CrystalReportFileType {
@@ -47,12 +47,19 @@ export enum CrystalReportFileType {
   crptXML = 28,
   crptPDF = 29,
   crptExcel80 = 30,
-  crptExcel80Tabular = 31
+  crptExcel80Tabular = 31,
 }
 
 export interface CrystalReportSection {
   name: string;
-  type: 'reportHeader' | 'pageHeader' | 'groupHeader' | 'detail' | 'groupFooter' | 'pageFooter' | 'reportFooter';
+  type:
+    | 'reportHeader'
+    | 'pageHeader'
+    | 'groupHeader'
+    | 'detail'
+    | 'groupFooter'
+    | 'pageFooter'
+    | 'reportFooter';
   height: number;
   suppressBlankSection: boolean;
   keepTogether: boolean;
@@ -61,7 +68,16 @@ export interface CrystalReportSection {
 }
 
 export interface CrystalReportItem {
-  type: 'text' | 'field' | 'formula' | 'line' | 'box' | 'image' | 'subreport' | 'chart' | 'crosstab';
+  type:
+    | 'text'
+    | 'field'
+    | 'formula'
+    | 'line'
+    | 'box'
+    | 'image'
+    | 'subreport'
+    | 'chart'
+    | 'crosstab';
   name: string;
   left: number;
   top: number;
@@ -114,12 +130,12 @@ export class CrystalReportEngine {
     this.formulas.set('CurrentDate', () => new Date().toLocaleDateString());
     this.formulas.set('CurrentTime', () => new Date().toLocaleTimeString());
     this.formulas.set('CurrentDateTime', () => new Date().toLocaleString());
-    
+
     // Formules de page
     this.formulas.set('PageNumber', () => this.currentPage);
     this.formulas.set('TotalPageCount', () => this.totalPages);
     this.formulas.set('PageNofM', () => `Page ${this.currentPage} of ${this.totalPages}`);
-    
+
     // Formules de résumé
     this.formulas.set('RecordNumber', () => this.recordset?.AbsolutePosition || 0);
     this.formulas.set('RecordCount', () => this.recordset?.RecordCount || 0);
@@ -130,7 +146,7 @@ export class CrystalReportEngine {
     try {
       // Charger la définition du rapport (simulé pour la démo)
       this.reportDefinition = await this.loadReportDefinition(reportFile);
-      
+
       // Initialiser la connexion à la base de données si nécessaire
       if (this.reportDefinition.database.connectionString) {
         this.connection = ADOManager.createConnection();
@@ -144,7 +160,7 @@ export class CrystalReportEngine {
   private async loadReportDefinition(reportFile: string): Promise<CrystalReportDefinition> {
     // Simuler le chargement d'un fichier .rpt
     // Dans une vraie implémentation, on parserait le fichier Crystal Reports
-    
+
     return {
       name: reportFile,
       sections: [
@@ -164,9 +180,9 @@ export class CrystalReportEngine {
               width: 672,
               height: 40,
               data: 'Sample Crystal Report',
-              formatting: { font: 'Arial', size: 24, bold: true, align: 'center' }
-            }
-          ]
+              formatting: { font: 'Arial', size: 24, bold: true, align: 'center' },
+            },
+          ],
         },
         {
           name: 'Page Header',
@@ -175,7 +191,7 @@ export class CrystalReportEngine {
           suppressBlankSection: false,
           keepTogether: true,
           canGrow: false,
-          items: []
+          items: [],
         },
         {
           name: 'Detail',
@@ -184,7 +200,7 @@ export class CrystalReportEngine {
           suppressBlankSection: false,
           keepTogether: false,
           canGrow: true,
-          items: []
+          items: [],
         },
         {
           name: 'Page Footer',
@@ -202,19 +218,19 @@ export class CrystalReportEngine {
               width: 200,
               height: 20,
               data: 'PageNofM',
-              formatting: { font: 'Arial', size: 10, align: 'center' }
-            }
-          ]
-        }
+              formatting: { font: 'Arial', size: 10, align: 'center' },
+            },
+          ],
+        },
       ],
       database: {
         tables: [],
-        links: []
+        links: [],
       },
       formulas: new Map(),
       parameters: new Map(),
       sortFields: [],
-      groupFields: []
+      groupFields: [],
     };
   }
 
@@ -223,7 +239,7 @@ export class CrystalReportEngine {
     if (this.connection) {
       this.connection.close();
     }
-    
+
     this.connection = ADOManager.createConnection();
     await this.connection.open(connectionString);
   }
@@ -259,22 +275,22 @@ export class CrystalReportEngine {
     try {
       // Récupérer les données
       await this.fetchReportData();
-      
+
       // Appliquer les groupements
       this.applyGrouping();
-      
+
       // Calculer la pagination
       this.calculatePagination();
-      
+
       // Générer les pages HTML
       const pages = this.renderPages();
-      
+
       return {
         pages,
         totalPages: this.totalPages,
         recordsPrinted: this.reportData.length,
         recordsSelected: this.reportData.length,
-        groups: this.getGroupTree()
+        groups: this.getGroupTree(),
       };
     } catch (error) {
       throw new Error(`Failed to generate report: ${error.message}`);
@@ -290,15 +306,15 @@ export class CrystalReportEngine {
 
     // Construire la requête SQL
     let sql = this.buildSQLQuery();
-    
+
     // Appliquer la formule de sélection
     if (this.reportDefinition?.selectionFormula) {
       sql += ' WHERE ' + this.convertSelectionFormula(this.reportDefinition.selectionFormula);
     }
-    
+
     // Exécuter la requête
     this.recordset = await this.connection.execute(sql);
-    
+
     // Convertir en tableau
     this.reportData = [];
     while (!this.recordset.EOF) {
@@ -315,26 +331,32 @@ export class CrystalReportEngine {
     const data = [];
     const categories = ['Electronics', 'Clothing', 'Food', 'Books', 'Toys'];
     const products = ['Product A', 'Product B', 'Product C', 'Product D', 'Product E'];
-    
+
     for (let i = 0; i < 100; i++) {
       data.push({
         OrderID: i + 1,
-        OrderDate: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1),
+        OrderDate: new Date(
+          2024,
+          Math.floor(Math.random() * 12),
+          Math.floor(Math.random() * 28) + 1
+        ),
         CustomerName: `Customer ${Math.floor(Math.random() * 20) + 1}`,
         ProductName: products[Math.floor(Math.random() * products.length)],
         Category: categories[Math.floor(Math.random() * categories.length)],
         Quantity: Math.floor(Math.random() * 10) + 1,
         UnitPrice: Math.round((Math.random() * 100 + 10) * 100) / 100,
-        get Total() { return this.Quantity * this.UnitPrice; }
+        get Total() {
+          return this.Quantity * this.UnitPrice;
+        },
       });
     }
-    
+
     return data;
   }
 
   private buildSQLQuery(): string {
     if (!this.reportDefinition) return 'SELECT * FROM Orders';
-    
+
     const tables = this.reportDefinition.database.tables.join(', ');
     return `SELECT * FROM ${tables}`;
   }
@@ -364,7 +386,7 @@ export class CrystalReportEngine {
 
   private groupBy(data: any[], field: string): any[] {
     const groups: { [key: string]: any[] } = {};
-    
+
     for (const record of data) {
       const key = record[field] || 'null';
       if (!groups[key]) {
@@ -372,7 +394,7 @@ export class CrystalReportEngine {
       }
       groups[key].push(record);
     }
-    
+
     return Object.entries(groups).map(([key, records]) => ({
       key,
       field,
@@ -381,171 +403,172 @@ export class CrystalReportEngine {
       sum: this.calculateSum(records),
       avg: this.calculateAverage(records),
       min: this.calculateMin(records),
-      max: this.calculateMax(records)
+      max: this.calculateMax(records),
     }));
   }
 
   private calculateSum(records: any[]): { [field: string]: number } {
     const sums: { [field: string]: number } = {};
-    
+
     if (records.length === 0) return sums;
-    
-    const numericFields = Object.keys(records[0]).filter(key => 
-      typeof records[0][key] === 'number'
+
+    const numericFields = Object.keys(records[0]).filter(
+      key => typeof records[0][key] === 'number'
     );
-    
+
     for (const field of numericFields) {
       sums[field] = records.reduce((sum, record) => sum + (record[field] || 0), 0);
     }
-    
+
     return sums;
   }
 
   private calculateAverage(records: any[]): { [field: string]: number } {
     const sums = this.calculateSum(records);
     const avgs: { [field: string]: number } = {};
-    
+
     for (const field in sums) {
       if (!Object.prototype.hasOwnProperty.call(sums, field)) continue;
       avgs[field] = sums[field] / records.length;
     }
-    
+
     return avgs;
   }
 
   private calculateMin(records: any[]): { [field: string]: number } {
     const mins: { [field: string]: number } = {};
-    
+
     if (records.length === 0) return mins;
-    
-    const numericFields = Object.keys(records[0]).filter(key => 
-      typeof records[0][key] === 'number'
+
+    const numericFields = Object.keys(records[0]).filter(
+      key => typeof records[0][key] === 'number'
     );
-    
+
     for (const field of numericFields) {
       mins[field] = Math.min(...records.map(r => r[field] || 0));
     }
-    
+
     return mins;
   }
 
   private calculateMax(records: any[]): { [field: string]: number } {
     const maxs: { [field: string]: number } = {};
-    
+
     if (records.length === 0) return maxs;
-    
-    const numericFields = Object.keys(records[0]).filter(key => 
-      typeof records[0][key] === 'number'
+
+    const numericFields = Object.keys(records[0]).filter(
+      key => typeof records[0][key] === 'number'
     );
-    
+
     for (const field of numericFields) {
       maxs[field] = Math.max(...records.map(r => r[field] || 0));
     }
-    
+
     return maxs;
   }
 
   private calculatePagination(): void {
     if (!this.reportDefinition) return;
-    
+
     const pageHeight = this.pageSize.height - this.margins.top - this.margins.bottom;
-    const detailHeight = this.reportDefinition.sections.find(s => s.type === 'detail')?.height || 20;
+    const detailHeight =
+      this.reportDefinition.sections.find(s => s.type === 'detail')?.height || 20;
     const recordsPerPage = Math.floor(pageHeight / detailHeight);
-    
+
     this.totalPages = Math.ceil(this.reportData.length / recordsPerPage);
   }
 
   private renderPages(): string[] {
     const pages: string[] = [];
-    
+
     if (!this.reportDefinition) return pages;
-    
+
     const pageHeight = this.pageSize.height - this.margins.top - this.margins.bottom;
     const detailSection = this.reportDefinition.sections.find(s => s.type === 'detail');
     const detailHeight = detailSection?.height || 20;
     const recordsPerPage = Math.floor(pageHeight / detailHeight);
-    
+
     for (let page = 0; page < this.totalPages; page++) {
       const startIndex = page * recordsPerPage;
       const endIndex = Math.min(startIndex + recordsPerPage, this.reportData.length);
       const pageRecords = this.reportData.slice(startIndex, endIndex);
-      
+
       pages.push(this.renderPage(page + 1, pageRecords));
     }
-    
+
     return pages;
   }
 
   private renderPage(pageNumber: number, records: any[]): string {
     this.currentPage = pageNumber;
-    
+
     let html = '<div class="crystal-report-page">';
-    
+
     // Report Header (première page seulement)
     if (pageNumber === 1) {
       html += this.renderSection('reportHeader');
     }
-    
+
     // Page Header
     html += this.renderSection('pageHeader');
-    
+
     // Detail section avec les données
     html += '<div class="detail-section">';
     for (const record of records) {
       html += this.renderDetailRecord(record);
     }
     html += '</div>';
-    
+
     // Page Footer
     html += this.renderSection('pageFooter');
-    
+
     // Report Footer (dernière page seulement)
     if (pageNumber === this.totalPages) {
       html += this.renderSection('reportFooter');
     }
-    
+
     html += '</div>';
-    
+
     return html;
   }
 
   private renderSection(sectionType: string): string {
     const section = this.reportDefinition?.sections.find(s => s.type === sectionType);
     if (!section) return '';
-    
+
     let html = `<div class="report-section ${sectionType}" style="height: ${section.height}px;">`;
-    
+
     for (const item of section.items) {
       html += this.renderItem(item);
     }
-    
+
     html += '</div>';
-    
+
     return html;
   }
 
   private renderItem(item: CrystalReportItem): string {
     const style = `position: absolute; left: ${item.left}px; top: ${item.top}px; width: ${item.width}px; height: ${item.height}px;`;
-    
+
     switch (item.type) {
       case 'text':
         return `<div class="report-text" style="${style}">${this.formatText(item.data, item.formatting)}</div>`;
-      
+
       case 'field':
         return `<div class="report-field" style="${style}">${this.formatField(item.data, item.formatting)}</div>`;
-      
+
       case 'formula':
         return `<div class="report-formula" style="${style}">${this.evaluateFormula(item.data)}</div>`;
-      
+
       case 'line':
         return `<hr class="report-line" style="${style}">`;
-      
+
       case 'box':
         return `<div class="report-box" style="${style} border: 1px solid black;"></div>`;
-      
+
       case 'image':
         return `<img class="report-image" src="${item.data}" style="${style}">`;
-      
+
       default:
         return '';
     }
@@ -554,31 +577,31 @@ export class CrystalReportEngine {
   private renderDetailRecord(record: any): string {
     const section = this.reportDefinition?.sections.find(s => s.type === 'detail');
     if (!section) return '';
-    
+
     let html = '<div class="detail-record" style="height: ' + section.height + 'px;">';
-    
+
     // Exemple simple - afficher les champs du record
     let x = 0;
     for (const [field, value] of Object.entries(record)) {
       html += `<span style="position: absolute; left: ${x}px; width: 100px;">${value}</span>`;
       x += 110;
     }
-    
+
     html += '</div>';
-    
+
     return html;
   }
 
   private formatText(text: string, formatting: any): string {
     if (!formatting) return text;
-    
+
     let style = '';
     if (formatting.font) style += `font-family: ${formatting.font}; `;
     if (formatting.size) style += `font-size: ${formatting.size}px; `;
     if (formatting.bold) style += 'font-weight: bold; ';
     if (formatting.italic) style += 'font-style: italic; ';
     if (formatting.align) style += `text-align: ${formatting.align}; `;
-    
+
     return `<span style="${style}">${text}</span>`;
   }
 
@@ -598,12 +621,12 @@ export class CrystalReportEngine {
     if (formula && typeof formula === 'function') {
       return String(formula());
     }
-    
+
     const customFormula = this.reportDefinition?.formulas.get(formulaName);
     if (customFormula) {
       return this.evaluateCustomFormula(customFormula);
     }
-    
+
     return `{${formulaName}}`;
   }
 
@@ -615,12 +638,12 @@ export class CrystalReportEngine {
       let evaluated = formula.replace(/\{([^}]+)\}/g, (match, field) => {
         return this.getCurrentFieldValue(field);
       });
-      
+
       // Évaluer les fonctions de base
       evaluated = evaluated.replace(/Sum\(([^)]+)\)/g, (match, field) => {
         return String(this.calculateSum(this.reportData)[field] || 0);
       });
-      
+
       return evaluated;
     } catch (error) {
       return `Error: ${error.message}`;
@@ -629,7 +652,7 @@ export class CrystalReportEngine {
 
   private getGroupTree(): any[] {
     const tree: any[] = [];
-    
+
     for (const [field, groups] of this.groups) {
       for (const group of groups) {
         tree.push({
@@ -638,11 +661,11 @@ export class CrystalReportEngine {
           page: 1, // Calculer la vraie page où se trouve ce groupe
           field,
           value: group.key,
-          count: group.count
+          count: group.count,
         });
       }
     }
-    
+
     return tree;
   }
 
@@ -650,27 +673,27 @@ export class CrystalReportEngine {
   searchInReport(searchText: string): any[] {
     const results: any[] = [];
     const pages = this.renderPages();
-    
+
     pages.forEach((pageHtml, index) => {
       if (pageHtml.toLowerCase().includes(searchText.toLowerCase())) {
         results.push({
           page: index + 1,
           text: searchText,
-          context: this.extractContext(pageHtml, searchText)
+          context: this.extractContext(pageHtml, searchText),
         });
       }
     });
-    
+
     return results;
   }
 
   private extractContext(html: string, searchText: string): string {
     const index = html.toLowerCase().indexOf(searchText.toLowerCase());
     if (index === -1) return '';
-    
+
     const start = Math.max(0, index - 50);
     const end = Math.min(html.length, index + searchText.length + 50);
-    
+
     return '...' + html.substring(start, end) + '...';
   }
 
@@ -679,25 +702,25 @@ export class CrystalReportEngine {
     switch (format.toLowerCase()) {
       case 'pdf':
         return this.exportToPDF(reportData);
-      
+
       case 'xls':
       case 'xlsx':
         return this.exportToExcel(reportData);
-      
+
       case 'csv':
         return this.exportToCSV(reportData);
-      
+
       case 'xml':
         return this.exportToXML(reportData);
-      
+
       case 'html':
         return this.exportToHTML(reportData);
-      
+
       case 'rtf':
       case 'doc':
       case 'docx':
         return this.exportToWord(reportData);
-      
+
       default:
         throw new Error(`Unsupported export format: ${format}`);
     }
@@ -705,25 +728,23 @@ export class CrystalReportEngine {
 
   private exportToPDF(reportData: any): Uint8Array {
     const doc = new jsPDF();
-    
+
     // Ajouter le titre
     doc.setFontSize(20);
     doc.text('Crystal Report', 105, 20, { align: 'center' });
-    
+
     // Ajouter les données sous forme de tableau
     if (this.reportData.length > 0) {
       const headers = Object.keys(this.reportData[0]);
-      const data = this.reportData.map(record => 
-        headers.map(header => String(record[header]))
-      );
-      
+      const data = this.reportData.map(record => headers.map(header => String(record[header])));
+
       autoTable(doc, {
         head: [headers],
         body: data,
-        startY: 40
+        startY: 40,
       });
     }
-    
+
     return doc.output('arraybuffer') as Uint8Array;
   }
 
@@ -731,33 +752,35 @@ export class CrystalReportEngine {
     const ws = XLSX.utils.json_to_sheet(this.reportData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Report');
-    
+
     return XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
   }
 
   private exportToCSV(reportData: any): string {
     if (this.reportData.length === 0) return '';
-    
+
     const headers = Object.keys(this.reportData[0]);
     const csv = [
       headers.join(','),
-      ...this.reportData.map(record => 
-        headers.map(header => {
-          const value = record[header];
-          return typeof value === 'string' && value.includes(',') 
-            ? `"${value.replace(/"/g, '""')}"` 
-            : value;
-        }).join(',')
-      )
+      ...this.reportData.map(record =>
+        headers
+          .map(header => {
+            const value = record[header];
+            return typeof value === 'string' && value.includes(',')
+              ? `"${value.replace(/"/g, '""')}"`
+              : value;
+          })
+          .join(',')
+      ),
     ].join('\n');
-    
+
     return csv;
   }
 
   private exportToXML(reportData: any): string {
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<CrystalReport>\n';
-    
+
     for (const record of this.reportData) {
       xml += '  <Record>\n';
       for (const [key, value] of Object.entries(record)) {
@@ -765,9 +788,9 @@ export class CrystalReportEngine {
       }
       xml += '  </Record>\n';
     }
-    
+
     xml += '</CrystalReport>';
-    
+
     return xml;
   }
 
@@ -781,7 +804,7 @@ export class CrystalReportEngine {
     html += 'th { background-color: #f2f2f2; }\n';
     html += '</style>\n</head>\n<body>\n';
     html += '<h1>Crystal Report</h1>\n';
-    
+
     if (reportData.pages) {
       for (const page of reportData.pages) {
         html += page;
@@ -789,9 +812,9 @@ export class CrystalReportEngine {
     } else {
       html += this.renderDataTable();
     }
-    
+
     html += '</body>\n</html>';
-    
+
     return html;
   }
 
@@ -799,35 +822,35 @@ export class CrystalReportEngine {
     // Format RTF simplifié
     let rtf = '{\\rtf1\\ansi\\deff0 {\\fonttbl{\\f0 Times New Roman;}}';
     rtf += '\\f0\\fs24 Crystal Report\\par\\par';
-    
+
     if (this.reportData.length > 0) {
       const headers = Object.keys(this.reportData[0]);
-      
+
       // En-têtes
       rtf += '\\b ' + headers.join('\\tab ') + '\\b0\\par';
-      
+
       // Données
       for (const record of this.reportData) {
         rtf += headers.map(h => String(record[h])).join('\\tab ') + '\\par';
       }
     }
-    
+
     rtf += '}';
-    
+
     return rtf;
   }
 
   private renderDataTable(): string {
     if (this.reportData.length === 0) return '<p>No data</p>';
-    
+
     const headers = Object.keys(this.reportData[0]);
-    
+
     let html = '<table>\n<thead>\n<tr>\n';
     for (const header of headers) {
       html += `<th>${header}</th>\n`;
     }
     html += '</tr>\n</thead>\n<tbody>\n';
-    
+
     for (const record of this.reportData) {
       html += '<tr>\n';
       for (const header of headers) {
@@ -835,9 +858,9 @@ export class CrystalReportEngine {
       }
       html += '</tr>\n';
     }
-    
+
     html += '</tbody>\n</table>';
-    
+
     return html;
   }
 
@@ -865,7 +888,7 @@ export class CrystalReportEngine {
     html += '.report-section { position: relative; }\n';
     html += '.report-text, .report-field, .report-formula { position: absolute; }\n';
     html += '</style>\n</head>\n<body onload="window.print()">\n';
-    
+
     if (reportData.pages) {
       reportData.pages.forEach((page: string, index: number) => {
         html += page;
@@ -874,9 +897,9 @@ export class CrystalReportEngine {
         }
       });
     }
-    
+
     html += '</body>\n</html>';
-    
+
     return html;
   }
 
@@ -886,12 +909,12 @@ export class CrystalReportEngine {
       this.recordset.close();
       this.recordset = null;
     }
-    
+
     if (this.connection) {
       this.connection.close();
       this.connection = null;
     }
-    
+
     this.reportDefinition = null;
     this.reportData = [];
     this.groups.clear();

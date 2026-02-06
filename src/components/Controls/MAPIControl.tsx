@@ -1,6 +1,6 @@
 /**
  * VB6 MAPI Controls Implementation (MAPISession and MAPIMessages)
- * 
+ *
  * Email integration controls with web-compatible simulation
  */
 
@@ -14,7 +14,7 @@ export interface MAPISessionControl {
   top: number;
   width: number;
   height: number;
-  
+
   // MAPI Session Properties
   userName: string;
   password: string;
@@ -22,15 +22,15 @@ export interface MAPISessionControl {
   newSession: boolean;
   logonUI: boolean;
   downloadMail: boolean;
-  
+
   // Connection State
   connected: boolean;
-  
+
   // Behavior
   enabled: boolean;
   visible: boolean;
   tag: string;
-  
+
   // Events
   onSignOn?: string;
   onSignOff?: string;
@@ -66,18 +66,18 @@ export interface MAPIMessagesControl {
   top: number;
   width: number;
   height: number;
-  
+
   // Message Properties
   sessionID: number;
   msgIndex: number;
   fetchMsgType: string;
   fetchSorted: boolean;
   fetchUnreadOnly: boolean;
-  
+
   // Current Message
   currentMessage: MAPIMessage | null;
   messageCount: number;
-  
+
   // Behavior
   enabled: boolean;
   visible: boolean;
@@ -90,23 +90,23 @@ export const MAPIConstants = {
   msgOriginal: '',
   msgForward: 'FW',
   msgReply: 'RE',
-  
+
   // Recipient Types
   recipOriginal: 0,
   recipTo: 1,
   recipCC: 2,
   recipBCC: 3,
-  
+
   // Attachment Types
   attachData: 0,
   attachEmbedded: 1,
   attachOLE: 2,
-  
+
   // Logon Flags
   logonUI: 1,
   newSession: 2,
   forceDownload: 4,
-  
+
   // Errors
   SUCCESS: 0,
   USER_ABORT: 1,
@@ -133,7 +133,7 @@ export const MAPIConstants = {
   NETWORK_FAILURE: 23,
   INVALID_EDITFIELDS: 24,
   INVALID_RECIPS: 25,
-  NOT_SUPPORTED: 26
+  NOT_SUPPORTED: 26,
 };
 
 interface MAPISessionProps {
@@ -147,7 +147,7 @@ export const MAPISessionControl: React.FC<MAPISessionProps> = ({
   control,
   isDesignMode = false,
   onPropertyChange,
-  onEvent
+  onEvent,
 }) => {
   const {
     name,
@@ -164,7 +164,7 @@ export const MAPISessionControl: React.FC<MAPISessionProps> = ({
     connected = false,
     enabled = true,
     visible = true,
-    tag = ''
+    tag = '',
   } = control;
 
   const [isConnected, setIsConnected] = useState(connected);
@@ -181,12 +181,12 @@ export const MAPISessionControl: React.FC<MAPISessionProps> = ({
         // In real VB6, this would show logon dialog
         const mockUserName = prompt('Enter email username:') || '';
         const mockPassword = prompt('Enter password:') || '';
-        
+
         if (!mockUserName || !mockPassword) {
           setLastError(MAPIConstants.USER_ABORT);
           return MAPIConstants.USER_ABORT;
         }
-        
+
         onPropertyChange?.('userName', mockUserName);
         onPropertyChange?.('password', mockPassword);
       }
@@ -195,13 +195,13 @@ export const MAPISessionControl: React.FC<MAPISessionProps> = ({
       const newSessionID = Math.floor(Math.random() * 1000000);
       setCurrentSessionID(newSessionID);
       onPropertyChange?.('sessionID', newSessionID);
-      
+
       setIsConnected(true);
       onPropertyChange?.('connected', true);
       setLastError(MAPIConstants.SUCCESS);
-      
+
       onEvent?.('SignOn', { sessionID: newSessionID });
-      
+
       return MAPIConstants.SUCCESS;
     } catch (error) {
       setLastError(MAPIConstants.LOGIN_FAILURE);
@@ -219,9 +219,9 @@ export const MAPISessionControl: React.FC<MAPISessionProps> = ({
       onPropertyChange?.('connected', false);
       onPropertyChange?.('sessionID', 0);
       setLastError(MAPIConstants.SUCCESS);
-      
+
       onEvent?.('SignOff');
-      
+
       return MAPIConstants.SUCCESS;
     } catch (error) {
       setLastError(MAPIConstants.FAILURE);
@@ -231,7 +231,7 @@ export const MAPISessionControl: React.FC<MAPISessionProps> = ({
 
   const handleDoubleClick = useCallback(() => {
     if (!enabled) return;
-    
+
     if (isConnected) {
       signOff();
     } else {
@@ -258,7 +258,7 @@ export const MAPISessionControl: React.FC<MAPISessionProps> = ({
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '10px',
-    fontFamily: 'Tahoma, Arial, sans-serif'
+    fontFamily: 'Tahoma, Arial, sans-serif',
   };
 
   return (
@@ -271,9 +271,7 @@ export const MAPISessionControl: React.FC<MAPISessionProps> = ({
       title={`MAPI Session - ${isConnected ? 'Connected' : 'Disconnected'}`}
     >
       <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: '12px', marginBottom: '2px' }}>
-          {isConnected ? '📧' : '📪'}
-        </div>
+        <div style={{ fontSize: '12px', marginBottom: '2px' }}>{isConnected ? '📧' : '📪'}</div>
         <div>MAPI</div>
       </div>
 
@@ -289,7 +287,7 @@ export const MAPISessionControl: React.FC<MAPISessionProps> = ({
             padding: '2px',
             border: '1px solid #ccc',
             whiteSpace: 'nowrap',
-            zIndex: 1000
+            zIndex: 1000,
           }}
         >
           {name} - {isConnected ? `Session ${currentSessionID}` : 'Disconnected'}
@@ -310,7 +308,7 @@ export const MAPIMessagesControl: React.FC<MAPIMessagesProps> = ({
   control,
   isDesignMode = false,
   onPropertyChange,
-  onEvent
+  onEvent,
 }) => {
   const {
     name,
@@ -327,7 +325,7 @@ export const MAPIMessagesControl: React.FC<MAPIMessagesProps> = ({
     messageCount = 0,
     enabled = true,
     visible = true,
-    tag = ''
+    tag = '',
   } = control;
 
   const [messages, setMessages] = useState<MAPIMessage[]>([]);
@@ -350,7 +348,7 @@ export const MAPIMessagesControl: React.FC<MAPIMessagesProps> = ({
       origDisplayName: 'Demo User',
       msgID: 'msg_1',
       conversationID: 'conv_1',
-      read: false
+      read: false,
     },
     {
       id: '2',
@@ -366,118 +364,125 @@ export const MAPIMessagesControl: React.FC<MAPIMessagesProps> = ({
       origDisplayName: 'Test User',
       msgID: 'msg_2',
       conversationID: 'conv_2',
-      read: true
-    }
+      read: true,
+    },
   ];
 
   // Fetch messages
-  const fetch = useCallback((downloadHeaders: boolean = true) => {
-    if (!enabled || sessionID === 0) {
-      setLastError(MAPIConstants.INVALID_SESSION);
-      return MAPIConstants.INVALID_SESSION;
-    }
-
-    try {
-      let filteredMessages = [...mockMessages];
-
-      // Apply filters
-      if (fetchUnreadOnly) {
-        filteredMessages = filteredMessages.filter(msg => !msg.read);
+  const fetch = useCallback(
+    (downloadHeaders: boolean = true) => {
+      if (!enabled || sessionID === 0) {
+        setLastError(MAPIConstants.INVALID_SESSION);
+        return MAPIConstants.INVALID_SESSION;
       }
 
-      if (fetchMsgType && fetchMsgType !== MAPIConstants.msgOriginal) {
-        filteredMessages = filteredMessages.filter(msg => msg.msgType === fetchMsgType);
+      try {
+        let filteredMessages = [...mockMessages];
+
+        // Apply filters
+        if (fetchUnreadOnly) {
+          filteredMessages = filteredMessages.filter(msg => !msg.read);
+        }
+
+        if (fetchMsgType && fetchMsgType !== MAPIConstants.msgOriginal) {
+          filteredMessages = filteredMessages.filter(msg => msg.msgType === fetchMsgType);
+        }
+
+        // Sort if requested
+        if (fetchSorted) {
+          filteredMessages.sort((a, b) => b.dateReceived.getTime() - a.dateReceived.getTime());
+        }
+
+        setMessages(filteredMessages);
+        onPropertyChange?.('messageCount', filteredMessages.length);
+        setLastError(MAPIConstants.SUCCESS);
+
+        return MAPIConstants.SUCCESS;
+      } catch (error) {
+        setLastError(MAPIConstants.FAILURE);
+        return MAPIConstants.FAILURE;
       }
-
-      // Sort if requested
-      if (fetchSorted) {
-        filteredMessages.sort((a, b) => 
-          b.dateReceived.getTime() - a.dateReceived.getTime()
-        );
-      }
-
-      setMessages(filteredMessages);
-      onPropertyChange?.('messageCount', filteredMessages.length);
-      setLastError(MAPIConstants.SUCCESS);
-
-      return MAPIConstants.SUCCESS;
-    } catch (error) {
-      setLastError(MAPIConstants.FAILURE);
-      return MAPIConstants.FAILURE;
-    }
-  }, [enabled, sessionID, fetchMsgType, fetchSorted, fetchUnreadOnly, onPropertyChange]);
+    },
+    [enabled, sessionID, fetchMsgType, fetchSorted, fetchUnreadOnly, onPropertyChange]
+  );
 
   // Delete message
-  const deleteMessage = useCallback((msgIndex?: number) => {
-    const indexToDelete = msgIndex !== undefined ? msgIndex : currentMsgIndex;
-    
-    if (indexToDelete < 0 || indexToDelete >= messages.length) {
-      setLastError(MAPIConstants.INVALID_MESSAGE);
-      return MAPIConstants.INVALID_MESSAGE;
-    }
+  const deleteMessage = useCallback(
+    (msgIndex?: number) => {
+      const indexToDelete = msgIndex !== undefined ? msgIndex : currentMsgIndex;
 
-    try {
-      const newMessages = [...messages];
-      newMessages.splice(indexToDelete, 1);
-      setMessages(newMessages);
-      onPropertyChange?.('messageCount', newMessages.length);
-      
-      // Adjust current index if necessary
-      if (currentMsgIndex >= newMessages.length) {
-        setCurrentMsgIndex(Math.max(0, newMessages.length - 1));
+      if (indexToDelete < 0 || indexToDelete >= messages.length) {
+        setLastError(MAPIConstants.INVALID_MESSAGE);
+        return MAPIConstants.INVALID_MESSAGE;
       }
-      
-      setLastError(MAPIConstants.SUCCESS);
-      return MAPIConstants.SUCCESS;
-    } catch (error) {
-      setLastError(MAPIConstants.FAILURE);
-      return MAPIConstants.FAILURE;
-    }
-  }, [currentMsgIndex, messages, onPropertyChange]);
+
+      try {
+        const newMessages = [...messages];
+        newMessages.splice(indexToDelete, 1);
+        setMessages(newMessages);
+        onPropertyChange?.('messageCount', newMessages.length);
+
+        // Adjust current index if necessary
+        if (currentMsgIndex >= newMessages.length) {
+          setCurrentMsgIndex(Math.max(0, newMessages.length - 1));
+        }
+
+        setLastError(MAPIConstants.SUCCESS);
+        return MAPIConstants.SUCCESS;
+      } catch (error) {
+        setLastError(MAPIConstants.FAILURE);
+        return MAPIConstants.FAILURE;
+      }
+    },
+    [currentMsgIndex, messages, onPropertyChange]
+  );
 
   // Save message
-  const save = useCallback((showDialog: boolean = true) => {
-    if (currentMsgIndex < 0 || currentMsgIndex >= messages.length) {
-      setLastError(MAPIConstants.INVALID_MESSAGE);
-      return MAPIConstants.INVALID_MESSAGE;
-    }
-
-    try {
-      const message = messages[currentMsgIndex];
-      
-      if (showDialog) {
-        // Simulate save dialog
-        const fileName = prompt('Save message as:', `${message.subject}.txt`);
-        if (!fileName) {
-          setLastError(MAPIConstants.USER_ABORT);
-          return MAPIConstants.USER_ABORT;
-        }
+  const save = useCallback(
+    (showDialog: boolean = true) => {
+      if (currentMsgIndex < 0 || currentMsgIndex >= messages.length) {
+        setLastError(MAPIConstants.INVALID_MESSAGE);
+        return MAPIConstants.INVALID_MESSAGE;
       }
 
-      // Create downloadable content
-      const content = [
-        `Subject: ${message.subject}`,
-        `From: ${message.origDisplayName} <${message.origAddress}>`,
-        `Date: ${message.dateReceived.toLocaleString()}`,
-        ``,
-        message.noteText
-      ].join('\n');
+      try {
+        const message = messages[currentMsgIndex];
 
-      const blob = new Blob([content], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${message.subject}.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
+        if (showDialog) {
+          // Simulate save dialog
+          const fileName = prompt('Save message as:', `${message.subject}.txt`);
+          if (!fileName) {
+            setLastError(MAPIConstants.USER_ABORT);
+            return MAPIConstants.USER_ABORT;
+          }
+        }
 
-      setLastError(MAPIConstants.SUCCESS);
-      return MAPIConstants.SUCCESS;
-    } catch (error) {
-      setLastError(MAPIConstants.FAILURE);
-      return MAPIConstants.FAILURE;
-    }
-  }, [currentMsgIndex, messages]);
+        // Create downloadable content
+        const content = [
+          `Subject: ${message.subject}`,
+          `From: ${message.origDisplayName} <${message.origAddress}>`,
+          `Date: ${message.dateReceived.toLocaleString()}`,
+          ``,
+          message.noteText,
+        ].join('\n');
+
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${message.subject}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        setLastError(MAPIConstants.SUCCESS);
+        return MAPIConstants.SUCCESS;
+      } catch (error) {
+        setLastError(MAPIConstants.FAILURE);
+        return MAPIConstants.FAILURE;
+      }
+    },
+    [currentMsgIndex, messages]
+  );
 
   // Send mail
   const send = useCallback((showDialog: boolean = true) => {
@@ -487,7 +492,7 @@ export const MAPIMessagesControl: React.FC<MAPIMessagesProps> = ({
         const recipient = prompt('Send to:') || '';
         const subject = prompt('Subject:') || '';
         const body = prompt('Message:') || '';
-        
+
         if (!recipient) {
           setLastError(MAPIConstants.USER_ABORT);
           return MAPIConstants.USER_ABORT;
@@ -529,7 +534,7 @@ export const MAPIMessagesControl: React.FC<MAPIMessagesProps> = ({
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '10px',
-    fontFamily: 'Tahoma, Arial, sans-serif'
+    fontFamily: 'Tahoma, Arial, sans-serif',
   };
 
   return (
@@ -542,13 +547,9 @@ export const MAPIMessagesControl: React.FC<MAPIMessagesProps> = ({
       title={`MAPI Messages - ${messages.length} messages`}
     >
       <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: '12px', marginBottom: '2px' }}>
-          📨
-        </div>
+        <div style={{ fontSize: '12px', marginBottom: '2px' }}>📨</div>
         <div>Messages</div>
-        {messages.length > 0 && (
-          <div style={{ fontSize: '8px' }}>({messages.length})</div>
-        )}
+        {messages.length > 0 && <div style={{ fontSize: '8px' }}>({messages.length})</div>}
       </div>
 
       {isDesignMode && (
@@ -563,7 +564,7 @@ export const MAPIMessagesControl: React.FC<MAPIMessagesProps> = ({
             padding: '2px',
             border: '1px solid #ccc',
             whiteSpace: 'nowrap',
-            zIndex: 1000
+            zIndex: 1000,
           }}
         >
           {name} - {messages.length} messages
@@ -578,7 +579,11 @@ export const MAPIHelpers = {
   /**
    * Initialize MAPI session
    */
-  createSession: (userName?: string, password?: string, newSession: boolean = false): MAPISessionControl => {
+  createSession: (
+    userName?: string,
+    password?: string,
+    newSession: boolean = false
+  ): MAPISessionControl => {
     return {
       type: 'MAPISession',
       name: 'MAPISession1',
@@ -595,7 +600,7 @@ export const MAPIHelpers = {
       connected: false,
       enabled: true,
       visible: true,
-      tag: ''
+      tag: '',
     };
   },
 
@@ -619,7 +624,7 @@ export const MAPIHelpers = {
       messageCount: 0,
       enabled: true,
       visible: true,
-      tag: ''
+      tag: '',
     };
   },
 
@@ -640,7 +645,7 @@ export const MAPIHelpers = {
       [MAPIConstants.NO_MESSAGES]: 'No messages',
       [MAPIConstants.INVALID_MESSAGE]: 'Invalid message',
       [MAPIConstants.INVALID_SESSION]: 'Invalid session',
-      [MAPIConstants.NOT_SUPPORTED]: 'Not supported'
+      [MAPIConstants.NOT_SUPPORTED]: 'Not supported',
     };
 
     return errorMessages[errorCode] || `MAPI Error ${errorCode}`;
@@ -670,9 +675,13 @@ export const MAPIHelpers = {
   /**
    * Create recipient
    */
-  createRecipient: (name: string, address: string, type: number = MAPIConstants.recipTo): MAPIRecipient => {
+  createRecipient: (
+    name: string,
+    address: string,
+    type: number = MAPIConstants.recipTo
+  ): MAPIRecipient => {
     return { name, address, type };
-  }
+  },
 };
 
 // VB6 MAPI Methods simulation
@@ -683,15 +692,15 @@ export const MAPIMethods = {
   resolveName: (sessionID: number, name: string): { resolved: boolean; address: string } => {
     // Simulate address book lookup
     const mockAddresses: { [key: string]: string } = {
-      'admin': 'admin@company.com',
-      'support': 'support@company.com',
-      'sales': 'sales@company.com'
+      admin: 'admin@company.com',
+      support: 'support@company.com',
+      sales: 'sales@company.com',
     };
 
     const address = mockAddresses[name.toLowerCase()];
     return {
       resolved: !!address,
-      address: address || name
+      address: address || name,
     };
   },
 
@@ -700,12 +709,7 @@ export const MAPIMethods = {
    */
   showAddressBook: (sessionID: number): string[] => {
     // Return mock address list
-    return [
-      'admin@company.com',
-      'support@company.com',
-      'sales@company.com',
-      'user@example.com'
-    ];
+    return ['admin@company.com', 'support@company.com', 'sales@company.com', 'user@example.com'];
   },
 
   /**
@@ -715,7 +719,7 @@ export const MAPIMethods = {
     // Simulate showing recipient details
     alert('Recipient details would be shown here');
     return true;
-  }
+  },
 };
 
 export default { MAPISessionControl, MAPIMessagesControl, MAPIHelpers, MAPIMethods, MAPIConstants };

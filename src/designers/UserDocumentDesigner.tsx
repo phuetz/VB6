@@ -6,27 +6,27 @@ export enum DocumentContainerType {
   InternetExplorer = 'InternetExplorer',
   OfficeApplication = 'OfficeApplication',
   CustomContainer = 'CustomContainer',
-  Standalone = 'Standalone'
+  Standalone = 'Standalone',
 }
 
 export enum DocumentViewportMode {
   Normal = 'Normal',
   ScrollBars = 'ScrollBars',
   AutoScroll = 'AutoScroll',
-  NoScroll = 'NoScroll'
+  NoScroll = 'NoScroll',
 }
 
 export enum DocumentPrintMode {
   AllAtOnce = 'AllAtOnce',
   PageByPage = 'PageByPage',
-  Selection = 'Selection'
+  Selection = 'Selection',
 }
 
 export enum NavigationMode {
   None = 'None',
   Hyperlinks = 'Hyperlinks',
   Buttons = 'Buttons',
-  Menu = 'Menu'
+  Menu = 'Menu',
 }
 
 // Document Control Types
@@ -55,7 +55,7 @@ export enum DocumentControlType {
   StatusBar = 'StatusBar',
   ToolBar = 'ToolBar',
   TabStrip = 'TabStrip',
-  SSTab = 'SSTab'
+  SSTab = 'SSTab',
 }
 
 // Document Control
@@ -178,41 +178,48 @@ interface UserDocumentDesignerProps {
 export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
   initialDocument,
   onSave,
-  onPreview
+  onPreview,
 }) => {
-  const [document, setDocument] = useState<UserDocumentDefinition>(initialDocument || {
-    name: 'UserDocument1',
-    title: 'User Document',
-    author: '',
-    description: '',
-    version: '1.0',
-    containerType: DocumentContainerType.InternetExplorer,
-    viewportMode: DocumentViewportMode.ScrollBars,
-    navigationMode: NavigationMode.Hyperlinks,
-    printMode: DocumentPrintMode.AllAtOnce,
-    persistable: true,
-    scrollable: true,
-    resizable: true,
-    closeable: true,
-    minimizable: true,
-    maximizable: true,
-    pages: [{
-      id: 'page1',
-      name: 'Page1',
-      title: 'Page 1',
-      size: { width: 800, height: 600 },
-      margins: { left: 20, top: 20, right: 20, bottom: 20 },
-      controls: [],
-      hyperlinks: [],
-      navigationPoints: [],
-      printable: true
-    }],
-    menuBar: { enabled: false, items: [] },
-    toolBar: { enabled: false, items: [] },
-    statusBar: { enabled: false, panels: [] }
-  });
+  const [document, setDocument] = useState<UserDocumentDefinition>(
+    initialDocument || {
+      name: 'UserDocument1',
+      title: 'User Document',
+      author: '',
+      description: '',
+      version: '1.0',
+      containerType: DocumentContainerType.InternetExplorer,
+      viewportMode: DocumentViewportMode.ScrollBars,
+      navigationMode: NavigationMode.Hyperlinks,
+      printMode: DocumentPrintMode.AllAtOnce,
+      persistable: true,
+      scrollable: true,
+      resizable: true,
+      closeable: true,
+      minimizable: true,
+      maximizable: true,
+      pages: [
+        {
+          id: 'page1',
+          name: 'Page1',
+          title: 'Page 1',
+          size: { width: 800, height: 600 },
+          margins: { left: 20, top: 20, right: 20, bottom: 20 },
+          controls: [],
+          hyperlinks: [],
+          navigationPoints: [],
+          printable: true,
+        },
+      ],
+      menuBar: { enabled: false, items: [] },
+      toolBar: { enabled: false, items: [] },
+      statusBar: { enabled: false, panels: [] },
+    }
+  );
 
-  const [selectedControl, setSelectedControl] = useState<{ pageId: string; control: DocumentControl } | null>(null);
+  const [selectedControl, setSelectedControl] = useState<{
+    pageId: string;
+    control: DocumentControl;
+  } | null>(null);
   const [selectedPage, setSelectedPage] = useState<string>(document.pages[0]?.id || '');
   const [selectedHyperlink, setSelectedHyperlink] = useState<DocumentHyperlink | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -223,7 +230,7 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
   const [showRulers, setShowRulers] = useState(true);
   const [gridSize, setGridSize] = useState(10);
   const [mode, setMode] = useState<'design' | 'preview' | 'code'>('design');
-  
+
   const designerRef = useRef<HTMLDivElement>(null);
   const eventEmitter = useRef(new EventEmitter());
 
@@ -239,196 +246,259 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
   const toolboxItems = [
     { type: DocumentControlType.Label, icon: 'A', name: 'Label', category: 'Standard' },
     { type: DocumentControlType.TextBox, icon: '□', name: 'Text Box', category: 'Standard' },
-    { type: DocumentControlType.CommandButton, icon: 'Btn', name: 'Command Button', category: 'Standard' },
+    {
+      type: DocumentControlType.CommandButton,
+      icon: 'Btn',
+      name: 'Command Button',
+      category: 'Standard',
+    },
     { type: DocumentControlType.CheckBox, icon: '☑', name: 'Check Box', category: 'Standard' },
-    { type: DocumentControlType.OptionButton, icon: '◉', name: 'Option Button', category: 'Standard' },
+    {
+      type: DocumentControlType.OptionButton,
+      icon: '◉',
+      name: 'Option Button',
+      category: 'Standard',
+    },
     { type: DocumentControlType.ComboBox, icon: '▼', name: 'Combo Box', category: 'Standard' },
     { type: DocumentControlType.ListBox, icon: '≡', name: 'List Box', category: 'Standard' },
     { type: DocumentControlType.Frame, icon: '▢', name: 'Frame', category: 'Standard' },
     { type: DocumentControlType.Image, icon: '🖼️', name: 'Image', category: 'Standard' },
     { type: DocumentControlType.PictureBox, icon: '📷', name: 'Picture Box', category: 'Standard' },
     { type: DocumentControlType.Timer, icon: '⏱️', name: 'Timer', category: 'Standard' },
-    { type: DocumentControlType.HScrollBar, icon: '↔', name: 'H Scroll Bar', category: 'Standard' },
-    { type: DocumentControlType.VScrollBar, icon: '↕', name: 'V Scroll Bar', category: 'Standard' },
+    {
+      type: DocumentControlType.HScrollBar,
+      icon: '↔',
+      name: 'H Scroll Bar',
+      category: 'Standard',
+    },
+    {
+      type: DocumentControlType.VScrollBar,
+      icon: '↕',
+      name: 'V Scroll Bar',
+      category: 'Standard',
+    },
     { type: DocumentControlType.Line, icon: '━', name: 'Line', category: 'Standard' },
     { type: DocumentControlType.Shape, icon: '▭', name: 'Shape', category: 'Standard' },
     { type: DocumentControlType.WebBrowser, icon: '🌐', name: 'Web Browser', category: 'Internet' },
-    { type: DocumentControlType.ListView, icon: '📋', name: 'List View', category: 'Windows Common Controls' },
-    { type: DocumentControlType.TreeView, icon: '🌳', name: 'Tree View', category: 'Windows Common Controls' },
-    { type: DocumentControlType.ProgressBar, icon: '▓▓▓░░', name: 'Progress Bar', category: 'Windows Common Controls' },
-    { type: DocumentControlType.Slider, icon: '◀═══▶', name: 'Slider', category: 'Windows Common Controls' },
-    { type: DocumentControlType.StatusBar, icon: '═══', name: 'Status Bar', category: 'Windows Common Controls' },
-    { type: DocumentControlType.ToolBar, icon: '🛠️', name: 'Tool Bar', category: 'Windows Common Controls' },
-    { type: DocumentControlType.TabStrip, icon: '▦▦▦', name: 'Tab Strip', category: 'Windows Common Controls' },
-    { type: DocumentControlType.SSTab, icon: '📑', name: 'SSTab', category: 'Microsoft Tabbed Dialog Control' }
+    {
+      type: DocumentControlType.ListView,
+      icon: '📋',
+      name: 'List View',
+      category: 'Windows Common Controls',
+    },
+    {
+      type: DocumentControlType.TreeView,
+      icon: '🌳',
+      name: 'Tree View',
+      category: 'Windows Common Controls',
+    },
+    {
+      type: DocumentControlType.ProgressBar,
+      icon: '▓▓▓░░',
+      name: 'Progress Bar',
+      category: 'Windows Common Controls',
+    },
+    {
+      type: DocumentControlType.Slider,
+      icon: '◀═══▶',
+      name: 'Slider',
+      category: 'Windows Common Controls',
+    },
+    {
+      type: DocumentControlType.StatusBar,
+      icon: '═══',
+      name: 'Status Bar',
+      category: 'Windows Common Controls',
+    },
+    {
+      type: DocumentControlType.ToolBar,
+      icon: '🛠️',
+      name: 'Tool Bar',
+      category: 'Windows Common Controls',
+    },
+    {
+      type: DocumentControlType.TabStrip,
+      icon: '▦▦▦',
+      name: 'Tab Strip',
+      category: 'Windows Common Controls',
+    },
+    {
+      type: DocumentControlType.SSTab,
+      icon: '📑',
+      name: 'SSTab',
+      category: 'Microsoft Tabbed Dialog Control',
+    },
   ];
 
-  const createControl = useCallback((type: DocumentControlType, x: number, y: number): DocumentControl => {
-    const id = `control_${Date.now()}`;
-    const baseControl: DocumentControl = {
-      id,
-      type,
-      name: `${type}${id}`,
-      left: x,
-      top: y,
-      width: 100,
-      height: 25,
-      properties: {},
-      zIndex: 0,
-      visible: true,
-      enabled: true,
-      locked: false,
-      tag: ''
-    };
+  const createControl = useCallback(
+    (type: DocumentControlType, x: number, y: number): DocumentControl => {
+      const id = `control_${Date.now()}`;
+      const baseControl: DocumentControl = {
+        id,
+        type,
+        name: `${type}${id}`,
+        left: x,
+        top: y,
+        width: 100,
+        height: 25,
+        properties: {},
+        zIndex: 0,
+        visible: true,
+        enabled: true,
+        locked: false,
+        tag: '',
+      };
 
-    // Set default properties based on type
-    switch (type) {
-      case DocumentControlType.Label:
-        baseControl.properties = {
-          caption: 'Label',
-          alignment: 0, // Left
-          autoSize: false,
-          backStyle: 0, // Transparent
-          borderStyle: 0, // None
-          font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false }
-        };
-        break;
-      case DocumentControlType.TextBox:
-        baseControl.properties = {
-          text: '',
-          alignment: 0, // Left
-          multiline: false,
-          scrollBars: 0, // None
-          passwordChar: '',
-          maxLength: 0,
-          locked: false
-        };
-        baseControl.width = 120;
-        break;
-      case DocumentControlType.CommandButton:
-        baseControl.properties = {
-          caption: 'Command1',
-          default: false,
-          cancel: false,
-          style: 0 // Standard
-        };
-        baseControl.width = 75;
-        break;
-      case DocumentControlType.CheckBox:
-        baseControl.properties = {
-          caption: 'Check1',
-          value: 0, // Unchecked
-          alignment: 0 // Left
-        };
-        baseControl.width = 120;
-        break;
-      case DocumentControlType.OptionButton:
-        baseControl.properties = {
-          caption: 'Option1',
-          value: false,
-          alignment: 0 // Left
-        };
-        baseControl.width = 120;
-        break;
-      case DocumentControlType.ComboBox:
-        baseControl.properties = {
-          style: 0, // Dropdown Combo
-          text: '',
-          sorted: false,
-          list: []
-        };
-        baseControl.width = 120;
-        baseControl.height = 21;
-        break;
-      case DocumentControlType.ListBox:
-        baseControl.properties = {
-          multiSelect: 0, // None
-          sorted: false,
-          style: 0, // Standard
-          list: []
-        };
-        baseControl.width = 120;
-        baseControl.height = 80;
-        break;
-      case DocumentControlType.Frame:
-        baseControl.properties = {
-          caption: 'Frame1'
-        };
-        baseControl.width = 150;
-        baseControl.height = 100;
-        break;
-      case DocumentControlType.Image:
-        baseControl.properties = {
-          picture: '',
-          stretch: true,
-          borderStyle: 0 // None
-        };
-        baseControl.width = 80;
-        baseControl.height = 80;
-        break;
-      case DocumentControlType.PictureBox:
-        baseControl.properties = {
-          picture: '',
-          autoSize: false,
-          borderStyle: 1, // Fixed Single
-          scaleMode: 1 // Twips
-        };
-        baseControl.width = 100;
-        baseControl.height = 80;
-        break;
-      case DocumentControlType.WebBrowser:
-        baseControl.properties = {
-          navigate: '',
-          silent: false,
-          offline: false
-        };
-        baseControl.width = 300;
-        baseControl.height = 200;
-        break;
-      case DocumentControlType.ListView:
-        baseControl.properties = {
-          view: 3, // Report
-          labelEdit: 1, // Automatic
-          hideSelection: true,
-          multiSelect: false
-        };
-        baseControl.width = 200;
-        baseControl.height = 150;
-        break;
-      case DocumentControlType.TreeView:
-        baseControl.properties = {
-          labelEdit: 1, // Automatic
-          lineStyle: 1, // Tree Lines
-          style: 0 // Text Only
-        };
-        baseControl.width = 150;
-        baseControl.height = 150;
-        break;
-      case DocumentControlType.ProgressBar:
-        baseControl.properties = {
-          min: 0,
-          max: 100,
-          value: 0,
-          scrolling: 0 // Standard
-        };
-        baseControl.width = 150;
-        baseControl.height = 20;
-        break;
-      case DocumentControlType.Slider:
-        baseControl.properties = {
-          min: 0,
-          max: 10,
-          value: 5,
-          orientation: 0, // Horizontal
-          tickStyle: 3 // Both Sides
-        };
-        baseControl.width = 150;
-        baseControl.height = 30;
-        break;
-    }
+      // Set default properties based on type
+      switch (type) {
+        case DocumentControlType.Label:
+          baseControl.properties = {
+            caption: 'Label',
+            alignment: 0, // Left
+            autoSize: false,
+            backStyle: 0, // Transparent
+            borderStyle: 0, // None
+            font: { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false },
+          };
+          break;
+        case DocumentControlType.TextBox:
+          baseControl.properties = {
+            text: '',
+            alignment: 0, // Left
+            multiline: false,
+            scrollBars: 0, // None
+            passwordChar: '',
+            maxLength: 0,
+            locked: false,
+          };
+          baseControl.width = 120;
+          break;
+        case DocumentControlType.CommandButton:
+          baseControl.properties = {
+            caption: 'Command1',
+            default: false,
+            cancel: false,
+            style: 0, // Standard
+          };
+          baseControl.width = 75;
+          break;
+        case DocumentControlType.CheckBox:
+          baseControl.properties = {
+            caption: 'Check1',
+            value: 0, // Unchecked
+            alignment: 0, // Left
+          };
+          baseControl.width = 120;
+          break;
+        case DocumentControlType.OptionButton:
+          baseControl.properties = {
+            caption: 'Option1',
+            value: false,
+            alignment: 0, // Left
+          };
+          baseControl.width = 120;
+          break;
+        case DocumentControlType.ComboBox:
+          baseControl.properties = {
+            style: 0, // Dropdown Combo
+            text: '',
+            sorted: false,
+            list: [],
+          };
+          baseControl.width = 120;
+          baseControl.height = 21;
+          break;
+        case DocumentControlType.ListBox:
+          baseControl.properties = {
+            multiSelect: 0, // None
+            sorted: false,
+            style: 0, // Standard
+            list: [],
+          };
+          baseControl.width = 120;
+          baseControl.height = 80;
+          break;
+        case DocumentControlType.Frame:
+          baseControl.properties = {
+            caption: 'Frame1',
+          };
+          baseControl.width = 150;
+          baseControl.height = 100;
+          break;
+        case DocumentControlType.Image:
+          baseControl.properties = {
+            picture: '',
+            stretch: true,
+            borderStyle: 0, // None
+          };
+          baseControl.width = 80;
+          baseControl.height = 80;
+          break;
+        case DocumentControlType.PictureBox:
+          baseControl.properties = {
+            picture: '',
+            autoSize: false,
+            borderStyle: 1, // Fixed Single
+            scaleMode: 1, // Twips
+          };
+          baseControl.width = 100;
+          baseControl.height = 80;
+          break;
+        case DocumentControlType.WebBrowser:
+          baseControl.properties = {
+            navigate: '',
+            silent: false,
+            offline: false,
+          };
+          baseControl.width = 300;
+          baseControl.height = 200;
+          break;
+        case DocumentControlType.ListView:
+          baseControl.properties = {
+            view: 3, // Report
+            labelEdit: 1, // Automatic
+            hideSelection: true,
+            multiSelect: false,
+          };
+          baseControl.width = 200;
+          baseControl.height = 150;
+          break;
+        case DocumentControlType.TreeView:
+          baseControl.properties = {
+            labelEdit: 1, // Automatic
+            lineStyle: 1, // Tree Lines
+            style: 0, // Text Only
+          };
+          baseControl.width = 150;
+          baseControl.height = 150;
+          break;
+        case DocumentControlType.ProgressBar:
+          baseControl.properties = {
+            min: 0,
+            max: 100,
+            value: 0,
+            scrolling: 0, // Standard
+          };
+          baseControl.width = 150;
+          baseControl.height = 20;
+          break;
+        case DocumentControlType.Slider:
+          baseControl.properties = {
+            min: 0,
+            max: 10,
+            value: 5,
+            orientation: 0, // Horizontal
+            tickStyle: 3, // Both Sides
+          };
+          baseControl.width = 150;
+          baseControl.height = 30;
+          break;
+      }
 
-    return baseControl;
-  }, []);
+      return baseControl;
+    },
+    []
+  );
 
   const addControl = useCallback((pageId: string, control: DocumentControl) => {
     setDocument(prev => {
@@ -439,47 +509,53 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
       }
       return updated;
     });
-    
+
     setSelectedControl({ pageId, control });
     eventEmitter.current.emit('controlAdded', { pageId, control });
   }, []);
 
-  const updateControl = useCallback((pageId: string, controlId: string, updates: Partial<DocumentControl>) => {
-    setDocument(prev => {
-      const updated = { ...prev };
-      const page = updated.pages.find(p => p.id === pageId);
-      if (page) {
-        const controlIndex = page.controls.findIndex(c => c.id === controlId);
-        if (controlIndex >= 0) {
-          page.controls[controlIndex] = { ...page.controls[controlIndex], ...updates };
-          
-          if (selectedControl?.control.id === controlId) {
-            setSelectedControl({ pageId, control: page.controls[controlIndex] });
+  const updateControl = useCallback(
+    (pageId: string, controlId: string, updates: Partial<DocumentControl>) => {
+      setDocument(prev => {
+        const updated = { ...prev };
+        const page = updated.pages.find(p => p.id === pageId);
+        if (page) {
+          const controlIndex = page.controls.findIndex(c => c.id === controlId);
+          if (controlIndex >= 0) {
+            page.controls[controlIndex] = { ...page.controls[controlIndex], ...updates };
+
+            if (selectedControl?.control.id === controlId) {
+              setSelectedControl({ pageId, control: page.controls[controlIndex] });
+            }
           }
         }
-      }
-      return updated;
-    });
-    
-    eventEmitter.current.emit('controlUpdated', { pageId, controlId, updates });
-  }, [selectedControl]);
+        return updated;
+      });
 
-  const deleteControl = useCallback((pageId: string, controlId: string) => {
-    setDocument(prev => {
-      const updated = { ...prev };
-      const page = updated.pages.find(p => p.id === pageId);
-      if (page) {
-        page.controls = page.controls.filter(c => c.id !== controlId);
+      eventEmitter.current.emit('controlUpdated', { pageId, controlId, updates });
+    },
+    [selectedControl]
+  );
+
+  const deleteControl = useCallback(
+    (pageId: string, controlId: string) => {
+      setDocument(prev => {
+        const updated = { ...prev };
+        const page = updated.pages.find(p => p.id === pageId);
+        if (page) {
+          page.controls = page.controls.filter(c => c.id !== controlId);
+        }
+        return updated;
+      });
+
+      if (selectedControl?.control.id === controlId) {
+        setSelectedControl(null);
       }
-      return updated;
-    });
-    
-    if (selectedControl?.control.id === controlId) {
-      setSelectedControl(null);
-    }
-    
-    eventEmitter.current.emit('controlDeleted', { pageId, controlId });
-  }, [selectedControl]);
+
+      eventEmitter.current.emit('controlDeleted', { pageId, controlId });
+    },
+    [selectedControl]
+  );
 
   const addPage = useCallback(() => {
     const newPage: DocumentPage = {
@@ -491,14 +567,14 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
       controls: [],
       hyperlinks: [],
       navigationPoints: [],
-      printable: true
+      printable: true,
     };
-    
+
     setDocument(prev => ({
       ...prev,
-      pages: [...prev.pages, newPage]
+      pages: [...prev.pages, newPage],
     }));
-    
+
     setSelectedPage(newPage.id);
   }, [document.pages.length]);
 
@@ -513,9 +589,9 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
       left: x,
       top: y,
       width: 100,
-      height: 20
+      height: 20,
     };
-    
+
     setDocument(prev => {
       const updated = { ...prev };
       const page = updated.pages.find(p => p.id === pageId);
@@ -524,7 +600,7 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
       }
       return updated;
     });
-    
+
     setSelectedHyperlink(newHyperlink);
   }, []);
 
@@ -545,24 +621,27 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
     });
   }, []);
 
-  const handleDrop = useCallback((e: React.MouseEvent) => {
-    if (!draggedItem) return;
+  const handleDrop = useCallback(
+    (e: React.MouseEvent) => {
+      if (!draggedItem) return;
 
-    const rect = e.currentTarget.getBoundingClientRect();
-    const safeZoom = zoom === 0 ? 100 : zoom;
-    const x = (e.clientX - rect.left) / (safeZoom / 100);
-    const y = (e.clientY - rect.top) / (safeZoom / 100);
-    
-    // Snap to grid - prevent division by zero
-    const safeGridSize = gridSize === 0 ? 10 : gridSize;
-    const snappedX = Math.round(x / safeGridSize) * safeGridSize;
-    const snappedY = Math.round(y / safeGridSize) * safeGridSize;
-    
-    const newControl = createControl(draggedItem, snappedX, snappedY);
-    addControl(selectedPage, newControl);
-    
-    handleDragEnd();
-  }, [draggedItem, zoom, gridSize, createControl, addControl, selectedPage, handleDragEnd]);
+      const rect = e.currentTarget.getBoundingClientRect();
+      const safeZoom = zoom === 0 ? 100 : zoom;
+      const x = (e.clientX - rect.left) / (safeZoom / 100);
+      const y = (e.clientY - rect.top) / (safeZoom / 100);
+
+      // Snap to grid - prevent division by zero
+      const safeGridSize = gridSize === 0 ? 10 : gridSize;
+      const snappedX = Math.round(x / safeGridSize) * safeGridSize;
+      const snappedY = Math.round(y / safeGridSize) * safeGridSize;
+
+      const newControl = createControl(draggedItem, snappedX, snappedY);
+      addControl(selectedPage, newControl);
+
+      handleDragEnd();
+    },
+    [draggedItem, zoom, gridSize, createControl, addControl, selectedPage, handleDragEnd]
+  );
 
   const handleSave = useCallback(() => {
     onSave?.(document);
@@ -576,7 +655,7 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
 
   const generateVBCode = useCallback((): string => {
     const lines: string[] = [];
-    
+
     // Header
     lines.push(`VERSION 5.00`);
     lines.push(`Begin VB.UserDocument ${document.name}`);
@@ -589,53 +668,74 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
     lines.push(`   HelpContextID   =   ${document.helpContextId || 0}`);
     lines.push(`   MinHeight       =   ${document.pages[0]?.size.height || 600}`);
     lines.push(`   MinWidth        =   ${document.pages[0]?.size.width || 800}`);
-    lines.push(`   Persistable     =   ${document.persistable ? 1 : 0}  '${document.persistable ? 'Persistable' : 'NotPersistable'}`);
-    lines.push(`   ScrollBars      =   ${document.viewportMode === DocumentViewportMode.ScrollBars ? 3 : 0}  '${document.viewportMode}`);
+    lines.push(
+      `   Persistable     =   ${document.persistable ? 1 : 0}  '${document.persistable ? 'Persistable' : 'NotPersistable'}`
+    );
+    lines.push(
+      `   ScrollBars      =   ${document.viewportMode === DocumentViewportMode.ScrollBars ? 3 : 0}  '${document.viewportMode}`
+    );
     lines.push(`   ViewportHeight  =   ${document.pages[0]?.size.height || 600}`);
     lines.push(`   ViewportWidth   =   ${document.pages[0]?.size.width || 800}`);
     lines.push('');
-    
+
     // Controls for first page
     const firstPage = document.pages[0];
     if (firstPage) {
       firstPage.controls.forEach(control => {
-        const controlType = control.type === DocumentControlType.CommandButton ? 'CommandButton' :
-                          control.type === DocumentControlType.TextBox ? 'TextBox' :
-                          control.type === DocumentControlType.Label ? 'Label' :
-                          control.type === DocumentControlType.CheckBox ? 'CheckBox' :
-                          control.type === DocumentControlType.OptionButton ? 'OptionButton' :
-                          control.type === DocumentControlType.ComboBox ? 'ComboBox' :
-                          control.type === DocumentControlType.ListBox ? 'ListBox' :
-                          control.type === DocumentControlType.Frame ? 'Frame' :
-                          control.type === DocumentControlType.Image ? 'Image' :
-                          control.type === DocumentControlType.PictureBox ? 'PictureBox' :
-                          control.type === DocumentControlType.WebBrowser ? 'WebBrowser' : 'Control';
-        
+        const controlType =
+          control.type === DocumentControlType.CommandButton
+            ? 'CommandButton'
+            : control.type === DocumentControlType.TextBox
+              ? 'TextBox'
+              : control.type === DocumentControlType.Label
+                ? 'Label'
+                : control.type === DocumentControlType.CheckBox
+                  ? 'CheckBox'
+                  : control.type === DocumentControlType.OptionButton
+                    ? 'OptionButton'
+                    : control.type === DocumentControlType.ComboBox
+                      ? 'ComboBox'
+                      : control.type === DocumentControlType.ListBox
+                        ? 'ListBox'
+                        : control.type === DocumentControlType.Frame
+                          ? 'Frame'
+                          : control.type === DocumentControlType.Image
+                            ? 'Image'
+                            : control.type === DocumentControlType.PictureBox
+                              ? 'PictureBox'
+                              : control.type === DocumentControlType.WebBrowser
+                                ? 'WebBrowser'
+                                : 'Control';
+
         lines.push(`   Begin VB.${controlType} ${control.name}`);
         lines.push(`      Height          =   ${control.height * 15}`);
         lines.push(`      Left            =   ${control.left * 15}`);
         lines.push(`      Top             =   ${control.top * 15}`);
         lines.push(`      Width           =   ${control.width * 15}`);
-        
+
         // Add specific properties
         Object.entries(control.properties).forEach(([key, value]) => {
           if (key === 'caption' || key === 'text') {
-            lines.push(`      ${key.charAt(0).toUpperCase() + key.slice(1)}          =   "${value}"`);
+            lines.push(
+              `      ${key.charAt(0).toUpperCase() + key.slice(1)}          =   "${value}"`
+            );
           } else if (typeof value === 'boolean') {
-            lines.push(`      ${key.charAt(0).toUpperCase() + key.slice(1)}          =   ${value ? -1 : 0}  '${value ? 'True' : 'False'}`);
+            lines.push(
+              `      ${key.charAt(0).toUpperCase() + key.slice(1)}          =   ${value ? -1 : 0}  '${value ? 'True' : 'False'}`
+            );
           } else if (typeof value === 'number') {
             lines.push(`      ${key.charAt(0).toUpperCase() + key.slice(1)}          =   ${value}`);
           }
         });
-        
+
         lines.push(`   End`);
         lines.push('');
       });
     }
-    
+
     lines.push('End');
     lines.push('');
-    
+
     // Event procedures
     lines.push(`Attribute VB_Name = "${document.name}"`);
     lines.push(`Attribute VB_GlobalNameSpace = False`);
@@ -643,33 +743,33 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
     lines.push(`Attribute VB_PredeclaredId = False`);
     lines.push(`Attribute VB_Exposed = True`);
     lines.push('');
-    
+
     // Standard events
     lines.push(`Private Sub UserDocument_Initialize()`);
     lines.push(`    ' Document initialization code`);
     lines.push(`End Sub`);
     lines.push('');
-    
+
     lines.push(`Private Sub UserDocument_ReadProperties(PropBag As PropertyBag)`);
     lines.push(`    ' Read persistent properties`);
     lines.push(`End Sub`);
     lines.push('');
-    
+
     lines.push(`Private Sub UserDocument_WriteProperties(PropBag As PropertyBag)`);
     lines.push(`    ' Write persistent properties`);
     lines.push(`End Sub`);
     lines.push('');
-    
+
     lines.push(`Private Sub UserDocument_Show()`);
     lines.push(`    ' Document is being shown`);
     lines.push(`End Sub`);
     lines.push('');
-    
+
     lines.push(`Private Sub UserDocument_Hide()`);
     lines.push(`    ' Document is being hidden`);
     lines.push(`End Sub`);
     lines.push('');
-    
+
     // Navigation methods
     if (document.navigationMode !== NavigationMode.None) {
       lines.push(`Public Sub NavigateToPage(PageName As String)`);
@@ -683,13 +783,13 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
       lines.push(`End Sub`);
       lines.push('');
     }
-    
+
     return lines.join('\n');
   }, [document]);
 
   const renderControl = (control: DocumentControl): React.ReactNode => {
     const isSelected = selectedControl?.control.id === control.id;
-    
+
     const style: React.CSSProperties = {
       position: 'absolute',
       left: control.left,
@@ -701,15 +801,23 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
       fontFamily: 'MS Sans Serif',
       zIndex: control.zIndex,
       visibility: control.visible ? 'visible' : 'hidden',
-      opacity: control.enabled ? 1 : 0.5
+      opacity: control.enabled ? 1 : 0.5,
     };
-    
+
     let content: React.ReactNode = null;
-    
+
     switch (control.type) {
       case DocumentControlType.Label:
         content = (
-          <div style={{ ...style, display: 'flex', alignItems: 'center', padding: '2px', background: 'transparent' }}>
+          <div
+            style={{
+              ...style,
+              display: 'flex',
+              alignItems: 'center',
+              padding: '2px',
+              background: 'transparent',
+            }}
+          >
             {control.properties.caption || control.name}
           </div>
         );
@@ -748,7 +856,16 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
         break;
       case DocumentControlType.WebBrowser:
         content = (
-          <div style={{ ...style, background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px inset #ddd' }}>
+          <div
+            style={{
+              ...style,
+              background: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px inset #ddd',
+            }}
+          >
             <span style={{ color: '#666' }}>🌐 WebBrowser</span>
           </div>
         );
@@ -769,30 +886,48 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
         break;
       default:
         content = (
-          <div style={{ ...style, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f0f0' }}>
+          <div
+            style={{
+              ...style,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: '#f0f0f0',
+            }}
+          >
             {control.type}
           </div>
         );
     }
-    
+
     return (
       <div
         key={control.id}
-        onClick={(e) => {
+        onClick={e => {
           e.stopPropagation();
           setSelectedControl({ pageId: selectedPage, control });
         }}
         style={{ position: 'relative' }}
       >
         {content}
-        
+
         {isSelected && (
           <>
             {/* Resize handles */}
-            <div style={{ position: 'absolute', right: -4, bottom: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'se-resize' }} />
+            <div
+              style={{
+                position: 'absolute',
+                right: -4,
+                bottom: -4,
+                width: 8,
+                height: 8,
+                backgroundColor: '#0066cc',
+                cursor: 'se-resize',
+              }}
+            />
             {/* Delete button */}
             <button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 deleteControl(selectedPage, control.id);
               }}
@@ -807,7 +942,7 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
                 border: 'none',
                 borderRadius: '50%',
                 fontSize: '12px',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               ×
@@ -820,13 +955,13 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
 
   const renderHyperlink = (hyperlink: DocumentHyperlink): React.ReactNode => {
     const isSelected = selectedHyperlink?.id === hyperlink.id;
-    
+
     return (
       <a
         key={hyperlink.id}
         href={hyperlink.address}
         target={hyperlink.target}
-        onClick={(e) => {
+        onClick={e => {
           e.preventDefault();
           setSelectedHyperlink(hyperlink);
         }}
@@ -842,7 +977,7 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
           fontSize: '8pt',
           display: 'flex',
           alignItems: 'center',
-          padding: '2px'
+          padding: '2px',
         }}
         title={hyperlink.screenTip}
       >
@@ -863,7 +998,7 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
             <input
               type="text"
               value={document.name}
-              onChange={(e) => setDocument(prev => ({ ...prev, name: e.target.value }))}
+              onChange={e => setDocument(prev => ({ ...prev, name: e.target.value }))}
               className="px-2 py-1 border border-gray-300 rounded"
             />
           </div>
@@ -905,7 +1040,7 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
         {/* Toolbox */}
         <div className="w-48 bg-white border-r border-gray-200 p-4 overflow-y-auto">
           <h3 className="font-medium text-gray-700 mb-3">Toolbox</h3>
-          
+
           {/* Group by category */}
           {['Standard', 'Windows Common Controls', 'Internet'].map(category => (
             <div key={category} className="mb-4">
@@ -917,7 +1052,7 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
                     <div
                       key={item.type}
                       className="p-2 bg-gray-100 rounded cursor-move hover:bg-gray-200 flex items-center gap-2 text-xs"
-                      onMouseDown={(e) => handleDragStart(item.type, e)}
+                      onMouseDown={e => handleDragStart(item.type, e)}
                       onMouseUp={handleDragEnd}
                     >
                       <span>{item.icon}</span>
@@ -927,7 +1062,7 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
               </div>
             </div>
           ))}
-          
+
           <div className="mt-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-medium text-gray-700">Pages</h3>
@@ -944,7 +1079,9 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
                   key={page.id}
                   onClick={() => setSelectedPage(page.id)}
                   className={`p-2 rounded cursor-pointer text-sm ${
-                    selectedPage === page.id ? 'bg-blue-100 text-blue-700' : 'bg-gray-50 hover:bg-gray-100'
+                    selectedPage === page.id
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'bg-gray-50 hover:bg-gray-100'
                   }`}
                 >
                   {page.title}
@@ -965,23 +1102,23 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
               {activePage && (
                 <div
                   className="bg-white border border-gray-400 relative shadow-lg"
-                  style={{ 
-                    width: activePage.size.width, 
+                  style={{
+                    width: activePage.size.width,
                     height: activePage.size.height,
-                    backgroundColor: activePage.backgroundColor || 'white'
+                    backgroundColor: activePage.backgroundColor || 'white',
                   }}
                   onMouseUp={handleDrop}
-                  onMouseMove={(e) => {
+                  onMouseMove={e => {
                     if (isDragging) {
                       e.currentTarget.style.backgroundColor = '#f0f8ff';
                     }
                   }}
-                  onMouseLeave={(e) => {
+                  onMouseLeave={e => {
                     if (isDragging) {
                       e.currentTarget.style.backgroundColor = activePage.backgroundColor || 'white';
                     }
                   }}
-                  onDoubleClick={(e) => {
+                  onDoubleClick={e => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     const x = (e.clientX - rect.left) / (zoom / 100);
                     const y = (e.clientY - rect.top) / (zoom / 100);
@@ -990,74 +1127,86 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
                 >
                   {/* Grid */}
                   {showGrid && (
-                    <div style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundImage: `repeating-linear-gradient(0deg, #f0f0f0 0px, transparent 1px, transparent ${gridSize}px),
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundImage: `repeating-linear-gradient(0deg, #f0f0f0 0px, transparent 1px, transparent ${gridSize}px),
                                        repeating-linear-gradient(90deg, #f0f0f0 0px, transparent 1px, transparent ${gridSize}px)`,
-                      pointerEvents: 'none'
-                    }} />
+                        pointerEvents: 'none',
+                      }}
+                    />
                   )}
-                  
+
                   {/* Rulers */}
                   {showRulers && (
                     <>
-                      <div style={{
-                        position: 'absolute',
-                        top: -20,
-                        left: 0,
-                        right: 0,
-                        height: 20,
-                        backgroundColor: '#f0f0f0',
-                        borderBottom: '1px solid #ccc'
-                      }}>
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: -20,
+                          left: 0,
+                          right: 0,
+                          height: 20,
+                          backgroundColor: '#f0f0f0',
+                          borderBottom: '1px solid #ccc',
+                        }}
+                      >
                         {Array.from({ length: Math.ceil(activePage.size.width / 50) }, (_, i) => (
-                          <div key={i} style={{
-                            position: 'absolute',
-                            left: i * 50,
-                            top: 10,
-                            fontSize: '8px',
-                            color: '#666'
-                          }}>
+                          <div
+                            key={i}
+                            style={{
+                              position: 'absolute',
+                              left: i * 50,
+                              top: 10,
+                              fontSize: '8px',
+                              color: '#666',
+                            }}
+                          >
                             {i * 50}
                           </div>
                         ))}
                       </div>
-                      <div style={{
-                        position: 'absolute',
-                        left: -20,
-                        top: 0,
-                        bottom: 0,
-                        width: 20,
-                        backgroundColor: '#f0f0f0',
-                        borderRight: '1px solid #ccc'
-                      }}>
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: -20,
+                          top: 0,
+                          bottom: 0,
+                          width: 20,
+                          backgroundColor: '#f0f0f0',
+                          borderRight: '1px solid #ccc',
+                        }}
+                      >
                         {Array.from({ length: Math.ceil(activePage.size.height / 50) }, (_, i) => (
-                          <div key={i} style={{
-                            position: 'absolute',
-                            top: i * 50,
-                            left: 5,
-                            fontSize: '8px',
-                            color: '#666',
-                            transform: 'rotate(-90deg)',
-                            transformOrigin: 'left center'
-                          }}>
+                          <div
+                            key={i}
+                            style={{
+                              position: 'absolute',
+                              top: i * 50,
+                              left: 5,
+                              fontSize: '8px',
+                              color: '#666',
+                              transform: 'rotate(-90deg)',
+                              transformOrigin: 'left center',
+                            }}
+                          >
                             {i * 50}
                           </div>
                         ))}
                       </div>
                     </>
                   )}
-                  
+
                   {/* Controls */}
                   {activePage.controls.map(control => renderControl(control))}
-                  
+
                   {/* Hyperlinks */}
                   {activePage.hyperlinks.map(hyperlink => renderHyperlink(hyperlink))}
-                  
+
                   {/* Navigation Points */}
                   {activePage.navigationPoints.map(point => (
                     <div
@@ -1070,7 +1219,7 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
                         height: 10,
                         backgroundColor: '#ff6600',
                         borderRadius: '50%',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
                       }}
                       title={point.caption}
                     />
@@ -1079,29 +1228,42 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
               )}
             </div>
           )}
-          
+
           {mode === 'preview' && (
             <div className="p-4">
               <h3 className="text-lg font-medium mb-4">Document Preview</h3>
               <div className="bg-white border border-gray-300 rounded p-4">
                 <h4 className="font-medium">{document.title}</h4>
                 <p className="text-sm text-gray-600 mb-4">{document.description}</p>
-                
+
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><strong>Author:</strong> {document.author}</div>
-                  <div><strong>Version:</strong> {document.version}</div>
-                  <div><strong>Container:</strong> {document.containerType}</div>
-                  <div><strong>Viewport:</strong> {document.viewportMode}</div>
-                  <div><strong>Navigation:</strong> {document.navigationMode}</div>
-                  <div><strong>Pages:</strong> {document.pages.length}</div>
+                  <div>
+                    <strong>Author:</strong> {document.author}
+                  </div>
+                  <div>
+                    <strong>Version:</strong> {document.version}
+                  </div>
+                  <div>
+                    <strong>Container:</strong> {document.containerType}
+                  </div>
+                  <div>
+                    <strong>Viewport:</strong> {document.viewportMode}
+                  </div>
+                  <div>
+                    <strong>Navigation:</strong> {document.navigationMode}
+                  </div>
+                  <div>
+                    <strong>Pages:</strong> {document.pages.length}
+                  </div>
                 </div>
-                
+
                 <div className="mt-4">
                   <h5 className="font-medium mb-2">Pages:</h5>
                   <ul className="list-disc list-inside">
                     {document.pages.map(page => (
                       <li key={page.id} className="text-sm">
-                        {page.title} ({page.controls.length} controls, {page.hyperlinks.length} hyperlinks)
+                        {page.title} ({page.controls.length} controls, {page.hyperlinks.length}{' '}
+                        hyperlinks)
                       </li>
                     ))}
                   </ul>
@@ -1109,7 +1271,7 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
               </div>
             </div>
           )}
-          
+
           {mode === 'code' && (
             <div className="p-4">
               <h3 className="text-lg font-medium mb-4">Generated VB6 Code</h3>
@@ -1130,30 +1292,36 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
               {selectedControl && (
                 <>
                   <h3 className="font-medium text-gray-700 mb-3">Control Properties</h3>
-                  
+
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-600">Name</label>
                     <input
                       type="text"
                       value={selectedControl.control.name}
-                      onChange={(e) => updateControl(selectedControl.pageId, selectedControl.control.id, {
-                        name: e.target.value
-                      })}
+                      onChange={e =>
+                        updateControl(selectedControl.pageId, selectedControl.control.id, {
+                          name: e.target.value,
+                        })
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     />
                   </div>
-                  
+
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-600">Position & Size</label>
+                    <label className="block text-sm font-medium text-gray-600">
+                      Position & Size
+                    </label>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <label className="text-xs text-gray-500">Left</label>
                         <input
                           type="number"
                           value={selectedControl.control.left}
-                          onChange={(e) => updateControl(selectedControl.pageId, selectedControl.control.id, {
-                            left: Number(e.target.value)
-                          })}
+                          onChange={e =>
+                            updateControl(selectedControl.pageId, selectedControl.control.id, {
+                              left: Number(e.target.value),
+                            })
+                          }
                           className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                         />
                       </div>
@@ -1162,9 +1330,11 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
                         <input
                           type="number"
                           value={selectedControl.control.top}
-                          onChange={(e) => updateControl(selectedControl.pageId, selectedControl.control.id, {
-                            top: Number(e.target.value)
-                          })}
+                          onChange={e =>
+                            updateControl(selectedControl.pageId, selectedControl.control.id, {
+                              top: Number(e.target.value),
+                            })
+                          }
                           className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                         />
                       </div>
@@ -1173,9 +1343,11 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
                         <input
                           type="number"
                           value={selectedControl.control.width}
-                          onChange={(e) => updateControl(selectedControl.pageId, selectedControl.control.id, {
-                            width: Number(e.target.value)
-                          })}
+                          onChange={e =>
+                            updateControl(selectedControl.pageId, selectedControl.control.id, {
+                              width: Number(e.target.value),
+                            })
+                          }
                           className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                         />
                       </div>
@@ -1184,15 +1356,17 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
                         <input
                           type="number"
                           value={selectedControl.control.height}
-                          onChange={(e) => updateControl(selectedControl.pageId, selectedControl.control.id, {
-                            height: Number(e.target.value)
-                          })}
+                          onChange={e =>
+                            updateControl(selectedControl.pageId, selectedControl.control.id, {
+                              height: Number(e.target.value),
+                            })
+                          }
                           className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                         />
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Control-specific properties */}
                   {selectedControl.control.properties.caption !== undefined && (
                     <div className="mb-4">
@@ -1200,32 +1374,39 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
                       <input
                         type="text"
                         value={selectedControl.control.properties.caption}
-                        onChange={(e) => updateControl(selectedControl.pageId, selectedControl.control.id, {
-                          properties: { ...selectedControl.control.properties, caption: e.target.value }
-                        })}
+                        onChange={e =>
+                          updateControl(selectedControl.pageId, selectedControl.control.id, {
+                            properties: {
+                              ...selectedControl.control.properties,
+                              caption: e.target.value,
+                            },
+                          })
+                        }
                         className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       />
                     </div>
                   )}
                 </>
               )}
-              
+
               {selectedHyperlink && (
                 <>
                   <h3 className="font-medium text-gray-700 mb-3">Hyperlink Properties</h3>
-                  
+
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-600">Text</label>
                     <input
                       type="text"
                       value={selectedHyperlink.text}
-                      onChange={(e) => {
+                      onChange={e => {
                         const updated = { ...selectedHyperlink, text: e.target.value };
                         setDocument(prev => {
                           const newDoc = { ...prev };
                           const page = newDoc.pages.find(p => p.id === selectedPage);
                           if (page) {
-                            const linkIndex = page.hyperlinks.findIndex(h => h.id === selectedHyperlink.id);
+                            const linkIndex = page.hyperlinks.findIndex(
+                              h => h.id === selectedHyperlink.id
+                            );
                             if (linkIndex >= 0) {
                               page.hyperlinks[linkIndex] = updated;
                             }
@@ -1237,19 +1418,21 @@ export const UserDocumentDesigner: React.FC<UserDocumentDesignerProps> = ({
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     />
                   </div>
-                  
+
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-600">Address</label>
                     <input
                       type="text"
                       value={selectedHyperlink.address}
-                      onChange={(e) => {
+                      onChange={e => {
                         const updated = { ...selectedHyperlink, address: e.target.value };
                         setDocument(prev => {
                           const newDoc = { ...prev };
                           const page = newDoc.pages.find(p => p.id === selectedPage);
                           if (page) {
-                            const linkIndex = page.hyperlinks.findIndex(h => h.id === selectedHyperlink.id);
+                            const linkIndex = page.hyperlinks.findIndex(
+                              h => h.id === selectedHyperlink.id
+                            );
                             if (linkIndex >= 0) {
                               page.hyperlinks[linkIndex] = updated;
                             }

@@ -14,10 +14,10 @@ interface FileItem {
   attributes: string; // 'R' = ReadOnly, 'H' = Hidden, 'S' = System, 'A' = Archive
 }
 
-export const FileListBox: React.FC<FileListBoxProps> = ({ 
-  control, 
+export const FileListBox: React.FC<FileListBoxProps> = ({
+  control,
   isDesignMode = false,
-  onPropertyChange 
+  onPropertyChange,
 }) => {
   // VB6 FileListBox properties
   const {
@@ -74,7 +74,7 @@ export const FileListBox: React.FC<FileListBoxProps> = ({
 
       // Check pattern
       if (pattern === '*.*') return true;
-      
+
       const regex = new RegExp('^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$', 'i');
       return regex.test(file.name);
     });
@@ -82,31 +82,21 @@ export const FileListBox: React.FC<FileListBoxProps> = ({
     setFiles(filteredFiles);
   }, [path, pattern, archive, hidden, normal, readOnly, system]);
 
-  const handleFileClick = useCallback((file: FileItem, e: React.MouseEvent) => {
-    if (!enabled) return;
+  const handleFileClick = useCallback(
+    (file: FileItem, e: React.MouseEvent) => {
+      if (!enabled) return;
 
-    const currentTime = Date.now();
-    const isDoubleClick = currentTime - lastClickTime < 300;
-    setLastClickTime(currentTime);
+      const currentTime = Date.now();
+      const isDoubleClick = currentTime - lastClickTime < 300;
+      setLastClickTime(currentTime);
 
-    if (multiSelect === 0) {
-      // No multi-select
-      setSelectedFile(file.name);
-      setSelectedFiles(new Set([file.name]));
-      onPropertyChange?.('fileName', file.name);
-    } else if (multiSelect === 1) {
-      // Simple multi-select (click to toggle)
-      const newSelection = new Set(selectedFiles);
-      if (newSelection.has(file.name)) {
-        newSelection.delete(file.name);
-      } else {
-        newSelection.add(file.name);
-      }
-      setSelectedFiles(newSelection);
-      setSelectedFile(file.name);
-    } else if (multiSelect === 2) {
-      // Extended multi-select (Ctrl/Shift support)
-      if (e.ctrlKey) {
+      if (multiSelect === 0) {
+        // No multi-select
+        setSelectedFile(file.name);
+        setSelectedFiles(new Set([file.name]));
+        onPropertyChange?.('fileName', file.name);
+      } else if (multiSelect === 1) {
+        // Simple multi-select (click to toggle)
         const newSelection = new Set(selectedFiles);
         if (newSelection.has(file.name)) {
           newSelection.delete(file.name);
@@ -114,30 +104,52 @@ export const FileListBox: React.FC<FileListBoxProps> = ({
           newSelection.add(file.name);
         }
         setSelectedFiles(newSelection);
-      } else if (e.shiftKey && selectedFile) {
-        // Select range
-        const startIndex = files.findIndex(f => f.name === selectedFile);
-        const endIndex = files.findIndex(f => f.name === file.name);
-        const newSelection = new Set<string>();
-        for (let i = Math.min(startIndex, endIndex); i <= Math.max(startIndex, endIndex); i++) {
-          newSelection.add(files[i].name);
+        setSelectedFile(file.name);
+      } else if (multiSelect === 2) {
+        // Extended multi-select (Ctrl/Shift support)
+        if (e.ctrlKey) {
+          const newSelection = new Set(selectedFiles);
+          if (newSelection.has(file.name)) {
+            newSelection.delete(file.name);
+          } else {
+            newSelection.add(file.name);
+          }
+          setSelectedFiles(newSelection);
+        } else if (e.shiftKey && selectedFile) {
+          // Select range
+          const startIndex = files.findIndex(f => f.name === selectedFile);
+          const endIndex = files.findIndex(f => f.name === file.name);
+          const newSelection = new Set<string>();
+          for (let i = Math.min(startIndex, endIndex); i <= Math.max(startIndex, endIndex); i++) {
+            newSelection.add(files[i].name);
+          }
+          setSelectedFiles(newSelection);
+        } else {
+          setSelectedFiles(new Set([file.name]));
         }
-        setSelectedFiles(newSelection);
-      } else {
-        setSelectedFiles(new Set([file.name]));
+        setSelectedFile(file.name);
       }
-      setSelectedFile(file.name);
-    }
 
-    // Fire VB6 events
-    if (window.VB6Runtime?.fireEvent) {
-      window.VB6Runtime.fireEvent(control.name, 'Click');
-      
-      if (isDoubleClick) {
-        window.VB6Runtime.fireEvent(control.name, 'DblClick');
+      // Fire VB6 events
+      if (window.VB6Runtime?.fireEvent) {
+        window.VB6Runtime.fireEvent(control.name, 'Click');
+
+        if (isDoubleClick) {
+          window.VB6Runtime.fireEvent(control.name, 'DblClick');
+        }
       }
-    }
-  }, [control.name, enabled, files, lastClickTime, multiSelect, onPropertyChange, selectedFile, selectedFiles]);
+    },
+    [
+      control.name,
+      enabled,
+      files,
+      lastClickTime,
+      multiSelect,
+      onPropertyChange,
+      selectedFile,
+      selectedFiles,
+    ]
+  );
 
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`;
@@ -178,14 +190,13 @@ export const FileListBox: React.FC<FileListBoxProps> = ({
         data-control-index={index}
       >
         {files.map(file => {
-          const isSelected = multiSelect === 0 
-            ? selectedFile === file.name 
-            : selectedFiles.has(file.name);
-          
+          const isSelected =
+            multiSelect === 0 ? selectedFile === file.name : selectedFiles.has(file.name);
+
           return (
             <div
               key={file.name}
-              onClick={(e) => handleFileClick(file, e)}
+              onClick={e => handleFileClick(file, e)}
               style={{
                 padding: '2px 4px',
                 backgroundColor: isSelected ? '#0A246A' : 'transparent',
@@ -201,7 +212,7 @@ export const FileListBox: React.FC<FileListBoxProps> = ({
           );
         })}
       </div>
-      
+
       {/* Design mode indicator */}
       {isDesignMode && (
         <div

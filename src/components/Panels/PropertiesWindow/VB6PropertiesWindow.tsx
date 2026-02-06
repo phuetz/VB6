@@ -2,15 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useVB6Store } from '../../../stores/vb6Store';
 import { shallow } from 'zustand/shallow';
 import { Control } from '../../../context/types';
-import { 
-  Type, 
-  Grid,
-  Eye,
-  EyeOff,
-  Settings,
-  RefreshCw,
-  ChevronDown
-} from 'lucide-react';
+import { Type, Grid, Eye, EyeOff, Settings, RefreshCw, ChevronDown } from 'lucide-react';
 import PropertyGrid from './PropertyGrid';
 import PropertyManager from './PropertyManager';
 import './VB6PropertiesWindow.css';
@@ -18,7 +10,7 @@ import './VB6PropertiesWindow.css';
 const VB6PropertiesWindow: React.FC = () => {
   // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
   const { selectedControls, updateControl, formProperties, updateFormProperty } = useVB6Store(
-    (state) => ({
+    state => ({
       selectedControls: state.selectedControls,
       updateControl: state.updateControl,
       formProperties: state.formProperties,
@@ -47,7 +39,7 @@ const VB6PropertiesWindow: React.FC = () => {
   // Get properties for current object type
   const availableProperties = useMemo(() => {
     if (!currentObject) return [];
-    
+
     const objectType = currentObject.type || 'Form';
     return PropertyManager.getControlProperties(objectType);
   }, [currentObject]);
@@ -55,8 +47,8 @@ const VB6PropertiesWindow: React.FC = () => {
   // Get current property values
   const propertyValues = useMemo(() => {
     if (!currentObject) return {};
-    
-    const values: Record<string, any> = {};
+
+    const values: Record<string, unknown> = {};
     availableProperties.forEach(propDef => {
       if (currentObject.properties && propDef.name in currentObject.properties) {
         values[propDef.name] = currentObject.properties[propDef.name];
@@ -66,21 +58,24 @@ const VB6PropertiesWindow: React.FC = () => {
         values[propDef.name] = propDef.defaultValue;
       }
     });
-    
+
     return values;
   }, [currentObject, availableProperties]);
 
   // Handle property changes
-  const handlePropertyChange = useCallback((propertyName: string, value: any) => {
-    if (selectedControls.length === 1) {
-      // Single control selected
-      updateControl(selectedControls[0].id, propertyName, value);
-    } else if (selectedControls.length === 0) {
-      // Form selected
-      updateFormProperty(propertyName, value);
-    }
-    // Multiple selection handled by PropertyGrid internally
-  }, [selectedControls, updateControl, updateFormProperty]);
+  const handlePropertyChange = useCallback(
+    (propertyName: string, value: unknown) => {
+      if (selectedControls.length === 1) {
+        // Single control selected
+        updateControl(selectedControls[0].id, propertyName, value);
+      } else if (selectedControls.length === 0) {
+        // Form selected
+        updateFormProperty(propertyName, value);
+      }
+      // Multiple selection handled by PropertyGrid internally
+    },
+    [selectedControls, updateControl, updateFormProperty]
+  );
 
   // Handle validation errors
   const handleValidationError = useCallback((propertyName: string, error: string) => {
@@ -91,11 +86,11 @@ const VB6PropertiesWindow: React.FC = () => {
   // Object selection options
   const objectOptions = useMemo(() => {
     const options = [
-      { 
-        value: 'form', 
+      {
+        value: 'form',
         label: formProperties.Name || 'Form1',
-        type: 'Form'
-      }
+        type: 'Form',
+      },
     ];
 
     // Add all controls
@@ -103,7 +98,7 @@ const VB6PropertiesWindow: React.FC = () => {
       options.push({
         value: control.id.toString(),
         label: control.name,
-        type: control.type
+        type: control.type,
       });
     });
 
@@ -128,16 +123,14 @@ const VB6PropertiesWindow: React.FC = () => {
   }, []);
 
   return (
-    <div className="vb6-properties">
+    <div className="vb6-properties" role="region" aria-label="Properties Window">
       {/* Title Bar */}
-      <div className="vb6-properties-titlebar">
-        Properties
-      </div>
+      <div className="vb6-properties-titlebar">Properties</div>
 
       {/* Object Selection */}
       <div className="vb6-object-selector">
         <div className="flex items-center">
-          <select className="vb6-object-combo flex-1">
+          <select className="vb6-object-combo flex-1" aria-label="Selected object">
             <option value="">{objectDisplayName}</option>
             {objectOptions.map(option => (
               <option key={option.value} value={option.value}>
@@ -145,10 +138,11 @@ const VB6PropertiesWindow: React.FC = () => {
               </option>
             ))}
           </select>
-          <button 
+          <button
             onClick={refreshProperties}
             className="ml-1 vb6-toolbar-button"
             title="Refresh Properties"
+            aria-label="Refresh Properties"
           >
             <RefreshCw size={12} />
           </button>
@@ -156,49 +150,59 @@ const VB6PropertiesWindow: React.FC = () => {
       </div>
 
       {/* Toolbar */}
-      <div className="vb6-properties-toolbar">
-        <button 
+      <div className="vb6-properties-toolbar" role="toolbar" aria-label="Properties view options">
+        <button
           onClick={() => setViewMode('categorized')}
           className={`vb6-toolbar-button ${viewMode === 'categorized' ? 'pressed' : ''}`}
           title="Categorized View"
+          aria-pressed={viewMode === 'categorized'}
+          aria-label="Categorized View"
         >
           <Grid size={12} />
         </button>
-        <button 
+        <button
           onClick={() => setViewMode('alphabetic')}
           className={`vb6-toolbar-button ${viewMode === 'alphabetic' ? 'pressed' : ''}`}
           title="Alphabetic View"
+          aria-pressed={viewMode === 'alphabetic'}
+          aria-label="Alphabetic View"
         >
           <Type size={12} />
         </button>
-        
+
         <div className="flex-1" />
-        
-        <button 
+
+        <button
           onClick={() => setShowIcons(!showIcons)}
           className={`vb6-toolbar-button ${showIcons ? 'pressed' : ''}`}
           title="Show Property Icons"
+          aria-pressed={showIcons}
+          aria-label="Show Property Icons"
         >
           <Settings size={12} />
         </button>
-        <button 
+        <button
           onClick={() => setShowValidation(!showValidation)}
           className={`vb6-toolbar-button ${showValidation ? 'pressed' : ''}`}
           title="Show Validation"
+          aria-pressed={showValidation}
+          aria-label="Show Validation"
         >
           {showValidation ? <Eye size={12} /> : <EyeOff size={12} />}
         </button>
-        <button 
+        <button
           onClick={() => setShowDescriptions(!showDescriptions)}
           className={`vb6-toolbar-button ${showDescriptions ? 'pressed' : ''}`}
           title="Show Descriptions"
+          aria-pressed={showDescriptions}
+          aria-label="Show Descriptions"
         >
           {showDescriptions ? <Eye size={12} /> : <EyeOff size={12} />}
         </button>
       </div>
 
       {/* Property Grid */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden" role="form" aria-label="Property editor">
         {currentObject ? (
           <PropertyGrid
             properties={availableProperties}
@@ -229,9 +233,7 @@ const VB6PropertiesWindow: React.FC = () => {
             <span>
               {availableProperties.length} properties | {Object.keys(propertyValues).length} values
             </span>
-            <span>
-              {currentObject.type || 'Form'} object
-            </span>
+            <span>{currentObject.type || 'Form'} object</span>
           </div>
         ) : (
           <span>Multiple selection</span>

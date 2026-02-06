@@ -56,7 +56,9 @@ export class VB6Timer {
   private _interval: number = 1000;
   private _callback: (() => void) | null = null;
 
-  get Enabled(): boolean { return this._enabled; }
+  get Enabled(): boolean {
+    return this._enabled;
+  }
   set Enabled(value: boolean) {
     this._enabled = value;
     if (value) {
@@ -66,7 +68,9 @@ export class VB6Timer {
     }
   }
 
-  get Interval(): number { return this._interval; }
+  get Interval(): number {
+    return this._interval;
+  }
   set Interval(value: number) {
     this._interval = Math.max(1, value);
     if (this._enabled) {
@@ -247,7 +251,7 @@ export class VB6ByteArray {
     if (index < 0 || index >= this.data.length) {
       throw new Error('Subscript out of range');
     }
-    this.data[index] = value & 0xFF;
+    this.data[index] = value & 0xff;
   }
 
   ToString(): string {
@@ -273,7 +277,12 @@ export class VB6ByteArray {
     this.data = newData;
   }
 
-  Copy(destination: VB6ByteArray, srcOffset: number = 0, destOffset: number = 0, length?: number): void {
+  Copy(
+    destination: VB6ByteArray,
+    srcOffset: number = 0,
+    destOffset: number = 0,
+    length?: number
+  ): void {
     const copyLength = length || this.data.length - srcOffset;
     for (let i = 0; i < copyLength; i++) {
       destination.SetByte(destOffset + i, this.GetByte(srcOffset + i));
@@ -284,22 +293,14 @@ export class VB6ByteArray {
 /**
  * CopyMemory - Copies memory between byte arrays
  */
-export function CopyMemory(
-  destination: VB6ByteArray,
-  source: VB6ByteArray,
-  length: number
-): void {
+export function CopyMemory(destination: VB6ByteArray, source: VB6ByteArray, length: number): void {
   source.Copy(destination, 0, 0, length);
 }
 
 /**
  * FillMemory - Fills byte array with a value
  */
-export function FillMemory(
-  destination: VB6ByteArray,
-  value: number,
-  length: number
-): void {
+export function FillMemory(destination: VB6ByteArray, value: number, length: number): void {
   for (let i = 0; i < length; i++) {
     destination.SetByte(i, value);
   }
@@ -453,7 +454,6 @@ export const DebugStream = new VB6PrintStream();
  */
 export function DebugPrint(...args: any[]): void {
   DebugStream.PrintLine(...args);
-  console.log('[Debug]', ...args);
 }
 
 /**
@@ -482,14 +482,14 @@ export function GetSystemDefaultLCID(): number {
   const localeMap: { [key: string]: number } = {
     'en-US': 0x0409,
     'en-GB': 0x0809,
-    'fr-FR': 0x040C,
+    'fr-FR': 0x040c,
     'de-DE': 0x0407,
-    'es-ES': 0x0C0A,
+    'es-ES': 0x0c0a,
     'it-IT': 0x0410,
     'pt-BR': 0x0416,
     'ja-JP': 0x0411,
     'zh-CN': 0x0804,
-    'ko-KR': 0x0412
+    'ko-KR': 0x0412,
   };
 
   if (typeof navigator !== 'undefined') {
@@ -515,18 +515,18 @@ export function GetLocaleInfo(lcid: number, lcType: number): string {
   const locale = 'en-US'; // Would map from LCID
 
   const localeData: { [key: number]: string } = {
-    0x01: 'en-US',           // LOCALE_ILANGUAGE
-    0x02: 'English',         // LOCALE_SLANGUAGE
-    0x03: 'United States',   // LOCALE_SCOUNTRY
-    0x04: 'ENU',             // LOCALE_SABBREVLANGNAME
-    0x05: 'English',         // LOCALE_SNATIVELANGNAME
-    0x06: 'US',              // LOCALE_SABBREVCTRYNAME
-    0x07: 'United States',   // LOCALE_SNATIVECTRYNAME
-    0x14: '$',               // LOCALE_SCURRENCY
-    0x15: '.',               // LOCALE_STHOUSAND
-    0x16: '.',               // LOCALE_SDECIMAL
-    0x1D: 'M/d/yyyy',        // LOCALE_SSHORTDATE
-    0x1E: 'dddd, MMMM dd, yyyy', // LOCALE_SLONGDATE
+    0x01: 'en-US', // LOCALE_ILANGUAGE
+    0x02: 'English', // LOCALE_SLANGUAGE
+    0x03: 'United States', // LOCALE_SCOUNTRY
+    0x04: 'ENU', // LOCALE_SABBREVLANGNAME
+    0x05: 'English', // LOCALE_SNATIVELANGNAME
+    0x06: 'US', // LOCALE_SABBREVCTRYNAME
+    0x07: 'United States', // LOCALE_SNATIVECTRYNAME
+    0x14: '$', // LOCALE_SCURRENCY
+    0x15: '.', // LOCALE_STHOUSAND
+    0x16: '.', // LOCALE_SDECIMAL
+    0x1d: 'M/d/yyyy', // LOCALE_SSHORTDATE
+    0x1e: 'dddd, MMMM dd, yyyy', // LOCALE_SLONGDATE
   };
 
   return localeData[lcType] || '';
@@ -580,8 +580,8 @@ export function CreateGUID(): string {
 
   // Fallback implementation
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
@@ -606,8 +606,7 @@ export function IsDevMode(): boolean {
     return process.env?.NODE_ENV === 'development';
   }
   if (typeof window !== 'undefined') {
-    return window.location.hostname === 'localhost' ||
-           window.location.hostname === '127.0.0.1';
+    return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   }
   return false;
 }
@@ -626,7 +625,7 @@ export function GetPlatformInfo(): {
       os: 'Unknown',
       browser: 'Unknown',
       isMobile: false,
-      isTouch: false
+      isTouch: false,
     };
   }
 
@@ -745,13 +744,13 @@ export function Environ(envString: string | number): string {
   // Browser fallback - check common browser-accessible info
   if (typeof envString === 'string') {
     const browserEnv: Record<string, string> = {
-      'COMPUTERNAME': typeof location !== 'undefined' ? location.hostname : 'browser',
-      'USERNAME': 'WebUser',
-      'USERPROFILE': '/home/webuser',
-      'OS': typeof navigator !== 'undefined' ? navigator.platform : 'browser',
-      'PATH': '/',
-      'TEMP': '/tmp',
-      'TMP': '/tmp'
+      COMPUTERNAME: typeof location !== 'undefined' ? location.hostname : 'browser',
+      USERNAME: 'WebUser',
+      USERPROFILE: '/home/webuser',
+      OS: typeof navigator !== 'undefined' ? navigator.platform : 'browser',
+      PATH: '/',
+      TEMP: '/tmp',
+      TMP: '/tmp',
     };
     return browserEnv[envString.toUpperCase()] || '';
   }
@@ -762,8 +761,6 @@ export function Environ(envString: string | number): string {
  * Execute a shell command (simulated in browser)
  */
 export async function Shell(command: string, windowStyle?: number): Promise<number> {
-  console.log(`[Shell] Command: ${command} (Style: ${windowStyle ?? 1})`);
-
   // In browser, we can only simulate certain commands
   if (typeof window !== 'undefined') {
     // Handle URLs
@@ -784,7 +781,6 @@ export async function Shell(command: string, windowStyle?: number): Promise<numb
  * Activate an application window (simulated)
  */
 export function AppActivate(title: string, wait?: boolean): boolean {
-  console.log(`[AppActivate] Activating: ${title} (wait: ${wait ?? false})`);
   // In browser, we can only focus our own window
   if (typeof window !== 'undefined') {
     window.focus();
@@ -827,10 +823,8 @@ export function Beep(): void {
       oscillator.start();
       oscillator.stop(audioCtx.currentTime + 0.1);
     } catch (e) {
-      console.log('\u0007'); // Fallback: bell character
+      // Audio API may not be available in all environments
     }
-  } else {
-    console.log('\u0007');
   }
 }
 
@@ -883,7 +877,7 @@ export const Clipboard = {
   GetFormat(format: number): boolean {
     // In web, we mainly support text
     return format === 1; // vbCFText = 1
-  }
+  },
 };
 
 // ============================================================================
@@ -902,15 +896,15 @@ export function QBColor(color: number): number {
     0x000080, // 4: Red
     0x800080, // 5: Magenta
     0x008080, // 6: Brown/Yellow
-    0xC0C0C0, // 7: Light Gray
+    0xc0c0c0, // 7: Light Gray
     0x808080, // 8: Dark Gray
-    0xFF0000, // 9: Light Blue
-    0x00FF00, // 10: Light Green
-    0xFFFF00, // 11: Light Cyan
-    0x0000FF, // 12: Light Red
-    0xFF00FF, // 13: Light Magenta
-    0x00FFFF, // 14: Yellow
-    0xFFFFFF  // 15: White
+    0xff0000, // 9: Light Blue
+    0x00ff00, // 10: Light Green
+    0xffff00, // 11: Light Cyan
+    0x0000ff, // 12: Light Red
+    0xff00ff, // 13: Light Magenta
+    0x00ffff, // 14: Yellow
+    0xffffff, // 15: White
   ];
   return colors[color % 16] || 0;
 }
@@ -929,21 +923,21 @@ export function RGB(red: number, green: number, blue: number): number {
  * Extract Red component from color
  */
 export function ExtractRed(color: number): number {
-  return color & 0xFF;
+  return color & 0xff;
 }
 
 /**
  * Extract Green component from color
  */
 export function ExtractGreen(color: number): number {
-  return (color >> 8) & 0xFF;
+  return (color >> 8) & 0xff;
 }
 
 /**
  * Extract Blue component from color
  */
 export function ExtractBlue(color: number): number {
-  return (color >> 16) & 0xFF;
+  return (color >> 16) & 0xff;
 }
 
 // ============================================================================
@@ -964,7 +958,6 @@ export function InputBox(
     const result = window.prompt(prompt, defaultValue || '');
     return result;
   }
-  console.log(`[InputBox] ${title || 'Input'}: ${prompt}`);
   return defaultValue || '';
 }
 
@@ -972,11 +965,7 @@ export function InputBox(
  * MsgBox - Display message dialog
  * Returns button clicked
  */
-export function MsgBox(
-  prompt: string,
-  buttons?: number,
-  title?: string
-): number {
+export function MsgBox(prompt: string, buttons?: number, title?: string): number {
   const buttonsValue = buttons || 0;
   const titleValue = title || 'Message';
 
@@ -998,7 +987,6 @@ export function MsgBox(
     }
   }
 
-  console.log(`[MsgBox] ${titleValue}: ${prompt}`);
   return 1;
 }
 
@@ -1071,12 +1059,18 @@ export function TypeName(variable: any): string {
   if (variable instanceof Date) return 'Date';
   const type = typeof variable;
   switch (type) {
-    case 'boolean': return 'Boolean';
-    case 'number': return Number.isInteger(variable) ? 'Long' : 'Double';
-    case 'string': return 'String';
-    case 'object': return variable.constructor?.name || 'Object';
-    case 'function': return 'Function';
-    default: return 'Variant';
+    case 'boolean':
+      return 'Boolean';
+    case 'number':
+      return Number.isInteger(variable) ? 'Long' : 'Double';
+    case 'string':
+      return 'String';
+    case 'object':
+      return variable.constructor?.name || 'Object';
+    case 'function':
+      return 'Function';
+    default:
+      return 'Variant';
   }
 }
 
@@ -1182,5 +1176,5 @@ export const VB6EnhancedRuntime = {
   IsNumeric,
   IsObject,
   TypeName,
-  VarType
+  VarType,
 };

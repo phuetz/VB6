@@ -62,14 +62,14 @@ export interface TableRelationship {
 export enum RelationshipType {
   OneToOne = '1:1',
   OneToMany = '1:N',
-  ManyToMany = 'N:N'
+  ManyToMany = 'N:N',
 }
 
 export enum ReferentialAction {
   NoAction = 'NO ACTION',
   Cascade = 'CASCADE',
   SetNull = 'SET NULL',
-  SetDefault = 'SET DEFAULT'
+  SetDefault = 'SET DEFAULT',
 }
 
 // Data Types
@@ -86,7 +86,7 @@ export const DataTypes = {
   real: { category: 'Numeric', hasLength: false },
   money: { category: 'Numeric', hasLength: false },
   smallmoney: { category: 'Numeric', hasLength: false },
-  
+
   // String
   char: { category: 'String', hasLength: true },
   varchar: { category: 'String', hasLength: true },
@@ -94,7 +94,7 @@ export const DataTypes = {
   nvarchar: { category: 'String', hasLength: true },
   text: { category: 'String', hasLength: false },
   ntext: { category: 'String', hasLength: false },
-  
+
   // Date/Time
   date: { category: 'DateTime', hasLength: false },
   time: { category: 'DateTime', hasLength: false },
@@ -102,16 +102,16 @@ export const DataTypes = {
   datetime2: { category: 'DateTime', hasLength: false },
   smalldatetime: { category: 'DateTime', hasLength: false },
   datetimeoffset: { category: 'DateTime', hasLength: false },
-  
+
   // Binary
   binary: { category: 'Binary', hasLength: true },
   varbinary: { category: 'Binary', hasLength: true },
   image: { category: 'Binary', hasLength: false },
-  
+
   // Other
   uniqueidentifier: { category: 'Other', hasLength: false },
   xml: { category: 'Other', hasLength: false },
-  sql_variant: { category: 'Other', hasLength: false }
+  sql_variant: { category: 'Other', hasLength: false },
 };
 
 // Diagram Settings
@@ -122,7 +122,7 @@ export interface DiagramSettings {
   snapToGrid: boolean;
   gridSize: number;
   zoomLevel: number;
-  notation: 'IDEF1X' | 'Crow\'s Foot' | 'UML';
+  notation: 'IDEF1X' | "Crow's Foot" | 'UML';
 }
 
 interface DatabaseDiagramDesignerProps {
@@ -134,13 +134,17 @@ interface DatabaseDiagramDesignerProps {
 export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = ({
   onTableCreate,
   onRelationshipCreate,
-  onDiagramSave
+  onDiagramSave,
 }) => {
   const [tables, setTables] = useState<DiagramTable[]>([]);
   const [relationships, setRelationships] = useState<TableRelationship[]>([]);
   const [selectedTable, setSelectedTable] = useState<DiagramTable | null>(null);
   const [selectedRelationship, setSelectedRelationship] = useState<TableRelationship | null>(null);
-  const [draggedTable, setDraggedTable] = useState<{ id: string; offsetX: number; offsetY: number } | null>(null);
+  const [draggedTable, setDraggedTable] = useState<{
+    id: string;
+    offsetX: number;
+    offsetY: number;
+  } | null>(null);
   const [connectingRelationship, setConnectingRelationship] = useState<{
     fromTable: string;
     fromColumn: string;
@@ -152,7 +156,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
     snapToGrid: true,
     gridSize: 20,
     zoomLevel: 100,
-    notation: 'Crow\'s Foot'
+    notation: "Crow's Foot",
   });
   const [showTableDialog, setShowTableDialog] = useState(false);
   const [showRelationshipDialog, setShowRelationshipDialog] = useState(false);
@@ -161,20 +165,20 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
   const [selectedColumn, setSelectedColumn] = useState<TableColumn | null>(null);
   const [tableForm, setTableForm] = useState({
     name: '',
-    schema: 'dbo'
+    schema: 'dbo',
   });
   const [columnForm, setColumnForm] = useState<Partial<TableColumn>>({
     name: '',
     dataType: 'int',
     isNullable: true,
-    isPrimaryKey: false
+    isPrimaryKey: false,
   });
   const [relationshipForm, setRelationshipForm] = useState<Partial<TableRelationship>>({
     name: '',
     relationshipType: RelationshipType.OneToMany,
     onDelete: ReferentialAction.NoAction,
     onUpdate: ReferentialAction.NoAction,
-    isEnforced: true
+    isEnforced: true,
   });
   const [viewBox, setViewBox] = useState({ x: 0, y: 0, width: 1200, height: 800 });
   const [isPanning, setIsPanning] = useState(false);
@@ -208,7 +212,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
             isForeignKey: false,
             isIdentity: true,
             identitySeed: 1,
-            identityIncrement: 1
+            identityIncrement: 1,
           },
           {
             id: generateId(),
@@ -218,7 +222,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
             isNullable: false,
             isPrimaryKey: false,
             isForeignKey: false,
-            isIdentity: false
+            isIdentity: false,
           },
           {
             id: generateId(),
@@ -228,7 +232,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
             isNullable: true,
             isPrimaryKey: false,
             isForeignKey: false,
-            isIdentity: false
+            isIdentity: false,
           },
           {
             id: generateId(),
@@ -238,8 +242,8 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
             isNullable: true,
             isPrimaryKey: false,
             isForeignKey: false,
-            isIdentity: false
-          }
+            isIdentity: false,
+          },
         ],
         indexes: [
           {
@@ -248,11 +252,11 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
             columns: ['CustomerID'],
             isUnique: true,
             isClustered: true,
-            isPrimaryKey: true
-          }
+            isPrimaryKey: true,
+          },
         ],
         isSelected: false,
-        isExpanded: true
+        isExpanded: true,
       },
       {
         id: generateId(),
@@ -270,7 +274,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
             isNullable: false,
             isPrimaryKey: true,
             isForeignKey: false,
-            isIdentity: true
+            isIdentity: true,
           },
           {
             id: generateId(),
@@ -279,7 +283,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
             isNullable: false,
             isPrimaryKey: false,
             isForeignKey: true,
-            isIdentity: false
+            isIdentity: false,
           },
           {
             id: generateId(),
@@ -288,7 +292,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
             isNullable: true,
             isPrimaryKey: false,
             isForeignKey: false,
-            isIdentity: false
+            isIdentity: false,
           },
           {
             id: generateId(),
@@ -297,7 +301,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
             isNullable: true,
             isPrimaryKey: false,
             isForeignKey: false,
-            isIdentity: false
+            isIdentity: false,
           },
           {
             id: generateId(),
@@ -308,8 +312,8 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
             isNullable: true,
             isPrimaryKey: false,
             isForeignKey: false,
-            isIdentity: false
-          }
+            isIdentity: false,
+          },
         ],
         indexes: [
           {
@@ -318,7 +322,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
             columns: ['OrderID'],
             isUnique: true,
             isClustered: true,
-            isPrimaryKey: true
+            isPrimaryKey: true,
           },
           {
             id: generateId(),
@@ -326,12 +330,12 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
             columns: ['CustomerID'],
             isUnique: false,
             isClustered: false,
-            isPrimaryKey: false
-          }
+            isPrimaryKey: false,
+          },
         ],
         isSelected: false,
-        isExpanded: true
-      }
+        isExpanded: true,
+      },
     ];
 
     const sampleRelationship: TableRelationship = {
@@ -344,7 +348,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
       relationshipType: RelationshipType.OneToMany,
       onDelete: ReferentialAction.NoAction,
       onUpdate: ReferentialAction.NoAction,
-      isEnforced: true
+      isEnforced: true,
     };
 
     setTables(sampleTables);
@@ -373,8 +377,8 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
           isForeignKey: false,
           isIdentity: true,
           identitySeed: 1,
-          identityIncrement: 1
-        }
+          identityIncrement: 1,
+        },
       ],
       indexes: [
         {
@@ -383,17 +387,17 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
           columns: [`${tableForm.name}ID`],
           isUnique: true,
           isClustered: true,
-          isPrimaryKey: true
-        }
+          isPrimaryKey: true,
+        },
       ],
       isSelected: false,
-      isExpanded: true
+      isExpanded: true,
     };
 
     setTables(prev => [...prev, newTable]);
     setShowTableDialog(false);
     setTableForm({ name: '', schema: 'dbo' });
-    
+
     onTableCreate?.(newTable);
     eventEmitter.current.emit('tableCreated', newTable);
   }, [tableForm, tables, generateId, onTableCreate]);
@@ -416,40 +420,40 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
       identitySeed: columnForm.identitySeed,
       identityIncrement: columnForm.identityIncrement,
       defaultValue: columnForm.defaultValue,
-      description: columnForm.description
+      description: columnForm.description,
     };
 
-    setTables(prev => prev.map(table => {
-      if (table.id === selectedTable.id) {
-        const updatedTable = {
-          ...table,
-          columns: [...table.columns, newColumn],
-          height: table.height + 25
-        };
-        
-        // Add primary key index if needed
-        if (newColumn.isPrimaryKey) {
-          const pkIndex = table.indexes.find(idx => idx.isPrimaryKey);
-          if (pkIndex) {
-            updatedTable.indexes = table.indexes.map(idx =>
-              idx.isPrimaryKey
-                ? { ...idx, columns: [...idx.columns, newColumn.name] }
-                : idx
-            );
+    setTables(prev =>
+      prev.map(table => {
+        if (table.id === selectedTable.id) {
+          const updatedTable = {
+            ...table,
+            columns: [...table.columns, newColumn],
+            height: table.height + 25,
+          };
+
+          // Add primary key index if needed
+          if (newColumn.isPrimaryKey) {
+            const pkIndex = table.indexes.find(idx => idx.isPrimaryKey);
+            if (pkIndex) {
+              updatedTable.indexes = table.indexes.map(idx =>
+                idx.isPrimaryKey ? { ...idx, columns: [...idx.columns, newColumn.name] } : idx
+              );
+            }
           }
+
+          return updatedTable;
         }
-        
-        return updatedTable;
-      }
-      return table;
-    }));
+        return table;
+      })
+    );
 
     setShowColumnDialog(false);
     setColumnForm({
       name: '',
       dataType: 'int',
       isNullable: true,
-      isPrimaryKey: false
+      isPrimaryKey: false,
     });
 
     eventEmitter.current.emit('columnAdded', selectedTable, newColumn);
@@ -457,8 +461,13 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
 
   // Create relationship
   const createRelationship = useCallback(() => {
-    if (!relationshipForm.fromTable || !relationshipForm.fromColumn ||
-        !relationshipForm.toTable || !relationshipForm.toColumn) return;
+    if (
+      !relationshipForm.fromTable ||
+      !relationshipForm.fromColumn ||
+      !relationshipForm.toTable ||
+      !relationshipForm.toColumn
+    )
+      return;
 
     const newRelationship: TableRelationship = {
       id: generateId(),
@@ -470,7 +479,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
       relationshipType: relationshipForm.relationshipType || RelationshipType.OneToMany,
       onDelete: relationshipForm.onDelete || ReferentialAction.NoAction,
       onUpdate: relationshipForm.onUpdate || ReferentialAction.NoAction,
-      isEnforced: relationshipForm.isEnforced ?? true
+      isEnforced: relationshipForm.isEnforced ?? true,
     };
 
     setRelationships(prev => [...prev, newRelationship]);
@@ -480,7 +489,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
       relationshipType: RelationshipType.OneToMany,
       onDelete: ReferentialAction.NoAction,
       onUpdate: ReferentialAction.NoAction,
-      isEnforced: true
+      isEnforced: true,
     });
 
     onRelationshipCreate?.(newRelationship);
@@ -488,83 +497,88 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
   }, [relationshipForm, generateId, onRelationshipCreate]);
 
   // Delete table
-  const deleteTable = useCallback((tableId: string) => {
-    if (!window.confirm('Delete this table and all its relationships?')) return;
+  const deleteTable = useCallback(
+    (tableId: string) => {
+      if (!window.confirm('Delete this table and all its relationships?')) return;
 
-    setTables(prev => prev.filter(t => t.id !== tableId));
-    setRelationships(prev => prev.filter(r => 
-      r.fromTable !== tableId && r.toTable !== tableId
-    ));
-    
-    if (selectedTable?.id === tableId) {
-      setSelectedTable(null);
-    }
+      setTables(prev => prev.filter(t => t.id !== tableId));
+      setRelationships(prev => prev.filter(r => r.fromTable !== tableId && r.toTable !== tableId));
 
-    eventEmitter.current.emit('tableDeleted', tableId);
-  }, [selectedTable]);
+      if (selectedTable?.id === tableId) {
+        setSelectedTable(null);
+      }
+
+      eventEmitter.current.emit('tableDeleted', tableId);
+    },
+    [selectedTable]
+  );
 
   // Delete relationship
-  const deleteRelationship = useCallback((relationshipId: string) => {
-    if (!window.confirm('Delete this relationship?')) return;
+  const deleteRelationship = useCallback(
+    (relationshipId: string) => {
+      if (!window.confirm('Delete this relationship?')) return;
 
-    setRelationships(prev => prev.filter(r => r.id !== relationshipId));
-    
-    if (selectedRelationship?.id === relationshipId) {
-      setSelectedRelationship(null);
-    }
+      setRelationships(prev => prev.filter(r => r.id !== relationshipId));
 
-    eventEmitter.current.emit('relationshipDeleted', relationshipId);
-  }, [selectedRelationship]);
+      if (selectedRelationship?.id === relationshipId) {
+        setSelectedRelationship(null);
+      }
+
+      eventEmitter.current.emit('relationshipDeleted', relationshipId);
+    },
+    [selectedRelationship]
+  );
 
   // Handle table drag
   const handleTableMouseDown = useCallback((e: React.MouseEvent, table: DiagramTable) => {
     e.stopPropagation();
     setSelectedTable(table);
     setSelectedRelationship(null);
-    
+
     const rect = canvasRef.current?.getBoundingClientRect();
     if (rect) {
       setDraggedTable({
         id: table.id,
         offsetX: e.clientX - rect.left - table.x,
-        offsetY: e.clientY - rect.top - table.y
+        offsetY: e.clientY - rect.top - table.y,
       });
     }
   }, []);
 
   // Handle mouse move
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (draggedTable && canvasRef.current) {
-      const rect = canvasRef.current.getBoundingClientRect();
-      let newX = e.clientX - rect.left - draggedTable.offsetX;
-      let newY = e.clientY - rect.top - draggedTable.offsetY;
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (draggedTable && canvasRef.current) {
+        const rect = canvasRef.current.getBoundingClientRect();
+        let newX = e.clientX - rect.left - draggedTable.offsetX;
+        let newY = e.clientY - rect.top - draggedTable.offsetY;
 
-      // Snap to grid
-      if (settings.snapToGrid) {
-        newX = Math.round(newX / settings.gridSize) * settings.gridSize;
-        newY = Math.round(newY / settings.gridSize) * settings.gridSize;
+        // Snap to grid
+        if (settings.snapToGrid) {
+          newX = Math.round(newX / settings.gridSize) * settings.gridSize;
+          newY = Math.round(newY / settings.gridSize) * settings.gridSize;
+        }
+
+        setTables(prev =>
+          prev.map(table => (table.id === draggedTable.id ? { ...table, x: newX, y: newY } : table))
+        );
       }
 
-      setTables(prev => prev.map(table =>
-        table.id === draggedTable.id
-          ? { ...table, x: newX, y: newY }
-          : table
-      ));
-    }
+      if (isPanning && canvasRef.current) {
+        const deltaX = e.clientX - panStart.x;
+        const deltaY = e.clientY - panStart.y;
 
-    if (isPanning && canvasRef.current) {
-      const deltaX = e.clientX - panStart.x;
-      const deltaY = e.clientY - panStart.y;
-      
-      setViewBox(prev => ({
-        ...prev,
-        x: prev.x - deltaX,
-        y: prev.y - deltaY
-      }));
-      
-      setPanStart({ x: e.clientX, y: e.clientY });
-    }
-  }, [draggedTable, isPanning, panStart, settings]);
+        setViewBox(prev => ({
+          ...prev,
+          x: prev.x - deltaX,
+          y: prev.y - deltaY,
+        }));
+
+        setPanStart({ x: e.clientX, y: e.clientY });
+      }
+    },
+    [draggedTable, isPanning, panStart, settings]
+  );
 
   // Handle mouse up
   const handleMouseUp = useCallback(() => {
@@ -579,28 +593,28 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
     // Generate CREATE TABLE statements
     tables.forEach(table => {
       sql += `CREATE TABLE [${table.schema}].[${table.name}] (\n`;
-      
+
       const columnDefs = table.columns.map(col => {
         let def = `    [${col.name}] ${col.dataType}`;
-        
+
         if (col.length) def += `(${col.length})`;
         if (col.precision && col.scale) def += `(${col.precision}, ${col.scale})`;
-        
+
         if (col.isIdentity) {
           def += ` IDENTITY(${col.identitySeed || 1}, ${col.identityIncrement || 1})`;
         }
-        
+
         def += col.isNullable ? ' NULL' : ' NOT NULL';
-        
+
         if (col.defaultValue) {
           def += ` DEFAULT ${col.defaultValue}`;
         }
-        
+
         return def;
       });
-      
+
       sql += columnDefs.join(',\n');
-      
+
       // Add primary key constraint
       const pkIndex = table.indexes.find(idx => idx.isPrimaryKey);
       if (pkIndex) {
@@ -608,18 +622,20 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
         sql += pkIndex.columns.map(c => `[${c}]`).join(', ');
         sql += ')';
       }
-      
+
       sql += '\n);\n\n';
-      
+
       // Add non-PK indexes
-      table.indexes.filter(idx => !idx.isPrimaryKey).forEach(idx => {
-        sql += `CREATE ${idx.isUnique ? 'UNIQUE ' : ''}`;
-        sql += `${idx.isClustered ? 'CLUSTERED ' : 'NONCLUSTERED '}`;
-        sql += `INDEX [${idx.name}] ON [${table.schema}].[${table.name}] (`;
-        sql += idx.columns.map(c => `[${c}]`).join(', ');
-        sql += ');\n';
-      });
-      
+      table.indexes
+        .filter(idx => !idx.isPrimaryKey)
+        .forEach(idx => {
+          sql += `CREATE ${idx.isUnique ? 'UNIQUE ' : ''}`;
+          sql += `${idx.isClustered ? 'CLUSTERED ' : 'NONCLUSTERED '}`;
+          sql += `INDEX [${idx.name}] ON [${table.schema}].[${table.name}] (`;
+          sql += idx.columns.map(c => `[${c}]`).join(', ');
+          sql += ');\n';
+        });
+
       sql += '\n';
     });
 
@@ -627,7 +643,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
     relationships.forEach(rel => {
       const fromTable = tables.find(t => t.id === rel.fromTable);
       const toTable = tables.find(t => t.id === rel.toTable);
-      
+
       if (fromTable && toTable) {
         sql += `ALTER TABLE [${fromTable.schema}].[${fromTable.name}]\n`;
         sql += `ADD CONSTRAINT [${rel.name}] FOREIGN KEY ([${rel.fromColumn}])\n`;
@@ -641,57 +657,65 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
   }, [tables, relationships]);
 
   // Calculate table height
-  const calculateTableHeight = useCallback((table: DiagramTable): number => {
-    const headerHeight = 30;
-    const columnHeight = 25;
-    const padding = 10;
-    
-    if (!table.isExpanded) return headerHeight + padding;
-    
-    const columnsHeight = table.columns.length * columnHeight;
-    const indexesHeight = settings.showIndexes ? table.indexes.length * 20 : 0;
-    
-    return headerHeight + columnsHeight + indexesHeight + padding;
-  }, [settings.showIndexes]);
+  const calculateTableHeight = useCallback(
+    (table: DiagramTable): number => {
+      const headerHeight = 30;
+      const columnHeight = 25;
+      const padding = 10;
+
+      if (!table.isExpanded) return headerHeight + padding;
+
+      const columnsHeight = table.columns.length * columnHeight;
+      const indexesHeight = settings.showIndexes ? table.indexes.length * 20 : 0;
+
+      return headerHeight + columnsHeight + indexesHeight + padding;
+    },
+    [settings.showIndexes]
+  );
 
   // Update table heights when needed
   useEffect(() => {
-    setTables(prev => prev.map(table => ({
-      ...table,
-      height: calculateTableHeight(table)
-    })));
+    setTables(prev =>
+      prev.map(table => ({
+        ...table,
+        height: calculateTableHeight(table),
+      }))
+    );
   }, [settings.showIndexes, calculateTableHeight]);
 
   // Get relationship path
-  const getRelationshipPath = useCallback((rel: TableRelationship): string => {
-    const fromTable = tables.find(t => t.id === rel.fromTable);
-    const toTable = tables.find(t => t.id === rel.toTable);
-    
-    if (!fromTable || !toTable) return '';
-    
-    const fromColumnIndex = fromTable.columns.findIndex(c => c.name === rel.fromColumn);
-    const toColumnIndex = toTable.columns.findIndex(c => c.name === rel.toColumn);
-    
-    const fromY = fromTable.y + 30 + (fromColumnIndex + 0.5) * 25;
-    const toY = toTable.y + 30 + (toColumnIndex + 0.5) * 25;
-    
-    let fromX, toX;
-    
-    if (fromTable.x + fromTable.width < toTable.x) {
-      fromX = fromTable.x + fromTable.width;
-      toX = toTable.x;
-    } else if (toTable.x + toTable.width < fromTable.x) {
-      fromX = fromTable.x;
-      toX = toTable.x + toTable.width;
-    } else {
-      fromX = fromTable.x + fromTable.width / 2;
-      toX = toTable.x + toTable.width / 2;
-    }
-    
-    const midX = (fromX + toX) / 2;
-    
-    return `M ${fromX} ${fromY} C ${midX} ${fromY}, ${midX} ${toY}, ${toX} ${toY}`;
-  }, [tables]);
+  const getRelationshipPath = useCallback(
+    (rel: TableRelationship): string => {
+      const fromTable = tables.find(t => t.id === rel.fromTable);
+      const toTable = tables.find(t => t.id === rel.toTable);
+
+      if (!fromTable || !toTable) return '';
+
+      const fromColumnIndex = fromTable.columns.findIndex(c => c.name === rel.fromColumn);
+      const toColumnIndex = toTable.columns.findIndex(c => c.name === rel.toColumn);
+
+      const fromY = fromTable.y + 30 + (fromColumnIndex + 0.5) * 25;
+      const toY = toTable.y + 30 + (toColumnIndex + 0.5) * 25;
+
+      let fromX, toX;
+
+      if (fromTable.x + fromTable.width < toTable.x) {
+        fromX = fromTable.x + fromTable.width;
+        toX = toTable.x;
+      } else if (toTable.x + toTable.width < fromTable.x) {
+        fromX = fromTable.x;
+        toX = toTable.x + toTable.width;
+      } else {
+        fromX = fromTable.x + fromTable.width / 2;
+        toX = toTable.x + toTable.width / 2;
+      }
+
+      const midX = (fromX + toX) / 2;
+
+      return `M ${fromX} ${fromY} C ${midX} ${fromY}, ${midX} ${toY}, ${toX} ${toY}`;
+    },
+    [tables]
+  );
 
   // Format data type display
   const formatDataType = (col: TableColumn): string => {
@@ -733,7 +757,6 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
         <button
           onClick={() => {
             const sql = generateSQL();
-            console.log(sql);
             navigator.clipboard.writeText(sql);
           }}
           className="px-3 py-1 text-sm bg-gray-100 border border-gray-300 rounded hover:bg-gray-200"
@@ -760,7 +783,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
             min="25"
             max="200"
             value={settings.zoomLevel}
-            onChange={(e) => setSettings(prev => ({ ...prev, zoomLevel: parseInt(e.target.value) }))}
+            onChange={e => setSettings(prev => ({ ...prev, zoomLevel: parseInt(e.target.value) }))}
             className="w-32"
           />
           <span className="text-sm text-gray-600 w-12">{settings.zoomLevel}%</span>
@@ -775,7 +798,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
           viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
-          onMouseDown={(e) => {
+          onMouseDown={e => {
             if (e.target === e.currentTarget) {
               setSelectedTable(null);
               setSelectedRelationship(null);
@@ -798,9 +821,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
               </pattern>
             </defs>
           )}
-          {settings.snapToGrid && (
-            <rect width="100%" height="100%" fill="url(#grid)" />
-          )}
+          {settings.snapToGrid && <rect width="100%" height="100%" fill="url(#grid)" />}
 
           {/* Relationships */}
           {relationships.map(rel => (
@@ -826,19 +847,30 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
                   {rel.name}
                 </text>
               )}
-              
+
               {/* Crow's foot notation */}
-              {settings.notation === 'Crow\'s Foot' && (
+              {settings.notation === "Crow's Foot" && (
                 <>
                   {/* From side */}
-                  <g transform={`translate(${tables.find(t => t.id === rel.fromTable)?.x ?? 0}, ${tables.find(t => t.id === rel.fromTable)?.y ?? 0})`}>
+                  <g
+                    transform={`translate(${tables.find(t => t.id === rel.fromTable)?.x ?? 0}, ${tables.find(t => t.id === rel.fromTable)?.y ?? 0})`}
+                  >
                     {rel.relationshipType === RelationshipType.OneToMany && (
-                      <circle cx={tables.find(t => t.id === rel.fromTable)?.width ?? 0} cy="30" r="4" fill="white" stroke="#6B7280" strokeWidth="2" />
+                      <circle
+                        cx={tables.find(t => t.id === rel.fromTable)?.width ?? 0}
+                        cy="30"
+                        r="4"
+                        fill="white"
+                        stroke="#6B7280"
+                        strokeWidth="2"
+                      />
                     )}
                   </g>
-                  
+
                   {/* To side */}
-                  <g transform={`translate(${tables.find(t => t.id === rel.toTable)?.x ?? 0}, ${tables.find(t => t.id === rel.toTable)?.y ?? 0})`}>
+                  <g
+                    transform={`translate(${tables.find(t => t.id === rel.toTable)?.x ?? 0}, ${tables.find(t => t.id === rel.toTable)?.y ?? 0})`}
+                  >
                     {rel.relationshipType !== RelationshipType.OneToOne && (
                       <>
                         <line x1="-15" y1="25" x2="0" y2="30" stroke="#6B7280" strokeWidth="2" />
@@ -863,9 +895,9 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
                 strokeWidth={selectedTable?.id === table.id ? 3 : 1}
                 rx="4"
                 className="cursor-move"
-                onMouseDown={(e) => handleTableMouseDown(e, table)}
+                onMouseDown={e => handleTableMouseDown(e, table)}
               />
-              
+
               {/* Table Header */}
               <rect
                 width={table.width}
@@ -873,9 +905,9 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
                 fill={table.color || '#3B82F6'}
                 rx="4"
                 className="cursor-move"
-                onMouseDown={(e) => handleTableMouseDown(e, table)}
+                onMouseDown={e => handleTableMouseDown(e, table)}
               />
-              
+
               <text
                 x="10"
                 y="20"
@@ -886,7 +918,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
               >
                 {table.name}
               </text>
-              
+
               <text
                 x={table.width - 20}
                 y="20"
@@ -894,14 +926,14 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
                 fill="white"
                 className="cursor-pointer"
                 onClick={() => {
-                  setTables(prev => prev.map(t =>
-                    t.id === table.id ? { ...t, isExpanded: !t.isExpanded } : t
-                  ));
+                  setTables(prev =>
+                    prev.map(t => (t.id === table.id ? { ...t, isExpanded: !t.isExpanded } : t))
+                  );
                 }}
               >
                 {table.isExpanded ? '−' : '+'}
               </text>
-              
+
               {/* Columns */}
               {table.isExpanded && (
                 <>
@@ -919,14 +951,18 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
                           setSelectedColumn(col);
                         }}
                       />
-                      
+
                       {col.isPrimaryKey && (
-                        <text x="5" y="17" fontSize="12" fill="#F59E0B">🔑</text>
+                        <text x="5" y="17" fontSize="12" fill="#F59E0B">
+                          🔑
+                        </text>
                       )}
                       {col.isForeignKey && (
-                        <text x={col.isPrimaryKey ? '20' : '5'} y="17" fontSize="12" fill="#6B7280">🔗</text>
+                        <text x={col.isPrimaryKey ? '20' : '5'} y="17" fontSize="12" fill="#6B7280">
+                          🔗
+                        </text>
                       )}
-                      
+
                       <text
                         x={col.isPrimaryKey || col.isForeignKey ? '35' : '10'}
                         y="17"
@@ -935,7 +971,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
                       >
                         {col.name}
                       </text>
-                      
+
                       {settings.showDataTypes && (
                         <text
                           x={table.width - 60}
@@ -947,7 +983,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
                           {formatDataType(col)}
                         </text>
                       )}
-                      
+
                       {!col.isNullable && (
                         <text
                           x={table.width - 10}
@@ -961,30 +997,33 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
                       )}
                     </g>
                   ))}
-                  
+
                   {/* Indexes */}
-                  {settings.showIndexes && table.indexes.filter(idx => !idx.isPrimaryKey).length > 0 && (
-                    <>
-                      <line
-                        x1="0"
-                        y1={30 + table.columns.length * 25}
-                        x2={table.width}
-                        y2={30 + table.columns.length * 25}
-                        stroke="#E5E7EB"
-                      />
-                      {table.indexes.filter(idx => !idx.isPrimaryKey).map((idx, index) => (
-                        <text
-                          key={idx.id}
-                          x="10"
-                          y={30 + table.columns.length * 25 + 15 + index * 20}
-                          fontSize="11"
-                          fill="#6B7280"
-                        >
-                          📑 {idx.name}
-                        </text>
-                      ))}
-                    </>
-                  )}
+                  {settings.showIndexes &&
+                    table.indexes.filter(idx => !idx.isPrimaryKey).length > 0 && (
+                      <>
+                        <line
+                          x1="0"
+                          y1={30 + table.columns.length * 25}
+                          x2={table.width}
+                          y2={30 + table.columns.length * 25}
+                          stroke="#E5E7EB"
+                        />
+                        {table.indexes
+                          .filter(idx => !idx.isPrimaryKey)
+                          .map((idx, index) => (
+                            <text
+                              key={idx.id}
+                              x="10"
+                              y={30 + table.columns.length * 25 + 15 + index * 20}
+                              fontSize="11"
+                              fill="#6B7280"
+                            >
+                              📑 {idx.name}
+                            </text>
+                          ))}
+                      </>
+                    )}
                 </>
               )}
             </g>
@@ -1014,14 +1053,13 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
               </div>
             </div>
           )}
-          
+
           {selectedRelationship && (
             <div>
               <h3 className="font-medium mb-2">Relationship: {selectedRelationship.name}</h3>
               <div className="text-sm text-gray-600">
-                Type: {selectedRelationship.relationshipType} | 
-                On Delete: {selectedRelationship.onDelete} | 
-                On Update: {selectedRelationship.onUpdate}
+                Type: {selectedRelationship.relationshipType} | On Delete:{' '}
+                {selectedRelationship.onDelete} | On Update: {selectedRelationship.onUpdate}
               </div>
               <button
                 onClick={() => deleteRelationship(selectedRelationship.id)}
@@ -1039,35 +1077,31 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[400px]">
             <h2 className="text-lg font-medium mb-4">Add Table</h2>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Table Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Table Name</label>
                 <input
                   type="text"
                   value={tableForm.name}
-                  onChange={(e) => setTableForm(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => setTableForm(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="TableName"
                 />
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Schema
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Schema</label>
                 <input
                   type="text"
                   value={tableForm.schema}
-                  onChange={(e) => setTableForm(prev => ({ ...prev, schema: e.target.value }))}
+                  onChange={e => setTableForm(prev => ({ ...prev, schema: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="dbo"
                 />
               </div>
             </div>
-            
+
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => setShowTableDialog(false)}
@@ -1092,7 +1126,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[500px]">
             <h2 className="text-lg font-medium mb-4">Add Column to {selectedTable?.name}</h2>
-            
+
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -1102,42 +1136,45 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
                   <input
                     type="text"
                     value={columnForm.name}
-                    onChange={(e) => setColumnForm(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={e => setColumnForm(prev => ({ ...prev, name: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Data Type
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Data Type</label>
                   <select
                     value={columnForm.dataType}
-                    onChange={(e) => setColumnForm(prev => ({ ...prev, dataType: e.target.value }))}
+                    onChange={e => setColumnForm(prev => ({ ...prev, dataType: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   >
                     {Object.keys(DataTypes).map(type => (
-                      <option key={type} value={type}>{type}</option>
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
-              
-              {(DataTypes[columnForm.dataType as keyof typeof DataTypes]?.hasLength) && (
+
+              {DataTypes[columnForm.dataType as keyof typeof DataTypes]?.hasLength && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Length
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Length</label>
                   <input
                     type="number"
                     value={columnForm.length || ''}
-                    onChange={(e) => setColumnForm(prev => ({ ...prev, length: parseInt(e.target.value) || undefined }))}
+                    onChange={e =>
+                      setColumnForm(prev => ({
+                        ...prev,
+                        length: parseInt(e.target.value) || undefined,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   />
                 </div>
               )}
-              
-              {(DataTypes[columnForm.dataType as keyof typeof DataTypes]?.hasPrecisionScale) && (
+
+              {DataTypes[columnForm.dataType as keyof typeof DataTypes]?.hasPrecisionScale && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1146,53 +1183,67 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
                     <input
                       type="number"
                       value={columnForm.precision || ''}
-                      onChange={(e) => setColumnForm(prev => ({ ...prev, precision: parseInt(e.target.value) || undefined }))}
+                      onChange={e =>
+                        setColumnForm(prev => ({
+                          ...prev,
+                          precision: parseInt(e.target.value) || undefined,
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Scale
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Scale</label>
                     <input
                       type="number"
                       value={columnForm.scale || ''}
-                      onChange={(e) => setColumnForm(prev => ({ ...prev, scale: parseInt(e.target.value) || undefined }))}
+                      onChange={e =>
+                        setColumnForm(prev => ({
+                          ...prev,
+                          scale: parseInt(e.target.value) || undefined,
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
                   </div>
                 </div>
               )}
-              
+
               <div className="space-y-2">
                 <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={!columnForm.isNullable}
-                    onChange={(e) => setColumnForm(prev => ({ ...prev, isNullable: !e.target.checked }))}
+                    onChange={e =>
+                      setColumnForm(prev => ({ ...prev, isNullable: !e.target.checked }))
+                    }
                   />
                   <span className="text-sm">Not Null</span>
                 </label>
-                
+
                 <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={columnForm.isPrimaryKey}
-                    onChange={(e) => setColumnForm(prev => ({ ...prev, isPrimaryKey: e.target.checked }))}
+                    onChange={e =>
+                      setColumnForm(prev => ({ ...prev, isPrimaryKey: e.target.checked }))
+                    }
                   />
                   <span className="text-sm">Primary Key</span>
                 </label>
-                
+
                 <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={columnForm.isIdentity}
-                    onChange={(e) => setColumnForm(prev => ({ ...prev, isIdentity: e.target.checked }))}
+                    onChange={e =>
+                      setColumnForm(prev => ({ ...prev, isIdentity: e.target.checked }))
+                    }
                   />
                   <span className="text-sm">Identity</span>
                 </label>
               </div>
-              
+
               {columnForm.isIdentity && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -1202,7 +1253,12 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
                     <input
                       type="number"
                       value={columnForm.identitySeed || 1}
-                      onChange={(e) => setColumnForm(prev => ({ ...prev, identitySeed: parseInt(e.target.value) || 1 }))}
+                      onChange={e =>
+                        setColumnForm(prev => ({
+                          ...prev,
+                          identitySeed: parseInt(e.target.value) || 1,
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
                   </div>
@@ -1213,13 +1269,18 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
                     <input
                       type="number"
                       value={columnForm.identityIncrement || 1}
-                      onChange={(e) => setColumnForm(prev => ({ ...prev, identityIncrement: parseInt(e.target.value) || 1 }))}
+                      onChange={e =>
+                        setColumnForm(prev => ({
+                          ...prev,
+                          identityIncrement: parseInt(e.target.value) || 1,
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
                   </div>
                 </div>
               )}
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Default Value
@@ -1227,13 +1288,13 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
                 <input
                   type="text"
                   value={columnForm.defaultValue || ''}
-                  onChange={(e) => setColumnForm(prev => ({ ...prev, defaultValue: e.target.value }))}
+                  onChange={e => setColumnForm(prev => ({ ...prev, defaultValue: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="e.g., 0, 'N/A', GETDATE()"
                 />
               </div>
             </div>
-            
+
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => setShowColumnDialog(false)}
@@ -1258,84 +1319,94 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[600px]">
             <h2 className="text-lg font-medium mb-4">Add Relationship</h2>
-            
+
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    From Table
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">From Table</label>
                   <select
                     value={relationshipForm.fromTable || ''}
-                    onChange={(e) => setRelationshipForm(prev => ({ ...prev, fromTable: e.target.value }))}
+                    onChange={e =>
+                      setRelationshipForm(prev => ({ ...prev, fromTable: e.target.value }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   >
                     <option value="">Select table...</option>
                     {tables.map(table => (
-                      <option key={table.id} value={table.id}>{table.name}</option>
+                      <option key={table.id} value={table.id}>
+                        {table.name}
+                      </option>
                     ))}
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     From Column
                   </label>
                   <select
                     value={relationshipForm.fromColumn || ''}
-                    onChange={(e) => setRelationshipForm(prev => ({ ...prev, fromColumn: e.target.value }))}
+                    onChange={e =>
+                      setRelationshipForm(prev => ({ ...prev, fromColumn: e.target.value }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                     disabled={!relationshipForm.fromTable}
                   >
                     <option value="">Select column...</option>
-                    {relationshipForm.fromTable && tables
-                      .find(t => t.id === relationshipForm.fromTable)?.columns
-                      .map(col => (
-                        <option key={col.id} value={col.name}>{col.name}</option>
-                      ))
-                    }
+                    {relationshipForm.fromTable &&
+                      tables
+                        .find(t => t.id === relationshipForm.fromTable)
+                        ?.columns.map(col => (
+                          <option key={col.id} value={col.name}>
+                            {col.name}
+                          </option>
+                        ))}
                   </select>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    To Table
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">To Table</label>
                   <select
                     value={relationshipForm.toTable || ''}
-                    onChange={(e) => setRelationshipForm(prev => ({ ...prev, toTable: e.target.value }))}
+                    onChange={e =>
+                      setRelationshipForm(prev => ({ ...prev, toTable: e.target.value }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   >
                     <option value="">Select table...</option>
                     {tables.map(table => (
-                      <option key={table.id} value={table.id}>{table.name}</option>
+                      <option key={table.id} value={table.id}>
+                        {table.name}
+                      </option>
                     ))}
                   </select>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    To Column
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">To Column</label>
                   <select
                     value={relationshipForm.toColumn || ''}
-                    onChange={(e) => setRelationshipForm(prev => ({ ...prev, toColumn: e.target.value }))}
+                    onChange={e =>
+                      setRelationshipForm(prev => ({ ...prev, toColumn: e.target.value }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                     disabled={!relationshipForm.toTable}
                   >
                     <option value="">Select column...</option>
-                    {relationshipForm.toTable && tables
-                      .find(t => t.id === relationshipForm.toTable)?.columns
-                      .map(col => (
-                        <option key={col.id} value={col.name}>{col.name}</option>
-                      ))
-                    }
+                    {relationshipForm.toTable &&
+                      tables
+                        .find(t => t.id === relationshipForm.toTable)
+                        ?.columns.map(col => (
+                          <option key={col.id} value={col.name}>
+                            {col.name}
+                          </option>
+                        ))}
                   </select>
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Relationship Name
@@ -1343,69 +1414,88 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
                 <input
                   type="text"
                   value={relationshipForm.name || ''}
-                  onChange={(e) => setRelationshipForm(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => setRelationshipForm(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="FK_FromTable_ToTable"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Relationship Type
                 </label>
                 <select
                   value={relationshipForm.relationshipType}
-                  onChange={(e) => setRelationshipForm(prev => ({ ...prev, relationshipType: e.target.value as RelationshipType }))}
+                  onChange={e =>
+                    setRelationshipForm(prev => ({
+                      ...prev,
+                      relationshipType: e.target.value as RelationshipType,
+                    }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 >
                   {Object.values(RelationshipType).map(type => (
-                    <option key={type} value={type}>{type}</option>
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
                   ))}
                 </select>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    On Delete
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">On Delete</label>
                   <select
                     value={relationshipForm.onDelete}
-                    onChange={(e) => setRelationshipForm(prev => ({ ...prev, onDelete: e.target.value as ReferentialAction }))}
+                    onChange={e =>
+                      setRelationshipForm(prev => ({
+                        ...prev,
+                        onDelete: e.target.value as ReferentialAction,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   >
                     {Object.values(ReferentialAction).map(action => (
-                      <option key={action} value={action}>{action}</option>
+                      <option key={action} value={action}>
+                        {action}
+                      </option>
                     ))}
                   </select>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    On Update
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">On Update</label>
                   <select
                     value={relationshipForm.onUpdate}
-                    onChange={(e) => setRelationshipForm(prev => ({ ...prev, onUpdate: e.target.value as ReferentialAction }))}
+                    onChange={e =>
+                      setRelationshipForm(prev => ({
+                        ...prev,
+                        onUpdate: e.target.value as ReferentialAction,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   >
                     {Object.values(ReferentialAction).map(action => (
-                      <option key={action} value={action}>{action}</option>
+                      <option key={action} value={action}>
+                        {action}
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
-              
+
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={relationshipForm.isEnforced}
-                  onChange={(e) => setRelationshipForm(prev => ({ ...prev, isEnforced: e.target.checked }))}
+                  onChange={e =>
+                    setRelationshipForm(prev => ({ ...prev, isEnforced: e.target.checked }))
+                  }
                 />
                 <span className="text-sm">Enforce relationship</span>
               </label>
             </div>
-            
+
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => setShowRelationshipDialog(false)}
@@ -1415,7 +1505,12 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
               </button>
               <button
                 onClick={createRelationship}
-                disabled={!relationshipForm.fromTable || !relationshipForm.fromColumn || !relationshipForm.toTable || !relationshipForm.toColumn}
+                disabled={
+                  !relationshipForm.fromTable ||
+                  !relationshipForm.fromColumn ||
+                  !relationshipForm.toTable ||
+                  !relationshipForm.toColumn
+                }
                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
               >
                 Create
@@ -1430,67 +1525,71 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[400px]">
             <h2 className="text-lg font-medium mb-4">Diagram Settings</h2>
-            
+
             <div className="space-y-4">
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={settings.showDataTypes}
-                  onChange={(e) => setSettings(prev => ({ ...prev, showDataTypes: e.target.checked }))}
+                  onChange={e =>
+                    setSettings(prev => ({ ...prev, showDataTypes: e.target.checked }))
+                  }
                 />
                 <span className="text-sm">Show data types</span>
               </label>
-              
+
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={settings.showIndexes}
-                  onChange={(e) => setSettings(prev => ({ ...prev, showIndexes: e.target.checked }))}
+                  onChange={e => setSettings(prev => ({ ...prev, showIndexes: e.target.checked }))}
                 />
                 <span className="text-sm">Show indexes</span>
               </label>
-              
+
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={settings.showRelationshipLabels}
-                  onChange={(e) => setSettings(prev => ({ ...prev, showRelationshipLabels: e.target.checked }))}
+                  onChange={e =>
+                    setSettings(prev => ({ ...prev, showRelationshipLabels: e.target.checked }))
+                  }
                 />
                 <span className="text-sm">Show relationship labels</span>
               </label>
-              
+
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={settings.snapToGrid}
-                  onChange={(e) => setSettings(prev => ({ ...prev, snapToGrid: e.target.checked }))}
+                  onChange={e => setSettings(prev => ({ ...prev, snapToGrid: e.target.checked }))}
                 />
                 <span className="text-sm">Snap to grid</span>
               </label>
-              
+
               {settings.snapToGrid && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Grid Size
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Grid Size</label>
                   <input
                     type="number"
                     value={settings.gridSize}
-                    onChange={(e) => setSettings(prev => ({ ...prev, gridSize: parseInt(e.target.value) || 20 }))}
+                    onChange={e =>
+                      setSettings(prev => ({ ...prev, gridSize: parseInt(e.target.value) || 20 }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                     min="10"
                     max="50"
                   />
                 </div>
               )}
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Notation
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Notation</label>
                 <select
                   value={settings.notation}
-                  onChange={(e) => setSettings(prev => ({ ...prev, notation: e.target.value as any }))}
+                  onChange={e =>
+                    setSettings(prev => ({ ...prev, notation: e.target.value as any }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 >
                   <option value="IDEF1X">IDEF1X</option>
@@ -1499,7 +1598,7 @@ export const DatabaseDiagramDesigner: React.FC<DatabaseDiagramDesignerProps> = (
                 </select>
               </div>
             </div>
-            
+
             <div className="flex justify-end mt-6">
               <button
                 onClick={() => setShowSettingsDialog(false)}

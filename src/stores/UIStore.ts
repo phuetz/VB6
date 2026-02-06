@@ -13,14 +13,14 @@ import { devtools } from 'zustand/middleware';
 interface UIState {
   // Mode d'exécution
   executionMode: 'design' | 'run' | 'break';
-  
+
   // Fenêtres principales
   showCodeEditor: boolean;
   showGrid: boolean;
   gridSize: number;
   showAlignmentGuides: boolean;
   designerZoom: number;
-  
+
   // Panneaux
   showProjectExplorer: boolean;
   showPropertiesWindow: boolean;
@@ -39,7 +39,7 @@ interface UIState {
   showGitPanel: boolean;
   showMemoryProfiler: boolean;
   showTestRunner: boolean;
-  
+
   // Dialogues
   showMenuEditor: boolean;
   showNewProjectDialog: boolean;
@@ -51,7 +51,7 @@ interface UIState {
   showTemplateManager: boolean;
   showSnippetManager: boolean;
   showControlArrayDialog: boolean;
-  
+
   // Palette de commandes et outils
   showCommandPalette: boolean;
   showExportDialog: boolean;
@@ -60,10 +60,10 @@ interface UIState {
   showCodeAnalyzer: boolean;
   showRefactorTools: boolean;
   showBreakpointManager: boolean;
-  
+
   // État de la toolbox
   selectedToolboxTab: string;
-  
+
   // Thème et apparence
   theme: 'light' | 'dark' | 'classic-vb6';
   fontSize: number;
@@ -74,32 +74,32 @@ interface UIState {
 interface UIActions {
   // Mode d'exécution
   setExecutionMode: (mode: 'design' | 'run' | 'break') => void;
-  
+
   // Gestion des fenêtres
   toggleWindow: (windowName: keyof UIState) => void;
   showWindow: (windowName: keyof UIState) => void;
   hideWindow: (windowName: keyof UIState) => void;
   showDialog: (dialogName: keyof UIState, show: boolean) => void;
-  
+
   // Zoom du designer
   setDesignerZoom: (zoom: number) => void;
   zoomIn: () => void;
   zoomOut: () => void;
   resetZoom: () => void;
-  
+
   // Grid et guides
   toggleGrid: () => void;
   setGridSize: (size: number) => void;
   toggleAlignmentGuides: () => void;
-  
+
   // Toolbox
   setSelectedToolboxTab: (tab: string) => void;
-  
+
   // Thème
   setTheme: (theme: 'light' | 'dark' | 'classic-vb6') => void;
   setFontSize: (size: number) => void;
   setFontFamily: (family: string) => void;
-  
+
   // Utilitaires
   resetUILayout: () => void;
   saveUILayout: () => void;
@@ -111,14 +111,14 @@ type UIStore = UIState & UIActions;
 // Configuration par défaut optimisée pour performance
 const DEFAULT_UI_STATE: UIState = {
   executionMode: 'design',
-  
+
   // Fenêtres essentielles visibles, autres cachées pour performance
   showCodeEditor: false,
   showGrid: true,
   gridSize: 8,
   showAlignmentGuides: true,
   designerZoom: 100,
-  
+
   // Panneaux - minimalistes au démarrage
   showProjectExplorer: false,
   showPropertiesWindow: false,
@@ -137,7 +137,7 @@ const DEFAULT_UI_STATE: UIState = {
   showGitPanel: false,
   showMemoryProfiler: false,
   showTestRunner: false,
-  
+
   // Dialogues fermés par défaut
   showMenuEditor: false,
   showNewProjectDialog: false,
@@ -156,12 +156,12 @@ const DEFAULT_UI_STATE: UIState = {
   showCodeAnalyzer: false,
   showRefactorTools: false,
   showBreakpointManager: false,
-  
+
   selectedToolboxTab: 'General',
-  
+
   theme: 'classic-vb6',
   fontSize: 12,
-  fontFamily: 'Consolas, monospace'
+  fontFamily: 'Consolas, monospace',
 };
 
 // ULTRA-OPTIMIZED UI STORE avec performance monitoring
@@ -170,12 +170,12 @@ export const useUIStore = create<UIStore>()(
     subscribeWithSelector(
       immer((set, get) => ({
         ...DEFAULT_UI_STATE,
-        
+
         // Mode d'exécution
-        setExecutionMode: (mode) =>
-          set((state) => {
+        setExecutionMode: mode =>
+          set(state => {
             state.executionMode = mode;
-            
+
             // Ajuster automatiquement les fenêtres selon le mode
             if (mode === 'run') {
               state.showCodeEditor = false;
@@ -189,105 +189,105 @@ export const useUIStore = create<UIStore>()(
               state.showToolbox = true;
             }
           }),
-        
+
         // Gestion optimisée des fenêtres
-        toggleWindow: (windowName) =>
-          set((state) => {
+        toggleWindow: windowName =>
+          set(state => {
             const key = windowName as keyof UIState;
             if (typeof state[key] === 'boolean') {
               (state[key] as boolean) = !state[key];
             }
           }),
-        
-        showWindow: (windowName) =>
-          set((state) => {
+
+        showWindow: windowName =>
+          set(state => {
             const key = windowName as keyof UIState;
             if (typeof state[key] === 'boolean') {
               (state[key] as boolean) = true;
             }
           }),
-        
-        hideWindow: (windowName) =>
-          set((state) => {
+
+        hideWindow: windowName =>
+          set(state => {
             const key = windowName as keyof UIState;
             if (typeof state[key] === 'boolean') {
               (state[key] as boolean) = false;
             }
           }),
-        
+
         showDialog: (dialogName, show) =>
-          set((state) => {
+          set(state => {
             const key = dialogName as keyof UIState;
             if (typeof state[key] === 'boolean') {
               (state[key] as boolean) = show;
             }
           }),
-        
+
         // Zoom optimisé avec limites
-        setDesignerZoom: (zoom) =>
-          set((state) => {
+        setDesignerZoom: zoom =>
+          set(state => {
             const clampedZoom = Math.max(25, Math.min(400, zoom));
             state.designerZoom = clampedZoom;
           }),
-        
+
         zoomIn: () => {
           const current = get().designerZoom;
           get().setDesignerZoom(current + 25);
         },
-        
+
         zoomOut: () => {
           const current = get().designerZoom;
           get().setDesignerZoom(current - 25);
         },
-        
+
         resetZoom: () => get().setDesignerZoom(100),
-        
+
         // Grid et guides
         toggleGrid: () =>
-          set((state) => {
+          set(state => {
             state.showGrid = !state.showGrid;
           }),
-        
-        setGridSize: (size) =>
-          set((state) => {
+
+        setGridSize: size =>
+          set(state => {
             state.gridSize = Math.max(4, Math.min(32, size));
           }),
-        
+
         toggleAlignmentGuides: () =>
-          set((state) => {
+          set(state => {
             state.showAlignmentGuides = !state.showAlignmentGuides;
           }),
-        
+
         // Toolbox
-        setSelectedToolboxTab: (tab) =>
-          set((state) => {
+        setSelectedToolboxTab: tab =>
+          set(state => {
             state.selectedToolboxTab = tab;
           }),
-        
+
         // Thème
-        setTheme: (theme) =>
-          set((state) => {
+        setTheme: theme =>
+          set(state => {
             state.theme = theme;
             // Trigger theme update in document
             document.documentElement.setAttribute('data-theme', theme);
           }),
-        
-        setFontSize: (size) =>
-          set((state) => {
+
+        setFontSize: size =>
+          set(state => {
             state.fontSize = Math.max(8, Math.min(24, size));
           }),
-        
-        setFontFamily: (family) =>
-          set((state) => {
+
+        setFontFamily: family =>
+          set(state => {
             state.fontFamily = family;
           }),
-        
+
         // Layout management
         resetUILayout: () =>
           set(() => {
             return { ...DEFAULT_UI_STATE };
           }),
-        
+
         saveUILayout: () => {
           const state = get();
           const layout = {
@@ -298,18 +298,18 @@ export const useUIStore = create<UIStore>()(
             fontSize: state.fontSize,
             fontFamily: state.fontFamily,
             gridSize: state.gridSize,
-            designerZoom: state.designerZoom
+            designerZoom: state.designerZoom,
           };
-          
+
           localStorage.setItem('vb6-ui-layout', JSON.stringify(layout));
         },
-        
+
         loadUILayout: () => {
           try {
             const saved = localStorage.getItem('vb6-ui-layout');
             if (saved) {
               const layout = JSON.parse(saved);
-              set((state) => {
+              set(state => {
                 Object.assign(state, layout.windows || {});
                 state.theme = layout.theme || DEFAULT_UI_STATE.theme;
                 state.fontSize = layout.fontSize || DEFAULT_UI_STATE.fontSize;
@@ -321,11 +321,11 @@ export const useUIStore = create<UIStore>()(
           } catch (error) {
             console.error('❌ Error loading UI layout:', error);
           }
-        }
+        },
       })),
       {
         name: 'ui-store',
-        version: 1
+        version: 1,
       }
     )
   )
@@ -334,9 +334,8 @@ export const useUIStore = create<UIStore>()(
 // Sélecteurs optimisés pour éviter les re-renders
 export const uiSelectors = {
   // Sélecteurs de fenêtres
-  getWindowVisibility: (windowName: keyof UIState) => 
-    useUIStore.getState()[windowName] as boolean,
-  
+  getWindowVisibility: (windowName: keyof UIState) => useUIStore.getState()[windowName] as boolean,
+
   // Sélecteurs de layout
   getDesignerLayout: () => {
     const state = useUIStore.getState();
@@ -344,23 +343,22 @@ export const uiSelectors = {
       showGrid: state.showGrid,
       gridSize: state.gridSize,
       showAlignmentGuides: state.showAlignmentGuides,
-      designerZoom: state.designerZoom
+      designerZoom: state.designerZoom,
     };
   },
-  
+
   // Sélecteurs de thème
   getThemeSettings: () => {
     const state = useUIStore.getState();
     return {
       theme: state.theme,
       fontSize: state.fontSize,
-      fontFamily: state.fontFamily
+      fontFamily: state.fontFamily,
     };
   },
-  
+
   // Vérifier si en mode édition
   isInDesignMode: () => useUIStore.getState().executionMode === 'design',
   isInRunMode: () => useUIStore.getState().executionMode === 'run',
-  isInBreakMode: () => useUIStore.getState().executionMode === 'break'
+  isInBreakMode: () => useUIStore.getState().executionMode === 'break',
 };
-

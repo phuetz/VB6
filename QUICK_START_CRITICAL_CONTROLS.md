@@ -29,12 +29,14 @@ Toolbox
 ### 2. Add Control to Form
 
 **Method 1: Drag from Toolbox**
+
 1. Open Toolbox
 2. Select category (DataBound, Charts, or Graphics)
 3. Double-click or drag control to form
 4. Control appears with default size
 
 **Method 2: Manual Creation (Code)**
+
 ```vb6
 Private Sub Form_Load()
     ' This creates control at runtime (in real VB6)
@@ -51,6 +53,7 @@ End Sub
 **What it does**: Displays items from a database recordset in a list box
 
 **Basic Setup**:
+
 ```vb6
 Private Sub Form_Load()
     ' Set the data source
@@ -71,6 +74,7 @@ End Sub
 ```
 
 **Handling Selection**:
+
 ```vb6
 Private Sub DBList1_Change()
     ' User selected an item
@@ -90,6 +94,7 @@ End Sub
 ```
 
 **Working with List Items**:
+
 ```vb6
 ' Add item manually
 DBList1.AddItem "New Item"
@@ -110,6 +115,7 @@ item = DBList1.List(0)
 ```
 
 **Available Data Sources**:
+
 - `"Customers"`: CustomerID, CompanyName, Country
 - `"Products"`: ProductID, ProductName, CategoryID, Price
 
@@ -120,6 +126,7 @@ item = DBList1.List(0)
 **What it does**: Dropdown or editable combo box with database binding
 
 **Basic Setup**:
+
 ```vb6
 Private Sub Form_Load()
     ' Set combo style (0=Dropdown, 1=Simple, 2=DropdownList)
@@ -139,6 +146,7 @@ End Sub
 ```
 
 **Handling User Input**:
+
 ```vb6
 Private Sub DBCombo1_Change()
     ' Called when selection changes or text is edited
@@ -164,13 +172,16 @@ End Sub
 ```
 
 **Combo Styles Explained**:
+
 - **Style 0 - Dropdown Combo**: Text is editable, dropdown below
+
   ```vb6
   DBCombo1.Style = 0
   ' User can type or select from dropdown
   ```
 
 - **Style 1 - Simple Combo**: Text is editable, list always visible
+
   ```vb6
   DBCombo1.Style = 1
   ' Larger control, list always visible
@@ -183,6 +194,7 @@ End Sub
   ```
 
 **Getting Selection Value**:
+
 ```vb6
 Dim text As String
 Dim value As Variant
@@ -200,6 +212,7 @@ index = DBCombo1.ListIndex     ' Get selected item index
 **What it does**: Shows multiple records in a scrollable list with repeating template
 
 **Basic Setup**:
+
 ```vb6
 Private Sub Form_Load()
     ' Set data source
@@ -222,6 +235,7 @@ End Sub
 ```
 
 **Navigating Records**:
+
 ```vb6
 Private Sub cmdFirst_Click()
     DataRepeater1.MoveFirst
@@ -249,6 +263,7 @@ End Sub
 ```
 
 **Handling Record Changes**:
+
 ```vb6
 Private Sub DataRepeater1_CurrentRecordChanged()
     ' Called when user selects a different record
@@ -262,6 +277,7 @@ End Sub
 ```
 
 **Working with Records**:
+
 ```vb6
 ' Get current record number
 Dim current As Integer
@@ -276,6 +292,7 @@ Label1.Caption = "Record " & (current + 1) & " of " & total
 ```
 
 **Dynamic Row Height**:
+
 ```vb6
 ' Adjust row height based on content
 DataRepeater1.ReaderHeight = 80 ' Make rows taller for more info
@@ -293,6 +310,7 @@ End Sub
 **What it does**: Professional charting with multiple chart types
 
 **Basic Setup**:
+
 ```vb6
 Private Sub Form_Load()
     ' Set chart type (see types below)
@@ -338,6 +356,7 @@ End Sub
 ```
 
 **Chart Types**:
+
 ```vb6
 ' 2D Charts
 MSChart1.ChartType = VtChChartType.vtChChartType2dBar       ' 2D Bar Chart
@@ -355,6 +374,7 @@ MSChart1.ChartType = VtChChartType.vtChChartType2dXY        ' XY Scatter Chart
 ```
 
 **Legend Positions**:
+
 ```vb6
 MSChart1.LegendLocation = VtChLegendLocation.vtChLegendLocationNone     ' No legend
 MSChart1.LegendLocation = VtChLegendLocation.vtChLegendLocationBottom   ' Bottom
@@ -364,6 +384,7 @@ MSChart1.LegendLocation = VtChLegendLocation.vtChLegendLocationRight    ' Right
 ```
 
 **3D Settings**:
+
 ```vb6
 ' Enable 3D rendering
 MSChart1.Chart3D = True
@@ -378,6 +399,7 @@ MSChart1.Chart3D = False
 ```
 
 **Handling Chart Clicks**:
+
 ```vb6
 Private Sub MSChart1_PointSelected(Series As Integer, DataPoint As Integer)
     MsgBox "Selected Series " & Series & ", Point " & DataPoint
@@ -389,6 +411,7 @@ End Sub
 ```
 
 **Chart Operations**:
+
 ```vb6
 ' Copy to clipboard
 MSChart1.EditCopy
@@ -407,6 +430,7 @@ MSChart1.Layout
 ```
 
 **Updating Data Dynamically**:
+
 ```vb6
 Private Sub cmdUpdateData_Click()
     ' Change data and refresh
@@ -431,6 +455,7 @@ End Sub
 **What it does**: Display and navigate through sprite sheets
 
 **Basic Setup**:
+
 ```vb6
 Private Sub Form_Load()
     ' Load sprite image
@@ -449,6 +474,7 @@ End Sub
 ```
 
 **Sprite Navigation**:
+
 ```vb6
 Private Sub cmdPrevious_Click()
     ' Show previous sprite
@@ -482,6 +508,7 @@ End Sub
 ```
 
 **Sprite Animation**:
+
 ```vb6
 ' Create animation timer
 Private Sub Form_Load()
@@ -502,6 +529,7 @@ End Sub
 ```
 
 **Different Sprite Sheets**:
+
 ```vb6
 ' Switch between sprite sheets
 Private Sub cmbSprite_Change()
@@ -524,6 +552,7 @@ End Sub
 ```
 
 **Clipping Area Configuration**:
+
 ```vb6
 ' Define clipping region if not using full cells
 PictureClip1.ClipX = 0      ' Starting X (pixels)
@@ -537,6 +566,7 @@ PictureClip1.ClipHeight = 32 ' Cell height (pixels)
 ```
 
 **Clipboard Operations**:
+
 ```vb6
 ' Copy current sprite to clipboard
 Call PictureClip1.CopyToClipboard
@@ -556,6 +586,7 @@ MsgBox "Clip: " & rect.x & "," & rect.y & " " & rect.width & "x" & rect.height
 ## Common Patterns
 
 ### Pattern 1: Master-Detail with DataRepeater
+
 ```vb6
 ' Select from list, show details in repeater
 Private Sub DBList1_Change()
@@ -566,6 +597,7 @@ End Sub
 ```
 
 ### Pattern 2: Chart from DataRepeater Data
+
 ```vb6
 Private Sub cmdShowChart_Click()
     ' Create chart from repeater data
@@ -577,6 +609,7 @@ End Sub
 ```
 
 ### Pattern 3: Animated Sprite Loop
+
 ```vb6
 Private animIndex As Integer
 Private animStart As Integer
@@ -599,6 +632,7 @@ End Sub
 ```
 
 ### Pattern 4: Dynamic Chart Updates
+
 ```vb6
 Private Sub UpdateSalesChart()
     ' Fetch latest data and update chart
@@ -620,6 +654,7 @@ End Sub
 ## Property Reference Quick Guide
 
 ### DBList/DBCombo Common Properties
+
 ```
 DataSource      - Data source name
 DataField       - Field to bind to
@@ -634,6 +669,7 @@ MatchEntry      - Search mode (0/1/2)
 ```
 
 ### DataRepeater Properties
+
 ```
 DataSource      - Data source name
 CurrentRecord   - Selected record (0-based)
@@ -646,6 +682,7 @@ AllowUpdate     - Allow editing
 ```
 
 ### MSChart Properties
+
 ```
 ChartType       - Chart type
 ShowLegend      - Show legend
@@ -659,6 +696,7 @@ YAxisTitle      - Y-axis label
 ```
 
 ### PictureClip Properties
+
 ```
 Picture         - Image source
 Rows            - Grid rows
@@ -674,21 +712,25 @@ ClipWidth/Height - Clip dimensions
 ## Troubleshooting
 
 ### DBList Issues
+
 - **No data showing**: Check RowSource and ListField values
 - **No selection**: Make sure list has items (ListCount > 0)
 - **Change not firing**: Ensure control is enabled and not locked
 
 ### DataRepeater Issues
+
 - **Not scrolling**: Check ScrollBars property value
 - **Rows overlapping**: Increase ReaderHeight value
 - **Data not showing**: Check DataSource and RecordSource
 
 ### MSChart Issues
+
 - **No chart**: Check if data is populated and Refresh() is called
 - **Wrong chart type**: Verify ChartType enum value
 - **Chart is black**: Check chartBackColor property
 
 ### PictureClip Issues
+
 - **Image not loading**: Verify picture URL is correct
 - **Wrong sprite showing**: Check Rows/Cols match image grid
 - **Stretched image**: Set Stretch property to False

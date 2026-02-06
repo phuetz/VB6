@@ -1,6 +1,6 @@
 /**
  * VB6 Advanced Error Handling Implementation
- * 
+ *
  * Complete implementation of VB6 error handling features:
  * - On Error GoTo [label]
  * - On Error Resume Next
@@ -15,16 +15,16 @@ import { errorHandler } from './VB6ErrorHandling';
 
 // Error handling modes
 export enum VB6ErrorMode {
-  None = 0,           // No error handling (On Error GoTo 0)
-  GoToLabel = 1,      // On Error GoTo [label]
-  ResumeNext = 2      // On Error Resume Next
+  None = 0, // No error handling (On Error GoTo 0)
+  GoToLabel = 1, // On Error GoTo [label]
+  ResumeNext = 2, // On Error Resume Next
 }
 
 // Resume modes
 export enum VB6ResumeMode {
-  Normal = 0,         // Resume (retry the statement that caused error)
-  Next = 1,           // Resume Next (continue with next statement)
-  Label = 2           // Resume [label] (go to specific label)
+  Normal = 0, // Resume (retry the statement that caused error)
+  Next = 1, // Resume Next (continue with next statement)
+  Label = 2, // Resume [label] (go to specific label)
 }
 
 // GoSub return stack
@@ -71,26 +71,48 @@ export class VB6Err {
   constructor() {}
 
   // Properties
-  get Number(): number { return this._number; }
-  set Number(value: number) { 
+  get Number(): number {
+    return this._number;
+  }
+  set Number(value: number) {
     this._number = value;
     this._description = this.getErrorDescription(value);
   }
 
-  get Description(): string { return this._description; }
-  set Description(value: string) { this._description = value; }
+  get Description(): string {
+    return this._description;
+  }
+  set Description(value: string) {
+    this._description = value;
+  }
 
-  get Source(): string { return this._source; }
-  set Source(value: string) { this._source = value; }
+  get Source(): string {
+    return this._source;
+  }
+  set Source(value: string) {
+    this._source = value;
+  }
 
-  get HelpFile(): string { return this._helpFile; }
-  set HelpFile(value: string) { this._helpFile = value; }
+  get HelpFile(): string {
+    return this._helpFile;
+  }
+  set HelpFile(value: string) {
+    this._helpFile = value;
+  }
 
-  get HelpContext(): number { return this._helpContext; }
-  set HelpContext(value: number) { this._helpContext = value; }
+  get HelpContext(): number {
+    return this._helpContext;
+  }
+  set HelpContext(value: number) {
+    this._helpContext = value;
+  }
 
-  get LastDllError(): number { return this._lastDllError; }
-  set LastDllError(value: number) { this._lastDllError = value; }
+  get LastDllError(): number {
+    return this._lastDllError;
+  }
+  set LastDllError(value: number) {
+    this._lastDllError = value;
+  }
 
   // Methods
   Clear(): void {
@@ -102,7 +124,13 @@ export class VB6Err {
     this._lastDllError = 0;
   }
 
-  Raise(number: number, source?: string, description?: string, helpFile?: string, helpContext?: number): void {
+  Raise(
+    number: number,
+    source?: string,
+    description?: string,
+    helpFile?: string,
+    helpContext?: number
+  ): void {
     this._number = number;
     this._source = source || '';
     this._description = description || this.getErrorDescription(number);
@@ -126,7 +154,7 @@ export class VB6Err {
       13: 'Type mismatch',
       14: 'Out of string space',
       16: 'Expression too complex',
-      17: 'Can\'t perform requested operation',
+      17: "Can't perform requested operation",
       18: 'User interrupt occurred',
       20: 'Resume without error',
       28: 'Out of stack space',
@@ -149,7 +177,7 @@ export class VB6Err {
       68: 'Device unavailable',
       70: 'Permission denied',
       71: 'Disk not ready',
-      74: 'Can\'t rename with different drive',
+      74: "Can't rename with different drive",
       75: 'Path/File access error',
       76: 'Path not found',
       91: 'Object variable or With block variable not set',
@@ -167,14 +195,14 @@ export class VB6Err {
       422: 'Property not found',
       423: 'Property or method not found',
       424: 'Object required',
-      429: 'ActiveX component can\'t create object',
+      429: "ActiveX component can't create object",
       430: 'Class does not support Automation or does not support expected interface',
       432: 'File name or class name not found during Automation operation',
-      438: 'Object doesn\'t support this property or method',
+      438: "Object doesn't support this property or method",
       440: 'Automation error',
-      445: 'Object doesn\'t support this action',
-      446: 'Object doesn\'t support named arguments',
-      447: 'Object doesn\'t support current locale setting',
+      445: "Object doesn't support this action",
+      446: "Object doesn't support named arguments",
+      447: "Object doesn't support current locale setting",
       448: 'Named argument not found',
       449: 'Argument not optional',
       450: 'Wrong number of arguments or invalid property assignment',
@@ -192,9 +220,9 @@ export class VB6Err {
       463: 'Class not registered on local machine',
       481: 'Invalid picture',
       482: 'Printer error',
-      735: 'Can\'t save file to TEMP',
+      735: "Can't save file to TEMP",
       744: 'Search text not found',
-      746: 'Replacements too long'
+      746: 'Replacements too long',
     };
 
     return errorDescriptions[errorNumber] || `Error ${errorNumber}`;
@@ -207,7 +235,7 @@ export class VB6Err {
       source: this._source,
       helpFile: this._helpFile,
       helpContext: this._helpContext,
-      lastDllError: this._lastDllError
+      lastDllError: this._lastDllError,
     };
   }
 }
@@ -245,13 +273,11 @@ export class VB6AdvancedErrorHandler {
       currentLine: 0,
       errorLine: 0,
       isInErrorHandler: false,
-      parentContext: this.currentContext
+      parentContext: this.currentContext,
     };
 
     this.contextStack.push(context);
     this.currentContext = context;
-
-    console.log(`[VB6 Error Handler] Entered procedure: ${moduleName}.${procedureName}`);
   }
 
   /**
@@ -261,8 +287,6 @@ export class VB6AdvancedErrorHandler {
     if (this.contextStack.length > 0) {
       const exitingContext = this.contextStack.pop()!;
       this.currentContext = exitingContext.parentContext || null;
-      
-      console.log(`[VB6 Error Handler] Exited procedure: ${exitingContext.currentModule}.${exitingContext.currentProcedure}`);
     }
   }
 
@@ -302,8 +326,6 @@ export class VB6AdvancedErrorHandler {
     this.currentContext!.mode = VB6ErrorMode.GoToLabel;
     this.currentContext!.errorLabel = labelName;
     this.currentContext!.isInErrorHandler = false;
-
-    console.log(`[VB6 Error Handler] Set error handler: On Error GoTo ${labelName}`);
   }
 
   /**
@@ -317,8 +339,6 @@ export class VB6AdvancedErrorHandler {
     this.currentContext!.mode = VB6ErrorMode.ResumeNext;
     this.currentContext!.errorLabel = undefined;
     this.currentContext!.isInErrorHandler = false;
-
-    console.log(`[VB6 Error Handler] Set error handling: On Error Resume Next`);
   }
 
   /**
@@ -336,8 +356,6 @@ export class VB6AdvancedErrorHandler {
     // Clear current error
     this.Err.Clear();
     this.errorInfo = null;
-
-    console.log(`[VB6 Error Handler] Reset error handling: On Error GoTo 0`);
   }
 
   /**
@@ -348,7 +366,7 @@ export class VB6AdvancedErrorHandler {
       this.raiseError({
         number: 20,
         description: 'Resume without error',
-        source: this.currentContext?.currentProcedure || 'Unknown'
+        source: this.currentContext?.currentProcedure || 'Unknown',
       });
       return;
     }
@@ -358,8 +376,6 @@ export class VB6AdvancedErrorHandler {
     this.Err.Clear();
     this.errorInfo = null;
 
-    console.log(`[VB6 Error Handler] Resume execution at error point`);
-    
     // In a real implementation, this would jump back to the error line
     // For web implementation, we handle this through exception flow control
   }
@@ -372,7 +388,7 @@ export class VB6AdvancedErrorHandler {
       this.raiseError({
         number: 20,
         description: 'Resume without error',
-        source: this.currentContext?.currentProcedure || 'Unknown'
+        source: this.currentContext?.currentProcedure || 'Unknown',
       });
       return;
     }
@@ -381,8 +397,6 @@ export class VB6AdvancedErrorHandler {
     this.currentContext.resumeMode = VB6ResumeMode.Next;
     this.Err.Clear();
     this.errorInfo = null;
-
-    console.log(`[VB6 Error Handler] Resume Next - continue with next statement`);
   }
 
   /**
@@ -393,7 +407,7 @@ export class VB6AdvancedErrorHandler {
       this.raiseError({
         number: 20,
         description: 'Resume without error',
-        source: this.currentContext?.currentProcedure || 'Unknown'
+        source: this.currentContext?.currentProcedure || 'Unknown',
       });
       return;
     }
@@ -403,8 +417,6 @@ export class VB6AdvancedErrorHandler {
     this.currentContext.resumePoint = labelName;
     this.Err.Clear();
     this.errorInfo = null;
-
-    console.log(`[VB6 Error Handler] Resume ${labelName}`);
 
     // Execute the label handler if registered
     const key = this.getLabelKey(labelName);
@@ -441,18 +453,16 @@ export class VB6AdvancedErrorHandler {
 
       this.currentContext!.errorLine = this.currentContext!.currentLine;
 
-      console.log(`[VB6 Error Handler] Error ${errorInfo.number}: ${errorInfo.description} in ${errorInfo.source}`);
-
       // Handle based on current error mode
       switch (this.currentContext!.mode) {
         case VB6ErrorMode.ResumeNext:
           this.handleResumeNext();
           break;
-        
+
         case VB6ErrorMode.GoToLabel:
           this.handleGoToLabel();
           break;
-        
+
         case VB6ErrorMode.None:
         default:
           this.handleUnhandledError();
@@ -486,7 +496,7 @@ export class VB6AdvancedErrorHandler {
     moduleName: string = 'Module'
   ): T | undefined {
     this.enterProcedure(procedureName, moduleName);
-    
+
     try {
       return func();
     } catch (error) {
@@ -494,9 +504,9 @@ export class VB6AdvancedErrorHandler {
       const vb6Error: VB6ErrorInfo = {
         number: 5, // Invalid procedure call or argument
         description: error instanceof Error ? error.message : String(error),
-        source: `${moduleName}.${procedureName}`
+        source: `${moduleName}.${procedureName}`,
       };
-      
+
       this.raiseError(vb6Error);
       return undefined;
     } finally {
@@ -515,9 +525,9 @@ export class VB6AdvancedErrorHandler {
       const vb6Error: VB6ErrorInfo = {
         number: errorNumber,
         description: error instanceof Error ? error.message : String(error),
-        source: this.currentContext?.currentProcedure || 'Unknown'
+        source: this.currentContext?.currentProcedure || 'Unknown',
       };
-      
+
       this.raiseError(vb6Error);
       return false;
     }
@@ -530,13 +540,12 @@ export class VB6AdvancedErrorHandler {
       currentModule: 'Module1',
       currentLine: 0,
       errorLine: 0,
-      isInErrorHandler: false
+      isInErrorHandler: false,
     };
   }
 
   private handleResumeNext(): void {
     // In Resume Next mode, just continue execution
-    console.log(`[VB6 Error Handler] Continuing with Resume Next - error ignored`);
     // Error is stored in Err object but execution continues
   }
 
@@ -547,13 +556,12 @@ export class VB6AdvancedErrorHandler {
     }
 
     this.currentContext.isInErrorHandler = true;
-    
+
     // Find and execute error handler
     const key = this.getLabelKey(this.currentContext.errorLabel);
     const handler = this.errorHandlers.get(key);
-    
+
     if (handler) {
-      console.log(`[VB6 Error Handler] Jumping to error handler: ${this.currentContext.errorLabel}`);
       try {
         handler();
       } catch (handlerError) {
@@ -561,7 +569,9 @@ export class VB6AdvancedErrorHandler {
         this.handleUnhandledError();
       }
     } else {
-      console.error(`[VB6 Error Handler] Error handler not found: ${this.currentContext.errorLabel}`);
+      console.error(
+        `[VB6 Error Handler] Error handler not found: ${this.currentContext.errorLabel}`
+      );
       this.handleUnhandledError();
     }
   }
@@ -569,11 +579,13 @@ export class VB6AdvancedErrorHandler {
   private handleUnhandledError(): void {
     const errorMessage = `Runtime Error ${this.errorInfo?.number}: ${this.errorInfo?.description}`;
     console.error(`[VB6 Error Handler] Unhandled error: ${errorMessage}`);
-    
+
     // In VB6, unhandled errors would show a dialog and potentially terminate
     // In web environment, we'll throw the error or show an alert
     if (typeof window !== 'undefined') {
-      alert(`${errorMessage}\n\nProcedure: ${this.currentContext?.currentProcedure}\nModule: ${this.currentContext?.currentModule}\nLine: ${this.currentContext?.errorLine}`);
+      alert(
+        `${errorMessage}\n\nProcedure: ${this.currentContext?.currentProcedure}\nModule: ${this.currentContext?.currentModule}\nLine: ${this.currentContext?.errorLine}`
+      );
     } else {
       throw new Error(errorMessage);
     }
@@ -614,7 +626,7 @@ export class VB6AdvancedErrorHandler {
       errorHandlerCount: this.errorHandlers.size,
       labelCount: this.labelMap.size,
       currentMode: this.currentContext ? VB6ErrorMode[this.currentContext.mode] : 'None',
-      isInErrorHandler: this.isInErrorHandler
+      isInErrorHandler: this.isInErrorHandler,
     };
   }
 }
@@ -676,15 +688,15 @@ export const VB6AdvancedErrorHandlingAPI = {
   // Classes
   VB6Err,
   VB6AdvancedErrorHandler,
-  
+
   // Enums
   VB6ErrorMode,
   VB6ResumeMode,
-  
+
   // Global instances
   vb6ErrorHandler,
   Err,
-  
+
   // Functions
   OnErrorGoTo,
   OnErrorResumeNext,
@@ -696,7 +708,7 @@ export const VB6AdvancedErrorHandlingAPI = {
   RegisterLabel,
   SetCurrentLine,
   EnterProcedure,
-  ExitProcedure
+  ExitProcedure,
 };
 
 // Example VB6 error handling patterns
@@ -765,5 +777,5 @@ DatabaseError:
 ExitPoint:
     OpenDatabase = False
 End Function
-`
+`,
 };

@@ -1,6 +1,6 @@
 /**
  * VB6 DataRepeater Control Implementation
- * 
+ *
  * Data-bound repeater control with full VB6 compatibility
  */
 
@@ -21,40 +21,40 @@ export interface DataRepeaterControl {
   top: number;
   width: number;
   height: number;
-  
+
   // Data Properties
   dataSource: string; // Data source name
   dataMember: string; // Table/recordset name
   recordSource: string; // SQL or table name
-  
+
   // Repeater Properties
   readerHeight: number; // Height of each item
   currentRecord: number;
   recordCount: number;
-  
+
   // Template
   repeaterItems: DataRepeaterItem[];
-  
+
   // Scrolling
   scrollBars: number; // 0=None, 1=Horizontal, 2=Vertical, 3=Both
-  
+
   // Selection
   allowAddNew: boolean;
   allowDelete: boolean;
   allowUpdate: boolean;
-  
+
   // Appearance
   appearance: number; // 0=Flat, 1=3D
   borderStyle: number; // 0=None, 1=Fixed Single
   backColor: string;
   foreColor: string;
-  
+
   // Behavior
   enabled: boolean;
   visible: boolean;
   mousePointer: number;
   tag: string;
-  
+
   // Events
   onCurrentRecordChanged?: string;
   onReposition?: string;
@@ -73,7 +73,7 @@ export const DataRepeaterControl: React.FC<DataRepeaterControlProps> = ({
   control,
   isDesignMode = false,
   onPropertyChange,
-  onEvent
+  onEvent,
 }) => {
   const {
     name,
@@ -99,7 +99,7 @@ export const DataRepeaterControl: React.FC<DataRepeaterControlProps> = ({
     enabled = true,
     visible = true,
     mousePointer = 0,
-    tag = ''
+    tag = '',
   } = control;
 
   const [scrollTop, setScrollTop] = useState(0);
@@ -116,20 +116,23 @@ export const DataRepeaterControl: React.FC<DataRepeaterControlProps> = ({
         name: `Item ${i + 1}`,
         description: `Description for item ${i + 1}`,
         value: Math.floor(Math.random() * 1000),
-        date: new Date(2024, 0, i + 1).toISOString().split('T')[0]
+        date: new Date(2024, 0, i + 1).toISOString().split('T')[0],
       }));
       setData(mockData);
     }
   }, [isDesignMode]);
 
-  const handleRecordSelect = useCallback((recordIndex: number) => {
-    if (!enabled || recordIndex < 0 || recordIndex >= recordCount) return;
-    
-    setSelectedRecord(recordIndex);
-    onPropertyChange?.('currentRecord', recordIndex);
-    onEvent?.('CurrentRecordChanged', { oldRecord: currentRecord, newRecord: recordIndex });
-    onEvent?.('Reposition');
-  }, [enabled, recordCount, currentRecord, onPropertyChange, onEvent]);
+  const handleRecordSelect = useCallback(
+    (recordIndex: number) => {
+      if (!enabled || recordIndex < 0 || recordIndex >= recordCount) return;
+
+      setSelectedRecord(recordIndex);
+      onPropertyChange?.('currentRecord', recordIndex);
+      onEvent?.('CurrentRecordChanged', { oldRecord: currentRecord, newRecord: recordIndex });
+      onEvent?.('Reposition');
+    },
+    [enabled, recordCount, currentRecord, onPropertyChange, onEvent]
+  );
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
     const target = event.target as HTMLDivElement;
@@ -139,45 +142,52 @@ export const DataRepeaterControl: React.FC<DataRepeaterControlProps> = ({
 
   const handleAddNew = useCallback(() => {
     if (!allowAddNew || !enabled) return;
-    
+
     const newRecord = {
       id: data.length + 1,
       name: 'New Item',
       description: 'New item description',
       value: 0,
-      date: new Date().toISOString().split('T')[0]
+      date: new Date().toISOString().split('T')[0],
     };
-    
+
     const newData = [...data, newRecord];
     setData(newData);
     onPropertyChange?.('recordCount', newData.length);
     onEvent?.('GetData', { action: 'addnew' });
   }, [allowAddNew, enabled, data, onPropertyChange, onEvent]);
 
-  const handleDelete = useCallback((recordIndex: number) => {
-    if (!allowDelete || !enabled || recordIndex < 0 || recordIndex >= data.length) return;
-    
-    const newData = data.filter((_, index) => index !== recordIndex);
-    setData(newData);
-    
-    // Adjust current record if necessary
-    const newCurrentRecord = recordIndex >= newData.length ? Math.max(0, newData.length - 1) : recordIndex;
-    setSelectedRecord(newCurrentRecord);
-    
-    onPropertyChange?.('recordCount', newData.length);
-    onPropertyChange?.('currentRecord', newCurrentRecord);
-    onEvent?.('GetData', { action: 'delete', record: recordIndex });
-  }, [allowDelete, enabled, data, onPropertyChange, onEvent]);
+  const handleDelete = useCallback(
+    (recordIndex: number) => {
+      if (!allowDelete || !enabled || recordIndex < 0 || recordIndex >= data.length) return;
 
-  const handleUpdate = useCallback((recordIndex: number, field: string, value: any) => {
-    if (!allowUpdate || !enabled || recordIndex < 0 || recordIndex >= data.length) return;
-    
-    const newData = [...data];
-    newData[recordIndex] = { ...newData[recordIndex], [field]: value };
-    setData(newData);
-    
-    onEvent?.('GetData', { action: 'update', record: recordIndex, field, value });
-  }, [allowUpdate, enabled, data, onEvent]);
+      const newData = data.filter((_, index) => index !== recordIndex);
+      setData(newData);
+
+      // Adjust current record if necessary
+      const newCurrentRecord =
+        recordIndex >= newData.length ? Math.max(0, newData.length - 1) : recordIndex;
+      setSelectedRecord(newCurrentRecord);
+
+      onPropertyChange?.('recordCount', newData.length);
+      onPropertyChange?.('currentRecord', newCurrentRecord);
+      onEvent?.('GetData', { action: 'delete', record: recordIndex });
+    },
+    [allowDelete, enabled, data, onPropertyChange, onEvent]
+  );
+
+  const handleUpdate = useCallback(
+    (recordIndex: number, field: string, value: any) => {
+      if (!allowUpdate || !enabled || recordIndex < 0 || recordIndex >= data.length) return;
+
+      const newData = [...data];
+      newData[recordIndex] = { ...newData[recordIndex], [field]: value };
+      setData(newData);
+
+      onEvent?.('GetData', { action: 'update', record: recordIndex, field, value });
+    },
+    [allowUpdate, enabled, data, onEvent]
+  );
 
   if (!visible) {
     return null;
@@ -190,9 +200,21 @@ export const DataRepeaterControl: React.FC<DataRepeaterControlProps> = ({
 
   const getCursorStyle = () => {
     const cursors = [
-      'default', 'auto', 'crosshair', 'text', 'wait', 'help',
-      'pointer', 'not-allowed', 'move', 'col-resize', 'row-resize',
-      'n-resize', 's-resize', 'e-resize', 'w-resize'
+      'default',
+      'auto',
+      'crosshair',
+      'text',
+      'wait',
+      'help',
+      'pointer',
+      'not-allowed',
+      'move',
+      'col-resize',
+      'row-resize',
+      'n-resize',
+      's-resize',
+      'e-resize',
+      'w-resize',
     ];
     return cursors[mousePointer] || 'default';
   };
@@ -200,10 +222,10 @@ export const DataRepeaterControl: React.FC<DataRepeaterControlProps> = ({
   const getScrollStyle = () => {
     let overflowX = 'hidden';
     let overflowY = 'hidden';
-    
+
     if (scrollBars === 1 || scrollBars === 3) overflowX = 'auto'; // Horizontal
     if (scrollBars === 2 || scrollBars === 3) overflowY = 'auto'; // Vertical
-    
+
     return { overflowX, overflowY };
   };
 
@@ -219,16 +241,19 @@ export const DataRepeaterControl: React.FC<DataRepeaterControlProps> = ({
     cursor: getCursorStyle(),
     opacity: enabled ? 1 : 0.5,
     outline: isDesignMode ? '1px dotted #333' : 'none',
-    ...getScrollStyle()
+    ...getScrollStyle(),
   };
 
   const contentStyle = {
     width: '100%',
-    minHeight: `${data.length * readerHeight}px`
+    minHeight: `${data.length * readerHeight}px`,
   };
 
   const visibleStartIndex = Math.floor(scrollTop / readerHeight);
-  const visibleEndIndex = Math.min(data.length, visibleStartIndex + Math.ceil(height / readerHeight) + 1);
+  const visibleEndIndex = Math.min(
+    data.length,
+    visibleStartIndex + Math.ceil(height / readerHeight) + 1
+  );
 
   return (
     <div
@@ -242,7 +267,7 @@ export const DataRepeaterControl: React.FC<DataRepeaterControlProps> = ({
         {data.slice(visibleStartIndex, visibleEndIndex).map((record, virtualIndex) => {
           const actualIndex = visibleStartIndex + virtualIndex;
           const isSelected = actualIndex === selectedRecord;
-          
+
           return (
             <div
               key={record.id || actualIndex}
@@ -259,7 +284,7 @@ export const DataRepeaterControl: React.FC<DataRepeaterControlProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 cursor: 'pointer',
-                userSelect: 'none'
+                userSelect: 'none',
               }}
               onClick={() => handleRecordSelect(actualIndex)}
             >
@@ -270,7 +295,7 @@ export const DataRepeaterControl: React.FC<DataRepeaterControlProps> = ({
                   fontSize: '11px',
                   fontWeight: 'bold',
                   textAlign: 'center',
-                  marginRight: '8px'
+                  marginRight: '8px',
                 }}
               >
                 {actualIndex + 1}
@@ -289,7 +314,7 @@ export const DataRepeaterControl: React.FC<DataRepeaterControlProps> = ({
                         fontWeight: key === 'name' ? 'bold' : 'normal',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
+                        whiteSpace: 'nowrap',
                       }}
                       title={String(value)}
                     >
@@ -309,9 +334,9 @@ export const DataRepeaterControl: React.FC<DataRepeaterControlProps> = ({
                     border: 'none',
                     color: isSelected ? '#ffffff' : '#cc0000',
                     cursor: 'pointer',
-                    fontSize: '12px'
+                    fontSize: '12px',
                   }}
-                  onClick={(e) => {
+                  onClick={e => {
                     e.stopPropagation();
                     handleDelete(actualIndex);
                   }}
@@ -336,7 +361,7 @@ export const DataRepeaterControl: React.FC<DataRepeaterControlProps> = ({
             gap: '4px',
             background: 'rgba(0,0,0,0.7)',
             padding: '4px',
-            borderRadius: '4px'
+            borderRadius: '4px',
           }}
         >
           <button
@@ -346,26 +371,26 @@ export const DataRepeaterControl: React.FC<DataRepeaterControlProps> = ({
               background: '#f0f0f0',
               border: '1px solid #ccc',
               cursor: 'pointer',
-              fontSize: '10px'
+              fontSize: '10px',
             }}
             onClick={() => handleRecordSelect(Math.max(0, selectedRecord - 1))}
             disabled={selectedRecord <= 0}
           >
             ◄
           </button>
-          
+
           <span
             style={{
               color: 'white',
               fontSize: '10px',
               lineHeight: '20px',
               minWidth: '40px',
-              textAlign: 'center'
+              textAlign: 'center',
             }}
           >
             {selectedRecord + 1} / {data.length}
           </span>
-          
+
           <button
             style={{
               width: '20px',
@@ -373,14 +398,14 @@ export const DataRepeaterControl: React.FC<DataRepeaterControlProps> = ({
               background: '#f0f0f0',
               border: '1px solid #ccc',
               cursor: 'pointer',
-              fontSize: '10px'
+              fontSize: '10px',
             }}
             onClick={() => handleRecordSelect(Math.min(data.length - 1, selectedRecord + 1))}
             disabled={selectedRecord >= data.length - 1}
           >
             ►
           </button>
-          
+
           {allowAddNew && (
             <button
               style={{
@@ -390,7 +415,7 @@ export const DataRepeaterControl: React.FC<DataRepeaterControlProps> = ({
                 border: '1px solid #008800',
                 color: 'white',
                 cursor: 'pointer',
-                fontSize: '10px'
+                fontSize: '10px',
               }}
               onClick={handleAddNew}
               title="Add new record"
@@ -415,16 +440,12 @@ export const DataRepeaterControl: React.FC<DataRepeaterControlProps> = ({
           alignItems: 'center',
           padding: '0 4px',
           fontSize: '10px',
-          color: '#666'
+          color: '#666',
         }}
       >
         <span>Records: {data.length}</span>
-        {dataSource && (
-          <span style={{ marginLeft: '12px' }}>Source: {dataSource}</span>
-        )}
-        {isLoading && (
-          <span style={{ marginLeft: '12px' }}>Loading...</span>
-        )}
+        {dataSource && <span style={{ marginLeft: '12px' }}>Source: {dataSource}</span>}
+        {isLoading && <span style={{ marginLeft: '12px' }}>Loading...</span>}
       </div>
 
       {/* Design Mode Info */}
@@ -440,7 +461,7 @@ export const DataRepeaterControl: React.FC<DataRepeaterControlProps> = ({
             padding: '2px',
             border: '1px solid #ccc',
             whiteSpace: 'nowrap',
-            zIndex: 1000
+            zIndex: 1000,
           }}
         >
           {name} - DataRepeater ({data.length} records)
@@ -463,7 +484,7 @@ export const DataRepeaterHelpers = {
       value: Math.floor(Math.random() * 1000),
       date: new Date(2024, 0, i + 1).toISOString().split('T')[0],
       category: ['A', 'B', 'C'][i % 3],
-      active: Math.random() > 0.3
+      active: Math.random() > 0.3,
     }));
   },
 
@@ -481,7 +502,7 @@ export const DataRepeaterHelpers = {
     return [...data].sort((a, b) => {
       const aVal = a[field];
       const bVal = b[field];
-      
+
       if (aVal < bVal) return ascending ? -1 : 1;
       if (aVal > bVal) return ascending ? 1 : -1;
       return 0;
@@ -491,11 +512,16 @@ export const DataRepeaterHelpers = {
   /**
    * Calculate visible records for virtual scrolling
    */
-  getVisibleRange: (scrollTop: number, containerHeight: number, itemHeight: number, totalItems: number) => {
+  getVisibleRange: (
+    scrollTop: number,
+    containerHeight: number,
+    itemHeight: number,
+    totalItems: number
+  ) => {
     const startIndex = Math.floor(scrollTop / itemHeight);
     const visibleCount = Math.ceil(containerHeight / itemHeight);
     const endIndex = Math.min(totalItems, startIndex + visibleCount + 1);
-    
+
     return { startIndex, endIndex, visibleCount };
   },
 
@@ -511,7 +537,7 @@ export const DataRepeaterHelpers = {
    */
   getCurrentRecord: (data: any[], currentIndex: number): any | null => {
     return currentIndex >= 0 && currentIndex < data.length ? data[currentIndex] : null;
-  }
+  },
 };
 
 // VB6 DataRepeater methods simulation
@@ -534,9 +560,9 @@ export const DataRepeaterMethods = {
    * Move to next record
    */
   moveNext: (control: DataRepeaterControl) => {
-    return { 
-      ...control, 
-      currentRecord: Math.min(control.recordCount - 1, control.currentRecord + 1) 
+    return {
+      ...control,
+      currentRecord: Math.min(control.recordCount - 1, control.currentRecord + 1),
     };
   },
 
@@ -544,9 +570,9 @@ export const DataRepeaterMethods = {
    * Move to previous record
    */
   movePrevious: (control: DataRepeaterControl) => {
-    return { 
-      ...control, 
-      currentRecord: Math.max(0, control.currentRecord - 1) 
+    return {
+      ...control,
+      currentRecord: Math.max(0, control.currentRecord - 1),
     };
   },
 
@@ -556,7 +582,7 @@ export const DataRepeaterMethods = {
   refresh: (control: DataRepeaterControl) => {
     // This would trigger a data refresh in the component
     return control;
-  }
+  },
 };
 
 export default DataRepeaterControl;

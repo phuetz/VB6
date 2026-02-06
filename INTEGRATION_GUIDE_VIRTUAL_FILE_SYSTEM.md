@@ -148,7 +148,7 @@ const fileMenu = [
           // Toggle file browser visibility
           // Your state management here
         },
-        accelerator: 'Ctrl+Shift+B'
+        accelerator: 'Ctrl+Shift+B',
       },
       {
         label: 'Clear Virtual Files',
@@ -157,10 +157,10 @@ const fileMenu = [
             await persistentVFS.clear();
             alert('Virtual file system cleared');
           }
-        }
-      }
-    ]
-  }
+        },
+      },
+    ],
+  },
 ];
 ```
 
@@ -176,7 +176,7 @@ export {
   persistentVFS,
   VB6FileAttribute,
   type PersistentVFSEntry,
-  type FileHandle
+  type FileHandle,
 } from './VB6PersistentFileSystem';
 
 export {
@@ -210,7 +210,7 @@ export {
   VB6FileMode,
   VB6FileAccess,
   VB6FileLock,
-  VB6FileSystemEnhanced
+  VB6FileSystemEnhanced,
 } from './VB6FileSystemEnhanced';
 ```
 
@@ -275,7 +275,14 @@ if (typeof window !== 'undefined') {
 declare global {
   // File system functions
   function FreeFile(): number;
-  function Open(pathname: string, fileNumber: number, mode?: number, access?: number, lock?: number, recordLength?: number): Promise<number>;
+  function Open(
+    pathname: string,
+    fileNumber: number,
+    mode?: number,
+    access?: number,
+    lock?: number,
+    recordLength?: number
+  ): Promise<number>;
   function Close(...fileNumbers: number[]): Promise<void>;
   function Input(length: number, fileNumber: number): Promise<string>;
   function LineInput(fileNumber: number): Promise<string>;
@@ -317,6 +324,7 @@ export {};
 ### Storage Backend Preference
 
 By default, the system automatically selects:
+
 1. **IndexedDB** if available
 2. **localStorage** as fallback
 
@@ -347,7 +355,8 @@ async function checkQuota() {
   console.log(`Total Size: ${formatBytes(stats.totalSize)}`);
 
   // Clear if approaching quota
-  if (stats.totalSize > 40 * 1024 * 1024) { // 40MB
+  if (stats.totalSize > 40 * 1024 * 1024) {
+    // 40MB
     console.warn('Approaching storage quota');
     // Could prompt user to clean up
   }
@@ -475,6 +484,7 @@ End Sub
 ### Issue: File System Not Initializing
 
 **Solution:**
+
 ```typescript
 // Check initialization
 import { persistentVFS } from '@/runtime/VB6PersistentFileSystem';
@@ -491,6 +501,7 @@ try {
 ### Issue: Files Not Persisting
 
 **Solution:**
+
 1. Check browser allows IndexedDB/localStorage
 2. Verify storage quota not exceeded
 3. Check browser DevTools → Application → Storage
@@ -499,6 +510,7 @@ try {
 ### Issue: Slow File Operations
 
 **Solution:**
+
 1. Check if files are very large (>10MB)
 2. Monitor storage quota - clean up if needed
 3. Consider directory caching - it's automatic
@@ -507,6 +519,7 @@ try {
 ### Issue: Path Normalization Errors
 
 **Solution:**
+
 ```typescript
 // Use consistent path format
 // Windows style
@@ -525,6 +538,7 @@ await persistentVFS.getEntry('file.txt');
 ### Tips for Best Performance
 
 1. **Batch Operations**
+
    ```typescript
    // Instead of multiple creates
    for (let i = 0; i < 100; i++) {
@@ -535,6 +549,7 @@ await persistentVFS.getEntry('file.txt');
    ```
 
 2. **Cache Directory Listings**
+
    ```typescript
    const entries = await persistentVFS.listDirectory('/');
    // Directory cached automatically
@@ -542,11 +557,12 @@ await persistentVFS.getEntry('file.txt');
    ```
 
 3. **Avoid Large Files in Memory**
+
    ```typescript
    // Don't load entire 100MB file
    // Use streaming approach
    const fileNum = await persistentVFS.openFile(path, 1);
-   while (!await persistentVFS.isEOF(fileNum)) {
+   while (!(await persistentVFS.isEOF(fileNum))) {
      const chunk = await persistentVFS.readFromFile(fileNum, 10000);
      processChunk(chunk);
    }
@@ -555,7 +571,8 @@ await persistentVFS.getEntry('file.txt');
 4. **Monitor Storage Quota**
    ```typescript
    const stats = await persistentVFS.getStats();
-   if (stats.totalSize > 45 * 1024 * 1024) { // 45MB
+   if (stats.totalSize > 45 * 1024 * 1024) {
+     // 45MB
      // Clean up old files
    }
    ```
@@ -588,7 +605,7 @@ async function trackFileSystemMetrics() {
     fileCount: stats.filesCount,
     directoryCount: stats.directoriesCount,
     totalSize: stats.totalSize,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 }
 
@@ -607,6 +624,7 @@ setInterval(trackFileSystemMetrics, 60000); // Every minute
 ## Support
 
 For issues or questions:
+
 1. Check documentation: `docs/VIRTUAL_FILE_SYSTEM_ENHANCEMENT.md`
 2. Review test cases: `src/test/runtime/VirtualFileSystem.test.ts`
 3. Check browser console for detailed error messages

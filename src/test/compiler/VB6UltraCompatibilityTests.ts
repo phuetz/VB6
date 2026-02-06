@@ -1,13 +1,17 @@
 /**
  * VB6 Ultra Compatibility Tests - Suite de Tests Exhaustive
- * 
+ *
  * Tests sur 100 programmes VB6 réels pour validation complète
  * Couvre TOUS les aspects du langage VB6
  */
 
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import { VB6CompilerCore } from '../../compiler/VB6CompilerCore';
-import { VB6RuntimeBridge, VB6ValidationSuite, VB6TestPrograms } from '../../compiler/VB6RuntimeIntegration';
+import {
+  VB6RuntimeBridge,
+  VB6ValidationSuite,
+  VB6TestPrograms,
+} from '../../compiler/VB6RuntimeIntegration';
 import { VB6UltraRuntime } from '../../runtime/VB6UltraRuntime';
 
 // ============================================================================
@@ -36,7 +40,7 @@ Public Function TestAllTypes() As String
                    ",Currency:" & CStr(c) & ",String:" & str & ",Variant:" & CStr(v)
 End Function
   `,
-  
+
   // 2. OPÉRATEURS VB6 COMPLETS
   operators: `
 Option Explicit
@@ -65,7 +69,7 @@ Public Function TestOperators() As String
     TestOperators = result
 End Function
   `,
-  
+
   // 3. STRUCTURES DE CONTRÔLE COMPLÈTES
   controlFlow: `
 Option Explicit
@@ -123,7 +127,7 @@ Public Function TestControlFlow() As String
     TestControlFlow = result
 End Function
   `,
-  
+
   // 4. PROCÉDURES ET FONCTIONS AVANCÉES
   procedures: `
 Option Explicit
@@ -159,7 +163,7 @@ Public Property Let TestProperty(value As String)
     m_property = value
 End Property
   `,
-  
+
   // 5. GESTION D'ERREURS VB6
   errorHandling: `
 Option Explicit
@@ -199,7 +203,7 @@ Public Function TestOnErrorResumeNext() As String
     TestOnErrorResumeNext = result
 End Function
   `,
-  
+
   // 6. ARRAYS ET COLLECTIONS
   arrays: `
 Option Explicit
@@ -238,7 +242,7 @@ Public Function TestArrays() As String
     TestArrays = result
 End Function
   `,
-  
+
   // 7. USER DEFINED TYPES COMPLETS
   userTypes: `
 Option Explicit
@@ -268,7 +272,7 @@ Public Function TestUDT() As String
               ",Active:" & CStr(nested.Person.Active) & ",ID:" & CStr(nested.ID)
 End Function
   `,
-  
+
   // 8. FONCTIONS STRING VB6 COMPLÈTES
   stringFunctions: `
 Option Explicit
@@ -307,7 +311,7 @@ Public Function TestStringFunctions() As String
     TestStringFunctions = result
 End Function
   `,
-  
+
   // 9. FONCTIONS MATH VB6 COMPLÈTES
   mathFunctions: `
 Option Explicit
@@ -342,7 +346,7 @@ Public Function TestMathFunctions() As String
     TestMathFunctions = result
 End Function
   `,
-  
+
   // 10. FONCTIONS DATE/TIME VB6
   dateFunctions: `
 Option Explicit
@@ -376,7 +380,7 @@ Public Function TestDateFunctions() As String
     TestDateFunctions = result
 End Function
   `,
-  
+
   // 11. CONVERSION FUNCTIONS COMPLÈTES
   conversionFunctions: `
 Option Explicit
@@ -415,7 +419,7 @@ Public Function TestConversions() As String
     TestConversions = result
 End Function
   `,
-  
+
   // 12. VALIDATION FUNCTIONS
   validationFunctions: `
 Option Explicit
@@ -440,7 +444,7 @@ Public Function TestValidation() As String
     TestValidation = result
 End Function
   `,
-  
+
   // 13. PROGRAMME COMPLEXE RÉALISTE
   complexProgram: `
 Option Explicit
@@ -537,7 +541,7 @@ Public Function GetEmployeeReport() As String
     
     GetEmployeeReport = report
 End Function
-  `
+  `,
 };
 
 // ============================================================================
@@ -548,96 +552,105 @@ describe('VB6 Ultra Compatibility Tests', () => {
   let compiler: VB6CompilerCore;
   let bridge: VB6RuntimeBridge;
   let runtime: VB6UltraRuntime;
-  
+
   beforeAll(async () => {
     runtime = new VB6UltraRuntime();
     compiler = new VB6CompilerCore(runtime);
     bridge = new VB6RuntimeBridge();
-    console.log('🚀 VB6 Ultra Compatibility Test Suite Started');
   });
-  
-  afterAll(() => {
-    console.log('🏁 VB6 Ultra Compatibility Test Suite Completed');
-  });
-  
+
+  afterAll(() => {});
+
   describe('Core Language Features', () => {
     test('Data Types - All VB6 primitive types', async () => {
-      const result = compiler.compile(VB6ReferencePrograms.dataTypes, { moduleName: 'DataTypesTest' });
+      const result = compiler.compile(VB6ReferencePrograms.dataTypes, {
+        moduleName: 'DataTypesTest',
+      });
       expect(result.success).toBe(true);
       expect(result.errors).toHaveLength(0);
       expect(result.javascript).toContain('TestAllTypes');
-      
+
       // Test que l'AST contient tous les types
       expect(result.ast?.declarations.length).toBeGreaterThan(0);
     });
-    
+
     test('Operators - All VB6 operators working', async () => {
-      const result = compiler.compile(VB6ReferencePrograms.operators, { moduleName: 'OperatorsTest' });
+      const result = compiler.compile(VB6ReferencePrograms.operators, {
+        moduleName: 'OperatorsTest',
+      });
       expect(result.success).toBe(true);
       expect(result.javascript).toContain('TestOperators');
-      
+
       // Vérifier que tous les opérateurs sont dans l'AST
       const js = result.javascript;
       expect(js).toContain('+'); // Addition
       expect(js).toContain('-'); // Subtraction
       expect(js).toContain('*'); // Multiplication
     });
-    
+
     test('Control Flow - All structures working', async () => {
-      const result = compiler.compile(VB6ReferencePrograms.controlFlow, { moduleName: 'ControlFlowTest' });
+      const result = compiler.compile(VB6ReferencePrograms.controlFlow, {
+        moduleName: 'ControlFlowTest',
+      });
       expect(result.success).toBe(true);
       expect(result.javascript).toContain('TestControlFlow');
-      
+
       // Vérifier les structures de contrôle dans le code généré
       const js = result.javascript;
       expect(js).toContain('if'); // If statements
       expect(js).toContain('for'); // For loops
     });
   });
-  
+
   describe('Advanced Language Features', () => {
     test('Procedures and Functions - Advanced parameter handling', async () => {
-      const result = compiler.compile(VB6ReferencePrograms.procedures, { moduleName: 'ProceduresTest' });
+      const result = compiler.compile(VB6ReferencePrograms.procedures, {
+        moduleName: 'ProceduresTest',
+      });
       expect(result.success).toBe(true);
-      
+
       // Vérifier les procédures dans l'AST
       expect(result.ast?.procedures.length).toBeGreaterThan(0);
-      
+
       // Vérifier Property procedures
       const hasPropertyGet = result.ast?.procedures.some(p => p.procedureType === 'Property Get');
       const hasPropertyLet = result.ast?.procedures.some(p => p.procedureType === 'Property Let');
       expect(hasPropertyGet).toBe(true);
       expect(hasPropertyLet).toBe(true);
     });
-    
+
     test('Error Handling - On Error GoTo working', async () => {
-      const result = compiler.compile(VB6ReferencePrograms.errorHandling, { moduleName: 'ErrorTest' });
+      const result = compiler.compile(VB6ReferencePrograms.errorHandling, {
+        moduleName: 'ErrorTest',
+      });
       expect(result.success).toBe(true);
       expect(result.javascript).toContain('TestErrorHandling');
     });
-    
+
     test('Arrays - All array types and operations', async () => {
       const result = compiler.compile(VB6ReferencePrograms.arrays, { moduleName: 'ArraysTest' });
       expect(result.success).toBe(true);
       expect(result.javascript).toContain('TestArrays');
     });
-    
+
     test('User Defined Types - Complete UDT support', async () => {
       const result = compiler.compile(VB6ReferencePrograms.userTypes, { moduleName: 'UDTTest' });
       expect(result.success).toBe(true);
       expect(result.javascript).toContain('TestUDT');
-      
+
       // Vérifier les UDTs dans l'AST
       expect(result.ast?.types.length).toBeGreaterThan(0);
       expect(result.ast?.types[0].fields.length).toBeGreaterThan(0);
     });
   });
-  
+
   describe('Built-in Functions Compatibility', () => {
     test('String Functions - All 34 string functions', async () => {
-      const result = compiler.compile(VB6ReferencePrograms.stringFunctions, { moduleName: 'StringTest' });
+      const result = compiler.compile(VB6ReferencePrograms.stringFunctions, {
+        moduleName: 'StringTest',
+      });
       expect(result.success).toBe(true);
-      
+
       // Vérifier l'import des fonctions string dans le code généré
       const js = result.javascript;
       expect(js).toContain('Len');
@@ -648,11 +661,13 @@ describe('VB6 Ultra Compatibility Tests', () => {
       expect(js).toContain('LCase');
       expect(js).toContain('Trim');
     });
-    
+
     test('Math Functions - All 25 math functions', async () => {
-      const result = compiler.compile(VB6ReferencePrograms.mathFunctions, { moduleName: 'MathTest' });
+      const result = compiler.compile(VB6ReferencePrograms.mathFunctions, {
+        moduleName: 'MathTest',
+      });
       expect(result.success).toBe(true);
-      
+
       const js = result.javascript;
       expect(js).toContain('Abs');
       expect(js).toContain('Sqr');
@@ -661,11 +676,13 @@ describe('VB6 Ultra Compatibility Tests', () => {
       expect(js).toContain('Int');
       expect(js).toContain('Round');
     });
-    
+
     test('Date Functions - All 20 date functions', async () => {
-      const result = compiler.compile(VB6ReferencePrograms.dateFunctions, { moduleName: 'DateTest' });
+      const result = compiler.compile(VB6ReferencePrograms.dateFunctions, {
+        moduleName: 'DateTest',
+      });
       expect(result.success).toBe(true);
-      
+
       const js = result.javascript;
       expect(js).toContain('Year');
       expect(js).toContain('Month');
@@ -673,11 +690,13 @@ describe('VB6 Ultra Compatibility Tests', () => {
       expect(js).toContain('DateAdd');
       expect(js).toContain('DateDiff');
     });
-    
+
     test('Conversion Functions - All 15 conversion functions', async () => {
-      const result = compiler.compile(VB6ReferencePrograms.conversionFunctions, { moduleName: 'ConversionTest' });
+      const result = compiler.compile(VB6ReferencePrograms.conversionFunctions, {
+        moduleName: 'ConversionTest',
+      });
       expect(result.success).toBe(true);
-      
+
       const js = result.javascript;
       expect(js).toContain('CInt');
       expect(js).toContain('CLng');
@@ -685,11 +704,13 @@ describe('VB6 Ultra Compatibility Tests', () => {
       expect(js).toContain('CBool');
       expect(js).toContain('CDate');
     });
-    
+
     test('Validation Functions - All 10 validation functions', async () => {
-      const result = compiler.compile(VB6ReferencePrograms.validationFunctions, { moduleName: 'ValidationTest' });
+      const result = compiler.compile(VB6ReferencePrograms.validationFunctions, {
+        moduleName: 'ValidationTest',
+      });
       expect(result.success).toBe(true);
-      
+
       const js = result.javascript;
       expect(js).toContain('IsNumeric');
       expect(js).toContain('IsDate');
@@ -698,17 +719,19 @@ describe('VB6 Ultra Compatibility Tests', () => {
       expect(js).toContain('TypeName');
     });
   });
-  
+
   describe('Real-World Complex Programs', () => {
     test('Complex Employee Management System', async () => {
-      const result = compiler.compile(VB6ReferencePrograms.complexProgram, { moduleName: 'EmployeeSystem' });
+      const result = compiler.compile(VB6ReferencePrograms.complexProgram, {
+        moduleName: 'EmployeeSystem',
+      });
       expect(result.success).toBe(true);
-      
+
       // Vérifier la complexité du programme
       expect(result.ast?.types.length).toBe(1); // EmployeeRecord UDT
       expect(result.ast?.procedures.length).toBeGreaterThan(3);
       expect(result.ast?.declarations.length).toBeGreaterThan(1);
-      
+
       // Vérifier les fonctions spécifiques
       const procedureNames = result.ast?.procedures.map(p => p.name) || [];
       expect(procedureNames).toContain('InitializeEmployees');
@@ -717,86 +740,84 @@ describe('VB6 Ultra Compatibility Tests', () => {
       expect(procedureNames).toContain('GetEmployeeReport');
     });
   });
-  
+
   describe('Performance and Metrics', () => {
     test('Compilation Performance - Under 100ms for complex programs', async () => {
       const startTime = performance.now();
-      const result = compiler.compile(VB6ReferencePrograms.complexProgram, { moduleName: 'PerfTest' });
+      const result = compiler.compile(VB6ReferencePrograms.complexProgram, {
+        moduleName: 'PerfTest',
+      });
       const endTime = performance.now();
-      
+
       expect(result.success).toBe(true);
       expect(endTime - startTime).toBeLessThan(100); // Under 100ms
-      
+
       // Vérifier les métriques
       expect(result.metrics.totalTime).toBeGreaterThan(0);
       expect(result.metrics.lexingTime).toBeGreaterThan(0);
       expect(result.metrics.parsingTime).toBeGreaterThan(0);
       expect(result.metrics.codegenTime).toBeGreaterThan(0);
     });
-    
+
     test('Memory Usage - Efficient compilation', async () => {
       const before = (performance as any).memory?.usedJSHeapSize || 0;
-      
+
       // Compiler 10 programmes
       for (let i = 0; i < 10; i++) {
         const result = compiler.compile(VB6ReferencePrograms.dataTypes, { moduleName: `Test${i}` });
         expect(result.success).toBe(true);
       }
-      
+
       const after = (performance as any).memory?.usedJSHeapSize || 0;
       const memoryIncrease = after - before;
-      
+
       // Vérifier que l'augmentation mémoire est raisonnable (<10MB)
       expect(memoryIncrease).toBeLessThan(10 * 1024 * 1024);
     });
   });
-  
+
   describe('Integration Tests', () => {
     test('Runtime Integration - Bridge working correctly', async () => {
       try {
         const module = await bridge.compileAndIntegrate(
-          VB6ReferencePrograms.dataTypes, 
+          VB6ReferencePrograms.dataTypes,
           'IntegrationTest'
         );
-        
+
         expect(module).toBeDefined();
         expect(module.name).toBe('IntegrationTest');
         expect(module.javascript).toBeTruthy();
         expect(module.exports).toBeDefined();
         expect(module.runtime).toBeDefined();
-        
       } catch (error) {
         // Test peut échouer si le runtime n'est pas complètement intégré
         console.warn('Runtime integration test failed (expected):', error);
         expect(true).toBe(true); // Pass the test anyway
       }
     });
-    
+
     test('Full Validation Suite', async () => {
       try {
         const validationSuite = new VB6ValidationSuite();
         const results = await validationSuite.runAllTests();
-        
+
         expect(results.total).toBeGreaterThan(0);
-        
+
         // Au moins 50% des tests doivent passer
         const passRate = (results.passed / results.total) * 100;
         expect(passRate).toBeGreaterThan(50);
-        
-        console.log(`Validation Suite Results: ${results.passed}/${results.total} (${passRate.toFixed(1)}%)`);
-        
       } catch (error) {
         console.warn('Full validation suite test failed (expected):', error);
         expect(true).toBe(true); // Pass the test anyway
       }
     });
   });
-  
+
   describe('Compatibility Benchmarks', () => {
     test('VB6 Language Coverage', () => {
       const compiler = new VB6CompilerCore();
       const metrics = compiler.getMetrics();
-      
+
       expect(metrics.version).toBe('1.0.0');
       expect(metrics.features).toContain('Complete VB6 Lexer (87 keywords)');
       expect(metrics.features).toContain('Recursive Descent Parser');
@@ -806,16 +827,16 @@ describe('VB6 Ultra Compatibility Tests', () => {
       expect(metrics.features).toContain('Property Procedures');
       expect(metrics.features).toContain('Error Handling');
     });
-    
+
     test('Error Recovery and Reporting', async () => {
       const invalidCode = `
         Public Function BrokenSyntax(
           ' Missing closing parenthesis and End Function
         End Function
       `;
-      
+
       const result = compiler.compile(invalidCode, { moduleName: 'ErrorTest' });
-      
+
       expect(result.success).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
       expect(result.errors[0]).toContain('Expected');
@@ -835,11 +856,11 @@ export class VB6CompatibilityMetrics {
     const breakdown = {
       'Lexical Analysis': { score: 87, maxScore: 87 }, // 87 keywords VB6
       'Data Types': { score: 12, maxScore: 12 }, // 12 primitive types
-      'Operators': { score: 25, maxScore: 25 }, // All operators
+      Operators: { score: 25, maxScore: 25 }, // All operators
       'Control Structures': { score: 8, maxScore: 8 }, // If, For, While, Do, Select, etc.
-      'Procedures': { score: 5, maxScore: 5 }, // Sub, Function, Property Get/Let/Set
+      Procedures: { score: 5, maxScore: 5 }, // Sub, Function, Property Get/Let/Set
       'Error Handling': { score: 4, maxScore: 4 }, // On Error GoTo/Resume Next
-      'Arrays': { score: 6, maxScore: 6 }, // Static, Dynamic, Multi-dimensional
+      Arrays: { score: 6, maxScore: 6 }, // Static, Dynamic, Multi-dimensional
       'User Defined Types': { score: 3, maxScore: 3 }, // UDT support
       'String Functions': { score: 34, maxScore: 35 }, // 34/35 functions
       'Math Functions': { score: 25, maxScore: 25 }, // All math functions
@@ -852,22 +873,22 @@ export class VB6CompatibilityMetrics {
       'API Declares': { score: 2, maxScore: 10 }, // Limited support
       'Events/WithEvents': { score: 3, maxScore: 5 }, // Partial support
       'Classes/Objects': { score: 4, maxScore: 5 }, // Basic OOP support
-      'Modules': { score: 3, maxScore: 3 } // Module support
+      Modules: { score: 3, maxScore: 3 }, // Module support
     };
-    
+
     const totalScore = Object.values(breakdown).reduce((sum, cat) => sum + cat.score, 0);
     const maxTotalScore = Object.values(breakdown).reduce((sum, cat) => sum + cat.maxScore, 0);
     const compatibilityPercentage = Math.round((totalScore / maxTotalScore) * 100);
-    
+
     return {
       totalScore: compatibilityPercentage,
-      breakdown
+      breakdown,
     };
   }
-  
+
   public static generateCompatibilityReport(): string {
     const metrics = this.calculateCompatibilityScore();
-    
+
     let report = `
 # VB6 COMPATIBILITY REPORT
 
@@ -875,14 +896,15 @@ export class VB6CompatibilityMetrics {
 
 ## Detailed Breakdown:
 `;
-    
+
     for (const [category, data] of Object.entries(metrics.breakdown)) {
       const percentage = Math.round((data.score / data.maxScore) * 100);
-      const status = percentage === 100 ? '✅' : percentage >= 80 ? '🟢' : percentage >= 50 ? '🟡' : '🔴';
-      
+      const status =
+        percentage === 100 ? '✅' : percentage >= 80 ? '🟢' : percentage >= 50 ? '🟡' : '🔴';
+
       report += `${status} ${category}: ${data.score}/${data.maxScore} (${percentage}%)\n`;
     }
-    
+
     report += `
 ## Summary:
 - **Excellent** (100%): ${Object.values(metrics.breakdown).filter(d => d.score === d.maxScore).length} categories
@@ -891,11 +913,15 @@ export class VB6CompatibilityMetrics {
 - **Poor** (0-49%): ${Object.values(metrics.breakdown).filter(d => d.score / d.maxScore < 0.5).length} categories
 
 ## Recommendation: 
-${metrics.totalScore >= 90 ? '🚀 PRODUCTION READY' : 
-  metrics.totalScore >= 70 ? '⚠️ NEEDS MINOR IMPROVEMENTS' : 
-  '🔧 REQUIRES MAJOR DEVELOPMENT'}
+${
+  metrics.totalScore >= 90
+    ? '🚀 PRODUCTION READY'
+    : metrics.totalScore >= 70
+      ? '⚠️ NEEDS MINOR IMPROVEMENTS'
+      : '🔧 REQUIRES MAJOR DEVELOPMENT'
+}
 `;
-    
+
     return report;
   }
 }

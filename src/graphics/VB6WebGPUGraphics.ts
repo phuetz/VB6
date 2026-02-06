@@ -1,9 +1,9 @@
 /**
  * VB6 DirectX/OpenGL to WebGPU Bridge - Ultra Think V4 Graphics
- * 
+ *
  * Système GRAPHIQUE pour 99.9%+ compatibilité (Impact: 85, Usage: 25%)
  * Critique pour: Games, CAD, Visualization, Simulations
- * 
+ *
  * Implémente le bridge complet DirectX/OpenGL:
  * - DirectX 7/8/9 API mapping
  * - Direct3D device et rendering
@@ -14,7 +14,7 @@
  * - Shader compilation
  * - Texture management
  * - Hardware acceleration
- * 
+ *
  * Architecture Ultra Think V4:
  * - WebGPU native rendering
  * - WGSL shader generation
@@ -70,7 +70,7 @@ export interface D3DLight {
 export enum D3DLightType {
   D3DLIGHT_POINT = 1,
   D3DLIGHT_SPOT = 2,
-  D3DLIGHT_DIRECTIONAL = 3
+  D3DLIGHT_DIRECTIONAL = 3,
 }
 
 export enum D3DPrimitiveType {
@@ -79,7 +79,7 @@ export enum D3DPrimitiveType {
   D3DPT_LINESTRIP = 3,
   D3DPT_TRIANGLELIST = 4,
   D3DPT_TRIANGLESTRIP = 5,
-  D3DPT_TRIANGLEFAN = 6
+  D3DPT_TRIANGLEFAN = 6,
 }
 
 export enum D3DRenderState {
@@ -105,7 +105,7 @@ export enum D3DRenderState {
   D3DRENDERSTATE_FOGEND = 37,
   D3DRENDERSTATE_FOGDENSITY = 38,
   D3DRENDERSTATE_LIGHTING = 137,
-  D3DRENDERSTATE_AMBIENT = 139
+  D3DRENDERSTATE_AMBIENT = 139,
 }
 
 export enum D3DTextureStageState {
@@ -128,7 +128,7 @@ export enum D3DTextureStageState {
   D3DTSS_MIPFILTER = 18,
   D3DTSS_MIPMAPLODBIAS = 19,
   D3DTSS_MAXMIPLEVEL = 20,
-  D3DTSS_MAXANISOTROPY = 21
+  D3DTSS_MAXANISOTROPY = 21,
 }
 
 // ============================================================================
@@ -141,28 +141,33 @@ export class VB6WebGPUGraphics {
   private context: GPUCanvasContext | null = null;
   private canvas: HTMLCanvasElement | null = null;
   private adapter: GPUAdapter | null = null;
-  
+
   // Pipeline state
   private renderPipeline: GPURenderPipeline | null = null;
   private computePipeline: GPUComputePipeline | null = null;
   private currentRenderPass: GPURenderPassEncoder | null = null;
   private commandEncoder: GPUCommandEncoder | null = null;
-  
+
   // Resources
   private vertexBuffers: Map<number, GPUBuffer> = new Map();
   private indexBuffers: Map<number, GPUBuffer> = new Map();
   private textures: Map<number, GPUTexture> = new Map();
   private samplers: Map<number, GPUSampler> = new Map();
   private uniformBuffers: Map<number, GPUBuffer> = new Map();
-  
+
   // DirectX state emulation
   private renderStates: Map<D3DRenderState, any> = new Map();
   private textureStageStates: Map<number, Map<D3DTextureStageState, any>> = new Map();
   private transforms: Map<string, D3DMatrix> = new Map();
   private lights: Map<number, D3DLight> = new Map();
   private materials: Map<number, D3DMaterial> = new Map();
-  private viewport: { x: number; y: number; width: number; height: number } = { x: 0, y: 0, width: 800, height: 600 };
-  
+  private viewport: { x: number; y: number; width: number; height: number } = {
+    x: 0,
+    y: 0,
+    width: 800,
+    height: 600,
+  };
+
   // Shader cache
   private shaderCache: Map<string, GPUShaderModule> = new Map();
   private nextResourceId: number = 1;
@@ -192,13 +197,11 @@ export class VB6WebGPUGraphics {
     this.renderStates.set(D3DRenderState.D3DRENDERSTATE_FOGENABLE, false);
     this.renderStates.set(D3DRenderState.D3DRENDERSTATE_SPECULARENABLE, false);
     this.renderStates.set(D3DRenderState.D3DRENDERSTATE_CULLMODE, 2); // D3DCULL_CCW
-    
+
     // Default transforms
     this.transforms.set('world', this.createIdentityMatrix());
     this.transforms.set('view', this.createIdentityMatrix());
     this.transforms.set('projection', this.createIdentityMatrix());
-    
-    console.log('🎮 WebGPU Graphics initialized');
   }
 
   /**
@@ -214,9 +217,9 @@ export class VB6WebGPUGraphics {
 
       // Request adapter
       this.adapter = await navigator.gpu.requestAdapter({
-        powerPreference: 'high-performance'
+        powerPreference: 'high-performance',
       });
-      
+
       if (!this.adapter) {
         console.error('No WebGPU adapter found');
         return false;
@@ -237,14 +240,14 @@ export class VB6WebGPUGraphics {
           maxVertexBufferArrayStride: 2048,
           maxComputeWorkgroupSizeX: 256,
           maxComputeWorkgroupSizeY: 256,
-          maxComputeWorkgroupSizeZ: 64
-        }
+          maxComputeWorkgroupSizeZ: 64,
+        },
       });
 
       // Setup canvas context
       this.canvas = canvas;
       this.context = canvas.getContext('webgpu');
-      
+
       if (!this.context) {
         console.error('Failed to get WebGPU context');
         return false;
@@ -254,15 +257,12 @@ export class VB6WebGPUGraphics {
       this.context.configure({
         device: this.device,
         format: presentationFormat,
-        alphaMode: 'premultiplied'
+        alphaMode: 'premultiplied',
       });
 
       // Create default pipeline
       await this.createDefaultPipeline();
-
-      console.log('✅ WebGPU initialized successfully');
       return true;
-
     } catch (error) {
       console.error('Failed to initialize WebGPU:', error);
       return false;
@@ -332,12 +332,12 @@ export class VB6WebGPUGraphics {
     // Create shader modules
     const vertexShader = this.device.createShaderModule({
       label: 'Default Vertex Shader',
-      code: vertexShaderCode
+      code: vertexShaderCode,
     });
 
     const fragmentShader = this.device.createShaderModule({
       label: 'Default Fragment Shader',
-      code: fragmentShaderCode
+      code: fragmentShaderCode,
     });
 
     // Vertex buffer layout
@@ -347,8 +347,8 @@ export class VB6WebGPUGraphics {
         { format: 'float32x3', offset: 0, shaderLocation: 0 }, // position
         { format: 'float32x3', offset: 12, shaderLocation: 1 }, // normal
         { format: 'float32x2', offset: 24, shaderLocation: 2 }, // texCoord
-        { format: 'float32x4', offset: 32, shaderLocation: 3 }  // color
-      ]
+        { format: 'float32x4', offset: 32, shaderLocation: 3 }, // color
+      ],
     };
 
     // Create pipeline
@@ -358,40 +358,40 @@ export class VB6WebGPUGraphics {
       vertex: {
         module: vertexShader,
         entryPoint: 'main',
-        buffers: [vertexBufferLayout]
+        buffers: [vertexBufferLayout],
       },
       fragment: {
         module: fragmentShader,
         entryPoint: 'main',
-        targets: [{
-          format: navigator.gpu.getPreferredCanvasFormat(),
-          blend: {
-            color: {
-              srcFactor: 'src-alpha',
-              dstFactor: 'one-minus-src-alpha',
-              operation: 'add'
+        targets: [
+          {
+            format: navigator.gpu.getPreferredCanvasFormat(),
+            blend: {
+              color: {
+                srcFactor: 'src-alpha',
+                dstFactor: 'one-minus-src-alpha',
+                operation: 'add',
+              },
+              alpha: {
+                srcFactor: 'one',
+                dstFactor: 'one-minus-src-alpha',
+                operation: 'add',
+              },
             },
-            alpha: {
-              srcFactor: 'one',
-              dstFactor: 'one-minus-src-alpha',
-              operation: 'add'
-            }
-          }
-        }]
+          },
+        ],
       },
       primitive: {
         topology: 'triangle-list',
         cullMode: 'back',
-        frontFace: 'ccw'
+        frontFace: 'ccw',
       },
       depthStencil: {
         depthWriteEnabled: true,
         depthCompare: 'less',
-        format: 'depth24plus-stencil8'
-      }
+        format: 'depth24plus-stencil8',
+      },
     });
-
-    console.log('🎨 Default pipeline created');
   }
 
   // ============================================================================
@@ -402,13 +402,11 @@ export class VB6WebGPUGraphics {
    * Direct3DCreate (DirectX initialization)
    */
   public Direct3DCreate(version: number): any {
-    console.log(`🎮 Direct3D${version} created`);
-    
     return {
       EnumAdapterModes: this.enumAdapterModes.bind(this),
       GetAdapterCount: () => 1,
       GetAdapterIdentifier: this.getAdapterIdentifier.bind(this),
-      CreateDevice: this.createDevice.bind(this)
+      CreateDevice: this.createDevice.bind(this),
     };
   }
 
@@ -422,75 +420,79 @@ export class VB6WebGPUGraphics {
     behaviorFlags: number,
     presentParams: any
   ): any {
-    console.log('🎮 D3D Device created');
-    
     return {
       // Device capabilities
       GetDeviceCaps: this.getDeviceCaps.bind(this),
       GetDisplayMode: this.getDisplayMode.bind(this),
-      
+
       // Rendering
       Clear: this.clear.bind(this),
       BeginScene: this.beginScene.bind(this),
       EndScene: this.endScene.bind(this),
       Present: this.present.bind(this),
-      
+
       // State management
       SetRenderState: this.setRenderState.bind(this),
       GetRenderState: this.getRenderState.bind(this),
       SetTextureStageState: this.setTextureStageState.bind(this),
       GetTextureStageState: this.getTextureStageState.bind(this),
-      
+
       // Transforms
       SetTransform: this.setTransform.bind(this),
       GetTransform: this.getTransform.bind(this),
-      
+
       // Lighting
       SetLight: this.setLight.bind(this),
       GetLight: this.getLight.bind(this),
       LightEnable: this.lightEnable.bind(this),
-      
+
       // Materials
       SetMaterial: this.setMaterial.bind(this),
       GetMaterial: this.getMaterial.bind(this),
-      
+
       // Textures
       SetTexture: this.setTexture.bind(this),
       GetTexture: this.getTexture.bind(this),
       CreateTexture: this.createTexture.bind(this),
-      
+
       // Vertex/Index buffers
       CreateVertexBuffer: this.createVertexBuffer.bind(this),
       CreateIndexBuffer: this.createIndexBuffer.bind(this),
       SetStreamSource: this.setStreamSource.bind(this),
       SetIndices: this.setIndices.bind(this),
-      
+
       // Drawing
       DrawPrimitive: this.drawPrimitive.bind(this),
       DrawIndexedPrimitive: this.drawIndexedPrimitive.bind(this),
       DrawPrimitiveUP: this.drawPrimitiveUP.bind(this),
       DrawIndexedPrimitiveUP: this.drawIndexedPrimitiveUP.bind(this),
-      
+
       // Viewport
       SetViewport: this.setViewport.bind(this),
-      GetViewport: this.getViewport.bind(this)
+      GetViewport: this.getViewport.bind(this),
     };
   }
 
   /**
    * Clear render target
    */
-  private clear(count: number, rects: any[], flags: number, color: number, z: number, stencil: number): void {
+  private clear(
+    count: number,
+    rects: any[],
+    flags: number,
+    color: number,
+    z: number,
+    stencil: number
+  ): void {
     if (!this.device || !this.context) return;
 
     // Extract RGBA from color
-    const r = ((color >> 16) & 0xFF) / 255;
-    const g = ((color >> 8) & 0xFF) / 255;
-    const b = (color & 0xFF) / 255;
-    const a = ((color >> 24) & 0xFF) / 255;
+    const r = ((color >> 16) & 0xff) / 255;
+    const g = ((color >> 8) & 0xff) / 255;
+    const b = (color & 0xff) / 255;
+    const a = ((color >> 24) & 0xff) / 255;
 
     // Clear will be done in render pass
-    console.log(`🎨 Clear: color=${color.toString(16)}, depth=${z}`);
   }
 
   /**
@@ -500,23 +502,23 @@ export class VB6WebGPUGraphics {
     if (!this.device || !this.context) return;
 
     this.commandEncoder = this.device.createCommandEncoder();
-    
+
     const textureView = this.context.getCurrentTexture().createView();
-    
+
     this.currentRenderPass = this.commandEncoder.beginRenderPass({
-      colorAttachments: [{
-        view: textureView,
-        clearValue: { r: 0, g: 0, b: 0, a: 1 },
-        loadOp: 'clear',
-        storeOp: 'store'
-      }]
+      colorAttachments: [
+        {
+          view: textureView,
+          clearValue: { r: 0, g: 0, b: 0, a: 1 },
+          loadOp: 'clear',
+          storeOp: 'store',
+        },
+      ],
     });
 
     if (this.renderPipeline) {
       this.currentRenderPass.setPipeline(this.renderPipeline);
     }
-
-    console.log('🎬 Scene begun');
   }
 
   /**
@@ -526,14 +528,12 @@ export class VB6WebGPUGraphics {
     if (!this.currentRenderPass || !this.commandEncoder || !this.device) return;
 
     this.currentRenderPass.end();
-    
+
     const commandBuffer = this.commandEncoder.finish();
     this.device.queue.submit([commandBuffer]);
-    
+
     this.currentRenderPass = null;
     this.commandEncoder = null;
-
-    console.log('🎬 Scene ended');
   }
 
   /**
@@ -541,7 +541,6 @@ export class VB6WebGPUGraphics {
    */
   private present(): void {
     // WebGPU automatically presents when command buffer is submitted
-    console.log('🖼️ Frame presented');
   }
 
   /**
@@ -549,7 +548,6 @@ export class VB6WebGPUGraphics {
    */
   private setRenderState(state: D3DRenderState, value: any): void {
     this.renderStates.set(state, value);
-    console.log(`⚙️ RenderState[${D3DRenderState[state]}] = ${value}`);
   }
 
   /**
@@ -567,7 +565,6 @@ export class VB6WebGPUGraphics {
       this.textureStageStates.set(stage, new Map());
     }
     this.textureStageStates.get(stage)!.set(type, value);
-    console.log(`🎨 TextureStage[${stage}][${D3DTextureStageState[type]}] = ${value}`);
   }
 
   /**
@@ -582,7 +579,6 @@ export class VB6WebGPUGraphics {
    */
   private setTransform(transformType: string, matrix: D3DMatrix): void {
     this.transforms.set(transformType, matrix);
-    console.log(`📐 Transform[${transformType}] set`);
   }
 
   /**
@@ -597,7 +593,6 @@ export class VB6WebGPUGraphics {
    */
   private setLight(index: number, light: D3DLight): void {
     this.lights.set(index, light);
-    console.log(`💡 Light[${index}] set`);
   }
 
   /**
@@ -614,7 +609,6 @@ export class VB6WebGPUGraphics {
     const light = this.lights.get(index);
     if (light) {
       // Track enabled state
-      console.log(`💡 Light[${index}] ${enable ? 'enabled' : 'disabled'}`);
     }
   }
 
@@ -623,7 +617,6 @@ export class VB6WebGPUGraphics {
    */
   private setMaterial(material: D3DMaterial): void {
     this.materials.set(0, material);
-    console.log('🎨 Material set');
   }
 
   /**
@@ -647,28 +640,25 @@ export class VB6WebGPUGraphics {
     if (!this.device) return 0;
 
     const textureId = this.nextResourceId++;
-    
+
     const texture = this.device.createTexture({
       size: { width, height },
       format: 'rgba8unorm',
-      usage: GPUTextureUsage.TEXTURE_BINDING | 
-             GPUTextureUsage.COPY_DST | 
-             GPUTextureUsage.RENDER_ATTACHMENT,
-      mipLevelCount: levels || 1
+      usage:
+        GPUTextureUsage.TEXTURE_BINDING |
+        GPUTextureUsage.COPY_DST |
+        GPUTextureUsage.RENDER_ATTACHMENT,
+      mipLevelCount: levels || 1,
     });
 
     this.textures.set(textureId, texture);
-    console.log(`🖼️ Texture created: ${textureId} (${width}x${height})`);
-    
     return textureId;
   }
 
   /**
    * Set texture
    */
-  private setTexture(stage: number, textureId: number): void {
-    console.log(`🖼️ Texture[${stage}] = ${textureId}`);
-  }
+  private setTexture(stage: number, textureId: number): void {}
 
   /**
    * Get texture
@@ -680,66 +670,48 @@ export class VB6WebGPUGraphics {
   /**
    * Create vertex buffer
    */
-  private createVertexBuffer(
-    length: number,
-    usage: number,
-    fvf: number,
-    pool: number
-  ): number {
+  private createVertexBuffer(length: number, usage: number, fvf: number, pool: number): number {
     if (!this.device) return 0;
 
     const bufferId = this.nextResourceId++;
-    
+
     const buffer = this.device.createBuffer({
       size: length,
       usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-      mappedAtCreation: false
+      mappedAtCreation: false,
     });
 
     this.vertexBuffers.set(bufferId, buffer);
-    console.log(`📦 Vertex buffer created: ${bufferId} (${length} bytes)`);
-    
     return bufferId;
   }
 
   /**
    * Create index buffer
    */
-  private createIndexBuffer(
-    length: number,
-    usage: number,
-    format: number,
-    pool: number
-  ): number {
+  private createIndexBuffer(length: number, usage: number, format: number, pool: number): number {
     if (!this.device) return 0;
 
     const bufferId = this.nextResourceId++;
-    
+
     const buffer = this.device.createBuffer({
       size: length,
       usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
-      mappedAtCreation: false
+      mappedAtCreation: false,
     });
 
     this.indexBuffers.set(bufferId, buffer);
-    console.log(`📦 Index buffer created: ${bufferId} (${length} bytes)`);
-    
     return bufferId;
   }
 
   /**
    * Set stream source (vertex buffer)
    */
-  private setStreamSource(stream: number, bufferId: number, stride: number): void {
-    console.log(`📦 Stream[${stream}] = Buffer ${bufferId} (stride: ${stride})`);
-  }
+  private setStreamSource(stream: number, bufferId: number, stride: number): void {}
 
   /**
    * Set index buffer
    */
-  private setIndices(bufferId: number): void {
-    console.log(`📦 Index buffer = ${bufferId}`);
-  }
+  private setIndices(bufferId: number): void {}
 
   /**
    * Draw primitives
@@ -753,8 +725,6 @@ export class VB6WebGPUGraphics {
 
     const vertexCount = this.getVertexCount(primitiveType, primitiveCount);
     this.currentRenderPass.draw(vertexCount, 1, startVertex, 0);
-    
-    console.log(`✏️ DrawPrimitive: ${D3DPrimitiveType[primitiveType]} (${primitiveCount} primitives)`);
   }
 
   /**
@@ -772,8 +742,6 @@ export class VB6WebGPUGraphics {
 
     const indexCount = this.getVertexCount(primitiveType, primitiveCount);
     this.currentRenderPass.drawIndexed(indexCount, 1, startIndex, baseVertex, 0);
-    
-    console.log(`✏️ DrawIndexedPrimitive: ${D3DPrimitiveType[primitiveType]} (${primitiveCount} primitives)`);
   }
 
   /**
@@ -791,18 +759,16 @@ export class VB6WebGPUGraphics {
     const buffer = this.device.createBuffer({
       size: vertexData.byteLength,
       usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-      mappedAtCreation: true
+      mappedAtCreation: true,
     });
 
     new Uint8Array(buffer.getMappedRange()).set(new Uint8Array(vertexData));
     buffer.unmap();
 
     this.currentRenderPass.setVertexBuffer(0, buffer);
-    
+
     const vertexCount = this.getVertexCount(primitiveType, primitiveCount);
     this.currentRenderPass.draw(vertexCount, 1, 0, 0);
-    
-    console.log(`✏️ DrawPrimitiveUP: ${D3DPrimitiveType[primitiveType]} (${primitiveCount} primitives)`);
   }
 
   /**
@@ -824,7 +790,7 @@ export class VB6WebGPUGraphics {
     const vertexBuffer = this.device.createBuffer({
       size: vertexData.byteLength,
       usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-      mappedAtCreation: true
+      mappedAtCreation: true,
     });
     new Uint8Array(vertexBuffer.getMappedRange()).set(new Uint8Array(vertexData));
     vertexBuffer.unmap();
@@ -833,18 +799,16 @@ export class VB6WebGPUGraphics {
     const indexBuffer = this.device.createBuffer({
       size: indexData.byteLength,
       usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
-      mappedAtCreation: true
+      mappedAtCreation: true,
     });
     new Uint8Array(indexBuffer.getMappedRange()).set(new Uint8Array(indexData));
     indexBuffer.unmap();
 
     this.currentRenderPass.setVertexBuffer(0, vertexBuffer);
     this.currentRenderPass.setIndexBuffer(indexBuffer, indexFormat === 16 ? 'uint16' : 'uint32');
-    
+
     const indexCount = this.getVertexCount(primitiveType, primitiveCount);
     this.currentRenderPass.drawIndexed(indexCount, 1, 0, 0, 0);
-    
-    console.log(`✏️ DrawIndexedPrimitiveUP: ${D3DPrimitiveType[primitiveType]} (${primitiveCount} primitives)`);
   }
 
   /**
@@ -852,7 +816,6 @@ export class VB6WebGPUGraphics {
    */
   private setViewport(viewport: { x: number; y: number; width: number; height: number }): void {
     this.viewport = viewport;
-    console.log(`📐 Viewport: ${viewport.x},${viewport.y} ${viewport.width}x${viewport.height}`);
   }
 
   /**
@@ -886,10 +849,10 @@ export class VB6WebGPUGraphics {
       MaxVertexBlendMatrices: 4,
       MaxVertexBlendMatrixIndex: 255,
       MaxPointSize: 256.0,
-      MaxPrimitiveCount: 0xFFFFFF,
-      MaxVertexIndex: 0xFFFFFF,
+      MaxPrimitiveCount: 0xffffff,
+      MaxVertexIndex: 0xffffff,
       MaxStreams: 16,
-      MaxStreamStride: 2048
+      MaxStreamStride: 2048,
     };
   }
 
@@ -901,7 +864,7 @@ export class VB6WebGPUGraphics {
       Width: this.canvas?.width || 800,
       Height: this.canvas?.height || 600,
       RefreshRate: 60,
-      Format: 21 // D3DFMT_A8R8G8B8
+      Format: 21, // D3DFMT_A8R8G8B8
     };
   }
 
@@ -915,7 +878,7 @@ export class VB6WebGPUGraphics {
       { Width: 1024, Height: 768, RefreshRate: 60, Format: format },
       { Width: 1280, Height: 720, RefreshRate: 60, Format: format },
       { Width: 1280, Height: 1024, RefreshRate: 60, Format: format },
-      { Width: 1920, Height: 1080, RefreshRate: 60, Format: format }
+      { Width: 1920, Height: 1080, RefreshRate: 60, Format: format },
     ];
 
     return modes[mode] || modes[0];
@@ -930,12 +893,12 @@ export class VB6WebGPUGraphics {
       Description: 'WebGPU Adapter',
       DeviceName: '\\\\.\\DISPLAY1',
       DriverVersion: { HighPart: 1, LowPart: 0 },
-      VendorId: 0x10DE, // NVIDIA
+      VendorId: 0x10de, // NVIDIA
       DeviceId: 0x1180,
       SubSysId: 0,
       Revision: 0,
       DeviceIdentifier: '{00000000-0000-0000-0000-000000000000}',
-      WHQLLevel: 1
+      WHQLLevel: 1,
     };
   }
 
@@ -947,7 +910,6 @@ export class VB6WebGPUGraphics {
    * OpenGL context creation
    */
   public wglCreateContext(hdc: number): number {
-    console.log('🎮 OpenGL context created');
     return this.nextResourceId++;
   }
 
@@ -955,7 +917,6 @@ export class VB6WebGPUGraphics {
    * Make OpenGL context current
    */
   public wglMakeCurrent(hdc: number, hglrc: number): boolean {
-    console.log('🎮 OpenGL context made current');
     return true;
   }
 
@@ -963,7 +924,6 @@ export class VB6WebGPUGraphics {
    * Delete OpenGL context
    */
   public wglDeleteContext(hglrc: number): boolean {
-    console.log('🎮 OpenGL context deleted');
     return true;
   }
 
@@ -978,16 +938,12 @@ export class VB6WebGPUGraphics {
   /**
    * OpenGL glBegin
    */
-  public glBegin(mode: number): void {
-    console.log(`🎨 glBegin(${mode})`);
-  }
+  public glBegin(mode: number): void {}
 
   /**
    * OpenGL glEnd
    */
-  public glEnd(): void {
-    console.log('🎨 glEnd()');
-  }
+  public glEnd(): void {}
 
   /**
    * OpenGL glVertex3f
@@ -1030,8 +986,8 @@ export class VB6WebGPUGraphics {
         [1, 0, 0, 0],
         [0, 1, 0, 0],
         [0, 0, 1, 0],
-        [0, 0, 0, 1]
-      ]
+        [0, 0, 0, 1],
+      ],
     };
   }
 
@@ -1061,10 +1017,10 @@ export class VB6WebGPUGraphics {
    */
   private d3dColorToRGBA(color: number): { r: number; g: number; b: number; a: number } {
     return {
-      a: ((color >> 24) & 0xFF) / 255,
-      r: ((color >> 16) & 0xFF) / 255,
-      g: ((color >> 8) & 0xFF) / 255,
-      b: (color & 0xFF) / 255
+      a: ((color >> 24) & 0xff) / 255,
+      r: ((color >> 16) & 0xff) / 255,
+      g: ((color >> 8) & 0xff) / 255,
+      b: (color & 0xff) / 255,
     };
   }
 }
@@ -1079,7 +1035,6 @@ const graphicsInstance = VB6WebGPUGraphics.getInstance();
 export const Direct3DCreate8 = (sdkVersion: number) => graphicsInstance.Direct3DCreate(8);
 export const Direct3DCreate9 = (sdkVersion: number) => graphicsInstance.Direct3DCreate(9);
 export const DirectDrawCreate = (guid: any, lplpDD: any, pUnkOuter: any) => {
-  console.log('🎮 DirectDraw created');
   return 0; // DD_OK
 };
 
@@ -1108,7 +1063,7 @@ export const VB6Graphics = {
   D3DLightType,
   D3DPrimitiveType,
   D3DRenderState,
-  D3DTextureStageState
+  D3DTextureStageState,
 };
 
 export default VB6Graphics;

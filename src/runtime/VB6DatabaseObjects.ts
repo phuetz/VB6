@@ -1,6 +1,6 @@
 /**
  * VB6 Database Objects Implementation
- * 
+ *
  * Web-compatible implementation of ADO, DAO, RDO objects
  * Provides database connectivity simulation for VB6 applications
  */
@@ -14,7 +14,7 @@ export enum ConnectionState {
   adStateOpen = 1,
   adStateConnecting = 2,
   adStateExecuting = 4,
-  adStateFetching = 8
+  adStateFetching = 8,
 }
 
 // Cursor Types
@@ -22,7 +22,7 @@ export enum CursorType {
   adOpenForwardOnly = 0,
   adOpenKeyset = 1,
   adOpenDynamic = 2,
-  adOpenStatic = 3
+  adOpenStatic = 3,
 }
 
 // Lock Types
@@ -30,7 +30,7 @@ export enum LockType {
   adLockReadOnly = 1,
   adLockPessimistic = 2,
   adLockOptimistic = 3,
-  adLockBatchOptimistic = 4
+  adLockBatchOptimistic = 4,
 }
 
 // Field Types
@@ -69,7 +69,7 @@ export enum DataType {
   adLongVarWChar = 203,
   adBinary = 128,
   adVarBinary = 204,
-  adLongVarBinary = 205
+  adLongVarBinary = 205,
 }
 
 // Simulated Database Storage
@@ -93,34 +93,34 @@ class VB6DatabaseEngine {
   private initializeSampleDatabises() {
     // Create sample Northwind-style database
     const northwind = new VB6Database('Northwind');
-    
+
     // Sample Customers table
     const customers = new VB6Table('Customers');
     customers.addField('CustomerID', DataType.adVarChar, 5);
     customers.addField('CompanyName', DataType.adVarChar, 40);
     customers.addField('ContactName', DataType.adVarChar, 30);
     customers.addField('Country', DataType.adVarChar, 15);
-    
+
     // Sample data
     customers.addRecord(['ALFKI', 'Alfreds Futterkiste', 'Maria Anders', 'Germany']);
     customers.addRecord(['ANATR', 'Ana Trujillo Emparedados', 'Ana Trujillo', 'Mexico']);
     customers.addRecord(['ANTON', 'Antonio Moreno Taquería', 'Antonio Moreno', 'Mexico']);
-    
+
     northwind.addTable(customers);
-    
+
     // Sample Products table
     const products = new VB6Table('Products');
     products.addField('ProductID', DataType.adInteger, 0);
     products.addField('ProductName', DataType.adVarChar, 40);
     products.addField('UnitPrice', DataType.adCurrency, 0);
     products.addField('UnitsInStock', DataType.adSmallInt, 0);
-    
+
     products.addRecord([1, 'Chai', 18, 39]);
     products.addRecord([2, 'Chang', 19, 17]);
     products.addRecord([3, 'Aniseed Syrup', 10, 13]);
-    
+
     northwind.addTable(products);
-    
+
     this.databases.set('Northwind', northwind);
   }
 
@@ -134,13 +134,17 @@ class VB6DatabaseEngine {
 
   openDatabase(path: string): VB6Database {
     // Extract database name from path
-    const dbName = path.split(/[\\/]/).pop()?.replace(/\.[^/.]+$/, '') || 'Unknown';
-    
+    const dbName =
+      path
+        .split(/[\\/]/)
+        .pop()
+        ?.replace(/\.[^/.]+$/, '') || 'Unknown';
+
     // Return existing or create new database
     if (this.databases.has(dbName)) {
       return this.databases.get(dbName)!;
     }
-    
+
     const newDb = new VB6Database(dbName);
     this.databases.set(dbName, newDb);
     return newDb;
@@ -168,7 +172,7 @@ export class VB6Connection {
       if (connectionString) {
         this.ConnectionString = connectionString;
       }
-      
+
       if (!this.ConnectionString) {
         errorHandler.raiseError(3709, 'Connection string not specified', 'Connection.Open');
         return;
@@ -178,8 +182,6 @@ export class VB6Connection {
       // Set connection state immediately to match VB6 synchronous behavior
       this.State = ConnectionState.adStateOpen;
       this.isOpen = true;
-
-      console.log(`[VB6 Database] Connected to: ${this.ConnectionString}`);
     } catch (error) {
       errorHandler.raiseError(3709, 'Connection failed', 'Connection.Open');
     }
@@ -188,7 +190,6 @@ export class VB6Connection {
   Close(): void {
     this.State = ConnectionState.adStateClosed;
     this.isOpen = false;
-    console.log(`[VB6 Database] Connection closed`);
   }
 
   Execute(commandText: string, recordsAffected?: any, options?: number): VB6Recordset {
@@ -199,15 +200,17 @@ export class VB6Connection {
 
     // INTEGRATION BUG FIX: Validate SQL command before execution
     if (!commandText || typeof commandText !== 'string') {
-      errorHandler.raiseError(3709, 'Invalid SQL command: command must be a non-empty string', 'Connection.Execute');
+      errorHandler.raiseError(
+        3709,
+        'Invalid SQL command: command must be a non-empty string',
+        'Connection.Execute'
+      );
       return new VB6Recordset();
     }
 
-    console.log(`[VB6 Database] Executing: ${commandText}`);
-    
     // Parse simple SQL commands
     const sql = commandText.toUpperCase().trim();
-    
+
     if (sql.startsWith('SELECT')) {
       return this.executeSelect(commandText);
     } else if (sql.startsWith('INSERT')) {
@@ -218,7 +221,11 @@ export class VB6Connection {
       return this.executeDelete(commandText);
     } else {
       // INTEGRATION BUG FIX: Don't silently fail on unsupported SQL commands
-      errorHandler.raiseError(3709, `Unsupported SQL command: ${sql.substring(0, 50)}`, 'Connection.Execute');
+      errorHandler.raiseError(
+        3709,
+        `Unsupported SQL command: ${sql.substring(0, 50)}`,
+        'Connection.Execute'
+      );
       return new VB6Recordset();
     }
   }
@@ -226,7 +233,7 @@ export class VB6Connection {
   private executeSelect(sql: string): VB6Recordset {
     // Simplified SQL parsing for demo
     const recordset = new VB6Recordset();
-    
+
     // Mock data based on common table names
     if (sql.includes('CUSTOMERS')) {
       recordset.addField('CustomerID', DataType.adVarChar);
@@ -240,36 +247,27 @@ export class VB6Connection {
       recordset.addRecord([1, 'Chai', 18]);
       recordset.addRecord([2, 'Chang', 19]);
     }
-    
+
     return recordset;
   }
 
   private executeInsert(sql: string): VB6Recordset {
-    console.log(`[VB6 Database] Insert executed: ${sql}`);
     return new VB6Recordset();
   }
 
   private executeUpdate(sql: string): VB6Recordset {
-    console.log(`[VB6 Database] Update executed: ${sql}`);
     return new VB6Recordset();
   }
 
   private executeDelete(sql: string): VB6Recordset {
-    console.log(`[VB6 Database] Delete executed: ${sql}`);
     return new VB6Recordset();
   }
 
-  BeginTrans(): void {
-    console.log(`[VB6 Database] Transaction started`);
-  }
+  BeginTrans(): void {}
 
-  CommitTrans(): void {
-    console.log(`[VB6 Database] Transaction committed`);
-  }
+  CommitTrans(): void {}
 
-  RollbackTrans(): void {
-    console.log(`[VB6 Database] Transaction rolled back`);
-  }
+  RollbackTrans(): void {}
 }
 
 // VB6 Recordset Object (ADO)
@@ -296,7 +294,7 @@ export class VB6Recordset {
   addRecord(values: any[]): void {
     this.records.push(values);
     this.RecordCount = this.records.length;
-    
+
     if (this.records.length === 1) {
       this.BOF = false;
       this.EOF = false;
@@ -307,7 +305,13 @@ export class VB6Recordset {
     }
   }
 
-  Open(source?: string, activeConnection?: VB6Connection, cursorType?: CursorType, lockType?: LockType, options?: number): void {
+  Open(
+    source?: string,
+    activeConnection?: VB6Connection,
+    cursorType?: CursorType,
+    lockType?: LockType,
+    options?: number
+  ): void {
     if (typeof source === 'string' && source.toUpperCase().includes('SELECT')) {
       // Execute SQL query
       if (activeConnection) {
@@ -320,14 +324,12 @@ export class VB6Recordset {
         this.currentRecord = result.currentRecord;
       }
     }
-    
+
     this.State = 1; // adStateOpen
-    console.log(`[VB6 Database] Recordset opened with ${this.RecordCount} records`);
   }
 
   Close(): void {
     this.State = 0; // adStateClosed
-    console.log(`[VB6 Database] Recordset closed`);
   }
 
   MoveFirst(): void {
@@ -406,20 +408,18 @@ export class VB6Recordset {
     this.BOF = false;
   }
 
-  Update(): void {
-    console.log(`[VB6 Database] Record updated`);
-  }
+  Update(): void {}
 
   Delete(): void {
     if (this.currentRecord >= 0 && this.currentRecord < this.records.length) {
       this.records.splice(this.currentRecord, 1);
       this.RecordCount = this.records.length;
-      
+
       if (this.currentRecord >= this.RecordCount) {
         this.currentRecord = this.RecordCount - 1;
         this.EOF = true;
       }
-      
+
       if (this.RecordCount === 0) {
         this.BOF = true;
         this.EOF = true;
@@ -490,19 +490,19 @@ export class VB6Database {
 
   OpenRecordset(source: string, type?: number, options?: number, lockEdit?: number): VB6Recordset {
     const recordset = new VB6Recordset();
-    
+
     // Simple table lookup
     const tableName = source.toUpperCase().replace(/['"]/g, '');
     if (this.tables.has(tableName)) {
       const table = this.tables.get(tableName)!;
       return table.getRecordset();
     }
-    
+
     // SQL query simulation
     if (source.toUpperCase().includes('SELECT')) {
       return this.executeQuery(source);
     }
-    
+
     return recordset;
   }
 
@@ -527,7 +527,6 @@ export class VB6Database {
 
       // Very simplified SQL parsing
       const recordset = new VB6Recordset();
-      console.log(`[VB6 DAO] Executing query: ${sql}`);
       return recordset;
     } catch (error) {
       console.error(`[VB6 DAO] Query execution failed: ${error.message}`);
@@ -554,7 +553,7 @@ export class VB6Database {
         /DROP\s+DATABASE/i,
         /DROP\s+TABLE.*\*/i,
         /DELETE\s+FROM.*WHERE.*1\s*=\s*1/i,
-        /;\s*DROP/i
+        /;\s*DROP/i,
       ];
 
       for (const pattern of dangerousPatterns) {
@@ -562,8 +561,6 @@ export class VB6Database {
           throw new Error('Potentially dangerous SQL operation blocked for safety');
         }
       }
-
-      console.log(`[VB6 DAO] Executing statement: ${query}`);
     } catch (error) {
       console.error(`[VB6 DAO] Statement execution failed: ${error.message}`);
       throw new Error(`Database execution failed: ${error.message}`);
@@ -572,7 +569,6 @@ export class VB6Database {
 
   Close(): void {
     this.isOpen = false;
-    console.log(`[VB6 DAO] Database closed: ${this.Name}`);
   }
 }
 
@@ -596,30 +592,35 @@ export class VB6Table {
 
   getRecordset(): VB6Recordset {
     const recordset = new VB6Recordset();
-    
+
     // Add fields
     this.fields.forEach(field => {
       recordset.addField(field.Name, field.Type, field.Size);
     });
-    
+
     // Add records
     this.records.forEach(record => {
       recordset.addRecord(record);
     });
-    
+
     return recordset;
   }
 }
 
 // Global Database Functions
-export function OpenDatabase(name: string, options?: boolean, readOnly?: boolean, connect?: string): VB6Database {
+export function OpenDatabase(
+  name: string,
+  options?: boolean,
+  readOnly?: boolean,
+  connect?: string
+): VB6Database {
   const engine = VB6DatabaseEngine.getInstance();
   return engine.openDatabase(name);
 }
 
 export function CreateObject(progId: string): any {
   const engine = VB6DatabaseEngine.getInstance();
-  
+
   switch (progId.toUpperCase()) {
     case 'ADODB.CONNECTION':
       return engine.createConnection('');
@@ -628,7 +629,7 @@ export function CreateObject(progId: string): any {
     case 'DAO.DBENGINE':
       return {
         OpenDatabase: OpenDatabase,
-        Version: '6.0'
+        Version: '6.0',
       };
     default:
       console.warn(`[VB6 Database] Unknown COM object: ${progId}`);
@@ -642,18 +643,18 @@ export const VB6DatabaseObjects = {
   Connection: VB6Connection,
   Recordset: VB6Recordset,
   Field: VB6Field,
-  
-  // DAO Objects  
+
+  // DAO Objects
   Database: VB6Database,
   Table: VB6Table,
-  
+
   // Enums
   ConnectionState,
   CursorType,
   LockType,
   DataType,
-  
+
   // Functions
   OpenDatabase,
-  CreateObject
+  CreateObject,
 };

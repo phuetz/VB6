@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
+import {
   VB6DataEnvironmentInstance,
   DataEnvironment,
   DataConnection,
@@ -17,7 +17,7 @@ import {
   ParameterDirection,
   DataFieldType,
   DataParameter,
-  DataField
+  DataField,
 } from '../../services/VB6DataEnvironment';
 
 interface DataEnvironmentUIProps {
@@ -26,7 +26,9 @@ interface DataEnvironmentUIProps {
 
 export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose }) => {
   // State management
-  const [activeTab, setActiveTab] = useState<'environments' | 'connections' | 'commands' | 'relations' | 'query-designer' | 'data-view'>('environments');
+  const [activeTab, setActiveTab] = useState<
+    'environments' | 'connections' | 'commands' | 'relations' | 'query-designer' | 'data-view'
+  >('environments');
   const [environments, setEnvironments] = useState<DataEnvironment[]>([]);
   const [currentEnvironment, setCurrentEnvironment] = useState<DataEnvironment | null>(null);
   const [connections, setConnections] = useState<DataConnection[]>([]);
@@ -48,9 +50,9 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
 
   // Form data
   const [newEnvironmentData, setNewEnvironmentData] = useState({
-    name: '', 
-    description: '', 
-    author: ''
+    name: '',
+    description: '',
+    author: '',
   });
   const [newConnectionData, setNewConnectionData] = useState({
     name: '',
@@ -62,14 +64,14 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
     userId: '',
     password: '',
     connectionTimeout: 15,
-    commandTimeout: 30
+    commandTimeout: 30,
   });
   const [newCommandData, setNewCommandData] = useState({
     name: '',
     displayName: '',
     type: DataCommandType.SQL_STATEMENT,
     commandText: 'SELECT * FROM ',
-    prepared: false
+    prepared: false,
   });
   const [newRelationData, setNewRelationData] = useState({
     name: '',
@@ -79,7 +81,7 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
     parentFields: [''],
     childFields: [''],
     cascadeUpdate: true,
-    cascadeDelete: false
+    cascadeDelete: false,
   });
 
   // Load initial data
@@ -102,7 +104,7 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
         newEnvironmentData.description,
         newEnvironmentData.author
       );
-      
+
       setShowNewEnvironmentForm(false);
       setNewEnvironmentData({ name: '', description: '', author: '' });
       refreshData();
@@ -127,17 +129,18 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
   const handleCreateConnection = async () => {
     try {
       setLoading(true);
-      const connectionString = VB6DataEnvironmentInstance.generateConnectionString(newConnectionData);
-      
+      const connectionString =
+        VB6DataEnvironmentInstance.generateConnectionString(newConnectionData);
+
       const connection = VB6DataEnvironmentInstance.addConnection({
         ...newConnectionData,
         persistSecurityInfo: false,
         cursorLocation: 'client',
         lockType: 'optimistic',
         state: 'closed',
-        connectionString
+        connectionString,
       });
-      
+
       setShowNewConnectionForm(false);
       setNewConnectionData({
         name: '',
@@ -149,7 +152,7 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
         userId: '',
         password: '',
         connectionTimeout: 15,
-        commandTimeout: 30
+        commandTimeout: 30,
       });
       refreshData();
     } catch (err) {
@@ -197,16 +200,16 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
         parameters: [],
         cursorType: 'forward_only',
         lockType: 'readonly',
-        fields: []
+        fields: [],
       });
-      
+
       setShowNewCommandForm(false);
       setNewCommandData({
         name: '',
         displayName: '',
         type: DataCommandType.SQL_STATEMENT,
         commandText: 'SELECT * FROM ',
-        prepared: false
+        prepared: false,
       });
       refreshData();
     } catch (err) {
@@ -244,9 +247,9 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
       setLoading(true);
       VB6DataEnvironmentInstance.addRelation({
         ...newRelationData,
-        enforceConstraints: true
+        enforceConstraints: true,
       });
-      
+
       setShowNewRelationForm(false);
       setNewRelationData({
         name: '',
@@ -256,7 +259,7 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
         parentFields: [''],
         childFields: [''],
         cascadeUpdate: true,
-        cascadeDelete: false
+        cascadeDelete: false,
       });
       refreshData();
     } catch (err) {
@@ -302,7 +305,7 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
             </tr>
           </thead>
           <tbody>
-            {environments.map((env) => (
+            {environments.map(env => (
               <tr key={env.id} className={env.id === currentEnvironment?.id ? 'bg-blue-50' : ''}>
                 <td className="px-4 py-2 font-medium">{env.name}</td>
                 <td className="px-4 py-2">{env.description}</td>
@@ -342,7 +345,7 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                 <input
                   type="text"
                   value={newEnvironmentData.name}
-                  onChange={(e) => setNewEnvironmentData(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => setNewEnvironmentData(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full border rounded px-3 py-2"
                   placeholder="Environment name"
                 />
@@ -351,7 +354,9 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                 <label className="block text-sm font-medium mb-1">Description:</label>
                 <textarea
                   value={newEnvironmentData.description}
-                  onChange={(e) => setNewEnvironmentData(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={e =>
+                    setNewEnvironmentData(prev => ({ ...prev, description: e.target.value }))
+                  }
                   className="w-full border rounded px-3 py-2"
                   rows={3}
                   placeholder="Environment description"
@@ -362,7 +367,9 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                 <input
                   type="text"
                   value={newEnvironmentData.author}
-                  onChange={(e) => setNewEnvironmentData(prev => ({ ...prev, author: e.target.value }))}
+                  onChange={e =>
+                    setNewEnvironmentData(prev => ({ ...prev, author: e.target.value }))
+                  }
                   className="w-full border rounded px-3 py-2"
                   placeholder="Author name"
                 />
@@ -416,18 +423,25 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
             </tr>
           </thead>
           <tbody>
-            {connections.map((conn) => (
+            {connections.map(conn => (
               <tr key={conn.id} className={selectedConnection?.id === conn.id ? 'bg-blue-50' : ''}>
                 <td className="px-4 py-2 font-medium">{conn.name}</td>
                 <td className="px-4 py-2">{conn.type.toUpperCase()}</td>
-                <td className="px-4 py-2 truncate" title={conn.dataSource}>{conn.dataSource}</td>
+                <td className="px-4 py-2 truncate" title={conn.dataSource}>
+                  {conn.dataSource}
+                </td>
                 <td className="px-4 py-2">
-                  <span className={`px-2 py-1 rounded text-xs ${
-                    conn.state === 'open' ? 'bg-green-100 text-green-800' :
-                    conn.state === 'closed' ? 'bg-gray-100 text-gray-800' :
-                    conn.state === 'broken' ? 'bg-red-100 text-red-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
+                  <span
+                    className={`px-2 py-1 rounded text-xs ${
+                      conn.state === 'open'
+                        ? 'bg-green-100 text-green-800'
+                        : conn.state === 'closed'
+                          ? 'bg-gray-100 text-gray-800'
+                          : conn.state === 'broken'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                    }`}
+                  >
                     {conn.state}
                   </span>
                 </td>
@@ -467,12 +481,24 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
         <div className="border rounded-lg p-4 bg-gray-50">
           <h4 className="font-semibold mb-2">Connection: {selectedConnection.displayName}</h4>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div><strong>Provider:</strong> {selectedConnection.provider}</div>
-            <div><strong>Connection Timeout:</strong> {selectedConnection.connectionTimeout}s</div>
-            <div><strong>Command Timeout:</strong> {selectedConnection.commandTimeout}s</div>
-            <div><strong>Cursor Location:</strong> {selectedConnection.cursorLocation}</div>
-            <div><strong>Last Used:</strong> {selectedConnection.lastUsed?.toLocaleString() || 'Never'}</div>
-            <div><strong>Created:</strong> {selectedConnection.created.toLocaleString()}</div>
+            <div>
+              <strong>Provider:</strong> {selectedConnection.provider}
+            </div>
+            <div>
+              <strong>Connection Timeout:</strong> {selectedConnection.connectionTimeout}s
+            </div>
+            <div>
+              <strong>Command Timeout:</strong> {selectedConnection.commandTimeout}s
+            </div>
+            <div>
+              <strong>Cursor Location:</strong> {selectedConnection.cursorLocation}
+            </div>
+            <div>
+              <strong>Last Used:</strong> {selectedConnection.lastUsed?.toLocaleString() || 'Never'}
+            </div>
+            <div>
+              <strong>Created:</strong> {selectedConnection.created.toLocaleString()}
+            </div>
           </div>
           {selectedConnection.lastError && (
             <div className="mt-2 p-2 bg-red-100 text-red-800 rounded text-sm">
@@ -493,7 +519,7 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                 <input
                   type="text"
                   value={newConnectionData.name}
-                  onChange={(e) => setNewConnectionData(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => setNewConnectionData(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full border rounded px-3 py-2"
                   placeholder="Connection name (e.g., cnNorthwind)"
                 />
@@ -503,7 +529,9 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                 <input
                   type="text"
                   value={newConnectionData.displayName}
-                  onChange={(e) => setNewConnectionData(prev => ({ ...prev, displayName: e.target.value }))}
+                  onChange={e =>
+                    setNewConnectionData(prev => ({ ...prev, displayName: e.target.value }))
+                  }
                   className="w-full border rounded px-3 py-2"
                   placeholder="Display name"
                 />
@@ -512,11 +540,18 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                 <label className="block text-sm font-medium mb-1">Connection Type:</label>
                 <select
                   value={newConnectionData.type}
-                  onChange={(e) => setNewConnectionData(prev => ({ ...prev, type: e.target.value as DataConnectionType }))}
+                  onChange={e =>
+                    setNewConnectionData(prev => ({
+                      ...prev,
+                      type: e.target.value as DataConnectionType,
+                    }))
+                  }
                   className="w-full border rounded px-3 py-2"
                 >
                   {Object.values(DataConnectionType).map(type => (
-                    <option key={type} value={type}>{type.toUpperCase()}</option>
+                    <option key={type} value={type}>
+                      {type.toUpperCase()}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -524,7 +559,9 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                 <label className="block text-sm font-medium mb-1">Provider:</label>
                 <select
                   value={newConnectionData.provider}
-                  onChange={(e) => setNewConnectionData(prev => ({ ...prev, provider: e.target.value }))}
+                  onChange={e =>
+                    setNewConnectionData(prev => ({ ...prev, provider: e.target.value }))
+                  }
                   className="w-full border rounded px-3 py-2"
                 >
                   <option value="Microsoft.Jet.OLEDB.4.0">Microsoft Jet OLEDB 4.0</option>
@@ -538,7 +575,9 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                 <input
                   type="text"
                   value={newConnectionData.dataSource}
-                  onChange={(e) => setNewConnectionData(prev => ({ ...prev, dataSource: e.target.value }))}
+                  onChange={e =>
+                    setNewConnectionData(prev => ({ ...prev, dataSource: e.target.value }))
+                  }
                   className="w-full border rounded px-3 py-2"
                   placeholder="Server name or file path"
                 />
@@ -548,10 +587,17 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                   type="checkbox"
                   id="integratedSecurity"
                   checked={newConnectionData.integratedSecurity}
-                  onChange={(e) => setNewConnectionData(prev => ({ ...prev, integratedSecurity: e.target.checked }))}
+                  onChange={e =>
+                    setNewConnectionData(prev => ({
+                      ...prev,
+                      integratedSecurity: e.target.checked,
+                    }))
+                  }
                   className="mr-2"
                 />
-                <label htmlFor="integratedSecurity" className="text-sm">Use Integrated Security</label>
+                <label htmlFor="integratedSecurity" className="text-sm">
+                  Use Integrated Security
+                </label>
               </div>
               {!newConnectionData.integratedSecurity && (
                 <>
@@ -560,7 +606,9 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                     <input
                       type="text"
                       value={newConnectionData.userId}
-                      onChange={(e) => setNewConnectionData(prev => ({ ...prev, userId: e.target.value }))}
+                      onChange={e =>
+                        setNewConnectionData(prev => ({ ...prev, userId: e.target.value }))
+                      }
                       className="w-full border rounded px-3 py-2"
                     />
                   </div>
@@ -569,7 +617,9 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                     <input
                       type="password"
                       value={newConnectionData.password}
-                      onChange={(e) => setNewConnectionData(prev => ({ ...prev, password: e.target.value }))}
+                      onChange={e =>
+                        setNewConnectionData(prev => ({ ...prev, password: e.target.value }))
+                      }
                       className="w-full border rounded px-3 py-2"
                     />
                   </div>
@@ -581,7 +631,12 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                   <input
                     type="number"
                     value={newConnectionData.connectionTimeout}
-                    onChange={(e) => setNewConnectionData(prev => ({ ...prev, connectionTimeout: parseInt(e.target.value) || 15 }))}
+                    onChange={e =>
+                      setNewConnectionData(prev => ({
+                        ...prev,
+                        connectionTimeout: parseInt(e.target.value) || 15,
+                      }))
+                    }
                     className="w-full border rounded px-3 py-2"
                     min="0"
                   />
@@ -591,7 +646,12 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                   <input
                     type="number"
                     value={newConnectionData.commandTimeout}
-                    onChange={(e) => setNewConnectionData(prev => ({ ...prev, commandTimeout: parseInt(e.target.value) || 30 }))}
+                    onChange={e =>
+                      setNewConnectionData(prev => ({
+                        ...prev,
+                        commandTimeout: parseInt(e.target.value) || 30,
+                      }))
+                    }
                     className="w-full border rounded px-3 py-2"
                     min="0"
                   />
@@ -641,7 +701,8 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
       {selectedConnection && (
         <>
           <div className="text-sm text-gray-600 mb-4">
-            Connection: <strong>{selectedConnection.name}</strong> ({selectedConnection.commands.length} commands)
+            Connection: <strong>{selectedConnection.name}</strong> (
+            {selectedConnection.commands.length} commands)
           </div>
 
           {/* Commands List */}
@@ -658,7 +719,7 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                 </tr>
               </thead>
               <tbody>
-                {selectedConnection.commands.map((cmd) => (
+                {selectedConnection.commands.map(cmd => (
                   <tr key={cmd.id} className={selectedCommand?.id === cmd.id ? 'bg-blue-50' : ''}>
                     <td className="px-4 py-2 font-medium">{cmd.name}</td>
                     <td className="px-4 py-2">{cmd.type.replace('_', ' ').toUpperCase()}</td>
@@ -701,14 +762,27 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
             <div className="border rounded-lg p-4 bg-gray-50">
               <h4 className="font-semibold mb-2">Command: {selectedCommand.displayName}</h4>
               <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-                <div><strong>Type:</strong> {selectedCommand.type.replace('_', ' ').toUpperCase()}</div>
-                <div><strong>Cursor Type:</strong> {selectedCommand.cursorType.replace('_', ' ')}</div>
-                <div><strong>Lock Type:</strong> {selectedCommand.lockType.replace('_', ' ')}</div>
-                <div><strong>Prepared:</strong> {selectedCommand.prepared ? 'Yes' : 'No'}</div>
-                <div><strong>Last Executed:</strong> {selectedCommand.lastExecuted?.toLocaleString() || 'Never'}</div>
-                <div><strong>Record Count:</strong> {selectedCommand.recordCount || 0}</div>
+                <div>
+                  <strong>Type:</strong> {selectedCommand.type.replace('_', ' ').toUpperCase()}
+                </div>
+                <div>
+                  <strong>Cursor Type:</strong> {selectedCommand.cursorType.replace('_', ' ')}
+                </div>
+                <div>
+                  <strong>Lock Type:</strong> {selectedCommand.lockType.replace('_', ' ')}
+                </div>
+                <div>
+                  <strong>Prepared:</strong> {selectedCommand.prepared ? 'Yes' : 'No'}
+                </div>
+                <div>
+                  <strong>Last Executed:</strong>{' '}
+                  {selectedCommand.lastExecuted?.toLocaleString() || 'Never'}
+                </div>
+                <div>
+                  <strong>Record Count:</strong> {selectedCommand.recordCount || 0}
+                </div>
               </div>
-              
+
               <div className="mb-4">
                 <strong>Command Text:</strong>
                 <pre className="mt-1 p-2 bg-white border rounded text-sm font-mono whitespace-pre-wrap">
@@ -759,7 +833,7 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                 <input
                   type="text"
                   value={newCommandData.name}
-                  onChange={(e) => setNewCommandData(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => setNewCommandData(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full border rounded px-3 py-2"
                   placeholder="Command name (e.g., cmCustomers)"
                 />
@@ -769,7 +843,9 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                 <input
                   type="text"
                   value={newCommandData.displayName}
-                  onChange={(e) => setNewCommandData(prev => ({ ...prev, displayName: e.target.value }))}
+                  onChange={e =>
+                    setNewCommandData(prev => ({ ...prev, displayName: e.target.value }))
+                  }
                   className="w-full border rounded px-3 py-2"
                   placeholder="Display name"
                 />
@@ -778,11 +854,18 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                 <label className="block text-sm font-medium mb-1">Command Type:</label>
                 <select
                   value={newCommandData.type}
-                  onChange={(e) => setNewCommandData(prev => ({ ...prev, type: e.target.value as DataCommandType }))}
+                  onChange={e =>
+                    setNewCommandData(prev => ({
+                      ...prev,
+                      type: e.target.value as DataCommandType,
+                    }))
+                  }
                   className="w-full border rounded px-3 py-2"
                 >
                   {Object.values(DataCommandType).map(type => (
-                    <option key={type} value={type}>{type.replace('_', ' ').toUpperCase()}</option>
+                    <option key={type} value={type}>
+                      {type.replace('_', ' ').toUpperCase()}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -790,7 +873,9 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                 <label className="block text-sm font-medium mb-1">Command Text:</label>
                 <textarea
                   value={newCommandData.commandText}
-                  onChange={(e) => setNewCommandData(prev => ({ ...prev, commandText: e.target.value }))}
+                  onChange={e =>
+                    setNewCommandData(prev => ({ ...prev, commandText: e.target.value }))
+                  }
                   className="w-full border rounded px-3 py-2 font-mono"
                   rows={6}
                   placeholder="SQL statement or table name"
@@ -801,10 +886,14 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                   type="checkbox"
                   id="prepared"
                   checked={newCommandData.prepared}
-                  onChange={(e) => setNewCommandData(prev => ({ ...prev, prepared: e.target.checked }))}
+                  onChange={e =>
+                    setNewCommandData(prev => ({ ...prev, prepared: e.target.checked }))
+                  }
                   className="mr-2"
                 />
-                <label htmlFor="prepared" className="text-sm">Prepared Statement</label>
+                <label htmlFor="prepared" className="text-sm">
+                  Prepared Statement
+                </label>
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-6">
@@ -873,22 +962,32 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
               </tr>
             </thead>
             <tbody>
-              {allRelations.map((rel) => {
+              {allRelations.map(rel => {
                 const parentCmd = allCommands.find(cmd => cmd.id === rel.parentCommandId);
                 const childCmd = allCommands.find(cmd => cmd.id === rel.childCommandId);
-                
+
                 return (
                   <tr key={rel.id} className={selectedRelation?.id === rel.id ? 'bg-blue-50' : ''}>
                     <td className="px-4 py-2 font-medium">{rel.name}</td>
                     <td className="px-4 py-2">{rel.type.replace('_', '-').toUpperCase()}</td>
                     <td className="px-4 py-2">{parentCmd?.name || 'Unknown'}</td>
                     <td className="px-4 py-2">{childCmd?.name || 'Unknown'}</td>
-                    <td className="px-4 py-2">{rel.parentFields.join(', ')} → {rel.childFields.join(', ')}</td>
+                    <td className="px-4 py-2">
+                      {rel.parentFields.join(', ')} → {rel.childFields.join(', ')}
+                    </td>
                     <td className="px-4 py-2">
                       <div className="text-xs">
-                        {rel.cascadeUpdate && <span className="bg-blue-100 text-blue-800 px-1 rounded mr-1">Update</span>}
-                        {rel.cascadeDelete && <span className="bg-red-100 text-red-800 px-1 rounded mr-1">Delete</span>}
-                        {rel.enforceConstraints && <span className="bg-green-100 text-green-800 px-1 rounded">Enforce</span>}
+                        {rel.cascadeUpdate && (
+                          <span className="bg-blue-100 text-blue-800 px-1 rounded mr-1">
+                            Update
+                          </span>
+                        )}
+                        {rel.cascadeDelete && (
+                          <span className="bg-red-100 text-red-800 px-1 rounded mr-1">Delete</span>
+                        )}
+                        {rel.enforceConstraints && (
+                          <span className="bg-green-100 text-green-800 px-1 rounded">Enforce</span>
+                        )}
                       </div>
                     </td>
                     <td className="px-4 py-2">
@@ -911,12 +1010,25 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
           <div className="border rounded-lg p-4 bg-gray-50">
             <h4 className="font-semibold mb-2">Relation: {selectedRelation.name}</h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <div><strong>Type:</strong> {selectedRelation.type.replace('_', '-').toUpperCase()}</div>
-              <div><strong>Cascade Update:</strong> {selectedRelation.cascadeUpdate ? 'Yes' : 'No'}</div>
-              <div><strong>Cascade Delete:</strong> {selectedRelation.cascadeDelete ? 'Yes' : 'No'}</div>
-              <div><strong>Enforce Constraints:</strong> {selectedRelation.enforceConstraints ? 'Yes' : 'No'}</div>
-              <div><strong>Created:</strong> {selectedRelation.created.toLocaleString()}</div>
-              <div><strong>Modified:</strong> {selectedRelation.modified.toLocaleString()}</div>
+              <div>
+                <strong>Type:</strong> {selectedRelation.type.replace('_', '-').toUpperCase()}
+              </div>
+              <div>
+                <strong>Cascade Update:</strong> {selectedRelation.cascadeUpdate ? 'Yes' : 'No'}
+              </div>
+              <div>
+                <strong>Cascade Delete:</strong> {selectedRelation.cascadeDelete ? 'Yes' : 'No'}
+              </div>
+              <div>
+                <strong>Enforce Constraints:</strong>{' '}
+                {selectedRelation.enforceConstraints ? 'Yes' : 'No'}
+              </div>
+              <div>
+                <strong>Created:</strong> {selectedRelation.created.toLocaleString()}
+              </div>
+              <div>
+                <strong>Modified:</strong> {selectedRelation.modified.toLocaleString()}
+              </div>
             </div>
           </div>
         )}
@@ -932,7 +1044,7 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                   <input
                     type="text"
                     value={newRelationData.name}
-                    onChange={(e) => setNewRelationData(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={e => setNewRelationData(prev => ({ ...prev, name: e.target.value }))}
                     className="w-full border rounded px-3 py-2"
                     placeholder="Relation name"
                   />
@@ -941,11 +1053,18 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                   <label className="block text-sm font-medium mb-1">Relation Type:</label>
                   <select
                     value={newRelationData.type}
-                    onChange={(e) => setNewRelationData(prev => ({ ...prev, type: e.target.value as DataRelationType }))}
+                    onChange={e =>
+                      setNewRelationData(prev => ({
+                        ...prev,
+                        type: e.target.value as DataRelationType,
+                      }))
+                    }
                     className="w-full border rounded px-3 py-2"
                   >
                     {Object.values(DataRelationType).map(type => (
-                      <option key={type} value={type}>{type.replace('_', '-').toUpperCase()}</option>
+                      <option key={type} value={type}>
+                        {type.replace('_', '-').toUpperCase()}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -953,12 +1072,16 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                   <label className="block text-sm font-medium mb-1">Parent Command:</label>
                   <select
                     value={newRelationData.parentCommandId}
-                    onChange={(e) => setNewRelationData(prev => ({ ...prev, parentCommandId: e.target.value }))}
+                    onChange={e =>
+                      setNewRelationData(prev => ({ ...prev, parentCommandId: e.target.value }))
+                    }
                     className="w-full border rounded px-3 py-2"
                   >
                     <option value="">Select parent command</option>
                     {allCommands.map(cmd => (
-                      <option key={cmd.id} value={cmd.id}>{cmd.name}</option>
+                      <option key={cmd.id} value={cmd.id}>
+                        {cmd.name}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -966,12 +1089,16 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                   <label className="block text-sm font-medium mb-1">Child Command:</label>
                   <select
                     value={newRelationData.childCommandId}
-                    onChange={(e) => setNewRelationData(prev => ({ ...prev, childCommandId: e.target.value }))}
+                    onChange={e =>
+                      setNewRelationData(prev => ({ ...prev, childCommandId: e.target.value }))
+                    }
                     className="w-full border rounded px-3 py-2"
                   >
                     <option value="">Select child command</option>
                     {allCommands.map(cmd => (
-                      <option key={cmd.id} value={cmd.id}>{cmd.name}</option>
+                      <option key={cmd.id} value={cmd.id}>
+                        {cmd.name}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -980,10 +1107,12 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                   <input
                     type="text"
                     value={newRelationData.parentFields[0]}
-                    onChange={(e) => setNewRelationData(prev => ({ 
-                      ...prev, 
-                      parentFields: [e.target.value] 
-                    }))}
+                    onChange={e =>
+                      setNewRelationData(prev => ({
+                        ...prev,
+                        parentFields: [e.target.value],
+                      }))
+                    }
                     className="w-full border rounded px-3 py-2"
                     placeholder="Parent field name"
                   />
@@ -993,10 +1122,12 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                   <input
                     type="text"
                     value={newRelationData.childFields[0]}
-                    onChange={(e) => setNewRelationData(prev => ({ 
-                      ...prev, 
-                      childFields: [e.target.value] 
-                    }))}
+                    onChange={e =>
+                      setNewRelationData(prev => ({
+                        ...prev,
+                        childFields: [e.target.value],
+                      }))
+                    }
                     className="w-full border rounded px-3 py-2"
                     placeholder="Child field name"
                   />
@@ -1007,20 +1138,28 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                       type="checkbox"
                       id="cascadeUpdate"
                       checked={newRelationData.cascadeUpdate}
-                      onChange={(e) => setNewRelationData(prev => ({ ...prev, cascadeUpdate: e.target.checked }))}
+                      onChange={e =>
+                        setNewRelationData(prev => ({ ...prev, cascadeUpdate: e.target.checked }))
+                      }
                       className="mr-2"
                     />
-                    <label htmlFor="cascadeUpdate" className="text-sm">Cascade Update</label>
+                    <label htmlFor="cascadeUpdate" className="text-sm">
+                      Cascade Update
+                    </label>
                   </div>
                   <div className="flex items-center">
                     <input
                       type="checkbox"
                       id="cascadeDelete"
                       checked={newRelationData.cascadeDelete}
-                      onChange={(e) => setNewRelationData(prev => ({ ...prev, cascadeDelete: e.target.checked }))}
+                      onChange={e =>
+                        setNewRelationData(prev => ({ ...prev, cascadeDelete: e.target.checked }))
+                      }
                       className="mr-2"
                     />
-                    <label htmlFor="cascadeDelete" className="text-sm">Cascade Delete</label>
+                    <label htmlFor="cascadeDelete" className="text-sm">
+                      Cascade Delete
+                    </label>
                   </div>
                 </div>
               </div>
@@ -1034,7 +1173,12 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
                 <button
                   onClick={handleCreateRelation}
                   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                  disabled={!newRelationData.name || !newRelationData.parentCommandId || !newRelationData.childCommandId || loading}
+                  disabled={
+                    !newRelationData.name ||
+                    !newRelationData.parentCommandId ||
+                    !newRelationData.childCommandId ||
+                    loading
+                  }
                 >
                   Create
                 </button>
@@ -1053,7 +1197,9 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
         <div className="text-4xl mb-4">🔧</div>
         <h4 className="text-lg font-medium mb-2">Visual Query Designer</h4>
         <p>Drag and drop table designer, visual joins, and query builder</p>
-        <p className="text-sm mt-2">This feature would provide a complete visual interface for designing SQL queries</p>
+        <p className="text-sm mt-2">
+          This feature would provide a complete visual interface for designing SQL queries
+        </p>
       </div>
     </div>
   );
@@ -1062,9 +1208,7 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Data View</h3>
-        <div className="text-sm text-gray-600">
-          {queryResult.length} records returned
-        </div>
+        <div className="text-sm text-gray-600">{queryResult.length} records returned</div>
       </div>
 
       {queryResult.length === 0 ? (
@@ -1078,7 +1222,7 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
             <table className="w-full">
               <thead className="bg-gray-50 sticky top-0">
                 <tr>
-                  {Object.keys(queryResult[0] || {}).map((key) => (
+                  {Object.keys(queryResult[0] || {}).map(key => (
                     <th key={key} className="px-4 py-2 text-left font-medium">
                       {key}
                     </th>
@@ -1105,7 +1249,7 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
 
   const renderStatistics = () => {
     const stats = VB6DataEnvironmentInstance.getEnvironmentStats();
-    
+
     return (
       <div className="mt-6 p-4 bg-gray-50 rounded-lg">
         <h4 className="font-semibold mb-2">Statistics</h4>
@@ -1140,10 +1284,7 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
           <p className="text-sm text-gray-600">Visual database connection and query design tool</p>
         </div>
         {onClose && (
-          <button
-            onClick={onClose}
-            className="px-3 py-1 border rounded hover:bg-gray-100"
-          >
+          <button onClick={onClose} className="px-3 py-1 border rounded hover:bg-gray-100">
             Close
           </button>
         )}
@@ -1154,10 +1295,7 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
         <div className="mx-4 mt-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded">
           <div className="flex justify-between items-center">
             <span>{error}</span>
-            <button
-              onClick={() => setError(null)}
-              className="text-red-500 hover:text-red-700 ml-2"
-            >
+            <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700 ml-2">
               ×
             </button>
           </div>
@@ -1172,8 +1310,8 @@ export const VB6DataEnvironmentUI: React.FC<DataEnvironmentUIProps> = ({ onClose
           { id: 'commands', label: 'Commands', icon: '⚡' },
           { id: 'relations', label: 'Relations', icon: '🔄' },
           { id: 'query-designer', label: 'Query Designer', icon: '🎨' },
-          { id: 'data-view', label: 'Data View', icon: '📊' }
-        ].map((tab) => (
+          { id: 'data-view', label: 'Data View', icon: '📊' },
+        ].map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}

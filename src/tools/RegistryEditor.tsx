@@ -7,7 +7,7 @@ export enum RegistryHive {
   HKEY_CURRENT_USER = 'HKEY_CURRENT_USER',
   HKEY_LOCAL_MACHINE = 'HKEY_LOCAL_MACHINE',
   HKEY_USERS = 'HKEY_USERS',
-  HKEY_CURRENT_CONFIG = 'HKEY_CURRENT_CONFIG'
+  HKEY_CURRENT_CONFIG = 'HKEY_CURRENT_CONFIG',
 }
 
 // Registry Value Types
@@ -18,7 +18,7 @@ export enum RegistryValueType {
   REG_DWORD = 'DWORD',
   REG_QWORD = 'QWORD',
   REG_BINARY = 'Binary',
-  REG_NONE = 'None'
+  REG_NONE = 'None',
 }
 
 // Registry Key
@@ -57,7 +57,7 @@ export enum ExportFormat {
   REG = 'Registration Files (*.reg)',
   REG4 = 'Registration Files Version 4 (*.reg)',
   TXT = 'Text Files (*.txt)',
-  HIVE = 'Registry Hive Files (*.hiv)'
+  HIVE = 'Registry Hive Files (*.hiv)',
 }
 
 // Permission
@@ -76,7 +76,7 @@ interface RegistryEditorProps {
 export const RegistryEditor: React.FC<RegistryEditorProps> = ({
   onKeySelect,
   onValueChange,
-  onError
+  onError,
 }) => {
   const [selectedKey, setSelectedKey] = useState<RegistryKey | null>(null);
   const [selectedValue, setSelectedValue] = useState<RegistryValue | null>(null);
@@ -87,7 +87,7 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
     searchValueNames: true,
     searchValueData: true,
     matchWholeString: false,
-    caseSensitive: false
+    caseSensitive: false,
   });
   const [showSearchDialog, setShowSearchDialog] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
@@ -97,7 +97,7 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
   const [valueForm, setValueForm] = useState({
     name: '',
     type: RegistryValueType.REG_SZ,
-    data: ''
+    data: '',
   });
   const [favorites, setFavorites] = useState<string[]>([]);
   const [history, setHistory] = useState<string[]>([]);
@@ -131,9 +131,9 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
               name: '(Default)',
               type: RegistryValueType.REG_SZ,
               data: 'VisualBasic.Project',
-              size: 20
-            }
-          ]
+              size: 20,
+            },
+          ],
         },
         {
           id: generateId(),
@@ -154,20 +154,20 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
                   name: '(Default)',
                   type: RegistryValueType.REG_SZ,
                   data: 'My COM Component',
-                  size: 16
+                  size: 16,
                 },
                 {
                   id: generateId(),
                   name: 'InprocServer32',
                   type: RegistryValueType.REG_SZ,
                   data: 'C:\\Windows\\System32\\mycomponent.dll',
-                  size: 35
-                }
-              ]
-            }
-          ]
-        }
-      ]
+                  size: 35,
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
     {
       id: generateId(),
@@ -209,31 +209,31 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
                           name: 'GridSize',
                           type: RegistryValueType.REG_DWORD,
                           data: 8,
-                          size: 4
+                          size: 4,
                         },
                         {
                           id: generateId(),
                           name: 'ShowGrid',
                           type: RegistryValueType.REG_DWORD,
                           data: 1,
-                          size: 4
+                          size: 4,
                         },
                         {
                           id: generateId(),
                           name: 'LastProject',
                           type: RegistryValueType.REG_SZ,
                           data: 'C:\\Projects\\MyApp\\Project1.vbp',
-                          size: 31
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
+                          size: 31,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
     {
       id: generateId(),
@@ -247,77 +247,86 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
           path: 'HKEY_LOCAL_MACHINE\\SOFTWARE',
           name: 'SOFTWARE',
           hive: RegistryHive.HKEY_LOCAL_MACHINE,
-          hasSubkeys: true
+          hasSubkeys: true,
         },
         {
           id: generateId(),
           path: 'HKEY_LOCAL_MACHINE\\SYSTEM',
           name: 'SYSTEM',
           hive: RegistryHive.HKEY_LOCAL_MACHINE,
-          hasSubkeys: true
-        }
-      ]
-    }
+          hasSubkeys: true,
+        },
+      ],
+    },
   ];
 
   const [registryKeys, setRegistryKeys] = useState<RegistryKey[]>(sampleRegistry);
 
   // Load subkeys dynamically
-  const loadSubkeys = useCallback((key: RegistryKey) => {
-    if (!key.subkeys || key.subkeys.length === 0) {
-      // Simulate loading subkeys
-      const newSubkeys: RegistryKey[] = [];
-      for (let i = 0; i < 3; i++) {
-        newSubkeys.push({
-          id: generateId(),
-          path: `${key.path}\\Subkey${i + 1}`,
-          name: `Subkey${i + 1}`,
-          hive: key.hive,
-          hasSubkeys: Math.random() > 0.5,
-          values: [
-            {
-              id: generateId(),
-              name: '(Default)',
-              type: RegistryValueType.REG_SZ,
-              data: '',
-              size: 0
-            }
-          ]
-        });
+  const loadSubkeys = useCallback(
+    (key: RegistryKey) => {
+      if (!key.subkeys || key.subkeys.length === 0) {
+        // Simulate loading subkeys
+        const newSubkeys: RegistryKey[] = [];
+        for (let i = 0; i < 3; i++) {
+          newSubkeys.push({
+            id: generateId(),
+            path: `${key.path}\\Subkey${i + 1}`,
+            name: `Subkey${i + 1}`,
+            hive: key.hive,
+            hasSubkeys: Math.random() > 0.5,
+            values: [
+              {
+                id: generateId(),
+                name: '(Default)',
+                type: RegistryValueType.REG_SZ,
+                data: '',
+                size: 0,
+              },
+            ],
+          });
+        }
+        key.subkeys = newSubkeys;
       }
-      key.subkeys = newSubkeys;
-    }
-  }, [generateId]);
+    },
+    [generateId]
+  );
 
   // Toggle key expansion
-  const toggleKey = useCallback((key: RegistryKey) => {
-    setExpandedKeys(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(key.path)) {
-        newSet.delete(key.path);
-      } else {
-        loadSubkeys(key);
-        newSet.add(key.path);
-      }
-      return newSet;
-    });
-  }, [loadSubkeys]);
+  const toggleKey = useCallback(
+    (key: RegistryKey) => {
+      setExpandedKeys(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(key.path)) {
+          newSet.delete(key.path);
+        } else {
+          loadSubkeys(key);
+          newSet.add(key.path);
+        }
+        return newSet;
+      });
+    },
+    [loadSubkeys]
+  );
 
   // Select key
-  const selectKey = useCallback((key: RegistryKey) => {
-    setSelectedKey(key);
-    setSelectedValue(null);
-    setCurrentPath(key.path);
-    
-    // Add to history
-    setHistory(prev => {
-      const newHistory = [key.path, ...prev.filter(p => p !== key.path)].slice(0, 20);
-      return newHistory;
-    });
+  const selectKey = useCallback(
+    (key: RegistryKey) => {
+      setSelectedKey(key);
+      setSelectedValue(null);
+      setCurrentPath(key.path);
 
-    onKeySelect?.(key);
-    eventEmitter.current.emit('keySelected', key);
-  }, [onKeySelect]);
+      // Add to history
+      setHistory(prev => {
+        const newHistory = [key.path, ...prev.filter(p => p !== key.path)].slice(0, 20);
+        return newHistory;
+      });
+
+      onKeySelect?.(key);
+      eventEmitter.current.emit('keySelected', key);
+    },
+    [onKeySelect]
+  );
 
   // Create new key
   const createKey = useCallback(() => {
@@ -341,9 +350,9 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
           name: '(Default)',
           type: RegistryValueType.REG_SZ,
           data: '',
-          size: 0
-        }
-      ]
+          size: 0,
+        },
+      ],
     };
 
     if (!selectedKey.subkeys) {
@@ -369,7 +378,7 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
 
     // Find parent and remove key
     const parentPath = selectedKey.path.substring(0, selectedKey.path.lastIndexOf('\\'));
-    
+
     const removeFromTree = (keys: RegistryKey[]): boolean => {
       for (let i = 0; i < keys.length; i++) {
         if (keys[i].path === selectedKey.path) {
@@ -404,7 +413,7 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
     setValueForm({
       name: '',
       type: RegistryValueType.REG_SZ,
-      data: ''
+      data: '',
     });
     setShowValueDialog(true);
   }, [selectedKey, onError]);
@@ -418,7 +427,7 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
       name: valueForm.name,
       type: valueForm.type,
       data: valueForm.data,
-      size: String(valueForm.data).length
+      size: String(valueForm.data).length,
     };
 
     if (!selectedKey.values) {
@@ -443,74 +452,77 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
   }, [selectedKey, selectedValue, valueForm, generateId, onValueChange]);
 
   // Delete value
-  const deleteValue = useCallback((value: RegistryValue) => {
-    if (!selectedKey) return;
+  const deleteValue = useCallback(
+    (value: RegistryValue) => {
+      if (!selectedKey) return;
 
-    if (!window.confirm(`Delete value "${value.name}"?`)) {
-      return;
-    }
+      if (!window.confirm(`Delete value "${value.name}"?`)) {
+        return;
+      }
 
-    selectedKey.values = selectedKey.values?.filter(v => v.id !== value.id) || [];
-    setSelectedKey({ ...selectedKey });
-    
-    if (selectedValue?.id === value.id) {
-      setSelectedValue(null);
-    }
+      selectedKey.values = selectedKey.values?.filter(v => v.id !== value.id) || [];
+      setSelectedKey({ ...selectedKey });
 
-    eventEmitter.current.emit('valueDeleted', selectedKey, value);
-  }, [selectedKey, selectedValue]);
+      if (selectedValue?.id === value.id) {
+        setSelectedValue(null);
+      }
+
+      eventEmitter.current.emit('valueDeleted', selectedKey, value);
+    },
+    [selectedKey, selectedValue]
+  );
 
   // Export registry
-  const exportRegistry = useCallback((format: ExportFormat, path: string) => {
-    if (!selectedKey) return;
+  const exportRegistry = useCallback(
+    (format: ExportFormat, path: string) => {
+      if (!selectedKey) return;
 
-    let content = '';
+      let content = '';
 
-    if (format === ExportFormat.REG) {
-      content = 'Windows Registry Editor Version 5.00\n\n';
-      
-      const exportKey = (key: RegistryKey, indent: string = '') => {
-        content += `[${key.path}]\n`;
-        
-        if (key.values) {
-          key.values.forEach(value => {
-            if (value.name === '(Default)') {
-              content += `@="${value.data}"\n`;
-            } else {
-              switch (value.type) {
-                case RegistryValueType.REG_SZ:
-                  content += `"${value.name}"="${value.data}"\n`;
-                  break;
-                case RegistryValueType.REG_DWORD:
-                  content += `"${value.name}"=dword:${value.data.toString(16).padStart(8, '0')}\n`;
-                  break;
-                case RegistryValueType.REG_BINARY:
-                  content += `"${value.name}"=hex:${value.data}\n`;
-                  break;
+      if (format === ExportFormat.REG) {
+        content = 'Windows Registry Editor Version 5.00\n\n';
+
+        const exportKey = (key: RegistryKey, indent: string = '') => {
+          content += `[${key.path}]\n`;
+
+          if (key.values) {
+            key.values.forEach(value => {
+              if (value.name === '(Default)') {
+                content += `@="${value.data}"\n`;
+              } else {
+                switch (value.type) {
+                  case RegistryValueType.REG_SZ:
+                    content += `"${value.name}"="${value.data}"\n`;
+                    break;
+                  case RegistryValueType.REG_DWORD:
+                    content += `"${value.name}"=dword:${value.data.toString(16).padStart(8, '0')}\n`;
+                    break;
+                  case RegistryValueType.REG_BINARY:
+                    content += `"${value.name}"=hex:${value.data}\n`;
+                    break;
+                }
               }
-            }
-          });
-        }
-        content += '\n';
+            });
+          }
+          content += '\n';
 
-        if (key.subkeys) {
-          key.subkeys.forEach(subkey => exportKey(subkey));
-        }
-      };
+          if (key.subkeys) {
+            key.subkeys.forEach(subkey => exportKey(subkey));
+          }
+        };
 
-      exportKey(selectedKey);
-    }
+        exportKey(selectedKey);
+      }
 
-    // Simulate file save
-    console.log(`Exporting to ${path} in ${format} format:\n${content}`);
-    eventEmitter.current.emit('exported', path, format);
-  }, [selectedKey]);
+      // Simulate file save
+      eventEmitter.current.emit('exported', path, format);
+    },
+    [selectedKey]
+  );
 
   // Search registry
   const searchRegistry = useCallback(() => {
     if (!searchText) return;
-
-    console.log('Searching for:', searchText, 'with options:', searchOptions);
     // Implementation would search through registry tree
     eventEmitter.current.emit('search', searchText, searchOptions);
   }, [searchText, searchOptions]);
@@ -556,39 +568,40 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
   }, []);
 
   // Render registry tree
-  const renderTree = useCallback((keys: RegistryKey[], level: number = 0): React.ReactNode => {
-    return keys.map(key => {
-      const isExpanded = expandedKeys.has(key.path);
-      const isSelected = selectedKey?.path === key.path;
+  const renderTree = useCallback(
+    (keys: RegistryKey[], level: number = 0): React.ReactNode => {
+      return keys.map(key => {
+        const isExpanded = expandedKeys.has(key.path);
+        const isSelected = selectedKey?.path === key.path;
 
-      return (
-        <div key={key.id}>
-          <div
-            className={`flex items-center gap-1 py-1 px-2 hover:bg-gray-100 cursor-pointer ${
-              isSelected ? 'bg-blue-100' : ''
-            }`}
-            style={{ paddingLeft: `${level * 20 + 8}px` }}
-            onClick={() => selectKey(key)}
-          >
-            <span
-              className="text-xs cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleKey(key);
-              }}
+        return (
+          <div key={key.id}>
+            <div
+              className={`flex items-center gap-1 py-1 px-2 hover:bg-gray-100 cursor-pointer ${
+                isSelected ? 'bg-blue-100' : ''
+              }`}
+              style={{ paddingLeft: `${level * 20 + 8}px` }}
+              onClick={() => selectKey(key)}
             >
-              {key.hasSubkeys ? (isExpanded ? '▼' : '▶') : '  '}
-            </span>
-            <span className="text-sm">📁</span>
-            <span className="text-sm flex-1">{key.name}</span>
+              <span
+                className="text-xs cursor-pointer"
+                onClick={e => {
+                  e.stopPropagation();
+                  toggleKey(key);
+                }}
+              >
+                {key.hasSubkeys ? (isExpanded ? '▼' : '▶') : '  '}
+              </span>
+              <span className="text-sm">📁</span>
+              <span className="text-sm flex-1">{key.name}</span>
+            </div>
+            {isExpanded && key.subkeys && <div>{renderTree(key.subkeys, level + 1)}</div>}
           </div>
-          {isExpanded && key.subkeys && (
-            <div>{renderTree(key.subkeys, level + 1)}</div>
-          )}
-        </div>
-      );
-    });
-  }, [expandedKeys, selectedKey, selectKey, toggleKey]);
+        );
+      });
+    },
+    [expandedKeys, selectedKey, selectKey, toggleKey]
+  );
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -667,11 +680,10 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
           <input
             type="text"
             value={currentPath}
-            onChange={(e) => setCurrentPath(e.target.value)}
-            onKeyPress={(e) => {
+            onChange={e => setCurrentPath(e.target.value)}
+            onKeyPress={e => {
               if (e.key === 'Enter') {
                 // Navigate to path
-                console.log('Navigate to:', currentPath);
               }
             }}
             className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
@@ -716,7 +728,7 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
                         setValueForm({
                           name: value.name,
                           type: value.type,
-                          data: value.data
+                          data: value.data,
                         });
                         setShowValueDialog(true);
                       }}
@@ -748,44 +760,42 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
             <h2 className="text-lg font-medium mb-4">
               {selectedValue ? 'Edit Value' : 'New Value'}
             </h2>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Value Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Value Name</label>
                 <input
                   type="text"
                   value={valueForm.name}
-                  onChange={(e) => setValueForm(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => setValueForm(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="Enter value name"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Value Type
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Value Type</label>
                 <select
                   value={valueForm.type}
-                  onChange={(e) => setValueForm(prev => ({ ...prev, type: e.target.value as RegistryValueType }))}
+                  onChange={e =>
+                    setValueForm(prev => ({ ...prev, type: e.target.value as RegistryValueType }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 >
                   {Object.values(RegistryValueType).map(type => (
-                    <option key={type} value={type}>{type}</option>
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Value Data
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Value Data</label>
                 {valueForm.type === RegistryValueType.REG_MULTI_SZ ? (
                   <textarea
                     value={valueForm.data}
-                    onChange={(e) => setValueForm(prev => ({ ...prev, data: e.target.value }))}
+                    onChange={e => setValueForm(prev => ({ ...prev, data: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                     rows={4}
                     placeholder="Enter one value per line"
@@ -794,7 +804,7 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
                   <input
                     type={valueForm.type === RegistryValueType.REG_DWORD ? 'number' : 'text'}
                     value={valueForm.data}
-                    onChange={(e) => setValueForm(prev => ({ ...prev, data: e.target.value }))}
+                    onChange={e => setValueForm(prev => ({ ...prev, data: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                     placeholder="Enter value data"
                   />
@@ -825,31 +835,29 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[500px]">
             <h2 className="text-lg font-medium mb-4">Find</h2>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Find what:
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Find what:</label>
                 <input
                   type="text"
                   value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
+                  onChange={e => setSearchText(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="Enter search text"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Look at:
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Look at:</label>
                 <div className="space-y-1">
                   <label className="flex items-center gap-2">
                     <input
                       type="checkbox"
                       checked={searchOptions.searchKeys}
-                      onChange={(e) => setSearchOptions(prev => ({ ...prev, searchKeys: e.target.checked }))}
+                      onChange={e =>
+                        setSearchOptions(prev => ({ ...prev, searchKeys: e.target.checked }))
+                      }
                     />
                     <span className="text-sm">Keys</span>
                   </label>
@@ -857,7 +865,9 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
                     <input
                       type="checkbox"
                       checked={searchOptions.searchValueNames}
-                      onChange={(e) => setSearchOptions(prev => ({ ...prev, searchValueNames: e.target.checked }))}
+                      onChange={e =>
+                        setSearchOptions(prev => ({ ...prev, searchValueNames: e.target.checked }))
+                      }
                     />
                     <span className="text-sm">Value names</span>
                   </label>
@@ -865,7 +875,9 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
                     <input
                       type="checkbox"
                       checked={searchOptions.searchValueData}
-                      onChange={(e) => setSearchOptions(prev => ({ ...prev, searchValueData: e.target.checked }))}
+                      onChange={e =>
+                        setSearchOptions(prev => ({ ...prev, searchValueData: e.target.checked }))
+                      }
                     />
                     <span className="text-sm">Value data</span>
                   </label>
@@ -877,7 +889,9 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
                   <input
                     type="checkbox"
                     checked={searchOptions.matchWholeString}
-                    onChange={(e) => setSearchOptions(prev => ({ ...prev, matchWholeString: e.target.checked }))}
+                    onChange={e =>
+                      setSearchOptions(prev => ({ ...prev, matchWholeString: e.target.checked }))
+                    }
                   />
                   <span className="text-sm">Match whole string only</span>
                 </label>
@@ -885,7 +899,9 @@ export const RegistryEditor: React.FC<RegistryEditorProps> = ({
                   <input
                     type="checkbox"
                     checked={searchOptions.caseSensitive}
-                    onChange={(e) => setSearchOptions(prev => ({ ...prev, caseSensitive: e.target.checked }))}
+                    onChange={e =>
+                      setSearchOptions(prev => ({ ...prev, caseSensitive: e.target.checked }))
+                    }
                   />
                   <span className="text-sm">Match case</span>
                 </label>

@@ -6,7 +6,11 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { persistentVFS, VB6FileAttribute, PersistentVFSEntry } from '../../runtime/VB6PersistentFileSystem';
+import {
+  persistentVFS,
+  VB6FileAttribute,
+  PersistentVFSEntry,
+} from '../../runtime/VB6PersistentFileSystem';
 import './VirtualFileBrowser.css';
 
 interface FileBrowserState {
@@ -27,13 +31,13 @@ const VirtualFileBrowser: React.FC = () => {
     loading: false,
     searchFilter: '',
     viewMode: 'details',
-    error: null
+    error: null,
   });
 
   const [stats, setStats] = useState({
     filesCount: 0,
     directoriesCount: 0,
-    totalSize: 0
+    totalSize: 0,
   });
 
   const [editingFile, setEditingFile] = useState<{
@@ -63,7 +67,7 @@ const VirtualFileBrowser: React.FC = () => {
           return a.name.localeCompare(b.name);
         }),
         loading: false,
-        selectedFile: null
+        selectedFile: null,
       }));
 
       setStats(stats);
@@ -71,7 +75,7 @@ const VirtualFileBrowser: React.FC = () => {
       setState(prev => ({
         ...prev,
         error: error instanceof Error ? error.message : 'Failed to load directory',
-        loading: false
+        loading: false,
       }));
     }
   }, []);
@@ -79,11 +83,14 @@ const VirtualFileBrowser: React.FC = () => {
   /**
    * Navigate to directory
    */
-  const navigateTo = useCallback(async (entry: PersistentVFSEntry) => {
-    if (entry.type === 'directory') {
-      await loadDirectory(entry.path);
-    }
-  }, [loadDirectory]);
+  const navigateTo = useCallback(
+    async (entry: PersistentVFSEntry) => {
+      if (entry.type === 'directory') {
+        await loadDirectory(entry.path);
+      }
+    },
+    [loadDirectory]
+  );
 
   /**
    * Go back to parent directory
@@ -99,31 +106,37 @@ const VirtualFileBrowser: React.FC = () => {
   /**
    * Handle path navigation from breadcrumb
    */
-  const navigatePath = useCallback(async (path: string) => {
-    await loadDirectory(path);
-  }, [loadDirectory]);
+  const navigatePath = useCallback(
+    async (path: string) => {
+      await loadDirectory(path);
+    },
+    [loadDirectory]
+  );
 
   /**
    * Delete file or directory
    */
-  const deleteEntry = useCallback(async (entry: PersistentVFSEntry) => {
-    if (!confirm(`Delete ${entry.type === 'file' ? 'file' : 'directory'} "${entry.name}"?`)) {
-      return;
-    }
-
-    try {
-      const result = await persistentVFS.deleteEntry(entry.path);
-      if (result) {
-        await loadDirectory(state.currentPath);
-        setState(prev => ({ ...prev, selectedFile: null }));
+  const deleteEntry = useCallback(
+    async (entry: PersistentVFSEntry) => {
+      if (!confirm(`Delete ${entry.type === 'file' ? 'file' : 'directory'} "${entry.name}"?`)) {
+        return;
       }
-    } catch (error) {
-      setState(prev => ({
-        ...prev,
-        error: error instanceof Error ? error.message : 'Failed to delete'
-      }));
-    }
-  }, [state.currentPath, loadDirectory]);
+
+      try {
+        const result = await persistentVFS.deleteEntry(entry.path);
+        if (result) {
+          await loadDirectory(state.currentPath);
+          setState(prev => ({ ...prev, selectedFile: null }));
+        }
+      } catch (error) {
+        setState(prev => ({
+          ...prev,
+          error: error instanceof Error ? error.message : 'Failed to delete',
+        }));
+      }
+    },
+    [state.currentPath, loadDirectory]
+  );
 
   /**
    * Create new directory
@@ -133,15 +146,13 @@ const VirtualFileBrowser: React.FC = () => {
     if (!dirName) return;
 
     try {
-      const newPath = state.currentPath === '/'
-        ? `/${dirName}`
-        : `${state.currentPath}/${dirName}`;
+      const newPath = state.currentPath === '/' ? `/${dirName}` : `${state.currentPath}/${dirName}`;
       await persistentVFS.createDirectory(newPath);
       await loadDirectory(state.currentPath);
     } catch (error) {
       setState(prev => ({
         ...prev,
-        error: error instanceof Error ? error.message : 'Failed to create directory'
+        error: error instanceof Error ? error.message : 'Failed to create directory',
       }));
     }
   }, [state.currentPath, loadDirectory]);
@@ -154,15 +165,14 @@ const VirtualFileBrowser: React.FC = () => {
     if (!fileName) return;
 
     try {
-      const newPath = state.currentPath === '/'
-        ? `/${fileName}`
-        : `${state.currentPath}/${fileName}`;
+      const newPath =
+        state.currentPath === '/' ? `/${fileName}` : `${state.currentPath}/${fileName}`;
       await persistentVFS.createFile(newPath, '');
       await loadDirectory(state.currentPath);
     } catch (error) {
       setState(prev => ({
         ...prev,
-        error: error instanceof Error ? error.message : 'Failed to create file'
+        error: error instanceof Error ? error.message : 'Failed to create file',
       }));
     }
   }, [state.currentPath, loadDirectory]);
@@ -170,30 +180,33 @@ const VirtualFileBrowser: React.FC = () => {
   /**
    * Rename file or directory
    */
-  const renameEntry = useCallback(async (entry: PersistentVFSEntry) => {
-    const newName = prompt('Enter new name:', entry.name);
-    if (!newName || newName === entry.name) return;
+  const renameEntry = useCallback(
+    async (entry: PersistentVFSEntry) => {
+      const newName = prompt('Enter new name:', entry.name);
+      if (!newName || newName === entry.name) return;
 
-    try {
-      const parentPath = entry.path.substring(0, entry.path.lastIndexOf('/')) || '/';
-      const newPath = parentPath === '/' ? `/${newName}` : `${parentPath}/${newName}`;
+      try {
+        const parentPath = entry.path.substring(0, entry.path.lastIndexOf('/')) || '/';
+        const newPath = parentPath === '/' ? `/${newName}` : `${parentPath}/${newName}`;
 
-      if (entry.type === 'file') {
-        const content = (entry.content as string) || '';
-        await persistentVFS.createFile(newPath, content);
-      } else {
-        await persistentVFS.createDirectory(newPath);
+        if (entry.type === 'file') {
+          const content = (entry.content as string) || '';
+          await persistentVFS.createFile(newPath, content);
+        } else {
+          await persistentVFS.createDirectory(newPath);
+        }
+
+        await persistentVFS.deleteEntry(entry.path);
+        await loadDirectory(state.currentPath);
+      } catch (error) {
+        setState(prev => ({
+          ...prev,
+          error: error instanceof Error ? error.message : 'Failed to rename',
+        }));
       }
-
-      await persistentVFS.deleteEntry(entry.path);
-      await loadDirectory(state.currentPath);
-    } catch (error) {
-      setState(prev => ({
-        ...prev,
-        error: error instanceof Error ? error.message : 'Failed to rename'
-      }));
-    }
-  }, [state.currentPath, loadDirectory]);
+    },
+    [state.currentPath, loadDirectory]
+  );
 
   /**
    * Edit file content
@@ -216,7 +229,7 @@ const VirtualFileBrowser: React.FC = () => {
     } catch (error) {
       setState(prev => ({
         ...prev,
-        error: error instanceof Error ? error.message : 'Failed to save file'
+        error: error instanceof Error ? error.message : 'Failed to save file',
       }));
     }
   }, [editingFile, state.currentPath, loadDirectory]);
@@ -224,23 +237,26 @@ const VirtualFileBrowser: React.FC = () => {
   /**
    * Toggle file attribute
    */
-  const toggleAttribute = useCallback(async (entry: PersistentVFSEntry, attribute: number) => {
-    try {
-      const newAttributes = entry.attributes ^ attribute;
-      await persistentVFS.setAttributes(entry.path, newAttributes);
+  const toggleAttribute = useCallback(
+    async (entry: PersistentVFSEntry, attribute: number) => {
+      try {
+        const newAttributes = entry.attributes ^ attribute;
+        await persistentVFS.setAttributes(entry.path, newAttributes);
 
-      // Update local state
-      entry.attributes = newAttributes;
-      setState(prev => ({ ...prev, selectedFile: { ...entry } }));
+        // Update local state
+        entry.attributes = newAttributes;
+        setState(prev => ({ ...prev, selectedFile: { ...entry } }));
 
-      await loadDirectory(state.currentPath);
-    } catch (error) {
-      setState(prev => ({
-        ...prev,
-        error: error instanceof Error ? error.message : 'Failed to update attributes'
-      }));
-    }
-  }, [state.currentPath, loadDirectory]);
+        await loadDirectory(state.currentPath);
+      } catch (error) {
+        setState(prev => ({
+          ...prev,
+          error: error instanceof Error ? error.message : 'Failed to update attributes',
+        }));
+      }
+    },
+    [state.currentPath, loadDirectory]
+  );
 
   /**
    * Format file size for display
@@ -304,11 +320,7 @@ const VirtualFileBrowser: React.FC = () => {
           New Folder
         </button>
 
-        <button
-          className="vfb-btn vfb-btn-success"
-          onClick={createFile}
-          title="Create new file"
-        >
+        <button className="vfb-btn vfb-btn-success" onClick={createFile} title="Create new file">
           New File
         </button>
 
@@ -317,13 +329,15 @@ const VirtualFileBrowser: React.FC = () => {
             type="text"
             placeholder="Search..."
             value={state.searchFilter}
-            onChange={(e) => setState(prev => ({ ...prev, searchFilter: e.target.value }))}
+            onChange={e => setState(prev => ({ ...prev, searchFilter: e.target.value }))}
           />
         </div>
 
         <select
           value={state.viewMode}
-          onChange={(e) => setState(prev => ({ ...prev, viewMode: e.target.value as 'list' | 'details' }))}
+          onChange={e =>
+            setState(prev => ({ ...prev, viewMode: e.target.value as 'list' | 'details' }))
+          }
           className="vfb-view-select"
         >
           <option value="list">List View</option>
@@ -344,21 +358,24 @@ const VirtualFileBrowser: React.FC = () => {
 
           {state.currentPath !== '/' && (
             <>
-              {state.currentPath.split('/').filter(p => p).map((part, index, arr) => {
-                const path = '/' + arr.slice(0, index + 1).join('/');
-                return (
-                  <span key={path}>
-                    <span className="vfb-breadcrumb-separator">/</span>
-                    <span
-                      className="vfb-breadcrumb-item"
-                      onClick={() => navigatePath(path)}
-                      style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                    >
-                      {part}
+              {state.currentPath
+                .split('/')
+                .filter(p => p)
+                .map((part, index, arr) => {
+                  const path = '/' + arr.slice(0, index + 1).join('/');
+                  return (
+                    <span key={path}>
+                      <span className="vfb-breadcrumb-separator">/</span>
+                      <span
+                        className="vfb-breadcrumb-item"
+                        onClick={() => navigatePath(path)}
+                        style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                      >
+                        {part}
+                      </span>
                     </span>
-                  </span>
-                );
-              })}
+                  );
+                })}
             </>
           )}
         </div>
@@ -414,7 +431,7 @@ const VirtualFileBrowser: React.FC = () => {
                       <td className="vfb-actions">
                         <button
                           className="vfb-btn vfb-btn-sm vfb-btn-info"
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             renameEntry(entry);
                           }}
@@ -423,7 +440,7 @@ const VirtualFileBrowser: React.FC = () => {
                         </button>
                         <button
                           className="vfb-btn vfb-btn-sm vfb-btn-danger"
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             deleteEntry(entry);
                           }}
@@ -489,8 +506,12 @@ const VirtualFileBrowser: React.FC = () => {
                     <label>
                       <input
                         type="checkbox"
-                        checked={(state.selectedFile.attributes & VB6FileAttribute.vbReadOnly) !== 0}
-                        onChange={() => toggleAttribute(state.selectedFile!, VB6FileAttribute.vbReadOnly)}
+                        checked={
+                          (state.selectedFile.attributes & VB6FileAttribute.vbReadOnly) !== 0
+                        }
+                        onChange={() =>
+                          toggleAttribute(state.selectedFile!, VB6FileAttribute.vbReadOnly)
+                        }
                       />
                       Read-Only
                     </label>
@@ -498,7 +519,9 @@ const VirtualFileBrowser: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={(state.selectedFile.attributes & VB6FileAttribute.vbHidden) !== 0}
-                        onChange={() => toggleAttribute(state.selectedFile!, VB6FileAttribute.vbHidden)}
+                        onChange={() =>
+                          toggleAttribute(state.selectedFile!, VB6FileAttribute.vbHidden)
+                        }
                       />
                       Hidden
                     </label>
@@ -506,7 +529,9 @@ const VirtualFileBrowser: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={(state.selectedFile.attributes & VB6FileAttribute.vbSystem) !== 0}
-                        onChange={() => toggleAttribute(state.selectedFile!, VB6FileAttribute.vbSystem)}
+                        onChange={() =>
+                          toggleAttribute(state.selectedFile!, VB6FileAttribute.vbSystem)
+                        }
                       />
                       System
                     </label>
@@ -514,7 +539,9 @@ const VirtualFileBrowser: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={(state.selectedFile.attributes & VB6FileAttribute.vbArchive) !== 0}
-                        onChange={() => toggleAttribute(state.selectedFile!, VB6FileAttribute.vbArchive)}
+                        onChange={() =>
+                          toggleAttribute(state.selectedFile!, VB6FileAttribute.vbArchive)
+                        }
                       />
                       Archive
                     </label>
@@ -524,7 +551,12 @@ const VirtualFileBrowser: React.FC = () => {
                 {state.selectedFile.type === 'file' && (
                   <button
                     className="vfb-btn vfb-btn-primary"
-                    onClick={() => setEditingFile({ entry: state.selectedFile!, content: (state.selectedFile!.content as string) || '' })}
+                    onClick={() =>
+                      setEditingFile({
+                        entry: state.selectedFile!,
+                        content: (state.selectedFile!.content as string) || '',
+                      })
+                    }
                   >
                     Edit Content
                   </button>
@@ -539,14 +571,13 @@ const VirtualFileBrowser: React.FC = () => {
                 <h3>Edit: {editingFile.entry.name}</h3>
                 <textarea
                   value={editingFile.content}
-                  onChange={(e) => setEditingFile(prev => prev ? { ...prev, content: e.target.value } : null)}
+                  onChange={e =>
+                    setEditingFile(prev => (prev ? { ...prev, content: e.target.value } : null))
+                  }
                   className="vfb-editor-textarea"
                 />
                 <div className="vfb-editor-actions">
-                  <button
-                    className="vfb-btn vfb-btn-success"
-                    onClick={editFileContent}
-                  >
+                  <button className="vfb-btn vfb-btn-success" onClick={editFileContent}>
                     Save
                   </button>
                   <button
@@ -562,7 +593,9 @@ const VirtualFileBrowser: React.FC = () => {
 
           <div className="vfb-status-bar">
             <span>{filteredEntries.length} items</span>
-            <span>{stats.filesCount} files, {stats.directoriesCount} folders</span>
+            <span>
+              {stats.filesCount} files, {stats.directoriesCount} folders
+            </span>
             <span>Total: {formatSize(stats.totalSize)}</span>
           </div>
         </>

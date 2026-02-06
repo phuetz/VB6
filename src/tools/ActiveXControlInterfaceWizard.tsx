@@ -1,5 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, ChevronLeft, ChevronRight, Check, Settings, Code, Eye, Copy, Download, Upload, FileCode, AlertTriangle, Info, Zap, Target, Link, Shield, Palette, Wrench } from 'lucide-react';
+import {
+  X,
+  Plus,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  Settings,
+  Code,
+  Eye,
+  Copy,
+  Download,
+  Upload,
+  FileCode,
+  AlertTriangle,
+  Info,
+  Zap,
+  Target,
+  Link,
+  Shield,
+  Palette,
+  Wrench,
+} from 'lucide-react';
 
 // Types
 export enum PropertyType {
@@ -17,12 +39,12 @@ export enum PropertyType {
   COLOR = 'OLE_COLOR',
   FONT = 'StdFont',
   PICTURE = 'StdPicture',
-  ENUM = 'Enum'
+  ENUM = 'Enum',
 }
 
 export enum MethodType {
   SUB = 'Sub',
-  FUNCTION = 'Function'
+  FUNCTION = 'Function',
 }
 
 export enum EventType {
@@ -38,13 +60,13 @@ export enum EventType {
   LOSTFOCUS = 'LostFocus',
   CHANGE = 'Change',
   VALIDATE = 'Validate',
-  CUSTOM = 'Custom'
+  CUSTOM = 'Custom',
 }
 
 export enum AccessModifier {
   PUBLIC = 'Public',
   PRIVATE = 'Private',
-  FRIEND = 'Friend'
+  FRIEND = 'Friend',
 }
 
 export interface ControlProperty {
@@ -140,121 +162,129 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
   isOpen,
   onClose,
   controlInterface,
-  onSave
+  onSave,
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [wizardData, setWizardData] = useState<ActiveXControlInterface>(() => controlInterface || {
-    id: `control-${Date.now()}`,
-    name: 'MyControl',
-    description: 'Custom ActiveX Control',
-    version: '1.0.0',
-    guid: `{${generateGUID()}}`,
-    progId: 'MyProject.MyControl',
-    clsId: `{${generateGUID()}}`,
-    typeLibId: `{${generateGUID()}}`,
-    properties: [
-      {
-        id: 'prop-1',
-        name: 'Caption',
-        type: PropertyType.STRING,
-        defaultValue: '""',
-        description: 'The text displayed on the control',
-        category: 'Appearance',
-        readOnly: false,
-        designTime: true,
-        runtime: true
-      },
-      {
-        id: 'prop-2',
-        name: 'Enabled',
-        type: PropertyType.BOOLEAN,
-        defaultValue: 'True',
-        description: 'Determines whether the control can respond to user interaction',
-        category: 'Behavior',
-        readOnly: false,
-        designTime: true,
-        runtime: true
-      },
-      {
-        id: 'prop-3',
-        name: 'BackColor',
-        type: PropertyType.COLOR,
-        defaultValue: '&H8000000F',
-        description: 'The background color of the control',
-        category: 'Appearance',
-        readOnly: false,
-        designTime: true,
-        runtime: true
+  const [wizardData, setWizardData] = useState<ActiveXControlInterface>(
+    () =>
+      controlInterface || {
+        id: `control-${Date.now()}`,
+        name: 'MyControl',
+        description: 'Custom ActiveX Control',
+        version: '1.0.0',
+        guid: `{${generateGUID()}}`,
+        progId: 'MyProject.MyControl',
+        clsId: `{${generateGUID()}}`,
+        typeLibId: `{${generateGUID()}}`,
+        properties: [
+          {
+            id: 'prop-1',
+            name: 'Caption',
+            type: PropertyType.STRING,
+            defaultValue: '""',
+            description: 'The text displayed on the control',
+            category: 'Appearance',
+            readOnly: false,
+            designTime: true,
+            runtime: true,
+          },
+          {
+            id: 'prop-2',
+            name: 'Enabled',
+            type: PropertyType.BOOLEAN,
+            defaultValue: 'True',
+            description: 'Determines whether the control can respond to user interaction',
+            category: 'Behavior',
+            readOnly: false,
+            designTime: true,
+            runtime: true,
+          },
+          {
+            id: 'prop-3',
+            name: 'BackColor',
+            type: PropertyType.COLOR,
+            defaultValue: '&H8000000F',
+            description: 'The background color of the control',
+            category: 'Appearance',
+            readOnly: false,
+            designTime: true,
+            runtime: true,
+          },
+        ],
+        methods: [
+          {
+            id: 'method-1',
+            name: 'Refresh',
+            type: MethodType.SUB,
+            parameters: [],
+            description: 'Forces the control to repaint',
+            accessModifier: AccessModifier.PUBLIC,
+          },
+          {
+            id: 'method-2',
+            name: 'AboutBox',
+            type: MethodType.SUB,
+            parameters: [],
+            description: 'Displays the About dialog for the control',
+            accessModifier: AccessModifier.PUBLIC,
+          },
+        ],
+        events: [
+          {
+            id: 'event-1',
+            name: 'Click',
+            type: EventType.CLICK,
+            parameters: [],
+            description: 'Occurs when the user clicks the control',
+            cancelable: false,
+          },
+          {
+            id: 'event-2',
+            name: 'Change',
+            type: EventType.CHANGE,
+            parameters: [],
+            description: 'Occurs when the control value changes',
+            cancelable: false,
+          },
+        ],
+        propertyPages: [
+          {
+            id: 'page-1',
+            name: 'GeneralPage',
+            caption: 'General',
+            properties: ['Caption', 'Enabled'],
+            tabOrder: 0,
+          },
+          {
+            id: 'page-2',
+            name: 'AppearancePage',
+            caption: 'Appearance',
+            properties: ['BackColor'],
+            tabOrder: 1,
+          },
+        ],
+        supportedContainers: [
+          'Visual Basic',
+          'Visual C++',
+          'Internet Explorer',
+          'Office Applications',
+        ],
+        threading: 'Apartment',
+        registrationInfo: {
+          description: 'Custom ActiveX Control',
+          version: '1.0.0',
+          miscStatus: 0,
+          viewStatus: 0,
+        },
       }
-    ],
-    methods: [
-      {
-        id: 'method-1',
-        name: 'Refresh',
-        type: MethodType.SUB,
-        parameters: [],
-        description: 'Forces the control to repaint',
-        accessModifier: AccessModifier.PUBLIC
-      },
-      {
-        id: 'method-2',
-        name: 'AboutBox',
-        type: MethodType.SUB,
-        parameters: [],
-        description: 'Displays the About dialog for the control',
-        accessModifier: AccessModifier.PUBLIC
-      }
-    ],
-    events: [
-      {
-        id: 'event-1',
-        name: 'Click',
-        type: EventType.CLICK,
-        parameters: [],
-        description: 'Occurs when the user clicks the control',
-        cancelable: false
-      },
-      {
-        id: 'event-2',
-        name: 'Change',
-        type: EventType.CHANGE,
-        parameters: [],
-        description: 'Occurs when the control value changes',
-        cancelable: false
-      }
-    ],
-    propertyPages: [
-      {
-        id: 'page-1',
-        name: 'GeneralPage',
-        caption: 'General',
-        properties: ['Caption', 'Enabled'],
-        tabOrder: 0
-      },
-      {
-        id: 'page-2',
-        name: 'AppearancePage',
-        caption: 'Appearance',
-        properties: ['BackColor'],
-        tabOrder: 1
-      }
-    ],
-    supportedContainers: ['Visual Basic', 'Visual C++', 'Internet Explorer', 'Office Applications'],
-    threading: 'Apartment',
-    registrationInfo: {
-      description: 'Custom ActiveX Control',
-      version: '1.0.0',
-      miscStatus: 0,
-      viewStatus: 0
-    }
-  });
+  );
 
   const totalSteps = 6;
 
   function generateGUID(): string {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
       return v.toString(16).toUpperCase();
     });
   }
@@ -269,12 +299,12 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
       category: 'General',
       readOnly: false,
       designTime: true,
-      runtime: true
+      runtime: true,
     };
-    
+
     setWizardData({
       ...wizardData,
-      properties: [...wizardData.properties, newProperty]
+      properties: [...wizardData.properties, newProperty],
     });
   };
 
@@ -283,14 +313,14 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
       ...wizardData,
       properties: wizardData.properties.map(prop =>
         prop.id === propertyId ? { ...prop, ...updates } : prop
-      )
+      ),
     });
   };
 
   const deleteProperty = (propertyId: string) => {
     setWizardData({
       ...wizardData,
-      properties: wizardData.properties.filter(prop => prop.id !== propertyId)
+      properties: wizardData.properties.filter(prop => prop.id !== propertyId),
     });
   };
 
@@ -301,12 +331,12 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
       type: MethodType.SUB,
       parameters: [],
       description: 'New method',
-      accessModifier: AccessModifier.PUBLIC
+      accessModifier: AccessModifier.PUBLIC,
     };
-    
+
     setWizardData({
       ...wizardData,
-      methods: [...wizardData.methods, newMethod]
+      methods: [...wizardData.methods, newMethod],
     });
   };
 
@@ -315,14 +345,14 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
       ...wizardData,
       methods: wizardData.methods.map(method =>
         method.id === methodId ? { ...method, ...updates } : method
-      )
+      ),
     });
   };
 
   const deleteMethod = (methodId: string) => {
     setWizardData({
       ...wizardData,
-      methods: wizardData.methods.filter(method => method.id !== methodId)
+      methods: wizardData.methods.filter(method => method.id !== methodId),
     });
   };
 
@@ -333,12 +363,12 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
       type: EventType.CUSTOM,
       parameters: [],
       description: 'New event',
-      cancelable: false
+      cancelable: false,
     };
-    
+
     setWizardData({
       ...wizardData,
-      events: [...wizardData.events, newEvent]
+      events: [...wizardData.events, newEvent],
     });
   };
 
@@ -347,14 +377,14 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
       ...wizardData,
       events: wizardData.events.map(event =>
         event.id === eventId ? { ...event, ...updates } : event
-      )
+      ),
     });
   };
 
   const deleteEvent = (eventId: string) => {
     setWizardData({
       ...wizardData,
-      events: wizardData.events.filter(event => event.id !== eventId)
+      events: wizardData.events.filter(event => event.id !== eventId),
     });
   };
 
@@ -362,7 +392,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
     let code = `' ActiveX Control: ${wizardData.name}\n`;
     code += `' Generated by ActiveX Control Interface Wizard\n`;
     code += `' GUID: ${wizardData.guid}\n\n`;
-    
+
     code += `VERSION 5.00\n`;
     code += `Begin VB.UserControl ${wizardData.name}\n`;
     code += `   BackColor       =   &H80000005&\n`;
@@ -374,20 +404,20 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
     code += `   ScaleHeight     =   3600\n`;
     code += `   ScaleWidth      =   4800\n`;
     code += `End\n\n`;
-    
+
     code += `Attribute VB_Name = "${wizardData.name}"\n`;
     code += `Attribute VB_GlobalNameSpace = False\n`;
     code += `Attribute VB_Creatable = True\n`;
     code += `Attribute VB_PredeclaredId = False\n`;
     code += `Attribute VB_Exposed = True\n\n`;
-    
+
     // Property declarations
     wizardData.properties.forEach(prop => {
       code += `' Property: ${prop.name}\n`;
       code += `Private m_${prop.name} As ${prop.type}\n`;
     });
     code += '\n';
-    
+
     // Events declarations
     if (wizardData.events.length > 0) {
       code += "' Events\n";
@@ -397,7 +427,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
       });
       code += '\n';
     }
-    
+
     // Initialize
     code += `Private Sub UserControl_Initialize()\n`;
     wizardData.properties.forEach(prop => {
@@ -406,7 +436,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
       }
     });
     code += `End Sub\n\n`;
-    
+
     // Property procedures
     wizardData.properties.forEach(prop => {
       if (!prop.readOnly) {
@@ -416,7 +446,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
         code += `Attribute ${prop.name}.VB_UserMemId = 0\n`;
         code += `    ${prop.name} = m_${prop.name}\n`;
         code += `End Property\n\n`;
-        
+
         // Property Let/Set
         const letOrSet = prop.type === PropertyType.OBJECT ? 'Set' : 'Let';
         code += `Public Property ${letOrSet} ${prop.name}(ByVal New_${prop.name} As ${prop.type})\n`;
@@ -435,17 +465,21 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
         code += `End Property\n\n`;
       }
     });
-    
+
     // Methods
     wizardData.methods.forEach(method => {
-      const params = method.parameters.map(p => 
-        `${p.optional ? 'Optional ' : ''}${p.name} As ${p.type}${p.defaultValue ? ' = ' + p.defaultValue : ''}`
-      ).join(', ');
-      
-      const returnType = method.type === MethodType.FUNCTION && method.returnType ? ` As ${method.returnType}` : '';
+      const params = method.parameters
+        .map(
+          p =>
+            `${p.optional ? 'Optional ' : ''}${p.name} As ${p.type}${p.defaultValue ? ' = ' + p.defaultValue : ''}`
+        )
+        .join(', ');
+
+      const returnType =
+        method.type === MethodType.FUNCTION && method.returnType ? ` As ${method.returnType}` : '';
       code += `${method.accessModifier} ${method.type} ${method.name}(${params})${returnType}\n`;
       code += `Attribute ${method.name}.VB_Description = "${method.description}"\n`;
-      
+
       if (method.name === 'AboutBox') {
         code += `    MsgBox "${wizardData.name} Control" & vbCrLf & "Version ${wizardData.version}", vbInformation, "About ${wizardData.name}"\n`;
       } else if (method.name === 'Refresh') {
@@ -453,30 +487,30 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
       } else {
         code += `    ' TODO: Implement ${method.name}\n`;
       }
-      
+
       code += `End ${method.type}\n\n`;
     });
-    
+
     // Property bag procedures
     code += `Private Sub UserControl_ReadProperties(PropBag As PropertyBag)\n`;
     wizardData.properties.forEach(prop => {
       code += `    m_${prop.name} = PropBag.ReadProperty("${prop.name}", ${prop.defaultValue || '""'})\n`;
     });
     code += `End Sub\n\n`;
-    
+
     code += `Private Sub UserControl_WriteProperties(PropBag As PropertyBag)\n`;
     wizardData.properties.forEach(prop => {
       code += `    Call PropBag.WriteProperty("${prop.name}", m_${prop.name}, ${prop.defaultValue || '""'})\n`;
     });
     code += `End Sub\n\n`;
-    
+
     return code;
   };
 
   const generateTypeLibrary = (): string => {
     let tlb = `; Type Library for ${wizardData.name}\n`;
     tlb += `; Generated by ActiveX Control Interface Wizard\n\n`;
-    
+
     tlb += `[\n`;
     tlb += `  uuid(${wizardData.typeLibId}),\n`;
     tlb += `  version(1.0),\n`;
@@ -485,7 +519,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
     tlb += `library ${wizardData.name}Lib\n`;
     tlb += `{\n`;
     tlb += `  importlib("stdole2.tlb");\n\n`;
-    
+
     // Interface definition
     tlb += `  [\n`;
     tlb += `    uuid(${generateGUID()}),\n`;
@@ -495,27 +529,27 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
     tlb += `  ]\n`;
     tlb += `  interface I${wizardData.name} : IDispatch\n`;
     tlb += `  {\n`;
-    
+
     // Properties
     wizardData.properties.forEach(prop => {
       tlb += `    [id(${prop.id.replace('prop-', '')}), propget, helpstring("${prop.description}")]\n`;
       tlb += `    HRESULT ${prop.name}([out, retval] ${prop.type}* pVal);\n`;
-      
+
       if (!prop.readOnly) {
         tlb += `    [id(${prop.id.replace('prop-', '')}), propput, helpstring("${prop.description}")]\n`;
         tlb += `    HRESULT ${prop.name}([in] ${prop.type} newVal);\n`;
       }
     });
-    
+
     // Methods
     wizardData.methods.forEach(method => {
       const params = method.parameters.map((p, i) => `[in] ${p.type} ${p.name}`).join(', ');
       tlb += `    [id(${method.id.replace('method-', '')}), helpstring("${method.description}")]\n`;
       tlb += `    HRESULT ${method.name}(${params});\n`;
     });
-    
+
     tlb += `  };\n\n`;
-    
+
     // CoClass definition
     tlb += `  [\n`;
     tlb += `    uuid(${wizardData.clsId}),\n`;
@@ -527,7 +561,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
     tlb += `    [default] interface I${wizardData.name};\n`;
     tlb += `  };\n`;
     tlb += `}\n`;
-    
+
     return tlb;
   };
 
@@ -549,7 +583,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
               <input
                 type="text"
                 value={wizardData.name}
-                onChange={(e) => setWizardData({ ...wizardData, name: e.target.value })}
+                onChange={e => setWizardData({ ...wizardData, name: e.target.value })}
                 className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -558,29 +592,29 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
               <input
                 type="text"
                 value={wizardData.version}
-                onChange={(e) => setWizardData({ ...wizardData, version: e.target.value })}
+                onChange={e => setWizardData({ ...wizardData, version: e.target.value })}
                 className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-1">Description</label>
             <textarea
               value={wizardData.description}
-              onChange={(e) => setWizardData({ ...wizardData, description: e.target.value })}
+              onChange={e => setWizardData({ ...wizardData, description: e.target.value })}
               className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
               rows={3}
             />
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">ProgID</label>
               <input
                 type="text"
                 value={wizardData.progId}
-                onChange={(e) => setWizardData({ ...wizardData, progId: e.target.value })}
+                onChange={e => setWizardData({ ...wizardData, progId: e.target.value })}
                 className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -588,7 +622,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
               <label className="block text-sm font-medium mb-1">Threading Model</label>
               <select
                 value={wizardData.threading}
-                onChange={(e) => setWizardData({ ...wizardData, threading: e.target.value as any })}
+                onChange={e => setWizardData({ ...wizardData, threading: e.target.value as any })}
                 className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
               >
                 <option value="Apartment">Apartment</option>
@@ -597,21 +631,29 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
               </select>
             </div>
           </div>
-          
+
           <div className="bg-gray-50 p-4 rounded">
             <h4 className="font-medium mb-2">Generated GUIDs</h4>
             <div className="space-y-2 text-sm font-mono">
-              <div>CLSID: <span className="text-blue-600">{wizardData.clsId}</span></div>
-              <div>GUID: <span className="text-blue-600">{wizardData.guid}</span></div>
-              <div>TypeLib ID: <span className="text-blue-600">{wizardData.typeLibId}</span></div>
+              <div>
+                CLSID: <span className="text-blue-600">{wizardData.clsId}</span>
+              </div>
+              <div>
+                GUID: <span className="text-blue-600">{wizardData.guid}</span>
+              </div>
+              <div>
+                TypeLib ID: <span className="text-blue-600">{wizardData.typeLibId}</span>
+              </div>
             </div>
             <button
-              onClick={() => setWizardData({
-                ...wizardData,
-                clsId: `{${generateGUID()}}`,
-                guid: `{${generateGUID()}}`,
-                typeLibId: `{${generateGUID()}}`
-              })}
+              onClick={() =>
+                setWizardData({
+                  ...wizardData,
+                  clsId: `{${generateGUID()}}`,
+                  guid: `{${generateGUID()}}`,
+                  typeLibId: `{${generateGUID()}}`,
+                })
+              }
               className="mt-2 px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
             >
               Regenerate GUIDs
@@ -634,7 +676,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
           Add Property
         </button>
       </div>
-      
+
       <div className="space-y-4 max-h-96 overflow-y-auto">
         {wizardData.properties.map(property => (
           <div key={property.id} className="border rounded p-4">
@@ -645,7 +687,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                   <input
                     type="text"
                     value={property.name}
-                    onChange={(e) => updateProperty(property.id, { name: e.target.value })}
+                    onChange={e => updateProperty(property.id, { name: e.target.value })}
                     className="w-full px-2 py-1 border rounded text-sm"
                   />
                 </div>
@@ -653,11 +695,15 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                   <label className="block text-sm font-medium mb-1">Type</label>
                   <select
                     value={property.type}
-                    onChange={(e) => updateProperty(property.id, { type: e.target.value as PropertyType })}
+                    onChange={e =>
+                      updateProperty(property.id, { type: e.target.value as PropertyType })
+                    }
                     className="w-full px-2 py-1 border rounded text-sm"
                   >
                     {Object.values(PropertyType).map(type => (
-                      <option key={type} value={type}>{type}</option>
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -666,7 +712,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                   <input
                     type="text"
                     value={property.defaultValue || ''}
-                    onChange={(e) => updateProperty(property.id, { defaultValue: e.target.value })}
+                    onChange={e => updateProperty(property.id, { defaultValue: e.target.value })}
                     className="w-full px-2 py-1 border rounded text-sm"
                   />
                 </div>
@@ -678,13 +724,13 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4 mb-3">
               <div>
                 <label className="block text-sm font-medium mb-1">Category</label>
                 <select
                   value={property.category}
-                  onChange={(e) => updateProperty(property.id, { category: e.target.value })}
+                  onChange={e => updateProperty(property.id, { category: e.target.value })}
                   className="w-full px-2 py-1 border rounded text-sm"
                 >
                   <option value="General">General</option>
@@ -700,7 +746,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                   <input
                     type="checkbox"
                     checked={property.readOnly}
-                    onChange={(e) => updateProperty(property.id, { readOnly: e.target.checked })}
+                    onChange={e => updateProperty(property.id, { readOnly: e.target.checked })}
                   />
                   Read Only
                 </label>
@@ -708,7 +754,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                   <input
                     type="checkbox"
                     checked={property.designTime}
-                    onChange={(e) => updateProperty(property.id, { designTime: e.target.checked })}
+                    onChange={e => updateProperty(property.id, { designTime: e.target.checked })}
                   />
                   Design Time
                 </label>
@@ -716,18 +762,18 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                   <input
                     type="checkbox"
                     checked={property.runtime}
-                    onChange={(e) => updateProperty(property.id, { runtime: e.target.checked })}
+                    onChange={e => updateProperty(property.id, { runtime: e.target.checked })}
                   />
                   Runtime
                 </label>
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium mb-1">Description</label>
               <textarea
                 value={property.description}
-                onChange={(e) => updateProperty(property.id, { description: e.target.value })}
+                onChange={e => updateProperty(property.id, { description: e.target.value })}
                 className="w-full px-2 py-1 border rounded text-sm"
                 rows={2}
               />
@@ -750,7 +796,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
           Add Method
         </button>
       </div>
-      
+
       <div className="space-y-4 max-h-96 overflow-y-auto">
         {wizardData.methods.map(method => (
           <div key={method.id} className="border rounded p-4">
@@ -761,7 +807,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                   <input
                     type="text"
                     value={method.name}
-                    onChange={(e) => updateMethod(method.id, { name: e.target.value })}
+                    onChange={e => updateMethod(method.id, { name: e.target.value })}
                     className="w-full px-2 py-1 border rounded text-sm"
                   />
                 </div>
@@ -769,7 +815,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                   <label className="block text-sm font-medium mb-1">Type</label>
                   <select
                     value={method.type}
-                    onChange={(e) => updateMethod(method.id, { type: e.target.value as MethodType })}
+                    onChange={e => updateMethod(method.id, { type: e.target.value as MethodType })}
                     className="w-full px-2 py-1 border rounded text-sm"
                   >
                     <option value={MethodType.SUB}>Sub</option>
@@ -780,7 +826,9 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                   <label className="block text-sm font-medium mb-1">Access</label>
                   <select
                     value={method.accessModifier}
-                    onChange={(e) => updateMethod(method.id, { accessModifier: e.target.value as AccessModifier })}
+                    onChange={e =>
+                      updateMethod(method.id, { accessModifier: e.target.value as AccessModifier })
+                    }
                     className="w-full px-2 py-1 border rounded text-sm"
                   >
                     <option value={AccessModifier.PUBLIC}>Public</option>
@@ -793,11 +841,15 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                     <label className="block text-sm font-medium mb-1">Return Type</label>
                     <select
                       value={method.returnType || PropertyType.STRING}
-                      onChange={(e) => updateMethod(method.id, { returnType: e.target.value as PropertyType })}
+                      onChange={e =>
+                        updateMethod(method.id, { returnType: e.target.value as PropertyType })
+                      }
                       className="w-full px-2 py-1 border rounded text-sm"
                     >
                       {Object.values(PropertyType).map(type => (
-                        <option key={type} value={type}>{type}</option>
+                        <option key={type} value={type}>
+                          {type}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -810,17 +862,17 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
-            
+
             <div className="mb-3">
               <label className="block text-sm font-medium mb-1">Description</label>
               <textarea
                 value={method.description}
-                onChange={(e) => updateMethod(method.id, { description: e.target.value })}
+                onChange={e => updateMethod(method.id, { description: e.target.value })}
                 className="w-full px-2 py-1 border rounded text-sm"
                 rows={2}
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium mb-2">Parameters</label>
               <div className="space-y-2">
@@ -829,7 +881,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                     <input
                       type="text"
                       value={param.name}
-                      onChange={(e) => {
+                      onChange={e => {
                         const newParams = [...method.parameters];
                         newParams[index] = { ...param, name: e.target.value };
                         updateMethod(method.id, { parameters: newParams });
@@ -839,7 +891,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                     />
                     <select
                       value={param.type}
-                      onChange={(e) => {
+                      onChange={e => {
                         const newParams = [...method.parameters];
                         newParams[index] = { ...param, type: e.target.value as PropertyType };
                         updateMethod(method.id, { parameters: newParams });
@@ -847,14 +899,16 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                       className="px-2 py-1 border rounded text-sm"
                     >
                       {Object.values(PropertyType).map(type => (
-                        <option key={type} value={type}>{type}</option>
+                        <option key={type} value={type}>
+                          {type}
+                        </option>
                       ))}
                     </select>
                     <label className="flex items-center gap-1 text-sm">
                       <input
                         type="checkbox"
                         checked={param.optional}
-                        onChange={(e) => {
+                        onChange={e => {
                           const newParams = [...method.parameters];
                           newParams[index] = { ...param, optional: e.target.checked };
                           updateMethod(method.id, { parameters: newParams });
@@ -875,7 +929,10 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                 ))}
                 <button
                   onClick={() => {
-                    const newParams = [...method.parameters, { name: '', type: PropertyType.STRING, optional: false }];
+                    const newParams = [
+                      ...method.parameters,
+                      { name: '', type: PropertyType.STRING, optional: false },
+                    ];
                     updateMethod(method.id, { parameters: newParams });
                   }}
                   className="text-blue-600 hover:text-blue-800 text-sm"
@@ -902,7 +959,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
           Add Event
         </button>
       </div>
-      
+
       <div className="space-y-4 max-h-96 overflow-y-auto">
         {wizardData.events.map(event => (
           <div key={event.id} className="border rounded p-4">
@@ -913,7 +970,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                   <input
                     type="text"
                     value={event.name}
-                    onChange={(e) => updateEvent(event.id, { name: e.target.value })}
+                    onChange={e => updateEvent(event.id, { name: e.target.value })}
                     className="w-full px-2 py-1 border rounded text-sm"
                   />
                 </div>
@@ -921,11 +978,13 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                   <label className="block text-sm font-medium mb-1">Type</label>
                   <select
                     value={event.type}
-                    onChange={(e) => updateEvent(event.id, { type: e.target.value as EventType })}
+                    onChange={e => updateEvent(event.id, { type: e.target.value as EventType })}
                     className="w-full px-2 py-1 border rounded text-sm"
                   >
                     {Object.values(EventType).map(type => (
-                      <option key={type} value={type}>{type}</option>
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -934,7 +993,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                     <input
                       type="checkbox"
                       checked={event.cancelable}
-                      onChange={(e) => updateEvent(event.id, { cancelable: e.target.checked })}
+                      onChange={e => updateEvent(event.id, { cancelable: e.target.checked })}
                     />
                     Cancelable
                   </label>
@@ -947,17 +1006,17 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
-            
+
             <div className="mb-3">
               <label className="block text-sm font-medium mb-1">Description</label>
               <textarea
                 value={event.description}
-                onChange={(e) => updateEvent(event.id, { description: e.target.value })}
+                onChange={e => updateEvent(event.id, { description: e.target.value })}
                 className="w-full px-2 py-1 border rounded text-sm"
                 rows={2}
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium mb-2">Parameters</label>
               <div className="space-y-2">
@@ -966,7 +1025,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                     <input
                       type="text"
                       value={param.name}
-                      onChange={(e) => {
+                      onChange={e => {
                         const newParams = [...event.parameters];
                         newParams[index] = { ...param, name: e.target.value };
                         updateEvent(event.id, { parameters: newParams });
@@ -976,7 +1035,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                     />
                     <select
                       value={param.type}
-                      onChange={(e) => {
+                      onChange={e => {
                         const newParams = [...event.parameters];
                         newParams[index] = { ...param, type: e.target.value as PropertyType };
                         updateEvent(event.id, { parameters: newParams });
@@ -984,7 +1043,9 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                       className="px-2 py-1 border rounded text-sm"
                     >
                       {Object.values(PropertyType).map(type => (
-                        <option key={type} value={type}>{type}</option>
+                        <option key={type} value={type}>
+                          {type}
+                        </option>
                       ))}
                     </select>
                     <button
@@ -1000,7 +1061,10 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                 ))}
                 <button
                   onClick={() => {
-                    const newParams = [...event.parameters, { name: '', type: PropertyType.STRING }];
+                    const newParams = [
+                      ...event.parameters,
+                      { name: '', type: PropertyType.STRING },
+                    ];
                     updateEvent(event.id, { parameters: newParams });
                   }}
                   className="text-blue-600 hover:text-blue-800 text-sm"
@@ -1018,26 +1082,36 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
   const renderStep5 = () => (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold">Configuration</h3>
-      
+
       <div className="grid grid-cols-2 gap-6">
         <div>
           <h4 className="font-medium mb-3">Supported Containers</h4>
           <div className="space-y-2">
-            {['Visual Basic', 'Visual C++', 'Internet Explorer', 'Office Applications', 'Visual FoxPro', 'PowerBuilder', 'Delphi'].map(container => (
+            {[
+              'Visual Basic',
+              'Visual C++',
+              'Internet Explorer',
+              'Office Applications',
+              'Visual FoxPro',
+              'PowerBuilder',
+              'Delphi',
+            ].map(container => (
               <label key={container} className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={wizardData.supportedContainers.includes(container)}
-                  onChange={(e) => {
+                  onChange={e => {
                     if (e.target.checked) {
                       setWizardData({
                         ...wizardData,
-                        supportedContainers: [...wizardData.supportedContainers, container]
+                        supportedContainers: [...wizardData.supportedContainers, container],
                       });
                     } else {
                       setWizardData({
                         ...wizardData,
-                        supportedContainers: wizardData.supportedContainers.filter(c => c !== container)
+                        supportedContainers: wizardData.supportedContainers.filter(
+                          c => c !== container
+                        ),
                       });
                     }
                   }}
@@ -1047,7 +1121,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
             ))}
           </div>
         </div>
-        
+
         <div>
           <h4 className="font-medium mb-3">Registration Information</h4>
           <div className="space-y-3">
@@ -1056,10 +1130,15 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
               <input
                 type="text"
                 value={wizardData.registrationInfo.description}
-                onChange={(e) => setWizardData({
-                  ...wizardData,
-                  registrationInfo: { ...wizardData.registrationInfo, description: e.target.value }
-                })}
+                onChange={e =>
+                  setWizardData({
+                    ...wizardData,
+                    registrationInfo: {
+                      ...wizardData.registrationInfo,
+                      description: e.target.value,
+                    },
+                  })
+                }
                 className="w-full px-2 py-1 border rounded text-sm"
               />
             </div>
@@ -1068,10 +1147,12 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
               <input
                 type="text"
                 value={wizardData.registrationInfo.version}
-                onChange={(e) => setWizardData({
-                  ...wizardData,
-                  registrationInfo: { ...wizardData.registrationInfo, version: e.target.value }
-                })}
+                onChange={e =>
+                  setWizardData({
+                    ...wizardData,
+                    registrationInfo: { ...wizardData.registrationInfo, version: e.target.value },
+                  })
+                }
                 className="w-full px-2 py-1 border rounded text-sm"
               />
             </div>
@@ -1080,10 +1161,15 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
               <input
                 type="text"
                 value={wizardData.registrationInfo.toolboxBitmap || ''}
-                onChange={(e) => setWizardData({
-                  ...wizardData,
-                  registrationInfo: { ...wizardData.registrationInfo, toolboxBitmap: e.target.value }
-                })}
+                onChange={e =>
+                  setWizardData({
+                    ...wizardData,
+                    registrationInfo: {
+                      ...wizardData.registrationInfo,
+                      toolboxBitmap: e.target.value,
+                    },
+                  })
+                }
                 placeholder="Path to 16x16 bitmap"
                 className="w-full px-2 py-1 border rounded text-sm"
               />
@@ -1091,7 +1177,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
           </div>
         </div>
       </div>
-      
+
       <div>
         <h4 className="font-medium mb-3">Property Pages</h4>
         <div className="space-y-2">
@@ -1100,20 +1186,18 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
               <input
                 type="text"
                 value={page.caption}
-                onChange={(e) => {
+                onChange={e => {
                   setWizardData({
                     ...wizardData,
                     propertyPages: wizardData.propertyPages.map(p =>
                       p.id === page.id ? { ...p, caption: e.target.value } : p
-                    )
+                    ),
                   });
                 }}
                 className="flex-1 px-2 py-1 border rounded text-sm"
                 placeholder="Page caption"
               />
-              <div className="text-sm text-gray-600">
-                {page.properties.length} properties
-              </div>
+              <div className="text-sm text-gray-600">{page.properties.length} properties</div>
             </div>
           ))}
         </div>
@@ -1124,7 +1208,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
   const renderStep6 = () => (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold">Generated Code Preview</h3>
-      
+
       <div className="flex gap-2 mb-4">
         <button
           onClick={() => navigator.clipboard.writeText(generateControlCode())}
@@ -1157,7 +1241,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
           Download Files
         </button>
       </div>
-      
+
       <div className="grid grid-cols-1 gap-4">
         <div>
           <h4 className="font-medium mb-2">UserControl Code (.ctl)</h4>
@@ -1167,7 +1251,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
             </pre>
           </div>
         </div>
-        
+
         <div>
           <h4 className="font-medium mb-2">Type Library (.odl)</h4>
           <div className="border rounded">
@@ -1177,19 +1261,31 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
           </div>
         </div>
       </div>
-      
+
       <div className="bg-blue-50 border border-blue-200 rounded p-4">
         <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
           <Info className="w-4 h-4" />
           Summary
         </h4>
         <div className="text-sm text-blue-700 space-y-1">
-          <div>Control Name: <strong>{wizardData.name}</strong></div>
-          <div>Properties: <strong>{wizardData.properties.length}</strong></div>
-          <div>Methods: <strong>{wizardData.methods.length}</strong></div>
-          <div>Events: <strong>{wizardData.events.length}</strong></div>
-          <div>Property Pages: <strong>{wizardData.propertyPages.length}</strong></div>
-          <div>Supported Containers: <strong>{wizardData.supportedContainers.length}</strong></div>
+          <div>
+            Control Name: <strong>{wizardData.name}</strong>
+          </div>
+          <div>
+            Properties: <strong>{wizardData.properties.length}</strong>
+          </div>
+          <div>
+            Methods: <strong>{wizardData.methods.length}</strong>
+          </div>
+          <div>
+            Events: <strong>{wizardData.events.length}</strong>
+          </div>
+          <div>
+            Property Pages: <strong>{wizardData.propertyPages.length}</strong>
+          </div>
+          <div>
+            Supported Containers: <strong>{wizardData.supportedContainers.length}</strong>
+          </div>
         </div>
       </div>
     </div>
@@ -1209,10 +1305,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
               Step {currentStep} of {totalSteps}
             </span>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -1225,24 +1318,36 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
                 <div
                   key={step}
                   className={`flex items-center gap-2 ${
-                    step === currentStep ? 'text-blue-600' : step < currentStep ? 'text-green-600' : 'text-gray-400'
+                    step === currentStep
+                      ? 'text-blue-600'
+                      : step < currentStep
+                        ? 'text-green-600'
+                        : 'text-gray-400'
                   }`}
                 >
                   <div
                     className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
-                      step === currentStep ? 'bg-blue-100 border-2 border-blue-600' :
-                      step < currentStep ? 'bg-green-100 border-2 border-green-600' :
-                      'bg-gray-100 border-2 border-gray-300'
+                      step === currentStep
+                        ? 'bg-blue-100 border-2 border-blue-600'
+                        : step < currentStep
+                          ? 'bg-green-100 border-2 border-green-600'
+                          : 'bg-gray-100 border-2 border-gray-300'
                     }`}
                   >
                     {step < currentStep ? <Check className="w-3 h-3" /> : step}
                   </div>
                   <span className="font-medium">
-                    {step === 1 ? 'Info' :
-                     step === 2 ? 'Properties' :
-                     step === 3 ? 'Methods' :
-                     step === 4 ? 'Events' :
-                     step === 5 ? 'Config' : 'Generate'}
+                    {step === 1
+                      ? 'Info'
+                      : step === 2
+                        ? 'Properties'
+                        : step === 3
+                          ? 'Methods'
+                          : step === 4
+                            ? 'Events'
+                            : step === 5
+                              ? 'Config'
+                              : 'Generate'}
                   </span>
                   {step < totalSteps && <ChevronRight className="w-4 h-4 text-gray-400" />}
                 </div>
@@ -1271,7 +1376,7 @@ export const ActiveXControlInterfaceWizard: React.FC<ActiveXControlInterfaceWiza
             <ChevronLeft className="w-4 h-4" />
             Previous
           </button>
-          
+
           <div className="flex gap-2">
             {currentStep === totalSteps ? (
               <button

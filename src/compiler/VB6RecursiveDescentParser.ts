@@ -41,13 +41,27 @@ export interface VB6DeclarationNode extends VB6ASTNode {
   isStatic?: boolean;
   isWithEvents?: boolean;
   library?: string; // For Declare
-  alias?: string;   // For Declare
+  alias?: string; // For Declare
   parameters?: VB6ParameterNode[]; // For Event declarations
 }
 
 export interface VB6TypeNode extends VB6ASTNode {
   type: 'Type';
-  typeName: 'Integer' | 'Long' | 'Single' | 'Double' | 'String' | 'Boolean' | 'Variant' | 'Object' | 'Currency' | 'Decimal' | 'Date' | 'Byte' | 'Any' | string;
+  typeName:
+    | 'Integer'
+    | 'Long'
+    | 'Single'
+    | 'Double'
+    | 'String'
+    | 'Boolean'
+    | 'Variant'
+    | 'Object'
+    | 'Currency'
+    | 'Decimal'
+    | 'Date'
+    | 'Byte'
+    | 'Any'
+    | string;
   isArray?: boolean;
   dimensions?: VB6ExpressionNode[];
   isFixedLength?: boolean;
@@ -204,6 +218,9 @@ export interface VB6IdentifierNode extends VB6ExpressionNode {
   name: string;
 }
 
+/** Visibility modifier type shared by declarations and procedures */
+export type VB6Visibility = 'Public' | 'Private' | 'Friend' | 'Global' | null;
+
 // ============================================================================
 // PARSER ERROR TYPES
 // ============================================================================
@@ -224,18 +241,18 @@ export class VB6RecursiveDescentParser {
   private tokens: VB6Token[];
   private position: number = 0;
   private errors: VB6ParseError[] = [];
-  
+
   constructor(tokens: VB6Token[]) {
     this.tokens = tokens;
   }
-  
+
   /**
    * Parse VB6 module
    */
-  parseModule(): { ast: VB6ModuleNode | null, errors: VB6ParseError[] } {
+  parseModule(): { ast: VB6ModuleNode | null; errors: VB6ParseError[] } {
     this.position = 0;
     this.errors = [];
-    
+
     try {
       const ast = this.module();
       return { ast, errors: this.errors };
@@ -244,44 +261,44 @@ export class VB6RecursiveDescentParser {
       return { ast: null, errors: this.errors };
     }
   }
-  
+
   // ============================================================================
   // GRAMMAR RULES
   // ============================================================================
-  
+
   /**
    * Module := [Attributes] [Declarations] [Procedures]
    */
   private module(): VB6ModuleNode {
     const startToken = this.currentToken();
-    
+
     // Parse attributes
     const attributes: VB6AttributeNode[] = [];
     while (this.matchKeyword('attribute')) {
       const attr = this.attributeDeclaration();
       if (attr) attributes.push(attr);
     }
-    
+
     // Extract module name from VB_Name attribute
     const nameAttr = attributes.find(a => a.name === 'VB_Name');
     const moduleName = nameAttr ? nameAttr.value.replace(/"/g, '') : 'Module1';
-    
+
     // Parse option statements
     while (this.matchKeyword('option')) {
       this.optionStatement();
     }
-    
+
     // Parse declarations and procedures
     const declarations: VB6DeclarationNode[] = [];
     const procedures: VB6ProcedureNode[] = [];
-    
+
     while (!this.isAtEnd()) {
       this.skipNewlinesAndComments();
-      
+
       if (this.isAtEnd()) break;
-      
+
       const current = this.currentToken();
-      
+
       // Check for procedure
       if (this.isProcedureStart()) {
         const proc = this.procedureDeclaration();
@@ -303,7 +320,7 @@ export class VB6RecursiveDescentParser {
         this.advance();
       }
     }
-    
+
     return {
       type: 'Module',
       line: startToken.line,
@@ -311,43 +328,43 @@ export class VB6RecursiveDescentParser {
       name: moduleName,
       attributes,
       declarations,
-      procedures
+      procedures,
     };
   }
-  
+
   /**
    * AttributeDeclaration := 'Attribute' Identifier '=' StringLiteral
    */
   private attributeDeclaration(): VB6AttributeNode | null {
     const startToken = this.currentToken();
-    
+
     if (!this.consumeKeyword('attribute')) return null;
-    
+
     const nameToken = this.consume(VB6TokenType.Identifier, 'Expected attribute name');
     if (!nameToken) return null;
-    
+
     if (!this.consume(VB6TokenType.Operator, 'Expected =')) return null;
-    
+
     const valueToken = this.consume(VB6TokenType.StringLiteral, 'Expected attribute value');
     if (!valueToken) return null;
-    
+
     this.skipNewlinesAndComments();
-    
+
     return {
       type: 'Attribute',
       line: startToken.line,
       column: startToken.column,
       name: nameToken.value,
-      value: valueToken.value
+      value: valueToken.value,
     };
   }
-  
+
   /**
    * Option Statement := 'Option' ('Explicit' | 'Base' Number | 'Compare' CompareMode)
    */
   private optionStatement(): void {
     this.consumeKeyword('option');
-    
+
     if (this.matchKeyword('explicit')) {
       this.advance();
     } else if (this.matchKeyword('base')) {
@@ -360,10 +377,10 @@ export class VB6RecursiveDescentParser {
       this.advance();
       this.consumeKeyword('module');
     }
-    
+
     this.skipNewlinesAndComments();
   }
-  
+
   /**
    * Declaration := VariableDeclaration | ConstantDeclaration | TypeDeclaration | EnumDeclaration | DeclareDeclaration | EventDeclaration
    */
@@ -393,7 +410,7 @@ export class VB6RecursiveDescentParser {
 
     return null;
   }
-  
+
   /**
    * Variable Declaration List := [Visibility] ['Static'] ['Dim'] Variable {',' Variable}
    * Variable := Identifier [WithEvents] ['(' ArrayDimensions ')'] ['As' Type]
@@ -403,7 +420,10 @@ export class VB6RecursiveDescentParser {
    * - Dim a, b, c As Long: a and b are Variant, c is Long (type applies only to last)
    * - Dim a As Integer, b As String: each variable has its own type
    */
-  private variableDeclarationList(startToken: VB6Token, visibility: string | null): VB6DeclarationNode[] {
+  private variableDeclarationList(
+    startToken: VB6Token,
+    visibility: VB6Visibility
+  ): VB6DeclarationNode[] {
     const isStatic = this.matchKeyword('static');
     if (isStatic) this.advance();
 
@@ -444,7 +464,11 @@ export class VB6RecursiveDescentParser {
   /**
    * Parse a single variable in a declaration list
    */
-  private parseSingleVariable(startToken: VB6Token, visibility: string | null, isStatic: boolean): VB6DeclarationNode | null {
+  private parseSingleVariable(
+    startToken: VB6Token,
+    visibility: VB6Visibility,
+    isStatic: boolean
+  ): VB6DeclarationNode | null {
     const nameToken = this.consume(VB6TokenType.Identifier, 'Expected variable name');
     if (!nameToken) return null;
 
@@ -482,15 +506,15 @@ export class VB6RecursiveDescentParser {
       line: startToken.line,
       column: startToken.column,
       declarationType: 'Variable',
-      visibility: visibility as any,
+      visibility: visibility,
       name: nameToken.value,
       dataType,
       dimensions,
       isStatic,
-      isWithEvents
+      isWithEvents,
     };
   }
-  
+
   /**
    * Procedure Declaration := [Visibility] ('Sub' | 'Function' | 'Property') ProcedureName [Parameters] [AsType] NewLine [Body] 'End' ProcedureType
    */
@@ -499,9 +523,9 @@ export class VB6RecursiveDescentParser {
     const visibility = this.parseVisibility();
     const isStatic = this.matchKeyword('static');
     if (isStatic) this.advance();
-    
+
     let procedureType: 'Sub' | 'Function' | 'PropertyGet' | 'PropertyLet' | 'PropertySet';
-    
+
     if (this.matchKeyword('sub')) {
       procedureType = 'Sub';
       this.advance();
@@ -535,13 +559,13 @@ export class VB6RecursiveDescentParser {
 
     const nameToken = this.consume(VB6TokenType.Identifier, 'Expected procedure name');
     if (!nameToken) return null;
-    
+
     // Parse parameters
     let parameters: VB6ParameterNode[] = [];
     if (this.match(VB6TokenType.Punctuation, '(')) {
       parameters = this.parseParameterList();
     }
-    
+
     // Parse return type for functions and property gets
     let returnType: VB6TypeNode | undefined;
     if (procedureType === 'Function' || procedureType === 'PropertyGet') {
@@ -552,9 +576,9 @@ export class VB6RecursiveDescentParser {
         returnType = this.parseType();
       }
     }
-    
+
     this.skipNewlinesAndComments();
-    
+
     // Parse body
     const body: VB6StatementNode[] = [];
 
@@ -604,23 +628,23 @@ export class VB6RecursiveDescentParser {
         this.skipWhitespace();
       }
     }
-    
+
     this.skipNewlinesAndComments();
-    
+
     return {
       type: 'Procedure',
       line: startToken.line,
       column: startToken.column,
       procedureType,
       name: nameToken.value,
-      visibility: visibility as any,
+      visibility: visibility,
       parameters,
       returnType,
       isStatic,
-      body
+      body,
     };
   }
-  
+
   /**
    * Parse statement
    * Returns an array when parsing multiple variable declarations (Dim a, b, c)
@@ -634,7 +658,10 @@ export class VB6RecursiveDescentParser {
 
     // Keywords that end statement blocks - don't try to parse them as statements
     const blockEndKeywords = ['end', 'else', 'elseif', 'case', 'loop', 'next', 'wend', 'until'];
-    if (token.type === VB6TokenType.Keyword && blockEndKeywords.includes(token.value.toLowerCase())) {
+    if (
+      token.type === VB6TokenType.Keyword &&
+      blockEndKeywords.includes(token.value.toLowerCase())
+    ) {
       return null;
     }
 
@@ -658,21 +685,36 @@ export class VB6RecursiveDescentParser {
     // Control structures
     if (token.type === VB6TokenType.Keyword) {
       switch (token.value.toLowerCase()) {
-        case 'if': return this.ifStatement();
-        case 'for': return this.forStatement();
-        case 'do': return this.doStatement();
-        case 'select': return this.selectStatement();
-        case 'with': return this.withStatement();
-        case 'on': return this.errorHandlingStatement();
-        case 'dim': return this.localVariableDeclaration();
-        case 'redim': return this.redimStatement();
-        case 'set': return this.setStatement();
-        case 'call': return this.callStatement();
-        case 'exit': return this.exitStatement();
-        case 'goto': return this.gotoStatement();
-        case 'gosub': return this.gosubStatement();
-        case 'return': return this.returnStatement();
-        case 'resume': return this.resumeStatement();
+        case 'if':
+          return this.ifStatement();
+        case 'for':
+          return this.forStatement();
+        case 'do':
+          return this.doStatement();
+        case 'select':
+          return this.selectStatement();
+        case 'with':
+          return this.withStatement();
+        case 'on':
+          return this.errorHandlingStatement();
+        case 'dim':
+          return this.localVariableDeclaration();
+        case 'redim':
+          return this.redimStatement();
+        case 'set':
+          return this.setStatement();
+        case 'call':
+          return this.callStatement();
+        case 'exit':
+          return this.exitStatement();
+        case 'goto':
+          return this.gotoStatement();
+        case 'gosub':
+          return this.gosubStatement();
+        case 'return':
+          return this.returnStatement();
+        case 'resume':
+          return this.resumeStatement();
         default:
           // Return null for other keywords (they shouldn't be treated as expression statements)
           return null;
@@ -681,14 +723,14 @@ export class VB6RecursiveDescentParser {
 
     return this.expressionStatement();
   }
-  
+
   /**
    * Parse expression
    */
   private expression(): VB6ExpressionNode | null {
     return this.logicalOr();
   }
-  
+
   private logicalOr(): VB6ExpressionNode | null {
     let expr = this.logicalAnd();
     if (!expr) return null;
@@ -707,7 +749,7 @@ export class VB6RecursiveDescentParser {
         column: operator.column,
         operator: 'Or',
         left: expr,
-        right
+        right,
       };
     }
 
@@ -734,22 +776,24 @@ export class VB6RecursiveDescentParser {
         column: operator.column,
         operator: 'And',
         left: expr,
-        right
+        right,
       };
     }
 
     return expr;
   }
-  
+
   private equality(): VB6ExpressionNode | null {
     let expr = this.comparison();
     if (!expr) return null;
 
     this.skipWhitespace();
-    while (this.match(VB6TokenType.Operator, '=') ||
-           this.match(VB6TokenType.Operator, '<>') ||
-           this.matchKeyword('is') ||
-           this.matchKeyword('like')) {
+    while (
+      this.match(VB6TokenType.Operator, '=') ||
+      this.match(VB6TokenType.Operator, '<>') ||
+      this.matchKeyword('is') ||
+      this.matchKeyword('like')
+    ) {
       const operator = this.currentToken();
       this.advance();
       this.skipWhitespace();
@@ -764,7 +808,7 @@ export class VB6RecursiveDescentParser {
         column: operator.column,
         operator: operator.value,
         left: expr,
-        right
+        right,
       };
     }
 
@@ -776,10 +820,12 @@ export class VB6RecursiveDescentParser {
     if (!expr) return null;
 
     this.skipWhitespace();
-    while (this.match(VB6TokenType.Operator, '>') ||
-           this.match(VB6TokenType.Operator, '>=') ||
-           this.match(VB6TokenType.Operator, '<') ||
-           this.match(VB6TokenType.Operator, '<=')) {
+    while (
+      this.match(VB6TokenType.Operator, '>') ||
+      this.match(VB6TokenType.Operator, '>=') ||
+      this.match(VB6TokenType.Operator, '<') ||
+      this.match(VB6TokenType.Operator, '<=')
+    ) {
       const operator = this.currentToken();
       this.advance();
       this.skipWhitespace();
@@ -794,27 +840,29 @@ export class VB6RecursiveDescentParser {
         column: operator.column,
         operator: operator.value,
         left: expr,
-        right
+        right,
       };
     }
 
     return expr;
   }
-  
+
   private addition(): VB6ExpressionNode | null {
     let expr = this.multiplication();
     if (!expr) return null;
 
     this.skipWhitespace();
-    while (this.match(VB6TokenType.Operator, '+') ||
-           this.match(VB6TokenType.Operator, '-') ||
-           this.match(VB6TokenType.Operator, '&')) {
+    while (
+      this.match(VB6TokenType.Operator, '+') ||
+      this.match(VB6TokenType.Operator, '-') ||
+      this.match(VB6TokenType.Operator, '&')
+    ) {
       const operator = this.currentToken();
       this.advance();
       this.skipWhitespace();
       const right = this.multiplication();
       if (!right) break;
-      
+
       expr = {
         type: 'Expression',
         expressionType: 'BinaryOp',
@@ -822,7 +870,7 @@ export class VB6RecursiveDescentParser {
         column: operator.column,
         operator: operator.value,
         left: expr,
-        right
+        right,
       };
 
       this.skipWhitespace();
@@ -836,10 +884,12 @@ export class VB6RecursiveDescentParser {
     if (!expr) return null;
 
     this.skipWhitespace();
-    while (this.match(VB6TokenType.Operator, '*') ||
-           this.match(VB6TokenType.Operator, '/') ||
-           this.match(VB6TokenType.Operator, '\\') ||
-           this.matchKeyword('mod')) {
+    while (
+      this.match(VB6TokenType.Operator, '*') ||
+      this.match(VB6TokenType.Operator, '/') ||
+      this.match(VB6TokenType.Operator, '\\') ||
+      this.matchKeyword('mod')
+    ) {
       const operator = this.currentToken();
       this.advance();
       this.skipWhitespace();
@@ -853,7 +903,7 @@ export class VB6RecursiveDescentParser {
         column: operator.column,
         operator: operator.value,
         left: expr,
-        right
+        right,
       };
     }
 
@@ -878,38 +928,40 @@ export class VB6RecursiveDescentParser {
         column: operator.column,
         operator: '^',
         left: expr,
-        right
+        right,
       };
     }
 
     return expr;
   }
-  
+
   private unary(): VB6ExpressionNode | null {
-    if (this.match(VB6TokenType.Operator, '-') ||
-        this.match(VB6TokenType.Operator, '+') ||
-        this.matchKeyword('not')) {
+    if (
+      this.match(VB6TokenType.Operator, '-') ||
+      this.match(VB6TokenType.Operator, '+') ||
+      this.matchKeyword('not')
+    ) {
       const operator = this.currentToken();
       this.advance();
       const expr = this.unary();
       if (!expr) return null;
-      
+
       return {
         type: 'Expression',
         expressionType: 'UnaryOp',
         line: operator.line,
         column: operator.column,
         operator: operator.value,
-        operand: expr
+        operand: expr,
       };
     }
-    
+
     return this.primary();
   }
-  
+
   private primary(): VB6ExpressionNode | null {
     const token = this.currentToken();
-    
+
     // Literals
     if (token.type === VB6TokenType.StringLiteral) {
       this.advance();
@@ -919,10 +971,10 @@ export class VB6RecursiveDescentParser {
         line: token.line,
         column: token.column,
         literalType: 'String',
-        value: token.value
+        value: token.value,
       };
     }
-    
+
     if (token.type === VB6TokenType.NumberLiteral || token.type === VB6TokenType.FloatLiteral) {
       this.advance();
       return {
@@ -931,10 +983,13 @@ export class VB6RecursiveDescentParser {
         line: token.line,
         column: token.column,
         literalType: 'Number',
-        value: token.type === VB6TokenType.FloatLiteral ? parseFloat(token.value) : parseInt(token.value)
+        value:
+          token.type === VB6TokenType.FloatLiteral
+            ? parseFloat(token.value)
+            : parseInt(token.value),
       };
     }
-    
+
     if (token.type === VB6TokenType.DateLiteral) {
       this.advance();
       return {
@@ -943,10 +998,10 @@ export class VB6RecursiveDescentParser {
         line: token.line,
         column: token.column,
         literalType: 'Date',
-        value: new Date(token.value)
+        value: new Date(token.value),
       };
     }
-    
+
     // Keywords as literals
     if (this.matchKeyword('true') || this.matchKeyword('false')) {
       this.advance();
@@ -956,10 +1011,10 @@ export class VB6RecursiveDescentParser {
         line: token.line,
         column: token.column,
         literalType: 'Boolean',
-        value: token.value.toLowerCase() === 'true'
+        value: token.value.toLowerCase() === 'true',
       };
     }
-    
+
     if (this.matchKeyword('nothing') || this.matchKeyword('null') || this.matchKeyword('empty')) {
       this.advance();
       return {
@@ -967,12 +1022,16 @@ export class VB6RecursiveDescentParser {
         expressionType: 'Literal',
         line: token.line,
         column: token.column,
-        literalType: token.value.toLowerCase() === 'nothing' ? 'Nothing' : 
-                     token.value.toLowerCase() === 'null' ? 'Null' : 'Empty',
-        value: null
+        literalType:
+          token.value.toLowerCase() === 'nothing'
+            ? 'Nothing'
+            : token.value.toLowerCase() === 'null'
+              ? 'Null'
+              : 'Empty',
+        value: null,
       };
     }
-    
+
     // Parenthesized expression
     if (this.match(VB6TokenType.Punctuation, '(')) {
       this.advance();
@@ -993,7 +1052,7 @@ export class VB6RecursiveDescentParser {
         expressionType: 'WithMemberAccess',
         line: token.line,
         column: token.column,
-        member: member.value
+        member: member.value,
       };
 
       // Handle chained member access or function calls
@@ -1009,7 +1068,7 @@ export class VB6RecursiveDescentParser {
             line: expr.line,
             column: expr.column,
             object: expr,
-            member: nextMember.value
+            member: nextMember.value,
           };
         } else if (this.match(VB6TokenType.Punctuation, '(')) {
           // Function call or array access on the member
@@ -1030,9 +1089,14 @@ export class VB6RecursiveDescentParser {
             expressionType: 'FunctionCall',
             line: expr.line,
             column: expr.column,
-            name: (expr as any).member || 'unknown',
+            name: (expr.member as string) || 'unknown',
             callee: expr,
-            arguments: args.map(a => ({ type: 'Argument', value: a, line: a.line, column: a.column }))
+            arguments: args.map(a => ({
+              type: 'Argument',
+              value: a,
+              line: a.line,
+              column: a.column,
+            })),
           };
         } else {
           break;
@@ -1054,14 +1118,23 @@ export class VB6RecursiveDescentParser {
 
     // Don't treat statement-ending keywords or parameter keywords as errors in expressions
     // These should be handled at the statement or parameter level
-    if (this.matchKeyword('end') || this.matchKeyword('else') ||
-        this.matchKeyword('elseif') || this.matchKeyword('case') ||
-        this.matchKeyword('loop') || this.matchKeyword('next') ||
-        this.matchKeyword('wend') || this.matchKeyword('until') ||
-        this.matchKeyword('sub') || this.matchKeyword('function') ||
-        this.matchKeyword('property') || this.matchKeyword('byval') ||
-        this.matchKeyword('byref') || this.matchKeyword('optional') ||
-        this.matchKeyword('paramarray')) {
+    if (
+      this.matchKeyword('end') ||
+      this.matchKeyword('else') ||
+      this.matchKeyword('elseif') ||
+      this.matchKeyword('case') ||
+      this.matchKeyword('loop') ||
+      this.matchKeyword('next') ||
+      this.matchKeyword('wend') ||
+      this.matchKeyword('until') ||
+      this.matchKeyword('sub') ||
+      this.matchKeyword('function') ||
+      this.matchKeyword('property') ||
+      this.matchKeyword('byval') ||
+      this.matchKeyword('byref') ||
+      this.matchKeyword('optional') ||
+      this.matchKeyword('paramarray')
+    ) {
       return null;
     }
 
@@ -1079,9 +1152,9 @@ export class VB6RecursiveDescentParser {
     this.addError(`Unexpected token: ${token.value}`);
     return null;
   }
-  
+
   // Helper methods (simplified for space)
-  
+
   private identifierExpression(): VB6ExpressionNode | null {
     const token = this.currentToken();
     this.advance();
@@ -1091,7 +1164,7 @@ export class VB6RecursiveDescentParser {
       expressionType: 'Identifier',
       line: token.line,
       column: token.column,
-      name: token.value
+      name: token.value,
     };
 
     // Handle member access, array subscripting, and function calls
@@ -1124,7 +1197,7 @@ export class VB6RecursiveDescentParser {
           line: expr.line,
           column: expr.column,
           object: expr,
-          member: member.value
+          member: member.value,
         };
       } else if (this.match(VB6TokenType.Punctuation, '(')) {
         // Could be array subscripting or function call
@@ -1165,7 +1238,7 @@ export class VB6RecursiveDescentParser {
             line: expr.line,
             column: expr.column,
             array: expr,
-            indices
+            indices,
           } as VB6ArrayAccessNode;
         } else if (isValidArrayAccess) {
           // Empty parentheses - could be parameterless function call
@@ -1175,7 +1248,7 @@ export class VB6RecursiveDescentParser {
             line: expr.line,
             column: expr.column,
             name: (expr as VB6IdentifierNode).name,
-            arguments: []
+            arguments: [],
           };
         } else {
           // Failed to parse, restore position and break
@@ -1189,10 +1262,10 @@ export class VB6RecursiveDescentParser {
 
     return expr;
   }
-  
+
   // Additional parsing methods would go here...
   // (ifStatement, forStatement, etc. - simplified for space)
-  
+
   private ifStatement(): VB6StatementNode | null {
     const startToken = this.currentToken();
     this.advance(); // consume 'If'
@@ -1216,9 +1289,11 @@ export class VB6RecursiveDescentParser {
     // Parse then statements - stop at ElseIf, Else, or End
     while (!this.isAtEnd()) {
       // Check for end of if block
-      if (this.matchKeyword('elseif') ||
-          this.matchKeyword('else') ||
-          (this.matchKeyword('end') && this.peekKeyword('if'))) {
+      if (
+        this.matchKeyword('elseif') ||
+        this.matchKeyword('else') ||
+        (this.matchKeyword('end') && this.peekKeyword('if'))
+      ) {
         break;
       }
 
@@ -1231,9 +1306,11 @@ export class VB6RecursiveDescentParser {
         }
       } else {
         // Skip to next potential keyword if not at a control keyword
-        if (!this.matchKeyword('elseif') &&
-            !this.matchKeyword('else') &&
-            !this.matchKeyword('end')) {
+        if (
+          !this.matchKeyword('elseif') &&
+          !this.matchKeyword('else') &&
+          !this.matchKeyword('end')
+        ) {
           this.advance();
         } else {
           break;
@@ -1260,9 +1337,11 @@ export class VB6RecursiveDescentParser {
       const elseIfStatements: VB6StatementNode[] = [];
       while (!this.isAtEnd()) {
         // Check for next control structure
-        if (this.matchKeyword('elseif') ||
-            this.matchKeyword('else') ||
-            (this.matchKeyword('end') && this.peekKeyword('if'))) {
+        if (
+          this.matchKeyword('elseif') ||
+          this.matchKeyword('else') ||
+          (this.matchKeyword('end') && this.peekKeyword('if'))
+        ) {
           break;
         }
 
@@ -1275,9 +1354,11 @@ export class VB6RecursiveDescentParser {
           }
         } else {
           // Skip to next potential keyword if not at a control keyword
-          if (!this.matchKeyword('elseif') &&
-              !this.matchKeyword('else') &&
-              !this.matchKeyword('end')) {
+          if (
+            !this.matchKeyword('elseif') &&
+            !this.matchKeyword('else') &&
+            !this.matchKeyword('end')
+          ) {
             this.advance();
           } else {
             break;
@@ -1287,7 +1368,7 @@ export class VB6RecursiveDescentParser {
 
       elseIfClauses.push({
         condition: elseIfCondition,
-        statements: elseIfStatements
+        statements: elseIfStatements,
       });
     }
 
@@ -1339,20 +1420,22 @@ export class VB6RecursiveDescentParser {
       condition,
       thenStatements,
       elseIfClauses,
-      elseStatements
+      elseStatements,
     };
   }
-  
+
   // Utility methods
-  
+
   private currentToken(): VB6Token {
-    return this.tokens[this.position] || {
-      type: VB6TokenType.EOF,
-      value: '',
-      line: 0,
-      column: 0,
-      length: 0
-    };
+    return (
+      this.tokens[this.position] || {
+        type: VB6TokenType.EOF,
+        value: '',
+        line: 0,
+        column: 0,
+        length: 0,
+      }
+    );
   }
 
   private peekToken(offset: number = 1): VB6Token | null {
@@ -1371,12 +1454,11 @@ export class VB6RecursiveDescentParser {
     if (!this.isAtEnd()) this.position++;
     return this.tokens[this.position - 1];
   }
-  
+
   private isAtEnd(): boolean {
-    return this.position >= this.tokens.length || 
-           this.currentToken().type === VB6TokenType.EOF;
+    return this.position >= this.tokens.length || this.currentToken().type === VB6TokenType.EOF;
   }
-  
+
   private match(type: VB6TokenType, value?: string): boolean {
     const token = this.currentToken();
     return token.type === type && (value === undefined || token.value === value);
@@ -1384,10 +1466,11 @@ export class VB6RecursiveDescentParser {
 
   private matchKeyword(keyword: string): boolean {
     const token = this.currentToken();
-    return token.type === VB6TokenType.Keyword &&
-           token.value.toLowerCase() === keyword.toLowerCase();
+    return (
+      token.type === VB6TokenType.Keyword && token.value.toLowerCase() === keyword.toLowerCase()
+    );
   }
-  
+
   private consume(type: VB6TokenType, message: string): VB6Token | null {
     // Skip whitespace before consuming
     this.skipWhitespace();
@@ -1399,7 +1482,7 @@ export class VB6RecursiveDescentParser {
     this.addError(message);
     return null;
   }
-  
+
   private consumeKeyword(keyword: string): boolean {
     if (this.matchKeyword(keyword)) {
       this.advance();
@@ -1407,11 +1490,13 @@ export class VB6RecursiveDescentParser {
     }
     return false;
   }
-  
+
   private skipNewlinesAndComments(): void {
-    while (this.currentToken().type === VB6TokenType.NewLine ||
-           this.currentToken().type === VB6TokenType.Comment ||
-           this.currentToken().type === VB6TokenType.Whitespace) {
+    while (
+      this.currentToken().type === VB6TokenType.NewLine ||
+      this.currentToken().type === VB6TokenType.Comment ||
+      this.currentToken().type === VB6TokenType.Whitespace
+    ) {
       this.advance();
     }
   }
@@ -1421,20 +1506,20 @@ export class VB6RecursiveDescentParser {
       this.advance();
     }
   }
-  
+
   private addError(message: string): void {
     const token = this.currentToken();
     this.errors.push({
       message,
       line: token.line,
       column: token.column,
-      found: token.value
+      found: token.value,
     });
   }
-  
+
   // Additional helper methods (simplified)...
-  
-  private parseVisibility(): string | null {
+
+  private parseVisibility(): VB6Visibility {
     if (this.matchKeyword('public')) {
       this.advance();
       return 'Public';
@@ -1450,14 +1535,25 @@ export class VB6RecursiveDescentParser {
     }
     return null;
   }
-  
+
   private parseType(): VB6TypeNode {
     const token = this.currentToken();
 
     // Valid VB6 data types
     const validTypes = new Set([
-      'integer', 'long', 'single', 'double', 'string', 'boolean',
-      'variant', 'object', 'date', 'byte', 'currency', 'decimal', 'any'
+      'integer',
+      'long',
+      'single',
+      'double',
+      'string',
+      'boolean',
+      'variant',
+      'object',
+      'date',
+      'byte',
+      'currency',
+      'decimal',
+      'any',
     ]);
 
     // Normalize type name (case-insensitive)
@@ -1471,7 +1567,7 @@ export class VB6RecursiveDescentParser {
         type: 'Type',
         line: token.line,
         column: token.column,
-        typeName: token.value as any  // Use as-is if not recognized
+        typeName: token.value, // Use as-is if not recognized
       };
     }
 
@@ -1480,19 +1576,19 @@ export class VB6RecursiveDescentParser {
     // Normalize the type name to match what mapVB6TypeToJS expects (PascalCase)
     // Handle all VB6 types
     const typeMap: Record<string, string> = {
-      'integer': 'Integer',
-      'long': 'Long',
-      'single': 'Single',
-      'double': 'Double',
-      'string': 'String',
-      'boolean': 'Boolean',
-      'variant': 'Variant',
-      'object': 'Object',
-      'date': 'Date',
-      'byte': 'Byte',
-      'currency': 'Currency',
-      'decimal': 'Decimal',
-      'any': 'Any'
+      integer: 'Integer',
+      long: 'Long',
+      single: 'Single',
+      double: 'Double',
+      string: 'String',
+      boolean: 'Boolean',
+      variant: 'Variant',
+      object: 'Object',
+      date: 'Date',
+      byte: 'Byte',
+      currency: 'Currency',
+      decimal: 'Decimal',
+      any: 'Any',
     };
 
     const normalizedType = typeMap[lowerValue] || 'Variant';
@@ -1501,10 +1597,10 @@ export class VB6RecursiveDescentParser {
       type: 'Type',
       line: token.line,
       column: token.column,
-      typeName: normalizedType as any
+      typeName: normalizedType,
     };
   }
-  
+
   private parseParameterList(): VB6ParameterNode[] {
     const parameters: VB6ParameterNode[] = [];
 
@@ -1525,7 +1621,7 @@ export class VB6RecursiveDescentParser {
 
     return parameters;
   }
-  
+
   private parseParameter(): VB6ParameterNode | null {
     const startToken = this.currentToken();
 
@@ -1570,7 +1666,7 @@ export class VB6RecursiveDescentParser {
       this.skipWhitespace();
       defaultValue = this.expression();
     }
-    
+
     return {
       type: 'Parameter',
       line: startToken.line,
@@ -1578,10 +1674,10 @@ export class VB6RecursiveDescentParser {
       name: nameToken.value,
       parameterType,
       dataType,
-      defaultValue
+      defaultValue,
     };
   }
-  
+
   private parseArrayDimensions(): VB6ExpressionNode[] {
     this.advance(); // consume (
     const dimensions: VB6ExpressionNode[] = [];
@@ -1616,40 +1712,46 @@ export class VB6RecursiveDescentParser {
 
     return dimensions;
   }
-  
+
   // Complete implementations of statement types
-  private constantDeclaration(startToken: VB6Token, visibility: string | null): VB6DeclarationNode | null {
+  private constantDeclaration(
+    startToken: VB6Token,
+    visibility: VB6Visibility
+  ): VB6DeclarationNode | null {
     if (!this.consumeKeyword('const')) return null;
-    
+
     const nameToken = this.consume(VB6TokenType.Identifier, 'Expected constant name');
     if (!nameToken) return null;
-    
+
     let dataType: VB6TypeNode | undefined;
     if (this.matchKeyword('as')) {
       this.advance();
       dataType = this.parseType();
     }
-    
+
     if (!this.consume(VB6TokenType.Operator, 'Expected = in constant declaration')) return null;
-    
+
     const initialValue = this.expression();
     if (!initialValue) return null;
-    
+
     this.skipNewlinesAndComments();
-    
+
     return {
       type: 'Declaration',
       line: startToken.line,
       column: startToken.column,
       declarationType: 'Constant',
-      visibility: visibility as any,
+      visibility: visibility,
       name: nameToken.value,
       dataType,
-      initialValue
+      initialValue,
     };
   }
-  
-  private typeDeclaration(startToken: VB6Token, visibility: string | null): VB6DeclarationNode | null {
+
+  private typeDeclaration(
+    startToken: VB6Token,
+    visibility: VB6Visibility
+  ): VB6DeclarationNode | null {
     if (!this.consumeKeyword('type')) return null;
 
     this.skipWhitespace();
@@ -1659,14 +1761,17 @@ export class VB6RecursiveDescentParser {
     this.skipNewlinesAndComments();
 
     // Parse type members properly
-    const properties: { name: string; dataType?: VB6TypeNode; dimensions?: VB6ExpressionNode[] }[] = [];
+    const properties: { name: string; dataType?: VB6TypeNode; dimensions?: VB6ExpressionNode[] }[] =
+      [];
 
     while (!this.isAtEnd() && !this.matchKeyword('end')) {
       this.skipWhitespace();
 
       // Skip newlines and comments
-      if (this.currentToken().type === VB6TokenType.Newline ||
-          this.currentToken().type === VB6TokenType.Comment) {
+      if (
+        this.currentToken().type === VB6TokenType.Newline ||
+        this.currentToken().type === VB6TokenType.Comment
+      ) {
         this.advance();
         continue;
       }
@@ -1714,47 +1819,53 @@ export class VB6RecursiveDescentParser {
       line: startToken.line,
       column: startToken.column,
       declarationType: 'Type',
-      visibility: visibility as any,
-      name: nameToken.value
+      visibility: visibility,
+      name: nameToken.value,
     };
 
     // Attach properties to the declaration
-    (decl as any).properties = properties;
+    decl.properties = properties;
 
     return decl;
   }
-  
-  private enumDeclaration(startToken: VB6Token, visibility: string | null): VB6DeclarationNode | null {
+
+  private enumDeclaration(
+    startToken: VB6Token,
+    visibility: VB6Visibility
+  ): VB6DeclarationNode | null {
     if (!this.consumeKeyword('enum')) return null;
-    
+
     const nameToken = this.consume(VB6TokenType.Identifier, 'Expected enum name');
     if (!nameToken) return null;
-    
+
     this.skipNewlinesAndComments();
-    
+
     // Parse enum members (simplified - just skip to End Enum)
     while (!this.isAtEnd() && !this.matchKeyword('end')) {
       this.advance();
     }
-    
+
     if (this.matchKeyword('end')) {
       this.advance();
       this.consumeKeyword('enum');
     }
-    
+
     return {
       type: 'Declaration',
       line: startToken.line,
       column: startToken.column,
       declarationType: 'Enum',
-      visibility: visibility as any,
-      name: nameToken.value
+      visibility: visibility,
+      name: nameToken.value,
     };
   }
-  
-  private declareDeclaration(startToken: VB6Token, visibility: string | null): VB6DeclarationNode | null {
+
+  private declareDeclaration(
+    startToken: VB6Token,
+    visibility: VB6Visibility
+  ): VB6DeclarationNode | null {
     if (!this.consumeKeyword('declare')) return null;
-    
+
     // Parse Declare Function/Sub
     let procedureType = 'function';
     if (this.matchKeyword('function')) {
@@ -1763,46 +1874,49 @@ export class VB6RecursiveDescentParser {
       this.advance();
       procedureType = 'sub';
     }
-    
+
     const nameToken = this.consume(VB6TokenType.Identifier, 'Expected function name');
     if (!nameToken) return null;
-    
+
     if (!this.consumeKeyword('lib')) return null;
-    
+
     const libToken = this.consume(VB6TokenType.StringLiteral, 'Expected library name');
     if (!libToken) return null;
-    
+
     let alias: string | undefined;
     if (this.matchKeyword('alias')) {
       this.advance();
       const aliasToken = this.consume(VB6TokenType.StringLiteral, 'Expected alias name');
       if (aliasToken) alias = aliasToken.value;
     }
-    
+
     // Parse parameters if present
     if (this.match(VB6TokenType.Punctuation, '(')) {
       this.parseParameterList();
     }
-    
+
     // Parse return type for functions
     if (procedureType === 'function' && this.matchKeyword('as')) {
       this.advance();
       this.parseType();
     }
-    
+
     return {
       type: 'Declaration',
       line: startToken.line,
       column: startToken.column,
       declarationType: 'Declare',
-      visibility: visibility as any,
+      visibility: visibility,
       name: nameToken.value,
       library: libToken.value,
-      alias
+      alias,
     };
   }
-  
-  private eventDeclaration(startToken: VB6Token, visibility: string | null): VB6DeclarationNode | null {
+
+  private eventDeclaration(
+    startToken: VB6Token,
+    visibility: VB6Visibility
+  ): VB6DeclarationNode | null {
     if (!this.consumeKeyword('event')) return null;
 
     const nameToken = this.consume(VB6TokenType.Identifier, 'Expected event name');
@@ -1821,12 +1935,12 @@ export class VB6RecursiveDescentParser {
       line: startToken.line,
       column: startToken.column,
       declarationType: 'Event',
-      visibility: visibility as any,
+      visibility: visibility,
       name: nameToken.value,
-      parameters
+      parameters,
     };
   }
-  
+
   private assignmentOrCall(): VB6StatementNode | null {
     const startToken = this.currentToken();
 
@@ -1850,7 +1964,7 @@ export class VB6RecursiveDescentParser {
         column: startToken.column,
         target,
         value,
-        isSet: false
+        isSet: false,
       } as VB6AssignmentNode;
     }
 
@@ -1859,25 +1973,27 @@ export class VB6RecursiveDescentParser {
     // We need to check if the next token could be an argument
     // Don't do this if target is already a function call or array access
     const nextToken = this.currentToken();
-    const isAlreadyCallOrArray = target.expressionType === 'FunctionCall' ||
-                                 target.expressionType === 'ArrayAccess';
+    const isAlreadyCallOrArray =
+      target.expressionType === 'FunctionCall' || target.expressionType === 'ArrayAccess';
 
     // Allow '.' as argument start for With member access (.PropertyName)
-    const isPunctuationAllowed = nextToken.type === VB6TokenType.Punctuation && nextToken.value === '.';
+    const isPunctuationAllowed =
+      nextToken.type === VB6TokenType.Punctuation && nextToken.value === '.';
 
-    if (!isAlreadyCallOrArray &&
-        !this.isAtEnd() &&
-        nextToken.type !== VB6TokenType.NewLine &&
-        nextToken.type !== VB6TokenType.EOF &&
-        !this.matchKeyword('end') &&
-        !this.matchKeyword('else') &&
-        !this.matchKeyword('elseif') &&
-        !this.matchKeyword('then') &&
-        !this.matchKeyword('loop') &&
-        !this.matchKeyword('next') &&
-        !this.matchKeyword('wend') &&
-        (nextToken.type !== VB6TokenType.Punctuation || isPunctuationAllowed)) {
-
+    if (
+      !isAlreadyCallOrArray &&
+      !this.isAtEnd() &&
+      nextToken.type !== VB6TokenType.NewLine &&
+      nextToken.type !== VB6TokenType.EOF &&
+      !this.matchKeyword('end') &&
+      !this.matchKeyword('else') &&
+      !this.matchKeyword('elseif') &&
+      !this.matchKeyword('then') &&
+      !this.matchKeyword('loop') &&
+      !this.matchKeyword('next') &&
+      !this.matchKeyword('wend') &&
+      (nextToken.type !== VB6TokenType.Punctuation || isPunctuationAllowed)
+    ) {
       // Parse arguments without parentheses
       const args: VB6ArgumentNode[] = [];
 
@@ -1888,7 +2004,7 @@ export class VB6RecursiveDescentParser {
           type: 'Argument',
           line: firstArg.line,
           column: firstArg.column,
-          value: firstArg
+          value: firstArg,
         });
 
         // Parse additional comma-separated arguments
@@ -1901,7 +2017,7 @@ export class VB6RecursiveDescentParser {
             type: 'Argument',
             line: argExpr.line,
             column: argExpr.column,
-            value: argExpr
+            value: argExpr,
           });
         }
       }
@@ -1913,7 +2029,7 @@ export class VB6RecursiveDescentParser {
           line: target.line,
           column: target.column,
           name: (target as VB6IdentifierNode).name,
-          arguments: args
+          arguments: args,
         };
 
         return {
@@ -1921,7 +2037,7 @@ export class VB6RecursiveDescentParser {
           statementType: 'Expression',
           line: startToken.line,
           column: startToken.column,
-          expression: funcCall
+          expression: funcCall,
         };
       }
     }
@@ -1932,10 +2048,10 @@ export class VB6RecursiveDescentParser {
       statementType: 'Expression',
       line: startToken.line,
       column: startToken.column,
-      expression: target
+      expression: target,
     };
   }
-  
+
   private forStatement(): VB6StatementNode | null {
     const startToken = this.currentToken();
     this.advance(); // consume 'For'
@@ -1995,7 +2111,7 @@ export class VB6RecursiveDescentParser {
         column: startToken.column,
         variable: varToken.value,
         collection,
-        body
+        body,
       } as VB6ForEachNode;
     }
 
@@ -2066,7 +2182,7 @@ export class VB6RecursiveDescentParser {
       startValue,
       endValue,
       stepValue,
-      body
+      body,
     } as VB6ForNode;
   }
 
@@ -2160,7 +2276,7 @@ export class VB6RecursiveDescentParser {
       conditionType,
       condition,
       isPostCondition,
-      body
+      body,
     } as VB6DoNode;
   }
 
@@ -2216,7 +2332,7 @@ export class VB6RecursiveDescentParser {
             line: startToken.line,
             column: startToken.column,
             values,
-            statements: []
+            statements: [],
           };
 
           // Parse first value
@@ -2314,10 +2430,10 @@ export class VB6RecursiveDescentParser {
       column: startToken.column,
       expression,
       cases,
-      elseStatements
+      elseStatements,
     } as VB6SelectNode;
   }
-  
+
   private withStatement(): VB6StatementNode | null {
     const startToken = this.currentToken();
     this.advance(); // consume 'With'
@@ -2378,7 +2494,7 @@ export class VB6RecursiveDescentParser {
       line: startToken.line,
       column: startToken.column,
       expression,
-      body
+      body,
     } as VB6WithNode;
   }
 
@@ -2409,7 +2525,7 @@ export class VB6RecursiveDescentParser {
       expressionType: 'Identifier',
       line: dotToken.line,
       column: dotToken.column,
-      name: memberToken.value
+      name: memberToken.value,
     };
 
     // Handle chained member access (.Property.SubProperty) or method calls
@@ -2426,7 +2542,7 @@ export class VB6RecursiveDescentParser {
           line: memberExpr.line,
           column: memberExpr.column,
           object: memberExpr,
-          member: nextMember.value
+          member: nextMember.value,
         };
       } else if (this.match(VB6TokenType.Punctuation, '(')) {
         // Method call
@@ -2444,7 +2560,7 @@ export class VB6RecursiveDescentParser {
               type: 'Argument',
               line: argExpr.line,
               column: argExpr.column,
-              value: argExpr
+              value: argExpr,
             });
 
             this.skipWhitespace();
@@ -2462,7 +2578,7 @@ export class VB6RecursiveDescentParser {
           line: memberExpr.line,
           column: memberExpr.column,
           name: (memberExpr as VB6IdentifierNode).name,
-          arguments: args
+          arguments: args,
         };
         break;
       } else {
@@ -2488,7 +2604,7 @@ export class VB6RecursiveDescentParser {
         column: dotToken.column,
         target: memberExpr,
         value,
-        isSet
+        isSet,
       } as VB6AssignmentNode;
     }
 
@@ -2498,10 +2614,10 @@ export class VB6RecursiveDescentParser {
       statementType: 'ExpressionStatement',
       line: dotToken.line,
       column: dotToken.column,
-      expression: memberExpr
+      expression: memberExpr,
     };
   }
-  
+
   private errorHandlingStatement(): VB6StatementNode | null {
     const startToken = this.currentToken();
     this.advance(); // consume 'On'
@@ -2516,7 +2632,7 @@ export class VB6RecursiveDescentParser {
         line: startToken.line,
         column: startToken.column,
         action: 'GoTo',
-        label: undefined
+        label: undefined,
       } as VB6ErrorHandlingNode;
     }
 
@@ -2562,10 +2678,10 @@ export class VB6RecursiveDescentParser {
       line: startToken.line,
       column: startToken.column,
       action,
-      label
+      label,
     } as VB6ErrorHandlingNode;
   }
-  
+
   /**
    * Local variable declaration (inside procedures)
    * Returns an array of statements for multiple variables: Dim a, b, c As Long
@@ -2628,7 +2744,7 @@ export class VB6RecursiveDescentParser {
       name: nameToken.value,
       dimensions,
       dataType,
-      preserve
+      preserve,
     };
   }
 
@@ -2651,7 +2767,7 @@ export class VB6RecursiveDescentParser {
       expressionType: 'Identifier',
       line: identToken.line,
       column: identToken.column,
-      name: identToken.value
+      name: identToken.value,
     };
 
     // Handle member access chain
@@ -2669,7 +2785,7 @@ export class VB6RecursiveDescentParser {
         line: target.line,
         column: target.column,
         object: target,
-        member: member.value
+        member: member.value,
       };
     }
 
@@ -2687,10 +2803,10 @@ export class VB6RecursiveDescentParser {
       column: startToken.column,
       target,
       value,
-      isSet: true
+      isSet: true,
     } as VB6AssignmentNode;
   }
-  
+
   private callStatement(): VB6StatementNode | null {
     const startToken = this.currentToken();
     this.advance(); // consume 'Call'
@@ -2698,20 +2814,20 @@ export class VB6RecursiveDescentParser {
 
     const expression = this.expression();
     if (!expression) return null;
-    
+
     return {
       type: 'Statement',
       statementType: 'Call',
       line: startToken.line,
       column: startToken.column,
-      expression
+      expression,
     };
   }
-  
+
   private exitStatement(): VB6StatementNode | null {
     const startToken = this.currentToken();
     this.advance(); // consume 'Exit'
-    
+
     let exitType = 'Sub';
     if (this.matchKeyword('sub')) {
       this.advance();
@@ -2726,60 +2842,60 @@ export class VB6RecursiveDescentParser {
       this.advance();
       exitType = 'Do';
     }
-    
+
     return {
       type: 'Statement',
       statementType: 'Exit',
       line: startToken.line,
       column: startToken.column,
-      exitType
+      exitType,
     };
   }
-  
+
   private gotoStatement(): VB6StatementNode | null {
     const startToken = this.currentToken();
     this.advance(); // consume 'GoTo'
-    
+
     const labelToken = this.consume(VB6TokenType.Identifier, 'Expected label');
     if (!labelToken) return null;
-    
+
     return {
       type: 'Statement',
       statementType: 'GoTo',
       line: startToken.line,
       column: startToken.column,
-      label: labelToken.value
+      label: labelToken.value,
     };
   }
-  
+
   private gosubStatement(): VB6StatementNode | null {
     const startToken = this.currentToken();
     this.advance(); // consume 'GoSub'
-    
+
     const labelToken = this.consume(VB6TokenType.Identifier, 'Expected label');
     if (!labelToken) return null;
-    
+
     return {
       type: 'Statement',
       statementType: 'GoSub',
       line: startToken.line,
       column: startToken.column,
-      label: labelToken.value
+      label: labelToken.value,
     };
   }
-  
+
   private returnStatement(): VB6StatementNode | null {
     const startToken = this.currentToken();
     this.advance(); // consume 'Return'
-    
+
     return {
       type: 'Statement',
       statementType: 'Return',
       line: startToken.line,
-      column: startToken.column
+      column: startToken.column,
     };
   }
-  
+
   private resumeStatement(): VB6StatementNode | null {
     const startToken = this.currentToken();
     this.advance(); // consume 'Resume'
@@ -2809,7 +2925,7 @@ export class VB6RecursiveDescentParser {
       line: startToken.line,
       column: startToken.column,
       resumeType,
-      label
+      label,
     };
   }
 
@@ -2829,7 +2945,7 @@ export class VB6RecursiveDescentParser {
       statementType: 'Label',
       line: startToken.line,
       column: startToken.column,
-      name: labelName
+      name: labelName,
     };
   }
 
@@ -2837,38 +2953,51 @@ export class VB6RecursiveDescentParser {
     const startToken = this.currentToken();
     const expression = this.expression();
     if (!expression) return null;
-    
+
     return {
       type: 'Statement',
       statementType: 'Expression',
       line: startToken.line,
       column: startToken.column,
-      expression
+      expression,
     };
   }
-  
+
   private isProcedureStart(): boolean {
-    return this.matchKeyword('sub') || this.matchKeyword('function') || this.matchKeyword('property') ||
-           (this.matchKeyword('private') && this.peekProcedureKeyword()) ||
-           (this.matchKeyword('public') && this.peekProcedureKeyword()) ||
-           (this.matchKeyword('friend') && this.peekProcedureKeyword());
+    return (
+      this.matchKeyword('sub') ||
+      this.matchKeyword('function') ||
+      this.matchKeyword('property') ||
+      (this.matchKeyword('private') && this.peekProcedureKeyword()) ||
+      (this.matchKeyword('public') && this.peekProcedureKeyword()) ||
+      (this.matchKeyword('friend') && this.peekProcedureKeyword())
+    );
   }
-  
+
   private isDeclarationStart(): boolean {
-    return this.matchKeyword('dim') || this.matchKeyword('const') || this.matchKeyword('type') ||
-           this.matchKeyword('enum') || this.matchKeyword('declare') || this.matchKeyword('event') ||
-           (this.matchKeyword('private') && (this.peekDeclarationKeyword() || this.peekVariableName())) ||
-           (this.matchKeyword('public') && (this.peekDeclarationKeyword() || this.peekVariableName())) ||
-           (this.matchKeyword('global') && (this.peekDeclarationKeyword() || this.peekVariableName())) ||
-           (this.matchKeyword('friend') && (this.peekDeclarationKeyword() || this.peekVariableName()));
+    return (
+      this.matchKeyword('dim') ||
+      this.matchKeyword('const') ||
+      this.matchKeyword('type') ||
+      this.matchKeyword('enum') ||
+      this.matchKeyword('declare') ||
+      this.matchKeyword('event') ||
+      (this.matchKeyword('private') &&
+        (this.peekDeclarationKeyword() || this.peekVariableName())) ||
+      (this.matchKeyword('public') && (this.peekDeclarationKeyword() || this.peekVariableName())) ||
+      (this.matchKeyword('global') && (this.peekDeclarationKeyword() || this.peekVariableName())) ||
+      (this.matchKeyword('friend') && (this.peekDeclarationKeyword() || this.peekVariableName()))
+    );
   }
-  
+
   private peekKeyword(keyword: string): boolean {
     const nextPos = this.position + 1;
     if (nextPos >= this.tokens.length) return false;
     const nextToken = this.tokens[nextPos];
-    return nextToken.type === VB6TokenType.Keyword &&
-           nextToken.value.toLowerCase() === keyword.toLowerCase();
+    return (
+      nextToken.type === VB6TokenType.Keyword &&
+      nextToken.value.toLowerCase() === keyword.toLowerCase()
+    );
   }
 
   private peekProcedureKeyword(): boolean {
@@ -2879,10 +3008,12 @@ export class VB6RecursiveDescentParser {
     }
     if (nextPos >= this.tokens.length) return false;
     const nextToken = this.tokens[nextPos];
-    return nextToken.type === VB6TokenType.Keyword &&
-           ['sub', 'function', 'property'].includes(nextToken.value.toLowerCase());
+    return (
+      nextToken.type === VB6TokenType.Keyword &&
+      ['sub', 'function', 'property'].includes(nextToken.value.toLowerCase())
+    );
   }
-  
+
   private peekDeclarationKeyword(): boolean {
     let nextPos = this.position + 1;
     // Skip whitespace
@@ -2891,8 +3022,10 @@ export class VB6RecursiveDescentParser {
     }
     if (nextPos >= this.tokens.length) return false;
     const nextToken = this.tokens[nextPos];
-    return nextToken.type === VB6TokenType.Keyword &&
-           ['dim', 'const', 'type', 'enum', 'declare', 'event'].includes(nextToken.value.toLowerCase());
+    return (
+      nextToken.type === VB6TokenType.Keyword &&
+      ['dim', 'const', 'type', 'enum', 'declare', 'event'].includes(nextToken.value.toLowerCase())
+    );
   }
 
   private peekVariableName(): boolean {
@@ -2911,10 +3044,13 @@ export class VB6RecursiveDescentParser {
 /**
  * Convenience function to parse VB6 code
  */
-export function parseVB6Code(source: string): { ast: VB6ModuleNode | null, errors: VB6ParseError[] } {
+export function parseVB6Code(source: string): {
+  ast: VB6ModuleNode | null;
+  errors: VB6ParseError[];
+} {
   const lexer = new VB6AdvancedLexer(source);
   const tokens = lexer.tokenize();
-  
+
   const parser = new VB6RecursiveDescentParser(tokens);
   return parser.parseModule();
 }

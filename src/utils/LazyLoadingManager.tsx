@@ -16,19 +16,21 @@ interface LoadingFallbackProps {
   size?: 'small' | 'medium' | 'large';
 }
 
-const LoadingFallback: React.FC<LoadingFallbackProps> = ({ 
-  message = 'Loading...', 
-  size = 'medium' 
+const LoadingFallback: React.FC<LoadingFallbackProps> = ({
+  message = 'Loading...',
+  size = 'medium',
 }) => {
   const sizeClasses = {
     small: 'h-4 w-4',
-    medium: 'h-8 w-8', 
-    large: 'h-12 w-12'
+    medium: 'h-8 w-8',
+    large: 'h-12 w-12',
   };
 
   return (
     <div className="flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-      <div className={`animate-spin rounded-full border-2 border-blue-600 border-t-transparent ${sizeClasses[size]} mr-3`}></div>
+      <div
+        className={`animate-spin rounded-full border-2 border-blue-600 border-t-transparent ${sizeClasses[size]} mr-3`}
+      ></div>
       <span className="text-sm text-gray-600 dark:text-gray-300">{message}</span>
     </div>
   );
@@ -40,10 +42,7 @@ interface LazyErrorBoundaryState {
   error?: Error;
 }
 
-class LazyErrorBoundary extends React.Component<
-  React.PropsWithChildren,
-  LazyErrorBoundaryState
-> {
+class LazyErrorBoundary extends React.Component<React.PropsWithChildren, LazyErrorBoundaryState> {
   constructor(props: React.PropsWithChildren) {
     super(props);
     this.state = { hasError: false };
@@ -94,14 +93,14 @@ export function createLazyComponent<T = Record<string, any>>(
   const LazyComponent = lazy(async () => {
     try {
       const startTime = performance.now();
-      
+
       const module = await importFunction();
-      
+
       const loadTime = performance.now() - startTime;
-      
+
       // Mettre en cache
       componentCache.set(componentName, module.default);
-      
+
       return module;
     } catch (error) {
       console.error(`❌ Failed to load ${componentName}:`, error);
@@ -112,7 +111,10 @@ export function createLazyComponent<T = Record<string, any>>(
   // Précharger si demandé
   if (preload) {
     const promise = importFunction();
-    loadingPromises.set(componentName, promise.then(m => m.default));
+    loadingPromises.set(
+      componentName,
+      promise.then(m => m.default)
+    );
   }
 
   return LazyComponent;
@@ -124,7 +126,7 @@ export function usePreloadComponents(componentNames: string[]) {
 
   useEffect(() => {
     let mounted = true;
-    
+
     const preloadComponents = async () => {
       const promises = componentNames.map(async (name, index) => {
         const promise = loadingPromises.get(name);
@@ -167,7 +169,7 @@ export const LazyWrapper: React.FC<LazyWrapperProps> = ({
   children,
   fallback = <LoadingFallback />,
   errorFallback,
-  delay = 0
+  delay = 0,
 }) => {
   const [showContent, setShowContent] = useState(delay === 0);
 
@@ -184,9 +186,7 @@ export const LazyWrapper: React.FC<LazyWrapperProps> = ({
 
   return (
     <LazyErrorBoundary>
-      <Suspense fallback={fallback}>
-        {children}
-      </Suspense>
+      <Suspense fallback={fallback}>{children}</Suspense>
     </LazyErrorBoundary>
   );
 };
@@ -194,7 +194,7 @@ export const LazyWrapper: React.FC<LazyWrapperProps> = ({
 // ULTRA-OPTIMIZE: Composants de fallback pour les composants manquants
 const MissingComponent: React.FC<any> = ({ visible, onClose, ...props }) => {
   if (!visible) return null;
-  
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-md">
@@ -217,8 +217,8 @@ const MissingComponent: React.FC<any> = ({ visible, onClose, ...props }) => {
 export const LAZY_COMPONENTS = {
   // CHUNK 1: Éditeur optimisé
   MonacoEditor: createLazyComponent(
-    () => import('../components/Editor/OptimizedMonacoEditor'),
-    'OptimizedMonacoEditor'
+    () => import('../components/Editor/MonacoCodeEditor'),
+    'MonacoCodeEditor'
   ),
 
   // CHUNK 2: Composants de base (fallbacks pour les manquants)
@@ -234,11 +234,8 @@ export const LAZY_COMPONENTS = {
   TestRunner: () => MissingComponent,
   CommandPalette: () => MissingComponent,
 
-  // CHUNK 3: Dashboard de performance (existe)
-  PerformanceMonitor: createLazyComponent(
-    () => import('../components/Performance/UltraPerformanceDashboard'),
-    'UltraPerformanceDashboard'
-  )
+  // CHUNK 3: Dashboard de performance
+  PerformanceMonitor: () => MissingComponent,
 };
 
 // ULTRA-OPTIMIZE: Hook de gestion des chunks par contexte
@@ -246,7 +243,7 @@ export function useContextualLoading(mode: 'design' | 'debug' | 'performance') {
   const preloadLists = {
     design: ['CommandPalette', 'ProjectTemplateManager'],
     debug: ['BreakpointManager', 'AdvancedDebugPanel', 'PerformanceMonitor'],
-    performance: ['PerformanceMonitor', 'CodeAnalyzer']
+    performance: ['PerformanceMonitor', 'CodeAnalyzer'],
   };
 
   const { preloadedCount, totalComponents } = usePreloadComponents(preloadLists[mode]);
@@ -255,7 +252,6 @@ export function useContextualLoading(mode: 'design' | 'debug' | 'performance') {
     isReady: preloadedCount === totalComponents,
     progress: totalComponents > 0 ? (preloadedCount / totalComponents) * 100 : 100,
     preloadedCount,
-    totalComponents
+    totalComponents,
   };
 }
-

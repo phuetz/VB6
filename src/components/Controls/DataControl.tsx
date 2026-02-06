@@ -1,6 +1,18 @@
-import React, { useState, useEffect, useCallback, useRef, useImperativeHandle, forwardRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useImperativeHandle,
+  forwardRef,
+} from 'react';
 import { Control } from '../../context/types';
-import { vb6DatabaseService, ADOConnection, ADORecordset, ConnectionState } from '../../services/VB6DatabaseService';
+import {
+  vb6DatabaseService,
+  ADOConnection,
+  ADORecordset,
+  ConnectionState,
+} from '../../services/VB6DatabaseService';
 
 interface DataControlProps {
   control: Control;
@@ -13,10 +25,10 @@ interface DataRecord {
   [key: string]: any;
 }
 
-export const DataControl: React.FC<DataControlProps> = ({ 
-  control, 
+export const DataControl: React.FC<DataControlProps> = ({
+  control,
   isDesignMode = false,
-  onPropertyChange 
+  onPropertyChange,
 }) => {
   // VB6 Data control properties
   const {
@@ -119,8 +131,6 @@ export const DataControl: React.FC<DataControlProps> = ({
   useEffect(() => {
     if (!isDesignMode && databaseName && recordSource) {
       // In a real implementation, this would connect to a database
-      console.log(`Connecting to ${databaseName} with recordSource: ${recordSource}`);
-      
       // Fire VB6 events
       if (window.VB6Runtime?.fireEvent) {
         window.VB6Runtime.fireEvent(control.name, 'Initialize');
@@ -174,9 +184,10 @@ export const DataControl: React.FC<DataControlProps> = ({
     whiteSpace: 'nowrap',
   };
 
-  const recordInfo = records.length > 0 && currentIndex < records.length
-    ? `${caption} ${currentIndex + 1}/${records.length}`
-    : caption;
+  const recordInfo =
+    records.length > 0 && currentIndex < records.length
+      ? `${caption} ${currentIndex + 1}/${records.length}`
+      : caption;
 
   return (
     <>
@@ -196,7 +207,7 @@ export const DataControl: React.FC<DataControlProps> = ({
         >
           |◀
         </button>
-        
+
         {/* Move Previous Button */}
         <button
           style={buttonStyle}
@@ -206,12 +217,10 @@ export const DataControl: React.FC<DataControlProps> = ({
         >
           ◀
         </button>
-        
+
         {/* Caption/Record Info */}
-        <div style={captionStyle}>
-          {recordInfo}
-        </div>
-        
+        <div style={captionStyle}>{recordInfo}</div>
+
         {/* Move Next Button */}
         <button
           style={buttonStyle}
@@ -221,7 +230,7 @@ export const DataControl: React.FC<DataControlProps> = ({
         >
           ▶
         </button>
-        
+
         {/* Move Last Button */}
         <button
           style={buttonStyle}
@@ -232,7 +241,7 @@ export const DataControl: React.FC<DataControlProps> = ({
           ▶|
         </button>
       </div>
-      
+
       {/* Design mode indicator */}
       {isDesignMode && (
         <div

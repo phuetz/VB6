@@ -9,19 +9,24 @@ import { logger } from '../utils/logger';
 export class AppError extends Error {
   statusCode: number;
   isOperational: boolean;
-  
+
   constructor(message: string, statusCode: number = 500, isOperational: boolean = true) {
     super(message);
     this.statusCode = statusCode;
     this.isOperational = isOperational;
-    
+
     Error.captureStackTrace(this, this.constructor);
   }
 }
 
-export const errorHandler = (err: Error | AppError, req: Request, res: Response, next: NextFunction) => {
+export const errorHandler = (
+  err: Error | AppError,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   let error = err as AppError;
-  
+
   // Log error
   logger.error({
     message: error.message,
@@ -31,12 +36,12 @@ export const errorHandler = (err: Error | AppError, req: Request, res: Response,
     ip: req.ip,
     statusCode: error.statusCode || 500,
   });
-  
+
   // Default error values
   if (!error.statusCode) {
     error = new AppError(error.message || 'Internal Server Error', 500);
   }
-  
+
   // Handle specific error types
   if (err.name === 'ValidationError') {
     error = new AppError('Validation Error', 400);
@@ -49,7 +54,7 @@ export const errorHandler = (err: Error | AppError, req: Request, res: Response,
   } else if (err.name === 'SequelizeDatabaseError') {
     error = new AppError('Database Error', 500);
   }
-  
+
   // Send error response
   res.status(error.statusCode).json({
     success: false,
@@ -67,7 +72,9 @@ export const errorHandler = (err: Error | AppError, req: Request, res: Response,
 };
 
 // Async error handler wrapper
-export const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<void> | void) => {
+export const asyncHandler = (
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<void> | void
+) => {
   return (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
@@ -83,7 +90,7 @@ export const notFoundHandler = (req: Request, res: Response, next: NextFunction)
 export const unhandledRejectionHandler = () => {
   process.on('unhandledRejection', (reason: Error | any, promise: Promise<any>) => {
     logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
-    
+
     // Exit process in production
     if (process.env.NODE_ENV === 'production') {
       process.exit(1);
@@ -95,7 +102,7 @@ export const unhandledRejectionHandler = () => {
 export const uncaughtExceptionHandler = () => {
   process.on('uncaughtException', (error: Error) => {
     logger.error('Uncaught Exception:', error);
-    
+
     // Exit process
     process.exit(1);
   });

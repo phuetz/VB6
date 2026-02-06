@@ -32,23 +32,23 @@ export function Environ(expression: string | number): string {
     } else if (typeof window !== 'undefined') {
       // Browser environment - create simulated environment
       const browserEnv: Record<string, string> = {
-        'USERNAME': 'WebUser',
-        'COMPUTERNAME': 'WebClient',
-        'OS': navigator.platform || 'Unknown',
-        'PROCESSOR_ARCHITECTURE': 'Web',
-        'TEMP': '/tmp',
-        'TMP': '/tmp',
-        'HOMEDRIVE': 'C:',
-        'HOMEPATH': '\\Users\\WebUser',
-        'PATH': '/',
-        'WINDIR': 'C:\\Windows',
-        'SYSTEMROOT': 'C:\\Windows',
-        'SYSTEMDRIVE': 'C:',
-        'APPDATA': 'C:\\Users\\WebUser\\AppData\\Roaming',
-        'LOCALAPPDATA': 'C:\\Users\\WebUser\\AppData\\Local',
-        'PROGRAMFILES': 'C:\\Program Files',
+        USERNAME: 'WebUser',
+        COMPUTERNAME: 'WebClient',
+        OS: navigator.platform || 'Unknown',
+        PROCESSOR_ARCHITECTURE: 'Web',
+        TEMP: '/tmp',
+        TMP: '/tmp',
+        HOMEDRIVE: 'C:',
+        HOMEPATH: '\\Users\\WebUser',
+        PATH: '/',
+        WINDIR: 'C:\\Windows',
+        SYSTEMROOT: 'C:\\Windows',
+        SYSTEMDRIVE: 'C:',
+        APPDATA: 'C:\\Users\\WebUser\\AppData\\Roaming',
+        LOCALAPPDATA: 'C:\\Users\\WebUser\\AppData\\Local',
+        PROGRAMFILES: 'C:\\Program Files',
         'PROGRAMFILES(X86)': 'C:\\Program Files (x86)',
-        'USERPROFILE': 'C:\\Users\\WebUser'
+        USERPROFILE: 'C:\\Users\\WebUser',
       };
       envVars = Object.entries(browserEnv).map(([key, value]) => `${key}=${value}`);
     }
@@ -71,23 +71,23 @@ export function Environ(expression: string | number): string {
     // Browser fallback with comprehensive environment mapping
     if (typeof window !== 'undefined') {
       const browserEnv: Record<string, string> = {
-        'USERNAME': 'WebUser',
-        'COMPUTERNAME': 'WebClient',
-        'OS': navigator.platform || 'Unknown',
-        'PROCESSOR_ARCHITECTURE': 'Web',
-        'TEMP': '/tmp',
-        'TMP': '/tmp',
-        'HOMEDRIVE': 'C:',
-        'HOMEPATH': '\\Users\\WebUser',
-        'PATH': '/',
-        'WINDIR': 'C:\\Windows',
-        'SYSTEMROOT': 'C:\\Windows',
-        'SYSTEMDRIVE': 'C:',
-        'APPDATA': 'C:\\Users\\WebUser\\AppData\\Roaming',
-        'LOCALAPPDATA': 'C:\\Users\\WebUser\\AppData\\Local',
-        'PROGRAMFILES': 'C:\\Program Files',
+        USERNAME: 'WebUser',
+        COMPUTERNAME: 'WebClient',
+        OS: navigator.platform || 'Unknown',
+        PROCESSOR_ARCHITECTURE: 'Web',
+        TEMP: '/tmp',
+        TMP: '/tmp',
+        HOMEDRIVE: 'C:',
+        HOMEPATH: '\\Users\\WebUser',
+        PATH: '/',
+        WINDIR: 'C:\\Windows',
+        SYSTEMROOT: 'C:\\Windows',
+        SYSTEMDRIVE: 'C:',
+        APPDATA: 'C:\\Users\\WebUser\\AppData\\Roaming',
+        LOCALAPPDATA: 'C:\\Users\\WebUser\\AppData\\Local',
+        PROGRAMFILES: 'C:\\Program Files',
         'PROGRAMFILES(X86)': 'C:\\Program Files (x86)',
-        'USERPROFILE': 'C:\\Users\\WebUser'
+        USERPROFILE: 'C:\\Users\\WebUser',
       };
       return browserEnv[expression] || '';
     }
@@ -147,45 +147,45 @@ export enum VbStrConv {
   vbKatakana = 16,
   vbHiragana = 32,
   vbUnicode = 64,
-  vbFromUnicode = 128
+  vbFromUnicode = 128,
 }
 
 export function StrConv(str: string, conversion: VbStrConv, localeID?: number): string {
   if (str === null || str === undefined) return '';
-  
+
   switch (conversion) {
     case VbStrConv.vbUpperCase:
       return str.toUpperCase();
-      
+
     case VbStrConv.vbLowerCase:
       return str.toLowerCase();
-      
+
     case VbStrConv.vbProperCase:
       // Capitalize first letter of each word
       return str.replace(/\b\w/g, char => char.toUpperCase());
-      
+
     case VbStrConv.vbWide:
       // Convert half-width to full-width characters (Asian languages)
       return str.replace(/[\x20-\x7E]/g, char => {
-        return String.fromCharCode(char.charCodeAt(0) + 0xFEE0);
+        return String.fromCharCode(char.charCodeAt(0) + 0xfee0);
       });
-      
+
     case VbStrConv.vbNarrow:
       // Convert full-width to half-width characters (Asian languages)
       return str.replace(/[\uFF01-\uFF5E]/g, char => {
-        return String.fromCharCode(char.charCodeAt(0) - 0xFEE0);
+        return String.fromCharCode(char.charCodeAt(0) - 0xfee0);
       });
-      
+
     case VbStrConv.vbUnicode:
       // Convert from system default code page to Unicode
       // In JavaScript, strings are already Unicode
       return str;
-      
+
     case VbStrConv.vbFromUnicode:
       // Convert from Unicode to system default code page
       // This would lose data in JavaScript
       return str;
-      
+
     default:
       return str;
   }
@@ -201,11 +201,12 @@ export function Filter(
   compare: number = 0 // 0=vbBinaryCompare, 1=vbTextCompare
 ): string[] {
   if (!Array.isArray(sourceArray)) return [];
-  
-  const compareFunc = compare === 0 
-    ? (str: string) => str.includes(match)
-    : (str: string) => str.toLowerCase().includes(match.toLowerCase());
-  
+
+  const compareFunc =
+    compare === 0
+      ? (str: string) => str.includes(match)
+      : (str: string) => str.toLowerCase().includes(match.toLowerCase());
+
   return sourceArray.filter(item => {
     const matches = compareFunc(item);
     return include ? matches : !matches;
@@ -230,7 +231,7 @@ export function Split(
   compare: number = 0
 ): string[] {
   if (!expression) return [];
-  
+
   if (limit === -1) {
     return expression.split(delimiter);
   } else {
@@ -251,9 +252,9 @@ export function Replace(
   compare: number = 0
 ): string {
   if (!expression || !find) return expression;
-  
+
   let result = expression.substring(start - 1);
-  
+
   if (count === -1) {
     // Replace all occurrences
     if (compare === 1) {
@@ -268,17 +269,16 @@ export function Replace(
     // Replace limited occurrences
     let replaced = 0;
     while (replaced < count) {
-      const index = compare === 1 
-        ? result.toLowerCase().indexOf(find.toLowerCase())
-        : result.indexOf(find);
-      
+      const index =
+        compare === 1 ? result.toLowerCase().indexOf(find.toLowerCase()) : result.indexOf(find);
+
       if (index === -1) break;
-      
+
       result = result.substring(0, index) + replace + result.substring(index + find.length);
       replaced++;
     }
   }
-  
+
   return expression.substring(0, start - 1) + result;
 }
 
@@ -373,7 +373,7 @@ export enum VbMsgBoxStyle {
   vbMsgBoxHelpButton = 16384,
   vbMsgBoxSetForeground = 65536,
   vbMsgBoxRight = 524288,
-  vbMsgBoxRtlReading = 1048576
+  vbMsgBoxRtlReading = 1048576,
 }
 
 export enum VbMsgBoxResult {
@@ -383,7 +383,7 @@ export enum VbMsgBoxResult {
   vbRetry = 4,
   vbIgnore = 5,
   vbYes = 6,
-  vbNo = 7
+  vbNo = 7,
 }
 
 export function MsgBox(
@@ -392,23 +392,23 @@ export function MsgBox(
   title: string = 'Message'
 ): VbMsgBoxResult {
   if (typeof window !== 'undefined') {
-    const buttonType = buttons & 0x0F;
-    
+    const buttonType = buttons & 0x0f;
+
     switch (buttonType) {
       case VbMsgBoxStyle.vbOKOnly:
         alert(prompt);
         return VbMsgBoxResult.vbOK;
-        
+
       case VbMsgBoxStyle.vbOKCancel:
         return confirm(prompt) ? VbMsgBoxResult.vbOK : VbMsgBoxResult.vbCancel;
-        
+
       case VbMsgBoxStyle.vbYesNo:
       case VbMsgBoxStyle.vbYesNoCancel:
         return confirm(prompt) ? VbMsgBoxResult.vbYes : VbMsgBoxResult.vbNo;
-        
+
       case VbMsgBoxStyle.vbRetryCancel:
         return confirm(prompt) ? VbMsgBoxResult.vbRetry : VbMsgBoxResult.vbCancel;
-        
+
       default:
         alert(prompt);
         return VbMsgBoxResult.vbOK;
@@ -428,7 +428,7 @@ export enum VbCallType {
   vbMethod = 1,
   vbGet = 2,
   vbLet = 4,
-  vbSet = 8
+  vbSet = 8,
 }
 
 export function CallByName(
@@ -440,22 +440,22 @@ export function CallByName(
   if (!object || !procName) {
     throw new Error('Object required');
   }
-  
+
   switch (callType) {
     case VbCallType.vbMethod:
       if (typeof object[procName] === 'function') {
         return object[procName](...args);
       }
       throw new Error('Type mismatch');
-      
+
     case VbCallType.vbGet:
       return object[procName];
-      
+
     case VbCallType.vbLet:
     case VbCallType.vbSet:
       object[procName] = args[0];
       return undefined;
-      
+
     default:
       throw new Error('Invalid procedure call');
   }
@@ -491,15 +491,9 @@ export function CreateObject(className: string, serverName?: string): any {
 
       // Methods
       CreateTextFile: (filename: string, overwrite: boolean = true) => ({
-        Write: function (text: string) {
-          console.log(`[VB6FSO] Write: ${text}`);
-        },
-        WriteLine: function (line: string = '') {
-          console.log(`[VB6FSO] WriteLine: ${line}`);
-        },
-        Close: function () {
-          console.log('[VB6FSO] File closed');
-        }
+        Write: function (text: string) {},
+        WriteLine: function (line: string = '') {},
+        Close: function () {},
       }),
       OpenTextFile: (filename: string, ioMode: number = 1) => ({
         ReadAll: function () {
@@ -510,18 +504,14 @@ export function CreateObject(className: string, serverName?: string): any {
         },
         Write: function (text: string) {},
         WriteLine: function (line: string) {},
-        Close: function () {}
+        Close: function () {},
       }),
-      DeleteFile: (filespec: string) => {
-        console.log(`[VB6FSO] File deleted: ${filespec}`);
-      },
-      DeleteFolder: (folderspec: string) => {
-        console.log(`[VB6FSO] Folder deleted: ${folderspec}`);
-      },
+      DeleteFile: (filespec: string) => {},
+      DeleteFolder: (folderspec: string) => {},
       CreateFolder: (foldername: string) => ({
         Name: foldername,
         Path: `/${foldername}`,
-        Size: 0
+        Size: 0,
       }),
       GetFile: (filespec: string) => ({
         Name: filespec,
@@ -529,14 +519,14 @@ export function CreateObject(className: string, serverName?: string): any {
         Size: 0,
         DateCreated: new Date(),
         DateLastModified: new Date(),
-        DateLastAccessed: new Date()
+        DateLastAccessed: new Date(),
       }),
       GetFolder: (folderspec: string) => ({
         Name: folderspec,
         Path: `/${folderspec}`,
         Size: 0,
-        Files: { Count: 0 }
-      })
+        Files: { Count: 0 },
+      }),
     };
   }
 
@@ -568,7 +558,7 @@ export function CreateObject(className: string, serverName?: string): any {
       },
       RemoveAll: function () {
         dictData.clear();
-      }
+      },
     };
   }
 
@@ -580,20 +570,16 @@ export function CreateObject(className: string, serverName?: string): any {
       ConnectionTimeout: 15,
       Open: function (connectionString: string) {
         this.ConnectionString = connectionString;
-        console.log(`[VB6ADO] Connected: ${connectionString}`);
       },
-      Close: function () {
-        console.log('[VB6ADO] Connection closed');
-      },
+      Close: function () {},
       Execute: function (commandText: string) {
-        console.log(`[VB6ADO] Execute: ${commandText}`);
         return {
           RecordCount: 0,
           Fields: {},
           EOF: true,
-          BOF: true
+          BOF: true,
         };
-      }
+      },
     };
   }
 
@@ -604,14 +590,16 @@ export function CreateObject(className: string, serverName?: string): any {
       LockType: 1,
       Source: '',
       ActiveConnection: null,
-      Open: function (source: string, activeConnection: any, cursorType?: number, lockType?: number) {
+      Open: function (
+        source: string,
+        activeConnection: any,
+        cursorType?: number,
+        lockType?: number
+      ) {
         this.Source = source;
         this.ActiveConnection = activeConnection;
-        console.log(`[VB6ADO] Recordset opened: ${source}`);
       },
-      Close: function () {
-        console.log('[VB6ADO] Recordset closed');
-      },
+      Close: function () {},
       MoveFirst: function () {},
       MoveLast: function () {},
       MoveNext: function () {},
@@ -619,7 +607,7 @@ export function CreateObject(className: string, serverName?: string): any {
       RecordCount: 0,
       EOF: true,
       BOF: true,
-      Fields: {}
+      Fields: {},
     };
   }
 
@@ -631,15 +619,13 @@ export function CreateObject(className: string, serverName?: string): any {
         Add: function () {
           return {
             Worksheets: [{ Name: 'Sheet1', Cells: {} }],
-            SaveAs: function () {}
+            SaveAs: function () {},
           };
         },
-        Open: function (filename: string) {}
+        Open: function (filename: string) {},
       },
       Sheets: [],
-      Quit: function () {
-        console.log('[VB6COM] Excel quit');
-      }
+      Quit: function () {},
     };
   }
 
@@ -651,11 +637,9 @@ export function CreateObject(className: string, serverName?: string): any {
         Add: function () {
           return { Content: '', SaveAs: function () {} };
         },
-        Open: function (filename: string) {}
+        Open: function (filename: string) {},
       },
-      Quit: function () {
-        console.log('[VB6COM] Word quit');
-      }
+      Quit: function () {},
     };
   }
 
@@ -663,7 +647,6 @@ export function CreateObject(className: string, serverName?: string): any {
   if (normalizedName === 'wscript.shell') {
     return {
       Run: function (command: string, windowStyle?: number, waitOnReturn?: boolean) {
-        console.log(`[VB6COM] Shell Execute: ${command}`);
         return 0;
       },
       Exec: function (command: string) {
@@ -671,27 +654,29 @@ export function CreateObject(className: string, serverName?: string): any {
           StdOut: {
             ReadAll: function () {
               return '';
-            }
+            },
           },
-          Status: 0
+          Status: 0,
         };
       },
       RegRead: function (regPath: string) {
         return '';
       },
-      RegWrite: function (regPath: string, value: any) {}
+      RegWrite: function (regPath: string, value: any) {},
     };
   }
 
   // Shell.Application
   if (normalizedName === 'shell.application') {
     return {
-      ShellExecute: function (file: string, parameters?: string, directory?: string, verb?: string, windowStyle?: number) {
-        console.log(`[VB6COM] Shell.Application Execute: ${file}`);
-      },
-      Explore: function (folder: string) {
-        console.log(`[VB6COM] Explore: ${folder}`);
-      }
+      ShellExecute: function (
+        file: string,
+        parameters?: string,
+        directory?: string,
+        verb?: string,
+        windowStyle?: number
+      ) {},
+      Explore: function (folder: string) {},
     };
   }
 
@@ -715,7 +700,6 @@ export function GetObject(pathname?: string, className?: string): any {
   // If class name is provided, try to get running instance
   if (className && !pathname) {
     // Try to get running instance, fall back to CreateObject
-    console.log(`[VB6COM] GetObject requesting running instance: ${className}`);
     return CreateObject(className);
   }
 
@@ -730,7 +714,7 @@ export function GetObject(pathname?: string, className?: string): any {
         Path: pathname,
         Worksheets: [{ Name: 'Sheet1' }],
         Close: function () {},
-        Save: function () {}
+        Save: function () {},
       };
     }
 
@@ -741,7 +725,7 @@ export function GetObject(pathname?: string, className?: string): any {
         Path: pathname,
         Content: { Text: '' },
         Close: function () {},
-        Save: function () {}
+        Save: function () {},
       };
     }
 
@@ -752,7 +736,7 @@ export function GetObject(pathname?: string, className?: string): any {
         Path: pathname,
         Slides: [],
         Close: function () {},
-        Save: function () {}
+        Save: function () {},
       };
     }
 
@@ -763,7 +747,7 @@ export function GetObject(pathname?: string, className?: string): any {
       Size: 0,
       DateCreated: new Date(),
       DateLastModified: new Date(),
-      Close: function () {}
+      Close: function () {},
     };
   }
 
@@ -787,12 +771,7 @@ export function GetObject(pathname?: string, className?: string): any {
  * Returns format: "lower:upper" where each is right-aligned to 3 chars
  * Used for creating frequency distributions in databases
  */
-export function Partition(
-  number: number,
-  start: number,
-  stop: number,
-  interval: number
-): string {
+export function Partition(number: number, start: number, stop: number, interval: number): string {
   if (interval <= 0) {
     throw new Error('Invalid procedure call');
   }
@@ -897,7 +876,11 @@ export function TypeName(variable: any): string {
   // Check for objects
   if (typeof variable === 'object') {
     // Check if it's a custom object with a constructor name
-    if (variable.constructor && variable.constructor.name && variable.constructor.name !== 'Object') {
+    if (
+      variable.constructor &&
+      variable.constructor.name &&
+      variable.constructor.name !== 'Object'
+    ) {
       return variable.constructor.name;
     }
     return 'Object';
@@ -992,13 +975,13 @@ export function Switch(...args: any[]): any {
   if (args.length % 2 !== 0) {
     throw new Error('Invalid number of arguments');
   }
-  
+
   for (let i = 0; i < args.length; i += 2) {
     if (args[i]) {
       return args[i + 1];
     }
   }
-  
+
   return null;
 }
 
@@ -1046,12 +1029,7 @@ export function GetSetting(
 /**
  * SaveSetting - Save application setting to registry (uses localStorage)
  */
-export function SaveSetting(
-  appName: string,
-  section: string,
-  key: string,
-  value: string
-): void {
+export function SaveSetting(appName: string, section: string, key: string, value: string): void {
   if (typeof localStorage !== 'undefined') {
     const storageKey = `VB6_${appName}_${section}_${key}`;
     localStorage.setItem(storageKey, value);
@@ -1061,11 +1039,7 @@ export function SaveSetting(
 /**
  * DeleteSetting - Delete application setting from registry
  */
-export function DeleteSetting(
-  appName: string,
-  section?: string,
-  key?: string
-): void {
+export function DeleteSetting(appName: string, section?: string, key?: string): void {
   if (typeof localStorage !== 'undefined') {
     if (!section) {
       // Delete all settings for app
@@ -1090,10 +1064,10 @@ export function DeleteSetting(
  */
 export function GetAllSettings(appName: string, section: string): string[][] {
   const result: string[][] = [];
-  
+
   if (typeof localStorage !== 'undefined') {
     const prefix = `VB6_${appName}_${section}_`;
-    
+
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.startsWith(prefix)) {
@@ -1103,7 +1077,7 @@ export function GetAllSettings(appName: string, section: string): string[][] {
       }
     }
   }
-  
+
   return result;
 }
 
@@ -1123,21 +1097,21 @@ export function QBColor(color: number): number {
     0x000080, // 4 - Red
     0x800080, // 5 - Magenta
     0x008080, // 6 - Brown
-    0xC0C0C0, // 7 - White
+    0xc0c0c0, // 7 - White
     0x808080, // 8 - Gray
-    0xFF0000, // 9 - Light Blue
-    0x00FF00, // 10 - Light Green
-    0xFFFF00, // 11 - Light Cyan
-    0x0000FF, // 12 - Light Red
-    0xFF00FF, // 13 - Light Magenta
-    0x00FFFF, // 14 - Yellow
-    0xFFFFFF  // 15 - Bright White
+    0xff0000, // 9 - Light Blue
+    0x00ff00, // 10 - Light Green
+    0xffff00, // 11 - Light Cyan
+    0x0000ff, // 12 - Light Red
+    0xff00ff, // 13 - Light Magenta
+    0x00ffff, // 14 - Yellow
+    0xffffff, // 15 - Bright White
   ];
-  
+
   if (color < 0 || color > 15) {
     throw new Error('Invalid procedure call');
   }
-  
+
   return qbColors[color];
 }
 
@@ -1152,7 +1126,6 @@ export function Load(form: any): void {
   if (form && typeof form.Load === 'function') {
     form.Load();
   }
-  console.log('[VB6] Form loaded');
 }
 
 /**
@@ -1162,7 +1135,6 @@ export function Unload(form: any): void {
   if (form && typeof form.Unload === 'function') {
     form.Unload();
   }
-  console.log('[VB6] Form unloaded');
 }
 
 // ============================================================================
@@ -1178,23 +1150,21 @@ export function Beep(): void {
       const audioContext = new AudioContext();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
-      
+
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
-      
+
       oscillator.frequency.value = 800;
       oscillator.type = 'sine';
-      
+
       gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-      
+
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.1);
     } catch (error) {
-      console.log('[VB6] Beep');
+      // Audio API may not be available in all environments
     }
-  } else {
-    console.log('[VB6] Beep');
   }
 }
 
@@ -1258,7 +1228,7 @@ export const VB6FinalRuntime = {
   Unload,
 
   // Sound
-  Beep
+  Beep,
 };
 
 // Make functions globally available

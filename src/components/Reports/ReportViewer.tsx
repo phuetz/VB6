@@ -1,7 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  X, ZoomIn, ZoomOut, Download, Printer, ChevronLeft, ChevronRight, 
-  RotateCcw, Search, Settings, FileText, Eye 
+import {
+  X,
+  ZoomIn,
+  ZoomOut,
+  Download,
+  Printer,
+  ChevronLeft,
+  ChevronRight,
+  RotateCcw,
+  Search,
+  Settings,
+  FileText,
+  Eye,
 } from 'lucide-react';
 import {
   vb6ReportEngine,
@@ -9,7 +19,7 @@ import {
   ReportOutput,
   ReportPage,
   ReportPageElement,
-  ReportFieldType
+  ReportFieldType,
 } from '../../services/VB6ReportEngine';
 import { sanitizeHTML } from '../../utils/htmlSanitizer';
 
@@ -26,16 +36,18 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   onClose,
   reportId,
   reportOutput: initialReportOutput,
-  parameters = {}
+  parameters = {},
 }) => {
-  const [reportOutput, setReportOutput] = useState<ReportOutput | null>(initialReportOutput || null);
+  const [reportOutput, setReportOutput] = useState<ReportOutput | null>(
+    initialReportOutput || null
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const [zoom, setZoom] = useState(100);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showSettings, setShowSettings] = useState(false);
-  
+
   const viewerRef = useRef<HTMLDivElement>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -66,7 +78,8 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   // Navigation functions
   const goToFirstPage = () => setCurrentPage(1);
   const goToPreviousPage = () => setCurrentPage(Math.max(1, currentPage - 1));
-  const goToNextPage = () => setCurrentPage(Math.min(reportOutput?.totalPages || 1, currentPage + 1));
+  const goToNextPage = () =>
+    setCurrentPage(Math.min(reportOutput?.totalPages || 1, currentPage + 1));
   const goToLastPage = () => setCurrentPage(reportOutput?.totalPages || 1);
 
   // Zoom functions
@@ -98,17 +111,18 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   // Export to PDF function
   const exportToPDF = () => {
     if (!reportOutput) return;
-    
+
     // In a real implementation, this would use a PDF library like jsPDF
-    console.log('Export to PDF functionality would be implemented here');
   };
 
   // Generate HTML for printing
   const generatePrintHTML = (): string => {
     if (!reportOutput) return '';
 
-    const pagesHTML = reportOutput.pages.map((page, index) => 
-      `<div class="print-page" style="
+    const pagesHTML = reportOutput.pages
+      .map(
+        (page, index) =>
+          `<div class="print-page" style="
         width: ${page.width}px;
         height: ${page.height}px;
         position: relative;
@@ -119,7 +133,8 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
       ">
         ${renderPageElementsHTML(page)}
       </div>`
-    ).join('');
+      )
+      .join('');
 
     return `
       <!DOCTYPE html>
@@ -155,7 +170,9 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
 
   // Render page elements as HTML
   const renderPageElementsHTML = (page: ReportPage): string => {
-    return page.elements.map(element => `
+    return page.elements
+      .map(
+        element => `
       <div class="element" style="
         left: ${element.x}px;
         top: ${element.y}px;
@@ -176,7 +193,9 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
       ">
         ${escapeHTML(element.value)}
       </div>
-    `).join('');
+    `
+      )
+      .join('');
   };
 
   // Escape HTML for safe rendering - using safer approach
@@ -203,16 +222,17 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
       fontStyle: element.formatting.fontStyle,
       textDecoration: element.formatting.textDecoration,
       color: element.formatting.color,
-      backgroundColor: element.formatting.backgroundColor !== 'transparent' 
-        ? element.formatting.backgroundColor 
-        : undefined,
+      backgroundColor:
+        element.formatting.backgroundColor !== 'transparent'
+          ? element.formatting.backgroundColor
+          : undefined,
       textAlign: element.formatting.alignment,
       borderStyle: element.formatting.borderStyle,
       borderColor: element.formatting.borderColor,
       borderWidth: `${element.formatting.borderWidth}px`,
       padding: `${element.formatting.padding * (zoom / 100)}px`,
       overflow: 'hidden',
-      wordWrap: element.formatting.wordWrap ? 'break-word' : 'normal'
+      wordWrap: element.formatting.wordWrap ? 'break-word' : 'normal',
     };
 
     const content = element.value;
@@ -221,7 +241,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
     if (searchTerm && content.toLowerCase().includes(searchTerm.toLowerCase())) {
       const regex = new RegExp(`(${searchTerm})`, 'gi');
       const highlightedContent = content.replace(regex, '<mark>$1</mark>');
-      
+
       // SECURITY: HTML sanitizé via DOMPurify (TASK-004)
       return (
         <div
@@ -237,12 +257,13 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
       case ReportFieldType.Image:
         return (
           <div key={element.id} style={style}>
-            <img 
-              src={content} 
-              alt="Report Image" 
+            <img
+              src={content}
+              alt="Report Image"
               style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3QgeD0iMyIgeT0iMyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iMiIgc3Ryb2tlPSIjOTk5IiBzdHJva2Utd2lkdGg9IjIiLz4KPHA+Tm8gSW1hZ2U8L3A+Cjwvc3ZnPgo=';
+              onError={e => {
+                (e.target as HTMLImageElement).src =
+                  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3QgeD0iMyIgeT0iMyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iMiIgc3Ryb2tlPSIjOTk5IiBzdHJva2Utd2lkdGg9IjIiLz4KPHA+Tm8gSW1hZ2U8L3A+Cjwvc3ZnPgo=';
               }}
             />
           </div>
@@ -251,9 +272,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
       case ReportFieldType.Barcode:
         return (
           <div key={element.id} style={style} className="flex items-center justify-center">
-            <div className="text-xs text-gray-500">
-              [Barcode: {content}]
-            </div>
+            <div className="text-xs text-gray-500">[Barcode: {content}]</div>
           </div>
         );
 
@@ -264,7 +283,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
             style={{
               ...style,
               borderTop: `${element.formatting.borderWidth}px ${element.formatting.borderStyle} ${element.formatting.borderColor}`,
-              height: '0px'
+              height: '0px',
             }}
           />
         );
@@ -276,9 +295,10 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
             style={{
               ...style,
               border: `${element.formatting.borderWidth}px ${element.formatting.borderStyle} ${element.formatting.borderColor}`,
-              backgroundColor: element.formatting.backgroundColor !== 'transparent' 
-                ? element.formatting.backgroundColor 
-                : 'transparent'
+              backgroundColor:
+                element.formatting.backgroundColor !== 'transparent'
+                  ? element.formatting.backgroundColor
+                  : 'transparent',
             }}
           />
         );
@@ -303,7 +323,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
     }
 
     const page = reportOutput.pages[currentPage - 1];
-    
+
     return (
       <div className="flex justify-center p-8">
         <div
@@ -311,7 +331,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
           style={{
             width: `${page.width * (zoom / 100)}px`,
             height: `${page.height * (zoom / 100)}px`,
-            minHeight: '400px'
+            minHeight: '400px',
           }}
         >
           {page.elements.map(renderPageElement)}
@@ -380,11 +400,11 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
             >
               <ChevronLeft size={16} />
             </button>
-            
+
             <span className="text-sm text-gray-600 mx-2">
               Page {currentPage} of {reportOutput?.totalPages || 0}
             </span>
-            
+
             <button
               onClick={goToNextPage}
               disabled={currentPage === (reportOutput?.totalPages || 0)}
@@ -408,21 +428,11 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
 
           {/* Zoom */}
           <div className="flex items-center gap-2">
-            <button
-              onClick={zoomOut}
-              className="p-1 hover:bg-gray-200 rounded"
-              title="Zoom Out"
-            >
+            <button onClick={zoomOut} className="p-1 hover:bg-gray-200 rounded" title="Zoom Out">
               <ZoomOut size={16} />
             </button>
-            <span className="text-sm text-gray-600 min-w-[60px] text-center">
-              {zoom}%
-            </span>
-            <button
-              onClick={zoomIn}
-              className="p-1 hover:bg-gray-200 rounded"
-              title="Zoom In"
-            >
+            <span className="text-sm text-gray-600 min-w-[60px] text-center">{zoom}%</span>
+            <button onClick={zoomIn} className="p-1 hover:bg-gray-200 rounded" title="Zoom In">
               <ZoomIn size={16} />
             </button>
             <button
@@ -439,12 +449,15 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
           {/* Search */}
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" size={14} />
+              <Search
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={14}
+              />
               <input
                 type="text"
                 placeholder="Search in report..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
                 className="pl-8 pr-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -455,7 +468,8 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
           {/* Report Info */}
           {reportOutput && (
             <div className="text-xs text-gray-500">
-              {reportOutput.totalRecords} records • Generated {reportOutput.generatedAt.toLocaleTimeString()}
+              {reportOutput.totalRecords} records • Generated{' '}
+              {reportOutput.generatedAt.toLocaleTimeString()}
             </div>
           )}
         </div>
@@ -490,55 +504,58 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
         {/* Status Bar */}
         {reportOutput && (
           <div className="px-6 py-2 border-t border-gray-200 bg-gray-50 text-xs text-gray-600">
-            {reportOutput.report.name} • {reportOutput.pages.length} pages • {reportOutput.totalRecords} records
+            {reportOutput.report.name} • {reportOutput.pages.length} pages •{' '}
+            {reportOutput.totalRecords} records
           </div>
         )}
       </div>
 
       {/* Hidden print div for better print formatting */}
       <div ref={printRef} className="hidden">
-        {reportOutput && reportOutput.pages.map((page, index) => (
-          <div
-            key={index}
-            style={{
-              width: `${page.width}px`,
-              height: `${page.height}px`,
-              position: 'relative',
-              pageBreakAfter: index < reportOutput.pages.length - 1 ? 'always' : 'auto',
-              background: 'white'
-            }}
-          >
-            {page.elements.map(element => (
-              <div
-                key={element.id}
-                style={{
-                  position: 'absolute',
-                  left: `${element.x}px`,
-                  top: `${element.y}px`,
-                  width: `${element.width}px`,
-                  height: `${element.height}px`,
-                  fontFamily: element.formatting.fontFamily,
-                  fontSize: `${element.formatting.fontSize}px`,
-                  fontWeight: element.formatting.fontWeight,
-                  fontStyle: element.formatting.fontStyle,
-                  textDecoration: element.formatting.textDecoration,
-                  color: element.formatting.color,
-                  backgroundColor: element.formatting.backgroundColor !== 'transparent' 
-                    ? element.formatting.backgroundColor 
-                    : undefined,
-                  textAlign: element.formatting.alignment,
-                  borderStyle: element.formatting.borderStyle,
-                  borderColor: element.formatting.borderColor,
-                  borderWidth: `${element.formatting.borderWidth}px`,
-                  padding: `${element.formatting.padding}px`,
-                  overflow: 'hidden'
-                }}
-              >
-                {element.value}
-              </div>
-            ))}
-          </div>
-        ))}
+        {reportOutput &&
+          reportOutput.pages.map((page, index) => (
+            <div
+              key={index}
+              style={{
+                width: `${page.width}px`,
+                height: `${page.height}px`,
+                position: 'relative',
+                pageBreakAfter: index < reportOutput.pages.length - 1 ? 'always' : 'auto',
+                background: 'white',
+              }}
+            >
+              {page.elements.map(element => (
+                <div
+                  key={element.id}
+                  style={{
+                    position: 'absolute',
+                    left: `${element.x}px`,
+                    top: `${element.y}px`,
+                    width: `${element.width}px`,
+                    height: `${element.height}px`,
+                    fontFamily: element.formatting.fontFamily,
+                    fontSize: `${element.formatting.fontSize}px`,
+                    fontWeight: element.formatting.fontWeight,
+                    fontStyle: element.formatting.fontStyle,
+                    textDecoration: element.formatting.textDecoration,
+                    color: element.formatting.color,
+                    backgroundColor:
+                      element.formatting.backgroundColor !== 'transparent'
+                        ? element.formatting.backgroundColor
+                        : undefined,
+                    textAlign: element.formatting.alignment,
+                    borderStyle: element.formatting.borderStyle,
+                    borderColor: element.formatting.borderColor,
+                    borderWidth: `${element.formatting.borderWidth}px`,
+                    padding: `${element.formatting.padding}px`,
+                    overflow: 'hidden',
+                  }}
+                >
+                  {element.value}
+                </div>
+              ))}
+            </div>
+          ))}
       </div>
     </div>
   );

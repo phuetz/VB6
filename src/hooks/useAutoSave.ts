@@ -10,37 +10,41 @@ interface AutoSaveOptions {
 export const useAutoSave = <T = unknown>(data: T, options: AutoSaveOptions) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedDataRef = useRef<string>('');
-  const isSavingRef = useRef<boolean>(false); // RACE CONDITION BUG FIX: Prevent concurrent saves
-  const isMountedRef = useRef<boolean>(true); // MEMORY CORRUPTION BUG FIX: Track component mount status
-  const { enabled, interval, onSave, onError } = options;
+  const isSavingRef = useRef<boolean>(false);
+  const isMountedRef = useRef<boolean>(true);
+  const dataRef = useRef<T>(data);
+  const onSaveRef = useRef(options.onSave);
+  const onErrorRef = useRef(options.onError);
+  const { enabled, interval } = options;
+
+  // Keep refs in sync without triggering effect re-runs
+  dataRef.current = data;
+  onSaveRef.current = options.onSave;
+  onErrorRef.current = options.onError;
 
   const save = useCallback(async () => {
-    // MEMORY CORRUPTION BUG FIX: Prevent operations on unmounted component
     if (!isMountedRef.current || isSavingRef.current) {
       return;
     }
 
     try {
       isSavingRef.current = true;
-      const currentData = JSON.stringify(data);
+      const currentData = JSON.stringify(dataRef.current);
 
-      // Only save if data has changed and component is still mounted
       if (currentData !== lastSavedDataRef.current && isMountedRef.current) {
-        await onSave();
-        // Check again after async operation completes
+        await onSaveRef.current();
         if (isMountedRef.current) {
           lastSavedDataRef.current = currentData;
         }
       }
     } catch (error) {
-      // Only handle errors if component is still mounted
-      if (onError && isMountedRef.current) {
-        onError(error as Error);
+      if (onErrorRef.current && isMountedRef.current) {
+        onErrorRef.current(error as Error);
       }
     } finally {
-      isSavingRef.current = false; // Always reset the flag
+      isSavingRef.current = false;
     }
-  }, [data, onSave, onError]);
+  }, []);
 
   useEffect(() => {
     if (!enabled) {
@@ -64,13 +68,6 @@ export const useAutoSave = <T = unknown>(data: T, options: AutoSaveOptions) => {
     };
   }, [enabled, interval, save]);
 
-  // MEMORY CORRUPTION BUG FIX: Cleanup on component unmount
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
   // Manual save function
   const forceSave = useCallback(() => {
     save();
@@ -78,9 +75,9 @@ export const useAutoSave = <T = unknown>(data: T, options: AutoSaveOptions) => {
 
   // Check if there are unsaved changes
   const hasUnsavedChanges = useCallback(() => {
-    const currentData = JSON.stringify(data);
+    const currentData = JSON.stringify(dataRef.current);
     return currentData !== lastSavedDataRef.current;
-  }, [data]);
+  }, []);
 
   return {
     forceSave,
@@ -147,7 +144,7 @@ export const useVersioning = <T>(data: T) => {
         }
         return Math.random().toString(36).substring(2) + Date.now().toString(36);
       };
-      
+
       const newVersion = {
         id: generateSecureId(),
         timestamp: new Date(),

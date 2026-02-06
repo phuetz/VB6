@@ -12,7 +12,7 @@ export enum ReportSectionType {
   Details = 'Details',
   GroupFooter = 'GroupFooter',
   PageFooter = 'PageFooter',
-  ReportFooter = 'ReportFooter'
+  ReportFooter = 'ReportFooter',
 }
 
 // Field Types
@@ -25,7 +25,7 @@ export enum ReportFieldType {
   Barcode = 'Barcode',
   Line = 'Line',
   Box = 'Box',
-  Subreport = 'Subreport'
+  Subreport = 'Subreport',
 }
 
 // Text Alignment
@@ -33,7 +33,7 @@ export enum TextAlignment {
   Left = 'left',
   Center = 'center',
   Right = 'right',
-  Justify = 'justify'
+  Justify = 'justify',
 }
 
 // Border Styles
@@ -42,7 +42,7 @@ export enum BorderStyle {
   Solid = 'solid',
   Dashed = 'dashed',
   Dotted = 'dotted',
-  Double = 'double'
+  Double = 'double',
 }
 
 // Report Field Interface
@@ -229,14 +229,14 @@ class FormulaEngine {
 
   private handleDateAdd(match: string, interval: string, number: string, date: string): string {
     const intervals: { [key: string]: string } = {
-      'yyyy': 'FullYear',
-      'mm': 'Month',
-      'dd': 'Date',
-      'hh': 'Hours',
-      'nn': 'Minutes',
-      'ss': 'Seconds'
+      yyyy: 'FullYear',
+      mm: 'Month',
+      dd: 'Date',
+      hh: 'Hours',
+      nn: 'Minutes',
+      ss: 'Seconds',
     };
-    
+
     const method = intervals[interval.toLowerCase()];
     if (method) {
       return `(() => {
@@ -257,7 +257,7 @@ class FormulaEngine {
       .replace(/hh/g, 'getHours().toString().padStart(2,"0")')
       .replace(/nn/g, 'getMinutes().toString().padStart(2,"0")')
       .replace(/ss/g, 'getSeconds().toString().padStart(2,"0")');
-    
+
     return `(${date}).${jsFormat}`;
   }
 }
@@ -289,12 +289,12 @@ export class VB6ReportEngine {
       pageSettings: this.getDefaultPageSettings(),
       dataSource: {
         type: 'database',
-        data: []
+        data: [],
       },
       sections: this.getDefaultSections(),
       parameters: [],
       formulas: [],
-      subreports: []
+      subreports: [],
     };
 
     this.reports.set(report.id, report);
@@ -328,7 +328,10 @@ export class VB6ReportEngine {
   }
 
   // Generate report data
-  async generateReport(reportId: string, parameters: { [key: string]: any } = {}): Promise<ReportOutput> {
+  async generateReport(
+    reportId: string,
+    parameters: { [key: string]: any } = {}
+  ): Promise<ReportOutput> {
     const report = this.getReport(reportId);
     if (!report) {
       throw new Error(`Report with ID ${reportId} not found`);
@@ -336,7 +339,7 @@ export class VB6ReportEngine {
 
     // Load data
     const data = await this.loadReportData(report, parameters);
-    
+
     // Create context
     const context: ReportContext = {
       data,
@@ -347,7 +350,7 @@ export class VB6ReportEngine {
       recordNumber: 0,
       totalRecords: data.length,
       groupValues: {},
-      formulas: {}
+      formulas: {},
     };
 
     this.formulaEngine = new FormulaEngine(context);
@@ -366,12 +369,15 @@ export class VB6ReportEngine {
       context,
       generatedAt: new Date(),
       totalPages: pages.length,
-      totalRecords: data.length
+      totalRecords: data.length,
     };
   }
 
   // Load data for report
-  private async loadReportData(report: ReportDefinition, parameters: { [key: string]: any }): Promise<any[]> {
+  private async loadReportData(
+    report: ReportDefinition,
+    parameters: { [key: string]: any }
+  ): Promise<any[]> {
     const { dataSource } = report;
 
     switch (dataSource.type) {
@@ -396,7 +402,7 @@ export class VB6ReportEngine {
           const response = await fetch(dataSource.url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(parameters)
+            body: JSON.stringify(parameters),
           });
           return await response.json();
         }
@@ -410,13 +416,13 @@ export class VB6ReportEngine {
   private generatePages(report: ReportDefinition, context: ReportContext): ReportPage[] {
     const pages: ReportPage[] = [];
     const { pageSettings } = report;
-    
+
     let currentPage: ReportPage = this.createNewPage(pageSettings);
     let currentY = pageSettings.marginTop;
 
     // Group data if needed
     const groupedData = this.groupData(context.data, report.sections);
-    
+
     // Report Header
     const reportHeader = report.sections.find(s => s.type === ReportSectionType.ReportHeader);
     if (reportHeader && reportHeader.visible) {
@@ -508,12 +514,17 @@ export class VB6ReportEngine {
     return {
       width: pageSettings.width,
       height: pageSettings.height,
-      elements: []
+      elements: [],
     };
   }
 
   // Add section to page
-  private addSectionToPage(page: ReportPage, section: ReportSection, context: ReportContext, y: number): number {
+  private addSectionToPage(
+    page: ReportPage,
+    section: ReportSection,
+    context: ReportContext,
+    y: number
+  ): number {
     section.fields.forEach(field => {
       const element = this.createPageElement(field, context, y);
       if (element) {
@@ -525,7 +536,11 @@ export class VB6ReportEngine {
   }
 
   // Create page element from field
-  private createPageElement(field: ReportField, context: ReportContext, sectionY: number): ReportPageElement | null {
+  private createPageElement(
+    field: ReportField,
+    context: ReportContext,
+    sectionY: number
+  ): ReportPageElement | null {
     if (!field.visibility.visible) {
       return null;
     }
@@ -563,7 +578,7 @@ export class VB6ReportEngine {
       width: field.width,
       height: field.height,
       value: formattedValue,
-      formatting: field.formatting
+      formatting: field.formatting,
     };
   }
 
@@ -625,7 +640,7 @@ export class VB6ReportEngine {
       marginLeft: 72,
       marginRight: 72,
       columns: 1,
-      columnSpacing: 0
+      columnSpacing: 0,
     };
   }
 
@@ -643,7 +658,7 @@ export class VB6ReportEngine {
         newPageAfter: false,
         keepTogether: false,
         suppressIfBlank: false,
-        fields: []
+        fields: [],
       },
       {
         id: 'page_header',
@@ -656,7 +671,7 @@ export class VB6ReportEngine {
         newPageAfter: false,
         keepTogether: false,
         suppressIfBlank: false,
-        fields: []
+        fields: [],
       },
       {
         id: 'details',
@@ -669,7 +684,7 @@ export class VB6ReportEngine {
         newPageAfter: false,
         keepTogether: false,
         suppressIfBlank: false,
-        fields: []
+        fields: [],
       },
       {
         id: 'page_footer',
@@ -682,7 +697,7 @@ export class VB6ReportEngine {
         newPageAfter: false,
         keepTogether: false,
         suppressIfBlank: false,
-        fields: []
+        fields: [],
       },
       {
         id: 'report_footer',
@@ -695,8 +710,8 @@ export class VB6ReportEngine {
         newPageAfter: false,
         keepTogether: false,
         suppressIfBlank: false,
-        fields: []
-      }
+        fields: [],
+      },
     ];
   }
 
@@ -726,13 +741,13 @@ export class VB6ReportEngine {
         padding: 2,
         wordWrap: false,
         canGrow: false,
-        canShrink: false
+        canShrink: false,
       },
       visibility: {
         visible: true,
         suppressIfDuplicate: false,
-        suppressIfBlank: false
-      }
+        suppressIfBlank: false,
+      },
     };
   }
 

@@ -1,6 +1,6 @@
 /**
  * VB6 DataReport Designer Implementation
- * 
+ *
  * Visual designer for creating and managing data reports with sections, controls, and data binding
  */
 
@@ -38,7 +38,14 @@ export interface DataReport {
 
 export interface ReportSection {
   id: string;
-  type: 'reportHeader' | 'pageHeader' | 'groupHeader' | 'detail' | 'groupFooter' | 'pageFooter' | 'reportFooter';
+  type:
+    | 'reportHeader'
+    | 'pageHeader'
+    | 'groupHeader'
+    | 'detail'
+    | 'groupFooter'
+    | 'pageFooter'
+    | 'reportFooter';
   name: string;
   height: number;
   visible: boolean;
@@ -57,11 +64,11 @@ export interface ReportControl {
   top: number;
   width: number;
   height: number;
-  
+
   // Data binding
   dataField?: string;
   dataFormat?: string;
-  
+
   // Text properties
   caption?: string;
   font?: string;
@@ -72,21 +79,21 @@ export interface ReportControl {
   foreColor?: string;
   backColor?: string;
   alignment?: 'left' | 'center' | 'right' | 'justify';
-  
+
   // Border properties
   borderStyle?: 'none' | 'solid' | 'dashed' | 'dotted';
   borderColor?: string;
   borderWidth?: number;
-  
+
   // Shape properties (for line/shape controls)
   shapeType?: 'rectangle' | 'roundedRectangle' | 'circle' | 'line';
   lineStyle?: 'solid' | 'dashed' | 'dotted';
   fillStyle?: 'solid' | 'transparent';
-  
+
   // Function properties (for calculated fields)
   functionType?: 'sum' | 'count' | 'avg' | 'min' | 'max' | 'now' | 'page' | 'pages';
   functionExpression?: string;
-  
+
   // Image properties
   picture?: string;
   pictureAlignment?: 'stretch' | 'center' | 'tile' | 'clip';
@@ -102,7 +109,7 @@ const ReportConstants = {
   GROUP_FOOTER: 'groupFooter',
   PAGE_FOOTER: 'pageFooter',
   REPORT_FOOTER: 'reportFooter',
-  
+
   // Control types
   LABEL: 'label',
   TEXTBOX: 'textbox',
@@ -110,19 +117,19 @@ const ReportConstants = {
   LINE: 'line',
   SHAPE: 'shape',
   FUNCTION: 'function',
-  
+
   // Paper sizes
   LETTER: 'letter',
   LEGAL: 'legal',
   A4: 'a4',
   A3: 'a3',
   CUSTOM: 'custom',
-  
+
   // Alignments
   LEFT: 'left',
   CENTER: 'center',
   RIGHT: 'right',
-  JUSTIFY: 'justify'
+  JUSTIFY: 'justify',
 };
 
 interface DataReportDesignerProps {
@@ -142,9 +149,9 @@ const DraggableControl: React.FC<DraggableControlProps> = ({ controlType, label,
   const [{ isDragging }, drag] = useDrag({
     type: 'reportControl',
     item: { type: controlType },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging()
-    })
+    collect: monitor => ({
+      isDragging: monitor.isDragging(),
+    }),
   });
 
   return (
@@ -158,7 +165,7 @@ const DraggableControl: React.FC<DraggableControlProps> = ({ controlType, label,
         border: '1px solid #ccc',
         borderRadius: '4px',
         textAlign: 'center',
-        backgroundColor: '#f5f5f5'
+        backgroundColor: '#f5f5f5',
       }}
     >
       <i className={`pi ${icon}`} style={{ fontSize: '20px' }} />
@@ -179,18 +186,18 @@ const ReportSectionComponent: React.FC<ReportSectionComponentProps> = ({
   section,
   onUpdate,
   selectedControl,
-  onSelectControl
+  onSelectControl,
 }) => {
   const [{ isOver }, drop] = useDrop({
     accept: 'reportControl',
     drop: (item: any, monitor) => {
       const offset = monitor.getClientOffset();
       const sectionRect = (drop as any).current?.getBoundingClientRect();
-      
+
       if (offset && sectionRect) {
         const x = offset.x - sectionRect.left;
         const y = offset.y - sectionRect.top;
-        
+
         const newControl: ReportControl = {
           id: `ctrl_${Date.now()}`,
           type: item.type,
@@ -203,20 +210,20 @@ const ReportSectionComponent: React.FC<ReportSectionComponentProps> = ({
           font: 'Arial',
           fontSize: 10,
           foreColor: '#000000',
-          alignment: 'left'
+          alignment: 'left',
         };
-        
+
         const newSection = {
           ...section,
-          controls: [...section.controls, newControl]
+          controls: [...section.controls, newControl],
         };
-        
+
         onUpdate(newSection);
       }
     },
-    collect: (monitor) => ({
-      isOver: monitor.isOver()
-    })
+    collect: monitor => ({
+      isOver: monitor.isOver(),
+    }),
   });
 
   const handleControlClick = (control: ReportControl, event: React.MouseEvent) => {
@@ -233,21 +240,29 @@ const ReportSectionComponent: React.FC<ReportSectionComponentProps> = ({
       ...section,
       controls: section.controls.map(ctrl =>
         ctrl.id === controlId ? { ...ctrl, ...updates } : ctrl
-      )
+      ),
     };
     onUpdate(newSection);
   };
 
   const getSectionTitle = () => {
     switch (section.type) {
-      case 'reportHeader': return 'Report Header';
-      case 'pageHeader': return 'Page Header';
-      case 'groupHeader': return `Group Header (${section.groupField || 'None'})`;
-      case 'detail': return 'Detail';
-      case 'groupFooter': return `Group Footer (${section.groupField || 'None'})`;
-      case 'pageFooter': return 'Page Footer';
-      case 'reportFooter': return 'Report Footer';
-      default: return section.name;
+      case 'reportHeader':
+        return 'Report Header';
+      case 'pageHeader':
+        return 'Page Header';
+      case 'groupHeader':
+        return `Group Header (${section.groupField || 'None'})`;
+      case 'detail':
+        return 'Detail';
+      case 'groupFooter':
+        return `Group Footer (${section.groupField || 'None'})`;
+      case 'pageFooter':
+        return 'Page Footer';
+      case 'reportFooter':
+        return 'Report Footer';
+      default:
+        return section.name;
     }
   };
 
@@ -257,7 +272,7 @@ const ReportSectionComponent: React.FC<ReportSectionComponentProps> = ({
       style={{
         marginBottom: '2px',
         border: '1px solid #ddd',
-        backgroundColor: section.backColor || '#ffffff'
+        backgroundColor: section.backColor || '#ffffff',
       }}
       onClick={handleSectionClick}
     >
@@ -267,7 +282,7 @@ const ReportSectionComponent: React.FC<ReportSectionComponentProps> = ({
           padding: '4px 8px',
           fontSize: '12px',
           fontWeight: 'bold',
-          borderBottom: '1px solid #ccc'
+          borderBottom: '1px solid #ccc',
         }}
       >
         {getSectionTitle()}
@@ -277,7 +292,7 @@ const ReportSectionComponent: React.FC<ReportSectionComponentProps> = ({
           position: 'relative',
           height: `${section.height}px`,
           backgroundColor: isOver ? 'rgba(0, 123, 255, 0.1)' : 'transparent',
-          overflow: 'hidden'
+          overflow: 'hidden',
         }}
       >
         {section.controls.map(control => (
@@ -285,8 +300,8 @@ const ReportSectionComponent: React.FC<ReportSectionComponentProps> = ({
             key={control.id}
             control={control}
             selected={selectedControl?.id === control.id}
-            onUpdate={(updates) => updateControl(control.id, updates)}
-            onClick={(e) => handleControlClick(control, e)}
+            onUpdate={updates => updateControl(control.id, updates)}
+            onClick={e => handleControlClick(control, e)}
           />
         ))}
       </div>
@@ -306,7 +321,7 @@ const ReportControlComponent: React.FC<ReportControlComponentProps> = ({
   control,
   selected,
   onUpdate,
-  onClick
+  onClick,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -316,18 +331,21 @@ const ReportControlComponent: React.FC<ReportControlComponentProps> = ({
     setIsDragging(true);
     setDragStart({
       x: e.clientX - control.left,
-      y: e.clientY - control.top
+      y: e.clientY - control.top,
     });
   };
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (isDragging) {
-      onUpdate({
-        left: Math.max(0, e.clientX - dragStart.x),
-        top: Math.max(0, e.clientY - dragStart.y)
-      });
-    }
-  }, [isDragging, dragStart, onUpdate]);
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (isDragging) {
+        onUpdate({
+          left: Math.max(0, e.clientX - dragStart.x),
+          top: Math.max(0, e.clientY - dragStart.y),
+        });
+      }
+    },
+    [isDragging, dragStart, onUpdate]
+  );
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -354,7 +372,7 @@ const ReportControlComponent: React.FC<ReportControlComponentProps> = ({
       border: selected ? '1px dashed #007bff' : 'none',
       cursor: 'move',
       padding: '2px',
-      boxSizing: 'border-box'
+      boxSizing: 'border-box',
     };
 
     switch (control.type) {
@@ -370,7 +388,7 @@ const ReportControlComponent: React.FC<ReportControlComponentProps> = ({
               textDecoration: control.fontUnderline ? 'underline' : 'none',
               borderStyle: control.borderStyle || 'none',
               borderColor: control.borderColor,
-              borderWidth: `${control.borderWidth || 0}px`
+              borderWidth: `${control.borderWidth || 0}px`,
             }}
           >
             {control.caption}
@@ -388,7 +406,7 @@ const ReportControlComponent: React.FC<ReportControlComponentProps> = ({
               textAlign: control.alignment,
               borderStyle: control.borderStyle || 'solid',
               borderColor: control.borderColor || '#000000',
-              borderWidth: `${control.borderWidth || 1}px`
+              borderWidth: `${control.borderWidth || 1}px`,
             }}
           >
             {control.dataField ? `[${control.dataField}]` : '[Field]'}
@@ -407,8 +425,11 @@ const ReportControlComponent: React.FC<ReportControlComponentProps> = ({
                 stroke={control.foreColor || '#000000'}
                 strokeWidth={control.borderWidth || 1}
                 strokeDasharray={
-                  control.lineStyle === 'dashed' ? '5,5' :
-                  control.lineStyle === 'dotted' ? '2,2' : undefined
+                  control.lineStyle === 'dashed'
+                    ? '5,5'
+                    : control.lineStyle === 'dotted'
+                      ? '2,2'
+                      : undefined
                 }
               />
             </svg>
@@ -425,7 +446,9 @@ const ReportControlComponent: React.FC<ReportControlComponentProps> = ({
                   y="0"
                   width={control.width}
                   height={control.height}
-                  fill={control.fillStyle === 'transparent' ? 'none' : control.backColor || '#ffffff'}
+                  fill={
+                    control.fillStyle === 'transparent' ? 'none' : control.backColor || '#ffffff'
+                  }
                   stroke={control.borderColor || '#000000'}
                   strokeWidth={control.borderWidth || 1}
                 />
@@ -435,7 +458,9 @@ const ReportControlComponent: React.FC<ReportControlComponentProps> = ({
                   cx={control.width / 2}
                   cy={control.height / 2}
                   r={Math.min(control.width, control.height) / 2}
-                  fill={control.fillStyle === 'transparent' ? 'none' : control.backColor || '#ffffff'}
+                  fill={
+                    control.fillStyle === 'transparent' ? 'none' : control.backColor || '#ffffff'
+                  }
                   stroke={control.borderColor || '#000000'}
                   strokeWidth={control.borderWidth || 1}
                 />
@@ -453,7 +478,7 @@ const ReportControlComponent: React.FC<ReportControlComponentProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: '#f0f0f0'
+              backgroundColor: '#f0f0f0',
             }}
           >
             <i className="pi pi-image" style={{ fontSize: '24px', color: '#999' }} />
@@ -471,7 +496,7 @@ const ReportControlComponent: React.FC<ReportControlComponentProps> = ({
               textAlign: control.alignment,
               borderStyle: control.borderStyle || 'none',
               borderColor: control.borderColor,
-              borderWidth: `${control.borderWidth || 0}px`
+              borderWidth: `${control.borderWidth || 0}px`,
             }}
           >
             {control.functionType ? `[${control.functionType}()]` : '[Function]'}
@@ -484,10 +509,7 @@ const ReportControlComponent: React.FC<ReportControlComponentProps> = ({
   };
 
   return (
-    <div
-      onMouseDown={handleMouseDown}
-      onClick={onClick}
-    >
+    <div onMouseDown={handleMouseDown} onClick={onClick}>
       {renderControl()}
       {selected && (
         <>
@@ -500,7 +522,7 @@ const ReportControlComponent: React.FC<ReportControlComponentProps> = ({
               width: 6,
               height: 6,
               backgroundColor: '#007bff',
-              cursor: 'nw-resize'
+              cursor: 'nw-resize',
             }}
           />
           <div
@@ -511,7 +533,7 @@ const ReportControlComponent: React.FC<ReportControlComponentProps> = ({
               width: 6,
               height: 6,
               backgroundColor: '#007bff',
-              cursor: 'ne-resize'
+              cursor: 'ne-resize',
             }}
           />
           <div
@@ -522,7 +544,7 @@ const ReportControlComponent: React.FC<ReportControlComponentProps> = ({
               width: 6,
               height: 6,
               backgroundColor: '#007bff',
-              cursor: 'sw-resize'
+              cursor: 'sw-resize',
             }}
           />
           <div
@@ -533,7 +555,7 @@ const ReportControlComponent: React.FC<ReportControlComponentProps> = ({
               width: 6,
               height: 6,
               backgroundColor: '#007bff',
-              cursor: 'se-resize'
+              cursor: 'se-resize',
             }}
           />
         </>
@@ -545,7 +567,7 @@ const ReportControlComponent: React.FC<ReportControlComponentProps> = ({
 export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
   report,
   onUpdate,
-  onClose
+  onClose,
 }) => {
   const [currentReport, setCurrentReport] = useState<DataReport>(report);
   const [selectedSection, setSelectedSection] = useState<ReportSection | null>(null);
@@ -559,7 +581,7 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
     { label: 'Legal (8.5" x 14")', value: 'legal' },
     { label: 'A4 (210mm x 297mm)', value: 'a4' },
     { label: 'A3 (297mm x 420mm)', value: 'a3' },
-    { label: 'Custom', value: 'custom' }
+    { label: 'Custom', value: 'custom' },
   ];
 
   // Control toolbox items
@@ -569,7 +591,7 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
     { type: 'image', label: 'Image', icon: 'pi-image' },
     { type: 'line', label: 'Line', icon: 'pi-minus' },
     { type: 'shape', label: 'Shape', icon: 'pi-stop' },
-    { type: 'function', label: 'Function', icon: 'pi-calculator' }
+    { type: 'function', label: 'Function', icon: 'pi-calculator' },
   ];
 
   // Function types
@@ -581,7 +603,7 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
     { label: 'Maximum', value: 'max' },
     { label: 'Now (Date/Time)', value: 'now' },
     { label: 'Page Number', value: 'page' },
-    { label: 'Total Pages', value: 'pages' }
+    { label: 'Total Pages', value: 'pages' },
   ];
 
   // Update section
@@ -590,7 +612,7 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
       ...currentReport,
       sections: currentReport.sections.map(section =>
         section.id === sectionId ? { ...section, ...updates } : section
-      )
+      ),
     };
     setCurrentReport(newReport);
     onUpdate(newReport);
@@ -602,9 +624,9 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
 
     const newSection = {
       ...selectedSection,
-      controls: selectedSection.controls.filter(ctrl => ctrl.id !== selectedControl.id)
+      controls: selectedSection.controls.filter(ctrl => ctrl.id !== selectedControl.id),
     };
-    
+
     updateSection(selectedSection.id, newSection);
     setSelectedControl(null);
   };
@@ -646,7 +668,7 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
       if (!section.visible) return;
 
       html += `<div class="report-section" style="height: ${section.height}px; background-color: ${section.backColor || '#ffffff'};">`;
-      
+
       // Add controls
       section.controls.forEach(control => {
         const controlStyle = `
@@ -698,23 +720,23 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
     let code = `' DataReport Code Generated\n`;
     code += `' Report: ${currentReport.name}\n`;
     code += `' Generated: ${new Date().toLocaleString()}\n\n`;
-    
+
     code += `Private Sub InitializeReport()\n`;
     code += `    Dim rpt As DataReport\n`;
     code += `    Set rpt = New DataReport\n\n`;
-    
+
     code += `    ' Report Properties\n`;
     code += `    rpt.Title = "${currentReport.title}"\n`;
     code += `    rpt.DataSource = ${currentReport.dataSource}\n`;
     code += `    rpt.DataMember = "${currentReport.dataCommand}"\n\n`;
-    
+
     code += `    ' Sections\n`;
     currentReport.sections.forEach(section => {
       const sectionVar = section.type.charAt(0).toUpperCase() + section.type.slice(1);
       code += `    With rpt.Sections("${section.type}")\n`;
       code += `        .Height = ${section.height * 15} ' twips\n`;
       code += `        .Visible = ${section.visible ? 'True' : 'False'}\n`;
-      
+
       section.controls.forEach(control => {
         code += `\n        ' Control: ${control.name}\n`;
         code += `        .Controls.Add "${control.type}", "${control.name}"\n`;
@@ -723,20 +745,20 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
         code += `            .Top = ${control.top * 15}\n`;
         code += `            .Width = ${control.width * 15}\n`;
         code += `            .Height = ${control.height * 15}\n`;
-        
+
         if (control.caption) {
           code += `            .Caption = "${control.caption}"\n`;
         }
         if (control.dataField) {
           code += `            .DataField = "${control.dataField}"\n`;
         }
-        
+
         code += `        End With\n`;
       });
-      
+
       code += `    End With\n\n`;
     });
-    
+
     code += `    ' Show the report\n`;
     code += `    rpt.Show\n`;
     code += `End Sub\n`;
@@ -747,11 +769,26 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
 
   const leftToolbar = (
     <div className="p-toolbar-group-left">
-      <Button label="Save" icon="pi pi-save" onClick={() => onUpdate(currentReport)} className="p-mr-2" />
-      <Button label="Preview" icon="pi pi-eye" onClick={() => setShowPreview(true)} className="p-mr-2" />
+      <Button
+        label="Save"
+        icon="pi pi-save"
+        onClick={() => onUpdate(currentReport)}
+        className="p-mr-2"
+      />
+      <Button
+        label="Preview"
+        icon="pi pi-eye"
+        onClick={() => setShowPreview(true)}
+        className="p-mr-2"
+      />
       <Button label="Export Code" icon="pi pi-code" onClick={exportToVB6} className="p-mr-2" />
       {selectedControl && (
-        <Button label="Delete" icon="pi pi-trash" onClick={deleteSelectedControl} severity="danger" />
+        <Button
+          label="Delete"
+          icon="pi pi-trash"
+          onClick={deleteSelectedControl}
+          severity="danger"
+        />
       )}
     </div>
   );
@@ -762,7 +799,7 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
       <Dropdown
         value={zoom}
         options={[50, 75, 100, 125, 150, 200].map(z => ({ label: `${z}%`, value: z }))}
-        onChange={(e) => setZoom(e.value)}
+        onChange={e => setZoom(e.value)}
         style={{ width: '100px' }}
       />
     </div>
@@ -780,10 +817,17 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
       >
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
           <Toolbar left={leftToolbar} right={rightToolbar} />
-          
+
           <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
             {/* Toolbox */}
-            <div style={{ width: '200px', borderRight: '1px solid #ddd', padding: '10px', overflow: 'auto' }}>
+            <div
+              style={{
+                width: '200px',
+                borderRight: '1px solid #ddd',
+                padding: '10px',
+                overflow: 'auto',
+              }}
+            >
               <h4>Toolbox</h4>
               {toolboxItems.map(item => (
                 <DraggableControl
@@ -805,18 +849,18 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
                   boxShadow: '0 0 10px rgba(0,0,0,0.1)',
                   width: currentReport.orientation === 'portrait' ? '8.5in' : '11in',
                   minHeight: currentReport.orientation === 'portrait' ? '11in' : '8.5in',
-                  padding: '20px'
+                  padding: '20px',
                 }}
               >
                 <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>{currentReport.title}</h2>
-                
+
                 {currentReport.sections.map(section => (
                   <ReportSectionComponent
                     key={section.id}
                     section={section}
-                    onUpdate={(updatedSection) => updateSection(section.id, updatedSection)}
+                    onUpdate={updatedSection => updateSection(section.id, updatedSection)}
                     selectedControl={selectedControl}
-                    onSelectControl={(control) => {
+                    onSelectControl={control => {
                       setSelectedControl(control);
                       setSelectedSection(section);
                     }}
@@ -834,7 +878,9 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
                       <label>Title</label>
                       <InputText
                         value={currentReport.title}
-                        onChange={(e) => setCurrentReport({ ...currentReport, title: e.target.value })}
+                        onChange={e =>
+                          setCurrentReport({ ...currentReport, title: e.target.value })
+                        }
                       />
                     </div>
                     <div className="p-field">
@@ -842,7 +888,7 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
                       <Dropdown
                         value={currentReport.paperSize}
                         options={paperSizes}
-                        onChange={(e) => setCurrentReport({ ...currentReport, paperSize: e.value })}
+                        onChange={e => setCurrentReport({ ...currentReport, paperSize: e.value })}
                       />
                     </div>
                     <div className="p-field">
@@ -851,9 +897,9 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
                         value={currentReport.orientation}
                         options={[
                           { label: 'Portrait', value: 'portrait' },
-                          { label: 'Landscape', value: 'landscape' }
+                          { label: 'Landscape', value: 'landscape' },
                         ]}
-                        onChange={(e) => setCurrentReport({ ...currentReport, orientation: e.value })}
+                        onChange={e => setCurrentReport({ ...currentReport, orientation: e.value })}
                       />
                     </div>
                   </div>
@@ -866,7 +912,7 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
                         <label>Name</label>
                         <InputText
                           value={selectedControl.name}
-                          onChange={(e) => {
+                          onChange={e => {
                             const updated = { ...selectedControl, name: e.target.value };
                             setSelectedControl(updated);
                             // Update in section
@@ -874,7 +920,7 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
                               updateSection(selectedSection.id, {
                                 controls: selectedSection.controls.map(c =>
                                   c.id === selectedControl.id ? updated : c
-                                )
+                                ),
                               });
                             }
                           }}
@@ -886,14 +932,14 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
                           <label>Caption</label>
                           <InputText
                             value={selectedControl.caption || ''}
-                            onChange={(e) => {
+                            onChange={e => {
                               const updated = { ...selectedControl, caption: e.target.value };
                               setSelectedControl(updated);
                               if (selectedSection) {
                                 updateSection(selectedSection.id, {
                                   controls: selectedSection.controls.map(c =>
                                     c.id === selectedControl.id ? updated : c
-                                  )
+                                  ),
                                 });
                               }
                             }}
@@ -906,14 +952,14 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
                           <label>Data Field</label>
                           <InputText
                             value={selectedControl.dataField || ''}
-                            onChange={(e) => {
+                            onChange={e => {
                               const updated = { ...selectedControl, dataField: e.target.value };
                               setSelectedControl(updated);
                               if (selectedSection) {
                                 updateSection(selectedSection.id, {
                                   controls: selectedSection.controls.map(c =>
                                     c.id === selectedControl.id ? updated : c
-                                  )
+                                  ),
                                 });
                               }
                             }}
@@ -927,14 +973,14 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
                           <Dropdown
                             value={selectedControl.functionType}
                             options={functionTypes}
-                            onChange={(e) => {
+                            onChange={e => {
                               const updated = { ...selectedControl, functionType: e.value };
                               setSelectedControl(updated);
                               if (selectedSection) {
                                 updateSection(selectedSection.id, {
                                   controls: selectedSection.controls.map(c =>
                                     c.id === selectedControl.id ? updated : c
-                                  )
+                                  ),
                                 });
                               }
                             }}
@@ -946,14 +992,14 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
                         <label>Font Size</label>
                         <InputNumber
                           value={selectedControl.fontSize || 10}
-                          onChange={(e) => {
+                          onChange={e => {
                             const updated = { ...selectedControl, fontSize: e.value };
                             setSelectedControl(updated);
                             if (selectedSection) {
                               updateSection(selectedSection.id, {
                                 controls: selectedSection.controls.map(c =>
                                   c.id === selectedControl.id ? updated : c
-                                )
+                                ),
                               });
                             }
                           }}
@@ -966,14 +1012,14 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
                         <label>Text Color</label>
                         <ColorPicker
                           value={selectedControl.foreColor || '#000000'}
-                          onChange={(e) => {
+                          onChange={e => {
                             const updated = { ...selectedControl, foreColor: `#${e.value}` };
                             setSelectedControl(updated);
                             if (selectedSection) {
                               updateSection(selectedSection.id, {
                                 controls: selectedSection.controls.map(c =>
                                   c.id === selectedControl.id ? updated : c
-                                )
+                                ),
                               });
                             }
                           }}
@@ -984,14 +1030,14 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
                         <Checkbox
                           inputId="fontBold"
                           checked={selectedControl.fontBold || false}
-                          onChange={(e) => {
+                          onChange={e => {
                             const updated = { ...selectedControl, fontBold: e.checked };
                             setSelectedControl(updated);
                             if (selectedSection) {
                               updateSection(selectedSection.id, {
                                 controls: selectedSection.controls.map(c =>
                                   c.id === selectedControl.id ? updated : c
-                                )
+                                ),
                               });
                             }
                           }}
@@ -1003,14 +1049,14 @@ export const DataReportDesigner: React.FC<DataReportDesignerProps> = ({
                         <Checkbox
                           inputId="fontItalic"
                           checked={selectedControl.fontItalic || false}
-                          onChange={(e) => {
+                          onChange={e => {
                             const updated = { ...selectedControl, fontItalic: e.checked };
                             setSelectedControl(updated);
                             if (selectedSection) {
                               updateSection(selectedSection.id, {
                                 controls: selectedSection.controls.map(c =>
                                   c.id === selectedControl.id ? updated : c
-                                )
+                                ),
                               });
                             }
                           }}
@@ -1058,7 +1104,7 @@ export const createDataReport = (name: string = 'DataReport1'): DataReport => {
       top: 10,
       bottom: 10,
       left: 10,
-      right: 10
+      right: 10,
     },
     sections: [
       {
@@ -1070,7 +1116,7 @@ export const createDataReport = (name: string = 'DataReport1'): DataReport => {
         backColor: '#ffffff',
         keepTogether: true,
         forceNewPage: 'none',
-        controls: []
+        controls: [],
       },
       {
         id: 'ph',
@@ -1081,7 +1127,7 @@ export const createDataReport = (name: string = 'DataReport1'): DataReport => {
         backColor: '#ffffff',
         keepTogether: true,
         forceNewPage: 'none',
-        controls: []
+        controls: [],
       },
       {
         id: 'd',
@@ -1092,7 +1138,7 @@ export const createDataReport = (name: string = 'DataReport1'): DataReport => {
         backColor: '#ffffff',
         keepTogether: false,
         forceNewPage: 'none',
-        controls: []
+        controls: [],
       },
       {
         id: 'pf',
@@ -1103,7 +1149,7 @@ export const createDataReport = (name: string = 'DataReport1'): DataReport => {
         backColor: '#ffffff',
         keepTogether: true,
         forceNewPage: 'none',
-        controls: []
+        controls: [],
       },
       {
         id: 'rf',
@@ -1114,9 +1160,9 @@ export const createDataReport = (name: string = 'DataReport1'): DataReport => {
         backColor: '#ffffff',
         keepTogether: true,
         forceNewPage: 'none',
-        controls: []
-      }
-    ]
+        controls: [],
+      },
+    ],
   };
 };
 

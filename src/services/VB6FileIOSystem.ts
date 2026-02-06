@@ -11,18 +11,18 @@ const logger = createLogger('FileIO');
 
 // VB6 File Access Modes
 export enum VB6FileMode {
-  Input = 1,        // Sequential input
-  Output = 2,       // Sequential output
-  Random = 4,       // Random access
-  Append = 8,       // Sequential append
-  Binary = 32       // Binary access
+  Input = 1, // Sequential input
+  Output = 2, // Sequential output
+  Random = 4, // Random access
+  Append = 8, // Sequential append
+  Binary = 32, // Binary access
 }
 
 // VB6 File Access Types
 export enum VB6FileAccess {
   Read = 1,
   Write = 2,
-  ReadWrite = 3
+  ReadWrite = 3,
 }
 
 // VB6 File Share Modes
@@ -31,21 +31,21 @@ export enum VB6FileShare {
   Exclusive = 1,
   DenyNone = 64,
   DenyRead = 32,
-  DenyWrite = 16
+  DenyWrite = 16,
 }
 
 // VB6 File Lock Types
 export enum VB6FileLock {
   ReadWrite = 0,
   Read = 1,
-  Write = 2
+  Write = 2,
 }
 
 // VB6 File Seek Origin
 export enum VB6SeekOrigin {
   Begin = 0,
   Current = 1,
-  End = 2
+  End = 2,
 }
 
 // File Handle Structure
@@ -91,7 +91,7 @@ export class VB6FileIOSystem {
     openFiles: 0,
     totalBytesRead: 0,
     totalBytesWritten: 0,
-    errorCount: 0
+    errorCount: 0,
   };
 
   // Virtual file system for web environment
@@ -111,10 +111,16 @@ export class VB6FileIOSystem {
   // Initialize with some sample files
   private initializeVirtualFileSystem(): void {
     // Create sample text files
-    this.createVirtualFile('C:\\TEMP\\sample.txt', 'Hello World!\nThis is a test file.\nLine 3\nLine 4');
+    this.createVirtualFile(
+      'C:\\TEMP\\sample.txt',
+      'Hello World!\nThis is a test file.\nLine 3\nLine 4'
+    );
     this.createVirtualFile('C:\\DATA\\numbers.dat', '1,2,3,4,5\n6,7,8,9,10\n11,12,13,14,15');
-    this.createVirtualFile('C:\\CONFIG\\settings.ini', '[Settings]\nLanguage=English\nTheme=Default\n[Options]\nAutoSave=True');
-    
+    this.createVirtualFile(
+      'C:\\CONFIG\\settings.ini',
+      '[Settings]\nLanguage=English\nTheme=Default\n[Options]\nAutoSave=True'
+    );
+
     // Create sample binary file
     const binaryData = new Uint8Array(256);
     for (let i = 0; i < 256; i++) {
@@ -133,7 +139,8 @@ export class VB6FileIOSystem {
     let fileNumber = Math.max(start, 1);
     while (this.fileHandles.has(fileNumber)) {
       fileNumber++;
-      if (fileNumber > 511) { // VB6 limit
+      if (fileNumber > 511) {
+        // VB6 limit
         throw new Error('Too many files open');
       }
     }
@@ -141,17 +148,24 @@ export class VB6FileIOSystem {
   }
 
   // Open File
-  OpenFile(fileName: string, mode: VB6FileMode, access: VB6FileAccess = VB6FileAccess.ReadWrite, share: VB6FileShare = VB6FileShare.Default, fileNumber?: number, recordLength: number = 128): number {
+  OpenFile(
+    fileName: string,
+    mode: VB6FileMode,
+    access: VB6FileAccess = VB6FileAccess.ReadWrite,
+    share: VB6FileShare = VB6FileShare.Default,
+    fileNumber?: number,
+    recordLength: number = 128
+  ): number {
     // Get file number
     const fileNum = fileNumber || this.FreeFile();
-    
+
     if (this.fileHandles.has(fileNum)) {
       throw new Error(`File ${fileNum} is already open`);
     }
 
     // Normalize file path
     const normalizedPath = fileName.toUpperCase().replace(/\//g, '\\');
-    
+
     // Get or create file data
     let fileData: Uint8Array;
     if (this.virtualFileSystem.has(normalizedPath)) {
@@ -178,7 +192,7 @@ export class VB6FileIOSystem {
       textEncoder: new TextEncoder(),
       textDecoder: new TextDecoder(),
       endOfFile: fileData.length === 0,
-      lastError: null
+      lastError: null,
     };
 
     // Set initial position based on mode
@@ -211,8 +225,11 @@ export class VB6FileIOSystem {
   }
 
   private closeHandle(handle: VB6FileHandle): void {
-    if (handle.mode === VB6FileMode.Output || handle.mode === VB6FileMode.Append || 
-        (handle.access & VB6FileAccess.Write) !== 0) {
+    if (
+      handle.mode === VB6FileMode.Output ||
+      handle.mode === VB6FileMode.Append ||
+      (handle.access & VB6FileAccess.Write) !== 0
+    ) {
       // Save changes back to virtual file system
       this.virtualFileSystem.set(handle.fileName, handle.data);
     }
@@ -360,18 +377,16 @@ export class VB6FileIOSystem {
   // File Locking
   Lock(fileNumber: number, recordRange?: { start: number; end?: number }): void {
     const handle = this.getHandle(fileNumber);
-    
+
     if (recordRange) {
       if (handle.mode === VB6FileMode.Random) {
         handle.lockStart = (recordRange.start - 1) * handle.recordLength;
-        handle.lockLength = recordRange.end ? 
-          ((recordRange.end - recordRange.start + 1) * handle.recordLength) : 
-          handle.recordLength;
+        handle.lockLength = recordRange.end
+          ? (recordRange.end - recordRange.start + 1) * handle.recordLength
+          : handle.recordLength;
       } else {
         handle.lockStart = recordRange.start - 1;
-        handle.lockLength = recordRange.end ? 
-          (recordRange.end - recordRange.start + 1) : 
-          1;
+        handle.lockLength = recordRange.end ? recordRange.end - recordRange.start + 1 : 1;
       }
     } else {
       // Lock entire file
@@ -416,12 +431,12 @@ export class VB6FileIOSystem {
       const files = Array.from(this.virtualFileSystem.keys());
       return files.length > 0 ? files[0].split('\\').pop() || '' : '';
     }
-    
+
     const normalizedPath = pathName.toUpperCase().replace(/\//g, '\\');
     const files = Array.from(this.virtualFileSystem.keys())
       .filter(path => path.startsWith(normalizedPath.replace('*', '').replace('?', '')))
       .map(path => path.split('\\').pop() || '');
-    
+
     return files.length > 0 ? files[0] : '';
   }
 
@@ -454,12 +469,12 @@ export class VB6FileIOSystem {
   FileCopy(source: string, destination: string): void {
     const normalizedSource = source.toUpperCase().replace(/\//g, '\\');
     const normalizedDest = destination.toUpperCase().replace(/\//g, '\\');
-    
+
     const sourceData = this.virtualFileSystem.get(normalizedSource);
     if (!sourceData) {
       throw new Error(`File not found: ${source}`);
     }
-    
+
     this.virtualFileSystem.set(normalizedDest, sourceData.slice());
   }
 
@@ -473,12 +488,12 @@ export class VB6FileIOSystem {
   Name(oldName: string, newName: string): void {
     const normalizedOld = oldName.toUpperCase().replace(/\//g, '\\');
     const normalizedNew = newName.toUpperCase().replace(/\//g, '\\');
-    
+
     const data = this.virtualFileSystem.get(normalizedOld);
     if (!data) {
       throw new Error(`File not found: ${oldName}`);
     }
-    
+
     this.virtualFileSystem.set(normalizedNew, data);
     this.virtualFileSystem.delete(normalizedOld);
   }
@@ -532,7 +547,7 @@ export class VB6FileIOSystem {
 
   private writeString(handle: VB6FileHandle, text: string): void {
     const bytes = handle.textEncoder.encode(text);
-    
+
     // Expand file if necessary
     const newPosition = handle.position + bytes.length;
     if (newPosition > handle.data.length) {
@@ -560,7 +575,7 @@ export class VB6FileIOSystem {
     let endPos = startPos;
 
     // Find end of line
-    while (endPos < handle.size && handle.data[endPos] !== 0x0D && handle.data[endPos] !== 0x0A) {
+    while (endPos < handle.size && handle.data[endPos] !== 0x0d && handle.data[endPos] !== 0x0a) {
       endPos++;
     }
 
@@ -570,7 +585,11 @@ export class VB6FileIOSystem {
 
     // Skip line ending
     if (endPos < handle.size) {
-      if (handle.data[endPos] === 0x0D && endPos + 1 < handle.size && handle.data[endPos + 1] === 0x0A) {
+      if (
+        handle.data[endPos] === 0x0d &&
+        endPos + 1 < handle.size &&
+        handle.data[endPos + 1] === 0x0a
+      ) {
         endPos += 2; // CRLF
       } else {
         endPos += 1; // CR or LF
@@ -580,7 +599,7 @@ export class VB6FileIOSystem {
     handle.position = endPos;
     handle.endOfFile = handle.position >= handle.size;
 
-    this.stats.totalBytesRead += (endPos - startPos);
+    this.stats.totalBytesRead += endPos - startPos;
 
     return line;
   }
@@ -624,10 +643,10 @@ export class VB6FileIOSystem {
     if (str === '') return '';
     if (str.toLowerCase() === 'true') return true;
     if (str.toLowerCase() === 'false') return false;
-    
+
     const num = parseFloat(str);
     if (!isNaN(num) && isFinite(num)) return num;
-    
+
     return str;
   }
 
@@ -705,7 +724,7 @@ export class VB6FileIOSystem {
 
   private getBinaryData(handle: VB6FileHandle, variable?: any): any {
     let bytesToRead = 1;
-    
+
     if (typeof variable === 'number') {
       bytesToRead = 8; // Double
     } else if (typeof variable === 'string') {
@@ -772,13 +791,19 @@ export class VB6FileIOSystem {
     return { ...this.stats };
   }
 
-  getOpenFiles(): Array<{ fileNumber: number; fileName: string; mode: string; position: number; size: number }> {
+  getOpenFiles(): Array<{
+    fileNumber: number;
+    fileName: string;
+    mode: string;
+    position: number;
+    size: number;
+  }> {
     return Array.from(this.fileHandles.values()).map(handle => ({
       fileNumber: handle.fileNumber,
       fileName: handle.fileName,
       mode: VB6FileMode[handle.mode],
       position: handle.position,
-      size: handle.size
+      size: handle.size,
     }));
   }
 
@@ -810,7 +835,14 @@ export function FreeFile(start: number = 1): number {
   return VB6FileIO.FreeFile(start);
 }
 
-export function Open(fileName: string, mode: VB6FileMode, access?: VB6FileAccess, share?: VB6FileShare, fileNumber?: number, recordLength?: number): number {
+export function Open(
+  fileName: string,
+  mode: VB6FileMode,
+  access?: VB6FileAccess,
+  share?: VB6FileShare,
+  fileNumber?: number,
+  recordLength?: number
+): number {
   return VB6FileIO.OpenFile(fileName, mode, access, share, fileNumber, recordLength);
 }
 
@@ -881,7 +913,7 @@ export function Name(oldName: string, newName: string): void {
 // Initialize global VB6 file I/O functions
 if (typeof window !== 'undefined') {
   const globalAny = window as any;
-  
+
   // File I/O functions
   globalAny.FreeFile = FreeFile;
   globalAny.Open = Open;
@@ -901,7 +933,7 @@ if (typeof window !== 'undefined') {
   globalAny.FileCopy = FileCopy;
   globalAny.Kill = Kill;
   globalAny.Name = Name;
-  
+
   // File system object
   globalAny.VB6FileIO = VB6FileIO;
 
@@ -910,7 +942,9 @@ if (typeof window !== 'undefined') {
   globalAny.VB6FileAccess = VB6FileAccess;
   globalAny.VB6FileShare = VB6FileShare;
 
-  logger.info('VB6 File I/O System initialized with full sequential, random, and binary file support');
+  logger.info(
+    'VB6 File I/O System initialized with full sequential, random, and binary file support'
+  );
 }
 
 export default VB6FileIOSystem;

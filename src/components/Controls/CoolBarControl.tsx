@@ -1,6 +1,6 @@
 /**
  * VB6 CoolBar Control Implementation
- * 
+ *
  * Advanced toolbar with resizable bands and full VB6 compatibility
  */
 
@@ -28,34 +28,34 @@ export interface CoolBarControl {
   top: number;
   width: number;
   height: number;
-  
+
   // Band management
   bands: CoolBarBand[];
-  
+
   // Appearance
   allowResize: boolean;
   allowVertical: boolean;
   fixedOrder: boolean;
   orientation: number; // 0=Horizontal, 1=Vertical
-  
+
   // Band appearance
   bandBorders: boolean;
   bandMaxWidth: number;
   bandMinHeight: number;
-  
+
   // ImageList associations
   imageList: string; // ImageList control name
-  
+
   // Behavior
   enabled: boolean;
   visible: boolean;
-  
+
   // Appearance
   appearance: number; // 0=Flat, 1=3D
   borderStyle: number; // 0=None, 1=Fixed Single
   mousePointer: number;
   tag: string;
-  
+
   // Events
   onBandClick?: string;
   onChange?: string;
@@ -73,7 +73,7 @@ export const CoolBarControl: React.FC<CoolBarControlProps> = ({
   control,
   isDesignMode = false,
   onPropertyChange,
-  onEvent
+  onEvent,
 }) => {
   const {
     name,
@@ -95,7 +95,7 @@ export const CoolBarControl: React.FC<CoolBarControlProps> = ({
     appearance = 1,
     borderStyle = 1,
     mousePointer = 0,
-    tag = ''
+    tag = '',
   } = control;
 
   const [dragState, setDragState] = useState<{
@@ -109,7 +109,7 @@ export const CoolBarControl: React.FC<CoolBarControlProps> = ({
     dragType: null,
     bandIndex: -1,
     startX: 0,
-    startWidth: 0
+    startWidth: 0,
   });
 
   const [hoveredBand, setHoveredBand] = useState<number>(-1);
@@ -117,55 +117,61 @@ export const CoolBarControl: React.FC<CoolBarControlProps> = ({
 
   const isHorizontal = orientation === 0;
 
-  const handleBandClick = useCallback((band: CoolBarBand, event: React.MouseEvent) => {
-    if (!enabled || !band.enabled) return;
-    
-    event.preventDefault();
-    onEvent?.('BandClick', { band: band.index, key: band.key });
-  }, [enabled, onEvent]);
+  const handleBandClick = useCallback(
+    (band: CoolBarBand, event: React.MouseEvent) => {
+      if (!enabled || !band.enabled) return;
 
-  const handleResizeStart = useCallback((bandIndex: number, event: React.MouseEvent) => {
-    if (!allowResize || !enabled) return;
-    
-    event.preventDefault();
-    event.stopPropagation();
-    
-    setDragState({
-      isDragging: true,
-      dragType: 'resize',
-      bandIndex,
-      startX: event.clientX,
-      startWidth: bands[bandIndex]?.width || 100
-    });
-  }, [allowResize, enabled, bands]);
+      event.preventDefault();
+      onEvent?.('BandClick', { band: band.index, key: band.key });
+    },
+    [enabled, onEvent]
+  );
 
-  const handleMouseMove = useCallback((event: MouseEvent) => {
-    if (!dragState.isDragging) return;
-    
-    const deltaX = event.clientX - dragState.startX;
-    
-    if (dragState.dragType === 'resize') {
-      const band = bands[dragState.bandIndex];
-      if (!band) return;
-      
-      const newWidth = Math.max(
-        band.minWidth || 50,
-        dragState.startWidth + deltaX
-      );
-      
-      if (bandMaxWidth > 0) {
-        Math.min(newWidth, bandMaxWidth);
+  const handleResizeStart = useCallback(
+    (bandIndex: number, event: React.MouseEvent) => {
+      if (!allowResize || !enabled) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      setDragState({
+        isDragging: true,
+        dragType: 'resize',
+        bandIndex,
+        startX: event.clientX,
+        startWidth: bands[bandIndex]?.width || 100,
+      });
+    },
+    [allowResize, enabled, bands]
+  );
+
+  const handleMouseMove = useCallback(
+    (event: MouseEvent) => {
+      if (!dragState.isDragging) return;
+
+      const deltaX = event.clientX - dragState.startX;
+
+      if (dragState.dragType === 'resize') {
+        const band = bands[dragState.bandIndex];
+        if (!band) return;
+
+        const newWidth = Math.max(band.minWidth || 50, dragState.startWidth + deltaX);
+
+        if (bandMaxWidth > 0) {
+          Math.min(newWidth, bandMaxWidth);
+        }
+
+        // Update band width
+        const updatedBands = bands.map((b, index) =>
+          index === dragState.bandIndex ? { ...b, width: newWidth } : b
+        );
+
+        onPropertyChange?.('bands', updatedBands);
+        onEvent?.('Change');
       }
-      
-      // Update band width
-      const updatedBands = bands.map((b, index) => 
-        index === dragState.bandIndex ? { ...b, width: newWidth } : b
-      );
-      
-      onPropertyChange?.('bands', updatedBands);
-      onEvent?.('Change');
-    }
-  }, [dragState, bands, bandMaxWidth, onPropertyChange, onEvent]);
+    },
+    [dragState, bands, bandMaxWidth, onPropertyChange, onEvent]
+  );
 
   const handleMouseUp = useCallback(() => {
     setDragState({
@@ -173,7 +179,7 @@ export const CoolBarControl: React.FC<CoolBarControlProps> = ({
       dragType: null,
       bandIndex: -1,
       startX: 0,
-      startWidth: 0
+      startWidth: 0,
     });
   }, []);
 
@@ -208,27 +214,39 @@ export const CoolBarControl: React.FC<CoolBarControlProps> = ({
 
   const getCursorStyle = () => {
     const cursors = [
-      'default', 'auto', 'crosshair', 'text', 'wait', 'help',
-      'pointer', 'not-allowed', 'move', 'col-resize', 'row-resize',
-      'n-resize', 's-resize', 'e-resize', 'w-resize'
+      'default',
+      'auto',
+      'crosshair',
+      'text',
+      'wait',
+      'help',
+      'pointer',
+      'not-allowed',
+      'move',
+      'col-resize',
+      'row-resize',
+      'n-resize',
+      's-resize',
+      'e-resize',
+      'w-resize',
     ];
     return cursors[mousePointer] || 'default';
   };
 
   const getBandStyle = (band: CoolBarBand, index: number) => {
     const isHovered = hoveredBand === index;
-    
+
     let background = '#f0f0f0';
     const border = bandBorders ? '1px outset #d0d0d0' : 'none';
-    
+
     if (isHovered && enabled && band.enabled) {
       background = '#f8f8f8';
     }
-    
+
     if (!band.enabled) {
       background = '#e0e0e0';
     }
-    
+
     return {
       display: band.visible ? 'flex' : 'none',
       alignItems: 'center',
@@ -241,7 +259,7 @@ export const CoolBarControl: React.FC<CoolBarControlProps> = ({
       position: 'relative' as const,
       marginRight: '2px',
       padding: '2px 4px',
-      overflow: 'hidden'
+      overflow: 'hidden',
     };
   };
 
@@ -257,16 +275,16 @@ export const CoolBarControl: React.FC<CoolBarControlProps> = ({
     opacity: enabled ? 1 : 0.5,
     outline: isDesignMode ? '1px dotted #333' : 'none',
     display: 'flex',
-    flexDirection: isHorizontal ? 'row' : 'column' as const,
+    flexDirection: isHorizontal ? 'row' : ('column' as const),
     alignItems: 'stretch',
     overflow: 'hidden',
-    userSelect: 'none' as const
+    userSelect: 'none' as const,
   };
 
   // Group bands by rows
   const bandRows: CoolBarBand[][] = [];
   let currentRow: CoolBarBand[] = [];
-  
+
   for (const band of bands) {
     if (band.newRow && currentRow.length > 0) {
       bandRows.push(currentRow);
@@ -293,19 +311,19 @@ export const CoolBarControl: React.FC<CoolBarControlProps> = ({
           key={rowIndex}
           style={{
             display: 'flex',
-            flexDirection: isHorizontal ? 'row' : 'column' as const,
+            flexDirection: isHorizontal ? 'row' : ('column' as const),
             width: '100%',
-            minHeight: `${bandMinHeight}px`
+            minHeight: `${bandMinHeight}px`,
           }}
         >
           {row.map((band, bandIndex) => {
             const actualIndex = bands.indexOf(band);
-            
+
             return (
               <div
                 key={band.key || actualIndex}
                 style={getBandStyle(band, actualIndex)}
-                onClick={(e) => handleBandClick(band, e)}
+                onClick={e => handleBandClick(band, e)}
                 onMouseEnter={() => handleBandMouseEnter(actualIndex)}
                 onMouseLeave={handleBandMouseLeave}
               >
@@ -322,7 +340,7 @@ export const CoolBarControl: React.FC<CoolBarControlProps> = ({
                       #c0c0c0 2px
                     )`,
                     marginRight: '4px',
-                    cursor: fixedOrder ? 'default' : 'move'
+                    cursor: fixedOrder ? 'default' : 'move',
                   }}
                 />
 
@@ -333,7 +351,7 @@ export const CoolBarControl: React.FC<CoolBarControlProps> = ({
                       width: '16px',
                       height: '16px',
                       background: `url(images/${imageList}) -${band.image * 16}px 0`,
-                      marginRight: '4px'
+                      marginRight: '4px',
                     }}
                   />
                 )}
@@ -347,7 +365,7 @@ export const CoolBarControl: React.FC<CoolBarControlProps> = ({
                       marginRight: '4px',
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
-                      textOverflow: 'ellipsis'
+                      textOverflow: 'ellipsis',
                     }}
                   >
                     {band.caption}
@@ -366,7 +384,7 @@ export const CoolBarControl: React.FC<CoolBarControlProps> = ({
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: '9px',
-                      color: '#666'
+                      color: '#666',
                     }}
                   >
                     {isDesignMode ? band.child : ''}
@@ -382,9 +400,9 @@ export const CoolBarControl: React.FC<CoolBarControlProps> = ({
                       background: '#d0d0d0',
                       cursor: 'col-resize',
                       marginLeft: '2px',
-                      borderLeft: '1px solid #a0a0a0'
+                      borderLeft: '1px solid #a0a0a0',
                     }}
-                    onMouseDown={(e) => handleResizeStart(actualIndex, e)}
+                    onMouseDown={e => handleResizeStart(actualIndex, e)}
                   />
                 )}
               </div>
@@ -406,7 +424,7 @@ export const CoolBarControl: React.FC<CoolBarControlProps> = ({
             padding: '2px',
             border: '1px solid #ccc',
             whiteSpace: 'nowrap',
-            zIndex: 1000
+            zIndex: 1000,
           }}
         >
           {name} ({bands.length} bands)
@@ -434,7 +452,7 @@ export const CoolBarHelpers = {
     visible: true,
     enabled: true,
     image: -1,
-    tag: ''
+    tag: '',
   }),
 
   /**
@@ -449,37 +467,33 @@ export const CoolBarHelpers = {
    * Remove band from coolbar
    */
   removeBand: (bands: CoolBarBand[], index: number): CoolBarBand[] => {
-    return bands.filter((_, i) => i !== index).map((band, i) => ({
-      ...band,
-      index: i
-    }));
+    return bands
+      .filter((_, i) => i !== index)
+      .map((band, i) => ({
+        ...band,
+        index: i,
+      }));
   },
 
   /**
    * Set band child control
    */
   setBandChild: (bands: CoolBarBand[], index: number, childName: string): CoolBarBand[] => {
-    return bands.map((band, i) => 
-      i === index ? { ...band, child: childName } : band
-    );
+    return bands.map((band, i) => (i === index ? { ...band, child: childName } : band));
   },
 
   /**
    * Set band width
    */
   setBandWidth: (bands: CoolBarBand[], index: number, width: number): CoolBarBand[] => {
-    return bands.map((band, i) => 
-      i === index ? { ...band, width } : band
-    );
+    return bands.map((band, i) => (i === index ? { ...band, width } : band));
   },
 
   /**
    * Set band on new row
    */
   setBandNewRow: (bands: CoolBarBand[], index: number, newRow: boolean): CoolBarBand[] => {
-    return bands.map((band, i) => 
-      i === index ? { ...band, newRow } : band
-    );
+    return bands.map((band, i) => (i === index ? { ...band, newRow } : band));
   },
 
   /**
@@ -489,7 +503,7 @@ export const CoolBarHelpers = {
     const newBands = [...bands];
     const [moved] = newBands.splice(fromIndex, 1);
     newBands.splice(toIndex, 0, moved);
-    
+
     // Update indices
     return newBands.map((band, index) => ({ ...band, index }));
   },
@@ -498,9 +512,7 @@ export const CoolBarHelpers = {
    * Calculate total width of all bands
    */
   calculateTotalWidth: (bands: CoolBarBand[]): number => {
-    return bands
-      .filter(band => band.visible)
-      .reduce((total, band) => total + band.width + 10, 0); // +10 for margins/borders
+    return bands.filter(band => band.visible).reduce((total, band) => total + band.width + 10, 0); // +10 for margins/borders
   },
 
   /**
@@ -517,7 +529,7 @@ export const CoolBarHelpers = {
   getBandRows: (bands: CoolBarBand[]): CoolBarBand[][] => {
     const rows: CoolBarBand[][] = [];
     let currentRow: CoolBarBand[] = [];
-    
+
     for (const band of bands) {
       if (band.newRow && currentRow.length > 0) {
         rows.push(currentRow);
@@ -530,9 +542,9 @@ export const CoolBarHelpers = {
     if (currentRow.length > 0) {
       rows.push(currentRow);
     }
-    
+
     return rows;
-  }
+  },
 };
 
 export default CoolBarControl;

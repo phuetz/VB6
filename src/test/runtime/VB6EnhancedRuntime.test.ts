@@ -39,7 +39,7 @@ import {
   IsNumeric,
   IsObject,
   TypeName,
-  VarType
+  VarType,
 } from '../../runtime/VB6EnhancedRuntime';
 
 describe('VB6 Enhanced Runtime Functions', () => {
@@ -125,10 +125,7 @@ describe('VB6 Enhanced Runtime Functions', () => {
     });
 
     it('should chain methods', () => {
-      const sb = CreateStringBuilder()
-        .Append('Hello')
-        .Append(' ')
-        .Append('World');
+      const sb = CreateStringBuilder().Append('Hello').Append(' ').Append('World');
       expect(sb.ToString()).toBe('Hello World');
     });
   });
@@ -277,8 +274,8 @@ describe('VB6 Enhanced Runtime Functions', () => {
 
   describe('Color Functions', () => {
     it('QBColor should return color values', () => {
-      expect(QBColor(0)).toBe(0x000000);  // Black
-      expect(QBColor(15)).toBe(0xFFFFFF); // White
+      expect(QBColor(0)).toBe(0x000000); // Black
+      expect(QBColor(15)).toBe(0xffffff); // White
     });
 
     it('QBColor should wrap around for values > 15', () => {
@@ -287,10 +284,10 @@ describe('VB6 Enhanced Runtime Functions', () => {
 
     it('RGB should create color in VB6 BGR format', () => {
       // VB6 RGB stores as BGR: (blue << 16) | (green << 8) | red
-      expect(RGB(255, 0, 0)).toBe(255);         // Red in low byte
-      expect(RGB(0, 255, 0)).toBe(0xFF00);      // Green in middle byte
-      expect(RGB(0, 0, 255)).toBe(0xFF0000);    // Blue in high byte
-      expect(RGB(255, 255, 255)).toBe(0xFFFFFF); // White
+      expect(RGB(255, 0, 0)).toBe(255); // Red in low byte
+      expect(RGB(0, 255, 0)).toBe(0xff00); // Green in middle byte
+      expect(RGB(0, 0, 255)).toBe(0xff0000); // Blue in high byte
+      expect(RGB(255, 255, 255)).toBe(0xffffff); // White
     });
 
     it('RGB should clamp values to 0-255', () => {
@@ -298,19 +295,19 @@ describe('VB6 Enhanced Runtime Functions', () => {
     });
 
     it('ExtractRed should get red component from low byte', () => {
-      expect(ExtractRed(0xFF)).toBe(255);       // Pure red
-      expect(ExtractRed(0xFF0000)).toBe(0);     // Pure blue has no red
-      expect(ExtractRed(0xAABBCC)).toBe(0xCC);  // Extract CC
+      expect(ExtractRed(0xff)).toBe(255); // Pure red
+      expect(ExtractRed(0xff0000)).toBe(0); // Pure blue has no red
+      expect(ExtractRed(0xaabbcc)).toBe(0xcc); // Extract CC
     });
 
     it('ExtractGreen should get green component from middle byte', () => {
-      expect(ExtractGreen(0x00FF00)).toBe(255);
-      expect(ExtractGreen(0xAABBCC)).toBe(0xBB);
+      expect(ExtractGreen(0x00ff00)).toBe(255);
+      expect(ExtractGreen(0xaabbcc)).toBe(0xbb);
     });
 
     it('ExtractBlue should get blue component from high byte', () => {
-      expect(ExtractBlue(0xFF0000)).toBe(255);
-      expect(ExtractBlue(0xAABBCC)).toBe(0xAA);
+      expect(ExtractBlue(0xff0000)).toBe(255);
+      expect(ExtractBlue(0xaabbcc)).toBe(0xaa);
     });
   });
 
@@ -413,12 +410,12 @@ describe('VB6 Enhanced Runtime Functions', () => {
 
     describe('VarType', () => {
       it('should return correct type codes', () => {
-        expect(VarType(undefined)).toBe(0);  // vbEmpty
-        expect(VarType(null)).toBe(1);       // vbNull
-        expect(VarType(true)).toBe(11);      // vbBoolean
-        expect(VarType('hello')).toBe(8);    // vbString
+        expect(VarType(undefined)).toBe(0); // vbEmpty
+        expect(VarType(null)).toBe(1); // vbNull
+        expect(VarType(true)).toBe(11); // vbBoolean
+        expect(VarType('hello')).toBe(8); // vbString
         expect(VarType(new Date())).toBe(7); // vbDate
-        expect(VarType({})).toBe(9);         // vbObject
+        expect(VarType({})).toBe(9); // vbObject
       });
 
       it('should return numeric type codes', () => {

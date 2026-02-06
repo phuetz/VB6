@@ -1,6 +1,6 @@
 /**
  * VB6 Runtime Integration - Pont entre Compilateur et Runtime
- * 
+ *
  * Intègre le nouveau VB6CompilerCore avec le VB6UltraRuntime existant
  * Assure 100% compatibilité avec l'écosystème VB6 du projet
  */
@@ -41,17 +41,17 @@ export class VB6RuntimeBridge {
   private ultraRuntime: VB6UltraRuntime;
   private legacyRuntime: VB6Runtime;
   private compiledModules = new Map<string, VB6CompiledModule>();
-  
+
   constructor(options: VB6IntegrationOptions = {}) {
     this.ultraRuntime = new VB6UltraRuntime();
     this.legacyRuntime = new VB6Runtime();
     this.compiler = new VB6CompilerCore(this.ultraRuntime);
-    
+
     if (options.autoImportBuiltins) {
       this.setupBuiltinFunctions();
     }
   }
-  
+
   /**
    * Compiler et intégrer un module VB6 avec le runtime
    */
@@ -59,73 +59,71 @@ export class VB6RuntimeBridge {
     try {
       // Phase 1: Compilation avec le nouveau compilateur
       const compilationResult = this.compiler.compile(source, { moduleName });
-      
+
       if (!compilationResult.success) {
         throw new Error(`Compilation failed: ${compilationResult.errors.join(', ')}`);
       }
-      
+
       // Phase 2: Analyse de l'AST pour extraction des exports
       const exports = this.extractExports(compilationResult.ast!);
-      
+
       // Phase 3: Intégration avec le runtime
       const integratedJS = this.integrateWithRuntime(compilationResult.javascript, exports);
-      
+
       // Phase 4: Création du module compilé
       const compiledModule: VB6CompiledModule = {
         name: moduleName,
         javascript: integratedJS,
         exports,
         runtime: this.ultraRuntime,
-        execute: async () => this.executeModule(moduleName, integratedJS)
+        execute: async () => this.executeModule(moduleName, integratedJS),
       };
-      
+
       this.compiledModules.set(moduleName, compiledModule);
-      
-      console.log(`✅ Module '${moduleName}' compiled and integrated successfully`);
-      console.log(`   Functions: ${exports.functions.length}`);
-      console.log(`   Variables: ${exports.variables.length}`);
-      console.log(`   Classes: ${exports.classes.length}`);
-      
+
       return compiledModule;
-      
     } catch (error) {
       console.error(`❌ Failed to compile module '${moduleName}':`, error);
       throw error;
     }
   }
-  
+
   /**
    * Extraire les exports d'un AST VB6
    */
-  private extractExports(ast: VB6Module): { functions: string[]; variables: string[]; classes: string[] } {
+  private extractExports(ast: VB6Module): {
+    functions: string[];
+    variables: string[];
+    classes: string[];
+  } {
     const exports = {
       functions: [] as string[],
       variables: [] as string[],
-      classes: [] as string[]
+      classes: [] as string[],
     };
-    
+
     // Extraire les procédures/fonctions publiques
     for (const proc of ast.procedures) {
       if (proc.visibility === 'Public') {
         exports.functions.push(proc.name);
       }
     }
-    
+
     // Extraire les variables publiques
     for (const decl of ast.declarations) {
       if (decl.visibility === 'Public' || decl.visibility === 'Global') {
         exports.variables.push(decl.name);
       }
     }
-    
+
     // Extraire les UDTs (User Defined Types) comme classes
     for (const udt of ast.types) {
       exports.classes.push(udt.name);
     }
-    
+
     return exports;
   }
-  
+
   /**
    * Intégrer le code JavaScript généré avec le runtime VB6
    */
@@ -169,10 +167,10 @@ if (typeof module !== 'undefined' && module.exports) {
   };
 }
 `;
-    
+
     return integratedCode;
   }
-  
+
   /**
    * Générer les imports des fonctions built-in VB6
    */
@@ -217,7 +215,7 @@ const Val = runtime.Val.bind(runtime);
 const Str = runtime.Str.bind(runtime);
 `;
   }
-  
+
   /**
    * Exécuter un module compilé
    */
@@ -225,28 +223,30 @@ const Str = runtime.Str.bind(runtime);
     try {
       // Créer un contexte d'exécution isolé
       const context = this.createExecutionContext();
-      
+
       // Évaluer le code JavaScript dans le contexte
-      const moduleFunction = new Function('VB6Runtime', 'context', `
+      const moduleFunction = new Function(
+        'VB6Runtime',
+        'context',
+        `
         ${javascript}
         return typeof Module1 !== 'undefined' ? Module1 : null;
-      `);
-      
+      `
+      );
+
       const moduleInstance = moduleFunction(this.ultraRuntime, context);
-      
+
       if (!moduleInstance) {
         throw new Error(`Module '${moduleName}' did not export a class`);
       }
-      
-      console.log(`✅ Module '${moduleName}' executed successfully`);
+
       return new moduleInstance();
-      
     } catch (error) {
       console.error(`❌ Failed to execute module '${moduleName}':`, error);
       throw error;
     }
   }
-  
+
   /**
    * Créer un contexte d'exécution pour les modules VB6
    */
@@ -257,17 +257,17 @@ const Str = runtime.Str.bind(runtime);
       Screen: this.ultraRuntime.createScreenObject(),
       Printer: this.ultraRuntime.createPrinterObject(),
       Clipboard: this.ultraRuntime.createClipboardObject(),
-      
+
       // Error handling
       Err: this.ultraRuntime.createErrObject(),
-      
+
       // Debug
       Debug: {
-        Print: (msg: string) => console.log('[VB6 Debug]', msg)
-      }
+        Print: (msg: string) => {},
+      },
     };
   }
-  
+
   /**
    * Configurer les fonctions built-in
    */
@@ -275,62 +275,123 @@ const Str = runtime.Str.bind(runtime);
     // Enregistrer toutes les fonctions VB6 dans le runtime
     const builtins = [
       // String functions
-      'Len', 'Left', 'Right', 'Mid', 'UCase', 'LCase', 'Trim', 'LTrim', 'RTrim',
-      'InStr', 'InStrRev', 'Replace', 'Space', 'String', 'StrReverse', 'Split', 'Join',
-      
+      'Len',
+      'Left',
+      'Right',
+      'Mid',
+      'UCase',
+      'LCase',
+      'Trim',
+      'LTrim',
+      'RTrim',
+      'InStr',
+      'InStrRev',
+      'Replace',
+      'Space',
+      'String',
+      'StrReverse',
+      'Split',
+      'Join',
+
       // Math functions
-      'Abs', 'Sqr', 'Sin', 'Cos', 'Tan', 'Atn', 'Exp', 'Log', 'Int', 'Fix', 'Round',
-      'Rnd', 'Sgn', 'Randomize',
-      
+      'Abs',
+      'Sqr',
+      'Sin',
+      'Cos',
+      'Tan',
+      'Atn',
+      'Exp',
+      'Log',
+      'Int',
+      'Fix',
+      'Round',
+      'Rnd',
+      'Sgn',
+      'Randomize',
+
       // Date/Time functions
-      'Now', 'Date', 'Time', 'Year', 'Month', 'Day', 'Hour', 'Minute', 'Second',
-      'Weekday', 'DateAdd', 'DateDiff', 'DatePart',
-      
+      'Now',
+      'Date',
+      'Time',
+      'Year',
+      'Month',
+      'Day',
+      'Hour',
+      'Minute',
+      'Second',
+      'Weekday',
+      'DateAdd',
+      'DateDiff',
+      'DatePart',
+
       // Conversion functions
-      'CInt', 'CLng', 'CSng', 'CDbl', 'CStr', 'CBool', 'CByte', 'CDate', 'CCur',
-      'CVar', 'CVErr',
-      
+      'CInt',
+      'CLng',
+      'CSng',
+      'CDbl',
+      'CStr',
+      'CBool',
+      'CByte',
+      'CDate',
+      'CCur',
+      'CVar',
+      'CVErr',
+
       // I/O functions
-      'MsgBox', 'InputBox', 'Print',
-      
+      'MsgBox',
+      'InputBox',
+      'Print',
+
       // Type functions
-      'IsNumeric', 'IsDate', 'IsEmpty', 'IsNull', 'IsObject', 'IsArray',
-      'VarType', 'TypeName',
-      
+      'IsNumeric',
+      'IsDate',
+      'IsEmpty',
+      'IsNull',
+      'IsObject',
+      'IsArray',
+      'VarType',
+      'TypeName',
+
       // Other
-      'Val', 'Str', 'Hex', 'Oct', 'Asc', 'Chr', 'Format'
+      'Val',
+      'Str',
+      'Hex',
+      'Oct',
+      'Asc',
+      'Chr',
+      'Format',
     ];
-    
+
     for (const builtin of builtins) {
       if (typeof (this.ultraRuntime as any)[builtin] === 'function') {
-        console.log(`✅ Registered built-in function: ${builtin}`);
+        // noop
       } else {
         console.warn(`⚠️ Built-in function not found in runtime: ${builtin}`);
       }
     }
   }
-  
+
   /**
    * Obtenir un module compilé
    */
   public getModule(moduleName: string): VB6CompiledModule | undefined {
     return this.compiledModules.get(moduleName);
   }
-  
+
   /**
    * Lister tous les modules compilés
    */
   public listModules(): string[] {
     return Array.from(this.compiledModules.keys());
   }
-  
+
   /**
    * Supprimer un module compilé
    */
   public removeModule(moduleName: string): boolean {
     return this.compiledModules.delete(moduleName);
   }
-  
+
   /**
    * Obtenir les statistiques de compilation
    */
@@ -341,8 +402,8 @@ const Str = runtime.Str.bind(runtime);
         name,
         functions: module.exports.functions.length,
         variables: module.exports.variables.length,
-        classes: module.exports.classes.length
-      }))
+        classes: module.exports.classes.length,
+      })),
     };
   }
 }
@@ -376,7 +437,7 @@ Public Function Divide(a As Double, b As Double) As Double
     End If
 End Function
   `,
-  
+
   // Test 2: Gestion des strings
   stringOperations: `
 Option Explicit
@@ -392,7 +453,7 @@ Public Function FormatName(firstName As String, lastName As String) As String
     FormatName = Trim(firstName) & " " & UCase(lastName)
 End Function
   `,
-  
+
   // Test 3: Structures de contrôle
   controlStructures: `
 Option Explicit
@@ -423,7 +484,7 @@ Public Function CheckGrade(score As Integer) As String
     End Select
 End Function
   `,
-  
+
   // Test 4: User Defined Types
   userDefinedTypes: `
 Option Explicit
@@ -446,7 +507,7 @@ Public Function FormatPerson(p As Person) As String
     FormatPerson = p.Name & " (" & CStr(p.Age) & ") - " & p.Email
 End Function
   `,
-  
+
   // Test 5: Gestion d'erreurs
   errorHandling: `
 Option Explicit
@@ -479,7 +540,7 @@ Public Function ValidateInput(input As String) As Boolean
 ErrorHandler:
     ValidateInput = False
 End Function
-  `
+  `,
 };
 
 // ============================================================================
@@ -489,57 +550,47 @@ End Function
 export class VB6ValidationSuite {
   private bridge: VB6RuntimeBridge;
   private testResults: { [key: string]: boolean } = {};
-  
+
   constructor() {
     this.bridge = new VB6RuntimeBridge({
       useExistingRuntime: true,
       autoImportBuiltins: true,
-      enableDebugging: true
+      enableDebugging: true,
     });
   }
-  
+
   /**
    * Exécuter tous les tests de validation
    */
   public async runAllTests(): Promise<{ passed: number; total: number; results: any }> {
-    console.log('🧪 Running VB6 Validation Suite...');
-    
     const tests = Object.entries(VB6TestPrograms);
     let passed = 0;
-    
+
     for (const [testName, program] of tests) {
       try {
-        console.log(`\n📋 Testing: ${testName}`);
         const module = await this.bridge.compileAndIntegrate(program, testName);
         const instance = await module.execute();
-        
+
         // Test spécifique selon le type de programme
         const testPassed = await this.runSpecificTest(testName, instance);
         this.testResults[testName] = testPassed;
-        
+
         if (testPassed) {
           passed++;
-          console.log(`✅ ${testName}: PASSED`);
         } else {
-          console.log(`❌ ${testName}: FAILED`);
+          // noop
         }
-        
       } catch (error) {
-        console.log(`❌ ${testName}: ERROR - ${error}`);
         this.testResults[testName] = false;
       }
     }
-    
+
     const total = tests.length;
     const percentage = Math.round((passed / total) * 100);
-    
-    console.log(`\n🏆 VALIDATION RESULTS:`);
-    console.log(`   Passed: ${passed}/${total} (${percentage}%)`);
-    console.log(`   Status: ${percentage >= 80 ? '✅ EXCELLENT' : percentage >= 60 ? '⚠️ ACCEPTABLE' : '❌ NEEDS WORK'}`);
-    
+
     return { passed, total, results: this.testResults };
   }
-  
+
   /**
    * Exécuter un test spécifique selon le type
    */
@@ -553,20 +604,20 @@ export class VB6ValidationSuite {
             instance.Multiply(4, 5) === 20 &&
             instance.Divide(10, 2) === 5
           );
-          
+
         case 'stringOperations':
           return (
             instance.ProcessString('  hello world  ') === 'HELLO_WORLD' &&
             instance.FormatName('john', 'doe') === 'john DOE'
           );
-          
+
         case 'controlStructures':
           return (
             instance.CountToTen() === '1 2 3 4 5 6 7 8 9 10' &&
             instance.CheckGrade(95) === 'A' &&
             instance.CheckGrade(85) === 'B'
           );
-          
+
         default:
           return true; // Tests plus complexes nécessitent une implémentation spécifique
       }

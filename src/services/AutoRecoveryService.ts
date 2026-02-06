@@ -36,7 +36,7 @@ class AutoRecoveryService {
       logger.info('Error detected, creating recovery point...');
       this.createRecoveryPoint('Error recovery point: ' + event.message);
     };
-    
+
     this.rejectionHandler = (event: PromiseRejectionEvent) => {
       logger.info('Unhandled rejection, creating recovery point...');
       this.createRecoveryPoint('Promise rejection recovery point');
@@ -50,7 +50,7 @@ class AutoRecoveryService {
 
   startAutoSave(intervalMs: number = 60000) {
     logger.info('Starting auto-save with interval:', intervalMs + 'ms');
-    
+
     if (this.autoSaveInterval) {
       clearInterval(this.autoSaveInterval);
     }
@@ -70,7 +70,7 @@ class AutoRecoveryService {
 
   createRecoveryPoint(description: string = 'Manual save') {
     const now = Date.now();
-    
+
     // Avoid creating too many recovery points too quickly
     if (now - this.lastSaveTime < 5000) {
       logger.debug('Skipping recovery point (too soon)');
@@ -94,7 +94,7 @@ class AutoRecoveryService {
       };
 
       this.recoveryPoints.push(recoveryPoint);
-      
+
       // Keep only the latest recovery points
       if (this.recoveryPoints.length > this.maxRecoveryPoints) {
         this.recoveryPoints.shift();
@@ -102,7 +102,7 @@ class AutoRecoveryService {
 
       this.saveRecoveryPoints();
       this.lastSaveTime = now;
-      
+
       logger.info('Recovery point created:', description);
       logger.debug(`Total recovery points: ${this.recoveryPoints.length}`);
     } catch (error) {
@@ -116,7 +116,7 @@ class AutoRecoveryService {
 
   restoreRecoveryPoint(timestamp: number): boolean {
     const recoveryPoint = this.recoveryPoints.find(rp => rp.timestamp === timestamp);
-    
+
     if (!recoveryPoint) {
       logger.error('Recovery point not found');
       return false;
@@ -124,7 +124,7 @@ class AutoRecoveryService {
 
     try {
       const store = useVB6Store.getState();
-      
+
       // Restore state
       if (recoveryPoint.state.controls) {
         store.controls = recoveryPoint.state.controls;
@@ -190,7 +190,7 @@ class AutoRecoveryService {
 
   exportRecoveryPoint(timestamp: number): string | null {
     const recoveryPoint = this.recoveryPoints.find(rp => rp.timestamp === timestamp);
-    
+
     if (!recoveryPoint) {
       return null;
     }
@@ -201,7 +201,7 @@ class AutoRecoveryService {
   importRecoveryPoint(data: string): boolean {
     try {
       const recoveryPoint = JSON.parse(data) as RecoveryPoint;
-      
+
       // Validate recovery point
       if (!recoveryPoint.timestamp || !recoveryPoint.state || !recoveryPoint.description) {
         throw new Error('Invalid recovery point format');
@@ -209,7 +209,7 @@ class AutoRecoveryService {
 
       this.recoveryPoints.push(recoveryPoint);
       this.saveRecoveryPoints();
-      
+
       logger.info('Recovery point imported:', recoveryPoint.description);
       return true;
     } catch (error) {
@@ -224,21 +224,21 @@ class AutoRecoveryService {
   destroy(): void {
     // Stop auto-save interval
     this.stopAutoSave();
-    
+
     // Remove error event listeners
     if (this.errorHandler) {
       window.removeEventListener('error', this.errorHandler);
       this.errorHandler = null;
     }
-    
+
     if (this.rejectionHandler) {
       window.removeEventListener('unhandledrejection', this.rejectionHandler);
       this.rejectionHandler = null;
     }
-    
+
     // Clear recovery points from memory
     this.recoveryPoints = [];
-    
+
     logger.info('AutoRecoveryService destroyed and cleaned up');
   }
 }

@@ -4,19 +4,19 @@ import { EventEmitter } from 'events';
 // Compilation Options
 export enum CompilationType {
   NativeCode = 'Native Code',
-  PCode = 'P-Code'
+  PCode = 'P-Code',
 }
 
 export enum OptimizationType {
   None = 'No Optimization',
   OptimizeForFastCode = 'Optimize for Fast Code',
   OptimizeForSmallCode = 'Optimize for Small Code',
-  FavorPentiumPro = 'Favor Pentium Pro(tm)'
+  FavorPentiumPro = 'Favor Pentium Pro(tm)',
 }
 
 export enum DLLBaseAddress {
   Default = '&H11000000',
-  Custom = 'Custom'
+  Custom = 'Custom',
 }
 
 // Version Information
@@ -39,7 +39,7 @@ export interface MakeOptions {
   outputPath: string;
   outputFileName: string;
   compilationType: CompilationType;
-  
+
   // Compile
   optimizationType: OptimizationType;
   favorPentiumPro: boolean;
@@ -47,7 +47,7 @@ export interface MakeOptions {
   compileToDLL: boolean;
   dllBaseAddress: string;
   threadingModel: 'Single Threaded' | 'Apartment Threaded';
-  
+
   // Advanced Optimizations
   assumeNoAliasing: boolean;
   removeArrayBoundsChecks: boolean;
@@ -55,14 +55,14 @@ export interface MakeOptions {
   removeFloatingPointErrorChecks: boolean;
   allowUnroundedFloatingPoint: boolean;
   removeSafeModePentiumFDIVChecks: boolean;
-  
+
   // Debugging
   symbolicDebugInfo: boolean;
   conditionalCompilationArgs: string;
-  
+
   // Version
   versionInfo: VersionInfo;
-  
+
   // Command Line
   preBuildCommand: string;
   postBuildCommand: string;
@@ -102,9 +102,11 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
   projectType,
   defaultOptions,
   onCompile,
-  onClose
+  onClose,
 }) => {
-  const [selectedTab, setSelectedTab] = useState<'general' | 'compile' | 'component' | 'version' | 'cmdline'>('general');
+  const [selectedTab, setSelectedTab] = useState<
+    'general' | 'compile' | 'component' | 'version' | 'cmdline'
+  >('general');
   const [isCompiling, setIsCompiling] = useState(false);
   const [compilationResult, setCompilationResult] = useState<CompilationResult | null>(null);
   const [recentBuilds, setRecentBuilds] = useState<RecentBuild[]>([]);
@@ -113,24 +115,24 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
     outputPath: defaultOptions?.outputPath || 'bin\\Release\\',
     outputFileName: defaultOptions?.outputFileName || `${projectName}.exe`,
     compilationType: defaultOptions?.compilationType || CompilationType.NativeCode,
-    
+
     optimizationType: defaultOptions?.optimizationType || OptimizationType.OptimizeForFastCode,
     favorPentiumPro: defaultOptions?.favorPentiumPro || false,
     createSymbolicDebugInfo: defaultOptions?.createSymbolicDebugInfo || false,
     compileToDLL: defaultOptions?.compileToDLL || projectType.includes('DLL'),
     dllBaseAddress: defaultOptions?.dllBaseAddress || DLLBaseAddress.Default,
     threadingModel: defaultOptions?.threadingModel || 'Apartment Threaded',
-    
+
     assumeNoAliasing: defaultOptions?.assumeNoAliasing || false,
     removeArrayBoundsChecks: defaultOptions?.removeArrayBoundsChecks || false,
     removeIntegerOverflowChecks: defaultOptions?.removeIntegerOverflowChecks || false,
     removeFloatingPointErrorChecks: defaultOptions?.removeFloatingPointErrorChecks || false,
     allowUnroundedFloatingPoint: defaultOptions?.allowUnroundedFloatingPoint || false,
     removeSafeModePentiumFDIVChecks: defaultOptions?.removeSafeModePentiumFDIVChecks || false,
-    
+
     symbolicDebugInfo: defaultOptions?.symbolicDebugInfo || false,
     conditionalCompilationArgs: defaultOptions?.conditionalCompilationArgs || '',
-    
+
     versionInfo: defaultOptions?.versionInfo || {
       major: 1,
       minor: 0,
@@ -141,13 +143,13 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
       legalCopyright: `Copyright © ${new Date().getFullYear()}`,
       legalTrademarks: '',
       productName: projectName,
-      comments: ''
+      comments: '',
     },
-    
+
     preBuildCommand: defaultOptions?.preBuildCommand || '',
     postBuildCommand: defaultOptions?.postBuildCommand || '',
     useCommandLineArguments: defaultOptions?.useCommandLineArguments || false,
-    commandLineArguments: defaultOptions?.commandLineArguments || ''
+    commandLineArguments: defaultOptions?.commandLineArguments || '',
   });
 
   const eventEmitter = useRef(new EventEmitter());
@@ -161,22 +163,22 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
         outputFile: 'bin\\Release\\MyApp.exe',
         configuration: 'Release',
         success: true,
-        buildTime: 4520
+        buildTime: 4520,
       },
       {
         timestamp: new Date(Date.now() - 7200000),
         outputFile: 'bin\\Debug\\MyApp.exe',
         configuration: 'Debug',
         success: true,
-        buildTime: 3200
+        buildTime: 3200,
       },
       {
         timestamp: new Date(Date.now() - 86400000),
         outputFile: 'bin\\Release\\MyApp.exe',
         configuration: 'Release',
         success: false,
-        buildTime: 1500
-      }
+        buildTime: 1500,
+      },
     ];
     setRecentBuilds(sampleBuilds);
   }, []);
@@ -187,7 +189,7 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
     const baseName = options.outputFileName.replace(/\.(exe|dll)$/i, '');
     setOptions(prev => ({
       ...prev,
-      outputFileName: baseName + extension
+      outputFileName: baseName + extension,
     }));
   }, [options.compileToDLL]);
 
@@ -207,16 +209,17 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
     const result: CompilationResult = {
       success,
       outputFile: `${options.outputPath}${options.outputFileName}`,
-      errors: success ? [] : [
-        'Compile error in module MainForm: Variable not defined',
-        'Type mismatch in function Calculate()'
-      ],
-      warnings: success ? [
-        'Variable \'unused\' is declared but never used',
-        'Function \'OldMethod\' is obsolete'
-      ] : [],
+      errors: success
+        ? []
+        : [
+            'Compile error in module MainForm: Variable not defined',
+            'Type mismatch in function Calculate()',
+          ],
+      warnings: success
+        ? ["Variable 'unused' is declared but never used", "Function 'OldMethod' is obsolete"]
+        : [],
       buildTime: 2000 + Math.random() * 3000,
-      fileSize: Math.floor(Math.random() * 1024 * 1024) + 102400 // 100KB to 1.1MB
+      fileSize: Math.floor(Math.random() * 1024 * 1024) + 102400, // 100KB to 1.1MB
     };
 
     setCompilationResult(result);
@@ -228,7 +231,7 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
       outputFile: result.outputFile,
       configuration: options.optimizationType === OptimizationType.None ? 'Debug' : 'Release',
       success: result.success,
-      buildTime: result.buildTime
+      buildTime: result.buildTime,
     };
     setRecentBuilds(prev => [newBuild, ...prev.slice(0, 9)]);
 
@@ -263,10 +266,7 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-medium">Make {projectName}</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
-            >
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
               ×
             </button>
           </div>
@@ -343,7 +343,7 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                     <input
                       type="text"
                       value={options.outputPath}
-                      onChange={(e) => setOptions(prev => ({ ...prev, outputPath: e.target.value }))}
+                      onChange={e => setOptions(prev => ({ ...prev, outputPath: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
                   </div>
@@ -354,7 +354,9 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                     <input
                       type="text"
                       value={options.outputFileName}
-                      onChange={(e) => setOptions(prev => ({ ...prev, outputFileName: e.target.value }))}
+                      onChange={e =>
+                        setOptions(prev => ({ ...prev, outputFileName: e.target.value }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
                   </div>
@@ -371,7 +373,12 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                       name="compilationType"
                       value={CompilationType.NativeCode}
                       checked={options.compilationType === CompilationType.NativeCode}
-                      onChange={(e) => setOptions(prev => ({ ...prev, compilationType: e.target.value as CompilationType }))}
+                      onChange={e =>
+                        setOptions(prev => ({
+                          ...prev,
+                          compilationType: e.target.value as CompilationType,
+                        }))
+                      }
                     />
                     <span>Compile to Native Code</span>
                   </label>
@@ -381,7 +388,12 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                       name="compilationType"
                       value={CompilationType.PCode}
                       checked={options.compilationType === CompilationType.PCode}
-                      onChange={(e) => setOptions(prev => ({ ...prev, compilationType: e.target.value as CompilationType }))}
+                      onChange={e =>
+                        setOptions(prev => ({
+                          ...prev,
+                          compilationType: e.target.value as CompilationType,
+                        }))
+                      }
                     />
                     <span>Compile to P-Code</span>
                   </label>
@@ -438,7 +450,12 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                         name="optimization"
                         value={type}
                         checked={options.optimizationType === type}
-                        onChange={(e) => setOptions(prev => ({ ...prev, optimizationType: e.target.value as OptimizationType }))}
+                        onChange={e =>
+                          setOptions(prev => ({
+                            ...prev,
+                            optimizationType: e.target.value as OptimizationType,
+                          }))
+                        }
                       />
                       <span>{type}</span>
                     </label>
@@ -450,7 +467,9 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                       <input
                         type="checkbox"
                         checked={options.favorPentiumPro}
-                        onChange={(e) => setOptions(prev => ({ ...prev, favorPentiumPro: e.target.checked }))}
+                        onChange={e =>
+                          setOptions(prev => ({ ...prev, favorPentiumPro: e.target.checked }))
+                        }
                       />
                       <span className="text-sm">Favor Pentium Pro(tm)</span>
                     </label>
@@ -472,7 +491,9 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                       <input
                         type="checkbox"
                         checked={options.assumeNoAliasing}
-                        onChange={(e) => setOptions(prev => ({ ...prev, assumeNoAliasing: e.target.checked }))}
+                        onChange={e =>
+                          setOptions(prev => ({ ...prev, assumeNoAliasing: e.target.checked }))
+                        }
                       />
                       <span className="text-sm">Assume No Aliasing</span>
                     </label>
@@ -480,7 +501,12 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                       <input
                         type="checkbox"
                         checked={options.removeArrayBoundsChecks}
-                        onChange={(e) => setOptions(prev => ({ ...prev, removeArrayBoundsChecks: e.target.checked }))}
+                        onChange={e =>
+                          setOptions(prev => ({
+                            ...prev,
+                            removeArrayBoundsChecks: e.target.checked,
+                          }))
+                        }
                       />
                       <span className="text-sm">Remove Array Bounds Checks</span>
                     </label>
@@ -488,7 +514,12 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                       <input
                         type="checkbox"
                         checked={options.removeIntegerOverflowChecks}
-                        onChange={(e) => setOptions(prev => ({ ...prev, removeIntegerOverflowChecks: e.target.checked }))}
+                        onChange={e =>
+                          setOptions(prev => ({
+                            ...prev,
+                            removeIntegerOverflowChecks: e.target.checked,
+                          }))
+                        }
                       />
                       <span className="text-sm">Remove Integer Overflow Checks</span>
                     </label>
@@ -496,7 +527,12 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                       <input
                         type="checkbox"
                         checked={options.removeFloatingPointErrorChecks}
-                        onChange={(e) => setOptions(prev => ({ ...prev, removeFloatingPointErrorChecks: e.target.checked }))}
+                        onChange={e =>
+                          setOptions(prev => ({
+                            ...prev,
+                            removeFloatingPointErrorChecks: e.target.checked,
+                          }))
+                        }
                       />
                       <span className="text-sm">Remove Floating Point Error Checks</span>
                     </label>
@@ -504,7 +540,12 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                       <input
                         type="checkbox"
                         checked={options.allowUnroundedFloatingPoint}
-                        onChange={(e) => setOptions(prev => ({ ...prev, allowUnroundedFloatingPoint: e.target.checked }))}
+                        onChange={e =>
+                          setOptions(prev => ({
+                            ...prev,
+                            allowUnroundedFloatingPoint: e.target.checked,
+                          }))
+                        }
                       />
                       <span className="text-sm">Allow Unrounded Floating Point Operations</span>
                     </label>
@@ -512,12 +553,18 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                       <input
                         type="checkbox"
                         checked={options.removeSafeModePentiumFDIVChecks}
-                        onChange={(e) => setOptions(prev => ({ ...prev, removeSafeModePentiumFDIVChecks: e.target.checked }))}
+                        onChange={e =>
+                          setOptions(prev => ({
+                            ...prev,
+                            removeSafeModePentiumFDIVChecks: e.target.checked,
+                          }))
+                        }
                       />
                       <span className="text-sm">Remove Safe Pentium(tm) FDIV Checks</span>
                     </label>
                     <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
-                      ⚠️ Warning: These optimizations may affect program stability. Use with caution.
+                      ⚠️ Warning: These optimizations may affect program stability. Use with
+                      caution.
                     </div>
                   </div>
                 )}
@@ -530,7 +577,9 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                   <input
                     type="checkbox"
                     checked={options.createSymbolicDebugInfo}
-                    onChange={(e) => setOptions(prev => ({ ...prev, createSymbolicDebugInfo: e.target.checked }))}
+                    onChange={e =>
+                      setOptions(prev => ({ ...prev, createSymbolicDebugInfo: e.target.checked }))
+                    }
                   />
                   <span>Create Symbolic Debug Info</span>
                 </label>
@@ -544,7 +593,9 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                 <input
                   type="text"
                   value={options.conditionalCompilationArgs}
-                  onChange={(e) => setOptions(prev => ({ ...prev, conditionalCompilationArgs: e.target.value }))}
+                  onChange={e =>
+                    setOptions(prev => ({ ...prev, conditionalCompilationArgs: e.target.value }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="DEBUG = 1 : VERSION = 2"
                 />
@@ -561,7 +612,9 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                   <input
                     type="checkbox"
                     checked={options.compileToDLL}
-                    onChange={(e) => setOptions(prev => ({ ...prev, compileToDLL: e.target.checked }))}
+                    onChange={e =>
+                      setOptions(prev => ({ ...prev, compileToDLL: e.target.checked }))
+                    }
                   />
                   <span>Compile to ActiveX DLL</span>
                 </label>
@@ -578,7 +631,12 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                           type="radio"
                           name="dllBase"
                           checked={options.dllBaseAddress === DLLBaseAddress.Default}
-                          onChange={() => setOptions(prev => ({ ...prev, dllBaseAddress: DLLBaseAddress.Default }))}
+                          onChange={() =>
+                            setOptions(prev => ({
+                              ...prev,
+                              dllBaseAddress: DLLBaseAddress.Default,
+                            }))
+                          }
                         />
                         <span>Default ({DLLBaseAddress.Default})</span>
                       </label>
@@ -592,8 +650,14 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                         <span>Custom:</span>
                         <input
                           type="text"
-                          value={options.dllBaseAddress === DLLBaseAddress.Default ? '' : options.dllBaseAddress}
-                          onChange={(e) => setOptions(prev => ({ ...prev, dllBaseAddress: e.target.value }))}
+                          value={
+                            options.dllBaseAddress === DLLBaseAddress.Default
+                              ? ''
+                              : options.dllBaseAddress
+                          }
+                          onChange={e =>
+                            setOptions(prev => ({ ...prev, dllBaseAddress: e.target.value }))
+                          }
                           className="px-2 py-1 border border-gray-300 rounded"
                           placeholder="&H11000000"
                           disabled={options.dllBaseAddress === DLLBaseAddress.Default}
@@ -611,7 +675,9 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                           name="threading"
                           value="Single Threaded"
                           checked={options.threadingModel === 'Single Threaded'}
-                          onChange={(e) => setOptions(prev => ({ ...prev, threadingModel: e.target.value as any }))}
+                          onChange={e =>
+                            setOptions(prev => ({ ...prev, threadingModel: e.target.value as any }))
+                          }
                         />
                         <span>Single Threaded</span>
                       </label>
@@ -621,7 +687,9 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                           name="threading"
                           value="Apartment Threaded"
                           checked={options.threadingModel === 'Apartment Threaded'}
-                          onChange={(e) => setOptions(prev => ({ ...prev, threadingModel: e.target.value as any }))}
+                          onChange={e =>
+                            setOptions(prev => ({ ...prev, threadingModel: e.target.value as any }))
+                          }
                         />
                         <span>Apartment Threaded</span>
                       </label>
@@ -657,10 +725,12 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                   <input
                     type="number"
                     value={options.versionInfo.major}
-                    onChange={(e) => setOptions(prev => ({
-                      ...prev,
-                      versionInfo: { ...prev.versionInfo, major: parseInt(e.target.value) || 0 }
-                    }))}
+                    onChange={e =>
+                      setOptions(prev => ({
+                        ...prev,
+                        versionInfo: { ...prev.versionInfo, major: parseInt(e.target.value) || 0 },
+                      }))
+                    }
                     className="w-20 px-2 py-1 border border-gray-300 rounded"
                     min="0"
                   />
@@ -668,10 +738,12 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                   <input
                     type="number"
                     value={options.versionInfo.minor}
-                    onChange={(e) => setOptions(prev => ({
-                      ...prev,
-                      versionInfo: { ...prev.versionInfo, minor: parseInt(e.target.value) || 0 }
-                    }))}
+                    onChange={e =>
+                      setOptions(prev => ({
+                        ...prev,
+                        versionInfo: { ...prev.versionInfo, minor: parseInt(e.target.value) || 0 },
+                      }))
+                    }
                     className="w-20 px-2 py-1 border border-gray-300 rounded"
                     min="0"
                   />
@@ -679,10 +751,15 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                   <input
                     type="number"
                     value={options.versionInfo.revision}
-                    onChange={(e) => setOptions(prev => ({
-                      ...prev,
-                      versionInfo: { ...prev.versionInfo, revision: parseInt(e.target.value) || 0 }
-                    }))}
+                    onChange={e =>
+                      setOptions(prev => ({
+                        ...prev,
+                        versionInfo: {
+                          ...prev.versionInfo,
+                          revision: parseInt(e.target.value) || 0,
+                        },
+                      }))
+                    }
                     className="w-20 px-2 py-1 border border-gray-300 rounded"
                     min="0"
                   />
@@ -690,10 +767,12 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                     <input
                       type="checkbox"
                       checked={options.versionInfo.autoIncrement}
-                      onChange={(e) => setOptions(prev => ({
-                        ...prev,
-                        versionInfo: { ...prev.versionInfo, autoIncrement: e.target.checked }
-                      }))}
+                      onChange={e =>
+                        setOptions(prev => ({
+                          ...prev,
+                          versionInfo: { ...prev.versionInfo, autoIncrement: e.target.checked },
+                        }))
+                      }
                     />
                     <span className="text-sm">Auto Increment</span>
                   </label>
@@ -709,10 +788,12 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                   <input
                     type="text"
                     value={options.versionInfo.companyName}
-                    onChange={(e) => setOptions(prev => ({
-                      ...prev,
-                      versionInfo: { ...prev.versionInfo, companyName: e.target.value }
-                    }))}
+                    onChange={e =>
+                      setOptions(prev => ({
+                        ...prev,
+                        versionInfo: { ...prev.versionInfo, companyName: e.target.value },
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   />
                 </div>
@@ -723,10 +804,12 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                   <input
                     type="text"
                     value={options.versionInfo.fileDescription}
-                    onChange={(e) => setOptions(prev => ({
-                      ...prev,
-                      versionInfo: { ...prev.versionInfo, fileDescription: e.target.value }
-                    }))}
+                    onChange={e =>
+                      setOptions(prev => ({
+                        ...prev,
+                        versionInfo: { ...prev.versionInfo, fileDescription: e.target.value },
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   />
                 </div>
@@ -737,10 +820,12 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                   <input
                     type="text"
                     value={options.versionInfo.legalCopyright}
-                    onChange={(e) => setOptions(prev => ({
-                      ...prev,
-                      versionInfo: { ...prev.versionInfo, legalCopyright: e.target.value }
-                    }))}
+                    onChange={e =>
+                      setOptions(prev => ({
+                        ...prev,
+                        versionInfo: { ...prev.versionInfo, legalCopyright: e.target.value },
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   />
                 </div>
@@ -751,10 +836,12 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                   <input
                     type="text"
                     value={options.versionInfo.legalTrademarks}
-                    onChange={(e) => setOptions(prev => ({
-                      ...prev,
-                      versionInfo: { ...prev.versionInfo, legalTrademarks: e.target.value }
-                    }))}
+                    onChange={e =>
+                      setOptions(prev => ({
+                        ...prev,
+                        versionInfo: { ...prev.versionInfo, legalTrademarks: e.target.value },
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   />
                 </div>
@@ -765,23 +852,25 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                   <input
                     type="text"
                     value={options.versionInfo.productName}
-                    onChange={(e) => setOptions(prev => ({
-                      ...prev,
-                      versionInfo: { ...prev.versionInfo, productName: e.target.value }
-                    }))}
+                    onChange={e =>
+                      setOptions(prev => ({
+                        ...prev,
+                        versionInfo: { ...prev.versionInfo, productName: e.target.value },
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Comments
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Comments</label>
                   <textarea
                     value={options.versionInfo.comments}
-                    onChange={(e) => setOptions(prev => ({
-                      ...prev,
-                      versionInfo: { ...prev.versionInfo, comments: e.target.value }
-                    }))}
+                    onChange={e =>
+                      setOptions(prev => ({
+                        ...prev,
+                        versionInfo: { ...prev.versionInfo, comments: e.target.value },
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                     rows={3}
                   />
@@ -799,7 +888,7 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                 </label>
                 <textarea
                   value={options.preBuildCommand}
-                  onChange={(e) => setOptions(prev => ({ ...prev, preBuildCommand: e.target.value }))}
+                  onChange={e => setOptions(prev => ({ ...prev, preBuildCommand: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded font-mono text-sm"
                   rows={3}
                   placeholder="Commands to run before build..."
@@ -813,7 +902,9 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                 </label>
                 <textarea
                   value={options.postBuildCommand}
-                  onChange={(e) => setOptions(prev => ({ ...prev, postBuildCommand: e.target.value }))}
+                  onChange={e =>
+                    setOptions(prev => ({ ...prev, postBuildCommand: e.target.value }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded font-mono text-sm"
                   rows={3}
                   placeholder="Commands to run after build..."
@@ -826,7 +917,9 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                   <input
                     type="checkbox"
                     checked={options.useCommandLineArguments}
-                    onChange={(e) => setOptions(prev => ({ ...prev, useCommandLineArguments: e.target.checked }))}
+                    onChange={e =>
+                      setOptions(prev => ({ ...prev, useCommandLineArguments: e.target.checked }))
+                    }
                   />
                   <span className="font-medium">Use Command Line Arguments</span>
                 </label>
@@ -834,7 +927,9 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                   <input
                     type="text"
                     value={options.commandLineArguments}
-                    onChange={(e) => setOptions(prev => ({ ...prev, commandLineArguments: e.target.value }))}
+                    onChange={e =>
+                      setOptions(prev => ({ ...prev, commandLineArguments: e.target.value }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                     placeholder="/debug /config=release"
                   />
@@ -849,8 +944,10 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                     {`vb6.exe /make "${projectName}.vbp" /out "${options.outputPath}${options.outputFileName}"`}
                     {options.compilationType === CompilationType.NativeCode && ' /compile'}
                     {options.createSymbolicDebugInfo && ' /d'}
-                    {options.conditionalCompilationArgs && ` /cmd "${options.conditionalCompilationArgs}"`}
-                    {options.optimizationType !== OptimizationType.None && ` /O${options.optimizationType.charAt(0)}`}
+                    {options.conditionalCompilationArgs &&
+                      ` /cmd "${options.conditionalCompilationArgs}"`}
+                    {options.optimizationType !== OptimizationType.None &&
+                      ` /O${options.optimizationType.charAt(0)}`}
                   </div>
                 </div>
               </div>
@@ -860,7 +957,9 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
 
         {/* Compilation Result */}
         {compilationResult && (
-          <div className={`p-4 border-t ${compilationResult.success ? 'bg-green-50' : 'bg-red-50'}`}>
+          <div
+            className={`p-4 border-t ${compilationResult.success ? 'bg-green-50' : 'bg-red-50'}`}
+          >
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-medium">
                 {compilationResult.success ? '✅ Build Succeeded' : '❌ Build Failed'}
@@ -869,7 +968,7 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                 Build time: {formatBuildTime(compilationResult.buildTime)}
               </span>
             </div>
-            
+
             {compilationResult.success && (
               <div className="text-sm text-gray-700">
                 <div>Output: {compilationResult.outputFile}</div>
@@ -915,7 +1014,7 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
                   removeIntegerOverflowChecks: false,
                   removeFloatingPointErrorChecks: false,
                   allowUnroundedFloatingPoint: false,
-                  removeSafeModePentiumFDIVChecks: false
+                  removeSafeModePentiumFDIVChecks: false,
                 });
               }}
               className="px-4 py-2 text-gray-600 hover:text-gray-800"
@@ -923,10 +1022,7 @@ export const MakeProjectDialog: React.FC<MakeProjectDialogProps> = ({
               Reset to Defaults
             </button>
             <div className="flex gap-2">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              >
+              <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:text-gray-800">
                 Cancel
               </button>
               <button

@@ -1,15 +1,10 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { 
-  vb6TestFramework, 
-  TestSuite, 
-  TestCase, 
-  TestResult 
-} from '../../services/VB6TestFramework';
-import { 
-  Play, 
-  Square, 
-  CheckCircle, 
-  XCircle, 
+import { vb6TestFramework, TestSuite, TestCase, TestResult } from '../../services/VB6TestFramework';
+import {
+  Play,
+  Square,
+  CheckCircle,
+  XCircle,
   AlertCircle,
   FileText,
   Activity,
@@ -17,7 +12,7 @@ import {
   Download,
   RefreshCw,
   Filter,
-  Search
+  Search,
 } from 'lucide-react';
 
 interface TestRunnerProps {
@@ -41,8 +36,11 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className = '' }) => {
 
   const loadTestSuites = () => {
     // Create sample test suites for demonstration
-    const suite1 = vb6TestFramework.createTestSuite('Form Controls', 'Tests for form control functionality');
-    
+    const suite1 = vb6TestFramework.createTestSuite(
+      'Form Controls',
+      'Tests for form control functionality'
+    );
+
     vb6TestFramework.addTest(suite1.id, {
       name: 'TextBox Value Property',
       category: 'Controls',
@@ -57,7 +55,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className = '' }) => {
         txt.MaxLength = 10
         txt.Text = "This is a very long string"
         Assert.AreEqual 10, Len(txt.Text), "Text should be truncated to MaxLength"
-      `
+      `,
     });
 
     vb6TestFramework.addTest(suite1.id, {
@@ -79,7 +77,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className = '' }) => {
         Sub CommandButton1_Click()
           clicked = True
         End Sub
-      `
+      `,
     });
 
     vb6TestFramework.addTest(suite1.id, {
@@ -99,11 +97,14 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className = '' }) => {
         
         lst.RemoveItem 1
         Assert.AreEqual 2, lst.ListCount, "Should have 2 items after removal"
-      `
+      `,
     });
 
-    const suite2 = vb6TestFramework.createTestSuite('String Functions', 'Tests for VB6 string functions');
-    
+    const suite2 = vb6TestFramework.createTestSuite(
+      'String Functions',
+      'Tests for VB6 string functions'
+    );
+
     vb6TestFramework.addTest(suite2.id, {
       name: 'String Manipulation',
       category: 'Functions',
@@ -114,7 +115,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className = '' }) => {
         Assert.AreEqual "Hello", Left("Hello World", 5), "Left should return first 5 characters"
         Assert.AreEqual "World", Right("Hello World", 5), "Right should return last 5 characters"
         Assert.AreEqual "lo Wo", Mid("Hello World", 4, 5), "Mid should return substring"
-      `
+      `,
     });
 
     vb6TestFramework.addTest(suite2.id, {
@@ -125,11 +126,14 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className = '' }) => {
         Assert.AreEqual "Hello", Trim("  Hello  "), "Trim should remove spaces"
         Assert.AreEqual "Hello  ", LTrim("  Hello  "), "LTrim should remove left spaces"
         Assert.AreEqual "  Hello", RTrim("  Hello  "), "RTrim should remove right spaces"
-      `
+      `,
     });
 
-    const suite3 = vb6TestFramework.createTestSuite('Math Functions', 'Tests for mathematical operations');
-    
+    const suite3 = vb6TestFramework.createTestSuite(
+      'Math Functions',
+      'Tests for mathematical operations'
+    );
+
     vb6TestFramework.addTest(suite3.id, {
       name: 'Basic Math Operations',
       category: 'Math',
@@ -140,7 +144,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className = '' }) => {
         Assert.AreEqual 8, 2 ^ 3, "Power operator should work"
         Assert.IsTrue Sin(0) = 0, "Sin(0) should be 0"
         Assert.IsTrue Cos(0) = 1, "Cos(0) should be 1"
-      `
+      `,
     });
 
     // Update state with all suites
@@ -158,7 +162,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className = '' }) => {
     try {
       const results = await vb6TestFramework.runAllTests();
       setTestResults(results);
-      
+
       // Get coverage data
       const coverage = vb6TestFramework.getCoverageReport();
       setCoverageData(coverage);
@@ -220,9 +224,10 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className = '' }) => {
 
     // Apply search filter
     if (searchTerm) {
-      tests = tests.filter(test => 
-        test.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        test.category.toLowerCase().includes(searchTerm.toLowerCase())
+      tests = tests.filter(
+        test =>
+          test.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          test.category.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -283,10 +288,15 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className = '' }) => {
                     {suite.status === 'running' ? (
                       <RefreshCw size={12} className="animate-spin" />
                     ) : suite.status !== 'pending' ? (
-                      <span className={`text-xs ${
-                        suite.status === 'passed' ? 'text-green-600' : 
-                        suite.status === 'failed' ? 'text-red-600' : 'text-yellow-600'
-                      }`}>
+                      <span
+                        className={`text-xs ${
+                          suite.status === 'passed'
+                            ? 'text-green-600'
+                            : suite.status === 'failed'
+                              ? 'text-red-600'
+                              : 'text-yellow-600'
+                        }`}
+                      >
                         {passedCount}/{totalCount}
                       </span>
                     ) : null}
@@ -332,13 +342,13 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className = '' }) => {
                     type="text"
                     placeholder="Search tests..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={e => setSearchTerm(e.target.value)}
                     className="w-full pl-7 pr-2 py-1 text-xs border rounded"
                   />
                 </div>
                 <select
                   value={filter}
-                  onChange={(e) => setFilter(e.target.value as any)}
+                  onChange={e => setFilter(e.target.value as any)}
                   className="px-2 py-1 text-xs border rounded"
                 >
                   <option value="all">All Tests</option>
@@ -360,8 +370,8 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className = '' }) => {
                         <span>{coverageData.overall.lines.percentage.toFixed(1)}%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-green-500 h-2 rounded-full" 
+                        <div
+                          className="bg-green-500 h-2 rounded-full"
                           style={{ width: `${coverageData.overall.lines.percentage}%` }}
                         />
                       </div>
@@ -372,8 +382,8 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className = '' }) => {
                         <span>{coverageData.overall.functions.percentage.toFixed(1)}%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-green-500 h-2 rounded-full" 
+                        <div
+                          className="bg-green-500 h-2 rounded-full"
                           style={{ width: `${coverageData.overall.functions.percentage}%` }}
                         />
                       </div>
@@ -384,8 +394,8 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className = '' }) => {
                         <span>{coverageData.overall.branches.percentage.toFixed(1)}%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-green-500 h-2 rounded-full" 
+                        <div
+                          className="bg-green-500 h-2 rounded-full"
                           style={{ width: `${coverageData.overall.branches.percentage}%` }}
                         />
                       </div>
@@ -395,8 +405,10 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className = '' }) => {
               ) : (
                 <div className="divide-y divide-gray-200">
                   {filteredTests(selectedSuiteData).map(test => {
-                    const result = testResults.get(selectedSuiteData.id)?.find(r => r.testId === test.id);
-                    
+                    const result = testResults
+                      .get(selectedSuiteData.id)
+                      ?.find(r => r.testId === test.id);
+
                     return (
                       <div key={test.id} className="p-3 hover:bg-gray-50">
                         <div className="flex items-start gap-2">
@@ -411,9 +423,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className = '' }) => {
                                 {test.type}
                               </span>
                               {test.duration && (
-                                <span className="ml-2 text-gray-500">
-                                  {test.duration}ms
-                                </span>
+                                <span className="ml-2 text-gray-500">{test.duration}ms</span>
                               )}
                             </div>
                             {test.error && (
@@ -425,12 +435,16 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className = '' }) => {
                               <div className="mt-2 text-xs">
                                 <div className="font-semibold mb-1">Assertions:</div>
                                 {result.assertions.map((assertion, i) => (
-                                  <div 
-                                    key={i} 
+                                  <div
+                                    key={i}
                                     className={`flex items-center gap-2 ${assertion.passed ? 'text-green-600' : 'text-red-600'}`}
                                   >
                                     {assertion.passed ? '✓' : '✗'}
-                                    <span>{assertion.type}: {assertion.message || `Expected ${assertion.expected}, got ${assertion.actual}`}</span>
+                                    <span>
+                                      {assertion.type}:{' '}
+                                      {assertion.message ||
+                                        `Expected ${assertion.expected}, got ${assertion.actual}`}
+                                    </span>
                                   </div>
                                 ))}
                               </div>

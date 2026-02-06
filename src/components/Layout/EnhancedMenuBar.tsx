@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 // ULTRA-OPTIMIZED: Import domain-specific stores
 import { useUIStore } from '../../stores/UIStore';
-import { useVB6Store } from '../../stores/vb6Store'; // Keep for legacy features not yet migrated
+import { useWindowStore } from '../../stores/windowStore';
+import { shallow } from 'zustand/shallow';
 import {
   FileText,
   FolderOpen,
@@ -50,12 +51,28 @@ interface EnhancedMenuBarProps {
   onShowHotReloadDashboard?: () => void;
 }
 
-const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplates, onImportForm, onExportForm, onShowDatabaseManager, onShowReportDesigner, onShowDebugPanel, onShowHotReloadDashboard }) => {
+const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({
+  onShowProjectTemplates,
+  onImportForm,
+  onExportForm,
+  onShowDatabaseManager,
+  onShowReportDesigner,
+  onShowDebugPanel,
+  onShowHotReloadDashboard,
+}) => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  
-  // ULTRA-OPTIMIZED: Use UIStore for UI-related state
+
+  // ULTRA-OPTIMIZED: Use UIStore for execution mode only
+  const { executionMode, setExecutionMode } = useUIStore(
+    state => ({
+      executionMode: state.executionMode,
+      setExecutionMode: state.setExecutionMode,
+    }),
+    shallow
+  );
+
+  // Use windowStore for all window/panel visibility state and methods
   const {
-    executionMode,
     showCodeEditor,
     showProjectExplorer,
     showPropertiesWindow,
@@ -65,17 +82,30 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
     showMemoryProfiler,
     showTestRunner,
     toggleWindow,
-    setExecutionMode,
     showDialog,
-  } = useUIStore();
+  } = useWindowStore(
+    state => ({
+      showCodeEditor: state.showCodeEditor,
+      showProjectExplorer: state.showProjectExplorer,
+      showPropertiesWindow: state.showPropertiesWindow,
+      showControlTree: state.showControlTree,
+      showToolbox: state.showToolbox,
+      showGitPanel: state.showGitPanel,
+      showMemoryProfiler: state.showMemoryProfiler,
+      showTestRunner: state.showTestRunner,
+      toggleWindow: state.toggleWindow,
+      showDialog: state.showDialog,
+    }),
+    shallow
+  );
 
-  const setShowErrorList = () => console.log('Show error list');
-  const setShowCommandPalette = () => console.log('Show command palette');
-  const setShowExportDialog = () => console.log('Show export dialog');
-  const setShowSnippetManager = () => console.log('Show snippet manager');
-  const setShowCodeFormatter = () => console.log('Show code formatter');
-  const setShowCodeConverter = () => console.log('Show code converter');
-  const setShowTestDebugger = () => console.log('Show test debugger');
+  const setShowErrorList = () => {};
+  const setShowCommandPalette = () => {};
+  const setShowExportDialog = () => {};
+  const setShowSnippetManager = () => {};
+  const setShowCodeFormatter = () => {};
+  const setShowCodeConverter = () => {};
+  const setShowTestDebugger = () => {};
 
   const handleMenuHover = (menuName: string) => {
     if (activeMenu) {
@@ -109,7 +139,7 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
         label: 'Open Project...',
         icon: <FolderOpen size={14} />,
         shortcut: 'Ctrl+O',
-        action: () => console.log('Open project'),
+        action: () => {},
       },
       {
         label: 'Import VB6 Form...',
@@ -126,11 +156,11 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
         label: 'Save Project',
         icon: <Save size={14} />,
         shortcut: 'Ctrl+S',
-        action: () => console.log('Save project'),
+        action: () => {},
       },
       {
         label: 'Save Project As...',
-        action: () => console.log('Save as'),
+        action: () => {},
       },
       {
         label: 'Export...',
@@ -141,12 +171,12 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
       {
         label: 'Print...',
         shortcut: 'Ctrl+P',
-        action: () => console.log('Print'),
+        action: () => {},
       },
       { separator: true },
       {
         label: 'Make Project1.exe...',
-        action: () => console.log('Make exe'),
+        action: () => {},
       },
       { separator: true },
       {
@@ -172,44 +202,44 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
         label: 'Undo',
         icon: <Undo size={14} />,
         shortcut: 'Ctrl+Z',
-        action: () => console.log('Undo'),
+        action: () => {},
       },
       {
         label: 'Redo',
         icon: <Redo size={14} />,
         shortcut: 'Ctrl+Y',
-        action: () => console.log('Redo'),
+        action: () => {},
       },
       { separator: true },
       {
         label: 'Cut',
         icon: <Cut size={14} />,
         shortcut: 'Ctrl+X',
-        action: () => console.log('Cut'),
+        action: () => {},
       },
       {
         label: 'Copy',
         icon: <Copy size={14} />,
         shortcut: 'Ctrl+C',
-        action: () => console.log('Copy'),
+        action: () => {},
       },
       {
         label: 'Paste',
         icon: <Clipboard size={14} />,
         shortcut: 'Ctrl+V',
-        action: () => console.log('Paste'),
+        action: () => {},
       },
       { separator: true },
       {
         label: 'Find...',
         icon: <Search size={14} />,
         shortcut: 'Ctrl+F',
-        action: () => console.log('Find'),
+        action: () => {},
       },
       {
         label: 'Replace...',
         shortcut: 'Ctrl+H',
-        action: () => console.log('Replace'),
+        action: () => {},
       },
     ],
     View: [
@@ -272,15 +302,15 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
     Project: [
       {
         label: 'Add Form',
-        action: () => console.log('Add form'),
+        action: () => {},
       },
       {
         label: 'Add Module',
-        action: () => console.log('Add module'),
+        action: () => {},
       },
       {
         label: 'Add Class Module',
-        action: () => console.log('Add class'),
+        action: () => {},
       },
       { separator: true },
       {
@@ -296,7 +326,7 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
       { separator: true },
       {
         label: 'Project Properties...',
-        action: () => console.log('Project properties'),
+        action: () => {},
       },
     ],
     Format: [
@@ -347,24 +377,24 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
       {
         label: 'Code Analyzer...',
         icon: <BarChart size={14} />,
-        action: () => console.log('Open code analyzer'),
+        action: () => {},
       },
       {
         label: 'Refactor...',
         icon: <WandSparkles size={14} />,
-        action: () => console.log('Open refactoring tools'),
+        action: () => {},
       },
       { separator: true },
       {
         label: 'Performance Monitor',
         icon: <ActivitySquare size={14} />,
-        action: () => console.log('Open performance monitor'),
+        action: () => {},
       },
       {
         label: 'Breakpoint Manager...',
         icon: <AlertOctagon size={14} />,
         shortcut: 'Alt+F9',
-        action: () => console.log('Open breakpoint manager'),
+        action: () => {},
       },
     ],
     Debug: [
@@ -389,12 +419,12 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
       {
         label: 'Step Over',
         shortcut: 'Shift+F8',
-        action: () => console.log('Step over'),
+        action: () => {},
       },
       {
         label: 'Step Out',
         shortcut: 'Ctrl+Shift+F8',
-        action: () => console.log('Step out'),
+        action: () => {},
       },
       { separator: true },
       {
@@ -405,48 +435,48 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
       {
         label: 'Conditional Breakpoint...',
         shortcut: 'Ctrl+F9',
-        action: () => console.log('Add conditional breakpoint'),
+        action: () => {},
       },
       {
         label: 'Tracepoint...',
         shortcut: 'Ctrl+Shift+F9',
-        action: () => console.log('Add tracepoint'),
+        action: () => {},
       },
       {
         label: 'Data Breakpoint...',
-        action: () => console.log('Add data breakpoint'),
+        action: () => {},
       },
       { separator: true },
       {
         label: 'Exception Settings...',
-        action: () => console.log('Configure exception breakpoints'),
+        action: () => {},
       },
       {
         label: 'Take Snapshot',
-        action: () => console.log('Take debug snapshot'),
+        action: () => {},
       },
       { separator: true },
       {
         label: 'Start Profiling',
-        action: () => console.log('Start performance profiling'),
+        action: () => {},
       },
       {
         label: 'Stop Profiling',
-        action: () => console.log('Stop performance profiling'),
+        action: () => {},
       },
       {
         label: 'Clear All Breakpoints',
-        action: () => console.log('Clear breakpoints'),
+        action: () => {},
       },
       { separator: true },
       {
         label: 'Add Watch...',
-        action: () => console.log('Add watch'),
+        action: () => {},
       },
       {
         label: 'Quick Watch...',
         shortcut: 'Shift+F9',
-        action: () => console.log('Quick watch'),
+        action: () => {},
       },
       { separator: true },
       {
@@ -490,13 +520,13 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
       { separator: true },
       {
         label: 'Compile Project1',
-        action: () => console.log('Compile'),
+        action: () => {},
       },
     ],
     Tools: [
       {
         label: 'Add Procedure...',
-        action: () => console.log('Add procedure'),
+        action: () => {},
       },
       {
         label: 'Snippets...',
@@ -561,7 +591,7 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
       {
         label: 'Run All Tests',
         icon: <Play size={14} />,
-        action: () => console.log('Run all tests'),
+        action: () => {},
         shortcut: 'Ctrl+R, A',
       },
       {
@@ -574,26 +604,26 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
       {
         label: 'Create Unit Test...',
         icon: <FileCheck size={14} />,
-        action: () => console.log('Create unit test'),
+        action: () => {},
       },
       {
         label: 'Create Integration Test...',
-        action: () => console.log('Create integration test'),
+        action: () => {},
       },
       {
         label: 'Create Visual Test...',
-        action: () => console.log('Create visual test'),
+        action: () => {},
       },
       { separator: true },
       {
         label: 'Code Coverage',
         icon: <BarChart size={14} />,
-        action: () => console.log('Show code coverage'),
+        action: () => {},
         shortcut: 'Ctrl+R, C',
       },
       {
         label: 'Test Settings...',
-        action: () => console.log('Test settings'),
+        action: () => {},
       },
     ],
     Help: [
@@ -601,17 +631,21 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
         label: 'Microsoft Visual Basic Help',
         icon: <HelpCircle size={14} />,
         shortcut: 'F1',
-        action: () => console.log('Help'),
+        action: () => {},
       },
       {
         label: 'About Microsoft Visual Basic',
-        action: () => console.log('About'),
+        action: () => {},
       },
     ],
   };
 
   const renderSubmenu = (items: any[], parentLabel: string) => (
-    <div className="absolute left-full top-0 ml-1 bg-gray-200 border border-gray-400 shadow-lg min-w-48 z-50">
+    <div
+      className="absolute left-full top-0 ml-1 bg-gray-200 border border-gray-400 shadow-lg min-w-48 z-50"
+      role="menu"
+      aria-label={parentLabel}
+    >
       {items.map((item, index) => (
         <div key={index}>
           {item.separator ? (
@@ -619,6 +653,8 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
           ) : (
             <div
               className="px-4 py-1 hover:bg-blue-600 hover:text-white cursor-pointer text-xs flex items-center justify-between"
+              role="menuitem"
+              tabIndex={-1}
               onClick={() => {
                 item.action();
                 handleMenuClose();
@@ -637,7 +673,11 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
   );
 
   const renderMenu = (menuName: string, items: any[]) => (
-    <div className="absolute left-0 top-full bg-gray-200 border border-gray-400 shadow-lg min-w-48 z-40">
+    <div
+      className="absolute left-0 top-full bg-gray-200 border border-gray-400 shadow-lg min-w-48 z-40"
+      role="menu"
+      aria-label={menuName}
+    >
       {items.map((item, index) => (
         <div key={index} className="relative group">
           {item.separator ? (
@@ -645,6 +685,9 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
           ) : (
             <div
               className="px-4 py-1 hover:bg-blue-600 hover:text-white cursor-pointer text-xs flex items-center justify-between"
+              role="menuitem"
+              aria-haspopup={item.submenu ? 'true' : undefined}
+              tabIndex={-1}
               onClick={() => {
                 if (!item.submenu) {
                   item.action();
@@ -675,13 +718,21 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
 
   return (
     <>
-      <div className="h-6 bg-gray-200 border-b border-gray-400 flex items-center px-2 text-xs relative">
+      <div
+        className="h-6 bg-gray-200 border-b border-gray-400 flex items-center px-2 text-xs relative"
+        role="menubar"
+        aria-label="Main Menu"
+      >
         {Object.keys(menuItems).map(menuName => (
           <div key={menuName} className="relative">
             <span
               className={`px-2 py-1 hover:bg-gray-300 cursor-pointer ${
                 activeMenu === menuName ? 'bg-gray-300' : ''
               }`}
+              role="menuitem"
+              aria-haspopup="true"
+              aria-expanded={activeMenu === menuName}
+              tabIndex={0}
               onClick={() => handleMenuClick(menuName)}
               onMouseEnter={() => handleMenuHover(menuName)}
             >
@@ -694,7 +745,9 @@ const EnhancedMenuBar: React.FC<EnhancedMenuBarProps> = ({ onShowProjectTemplate
       </div>
 
       {/* Overlay to close menu when clicking outside */}
-      {activeMenu && <div className="fixed inset-0 z-30" onClick={handleMenuClose} />}
+      {activeMenu && (
+        <div className="fixed inset-0 z-30" aria-hidden="true" onClick={handleMenuClose} />
+      )}
     </>
   );
 };

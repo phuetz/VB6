@@ -10,10 +10,10 @@ const path = require('path');
 
 function processCompatibilityResults(testResultsFile) {
   console.log('Processing VB6 compatibility test results...');
-  
+
   try {
     const results = JSON.parse(fs.readFileSync(testResultsFile, 'utf8'));
-    
+
     const report = {
       summary: {
         totalTests: 0,
@@ -21,22 +21,22 @@ function processCompatibilityResults(testResultsFile) {
         failedTests: 0,
         skippedTests: 0,
         successRate: 0,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       categories: {},
       functions: {},
       failedTests: [],
       performance: {
         averageDuration: 0,
-        slowestTests: []
-      }
+        slowestTests: [],
+      },
     };
-    
+
     // Traiter les résultats de test
     if (results.tests) {
       results.tests.forEach(test => {
         report.summary.totalTests++;
-        
+
         switch (test.state) {
           case 'passed':
             report.summary.passedTests++;
@@ -46,14 +46,14 @@ function processCompatibilityResults(testResultsFile) {
             report.failedTests.push({
               name: test.title,
               error: test.err?.message || 'Unknown error',
-              stack: test.err?.stack
+              stack: test.err?.stack,
             });
             break;
           case 'skipped':
             report.summary.skippedTests++;
             break;
         }
-        
+
         // Extraire la catégorie du nom du test
         const category = extractCategory(test.title);
         if (!report.categories[category]) {
@@ -61,73 +61,73 @@ function processCompatibilityResults(testResultsFile) {
             total: 0,
             passed: 0,
             failed: 0,
-            successRate: 0
+            successRate: 0,
           };
         }
-        
+
         report.categories[category].total++;
         if (test.state === 'passed') {
           report.categories[category].passed++;
         } else if (test.state === 'failed') {
           report.categories[category].failed++;
         }
-        
+
         // Données de performance
         if (test.duration) {
           if (!report.performance.averageDuration) {
             report.performance.averageDuration = 0;
           }
           report.performance.averageDuration += test.duration;
-          
+
           report.performance.slowestTests.push({
             name: test.title,
-            duration: test.duration
+            duration: test.duration,
           });
         }
       });
     }
-    
+
     // Calculer les taux de réussite
-    report.summary.successRate = report.summary.totalTests > 0 
-      ? (report.summary.passedTests / report.summary.totalTests) * 100 
-      : 0;
-    
+    report.summary.successRate =
+      report.summary.totalTests > 0
+        ? (report.summary.passedTests / report.summary.totalTests) * 100
+        : 0;
+
     Object.keys(report.categories).forEach(category => {
       const cat = report.categories[category];
       cat.successRate = cat.total > 0 ? (cat.passed / cat.total) * 100 : 0;
     });
-    
+
     if (report.summary.totalTests > 0) {
       report.performance.averageDuration /= report.summary.totalTests;
     }
-    
+
     // Trier les tests les plus lents
     report.performance.slowestTests.sort((a, b) => b.duration - a.duration);
     report.performance.slowestTests = report.performance.slowestTests.slice(0, 10);
-    
+
     // Sauvegarder le rapport JSON
     const reportFile = testResultsFile.replace('.json', '-report.json');
     fs.writeFileSync(reportFile, JSON.stringify(report, null, 2));
-    
+
     // Générer le rapport HTML
     generateHTMLReport(report, testResultsFile.replace('.json', '-report.html'));
-    
+
     console.log(`✅ Report generated successfully`);
     console.log(`📊 Total Tests: ${report.summary.totalTests}`);
     console.log(`✅ Passed: ${report.summary.passedTests}`);
     console.log(`❌ Failed: ${report.summary.failedTests}`);
     console.log(`📈 Success Rate: ${report.summary.successRate.toFixed(2)}%`);
-    
+
     // Alertes basées sur les résultats
     if (report.summary.successRate < 90) {
       console.warn('⚠️ Warning: Success rate below 90%');
     }
-    
+
     if (report.summary.successRate < 80) {
       console.error('🚨 Critical: Success rate below 80%');
       process.exit(1);
     }
-    
   } catch (error) {
     console.error('❌ Error processing results:', error.message);
     process.exit(1);
@@ -136,24 +136,24 @@ function processCompatibilityResults(testResultsFile) {
 
 function extractCategory(testTitle) {
   const categories = {
-    'String': /string|len|left|right|mid|trim|instr|replace/i,
-    'Math': /math|sin|cos|tan|sqr|abs|round|rnd/i,
-    'DateTime': /date|time|now|year|month|day|hour/i,
-    'Array': /array|ubound|lbound|redim|erase/i,
-    'Conversion': /conversion|cint|clng|cstr|cdbl|val/i,
-    'FileSystem': /file|dir|open|close|input|output/i,
-    'Validation': /validation|isnumeric|isdate|isarray|isobject/i,
-    'Operators': /operator|arithmetic|comparison|logical/i,
-    'ControlStructures': /control|if|for|while|do|select/i,
-    'ErrorHandling': /error|on error|err\./i
+    String: /string|len|left|right|mid|trim|instr|replace/i,
+    Math: /math|sin|cos|tan|sqr|abs|round|rnd/i,
+    DateTime: /date|time|now|year|month|day|hour/i,
+    Array: /array|ubound|lbound|redim|erase/i,
+    Conversion: /conversion|cint|clng|cstr|cdbl|val/i,
+    FileSystem: /file|dir|open|close|input|output/i,
+    Validation: /validation|isnumeric|isdate|isarray|isobject/i,
+    Operators: /operator|arithmetic|comparison|logical/i,
+    ControlStructures: /control|if|for|while|do|select/i,
+    ErrorHandling: /error|on error|err\./i,
   };
-  
+
   for (const [category, pattern] of Object.entries(categories)) {
     if (pattern.test(testTitle)) {
       return category;
     }
   }
-  
+
   return 'Other';
 }
 
@@ -350,8 +350,9 @@ function generateHTMLReport(report, outputFile) {
                     </thead>
                     <tbody>
                         ${Object.entries(report.categories)
-                          .sort(([,a], [,b]) => b.successRate - a.successRate)
-                          .map(([category, data]) => `
+                          .sort(([, a], [, b]) => b.successRate - a.successRate)
+                          .map(
+                            ([category, data]) => `
                             <tr>
                                 <td><strong>${category}</strong></td>
                                 <td>${data.total}</td>
@@ -365,12 +366,16 @@ function generateHTMLReport(report, outputFile) {
                                     </div>
                                 </td>
                             </tr>
-                          `).join('')}
+                          `
+                          )
+                          .join('')}
                     </tbody>
                 </table>
             </div>
             
-            ${report.performance.slowestTests.length > 0 ? `
+            ${
+              report.performance.slowestTests.length > 0
+                ? `
             <div class="section">
                 <h2>⏱️ Performance Analysis</h2>
                 <p><strong>Average Test Duration:</strong> ${report.performance.averageDuration.toFixed(2)}ms</p>
@@ -384,28 +389,42 @@ function generateHTMLReport(report, outputFile) {
                         </tr>
                     </thead>
                     <tbody>
-                        ${report.performance.slowestTests.map(test => `
+                        ${report.performance.slowestTests
+                          .map(
+                            test => `
                             <tr>
                                 <td>${test.name}</td>
                                 <td>${test.duration.toFixed(2)}</td>
                             </tr>
-                        `).join('')}
+                        `
+                          )
+                          .join('')}
                     </tbody>
                 </table>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
             
-            ${report.failedTests.length > 0 ? `
+            ${
+              report.failedTests.length > 0
+                ? `
             <div class="section">
                 <h2>❌ Failed Tests</h2>
-                ${report.failedTests.map(test => `
+                ${report.failedTests
+                  .map(
+                    test => `
                     <div class="failed-test">
                         <h4>${test.name}</h4>
                         <div class="error-message">${test.error}</div>
                     </div>
-                `).join('')}
+                `
+                  )
+                  .join('')}
             </div>
-            ` : ''}
+            `
+                : ''
+            }
         </div>
         
         <div class="footer">
@@ -415,13 +434,13 @@ function generateHTMLReport(report, outputFile) {
 </body>
 </html>
   `;
-  
+
   fs.writeFileSync(outputFile, html);
 }
 
 function generateCompatibilityStatus(report) {
   const successRate = report.summary.successRate;
-  
+
   if (successRate >= 95) {
     return `
       <div class="alert alert-success">
@@ -456,17 +475,17 @@ function generateCompatibilityStatus(report) {
 // Exécution du script
 if (require.main === module) {
   const testResultsFile = process.argv[2];
-  
+
   if (!testResultsFile) {
     console.error('Usage: node process-compatibility-results.js <test-results.json>');
     process.exit(1);
   }
-  
+
   if (!fs.existsSync(testResultsFile)) {
     console.error(`❌ Test results file not found: ${testResultsFile}`);
     process.exit(1);
   }
-  
+
   processCompatibilityResults(testResultsFile);
 }
 

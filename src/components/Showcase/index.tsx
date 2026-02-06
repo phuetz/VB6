@@ -1,6 +1,6 @@
 /**
  * VB6 IDE Showcase - Main Entry Point
- * 
+ *
  * Complete demonstration platform for the VB6 Web IDE project
  * showcasing all features, capabilities, and implementations.
  */
@@ -29,22 +29,22 @@ export const VB6Showcase: React.FC = () => {
       title: 'Interactive Presentation',
       description: 'Guided tour of all VB6 IDE features and capabilities',
       component: VB6IDEShowcase,
-      icon: '🎯'
+      icon: '🎯',
     },
     {
       id: 'demo-runner',
       title: 'Automated Demos',
       description: 'Automated demonstrations of building real applications',
       component: DemoRunner,
-      icon: '🚀'
+      icon: '🚀',
     },
     {
       id: 'live-ide',
       title: 'Live IDE',
       description: 'Full interactive VB6 IDE for hands-on exploration',
       component: LiveIDEDemo,
-      icon: '💻'
-    }
+      icon: '💻',
+    },
   ];
 
   useEffect(() => {
@@ -80,7 +80,7 @@ export const VB6Showcase: React.FC = () => {
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center space-x-6">
             <div className="text-xl font-bold gradient-text">VB6 Web IDE Showcase</div>
-            
+
             <div className="flex space-x-2">
               {showcaseModes.map(mode => (
                 <button
@@ -104,7 +104,7 @@ export const VB6Showcase: React.FC = () => {
             <div className="text-sm text-gray-300 hidden md:block">
               {currentModeData?.description}
             </div>
-            
+
             <button
               onClick={toggleFullscreen}
               className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-all"
@@ -112,7 +112,7 @@ export const VB6Showcase: React.FC = () => {
             >
               {isFullscreen ? '🗗' : '🗖'}
             </button>
-            
+
             <a
               href="https://github.com/your-repo/vb6-web-ide"
               target="_blank"
@@ -161,15 +161,13 @@ const IntroScreen: React.FC<{ onSkip: () => void }> = ({ onSkip }) => {
     <div className="h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center text-white">
       <div className="text-center max-w-4xl px-8">
         <div className="mb-8 animate-fadeIn">
-          <div className="text-6xl md:text-8xl font-bold mb-4 gradient-text">
-            VB6 Web IDE
-          </div>
+          <div className="text-6xl md:text-8xl font-bold mb-4 gradient-text">VB6 Web IDE</div>
           <div className="text-2xl md:text-3xl text-blue-200 mb-6">
             Complete Implementation Showcase
           </div>
           <div className="text-lg text-gray-300 max-w-2xl mx-auto">
-            Experience the full power of Visual Basic 6 running natively in your browser
-            with advanced form designer, native compiler, and ActiveX support.
+            Experience the full power of Visual Basic 6 running natively in your browser with
+            advanced form designer, native compiler, and ActiveX support.
           </div>
         </div>
 
@@ -225,8 +223,8 @@ const LiveIDEDemo: React.FC = () => {
         <div className="text-4xl mb-4">🚧</div>
         <div className="text-2xl font-bold mb-4">Live IDE Integration</div>
         <div className="text-gray-400 mb-8 max-w-md">
-          This would integrate the full VB6 IDE interface allowing users
-          to create, edit, and test VB6 applications directly.
+          This would integrate the full VB6 IDE interface allowing users to create, edit, and test
+          VB6 applications directly.
         </div>
         <div className="space-y-2 text-sm text-left bg-gray-900 p-4 rounded max-w-md">
           <div className="text-green-400">✓ Form Designer Integration</div>
@@ -247,7 +245,7 @@ const PerformanceMonitor: React.FC = () => {
   const [stats, setStats] = useState({
     fps: 0,
     memory: 0,
-    renderTime: 0
+    renderTime: 0,
   });
 
   useEffect(() => {
@@ -261,7 +259,7 @@ const PerformanceMonitor: React.FC = () => {
       if (now - lastTime >= 1000) {
         setStats(prev => ({
           ...prev,
-          fps: Math.round(frameCount * 1000 / (now - lastTime))
+          fps: Math.round((frameCount * 1000) / (now - lastTime)),
         }));
         frameCount = 0;
         lastTime = now;
@@ -271,7 +269,7 @@ const PerformanceMonitor: React.FC = () => {
       if ((performance as any).memory) {
         setStats(prev => ({
           ...prev,
-          memory: Math.round((performance as any).memory.usedJSHeapSize / 1024 / 1024)
+          memory: Math.round((performance as any).memory.usedJSHeapSize / 1024 / 1024),
         }));
       }
 

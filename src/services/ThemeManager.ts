@@ -363,7 +363,7 @@ export class ThemeManager {
       // Handle cases where className might be undefined
       const currentClassName = document.body.className || '';
       document.body.className = currentClassName.replace(/theme-[\w-]+/g, '');
-      
+
       // Add new theme class based on theme name
       const themeClass = this.getThemeClassName(theme.name);
       if (document.body.classList && document.body.classList.add) {
@@ -406,9 +406,9 @@ export class ThemeManager {
       'Light Theme': 'theme-light',
       'Light Modern': 'theme-light-modern',
       'Modern Theme': 'theme-modern',
-      'High Contrast': 'theme-high-contrast'
+      'High Contrast': 'theme-high-contrast',
     };
-    
+
     return classMap[themeName] || `theme-${themeName.toLowerCase().replace(/\s+/g, '-')}`;
   }
 
@@ -417,24 +417,38 @@ export class ThemeManager {
    */
   private static isValidCSSColor(value: string): boolean {
     if (typeof value !== 'string') return false;
-    
+
     // CSS color patterns: hex, rgb, rgba, hsl, hsla, named colors
     const colorPatterns = [
       /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/, // hex colors
       /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/, // rgb
       /^rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*([01]?\.?\d*)\s*\)$/, // rgba
       /^hsl\(\s*(\d{1,3})\s*,\s*(\d{1,3})%\s*,\s*(\d{1,3})%\s*\)$/, // hsl
-      /^hsla\(\s*(\d{1,3})\s*,\s*(\d{1,3})%\s*,\s*(\d{1,3})%\s*,\s*([01]?\.?\d*)\s*\)$/ // hsla
+      /^hsla\(\s*(\d{1,3})\s*,\s*(\d{1,3})%\s*,\s*(\d{1,3})%\s*,\s*([01]?\.?\d*)\s*\)$/, // hsla
     ];
-    
+
     // Named CSS colors (basic set)
     const namedColors = [
-      'black', 'white', 'red', 'green', 'blue', 'yellow', 'orange', 'purple', 
-      'pink', 'brown', 'gray', 'grey', 'transparent', 'currentColor'
+      'black',
+      'white',
+      'red',
+      'green',
+      'blue',
+      'yellow',
+      'orange',
+      'purple',
+      'pink',
+      'brown',
+      'gray',
+      'grey',
+      'transparent',
+      'currentColor',
     ];
-    
-    return colorPatterns.some(pattern => pattern.test(value)) || 
-           namedColors.includes(value.toLowerCase());
+
+    return (
+      colorPatterns.some(pattern => pattern.test(value)) ||
+      namedColors.includes(value.toLowerCase())
+    );
   }
 
   /**
@@ -442,30 +456,30 @@ export class ThemeManager {
    */
   static isValidCSSValue(value: string): boolean {
     if (typeof value !== 'string') return false;
-    
+
     // Reject dangerous CSS expressions and functions
     const dangerousPatterns = [
-      /expression\s*\(/i,           // IE CSS expressions
-      /javascript\s*:/i,           // JavaScript URLs
-      /vbscript\s*:/i,            // VBScript URLs
-      /data\s*:/i,                // Data URLs
-      /import\s*['"@]/i,          // CSS imports
-      /<.*>/,                     // HTML tags
-      /&\w+;/,                    // HTML entities
-      /\/\*.*\*\//,               // CSS comments
+      /expression\s*\(/i, // IE CSS expressions
+      /javascript\s*:/i, // JavaScript URLs
+      /vbscript\s*:/i, // VBScript URLs
+      /data\s*:/i, // Data URLs
+      /import\s*['"@]/i, // CSS imports
+      /<.*>/, // HTML tags
+      /&\w+;/, // HTML entities
+      /\/\*.*\*\//, // CSS comments
       /url\s*\(\s*['"]*javascript:/i, // JavaScript in URLs
     ];
-    
+
     // Check for dangerous patterns
     if (dangerousPatterns.some(pattern => pattern.test(value))) {
       return false;
     }
-    
+
     // Basic length limit to prevent CSS bombs
     if (value.length > 200) {
       return false;
     }
-    
+
     return true;
   }
 
@@ -628,10 +642,10 @@ export class ThemeManager {
       this.mediaQueryList = null;
       this.mediaQueryHandler = null;
     }
-    
+
     // Clear listeners
     this.listeners = [];
-    
+
     logger.debug('ThemeManager destroyed and cleaned up');
   }
 
@@ -670,28 +684,28 @@ export class ThemeManager {
     if (typeof document === 'undefined') {
       return false;
     }
-    
+
     try {
       const root = document.documentElement;
       let hasValidVariables = false;
-      
+
       Object.entries(variables).forEach(([key, value]) => {
         // Validate CSS variable name format
         if (!key.startsWith('--')) {
           logger.warn(`Invalid CSS variable name: ${key}. Must start with '--'`);
           return;
         }
-        
+
         // Validate CSS variable value
         if (!ThemeManager.isValidCSSValue(value)) {
           logger.warn(`Invalid CSS variable value for ${key}: ${value}`);
           return;
         }
-        
+
         root.style.setProperty(key, value);
         hasValidVariables = true;
       });
-      
+
       return hasValidVariables;
     } catch (error) {
       logger.warn('DOM error during CSS variable setting:', error);
@@ -724,17 +738,17 @@ export class ThemeManager {
     if (typeof scale !== 'number' || isNaN(scale) || scale < 0.5 || scale > 3) {
       return false;
     }
-    
+
     // Only accept values within the exact range, don't clamp
     if (scale < 0.5 || scale > 3) {
       return false;
     }
-    
+
     if (typeof document !== 'undefined') {
       document.documentElement.style.setProperty('--font-scale', scale.toString());
       localStorage.setItem('vb6-font-scale', scale.toString());
     }
-    
+
     return true;
   }
 

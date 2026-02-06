@@ -8,14 +8,14 @@ export enum ProjectType {
   ActiveXDLL = 'ActiveX DLL',
   ActiveXControl = 'ActiveX Control',
   ActiveXDocument = 'ActiveX Document DLL',
-  ActiveXDocumentEXE = 'ActiveX Document EXE'
+  ActiveXDocumentEXE = 'ActiveX Document EXE',
 }
 
 // Build Configuration
 export enum BuildConfiguration {
   Debug = 'Debug',
   Release = 'Release',
-  Custom = 'Custom'
+  Custom = 'Custom',
 }
 
 // Project Status
@@ -24,7 +24,7 @@ export enum ProjectStatus {
   Modified = 'Modified',
   Building = 'Building',
   Error = 'Error',
-  Unloaded = 'Unloaded'
+  Unloaded = 'Unloaded',
 }
 
 // Project Dependencies
@@ -108,7 +108,7 @@ export enum GroupOperation {
   CleanAll = 'Clean All',
   DeployAll = 'Deploy All',
   RunStartup = 'Run Startup',
-  DebugStartup = 'Debug Startup'
+  DebugStartup = 'Debug Startup',
 }
 
 interface ProjectGroupManagerProps {
@@ -120,7 +120,7 @@ interface ProjectGroupManagerProps {
 export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
   onProjectOpen,
   onGroupOperation,
-  onBuildComplete
+  onBuildComplete,
 }) => {
   const [groups, setGroups] = useState<ProjectGroup[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<ProjectGroup | null>(null);
@@ -131,15 +131,17 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
   const [showAddProjectDialog, setShowAddProjectDialog] = useState(false);
   const [showDependencyDialog, setShowDependencyDialog] = useState(false);
   const [showBuildOrderDialog, setShowBuildOrderDialog] = useState(false);
-  const [selectedTab, setSelectedTab] = useState<'projects' | 'dependencies' | 'build' | 'settings'>('projects');
+  const [selectedTab, setSelectedTab] = useState<
+    'projects' | 'dependencies' | 'build' | 'settings'
+  >('projects');
   const [groupForm, setGroupForm] = useState({
     name: '',
-    path: ''
+    path: '',
   });
   const [projectForm, setProjectForm] = useState({
     name: '',
     path: '',
-    type: ProjectType.StandardEXE
+    type: ProjectType.StandardEXE,
   });
   const [buildLog, setBuildLog] = useState<string[]>([]);
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
@@ -170,27 +172,27 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
           {
             projectId: '2',
             projectName: 'BusinessLogic',
-            type: 'project'
+            type: 'project',
           },
           {
             projectId: '3',
             projectName: 'DataAccess',
-            type: 'project'
-          }
+            type: 'project',
+          },
         ],
         references: [
           {
             name: 'Visual Basic For Applications',
             guid: '{000204EF-0000-0000-C000-000000000046}',
             version: '4.0',
-            path: 'C:\\Windows\\System32\\vbe7.dll'
-          }
+            path: 'C:\\Windows\\System32\\vbe7.dll',
+          },
         ],
         components: [
           { name: 'frmMain', type: 'form', path: 'Forms\\frmMain.frm' },
           { name: 'frmLogin', type: 'form', path: 'Forms\\frmLogin.frm' },
-          { name: 'modGlobal', type: 'module', path: 'Modules\\modGlobal.bas' }
-        ]
+          { name: 'modGlobal', type: 'module', path: 'Modules\\modGlobal.bas' },
+        ],
       },
       {
         id: generateId(),
@@ -206,15 +208,15 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
           {
             projectId: '3',
             projectName: 'DataAccess',
-            type: 'project'
-          }
+            type: 'project',
+          },
         ],
         references: [],
         components: [
           { name: 'clsCustomer', type: 'class', path: 'Classes\\clsCustomer.cls' },
           { name: 'clsOrder', type: 'class', path: 'Classes\\clsOrder.cls' },
-          { name: 'clsProduct', type: 'class', path: 'Classes\\clsProduct.cls' }
-        ]
+          { name: 'clsProduct', type: 'class', path: 'Classes\\clsProduct.cls' },
+        ],
       },
       {
         id: generateId(),
@@ -232,13 +234,13 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
             name: 'Microsoft ActiveX Data Objects 2.8 Library',
             guid: '{2A75196C-D9EB-4129-B803-931327F72D5C}',
             version: '2.8',
-            path: 'C:\\Program Files\\Common Files\\System\\ado\\msado15.dll'
-          }
+            path: 'C:\\Program Files\\Common Files\\System\\ado\\msado15.dll',
+          },
         ],
         components: [
           { name: 'clsDatabase', type: 'class', path: 'Classes\\clsDatabase.cls' },
-          { name: 'clsDataAccess', type: 'class', path: 'Classes\\clsDataAccess.cls' }
-        ]
+          { name: 'clsDataAccess', type: 'class', path: 'Classes\\clsDataAccess.cls' },
+        ],
       },
       {
         id: generateId(),
@@ -254,21 +256,21 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
           {
             projectId: '2',
             projectName: 'BusinessLogic',
-            type: 'project'
-          }
+            type: 'project',
+          },
         ],
         references: [],
         components: [
           { name: 'clsReportGenerator', type: 'class', path: 'Classes\\clsReportGenerator.cls' },
-          { name: 'clsExcelExport', type: 'class', path: 'Classes\\clsExcelExport.cls' }
-        ]
-      }
+          { name: 'clsExcelExport', type: 'class', path: 'Classes\\clsExcelExport.cls' },
+        ],
+      },
     ],
     buildOrder: [
       { projectId: '3', order: 1, dependencies: [], canParallel: true },
       { projectId: '2', order: 2, dependencies: ['3'], canParallel: false },
       { projectId: '4', order: 3, dependencies: ['2'], canParallel: true },
-      { projectId: '1', order: 3, dependencies: ['2', '3'], canParallel: true }
+      { projectId: '1', order: 3, dependencies: ['2', '3'], canParallel: true },
     ],
     configuration: BuildConfiguration.Debug,
     startupProject: '1',
@@ -279,8 +281,8 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
       stopOnFirstError: false,
       preBuildCommand: 'echo Starting build...',
       postBuildCommand: 'echo Build complete!',
-      deployPath: 'C:\\Deploy\\EnterpriseApp'
-    }
+      deployPath: 'C:\\Deploy\\EnterpriseApp',
+    },
   };
 
   // Initialize with sample group
@@ -304,8 +306,8 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
       modifiedDate: new Date(),
       settings: {
         parallelBuild: false,
-        stopOnFirstError: true
-      }
+        stopOnFirstError: true,
+      },
     };
 
     setGroups(prev => [...prev, newGroup]);
@@ -332,16 +334,16 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
       outputPath: `bin\\Debug\\${projectForm.name}${projectForm.type === ProjectType.StandardEXE ? '.exe' : '.dll'}`,
       dependencies: [],
       references: [],
-      components: []
+      components: [],
     };
 
     const updatedGroup = {
       ...selectedGroup,
       projects: [...selectedGroup.projects, newProject],
-      modifiedDate: new Date()
+      modifiedDate: new Date(),
     };
 
-    setGroups(prev => prev.map(g => g.id === selectedGroup.id ? updatedGroup : g));
+    setGroups(prev => prev.map(g => (g.id === selectedGroup.id ? updatedGroup : g)));
     setSelectedGroup(updatedGroup);
     setShowAddProjectDialog(false);
     setProjectForm({ name: '', path: '', type: ProjectType.StandardEXE });
@@ -350,49 +352,55 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
   }, [selectedGroup, projectForm, generateId]);
 
   // Remove project from group
-  const removeProject = useCallback((project: GroupProject) => {
-    if (!selectedGroup || !window.confirm(`Remove project "${project.name}" from group?`)) return;
+  const removeProject = useCallback(
+    (project: GroupProject) => {
+      if (!selectedGroup || !window.confirm(`Remove project "${project.name}" from group?`)) return;
 
-    const updatedGroup = {
-      ...selectedGroup,
-      projects: selectedGroup.projects.filter(p => p.id !== project.id),
-      buildOrder: selectedGroup.buildOrder.filter(b => b.projectId !== project.id),
-      modifiedDate: new Date()
-    };
+      const updatedGroup = {
+        ...selectedGroup,
+        projects: selectedGroup.projects.filter(p => p.id !== project.id),
+        buildOrder: selectedGroup.buildOrder.filter(b => b.projectId !== project.id),
+        modifiedDate: new Date(),
+      };
 
-    // Update dependencies
-    updatedGroup.projects.forEach(p => {
-      p.dependencies = p.dependencies.filter(d => d.projectId !== project.id);
-    });
+      // Update dependencies
+      updatedGroup.projects.forEach(p => {
+        p.dependencies = p.dependencies.filter(d => d.projectId !== project.id);
+      });
 
-    setGroups(prev => prev.map(g => g.id === selectedGroup.id ? updatedGroup : g));
-    setSelectedGroup(updatedGroup);
-    if (selectedProject?.id === project.id) {
-      setSelectedProject(null);
-    }
+      setGroups(prev => prev.map(g => (g.id === selectedGroup.id ? updatedGroup : g)));
+      setSelectedGroup(updatedGroup);
+      if (selectedProject?.id === project.id) {
+        setSelectedProject(null);
+      }
 
-    eventEmitter.current.emit('projectRemoved', project, updatedGroup);
-  }, [selectedGroup, selectedProject]);
+      eventEmitter.current.emit('projectRemoved', project, updatedGroup);
+    },
+    [selectedGroup, selectedProject]
+  );
 
   // Set startup project
-  const setStartupProject = useCallback((project: GroupProject) => {
-    if (!selectedGroup) return;
+  const setStartupProject = useCallback(
+    (project: GroupProject) => {
+      if (!selectedGroup) return;
 
-    const updatedGroup = {
-      ...selectedGroup,
-      startupProject: project.id,
-      projects: selectedGroup.projects.map(p => ({
-        ...p,
-        isStartup: p.id === project.id
-      })),
-      modifiedDate: new Date()
-    };
+      const updatedGroup = {
+        ...selectedGroup,
+        startupProject: project.id,
+        projects: selectedGroup.projects.map(p => ({
+          ...p,
+          isStartup: p.id === project.id,
+        })),
+        modifiedDate: new Date(),
+      };
 
-    setGroups(prev => prev.map(g => g.id === selectedGroup.id ? updatedGroup : g));
-    setSelectedGroup(updatedGroup);
+      setGroups(prev => prev.map(g => (g.id === selectedGroup.id ? updatedGroup : g)));
+      setSelectedGroup(updatedGroup);
 
-    eventEmitter.current.emit('startupProjectChanged', project, updatedGroup);
-  }, [selectedGroup]);
+      eventEmitter.current.emit('startupProjectChanged', project, updatedGroup);
+    },
+    [selectedGroup]
+  );
 
   // Build all projects
   const buildAll = useCallback(async () => {
@@ -406,13 +414,13 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
 
     // Simulate building projects in order
     const results: BuildResult[] = [];
-    
+
     for (const buildItem of selectedGroup.buildOrder) {
       const project = selectedGroup.projects.find(p => p.id === buildItem.projectId);
       if (!project) continue;
 
       setBuildLog(prev => [...prev, `Building ${project.name}...`]);
-      
+
       // Update project status
       project.status = ProjectStatus.Building;
       setSelectedGroup({ ...selectedGroup });
@@ -428,7 +436,7 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
         duration: 1000 + Math.random() * 4000,
         errors: success ? [] : [`Error in ${project.name}: Compilation failed`],
         warnings: success ? [`Warning: Implicit conversion in line 42`] : [],
-        outputFile: success ? project.outputPath : undefined
+        outputFile: success ? project.outputPath : undefined,
       };
 
       results.push(result);
@@ -440,10 +448,11 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
       project.lastBuildSuccess = success;
       setSelectedGroup({ ...selectedGroup });
 
-      setBuildLog(prev => [...prev, 
+      setBuildLog(prev => [
+        ...prev,
         `${project.name}: ${success ? 'Build succeeded' : 'Build failed'}`,
         ...result.errors,
-        ...result.warnings
+        ...result.warnings,
       ]);
 
       // Stop on error if configured
@@ -454,8 +463,11 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
     }
 
     setIsBuilding(false);
-    setBuildLog(prev => [...prev, `Build complete. ${results.filter(r => r.success).length}/${results.length} succeeded`]);
-    
+    setBuildLog(prev => [
+      ...prev,
+      `Build complete. ${results.filter(r => r.success).length}/${results.length} succeeded`,
+    ]);
+
     onBuildComplete?.(results);
     eventEmitter.current.emit('buildComplete', results);
   }, [selectedGroup, onGroupOperation, onBuildComplete]);
@@ -470,7 +482,7 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
 
     const processDependencies = (projectId: string, depth: number = 0): void => {
       if (processed.has(projectId) || processing.has(projectId)) return;
-      
+
       processing.add(projectId);
       const project = selectedGroup.projects.find(p => p.id === projectId);
       if (!project) return;
@@ -492,7 +504,7 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
           projectId,
           order: depth,
           dependencies,
-          canParallel: true // Simplified - would need more complex analysis
+          canParallel: true, // Simplified - would need more complex analysis
         });
         processed.add(projectId);
       }
@@ -506,21 +518,24 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
     const updatedGroup = {
       ...selectedGroup,
       buildOrder: order.sort((a, b) => b.order - a.order), // Reverse order for dependencies
-      modifiedDate: new Date()
+      modifiedDate: new Date(),
     };
 
-    setGroups(prev => prev.map(g => g.id === selectedGroup.id ? updatedGroup : g));
+    setGroups(prev => prev.map(g => (g.id === selectedGroup.id ? updatedGroup : g)));
     setSelectedGroup(updatedGroup);
 
     eventEmitter.current.emit('buildOrderCalculated', order);
   }, [selectedGroup]);
 
   // Open project
-  const openProject = useCallback((project: GroupProject) => {
-    setSelectedProject(project);
-    onProjectOpen?.(project);
-    eventEmitter.current.emit('projectOpened', project);
-  }, [onProjectOpen]);
+  const openProject = useCallback(
+    (project: GroupProject) => {
+      setSelectedProject(project);
+      onProjectOpen?.(project);
+      eventEmitter.current.emit('projectOpened', project);
+    },
+    [onProjectOpen]
+  );
 
   // Toggle project expansion
   const toggleProjectExpansion = useCallback((projectId: string) => {
@@ -611,7 +626,7 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
         <div className="p-2 border-b border-gray-200">
           <select
             value={selectedGroup?.id || ''}
-            onChange={(e) => {
+            onChange={e => {
               const group = groups.find(g => g.id === e.target.value);
               setSelectedGroup(group || null);
             }}
@@ -635,7 +650,7 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
               <div className="text-sm font-medium">{selectedGroup.name}</div>
               <div className="text-xs text-gray-600">{selectedGroup.path}</div>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-2">
               {selectedGroup.projects.map(project => (
                 <div key={project.id} className="mb-2">
@@ -646,7 +661,7 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
                     onClick={() => openProject(project)}
                   >
                     <button
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation();
                         toggleProjectExpansion(project.id);
                       }}
@@ -676,12 +691,20 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
                   {expandedProjects.has(project.id) && (
                     <div className="ml-8 mt-1">
                       {project.components.map((comp, index) => (
-                        <div key={index} className="flex items-center gap-2 py-1 text-sm text-gray-600">
+                        <div
+                          key={index}
+                          className="flex items-center gap-2 py-1 text-sm text-gray-600"
+                        >
                           <span>
-                            {comp.type === 'form' ? '📋' :
-                             comp.type === 'module' ? '📄' :
-                             comp.type === 'class' ? '🎯' :
-                             comp.type === 'usercontrol' ? '🎨' : '📦'}
+                            {comp.type === 'form'
+                              ? '📋'
+                              : comp.type === 'module'
+                                ? '📄'
+                                : comp.type === 'class'
+                                  ? '🎯'
+                                  : comp.type === 'usercontrol'
+                                    ? '🎨'
+                                    : '📦'}
                           </span>
                           <span>{comp.name}</span>
                         </div>
@@ -750,7 +773,7 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
                       <span className="text-2xl">{getProjectIcon(selectedProject.type)}</span>
                       {selectedProject.name}
                     </h2>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Path</label>
@@ -765,7 +788,9 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
                         <div className="text-sm text-gray-600">{selectedProject.outputPath}</div>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">Configuration</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Configuration
+                        </label>
                         <div className="text-sm text-gray-600">{selectedProject.configuration}</div>
                       </div>
                     </div>
@@ -805,15 +830,22 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
 
                   {/* Components */}
                   <div>
-                    <h3 className="font-medium mb-2">Components ({selectedProject.components.length})</h3>
+                    <h3 className="font-medium mb-2">
+                      Components ({selectedProject.components.length})
+                    </h3>
                     <div className="space-y-1">
                       {selectedProject.components.map((comp, index) => (
                         <div key={index} className="flex items-center gap-2 text-sm">
                           <span>
-                            {comp.type === 'form' ? '📋' :
-                             comp.type === 'module' ? '📄' :
-                             comp.type === 'class' ? '🎯' :
-                             comp.type === 'usercontrol' ? '🎨' : '📦'}
+                            {comp.type === 'form'
+                              ? '📋'
+                              : comp.type === 'module'
+                                ? '📄'
+                                : comp.type === 'class'
+                                  ? '🎯'
+                                  : comp.type === 'usercontrol'
+                                    ? '🎨'
+                                    : '📦'}
                           </span>
                           <span>{comp.name}</span>
                           <span className="text-gray-500">{comp.path}</span>
@@ -865,7 +897,10 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
                         const project = selectedGroup.projects.find(p => p.id === item.projectId);
                         if (!project) return null;
                         return (
-                          <div key={item.projectId} className="flex items-center gap-3 p-2 border border-gray-200 rounded">
+                          <div
+                            key={item.projectId}
+                            className="flex items-center gap-3 p-2 border border-gray-200 rounded"
+                          >
                             <span className="text-lg font-mono">{index + 1}</span>
                             <span className="flex-1">{project.name}</span>
                             {item.canParallel && (
@@ -889,12 +924,19 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
                       <h3 className="font-medium mb-3">Build Results</h3>
                       <div className="space-y-2">
                         {buildResults.map((result, index) => {
-                          const project = selectedGroup.projects.find(p => p.id === result.projectId);
+                          const project = selectedGroup.projects.find(
+                            p => p.id === result.projectId
+                          );
                           if (!project) return null;
                           return (
-                            <div key={index} className={`p-3 border rounded ${
-                              result.success ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'
-                            }`}>
+                            <div
+                              key={index}
+                              className={`p-3 border rounded ${
+                                result.success
+                                  ? 'border-green-300 bg-green-50'
+                                  : 'border-red-300 bg-red-50'
+                              }`}
+                            >
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                   <span className={result.success ? '✅' : '❌'} />
@@ -930,11 +972,18 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
                     <h3 className="font-medium mb-3">Build Output</h3>
                     <div className="bg-gray-900 text-gray-100 p-4 rounded font-mono text-sm max-h-96 overflow-y-auto">
                       {buildLog.map((line, index) => (
-                        <div key={index} className={
-                          line.includes('Error') ? 'text-red-400' :
-                          line.includes('Warning') ? 'text-yellow-400' :
-                          line.includes('succeeded') ? 'text-green-400' : ''
-                        }>
+                        <div
+                          key={index}
+                          className={
+                            line.includes('Error')
+                              ? 'text-red-400'
+                              : line.includes('Warning')
+                                ? 'text-yellow-400'
+                                : line.includes('succeeded')
+                                  ? 'text-green-400'
+                                  : ''
+                          }
+                        >
                           {line}
                         </div>
                       ))}
@@ -949,23 +998,25 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
               {selectedTab === 'settings' && (
                 <div>
                   <h3 className="font-medium mb-4">Group Settings</h3>
-                  
+
                   <div className="space-y-4">
                     <div>
                       <label className="flex items-center gap-2">
                         <input
                           type="checkbox"
                           checked={selectedGroup.settings.parallelBuild}
-                          onChange={(e) => {
+                          onChange={e => {
                             const updated = {
                               ...selectedGroup,
                               settings: {
                                 ...selectedGroup.settings,
-                                parallelBuild: e.target.checked
-                              }
+                                parallelBuild: e.target.checked,
+                              },
                             };
                             setSelectedGroup(updated);
-                            setGroups(prev => prev.map(g => g.id === selectedGroup.id ? updated : g));
+                            setGroups(prev =>
+                              prev.map(g => (g.id === selectedGroup.id ? updated : g))
+                            );
                           }}
                         />
                         <span>Enable parallel build</span>
@@ -977,16 +1028,18 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
                         <input
                           type="checkbox"
                           checked={selectedGroup.settings.stopOnFirstError}
-                          onChange={(e) => {
+                          onChange={e => {
                             const updated = {
                               ...selectedGroup,
                               settings: {
                                 ...selectedGroup.settings,
-                                stopOnFirstError: e.target.checked
-                              }
+                                stopOnFirstError: e.target.checked,
+                              },
                             };
                             setSelectedGroup(updated);
-                            setGroups(prev => prev.map(g => g.id === selectedGroup.id ? updated : g));
+                            setGroups(prev =>
+                              prev.map(g => (g.id === selectedGroup.id ? updated : g))
+                            );
                           }}
                         />
                         <span>Stop on first error</span>
@@ -1000,16 +1053,18 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
                       <input
                         type="text"
                         value={selectedGroup.settings.preBuildCommand || ''}
-                        onChange={(e) => {
+                        onChange={e => {
                           const updated = {
                             ...selectedGroup,
                             settings: {
                               ...selectedGroup.settings,
-                              preBuildCommand: e.target.value
-                            }
+                              preBuildCommand: e.target.value,
+                            },
                           };
                           setSelectedGroup(updated);
-                          setGroups(prev => prev.map(g => g.id === selectedGroup.id ? updated : g));
+                          setGroups(prev =>
+                            prev.map(g => (g.id === selectedGroup.id ? updated : g))
+                          );
                         }}
                         className="w-full px-3 py-2 border border-gray-300 rounded"
                       />
@@ -1022,16 +1077,18 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
                       <input
                         type="text"
                         value={selectedGroup.settings.postBuildCommand || ''}
-                        onChange={(e) => {
+                        onChange={e => {
                           const updated = {
                             ...selectedGroup,
                             settings: {
                               ...selectedGroup.settings,
-                              postBuildCommand: e.target.value
-                            }
+                              postBuildCommand: e.target.value,
+                            },
                           };
                           setSelectedGroup(updated);
-                          setGroups(prev => prev.map(g => g.id === selectedGroup.id ? updated : g));
+                          setGroups(prev =>
+                            prev.map(g => (g.id === selectedGroup.id ? updated : g))
+                          );
                         }}
                         className="w-full px-3 py-2 border border-gray-300 rounded"
                       />
@@ -1044,16 +1101,18 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
                       <input
                         type="text"
                         value={selectedGroup.settings.deployPath || ''}
-                        onChange={(e) => {
+                        onChange={e => {
                           const updated = {
                             ...selectedGroup,
                             settings: {
                               ...selectedGroup.settings,
-                              deployPath: e.target.value
-                            }
+                              deployPath: e.target.value,
+                            },
                           };
                           setSelectedGroup(updated);
-                          setGroups(prev => prev.map(g => g.id === selectedGroup.id ? updated : g));
+                          setGroups(prev =>
+                            prev.map(g => (g.id === selectedGroup.id ? updated : g))
+                          );
                         }}
                         className="w-full px-3 py-2 border border-gray-300 rounded"
                         placeholder="C:\Deploy"
@@ -1080,16 +1139,14 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[500px]">
             <h2 className="text-lg font-medium mb-4">New Project Group</h2>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Group Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Group Name</label>
                 <input
                   type="text"
                   value={groupForm.name}
-                  onChange={(e) => setGroupForm(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => setGroupForm(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="My Project Group"
                 />
@@ -1102,7 +1159,7 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
                 <input
                   type="text"
                   value={groupForm.path}
-                  onChange={(e) => setGroupForm(prev => ({ ...prev, path: e.target.value }))}
+                  onChange={e => setGroupForm(prev => ({ ...prev, path: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="C:\Projects\MyGroup.vbg"
                 />
@@ -1133,32 +1190,32 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[500px]">
             <h2 className="text-lg font-medium mb-4">Add Project to Group</h2>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Project Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Project Name</label>
                 <input
                   type="text"
                   value={projectForm.name}
-                  onChange={(e) => setProjectForm(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => setProjectForm(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="MyProject"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Project Type
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Project Type</label>
                 <select
                   value={projectForm.type}
-                  onChange={(e) => setProjectForm(prev => ({ ...prev, type: e.target.value as ProjectType }))}
+                  onChange={e =>
+                    setProjectForm(prev => ({ ...prev, type: e.target.value as ProjectType }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 >
                   {Object.values(ProjectType).map(type => (
-                    <option key={type} value={type}>{type}</option>
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -1170,7 +1227,7 @@ export const ProjectGroupManager: React.FC<ProjectGroupManagerProps> = ({
                 <input
                   type="text"
                   value={projectForm.path}
-                  onChange={(e) => setProjectForm(prev => ({ ...prev, path: e.target.value }))}
+                  onChange={e => setProjectForm(prev => ({ ...prev, path: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="C:\Projects\MyProject\MyProject.vbp"
                 />

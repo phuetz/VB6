@@ -1,6 +1,6 @@
 /**
  * VB6 Optimized Lexer - Ultra-Complete Implementation
- * 
+ *
  * Features:
  * - Trie-based keyword recognition for O(1) lookup
  * - Uint16Array buffer for high-performance scanning
@@ -18,7 +18,7 @@ export enum TokenType {
   STRING = 'STRING',
   BOOLEAN = 'BOOLEAN',
   DATE = 'DATE',
-  
+
   // Keywords
   DIM = 'DIM',
   AS = 'AS',
@@ -65,7 +65,7 @@ export enum TokenType {
   ON = 'ON',
   ERROR = 'ERROR',
   RESUME = 'RESUME',
-  
+
   // Operators
   PLUS = 'PLUS',
   MINUS = 'MINUS',
@@ -88,7 +88,7 @@ export enum TokenType {
   NOT = 'NOT',
   LIKE = 'LIKE',
   IS = 'IS',
-  
+
   // Punctuation
   LEFT_PAREN = 'LEFT_PAREN',
   RIGHT_PAREN = 'RIGHT_PAREN',
@@ -98,7 +98,7 @@ export enum TokenType {
   DOT = 'DOT',
   COLON = 'COLON',
   SEMICOLON = 'SEMICOLON',
-  
+
   // Special
   NEWLINE = 'NEWLINE',
   WHITESPACE = 'WHITESPACE',
@@ -106,7 +106,7 @@ export enum TokenType {
   LABEL = 'LABEL',
   LINE_CONTINUATION = 'LINE_CONTINUATION',
   EOF = 'EOF',
-  INVALID = 'INVALID'
+  INVALID = 'INVALID',
 }
 
 export interface Token {
@@ -167,19 +167,19 @@ class KeywordTrie {
   public insert(keyword: string, tokenType: TokenType): void {
     let current = this.root;
     const upperKeyword = keyword.toUpperCase();
-    
+
     for (let i = 0; i < upperKeyword.length; i++) {
       const charCode = upperKeyword.charCodeAt(i);
-      
+
       if (!current.children.has(charCode)) {
         const newNode = new TrieNode();
         newNode.depth = current.depth + 1;
         current.children.set(charCode, newNode);
       }
-      
+
       current = current.children.get(charCode)!;
     }
-    
+
     current.isEndOfWord = true;
     current.tokenType = tokenType;
     this.maxDepth = Math.max(this.maxDepth, current.depth);
@@ -188,7 +188,11 @@ class KeywordTrie {
   /**
    * Search for keyword in trie
    */
-  public search(buffer: Uint16Array, start: number, maxLength: number): {
+  public search(
+    buffer: Uint16Array,
+    start: number,
+    maxLength: number
+  ): {
     tokenType: TokenType | null;
     length: number;
   } {
@@ -199,7 +203,7 @@ class KeywordTrie {
 
     while (length < maxLength && start + length < buffer.length) {
       const charCode = buffer[start + length];
-      
+
       // Check if character is alphabetic or underscore
       if (!this.isIdentifierChar(charCode)) {
         break;
@@ -207,24 +211,24 @@ class KeywordTrie {
 
       // Convert to uppercase for comparison
       const upperCharCode = this.toUpperCase(charCode);
-      
+
       if (!current.children.has(upperCharCode)) {
         break;
       }
-      
+
       current = current.children.get(upperCharCode)!;
       length++;
-      
+
       if (current.isEndOfWord) {
         lastValidTokenType = current.tokenType;
         lastValidLength = length;
       }
     }
-    
+
     // Return longest valid match
     return {
       tokenType: lastValidTokenType,
-      length: lastValidLength
+      length: lastValidLength,
     };
   }
 
@@ -232,17 +236,20 @@ class KeywordTrie {
    * Check if character can be part of identifier
    */
   private isIdentifierChar(charCode: number): boolean {
-    return (charCode >= 65 && charCode <= 90) ||  // A-Z
-           (charCode >= 97 && charCode <= 122) || // a-z
-           (charCode >= 48 && charCode <= 57) ||  // 0-9
-           charCode === 95;                       // _
+    return (
+      (charCode >= 65 && charCode <= 90) || // A-Z
+      (charCode >= 97 && charCode <= 122) || // a-z
+      (charCode >= 48 && charCode <= 57) || // 0-9
+      charCode === 95
+    ); // _
   }
 
   /**
    * Convert character to uppercase
    */
   private toUpperCase(charCode: number): number {
-    if (charCode >= 97 && charCode <= 122) { // a-z
+    if (charCode >= 97 && charCode <= 122) {
+      // a-z
       return charCode - 32;
     }
     return charCode;
@@ -305,7 +312,7 @@ class KeywordTrie {
       ['LIKE', TokenType.LIKE],
       ['IS', TokenType.IS],
       ['TRUE', TokenType.BOOLEAN],
-      ['FALSE', TokenType.BOOLEAN]
+      ['FALSE', TokenType.BOOLEAN],
     ];
 
     for (const [keyword, tokenType] of keywords) {
@@ -366,7 +373,7 @@ export class VB6OptimizedLexer {
       caseSensitive: options.caseSensitive ?? false,
       bufferSize: options.bufferSize ?? 64 * 1024, // 64KB default
       enableMetrics: options.enableMetrics ?? true,
-      enableErrorRecovery: options.enableErrorRecovery ?? true
+      enableErrorRecovery: options.enableErrorRecovery ?? true,
     };
 
     this.keywordTrie = new KeywordTrie();
@@ -380,7 +387,7 @@ export class VB6OptimizedLexer {
   public tokenize(source: string): Token[] {
     this.startTime = performance.now();
     this.resetState();
-    
+
     // Convert string to Uint16Array for performance
     this.buffer = new Uint16Array(source.length);
     for (let i = 0; i < source.length; i++) {
@@ -388,13 +395,13 @@ export class VB6OptimizedLexer {
     }
 
     const tokens: Token[] = [];
-    
+
     while (this.position < this.buffer.length) {
       const token = this.nextToken();
       if (token) {
         tokens.push(token);
         this.metrics.tokensGenerated++;
-        
+
         if (token.type === TokenType.NEWLINE) {
           this.metrics.linesProcessed++;
         }
@@ -470,11 +477,14 @@ export class VB6OptimizedLexer {
    */
   private scanNewline(startPos: number, line: number, column: number): Token {
     let value = '';
-    
+
     if (this.buffer[this.position] === VB6OptimizedLexer.CHAR_CR) {
       value += '\r';
       this.position++;
-      if (this.position < this.buffer.length && this.buffer[this.position] === VB6OptimizedLexer.CHAR_LF) {
+      if (
+        this.position < this.buffer.length &&
+        this.buffer[this.position] === VB6OptimizedLexer.CHAR_LF
+      ) {
         value += '\n';
         this.position++;
       }
@@ -482,10 +492,10 @@ export class VB6OptimizedLexer {
       value += '\n';
       this.position++;
     }
-    
+
     this.line++;
     this.column = 1;
-    
+
     return this.createToken(TokenType.NEWLINE, value, startPos, this.position, line, column);
   }
 
@@ -494,7 +504,7 @@ export class VB6OptimizedLexer {
    */
   private scanComment(startPos: number, line: number, column: number): Token {
     let value = '';
-    
+
     while (this.position < this.buffer.length) {
       const char = this.buffer[this.position];
       if (char === VB6OptimizedLexer.CHAR_CR || char === VB6OptimizedLexer.CHAR_LF) {
@@ -503,7 +513,7 @@ export class VB6OptimizedLexer {
       value += String.fromCharCode(char);
       this.advance();
     }
-    
+
     return this.createToken(TokenType.COMMENT, value, startPos, this.position, line, column);
   }
 
@@ -513,14 +523,16 @@ export class VB6OptimizedLexer {
   private scanString(startPos: number, line: number, column: number): Token {
     let value = '';
     this.advance(); // Skip opening quote
-    
+
     while (this.position < this.buffer.length) {
       const char = this.buffer[this.position];
-      
+
       if (char === VB6OptimizedLexer.CHAR_QUOTE) {
         // Check for escaped quote
-        if (this.position + 1 < this.buffer.length && 
-            this.buffer[this.position + 1] === VB6OptimizedLexer.CHAR_QUOTE) {
+        if (
+          this.position + 1 < this.buffer.length &&
+          this.buffer[this.position + 1] === VB6OptimizedLexer.CHAR_QUOTE
+        ) {
           value += '"';
           this.advance();
           this.advance();
@@ -541,7 +553,7 @@ export class VB6OptimizedLexer {
         this.advance();
       }
     }
-    
+
     return this.createToken(TokenType.STRING, value, startPos, this.position, line, column);
   }
 
@@ -552,32 +564,38 @@ export class VB6OptimizedLexer {
     let value = '';
     let hasDecimal = false;
     let hasExponent = false;
-    
+
     while (this.position < this.buffer.length) {
       const char = this.buffer[this.position];
-      
+
       if (this.isDigit(char)) {
         value += String.fromCharCode(char);
         this.advance();
       } else if (char === VB6OptimizedLexer.CHAR_DOT && !hasDecimal && !hasExponent) {
         // Check if next character is digit
-        if (this.position + 1 < this.buffer.length && 
-            this.isDigit(this.buffer[this.position + 1])) {
+        if (
+          this.position + 1 < this.buffer.length &&
+          this.isDigit(this.buffer[this.position + 1])
+        ) {
           hasDecimal = true;
           value += '.';
           this.advance();
         } else {
           break;
         }
-      } else if ((char === 69 || char === 101) && !hasExponent) { // 'E' or 'e'
+      } else if ((char === 69 || char === 101) && !hasExponent) {
+        // 'E' or 'e'
         hasExponent = true;
         value += String.fromCharCode(char);
         this.advance();
-        
+
         // Handle optional sign after E
         if (this.position < this.buffer.length) {
           const nextChar = this.buffer[this.position];
-          if (nextChar === VB6OptimizedLexer.CHAR_PLUS || nextChar === VB6OptimizedLexer.CHAR_MINUS) {
+          if (
+            nextChar === VB6OptimizedLexer.CHAR_PLUS ||
+            nextChar === VB6OptimizedLexer.CHAR_MINUS
+          ) {
             value += String.fromCharCode(nextChar);
             this.advance();
           }
@@ -586,16 +604,17 @@ export class VB6OptimizedLexer {
         break;
       }
     }
-    
+
     // Handle type suffixes
     if (this.position < this.buffer.length) {
       const suffix = this.buffer[this.position];
-      if (suffix === 37 || suffix === 38 || suffix === 33 || suffix === 35 || suffix === 64) { // % & ! # @
+      if (suffix === 37 || suffix === 38 || suffix === 33 || suffix === 35 || suffix === 64) {
+        // % & ! # @
         value += String.fromCharCode(suffix);
         this.advance();
       }
     }
-    
+
     return this.createToken(TokenType.NUMBER, value, startPos, this.position, line, column);
   }
 
@@ -606,37 +625,37 @@ export class VB6OptimizedLexer {
     // Use trie to check for keywords first
     const maxKeywordLength = this.keywordTrie.getMaxDepth();
     const trieResult = this.keywordTrie.search(this.buffer, this.position, maxKeywordLength);
-    
+
     this.metrics.trieOperations++;
-    
+
     if (trieResult.tokenType) {
       // Check if keyword is complete (next char is not identifier char)
       const nextCharPos = this.position + trieResult.length;
-      if (nextCharPos >= this.buffer.length || 
-          !this.isIdentifierChar(this.buffer[nextCharPos])) {
-        
+      if (nextCharPos >= this.buffer.length || !this.isIdentifierChar(this.buffer[nextCharPos])) {
         let value = '';
         for (let i = 0; i < trieResult.length; i++) {
           value += String.fromCharCode(this.buffer[this.position + i]);
         }
-        
+
         this.position += trieResult.length;
         this.column += trieResult.length;
         this.metrics.keywordHits++;
-        
+
         return this.createToken(trieResult.tokenType, value, startPos, this.position, line, column);
       }
     }
-    
+
     // Not a keyword, scan as identifier
     let value = '';
-    
-    while (this.position < this.buffer.length && 
-           this.isIdentifierChar(this.buffer[this.position])) {
+
+    while (
+      this.position < this.buffer.length &&
+      this.isIdentifierChar(this.buffer[this.position])
+    ) {
       value += String.fromCharCode(this.buffer[this.position]);
       this.advance();
     }
-    
+
     return this.createToken(TokenType.IDENTIFIER, value, startPos, this.position, line, column);
   }
 
@@ -646,7 +665,7 @@ export class VB6OptimizedLexer {
   private tryScandLineContinuation(startPos: number, line: number, column: number): Token | null {
     // Look ahead to see if underscore is followed by whitespace and newline
     let pos = this.position + 1;
-    
+
     // Skip whitespace after underscore
     while (pos < this.buffer.length) {
       const char = this.buffer[pos];
@@ -656,7 +675,7 @@ export class VB6OptimizedLexer {
         break;
       }
     }
-    
+
     // Check if followed by newline
     if (pos < this.buffer.length) {
       const char = this.buffer[pos];
@@ -667,11 +686,18 @@ export class VB6OptimizedLexer {
           value += String.fromCharCode(this.buffer[this.position]);
           this.advance();
         }
-        
-        return this.createToken(TokenType.LINE_CONTINUATION, value, startPos, this.position, line, column);
+
+        return this.createToken(
+          TokenType.LINE_CONTINUATION,
+          value,
+          startPos,
+          this.position,
+          line,
+          column
+        );
       }
     }
-    
+
     return null; // Not a line continuation
   }
 
@@ -680,33 +706,40 @@ export class VB6OptimizedLexer {
    */
   private scanOperatorOrPunctuation(startPos: number, line: number, column: number): Token {
     const char = this.buffer[this.position];
-    
+
     // Two-character operators
     if (this.position + 1 < this.buffer.length) {
       const nextChar = this.buffer[this.position + 1];
-      
+
       if (char === VB6OptimizedLexer.CHAR_LESS && nextChar === VB6OptimizedLexer.CHAR_GREATER) {
         this.advance();
         this.advance();
         return this.createToken(TokenType.NOT_EQUAL, '<>', startPos, this.position, line, column);
       }
-      
+
       if (char === VB6OptimizedLexer.CHAR_LESS && nextChar === VB6OptimizedLexer.CHAR_EQUAL) {
         this.advance();
         this.advance();
         return this.createToken(TokenType.LESS_EQUAL, '<=', startPos, this.position, line, column);
       }
-      
+
       if (char === VB6OptimizedLexer.CHAR_GREATER && nextChar === VB6OptimizedLexer.CHAR_EQUAL) {
         this.advance();
         this.advance();
-        return this.createToken(TokenType.GREATER_EQUAL, '>=', startPos, this.position, line, column);
+        return this.createToken(
+          TokenType.GREATER_EQUAL,
+          '>=',
+          startPos,
+          this.position,
+          line,
+          column
+        );
       }
     }
-    
+
     // Single-character operators and punctuation
     this.advance();
-    
+
     switch (char) {
       case VB6OptimizedLexer.CHAR_PLUS:
         return this.createToken(TokenType.PLUS, '+', startPos, this.position, line, column);
@@ -717,7 +750,14 @@ export class VB6OptimizedLexer {
       case VB6OptimizedLexer.CHAR_DIVIDE:
         return this.createToken(TokenType.DIVIDE, '/', startPos, this.position, line, column);
       case VB6OptimizedLexer.CHAR_BACKSLASH:
-        return this.createToken(TokenType.INTEGER_DIVIDE, '\\', startPos, this.position, line, column);
+        return this.createToken(
+          TokenType.INTEGER_DIVIDE,
+          '\\',
+          startPos,
+          this.position,
+          line,
+          column
+        );
       case VB6OptimizedLexer.CHAR_CARET:
         return this.createToken(TokenType.POWER, '^', startPos, this.position, line, column);
       case VB6OptimizedLexer.CHAR_AMPERSAND:
@@ -735,7 +775,14 @@ export class VB6OptimizedLexer {
       case VB6OptimizedLexer.CHAR_LEFT_BRACKET:
         return this.createToken(TokenType.LEFT_BRACKET, '[', startPos, this.position, line, column);
       case VB6OptimizedLexer.CHAR_RIGHT_BRACKET:
-        return this.createToken(TokenType.RIGHT_BRACKET, ']', startPos, this.position, line, column);
+        return this.createToken(
+          TokenType.RIGHT_BRACKET,
+          ']',
+          startPos,
+          this.position,
+          line,
+          column
+        );
       case VB6OptimizedLexer.CHAR_COMMA:
         return this.createToken(TokenType.COMMA, ',', startPos, this.position, line, column);
       case VB6OptimizedLexer.CHAR_DOT:
@@ -746,7 +793,14 @@ export class VB6OptimizedLexer {
         return this.createToken(TokenType.SEMICOLON, ';', startPos, this.position, line, column);
       default:
         this.metrics.errorCount++;
-        return this.createToken(TokenType.INVALID, String.fromCharCode(char), startPos, this.position, line, column);
+        return this.createToken(
+          TokenType.INVALID,
+          String.fromCharCode(char),
+          startPos,
+          this.position,
+          line,
+          column
+        );
     }
   }
 
@@ -802,11 +856,11 @@ export class VB6OptimizedLexer {
    * Create token
    */
   private createToken(
-    type: TokenType, 
-    value: string, 
-    startPos: number, 
-    endPos: number, 
-    line?: number, 
+    type: TokenType,
+    value: string,
+    startPos: number,
+    endPos: number,
+    line?: number,
     column?: number
   ): Token {
     return {
@@ -815,7 +869,7 @@ export class VB6OptimizedLexer {
       line: line || this.line,
       column: column || this.column,
       startPos,
-      endPos
+      endPos,
     };
   }
 
@@ -841,7 +895,7 @@ export class VB6OptimizedLexer {
       throughput: 0,
       errorCount: 0,
       keywordHits: 0,
-      trieOperations: 0
+      trieOperations: 0,
     };
   }
 
@@ -859,7 +913,7 @@ export class VB6OptimizedLexer {
     return {
       line: this.line,
       column: this.column,
-      position: this.position
+      position: this.position,
     };
   }
 

@@ -11,11 +11,10 @@ import {
   CreateUDT,
   CreateUDTArray,
   VB6FixedString,
-  UDTRegistry
+  UDTRegistry,
 } from '../../runtime/VB6UserDefinedTypes';
 
 describe('VB6 UDT Support', () => {
-
   describe('UDT Processor - Parsing', () => {
     let processor: VB6UDTProcessor;
 
@@ -120,7 +119,7 @@ describe('VB6 UDT Support', () => {
         'Age As Integer',
         'Salary As Currency',
         'HireDate As Date',
-        'IsActive As Boolean'
+        'IsActive As Boolean',
       ];
 
       const result = processor.processType(typeDecl!, fieldLines);
@@ -160,12 +159,7 @@ describe('VB6 UDT Support', () => {
 
     it('should generate TypeScript interface for UDT', () => {
       const typeDecl = processor.parseTypeDeclaration('Type Rectangle', 1);
-      const fieldLines = [
-        'Left As Long',
-        'Top As Long',
-        'Width As Long',
-        'Height As Long'
-      ];
+      const fieldLines = ['Left As Long', 'Top As Long', 'Width As Long', 'Height As Long'];
       const processed = processor.processType(typeDecl!, fieldLines);
 
       const tsCode = processor.generateTypeScript(processed);
@@ -186,7 +180,7 @@ describe('VB6 UDT Support', () => {
     it('should register and create simple UDT', () => {
       DefineType('TestPoint', [
         { name: 'X', type: 'Long' },
-        { name: 'Y', type: 'Long' }
+        { name: 'Y', type: 'Long' },
       ]);
 
       const point = CreateUDT('TestPoint');
@@ -198,12 +192,12 @@ describe('VB6 UDT Support', () => {
     it('should initialize UDT with values', () => {
       DefineType('TestPerson', [
         { name: 'Name', type: 'String' },
-        { name: 'Age', type: 'Integer' }
+        { name: 'Age', type: 'Integer' },
       ]);
 
       const person = CreateUDT('TestPerson', {
         Name: 'John Doe',
-        Age: 30
+        Age: 30,
       });
 
       expect(person.Name).toBe('John Doe');
@@ -211,9 +205,7 @@ describe('VB6 UDT Support', () => {
     });
 
     it('should handle fixed-length strings', () => {
-      DefineType('TestRecord', [
-        { name: 'Code', type: 'String', isFixedString: true, size: 10 }
-      ]);
+      DefineType('TestRecord', [{ name: 'Code', type: 'String', isFixedString: true, size: 10 }]);
 
       const record = CreateUDT('TestRecord');
       expect(record.Code).toBeInstanceOf(VB6FixedString);
@@ -223,7 +215,7 @@ describe('VB6 UDT Support', () => {
     it('should create UDT arrays', () => {
       DefineType('TestEmployee', [
         { name: 'ID', type: 'Long' },
-        { name: 'Salary', type: 'Currency' }
+        { name: 'Salary', type: 'Currency' },
       ]);
 
       const employees = CreateUDTArray('TestEmployee', 5);
@@ -233,9 +225,7 @@ describe('VB6 UDT Support', () => {
     });
 
     it('should create multi-dimensional UDT arrays', () => {
-      DefineType('TestCell', [
-        { name: 'Value', type: 'Double' }
-      ]);
+      DefineType('TestCell', [{ name: 'Value', type: 'Double' }]);
 
       const grid = CreateUDTArray('TestCell', 3, 3);
       expect(grid).toHaveLength(3);
@@ -246,12 +236,12 @@ describe('VB6 UDT Support', () => {
     it('should copy UDT instances', () => {
       DefineType('TestData', [
         { name: 'Value', type: 'Long' },
-        { name: 'Name', type: 'String' }
+        { name: 'Name', type: 'String' },
       ]);
 
       const original = CreateUDT('TestData', {
         Value: 42,
-        Name: 'Original'
+        Name: 'Original',
       });
 
       const copy = UDTRegistry.copyInstance(original, 'TestData');
@@ -267,7 +257,7 @@ describe('VB6 UDT Support', () => {
     it('should compare UDT instances', () => {
       DefineType('TestCompare', [
         { name: 'A', type: 'Long' },
-        { name: 'B', type: 'String' }
+        { name: 'B', type: 'String' },
       ]);
 
       const obj1 = CreateUDT('TestCompare', { A: 1, B: 'test' });
@@ -283,13 +273,13 @@ describe('VB6 UDT Support', () => {
     it('should handle nested UDTs', () => {
       DefineType('TestAddress', [
         { name: 'Street', type: 'String', isFixedString: true, size: 100 },
-        { name: 'City', type: 'String', isFixedString: true, size: 50 }
+        { name: 'City', type: 'String', isFixedString: true, size: 50 },
       ]);
 
       DefineType('TestCustomer', [
         { name: 'Name', type: 'String' },
         { name: 'HomeAddress', type: 'TestAddress', isUDT: true, udtTypeName: 'TestAddress' },
-        { name: 'WorkAddress', type: 'TestAddress', isUDT: true, udtTypeName: 'TestAddress' }
+        { name: 'WorkAddress', type: 'TestAddress', isUDT: true, udtTypeName: 'TestAddress' },
       ]);
 
       const customer = CreateUDT('TestCustomer');
@@ -302,12 +292,12 @@ describe('VB6 UDT Support', () => {
     it('should copy nested UDTs correctly', () => {
       DefineType('TestLocation', [
         { name: 'Lat', type: 'Double' },
-        { name: 'Lng', type: 'Double' }
+        { name: 'Lng', type: 'Double' },
       ]);
 
       DefineType('TestPlace', [
         { name: 'Name', type: 'String' },
-        { name: 'Coordinates', type: 'TestLocation', isUDT: true, udtTypeName: 'TestLocation' }
+        { name: 'Coordinates', type: 'TestLocation', isUDT: true, udtTypeName: 'TestLocation' },
       ]);
 
       const original = CreateUDT('TestPlace');
@@ -328,7 +318,7 @@ describe('VB6 UDT Support', () => {
     it('should handle array fields in UDTs', () => {
       DefineType('TestMatrix', [
         { name: 'Name', type: 'String' },
-        { name: 'Values', type: 'Double', isArray: true, dimensions: [3, 3] }
+        { name: 'Values', type: 'Double', isArray: true, dimensions: [3, 3] },
       ]);
 
       const matrix = CreateUDT('TestMatrix');
@@ -340,7 +330,7 @@ describe('VB6 UDT Support', () => {
 
     it('should initialize array fields correctly', () => {
       DefineType('TestVector', [
-        { name: 'Components', type: 'Single', isArray: true, dimensions: [3] }
+        { name: 'Components', type: 'Single', isArray: true, dimensions: [3] },
       ]);
 
       const vector = CreateUDT('TestVector');
@@ -433,11 +423,11 @@ describe('VB6 UDT Support', () => {
     it('should handle complete Employee example', () => {
       const employee = CreateUDT('Employee', {
         ID: 1001,
-        Salary: 75000.50
+        Salary: 75000.5,
       });
 
       expect(employee.ID).toBe(1001);
-      expect(employee.Salary).toBe(75000.50);
+      expect(employee.Salary).toBe(75000.5);
       expect(employee.IsActive).toBe(false); // Default
     });
 

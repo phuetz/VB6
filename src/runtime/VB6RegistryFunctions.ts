@@ -1,6 +1,6 @@
 /**
  * VB6 Registry Functions Implementation
- * 
+ *
  * Web-compatible implementation of VB6 registry functions
  * SaveSetting, GetSetting, DeleteSetting, GetAllSettings
  * Note: Uses localStorage for persistence since web browsers can't access Windows registry
@@ -8,13 +8,28 @@
 
 import { errorHandler } from './VB6ErrorHandling';
 
+// Type-safe globalThis extension for registry fallback
+interface VB6RegistryGlobal {
+  __vb6Registry?: Record<string, string>;
+}
+
+const vb6Global = globalThis as VB6RegistryGlobal;
+
+// Helper to get or initialize the in-memory registry fallback
+function getMemoryRegistry(): Record<string, string> {
+  if (!vb6Global.__vb6Registry) {
+    vb6Global.__vb6Registry = {};
+  }
+  return vb6Global.__vb6Registry;
+}
+
 // VB6 Registry root keys (for compatibility, but all stored in localStorage)
 export const VB6RegistryConstants = {
   HKEY_CURRENT_USER: 'HKEY_CURRENT_USER',
   HKEY_LOCAL_MACHINE: 'HKEY_LOCAL_MACHINE',
   HKEY_CLASSES_ROOT: 'HKEY_CLASSES_ROOT',
   HKEY_USERS: 'HKEY_USERS',
-  HKEY_CURRENT_CONFIG: 'HKEY_CURRENT_CONFIG'
+  HKEY_CURRENT_CONFIG: 'HKEY_CURRENT_CONFIG',
 } as const;
 
 // Registry simulation using localStorage
@@ -44,14 +59,14 @@ class VB6Registry {
       }
 
       const registryKey = this.getSettingsKey(appName, section, key);
-      
+
       // Store in localStorage
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem(registryKey, String(setting));
       } else {
         // Fallback for environments without localStorage
-        (globalThis as any).__vb6Registry = (globalThis as any).__vb6Registry || {};
-        (globalThis as any).__vb6Registry[registryKey] = String(setting);
+        const registry = getMemoryRegistry();
+        registry[registryKey] = String(setting);
       }
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'SaveSetting');
@@ -61,7 +76,12 @@ class VB6Registry {
   /**
    * Get a setting from the simulated registry (localStorage)
    */
-  static getSetting(appName: string, section: string, key: string, defaultValue: string = ''): string {
+  static getSetting(
+    appName: string,
+    section: string,
+    key: string,
+    defaultValue: string = ''
+  ): string {
     try {
       if (!appName || !section || !key) {
         errorHandler.raiseError(5, 'Invalid procedure call or argument', 'GetSetting');
@@ -69,14 +89,14 @@ class VB6Registry {
       }
 
       const registryKey = this.getSettingsKey(appName, section, key);
-      
+
       // Get from localStorage
       if (typeof localStorage !== 'undefined') {
         const value = localStorage.getItem(registryKey);
         return value !== null ? value : defaultValue;
       } else {
         // Fallback for environments without localStorage
-        const registry = (globalThis as any).__vb6Registry || {};
+        const registry = getMemoryRegistry();
         return registry[registryKey] || defaultValue;
       }
     } catch (error) {
@@ -98,17 +118,17 @@ class VB6Registry {
       if (key) {
         // Delete specific key
         const registryKey = this.getSettingsKey(appName, section, key);
-        
+
         if (typeof localStorage !== 'undefined') {
           localStorage.removeItem(registryKey);
         } else {
-          const registry = (globalThis as any).__vb6Registry || {};
+          const registry = getMemoryRegistry();
           delete registry[registryKey];
         }
       } else {
         // Delete entire section
         const sectionPrefix = this.getSettingsKey(appName, section);
-        
+
         if (typeof localStorage !== 'undefined') {
           // Find and remove all keys that start with the section prefix
           const keysToRemove: string[] = [];
@@ -120,7 +140,7 @@ class VB6Registry {
           }
           keysToRemove.forEach(key => localStorage.removeItem(key));
         } else {
-          const registry = (globalThis as any).__vb6Registry || {};
+          const registry = getMemoryRegistry();
           Object.keys(registry).forEach(key => {
             if (key.startsWith(sectionPrefix)) {
               delete registry[key];
@@ -145,7 +165,7 @@ class VB6Registry {
 
       const sectionPrefix = this.getSettingsKey(appName, section) + '\\';
       const settings: string[][] = [];
-      
+
       if (typeof localStorage !== 'undefined') {
         // Search localStorage for matching keys
         for (let i = 0; i < localStorage.length; i++) {
@@ -159,7 +179,7 @@ class VB6Registry {
           }
         }
       } else {
-        const registry = (globalThis as any).__vb6Registry || {};
+        const registry = getMemoryRegistry();
         Object.keys(registry).forEach(fullKey => {
           if (fullKey.startsWith(sectionPrefix)) {
             const keyName = fullKey.substring(sectionPrefix.length);
@@ -168,7 +188,7 @@ class VB6Registry {
           }
         });
       }
-      
+
       return settings;
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'GetAllSettings');
@@ -188,7 +208,7 @@ class VB6Registry {
 
       const appPrefix = this.VB6_REGISTRY_PREFIX + this.VB6_SETTINGS_PATH + appName + '\\';
       const sections = new Set<string>();
-      
+
       if (typeof localStorage !== 'undefined') {
         for (let i = 0; i < localStorage.length; i++) {
           const fullKey = localStorage.key(i);
@@ -202,7 +222,7 @@ class VB6Registry {
           }
         }
       } else {
-        const registry = (globalThis as any).__vb6Registry || {};
+        const registry = getMemoryRegistry();
         Object.keys(registry).forEach(fullKey => {
           if (fullKey.startsWith(appPrefix)) {
             const remainder = fullKey.substring(appPrefix.length);
@@ -214,7 +234,7 @@ class VB6Registry {
           }
         });
       }
-      
+
       return Array.from(sections);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'GetAllSections');
@@ -232,11 +252,11 @@ class VB6Registry {
       }
 
       const registryKey = this.getSettingsKey(appName, section, key);
-      
+
       if (typeof localStorage !== 'undefined') {
         return localStorage.getItem(registryKey) !== null;
       } else {
-        const registry = (globalThis as any).__vb6Registry || {};
+        const registry = getMemoryRegistry();
         return registryKey in registry;
       }
     } catch (error) {
@@ -255,7 +275,7 @@ class VB6Registry {
       }
 
       const appPrefix = this.VB6_REGISTRY_PREFIX + this.VB6_SETTINGS_PATH + appName + '\\';
-      
+
       if (typeof localStorage !== 'undefined') {
         const keysToRemove: string[] = [];
         for (let i = 0; i < localStorage.length; i++) {
@@ -266,7 +286,7 @@ class VB6Registry {
         }
         keysToRemove.forEach(key => localStorage.removeItem(key));
       } else {
-        const registry = (globalThis as any).__vb6Registry || {};
+        const registry = getMemoryRegistry();
         Object.keys(registry).forEach(key => {
           if (key.startsWith(appPrefix)) {
             delete registry[key];
@@ -289,8 +309,21 @@ class VB6Registry {
       }
 
       const appPrefix = this.VB6_REGISTRY_PREFIX + this.VB6_SETTINGS_PATH + appName + '\\';
-      const settings: { [key: string]: any } = {};
-      
+      const settings: Record<string, unknown> = {};
+
+      // Helper to set a nested value in the settings object
+      const setNestedValue = (keyPath: string, value: string): void => {
+        const parts = keyPath.split('\\');
+        let current: Record<string, unknown> = settings;
+        for (let j = 0; j < parts.length - 1; j++) {
+          if (!current[parts[j]]) {
+            current[parts[j]] = {};
+          }
+          current = current[parts[j]] as Record<string, unknown>;
+        }
+        current[parts[parts.length - 1]] = value;
+      };
+
       if (typeof localStorage !== 'undefined') {
         for (let i = 0; i < localStorage.length; i++) {
           const fullKey = localStorage.key(i);
@@ -298,39 +331,21 @@ class VB6Registry {
             const keyPath = fullKey.substring(appPrefix.length);
             const value = localStorage.getItem(fullKey);
             if (value !== null) {
-              // Convert path to nested object structure
-              const parts = keyPath.split('\\');
-              let current = settings;
-              for (let j = 0; j < parts.length - 1; j++) {
-                if (!current[parts[j]]) {
-                  current[parts[j]] = {};
-                }
-                current = current[parts[j]];
-              }
-              current[parts[parts.length - 1]] = value;
+              setNestedValue(keyPath, value);
             }
           }
         }
       } else {
-        const registry = (globalThis as any).__vb6Registry || {};
+        const registry = getMemoryRegistry();
         Object.keys(registry).forEach(fullKey => {
           if (fullKey.startsWith(appPrefix)) {
             const keyPath = fullKey.substring(appPrefix.length);
             const value = registry[fullKey];
-            // Convert path to nested object structure
-            const parts = keyPath.split('\\');
-            let current = settings;
-            for (let j = 0; j < parts.length - 1; j++) {
-              if (!current[parts[j]]) {
-                current[parts[j]] = {};
-              }
-              current = current[parts[j]];
-            }
-            current[parts[parts.length - 1]] = value;
+            setNestedValue(keyPath, value);
           }
         });
       }
-      
+
       return JSON.stringify(settings, null, 2);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'ExportSettings');
@@ -349,10 +364,10 @@ class VB6Registry {
       }
 
       const settings = JSON.parse(jsonData);
-      
+
       // Clear existing settings first
       this.clearAllSettings(appName);
-      
+
       // Import new settings
       this.importSettingsRecursive(appName, '', settings);
     } catch (error) {
@@ -363,13 +378,17 @@ class VB6Registry {
   /**
    * Helper method for recursive settings import
    */
-  private static importSettingsRecursive(appName: string, sectionPath: string, obj: any): void {
+  private static importSettingsRecursive(
+    appName: string,
+    sectionPath: string,
+    obj: Record<string, unknown>
+  ): void {
     Object.keys(obj).forEach(key => {
       const currentSection = sectionPath ? `${sectionPath}\\${key}` : key;
-      
+
       if (typeof obj[key] === 'object' && obj[key] !== null) {
         // Recursively import nested objects
-        this.importSettingsRecursive(appName, currentSection, obj[key]);
+        this.importSettingsRecursive(appName, currentSection, obj[key] as Record<string, unknown>);
       } else {
         // This is a leaf value, save it
         const parentSection = sectionPath || 'General';
@@ -388,10 +407,15 @@ export function SaveSetting(appName: string, section: string, key: string, setti
 }
 
 /**
- * VB6 GetSetting Function  
+ * VB6 GetSetting Function
  * Returns a key setting value from an application's entry in the Windows registry
  */
-export function GetSetting(appName: string, section: string, key: string, defaultValue: string = ''): string {
+export function GetSetting(
+  appName: string,
+  section: string,
+  key: string,
+  defaultValue: string = ''
+): string {
   return VB6Registry.getSetting(appName, section, key, defaultValue);
 }
 
@@ -453,18 +477,26 @@ export function ImportSettings(appName: string, jsonData: string): void {
 /**
  * Get registry information and stats
  */
-export function GetRegistryInfo(): { [key: string]: any } {
+interface RegistryInfo {
+  storageType: string;
+  totalKeys: number;
+  applications: string[];
+  totalSize: number;
+  totalSizeKB?: number;
+}
+
+export function GetRegistryInfo(): RegistryInfo {
   try {
-    const info: { [key: string]: any } = {
+    const info: RegistryInfo = {
       storageType: typeof localStorage !== 'undefined' ? 'localStorage' : 'memory',
       totalKeys: 0,
       applications: [],
-      totalSize: 0
+      totalSize: 0,
     };
 
     const applications = new Set<string>();
     const VB6_PREFIX = 'VB6_Registry_Software\\VB and VBA Program Settings\\';
-    
+
     if (typeof localStorage !== 'undefined') {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -474,7 +506,7 @@ export function GetRegistryInfo(): { [key: string]: any } {
           if (value) {
             info.totalSize += key.length + value.length;
           }
-          
+
           // Extract application name
           if (key.startsWith(VB6_PREFIX)) {
             const remainder = key.substring(VB6_PREFIX.length);
@@ -486,13 +518,13 @@ export function GetRegistryInfo(): { [key: string]: any } {
         }
       }
     } else {
-      const registry = (globalThis as any).__vb6Registry || {};
+      const registry = getMemoryRegistry();
       Object.keys(registry).forEach(key => {
         if (key.startsWith('VB6_Registry_')) {
           info.totalKeys++;
           const value = registry[key];
           info.totalSize += key.length + String(value).length;
-          
+
           // Extract application name
           if (key.startsWith(VB6_PREFIX)) {
             const remainder = key.substring(VB6_PREFIX.length);
@@ -504,14 +536,14 @@ export function GetRegistryInfo(): { [key: string]: any } {
         }
       });
     }
-    
+
     info.applications = Array.from(applications);
-    info.totalSizeKB = Math.round(info.totalSize / 1024 * 100) / 100;
-    
+    info.totalSizeKB = Math.round((info.totalSize / 1024) * 100) / 100;
+
     return info;
   } catch (error) {
     errorHandler.raiseError(5, 'Invalid procedure call or argument', 'GetRegistryInfo');
-    return {};
+    return { storageType: 'unknown', totalKeys: 0, applications: [], totalSize: 0 };
   }
 }
 
@@ -519,18 +551,18 @@ export function GetRegistryInfo(): { [key: string]: any } {
 export const VB6RegistryFunctions = {
   // Constants
   VB6RegistryConstants,
-  
+
   // Core VB6 functions
   SaveSetting,
   GetSetting,
   DeleteSetting,
   GetAllSettings,
-  
+
   // Extended functions
   GetAllSections,
   SettingExists,
   ClearAllSettings,
   ExportSettings,
   ImportSettings,
-  GetRegistryInfo
+  GetRegistryInfo,
 };

@@ -1,6 +1,6 @@
 /**
  * VB6 Property Get/Let/Set Support Implementation
- * 
+ *
  * Complete support for VB6 property procedures
  */
 
@@ -49,9 +49,10 @@ export class VB6PropertyProcessor {
    * Property Set Value(ByVal vNewValue As Object)
    */
   parsePropertyDeclaration(code: string, line: number): VB6PropertyDeclaration | null {
-    const propertyRegex = /^(Public\s+|Private\s+|Friend\s+)?(Static\s+)?Property\s+(Get|Let|Set)\s+(\w+)\s*\(([^)]*)\)(?:\s+As\s+(.+))?$/i;
+    const propertyRegex =
+      /^(Public\s+|Private\s+|Friend\s+)?(Static\s+)?Property\s+(Get|Let|Set)\s+(\w+)\s*\(([^)]*)\)(?:\s+As\s+(.+))?$/i;
     const match = code.match(propertyRegex);
-    
+
     if (!match) return null;
 
     const scope = match[1] ? match[1].trim().toLowerCase() : 'public';
@@ -72,7 +73,7 @@ export class VB6PropertyProcessor {
       public: scope === 'public',
       static: isStatic,
       module: this.currentModule,
-      line
+      line,
     };
   }
 
@@ -89,7 +90,8 @@ export class VB6PropertyProcessor {
       const trimmed = param.trim();
       if (!trimmed) continue;
 
-      const paramRegex = /^(Optional\s+)?(ByRef\s+|ByVal\s+)?(\w+)(?:\s+As\s+(.+?))?(?:\s*=\s*(.+))?$/i;
+      const paramRegex =
+        /^(Optional\s+)?(ByRef\s+|ByVal\s+)?(\w+)(?:\s+As\s+(.+?))?(?:\s*=\s*(.+))?$/i;
       const match = trimmed.match(paramRegex);
 
       if (match) {
@@ -104,7 +106,7 @@ export class VB6PropertyProcessor {
           type: paramType,
           byRef,
           optional: isOptional,
-          defaultValue: defaultValue ? this.parseDefaultValue(defaultValue) : undefined
+          defaultValue: defaultValue ? this.parseDefaultValue(defaultValue) : undefined,
         });
       }
     }
@@ -117,25 +119,25 @@ export class VB6PropertyProcessor {
    */
   private parseDefaultValue(value: string): any {
     const trimmed = value.trim();
-    
+
     // String literals
     if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
       return trimmed.substring(1, trimmed.length - 1);
     }
-    
+
     // Numeric values
     if (!isNaN(Number(trimmed))) {
       return Number(trimmed);
     }
-    
+
     // Boolean values
     if (trimmed.toLowerCase() === 'true') return true;
     if (trimmed.toLowerCase() === 'false') return false;
-    
+
     // Constants
     if (trimmed.toLowerCase() === 'nothing') return null;
     if (trimmed.toLowerCase() === 'empty') return undefined;
-    
+
     return trimmed; // Return as string for other cases
   }
 
@@ -144,13 +146,13 @@ export class VB6PropertyProcessor {
    */
   registerProperty(propDecl: VB6PropertyDeclaration) {
     const key = propDecl.public ? propDecl.name : `${this.currentModule}.${propDecl.name}`;
-    
+
     let propertyGroup = this.properties.get(key);
     if (!propertyGroup) {
       propertyGroup = {
         name: propDecl.name,
         readOnly: false,
-        writeOnly: false
+        writeOnly: false,
       };
       this.properties.set(key, propertyGroup);
     }
@@ -168,8 +170,10 @@ export class VB6PropertyProcessor {
     }
 
     // Update read/write only flags
-    propertyGroup.readOnly = !!propertyGroup.getter && !propertyGroup.letter && !propertyGroup.setter;
-    propertyGroup.writeOnly = !propertyGroup.getter && (!!propertyGroup.letter || !!propertyGroup.setter);
+    propertyGroup.readOnly =
+      !!propertyGroup.getter && !propertyGroup.letter && !propertyGroup.setter;
+    propertyGroup.writeOnly =
+      !propertyGroup.getter && (!!propertyGroup.letter || !!propertyGroup.setter);
   }
 
   /**
@@ -194,7 +198,7 @@ export class VB6PropertyProcessor {
     if (propertyGroup.getter) {
       const getter = propertyGroup.getter;
       jsCode += `get ${propName}() {\n`;
-      
+
       if (getter.body.length > 0) {
         // Custom getter implementation
         jsCode += `  ${this.generatePropertyBody(getter.body)}\n`;
@@ -202,7 +206,7 @@ export class VB6PropertyProcessor {
         // Default getter
         jsCode += `  return this.${backingField};\n`;
       }
-      
+
       jsCode += `},\n\n`;
     }
 
@@ -211,14 +215,14 @@ export class VB6PropertyProcessor {
     if (setter) {
       const isObjectSetter = setter.type === 'Set';
       jsCode += `set ${propName}(value) {\n`;
-      
+
       // Type checking for Set properties
       if (isObjectSetter) {
         jsCode += `  if (value !== null && typeof value !== 'object') {\n`;
         jsCode += `    throw new Error('Property Set can only be used with object values');\n`;
         jsCode += `  }\n`;
       }
-      
+
       if (setter.body.length > 0) {
         // Custom setter implementation
         jsCode += `  ${this.generatePropertyBody(setter.body, 'value')}\n`;
@@ -226,7 +230,7 @@ export class VB6PropertyProcessor {
         // Default setter
         jsCode += `  this.${backingField} = value;\n`;
       }
-      
+
       jsCode += `},\n\n`;
     }
 
@@ -241,7 +245,7 @@ export class VB6PropertyProcessor {
     // In a real compiler, this would transpile VB6 code to JavaScript
     const jsBody = body.map(line => {
       let jsLine = line;
-      
+
       // Replace VB6 specific constructs
       jsLine = jsLine.replace(/\bMe\b/g, 'this');
       jsLine = jsLine.replace(/\bNothing\b/g, 'null');
@@ -250,15 +254,15 @@ export class VB6PropertyProcessor {
       jsLine = jsLine.replace(/\bAnd\b/g, '&&');
       jsLine = jsLine.replace(/\bOr\b/g, '||');
       jsLine = jsLine.replace(/\bNot\b/g, '!');
-      
+
       // Handle property assignment
       if (paramName) {
         jsLine = jsLine.replace(new RegExp(`\\b${paramName}\\b`, 'g'), 'value');
       }
-      
+
       return `  ${jsLine}`;
     });
-    
+
     return jsBody.join('\n');
   }
 
@@ -269,17 +273,17 @@ export class VB6PropertyProcessor {
     const propName = propertyGroup.name;
     const getter = propertyGroup.getter;
     const setter = propertyGroup.letter || propertyGroup.setter;
-    
+
     let tsType = 'any';
-    
+
     if (getter && getter.returnType) {
       tsType = this.mapVB6TypeToTypeScript(getter.returnType);
     } else if (setter && setter.parameters.length > 0) {
       tsType = this.mapVB6TypeToTypeScript(setter.parameters[0].type);
     }
-    
+
     let declaration = '';
-    
+
     if (propertyGroup.readOnly) {
       declaration = `readonly ${propName}: ${tsType};`;
     } else if (propertyGroup.writeOnly) {
@@ -287,7 +291,7 @@ export class VB6PropertyProcessor {
     } else {
       declaration = `${propName}: ${tsType};`;
     }
-    
+
     return declaration;
   }
 
@@ -330,9 +334,11 @@ export class VB6PropertyProcessor {
     if (getter && setter && getter.returnType && setter.parameters.length > 0) {
       const getterType = getter.returnType.toLowerCase();
       const setterType = setter.parameters[0].type.toLowerCase();
-      
+
       if (getterType !== setterType && getterType !== 'variant' && setterType !== 'variant') {
-        errors.push(`Property ${propertyGroup.name}: Get returns ${getter.returnType} but ${setter.type} expects ${setter.parameters[0].type}`);
+        errors.push(
+          `Property ${propertyGroup.name}: Get returns ${getter.returnType} but ${setter.type} expects ${setter.parameters[0].type}`
+        );
       }
     }
 
@@ -342,7 +348,9 @@ export class VB6PropertyProcessor {
       if (setter.parameters.length > 0) {
         const paramType = setter.parameters[0].type.toLowerCase();
         if (paramType !== 'object' && paramType !== 'variant') {
-          errors.push(`Property ${propertyGroup.name}: Property Set should be used with Object types, not ${setter.parameters[0].type}`);
+          errors.push(
+            `Property ${propertyGroup.name}: Property Set should be used with Object types, not ${setter.parameters[0].type}`
+          );
         }
       }
     }
@@ -353,7 +361,9 @@ export class VB6PropertyProcessor {
       if (letter.parameters.length > 0) {
         const paramType = letter.parameters[0].type.toLowerCase();
         if (paramType === 'object' && !paramType.includes('variant')) {
-          errors.push(`Property ${propertyGroup.name}: Property Let should not be used with Object types, use Property Set instead`);
+          errors.push(
+            `Property ${propertyGroup.name}: Property Let should not be used with Object types, use Property Set instead`
+          );
         }
       }
     }
@@ -366,12 +376,12 @@ export class VB6PropertyProcessor {
    */
   generatePropertyAccessors(className: string): string {
     let jsCode = `// Property accessors for ${className}\n`;
-    
+
     for (const [key, propertyGroup] of this.properties.entries()) {
       if (!key.includes('.') || key.startsWith(this.currentModule)) {
         const propCode = this.generateJavaScript(propertyGroup);
         jsCode += propCode;
-        
+
         // Add validation
         const errors = this.validatePropertyConsistency(propertyGroup);
         if (errors.length > 0) {
@@ -382,7 +392,7 @@ export class VB6PropertyProcessor {
         }
       }
     }
-    
+
     return jsCode;
   }
 
@@ -397,12 +407,10 @@ export class VB6PropertyProcessor {
    * Get all properties in current module
    */
   getModuleProperties(): VB6PropertyGroup[] {
-    return Array.from(this.properties.values())
-      .filter(prop => {
-        const key = Array.from(this.properties.keys())
-          .find(k => this.properties.get(k) === prop);
-        return key && (key.startsWith(this.currentModule) || !key.includes('.'));
-      });
+    return Array.from(this.properties.values()).filter(prop => {
+      const key = Array.from(this.properties.keys()).find(k => this.properties.get(k) === prop);
+      return key && (key.startsWith(this.currentModule) || !key.includes('.'));
+    });
   }
 
   /**
@@ -481,7 +489,7 @@ End Property
 Property Let Item(ByVal Index As Variant, ByVal vNewItem As Variant)
     m_items(Index) = vNewItem
 End Property
-`
+`,
 };
 
 // Global property processor instance

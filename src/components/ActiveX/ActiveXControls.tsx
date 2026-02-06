@@ -25,14 +25,16 @@ export const CommonDialog = forwardRef<HTMLDivElement, ActiveXControlProps>((pro
   const { id, name, visible = true, enabled = true, tag, ...rest } = props;
   const { fireEvent } = useVB6Store();
 
-  const [dialogType, setDialogType] = useState<'open' | 'save' | 'font' | 'color' | 'print' | null>(null);
+  const [dialogType, setDialogType] = useState<'open' | 'save' | 'font' | 'color' | 'print' | null>(
+    null
+  );
   const [selectedFile, setSelectedFile] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('#000000');
   const [selectedFont, setSelectedFont] = useState<any>({
     name: 'Arial',
     size: 12,
     bold: false,
-    italic: false
+    italic: false,
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -40,7 +42,7 @@ export const CommonDialog = forwardRef<HTMLDivElement, ActiveXControlProps>((pro
   // Méthodes CommonDialog
   const showOpen = useCallback(() => {
     if (!enabled) return;
-    
+
     setDialogType('open');
     if (fileInputRef.current) {
       fileInputRef.current.click();
@@ -49,7 +51,7 @@ export const CommonDialog = forwardRef<HTMLDivElement, ActiveXControlProps>((pro
 
   const showSave = useCallback(() => {
     if (!enabled) return;
-    
+
     setDialogType('save');
     if (fileInputRef.current) {
       fileInputRef.current.click();
@@ -58,7 +60,7 @@ export const CommonDialog = forwardRef<HTMLDivElement, ActiveXControlProps>((pro
 
   const showColor = useCallback(() => {
     if (!enabled) return;
-    
+
     setDialogType('color');
     const color = window.prompt('Sélectionnez une couleur (format hex):', selectedColor);
     if (color) {
@@ -69,7 +71,7 @@ export const CommonDialog = forwardRef<HTMLDivElement, ActiveXControlProps>((pro
 
   const showFont = useCallback(() => {
     if (!enabled) return;
-    
+
     setDialogType('font');
     const fontName = window.prompt('Nom de la police:', selectedFont.name);
     if (fontName) {
@@ -81,19 +83,22 @@ export const CommonDialog = forwardRef<HTMLDivElement, ActiveXControlProps>((pro
 
   const showPrinter = useCallback(() => {
     if (!enabled) return;
-    
+
     setDialogType('print');
     window.print();
     fireEvent(name, 'PrintRequested', {});
   }, [enabled, name, fireEvent]);
 
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file.name);
-      fireEvent(name, 'FileSelected', { fileName: file.name, file });
-    }
-  }, [name, fireEvent]);
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        setSelectedFile(file.name);
+        fireEvent(name, 'FileSelected', { fileName: file.name, file });
+      }
+    },
+    [name, fireEvent]
+  );
 
   return (
     <div
@@ -109,7 +114,7 @@ export const CommonDialog = forwardRef<HTMLDivElement, ActiveXControlProps>((pro
         style={{ display: 'none' }}
         onChange={handleFileSelect}
       />
-      
+
       {/* Interface pour les développeurs */}
       <div className="hidden">
         <button onClick={showOpen}>Show Open Dialog</button>
@@ -124,54 +129,46 @@ export const CommonDialog = forwardRef<HTMLDivElement, ActiveXControlProps>((pro
 
 // WebBrowser - Contrôle de navigateur web
 export const WebBrowser = forwardRef<HTMLDivElement, ActiveXControlProps>((props, ref) => {
-  const {
-    id,
-    name,
-    x,
-    y,
-    width,
-    height,
-    visible = true,
-    enabled = true,
-    tag,
-    ...rest
-  } = props;
+  const { id, name, x, y, width, height, visible = true, enabled = true, tag, ...rest } = props;
 
   const [url, setUrl] = useState<string>('about:blank');
   const [canGoBack, setCanGoBack] = useState<boolean>(false);
   const [canGoForward, setCanGoForward] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [documentTitle, setDocumentTitle] = useState<string>('');
-  
+
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { fireEvent } = useVB6Store();
 
   // Méthodes WebBrowser
-  const navigate = useCallback((newUrl: string) => {
-    if (!enabled) return;
-    
-    setIsLoading(true);
-    setUrl(newUrl);
-    fireEvent(name, 'BeforeNavigate', { url: newUrl });
-  }, [enabled, name, fireEvent]);
+  const navigate = useCallback(
+    (newUrl: string) => {
+      if (!enabled) return;
+
+      setIsLoading(true);
+      setUrl(newUrl);
+      fireEvent(name, 'BeforeNavigate', { url: newUrl });
+    },
+    [enabled, name, fireEvent]
+  );
 
   const goBack = useCallback(() => {
     if (!enabled || !canGoBack) return;
-    
+
     window.history.back();
     fireEvent(name, 'NavigateBack', {});
   }, [enabled, canGoBack, name, fireEvent]);
 
   const goForward = useCallback(() => {
     if (!enabled || !canGoForward) return;
-    
+
     window.history.forward();
     fireEvent(name, 'NavigateForward', {});
   }, [enabled, canGoForward, name, fireEvent]);
 
   const refresh = useCallback(() => {
     if (!enabled) return;
-    
+
     if (iframeRef.current && iframeRef.current.src) {
       // Force reload by reassigning src
       const currentSrc = iframeRef.current.src;
@@ -182,7 +179,7 @@ export const WebBrowser = forwardRef<HTMLDivElement, ActiveXControlProps>((props
 
   const stop = useCallback(() => {
     if (!enabled) return;
-    
+
     setIsLoading(false);
     fireEvent(name, 'NavigateStop', {});
   }, [enabled, name, fireEvent]);
@@ -210,13 +207,7 @@ export const WebBrowser = forwardRef<HTMLDivElement, ActiveXControlProps>((props
   };
 
   return (
-    <div
-      ref={ref}
-      style={browserStyle}
-      data-name={name}
-      data-tag={tag}
-      {...rest}
-    >
+    <div ref={ref} style={browserStyle} data-name={name} data-tag={tag} {...rest}>
       {/* Barre d'outils */}
       <div className="flex items-center h-8 bg-gray-100 border-b border-gray-300 px-2 space-x-2">
         <button
@@ -233,29 +224,21 @@ export const WebBrowser = forwardRef<HTMLDivElement, ActiveXControlProps>((props
         >
           ▶
         </button>
-        <button
-          onClick={refresh}
-          className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300"
-        >
+        <button onClick={refresh} className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300">
           🔄
         </button>
-        <button
-          onClick={stop}
-          className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300"
-        >
+        <button onClick={stop} className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300">
           ⏹
         </button>
         <input
           type="text"
           value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && navigate(url)}
+          onChange={e => setUrl(e.target.value)}
+          onKeyPress={e => e.key === 'Enter' && navigate(url)}
           className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded"
           placeholder="Enter URL..."
         />
-        {isLoading && (
-          <div className="text-xs text-blue-600">Chargement...</div>
-        )}
+        {isLoading && <div className="text-xs text-blue-600">Chargement...</div>}
       </div>
 
       {/* Contenu du navigateur */}
@@ -277,18 +260,7 @@ export const WebBrowser = forwardRef<HTMLDivElement, ActiveXControlProps>((props
 
 // RichTextBox - Contrôle de texte enrichi
 export const RichTextBox = forwardRef<HTMLDivElement, ActiveXControlProps>((props, ref) => {
-  const {
-    id,
-    name,
-    x,
-    y,
-    width,
-    height,
-    visible = true,
-    enabled = true,
-    tag,
-    ...rest
-  } = props;
+  const { id, name, x, y, width, height, visible = true, enabled = true, tag, ...rest } = props;
 
   const [text, setText] = useState<string>('');
   const [rtfText, setRtfText] = useState<string>('');
@@ -302,108 +274,134 @@ export const RichTextBox = forwardRef<HTMLDivElement, ActiveXControlProps>((prop
   const [selFontSize, setSelFontSize] = useState<number>(12);
   const [maxLength, setMaxLength] = useState<number>(0);
   const [multiLine, setMultiLine] = useState<boolean>(true);
-  const [scrollBars, setScrollBars] = useState<'none' | 'horizontal' | 'vertical' | 'both'>('vertical');
+  const [scrollBars, setScrollBars] = useState<'none' | 'horizontal' | 'vertical' | 'both'>(
+    'vertical'
+  );
   const [wordWrap, setWordWrap] = useState<boolean>(true);
   const [readOnly, setReadOnly] = useState<boolean>(false);
   const [hideSelection, setHideSelection] = useState<boolean>(false);
-  
+
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const { fireEvent } = useVB6Store();
 
   // Méthodes RichTextBox
-  const loadFile = useCallback((fileName: string) => {
-    if (!enabled) return;
-    
-    // Simulation du chargement de fichier
-    const fileContent = `Contenu du fichier: ${fileName}`;
-    setText(fileContent);
-    fireEvent(name, 'FileLoaded', { fileName, content: fileContent });
-  }, [enabled, name, fireEvent]);
+  const loadFile = useCallback(
+    (fileName: string) => {
+      if (!enabled) return;
 
-  const saveFile = useCallback((fileName: string) => {
-    if (!enabled) return;
-    
-    fireEvent(name, 'FileSaved', { fileName, content: text });
-  }, [enabled, text, name, fireEvent]);
+      // Simulation du chargement de fichier
+      const fileContent = `Contenu du fichier: ${fileName}`;
+      setText(fileContent);
+      fireEvent(name, 'FileLoaded', { fileName, content: fileContent });
+    },
+    [enabled, name, fireEvent]
+  );
 
-  const find = useCallback((searchText: string, start?: number, options?: any) => {
-    if (!enabled) return -1;
-    
-    const startPos = start || selStart;
-    const index = text.indexOf(searchText, startPos);
-    
-    if (index >= 0) {
-      setSelStart(index);
-      setSelLength(searchText.length);
-      fireEvent(name, 'TextFound', { text: searchText, position: index });
-      return index;
-    }
-    
-    fireEvent(name, 'TextNotFound', { text: searchText });
-    return -1;
-  }, [enabled, text, selStart, name, fireEvent]);
+  const saveFile = useCallback(
+    (fileName: string) => {
+      if (!enabled) return;
 
-  const selText = useCallback((newText?: string) => {
-    if (!enabled) return '';
-    
-    if (newText !== undefined) {
-      const beforeSel = text.substring(0, selStart);
-      const afterSel = text.substring(selStart + selLength);
-      const newFullText = beforeSel + newText + afterSel;
-      setText(newFullText);
-      setSelLength(newText.length);
-      fireEvent(name, 'TextChanged', { text: newFullText });
-    }
-    
-    return text.substring(selStart, selStart + selLength);
-  }, [enabled, text, selStart, selLength, name, fireEvent]);
+      fireEvent(name, 'FileSaved', { fileName, content: text });
+    },
+    [enabled, text, name, fireEvent]
+  );
 
-  const span = useCallback((start: number, length: number) => {
-    if (!enabled) return;
-    
-    setSelStart(start);
-    setSelLength(length);
-    fireEvent(name, 'SelectionChanged', { start, length });
-  }, [enabled, name, fireEvent]);
+  const find = useCallback(
+    (searchText: string, start?: number, options?: any) => {
+      if (!enabled) return -1;
 
-  const getLineFromChar = useCallback((charIndex: number) => {
-    if (!enabled) return 0;
-    
-    const beforeChar = text.substring(0, charIndex);
-    return beforeChar.split('\n').length - 1;
-  }, [enabled, text]);
+      const startPos = start || selStart;
+      const index = text.indexOf(searchText, startPos);
 
-  const getCharFromLine = useCallback((lineNumber: number) => {
-    if (!enabled) return 0;
-    
-    const lines = text.split('\n');
-    let charIndex = 0;
-    
-    for (let i = 0; i < lineNumber && i < lines.length; i++) {
-      charIndex += lines[i].length + 1; // +1 pour \n
-    }
-    
-    return charIndex;
-  }, [enabled, text]);
+      if (index >= 0) {
+        setSelStart(index);
+        setSelLength(searchText.length);
+        fireEvent(name, 'TextFound', { text: searchText, position: index });
+        return index;
+      }
 
-  const handleTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (!enabled || readOnly) return;
-    
-    const newText = e.target.value;
-    if (maxLength > 0 && newText.length > maxLength) {
-      return;
-    }
-    
-    setText(newText);
-    fireEvent(name, 'TextChanged', { text: newText });
-  }, [enabled, readOnly, maxLength, name, fireEvent]);
+      fireEvent(name, 'TextNotFound', { text: searchText });
+      return -1;
+    },
+    [enabled, text, selStart, name, fireEvent]
+  );
+
+  const selText = useCallback(
+    (newText?: string) => {
+      if (!enabled) return '';
+
+      if (newText !== undefined) {
+        const beforeSel = text.substring(0, selStart);
+        const afterSel = text.substring(selStart + selLength);
+        const newFullText = beforeSel + newText + afterSel;
+        setText(newFullText);
+        setSelLength(newText.length);
+        fireEvent(name, 'TextChanged', { text: newFullText });
+      }
+
+      return text.substring(selStart, selStart + selLength);
+    },
+    [enabled, text, selStart, selLength, name, fireEvent]
+  );
+
+  const span = useCallback(
+    (start: number, length: number) => {
+      if (!enabled) return;
+
+      setSelStart(start);
+      setSelLength(length);
+      fireEvent(name, 'SelectionChanged', { start, length });
+    },
+    [enabled, name, fireEvent]
+  );
+
+  const getLineFromChar = useCallback(
+    (charIndex: number) => {
+      if (!enabled) return 0;
+
+      const beforeChar = text.substring(0, charIndex);
+      return beforeChar.split('\n').length - 1;
+    },
+    [enabled, text]
+  );
+
+  const getCharFromLine = useCallback(
+    (lineNumber: number) => {
+      if (!enabled) return 0;
+
+      const lines = text.split('\n');
+      let charIndex = 0;
+
+      for (let i = 0; i < lineNumber && i < lines.length; i++) {
+        charIndex += lines[i].length + 1; // +1 pour \n
+      }
+
+      return charIndex;
+    },
+    [enabled, text]
+  );
+
+  const handleTextChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      if (!enabled || readOnly) return;
+
+      const newText = e.target.value;
+      if (maxLength > 0 && newText.length > maxLength) {
+        return;
+      }
+
+      setText(newText);
+      fireEvent(name, 'TextChanged', { text: newText });
+    },
+    [enabled, readOnly, maxLength, name, fireEvent]
+  );
 
   const handleSelectionChange = useCallback(() => {
     if (!enabled || !textAreaRef.current) return;
-    
+
     const start = textAreaRef.current.selectionStart;
     const end = textAreaRef.current.selectionEnd;
-    
+
     setSelStart(start);
     setSelLength(end - start);
     fireEvent(name, 'SelectionChanged', { start, length: end - start });
@@ -422,13 +420,7 @@ export const RichTextBox = forwardRef<HTMLDivElement, ActiveXControlProps>((prop
   };
 
   return (
-    <div
-      ref={ref}
-      style={richTextStyle}
-      data-name={name}
-      data-tag={tag}
-      {...rest}
-    >
+    <div ref={ref} style={richTextStyle} data-name={name} data-tag={tag} {...rest}>
       {/* Barre d'outils de formatage */}
       <div className="flex items-center h-8 bg-gray-100 border-b border-gray-300 px-2 space-x-2">
         <button
@@ -452,7 +444,7 @@ export const RichTextBox = forwardRef<HTMLDivElement, ActiveXControlProps>((prop
         <div className="w-px h-6 bg-gray-300" />
         <select
           value={selFontName}
-          onChange={(e) => setSelFontName(e.target.value)}
+          onChange={e => setSelFontName(e.target.value)}
           className="px-2 py-1 text-xs border border-gray-300 rounded"
         >
           <option value="Arial">Arial</option>
@@ -462,7 +454,7 @@ export const RichTextBox = forwardRef<HTMLDivElement, ActiveXControlProps>((prop
         </select>
         <select
           value={selFontSize}
-          onChange={(e) => setSelFontSize(parseInt(e.target.value))}
+          onChange={e => setSelFontSize(parseInt(e.target.value))}
           className="px-2 py-1 text-xs border border-gray-300 rounded"
         >
           <option value="8">8</option>
@@ -476,7 +468,7 @@ export const RichTextBox = forwardRef<HTMLDivElement, ActiveXControlProps>((prop
         <input
           type="color"
           value={selColor}
-          onChange={(e) => setSelColor(e.target.value)}
+          onChange={e => setSelColor(e.target.value)}
           className="w-8 h-6 border border-gray-300 rounded cursor-pointer"
         />
       </div>
@@ -502,9 +494,14 @@ export const RichTextBox = forwardRef<HTMLDivElement, ActiveXControlProps>((prop
           color: selColor,
           resize: 'none',
           whiteSpace: wordWrap ? 'pre-wrap' : 'pre',
-          overflow: scrollBars === 'both' ? 'auto' : 
-                   scrollBars === 'horizontal' ? 'auto hidden' :
-                   scrollBars === 'vertical' ? 'hidden auto' : 'hidden',
+          overflow:
+            scrollBars === 'both'
+              ? 'auto'
+              : scrollBars === 'horizontal'
+                ? 'auto hidden'
+                : scrollBars === 'vertical'
+                  ? 'hidden auto'
+                  : 'hidden',
         }}
         placeholder="Tapez votre texte ici..."
       />
@@ -514,18 +511,7 @@ export const RichTextBox = forwardRef<HTMLDivElement, ActiveXControlProps>((prop
 
 // MediaPlayer - Contrôle de lecture multimédia
 export const MediaPlayer = forwardRef<HTMLDivElement, ActiveXControlProps>((props, ref) => {
-  const {
-    id,
-    name,
-    x,
-    y,
-    width,
-    height,
-    visible = true,
-    enabled = true,
-    tag,
-    ...rest
-  } = props;
+  const { id, name, x, y, width, height, visible = true, enabled = true, tag, ...rest } = props;
 
   const [fileName, setFileName] = useState<string>('');
   const [currentPosition, setCurrentPosition] = useState<number>(0);
@@ -541,30 +527,33 @@ export const MediaPlayer = forwardRef<HTMLDivElement, ActiveXControlProps>((prop
   const [autoStart, setAutoStart] = useState<boolean>(false);
   const [autoRewind, setAutoRewind] = useState<boolean>(false);
   const [loop, setLoop] = useState<boolean>(false);
-  
+
   const audioRef = useRef<HTMLAudioElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { fireEvent } = useVB6Store();
 
   // Méthodes MediaPlayer
-  const open = useCallback((newFileName: string) => {
-    if (!enabled) return;
-    
-    setFileName(newFileName);
-    if (audioRef.current) {
-      audioRef.current.src = newFileName;
-      audioRef.current.load();
-    }
-    if (videoRef.current) {
-      videoRef.current.src = newFileName;
-      videoRef.current.load();
-    }
-    fireEvent(name, 'OpenStateChange', { fileName: newFileName });
-  }, [enabled, name, fireEvent]);
+  const open = useCallback(
+    (newFileName: string) => {
+      if (!enabled) return;
+
+      setFileName(newFileName);
+      if (audioRef.current) {
+        audioRef.current.src = newFileName;
+        audioRef.current.load();
+      }
+      if (videoRef.current) {
+        videoRef.current.src = newFileName;
+        videoRef.current.load();
+      }
+      fireEvent(name, 'OpenStateChange', { fileName: newFileName });
+    },
+    [enabled, name, fireEvent]
+  );
 
   const play = useCallback(() => {
     if (!enabled || !fileName) return;
-    
+
     setPlayState('playing');
     if (audioRef.current) {
       audioRef.current.play();
@@ -577,7 +566,7 @@ export const MediaPlayer = forwardRef<HTMLDivElement, ActiveXControlProps>((prop
 
   const pause = useCallback(() => {
     if (!enabled) return;
-    
+
     setPlayState('paused');
     if (audioRef.current) {
       audioRef.current.pause();
@@ -590,7 +579,7 @@ export const MediaPlayer = forwardRef<HTMLDivElement, ActiveXControlProps>((prop
 
   const stop = useCallback(() => {
     if (!enabled) return;
-    
+
     setPlayState('stopped');
     setCurrentPosition(0);
     if (audioRef.current) {
@@ -606,13 +595,13 @@ export const MediaPlayer = forwardRef<HTMLDivElement, ActiveXControlProps>((prop
 
   const next = useCallback(() => {
     if (!enabled) return;
-    
+
     fireEvent(name, 'NextTrack', {});
   }, [enabled, name, fireEvent]);
 
   const previous = useCallback(() => {
     if (!enabled) return;
-    
+
     fireEvent(name, 'PreviousTrack', {});
   }, [enabled, name, fireEvent]);
 
@@ -660,16 +649,13 @@ export const MediaPlayer = forwardRef<HTMLDivElement, ActiveXControlProps>((prop
   };
 
   return (
-    <div
-      ref={ref}
-      style={playerStyle}
-      data-name={name}
-      data-tag={tag}
-      {...rest}
-    >
+    <div ref={ref} style={playerStyle} data-name={name} data-tag={tag} {...rest}>
       {/* Zone d'affichage */}
       {showDisplay && (
-        <div className="relative bg-black" style={{ height: showControls ? 'calc(100% - 80px)' : '100%' }}>
+        <div
+          className="relative bg-black"
+          style={{ height: showControls ? 'calc(100% - 80px)' : '100%' }}
+        >
           {isVideo && (
             <video
               ref={videoRef}
@@ -702,17 +688,16 @@ export const MediaPlayer = forwardRef<HTMLDivElement, ActiveXControlProps>((prop
       {showStatusBar && (
         <div className="h-6 bg-gray-200 border-t border-gray-300 flex items-center justify-between px-2 text-xs">
           <div>{fileName || 'Prêt'}</div>
-          <div>{formatTime(currentPosition)} / {formatTime(duration)}</div>
+          <div>
+            {formatTime(currentPosition)} / {formatTime(duration)}
+          </div>
         </div>
       )}
 
       {/* Contrôles */}
       {showControls && (
         <div className="h-14 bg-gray-100 border-t border-gray-300 flex items-center justify-center space-x-2 px-4">
-          <button
-            onClick={previous}
-            className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded"
-          >
+          <button onClick={previous} className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded">
             ⏮
           </button>
           <button
@@ -721,26 +706,20 @@ export const MediaPlayer = forwardRef<HTMLDivElement, ActiveXControlProps>((prop
           >
             {playState === 'playing' ? '⏸' : '▶'}
           </button>
-          <button
-            onClick={stop}
-            className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded"
-          >
+          <button onClick={stop} className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded">
             ⏹
           </button>
-          <button
-            onClick={next}
-            className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded"
-          >
+          <button onClick={next} className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded">
             ⏭
           </button>
-          
+
           <div className="flex-1 mx-4">
             <input
               type="range"
               min="0"
               max={duration}
               value={currentPosition}
-              onChange={(e) => {
+              onChange={e => {
                 const newPosition = parseFloat(e.target.value);
                 setCurrentPosition(newPosition);
                 if (audioRef.current) audioRef.current.currentTime = newPosition;
@@ -749,7 +728,7 @@ export const MediaPlayer = forwardRef<HTMLDivElement, ActiveXControlProps>((prop
               className="w-full"
             />
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setMute(!mute)}
@@ -762,7 +741,7 @@ export const MediaPlayer = forwardRef<HTMLDivElement, ActiveXControlProps>((prop
               min="0"
               max="100"
               value={volume}
-              onChange={(e) => {
+              onChange={e => {
                 const newVolume = parseInt(e.target.value);
                 setVolume(newVolume);
                 if (audioRef.current) audioRef.current.volume = newVolume / 100;
@@ -779,18 +758,7 @@ export const MediaPlayer = forwardRef<HTMLDivElement, ActiveXControlProps>((prop
 
 // Calendar - Contrôle de calendrier
 export const Calendar = forwardRef<HTMLDivElement, ActiveXControlProps>((props, ref) => {
-  const {
-    id,
-    name,
-    x,
-    y,
-    width,
-    height,
-    visible = true,
-    enabled = true,
-    tag,
-    ...rest
-  } = props;
+  const { id, name, x, y, width, height, visible = true, enabled = true, tag, ...rest } = props;
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
@@ -804,12 +772,22 @@ export const Calendar = forwardRef<HTMLDivElement, ActiveXControlProps>((props, 
   const [titleBackColor, setTitleBackColor] = useState<string>('#C0C0C0');
   const [titleForeColor, setTitleForeColor] = useState<string>('#000000');
   const [trailingForeColor, setTrailingForeColor] = useState<string>('#808080');
-  
+
   const { fireEvent } = useVB6Store();
 
   const months = [
-    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    'Janvier',
+    'Février',
+    'Mars',
+    'Avril',
+    'Mai',
+    'Juin',
+    'Juillet',
+    'Août',
+    'Septembre',
+    'Octobre',
+    'Novembre',
+    'Décembre',
   ];
 
   const daysOfWeek = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
@@ -822,50 +800,56 @@ export const Calendar = forwardRef<HTMLDivElement, ActiveXControlProps>((props, 
     return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
   }, []);
 
-  const handleDateClick = useCallback((day: number) => {
-    if (!enabled) return;
+  const handleDateClick = useCallback(
+    (day: number) => {
+      if (!enabled) return;
 
-    const newDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-    setSelectedDate(newDate);
-    
-    if (maxSelectionCount === 1) {
-      setSelectedDates([newDate]);
-    } else {
-      setSelectedDates(prev => {
-        const existing = prev.find(d => d.getTime() === newDate.getTime());
-        if (existing) {
-          return prev.filter(d => d.getTime() !== newDate.getTime());
-        } else if (prev.length < maxSelectionCount) {
-          return [...prev, newDate];
-        }
-        return prev;
-      });
-    }
-    
-    fireEvent(name, 'DateClick', { date: newDate });
-  }, [enabled, currentMonth, maxSelectionCount, name, fireEvent]);
+      const newDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+      setSelectedDate(newDate);
 
-  const handleMonthChange = useCallback((direction: number) => {
-    if (!enabled) return;
+      if (maxSelectionCount === 1) {
+        setSelectedDates([newDate]);
+      } else {
+        setSelectedDates(prev => {
+          const existing = prev.find(d => d.getTime() === newDate.getTime());
+          if (existing) {
+            return prev.filter(d => d.getTime() !== newDate.getTime());
+          } else if (prev.length < maxSelectionCount) {
+            return [...prev, newDate];
+          }
+          return prev;
+        });
+      }
 
-    const newMonth = new Date(currentMonth);
-    newMonth.setMonth(newMonth.getMonth() + direction);
-    setCurrentMonth(newMonth);
-    fireEvent(name, 'MonthChange', { month: newMonth });
-  }, [enabled, currentMonth, name, fireEvent]);
+      fireEvent(name, 'DateClick', { date: newDate });
+    },
+    [enabled, currentMonth, maxSelectionCount, name, fireEvent]
+  );
+
+  const handleMonthChange = useCallback(
+    (direction: number) => {
+      if (!enabled) return;
+
+      const newMonth = new Date(currentMonth);
+      newMonth.setMonth(newMonth.getMonth() + direction);
+      setCurrentMonth(newMonth);
+      fireEvent(name, 'MonthChange', { month: newMonth });
+    },
+    [enabled, currentMonth, name, fireEvent]
+  );
 
   const renderCalendar = useCallback(() => {
     const daysInMonth = getDaysInMonth(currentMonth);
     const firstDay = getFirstDayOfMonth(currentMonth);
     const today = new Date();
-    
+
     const days = [];
-    
+
     // Jours du mois précédent
     const prevMonth = new Date(currentMonth);
     prevMonth.setMonth(prevMonth.getMonth() - 1);
     const daysInPrevMonth = getDaysInMonth(prevMonth);
-    
+
     for (let i = firstDay - 1; i >= 0; i--) {
       days.push(
         <div
@@ -877,13 +861,13 @@ export const Calendar = forwardRef<HTMLDivElement, ActiveXControlProps>((props, 
         </div>
       );
     }
-    
+
     // Jours du mois actuel
     for (let day = 1; day <= daysInMonth; day++) {
       const dayDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
       const isToday = showToday && dayDate.toDateString() === today.toDateString();
       const isSelected = selectedDates.some(d => d.toDateString() === dayDate.toDateString());
-      
+
       days.push(
         <div
           key={day}
@@ -900,7 +884,7 @@ export const Calendar = forwardRef<HTMLDivElement, ActiveXControlProps>((props, 
         </div>
       );
     }
-    
+
     // Jours du mois suivant
     const remainingCells = 42 - days.length;
     for (let day = 1; day <= remainingCells; day++) {
@@ -914,9 +898,18 @@ export const Calendar = forwardRef<HTMLDivElement, ActiveXControlProps>((props, 
         </div>
       );
     }
-    
+
     return days;
-  }, [currentMonth, selectedDates, showToday, gridForeColor, trailingForeColor, getDaysInMonth, getFirstDayOfMonth, handleDateClick]);
+  }, [
+    currentMonth,
+    selectedDates,
+    showToday,
+    gridForeColor,
+    trailingForeColor,
+    getDaysInMonth,
+    getFirstDayOfMonth,
+    handleDateClick,
+  ]);
 
   const calendarStyle: React.CSSProperties = {
     position: 'absolute',
@@ -933,13 +926,7 @@ export const Calendar = forwardRef<HTMLDivElement, ActiveXControlProps>((props, 
   };
 
   return (
-    <div
-      ref={ref}
-      style={calendarStyle}
-      data-name={name}
-      data-tag={tag}
-      {...rest}
-    >
+    <div ref={ref} style={calendarStyle} data-name={name} data-tag={tag} {...rest}>
       {/* En-tête */}
       <div
         className="flex items-center justify-between px-2 py-1 border-b border-gray-300"
@@ -967,10 +954,7 @@ export const Calendar = forwardRef<HTMLDivElement, ActiveXControlProps>((props, 
       {/* Jours de la semaine */}
       <div className="grid grid-cols-7 border-b border-gray-300 bg-gray-100">
         {daysOfWeek.map(day => (
-          <div
-            key={day}
-            className="text-center py-1 text-xs font-bold border-r border-gray-300"
-          >
+          <div key={day} className="text-center py-1 text-xs font-bold border-r border-gray-300">
             {day}
           </div>
         ))}

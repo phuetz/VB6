@@ -33,8 +33,8 @@ export interface Color {
 
 export enum DrawMode {
   vbCopyPen = 13, // Default - normal drawing
-  vbInvert = 6,   // Invert destination
-  vbXorPen = 7,   // XOR with destination
+  vbInvert = 6, // Invert destination
+  vbXorPen = 7, // XOR with destination
   vbNotXorPen = 8,
   vbMaskPen = 9,
   vbNotMaskPen = 10,
@@ -44,7 +44,7 @@ export enum DrawMode {
   vbMaskPenNot = 5,
   vbNop = 11,
   vbBlackness = 1,
-  vbWhiteness = 2
+  vbWhiteness = 2,
 }
 
 export enum FillStyle {
@@ -55,7 +55,7 @@ export enum FillStyle {
   vbUpwardDiagonal = 4,
   vbDownwardDiagonal = 5,
   vbCross = 6,
-  vbDiagonalCross = 7
+  vbDiagonalCross = 7,
 }
 
 export enum DrawStyle {
@@ -65,7 +65,7 @@ export enum DrawStyle {
   vbDashDot = 3,
   vbDashDotDot = 4,
   vbTransparent = 5,
-  vbInsideSolid = 6
+  vbInsideSolid = 6,
 }
 
 export enum ScaleMode {
@@ -76,7 +76,7 @@ export enum ScaleMode {
   vbCharacters = 4,
   vbInches = 5,
   vbMillimeters = 6,
-  vbCentimeters = 7
+  vbCentimeters = 7,
 }
 
 // ============================================================================
@@ -91,10 +91,10 @@ export class VB6GraphicsContext {
   private _drawMode: DrawMode = DrawMode.vbCopyPen;
   private _drawStyle: DrawStyle = DrawStyle.vbSolid;
   private _drawWidth: number = 1;
-  private _fillColor: number = 0xFFFFFF;
+  private _fillColor: number = 0xffffff;
   private _fillStyle: FillStyle = FillStyle.vbFSSolid;
   private _foreColor: number = 0x000000;
-  private _backColor: number = 0xFFFFFF;
+  private _backColor: number = 0xffffff;
   private _fontName: string = 'MS Sans Serif';
   private _fontSize: number = 8;
   private _fontBold: boolean = false;
@@ -255,9 +255,9 @@ export class VB6GraphicsContext {
 
   private colorToCSS(color: number): string {
     // VB6 color format is BGR (blue in high byte, red in low byte)
-    const r = color & 0xFF;
-    const g = (color >> 8) & 0xFF;
-    const b = (color >> 16) & 0xFF;
+    const r = color & 0xff;
+    const g = (color >> 8) & 0xff;
+    const b = (color >> 16) & 0xff;
     return `rgb(${r},${g},${b})`;
   }
 
@@ -424,14 +424,7 @@ export class VB6GraphicsContext {
   /**
    * Draw a line (Line method)
    */
-  Line(
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-    color?: number,
-    boxMode?: 'B' | 'BF'
-  ): void {
+  Line(x1: number, y1: number, x2: number, y2: number, color?: number, boxMode?: 'B' | 'BF'): void {
     const c = color !== undefined ? color : this._foreColor;
     this.ctx.strokeStyle = this.colorToCSS(c);
     this.ctx.fillStyle = this.colorToCSS(c);
@@ -495,10 +488,7 @@ export class VB6GraphicsContext {
     this.ctx.arc(0, 0, radius, -start, -end, true);
 
     // Fill if not transparent
-    if (
-      this._fillStyle !== FillStyle.vbFSTransparent &&
-      this._fillStyle !== FillStyle.vbFSSolid
-    ) {
+    if (this._fillStyle !== FillStyle.vbFSTransparent && this._fillStyle !== FillStyle.vbFSSolid) {
       const pattern = this.applyFillPattern();
       if (pattern) {
         this.ctx.fillStyle = pattern;
@@ -531,10 +521,7 @@ export class VB6GraphicsContext {
       const metrics = this.ctx.measureText(text);
       this.ctx.beginPath();
       this.ctx.moveTo(this._currentX, this._currentY + this._fontSize + 2);
-      this.ctx.lineTo(
-        this._currentX + metrics.width,
-        this._currentY + this._fontSize + 2
-      );
+      this.ctx.lineTo(this._currentX + metrics.width, this._currentY + this._fontSize + 2);
       this.ctx.strokeStyle = this.colorToCSS(this._foreColor);
       this.ctx.lineWidth = 1;
       this.ctx.stroke();
@@ -566,19 +553,14 @@ export class VB6GraphicsContext {
    */
   Paint(x: number, y: number, fillColor: number, borderColor?: number): void {
     // Implement flood fill algorithm
-    const imageData = this.ctx.getImageData(
-      0,
-      0,
-      this.canvas.width,
-      this.canvas.height
-    );
+    const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
     const data = imageData.data;
 
     const targetColor = this.getPixelColor(data, x, y);
     const fill = {
       r: fillColor & 0xff,
       g: (fillColor >> 8) & 0xff,
-      b: (fillColor >> 16) & 0xff
+      b: (fillColor >> 16) & 0xff,
     };
 
     if (this.colorsMatch(targetColor, fill)) return;
@@ -646,12 +628,7 @@ export class VB6GraphicsContext {
   /**
    * Scale method to set custom coordinate system
    */
-  Scale(
-    x1?: number,
-    y1?: number,
-    x2?: number,
-    y2?: number
-  ): void {
+  Scale(x1?: number, y1?: number, x2?: number, y2?: number): void {
     if (x1 === undefined) {
       // Reset to default
       this._scaleLeft = 0;
@@ -691,13 +668,13 @@ export class VB6GraphicsContext {
       case ScaleMode.vbTwips:
         return value / 15;
       case ScaleMode.vbPoints:
-        return value * 96 / 72;
+        return (value * 96) / 72;
       case ScaleMode.vbInches:
         return value * 96;
       case ScaleMode.vbMillimeters:
-        return value * 96 / 25.4;
+        return (value * 96) / 25.4;
       case ScaleMode.vbCentimeters:
-        return value * 96 / 2.54;
+        return (value * 96) / 2.54;
       case ScaleMode.vbCharacters:
         return value * 8;
       case ScaleMode.vbPixels:
@@ -715,13 +692,13 @@ export class VB6GraphicsContext {
       case ScaleMode.vbTwips:
         return pixels * 15;
       case ScaleMode.vbPoints:
-        return pixels * 72 / 96;
+        return (pixels * 72) / 96;
       case ScaleMode.vbInches:
         return pixels / 96;
       case ScaleMode.vbMillimeters:
-        return pixels * 25.4 / 96;
+        return (pixels * 25.4) / 96;
       case ScaleMode.vbCentimeters:
-        return pixels * 2.54 / 96;
+        return (pixels * 2.54) / 96;
       case ScaleMode.vbCharacters:
         return pixels / 8;
       case ScaleMode.vbPixels:
@@ -782,9 +759,7 @@ export class VB6GraphicsContext {
     sourceY: number,
     rop?: number
   ): void {
-    const imageData = sourceCanvas
-      .getContext('2d')!
-      .getImageData(sourceX, sourceY, width, height);
+    const imageData = sourceCanvas.getContext('2d')!.getImageData(sourceX, sourceY, width, height);
     this.ctx.putImageData(imageData, destX, destY);
   }
 
@@ -943,12 +918,7 @@ export class VB6GraphicsContext {
     this.ctx.lineTo(x + width - radiusX, y);
     this.ctx.quadraticCurveTo(x + width, y, x + width, y + radiusY);
     this.ctx.lineTo(x + width, y + height - radiusY);
-    this.ctx.quadraticCurveTo(
-      x + width,
-      y + height,
-      x + width - radiusX,
-      y + height
-    );
+    this.ctx.quadraticCurveTo(x + width, y + height, x + width - radiusX, y + height);
     this.ctx.lineTo(x + radiusX, y + height);
     this.ctx.quadraticCurveTo(x, y + height, x, y + height - radiusY);
     this.ctx.lineTo(x, y + radiusY);
@@ -971,9 +941,7 @@ export class VB6GraphicsContext {
 /**
  * Create a VB6 graphics context from a canvas element
  */
-export function CreateGraphicsContext(
-  canvas: HTMLCanvasElement
-): VB6GraphicsContext {
+export function CreateGraphicsContext(canvas: HTMLCanvasElement): VB6GraphicsContext {
   return new VB6GraphicsContext(canvas);
 }
 
@@ -1007,7 +975,7 @@ export const VB6AdvancedGraphics = {
   DrawMode,
   FillStyle,
   DrawStyle,
-  ScaleMode
+  ScaleMode,
 };
 
 export default VB6AdvancedGraphics;

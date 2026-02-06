@@ -21,7 +21,7 @@ export enum VB6DataType {
   vbDecimal = 14,
   vbByte = 17,
   vbUserDefinedType = 36,
-  vbArray = 8192
+  vbArray = 8192,
 }
 
 export interface VB6Variable {

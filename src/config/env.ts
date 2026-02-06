@@ -23,10 +23,7 @@ export const logLevel: string = (import.meta.env.VITE_LOG_LEVEL as string) || 'i
 
 // Basic runtime guards (no-throw; consumers can enforce stricter checks)
 export function validateClientEnv(): { ok: boolean; missing: string[] } {
-  const required = [
-    'VITE_API_URL',
-  ];
-  const missing: string[] = required.filter((key) => !import.meta.env[key as keyof ImportMetaEnv]);
+  const required = ['VITE_API_URL'];
+  const missing: string[] = required.filter(key => !import.meta.env[key as keyof ImportMetaEnv]);
   return { ok: missing.length === 0, missing };
 }
-

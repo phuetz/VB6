@@ -1,6 +1,6 @@
 /**
  * VB6 Extended Conversion Functions
- * 
+ *
  * Comprehensive conversion functions for VB6 runtime
  */
 
@@ -13,33 +13,33 @@ export class VB6ConversionFunctions {
     if (expression === null || expression === undefined) {
       return false;
     }
-    
+
     // VB6 numeric to boolean: 0 = False, anything else = True
     if (typeof expression === 'number') {
       return expression !== 0;
     }
-    
+
     if (typeof expression === 'string') {
       const str = expression.trim().toLowerCase();
-      
+
       // VB6 string literals
       if (str === 'true' || str === '#true#') return true;
       if (str === 'false' || str === '#false#') return false;
-      
+
       // Try numeric conversion
       const num = Number(expression);
       if (!isNaN(num)) {
         return num !== 0;
       }
-      
+
       // Non-empty string = True in VB6
       return expression.length > 0;
     }
-    
+
     if (typeof expression === 'boolean') {
       return expression;
     }
-    
+
     // Objects and arrays are True if not null
     return true;
   }
@@ -50,11 +50,11 @@ export class VB6ConversionFunctions {
    */
   static CByte(expression: any): number {
     const num = this.toNumber(expression);
-    
+
     if (num < 0 || num > 255) {
       throw new Error('Overflow: Value must be between 0 and 255');
     }
-    
+
     return Math.floor(num);
   }
 
@@ -64,14 +64,14 @@ export class VB6ConversionFunctions {
    */
   static CInt(expression: any): number {
     const num = this.toNumber(expression);
-    
+
     // VB6 CInt uses banker's rounding
     const rounded = this.bankersRound(num);
-    
+
     if (rounded < -32768 || rounded > 32767) {
       throw new Error('Overflow: Value must be between -32768 and 32767');
     }
-    
+
     return rounded;
   }
 
@@ -81,14 +81,14 @@ export class VB6ConversionFunctions {
    */
   static CLng(expression: any): number {
     const num = this.toNumber(expression);
-    
+
     // VB6 CLng uses banker's rounding
     const rounded = this.bankersRound(num);
-    
+
     if (rounded < -2147483648 || rounded > 2147483647) {
       throw new Error('Overflow: Value must be between -2147483648 and 2147483647');
     }
-    
+
     return rounded;
   }
 
@@ -98,17 +98,17 @@ export class VB6ConversionFunctions {
    */
   static CSng(expression: any): number {
     const num = this.toNumber(expression);
-    
+
     // JavaScript's number is already double precision
     // Simulate single precision limits
     if (Math.abs(num) > 3.402823e38) {
       throw new Error('Overflow: Value exceeds Single precision range');
     }
-    
+
     if (Math.abs(num) < 1.401298e-45 && num !== 0) {
       return 0; // Underflow to zero
     }
-    
+
     // Reduce precision to simulate Single
     return Math.fround(num);
   }
@@ -127,7 +127,7 @@ export class VB6ConversionFunctions {
    */
   static CCur(expression: any): number {
     const num = this.toNumber(expression);
-    
+
     // Currency in VB6 has a specific range
     // Using safe integer limits to avoid precision loss
     const minCurrency = -Number.MAX_SAFE_INTEGER;
@@ -135,7 +135,7 @@ export class VB6ConversionFunctions {
     if (num < minCurrency || num > maxCurrency) {
       throw new Error('Overflow: Value exceeds Currency range');
     }
-    
+
     // Currency has 4 decimal places
     return Math.round(num * 10000) / 10000;
   }
@@ -148,28 +148,28 @@ export class VB6ConversionFunctions {
     if (expression instanceof Date) {
       return new Date(expression);
     }
-    
+
     if (typeof expression === 'number') {
       // VB6 date serial number (days since 1899-12-30)
       const baseDate = new Date(1899, 11, 30);
       return new Date(baseDate.getTime() + expression * 24 * 60 * 60 * 1000);
     }
-    
+
     if (typeof expression === 'string') {
       // Try parsing various date formats
       const date = new Date(expression);
-      
+
       if (isNaN(date.getTime())) {
         // Try VB6 specific formats
         const vb6Date = this.parseVB6DateString(expression);
         if (vb6Date) return vb6Date;
-        
+
         throw new Error('Type mismatch: Cannot convert to Date');
       }
-      
+
       return date;
     }
-    
+
     throw new Error('Type mismatch: Cannot convert to Date');
   }
 
@@ -181,25 +181,25 @@ export class VB6ConversionFunctions {
     if (expression === null || expression === undefined) {
       return '';
     }
-    
+
     if (typeof expression === 'boolean') {
       return expression ? 'True' : 'False';
     }
-    
+
     if (expression instanceof Date) {
       return this.formatVB6Date(expression);
     }
-    
+
     if (typeof expression === 'number') {
       // Handle special cases
       if (expression === Infinity) return 'Infinity';
       if (expression === -Infinity) return '-Infinity';
       if (isNaN(expression)) return '';
-      
+
       // Format number VB6 style
       return this.formatVB6Number(expression);
     }
-    
+
     return String(expression);
   }
 
@@ -209,14 +209,14 @@ export class VB6ConversionFunctions {
    */
   static CDec(expression: any): number {
     const num = this.toNumber(expression);
-    
+
     // VB6 Decimal has 28-29 significant digits
     // JavaScript can't fully represent this, but we'll validate range
     const maxDecimal = 7.922816251426434e28;
     if (Math.abs(num) > maxDecimal) {
       throw new Error('Overflow: Value exceeds Decimal range');
     }
-    
+
     return num;
   }
 
@@ -260,7 +260,7 @@ export class VB6ConversionFunctions {
       68: 'Device unavailable',
       70: 'Permission denied',
       71: 'Disk not ready',
-      74: 'Can\'t rename with different drive',
+      74: "Can't rename with different drive",
       75: 'Path/File access error',
       76: 'Path not found',
       91: 'Object variable not set',
@@ -268,7 +268,7 @@ export class VB6ConversionFunctions {
       93: 'Invalid pattern string',
       94: 'Invalid use of Null',
     };
-    
+
     const message = errorMap[errorNumber] || `Error ${errorNumber}`;
     const error = new Error(message);
     (error as any).number = errorNumber;
@@ -290,7 +290,7 @@ export class VB6ConversionFunctions {
    */
   static Fix(number: any): number {
     const num = this.toNumber(number);
-    
+
     if (num >= 0) {
       return Math.floor(num);
     } else {
@@ -313,12 +313,12 @@ export class VB6ConversionFunctions {
    */
   static Hex(number: any): string {
     const num = this.CLng(number);
-    
+
     if (num < 0) {
       // VB6 uses two's complement for negative numbers
       return (num >>> 0).toString(16).toUpperCase();
     }
-    
+
     return num.toString(16).toUpperCase();
   }
 
@@ -328,12 +328,12 @@ export class VB6ConversionFunctions {
    */
   static Oct(number: any): string {
     const num = this.CLng(number);
-    
+
     if (num < 0) {
       // VB6 uses two's complement for negative numbers
       return (num >>> 0).toString(8);
     }
-    
+
     return num.toString(8);
   }
 
@@ -343,7 +343,7 @@ export class VB6ConversionFunctions {
    */
   static Str(number: any): string {
     const num = this.toNumber(number);
-    
+
     if (num >= 0) {
       return ' ' + num.toString();
     } else {
@@ -359,46 +359,46 @@ export class VB6ConversionFunctions {
     if (typeof stringExpression !== 'string') {
       stringExpression = String(stringExpression);
     }
-    
+
     // VB6 Val stops at first non-numeric character
     let numStr = '';
     let decimalFound = false;
     let signFound = false;
-    
+
     for (let i = 0; i < stringExpression.length; i++) {
       const char = stringExpression[i];
-      
+
       // Skip leading spaces
       if (char === ' ' && numStr === '') continue;
-      
+
       // Handle sign
       if ((char === '+' || char === '-') && !signFound && numStr === '') {
         numStr += char;
         signFound = true;
         continue;
       }
-      
+
       // Handle decimal point
       if (char === '.' && !decimalFound) {
         numStr += char;
         decimalFound = true;
         continue;
       }
-      
+
       // Handle digits
       if (char >= '0' && char <= '9') {
         numStr += char;
         continue;
       }
-      
+
       // Stop at first non-numeric character
       break;
     }
-    
+
     if (numStr === '' || numStr === '+' || numStr === '-' || numStr === '.') {
       return 0;
     }
-    
+
     return parseFloat(numStr);
   }
 
@@ -411,20 +411,20 @@ export class VB6ConversionFunctions {
     if (!formatString) {
       return this.CStr(expression);
     }
-    
+
     // Handle predefined formats
     const format = formatString.toLowerCase();
-    
+
     if (expression instanceof Date || !isNaN(Date.parse(expression))) {
       const date = expression instanceof Date ? expression : new Date(expression);
       return this.formatDate(date, formatString);
     }
-    
+
     if (typeof expression === 'number' || !isNaN(Number(expression))) {
       const num = Number(expression);
       return this.formatNumber(num, formatString);
     }
-    
+
     // String formatting
     return this.formatString(String(expression), formatString);
   }
@@ -447,17 +447,17 @@ export class VB6ConversionFunctions {
     const num = this.toNumber(expression);
     const isNegative = num < 0;
     const absNum = Math.abs(num);
-    
+
     let result = this.formatWithOptions(
       absNum,
       numDigitsAfterDecimal,
       includeLeadingDigit,
       groupDigits
     );
-    
+
     // Add currency symbol
     result = '$' + result;
-    
+
     // Handle negative numbers
     if (isNegative) {
       if (useParensForNegativeNumbers === -1 || useParensForNegativeNumbers === -2) {
@@ -466,7 +466,7 @@ export class VB6ConversionFunctions {
         result = '-' + result;
       }
     }
-    
+
     return result;
   }
 
@@ -488,14 +488,14 @@ export class VB6ConversionFunctions {
     const num = this.toNumber(expression);
     const isNegative = num < 0;
     const absNum = Math.abs(num);
-    
+
     let result = this.formatWithOptions(
       absNum,
       numDigitsAfterDecimal,
       includeLeadingDigit,
       groupDigits
     );
-    
+
     // Handle negative numbers
     if (isNegative) {
       if (useParensForNegativeNumbers === -1 || useParensForNegativeNumbers === -2) {
@@ -504,7 +504,7 @@ export class VB6ConversionFunctions {
         result = '-' + result;
       }
     }
-    
+
     return result;
   }
 
@@ -526,17 +526,17 @@ export class VB6ConversionFunctions {
     const num = this.toNumber(expression) * 100;
     const isNegative = num < 0;
     const absNum = Math.abs(num);
-    
+
     let result = this.formatWithOptions(
       absNum,
       numDigitsAfterDecimal,
       includeLeadingDigit,
       groupDigits
     );
-    
+
     // Add percent symbol
     result = result + '%';
-    
+
     // Handle negative numbers
     if (isNegative) {
       if (useParensForNegativeNumbers === -1 || useParensForNegativeNumbers === -2) {
@@ -545,7 +545,7 @@ export class VB6ConversionFunctions {
         result = '-' + result;
       }
     }
-    
+
     return result;
   }
 
@@ -556,29 +556,29 @@ export class VB6ConversionFunctions {
    */
   static FormatDateTime(date: any, namedFormat: number = 0): string {
     const d = this.CDate(date);
-    
+
     switch (namedFormat) {
       case 0: // vbGeneralDate
         return this.formatVB6Date(d);
       case 1: // vbLongDate
-        return d.toLocaleDateString('en-US', { 
-          weekday: 'long', 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
+        return d.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
         });
       case 2: // vbShortDate
         return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
       case 3: // vbLongTime
-        return d.toLocaleTimeString('en-US', { 
-          hour: '2-digit', 
-          minute: '2-digit', 
-          second: '2-digit' 
+        return d.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
         });
       case 4: // vbShortTime
-        return d.toLocaleTimeString('en-US', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
+        return d.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
         });
       default:
         throw new Error('Invalid procedure call or argument');
@@ -591,25 +591,25 @@ export class VB6ConversionFunctions {
     if (typeof expression === 'number') {
       return expression;
     }
-    
+
     if (typeof expression === 'boolean') {
       return expression ? -1 : 0; // VB6 True = -1
     }
-    
+
     if (expression instanceof Date) {
       // Convert to VB6 date serial number
       const baseDate = new Date(1899, 11, 30);
       return (expression.getTime() - baseDate.getTime()) / (24 * 60 * 60 * 1000);
     }
-    
+
     if (typeof expression === 'string') {
       const trimmed = expression.trim();
       if (trimmed === '') return 0;
-      
+
       // Handle VB6 boolean strings
       if (trimmed.toLowerCase() === 'true') return -1;
       if (trimmed.toLowerCase() === 'false') return 0;
-      
+
       // Try parsing as number
       const num = Number(trimmed);
       if (isNaN(num)) {
@@ -617,18 +617,18 @@ export class VB6ConversionFunctions {
       }
       return num;
     }
-    
+
     if (expression === null || expression === undefined) {
       return 0;
     }
-    
+
     throw new Error('Type mismatch');
   }
 
   private static bankersRound(num: number): number {
     const integer = Math.floor(num);
     const decimal = num - integer;
-    
+
     if (decimal === 0.5) {
       // Round to even
       return integer % 2 === 0 ? integer : integer + 1;
@@ -642,40 +642,40 @@ export class VB6ConversionFunctions {
   private static parseVB6DateString(str: string): Date | null {
     // Try common VB6 date formats
     const formats = [
-      /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/,  // M/D/Y
-      /^(\d{1,2})-(\d{1,2})-(\d{2,4})$/,    // M-D-Y
-      /^(\d{4})\/(\d{1,2})\/(\d{1,2})$/,    // Y/M/D
-      /^(\d{4})-(\d{1,2})-(\d{1,2})$/,      // Y-M-D
+      /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/, // M/D/Y
+      /^(\d{1,2})-(\d{1,2})-(\d{2,4})$/, // M-D-Y
+      /^(\d{4})\/(\d{1,2})\/(\d{1,2})$/, // Y/M/D
+      /^(\d{4})-(\d{1,2})-(\d{1,2})$/, // Y-M-D
     ];
-    
+
     for (const format of formats) {
       const match = str.match(format);
       if (match) {
         let year = parseInt(match[3]);
         const month = parseInt(match[1]);
         const day = parseInt(match[2]);
-        
+
         // Handle 2-digit years
         if (year < 100) {
           year += year < 30 ? 2000 : 1900;
         }
-        
+
         return new Date(year, month - 1, day);
       }
     }
-    
+
     return null;
   }
 
   private static formatVB6Date(date: Date): string {
     const dateStr = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
     const timeStr = date.toLocaleTimeString('en-US');
-    
+
     // Only include time if not midnight
     if (date.getHours() === 0 && date.getMinutes() === 0 && date.getSeconds() === 0) {
       return dateStr;
     }
-    
+
     return `${dateStr} ${timeStr}`;
   }
 
@@ -684,13 +684,13 @@ export class VB6ConversionFunctions {
     if (Number.isInteger(num)) {
       return num.toString();
     }
-    
+
     // Remove trailing zeros
     let str = num.toString();
     if (str.includes('.')) {
       str = str.replace(/\.?0+$/, '');
     }
-    
+
     return str;
   }
 
@@ -701,59 +701,59 @@ export class VB6ConversionFunctions {
     groupDigits: number
   ): string {
     let str = num.toFixed(decimalPlaces);
-    
+
     // Handle leading zero
     if (includeLeadingDigit === 0 && str.startsWith('0.')) {
       str = str.substring(1);
     }
-    
+
     // Handle grouping
     if (groupDigits === -1 || groupDigits === -2) {
       const parts = str.split('.');
       parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       str = parts.join('.');
     }
-    
+
     return str;
   }
 
   private static formatDate(date: Date, format: string): string {
     const replacements: { [key: string]: () => string } = {
-      'yyyy': () => date.getFullYear().toString(),
-      'yy': () => date.getFullYear().toString().slice(-2),
-      'mmmm': () => date.toLocaleString('en-US', { month: 'long' }),
-      'mmm': () => date.toLocaleString('en-US', { month: 'short' }),
-      'mm': () => (date.getMonth() + 1).toString().padStart(2, '0'),
-      'm': () => (date.getMonth() + 1).toString(),
-      'dddd': () => date.toLocaleString('en-US', { weekday: 'long' }),
-      'ddd': () => date.toLocaleString('en-US', { weekday: 'short' }),
-      'dd': () => date.getDate().toString().padStart(2, '0'),
-      'd': () => date.getDate().toString(),
-      'hh': () => date.getHours().toString().padStart(2, '0'),
-      'h': () => date.getHours().toString(),
-      'nn': () => date.getMinutes().toString().padStart(2, '0'),
-      'n': () => date.getMinutes().toString(),
-      'ss': () => date.getSeconds().toString().padStart(2, '0'),
-      's': () => date.getSeconds().toString(),
+      yyyy: () => date.getFullYear().toString(),
+      yy: () => date.getFullYear().toString().slice(-2),
+      mmmm: () => date.toLocaleString('en-US', { month: 'long' }),
+      mmm: () => date.toLocaleString('en-US', { month: 'short' }),
+      mm: () => (date.getMonth() + 1).toString().padStart(2, '0'),
+      m: () => (date.getMonth() + 1).toString(),
+      dddd: () => date.toLocaleString('en-US', { weekday: 'long' }),
+      ddd: () => date.toLocaleString('en-US', { weekday: 'short' }),
+      dd: () => date.getDate().toString().padStart(2, '0'),
+      d: () => date.getDate().toString(),
+      hh: () => date.getHours().toString().padStart(2, '0'),
+      h: () => date.getHours().toString(),
+      nn: () => date.getMinutes().toString().padStart(2, '0'),
+      n: () => date.getMinutes().toString(),
+      ss: () => date.getSeconds().toString().padStart(2, '0'),
+      s: () => date.getSeconds().toString(),
     };
-    
+
     let result = format;
-    
+
     // Sort by length to replace longer patterns first
     const patterns = Object.keys(replacements).sort((a, b) => b.length - a.length);
-    
+
     for (const pattern of patterns) {
       const regex = new RegExp(pattern, 'gi');
       result = result.replace(regex, replacements[pattern]());
     }
-    
+
     return result;
   }
 
   private static formatNumber(num: number, format: string): string {
     // Handle predefined numeric formats
     const lowerFormat = format.toLowerCase();
-    
+
     switch (lowerFormat) {
       case 'general number':
         return this.formatVB6Number(num);
@@ -774,7 +774,7 @@ export class VB6ConversionFunctions {
       case 'on/off':
         return num !== 0 ? 'On' : 'Off';
     }
-    
+
     // Custom format string
     return this.applyCustomNumberFormat(num, format);
   }
@@ -783,10 +783,10 @@ export class VB6ConversionFunctions {
     // Handle string format characters
     let result = '';
     let strIndex = 0;
-    
+
     for (let i = 0; i < format.length; i++) {
       const char = format[i];
-      
+
       switch (char) {
         case '@':
           // Character placeholder
@@ -815,17 +815,17 @@ export class VB6ConversionFunctions {
           result += char;
       }
     }
-    
+
     return result;
   }
 
   private static applyCustomNumberFormat(num: number, format: string): string {
     // Simple custom format implementation
     // VB6 supports complex formats with sections for positive/negative/zero
-    
+
     const sections = format.split(';');
     let selectedFormat: string;
-    
+
     if (num > 0) {
       selectedFormat = sections[0];
     } else if (num < 0) {
@@ -834,26 +834,29 @@ export class VB6ConversionFunctions {
     } else {
       selectedFormat = sections[2] || sections[0];
     }
-    
+
     // Count decimal places
     const decimalMatch = selectedFormat.match(/\.([0#]+)/);
     const decimalPlaces = decimalMatch ? decimalMatch[1].length : 0;
-    
+
     // Format the number
     let result = num.toFixed(decimalPlaces);
-    
+
     // Add thousands separator if comma present before decimal
-    if (selectedFormat.indexOf(',') > -1 && selectedFormat.indexOf(',') < selectedFormat.indexOf('.')) {
+    if (
+      selectedFormat.indexOf(',') > -1 &&
+      selectedFormat.indexOf(',') < selectedFormat.indexOf('.')
+    ) {
       const parts = result.split('.');
       parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       result = parts.join('.');
     }
-    
+
     // Handle percentage
     if (selectedFormat.includes('%')) {
       result = (num * 100).toFixed(decimalPlaces) + '%';
     }
-    
+
     return result;
   }
 }
@@ -883,7 +886,7 @@ export const {
   FormatCurrency,
   FormatNumber,
   FormatPercent,
-  FormatDateTime
+  FormatDateTime,
 } = VB6ConversionFunctions;
 
 // VB6 Format constants
@@ -894,12 +897,12 @@ export const VB6FormatConstants = {
   vbShortDate: 2,
   vbLongTime: 3,
   vbShortTime: 4,
-  
+
   // Tristate values
   vbUseDefault: -2,
   vbTrue: -1,
   vbFalse: 0,
-  
+
   // First day of week
   vbUseSystemDayOfWeek: 0,
   vbSunday: 1,
@@ -909,17 +912,17 @@ export const VB6FormatConstants = {
   vbThursday: 5,
   vbFriday: 6,
   vbSaturday: 7,
-  
+
   // First week of year
   vbUseSystem: 0,
   vbFirstJan1: 1,
   vbFirstFourDays: 2,
-  vbFirstFullWeek: 3
+  vbFirstFullWeek: 3,
 };
 
 // Type conversion error codes
 export const VB6ConversionErrors = {
   OVERFLOW: 6,
   TYPE_MISMATCH: 13,
-  INVALID_PROCEDURE_CALL: 5
+  INVALID_PROCEDURE_CALL: 5,
 };

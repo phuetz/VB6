@@ -24,7 +24,12 @@ const mockEditor = {
   addCommand: vi.fn(),
   addAction: vi.fn(),
   updateOptions: vi.fn(),
-  getSelection: vi.fn(() => ({ startLineNumber: 1, startColumn: 1, endLineNumber: 1, endColumn: 1 })),
+  getSelection: vi.fn(() => ({
+    startLineNumber: 1,
+    startColumn: 1,
+    endLineNumber: 1,
+    endColumn: 1,
+  })),
   setSelection: vi.fn(),
   revealLine: vi.fn(),
   revealRange: vi.fn(),
@@ -35,7 +40,7 @@ const mockModel = {
   getValue: vi.fn(() => 'Private Sub Form_Load()\n    MsgBox "Hello World"\nEnd Sub'),
   setValue: vi.fn(),
   getLineCount: vi.fn(() => 3),
-  getLineContent: vi.fn((line) => {
+  getLineContent: vi.fn(line => {
     const lines = ['Private Sub Form_Load()', '    MsgBox "Hello World"', 'End Sub'];
     return lines[line - 1] || '';
   }),
@@ -88,7 +93,7 @@ vi.mock('@monaco-editor/react', () => ({
         <textarea
           data-testid="monaco-textarea"
           value={value}
-          onChange={(e) => onChange?.(e.target.value)}
+          onChange={e => onChange?.(e.target.value)}
           onFocus={() => onMount?.(mockEditor, mockMonaco)}
         />
       </div>
@@ -138,7 +143,7 @@ describe('Monaco Editor - Basic Integration', () => {
           <textarea
             data-testid="monaco-textarea"
             value={value}
-            onChange={(e) => onChangeCallback?.(e.target.value)}
+            onChange={e => onChangeCallback?.(e.target.value)}
           />
         </div>
       );
@@ -164,7 +169,10 @@ describe('Monaco Editor - Basic Integration', () => {
     registerVB6Language();
 
     expect(mockMonaco.languages.register).toHaveBeenCalledWith({ id: 'vb6' });
-    expect(mockMonaco.languages.setMonarchTokensProvider).toHaveBeenCalledWith('vb6', expect.any(Object));
+    expect(mockMonaco.languages.setMonarchTokensProvider).toHaveBeenCalledWith(
+      'vb6',
+      expect.any(Object)
+    );
   });
 
   it('should handle editor mounting and unmounting', async () => {
@@ -223,8 +231,9 @@ describe('Monaco Editor - VB6 Syntax Highlighting', () => {
 
   it('should handle VB6 string literals', () => {
     const tokenProvider = getVB6TokenProvider();
-    const stringRule = tokenProvider.tokenizer.root.find((rule: any) => 
-      rule[0].toString().includes('"'));
+    const stringRule = tokenProvider.tokenizer.root.find((rule: any) =>
+      rule[0].toString().includes('"')
+    );
 
     expect(stringRule).toBeDefined();
     expect(stringRule[1]).toBe('string');
@@ -232,8 +241,9 @@ describe('Monaco Editor - VB6 Syntax Highlighting', () => {
 
   it('should handle VB6 comments', () => {
     const tokenProvider = getVB6TokenProvider();
-    const commentRule = tokenProvider.tokenizer.root.find((rule: any) => 
-      rule[0].toString().includes("'"));
+    const commentRule = tokenProvider.tokenizer.root.find((rule: any) =>
+      rule[0].toString().includes("'")
+    );
 
     expect(commentRule).toBeDefined();
     expect(commentRule[1]).toBe('comment');
@@ -241,8 +251,9 @@ describe('Monaco Editor - VB6 Syntax Highlighting', () => {
 
   it('should handle VB6 numbers', () => {
     const tokenProvider = getVB6TokenProvider();
-    const numberRule = tokenProvider.tokenizer.root.find((rule: any) => 
-      rule[0].toString().includes('\\d'));
+    const numberRule = tokenProvider.tokenizer.root.find((rule: any) =>
+      rule[0].toString().includes('\\d')
+    );
 
     expect(numberRule).toBeDefined();
     expect(numberRule[1]).toBe('number');
@@ -292,9 +303,13 @@ describe('Monaco Editor - VB6 IntelliSense', () => {
   });
 
   it('should provide variable type completions', () => {
-    const completions = getVB6CompletionItems(mockModel, { lineNumber: 1, column: 10 }, { triggerKind: 1 });
+    const completions = getVB6CompletionItems(
+      mockModel,
+      { lineNumber: 1, column: 10 },
+      { triggerKind: 1 }
+    );
 
-    const typeCompletions = completions.suggestions.filter((s: any) => 
+    const typeCompletions = completions.suggestions.filter((s: any) =>
       ['Integer', 'String', 'Boolean', 'Long', 'Double'].includes(s.label)
     );
 
@@ -328,8 +343,8 @@ describe('Monaco Editor - VB6 IntelliSense', () => {
       range: expect.any(Object),
       contents: [
         { value: '**MsgBox** - Displays a message box' },
-        { value: 'Syntax: MsgBox(prompt[, buttons][, title])' }
-      ]
+        { value: 'Syntax: MsgBox(prompt[, buttons][, title])' },
+      ],
     });
   });
 });
@@ -358,7 +373,7 @@ describe('Monaco Editor - Code Formatting', () => {
 
     expect(formattedEdits).toContainEqual({
       range: expect.any(Object),
-      text: 'Private Sub Form_Load()\n    MsgBox "Hello"\nEnd Sub'
+      text: 'Private Sub Form_Load()\n    MsgBox "Hello"\nEnd Sub',
     });
   });
 
@@ -411,10 +426,7 @@ describe('Monaco Editor - Keyboard Shortcuts', () => {
 
     registerShortcuts();
 
-    expect(mockEditor.addCommand).toHaveBeenCalledWith(
-      mockMonaco.KeyCode.F5,
-      expect.any(Function)
-    );
+    expect(mockEditor.addCommand).toHaveBeenCalledWith(mockMonaco.KeyCode.F5, expect.any(Function));
   });
 
   it('should register F9 for toggle breakpoint', () => {
@@ -426,28 +438,19 @@ describe('Monaco Editor - Keyboard Shortcuts', () => {
 
     registerShortcuts();
 
-    expect(mockEditor.addCommand).toHaveBeenCalledWith(
-      mockMonaco.KeyCode.F9,
-      expect.any(Function)
-    );
+    expect(mockEditor.addCommand).toHaveBeenCalledWith(mockMonaco.KeyCode.F9, expect.any(Function));
   });
 
   it('should register Ctrl+Space for IntelliSense', () => {
     const registerShortcuts = () => {
-      mockEditor.addCommand(
-        mockMonaco.KeyMod.CtrlCmd | mockMonaco.KeyCode.Space,
-        () => {
-          mockEditor.trigger('keyboard', 'editor.action.triggerSuggest', {});
-        }
-      );
+      mockEditor.addCommand(mockMonaco.KeyMod.CtrlCmd | mockMonaco.KeyCode.Space, () => {
+        mockEditor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+      });
     };
 
     registerShortcuts();
 
-    expect(mockEditor.addCommand).toHaveBeenCalledWith(
-      expect.any(Number),
-      expect.any(Function)
-    );
+    expect(mockEditor.addCommand).toHaveBeenCalledWith(expect.any(Number), expect.any(Function));
   });
 });
 
@@ -466,19 +469,22 @@ describe('Monaco Editor - Theme Support', () => {
         colors: {
           'editor.background': '#1e1e1e',
           'editor.foreground': '#d4d4d4',
-        }
+        },
       });
     };
 
     defineVB6Theme();
 
-    expect(mockMonaco.editor.defineTheme).toHaveBeenCalledWith('vb6-dark', expect.objectContaining({
-      base: 'vs-dark',
-      inherit: true,
-      rules: expect.arrayContaining([
-        expect.objectContaining({ token: 'keyword', foreground: '569cd6' }),
-      ]),
-    }));
+    expect(mockMonaco.editor.defineTheme).toHaveBeenCalledWith(
+      'vb6-dark',
+      expect.objectContaining({
+        base: 'vs-dark',
+        inherit: true,
+        rules: expect.arrayContaining([
+          expect.objectContaining({ token: 'keyword', foreground: '569cd6' }),
+        ]),
+      })
+    );
   });
 
   it('should define VB6 light theme', () => {
@@ -495,16 +501,19 @@ describe('Monaco Editor - Theme Support', () => {
         colors: {
           'editor.background': '#ffffff',
           'editor.foreground': '#000000',
-        }
+        },
       });
     };
 
     defineVB6Theme();
 
-    expect(mockMonaco.editor.defineTheme).toHaveBeenCalledWith('vb6-light', expect.objectContaining({
-      base: 'vs',
-      inherit: true,
-    }));
+    expect(mockMonaco.editor.defineTheme).toHaveBeenCalledWith(
+      'vb6-light',
+      expect.objectContaining({
+        base: 'vs',
+        inherit: true,
+      })
+    );
   });
 
   it('should apply theme to editor', () => {
@@ -519,14 +528,66 @@ describe('Monaco Editor - Theme Support', () => {
 function getVB6TokenProvider() {
   return {
     keywords: [
-      'Private', 'Public', 'Sub', 'Function', 'End', 'Dim', 'As', 'Integer', 'String', 'Boolean',
-      'Long', 'Double', 'Single', 'Byte', 'Date', 'Object', 'Variant', 'If', 'Then', 'Else',
-      'ElseIf', 'End If', 'For', 'To', 'Next', 'While', 'Wend', 'Do', 'Loop', 'Until',
-      'Select', 'Case', 'True', 'False', 'Nothing', 'Null', 'Empty'
+      'Private',
+      'Public',
+      'Sub',
+      'Function',
+      'End',
+      'Dim',
+      'As',
+      'Integer',
+      'String',
+      'Boolean',
+      'Long',
+      'Double',
+      'Single',
+      'Byte',
+      'Date',
+      'Object',
+      'Variant',
+      'If',
+      'Then',
+      'Else',
+      'ElseIf',
+      'End If',
+      'For',
+      'To',
+      'Next',
+      'While',
+      'Wend',
+      'Do',
+      'Loop',
+      'Until',
+      'Select',
+      'Case',
+      'True',
+      'False',
+      'Nothing',
+      'Null',
+      'Empty',
     ],
     operators: [
-      '=', '<>', '<', '<=', '>', '>=', '+', '-', '*', '/', '\\', '^', 'Mod',
-      'And', 'Or', 'Not', 'Xor', 'Eqv', 'Imp', 'Like', 'Is'
+      '=',
+      '<>',
+      '<',
+      '<=',
+      '>',
+      '>=',
+      '+',
+      '-',
+      '*',
+      '/',
+      '\\',
+      '^',
+      'Mod',
+      'And',
+      'Or',
+      'Not',
+      'Xor',
+      'Eqv',
+      'Imp',
+      'Like',
+      'Is',
     ],
     symbols: /[=><!~?:&|+*/%^-]+/,
     tokenizer: {
@@ -534,20 +595,26 @@ function getVB6TokenProvider() {
         [/".*?"/, 'string'],
         [/'.*$/, 'comment'],
         [/\b\d+(\.\d+)?\b/, 'number'],
-        [/[a-zA-Z_]\w*/, {
-          cases: {
-            '@keywords': 'keyword',
-            '@default': 'identifier'
-          }
-        }],
-        [/@symbols/, {
-          cases: {
-            '@operators': 'operator',
-            '@default': ''
-          }
-        }],
-      ]
-    }
+        [
+          /[a-zA-Z_]\w*/,
+          {
+            cases: {
+              '@keywords': 'keyword',
+              '@default': 'identifier',
+            },
+          },
+        ],
+        [
+          /@symbols/,
+          {
+            cases: {
+              '@operators': 'operator',
+              '@default': '',
+            },
+          },
+        ],
+      ],
+    },
   };
 }
 
@@ -559,60 +626,60 @@ function getVB6CompletionItems(model: any, position: any, context: any) {
         kind: 15, // Snippet
         insertText: 'Private Sub ${1:ProcedureName}()\n    $0\nEnd Sub',
         insertTextRules: 4, // InsertAsSnippet
-        documentation: 'Creates a private subroutine'
+        documentation: 'Creates a private subroutine',
       },
       {
         label: 'Public Function',
         kind: 15,
         insertText: 'Public Function ${1:FunctionName}() As ${2:ReturnType}\n    $0\nEnd Function',
         insertTextRules: 4,
-        documentation: 'Creates a public function'
+        documentation: 'Creates a public function',
       },
       {
         label: 'Dim',
         kind: 14, // Keyword
         insertText: 'Dim ${1:variableName} As ${2:Type}',
         insertTextRules: 4,
-        documentation: 'Declares a variable'
+        documentation: 'Declares a variable',
       },
       {
         label: 'MsgBox',
         kind: 3, // Function
         insertText: 'MsgBox "${1:message}"',
         insertTextRules: 4,
-        documentation: 'Displays a message box'
+        documentation: 'Displays a message box',
       },
       {
         label: 'Integer',
         kind: 25, // TypeParameter
         insertText: 'Integer',
-        documentation: 'Integer data type (-32,768 to 32,767)'
+        documentation: 'Integer data type (-32,768 to 32,767)',
       },
       {
         label: 'String',
         kind: 25,
         insertText: 'String',
-        documentation: 'String data type'
+        documentation: 'String data type',
       },
       {
         label: 'Boolean',
         kind: 25,
         insertText: 'Boolean',
-        documentation: 'Boolean data type (True or False)'
+        documentation: 'Boolean data type (True or False)',
       },
       {
         label: 'Long',
         kind: 25,
         insertText: 'Long',
-        documentation: 'Long integer data type'
+        documentation: 'Long integer data type',
       },
       {
         label: 'Double',
         kind: 25,
         insertText: 'Double',
-        documentation: 'Double-precision floating-point data type'
-      }
-    ]
+        documentation: 'Double-precision floating-point data type',
+      },
+    ],
   };
 }
 
@@ -621,34 +688,54 @@ function getVB6HoverInfo(model: any, position: any) {
   if (!word) return null;
 
   const hoverMap: Record<string, any> = {
-    'MsgBox': {
-      range: new mockMonaco.Range(position.lineNumber, word.startColumn, position.lineNumber, word.endColumn),
+    MsgBox: {
+      range: new mockMonaco.Range(
+        position.lineNumber,
+        word.startColumn,
+        position.lineNumber,
+        word.endColumn
+      ),
       contents: [
         { value: '**MsgBox** - Displays a message box' },
-        { value: 'Syntax: MsgBox(prompt[, buttons][, title])' }
-      ]
+        { value: 'Syntax: MsgBox(prompt[, buttons][, title])' },
+      ],
     },
-    'Dim': {
-      range: new mockMonaco.Range(position.lineNumber, word.startColumn, position.lineNumber, word.endColumn),
+    Dim: {
+      range: new mockMonaco.Range(
+        position.lineNumber,
+        word.startColumn,
+        position.lineNumber,
+        word.endColumn
+      ),
       contents: [
         { value: '**Dim** - Declares variables' },
-        { value: 'Syntax: Dim variableName As DataType' }
-      ]
+        { value: 'Syntax: Dim variableName As DataType' },
+      ],
     },
-    'Integer': {
-      range: new mockMonaco.Range(position.lineNumber, word.startColumn, position.lineNumber, word.endColumn),
+    Integer: {
+      range: new mockMonaco.Range(
+        position.lineNumber,
+        word.startColumn,
+        position.lineNumber,
+        word.endColumn
+      ),
       contents: [
         { value: '**Integer** - Integer data type' },
-        { value: 'Range: -32,768 to 32,767' }
-      ]
+        { value: 'Range: -32,768 to 32,767' },
+      ],
     },
-    'String': {
-      range: new mockMonaco.Range(position.lineNumber, word.startColumn, position.lineNumber, word.endColumn),
+    String: {
+      range: new mockMonaco.Range(
+        position.lineNumber,
+        word.startColumn,
+        position.lineNumber,
+        word.endColumn
+      ),
       contents: [
         { value: '**String** - String data type' },
-        { value: 'Variable-length string of characters' }
-      ]
-    }
+        { value: 'Variable-length string of characters' },
+      ],
+    },
   };
 
   return hoverMap[word.word] || null;
@@ -659,30 +746,41 @@ function formatVB6Code(model: any, options: any) {
   const lines = content.split('\n');
   let indentLevel = 0;
   const indentStr = options.insertSpaces ? ' '.repeat(options.tabSize) : '\t';
-  
+
   const formattedLines = lines.map((line: string) => {
     const trimmedLine = line.trim();
-    
+
     // Decrease indent for end statements
     if (/^End\s+(Sub|Function|If|For|While|Do|Select)/i.test(trimmedLine)) {
       indentLevel = Math.max(0, indentLevel - 1);
     }
-    
+
     const formattedLine = indentStr.repeat(indentLevel) + trimmedLine;
-    
+
     // Increase indent for start statements
-    if (/^(Private\s+Sub|Public\s+Sub|Private\s+Function|Public\s+Function|If\s+.*Then|For\s+.*To|While\s+|Do\s*$|Select\s+Case)/i.test(trimmedLine)) {
+    if (
+      /^(Private\s+Sub|Public\s+Sub|Private\s+Function|Public\s+Function|If\s+.*Then|For\s+.*To|While\s+|Do\s*$|Select\s+Case)/i.test(
+        trimmedLine
+      )
+    ) {
       indentLevel++;
     } else if (/^(Else|ElseIf)/i.test(trimmedLine)) {
       // Handle Else/ElseIf special case
       return indentStr.repeat(Math.max(0, indentLevel - 1)) + trimmedLine;
     }
-    
+
     return formattedLine;
   });
 
-  return [{
-    range: new mockMonaco.Range(1, 1, model.getLineCount(), model.getLineContent(model.getLineCount()).length + 1),
-    text: formattedLines.join('\n')
-  }];
+  return [
+    {
+      range: new mockMonaco.Range(
+        1,
+        1,
+        model.getLineCount(),
+        model.getLineContent(model.getLineCount()).length + 1
+      ),
+      text: formattedLines.join('\n'),
+    },
+  ];
 }

@@ -1,6 +1,6 @@
 /**
  * VB6 HScrollBar Control Implementation
- * 
+ *
  * Horizontal scrollbar control with full VB6 compatibility
  */
 
@@ -13,7 +13,7 @@ export interface HScrollBarControl {
   top: number;
   width: number;
   height: number;
-  
+
   // VB6 HScrollBar Properties
   min: number;
   max: number;
@@ -22,11 +22,11 @@ export interface HScrollBarControl {
   largeChange: number;
   enabled: boolean;
   visible: boolean;
-  
+
   // Appearance
   mousePointer: number;
   tag: string;
-  
+
   // Events
   onChange?: string;
   onScroll?: string;
@@ -43,7 +43,7 @@ export const HScrollBarControl: React.FC<HScrollBarControlProps> = ({
   control,
   isDesignMode = false,
   onPropertyChange,
-  onEvent
+  onEvent,
 }) => {
   const {
     name,
@@ -59,7 +59,7 @@ export const HScrollBarControl: React.FC<HScrollBarControlProps> = ({
     enabled = true,
     visible = true,
     mousePointer = 0,
-    tag = ''
+    tag = '',
   } = control;
 
   const [currentValue, setCurrentValue] = useState(value);
@@ -78,17 +78,20 @@ export const HScrollBarControl: React.FC<HScrollBarControlProps> = ({
   const trackWidth = width - 40; // Subtract arrow button widths
   const thumbPosition = ((currentValue - min) / range) * (trackWidth - thumbWidth);
 
-  const handleValueChange = useCallback((newValue: number) => {
-    const clampedValue = Math.max(min, Math.min(max, newValue));
-    setCurrentValue(clampedValue);
-    onPropertyChange?.('value', clampedValue);
-    
-    // Fire events
-    if (onEvent) {
-      onEvent('Change');
-      onEvent('Scroll');
-    }
-  }, [min, max, onPropertyChange, onEvent]);
+  const handleValueChange = useCallback(
+    (newValue: number) => {
+      const clampedValue = Math.max(min, Math.min(max, newValue));
+      setCurrentValue(clampedValue);
+      onPropertyChange?.('value', clampedValue);
+
+      // Fire events
+      if (onEvent) {
+        onEvent('Change');
+        onEvent('Scroll');
+      }
+    },
+    [min, max, onPropertyChange, onEvent]
+  );
 
   const handleLeftArrowClick = useCallback(() => {
     if (!enabled) return;
@@ -100,41 +103,50 @@ export const HScrollBarControl: React.FC<HScrollBarControlProps> = ({
     handleValueChange(currentValue + smallChange);
   }, [currentValue, smallChange, enabled, handleValueChange]);
 
-  const handleTrackClick = useCallback((event: React.MouseEvent) => {
-    if (!enabled || isDragging) return;
-    
-    const rect = scrollbarRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    
-    const clickX = event.clientX - rect.left - 20; // Subtract left arrow width
-    const trackWidth = width - 40 - thumbWidth;
-    const percentage = Math.max(0, Math.min(1, clickX / trackWidth));
-    const newValue = min + (percentage * range);
-    
-    handleValueChange(newValue);
-  }, [enabled, isDragging, width, thumbWidth, min, range, handleValueChange]);
+  const handleTrackClick = useCallback(
+    (event: React.MouseEvent) => {
+      if (!enabled || isDragging) return;
 
-  const handleThumbMouseDown = useCallback((event: React.MouseEvent) => {
-    if (!enabled) return;
-    
-    event.preventDefault();
-    setIsDragging(true);
-    setDragStart({
-      x: event.clientX,
-      value: currentValue
-    });
-  }, [enabled, currentValue]);
+      const rect = scrollbarRef.current?.getBoundingClientRect();
+      if (!rect) return;
 
-  const handleMouseMove = useCallback((event: MouseEvent) => {
-    if (!isDragging || !enabled) return;
-    
-    const deltaX = event.clientX - dragStart.x;
-    const trackWidth = width - 40 - thumbWidth;
-    const valueChange = (deltaX / trackWidth) * range;
-    const newValue = dragStart.value + valueChange;
-    
-    handleValueChange(newValue);
-  }, [isDragging, enabled, dragStart, width, thumbWidth, range, handleValueChange]);
+      const clickX = event.clientX - rect.left - 20; // Subtract left arrow width
+      const trackWidth = width - 40 - thumbWidth;
+      const percentage = Math.max(0, Math.min(1, clickX / trackWidth));
+      const newValue = min + percentage * range;
+
+      handleValueChange(newValue);
+    },
+    [enabled, isDragging, width, thumbWidth, min, range, handleValueChange]
+  );
+
+  const handleThumbMouseDown = useCallback(
+    (event: React.MouseEvent) => {
+      if (!enabled) return;
+
+      event.preventDefault();
+      setIsDragging(true);
+      setDragStart({
+        x: event.clientX,
+        value: currentValue,
+      });
+    },
+    [enabled, currentValue]
+  );
+
+  const handleMouseMove = useCallback(
+    (event: MouseEvent) => {
+      if (!isDragging || !enabled) return;
+
+      const deltaX = event.clientX - dragStart.x;
+      const trackWidth = width - 40 - thumbWidth;
+      const valueChange = (deltaX / trackWidth) * range;
+      const newValue = dragStart.value + valueChange;
+
+      handleValueChange(newValue);
+    },
+    [isDragging, enabled, dragStart, width, thumbWidth, range, handleValueChange]
+  );
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -153,36 +165,39 @@ export const HScrollBarControl: React.FC<HScrollBarControlProps> = ({
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
   // Keyboard handling
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-    if (!enabled) return;
-    
-    switch (event.key) {
-      case 'ArrowLeft':
-        event.preventDefault();
-        handleValueChange(currentValue - smallChange);
-        break;
-      case 'ArrowRight':
-        event.preventDefault();
-        handleValueChange(currentValue + smallChange);
-        break;
-      case 'PageUp':
-        event.preventDefault();
-        handleValueChange(currentValue - largeChange);
-        break;
-      case 'PageDown':
-        event.preventDefault();
-        handleValueChange(currentValue + largeChange);
-        break;
-      case 'Home':
-        event.preventDefault();
-        handleValueChange(min);
-        break;
-      case 'End':
-        event.preventDefault();
-        handleValueChange(max);
-        break;
-    }
-  }, [enabled, currentValue, smallChange, largeChange, min, max, handleValueChange]);
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (!enabled) return;
+
+      switch (event.key) {
+        case 'ArrowLeft':
+          event.preventDefault();
+          handleValueChange(currentValue - smallChange);
+          break;
+        case 'ArrowRight':
+          event.preventDefault();
+          handleValueChange(currentValue + smallChange);
+          break;
+        case 'PageUp':
+          event.preventDefault();
+          handleValueChange(currentValue - largeChange);
+          break;
+        case 'PageDown':
+          event.preventDefault();
+          handleValueChange(currentValue + largeChange);
+          break;
+        case 'Home':
+          event.preventDefault();
+          handleValueChange(min);
+          break;
+        case 'End':
+          event.preventDefault();
+          handleValueChange(max);
+          break;
+      }
+    },
+    [enabled, currentValue, smallChange, largeChange, min, max, handleValueChange]
+  );
 
   if (!visible) {
     return null;
@@ -190,9 +205,21 @@ export const HScrollBarControl: React.FC<HScrollBarControlProps> = ({
 
   const getCursorStyle = () => {
     const cursors = [
-      'default', 'auto', 'crosshair', 'text', 'wait', 'help',
-      'pointer', 'not-allowed', 'move', 'col-resize', 'row-resize',
-      'n-resize', 's-resize', 'e-resize', 'w-resize'
+      'default',
+      'auto',
+      'crosshair',
+      'text',
+      'wait',
+      'help',
+      'pointer',
+      'not-allowed',
+      'move',
+      'col-resize',
+      'row-resize',
+      'n-resize',
+      's-resize',
+      'e-resize',
+      'w-resize',
     ];
     return cursors[mousePointer] || 'default';
   };
@@ -209,7 +236,7 @@ export const HScrollBarControl: React.FC<HScrollBarControlProps> = ({
         height: `${height}px`,
         cursor: getCursorStyle(),
         opacity: enabled ? 1 : 0.5,
-        outline: isDesignMode ? '1px dotted #333' : 'none'
+        outline: isDesignMode ? '1px dotted #333' : 'none',
       }}
       tabIndex={enabled ? 0 : -1}
       onKeyDown={handleKeyDown}
@@ -231,11 +258,11 @@ export const HScrollBarControl: React.FC<HScrollBarControlProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '12px'
+          fontSize: '12px',
         }}
         disabled={!enabled}
         onMouseDown={handleLeftArrowClick}
-        onMouseDown={(e) => {
+        onMouseDown={e => {
           e.preventDefault();
           handleLeftArrowClick();
         }}
@@ -254,7 +281,7 @@ export const HScrollBarControl: React.FC<HScrollBarControlProps> = ({
           height: `${height}px`,
           border: '1px inset #999',
           background: '#f8f8f8',
-          cursor: enabled ? 'pointer' : 'not-allowed'
+          cursor: enabled ? 'pointer' : 'not-allowed',
         }}
         onClick={handleTrackClick}
       >
@@ -270,7 +297,7 @@ export const HScrollBarControl: React.FC<HScrollBarControlProps> = ({
             border: '1px outset #999',
             background: enabled ? '#d0d0d0' : '#e0e0e0',
             cursor: enabled ? (isDragging ? 'grabbing' : 'grab') : 'not-allowed',
-            userSelect: 'none'
+            userSelect: 'none',
           }}
           onMouseDown={handleThumbMouseDown}
         />
@@ -291,10 +318,10 @@ export const HScrollBarControl: React.FC<HScrollBarControlProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '12px'
+          fontSize: '12px',
         }}
         disabled={!enabled}
-        onMouseDown={(e) => {
+        onMouseDown={e => {
           e.preventDefault();
           handleRightArrowClick();
         }}
@@ -315,7 +342,7 @@ export const HScrollBarControl: React.FC<HScrollBarControlProps> = ({
             padding: '2px',
             border: '1px solid #ccc',
             whiteSpace: 'nowrap',
-            zIndex: 1000
+            zIndex: 1000,
           }}
         >
           {name} ({currentValue})

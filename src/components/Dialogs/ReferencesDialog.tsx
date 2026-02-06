@@ -1,11 +1,13 @@
 import React from 'react';
 import { useVB6 } from '../../context/VB6Context';
+import { useWindowStore } from '../../stores/windowStore';
 
 const ReferencesDialog: React.FC = () => {
-  const { state, dispatch } = useVB6();
+  const { state } = useVB6();
+  const windowShowDialog = useWindowStore(state => state.showDialog);
 
   const handleClose = () => {
-    dispatch({ type: 'SHOW_DIALOG', payload: { dialogName: 'showReferences', show: false } });
+    windowShowDialog('showReferences', false);
   };
 
   return (

@@ -122,7 +122,8 @@ const lightTheme: ThemeConfig = {
       type: '#EC4899',
     },
   },
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
   fontSize: 14,
   borderRadius: 6,
   spacing: {
@@ -191,7 +192,8 @@ const darkTheme: ThemeConfig = {
       type: '#F472B6',
     },
   },
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
   fontSize: 14,
   borderRadius: 6,
   spacing: {
@@ -379,7 +381,10 @@ interface ThemeProviderProps {
   defaultTheme?: keyof typeof themes;
 }
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, defaultTheme = 'light' }) => {
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({
+  children,
+  defaultTheme = 'light',
+}) => {
   const [currentTheme, setCurrentTheme] = useState<ThemeConfig>(themes[defaultTheme]);
 
   useEffect(() => {
@@ -434,7 +439,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, defaultT
     } else {
       document.body.classList.remove('enable-animations');
     }
-
   }, [currentTheme]);
 
   const setTheme = (themeName: keyof typeof themes) => {
@@ -443,7 +447,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, defaultT
   };
 
   const customizeTheme = (customization: Partial<ThemeConfig>) => {
-    setCurrentTheme((prev) => ({
+    setCurrentTheme(prev => ({
       ...prev,
       ...customization,
       colors: {

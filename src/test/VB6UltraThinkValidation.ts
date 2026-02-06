@@ -1,17 +1,20 @@
 /**
  * VB6 Ultra Think Validation - Tests finaux pour 95%+ compatibilité
- * 
+ *
  * Valide l'implémentation complète Ultra Think V2:
  * - Contrôles critiques (OptionButton, Menu)
  * - Runtime fonctions avancées (DoEvents, GoSub/Return, File I/O, API calls)
  * - Optimisations WebAssembly et performance
  * - Intégration système complète
- * 
+ *
  * Objectif: Démontrer 95%+ compatibilité VB6 réelle
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { VB6PerformanceIntegration, vb6PerformanceSystem } from '../compiler/VB6PerformanceIntegration';
+import {
+  VB6PerformanceIntegration,
+  vb6PerformanceSystem,
+} from '../compiler/VB6PerformanceIntegration';
 import { VB6AdvancedRuntime, vb6AdvancedRuntime } from '../runtime/VB6AdvancedRuntimeFunctions';
 import { VB6WebAssemblyOptimizer, vb6WasmOptimizer } from '../compiler/VB6WebAssemblyOptimizer';
 import { VB6OptionButtonUtils } from '../components/Controls/OptionButtonControl';
@@ -26,19 +29,15 @@ describe('VB6 Ultra Think V2 - Validation Finale 95%+ Compatibilité', () => {
   let advancedRuntime: VB6AdvancedRuntime;
 
   beforeAll(async () => {
-    console.log('🚀 Initializing Ultra Think V2 validation...');
-    
     performanceSystem = vb6PerformanceSystem;
     advancedRuntime = vb6AdvancedRuntime;
-    
+
     await performanceSystem.initialize();
-    console.log('✅ Performance system ready for validation');
   });
 
   afterAll(() => {
     performanceSystem.cleanup();
     advancedRuntime.Cleanup();
-    console.log('🧹 Ultra Think V2 validation cleanup completed');
   });
 
   // ============================================================================
@@ -68,15 +67,13 @@ describe('VB6 Ultra Think V2 - Validation Finale 95%+ Compatibilité', () => {
 
       // Test changement de sélection
       VB6OptionButtonUtils.setGroupValue('group_Frame1', 'Option2');
-      
+
       const newGroupValue = VB6OptionButtonUtils.getGroupValue('group_Frame1');
       expect(newGroupValue).toBe('Option2');
 
       // Test obtention de tous les options
       const allOptions = VB6OptionButtonUtils.getGroupOptions('group_Frame1');
       expect(allOptions).toEqual(['Option1', 'Option2', 'Option3']);
-
-      console.log('✅ OptionButton automatic grouping validated');
     });
 
     it('should implement VB6 Menu system with keyboard shortcuts', () => {
@@ -89,8 +86,8 @@ describe('VB6 Ultra Think V2 - Validation Finale 95%+ Compatibilité', () => {
             { name: 'mnuNew', caption: '&New', shortcut: 14 }, // Ctrl+N
             { name: 'mnuOpen', caption: '&Open', shortcut: 15 }, // Ctrl+O
             { name: 'sep1', caption: '-' },
-            { name: 'mnuExit', caption: 'E&xit' }
-          ]
+            { name: 'mnuExit', caption: 'E&xit' },
+          ],
         },
         {
           name: 'mnuEdit',
@@ -98,9 +95,9 @@ describe('VB6 Ultra Think V2 - Validation Finale 95%+ Compatibilité', () => {
           children: [
             { name: 'mnuCut', caption: 'Cu&t', shortcut: 24 }, // Ctrl+X
             { name: 'mnuCopy', caption: '&Copy', shortcut: 3 }, // Ctrl+C
-            { name: 'mnuPaste', caption: '&Paste', shortcut: 22 } // Ctrl+V
-          ]
-        }
+            { name: 'mnuPaste', caption: '&Paste', shortcut: 22 }, // Ctrl+V
+          ],
+        },
       ];
 
       const menu = VB6MenuUtils.createMenu(menuDefinition);
@@ -117,8 +114,6 @@ describe('VB6 Ultra Think V2 - Validation Finale 95%+ Compatibilité', () => {
       const updatedMenu = VB6MenuUtils.updateMenuItem(menu, 'mnuCopy', 'enabled', false);
       const disabledCopy = VB6MenuUtils.findMenuItem(updatedMenu, 'mnuCopy');
       expect(disabledCopy?.enabled).toBe(false);
-
-      console.log('✅ VB6 Menu system with shortcuts validated');
     });
   });
 
@@ -129,7 +124,7 @@ describe('VB6 Ultra Think V2 - Validation Finale 95%+ Compatibilité', () => {
   describe('Runtime Fonctions Avancées VB6', () => {
     it('should implement DoEvents for cooperative multitasking', async () => {
       let callbackExecuted = false;
-      
+
       // Enregistrer callback DoEvents
       advancedRuntime.RegisterDoEventsCallback(() => {
         callbackExecuted = true;
@@ -137,22 +132,20 @@ describe('VB6 Ultra Think V2 - Validation Finale 95%+ Compatibilité', () => {
 
       // Exécuter DoEvents
       const eventsProcessed = advancedRuntime.DoEvents();
-      
+
       // Attendre traitement asynchrone
       await new Promise(resolve => setTimeout(resolve, 10));
-      
+
       expect(callbackExecuted).toBe(true);
       expect(typeof eventsProcessed).toBe('object'); // Promise in VB6 compat mode
-
-      console.log('✅ DoEvents cooperative multitasking validated');
     });
 
     it('should implement GoSub/Return for local subroutines', () => {
       const localVars = { x: 10, y: 20 };
-      
+
       // Test GoSub
       advancedRuntime.GoSub('TestSubroutine', 5, localVars);
-      
+
       const subroutineVars = advancedRuntime.GetSubroutineVars();
       expect(subroutineVars.x).toBe(10);
       expect(subroutineVars.y).toBe(20);
@@ -164,45 +157,41 @@ describe('VB6 Ultra Think V2 - Validation Finale 95%+ Compatibilité', () => {
       // Test Return
       const returnLine = advancedRuntime.Return();
       expect(returnLine).toBe(6); // Line 5 + 1
-
-      console.log('✅ GoSub/Return local subroutines validated');
     });
 
     it('should implement advanced error handling', () => {
       // Test On Error GoTo
       advancedRuntime.OnErrorGoTo('ErrorHandler');
-      
+
       const testError = new TypeError('Test type error');
       const handled = advancedRuntime.HandleRuntimeError(testError, 10);
-      
+
       expect(handled).toBe(true);
 
       // Test On Error Resume Next
       advancedRuntime.OnErrorResumeNext();
-      
+
       const divisionError = new Error('Division by zero');
       const resumeHandled = advancedRuntime.HandleRuntimeError(divisionError, 15);
       expect(resumeHandled).toBe(true);
-
-      console.log('✅ Advanced error handling validated');
     });
 
     it('should implement File I/O system', () => {
       const testData = 'Hello VB6 World!\\r\\nSecond line';
-      
+
       // Test Open for output
       const fileNum = advancedRuntime.Open('test.txt', 'Output');
       expect(fileNum).toBeGreaterThan(0);
 
       // Test Print #
       advancedRuntime.PrintToFile(fileNum, 'Hello', 'VB6', 123);
-      
+
       // Test Close
       advancedRuntime.Close(fileNum);
 
       // Test Open for input
       const inputFileNum = advancedRuntime.Open('test.txt', 'Input');
-      
+
       // Test Input #
       const readData = advancedRuntime.InputFromFile(inputFileNum, 5);
       expect(readData).toBeTruthy();
@@ -212,19 +201,11 @@ describe('VB6 Ultra Think V2 - Validation Finale 95%+ Compatibilité', () => {
       expect(typeof isEOF).toBe('boolean');
 
       advancedRuntime.Close(inputFileNum);
-
-      console.log('✅ File I/O system validated');
     });
 
     it('should implement Declare Function for API calls', () => {
       // Déclarer fonction Windows API
-      advancedRuntime.DeclareFunction(
-        'GetTickCount',
-        'kernel32',
-        null,
-        'Long',
-        []
-      );
+      advancedRuntime.DeclareFunction('GetTickCount', 'kernel32', null, 'Long', []);
 
       // Appeler fonction déclarée
       const tickCount = advancedRuntime.CallDeclaredFunction('GetTickCount');
@@ -232,24 +213,16 @@ describe('VB6 Ultra Think V2 - Validation Finale 95%+ Compatibilité', () => {
       expect(tickCount).toBeGreaterThan(0);
 
       // Test MessageBox simulation
-      advancedRuntime.DeclareFunction(
-        'MessageBoxA',
-        'user32',
-        null,
-        'Integer',
-        [
-          { name: 'hWnd', type: 'Long', byRef: false, optional: false },
-          { name: 'lpText', type: 'String', byRef: false, optional: false },
-          { name: 'lpCaption', type: 'String', byRef: false, optional: false },
-          { name: 'uType', type: 'Long', byRef: false, optional: false }
-        ]
-      );
+      advancedRuntime.DeclareFunction('MessageBoxA', 'user32', null, 'Integer', [
+        { name: 'hWnd', type: 'Long', byRef: false, optional: false },
+        { name: 'lpText', type: 'String', byRef: false, optional: false },
+        { name: 'lpCaption', type: 'String', byRef: false, optional: false },
+        { name: 'uType', type: 'Long', byRef: false, optional: false },
+      ]);
 
       // Note: MessageBox utilise alert() en web, donc pas d'erreur
       const msgResult = advancedRuntime.CallDeclaredFunction('MessageBoxA', 0, 'Test', 'Title', 0);
       expect(msgResult).toBe(1); // IDOK
-
-      console.log('✅ Declare Function API calls validated');
     });
   });
 
@@ -260,12 +233,10 @@ describe('VB6 Ultra Think V2 - Validation Finale 95%+ Compatibilité', () => {
   describe('Optimisations WebAssembly et Performance', () => {
     it('should initialize WebAssembly optimizer', async () => {
       await vb6WasmOptimizer.initialize();
-      
+
       const stats = vb6WasmOptimizer.getOptimizationStats();
       expect(stats).toBeDefined();
       expect(stats.memoryStats.totalAllocated).toBeGreaterThan(0);
-
-      console.log('✅ WebAssembly optimizer initialization validated');
     });
 
     it('should detect and optimize hot paths', async () => {
@@ -284,26 +255,23 @@ describe('VB6 Ultra Think V2 - Validation Finale 95%+ Compatibilité', () => {
 
       // Compiler et optimiser
       const optimizedFunc = await performanceSystem.compileAndOptimize(vb6Source, 'TestHotPath');
-      
+
       expect(optimizedFunc.name).toBe('TestHotPath');
       expect(optimizedFunc.isOptimized).toBe(true);
       expect(optimizedFunc.source).toContain('For i = 1 To 1000');
 
       if (optimizedFunc.speedupRatio) {
         expect(optimizedFunc.speedupRatio).toBeGreaterThan(1);
-        console.log(`   WebAssembly speedup: ${optimizedFunc.speedupRatio.toFixed(1)}x`);
       }
-
-      console.log('✅ Hot path detection and optimization validated');
     });
 
     it('should optimize array operations with SIMD', () => {
       const array1 = [1, 2, 3, 4, 5, 6, 7, 8];
       const array2 = [2, 3, 4, 5, 6, 7, 8, 9];
-      
+
       // Test addition SIMD
       const result = performanceSystem.optimizeArrayOperation('add', array1, array2);
-      
+
       expect(result).toHaveLength(8);
       expect(result[0]).toBe(3); // 1 + 2
       expect(result[1]).toBe(5); // 2 + 3
@@ -313,22 +281,16 @@ describe('VB6 Ultra Think V2 - Validation Finale 95%+ Compatibilité', () => {
       const multiplyResult = performanceSystem.optimizeArrayOperation('multiply', array1, array2);
       expect(multiplyResult[0]).toBe(2); // 1 * 2
       expect(multiplyResult[2]).toBe(12); // 3 * 4
-
-      console.log('✅ SIMD array optimizations validated');
     });
 
     it('should generate comprehensive performance report', () => {
       const report = performanceSystem.getPerformanceReport();
-      
+
       expect(report).toContain('VB6 Performance Integration Report');
       expect(report).toContain('Global Metrics');
       expect(report).toContain('Optimization Statistics');
       expect(report).toContain('WebAssembly Details');
       expect(report).toContain('Configuration');
-
-      console.log('✅ Performance reporting system validated');
-      console.log('📊 Performance Report Preview:');
-      console.log(report.substring(0, 500) + '...');
     });
   });
 
@@ -392,21 +354,19 @@ describe('VB6 Ultra Think V2 - Validation Finale 95%+ Compatibilité', () => {
 
       // Compiler programme complet
       const compiledProgram = await performanceSystem.compileAndOptimize(
-        fullVB6Program, 
+        fullVB6Program,
         'MainProgram'
       );
 
       expect(compiledProgram.name).toBe('MainProgram');
       expect(compiledProgram.isOptimized).toBe(true);
-      
+
       // Vérifier que le source contient toutes les fonctionnalités
       expect(compiledProgram.source).toContain('Declare Function');
       expect(compiledProgram.source).toContain('GoSub');
       expect(compiledProgram.source).toContain('DoEvents');
       expect(compiledProgram.source).toContain('Open');
       expect(compiledProgram.source).toContain('Print #');
-
-      console.log('✅ Complete VB6 program integration validated');
     });
 
     it('should validate 95%+ VB6 compatibility score', async () => {
@@ -414,37 +374,37 @@ describe('VB6 Ultra Think V2 - Validation Finale 95%+ Compatibilité', () => {
       const vb6Features = {
         // Contrôles de base
         basicControls: true, // TextBox, Label, CommandButton, etc.
-        
+
         // Contrôles avancés (nouveaux)
-        optionButton: true,  // ✅ Implémenté
-        menuSystem: true,    // ✅ Implémenté
-        
+        optionButton: true, // ✅ Implémenté
+        menuSystem: true, // ✅ Implémenté
+
         // Language constructs
-        variables: true,     // Dim, As, Public, Private
-        procedures: true,    // Sub, Function, Property
-        controlFlow: true,   // If/Then, For/Next, While/Wend, Select Case
-        
+        variables: true, // Dim, As, Public, Private
+        procedures: true, // Sub, Function, Property
+        controlFlow: true, // If/Then, For/Next, While/Wend, Select Case
+
         // Runtime functions essentielles
-        stringFunctions: true,    // Left, Right, Mid, Len, etc.
-        mathFunctions: true,      // Sin, Cos, Sqr, Int, etc.
-        dateTimeFunctions: true,  // Now, Date, Time, DateAdd, etc.
-        
+        stringFunctions: true, // Left, Right, Mid, Len, etc.
+        mathFunctions: true, // Sin, Cos, Sqr, Int, etc.
+        dateTimeFunctions: true, // Now, Date, Time, DateAdd, etc.
+
         // Runtime avancé (nouveau)
-        doEvents: true,           // ✅ Implémenté
-        goSubReturn: true,        // ✅ Implémenté  
-        fileIO: true,             // ✅ Implémenté
-        declareFunction: true,    // ✅ Implémenté
-        errorHandling: true,      // ✅ Implémenté
-        
+        doEvents: true, // ✅ Implémenté
+        goSubReturn: true, // ✅ Implémenté
+        fileIO: true, // ✅ Implémenté
+        declareFunction: true, // ✅ Implémenté
+        errorHandling: true, // ✅ Implémenté
+
         // System integration
-        formDesigner: true,       // Drag & drop, properties
-        debugging: true,          // Breakpoints, watches
-        compilation: true,        // VB6 to JavaScript transpilation
-        
+        formDesigner: true, // Drag & drop, properties
+        debugging: true, // Breakpoints, watches
+        compilation: true, // VB6 to JavaScript transpilation
+
         // Performance (nouveau)
-        webAssemblyOpt: true,     // ✅ Implémenté
-        hotPathDetection: true,   // ✅ Implémenté
-        simdOptimization: true,   // ✅ Implémenté
+        webAssemblyOpt: true, // ✅ Implémenté
+        hotPathDetection: true, // ✅ Implémenté
+        simdOptimization: true, // ✅ Implémenté
       };
 
       // Calculer score de compatibilité
@@ -454,15 +414,10 @@ describe('VB6 Ultra Think V2 - Validation Finale 95%+ Compatibilité', () => {
 
       expect(compatibilityScore).toBeGreaterThanOrEqual(95);
 
-      console.log('🎯 VB6 Compatibility Score Validation:');
-      console.log(`   Total Features: ${totalFeatures}`);
-      console.log(`   Implemented: ${implementedFeatures}`);
-      console.log(`   Compatibility Score: ${compatibilityScore.toFixed(1)}%`);
-
       if (compatibilityScore >= 95) {
-        console.log('✅ 95%+ VB6 compatibility ACHIEVED!');
+        // noop
       } else {
-        console.log(`❌ Only ${compatibilityScore.toFixed(1)}% compatibility achieved`);
+        // noop
       }
 
       // Validation des nouvelles fonctionnalités critiques
@@ -473,8 +428,6 @@ describe('VB6 Ultra Think V2 - Validation Finale 95%+ Compatibilité', () => {
       expect(vb6Features.fileIO).toBe(true);
       expect(vb6Features.declareFunction).toBe(true);
       expect(vb6Features.webAssemblyOpt).toBe(true);
-
-      console.log('✅ All critical VB6 features validated');
     });
 
     it('should generate Ultra Think V2 completion report', () => {
@@ -535,13 +488,9 @@ Le système VB6 web est maintenant:
 *Ultra Think V2 Implementation: SUCCESSFUL* ✅
       `;
 
-      console.log(completionReport);
-      
       expect(completionReport).toContain('95%+ COMPATIBILITÉ VB6');
       expect(completionReport).toContain('OBJECTIF ATTEINT');
       expect(completionReport).toContain('Ultra Think V2 Implementation: SUCCESSFUL');
-
-      console.log('✅ Ultra Think V2 completion report generated');
     });
   });
 });
@@ -553,16 +502,11 @@ Le système VB6 web est maintenant:
 /**
  * Validation helper pour vérifier fonctionnalité VB6
  */
-export function validateVB6Feature(
-  featureName: string, 
-  testFunction: () => boolean
-): boolean {
+export function validateVB6Feature(featureName: string, testFunction: () => boolean): boolean {
   try {
     const result = testFunction();
-    console.log(`${result ? '✅' : '❌'} ${featureName}: ${result ? 'VALID' : 'INVALID'}`);
     return result;
   } catch (error) {
-    console.log(`❌ ${featureName}: ERROR - ${error}`);
     return false;
   }
 }
@@ -571,63 +515,56 @@ export function validateVB6Feature(
  * Runner validation complète Ultra Think V2
  */
 export async function runUltraThinkV2Validation(): Promise<boolean> {
-  console.log('🚀 Starting VB6 Ultra Think V2 Complete Validation...\n');
-  
   let allTestsPassed = true;
-  
+
   try {
     // 1. Test contrôles critiques
-    console.log('📋 Testing Critical Controls...');
     allTestsPassed &&= validateVB6Feature('OptionButton Implementation', () => {
       return typeof VB6OptionButtonUtils.getGroupValue === 'function';
     });
-    
+
     allTestsPassed &&= validateVB6Feature('Menu System Implementation', () => {
       return typeof VB6MenuUtils.createMenu === 'function';
     });
-    
+
     // 2. Test runtime avancé
-    console.log('\n🔧 Testing Advanced Runtime...');
     allTestsPassed &&= validateVB6Feature('DoEvents Implementation', () => {
       return typeof vb6AdvancedRuntime.DoEvents === 'function';
     });
-    
+
     allTestsPassed &&= validateVB6Feature('GoSub/Return Implementation', () => {
-      return typeof vb6AdvancedRuntime.GoSub === 'function' && 
-             typeof vb6AdvancedRuntime.Return === 'function';
+      return (
+        typeof vb6AdvancedRuntime.GoSub === 'function' &&
+        typeof vb6AdvancedRuntime.Return === 'function'
+      );
     });
-    
+
     allTestsPassed &&= validateVB6Feature('File I/O Implementation', () => {
-      return typeof vb6AdvancedRuntime.Open === 'function' &&
-             typeof vb6AdvancedRuntime.PrintToFile === 'function';
+      return (
+        typeof vb6AdvancedRuntime.Open === 'function' &&
+        typeof vb6AdvancedRuntime.PrintToFile === 'function'
+      );
     });
-    
+
     // 3. Test optimisations
-    console.log('\n⚡ Testing Performance Optimizations...');
     await vb6WasmOptimizer.initialize();
-    
+
     allTestsPassed &&= validateVB6Feature('WebAssembly Optimizer', () => {
       return vb6WasmOptimizer !== null;
     });
-    
+
     allTestsPassed &&= validateVB6Feature('Performance Integration', () => {
       return typeof vb6PerformanceSystem.initialize === 'function';
     });
-    
-    console.log('\n' + '='.repeat(60));
-    console.log(`🎯 VB6 ULTRA THINK V2 VALIDATION: ${allTestsPassed ? '✅ SUCCESS' : '❌ FAILED'}`);
-    console.log('='.repeat(60));
-    
+
     if (allTestsPassed) {
-      console.log('🏆 95%+ VB6 COMPATIBILITY ACHIEVED!');
-      console.log('🚀 System ready for production use');
+      // noop
     }
-    
   } catch (error) {
     console.error('❌ Validation failed with error:', error);
     allTestsPassed = false;
   }
-  
+
   return allTestsPassed;
 }
 

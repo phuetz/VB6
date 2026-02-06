@@ -246,13 +246,7 @@ export function RandomInt(min: number, max: number): number {
 /**
  * Pmt - Payment for a loan
  */
-export function Pmt(
-  rate: number,
-  nper: number,
-  pv: number,
-  fv?: number,
-  type?: number
-): number {
+export function Pmt(rate: number, nper: number, pv: number, fv?: number, type?: number): number {
   const futureValue = fv || 0;
   const paymentType = type || 0;
 
@@ -273,13 +267,7 @@ export function Pmt(
 /**
  * PV - Present value
  */
-export function PV(
-  rate: number,
-  nper: number,
-  pmt: number,
-  fv?: number,
-  type?: number
-): number {
+export function PV(rate: number, nper: number, pmt: number, fv?: number, type?: number): number {
   const futureValue = fv || 0;
   const paymentType = type || 0;
 
@@ -288,7 +276,7 @@ export function PV(
   }
 
   const pvif = Math.pow(1 + rate, nper);
-  let present = (-pmt * (pvif - 1) / rate - futureValue) / pvif;
+  let present = ((-pmt * (pvif - 1)) / rate - futureValue) / pvif;
 
   if (paymentType === 1) {
     present = present * (1 + rate);
@@ -300,13 +288,7 @@ export function PV(
 /**
  * FV - Future value
  */
-export function FV(
-  rate: number,
-  nper: number,
-  pmt: number,
-  pv?: number,
-  type?: number
-): number {
+export function FV(rate: number, nper: number, pmt: number, pv?: number, type?: number): number {
   const presentValue = pv || 0;
   const paymentType = type || 0;
 
@@ -318,9 +300,9 @@ export function FV(
   let future: number;
 
   if (paymentType === 1) {
-    future = -presentValue * pvif - pmt * (1 + rate) * (pvif - 1) / rate;
+    future = -presentValue * pvif - (pmt * (1 + rate) * (pvif - 1)) / rate;
   } else {
-    future = -presentValue * pvif - pmt * (pvif - 1) / rate;
+    future = -presentValue * pvif - (pmt * (pvif - 1)) / rate;
   }
 
   return future;
@@ -329,13 +311,7 @@ export function FV(
 /**
  * NPer - Number of periods
  */
-export function NPer(
-  rate: number,
-  pmt: number,
-  pv: number,
-  fv?: number,
-  type?: number
-): number {
+export function NPer(rate: number, pmt: number, pv: number, fv?: number, type?: number): number {
   const futureValue = fv || 0;
   const paymentType = type || 0;
 
@@ -415,7 +391,7 @@ export function IRR(values: number[], guess?: number): number {
     for (let j = 0; j < values.length; j++) {
       const factor = Math.pow(1 + rate, j);
       npv += values[j] / factor;
-      dnpv -= j * values[j] / (factor * (1 + rate));
+      dnpv -= (j * values[j]) / (factor * (1 + rate));
     }
 
     if (Math.abs(npv) < tolerance) {
@@ -433,11 +409,7 @@ export function IRR(values: number[], guess?: number): number {
 /**
  * MIRR - Modified internal rate of return
  */
-export function MIRR(
-  values: number[],
-  financeRate: number,
-  reinvestRate: number
-): number {
+export function MIRR(values: number[], financeRate: number, reinvestRate: number): number {
   const n = values.length;
   let positiveValue = 0;
   let negativeValue = 0;
@@ -499,15 +471,10 @@ export function SLN(cost: number, salvage: number, life: number): number {
 /**
  * SYD - Sum-of-years-digits depreciation
  */
-export function SYD(
-  cost: number,
-  salvage: number,
-  life: number,
-  period: number
-): number {
+export function SYD(cost: number, salvage: number, life: number, period: number): number {
   const depreciable = cost - salvage;
   const sumYears = (life * (life + 1)) / 2;
-  return depreciable * (life - period + 1) / sumYears;
+  return (depreciable * (life - period + 1)) / sumYears;
 }
 
 /**
@@ -694,7 +661,7 @@ export const VB6MathFunctions = {
   LOG2E,
   LOG10E,
   SQRT2,
-  SQRT1_2
+  SQRT1_2,
 };
 
 export default VB6MathFunctions;

@@ -16,7 +16,7 @@ export enum ComponentType {
   Interface = 'Interface',
   Enumeration = 'Enumeration',
   Module = 'Module',
-  Resource = 'Resource'
+  Resource = 'Resource',
 }
 
 export enum ComponentCategory {
@@ -32,7 +32,7 @@ export enum ComponentCategory {
   Database = 'Database',
   Business = 'Business Logic',
   Security = 'Security',
-  Custom = 'Custom'
+  Custom = 'Custom',
 }
 
 export enum ComponentStatus {
@@ -40,7 +40,7 @@ export enum ComponentStatus {
   InUse = 'In Use',
   Deprecated = 'Deprecated',
   Beta = 'Beta',
-  Experimental = 'Experimental'
+  Experimental = 'Experimental',
 }
 
 // Component Information
@@ -141,9 +141,11 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
   onComponentSelect,
   onComponentInstall,
   onComponentPublish,
-  onCodeInsert
+  onCodeInsert,
 }) => {
-  const [selectedTab, setSelectedTab] = useState<'browse' | 'collections' | 'publish' | 'settings'>('browse');
+  const [selectedTab, setSelectedTab] = useState<'browse' | 'collections' | 'publish' | 'settings'>(
+    'browse'
+  );
   const [selectedCategory, setSelectedCategory] = useState<ComponentCategory | 'All'>('All');
   const [selectedType, setSelectedType] = useState<ComponentType | 'All'>('All');
   const [searchFilter, setSearchFilter] = useState('');
@@ -165,7 +167,7 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
     properties: [],
     methods: [],
     events: [],
-    examples: []
+    examples: [],
   });
 
   const eventEmitter = useRef(new EventEmitter());
@@ -180,7 +182,8 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
       id: 'comp_1',
       name: 'EnhancedTextBox',
       title: 'Enhanced TextBox Control',
-      description: 'A powerful TextBox control with built-in validation, formatting, and autocomplete features.',
+      description:
+        'A powerful TextBox control with built-in validation, formatting, and autocomplete features.',
       type: ComponentType.UserControl,
       category: ComponentCategory.UserInterface,
       status: ComponentStatus.Available,
@@ -197,38 +200,46 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
       dependencies: ['msvbvm60.dll', 'oleaut32.dll'],
       interfaces: ['IEnhancedTextBox', 'IValidation'],
       properties: [
-        { name: 'ValidationPattern', type: 'String', description: 'Regular expression for validation', defaultValue: '' },
-        { name: 'AutoComplete', type: 'Boolean', description: 'Enable autocomplete feature', defaultValue: true },
-        { name: 'FormatMask', type: 'String', description: 'Input format mask', defaultValue: '' }
+        {
+          name: 'ValidationPattern',
+          type: 'String',
+          description: 'Regular expression for validation',
+          defaultValue: '',
+        },
+        {
+          name: 'AutoComplete',
+          type: 'Boolean',
+          description: 'Enable autocomplete feature',
+          defaultValue: true,
+        },
+        { name: 'FormatMask', type: 'String', description: 'Input format mask', defaultValue: '' },
       ],
       methods: [
         {
           name: 'Validate',
           parameters: [],
           returnType: 'Boolean',
-          description: 'Validates the current text against the pattern'
+          description: 'Validates the current text against the pattern',
         },
         {
           name: 'ClearHistory',
           parameters: [],
-          description: 'Clears the autocomplete history'
-        }
+          description: 'Clears the autocomplete history',
+        },
       ],
       events: [
         {
           name: 'ValidationError',
-          parameters: [
-            { name: 'ErrorMessage', type: 'String' }
-          ],
-          description: 'Fired when validation fails'
-        }
+          parameters: [{ name: 'ErrorMessage', type: 'String' }],
+          description: 'Fired when validation fails',
+        },
       ],
       examples: [
         {
           title: 'Email Validation',
           code: 'EnhancedTextBox1.ValidationPattern = "^[\\w\\._%+-]+@[\\w\\.-]+\\.[A-Za-z]{2,}$"',
-          description: 'Set up email validation pattern'
-        }
+          description: 'Set up email validation pattern',
+        },
       ],
       rating: 4.5,
       downloads: 1250,
@@ -238,15 +249,16 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
           user: 'Developer123',
           rating: 5,
           comment: 'Excellent control! Saved me hours of work.',
-          date: new Date('2023-05-10')
-        }
-      ]
+          date: new Date('2023-05-10'),
+        },
+      ],
     },
     {
       id: 'comp_2',
       name: 'DatabaseHelper',
       title: 'Database Helper Class',
-      description: 'A comprehensive class for database operations with connection pooling and error handling.',
+      description:
+        'A comprehensive class for database operations with connection pooling and error handling.',
       type: ComponentType.ClassModule,
       category: ComponentCategory.DataAccess,
       status: ComponentStatus.Available,
@@ -264,55 +276,61 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
       interfaces: ['IDatabaseHelper'],
       properties: [
         { name: 'ConnectionString', type: 'String', description: 'Database connection string' },
-        { name: 'CommandTimeout', type: 'Long', description: 'Command timeout in seconds', defaultValue: 30 }
+        {
+          name: 'CommandTimeout',
+          type: 'Long',
+          description: 'Command timeout in seconds',
+          defaultValue: 30,
+        },
       ],
       methods: [
         {
           name: 'ExecuteQuery',
           parameters: [
             { name: 'SQL', type: 'String', optional: false },
-            { name: 'Parameters', type: 'Variant', optional: true }
+            { name: 'Parameters', type: 'Variant', optional: true },
           ],
           returnType: 'ADODB.Recordset',
-          description: 'Executes a SELECT query and returns a recordset'
+          description: 'Executes a SELECT query and returns a recordset',
         },
         {
           name: 'ExecuteNonQuery',
           parameters: [
             { name: 'SQL', type: 'String', optional: false },
-            { name: 'Parameters', type: 'Variant', optional: true }
+            { name: 'Parameters', type: 'Variant', optional: true },
           ],
           returnType: 'Long',
-          description: 'Executes an INSERT/UPDATE/DELETE query'
-        }
+          description: 'Executes an INSERT/UPDATE/DELETE query',
+        },
       ],
       events: [
         {
           name: 'QueryExecuted',
           parameters: [
             { name: 'SQL', type: 'String' },
-            { name: 'RecordsAffected', type: 'Long' }
+            { name: 'RecordsAffected', type: 'Long' },
           ],
-          description: 'Fired after a query is executed'
-        }
+          description: 'Fired after a query is executed',
+        },
       ],
       examples: [
         {
           title: 'Simple Query',
           code: 'Dim rs As ADODB.Recordset\nSet rs = dbHelper.ExecuteQuery("SELECT * FROM Users WHERE Active = ?", Array(True))',
-          description: 'Execute a parameterized query'
-        }
+          description: 'Execute a parameterized query',
+        },
       ],
       rating: 4.8,
       downloads: 2100,
       favorites: 156,
-      reviews: []
+      reviews: [],
     },
     {
       id: 'comp_3',
       name: 'Logger',
       title: 'Application Logger',
-      description: 'A flexible logging system with multiple output targets and configurable log levels.',
+      description:
+        'A flexible logging system with multiple output targets and configurable log levels.',
       type: ComponentType.Module,
       category: ComponentCategory.Utility,
       status: ComponentStatus.Available,
@@ -332,33 +350,31 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
       methods: [
         {
           name: 'LogInfo',
-          parameters: [
-            { name: 'Message', type: 'String', optional: false }
-          ],
-          description: 'Logs an informational message'
+          parameters: [{ name: 'Message', type: 'String', optional: false }],
+          description: 'Logs an informational message',
         },
         {
           name: 'LogError',
           parameters: [
             { name: 'Message', type: 'String', optional: false },
-            { name: 'ErrorNumber', type: 'Long', optional: true }
+            { name: 'ErrorNumber', type: 'Long', optional: true },
           ],
-          description: 'Logs an error message'
-        }
+          description: 'Logs an error message',
+        },
       ],
       events: [],
       examples: [
         {
           title: 'Basic Logging',
           code: 'Call LogInfo("Application started")\nCall LogError("Failed to connect to database", Err.Number)',
-          description: 'Basic logging examples'
-        }
+          description: 'Basic logging examples',
+        },
       ],
       rating: 4.2,
       downloads: 850,
       favorites: 45,
-      reviews: []
-    }
+      reviews: [],
+    },
   ];
 
   // Initialize components
@@ -368,15 +384,16 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
 
   // Filter components
   const filteredComponents = components.filter(comp => {
-    const matchesSearch = !searchFilter || 
+    const matchesSearch =
+      !searchFilter ||
       comp.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
       comp.title.toLowerCase().includes(searchFilter.toLowerCase()) ||
       comp.description.toLowerCase().includes(searchFilter.toLowerCase()) ||
       comp.keywords.some(k => k.toLowerCase().includes(searchFilter.toLowerCase()));
-    
+
     const matchesCategory = selectedCategory === 'All' || comp.category === selectedCategory;
     const matchesType = selectedType === 'All' || comp.type === selectedType;
-    
+
     return matchesSearch && matchesCategory && matchesType;
   });
 
@@ -410,20 +427,24 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
   }, []);
 
   // Install component
-  const installComponent = useCallback((component: ComponentInfo) => {
-    onComponentInstall?.(component);
-    // Update download count
-    setComponents(prev => prev.map(c => 
-      c.id === component.id 
-        ? { ...c, downloads: c.downloads + 1 }
-        : c
-    ));
-  }, [onComponentInstall]);
+  const installComponent = useCallback(
+    (component: ComponentInfo) => {
+      onComponentInstall?.(component);
+      // Update download count
+      setComponents(prev =>
+        prev.map(c => (c.id === component.id ? { ...c, downloads: c.downloads + 1 } : c))
+      );
+    },
+    [onComponentInstall]
+  );
 
   // Insert code
-  const insertCode = useCallback((code: string) => {
-    onCodeInsert?.(code);
-  }, [onCodeInsert]);
+  const insertCode = useCallback(
+    (code: string) => {
+      onCodeInsert?.(code);
+    },
+    [onCodeInsert]
+  );
 
   // Publish component
   const publishComponent = useCallback(() => {
@@ -456,7 +477,7 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
       rating: 0,
       downloads: 0,
       favorites: 0,
-      reviews: []
+      reviews: [],
     };
 
     setComponents(prev => [...prev, newComponent]);
@@ -471,7 +492,7 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
       properties: [],
       methods: [],
       events: [],
-      examples: []
+      examples: [],
     });
   }, [publishForm, generateId, onComponentPublish]);
 
@@ -487,27 +508,31 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
                 type="text"
                 placeholder="Search components..."
                 value={searchFilter}
-                onChange={(e) => setSearchFilter(e.target.value)}
+                onChange={e => setSearchFilter(e.target.value)}
                 className="px-3 py-1 border border-gray-300 rounded w-64"
               />
               <select
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value as ComponentCategory | 'All')}
+                onChange={e => setSelectedCategory(e.target.value as ComponentCategory | 'All')}
                 className="px-2 py-1 border border-gray-300 rounded"
               >
                 <option value="All">All Categories</option>
                 {Object.values(ComponentCategory).map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
                 ))}
               </select>
               <select
                 value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value as ComponentType | 'All')}
+                onChange={e => setSelectedType(e.target.value as ComponentType | 'All')}
                 className="px-2 py-1 border border-gray-300 rounded"
               >
                 <option value="All">All Types</option>
                 {Object.values(ComponentType).map(type => (
-                  <option key={type} value={type}>{type}</option>
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
                 ))}
               </select>
             </div>
@@ -515,7 +540,7 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
           <div className="flex items-center gap-2">
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
+              onChange={e => setSortBy(e.target.value as any)}
               className="px-2 py-1 border border-gray-300 rounded text-sm"
             >
               <option value="name">Sort by Name</option>
@@ -554,7 +579,7 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
             { key: 'browse', label: 'Browse Components', count: components.length },
             { key: 'collections', label: 'Collections', count: collections.length },
             { key: 'publish', label: 'Publish', count: 0 },
-            { key: 'settings', label: 'Settings', count: 0 }
+            { key: 'settings', label: 'Settings', count: 0 },
           ].map(tab => (
             <button
               key={tab.key}
@@ -593,7 +618,7 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
                         <div className="flex items-center gap-2">
                           <span className="text-2xl">{getComponentIcon(component.type)}</span>
                           <button
-                            onClick={(e) => {
+                            onClick={e => {
                               e.stopPropagation();
                               toggleFavorite(component.id);
                             }}
@@ -602,12 +627,16 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
                             ★
                           </button>
                         </div>
-                        <span className={`px-2 py-1 rounded text-xs ${getStatusColor(component.status)}`}>
+                        <span
+                          className={`px-2 py-1 rounded text-xs ${getStatusColor(component.status)}`}
+                        >
                           {component.status}
                         </span>
                       </div>
                       <h3 className="font-medium text-sm mb-1 truncate">{component.title}</h3>
-                      <p className="text-xs text-gray-600 mb-2 line-clamp-2">{component.description}</p>
+                      <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+                        {component.description}
+                      </p>
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <span>{component.category}</span>
                         <span>v{component.version}</span>
@@ -618,7 +647,7 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
                           <span>📥 {component.downloads}</span>
                         </div>
                         <button
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             installComponent(component);
                           }}
@@ -646,7 +675,9 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-medium">{component.title}</h3>
-                          <span className={`px-2 py-1 rounded text-xs ${getStatusColor(component.status)}`}>
+                          <span
+                            className={`px-2 py-1 rounded text-xs ${getStatusColor(component.status)}`}
+                          >
                             {component.status}
                           </span>
                         </div>
@@ -660,7 +691,7 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
                       </div>
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             toggleFavorite(component.id);
                           }}
@@ -669,7 +700,7 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
                           ★
                         </button>
                         <button
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             installComponent(component);
                           }}
@@ -682,7 +713,7 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
                   ))}
                 </div>
               )}
-              
+
               {sortedComponents.length === 0 && (
                 <div className="text-center py-12 text-gray-500">
                   <div className="text-4xl mb-4">📦</div>
@@ -725,7 +756,10 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
                         <h3 className="font-medium mb-2">Properties</h3>
                         <div className="border border-gray-300 rounded">
                           {selectedComponent.properties.map((prop, index) => (
-                            <div key={index} className="p-3 border-b border-gray-200 last:border-b-0">
+                            <div
+                              key={index}
+                              className="p-3 border-b border-gray-200 last:border-b-0"
+                            >
                               <div className="flex items-center justify-between mb-1">
                                 <span className="font-mono text-sm">{prop.name}</span>
                                 <span className="text-sm text-blue-600">{prop.type}</span>
@@ -743,14 +777,19 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
                         <h3 className="font-medium mb-2">Methods</h3>
                         <div className="border border-gray-300 rounded">
                           {selectedComponent.methods.map((method, index) => (
-                            <div key={index} className="p-3 border-b border-gray-200 last:border-b-0">
+                            <div
+                              key={index}
+                              className="p-3 border-b border-gray-200 last:border-b-0"
+                            >
                               <div className="mb-1">
                                 <span className="font-mono text-sm">{method.name}</span>
                                 <span className="text-xs text-gray-500">
                                   ({method.parameters.map(p => `${p.name}: ${p.type}`).join(', ')})
                                 </span>
                                 {method.returnType && (
-                                  <span className="text-sm text-blue-600 ml-2">→ {method.returnType}</span>
+                                  <span className="text-sm text-blue-600 ml-2">
+                                    → {method.returnType}
+                                  </span>
                                 )}
                               </div>
                               <p className="text-xs text-gray-600">{method.description}</p>
@@ -786,14 +825,32 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
                     <div>
                       <h3 className="font-medium mb-2">Information</h3>
                       <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div><strong>Version:</strong> {selectedComponent.version}</div>
-                        <div><strong>Type:</strong> {selectedComponent.type}</div>
-                        <div><strong>Category:</strong> {selectedComponent.category}</div>
-                        <div><strong>Status:</strong> {selectedComponent.status}</div>
-                        <div><strong>File Size:</strong> {(selectedComponent.size / 1024).toFixed(1)} KB</div>
-                        <div><strong>Downloads:</strong> {selectedComponent.downloads}</div>
-                        <div><strong>Rating:</strong> ⭐ {selectedComponent.rating.toFixed(1)}</div>
-                        <div><strong>Modified:</strong> {selectedComponent.modified.toLocaleDateString()}</div>
+                        <div>
+                          <strong>Version:</strong> {selectedComponent.version}
+                        </div>
+                        <div>
+                          <strong>Type:</strong> {selectedComponent.type}
+                        </div>
+                        <div>
+                          <strong>Category:</strong> {selectedComponent.category}
+                        </div>
+                        <div>
+                          <strong>Status:</strong> {selectedComponent.status}
+                        </div>
+                        <div>
+                          <strong>File Size:</strong> {(selectedComponent.size / 1024).toFixed(1)}{' '}
+                          KB
+                        </div>
+                        <div>
+                          <strong>Downloads:</strong> {selectedComponent.downloads}
+                        </div>
+                        <div>
+                          <strong>Rating:</strong> ⭐ {selectedComponent.rating.toFixed(1)}
+                        </div>
+                        <div>
+                          <strong>Modified:</strong>{' '}
+                          {selectedComponent.modified.toLocaleDateString()}
+                        </div>
                       </div>
                     </div>
 
@@ -818,7 +875,9 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
             <div className="text-center py-12 text-gray-500">
               <div className="text-4xl mb-4">📚</div>
               <p className="text-lg">Component Collections</p>
-              <p className="text-sm mt-2">Organize your components into collections for easy access</p>
+              <p className="text-sm mt-2">
+                Organize your components into collections for easy access
+              </p>
             </div>
           </div>
         )}
@@ -838,7 +897,9 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
             <div className="text-center py-12 text-gray-500">
               <div className="text-4xl mb-4">⚙️</div>
               <p className="text-lg">Component Manager Settings</p>
-              <p className="text-sm mt-2">Configure repositories, preferences, and update settings</p>
+              <p className="text-sm mt-2">
+                Configure repositories, preferences, and update settings
+              </p>
             </div>
           </div>
         )}
@@ -849,7 +910,7 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[600px] max-h-[80vh] overflow-y-auto">
             <h3 className="text-lg font-medium mb-4">Publish Component</h3>
-            
+
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -857,7 +918,7 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
                   <input
                     type="text"
                     value={publishForm.name || ''}
-                    onChange={(e) => setPublishForm(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={e => setPublishForm(prev => ({ ...prev, name: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   />
                 </div>
@@ -866,43 +927,47 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
                   <input
                     type="text"
                     value={publishForm.version || ''}
-                    onChange={(e) => setPublishForm(prev => ({ ...prev, version: e.target.value }))}
+                    onChange={e => setPublishForm(prev => ({ ...prev, version: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                     placeholder="1.0.0"
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
                 <input
                   type="text"
                   value={publishForm.title || ''}
-                  onChange={(e) => setPublishForm(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={e => setPublishForm(prev => ({ ...prev, title: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
                   value={publishForm.description || ''}
-                  onChange={(e) => setPublishForm(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={e => setPublishForm(prev => ({ ...prev, description: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   rows={3}
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
                   <select
                     value={publishForm.type}
-                    onChange={(e) => setPublishForm(prev => ({ ...prev, type: e.target.value as ComponentType }))}
+                    onChange={e =>
+                      setPublishForm(prev => ({ ...prev, type: e.target.value as ComponentType }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   >
                     {Object.values(ComponentType).map(type => (
-                      <option key={type} value={type}>{type}</option>
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -910,17 +975,24 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
                   <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                   <select
                     value={publishForm.category}
-                    onChange={(e) => setPublishForm(prev => ({ ...prev, category: e.target.value as ComponentCategory }))}
+                    onChange={e =>
+                      setPublishForm(prev => ({
+                        ...prev,
+                        category: e.target.value as ComponentCategory,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   >
                     {Object.values(ComponentCategory).map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
             </div>
-            
+
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => setShowPublishDialog(false)}
@@ -944,32 +1016,53 @@ export const VisualComponentManager: React.FC<VisualComponentManagerProps> = ({
 
   function getComponentIcon(type: ComponentType): string {
     switch (type) {
-      case ComponentType.ActiveXControl: return '🎛️';
-      case ComponentType.CodeSnippet: return '📝';
-      case ComponentType.ClassModule: return '🏛️';
-      case ComponentType.FormTemplate: return '📋';
-      case ComponentType.UserControl: return '🎨';
-      case ComponentType.PropertyPage: return '⚙️';
-      case ComponentType.Document: return '📄';
-      case ComponentType.Designer: return '🎯';
-      case ComponentType.AddIn: return '🔌';
-      case ComponentType.TypeLibrary: return '📚';
-      case ComponentType.Interface: return '🔗';
-      case ComponentType.Enumeration: return '📋';
-      case ComponentType.Module: return '📦';
-      case ComponentType.Resource: return '🎪';
-      default: return '📦';
+      case ComponentType.ActiveXControl:
+        return '🎛️';
+      case ComponentType.CodeSnippet:
+        return '📝';
+      case ComponentType.ClassModule:
+        return '🏛️';
+      case ComponentType.FormTemplate:
+        return '📋';
+      case ComponentType.UserControl:
+        return '🎨';
+      case ComponentType.PropertyPage:
+        return '⚙️';
+      case ComponentType.Document:
+        return '📄';
+      case ComponentType.Designer:
+        return '🎯';
+      case ComponentType.AddIn:
+        return '🔌';
+      case ComponentType.TypeLibrary:
+        return '📚';
+      case ComponentType.Interface:
+        return '🔗';
+      case ComponentType.Enumeration:
+        return '📋';
+      case ComponentType.Module:
+        return '📦';
+      case ComponentType.Resource:
+        return '🎪';
+      default:
+        return '📦';
     }
   }
 
   function getStatusColor(status: ComponentStatus): string {
     switch (status) {
-      case ComponentStatus.Available: return 'bg-green-100 text-green-800';
-      case ComponentStatus.InUse: return 'bg-blue-100 text-blue-800';
-      case ComponentStatus.Deprecated: return 'bg-red-100 text-red-800';
-      case ComponentStatus.Beta: return 'bg-yellow-100 text-yellow-800';
-      case ComponentStatus.Experimental: return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case ComponentStatus.Available:
+        return 'bg-green-100 text-green-800';
+      case ComponentStatus.InUse:
+        return 'bg-blue-100 text-blue-800';
+      case ComponentStatus.Deprecated:
+        return 'bg-red-100 text-red-800';
+      case ComponentStatus.Beta:
+        return 'bg-yellow-100 text-yellow-800';
+      case ComponentStatus.Experimental:
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   }
 };

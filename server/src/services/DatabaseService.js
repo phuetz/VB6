@@ -30,30 +30,30 @@ class DatabaseService {
 
     try {
       let connection;
-      
+
       switch (type.toLowerCase()) {
         case 'mysql':
           connection = await this.createMySQLConnection(connectionConfig);
           break;
-        
+
         case 'postgresql':
         case 'postgres':
           connection = await this.createPostgreSQLConnection(connectionConfig);
           break;
-        
+
         case 'mssql':
         case 'sqlserver':
           connection = await this.createMSSQLConnection(connectionConfig);
           break;
-        
+
         case 'mongodb':
           connection = await this.createMongoDBConnection(connectionConfig);
           break;
-        
+
         case 'sqlite':
           connection = await this.createSQLiteConnection(connectionConfig);
           break;
-        
+
         default:
           throw new Error(`Unsupported database type: ${type}`);
       }
@@ -64,16 +64,16 @@ class DatabaseService {
         connection,
         config: connectionConfig,
         createdAt: new Date(),
-        lastUsed: new Date()
+        lastUsed: new Date(),
       });
 
       logger.info(`Database connection created: ${connectionId} (${type})`);
-      
+
       return {
         connectionId,
         type,
         status: 'connected',
-        createdAt: new Date()
+        createdAt: new Date(),
       };
     } catch (error) {
       logger.error(`Failed to create connection: ${error.message}`);
@@ -93,7 +93,7 @@ class DatabaseService {
       connectionLimit: config.connectionLimit || 10,
       queueLimit: 0,
       enableKeepAlive: true,
-      keepAliveInitialDelay: 0
+      keepAliveInitialDelay: 0,
     });
 
     // Test de connexion
@@ -135,12 +135,12 @@ class DatabaseService {
       pool: {
         max: config.connectionLimit || 10,
         min: 0,
-        idleTimeoutMillis: 30000
+        idleTimeoutMillis: 30000,
       },
       options: {
         encrypt: config.encrypt || false,
-        trustServerCertificate: config.trustServerCertificate || true
-      }
+        trustServerCertificate: config.trustServerCertificate || true,
+      },
     };
 
     const pool = await mssql.connect(sqlConfig);
@@ -153,12 +153,12 @@ class DatabaseService {
     const client = new MongoClient(url, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      maxPoolSize: config.connectionLimit || 10
+      maxPoolSize: config.connectionLimit || 10,
     });
 
     await client.connect();
     const db = client.db(config.database);
-    
+
     return { client, db };
   }
 
@@ -166,7 +166,7 @@ class DatabaseService {
   async createSQLiteConnection(config) {
     const db = await open({
       filename: config.filename || ':memory:',
-      driver: sqlite3.Database
+      driver: sqlite3.Database,
     });
 
     return db;
@@ -175,7 +175,7 @@ class DatabaseService {
   // Exécuter une requête
   async executeQuery(params) {
     const { connectionId, query, parameters = [], options = {} } = params;
-    
+
     const connectionInfo = activeConnections.get(connectionId);
     if (!connectionInfo) {
       throw new Error('Connection not found');
@@ -200,38 +200,38 @@ class DatabaseService {
         case 'mysql':
           result = await this.executeMySQLQuery(connectionInfo.connection, query, parameters);
           break;
-        
+
         case 'postgresql':
         case 'postgres':
           result = await this.executePostgreSQLQuery(connectionInfo.connection, query, parameters);
           break;
-        
+
         case 'mssql':
         case 'sqlserver':
           result = await this.executeMSSQLQuery(connectionInfo.connection, query, parameters);
           break;
-        
+
         case 'mongodb':
           result = await this.executeMongoDBQuery(connectionInfo.connection, query, parameters);
           break;
-        
+
         case 'sqlite':
           result = await this.executeSQLiteQuery(connectionInfo.connection, query, parameters);
           break;
-        
+
         default:
           throw new Error(`Unsupported database type: ${connectionInfo.type}`);
       }
 
       const executionTime = Date.now() - startTime;
-      
+
       const response = {
         success: true,
         data: result.rows || result,
         rowCount: result.rowCount || (Array.isArray(result) ? result.length : 0),
         fields: result.fields || [],
         executionTime,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       // Mettre en cache si nécessaire
@@ -240,7 +240,7 @@ class DatabaseService {
       }
 
       logger.info(`Query executed successfully in ${executionTime}ms`);
-      
+
       return response;
     } catch (error) {
       logger.error(`Query execution failed: ${error.message}`);
@@ -256,9 +256,9 @@ class DatabaseService {
       fields: fields.map(f => ({
         name: f.name,
         type: f.type,
-        table: f.table
+        table: f.table,
       })),
-      rowCount: Array.isArray(rows) ? rows.length : rows.affectedRows
+      rowCount: Array.isArray(rows) ? rows.length : rows.affectedRows,
     };
   }
 
@@ -270,16 +270,16 @@ class DatabaseService {
       fields: result.fields.map(f => ({
         name: f.name,
         dataTypeID: f.dataTypeID,
-        tableID: f.tableID
+        tableID: f.tableID,
       })),
-      rowCount: result.rowCount
+      rowCount: result.rowCount,
     };
   }
 
   // Exécution MSSQL
   async executeMSSQLQuery(pool, query, parameters) {
     const request = pool.request();
-    
+
     // Ajouter les paramètres
     parameters.forEach((param, index) => {
       request.input(`param${index}`, param);
@@ -289,7 +289,7 @@ class DatabaseService {
     return {
       rows: result.recordset,
       fields: result.recordset.columns,
-      rowCount: result.rowsAffected[0]
+      rowCount: result.rowsAffected[0],
     };
   }
 
@@ -297,22 +297,26 @@ class DatabaseService {
   safeJSONParse(jsonString) {
     try {
       const parsed = JSON.parse(jsonString);
-      
+
       // Check for prototype pollution attempts
       if (parsed && typeof parsed === 'object') {
         const dangerousKeys = ['__proto__', 'constructor', 'prototype'];
         for (const key of dangerousKeys) {
           if (key in parsed) {
-            throw new Error(`Dangerous key "${key}" found in JSON - potential prototype pollution attack`);
+            throw new Error(
+              `Dangerous key "${key}" found in JSON - potential prototype pollution attack`
+            );
           }
         }
-        
+
         // Recursively check nested objects
-        const checkNested = (obj) => {
+        const checkNested = obj => {
           if (obj && typeof obj === 'object') {
             for (const [key, value] of Object.entries(obj)) {
               if (dangerousKeys.includes(key)) {
-                throw new Error(`Dangerous key "${key}" found in nested object - potential prototype pollution attack`);
+                throw new Error(
+                  `Dangerous key "${key}" found in nested object - potential prototype pollution attack`
+                );
               }
               if (typeof value === 'object' && value !== null) {
                 checkNested(value);
@@ -321,11 +325,11 @@ class DatabaseService {
           }
         };
         checkNested(parsed);
-        
+
         // Create clean object without prototype chain
         return Object.create(null, Object.getOwnPropertyDescriptors(parsed));
       }
-      
+
       return parsed;
     } catch (error) {
       throw new Error(`JSON parsing failed: ${error.message}`);
@@ -337,7 +341,7 @@ class DatabaseService {
     const { db } = connection;
     const parsedQuery = this.safeJSONParse(query);
     const { collection, operation, ...queryParams } = parsedQuery;
-    
+
     const coll = db.collection(collection);
     let result;
 
@@ -345,23 +349,23 @@ class DatabaseService {
       case 'find':
         result = await coll.find(queryParams.filter || {}, queryParams.options || {}).toArray();
         break;
-      
+
       case 'insertOne':
         result = await coll.insertOne(queryParams.document);
         break;
-      
+
       case 'updateOne':
         result = await coll.updateOne(queryParams.filter, queryParams.update, queryParams.options);
         break;
-      
+
       case 'deleteOne':
         result = await coll.deleteOne(queryParams.filter);
         break;
-      
+
       case 'aggregate':
         result = await coll.aggregate(queryParams.pipeline).toArray();
         break;
-      
+
       default:
         throw new Error(`Unsupported MongoDB operation: ${operation}`);
     }
@@ -375,13 +379,13 @@ class DatabaseService {
       const rows = await db.all(query, parameters);
       return {
         rows,
-        rowCount: rows.length
+        rowCount: rows.length,
       };
     } else {
       const result = await db.run(query, parameters);
       return {
         rowCount: result.changes,
-        lastID: result.lastID
+        lastID: result.lastID,
       };
     }
   }
@@ -397,19 +401,23 @@ class DatabaseService {
 
     switch (connectionInfo.type.toLowerCase()) {
       case 'mysql':
-        metadata = await this.getMySQLTableMetadata(connectionInfo.connection, connectionInfo.config.database, tableName);
+        metadata = await this.getMySQLTableMetadata(
+          connectionInfo.connection,
+          connectionInfo.config.database,
+          tableName
+        );
         break;
-      
+
       case 'postgresql':
       case 'postgres':
         metadata = await this.getPostgreSQLTableMetadata(connectionInfo.connection, tableName);
         break;
-      
+
       case 'mssql':
       case 'sqlserver':
         metadata = await this.getMSSQLTableMetadata(connectionInfo.connection, tableName);
         break;
-      
+
       default:
         throw new Error(`Metadata retrieval not implemented for ${connectionInfo.type}`);
     }
@@ -430,13 +438,14 @@ class DatabaseService {
       nullable: col.IS_NULLABLE === 'YES',
       key: col.COLUMN_KEY,
       default: col.COLUMN_DEFAULT,
-      extra: col.EXTRA
+      extra: col.EXTRA,
     }));
   }
 
   // Métadonnées PostgreSQL
   async getPostgreSQLTableMetadata(pool, tableName) {
-    const result = await pool.query(`
+    const result = await pool.query(
+      `
       SELECT 
         column_name,
         data_type,
@@ -445,21 +454,21 @@ class DatabaseService {
       FROM information_schema.columns
       WHERE table_name = $1
       ORDER BY ordinal_position
-    `, [tableName]);
+    `,
+      [tableName]
+    );
 
     return result.rows.map(col => ({
       name: col.column_name,
       type: col.data_type,
       nullable: col.is_nullable === 'YES',
-      default: col.column_default
+      default: col.column_default,
     }));
   }
 
   // Métadonnées MSSQL
   async getMSSQLTableMetadata(pool, tableName) {
-    const result = await pool.request()
-      .input('tableName', tableName)
-      .query(`
+    const result = await pool.request().input('tableName', tableName).query(`
         SELECT 
           c.name AS column_name,
           t.name AS data_type,
@@ -476,7 +485,7 @@ class DatabaseService {
       name: col.column_name,
       type: col.data_type,
       nullable: col.is_nullable,
-      default: col.default_value
+      default: col.default_value,
     }));
   }
 
@@ -494,7 +503,7 @@ class DatabaseService {
         connectionInfo.transaction = mysqlConn;
         break;
       }
-      
+
       case 'postgresql':
       case 'postgres': {
         const pgClient = await connectionInfo.connection.connect();
@@ -502,7 +511,7 @@ class DatabaseService {
         connectionInfo.transaction = pgClient;
         break;
       }
-      
+
       case 'mssql':
       case 'sqlserver': {
         const transaction = new mssql.Transaction(connectionInfo.connection);
@@ -526,13 +535,13 @@ class DatabaseService {
         await connectionInfo.transaction.commit();
         connectionInfo.transaction.release();
         break;
-      
+
       case 'postgresql':
       case 'postgres':
         await connectionInfo.transaction.query('COMMIT');
         connectionInfo.transaction.release();
         break;
-      
+
       case 'mssql':
       case 'sqlserver':
         await connectionInfo.transaction.commit();
@@ -553,13 +562,13 @@ class DatabaseService {
         await connectionInfo.transaction.rollback();
         connectionInfo.transaction.release();
         break;
-      
+
       case 'postgresql':
       case 'postgres':
         await connectionInfo.transaction.query('ROLLBACK');
         connectionInfo.transaction.release();
         break;
-      
+
       case 'mssql':
       case 'sqlserver':
         await connectionInfo.transaction.rollback();
@@ -581,21 +590,21 @@ class DatabaseService {
         case 'mysql':
           await connectionInfo.connection.end();
           break;
-        
+
         case 'postgresql':
         case 'postgres':
           await connectionInfo.connection.end();
           break;
-        
+
         case 'mssql':
         case 'sqlserver':
           await connectionInfo.connection.close();
           break;
-        
+
         case 'mongodb':
           await connectionInfo.connection.client.close();
           break;
-        
+
         case 'sqlite':
           await connectionInfo.connection.close();
           break;
@@ -612,7 +621,7 @@ class DatabaseService {
   // Fermer toutes les connexions
   async closeAllConnections() {
     const promises = [];
-    
+
     for (const [connectionId] of activeConnections) {
       promises.push(this.closeConnection(connectionId));
     }
@@ -624,13 +633,13 @@ class DatabaseService {
   // Obtenir les connexions actives
   getActiveConnections() {
     const connections = [];
-    
+
     for (const [id, info] of activeConnections) {
       connections.push({
         id,
         type: info.type,
         createdAt: info.createdAt,
-        lastUsed: info.lastUsed
+        lastUsed: info.lastUsed,
       });
     }
 
@@ -648,13 +657,13 @@ class DatabaseService {
     const results = {
       success: 0,
       failed: 0,
-      errors: []
+      errors: [],
     };
 
     // Traiter les données par batch
     for (let i = 0; i < data.length; i += batchSize) {
       const batch = data.slice(i, i + batchSize);
-      
+
       try {
         await this.insertBatch(connectionInfo, tableName, batch);
         results.success += batch.length;
@@ -662,7 +671,7 @@ class DatabaseService {
         results.failed += batch.length;
         results.errors.push({
           batch: `${i}-${i + batch.length}`,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -676,23 +685,38 @@ class DatabaseService {
     if (!/^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)?$/.test(identifier)) {
       throw new Error(`Invalid SQL identifier: ${identifier} - potential SQL injection attack`);
     }
-    
+
     // Prevent SQL keywords that could be used for injection
-    const dangerousKeywords = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE', 'EXEC', 'EXECUTE', 'UNION', 'OR', 'AND', '--', ';'];
+    const dangerousKeywords = [
+      'SELECT',
+      'INSERT',
+      'UPDATE',
+      'DELETE',
+      'DROP',
+      'ALTER',
+      'CREATE',
+      'EXEC',
+      'EXECUTE',
+      'UNION',
+      'OR',
+      'AND',
+      '--',
+      ';',
+    ];
     const upperIdentifier = identifier.toUpperCase();
     for (const keyword of dangerousKeywords) {
       if (upperIdentifier.includes(keyword)) {
         throw new Error(`Dangerous keyword "${keyword}" found in identifier: ${identifier}`);
       }
     }
-    
+
     return identifier;
   }
 
   async exportData(connectionId, tableName, options = {}) {
     // SECURITY FIX: Validate all inputs to prevent SQL injection
     const validatedTableName = this.validateSQLIdentifier(tableName);
-    
+
     const limit = Math.max(1, Math.min(50000, parseInt(options.limit) || 10000)); // Limit between 1-50000
     const offset = Math.max(0, parseInt(options.offset) || 0); // Offset >= 0
     const format = options.format || 'json';
@@ -706,7 +730,7 @@ class DatabaseService {
         // Use parameterized query for LIMIT/OFFSET where possible
         query = `SELECT * FROM \`${validatedTableName}\` LIMIT ? OFFSET ?`;
         break;
-      
+
       case 'mssql':
       case 'sqlserver':
         query = `SELECT * FROM [${validatedTableName}] ORDER BY 1 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY`;
@@ -716,20 +740,20 @@ class DatabaseService {
     const result = await this.executeQuery({
       connectionId,
       query,
-      parameters: [limit, offset]
+      parameters: [limit, offset],
     });
 
     // Convertir selon le format demandé
     switch (format) {
       case 'csv':
         return this.convertToCSV(result.data);
-      
+
       case 'xml':
         return this.convertToXML(result.data);
-      
+
       case 'sql':
         return this.convertToSQL(tableName, result.data);
-      
+
       default:
         return result.data;
     }
@@ -738,18 +762,20 @@ class DatabaseService {
   // Méthodes utilitaires de conversion
   convertToCSV(data) {
     if (!data || data.length === 0) return '';
-    
+
     const headers = Object.keys(data[0]);
     const csv = [
       headers.join(','),
-      ...data.map(row => 
-        headers.map(header => {
-          const value = row[header];
-          return typeof value === 'string' && value.includes(',') 
-            ? `"${value.replace(/"/g, '""')}"` 
-            : value;
-        }).join(',')
-      )
+      ...data.map(row =>
+        headers
+          .map(header => {
+            const value = row[header];
+            return typeof value === 'string' && value.includes(',')
+              ? `"${value.replace(/"/g, '""')}"`
+              : value;
+          })
+          .join(',')
+      ),
     ].join('\n');
 
     return csv;
@@ -757,7 +783,7 @@ class DatabaseService {
 
   convertToXML(data) {
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<data>\n';
-    
+
     for (const row of data) {
       xml += '  <row>\n';
       for (const [key, value] of Object.entries(row)) {
@@ -765,39 +791,43 @@ class DatabaseService {
       }
       xml += '  </row>\n';
     }
-    
+
     xml += '</data>';
     return xml;
   }
 
   convertToSQL(tableName, data) {
     if (!data || data.length === 0) return '';
-    
+
     // SECURITY FIX: Validate table name to prevent SQL injection
     const validatedTableName = this.validateSQLIdentifier(tableName);
-    
-    const sql = data.map(row => {
-      // SECURITY FIX: Validate column names to prevent SQL injection
-      const validatedColumns = Object.keys(row).map(column => {
-        try {
-          return this.validateSQLIdentifier(column);
-        } catch (error) {
-          throw new Error(`Invalid column name "${column}": ${error.message}`);
-        }
-      });
-      
-      const columns = validatedColumns.join(', ');
-      const values = Object.values(row).map(value => {
-        if (value === null) return 'NULL';
-        if (typeof value === 'string') return `'${value.replace(/'/g, "''")}'`;
-        if (typeof value === 'number') return value;
-        if (typeof value === 'boolean') return value ? 'TRUE' : 'FALSE';
-        // Convert other types to string and escape
-        return `'${String(value).replace(/'/g, "''")}'`;
-      }).join(', ');
-      
-      return `INSERT INTO \`${validatedTableName}\` (\`${validatedColumns.join('\`, \`')}\`) VALUES (${values});`;
-    }).join('\n');
+
+    const sql = data
+      .map(row => {
+        // SECURITY FIX: Validate column names to prevent SQL injection
+        const validatedColumns = Object.keys(row).map(column => {
+          try {
+            return this.validateSQLIdentifier(column);
+          } catch (error) {
+            throw new Error(`Invalid column name "${column}": ${error.message}`);
+          }
+        });
+
+        const columns = validatedColumns.join(', ');
+        const values = Object.values(row)
+          .map(value => {
+            if (value === null) return 'NULL';
+            if (typeof value === 'string') return `'${value.replace(/'/g, "''")}'`;
+            if (typeof value === 'number') return value;
+            if (typeof value === 'boolean') return value ? 'TRUE' : 'FALSE';
+            // Convert other types to string and escape
+            return `'${String(value).replace(/'/g, "''")}'`;
+          })
+          .join(', ');
+
+        return `INSERT INTO \`${validatedTableName}\` (\`${validatedColumns.join('\`, \`')}\`) VALUES (${values});`;
+      })
+      .join('\n');
 
     return sql;
   }
@@ -826,33 +856,38 @@ class DatabaseService {
         throw new Error(`Invalid column name "${column}": ${error.message}`);
       }
     });
-    
+
     switch (connectionInfo.type.toLowerCase()) {
       case 'mysql': {
-        const placeholders = data.map(() => `(${validatedColumns.map(() => '?').join(',')})`).join(',');
+        const placeholders = data
+          .map(() => `(${validatedColumns.map(() => '?').join(',')})`)
+          .join(',');
         const values = data.flatMap(row => columns.map(col => row[col]));
-        
+
         await connectionInfo.connection.execute(
           `INSERT INTO \`${validatedTableName}\` (\`${validatedColumns.join('\`, \`')}\`) VALUES ${placeholders}`,
           values
         );
         break;
       }
-      
+
       case 'postgresql':
       case 'postgres':
         // Utiliser COPY pour de meilleures performances
         const client = await connectionInfo.connection.connect();
         try {
           await client.query('BEGIN');
-          
+
           const placeholders = validatedColumns.map((_, i) => `$${i + 1}`).join(',');
           const insertQuery = `INSERT INTO "${validatedTableName}" ("${validatedColumns.join('", "')}") VALUES (${placeholders})`;
-          
+
           for (const row of data) {
-            await client.query(insertQuery, columns.map(col => row[col]));
+            await client.query(
+              insertQuery,
+              columns.map(col => row[col])
+            );
           }
-          
+
           await client.query('COMMIT');
         } catch (error) {
           await client.query('ROLLBACK');

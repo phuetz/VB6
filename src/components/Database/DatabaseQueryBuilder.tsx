@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { X, Play, Save, Download, Upload, Plus, Minus, Database, Table, Eye, Code } from 'lucide-react';
+import {
+  X,
+  Play,
+  Save,
+  Download,
+  Upload,
+  Plus,
+  Minus,
+  Database,
+  Table,
+  Eye,
+  Code,
+} from 'lucide-react';
 import { vb6DatabaseService, ADOConnection } from '../../services/VB6DatabaseService';
 
 interface QueryField {
@@ -32,18 +44,22 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
   onClose,
   connection,
   onQueryResult,
-  initialSQL = ''
+  initialSQL = '',
 }) => {
   const [mode, setMode] = useState<'visual' | 'sql'>('visual');
   const [availableTables, setAvailableTables] = useState<string[]>([]);
-  const [tableSchemas, setTableSchemas] = useState<{ [table: string]: { [field: string]: string } }>({});
+  const [tableSchemas, setTableSchemas] = useState<{
+    [table: string]: { [field: string]: string };
+  }>({});
   const [selectedTables, setSelectedTables] = useState<string[]>([]);
   const [queryFields, setQueryFields] = useState<QueryField[]>([]);
   const [joins, setJoins] = useState<QueryJoin[]>([]);
   const [whereConditions, setWhereConditions] = useState<string>('');
   const [groupByFields, setGroupByFields] = useState<string[]>([]);
   const [havingConditions, setHavingConditions] = useState<string>('');
-  const [orderByFields, setOrderByFields] = useState<{ field: string; direction: 'ASC' | 'DESC' }[]>([]);
+  const [orderByFields, setOrderByFields] = useState<
+    { field: string; direction: 'ASC' | 'DESC' }[]
+  >([]);
   const [sqlQuery, setSqlQuery] = useState(initialSQL);
   const [queryResults, setQueryResults] = useState<any[]>([]);
   const [isExecuting, setIsExecuting] = useState(false);
@@ -72,7 +88,7 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
     try {
       const tables = vb6DatabaseService.getAvailableTables();
       setAvailableTables(tables);
-      
+
       // Load schemas for all tables
       const schemas: { [table: string]: { [field: string]: string } } = {};
       tables.forEach(table => {
@@ -87,7 +103,7 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
   const addTable = (tableName: string) => {
     if (!selectedTables.includes(tableName)) {
       setSelectedTables([...selectedTables, tableName]);
-      
+
       // Add all fields from the table to query fields
       const schema = tableSchemas[tableName];
       if (schema) {
@@ -95,7 +111,7 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
           table: tableName,
           field,
           show: false,
-          sort: '' as any
+          sort: '' as any,
         }));
         setQueryFields([...queryFields, ...newFields]);
       }
@@ -121,7 +137,7 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
         rightTable: selectedTables[1],
         leftField: Object.keys(tableSchemas[selectedTables[0]] || {})[0] || '',
         rightField: Object.keys(tableSchemas[selectedTables[1]] || {})[0] || '',
-        joinType: 'INNER'
+        joinType: 'INNER',
       };
       setJoins([...joins, newJoin]);
     }
@@ -144,7 +160,7 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
     }
 
     let sql = 'SELECT ';
-    
+
     // SELECT clause
     const selectFields = queryFields
       .filter(f => f.show)
@@ -155,44 +171,44 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
         }
         return fieldExpr;
       });
-    
+
     if (selectFields.length === 0) {
       selectFields.push('*');
     }
-    
+
     sql += selectFields.join(', ');
-    
+
     // FROM clause
     if (selectedTables.length > 0) {
       sql += `\nFROM ${selectedTables[0]}`;
-      
+
       // JOINs
       joins.forEach(join => {
         sql += `\n${join.joinType} JOIN ${join.rightTable} ON ${join.leftTable}.${join.leftField} = ${join.rightTable}.${join.rightField}`;
       });
     }
-    
+
     // WHERE clause
     if (whereConditions.trim()) {
       sql += `\nWHERE ${whereConditions}`;
     }
-    
+
     // GROUP BY clause
     if (groupByFields.length > 0) {
       sql += `\nGROUP BY ${groupByFields.join(', ')}`;
     }
-    
+
     // HAVING clause
     if (havingConditions.trim()) {
       sql += `\nHAVING ${havingConditions}`;
     }
-    
+
     // ORDER BY clause
     if (orderByFields.length > 0) {
       const orderBy = orderByFields.map(f => `${f.field} ${f.direction}`).join(', ');
       sql += `\nORDER BY ${orderBy}`;
     }
-    
+
     setSqlQuery(sql);
   };
 
@@ -234,7 +250,7 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         const content = e.target?.result as string;
         setSqlQuery(content);
         setMode('sql');
@@ -257,8 +273,8 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
               <button
                 onClick={() => setMode('visual')}
                 className={`px-3 py-1 text-sm rounded ${
-                  mode === 'visual' 
-                    ? 'bg-purple-100 text-purple-700' 
+                  mode === 'visual'
+                    ? 'bg-purple-100 text-purple-700'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
@@ -268,8 +284,8 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
               <button
                 onClick={() => setMode('sql')}
                 className={`px-3 py-1 text-sm rounded ${
-                  mode === 'sql' 
-                    ? 'bg-purple-100 text-purple-700' 
+                  mode === 'sql'
+                    ? 'bg-purple-100 text-purple-700'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
@@ -302,12 +318,7 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
             <label className="flex items-center gap-2 px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 cursor-pointer text-sm">
               <Upload size={14} />
               Import
-              <input
-                type="file"
-                accept=".sql,.txt"
-                onChange={importQuery}
-                className="hidden"
-              />
+              <input type="file" accept=".sql,.txt" onChange={importQuery} className="hidden" />
             </label>
             <button
               onClick={onClose}
@@ -342,10 +353,15 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
 
                   {selectedTables.length > 0 && (
                     <>
-                      <h3 className="text-sm font-semibold text-gray-700 mt-6 mb-3">Selected Tables</h3>
+                      <h3 className="text-sm font-semibold text-gray-700 mt-6 mb-3">
+                        Selected Tables
+                      </h3>
                       <div className="space-y-2">
                         {selectedTables.map(table => (
-                          <div key={table} className="flex items-center justify-between bg-white p-2 rounded border">
+                          <div
+                            key={table}
+                            className="flex items-center justify-between bg-white p-2 rounded border"
+                          >
                             <span className="text-sm font-medium">{table}</span>
                             <button
                               onClick={() => removeTable(table)}
@@ -390,12 +406,17 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
                         </thead>
                         <tbody>
                           {queryFields.map((field, index) => (
-                            <tr key={`${field.table}.${field.field}`} className="border-t border-gray-200">
+                            <tr
+                              key={`${field.table}.${field.field}`}
+                              className="border-t border-gray-200"
+                            >
                               <td className="px-3 py-2">
                                 <input
                                   type="checkbox"
                                   checked={field.show}
-                                  onChange={(e) => updateQueryField(index, { show: e.target.checked })}
+                                  onChange={e =>
+                                    updateQueryField(index, { show: e.target.checked })
+                                  }
                                 />
                               </td>
                               <td className="px-3 py-2 font-mono text-xs">{field.table}</td>
@@ -404,7 +425,7 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
                                 <input
                                   type="text"
                                   value={field.alias || ''}
-                                  onChange={(e) => updateQueryField(index, { alias: e.target.value })}
+                                  onChange={e => updateQueryField(index, { alias: e.target.value })}
                                   className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                                   placeholder="Alias"
                                 />
@@ -412,7 +433,9 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
                               <td className="px-3 py-2">
                                 <select
                                   value={field.sort || ''}
-                                  onChange={(e) => updateQueryField(index, { sort: e.target.value as any })}
+                                  onChange={e =>
+                                    updateQueryField(index, { sort: e.target.value as any })
+                                  }
                                   className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                                 >
                                   <option value="">None</option>
@@ -424,7 +447,9 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
                                 <input
                                   type="text"
                                   value={field.criteria || ''}
-                                  onChange={(e) => updateQueryField(index, { criteria: e.target.value })}
+                                  onChange={e =>
+                                    updateQueryField(index, { criteria: e.target.value })
+                                  }
                                   className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                                   placeholder="= 'value'"
                                 />
@@ -447,7 +472,7 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
                           <div className="flex items-center gap-3">
                             <select
                               value={join.joinType}
-                              onChange={(e) => updateJoin(index, { joinType: e.target.value as any })}
+                              onChange={e => updateJoin(index, { joinType: e.target.value as any })}
                               className="px-2 py-1 text-xs border border-gray-300 rounded"
                             >
                               <option value="INNER">INNER JOIN</option>
@@ -455,41 +480,47 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
                               <option value="RIGHT">RIGHT JOIN</option>
                               <option value="FULL">FULL JOIN</option>
                             </select>
-                            
+
                             <select
                               value={join.leftTable}
-                              onChange={(e) => updateJoin(index, { leftTable: e.target.value })}
+                              onChange={e => updateJoin(index, { leftTable: e.target.value })}
                               className="px-2 py-1 text-xs border border-gray-300 rounded"
                             >
                               {selectedTables.map(table => (
-                                <option key={table} value={table}>{table}</option>
+                                <option key={table} value={table}>
+                                  {table}
+                                </option>
                               ))}
                             </select>
-                            
+
                             <span className="text-xs text-gray-500">ON</span>
-                            
+
                             <select
                               value={join.leftField}
-                              onChange={(e) => updateJoin(index, { leftField: e.target.value })}
+                              onChange={e => updateJoin(index, { leftField: e.target.value })}
                               className="px-2 py-1 text-xs border border-gray-300 rounded"
                             >
                               {Object.keys(tableSchemas[join.leftTable] || {}).map(field => (
-                                <option key={field} value={field}>{field}</option>
+                                <option key={field} value={field}>
+                                  {field}
+                                </option>
                               ))}
                             </select>
-                            
+
                             <span className="text-xs text-gray-500">=</span>
-                            
+
                             <select
                               value={join.rightField}
-                              onChange={(e) => updateJoin(index, { rightField: e.target.value })}
+                              onChange={e => updateJoin(index, { rightField: e.target.value })}
                               className="px-2 py-1 text-xs border border-gray-300 rounded"
                             >
                               {Object.keys(tableSchemas[join.rightTable] || {}).map(field => (
-                                <option key={field} value={field}>{field}</option>
+                                <option key={field} value={field}>
+                                  {field}
+                                </option>
                               ))}
                             </select>
-                            
+
                             <button
                               onClick={() => removeJoin(index)}
                               className="text-red-500 hover:text-red-700"
@@ -510,7 +541,7 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
                   </label>
                   <textarea
                     value={whereConditions}
-                    onChange={(e) => setWhereConditions(e.target.value)}
+                    onChange={e => setWhereConditions(e.target.value)}
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg font-mono"
                     rows={3}
                     placeholder="Enter WHERE conditions (e.g., Products.Price > 20 AND Products.CategoryID = 1)"
@@ -524,7 +555,7 @@ export const DatabaseQueryBuilder: React.FC<DatabaseQueryBuilderProps> = ({
               <div className="flex-1 p-4">
                 <textarea
                   value={sqlQuery}
-                  onChange={(e) => setSqlQuery(e.target.value)}
+                  onChange={e => setSqlQuery(e.target.value)}
                   className="w-full h-full px-3 py-2 text-sm border border-gray-300 rounded-lg font-mono resize-none"
                   placeholder="Enter your SQL query here..."
                 />

@@ -14,10 +14,10 @@ interface DirectoryItem {
   level: number;
 }
 
-export const DirListBox: React.FC<DirListBoxProps> = ({ 
-  control, 
+export const DirListBox: React.FC<DirListBoxProps> = ({
+  control,
   isDesignMode = false,
-  onPropertyChange 
+  onPropertyChange,
 }) => {
   // VB6 DirListBox properties
   const {
@@ -46,46 +46,54 @@ export const DirListBox: React.FC<DirListBoxProps> = ({
     const mockDirs: DirectoryItem[] = [
       { name: 'C:\\', path: 'C:\\', hasChildren: true, level: 0 },
       { name: 'Program Files', path: 'C:\\Program Files', hasChildren: true, level: 1 },
-      { name: 'Common Files', path: 'C:\\Program Files\\Common Files', hasChildren: false, level: 2 },
+      {
+        name: 'Common Files',
+        path: 'C:\\Program Files\\Common Files',
+        hasChildren: false,
+        level: 2,
+      },
       { name: 'Windows', path: 'C:\\Windows', hasChildren: true, level: 1 },
       { name: 'System32', path: 'C:\\Windows\\System32', hasChildren: false, level: 2 },
       { name: 'Users', path: 'C:\\Users', hasChildren: true, level: 1 },
       { name: 'Public', path: 'C:\\Users\\Public', hasChildren: false, level: 2 },
       { name: 'Documents', path: 'C:\\Documents', hasChildren: false, level: 1 },
     ];
-    
+
     setDirectories(mockDirs);
     setExpandedDirs(new Set(['C:\\']));
   }, []);
 
-  const handleDirectoryClick = useCallback((dir: DirectoryItem) => {
-    if (!enabled) return;
-    
-    setSelectedPath(dir.path);
-    onPropertyChange?.('path', dir.path);
-    
-    // Toggle expansion for directories with children
-    if (dir.hasChildren) {
-      const newExpanded = new Set(expandedDirs);
-      if (newExpanded.has(dir.path)) {
-        newExpanded.delete(dir.path);
-      } else {
-        newExpanded.add(dir.path);
+  const handleDirectoryClick = useCallback(
+    (dir: DirectoryItem) => {
+      if (!enabled) return;
+
+      setSelectedPath(dir.path);
+      onPropertyChange?.('path', dir.path);
+
+      // Toggle expansion for directories with children
+      if (dir.hasChildren) {
+        const newExpanded = new Set(expandedDirs);
+        if (newExpanded.has(dir.path)) {
+          newExpanded.delete(dir.path);
+        } else {
+          newExpanded.add(dir.path);
+        }
+        setExpandedDirs(newExpanded);
       }
-      setExpandedDirs(newExpanded);
-    }
-    
-    // Fire VB6 Change event
-    if (window.VB6Runtime?.fireEvent) {
-      window.VB6Runtime.fireEvent(control.name, 'Change');
-      window.VB6Runtime.fireEvent(control.name, 'PathChange');
-    }
-  }, [control.name, enabled, expandedDirs, onPropertyChange]);
+
+      // Fire VB6 Change event
+      if (window.VB6Runtime?.fireEvent) {
+        window.VB6Runtime.fireEvent(control.name, 'Change');
+        window.VB6Runtime.fireEvent(control.name, 'PathChange');
+      }
+    },
+    [control.name, enabled, expandedDirs, onPropertyChange]
+  );
 
   const renderDirectory = (dir: DirectoryItem) => {
     const isExpanded = expandedDirs.has(dir.path);
     const isSelected = selectedPath === dir.path;
-    
+
     return (
       <div
         key={dir.path}
@@ -102,11 +110,7 @@ export const DirListBox: React.FC<DirListBoxProps> = ({
           textOverflow: 'ellipsis',
         }}
       >
-        {dir.hasChildren && (
-          <span style={{ marginRight: '4px' }}>
-            {isExpanded ? '📂' : '📁'}
-          </span>
-        )}
+        {dir.hasChildren && <span style={{ marginRight: '4px' }}>{isExpanded ? '📂' : '📁'}</span>}
         {dir.name}
       </div>
     );
@@ -137,7 +141,7 @@ export const DirListBox: React.FC<DirListBoxProps> = ({
   // Filter directories based on expansion state
   const visibleDirs = directories.filter(dir => {
     if (dir.level === 0) return true;
-    
+
     // Check if parent is expanded
     const parentPath = dir.path.substring(0, dir.path.lastIndexOf('\\'));
     return expandedDirs.has(parentPath);
@@ -154,7 +158,7 @@ export const DirListBox: React.FC<DirListBoxProps> = ({
       >
         {visibleDirs.map(dir => renderDirectory(dir))}
       </div>
-      
+
       {/* Design mode indicator */}
       {isDesignMode && (
         <div

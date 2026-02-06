@@ -1,13 +1,13 @@
 /**
  * VB6 Math Functions Implementation
- * 
+ *
  * Complete implementation of VB6 mathematical functions
  */
 
 // Math constants from VB6
 export const VB6MathConstants = {
   PI: Math.PI,
-  E: Math.E
+  E: Math.E,
 };
 
 /**
@@ -101,7 +101,7 @@ export function Rnd(number?: number): number {
     // Next random number in sequence
     return Math.random();
   }
-  
+
   const num = Number(number);
   if (num < 0) {
     // Same number every time for negative values (repeatable)
@@ -190,13 +190,13 @@ export function Switch(...args: any[]): any {
   if (args.length % 2 !== 0) {
     throw new Error('Switch requires an even number of arguments');
   }
-  
+
   for (let i = 0; i < args.length; i += 2) {
     if (args[i]) {
       return args[i + 1];
     }
   }
-  
+
   return null; // No condition was true
 }
 
@@ -217,29 +217,29 @@ export function Nz(variant: any, valueIfNull?: any): any {
  */
 export function Partition(number: number, start: number, stop: number, interval: number): string {
   if (number === null || number === undefined) return '';
-  
+
   const num = Number(number);
   const startNum = Number(start);
   const stopNum = Number(stop);
   const intervalNum = Number(interval);
-  
+
   if (intervalNum <= 0) {
     throw new Error('Invalid procedure call or argument - interval must be positive');
   }
-  
+
   if (num < startNum) {
     return `: ${startNum - 1}`;
   }
-  
+
   if (num > stopNum) {
     return `${stopNum + 1}: `;
   }
-  
+
   // Calculate which partition the number falls into
   const partitionIndex = Math.floor((num - startNum) / intervalNum);
-  const partitionStart = startNum + (partitionIndex * intervalNum);
+  const partitionStart = startNum + partitionIndex * intervalNum;
   const partitionEnd = partitionStart + intervalNum - 1;
-  
+
   // Format as VB6 does: "start: end"
   return `${partitionStart}: ${Math.min(partitionEnd, stopNum)}`;
 }
@@ -373,14 +373,14 @@ export function Log10(number: number): number {
 export function LogBase(number: number, base: number): number {
   if (number === null || number === undefined) return 0;
   if (base === null || base === undefined) base = Math.E;
-  
+
   const num = Number(number);
   const baseNum = Number(base);
-  
+
   if (num <= 0 || baseNum <= 0 || baseNum === 1) {
     throw new Error('Invalid procedure call or argument');
   }
-  
+
   return Math.log(num) / Math.log(baseNum);
 }
 
@@ -390,16 +390,16 @@ export function LogBase(number: number, base: number): number {
 export function GCD(a: number, b: number): number {
   if (a === null || a === undefined) a = 0;
   if (b === null || b === undefined) b = 0;
-  
+
   let x = Math.abs(Math.floor(Number(a)));
   let y = Math.abs(Math.floor(Number(b)));
-  
+
   while (y !== 0) {
     const temp = y;
     y = x % y;
     x = temp;
   }
-  
+
   return x;
 }
 
@@ -409,12 +409,12 @@ export function GCD(a: number, b: number): number {
 export function LCM(a: number, b: number): number {
   if (a === null || a === undefined) a = 0;
   if (b === null || b === undefined) b = 0;
-  
+
   const x = Math.abs(Math.floor(Number(a)));
   const y = Math.abs(Math.floor(Number(b)));
-  
+
   if (x === 0 || y === 0) return 0;
-  
+
   return Math.abs(x * y) / GCD(x, y);
 }
 
@@ -424,18 +424,18 @@ export function LCM(a: number, b: number): number {
 export function Factorial(n: number): number {
   if (n === null || n === undefined) return 1;
   const num = Math.floor(Number(n));
-  
+
   if (num < 0) {
     throw new Error('Invalid procedure call or argument - Factorial requires non-negative integer');
   }
-  
+
   if (num === 0 || num === 1) return 1;
-  
+
   let result = 1;
   for (let i = 2; i <= num; i++) {
     result *= i;
   }
-  
+
   return result;
 }
 
@@ -445,16 +445,16 @@ export function Factorial(n: number): number {
 export function IsPrime(n: number): boolean {
   if (n === null || n === undefined) return false;
   const num = Math.floor(Number(n));
-  
+
   if (num < 2) return false;
   if (num === 2) return true;
   if (num % 2 === 0) return false;
-  
+
   const sqrt = Math.sqrt(num);
   for (let i = 3; i <= sqrt; i += 2) {
     if (num % i === 0) return false;
   }
-  
+
   return true;
 }
 
@@ -474,14 +474,14 @@ export const VB6MathFunctions = {
   Sin,
   Sqr,
   Tan,
-  
+
   // Advanced VB6 functions
   IIf,
   Choose,
   Switch,
   Nz,
   Partition,
-  
+
   // Extended math functions
   Power,
   Round,
@@ -500,22 +500,24 @@ export const VB6MathFunctions = {
   LCM,
   Factorial,
   IsPrime,
-  
+
   // Constants
-  VB6MathConstants
+  VB6MathConstants,
 };
 
 // Helper function to validate numeric input
 export function validateNumericInput(value: any, functionName: string): number {
   if (value === null || value === undefined) {
-    throw new Error(`Invalid procedure call or argument - ${functionName} requires a numeric value`);
+    throw new Error(
+      `Invalid procedure call or argument - ${functionName} requires a numeric value`
+    );
   }
-  
+
   const num = Number(value);
   if (isNaN(num)) {
     throw new Error(`Type mismatch - ${functionName} requires a numeric value`);
   }
-  
+
   return num;
 }
 
@@ -556,5 +558,5 @@ export const VB6MathHelpers = {
       throw new Error('Division by zero');
     }
     return Number(dividend) / Number(divisor);
-  }
+  },
 };

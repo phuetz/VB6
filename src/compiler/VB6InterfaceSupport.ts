@@ -1,6 +1,6 @@
 /**
  * VB6 Interface Support Implementation
- * 
+ *
  * Complete support for VB6 Interface declarations and Implements statement
  */
 
@@ -82,7 +82,7 @@ export class VB6InterfaceProcessor {
   parseInterfaceDeclaration(code: string, line: number): VB6InterfaceDeclaration | null {
     const interfaceRegex = /^(Public\s+|Private\s+)?Interface\s+(\w+)$/i;
     const match = code.match(interfaceRegex);
-    
+
     if (!match) return null;
 
     const scope = match[1] ? match[1].trim().toLowerCase() : 'public';
@@ -94,7 +94,7 @@ export class VB6InterfaceProcessor {
       properties: [],
       public: scope === 'public',
       module: this.currentModule,
-      line
+      line,
     };
   }
 
@@ -104,7 +104,7 @@ export class VB6InterfaceProcessor {
   parseInterfaceMethod(code: string, line: number): VB6InterfaceMethod | null {
     const methodRegex = /^(Function|Sub)\s+(\w+)\s*\(([^)]*)\)(?:\s+As\s+(.+))?$/i;
     const match = code.match(methodRegex);
-    
+
     if (!match) return null;
 
     const type = match[1].toLowerCase();
@@ -128,7 +128,7 @@ export class VB6InterfaceProcessor {
       parameters,
       returnType,
       isFunction,
-      line
+      line,
     };
   }
 
@@ -138,7 +138,7 @@ export class VB6InterfaceProcessor {
   parseInterfaceProperty(code: string, line: number): VB6InterfaceProperty | null {
     const propertyRegex = /^Property\s+(Get|Let|Set)\s+(\w+)\s*(?:\(([^)]*)\))?\s+As\s+(.+)$/i;
     const match = code.match(propertyRegex);
-    
+
     if (!match) return null;
 
     const propertyType = match[1].toLowerCase();
@@ -153,7 +153,7 @@ export class VB6InterfaceProcessor {
       type: dataType,
       readOnly: propertyType === 'get',
       writeOnly: propertyType === 'let' || propertyType === 'set',
-      line
+      line,
     };
   }
 
@@ -170,7 +170,8 @@ export class VB6InterfaceProcessor {
       const trimmed = param.trim();
       if (!trimmed) continue;
 
-      const paramRegex = /^(Optional\s+)?(ByRef\s+|ByVal\s+)?(\w+)(?:\s+As\s+(.+?))?(?:\s*=\s*(.+))?$/i;
+      const paramRegex =
+        /^(Optional\s+)?(ByRef\s+|ByVal\s+)?(\w+)(?:\s+As\s+(.+?))?(?:\s*=\s*(.+))?$/i;
       const match = trimmed.match(paramRegex);
 
       if (match) {
@@ -185,7 +186,7 @@ export class VB6InterfaceProcessor {
           type: paramType,
           byRef,
           optional: isOptional,
-          defaultValue: defaultValue ? this.parseDefaultValue(defaultValue) : undefined
+          defaultValue: defaultValue ? this.parseDefaultValue(defaultValue) : undefined,
         });
       }
     }
@@ -198,19 +199,19 @@ export class VB6InterfaceProcessor {
    */
   private parseDefaultValue(value: string): any {
     const trimmed = value.trim();
-    
+
     if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
       return trimmed.substring(1, trimmed.length - 1);
     }
-    
+
     if (!isNaN(Number(trimmed))) {
       return Number(trimmed);
     }
-    
+
     if (trimmed.toLowerCase() === 'true') return true;
     if (trimmed.toLowerCase() === 'false') return false;
     if (trimmed.toLowerCase() === 'nothing') return null;
-    
+
     return trimmed;
   }
 
@@ -221,7 +222,7 @@ export class VB6InterfaceProcessor {
   parseImplementsStatement(code: string, line: number): string | null {
     const implementsRegex = /^Implements\s+(\w+)$/i;
     const match = code.match(implementsRegex);
-    
+
     return match ? match[1] : null;
   }
 
@@ -230,9 +231,10 @@ export class VB6InterfaceProcessor {
    * Example: Private Function IComparable_CompareTo(obj As Object) As Integer
    */
   parseInterfaceMethodImplementation(code: string, line: number): VB6InterfaceMethodImpl | null {
-    const implRegex = /^(Private\s+|Public\s+)?(Function|Sub)\s+(\w+)_(\w+)\s*\(([^)]*)\)(?:\s+As\s+(.+))?$/i;
+    const implRegex =
+      /^(Private\s+|Public\s+)?(Function|Sub)\s+(\w+)_(\w+)\s*\(([^)]*)\)(?:\s+As\s+(.+))?$/i;
     const match = code.match(implRegex);
-    
+
     if (!match) return null;
 
     const interfaceName = match[3];
@@ -244,7 +246,7 @@ export class VB6InterfaceProcessor {
       interfaceMethod,
       implementationMethod,
       body: [],
-      line
+      line,
     };
   }
 
@@ -252,7 +254,9 @@ export class VB6InterfaceProcessor {
    * Register interface
    */
   registerInterface(interfaceDecl: VB6InterfaceDeclaration) {
-    const key = interfaceDecl.public ? interfaceDecl.name : `${this.currentModule}.${interfaceDecl.name}`;
+    const key = interfaceDecl.public
+      ? interfaceDecl.name
+      : `${this.currentModule}.${interfaceDecl.name}`;
     this.interfaces.set(key, interfaceDecl);
   }
 
@@ -288,26 +292,30 @@ export class VB6InterfaceProcessor {
    */
   registerImplements(className: string, interfaceName: string, line: number) {
     const key = `${this.currentModule}.${className}.${interfaceName}`;
-    
+
     const implementation: VB6ImplementsDeclaration = {
       className,
       interfaceName,
       implementedMethods: new Map(),
       implementedProperties: new Map(),
       module: this.currentModule,
-      line
+      line,
     };
-    
+
     this.implementations.set(key, implementation);
   }
 
   /**
    * Add method implementation
    */
-  addMethodImplementation(className: string, interfaceName: string, methodImpl: VB6InterfaceMethodImpl) {
+  addMethodImplementation(
+    className: string,
+    interfaceName: string,
+    methodImpl: VB6InterfaceMethodImpl
+  ) {
     const key = `${this.currentModule}.${className}.${interfaceName}`;
     const implementation = this.implementations.get(key);
-    
+
     if (implementation) {
       implementation.implementedMethods.set(methodImpl.interfaceMethod, methodImpl);
     }
@@ -317,13 +325,19 @@ export class VB6InterfaceProcessor {
    * Get interface
    */
   getInterface(interfaceName: string): VB6InterfaceDeclaration | undefined {
-    return this.interfaces.get(interfaceName) || this.interfaces.get(`${this.currentModule}.${interfaceName}`);
+    return (
+      this.interfaces.get(interfaceName) ||
+      this.interfaces.get(`${this.currentModule}.${interfaceName}`)
+    );
   }
 
   /**
    * Get implementation
    */
-  getImplementation(className: string, interfaceName: string): VB6ImplementsDeclaration | undefined {
+  getImplementation(
+    className: string,
+    interfaceName: string
+  ): VB6ImplementsDeclaration | undefined {
     const key = `${this.currentModule}.${className}.${interfaceName}`;
     return this.implementations.get(key);
   }
@@ -335,7 +349,7 @@ export class VB6InterfaceProcessor {
     let jsCode = `// Interface: ${interfaceDecl.name}\n`;
     jsCode += `// This is a TypeScript-style interface for documentation\n`;
     jsCode += `class ${interfaceDecl.name} {\n`;
-    
+
     // Generate method signatures as comments
     for (const method of interfaceDecl.methods) {
       jsCode += `  // ${method.isFunction ? 'Function' : 'Sub'}: ${method.name}(`;
@@ -347,7 +361,7 @@ export class VB6InterfaceProcessor {
       }
       jsCode += '\n';
     }
-    
+
     // Generate property signatures
     for (const property of interfaceDecl.properties) {
       jsCode += `  // Property: ${property.name}: ${property.type}`;
@@ -355,9 +369,9 @@ export class VB6InterfaceProcessor {
       if (property.writeOnly) jsCode += ' (WriteOnly)';
       jsCode += '\n';
     }
-    
+
     jsCode += `}\n\n`;
-    
+
     return jsCode;
   }
 
@@ -372,18 +386,20 @@ export class VB6InterfaceProcessor {
 
     let jsCode = `// Implementation of ${implementation.interfaceName} by ${implementation.className}\n`;
     jsCode += `// Interface methods for ${implementation.className}\n\n`;
-    
+
     // Generate interface method implementations
     for (const method of interfaceDecl.methods) {
-      const implMethod = implementation.implementedMethods.get(`${implementation.interfaceName}.${method.name}`);
-      
+      const implMethod = implementation.implementedMethods.get(
+        `${implementation.interfaceName}.${method.name}`
+      );
+
       jsCode += `// Interface method: ${method.name}\n`;
       jsCode += `${implMethod?.implementationMethod || `${implementation.interfaceName}_${method.name}`}: function(`;
-      
+
       const paramNames = method.parameters.map(p => p.name);
       jsCode += paramNames.join(', ');
       jsCode += ') {\n';
-      
+
       if (implMethod && implMethod.body.length > 0) {
         for (const line of implMethod.body) {
           jsCode += `  ${this.transpileVB6Line(line)}\n`;
@@ -391,14 +407,14 @@ export class VB6InterfaceProcessor {
       } else {
         jsCode += `  throw new Error('Method ${method.name} not implemented');\n`;
       }
-      
+
       if (method.isFunction) {
         jsCode += `  // return ${this.getDefaultReturnValue(method.returnType || 'Variant')};\n`;
       }
-      
+
       jsCode += `},\n\n`;
     }
-    
+
     return jsCode;
   }
 
@@ -407,7 +423,7 @@ export class VB6InterfaceProcessor {
    */
   private transpileVB6Line(line: string): string {
     let jsLine = line;
-    
+
     // Basic VB6 to JavaScript conversions
     jsLine = jsLine.replace(/\bMe\b/g, 'this');
     jsLine = jsLine.replace(/\bNothing\b/g, 'null');
@@ -419,7 +435,7 @@ export class VB6InterfaceProcessor {
     jsLine = jsLine.replace(/\bThen\b/g, '');
     jsLine = jsLine.replace(/\bEnd If\b/g, '}');
     jsLine = jsLine.replace(/\bIf\b(.+)\bThen\b/g, 'if ($1) {');
-    
+
     return jsLine;
   }
 
@@ -457,42 +473,42 @@ export class VB6InterfaceProcessor {
   generateTypeScript(interfaceDecl: VB6InterfaceDeclaration): string {
     let tsCode = `// VB6 Interface: ${interfaceDecl.name}\n`;
     tsCode += `interface ${interfaceDecl.name} {\n`;
-    
+
     // Generate method signatures
     for (const method of interfaceDecl.methods) {
       tsCode += `  ${method.name}(`;
-      
+
       const paramSignatures = method.parameters.map(param => {
         const tsType = this.mapVB6TypeToTypeScript(param.type);
         const optional = param.optional ? '?' : '';
         return `${param.name}${optional}: ${tsType}`;
       });
-      
+
       tsCode += paramSignatures.join(', ');
       tsCode += ')';
-      
+
       if (method.isFunction && method.returnType) {
         const returnType = this.mapVB6TypeToTypeScript(method.returnType);
         tsCode += `: ${returnType}`;
       } else {
         tsCode += ': void';
       }
-      
+
       tsCode += ';\n';
     }
-    
+
     // Generate property signatures
     for (const property of interfaceDecl.properties) {
       const tsType = this.mapVB6TypeToTypeScript(property.type);
       let modifier = '';
-      
+
       if (property.readOnly) modifier = 'readonly ';
-      
+
       tsCode += `  ${modifier}${property.name}: ${tsType};\n`;
     }
-    
+
     tsCode += `}\n\n`;
-    
+
     return tsCode;
   }
 
@@ -538,16 +554,18 @@ export class VB6InterfaceProcessor {
     // Generate method stubs
     for (const method of interfaceDecl.methods) {
       const implMethodName = `${interfaceName}_${method.name}`;
-      const params = method.parameters.map(p => {
-        let paramStr = '';
-        if (p.optional) paramStr += 'Optional ';
-        paramStr += p.byRef ? 'ByRef ' : 'ByVal ';
-        paramStr += `${p.name} As ${p.type}`;
-        if (p.optional && p.defaultValue !== undefined) {
-          paramStr += ` = ${this.formatDefaultValue(p.defaultValue)}`;
-        }
-        return paramStr;
-      }).join(', ');
+      const params = method.parameters
+        .map(p => {
+          let paramStr = '';
+          if (p.optional) paramStr += 'Optional ';
+          paramStr += p.byRef ? 'ByRef ' : 'ByVal ';
+          paramStr += `${p.name} As ${p.type}`;
+          if (p.optional && p.defaultValue !== undefined) {
+            paramStr += ` = ${this.formatDefaultValue(p.defaultValue)}`;
+          }
+          return paramStr;
+        })
+        .join(', ');
 
       if (method.isFunction) {
         vb6Code += `Private Function ${implMethodName}(${params}) As ${method.returnType}\n`;
@@ -575,8 +593,10 @@ export class VB6InterfaceProcessor {
 
       if (!property.readOnly) {
         // Generate Property Let/Set
-        const setterType = property.type.toLowerCase() === 'object' ||
-                          property.type.toLowerCase() === 'variant' ? 'Set' : 'Let';
+        const setterType =
+          property.type.toLowerCase() === 'object' || property.type.toLowerCase() === 'variant'
+            ? 'Set'
+            : 'Let';
         vb6Code += `Private Property ${setterType} ${implPropertyName}(ByVal value As ${property.type})\n`;
         vb6Code += `    ' TODO: Implement ${interfaceName}.${property.name} setter\n`;
         vb6Code += `End Property\n\n`;
@@ -681,7 +701,9 @@ export class VB6InterfaceProcessor {
       if (interfaceDecl) {
         for (const property of interfaceDecl.properties) {
           const fieldName = `_${interfaceName}_${property.name}`;
-          const defaultValue = this.formatJSValue(this.parseDefaultValue(this.getDefaultReturnValue(property.type)));
+          const defaultValue = this.formatJSValue(
+            this.parseDefaultValue(this.getDefaultReturnValue(property.type))
+          );
           backingFields.push(`    this.${fieldName} = ${defaultValue};`);
         }
       }
@@ -695,7 +717,10 @@ export class VB6InterfaceProcessor {
       jsCode += `  // ========== ${interfaceName} Implementation ==========\n\n`;
       const stubs = this.generateJSImplementationStubs(className, interfaceName);
       // Indent the stubs
-      jsCode += stubs.split('\n').map(line => line ? '  ' + line : line).join('\n');
+      jsCode += stubs
+        .split('\n')
+        .map(line => (line ? '  ' + line : line))
+        .join('\n');
     }
 
     jsCode += `}\n`;
@@ -708,37 +733,41 @@ export class VB6InterfaceProcessor {
   validateImplementation(className: string, interfaceName: string): string[] {
     const interfaceDecl = this.getInterface(interfaceName);
     const implementation = this.getImplementation(className, interfaceName);
-    
+
     if (!interfaceDecl) {
       return [`Interface ${interfaceName} not found`];
     }
-    
+
     if (!implementation) {
       return [`Class ${className} does not implement interface ${interfaceName}`];
     }
-    
+
     const errors: string[] = [];
-    
+
     // Check all interface methods are implemented
     for (const method of interfaceDecl.methods) {
       const methodKey = `${interfaceName}.${method.name}`;
       const implMethod = implementation.implementedMethods.get(methodKey);
-      
+
       if (!implMethod) {
-        errors.push(`Method ${method.name} from interface ${interfaceName} is not implemented in class ${className}`);
+        errors.push(
+          `Method ${method.name} from interface ${interfaceName} is not implemented in class ${className}`
+        );
       }
     }
-    
+
     // Check all interface properties are implemented
     for (const property of interfaceDecl.properties) {
       const propertyKey = `${interfaceName}.${property.name}`;
       const implProperty = implementation.implementedProperties.get(propertyKey);
-      
+
       if (!implProperty) {
-        errors.push(`Property ${property.name} from interface ${interfaceName} is not implemented in class ${className}`);
+        errors.push(
+          `Property ${property.name} from interface ${interfaceName} is not implemented in class ${className}`
+        );
       }
     }
-    
+
     return errors;
   }
 
@@ -754,58 +783,83 @@ export class VB6InterfaceProcessor {
    * Get all interfaces in current module
    */
   getModuleInterfaces(): VB6InterfaceDeclaration[] {
-    return Array.from(this.interfaces.values())
-      .filter(iface => iface.module === this.currentModule);
+    return Array.from(this.interfaces.values()).filter(
+      iface => iface.module === this.currentModule
+    );
   }
 
   /**
    * Get all implementations in current module
    */
   getModuleImplementations(): VB6ImplementsDeclaration[] {
-    return Array.from(this.implementations.values())
-      .filter(impl => impl.module === this.currentModule);
+    return Array.from(this.implementations.values()).filter(
+      impl => impl.module === this.currentModule
+    );
   }
 
   /**
    * Export interface data for serialization
    */
-  export(): { interfaces: { [key: string]: VB6InterfaceDeclaration }, implementations: { [key: string]: VB6ImplementsDeclaration } } {
+  export(): {
+    interfaces: { [key: string]: VB6InterfaceDeclaration };
+    implementations: { [key: string]: VB6ImplementsDeclaration };
+  } {
     const interfaces: { [key: string]: VB6InterfaceDeclaration } = {};
     const implementations: { [key: string]: VB6ImplementsDeclaration } = {};
-    
+
     for (const [key, value] of this.interfaces.entries()) {
       interfaces[key] = value;
     }
-    
+
     for (const [key, value] of this.implementations.entries()) {
       // Convert Map to plain object for serialization
-      implementations[key] = {
+      // The serialized form uses plain objects instead of Maps
+      const serialized = {
         ...value,
-        implementedMethods: Object.fromEntries(value.implementedMethods) as any,
-        implementedProperties: Object.fromEntries(value.implementedProperties) as any
+        implementedMethods: Object.fromEntries(value.implementedMethods),
+        implementedProperties: Object.fromEntries(value.implementedProperties),
       };
+      implementations[key] = serialized as unknown as VB6ImplementsDeclaration;
     }
-    
+
     return { interfaces, implementations };
   }
 
   /**
    * Import interface data from serialization
    */
-  import(data: { interfaces: { [key: string]: VB6InterfaceDeclaration }, implementations: { [key: string]: VB6ImplementsDeclaration } }) {
+  import(data: {
+    interfaces: { [key: string]: VB6InterfaceDeclaration };
+    implementations: { [key: string]: VB6ImplementsDeclaration };
+  }) {
     this.interfaces.clear();
     this.implementations.clear();
-    
+
     for (const [key, value] of Object.entries(data.interfaces)) {
       this.interfaces.set(key, value);
     }
-    
+
     for (const [key, value] of Object.entries(data.implementations)) {
       // Convert plain object back to Map
-      const implementation = {
+      // The serialized form stores Maps as plain objects
+      const methods =
+        value.implementedMethods instanceof Map
+          ? value.implementedMethods
+          : new Map(
+              Object.entries(value.implementedMethods as Record<string, VB6InterfaceMethodImpl>)
+            );
+      const properties =
+        value.implementedProperties instanceof Map
+          ? value.implementedProperties
+          : new Map(
+              Object.entries(
+                value.implementedProperties as Record<string, VB6InterfacePropertyImpl>
+              )
+            );
+      const implementation: VB6ImplementsDeclaration = {
         ...value,
-        implementedMethods: new Map(Object.entries(value.implementedMethods as any)),
-        implementedProperties: new Map(Object.entries(value.implementedProperties as any))
+        implementedMethods: methods,
+        implementedProperties: properties,
       };
       this.implementations.set(key, implementation);
     }
@@ -885,7 +939,7 @@ Public Interface IEnumerator
     Function MoveNext() As Boolean
     Sub Reset()
 End Interface
-`
+`,
 };
 
 // Global interface processor instance

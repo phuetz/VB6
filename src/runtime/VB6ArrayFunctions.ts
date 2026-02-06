@@ -1,6 +1,6 @@
 /**
  * VB6 Advanced Array Functions
- * 
+ *
  * Extended array manipulation functions for VB6 runtime
  */
 
@@ -22,9 +22,10 @@ export class VB6ArrayFunctions {
       throw new Error('Type mismatch: sourceArray must be an array');
     }
 
-    const compareFunc = compare === 1 
-      ? (a: string, b: string) => a.toLowerCase().includes(b.toLowerCase())
-      : (a: string, b: string) => a.includes(b);
+    const compareFunc =
+      compare === 1
+        ? (a: string, b: string) => a.toLowerCase().includes(b.toLowerCase())
+        : (a: string, b: string) => a.includes(b);
 
     return sourceArray.filter(item => {
       const matches = compareFunc(String(item), match);
@@ -68,12 +69,11 @@ export class VB6ArrayFunctions {
 
     // Handle regex special characters in delimiter
     const escapedDelimiter = delimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = compare === 1
-      ? new RegExp(escapedDelimiter, 'gi')
-      : new RegExp(escapedDelimiter, 'g');
+    const regex =
+      compare === 1 ? new RegExp(escapedDelimiter, 'gi') : new RegExp(escapedDelimiter, 'g');
 
     let result = str.split(regex);
-    
+
     if (limit > 0 && result.length > limit) {
       // VB6 behavior: last element contains remainder
       const limited = result.slice(0, limit - 1);
@@ -109,14 +109,14 @@ export class VB6ArrayFunctions {
     if (!Array.isArray(arrayname)) {
       throw new Error('Type mismatch: argument must be an array');
     }
-    
+
     // VB6 arrays can have custom lower bounds, but JS arrays always start at 0
     // For multi-dimensional arrays, we'd need metadata
     if (dimension !== 1) {
       // For simplicity, assume all dimensions start at 0
       return 0;
     }
-    
+
     return 0;
   }
 
@@ -129,18 +129,18 @@ export class VB6ArrayFunctions {
     if (!Array.isArray(arrayname)) {
       throw new Error('Type mismatch: argument must be an array');
     }
-    
+
     if (dimension === 1) {
       return arrayname.length - 1;
     }
-    
+
     // For multi-dimensional arrays, check first element
     if (arrayname.length > 0 && Array.isArray(arrayname[0])) {
       if (dimension === 2) {
         return arrayname[0].length - 1;
       }
     }
-    
+
     throw new Error('Subscript out of range');
   }
 
@@ -150,35 +150,31 @@ export class VB6ArrayFunctions {
    * @param dimensions New dimensions
    * @param preserve Preserve existing data
    */
-  static ReDim(
-    arrayname: any[],
-    dimensions: number | number[],
-    preserve: boolean = false
-  ): any[] {
+  static ReDim(arrayname: any[], dimensions: number | number[], preserve: boolean = false): any[] {
     if (typeof dimensions === 'number') {
       // Single dimension
       const newArray = new Array(dimensions + 1);
-      
+
       if (preserve && Array.isArray(arrayname)) {
         const copyLength = Math.min(arrayname.length, newArray.length);
         for (let i = 0; i < copyLength; i++) {
           newArray[i] = arrayname[i];
         }
       }
-      
+
       // Initialize undefined elements
       for (let i = 0; i < newArray.length; i++) {
         if (newArray[i] === undefined) {
           newArray[i] = null;
         }
       }
-      
+
       return newArray;
     } else if (Array.isArray(dimensions)) {
       // Multi-dimensional array
       return this.createMultiDimensionalArray(dimensions, preserve ? arrayname : null);
     }
-    
+
     throw new Error('Invalid dimensions');
   }
 
@@ -202,43 +198,39 @@ export class VB6ArrayFunctions {
    * @param ascending Sort order
    * @param compareMode Comparison mode
    */
-  static ArraySort(
-    arrayname: any[],
-    ascending: boolean = true,
-    compareMode: number = 0
-  ): any[] {
+  static ArraySort(arrayname: any[], ascending: boolean = true, compareMode: number = 0): any[] {
     if (!Array.isArray(arrayname)) {
       throw new Error('Type mismatch: argument must be an array');
     }
 
     const sorted = [...arrayname];
-    
+
     sorted.sort((a, b) => {
       // Handle null/undefined
       if (a === null || a === undefined) return ascending ? -1 : 1;
       if (b === null || b === undefined) return ascending ? 1 : -1;
-      
+
       // Text comparison
       if (compareMode === 1) {
         const strA = String(a).toLowerCase();
         const strB = String(b).toLowerCase();
         return ascending ? strA.localeCompare(strB) : strB.localeCompare(strA);
       }
-      
+
       // Numeric comparison if possible
       const numA = Number(a);
       const numB = Number(b);
-      
+
       if (!isNaN(numA) && !isNaN(numB)) {
         return ascending ? numA - numB : numB - numA;
       }
-      
+
       // Default to string comparison
       const strA = String(a);
       const strB = String(b);
       return ascending ? strA.localeCompare(strB) : strB.localeCompare(strA);
     });
-    
+
     return sorted;
   }
 
@@ -275,7 +267,7 @@ export class VB6ArrayFunctions {
         return i;
       }
     }
-    
+
     return -1;
   }
 
@@ -285,11 +277,7 @@ export class VB6ArrayFunctions {
    * @param searchElement Element to count
    * @param compareMode Comparison mode
    */
-  static ArrayCount(
-    arrayname: any[],
-    searchElement: any,
-    compareMode: number = 0
-  ): number {
+  static ArrayCount(arrayname: any[], searchElement: any, compareMode: number = 0): number {
     if (!Array.isArray(arrayname)) {
       throw new Error('Type mismatch: argument must be an array');
     }
@@ -300,7 +288,7 @@ export class VB6ArrayFunctions {
         count++;
       }
     }
-    
+
     return count;
   }
 
@@ -316,18 +304,17 @@ export class VB6ArrayFunctions {
 
     const unique: any[] = [];
     const seen = new Set<string>();
-    
+
     for (const element of arrayname) {
-      const key = compareMode === 1 && typeof element === 'string'
-        ? element.toLowerCase()
-        : String(element);
-        
+      const key =
+        compareMode === 1 && typeof element === 'string' ? element.toLowerCase() : String(element);
+
       if (!seen.has(key)) {
         seen.add(key);
         unique.push(element);
       }
     }
-    
+
     return unique;
   }
 
@@ -349,18 +336,14 @@ export class VB6ArrayFunctions {
    * @param startIndex Starting index (inclusive)
    * @param endIndex Ending index (inclusive, -1 for end)
    */
-  static ArraySlice(
-    arrayname: any[],
-    startIndex: number,
-    endIndex: number = -1
-  ): any[] {
+  static ArraySlice(arrayname: any[], startIndex: number, endIndex: number = -1): any[] {
     if (!Array.isArray(arrayname)) {
       throw new Error('Type mismatch: argument must be an array');
     }
 
     const start = Math.max(0, startIndex);
     const end = endIndex === -1 ? arrayname.length : Math.min(arrayname.length, endIndex + 1);
-    
+
     return arrayname.slice(start, end);
   }
 
@@ -416,11 +399,11 @@ export class VB6ArrayFunctions {
     const result = [...arrayname];
     const start = Math.max(0, startIndex);
     const end = endIndex === -1 ? result.length : Math.min(result.length, endIndex + 1);
-    
+
     for (let i = start; i < end; i++) {
       result[i] = value;
     }
-    
+
     return result;
   }
 
@@ -456,9 +439,7 @@ export class VB6ArrayFunctions {
       throw new Error('Reduce of empty array with no initial value');
     }
 
-    return arguments.length >= 3
-      ? arrayname.reduce(func, initialValue)
-      : arrayname.reduce(func);
+    return arguments.length >= 3 ? arrayname.reduce(func, initialValue) : arrayname.reduce(func);
   }
 
   /**
@@ -509,14 +490,14 @@ export class VB6ArrayFunctions {
     return arrayname.reduce((min, value) => {
       if (min === null || min === undefined) return value;
       if (value === null || value === undefined) return min;
-      
+
       const numMin = Number(min);
       const numValue = Number(value);
-      
+
       if (!isNaN(numMin) && !isNaN(numValue)) {
         return numValue < numMin ? value : min;
       }
-      
+
       return String(value) < String(min) ? value : min;
     });
   }
@@ -537,14 +518,14 @@ export class VB6ArrayFunctions {
     return arrayname.reduce((max, value) => {
       if (max === null || max === undefined) return value;
       if (value === null || value === undefined) return max;
-      
+
       const numMax = Number(max);
       const numValue = Number(value);
-      
+
       if (!isNaN(numMax) && !isNaN(numValue)) {
         return numValue > numMax ? value : max;
       }
-      
+
       return String(value) > String(max) ? value : max;
     });
   }
@@ -628,21 +609,21 @@ export class VB6ArrayFunctions {
 
   private static compareElements(a: any, b: any, compareMode: number): boolean {
     if (a === b) return true;
-    
+
     if (compareMode === 1) {
       // Text compare - case insensitive
       if (typeof a === 'string' && typeof b === 'string') {
         return a.toLowerCase() === b.toLowerCase();
       }
     }
-    
+
     // Try numeric comparison
     const numA = Number(a);
     const numB = Number(b);
     if (!isNaN(numA) && !isNaN(numB)) {
       return numA === numB;
     }
-    
+
     // String comparison
     return String(a) === String(b);
   }
@@ -717,14 +698,14 @@ export const {
   ArrayMax,
   ArrayFlatten,
   ArrayZip,
-  ArrayPartition
+  ArrayPartition,
 } = VB6ArrayFunctions;
 
 // VB6 Constants
 export const VB6ArrayConstants = {
   vbBinaryCompare: 0,
   vbTextCompare: 1,
-  vbDatabaseCompare: 2
+  vbDatabaseCompare: 2,
 };
 
 // Type definitions for better TypeScript support

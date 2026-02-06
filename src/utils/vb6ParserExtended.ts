@@ -1,4 +1,14 @@
-import { parseVB6Module, VB6ModuleAST, VB6Parameter, VB6Procedure, VB6Visibility, VB6ProcedureType, VB6Variable, VB6Event, VB6Property } from './vb6Parser';
+import {
+  parseVB6Module,
+  VB6ModuleAST,
+  VB6Parameter,
+  VB6Procedure,
+  VB6Visibility,
+  VB6ProcedureType,
+  VB6Variable,
+  VB6Event,
+  VB6Property,
+} from './vb6Parser';
 
 // Extended interfaces for VB6 language features
 
@@ -90,7 +100,7 @@ export interface VB6ExtendedModuleAST extends VB6ModuleAST {
 export function parseVB6ModuleExtended(code: string, name = 'Module1'): VB6ExtendedModuleAST {
   // Start with basic parsing
   const basicAST = parseVB6Module(code, name);
-  
+
   // Initialize extended features
   const extendedAST: VB6ExtendedModuleAST = {
     ...basicAST,
@@ -100,7 +110,7 @@ export function parseVB6ModuleExtended(code: string, name = 'Module1'): VB6Exten
     declares: [],
     withEventsVariables: [],
     interfaces: [],
-    classes: []
+    classes: [],
   };
 
   const lines = code.split(/\r?\n/);
@@ -113,7 +123,7 @@ export function parseVB6ModuleExtended(code: string, name = 'Module1'): VB6Exten
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const trimmed = line.trim();
-    
+
     // Skip empty lines and comments
     if (!trimmed || trimmed.startsWith("'") || trimmed.startsWith('REM ')) {
       continue;
@@ -136,7 +146,7 @@ export function parseVB6ModuleExtended(code: string, name = 'Module1'): VB6Exten
       currentUDT = {
         name: udtStartMatch[2],
         visibility: (udtStartMatch[1]?.toLowerCase() as VB6Visibility) || 'public',
-        fields: []
+        fields: [],
       };
       continue;
     }
@@ -157,7 +167,7 @@ export function parseVB6ModuleExtended(code: string, name = 'Module1'): VB6Exten
           isArray: !!fieldMatch[2],
           arrayBounds: fieldMatch[2] || undefined,
           isFixedString: fieldMatch[3].toLowerCase() === 'string' && !!fieldMatch[4],
-          fixedStringLength: fieldMatch[4] ? parseInt(fieldMatch[4]) : undefined
+          fixedStringLength: fieldMatch[4] ? parseInt(fieldMatch[4]) : undefined,
         };
         currentUDT.fields.push(field);
       }
@@ -170,7 +180,7 @@ export function parseVB6ModuleExtended(code: string, name = 'Module1'): VB6Exten
       currentEnum = {
         name: enumStartMatch[2],
         visibility: (enumStartMatch[1]?.toLowerCase() as VB6Visibility) || 'public',
-        values: []
+        values: [],
       };
       continue;
     }
@@ -187,7 +197,7 @@ export function parseVB6ModuleExtended(code: string, name = 'Module1'): VB6Exten
       if (enumValueMatch) {
         const enumValue: VB6EnumValue = {
           name: enumValueMatch[1],
-          value: enumValueMatch[2] ? parseEnumValue(enumValueMatch[2]) : undefined
+          value: enumValueMatch[2] ? parseEnumValue(enumValueMatch[2]) : undefined,
         };
         currentEnum.values.push(enumValue);
       }
@@ -195,20 +205,24 @@ export function parseVB6ModuleExtended(code: string, name = 'Module1'): VB6Exten
     }
 
     // Parse Constants
-    const constMatch = trimmed.match(/^(Public|Private)?\s*Const\s+(\w+)(?:\s+As\s+(\w+))?\s*=\s*(.+)/i);
+    const constMatch = trimmed.match(
+      /^(Public|Private)?\s*Const\s+(\w+)(?:\s+As\s+(\w+))?\s*=\s*(.+)/i
+    );
     if (constMatch) {
       const constant: VB6Const = {
         name: constMatch[2],
         type: constMatch[3],
         value: parseConstantValue(constMatch[4]),
-        visibility: (constMatch[1]?.toLowerCase() as VB6Visibility) || 'public'
+        visibility: (constMatch[1]?.toLowerCase() as VB6Visibility) || 'public',
       };
       extendedAST.constants.push(constant);
       continue;
     }
 
     // Parse Declare statements
-    const declareMatch = trimmed.match(/^(Public|Private)?\s*Declare\s+(Function|Sub)\s+(\w+)\s+Lib\s+"([^"]+)"(?:\s+Alias\s+"([^"]+)")?(?:\s*\(([^)]*)\))?(?:\s+As\s+(\w+))?/i);
+    const declareMatch = trimmed.match(
+      /^(Public|Private)?\s*Declare\s+(Function|Sub)\s+(\w+)\s+Lib\s+"([^"]+)"(?:\s+Alias\s+"([^"]+)")?(?:\s*\(([^)]*)\))?(?:\s+As\s+(\w+))?/i
+    );
     if (declareMatch) {
       const declareFunc: VB6DeclareFunction = {
         name: declareMatch[3],
@@ -217,7 +231,7 @@ export function parseVB6ModuleExtended(code: string, name = 'Module1'): VB6Exten
         libraryName: declareMatch[4],
         parameters: parseParams(declareMatch[6] ? `(${declareMatch[6]})` : ''),
         returnType: declareMatch[7],
-        isFunction: declareMatch[2].toLowerCase() === 'function'
+        isFunction: declareMatch[2].toLowerCase() === 'function',
       };
       extendedAST.declares.push(declareFunc);
       continue;
@@ -230,7 +244,7 @@ export function parseVB6ModuleExtended(code: string, name = 'Module1'): VB6Exten
         name: withEventsMatch[2],
         varType: withEventsMatch[3],
         withEvents: true,
-        objectType: withEventsMatch[3]
+        objectType: withEventsMatch[3],
       };
       extendedAST.withEventsVariables.push(withEventsVar);
       continue;
@@ -243,7 +257,7 @@ export function parseVB6ModuleExtended(code: string, name = 'Module1'): VB6Exten
         name: interfaceMatch[2],
         visibility: (interfaceMatch[1]?.toLowerCase() as VB6Visibility) || 'public',
         methods: [],
-        properties: []
+        properties: [],
       };
       continue;
     }
@@ -264,7 +278,7 @@ export function parseVB6ModuleExtended(code: string, name = 'Module1'): VB6Exten
         variables: [],
         procedures: [],
         properties: [],
-        events: []
+        events: [],
       };
       continue;
     }
@@ -290,9 +304,9 @@ export function parseVB6ModuleExtended(code: string, name = 'Module1'): VB6Exten
       const customEvent: VB6CustomEvent = {
         name: eventMatch[2],
         parameters: parseParams(eventMatch[3]),
-        visibility: (eventMatch[1]?.toLowerCase() as VB6Visibility) || 'public'
+        visibility: (eventMatch[1]?.toLowerCase() as VB6Visibility) || 'public',
       };
-      
+
       if (currentClass) {
         currentClass.events.push(customEvent);
       } else {
@@ -309,12 +323,14 @@ function parseParams(paramStr?: string): VB6Parameter[] {
   if (!paramStr) return [];
   const cleaned = paramStr.replace(/[()]/g, '').trim();
   if (!cleaned) return [];
-  
+
   return cleaned.split(',').map(p => {
     // Handle ByVal, ByRef, Optional, ParamArray
     const paramTrimmed = p.trim();
-    const byValMatch = paramTrimmed.match(/^(?:(ByVal|ByRef|Optional|ParamArray)\s+)?(\w+)(?:\s+As\s+(\w+))?(?:\s*=\s*(.+))?/i);
-    
+    const byValMatch = paramTrimmed.match(
+      /^(?:(ByVal|ByRef|Optional|ParamArray)\s+)?(\w+)(?:\s+As\s+(\w+))?(?:\s*=\s*(.+))?/i
+    );
+
     if (byValMatch) {
       return {
         name: byValMatch[2],
@@ -322,65 +338,65 @@ function parseParams(paramStr?: string): VB6Parameter[] {
         // Could extend to include modifier, default value, etc.
       };
     }
-    
+
     return {
       name: paramTrimmed,
-      type: null
+      type: null,
     };
   });
 }
 
 function parseEnumValue(valueStr: string): number | string {
   const trimmed = valueStr.trim();
-  
+
   // Try to parse as number
   const numValue = parseFloat(trimmed);
   if (!isNaN(numValue)) {
     return numValue;
   }
-  
+
   // Handle hex numbers
   if (trimmed.match(/^&H[0-9A-F]+$/i)) {
     return parseInt(trimmed.substring(2), 16);
   }
-  
+
   // Handle octal numbers
   if (trimmed.match(/^&O[0-7]+$/i)) {
     return parseInt(trimmed.substring(2), 8);
   }
-  
+
   // Return as string (could be expression or constant reference)
   return trimmed;
 }
 
 function parseConstantValue(valueStr: string): string | number | boolean {
   const trimmed = valueStr.trim();
-  
+
   // Boolean values
   if (trimmed.toLowerCase() === 'true') return true;
   if (trimmed.toLowerCase() === 'false') return false;
-  
+
   // Numeric values
   const numValue = parseFloat(trimmed);
   if (!isNaN(numValue)) {
     return numValue;
   }
-  
+
   // Hex numbers
   if (trimmed.match(/^&H[0-9A-F]+$/i)) {
     return parseInt(trimmed.substring(2), 16);
   }
-  
+
   // Octal numbers
   if (trimmed.match(/^&O[0-7]+$/i)) {
     return parseInt(trimmed.substring(2), 8);
   }
-  
+
   // String values (remove quotes)
   if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
     return trimmed.slice(1, -1);
   }
-  
+
   // Return as-is for expressions
   return trimmed;
 }
@@ -390,34 +406,34 @@ function parseConstantValue(valueStr: string): string | number | boolean {
  */
 export function generateUDTCode(udt: VB6UDT): string {
   let code = '';
-  
+
   if (udt.visibility === 'public') {
     code += 'Public ';
   } else if (udt.visibility === 'private') {
     code += 'Private ';
   }
-  
+
   code += `Type ${udt.name}\n`;
-  
+
   for (const field of udt.fields) {
     code += '    ';
     code += field.name;
-    
+
     if (field.isArray && field.arrayBounds) {
       code += `(${field.arrayBounds})`;
     }
-    
+
     code += ` As ${field.type}`;
-    
+
     if (field.isFixedString && field.fixedStringLength) {
       code += ` * ${field.fixedStringLength}`;
     }
-    
+
     code += '\n';
   }
-  
+
   code += 'End Type\n';
-  
+
   return code;
 }
 
@@ -426,15 +442,15 @@ export function generateUDTCode(udt: VB6UDT): string {
  */
 export function generateEnumCode(enumDef: VB6Enum): string {
   let code = '';
-  
+
   if (enumDef.visibility === 'public') {
     code += 'Public ';
   } else if (enumDef.visibility === 'private') {
     code += 'Private ';
   }
-  
+
   code += `Enum ${enumDef.name}\n`;
-  
+
   for (const value of enumDef.values) {
     code += `    ${value.name}`;
     if (value.value !== undefined) {
@@ -442,9 +458,9 @@ export function generateEnumCode(enumDef: VB6Enum): string {
     }
     code += '\n';
   }
-  
+
   code += 'End Enum\n';
-  
+
   return code;
 }
 
@@ -453,40 +469,42 @@ export function generateEnumCode(enumDef: VB6Enum): string {
  */
 export function generateDeclareCode(declare: VB6DeclareFunction): string {
   let code = '';
-  
+
   if (declare.visibility === 'private') {
     code += 'Private ';
   } else {
     code += 'Public ';
   }
-  
+
   code += 'Declare ';
   code += declare.isFunction ? 'Function ' : 'Sub ';
   code += declare.name;
   code += ` Lib "${declare.libraryName}"`;
-  
+
   if (declare.aliasName) {
     code += ` Alias "${declare.aliasName}"`;
   }
-  
+
   if (declare.parameters.length > 0) {
     code += ' (';
-    code += declare.parameters.map(p => {
-      let param = p.name;
-      if (p.type) {
-        param += ` As ${p.type}`;
-      }
-      return param;
-    }).join(', ');
+    code += declare.parameters
+      .map(p => {
+        let param = p.name;
+        if (p.type) {
+          param += ` As ${p.type}`;
+        }
+        return param;
+      })
+      .join(', ');
     code += ')';
   }
-  
+
   if (declare.returnType) {
     code += ` As ${declare.returnType}`;
   }
-  
+
   code += '\n';
-  
+
   return code;
 }
 
@@ -494,5 +512,5 @@ export default {
   parseVB6ModuleExtended,
   generateUDTCode,
   generateEnumCode,
-  generateDeclareCode
+  generateDeclareCode,
 };

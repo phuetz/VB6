@@ -14,21 +14,27 @@ export { useDebugStore, debugSelectors } from './DebugStore';
 export { useVB6Store } from './vb6Store';
 
 // Types communs réexportés
-export type { VB6Form, VB6Module, VB6Reference, VB6Component, ProjectMetadata } from './ProjectStore';
-export type { 
-  DragState, 
-  SelectionBox, 
-  AlignmentGuide, 
+export type {
+  VB6Form,
+  VB6Module,
+  VB6Reference,
+  VB6Component,
+  ProjectMetadata,
+} from './ProjectStore';
+export type {
+  DragState,
+  SelectionBox,
+  AlignmentGuide,
   CanvasState,
-  ZoomLevel 
+  ZoomLevel,
 } from './DesignerStore';
-export type { 
-  Breakpoint, 
-  WatchExpression, 
-  CallStackFrame, 
-  LocalVariable, 
+export type {
+  Breakpoint,
+  WatchExpression,
+  CallStackFrame,
+  LocalVariable,
   ConsoleEntry,
-  PerformanceMetric 
+  PerformanceMetric,
 } from './DebugStore';
 
 // Hook personnalisé pour migrer facilement du store monolithique
@@ -37,7 +43,7 @@ export const useStores = () => {
   const designer = useDesignerStore();
   const ui = useUIStore();
   const debug = useDebugStore();
-  
+
   return {
     project,
     designer,
@@ -47,7 +53,7 @@ export const useStores = () => {
     controls: designer.controls,
     selectedControls: designer.selectedControls,
     executionMode: ui.executionMode,
-    showCodeEditor: ui.showCodeEditor
+    showCodeEditor: ui.showCodeEditor,
   };
 };
 
@@ -57,33 +63,31 @@ export const checkStoresHealth = () => {
     project: useProjectStore.getState(),
     designer: useDesignerStore.getState(),
     ui: useUIStore.getState(),
-    debug: useDebugStore.getState()
+    debug: useDebugStore.getState(),
   };
-  
+
   console.group('🏥 Store Health Check');
-  
+
   // Vérifier la mémoire utilisée
   if (performance.memory) {
     // Memory monitoring available - could add memory checks here if needed
   }
-  
+
   // Statistiques des stores
-  
+
   console.groupEnd();
-  
+
   return stores;
 };
 
 // Fonction pour nettoyer les stores (utile pour les tests)
 export const resetAllStores = () => {
-  
   // Reset chaque store à son état initial
   useProjectStore.setState(useProjectStore.getInitialState());
   useDesignerStore.setState(useDesignerStore.getInitialState());
   useUIStore.getState().resetUILayout();
   useDebugStore.getState().clearConsole();
   useDebugStore.getState().clearAllBreakpoints();
-  
 };
 
 // CRITICAL: Observer les changements critiques pour le debug - DISABLED to prevent loops
@@ -91,7 +95,7 @@ export const resetAllStores = () => {
 // if (process.env.NODE_ENV === 'development') {
 //   // Observer les changements de performance
 //   let renderCount = 0;
-//   
+//
 //   useDesignerStore.subscribe(
 //     (state) => state.controls,
 //     () => {
@@ -100,18 +104,17 @@ export const resetAllStores = () => {
 //       }
 //     }
 //   );
-//   
+//
 //   // Observer les fuites mémoire potentielles
 //   setInterval(() => {
 //     const debugState = useDebugStore.getState();
 //     if (debugState.consoleOutput.length > 500) {
 //       console.warn('⚠️ Console output is getting large, consider clearing');
 //     }
-//     
+//
 //     const designerState = useDesignerStore.getState();
 //     if (designerState.history.past.length > 30) {
 //       console.warn('⚠️ History is getting large, consider limiting');
 //     }
 //   }, 30000); // Check every 30 seconds
 // }
-

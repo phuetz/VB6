@@ -18,50 +18,50 @@ class VB6EventRegistry {
   private static instance: VB6EventRegistry;
   private eventHandlers: Map<string, Map<string, VB6EventHandler[]>> = new Map();
   private eventObjects: Map<string, any> = new Map();
-  
+
   static getInstance(): VB6EventRegistry {
     if (!VB6EventRegistry.instance) {
       VB6EventRegistry.instance = new VB6EventRegistry();
     }
     return VB6EventRegistry.instance;
   }
-  
+
   // Register an event handler for an object
   addEventHandler(objectName: string, eventName: string, handler: VB6EventHandler): void {
     if (!this.eventHandlers.has(objectName)) {
       this.eventHandlers.set(objectName, new Map());
     }
-    
+
     const objectEvents = this.eventHandlers.get(objectName)!;
     if (!objectEvents.has(eventName)) {
       objectEvents.set(eventName, []);
     }
-    
+
     objectEvents.get(eventName)!.push(handler);
   }
-  
+
   // Remove an event handler
   removeEventHandler(objectName: string, eventName: string, handler: VB6EventHandler): void {
     const objectEvents = this.eventHandlers.get(objectName);
     if (!objectEvents) return;
-    
+
     const handlers = objectEvents.get(eventName);
     if (!handlers) return;
-    
+
     const index = handlers.indexOf(handler);
     if (index > -1) {
       handlers.splice(index, 1);
     }
   }
-  
+
   // Raise an event (RaiseEvent implementation)
   raiseEvent(objectName: string, eventName: string, ...args: any[]): void {
     const objectEvents = this.eventHandlers.get(objectName);
     if (!objectEvents) return;
-    
+
     const handlers = objectEvents.get(eventName);
     if (!handlers) return;
-    
+
     // Call all registered handlers
     handlers.forEach(handler => {
       try {
@@ -71,17 +71,17 @@ class VB6EventRegistry {
       }
     });
   }
-  
+
   // Register an object for events
   registerEventObject(objectName: string, obj: any): void {
     this.eventObjects.set(objectName, obj);
   }
-  
+
   // Get registered event object
   getEventObject(objectName: string): any {
     return this.eventObjects.get(objectName);
   }
-  
+
   // Clear all events for an object
   clearObjectEvents(objectName: string): void {
     this.eventHandlers.delete(objectName);
@@ -94,60 +94,60 @@ class VB6InterfaceManager {
   private static instance: VB6InterfaceManager;
   private interfaces: Map<string, VB6Interface> = new Map();
   private implementations: Map<any, Set<string>> = new Map();
-  
+
   static getInstance(): VB6InterfaceManager {
     if (!VB6InterfaceManager.instance) {
       VB6InterfaceManager.instance = new VB6InterfaceManager();
     }
     return VB6InterfaceManager.instance;
   }
-  
+
   // Register an interface
   defineInterface(name: string, members: string[]): VB6Interface {
     const interface_ = {
       __interfaceName: name,
-      __interfaceMembers: members
+      __interfaceMembers: members,
     };
-    
+
     this.interfaces.set(name, interface_);
     return interface_;
   }
-  
+
   // Implement an interface on an object
   implementInterface(obj: any, interfaceName: string): boolean {
     const interface_ = this.interfaces.get(interfaceName);
     if (!interface_) {
       throw new Error(`Interface '${interfaceName}' not found`);
     }
-    
+
     // Check if object implements all required members
     for (const member of interface_.__interfaceMembers) {
       if (!(member in obj) || typeof obj[member] !== 'function') {
         throw new Error(`Object does not implement required interface member: ${member}`);
       }
     }
-    
+
     // Mark object as implementing this interface
     if (!this.implementations.has(obj)) {
       this.implementations.set(obj, new Set());
     }
-    
+
     this.implementations.get(obj)!.add(interfaceName);
-    
+
     // Add interface marker to object
     obj.__implementedInterfaces = obj.__implementedInterfaces || [];
     if (!obj.__implementedInterfaces.includes(interfaceName)) {
       obj.__implementedInterfaces.push(interfaceName);
     }
-    
+
     return true;
   }
-  
+
   // Check if object implements an interface
   implementsInterface(obj: any, interfaceName: string): boolean {
     return this.implementations.get(obj)?.has(interfaceName) || false;
   }
-  
+
   // Get all interfaces implemented by an object
   getImplementedInterfaces(obj: any): string[] {
     const interfaces = this.implementations.get(obj);
@@ -160,31 +160,31 @@ class VB6AddressOfManager {
   private static instance: VB6AddressOfManager;
   private functionPointers: Map<string, VB6AddressOfFunction> = new Map();
   private nextId: number = 1;
-  
+
   static getInstance(): VB6AddressOfManager {
     if (!VB6AddressOfManager.instance) {
       VB6AddressOfManager.instance = new VB6AddressOfManager();
     }
     return VB6AddressOfManager.instance;
   }
-  
+
   // Get address of a function
   getAddressOf(func: VB6AddressOfFunction): string {
     const id = `func_${this.nextId++}`;
     this.functionPointers.set(id, func);
     return id;
   }
-  
+
   // Call function by address
   callFunction(address: string, ...args: any[]): any {
     const func = this.functionPointers.get(address);
     if (!func) {
       throw new Error(`Function not found at address: ${address}`);
     }
-    
+
     return func(...args);
   }
-  
+
   // Release function address
   releaseAddress(address: string): void {
     this.functionPointers.delete(address);
@@ -234,7 +234,11 @@ export function WithEvents(objectName: string, eventName: string, handler: VB6Ev
 /**
  * Remove an event handler
  */
-export function RemoveEventHandler(objectName: string, eventName: string, handler: VB6EventHandler): void {
+export function RemoveEventHandler(
+  objectName: string,
+  eventName: string,
+  handler: VB6EventHandler
+): void {
   eventRegistry.removeEventHandler(objectName, eventName, handler);
 }
 
@@ -270,38 +274,38 @@ export function ReleaseAddress(address: string): void {
  * Create a class with events support
  */
 export function CreateEventableClass(className: string, events: string[] = []): any {
-  const classConstructor = function(this: any, ...args: any[]) {
+  const classConstructor = function (this: any, ...args: any[]) {
     this.__className = className;
     this.__events = events;
     this.__eventHandlers = new Map();
-    
+
     // Register this instance for events
     const instanceName = `${className}_${Math.random().toString(36).substr(2, 9)}`;
     this.__instanceName = instanceName;
     eventRegistry.registerEventObject(instanceName, this);
-    
+
     // Initialize event handler methods
     events.forEach(eventName => {
       this[`on${eventName}`] = undefined; // Event handler property
     });
   };
-  
+
   // Add RaiseEvent method to prototype
-  classConstructor.prototype.RaiseEvent = function(eventName: string, ...args: any[]) {
+  classConstructor.prototype.RaiseEvent = function (eventName: string, ...args: any[]) {
     if (!this.__events.includes(eventName)) {
       throw new Error(`Event '${eventName}' is not defined for class '${this.__className}'`);
     }
-    
+
     // Call the event handler if assigned
     const handlerName = `on${eventName}`;
     if (this[handlerName] && typeof this[handlerName] === 'function') {
       this[handlerName](...args);
     }
-    
+
     // Also raise through event registry
     eventRegistry.raiseEvent(this.__instanceName, eventName, ...args);
   };
-  
+
   return classConstructor;
 }
 
@@ -309,7 +313,7 @@ export function CreateEventableClass(className: string, events: string[] = []): 
  * Event declaration decorator
  */
 export function VB6Event(eventName: string) {
-  return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     if (!target.__events) {
       target.__events = [];
     }
@@ -322,22 +326,22 @@ export function VB6Event(eventName: string) {
  */
 export function VB6Property(target: any, propertyKey: string) {
   let value: any;
-  
+
   Object.defineProperty(target, propertyKey, {
-    get: function() {
+    get: function () {
       return value;
     },
-    set: function(newValue: any) {
+    set: function (newValue: any) {
       const oldValue = value;
       value = newValue;
-      
+
       // Raise PropertyChanged event if object supports events
       if (this.RaiseEvent) {
         this.RaiseEvent('PropertyChanged', propertyKey, oldValue, newValue);
       }
     },
     enumerable: true,
-    configurable: true
+    configurable: true,
   });
 }
 
@@ -345,23 +349,23 @@ export function VB6Property(target: any, propertyKey: string) {
  * Method with events support
  */
 export function VB6Method(eventName?: string) {
-  return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
-    
-    descriptor.value = function(...args: any[]) {
+
+    descriptor.value = function (...args: any[]) {
       // Raise BeforeMethod event
       if (this.RaiseEvent && eventName) {
         this.RaiseEvent(`Before${eventName}`, ...args);
       }
-      
+
       try {
         const result = originalMethod.apply(this, args);
-        
+
         // Raise AfterMethod event
         if (this.RaiseEvent && eventName) {
           this.RaiseEvent(`After${eventName}`, result, ...args);
         }
-        
+
         return result;
       } catch (error) {
         // Raise MethodError event
@@ -382,7 +386,7 @@ export function CreateEventableCollection(): any {
     'ItemAdded',
     'ItemRemoved',
     'ItemChanged',
-    'CollectionCleared'
+    'CollectionCleared',
   ]);
 }
 
@@ -404,7 +408,7 @@ export function CreateEventableForm(): any {
     'MouseMove',
     'KeyDown',
     'KeyUp',
-    'KeyPress'
+    'KeyPress',
   ]);
 }
 
@@ -417,7 +421,7 @@ export function TypeOf(obj: any): {
   return {
     Is: (interfaceName: string) => {
       return interfaceManager.implementsInterface(obj, interfaceName);
-    }
+    },
   };
 }
 
@@ -430,11 +434,15 @@ export function SetWithEvents(objectVar: any, sourceObject: any, variableName: s
     sourceObject.__events.forEach((eventName: string) => {
       const handlerName = `${variableName}_${eventName}`;
       if (typeof (globalThis as any)[handlerName] === 'function') {
-        WithEvents(sourceObject.__instanceName || variableName, eventName, (globalThis as any)[handlerName]);
+        WithEvents(
+          sourceObject.__instanceName || variableName,
+          eventName,
+          (globalThis as any)[handlerName]
+        );
       }
     });
   }
-  
+
   return sourceObject;
 }
 
@@ -445,40 +453,40 @@ export const VB6AdvancedOOP = {
   Implements,
   ImplementsInterface,
   TypeOf,
-  
+
   // Event system
   RaiseEvent,
   WithEvents,
   RemoveEventHandler,
   RegisterEventObject,
   SetWithEvents,
-  
+
   // AddressOf system
   AddressOf,
   CallByAddress,
   ReleaseAddress,
-  
+
   // Class creation
   CreateEventableClass,
   CreateEventableCollection,
   CreateEventableForm,
-  
+
   // Decorators
   VB6Event,
   VB6Property,
   VB6Method,
-  
+
   // Managers
   EventRegistry: eventRegistry,
   InterfaceManager: interfaceManager,
-  AddressOfManager: addressOfManager
+  AddressOfManager: addressOfManager,
 };
 
 // Make functions globally available
 if (typeof window !== 'undefined') {
   const globalAny = window as any;
   globalAny.VB6AdvancedOOP = VB6AdvancedOOP;
-  
+
   // Expose individual functions globally for VB6 compatibility
   Object.assign(globalAny, {
     DefineInterface,
@@ -495,7 +503,7 @@ if (typeof window !== 'undefined') {
     CreateEventableCollection,
     CreateEventableForm,
     SetWithEvents,
-    TypeOf
+    TypeOf,
   });
 }
 

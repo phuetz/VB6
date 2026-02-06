@@ -1,6 +1,6 @@
 /**
  * Test Templates for VB6 Testing Framework
- * 
+ *
  * Provides pre-built test templates for common VB6 testing scenarios
  */
 
@@ -43,7 +43,7 @@ If Err.Number <> 0 Then
 End If
 On Error GoTo 0
     `,
-    tags: ['function', 'unit', 'validation']
+    tags: ['function', 'unit', 'validation'],
   },
   {
     id: 'control-property-test',
@@ -83,7 +83,7 @@ Function CreateTestControl(controlType As String) As Control
   Set CreateTestControl = New TextBox
 End Function
     `,
-    tags: ['control', 'property', 'events']
+    tags: ['control', 'property', 'events'],
   },
   {
     id: 'database-test',
@@ -140,7 +140,7 @@ If Not conn Is Nothing Then
 End If
 Set rs = Nothing
     `,
-    tags: ['database', 'ado', 'crud']
+    tags: ['database', 'ado', 'crud'],
   },
   {
     id: 'form-load-test',
@@ -178,7 +178,7 @@ If Not frm Is Nothing Then
   Set frm = Nothing
 End If
     `,
-    tags: ['form', 'initialization', 'events']
+    tags: ['form', 'initialization', 'events'],
   },
   {
     id: 'error-handling-test',
@@ -222,7 +222,7 @@ FileErrorHandler:
 Assert.IsTrue errorOccurred, "Error should have occurred for missing file"
 Assert.AreEqual 53, errorNumber, "Error number should be 53 (file not found)"
     `,
-    tags: ['error', 'exception', 'validation']
+    tags: ['error', 'exception', 'validation'],
   },
   {
     id: 'string-functions-test',
@@ -259,7 +259,7 @@ Assert.AreEqual 0, InStr("Hello World", "xyz"), "InStr should return 0 for non-e
 ' Test string replacement
 Assert.AreEqual "Hello Universe", Replace("Hello World", "World", "Universe"), "Replace should substitute text"
     `,
-    tags: ['string', 'functions', 'manipulation']
+    tags: ['string', 'functions', 'manipulation'],
   },
   {
     id: 'array-operations-test',
@@ -306,7 +306,7 @@ splitArr = Split(joinedStr, ", ")
 Assert.AreEqual 3, UBound(splitArr) + 1, "Split should create array with 3 elements"
 Assert.AreEqual "First", splitArr(0), "First split element should match"
     `,
-    tags: ['array', 'redim', 'split', 'join']
+    tags: ['array', 'redim', 'split', 'join'],
   },
   {
     id: 'performance-test',
@@ -363,7 +363,7 @@ Assert.IsTrue duration < 2, "File writing should complete within 2 seconds"
 ' Clean up
 Kill fileName
     `,
-    tags: ['performance', 'benchmark', 'timing']
+    tags: ['performance', 'benchmark', 'timing'],
   },
   {
     id: 'visual-test',
@@ -432,8 +432,8 @@ If Not frm Is Nothing Then
   Set frm = Nothing
 End If
     `,
-    tags: ['visual', 'regression', 'ui', 'layout']
-  }
+    tags: ['visual', 'regression', 'ui', 'layout'],
+  },
 ];
 
 /**
@@ -446,7 +446,9 @@ export function getTemplatesByCategory(category: string): TestTemplate[] {
 /**
  * Get test templates by type
  */
-export function getTemplatesByType(type: 'unit' | 'integration' | 'visual' | 'performance'): TestTemplate[] {
+export function getTemplatesByType(
+  type: 'unit' | 'integration' | 'visual' | 'performance'
+): TestTemplate[] {
   return testTemplates.filter(template => template.type === type);
 }
 
@@ -463,9 +465,10 @@ export function getCategories(): string[] {
  */
 export function searchTemplates(query: string): TestTemplate[] {
   const lowercaseQuery = query.toLowerCase();
-  return testTemplates.filter(template => 
-    template.name.toLowerCase().includes(lowercaseQuery) ||
-    template.description.toLowerCase().includes(lowercaseQuery) ||
-    template.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
+  return testTemplates.filter(
+    template =>
+      template.name.toLowerCase().includes(lowercaseQuery) ||
+      template.description.toLowerCase().includes(lowercaseQuery) ||
+      template.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
   );
 }

@@ -10,18 +10,18 @@ import { useVB6Store } from '../../stores/vb6Store';
 // VB6 DataList Constants
 export enum DataListConstants {
   dbcDataCombo = 0,
-  dbcDataList = 1
+  dbcDataList = 1,
 }
 
 export enum BoundColumnConstants {
   dbcBoundColumnFirst = 0,
-  dbcBoundColumnVisible = 1
+  dbcBoundColumnVisible = 1,
 }
 
 export enum MatchEntryConstants {
   dblExtendedMatching = 0,
   dblStandardMatching = 1,
-  dblFirstLetterMatching = 2
+  dblFirstLetterMatching = 2,
 }
 
 export interface DataListItem {
@@ -44,26 +44,26 @@ export interface DataListProps extends VB6ControlPropsEnhanced {
   listField?: string;
   boundColumn?: number;
   rowSource?: string;
-  
+
   // Behavior properties
   style?: DataListConstants;
   matchEntry?: MatchEntryConstants;
   integralHeight?: boolean;
   sorted?: boolean;
   readOnly?: boolean;
-  
+
   // List properties
   listCount?: number;
   listIndex?: number;
   itemData?: number[];
   list?: string[];
-  
+
   // Appearance
   listWidth?: number;
   visibleRows?: number;
   selectionStart?: number;
   selectionLength?: number;
-  
+
   // Events
   onDataChange?: () => void;
   onMouseDown?: (button: number, shift: number, x: number, y: number) => void;
@@ -210,7 +210,7 @@ export const DataListControl = forwardRef<HTMLDivElement, DataListProps>((props,
       if (index >= 0 && index < items.length) {
         items[index].data = bookmark;
       }
-    }
+    },
   };
 
   const loadDataFromSource = useCallback(() => {
@@ -224,11 +224,11 @@ export const DataListControl = forwardRef<HTMLDivElement, DataListProps>((props,
       recordset.records.forEach((record: any, index: number) => {
         const displayText = listField ? record[listField] : Object.prototype.toString.call(record);
         const value = boundColumn > 0 && dataField ? record[dataField] : displayText;
-        
+
         newItems.push({
           text: displayText,
           value: value,
-          data: { recordIndex: index, bookmark: record.bookmark }
+          data: { recordIndex: index, bookmark: record.bookmark },
         });
       });
     }
@@ -252,7 +252,6 @@ export const DataListControl = forwardRef<HTMLDivElement, DataListProps>((props,
       });
     } else if (rowSource.toLowerCase().startsWith('select')) {
       // SQL query (would need actual database connection)
-      console.log('SQL row source not implemented in demo:', rowSource);
     }
 
     setItems(sorted ? newItems.sort((a, b) => a.text.localeCompare(b.text)) : newItems);
@@ -377,7 +376,7 @@ export const DataListControl = forwardRef<HTMLDivElement, DataListProps>((props,
     setSelectedIndex(index);
     setCurrentText(item.text);
     setIsDropDownOpen(false);
-    
+
     onCloseUp?.();
     fireEvent(name, 'CloseUp', {});
     fireEvent(name, 'Click', { text: item.text, value: item.value });
@@ -440,8 +439,11 @@ export const DataListControl = forwardRef<HTMLDivElement, DataListProps>((props,
         left,
         top,
         width,
-        height: style === DataListConstants.dbcDataList ? Math.max(height as number, maxDropdownHeight) : height,
-        opacity: enabled ? 1 : 0.5
+        height:
+          style === DataListConstants.dbcDataList
+            ? Math.max(height as number, maxDropdownHeight)
+            : height,
+        opacity: enabled ? 1 : 0.5,
       }}
       onMouseDown={handleMouseDown}
       {...rest}
@@ -454,7 +456,7 @@ export const DataListControl = forwardRef<HTMLDivElement, DataListProps>((props,
             width: '100%',
             height: '100%',
             border: '2px inset #C0C0C0',
-            backgroundColor: enabled && !readOnly ? '#FFFFFF' : '#F0F0F0'
+            backgroundColor: enabled && !readOnly ? '#FFFFFF' : '#F0F0F0',
           }}
         >
           <input
@@ -472,7 +474,7 @@ export const DataListControl = forwardRef<HTMLDivElement, DataListProps>((props,
               padding: '2px 4px',
               fontFamily: 'MS Sans Serif',
               fontSize: '8pt',
-              backgroundColor: 'transparent'
+              backgroundColor: 'transparent',
             }}
           />
           <button
@@ -487,7 +489,7 @@ export const DataListControl = forwardRef<HTMLDivElement, DataListProps>((props,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '8px'
+              fontSize: '8px',
             }}
           >
             ▼
@@ -501,7 +503,7 @@ export const DataListControl = forwardRef<HTMLDivElement, DataListProps>((props,
             height: '100%',
             border: '2px inset #C0C0C0',
             backgroundColor: '#FFFFFF',
-            overflow: 'auto'
+            overflow: 'auto',
           }}
           onScroll={handleScroll}
         >
@@ -518,7 +520,7 @@ export const DataListControl = forwardRef<HTMLDivElement, DataListProps>((props,
                 height: `${itemHeight}px`,
                 display: 'flex',
                 alignItems: 'center',
-                borderBottom: '1px solid #E0E0E0'
+                borderBottom: '1px solid #E0E0E0',
               }}
               onClick={() => handleItemClick(item, index)}
               onMouseEnter={() => setSelectedIndex(index)}
@@ -543,7 +545,7 @@ export const DataListControl = forwardRef<HTMLDivElement, DataListProps>((props,
             border: '2px outset #C0C0C0',
             zIndex: 1000,
             overflow: 'auto',
-            boxShadow: '2px 2px 4px rgba(0,0,0,0.2)'
+            boxShadow: '2px 2px 4px rgba(0,0,0,0.2)',
           }}
           onScroll={handleScroll}
         >
@@ -559,7 +561,7 @@ export const DataListControl = forwardRef<HTMLDivElement, DataListProps>((props,
                 fontSize: '8pt',
                 height: `${itemHeight}px`,
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
               }}
               onClick={() => handleItemClick(item, index)}
               onMouseEnter={() => setSelectedIndex(index)}

@@ -70,7 +70,7 @@ export class VB6FormParser {
       header,
       properties: { ...properties, menus },
       controls,
-      code
+      code,
     };
   }
 
@@ -79,7 +79,7 @@ export class VB6FormParser {
       version: '5.00',
       objectType: 'Form',
       name: 'Form1',
-      caption: 'Form1'
+      caption: 'Form1',
     };
 
     // Parse VERSION line
@@ -170,7 +170,7 @@ export class VB6FormParser {
       name: match ? match[2] : 'Unknown',
       index: match && match[3] ? parseInt(match[3]) : undefined,
       properties: {},
-      children: []
+      children: [],
     };
 
     this.currentLine++;
@@ -208,7 +208,7 @@ export class VB6FormParser {
       name: match ? match[1] : 'Unknown',
       caption: '',
       index: match && match[2] ? parseInt(match[2]) : undefined,
-      children: []
+      children: [],
     };
 
     this.currentLine++;
@@ -276,9 +276,7 @@ export class VB6FormParser {
     const codeLines = this.lines.slice(this.currentLine);
 
     // Filter out Attribute lines (VB6 metadata)
-    const filteredCode = codeLines.filter(
-      line => !line.startsWith('Attribute VB_')
-    );
+    const filteredCode = codeLines.filter(line => !line.startsWith('Attribute VB_'));
 
     return filteredCode.join('\r\n');
   }
@@ -391,7 +389,7 @@ export class VB6FormGenerator {
         version: '5.00',
         objectType: 'Form',
         name: formName,
-        caption: formCaption
+        caption: formCaption,
       },
       properties: {
         Caption: formCaption,
@@ -402,10 +400,10 @@ export class VB6FormGenerator {
         ScaleHeight: formProperties.ScaleHeight || 3600,
         ScaleWidth: formProperties.ScaleWidth || 4800,
         StartUpPosition: formProperties.StartUpPosition || 3,
-        ...formProperties
+        ...formProperties,
       },
       controls: controls.map(c => this.controlToDefinition(c)),
-      code
+      code,
     };
 
     return this.generate(form);
@@ -427,17 +425,9 @@ export class VB6FormGenerator {
     const props = control.properties || control;
     for (const [key, value] of Object.entries(props)) {
       if (
-        ![
-          'id',
-          'type',
-          'name',
-          'left',
-          'top',
-          'width',
-          'height',
-          'events',
-          'properties'
-        ].includes(key)
+        !['id', 'type', 'name', 'left', 'top', 'width', 'height', 'events', 'properties'].includes(
+          key
+        )
       ) {
         properties[this.capitalizeFirst(key)] = value;
       }
@@ -446,7 +436,7 @@ export class VB6FormGenerator {
     return {
       type: this.mapControlType(control.type),
       name: control.name,
-      properties
+      properties,
     };
   }
 
@@ -490,7 +480,7 @@ export class VB6FormGenerator {
       // RichText
       RichTextBox: 'RichTextLib.RichTextBox',
       // Common dialog
-      CommonDialog: 'MSComDlg.CommonDialog'
+      CommonDialog: 'MSComDlg.CommonDialog',
     };
 
     return typeMap[type] || `VB.${type}`;
@@ -505,29 +495,19 @@ export class VB6FormGenerator {
 
     const addRef = (type: string) => {
       if (type.includes('MSComctlLib')) {
-        refs.add(
-          'Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.OCX"'
-        );
+        refs.add('Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.OCX"');
       }
       if (type.includes('MSFlexGridLib')) {
-        refs.add(
-          'Object = "{5E9E78A0-531B-11CF-91F6-C2863C385E30}#1.0#0"; "MSFLXGRD.OCX"'
-        );
+        refs.add('Object = "{5E9E78A0-531B-11CF-91F6-C2863C385E30}#1.0#0"; "MSFLXGRD.OCX"');
       }
       if (type.includes('RichTextLib')) {
-        refs.add(
-          'Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "RICHTX32.OCX"'
-        );
+        refs.add('Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "RICHTX32.OCX"');
       }
       if (type.includes('MSComDlg')) {
-        refs.add(
-          'Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "COMDLG32.OCX"'
-        );
+        refs.add('Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "COMDLG32.OCX"');
       }
       if (type.includes('MSAdodcLib')) {
-        refs.add(
-          'Object = "{67397AA1-7FB1-11D0-B148-00A0C922E820}#6.0#0"; "MSADODC.OCX"'
-        );
+        refs.add('Object = "{67397AA1-7FB1-11D0-B148-00A0C922E820}#6.0#0"; "MSADODC.OCX"');
       }
     };
 
@@ -554,7 +534,7 @@ export class VB6FormGenerator {
     let formatted: string;
 
     if (typeof value === 'boolean') {
-      formatted = value ? '-1  \'True' : '0   \'False';
+      formatted = value ? "-1  'True" : "0   'False";
     } else if (typeof value === 'number') {
       if (name.includes('Color') || name === 'BackColor' || name === 'ForeColor') {
         formatted = `&H${value.toString(16).toUpperCase().padStart(8, '0')}&`;
@@ -645,13 +625,7 @@ export function generateVB6FormFromControls(
   code?: string
 ): string {
   const generator = new VB6FormGenerator();
-  return generator.generateFromControls(
-    formName,
-    formCaption,
-    controls,
-    formProperties,
-    code
-  );
+  return generator.generateFromControls(formName, formCaption, controls, formProperties, code);
 }
 
 /**
@@ -673,7 +647,7 @@ export function vb6FormToControls(form: VB6FormDefinition): Control[] {
       top: twipsToPixel((props.Top as number) || 0),
       width: twipsToPixel((props.Width as number) || 100),
       height: twipsToPixel((props.Height as number) || 25),
-      properties: {}
+      properties: {},
     };
 
     // Copy properties
@@ -699,5 +673,5 @@ export default {
   parseVB6Form,
   generateVB6Form,
   generateVB6FormFromControls,
-  vb6FormToControls
+  vb6FormToControls,
 };

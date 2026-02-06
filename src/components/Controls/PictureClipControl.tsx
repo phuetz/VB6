@@ -1,6 +1,6 @@
 /**
  * VB6 PictureClip Control Implementation
- * 
+ *
  * Image clipping control for sprite handling with full VB6 compatibility
  */
 
@@ -13,11 +13,11 @@ export interface PictureClipControl {
   top: number;
   width: number;
   height: number;
-  
+
   // Picture Properties
   picture: string; // Image source
   stretch: boolean; // Stretch to fit control
-  
+
   // Clipping Properties
   rows: number; // Number of rows in sprite sheet
   cols: number; // Number of columns in sprite sheet
@@ -25,20 +25,20 @@ export interface PictureClipControl {
   clipY: number; // Current clip Y position
   clipWidth: number; // Width of each clip
   clipHeight: number; // Height of each clip
-  
+
   // Current Selection
   graphicCell: number; // Current cell (0-based index)
-  
+
   // Behavior
   enabled: boolean;
   visible: boolean;
-  
+
   // Appearance
   appearance: number; // 0=Flat, 1=3D
   borderStyle: number; // 0=None, 1=Fixed Single
   mousePointer: number;
   tag: string;
-  
+
   // Events
   onClick?: string;
 }
@@ -54,7 +54,7 @@ export const PictureClipControl: React.FC<PictureClipControlProps> = ({
   control,
   isDesignMode = false,
   onPropertyChange,
-  onEvent
+  onEvent,
 }) => {
   const {
     name,
@@ -76,7 +76,7 @@ export const PictureClipControl: React.FC<PictureClipControlProps> = ({
     appearance = 1,
     borderStyle = 1,
     mousePointer = 0,
-    tag = ''
+    tag = '',
   } = control;
 
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -103,81 +103,93 @@ export const PictureClipControl: React.FC<PictureClipControlProps> = ({
   }, [graphicCell]);
 
   // VB6-compatible methods exposed globally
-  const pictureClipMethods = useCallback(() => ({
-    // Navigation methods
-    nextCell: () => {
-      const maxCells = rows * cols;
-      const nextIndex = (currentCell + 1) % maxCells;
-      setGraphicCell(nextIndex);
-    },
-    
-    prevCell: () => {
-      const maxCells = rows * cols;
-      const prevIndex = currentCell > 0 ? currentCell - 1 : maxCells - 1;
-      setGraphicCell(prevIndex);
-    },
-    
-    gotoCell: (cellIndex: number) => {
-      setGraphicCell(cellIndex);
-    },
-    
-    // Clipboard operations
-    copyToClipboard: async () => {
-      if (!canvasRef.current) return;
-      try {
-        const canvas = canvasRef.current;
-        canvas.toBlob(async (blob) => {
-          if (blob && navigator.clipboard) {
-            await navigator.clipboard.write([
-              new ClipboardItem({ 'image/png': blob })
-            ]);
-          }
-        });
-      } catch (error) {
-        console.warn('Failed to copy to clipboard:', error);
-      }
-    },
-    
-    // Get current clip as data URL
-    getClipDataURL: (format = 'image/png') => {
-      if (!canvasRef.current) return '';
-      return canvasRef.current.toDataURL(format);
-    },
-    
-    // Get clip dimensions
-    getClipRect: () => {
-      const actualClipWidth = clipWidth > 0 ? clipWidth : Math.floor(naturalWidth / cols);
-      const actualClipHeight = clipHeight > 0 ? clipHeight : Math.floor(naturalHeight / rows);
-      const cellRow = Math.floor(currentCell / cols);
-      const cellCol = currentCell % cols;
-      
-      return {
-        x: clipX + (cellCol * actualClipWidth),
-        y: clipY + (cellRow * actualClipHeight),
-        width: actualClipWidth,
-        height: actualClipHeight
-      };
-    },
-    
-    // Refresh display
-    refresh: () => {
-      drawCurrentClip();
-    },
-    
-    // Point testing
-    pointInClip: (x: number, y: number) => {
-      const rect = pictureClipMethods().getClipRect();
-      return x >= rect.x && x < rect.x + rect.width &&
-             y >= rect.y && y < rect.y + rect.height;
-    }
-  }), [currentCell, rows, cols, clipX, clipY, clipWidth, clipHeight, naturalWidth, naturalHeight, setGraphicCell, drawCurrentClip]);
+  const pictureClipMethods = useCallback(
+    () => ({
+      // Navigation methods
+      nextCell: () => {
+        const maxCells = rows * cols;
+        const nextIndex = (currentCell + 1) % maxCells;
+        setGraphicCell(nextIndex);
+      },
+
+      prevCell: () => {
+        const maxCells = rows * cols;
+        const prevIndex = currentCell > 0 ? currentCell - 1 : maxCells - 1;
+        setGraphicCell(prevIndex);
+      },
+
+      gotoCell: (cellIndex: number) => {
+        setGraphicCell(cellIndex);
+      },
+
+      // Clipboard operations
+      copyToClipboard: async () => {
+        if (!canvasRef.current) return;
+        try {
+          const canvas = canvasRef.current;
+          canvas.toBlob(async blob => {
+            if (blob && navigator.clipboard) {
+              await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+            }
+          });
+        } catch (error) {
+          console.warn('Failed to copy to clipboard:', error);
+        }
+      },
+
+      // Get current clip as data URL
+      getClipDataURL: (format = 'image/png') => {
+        if (!canvasRef.current) return '';
+        return canvasRef.current.toDataURL(format);
+      },
+
+      // Get clip dimensions
+      getClipRect: () => {
+        const actualClipWidth = clipWidth > 0 ? clipWidth : Math.floor(naturalWidth / cols);
+        const actualClipHeight = clipHeight > 0 ? clipHeight : Math.floor(naturalHeight / rows);
+        const cellRow = Math.floor(currentCell / cols);
+        const cellCol = currentCell % cols;
+
+        return {
+          x: clipX + cellCol * actualClipWidth,
+          y: clipY + cellRow * actualClipHeight,
+          width: actualClipWidth,
+          height: actualClipHeight,
+        };
+      },
+
+      // Refresh display
+      refresh: () => {
+        drawCurrentClip();
+      },
+
+      // Point testing
+      pointInClip: (x: number, y: number) => {
+        const rect = pictureClipMethods().getClipRect();
+        return x >= rect.x && x < rect.x + rect.width && y >= rect.y && y < rect.y + rect.height;
+      },
+    }),
+    [
+      currentCell,
+      rows,
+      cols,
+      clipX,
+      clipY,
+      clipWidth,
+      clipHeight,
+      naturalWidth,
+      naturalHeight,
+      setGraphicCell,
+      drawCurrentClip,
+    ]
+  );
 
   // Expose methods globally for VB6 compatibility
   useEffect(() => {
     const global = window as any;
     if (!global.VB6Controls) global.VB6Controls = {};
     global.VB6Controls[name] = pictureClipMethods();
-    
+
     return () => {
       if (global.VB6Controls) {
         delete global.VB6Controls[name];
@@ -217,43 +229,73 @@ export const PictureClipControl: React.FC<PictureClipControlProps> = ({
     // Calculate current cell position
     const cellRow = Math.floor(currentCell / cols);
     const cellCol = currentCell % cols;
-    
-    const actualClipX = clipX + (cellCol * actualClipWidth);
-    const actualClipY = clipY + (cellRow * actualClipHeight);
+
+    const actualClipX = clipX + cellCol * actualClipWidth;
+    const actualClipY = clipY + cellRow * actualClipHeight;
 
     // Draw the clipped portion
     if (stretch) {
       ctx.drawImage(
         imageRef.current,
-        actualClipX, actualClipY, actualClipWidth, actualClipHeight,
-        0, 0, canvas.width, canvas.height
+        actualClipX,
+        actualClipY,
+        actualClipWidth,
+        actualClipHeight,
+        0,
+        0,
+        canvas.width,
+        canvas.height
       );
     } else {
       ctx.drawImage(
         imageRef.current,
-        actualClipX, actualClipY, actualClipWidth, actualClipHeight,
-        0, 0, actualClipWidth, actualClipHeight
+        actualClipX,
+        actualClipY,
+        actualClipWidth,
+        actualClipHeight,
+        0,
+        0,
+        actualClipWidth,
+        actualClipHeight
       );
     }
-  }, [imageLoaded, naturalWidth, naturalHeight, clipX, clipY, clipWidth, clipHeight, currentCell, rows, cols, stretch]);
+  }, [
+    imageLoaded,
+    naturalWidth,
+    naturalHeight,
+    clipX,
+    clipY,
+    clipWidth,
+    clipHeight,
+    currentCell,
+    rows,
+    cols,
+    stretch,
+  ]);
 
   // Redraw when relevant properties change
   useEffect(() => {
     drawCurrentClip();
   }, [drawCurrentClip]);
 
-  const handleClick = useCallback((event: React.MouseEvent) => {
-    if (!enabled) return;
-    onEvent?.('Click', { x: event.clientX, y: event.clientY });
-  }, [enabled, onEvent]);
+  const handleClick = useCallback(
+    (event: React.MouseEvent) => {
+      if (!enabled) return;
+      onEvent?.('Click', { x: event.clientX, y: event.clientY });
+    },
+    [enabled, onEvent]
+  );
 
-  const setGraphicCell = useCallback((cellIndex: number) => {
-    const maxCells = rows * cols;
-    const validIndex = Math.max(0, Math.min(maxCells - 1, cellIndex));
-    
-    setCurrentCell(validIndex);
-    onPropertyChange?.('graphicCell', validIndex);
-  }, [rows, cols, onPropertyChange]);
+  const setGraphicCell = useCallback(
+    (cellIndex: number) => {
+      const maxCells = rows * cols;
+      const validIndex = Math.max(0, Math.min(maxCells - 1, cellIndex));
+
+      setCurrentCell(validIndex);
+      onPropertyChange?.('graphicCell', validIndex);
+    },
+    [rows, cols, onPropertyChange]
+  );
 
   if (!visible) {
     return null;
@@ -266,9 +308,21 @@ export const PictureClipControl: React.FC<PictureClipControlProps> = ({
 
   const getCursorStyle = () => {
     const cursors = [
-      'default', 'auto', 'crosshair', 'text', 'wait', 'help',
-      'pointer', 'not-allowed', 'move', 'col-resize', 'row-resize',
-      'n-resize', 's-resize', 'e-resize', 'w-resize'
+      'default',
+      'auto',
+      'crosshair',
+      'text',
+      'wait',
+      'help',
+      'pointer',
+      'not-allowed',
+      'move',
+      'col-resize',
+      'row-resize',
+      'n-resize',
+      's-resize',
+      'e-resize',
+      'w-resize',
     ];
     return cursors[mousePointer] || 'default';
   };
@@ -287,13 +341,13 @@ export const PictureClipControl: React.FC<PictureClipControlProps> = ({
     overflow: 'hidden',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   };
 
   const canvasStyle = {
     maxWidth: '100%',
     maxHeight: '100%',
-    display: imageLoaded ? 'block' : 'none'
+    display: imageLoaded ? 'block' : 'none',
   };
 
   return (
@@ -316,8 +370,10 @@ export const PictureClipControl: React.FC<PictureClipControlProps> = ({
       {/* Canvas for displaying clipped image */}
       <canvas
         ref={canvasRef}
-        width={stretch ? width - 4 : (clipWidth > 0 ? clipWidth : Math.floor(naturalWidth / cols))}
-        height={stretch ? height - 4 : (clipHeight > 0 ? clipHeight : Math.floor(naturalHeight / rows))}
+        width={stretch ? width - 4 : clipWidth > 0 ? clipWidth : Math.floor(naturalWidth / cols)}
+        height={
+          stretch ? height - 4 : clipHeight > 0 ? clipHeight : Math.floor(naturalHeight / rows)
+        }
         style={canvasStyle}
       />
 
@@ -334,7 +390,7 @@ export const PictureClipControl: React.FC<PictureClipControlProps> = ({
             fontSize: '12px',
             color: '#666',
             textAlign: 'center',
-            padding: '8px'
+            padding: '8px',
           }}
         >
           {imageError ? (
@@ -370,7 +426,7 @@ export const PictureClipControl: React.FC<PictureClipControlProps> = ({
             gap: '2px',
             background: 'rgba(0,0,0,0.7)',
             padding: '2px',
-            borderRadius: '2px'
+            borderRadius: '2px',
           }}
         >
           <button
@@ -380,9 +436,9 @@ export const PictureClipControl: React.FC<PictureClipControlProps> = ({
               background: '#f0f0f0',
               border: '1px solid #ccc',
               cursor: 'pointer',
-              fontSize: '8px'
+              fontSize: '8px',
             }}
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               setGraphicCell(Math.max(0, currentCell - 1));
             }}
@@ -390,19 +446,19 @@ export const PictureClipControl: React.FC<PictureClipControlProps> = ({
           >
             ◄
           </button>
-          
+
           <div
             style={{
               color: 'white',
               fontSize: '8px',
               lineHeight: '16px',
               minWidth: '20px',
-              textAlign: 'center'
+              textAlign: 'center',
             }}
           >
             {currentCell}
           </div>
-          
+
           <button
             style={{
               width: '16px',
@@ -410,9 +466,9 @@ export const PictureClipControl: React.FC<PictureClipControlProps> = ({
               background: '#f0f0f0',
               border: '1px solid #ccc',
               cursor: 'pointer',
-              fontSize: '8px'
+              fontSize: '8px',
             }}
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               setGraphicCell(Math.min(rows * cols - 1, currentCell + 1));
             }}
@@ -436,7 +492,7 @@ export const PictureClipControl: React.FC<PictureClipControlProps> = ({
             padding: '2px',
             border: '1px solid #ccc',
             whiteSpace: 'nowrap',
-            zIndex: 1000
+            zIndex: 1000,
           }}
         >
           {name} - Cell {currentCell} ({rows}×{cols})
@@ -461,7 +517,7 @@ export const PictureClipHelpers = {
   rowColFromCell: (cellIndex: number, cols: number): { row: number; col: number } => {
     return {
       row: Math.floor(cellIndex / cols),
-      col: cellIndex % cols
+      col: cellIndex % cols,
     };
   },
 
@@ -481,14 +537,14 @@ export const PictureClipHelpers = {
   ) => {
     const actualClipWidth = clipWidth > 0 ? clipWidth : Math.floor(imageWidth / cols);
     const actualClipHeight = clipHeight > 0 ? clipHeight : Math.floor(imageHeight / rows);
-    
+
     const { row, col } = PictureClipHelpers.rowColFromCell(cellIndex, cols);
-    
+
     return {
-      x: clipX + (col * actualClipWidth),
-      y: clipY + (row * actualClipHeight),
+      x: clipX + col * actualClipWidth,
+      y: clipY + row * actualClipHeight,
       width: actualClipWidth,
-      height: actualClipHeight
+      height: actualClipHeight,
     };
   },
 
@@ -507,22 +563,34 @@ export const PictureClipHelpers = {
   ): HTMLCanvasElement => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d')!;
-    
+
     const coords = PictureClipHelpers.getClipCoords(
-      cellIndex, rows, cols,
-      imageElement.naturalWidth, imageElement.naturalHeight,
-      clipX, clipY, clipWidth, clipHeight
+      cellIndex,
+      rows,
+      cols,
+      imageElement.naturalWidth,
+      imageElement.naturalHeight,
+      clipX,
+      clipY,
+      clipWidth,
+      clipHeight
     );
-    
+
     canvas.width = coords.width;
     canvas.height = coords.height;
-    
+
     ctx.drawImage(
       imageElement,
-      coords.x, coords.y, coords.width, coords.height,
-      0, 0, coords.width, coords.height
+      coords.x,
+      coords.y,
+      coords.width,
+      coords.height,
+      0,
+      0,
+      coords.width,
+      coords.height
     );
-    
+
     return canvas;
   },
 
@@ -547,7 +615,7 @@ export const PictureClipHelpers = {
         resolve({
           image: img,
           width: img.naturalWidth,
-          height: img.naturalHeight
+          height: img.naturalHeight,
         });
       };
       img.onerror = () => {
@@ -574,19 +642,19 @@ export const PictureClipHelpers = {
     css += `  width: ${cellWidth}px;\n`;
     css += `  height: ${cellHeight}px;\n`;
     css += `}\n\n`;
-    
+
     for (let i = 0; i < rows * cols; i++) {
       const { row, col } = PictureClipHelpers.rowColFromCell(i, cols);
       const x = col * cellWidth;
       const y = row * cellHeight;
-      
+
       css += `.${classPrefix}-${i} {\n`;
       css += `  background-position: -${x}px -${y}px;\n`;
       css += `}\n\n`;
     }
-    
+
     return css;
-  }
+  },
 };
 
 // VB6 PictureClip methods simulation
@@ -597,7 +665,7 @@ export const PictureClipMethods = {
   getGraphic: (control: PictureClipControl, cellIndex: number) => {
     return {
       ...control,
-      graphicCell: Math.max(0, Math.min(control.rows * control.cols - 1, cellIndex))
+      graphicCell: Math.max(0, Math.min(control.rows * control.cols - 1, cellIndex)),
     };
   },
 
@@ -610,7 +678,7 @@ export const PictureClipMethods = {
       clipX: x,
       clipY: y,
       clipWidth: width,
-      clipHeight: height
+      clipHeight: height,
     };
   },
 
@@ -622,9 +690,9 @@ export const PictureClipMethods = {
       ...control,
       rows: Math.max(1, rows),
       cols: Math.max(1, cols),
-      graphicCell: 0 // Reset to first cell
+      graphicCell: 0, // Reset to first cell
     };
-  }
+  },
 };
 
 export default PictureClipControl;

@@ -29,6 +29,7 @@ Dans le cadre de la Phase 1 d'amélioration du compilateur VB6, nous avons dépl
 - `VB6SpeculativeCompiler.ts` - Compilateur avec optimisations spéculatives
 
 Ces fichiers restent disponibles pour:
+
 - Recherche et développement futur
 - Démonstrations techniques
 - Formation et éducation
@@ -39,7 +40,7 @@ Ces fichiers restent disponibles pour:
 Pour restaurer un fichier archivé vers le code principal:
 
 1. Copiez le fichier depuis `archive/` vers son dossier de destination
-2. Mettez à jour les imports et dépendances si nécessaire  
+2. Mettez à jour les imports et dépendances si nécessaire
 3. Ajoutez les tests appropriés
 4. Documentez les raisons de la restauration
 

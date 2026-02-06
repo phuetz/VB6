@@ -50,7 +50,7 @@ const Toast: React.FC<ToastProps> = ({
     if (closeTimeoutId) {
       clearTimeout(closeTimeoutId);
     }
-    
+
     setIsExiting(true);
     const timeoutId = setTimeout(() => {
       onClose(id);

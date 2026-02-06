@@ -1,104 +1,113 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VB6 Web IDE - Ultra Diagnostic</title>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+      }
+      .loading {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        z-index: 1000;
+      }
+      .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
         }
-        .loading {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            z-index: 1000;
+        100% {
+          transform: rotate(360deg);
         }
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div id="loading" class="loading">
-        <div class="spinner"></div>
-        <p>🔍 Initializing Ultra Diagnostic...</p>
-        <div id="loading-logs" style="text-align: left; max-width: 400px; font-family: monospace; font-size: 12px;"></div>
+      <div class="spinner"></div>
+      <p>🔍 Initializing Ultra Diagnostic...</p>
+      <div
+        id="loading-logs"
+        style="text-align: left; max-width: 400px; font-family: monospace; font-size: 12px"
+      ></div>
     </div>
     <div id="root"></div>
 
     <script>
-        // ULTRA-THINK: Logs en temps réel pendant le chargement
-        console.log('🔍 DIAGNOSTIC: HTML loaded, starting diagnostic...');
-        
-        const loadingLogs = document.getElementById('loading-logs');
-        const addLog = (message) => {
-            console.log(message);
-            if (loadingLogs) {
-                loadingLogs.innerHTML += '<div>' + message + '</div>';
-                loadingLogs.scrollTop = loadingLogs.scrollHeight;
-            }
-        };
+      // ULTRA-THINK: Logs en temps réel pendant le chargement
+      console.log('🔍 DIAGNOSTIC: HTML loaded, starting diagnostic...');
 
-        addLog('🔍 DOM loaded: ' + document.readyState);
-        addLog('🔍 Root element: ' + (document.getElementById('root') ? 'Found' : 'Missing'));
+      const loadingLogs = document.getElementById('loading-logs');
+      const addLog = message => {
+        console.log(message);
+        if (loadingLogs) {
+          loadingLogs.innerHTML += '<div>' + message + '</div>';
+          loadingLogs.scrollTop = loadingLogs.scrollHeight;
+        }
+      };
 
-        // Error handlers globaux avec logs détaillés
-        window.addEventListener('error', (event) => {
-            const message = `❌ Global Error: ${event.message} at ${event.filename}:${event.lineno}:${event.colno}`;
-            addLog(message);
-            console.error('Full error object:', event.error);
-        });
+      addLog('🔍 DOM loaded: ' + document.readyState);
+      addLog('🔍 Root element: ' + (document.getElementById('root') ? 'Found' : 'Missing'));
 
-        window.addEventListener('unhandledrejection', (event) => {
-            const message = `❌ Unhandled Promise Rejection: ${event.reason}`;
-            addLog(message);
-            console.error('Full rejection:', event.reason);
-        });
+      // Error handlers globaux avec logs détaillés
+      window.addEventListener('error', event => {
+        const message = `❌ Global Error: ${event.message} at ${event.filename}:${event.lineno}:${event.colno}`;
+        addLog(message);
+        console.error('Full error object:', event.error);
+      });
 
-        // Performance timing
-        window.addEventListener('load', () => {
-            const perfData = performance.getEntriesByType('navigation')[0];
-            if (perfData) {
-                addLog(`📊 Page load time: ${Math.round(perfData.loadEventEnd - perfData.fetchStart)}ms`);
-                addLog(`📊 DOM ready: ${Math.round(perfData.domContentLoadedEventEnd - perfData.fetchStart)}ms`);
-            }
-        });
+      window.addEventListener('unhandledrejection', event => {
+        const message = `❌ Unhandled Promise Rejection: ${event.reason}`;
+        addLog(message);
+        console.error('Full rejection:', event.reason);
+      });
 
-        addLog('🔍 Loading React module...');
+      // Performance timing
+      window.addEventListener('load', () => {
+        const perfData = performance.getEntriesByType('navigation')[0];
+        if (perfData) {
+          addLog(`📊 Page load time: ${Math.round(perfData.loadEventEnd - perfData.fetchStart)}ms`);
+          addLog(
+            `📊 DOM ready: ${Math.round(perfData.domContentLoadedEventEnd - perfData.fetchStart)}ms`
+          );
+        }
+      });
+
+      addLog('🔍 Loading React module...');
     </script>
-    
+
     <!-- Import React depuis CDN pour éviter les problèmes de bundling -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    
-    <script>
-        addLog('✅ React loaded from CDN');
-        addLog('🔍 React version: ' + React.version);
-        addLog('🔍 Starting diagnostic main...');
 
-        // Hide loading after React is loaded
-        setTimeout(() => {
-            const loading = document.getElementById('loading');
-            if (loading) loading.style.display = 'none';
-        }, 2000);
+    <script>
+      addLog('✅ React loaded from CDN');
+      addLog('🔍 React version: ' + React.version);
+      addLog('🔍 Starting diagnostic main...');
+
+      // Hide loading after React is loaded
+      setTimeout(() => {
+        const loading = document.getElementById('loading');
+        if (loading) loading.style.display = 'none';
+      }, 2000);
     </script>
 
     <!-- Load diagnostic main -->
     <script type="module" src="/src/diagnostic-main.tsx"></script>
-</body>
+  </body>
 </html>

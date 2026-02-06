@@ -108,12 +108,12 @@ type HotReloadEventHandler = (data: unknown) => void;
 
 export class HotReloadEngine {
   private static instance: HotReloadEngine;
-  
+
   // Core components
   private parser: VB6Parser;
   private transpiler: VB6Transpiler;
   private analyzer: VB6SemanticAnalyzer;
-  
+
   // Hot-reload state
   private currentAST: ASTNode | null = null;
   private codeCache: Map<string, string> = new Map();
@@ -121,7 +121,7 @@ export class HotReloadEngine {
   private patchHistory: HotReloadPatch[] = [];
   private watchers: Map<string, FileSystemWatcher> = new Map();
   private preservedState: StatePreservationData | null = null;
-  
+
   // Configuration
   private config: HotReloadConfig = {
     enabled: true,
@@ -131,9 +131,9 @@ export class HotReloadEngine {
     debounceMs: 300,
     maxRollbackHistory: 50,
     errorRecovery: true,
-    verboseLogging: false
+    verboseLogging: false,
   };
-  
+
   // Performance monitoring
   private metrics = {
     totalReloads: 0,
@@ -142,9 +142,9 @@ export class HotReloadEngine {
     astDiffTime: 0,
     statePreservationTime: 0,
     errorCount: 0,
-    rollbackCount: 0
+    rollbackCount: 0,
   };
-  
+
   // Event listeners - typed with unknown for flexibility
   private listeners: Map<string, HotReloadEventHandler[]> = new Map([
     ['beforeReload', []],
@@ -152,7 +152,7 @@ export class HotReloadEngine {
     ['error', []],
     ['rollback', []],
     ['statePreserved', []],
-    ['compilationComplete', []]
+    ['compilationComplete', []],
   ]);
 
   static getInstance(): HotReloadEngine {
@@ -171,41 +171,41 @@ export class HotReloadEngine {
 
   // 🚀 Main hot-reload method - Ultra-intelligent reloading
   public async performHotReload(
-    newCode: string, 
+    newCode: string,
     filePath: string = 'main.vb'
   ): Promise<HotReloadPatch | null> {
     if (!this.config.enabled) return null;
-    
+
     const startTime = performance.now();
     this.log('🔥 Starting hot-reload process...', newCode.length);
-    
+
     try {
       this.emit('beforeReload', { filePath, codeLength: newCode.length });
-      
+
       // 1. Parse new AST
       const newAST = await this.parseCodeToAST(newCode);
       if (!newAST) {
         throw new Error('Failed to parse new code');
       }
-      
+
       // 2. Compute AST diff
       const diffStartTime = performance.now();
       const diffs = this.currentAST ? this.computeASTDiff(this.currentAST, newAST) : [];
       this.metrics.astDiffTime = performance.now() - diffStartTime;
-      
+
       // 3. Analyze impact of changes
       const affectedAreas = this.analyzeChangeImpact(diffs);
-      
+
       // 4. Preserve current state if needed
       const stateStartTime = performance.now();
       const stateData = this.config.preserveState ? await this.preserveCurrentState() : null;
       this.metrics.statePreservationTime = performance.now() - stateStartTime;
-      
+
       // 5. Perform incremental compilation
       const compileStartTime = performance.now();
       const compiledCode = await this.performIncrementalCompilation(newCode, diffs, affectedAreas);
       this.metrics.incrementalCompileTime = performance.now() - compileStartTime;
-      
+
       // 6. Create reload patch
       const patch: HotReloadPatch = {
         id: this.generatePatchId(),
@@ -213,45 +213,54 @@ export class HotReloadEngine {
         changes: diffs,
         compiledCode,
         sourceMap: this.generateSourceMap(newCode, compiledCode),
-        statePreservation: stateData || { controlStates: {}, variableValues: {}, formProperties: {}, executionContext: null },
+        statePreservation: stateData || {
+          controlStates: {},
+          variableValues: {},
+          formProperties: {},
+          executionContext: null,
+        },
         rollbackData: {
           previousAST: this.currentAST!,
           previousCode: this.codeCache.get(filePath) || '',
-          previousState: this.preservedState || { controlStates: {}, variableValues: {}, formProperties: {}, executionContext: null }
-        }
+          previousState: this.preservedState || {
+            controlStates: {},
+            variableValues: {},
+            formProperties: {},
+            executionContext: null,
+          },
+        },
       };
-      
+
       // 7. Apply the patch
       await this.applyHotReloadPatch(patch);
-      
+
       // 8. Update internal state
       this.currentAST = newAST;
       this.codeCache.set(filePath, newCode);
       this.patchHistory.push(patch);
-      
+
       // Cleanup old patches
       if (this.patchHistory.length > this.config.maxRollbackHistory) {
         this.patchHistory.shift();
       }
-      
+
       // Update metrics
       const totalTime = performance.now() - startTime;
       this.metrics.totalReloads++;
       this.metrics.averageReloadTime = (this.metrics.averageReloadTime + totalTime) / 2;
-      
+
       this.log('✅ Hot-reload completed successfully', totalTime, 'ms');
       this.emit('afterReload', { patch, metrics: this.metrics });
-      
+
       return patch;
-      
     } catch (error) {
       this.metrics.errorCount++;
       this.log('❌ Hot-reload error:', error);
-      
+
       if (this.config.errorRecovery) {
         await this.attemptErrorRecovery(error);
       }
-      
+
       this.emit('error', { error, filePath });
       return null;
     }
@@ -267,21 +276,21 @@ export class HotReloadEngine {
         this.log('📋 Using cached AST');
         return JSON.parse(cached);
       }
-      
+
       // Parse fresh AST
       this.log('🔍 Parsing fresh AST...');
       const parseResult = this.parser.parse(code);
-      
+
       if (!parseResult.success || !parseResult.ast) {
         throw new Error(`Parse error: ${parseResult.errors?.join(', ')}`);
       }
-      
+
       // Convert to our AST format with metadata
       const ast = this.convertToHotReloadAST(parseResult.ast);
-      
+
       // Cache the result
       this.setCache(`ast_${codeHash}`, JSON.stringify(ast));
-      
+
       return ast;
     } catch (error) {
       this.log('❌ AST parsing failed:', error);
@@ -293,16 +302,16 @@ export class HotReloadEngine {
   private computeASTDiff(oldAST: ASTNode, newAST: ASTNode): ASTDiff[] {
     const diffs: ASTDiff[] = [];
     this.log('🔄 Computing AST differences...');
-    
+
     // Use Myers' diff algorithm adapted for AST nodes
     const visited = new Set<string>();
-    
+
     // Compare recursively
     this.compareASTNodes(oldAST, newAST, [], diffs, visited);
-    
+
     // Detect moved nodes
     this.detectMovedNodes(oldAST, newAST, diffs);
-    
+
     this.log(`📊 Found ${diffs.length} differences`);
     return diffs;
   }
@@ -315,34 +324,34 @@ export class HotReloadEngine {
     visited: Set<string>
   ): void {
     const pathKey = path.join('.');
-    
+
     if (visited.has(pathKey)) return;
     visited.add(pathKey);
-    
+
     if (!oldNode && !newNode) return;
-    
+
     if (!oldNode && newNode) {
       // Node added
       diffs.push({
         type: 'added',
         path,
         newNode,
-        affects: this.analyzeNodeImpact(newNode, 'added')
+        affects: this.analyzeNodeImpact(newNode, 'added'),
       });
       return;
     }
-    
+
     if (oldNode && !newNode) {
       // Node removed
       diffs.push({
         type: 'removed',
         path,
         oldNode,
-        affects: this.analyzeNodeImpact(oldNode, 'removed')
+        affects: this.analyzeNodeImpact(oldNode, 'removed'),
       });
       return;
     }
-    
+
     if (oldNode && newNode) {
       // Compare hashes for efficiency
       if (oldNode.hash !== newNode.hash) {
@@ -352,10 +361,10 @@ export class HotReloadEngine {
           path,
           oldNode,
           newNode,
-          affects: this.analyzeNodeImpact(newNode, 'modified', oldNode)
+          affects: this.analyzeNodeImpact(newNode, 'modified', oldNode),
         });
       }
-      
+
       // Compare children
       const maxChildren = Math.max(oldNode.children.length, newNode.children.length);
       for (let i = 0; i < maxChildren; i++) {
@@ -369,11 +378,11 @@ export class HotReloadEngine {
   // 🎯 Analyze change impact on the application
   private analyzeChangeImpact(diffs: ASTDiff[]): AffectedArea[] {
     const affectedAreas: AffectedArea[] = [];
-    
+
     for (const diff of diffs) {
       affectedAreas.push(...diff.affects);
     }
-    
+
     // Deduplicate and merge overlapping areas
     return this.mergeAffectedAreas(affectedAreas);
   }
@@ -384,7 +393,7 @@ export class HotReloadEngine {
     oldNode?: ASTNode
   ): AffectedArea[] {
     const areas: AffectedArea[] = [];
-    
+
     switch (node.type) {
       case 'SubDeclaration':
       case 'FunctionDeclaration':
@@ -394,10 +403,10 @@ export class HotReloadEngine {
           scope: 'global',
           requiresRecompile: true,
           requiresRerender: false,
-          requiresStatePreservation: changeType === 'modified'
+          requiresStatePreservation: changeType === 'modified',
         });
         break;
-        
+
       case 'VariableDeclaration':
         areas.push({
           type: 'variable',
@@ -405,10 +414,10 @@ export class HotReloadEngine {
           scope: this.determineScope(node),
           requiresRecompile: true,
           requiresRerender: false,
-          requiresStatePreservation: true
+          requiresStatePreservation: true,
         });
         break;
-        
+
       case 'ControlDeclaration':
         areas.push({
           type: 'control',
@@ -416,10 +425,10 @@ export class HotReloadEngine {
           scope: 'form',
           requiresRecompile: true,
           requiresRerender: true,
-          requiresStatePreservation: true
+          requiresStatePreservation: true,
         });
         break;
-        
+
       case 'FormDeclaration':
         areas.push({
           type: 'form',
@@ -427,10 +436,10 @@ export class HotReloadEngine {
           scope: 'global',
           requiresRecompile: true,
           requiresRerender: true,
-          requiresStatePreservation: true
+          requiresStatePreservation: true,
         });
         break;
-        
+
       case 'PropertyAssignment':
         areas.push({
           type: 'property',
@@ -438,11 +447,11 @@ export class HotReloadEngine {
           scope: 'control',
           requiresRecompile: false,
           requiresRerender: true,
-          requiresStatePreservation: false
+          requiresStatePreservation: false,
         });
         break;
     }
-    
+
     return areas;
   }
 
@@ -465,7 +474,9 @@ export class HotReloadEngine {
       // Preserve JavaScript variable values
       const variableValues: Record<string, unknown> = {};
       if (typeof window !== 'undefined') {
-        const windowWithRuntime = window as Window & { vb6Runtime?: { variables?: Record<string, unknown> } };
+        const windowWithRuntime = window as Window & {
+          vb6Runtime?: { variables?: Record<string, unknown> };
+        };
         if (windowWithRuntime.vb6Runtime?.variables) {
           Object.assign(variableValues, windowWithRuntime.vb6Runtime.variables);
         }
@@ -484,7 +495,7 @@ export class HotReloadEngine {
         controlStates,
         variableValues,
         formProperties,
-        executionContext: this.captureExecutionContext()
+        executionContext: this.captureExecutionContext(),
       };
 
       this.preservedState = stateData;
@@ -504,35 +515,35 @@ export class HotReloadEngine {
     affectedAreas: AffectedArea[]
   ): Promise<string> {
     this.log('⚡ Starting incremental compilation...');
-    
+
     if (!this.config.incrementalCompilation || diffs.length === 0) {
       // Full compilation
       return await this.performFullCompilation(newCode);
     }
-    
+
     try {
       // Only recompile affected procedures
       const recompileAreas = affectedAreas.filter(area => area.requiresRecompile);
-      
+
       if (recompileAreas.length === 0) {
         // No recompilation needed, return cached code
         return this.compilationCache.get('current') || '';
       }
-      
+
       let compiledCode = this.compilationCache.get('current') || '';
-      
+
       // Recompile each affected area
       for (const area of recompileAreas) {
         const areaCode = this.extractAreaCode(newCode, area);
         const compiledArea = await this.compileCodeArea(areaCode, area);
-        
+
         // Replace in the full compiled code
         compiledCode = this.replaceCompiledArea(compiledCode, compiledArea, area);
       }
-      
+
       this.compilationCache.set('current', compiledCode);
       this.emit('compilationComplete', { type: 'incremental', areas: recompileAreas });
-      
+
       return compiledCode;
     } catch (error) {
       this.log('❌ Incremental compilation failed, falling back to full compilation:', error);
@@ -542,17 +553,17 @@ export class HotReloadEngine {
 
   private async performFullCompilation(code: string): Promise<string> {
     this.log('🔄 Performing full compilation...');
-    
+
     try {
       const result = this.transpiler.transpile(code);
-      
+
       if (!result.success || !result.javascript) {
         throw new Error(`Compilation failed: ${result.errors?.join(', ')}`);
       }
-      
+
       this.compilationCache.set('current', result.javascript);
       this.emit('compilationComplete', { type: 'full' });
-      
+
       return result.javascript;
     } catch (error) {
       throw new Error(`Full compilation failed: ${error}`);
@@ -562,21 +573,20 @@ export class HotReloadEngine {
   // 🔧 Apply hot-reload patch to running application
   private async applyHotReloadPatch(patch: HotReloadPatch): Promise<void> {
     this.log('🔧 Applying hot-reload patch...', patch.id);
-    
+
     try {
       // 1. Execute new compiled code
       await this.executeCompiledCode(patch.compiledCode);
-      
+
       // 2. Restore preserved state
       if (this.config.preserveState && patch.statePreservation) {
         await this.restoreApplicationState(patch.statePreservation);
       }
-      
+
       // 3. Update UI for affected areas
       await this.updateAffectedUI(patch.changes);
-      
+
       this.log('✅ Patch applied successfully:', patch.id);
-      
     } catch (error) {
       this.log('❌ Patch application failed:', error);
       throw error;
@@ -586,19 +596,19 @@ export class HotReloadEngine {
   // 🔄 Error recovery and rollback system
   private async attemptErrorRecovery(error: any): Promise<void> {
     this.log('🔄 Attempting error recovery...');
-    
+
     if (this.patchHistory.length === 0) {
       this.log('❌ No rollback history available');
       return;
     }
-    
+
     try {
       const lastPatch = this.patchHistory[this.patchHistory.length - 1];
       await this.rollbackToPatch(lastPatch.rollbackData);
-      
+
       this.metrics.rollbackCount++;
       this.emit('rollback', { reason: error, patch: lastPatch });
-      
+
       this.log('✅ Successfully rolled back to previous state');
     } catch (rollbackError) {
       this.log('❌ Rollback failed:', rollbackError);
@@ -626,12 +636,12 @@ export class HotReloadEngine {
       startColumn: column,
       endColumn: column + (node.text?.length || 0),
       children,
-      metadata: node.metadata || {}
+      metadata: node.metadata || {},
     };
 
     return {
       ...nodeData,
-      hash: this.hashObject(nodeData)
+      hash: this.hashObject(nodeData),
     };
   }
 
@@ -647,7 +657,7 @@ export class HotReloadEngine {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash).toString(36);
@@ -710,22 +720,38 @@ export class HotReloadEngine {
   }
 
   // Stub methods to be implemented based on specific runtime
-  private extractControlState(element: HTMLElement): ControlState { return {}; }
-  private captureExecutionContext(): ExecutionContextData | null { return null; }
-  private extractAreaCode(code: string, area: AffectedArea): string { return ''; }
-  private async compileCodeArea(code: string, area: AffectedArea): Promise<string> { return ''; }
-  private replaceCompiledArea(fullCode: string, areaCode: string, area: AffectedArea): string { return fullCode; }
+  private extractControlState(element: HTMLElement): ControlState {
+    return {};
+  }
+  private captureExecutionContext(): ExecutionContextData | null {
+    return null;
+  }
+  private extractAreaCode(code: string, area: AffectedArea): string {
+    return '';
+  }
+  private async compileCodeArea(code: string, area: AffectedArea): Promise<string> {
+    return '';
+  }
+  private replaceCompiledArea(fullCode: string, areaCode: string, area: AffectedArea): string {
+    return fullCode;
+  }
   private async executeCompiledCode(code: string): Promise<void> {}
   private async restoreApplicationState(state: StatePreservationData): Promise<void> {}
   private async updateAffectedUI(changes: ASTDiff[]): Promise<void> {}
   private async rollbackToPatch(rollbackData: RollbackData): Promise<void> {}
-  private determineScope(node: ASTNode): string { return 'local'; }
+  private determineScope(node: ASTNode): string {
+    return 'local';
+  }
   private detectMovedNodes(oldAST: ASTNode, newAST: ASTNode, diffs: ASTDiff[]): void {}
-  private mergeAffectedAreas(areas: AffectedArea[]): AffectedArea[] { return areas; }
+  private mergeAffectedAreas(areas: AffectedArea[]): AffectedArea[] {
+    return areas;
+  }
   private generateSourceMap(source: string, compiled: string): SourceMap {
     return { version: 3, sources: ['main.vb'], mappings: '', names: [] };
   }
-  private getFromCache(key: string): string | null { return null; }
+  private getFromCache(key: string): string | null {
+    return null;
+  }
   private setCache(key: string, value: string): void {}
 }
 

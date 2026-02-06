@@ -8,7 +8,7 @@ export enum APICategory {
   TypeLibrary = 'Type Libraries',
   Constants = 'Constants',
   Structures = 'Structures',
-  Callbacks = 'Callbacks'
+  Callbacks = 'Callbacks',
 }
 
 // Parameter Types
@@ -27,7 +27,7 @@ export enum ParameterType {
   Byte = 'Byte',
   LongPtr = 'LongPtr',
   Handle = 'Handle',
-  Pointer = 'Pointer'
+  Pointer = 'Pointer',
 }
 
 // API Parameter
@@ -122,19 +122,20 @@ interface APIViewerProps {
   onCodeGenerate?: (code: string, language: 'VB6' | 'C++') => void;
 }
 
-export const APIViewer: React.FC<APIViewerProps> = ({
-  onDeclarationCopy,
-  onCodeGenerate
-}) => {
+export const APIViewer: React.FC<APIViewerProps> = ({ onDeclarationCopy, onCodeGenerate }) => {
   const [selectedCategory, setSelectedCategory] = useState<APICategory>(APICategory.WindowsAPI);
   const [searchFilter, setSearchFilter] = useState('');
-  const [selectedItem, setSelectedItem] = useState<APIFunction | APIConstant | APIStructure | null>(null);
-  const [filteredItems, setFilteredItems] = useState<(APIFunction | APIConstant | APIStructure)[]>([]);
+  const [selectedItem, setSelectedItem] = useState<APIFunction | APIConstant | APIStructure | null>(
+    null
+  );
+  const [filteredItems, setFilteredItems] = useState<(APIFunction | APIConstant | APIStructure)[]>(
+    []
+  );
   const [libraryFilter, setLibraryFilter] = useState<string>('All');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [recentItems, setRecentItems] = useState<string[]>([]);
-  
+
   const eventEmitter = useRef(new EventEmitter());
 
   // Sample API data (in a real implementation, this would come from external sources)
@@ -144,12 +145,42 @@ export const APIViewer: React.FC<APIViewerProps> = ({
       name: 'MessageBox',
       library: 'user32.dll',
       category: APICategory.WindowsAPI,
-      description: 'Displays a modal dialog box that contains a system icon, a set of buttons, and a brief application-specific message.',
+      description:
+        'Displays a modal dialog box that contains a system icon, a set of buttons, and a brief application-specific message.',
       parameters: [
-        { name: 'hWnd', type: 'LongPtr', isOptional: false, isArray: false, isByRef: false, description: 'Handle to the owner window' },
-        { name: 'lpText', type: 'String', isOptional: false, isArray: false, isByRef: false, description: 'Text to display' },
-        { name: 'lpCaption', type: 'String', isOptional: true, isArray: false, isByRef: false, description: 'Dialog box title' },
-        { name: 'uType', type: 'Long', isOptional: true, isArray: false, isByRef: false, defaultValue: '0', description: 'Message box type' }
+        {
+          name: 'hWnd',
+          type: 'LongPtr',
+          isOptional: false,
+          isArray: false,
+          isByRef: false,
+          description: 'Handle to the owner window',
+        },
+        {
+          name: 'lpText',
+          type: 'String',
+          isOptional: false,
+          isArray: false,
+          isByRef: false,
+          description: 'Text to display',
+        },
+        {
+          name: 'lpCaption',
+          type: 'String',
+          isOptional: true,
+          isArray: false,
+          isByRef: false,
+          description: 'Dialog box title',
+        },
+        {
+          name: 'uType',
+          type: 'Long',
+          isOptional: true,
+          isArray: false,
+          isByRef: false,
+          defaultValue: '0',
+          description: 'Message box type',
+        },
       ],
       returnType: 'Long',
       charset: 'Auto',
@@ -157,8 +188,9 @@ export const APIViewer: React.FC<APIViewerProps> = ({
       deprecated: false,
       minimumOS: 'Windows 95',
       example: 'Dim result As Long\nresult = MessageBox(0, "Hello World", "Test", 0)',
-      remarks: 'The message box is displayed in the foreground and blocks user interaction with other windows.',
-      seeAlso: ['MessageBoxEx', 'MessageBoxIndirect']
+      remarks:
+        'The message box is displayed in the foreground and blocks user interaction with other windows.',
+      seeAlso: ['MessageBoxEx', 'MessageBoxIndirect'],
     },
     {
       id: 'kernel32_GetCurrentProcessId',
@@ -172,7 +204,7 @@ export const APIViewer: React.FC<APIViewerProps> = ({
       deprecated: false,
       minimumOS: 'Windows NT 3.1',
       example: 'Dim processId As Long\nprocessId = GetCurrentProcessId()',
-      remarks: 'The process identifier is unique system-wide until the process terminates.'
+      remarks: 'The process identifier is unique system-wide until the process terminates.',
     },
     {
       id: 'gdi32_CreateSolidBrush',
@@ -181,15 +213,22 @@ export const APIViewer: React.FC<APIViewerProps> = ({
       category: APICategory.WindowsAPI,
       description: 'Creates a logical brush that has the specified solid color.',
       parameters: [
-        { name: 'crColor', type: 'Long', isOptional: false, isArray: false, isByRef: false, description: 'RGB color value' }
+        {
+          name: 'crColor',
+          type: 'Long',
+          isOptional: false,
+          isArray: false,
+          isByRef: false,
+          description: 'RGB color value',
+        },
       ],
       returnType: 'LongPtr',
       callingConvention: 'StdCall',
       deprecated: false,
       minimumOS: 'Windows 95',
       example: 'Dim hBrush As LongPtr\nhBrush = CreateSolidBrush(RGB(255, 0, 0))',
-      remarks: 'Remember to call DeleteObject to free the brush when no longer needed.'
-    }
+      remarks: 'Remember to call DeleteObject to free the brush when no longer needed.',
+    },
   ];
 
   const sampleConstants: APIConstant[] = [
@@ -200,7 +239,7 @@ export const APIViewer: React.FC<APIViewerProps> = ({
       type: ParameterType.Long,
       category: 'MessageBox',
       description: 'The message box contains one push button: OK.',
-      library: 'user32.dll'
+      library: 'user32.dll',
     },
     {
       id: 'MB_YESNO',
@@ -209,7 +248,7 @@ export const APIViewer: React.FC<APIViewerProps> = ({
       type: ParameterType.Long,
       category: 'MessageBox',
       description: 'The message box contains two push buttons: Yes and No.',
-      library: 'user32.dll'
+      library: 'user32.dll',
     },
     {
       id: 'GENERIC_READ',
@@ -218,8 +257,8 @@ export const APIViewer: React.FC<APIViewerProps> = ({
       type: ParameterType.Long,
       category: 'File Access',
       description: 'Generic read access to an object.',
-      library: 'kernel32.dll'
-    }
+      library: 'kernel32.dll',
+    },
   ];
 
   const sampleStructures: APIStructure[] = [
@@ -233,14 +272,15 @@ export const APIViewer: React.FC<APIViewerProps> = ({
       alignment: 4,
       fields: [
         { name: 'x', type: 'Long', offset: 0, size: 4, description: 'Horizontal coordinate' },
-        { name: 'y', type: 'Long', offset: 4, size: 4, description: 'Vertical coordinate' }
-      ]
+        { name: 'y', type: 'Long', offset: 4, size: 4, description: 'Vertical coordinate' },
+      ],
     },
     {
       id: 'RECT',
       name: 'RECT',
       category: 'Graphics',
-      description: 'Defines the coordinates of the upper-left and lower-right corners of a rectangle.',
+      description:
+        'Defines the coordinates of the upper-left and lower-right corners of a rectangle.',
       library: 'gdi32.dll',
       size: 16,
       alignment: 4,
@@ -248,9 +288,9 @@ export const APIViewer: React.FC<APIViewerProps> = ({
         { name: 'left', type: 'Long', offset: 0, size: 4, description: 'Left edge' },
         { name: 'top', type: 'Long', offset: 4, size: 4, description: 'Top edge' },
         { name: 'right', type: 'Long', offset: 8, size: 4, description: 'Right edge' },
-        { name: 'bottom', type: 'Long', offset: 12, size: 4, description: 'Bottom edge' }
-      ]
-    }
+        { name: 'bottom', type: 'Long', offset: 12, size: 4, description: 'Bottom edge' },
+      ],
+    },
   ];
 
   // Get all items based on category
@@ -270,23 +310,22 @@ export const APIViewer: React.FC<APIViewerProps> = ({
   // Filter items based on search and library
   useEffect(() => {
     let items = getAllItems();
-    
+
     // Apply search filter
     if (searchFilter) {
-      items = items.filter(item =>
-        item.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchFilter.toLowerCase()) ||
-        ('library' in item && item.library.toLowerCase().includes(searchFilter.toLowerCase()))
+      items = items.filter(
+        item =>
+          item.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+          item.description.toLowerCase().includes(searchFilter.toLowerCase()) ||
+          ('library' in item && item.library.toLowerCase().includes(searchFilter.toLowerCase()))
       );
     }
-    
+
     // Apply library filter
     if (libraryFilter !== 'All') {
-      items = items.filter(item => 
-        'library' in item && item.library === libraryFilter
-      );
+      items = items.filter(item => 'library' in item && item.library === libraryFilter);
     }
-    
+
     setFilteredItems(items);
   }, [selectedCategory, searchFilter, libraryFilter, getAllItems]);
 
@@ -303,104 +342,117 @@ export const APIViewer: React.FC<APIViewerProps> = ({
   }, [getAllItems]);
 
   // Generate VB6 declaration
-  const generateVB6Declaration = useCallback((item: APIFunction | APIConstant | APIStructure): string => {
-    if ('parameters' in item) {
-      // API Function
-      const params = item.parameters.map(p => {
-        let paramStr = '';
-        if (p.isOptional) paramStr += 'Optional ';
-        if (p.isByRef) paramStr += 'ByRef ';
-        else paramStr += 'ByVal ';
-        paramStr += `${p.name} As ${p.type}`;
-        if (p.defaultValue) paramStr += ` = ${p.defaultValue}`;
-        return paramStr;
-      }).join(', ');
-      
-      const returnPart = item.returnType !== 'void' ? ` As ${item.returnType}` : '';
-      const aliasPart = item.alias ? ` Alias "${item.alias}"` : '';
-      const libPart = ` Lib "${item.library}"`;
-      
-      return `Declare Function ${item.name}${libPart}${aliasPart} (${params})${returnPart}`;
-    } else if ('value' in item) {
-      // Constant
-      const value = typeof item.value === 'string' ? `"${item.value}"` : item.value.toString();
-      return `Public Const ${item.name} As ${item.type} = ${value}`;
-    } else if ('fields' in item) {
-      // Structure
-      let declaration = `Public Type ${item.name}\n`;
-      item.fields.forEach(field => {
-        declaration += `    ${field.name} As ${field.type}\n`;
-      });
-      declaration += 'End Type';
-      return declaration;
-    }
-    
-    return '';
-  }, []);
+  const generateVB6Declaration = useCallback(
+    (item: APIFunction | APIConstant | APIStructure): string => {
+      if ('parameters' in item) {
+        // API Function
+        const params = item.parameters
+          .map(p => {
+            let paramStr = '';
+            if (p.isOptional) paramStr += 'Optional ';
+            if (p.isByRef) paramStr += 'ByRef ';
+            else paramStr += 'ByVal ';
+            paramStr += `${p.name} As ${p.type}`;
+            if (p.defaultValue) paramStr += ` = ${p.defaultValue}`;
+            return paramStr;
+          })
+          .join(', ');
+
+        const returnPart = item.returnType !== 'void' ? ` As ${item.returnType}` : '';
+        const aliasPart = item.alias ? ` Alias "${item.alias}"` : '';
+        const libPart = ` Lib "${item.library}"`;
+
+        return `Declare Function ${item.name}${libPart}${aliasPart} (${params})${returnPart}`;
+      } else if ('value' in item) {
+        // Constant
+        const value = typeof item.value === 'string' ? `"${item.value}"` : item.value.toString();
+        return `Public Const ${item.name} As ${item.type} = ${value}`;
+      } else if ('fields' in item) {
+        // Structure
+        let declaration = `Public Type ${item.name}\n`;
+        item.fields.forEach(field => {
+          declaration += `    ${field.name} As ${field.type}\n`;
+        });
+        declaration += 'End Type';
+        return declaration;
+      }
+
+      return '';
+    },
+    []
+  );
 
   // Generate C++ declaration
-  const generateCppDeclaration = useCallback((item: APIFunction | APIConstant | APIStructure): string => {
-    if ('parameters' in item) {
-      // API Function
-      const params = item.parameters.map(p => {
-        const typeMap: Record<string, string> = {
-          'String': 'LPCTSTR',
-          'Long': 'LONG',
-          'LongPtr': 'LONG_PTR',
-          'Integer': 'INT',
-          'Boolean': 'BOOL',
-          'Handle': 'HANDLE',
-          'Pointer': 'LPVOID'
+  const generateCppDeclaration = useCallback(
+    (item: APIFunction | APIConstant | APIStructure): string => {
+      if ('parameters' in item) {
+        // API Function
+        const params = item.parameters
+          .map(p => {
+            const typeMap: Record<string, string> = {
+              String: 'LPCTSTR',
+              Long: 'LONG',
+              LongPtr: 'LONG_PTR',
+              Integer: 'INT',
+              Boolean: 'BOOL',
+              Handle: 'HANDLE',
+              Pointer: 'LPVOID',
+            };
+
+            const cppType = typeMap[p.type] || p.type;
+            return `${cppType} ${p.name}`;
+          })
+          .join(', ');
+
+        const returnTypeMap: Record<string, string> = {
+          String: 'LPCTSTR',
+          Long: 'LONG',
+          LongPtr: 'LONG_PTR',
+          Integer: 'INT',
+          Boolean: 'BOOL',
+          Handle: 'HANDLE',
+          Pointer: 'LPVOID',
+          void: 'void',
         };
-        
-        const cppType = typeMap[p.type] || p.type;
-        return `${cppType} ${p.name}`;
-      }).join(', ');
-      
-      const returnTypeMap: Record<string, string> = {
-        'String': 'LPCTSTR',
-        'Long': 'LONG',
-        'LongPtr': 'LONG_PTR',
-        'Integer': 'INT',
-        'Boolean': 'BOOL',
-        'Handle': 'HANDLE',
-        'Pointer': 'LPVOID',
-        'void': 'void'
-      };
-      
-      const cppReturnType = returnTypeMap[item.returnType] || item.returnType;
-      
-      return `${cppReturnType} WINAPI ${item.name}(${params});`;
-    } else if ('value' in item) {
-      // Constant
-      const value = typeof item.value === 'string' ? `"${item.value}"` : item.value.toString();
-      return `#define ${item.name} ${value}`;
-    } else if ('fields' in item) {
-      // Structure
-      let declaration = `typedef struct _${item.name} {\n`;
-      item.fields.forEach(field => {
-        const typeMap: Record<string, string> = {
-          'String': 'LPCTSTR',
-          'Long': 'LONG',
-          'Integer': 'INT',
-          'Boolean': 'BOOL'
-        };
-        const cppType = typeMap[field.type] || field.type;
-        declaration += `    ${cppType} ${field.name};\n`;
-      });
-      declaration += `} ${item.name.toUpperCase()}, *P${item.name.toUpperCase()};`;
-      return declaration;
-    }
-    
-    return '';
-  }, []);
+
+        const cppReturnType = returnTypeMap[item.returnType] || item.returnType;
+
+        return `${cppReturnType} WINAPI ${item.name}(${params});`;
+      } else if ('value' in item) {
+        // Constant
+        const value = typeof item.value === 'string' ? `"${item.value}"` : item.value.toString();
+        return `#define ${item.name} ${value}`;
+      } else if ('fields' in item) {
+        // Structure
+        let declaration = `typedef struct _${item.name} {\n`;
+        item.fields.forEach(field => {
+          const typeMap: Record<string, string> = {
+            String: 'LPCTSTR',
+            Long: 'LONG',
+            Integer: 'INT',
+            Boolean: 'BOOL',
+          };
+          const cppType = typeMap[field.type] || field.type;
+          declaration += `    ${cppType} ${field.name};\n`;
+        });
+        declaration += `} ${item.name.toUpperCase()}, *P${item.name.toUpperCase()};`;
+        return declaration;
+      }
+
+      return '';
+    },
+    []
+  );
 
   // Copy to clipboard
-  const copyToClipboard = useCallback((text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      onDeclarationCopy?.(text);
-    });
-  }, [onDeclarationCopy]);
+  const copyToClipboard = useCallback(
+    (text: string) => {
+      navigator.clipboard.writeText(text).then(() => {
+        onDeclarationCopy?.(text);
+      });
+    },
+    [onDeclarationCopy]
+  );
 
   // Add to favorites
   const toggleFavorite = useCallback((itemId: string) => {
@@ -424,10 +476,13 @@ export const APIViewer: React.FC<APIViewerProps> = ({
   }, []);
 
   // Select item
-  const selectItem = useCallback((item: APIFunction | APIConstant | APIStructure) => {
-    setSelectedItem(item);
-    addToRecent(item.id);
-  }, [addToRecent]);
+  const selectItem = useCallback(
+    (item: APIFunction | APIConstant | APIStructure) => {
+      setSelectedItem(item);
+      addToRecent(item.id);
+    },
+    [addToRecent]
+  );
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -441,17 +496,19 @@ export const APIViewer: React.FC<APIViewerProps> = ({
                 type="text"
                 placeholder="Search APIs..."
                 value={searchFilter}
-                onChange={(e) => setSearchFilter(e.target.value)}
+                onChange={e => setSearchFilter(e.target.value)}
                 className="px-3 py-1 border border-gray-300 rounded w-64"
               />
               <select
                 value={libraryFilter}
-                onChange={(e) => setLibraryFilter(e.target.value)}
+                onChange={e => setLibraryFilter(e.target.value)}
                 className="px-2 py-1 border border-gray-300 rounded"
               >
                 <option value="All">All Libraries</option>
                 {getLibraries().map(lib => (
-                  <option key={lib} value={lib}>{lib}</option>
+                  <option key={lib} value={lib}>
+                    {lib}
+                  </option>
                 ))}
               </select>
             </div>
@@ -459,7 +516,7 @@ export const APIViewer: React.FC<APIViewerProps> = ({
               <input
                 type="checkbox"
                 checked={showAdvanced}
-                onChange={(e) => setShowAdvanced(e.target.checked)}
+                onChange={e => setShowAdvanced(e.target.checked)}
               />
               Advanced View
             </label>
@@ -487,7 +544,11 @@ export const APIViewer: React.FC<APIViewerProps> = ({
                   {category === APICategory.WindowsAPI && `${sampleAPIs.length} functions`}
                   {category === APICategory.Constants && `${sampleConstants.length} constants`}
                   {category === APICategory.Structures && `${sampleStructures.length} structures`}
-                  {![APICategory.WindowsAPI, APICategory.Constants, APICategory.Structures].includes(category) && 'Coming soon'}
+                  {![
+                    APICategory.WindowsAPI,
+                    APICategory.Constants,
+                    APICategory.Structures,
+                  ].includes(category) && 'Coming soon'}
                 </div>
               </div>
             ))}
@@ -514,10 +575,12 @@ export const APIViewer: React.FC<APIViewerProps> = ({
                   <div className="font-medium text-sm">{item.name}</div>
                   <div className="flex items-center gap-1">
                     {recentItems.includes(item.id) && (
-                      <span className="text-xs bg-green-100 text-green-800 px-1 rounded">Recent</span>
+                      <span className="text-xs bg-green-100 text-green-800 px-1 rounded">
+                        Recent
+                      </span>
                     )}
                     <button
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation();
                         toggleFavorite(item.id);
                       }}
@@ -530,12 +593,10 @@ export const APIViewer: React.FC<APIViewerProps> = ({
                 {'library' in item && (
                   <div className="text-xs text-gray-500 mt-1">{item.library}</div>
                 )}
-                <div className="text-xs text-gray-600 mt-1 line-clamp-2">
-                  {item.description}
-                </div>
+                <div className="text-xs text-gray-600 mt-1 line-clamp-2">{item.description}</div>
               </div>
             ))}
-            
+
             {filteredItems.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 <p className="text-sm">No items found</p>
@@ -606,15 +667,30 @@ export const APIViewer: React.FC<APIViewerProps> = ({
                       </div>
                     </div>
                     {selectedItem.parameters.map((param, index) => (
-                      <div key={index} className="px-4 py-3 border-b border-gray-200 last:border-b-0">
+                      <div
+                        key={index}
+                        className="px-4 py-3 border-b border-gray-200 last:border-b-0"
+                      >
                         <div className="grid grid-cols-12 gap-2 text-sm">
                           <div className="col-span-3 font-mono">{param.name}</div>
                           <div className="col-span-2 font-mono text-blue-600">{param.type}</div>
                           <div className="col-span-2">
                             <div className="flex flex-wrap gap-1">
-                              {param.isOptional && <span className="bg-blue-100 text-blue-800 px-1 rounded text-xs">Optional</span>}
-                              {param.isArray && <span className="bg-green-100 text-green-800 px-1 rounded text-xs">Array</span>}
-                              {param.isByRef && <span className="bg-yellow-100 text-yellow-800 px-1 rounded text-xs">ByRef</span>}
+                              {param.isOptional && (
+                                <span className="bg-blue-100 text-blue-800 px-1 rounded text-xs">
+                                  Optional
+                                </span>
+                              )}
+                              {param.isArray && (
+                                <span className="bg-green-100 text-green-800 px-1 rounded text-xs">
+                                  Array
+                                </span>
+                              )}
+                              {param.isByRef && (
+                                <span className="bg-yellow-100 text-yellow-800 px-1 rounded text-xs">
+                                  ByRef
+                                </span>
+                              )}
                             </div>
                           </div>
                           <div className="col-span-5 text-gray-600">{param.description}</div>
@@ -639,7 +715,10 @@ export const APIViewer: React.FC<APIViewerProps> = ({
                       </div>
                     </div>
                     {selectedItem.fields.map((field, index) => (
-                      <div key={index} className="px-4 py-3 border-b border-gray-200 last:border-b-0">
+                      <div
+                        key={index}
+                        className="px-4 py-3 border-b border-gray-200 last:border-b-0"
+                      >
                         <div className="grid grid-cols-12 gap-2 text-sm">
                           <div className="col-span-3 font-mono">{field.name}</div>
                           <div className="col-span-2 font-mono text-blue-600">{field.type}</div>
@@ -657,7 +736,10 @@ export const APIViewer: React.FC<APIViewerProps> = ({
                 <div className="mb-6">
                   <h3 className="text-lg font-medium mb-2">Return Value</h3>
                   <p className="text-gray-700">
-                    Returns a value of type <code className="bg-gray-100 px-2 py-1 rounded font-mono text-sm">{selectedItem.returnType}</code>
+                    Returns a value of type{' '}
+                    <code className="bg-gray-100 px-2 py-1 rounded font-mono text-sm">
+                      {selectedItem.returnType}
+                    </code>
                   </p>
                 </div>
               )}
@@ -710,25 +792,32 @@ export const APIViewer: React.FC<APIViewerProps> = ({
               )}
 
               {/* See Also */}
-              {'seeAlso' in selectedItem && selectedItem.seeAlso && selectedItem.seeAlso.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-medium mb-2">See Also</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedItem.seeAlso.map((related, index) => (
-                      <span key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
-                        {related}
-                      </span>
-                    ))}
+              {'seeAlso' in selectedItem &&
+                selectedItem.seeAlso &&
+                selectedItem.seeAlso.length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="text-lg font-medium mb-2">See Also</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedItem.seeAlso.map((related, index) => (
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm"
+                        >
+                          {related}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           ) : (
             <div className="flex items-center justify-center h-full text-gray-500">
               <div className="text-center">
                 <div className="text-4xl mb-4">🔍</div>
                 <p className="text-lg">Select an API item</p>
-                <p className="text-sm mt-2">Choose an item from the list to view its details and documentation</p>
+                <p className="text-sm mt-2">
+                  Choose an item from the list to view its details and documentation
+                </p>
               </div>
             </div>
           )}

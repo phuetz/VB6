@@ -23,7 +23,7 @@ const ImageList: React.FC<ImageListProps> = ({
   onSelect,
   onDoubleClick,
   onMove,
-  onResize
+  onResize,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -35,15 +35,15 @@ const ImageList: React.FC<ImageListProps> = ({
   const images: VB6Image[] = properties.Images || [];
   const imageWidth = properties.ImageWidth || 16;
   const imageHeight = properties.ImageHeight || 16;
-  const backColor = properties.BackColor || 0xC0C0C0; // VB6 color format
-  const maskColor = properties.MaskColor || 0xFF00FF; // Magenta default
+  const backColor = properties.BackColor || 0xc0c0c0; // VB6 color format
+  const maskColor = properties.MaskColor || 0xff00ff; // Magenta default
   const useMaskColor = properties.UseMaskColor === true;
 
   // Convert VB6 color format (&HBBGGRR) to CSS hex color
   const vb6ColorToCss = useCallback((vb6Color: number): string => {
-    const r = vb6Color & 0xFF;
-    const g = (vb6Color >> 8) & 0xFF;
-    const b = (vb6Color >> 16) & 0xFF;
+    const r = vb6Color & 0xff;
+    const g = (vb6Color >> 8) & 0xff;
+    const b = (vb6Color >> 16) & 0xff;
     return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
   }, []);
 
@@ -54,14 +54,14 @@ const ImageList: React.FC<ImageListProps> = ({
         index: index || images.length + 1,
         key: key || `Image${images.length + 1}`,
         tag: '',
-        picture: picture || ''
+        picture: picture || '',
       };
-      
+
       const newImages = [...images, newImage];
       if (control.events?.onChange) {
         control.events.onChange('Images', newImages);
       }
-      
+
       return newImage;
     },
 
@@ -72,14 +72,14 @@ const ImageList: React.FC<ImageListProps> = ({
       } else {
         imageIndex = images.findIndex(img => img.index === indexOrKey);
       }
-      
+
       if (imageIndex >= 0) {
         const newImages = images.filter((_, i) => i !== imageIndex);
         // Reindex remaining images
         newImages.forEach((img, i) => {
           img.index = i + 1;
         });
-        
+
         if (control.events?.onChange) {
           control.events.onChange('Images', newImages);
         }
@@ -101,32 +101,35 @@ const ImageList: React.FC<ImageListProps> = ({
       // Simulate overlay functionality - in real VB6 this would combine images
       const image1 = images.find(img => img.index === index1);
       const image2 = images.find(img => img.index === index2);
-      
+
       if (image1 && image2) {
         // Return first image as overlay simulation
         return image1.picture;
       }
       return null;
-    }
+    },
   };
 
   // Handle file drop for adding images
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const files = Array.from(e.dataTransfer.files);
-    const imageFiles = files.filter(file => file.type.startsWith('image/'));
-    
-    imageFiles.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const base64 = event.target?.result as string;
-        vb6Methods.Add(undefined, file.name.split('.')[0], base64);
-      };
-      reader.readAsDataURL(file);
-    });
-  }, [vb6Methods]);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const files = Array.from(e.dataTransfer.files);
+      const imageFiles = files.filter(file => file.type.startsWith('image/'));
+
+      imageFiles.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = event => {
+          const base64 = event.target?.result as string;
+          vb6Methods.Add(undefined, file.name.split('.')[0], base64);
+        };
+        reader.readAsDataURL(file);
+      });
+    },
+    [vb6Methods]
+  );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -185,7 +188,7 @@ const ImageList: React.FC<ImageListProps> = ({
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '16px',
-    overflow: 'hidden'
+    overflow: 'hidden',
   };
 
   const previewStyle: React.CSSProperties = {
@@ -199,7 +202,7 @@ const ImageList: React.FC<ImageListProps> = ({
     zIndex: 1000,
     display: selected ? 'block' : 'none',
     maxHeight: 200,
-    overflowY: 'auto'
+    overflowY: 'auto',
   };
 
   return (
@@ -226,7 +229,7 @@ const ImageList: React.FC<ImageListProps> = ({
               padding: '1px 3px',
               borderRadius: '2px',
               minWidth: '12px',
-              textAlign: 'center'
+              textAlign: 'center',
             }}
           >
             {images.length}
@@ -241,18 +244,18 @@ const ImageList: React.FC<ImageListProps> = ({
             fontSize: '10px',
             fontWeight: 'bold',
             marginBottom: 8,
-            color: '#333'
+            color: '#333',
           }}
         >
           ImageList Preview ({imageWidth}×{imageHeight})
         </div>
-        
+
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: `repeat(auto-fill, ${imageWidth + 4}px)`,
             gap: 4,
-            justifyContent: 'start'
+            justifyContent: 'start',
           }}
         >
           {images.map((image, index) => (
@@ -267,7 +270,7 @@ const ImageList: React.FC<ImageListProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 overflow: 'hidden',
-                position: 'relative'
+                position: 'relative',
               }}
               title={`${image.key} (${image.index})`}
             >
@@ -278,17 +281,15 @@ const ImageList: React.FC<ImageListProps> = ({
                   style={{
                     maxWidth: '100%',
                     maxHeight: '100%',
-                    objectFit: 'contain'
+                    objectFit: 'contain',
                   }}
                 />
               ) : (
-                <span style={{ fontSize: '8px', color: '#999' }}>
-                  {image.index}
-                </span>
+                <span style={{ fontSize: '8px', color: '#999' }}>{image.index}</span>
               )}
             </div>
           ))}
-          
+
           {/* Add new image placeholder */}
           <div
             style={{
@@ -300,18 +301,18 @@ const ImageList: React.FC<ImageListProps> = ({
               justifyContent: 'center',
               cursor: 'pointer',
               fontSize: '12px',
-              color: '#999'
+              color: '#999',
             }}
             onClick={() => {
               const input = document.createElement('input');
               input.type = 'file';
               input.multiple = true;
               input.accept = 'image/*';
-              input.onchange = (e) => {
+              input.onchange = e => {
                 const files = Array.from((e.target as HTMLInputElement).files || []);
                 files.forEach(file => {
                   const reader = new FileReader();
-                  reader.onload = (event) => {
+                  reader.onload = event => {
                     const base64 = event.target?.result as string;
                     vb6Methods.Add(undefined, file.name.split('.')[0], base64);
                   };
@@ -325,7 +326,7 @@ const ImageList: React.FC<ImageListProps> = ({
             +
           </div>
         </div>
-        
+
         {images.length === 0 && (
           <div
             style={{
@@ -333,25 +334,28 @@ const ImageList: React.FC<ImageListProps> = ({
               color: '#999',
               fontSize: '10px',
               fontStyle: 'italic',
-              padding: 20
+              padding: 20,
             }}
           >
-            No images loaded<br />
+            No images loaded
+            <br />
             Drop image files here or click + to add
           </div>
         )}
-        
+
         <div
           style={{
             marginTop: 8,
             padding: 4,
             backgroundColor: '#e0e0e0',
             fontSize: '9px',
-            color: '#666'
+            color: '#666',
           }}
         >
           <div>Count: {images.length}</div>
-          <div>Size: {imageWidth}×{imageHeight}</div>
+          <div>
+            Size: {imageWidth}×{imageHeight}
+          </div>
           <div>Mask: {useMaskColor ? vb6ColorToCss(maskColor) : 'None'}</div>
         </div>
       </div>

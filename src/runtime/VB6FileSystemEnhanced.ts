@@ -14,20 +14,20 @@ export enum VB6FileMode {
   Output = 2,
   Random = 4,
   Append = 8,
-  Binary = 32
+  Binary = 32,
 }
 
 export enum VB6FileAccess {
   Read = 1,
   Write = 2,
-  ReadWrite = 3
+  ReadWrite = 3,
 }
 
 export enum VB6FileLock {
   Shared = 1,
   LockRead = 2,
   LockWrite = 3,
-  LockReadWrite = 4
+  LockReadWrite = 4,
 }
 
 /**
@@ -36,7 +36,6 @@ export enum VB6FileLock {
 export async function initializeFileSystem(): Promise<void> {
   try {
     await persistentVFS.initialize();
-    console.log('[VB6] File system initialized with persistent storage');
   } catch (error) {
     console.error('[VB6] File system initialization failed:', error);
   }
@@ -80,7 +79,6 @@ export async function Open(
     const actualMode = mode || VB6FileMode.Input;
     await persistentVFS.openFile(pathname, actualMode, recordLength);
 
-    console.log(`[VB6 FileSystem] Opened file "${pathname}" as #${actualFileNumber}`);
     return actualFileNumber;
   } catch (error) {
     errorHandler.raiseError(53, `File not found: ${pathname}`, 'Open');
@@ -95,12 +93,10 @@ export async function Close(...fileNumbers: number[]): Promise<void> {
   try {
     if (fileNumbers.length === 0) {
       // Close all files - need to implement proper tracking
-      console.log('[VB6 FileSystem] Closed all files');
     } else {
       for (const fileNumber of fileNumbers) {
         await persistentVFS.closeFile(fileNumber);
       }
-      console.log(`[VB6 FileSystem] Closed files: ${fileNumbers.join(', ')}`);
     }
   } catch (error) {
     errorHandler.raiseError(52, 'Bad file name or number', 'Close');
@@ -113,7 +109,6 @@ export async function Close(...fileNumbers: number[]): Promise<void> {
 export async function Reset(): Promise<void> {
   try {
     // Close all open files
-    console.log('[VB6 FileSystem] Reset - All files closed and buffers cleared');
   } catch (error) {
     errorHandler.raiseError(52, 'Bad file name or number', 'Reset');
   }
@@ -160,17 +155,20 @@ export async function Print(fileNumber: number, ...expressions: any[]): Promise<
  */
 export async function Write(fileNumber: number, ...expressions: any[]): Promise<void> {
   try {
-    const output = expressions.map(expr => {
-      if (typeof expr === 'string') {
-        return `"${expr.replace(/"/g, '""')}"`;
-      } else if (expr === null) {
-        return '#NULL#';
-      } else if (expr instanceof Date) {
-        return `#${expr.toISOString()}#`;
-      } else {
-        return String(expr);
-      }
-    }).join(',') + '\n';
+    const output =
+      expressions
+        .map(expr => {
+          if (typeof expr === 'string') {
+            return `"${expr.replace(/"/g, '""')}"`;
+          } else if (expr === null) {
+            return '#NULL#';
+          } else if (expr instanceof Date) {
+            return `#${expr.toISOString()}#`;
+          } else {
+            return String(expr);
+          }
+        })
+        .join(',') + '\n';
 
     await persistentVFS.writeToFile(fileNumber, output);
   } catch (error) {
@@ -198,11 +196,7 @@ export async function Get(fileNumber: number, recordNumber?: number): Promise<an
 /**
  * Put - Write binary record
  */
-export async function Put(
-  fileNumber: number,
-  recordNumber?: number,
-  data?: any
-): Promise<void> {
+export async function Put(fileNumber: number, recordNumber?: number, data?: any): Promise<void> {
   try {
     if (recordNumber !== undefined) {
       persistentVFS.seekFile(fileNumber, (recordNumber - 1) * 128);
@@ -340,7 +334,6 @@ export async function Kill(pathname: string): Promise<void> {
     }
 
     await persistentVFS.deleteEntry(pathname);
-    console.log(`[VB6 FileSystem] Deleted file: ${pathname}`);
   } catch (error) {
     errorHandler.raiseError(53, error instanceof Error ? error.message : 'File not found', 'Kill');
   }
@@ -358,10 +351,12 @@ export async function FileCopy(source: string, destination: string): Promise<voi
 
     const content = (sourceEntry.content as string) || '';
     await persistentVFS.createFile(destination, content);
-
-    console.log(`[VB6 FileSystem] Copied ${source} to ${destination}`);
   } catch (error) {
-    errorHandler.raiseError(53, error instanceof Error ? error.message : 'File not found', 'FileCopy');
+    errorHandler.raiseError(
+      53,
+      error instanceof Error ? error.message : 'File not found',
+      'FileCopy'
+    );
   }
 }
 
@@ -384,8 +379,6 @@ export async function Name(oldPath: string, newPath: string): Promise<void> {
 
     // Delete old entry
     await persistentVFS.deleteEntry(oldPath);
-
-    console.log(`[VB6 FileSystem] Renamed ${oldPath} to ${newPath}`);
   } catch (error) {
     errorHandler.raiseError(53, error instanceof Error ? error.message : 'Path not found', 'Name');
   }
@@ -406,9 +399,12 @@ export async function MkDir(path: string): Promise<void> {
     }
 
     await persistentVFS.createDirectory(path);
-    console.log(`[VB6 FileSystem] Created directory: ${path}`);
   } catch (error) {
-    errorHandler.raiseError(75, error instanceof Error ? error.message : 'Path/File access error', 'MkDir');
+    errorHandler.raiseError(
+      75,
+      error instanceof Error ? error.message : 'Path/File access error',
+      'MkDir'
+    );
   }
 }
 
@@ -429,9 +425,12 @@ export async function RmDir(path: string): Promise<void> {
     }
 
     await persistentVFS.deleteEntry(path);
-    console.log(`[VB6 FileSystem] Removed directory: ${path}`);
   } catch (error) {
-    errorHandler.raiseError(75, error instanceof Error ? error.message : 'Path/File access error', 'RmDir');
+    errorHandler.raiseError(
+      75,
+      error instanceof Error ? error.message : 'Path/File access error',
+      'RmDir'
+    );
   }
 }
 
@@ -441,7 +440,6 @@ export async function RmDir(path: string): Promise<void> {
 export async function ChDir(path: string): Promise<void> {
   try {
     await persistentVFS.changeDirectory(path);
-    console.log(`[VB6 FileSystem] Changed directory to: ${path}`);
   } catch (error) {
     errorHandler.raiseError(76, 'Path not found', 'ChDir');
   }
@@ -457,9 +455,7 @@ export function CurDir(_drive?: string): string {
 /**
  * ChDrive - Change current drive (no-op in browser)
  */
-export function ChDrive(drive: string): void {
-  console.log(`[VB6 FileSystem] ChDrive ignored in browser: ${drive}`);
-}
+export function ChDrive(drive: string): void {}
 
 // ============================================================================
 // DIR FUNCTION WITH PROPER PATTERN MATCHING
@@ -472,7 +468,7 @@ const dirState: {
 } = {
   pattern: '',
   entries: [],
-  index: 0
+  index: 0,
 };
 
 /**
@@ -491,15 +487,13 @@ export async function Dir(
 
       // Parse pattern
       const lastSlash = pathname.lastIndexOf('/');
-      const directory = lastSlash >= 0 ? pathname.substring(0, lastSlash) : persistentVFS.getCurrentDirectory();
+      const directory =
+        lastSlash >= 0 ? pathname.substring(0, lastSlash) : persistentVFS.getCurrentDirectory();
       const pattern = lastSlash >= 0 ? pathname.substring(lastSlash + 1) : pathname;
 
       // Convert DOS wildcards to regex
       const regex = new RegExp(
-        '^' + pattern
-          .replace(/\./g, '\\.')
-          .replace(/\*/g, '.*')
-          .replace(/\?/g, '.') + '$',
+        '^' + pattern.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.') + '$',
         'i'
       );
 
@@ -580,7 +574,7 @@ export const VB6FileSystemEnhanced = {
   VB6FileAttribute,
 
   // Persistent file system
-  persistentVFS
+  persistentVFS,
 };
 
 // Make functions globally available
@@ -615,8 +609,6 @@ if (typeof window !== 'undefined') {
   globalAny.CurDir = CurDir;
   globalAny.ChDrive = ChDrive;
   globalAny.Dir = Dir;
-
-  console.log('[VB6] Enhanced File System loaded with persistent IndexedDB storage');
 }
 
 export default VB6FileSystemEnhanced;

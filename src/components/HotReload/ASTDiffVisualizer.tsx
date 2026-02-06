@@ -19,7 +19,7 @@ import {
   Clock,
   Hash,
   FileText,
-  Settings
+  Settings,
 } from 'lucide-react';
 import { ASTDiff, ASTNode, AffectedArea } from '../../services/HotReloadEngine';
 
@@ -51,13 +51,15 @@ export const ASTDiffVisualizer: React.FC<ASTDiffVisualizerProps> = ({
   oldAST,
   newAST,
   onNodeSelect,
-  onDiffSelect
+  onDiffSelect,
 }) => {
   const [activeTab, setActiveTab] = useState<'diffs' | 'tree' | 'analysis'>('diffs');
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [selectedDiff, setSelectedDiff] = useState<ASTDiff | null>(null);
   const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
-  const [filterType, setFilterType] = useState<'all' | 'added' | 'removed' | 'modified' | 'moved'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'added' | 'removed' | 'modified' | 'moved'>(
+    'all'
+  );
 
   // Filter diffs based on type
   const filteredDiffs = useMemo(() => {
@@ -79,14 +81,14 @@ export const ASTDiffVisualizer: React.FC<ASTDiffVisualizerProps> = ({
       riskLevel: 'low' as 'low' | 'medium' | 'high',
       recompileRequired: false,
       rerenderRequired: false,
-      statePreservationRequired: false
+      statePreservationRequired: false,
     };
 
     diffs.forEach(diff => {
       diff.affects.forEach(area => {
         const key = `${area.type}:${area.scope}`;
         analysis.affectedAreas.set(key, (analysis.affectedAreas.get(key) || 0) + 1);
-        
+
         if (area.requiresRecompile) analysis.recompileRequired = true;
         if (area.requiresRerender) analysis.rerenderRequired = true;
         if (area.requiresStatePreservation) analysis.statePreservationRequired = true;
@@ -132,13 +134,13 @@ export const ASTDiffVisualizer: React.FC<ASTDiffVisualizerProps> = ({
               {diffs.length} changes
             </span>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
               className={`px-3 py-1 rounded text-sm transition-colors ${
-                showTechnicalDetails 
-                  ? 'bg-white bg-opacity-20' 
+                showTechnicalDetails
+                  ? 'bg-white bg-opacity-20'
                   : 'hover:bg-white hover:bg-opacity-10'
               }`}
             >
@@ -159,7 +161,12 @@ export const ASTDiffVisualizer: React.FC<ASTDiffVisualizerProps> = ({
           {[
             { id: 'diffs', label: 'Changes', icon: Edit3, count: diffs.length },
             { id: 'tree', label: 'AST Tree', icon: GitBranch, count: newAST ? 1 : 0 },
-            { id: 'analysis', label: 'Impact Analysis', icon: Zap, count: impactAnalysis.affectedAreas.size }
+            {
+              id: 'analysis',
+              label: 'Impact Analysis',
+              icon: Zap,
+              count: impactAnalysis.affectedAreas.size,
+            },
           ].map(tab => (
             <button
               key={tab.id}
@@ -193,14 +200,22 @@ export const ASTDiffVisualizer: React.FC<ASTDiffVisualizerProps> = ({
                     <span className="text-sm text-gray-600">Filter:</span>
                     <select
                       value={filterType}
-                      onChange={(e) => setFilterType(e.target.value as any)}
+                      onChange={e => setFilterType(e.target.value as any)}
                       className="text-sm border border-gray-300 rounded px-2 py-1"
                     >
                       <option value="all">All Changes ({diffs.length})</option>
-                      <option value="added">Added ({diffs.filter(d => d.type === 'added').length})</option>
-                      <option value="removed">Removed ({diffs.filter(d => d.type === 'removed').length})</option>
-                      <option value="modified">Modified ({diffs.filter(d => d.type === 'modified').length})</option>
-                      <option value="moved">Moved ({diffs.filter(d => d.type === 'moved').length})</option>
+                      <option value="added">
+                        Added ({diffs.filter(d => d.type === 'added').length})
+                      </option>
+                      <option value="removed">
+                        Removed ({diffs.filter(d => d.type === 'removed').length})
+                      </option>
+                      <option value="modified">
+                        Modified ({diffs.filter(d => d.type === 'modified').length})
+                      </option>
+                      <option value="moved">
+                        Moved ({diffs.filter(d => d.type === 'moved').length})
+                      </option>
                     </select>
                   </div>
                 </div>
@@ -216,7 +231,7 @@ export const ASTDiffVisualizer: React.FC<ASTDiffVisualizerProps> = ({
                       showDetails={showTechnicalDetails}
                     />
                   ))}
-                  
+
                   {filteredDiffs.length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                       <FileText size={32} className="mx-auto mb-2 opacity-50" />
@@ -280,43 +295,51 @@ const DiffItem: React.FC<{
 }> = ({ diff, isSelected, onClick, showDetails }) => {
   const getChangeIcon = (type: string) => {
     switch (type) {
-      case 'added': return <Plus size={14} className="text-green-600" />;
-      case 'removed': return <Minus size={14} className="text-red-600" />;
-      case 'modified': return <Edit3 size={14} className="text-blue-600" />;
-      case 'moved': return <Move size={14} className="text-purple-600" />;
-      default: return <Code size={14} className="text-gray-600" />;
+      case 'added':
+        return <Plus size={14} className="text-green-600" />;
+      case 'removed':
+        return <Minus size={14} className="text-red-600" />;
+      case 'modified':
+        return <Edit3 size={14} className="text-blue-600" />;
+      case 'moved':
+        return <Move size={14} className="text-purple-600" />;
+      default:
+        return <Code size={14} className="text-gray-600" />;
     }
   };
 
   const getChangeColor = (type: string) => {
     switch (type) {
-      case 'added': return 'border-l-green-500 bg-green-50';
-      case 'removed': return 'border-l-red-500 bg-red-50';
-      case 'modified': return 'border-l-blue-500 bg-blue-50';
-      case 'moved': return 'border-l-purple-500 bg-purple-50';
-      default: return 'border-l-gray-500 bg-gray-50';
+      case 'added':
+        return 'border-l-green-500 bg-green-50';
+      case 'removed':
+        return 'border-l-red-500 bg-red-50';
+      case 'modified':
+        return 'border-l-blue-500 bg-blue-50';
+      case 'moved':
+        return 'border-l-purple-500 bg-purple-50';
+      default:
+        return 'border-l-gray-500 bg-gray-50';
     }
   };
 
   return (
     <div
       onClick={onClick}
-      className={`p-3 border-l-4 rounded cursor-pointer transition-all ${
-        getChangeColor(diff.type)
-      } ${isSelected ? 'ring-2 ring-blue-300' : 'hover:shadow-md'}`}
+      className={`p-3 border-l-4 rounded cursor-pointer transition-all ${getChangeColor(
+        diff.type
+      )} ${isSelected ? 'ring-2 ring-blue-300' : 'hover:shadow-md'}`}
     >
       <div className="flex items-center gap-2 mb-1">
         {getChangeIcon(diff.type)}
         <span className="font-medium capitalize text-sm">{diff.type}</span>
-        <span className="text-xs text-gray-500">
-          {diff.path.join(' → ') || 'Root'}
-        </span>
+        <span className="text-xs text-gray-500">{diff.path.join(' → ') || 'Root'}</span>
       </div>
-      
+
       <div className="text-sm text-gray-700">
         {diff.newNode?.name || diff.oldNode?.name || 'Unnamed node'}
       </div>
-      
+
       <div className="text-xs text-gray-500 mt-1">
         {diff.affects.length} area{diff.affects.length !== 1 ? 's' : ''} affected
       </div>
@@ -342,9 +365,15 @@ const DiffDetails: React.FC<{
         <h3 className="font-semibold text-lg mb-2">Change Details</h3>
         <div className="bg-gray-100 rounded p-3">
           <div className="grid grid-cols-2 gap-2 text-sm">
-            <div><strong>Type:</strong> {diff.type}</div>
-            <div><strong>Path:</strong> {diff.path.join(' → ') || 'Root'}</div>
-            <div><strong>Affected Areas:</strong> {diff.affects.length}</div>
+            <div>
+              <strong>Type:</strong> {diff.type}
+            </div>
+            <div>
+              <strong>Path:</strong> {diff.path.join(' → ') || 'Root'}
+            </div>
+            <div>
+              <strong>Affected Areas:</strong> {diff.affects.length}
+            </div>
           </div>
         </div>
       </div>
@@ -376,30 +405,38 @@ const DiffDetails: React.FC<{
 const AffectedAreaItem: React.FC<{ area: AffectedArea }> = ({ area }) => {
   const getAreaIcon = (type: string) => {
     switch (type) {
-      case 'form': return <FileText size={14} />;
-      case 'control': return <Settings size={14} />;
-      case 'procedure': return <Code size={14} />;
-      case 'variable': return <Hash size={14} />;
-      case 'property': return <Edit3 size={14} />;
-      default: return <AlertTriangle size={14} />;
+      case 'form':
+        return <FileText size={14} />;
+      case 'control':
+        return <Settings size={14} />;
+      case 'procedure':
+        return <Code size={14} />;
+      case 'variable':
+        return <Hash size={14} />;
+      case 'property':
+        return <Edit3 size={14} />;
+      default:
+        return <AlertTriangle size={14} />;
     }
   };
 
   return (
     <div className="flex items-center gap-3 p-2 bg-gray-50 rounded">
-      <div className="text-gray-600">
-        {getAreaIcon(area.type)}
-      </div>
+      <div className="text-gray-600">{getAreaIcon(area.type)}</div>
       <div className="flex-1">
         <div className="font-medium text-sm">{area.name}</div>
-        <div className="text-xs text-gray-500">{area.type} in {area.scope}</div>
+        <div className="text-xs text-gray-500">
+          {area.type} in {area.scope}
+        </div>
       </div>
       <div className="flex gap-1">
         {area.requiresRecompile && (
           <span className="px-1 py-0.5 bg-red-100 text-red-700 text-xs rounded">Recompile</span>
         )}
         {area.requiresRerender && (
-          <span className="px-1 py-0.5 bg-orange-100 text-orange-700 text-xs rounded">Rerender</span>
+          <span className="px-1 py-0.5 bg-orange-100 text-orange-700 text-xs rounded">
+            Rerender
+          </span>
         )}
         {area.requiresStatePreservation && (
           <span className="px-1 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">Preserve</span>
@@ -429,31 +466,38 @@ const TreeView: React.FC<{
         onClick={() => hasChildren && onToggleExpand(node.id)}
       >
         {hasChildren ? (
-          isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />
+          isExpanded ? (
+            <ChevronDown size={14} />
+          ) : (
+            <ChevronRight size={14} />
+          )
         ) : (
           <div className="w-[14px]" />
         )}
-        
+
         <Code size={14} className="text-gray-600" />
-        
+
         <span className="font-medium text-sm">{node.type}</span>
-        
-        {node.name && (
-          <span className="text-gray-600 text-sm">({node.name})</span>
-        )}
-        
+
+        {node.name && <span className="text-gray-600 text-sm">({node.name})</span>}
+
         {node.diff && (
-          <span className={`px-1 py-0.5 text-xs rounded ${
-            node.diff.type === 'added' ? 'bg-green-100 text-green-700' :
-            node.diff.type === 'removed' ? 'bg-red-100 text-red-700' :
-            node.diff.type === 'modified' ? 'bg-blue-100 text-blue-700' :
-            'bg-purple-100 text-purple-700'
-          }`}>
+          <span
+            className={`px-1 py-0.5 text-xs rounded ${
+              node.diff.type === 'added'
+                ? 'bg-green-100 text-green-700'
+                : node.diff.type === 'removed'
+                  ? 'bg-red-100 text-red-700'
+                  : node.diff.type === 'modified'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-purple-100 text-purple-700'
+            }`}
+          >
             {node.diff.type}
           </span>
         )}
       </div>
-      
+
       {hasChildren && isExpanded && (
         <div>
           {node.children.map(child => (
@@ -478,10 +522,14 @@ const ImpactAnalysis: React.FC<{
 }> = ({ analysis, diffs }) => {
   const getRiskColor = (level: string) => {
     switch (level) {
-      case 'high': return 'text-red-600 bg-red-50 border-red-200';
-      case 'medium': return 'text-orange-600 bg-orange-50 border-orange-200';
-      case 'low': return 'text-green-600 bg-green-50 border-green-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
+      case 'high':
+        return 'text-red-600 bg-red-50 border-red-200';
+      case 'medium':
+        return 'text-orange-600 bg-orange-50 border-orange-200';
+      case 'low':
+        return 'text-green-600 bg-green-50 border-green-200';
+      default:
+        return 'text-gray-600 bg-gray-50 border-gray-200';
     }
   };
 
@@ -493,7 +541,7 @@ const ImpactAnalysis: React.FC<{
           <Zap size={16} />
           Risk Assessment
         </h3>
-        
+
         <div className={`p-3 border rounded ${getRiskColor(analysis.riskLevel)}`}>
           <div className="flex items-center gap-2 mb-2">
             {analysis.riskLevel === 'high' && <AlertTriangle size={16} />}
@@ -502,8 +550,10 @@ const ImpactAnalysis: React.FC<{
             <span className="font-medium capitalize">{analysis.riskLevel} Risk</span>
           </div>
           <p className="text-sm">
-            {analysis.riskLevel === 'high' && 'Significant changes detected. Manual testing recommended.'}
-            {analysis.riskLevel === 'medium' && 'Moderate changes. Automated testing should be sufficient.'}
+            {analysis.riskLevel === 'high' &&
+              'Significant changes detected. Manual testing recommended.'}
+            {analysis.riskLevel === 'medium' &&
+              'Moderate changes. Automated testing should be sufficient.'}
             {analysis.riskLevel === 'low' && 'Minor changes. Hot-reload should work seamlessly.'}
           </p>
         </div>
@@ -513,23 +563,35 @@ const ImpactAnalysis: React.FC<{
       <div className="bg-white border rounded-lg p-4">
         <h3 className="font-semibold mb-3">Requirements</h3>
         <div className="grid grid-cols-3 gap-3">
-          <div className={`p-3 rounded text-center ${
-            analysis.recompileRequired ? 'bg-red-50 text-red-700' : 'bg-gray-50 text-gray-500'
-          }`}>
+          <div
+            className={`p-3 rounded text-center ${
+              analysis.recompileRequired ? 'bg-red-50 text-red-700' : 'bg-gray-50 text-gray-500'
+            }`}
+          >
             <div className="font-medium">Recompilation</div>
             <div className="text-sm">{analysis.recompileRequired ? 'Required' : 'Not needed'}</div>
           </div>
-          <div className={`p-3 rounded text-center ${
-            analysis.rerenderRequired ? 'bg-orange-50 text-orange-700' : 'bg-gray-50 text-gray-500'
-          }`}>
+          <div
+            className={`p-3 rounded text-center ${
+              analysis.rerenderRequired
+                ? 'bg-orange-50 text-orange-700'
+                : 'bg-gray-50 text-gray-500'
+            }`}
+          >
             <div className="font-medium">Re-render</div>
             <div className="text-sm">{analysis.rerenderRequired ? 'Required' : 'Not needed'}</div>
           </div>
-          <div className={`p-3 rounded text-center ${
-            analysis.statePreservationRequired ? 'bg-blue-50 text-blue-700' : 'bg-gray-50 text-gray-500'
-          }`}>
+          <div
+            className={`p-3 rounded text-center ${
+              analysis.statePreservationRequired
+                ? 'bg-blue-50 text-blue-700'
+                : 'bg-gray-50 text-gray-500'
+            }`}
+          >
             <div className="font-medium">State Preservation</div>
-            <div className="text-sm">{analysis.statePreservationRequired ? 'Required' : 'Not needed'}</div>
+            <div className="text-sm">
+              {analysis.statePreservationRequired ? 'Required' : 'Not needed'}
+            </div>
           </div>
         </div>
       </div>
@@ -555,14 +617,8 @@ const ImpactAnalysis: React.FC<{
 };
 
 // Helper function to convert AST to tree view
-function convertASTToTreeView(
-  node: ASTNode,
-  diffs: ASTDiff[],
-  depth: number
-): TreeViewNode {
-  const nodeDiff = diffs.find(diff => 
-    diff.newNode?.id === node.id || diff.oldNode?.id === node.id
-  );
+function convertASTToTreeView(node: ASTNode, diffs: ASTDiff[], depth: number): TreeViewNode {
+  const nodeDiff = diffs.find(diff => diff.newNode?.id === node.id || diff.oldNode?.id === node.id);
 
   return {
     id: node.id,
@@ -572,7 +628,7 @@ function convertASTToTreeView(
     expanded: depth < 2, // Auto-expand first 2 levels
     diff: nodeDiff,
     highlighted: !!nodeDiff,
-    depth
+    depth,
   };
 }
 

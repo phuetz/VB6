@@ -125,7 +125,7 @@ export class VB6ControlArray<T extends Control = Control> implements Iterable<T>
     if (this._templateControl) {
       for (const [key, value] of Object.entries(this._templateControl)) {
         if (!(key in control)) {
-          (control as any)[key] = value;
+          (control as Record<string, unknown>)[key] = value;
         }
       }
     }
@@ -135,7 +135,7 @@ export class VB6ControlArray<T extends Control = Control> implements Iterable<T>
 
     const member: ControlArrayMember = {
       index: actualIndex,
-      control
+      control,
     };
 
     this._members.set(actualIndex, member);
@@ -175,7 +175,7 @@ export class VB6ControlArray<T extends Control = Control> implements Iterable<T>
 
     const member: ControlArrayMember = {
       index,
-      control: newControl
+      control: newControl,
     };
 
     this._members.set(index, member);
@@ -266,22 +266,22 @@ export class VB6ControlArray<T extends Control = Control> implements Iterable<T>
     // Standard VB6 events
     element.addEventListener('click', () => this.RaiseEvent(index, 'Click'));
     element.addEventListener('dblclick', () => this.RaiseEvent(index, 'DblClick'));
-    element.addEventListener('mousedown', (e) =>
+    element.addEventListener('mousedown', e =>
       this.RaiseEvent(index, 'MouseDown', this.getMouseButton(e), e.shiftKey, e.clientX, e.clientY)
     );
-    element.addEventListener('mouseup', (e) =>
+    element.addEventListener('mouseup', e =>
       this.RaiseEvent(index, 'MouseUp', this.getMouseButton(e), e.shiftKey, e.clientX, e.clientY)
     );
-    element.addEventListener('mousemove', (e) =>
+    element.addEventListener('mousemove', e =>
       this.RaiseEvent(index, 'MouseMove', this.getMouseButton(e), e.shiftKey, e.clientX, e.clientY)
     );
-    element.addEventListener('keydown', (e) =>
+    element.addEventListener('keydown', e =>
       this.RaiseEvent(index, 'KeyDown', (e as KeyboardEvent).keyCode, e.shiftKey)
     );
-    element.addEventListener('keyup', (e) =>
+    element.addEventListener('keyup', e =>
       this.RaiseEvent(index, 'KeyUp', (e as KeyboardEvent).keyCode, e.shiftKey)
     );
-    element.addEventListener('keypress', (e) =>
+    element.addEventListener('keypress', e =>
       this.RaiseEvent(index, 'KeyPress', (e as KeyboardEvent).keyCode)
     );
     element.addEventListener('focus', () => this.RaiseEvent(index, 'GotFocus'));
@@ -348,7 +348,7 @@ export class VB6ControlArray<T extends Control = Control> implements Iterable<T>
           return { value: members[index++], done: false };
         }
         return { value: undefined as any, done: true };
-      }
+      },
     };
   }
 
@@ -398,8 +398,8 @@ export class VB6ControlArray<T extends Control = Control> implements Iterable<T>
       type: this._type,
       members: this.Indices().map(index => ({
         index,
-        control: this._members.get(index)!.control
-      }))
+        control: this._members.get(index)!.control,
+      })),
     };
   }
 
@@ -498,7 +498,7 @@ export class VB6ControlArrayManager {
 
     return {
       name: match[1],
-      index: match[2] ? parseInt(match[2]) : undefined
+      index: match[2] ? parseInt(match[2]) : undefined,
     };
   }
 }
@@ -542,10 +542,7 @@ export function UnloadControl(arrayName: string, index: number): void {
 /**
  * Get control from array
  */
-export function GetControlArrayItem(
-  arrayName: string,
-  index: number
-): Control | undefined {
+export function GetControlArrayItem(arrayName: string, index: number): Control | undefined {
   const array = controlArrayManager.Get(arrayName);
   return array?.Item(index);
 }
@@ -560,5 +557,5 @@ export default {
   controlArrayManager,
   LoadControl,
   UnloadControl,
-  GetControlArrayItem
+  GetControlArrayItem,
 };

@@ -56,17 +56,17 @@ export interface PrintMargins {
 }
 
 export type PaperSize =
-  | 'letter'      // 8.5" x 11"
-  | 'legal'       // 8.5" x 14"
-  | 'a4'          // 210mm x 297mm
-  | 'a3'          // 297mm x 420mm
-  | 'a5'          // 148mm x 210mm
-  | 'b5'          // 176mm x 250mm
-  | 'executive'   // 7.25" x 10.5"
-  | 'tabloid';    // 11" x 17"
+  | 'letter' // 8.5" x 11"
+  | 'legal' // 8.5" x 14"
+  | 'a4' // 210mm x 297mm
+  | 'a3' // 297mm x 420mm
+  | 'a5' // 148mm x 210mm
+  | 'b5' // 176mm x 250mm
+  | 'executive' // 7.25" x 10.5"
+  | 'tabloid'; // 11" x 17"
 
 interface PaperDimensions {
-  width: number;  // in points (72 points = 1 inch)
+  width: number; // in points (72 points = 1 inch)
   height: number;
 }
 
@@ -78,7 +78,7 @@ const PAPER_SIZES: Record<PaperSize, PaperDimensions> = {
   a5: { width: 420, height: 595 },
   b5: { width: 499, height: 709 },
   executive: { width: 522, height: 756 },
-  tabloid: { width: 792, height: 1224 }
+  tabloid: { width: 792, height: 1224 },
 };
 
 // ============================================================================
@@ -102,7 +102,7 @@ export class VB6Printer {
     size: 12,
     bold: false,
     italic: false,
-    underline: false
+    underline: false,
   };
   private _foreColor: string = '#000000';
   private _fillColor: string = '#FFFFFF';
@@ -116,65 +116,136 @@ export class VB6Printer {
   // Scale factors (twips to points)
   private get scaleFactor(): number {
     switch (this._scaleMode) {
-      case 0: return 1; // User-defined
-      case 1: return 1 / 20; // Twips (1440 twips/inch, 72 points/inch)
-      case 2: return 1; // Points
-      case 3: return 1; // Pixels (approximate)
-      case 4: return 72; // Characters
-      case 5: return 72; // Inches
-      case 6: return 72 / 25.4; // Millimeters
-      case 7: return 72 / 2.54; // Centimeters
-      default: return 1;
+      case 0:
+        return 1; // User-defined
+      case 1:
+        return 1 / 20; // Twips (1440 twips/inch, 72 points/inch)
+      case 2:
+        return 1; // Points
+      case 3:
+        return 1; // Pixels (approximate)
+      case 4:
+        return 72; // Characters
+      case 5:
+        return 72; // Inches
+      case 6:
+        return 72 / 25.4; // Millimeters
+      case 7:
+        return 72 / 2.54; // Centimeters
+      default:
+        return 1;
     }
   }
 
   // Properties
-  get CurrentX(): number { return this._currentX; }
-  set CurrentX(value: number) { this._currentX = value; }
+  get CurrentX(): number {
+    return this._currentX;
+  }
+  set CurrentX(value: number) {
+    this._currentX = value;
+  }
 
-  get CurrentY(): number { return this._currentY; }
-  set CurrentY(value: number) { this._currentY = value; }
+  get CurrentY(): number {
+    return this._currentY;
+  }
+  set CurrentY(value: number) {
+    this._currentY = value;
+  }
 
-  get ScaleMode(): number { return this._scaleMode; }
-  set ScaleMode(value: number) { this._scaleMode = value; }
+  get ScaleMode(): number {
+    return this._scaleMode;
+  }
+  set ScaleMode(value: number) {
+    this._scaleMode = value;
+  }
 
-  get FontName(): string { return this._font.name; }
-  set FontName(value: string) { this._font.name = value; }
+  get FontName(): string {
+    return this._font.name;
+  }
+  set FontName(value: string) {
+    this._font.name = value;
+  }
 
-  get FontSize(): number { return this._font.size; }
-  set FontSize(value: number) { this._font.size = value; }
+  get FontSize(): number {
+    return this._font.size;
+  }
+  set FontSize(value: number) {
+    this._font.size = value;
+  }
 
-  get FontBold(): boolean { return this._font.bold; }
-  set FontBold(value: boolean) { this._font.bold = value; }
+  get FontBold(): boolean {
+    return this._font.bold;
+  }
+  set FontBold(value: boolean) {
+    this._font.bold = value;
+  }
 
-  get FontItalic(): boolean { return this._font.italic; }
-  set FontItalic(value: boolean) { this._font.italic = value; }
+  get FontItalic(): boolean {
+    return this._font.italic;
+  }
+  set FontItalic(value: boolean) {
+    this._font.italic = value;
+  }
 
-  get FontUnderline(): boolean { return this._font.underline; }
-  set FontUnderline(value: boolean) { this._font.underline = value; }
+  get FontUnderline(): boolean {
+    return this._font.underline;
+  }
+  set FontUnderline(value: boolean) {
+    this._font.underline = value;
+  }
 
-  get ForeColor(): string { return this._foreColor; }
-  set ForeColor(value: string) { this._foreColor = value; }
+  get ForeColor(): string {
+    return this._foreColor;
+  }
+  set ForeColor(value: string) {
+    this._foreColor = value;
+  }
 
-  get FillColor(): string { return this._fillColor; }
-  set FillColor(value: string) { this._fillColor = value; }
+  get FillColor(): string {
+    return this._fillColor;
+  }
+  set FillColor(value: string) {
+    this._fillColor = value;
+  }
 
-  get FillStyle(): number { return this._fillStyle; }
-  set FillStyle(value: number) { this._fillStyle = value; }
+  get FillStyle(): number {
+    return this._fillStyle;
+  }
+  set FillStyle(value: number) {
+    this._fillStyle = value;
+  }
 
-  get DrawWidth(): number { return this._drawWidth; }
-  set DrawWidth(value: number) { this._drawWidth = value; }
+  get DrawWidth(): number {
+    return this._drawWidth;
+  }
+  set DrawWidth(value: number) {
+    this._drawWidth = value;
+  }
 
-  get DrawStyle(): number { return this._drawStyle; }
-  set DrawStyle(value: number) { this._drawStyle = value; }
+  get DrawStyle(): number {
+    return this._drawStyle;
+  }
+  set DrawStyle(value: number) {
+    this._drawStyle = value;
+  }
 
-  get Orientation(): number { return this._orientation === 'portrait' ? 1 : 2; }
-  set Orientation(value: number) { this._orientation = value === 1 ? 'portrait' : 'landscape'; }
+  get Orientation(): number {
+    return this._orientation === 'portrait' ? 1 : 2;
+  }
+  set Orientation(value: number) {
+    this._orientation = value === 1 ? 'portrait' : 'landscape';
+  }
 
-  get PaperSize(): PaperSize { return this._paperSize; }
-  set PaperSize(value: PaperSize) { this._paperSize = value; }
+  get PaperSize(): PaperSize {
+    return this._paperSize;
+  }
+  set PaperSize(value: PaperSize) {
+    this._paperSize = value;
+  }
 
-  get Page(): number { return this._pages.length + 1; }
+  get Page(): number {
+    return this._pages.length + 1;
+  }
 
   get ScaleWidth(): number {
     const paper = PAPER_SIZES[this._paperSize];
@@ -208,11 +279,11 @@ export class VB6Printer {
       fontBold: this._font.bold,
       fontItalic: this._font.italic,
       fontUnderline: this._font.underline,
-      foreColor: this._foreColor
+      foreColor: this._foreColor,
     });
 
     // Move to next line
-    this._currentY += this._font.size * 1.2 / this.scaleFactor;
+    this._currentY += (this._font.size * 1.2) / this.scaleFactor;
     this._currentX = 0;
   }
 
@@ -235,7 +306,7 @@ export class VB6Printer {
         borderColor: color || this._foreColor,
         borderWidth: this._drawWidth,
         fillColor: boxMode === 'BF' ? this._fillColor : 'transparent',
-        fillStyle: this._fillStyle
+        fillStyle: this._fillStyle,
       });
     } else {
       this._elements.push({
@@ -245,7 +316,7 @@ export class VB6Printer {
         width: scaledX2 - scaledX1,
         height: scaledY2 - scaledY1,
         borderColor: color || this._foreColor,
-        borderWidth: this._drawWidth
+        borderWidth: this._drawWidth,
       });
     }
 
@@ -264,7 +335,7 @@ export class VB6Printer {
       radius: radius * this.scaleFactor,
       borderColor: color || this._foreColor,
       borderWidth: this._drawWidth,
-      fillColor: this._fillStyle === 0 ? this._fillColor : 'transparent'
+      fillColor: this._fillStyle === 0 ? this._fillColor : 'transparent',
     });
   }
 
@@ -277,7 +348,7 @@ export class VB6Printer {
       x: x * this.scaleFactor + this._margins.left,
       y: y * this.scaleFactor + this._margins.top,
       radius: this._drawWidth / 2,
-      fillColor: color || this._foreColor
+      fillColor: color || this._foreColor,
     });
   }
 
@@ -291,7 +362,7 @@ export class VB6Printer {
       y: y * this.scaleFactor + this._margins.top,
       width: width ? width * this.scaleFactor : undefined,
       height: height ? height * this.scaleFactor : undefined,
-      imageData
+      imageData,
     });
   }
 
@@ -308,7 +379,7 @@ export class VB6Printer {
    * Get text height in current font
    */
   TextHeight(text: string): number {
-    return this._font.size * 1.2 / this.scaleFactor;
+    return (this._font.size * 1.2) / this.scaleFactor;
   }
 
   // ============================================================================
@@ -323,7 +394,7 @@ export class VB6Printer {
       this._pages.push({
         elements: [...this._elements],
         pageNumber: this._pages.length + 1,
-        orientation: this._orientation
+        orientation: this._orientation,
       });
       this._elements = [];
     }
@@ -339,7 +410,7 @@ export class VB6Printer {
       this._pages.push({
         elements: [...this._elements],
         pageNumber: this._pages.length + 1,
-        orientation: this._orientation
+        orientation: this._orientation,
       });
     }
 
@@ -402,7 +473,7 @@ export const VB6PrintPreview: React.FC<VB6PrintPreviewProps> = ({
   paperSize = 'letter',
   onPrint,
   onClose,
-  title = 'Print Preview'
+  title = 'Print Preview',
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [zoom, setZoom] = useState(100);
@@ -417,99 +488,102 @@ export const VB6PrintPreview: React.FC<VB6PrintPreviewProps> = ({
     return dimensions;
   }, [paperSize, pages, currentPage]);
 
-  const renderPage = useCallback((ctx: CanvasRenderingContext2D, page: PrintPage) => {
-    // Clear canvas
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  const renderPage = useCallback(
+    (ctx: CanvasRenderingContext2D, page: PrintPage) => {
+      // Clear canvas
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    const scale = zoom / 100;
+      const scale = zoom / 100;
 
-    for (const element of page.elements) {
-      const x = element.x * scale;
-      const y = element.y * scale;
+      for (const element of page.elements) {
+        const x = element.x * scale;
+        const y = element.y * scale;
 
-      switch (element.type) {
-        case 'text':
-          ctx.save();
-          ctx.fillStyle = element.foreColor || '#000000';
+        switch (element.type) {
+          case 'text':
+            ctx.save();
+            ctx.fillStyle = element.foreColor || '#000000';
 
-          let fontStyle = '';
-          if (element.fontBold) fontStyle += 'bold ';
-          if (element.fontItalic) fontStyle += 'italic ';
-          ctx.font = `${fontStyle}${(element.fontSize || 12) * scale}px ${element.fontName || 'Arial'}`;
+            let fontStyle = '';
+            if (element.fontBold) fontStyle += 'bold ';
+            if (element.fontItalic) fontStyle += 'italic ';
+            ctx.font = `${fontStyle}${(element.fontSize || 12) * scale}px ${element.fontName || 'Arial'}`;
 
-          ctx.fillText(element.content || '', x, y + (element.fontSize || 12) * scale);
+            ctx.fillText(element.content || '', x, y + (element.fontSize || 12) * scale);
 
-          if (element.fontUnderline) {
-            const textWidth = ctx.measureText(element.content || '').width;
+            if (element.fontUnderline) {
+              const textWidth = ctx.measureText(element.content || '').width;
+              ctx.beginPath();
+              ctx.moveTo(x, y + (element.fontSize || 12) * scale + 2);
+              ctx.lineTo(x + textWidth, y + (element.fontSize || 12) * scale + 2);
+              ctx.stroke();
+            }
+            ctx.restore();
+            break;
+
+          case 'line':
+            ctx.save();
+            ctx.strokeStyle = element.borderColor || '#000000';
+            ctx.lineWidth = (element.borderWidth || 1) * scale;
             ctx.beginPath();
-            ctx.moveTo(x, y + (element.fontSize || 12) * scale + 2);
-            ctx.lineTo(x + textWidth, y + (element.fontSize || 12) * scale + 2);
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + (element.width || 0) * scale, y + (element.height || 0) * scale);
             ctx.stroke();
-          }
-          ctx.restore();
-          break;
+            ctx.restore();
+            break;
 
-        case 'line':
-          ctx.save();
-          ctx.strokeStyle = element.borderColor || '#000000';
-          ctx.lineWidth = (element.borderWidth || 1) * scale;
-          ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.lineTo(x + (element.width || 0) * scale, y + (element.height || 0) * scale);
-          ctx.stroke();
-          ctx.restore();
-          break;
+          case 'rectangle':
+            ctx.save();
+            if (element.fillColor && element.fillColor !== 'transparent') {
+              ctx.fillStyle = element.fillColor;
+              ctx.fillRect(x, y, (element.width || 0) * scale, (element.height || 0) * scale);
+            }
+            if (element.borderColor) {
+              ctx.strokeStyle = element.borderColor;
+              ctx.lineWidth = (element.borderWidth || 1) * scale;
+              ctx.strokeRect(x, y, (element.width || 0) * scale, (element.height || 0) * scale);
+            }
+            ctx.restore();
+            break;
 
-        case 'rectangle':
-          ctx.save();
-          if (element.fillColor && element.fillColor !== 'transparent') {
-            ctx.fillStyle = element.fillColor;
-            ctx.fillRect(x, y, (element.width || 0) * scale, (element.height || 0) * scale);
-          }
-          if (element.borderColor) {
-            ctx.strokeStyle = element.borderColor;
-            ctx.lineWidth = (element.borderWidth || 1) * scale;
-            ctx.strokeRect(x, y, (element.width || 0) * scale, (element.height || 0) * scale);
-          }
-          ctx.restore();
-          break;
+          case 'circle':
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(x, y, (element.radius || 10) * scale, 0, Math.PI * 2);
+            if (element.fillColor && element.fillColor !== 'transparent') {
+              ctx.fillStyle = element.fillColor;
+              ctx.fill();
+            }
+            if (element.borderColor) {
+              ctx.strokeStyle = element.borderColor;
+              ctx.lineWidth = (element.borderWidth || 1) * scale;
+              ctx.stroke();
+            }
+            ctx.restore();
+            break;
 
-        case 'circle':
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(x, y, (element.radius || 10) * scale, 0, Math.PI * 2);
-          if (element.fillColor && element.fillColor !== 'transparent') {
-            ctx.fillStyle = element.fillColor;
-            ctx.fill();
-          }
-          if (element.borderColor) {
-            ctx.strokeStyle = element.borderColor;
-            ctx.lineWidth = (element.borderWidth || 1) * scale;
-            ctx.stroke();
-          }
-          ctx.restore();
-          break;
-
-        case 'image':
-          if (element.imageData) {
-            const img = new Image();
-            img.src = element.imageData;
-            img.onload = () => {
-              const imgWidth = element.width ? element.width * scale : img.width * scale;
-              const imgHeight = element.height ? element.height * scale : img.height * scale;
-              ctx.drawImage(img, x, y, imgWidth, imgHeight);
-            };
-          }
-          break;
+          case 'image':
+            if (element.imageData) {
+              const img = new Image();
+              img.src = element.imageData;
+              img.onload = () => {
+                const imgWidth = element.width ? element.width * scale : img.width * scale;
+                const imgHeight = element.height ? element.height * scale : img.height * scale;
+                ctx.drawImage(img, x, y, imgWidth, imgHeight);
+              };
+            }
+            break;
+        }
       }
-    }
 
-    // Draw page border
-    ctx.strokeStyle = '#CCCCCC';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  }, [zoom]);
+      // Draw page border
+      ctx.strokeStyle = '#CCCCCC';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    },
+    [zoom]
+  );
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -585,7 +659,7 @@ export const VB6PrintPreview: React.FC<VB6PrintPreviewProps> = ({
       flexDirection: 'column',
       height: '100%',
       backgroundColor: '#F0F0F0',
-      fontFamily: 'Segoe UI, Tahoma, sans-serif'
+      fontFamily: 'Segoe UI, Tahoma, sans-serif',
     },
     toolbar: {
       display: 'flex',
@@ -593,7 +667,7 @@ export const VB6PrintPreview: React.FC<VB6PrintPreviewProps> = ({
       gap: '8px',
       padding: '8px 16px',
       backgroundColor: '#E8E8E8',
-      borderBottom: '1px solid #CCCCCC'
+      borderBottom: '1px solid #CCCCCC',
     },
     toolbarButton: {
       padding: '4px 12px',
@@ -601,24 +675,24 @@ export const VB6PrintPreview: React.FC<VB6PrintPreviewProps> = ({
       borderRadius: '2px',
       backgroundColor: '#FFFFFF',
       cursor: 'pointer',
-      fontSize: '12px'
+      fontSize: '12px',
     },
     toolbarSeparator: {
       width: '1px',
       height: '24px',
       backgroundColor: '#CCCCCC',
-      margin: '0 8px'
+      margin: '0 8px',
     },
     pageInfo: {
       fontSize: '12px',
-      color: '#333333'
+      color: '#333333',
     },
     zoomSelect: {
       padding: '4px 8px',
       border: '1px solid #999999',
       borderRadius: '2px',
       backgroundColor: '#FFFFFF',
-      fontSize: '12px'
+      fontSize: '12px',
     },
     previewArea: {
       flex: 1,
@@ -627,11 +701,11 @@ export const VB6PrintPreview: React.FC<VB6PrintPreviewProps> = ({
       justifyContent: 'center',
       alignItems: 'flex-start',
       padding: '20px',
-      backgroundColor: '#808080'
+      backgroundColor: '#808080',
     },
     canvasContainer: {
       boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-      backgroundColor: '#FFFFFF'
+      backgroundColor: '#FFFFFF',
     },
     footer: {
       display: 'flex',
@@ -639,7 +713,7 @@ export const VB6PrintPreview: React.FC<VB6PrintPreviewProps> = ({
       gap: '8px',
       padding: '8px 16px',
       backgroundColor: '#E8E8E8',
-      borderTop: '1px solid #CCCCCC'
+      borderTop: '1px solid #CCCCCC',
     },
     footerButton: {
       padding: '6px 20px',
@@ -648,13 +722,13 @@ export const VB6PrintPreview: React.FC<VB6PrintPreviewProps> = ({
       backgroundColor: '#FFFFFF',
       cursor: 'pointer',
       fontSize: '12px',
-      minWidth: '80px'
+      minWidth: '80px',
     },
     printButton: {
       backgroundColor: '#0078D7',
       color: '#FFFFFF',
-      border: '1px solid #0078D7'
-    }
+      border: '1px solid #0078D7',
+    },
   };
 
   if (pages.length === 0) {
@@ -709,7 +783,7 @@ export const VB6PrintPreview: React.FC<VB6PrintPreviewProps> = ({
         <select
           style={styles.zoomSelect}
           value={zoom}
-          onChange={(e) => setZoom(Number(e.target.value))}
+          onChange={e => setZoom(Number(e.target.value))}
         >
           <option value={50}>50%</option>
           <option value={75}>75%</option>
@@ -729,10 +803,7 @@ export const VB6PrintPreview: React.FC<VB6PrintPreviewProps> = ({
 
       {/* Footer */}
       <div style={styles.footer}>
-        <button
-          style={{ ...styles.footerButton, ...styles.printButton }}
-          onClick={handlePrint}
-        >
+        <button style={{ ...styles.footerButton, ...styles.printButton }} onClick={handlePrint}>
           Print
         </button>
         {onClose && (
@@ -764,7 +835,7 @@ export const VB6PrintPreviewDialog: React.FC<VB6PrintPreviewDialogProps> = ({
   paperSize,
   title,
   onPrint,
-  onClose
+  onClose,
 }) => {
   if (!isOpen) return null;
 
@@ -779,7 +850,7 @@ export const VB6PrintPreviewDialog: React.FC<VB6PrintPreviewDialogProps> = ({
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      zIndex: 10000
+      zIndex: 10000,
     },
     dialog: {
       width: '90vw',
@@ -787,7 +858,7 @@ export const VB6PrintPreviewDialog: React.FC<VB6PrintPreviewDialogProps> = ({
       backgroundColor: '#F0F0F0',
       border: '2px solid #333333',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
     },
     titleBar: {
       display: 'flex',
@@ -797,7 +868,7 @@ export const VB6PrintPreviewDialog: React.FC<VB6PrintPreviewDialogProps> = ({
       backgroundColor: '#000080',
       color: '#FFFFFF',
       fontSize: '12px',
-      fontWeight: 'bold'
+      fontWeight: 'bold',
     },
     closeButton: {
       background: 'none',
@@ -805,12 +876,12 @@ export const VB6PrintPreviewDialog: React.FC<VB6PrintPreviewDialogProps> = ({
       color: '#FFFFFF',
       cursor: 'pointer',
       fontSize: '16px',
-      padding: '0 4px'
+      padding: '0 4px',
     },
     content: {
       flex: 1,
-      overflow: 'hidden'
-    }
+      overflow: 'hidden',
+    },
   };
 
   return (
@@ -818,7 +889,9 @@ export const VB6PrintPreviewDialog: React.FC<VB6PrintPreviewDialogProps> = ({
       <div style={dialogStyles.dialog} onClick={e => e.stopPropagation()}>
         <div style={dialogStyles.titleBar}>
           <span>{title || 'Print Preview'}</span>
-          <button style={dialogStyles.closeButton} onClick={onClose}>✕</button>
+          <button style={dialogStyles.closeButton} onClick={onClose}>
+            ✕
+          </button>
         </div>
         <div style={dialogStyles.content}>
           <VB6PrintPreview
@@ -939,5 +1012,5 @@ export default {
   VB6PrintPreviewDialog,
   VB6ReportBuilder,
   Printer,
-  PAPER_SIZES
+  PAPER_SIZES,
 };

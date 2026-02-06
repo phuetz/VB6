@@ -1,6 +1,6 @@
 /**
  * VB6 IDE Performance Optimizer
- * 
+ *
  * Comprehensive performance optimization system for the VB6 Web IDE
  * including memory management, rendering optimization, and compilation speed.
  */
@@ -38,7 +38,7 @@ export class PerformanceOptimizer {
   private lastRenderTime: number = 0;
   private frameCount: number = 0;
   private measurements: Map<string, number[]> = new Map();
-  
+
   constructor(config: Partial<OptimizationConfig> = {}) {
     this.config = {
       enableMemoryPooling: true,
@@ -49,9 +49,9 @@ export class PerformanceOptimizer {
       maxConcurrentOperations: 4,
       renderThrottleMs: 16, // 60fps
       memoryGCThreshold: 100 * 1024 * 1024, // 100MB
-      ...config
+      ...config,
     };
-    
+
     this.metrics = {
       renderTime: 0,
       memoryUsage: 0,
@@ -59,12 +59,12 @@ export class PerformanceOptimizer {
       controlCount: 0,
       fps: 0,
       bundleSize: 0,
-      loadTime: 0
+      loadTime: 0,
     };
-    
+
     this.initializeOptimizations();
   }
-  
+
   /**
    * Initialize all performance optimizations
    */
@@ -75,50 +75,50 @@ export class PerformanceOptimizer {
     this.setupMetricsCollection();
     this.setupAutoGarbageCollection();
   }
-  
+
   /**
    * Memory pooling for frequently allocated objects
    */
   private setupMemoryPooling(): void {
     if (!this.config.enableMemoryPooling) return;
-    
+
     // MEMORY LAYOUT PREDICTABILITY BUG FIX: Randomize pool initialization order
     const poolTypes = ['controls', 'events', 'ast-nodes', 'render-commands'];
     const shuffledPools = this.shuffleArray(poolTypes);
-    
+
     // MEMORY LAYOUT PREDICTABILITY BUG FIX: Add randomized dummy pools to obfuscate layout
     const dummyPoolCount = Math.floor(Math.random() * 5) + 2; // 2-7 dummy pools
     for (let i = 0; i < dummyPoolCount; i++) {
       shuffledPools.push(`dummy-${Math.random().toString(36).substring(2, 8)}`);
     }
-    
+
     // Initialize pools in randomized order with variable initial capacities
     shuffledPools.forEach(poolName => {
       // MEMORY LAYOUT PREDICTABILITY BUG FIX: Randomize initial pool sizes
       const initialCapacity = Math.floor(Math.random() * 20) + 5; // 5-25 initial objects
       const pool = new Array(initialCapacity);
-      
+
       // Fill with dummy objects to randomize memory layout
       for (let i = 0; i < initialCapacity; i++) {
         pool[i] = this.createDummyPoolObject();
       }
-      
+
       this.memoryPools.set(poolName, pool);
     });
-    
+
     // MEMORY LAYOUT PREDICTABILITY BUG FIX: Perform initial heap randomization
     this.randomizeHeapLayout();
   }
-  
+
   /**
    * Get object from memory pool or create new one
    */
   getFromPool<T>(poolName: string, factory: () => T): T {
     if (!this.config.enableMemoryPooling) return factory();
-    
+
     // MEMORY LAYOUT PREDICTABILITY BUG FIX: Add layout randomization before pool access
     this.performMemoryLayoutJitter();
-    
+
     // CONCURRENCY BUG FIX: Atomic pool access to prevent race conditions
     const pool = this.memoryPools.get(poolName);
     if (!pool) {
@@ -127,11 +127,11 @@ export class PerformanceOptimizer {
       this.randomizeObjectLayout(obj);
       return obj;
     }
-    
+
     // MEMORY LAYOUT PREDICTABILITY BUG FIX: Random pool access pattern
     const accessPattern = Math.random();
     let object: any;
-    
+
     if (accessPattern < 0.7) {
       // 70% chance: pop from end (normal behavior)
       object = pool.pop();
@@ -145,64 +145,64 @@ export class PerformanceOptimizer {
       // 10% chance: take from beginning
       object = pool.shift();
     }
-    
+
     if (object !== undefined && !object.__isDummy) {
       // MEMORY LAYOUT PREDICTABILITY BUG FIX: Randomize object properties
       this.randomizeObjectLayout(object);
       return object as T;
     }
-    
+
     // No object available in pool, create new one with randomized layout
     const newObj = factory();
     this.randomizeObjectLayout(newObj);
     return newObj;
   }
-  
+
   /**
    * Return object to memory pool
    */
   returnToPool(poolName: string, object: any): void {
     if (!this.config.enableMemoryPooling || !object) return;
-    
+
     // MEMORY LAYOUT PREDICTABILITY BUG FIX: Add layout jitter before pool return
     this.performMemoryLayoutJitter();
-    
+
     // CONCURRENCY BUG FIX: Validate object before pooling
     if (object.__pooled) {
       console.warn('Object already returned to pool - preventing double-free');
       return;
     }
-    
+
     const pool = this.memoryPools.get(poolName);
     if (!pool) {
       // Pool doesn't exist, discard object
       return;
     }
-    
+
     // MEMORY LAYOUT PREDICTABILITY BUG FIX: Randomize pool size limit
     const maxPoolSize = 100 + Math.floor(Math.random() * 50); // 100-150 randomized limit
     if (pool.length >= maxPoolSize) {
       // Pool is full, discard object
       return;
     }
-    
+
     // Reset object state safely
     try {
       if (typeof object.reset === 'function') {
         object.reset();
       }
-      
+
       // MEMORY LAYOUT PREDICTABILITY BUG FIX: Randomize object property layout before pooling
       this.scrambleObjectProperties(object);
-      
+
       // Mark object as pooled to prevent double-free
       Object.defineProperty(object, '__pooled', {
         value: true,
         writable: true,
         enumerable: false,
-        configurable: true
+        configurable: true,
       });
-      
+
       // MEMORY LAYOUT PREDICTABILITY BUG FIX: Randomize insertion position
       const insertPattern = Math.random();
       if (insertPattern < 0.6) {
@@ -214,19 +214,18 @@ export class PerformanceOptimizer {
         const randomIndex = Math.floor(Math.random() * (pool.length + 1));
         pool.splice(randomIndex, 0, object);
       }
-      
     } catch (error) {
       console.warn('Failed to return object to pool:', error);
     }
   }
-  
+
   /**
    * Render optimization with throttling and caching
    */
   private setupRenderOptimization(): void {
     this.startFPSMonitoring();
   }
-  
+
   /**
    * Throttled render function
    */
@@ -239,7 +238,7 @@ export class PerformanceOptimizer {
       this.lastRenderTime = now;
     }
   }
-  
+
   /**
    * Cache render results
    */
@@ -249,19 +248,19 @@ export class PerformanceOptimizer {
     if (cachedValue !== undefined) {
       return cachedValue;
     }
-    
+
     // Compute value - potential race condition here in multi-threaded environment
     // but JavaScript is single-threaded so this is safe
     const result = renderFn();
-    
+
     // CONCURRENCY BUG FIX: Check again to prevent duplicate computation
     const existingValue = this.renderCache.get(key);
     if (existingValue !== undefined) {
       return existingValue;
     }
-    
+
     this.renderCache.set(key, result);
-    
+
     // Limit cache size with LRU eviction
     if (this.renderCache.size > 1000) {
       // CONCURRENCY BUG FIX: Use iterator to safely remove oldest entry
@@ -271,10 +270,10 @@ export class PerformanceOptimizer {
         this.renderCache.delete(firstKey);
       }
     }
-    
+
     return result;
   }
-  
+
   /**
    * Control virtualization for large forms
    */
@@ -282,7 +281,7 @@ export class PerformanceOptimizer {
     if (!this.config.enableControlVirtualization || controls.length < 50) {
       return controls;
     }
-    
+
     // Only render controls within viewport + buffer
     const buffer = 100;
     return controls.filter(control => {
@@ -290,9 +289,9 @@ export class PerformanceOptimizer {
         left: control.x,
         top: control.y,
         right: control.x + control.width,
-        bottom: control.y + control.height
+        bottom: control.y + control.height,
       };
-      
+
       return !(
         controlBounds.right < viewportBounds.left - buffer ||
         controlBounds.left > viewportBounds.right + buffer ||
@@ -301,14 +300,14 @@ export class PerformanceOptimizer {
       );
     });
   }
-  
+
   /**
    * Compiler optimization with caching
    */
   private setupCompilerOptimization(): void {
     // Compiler cache is handled by compilation methods
   }
-  
+
   /**
    * Get cached compilation result
    */
@@ -316,25 +315,25 @@ export class PerformanceOptimizer {
     if (!this.config.enableCompilerCaching) {
       return compileFn();
     }
-    
+
     // CONCURRENCY BUG FIX: Prevent ABA problem with atomic get-or-compute pattern
     const cachedValue = this.compilationCache.get(sourceHash);
     if (cachedValue !== undefined) {
       return cachedValue;
     }
-    
+
     const startTime = performance.now();
     const result = compileFn();
     this.metrics.compilationTime = performance.now() - startTime;
-    
+
     // CONCURRENCY BUG FIX: Check again to prevent duplicate compilation
     const existingValue = this.compilationCache.get(sourceHash);
     if (existingValue !== undefined) {
       return existingValue;
     }
-    
+
     this.compilationCache.set(sourceHash, result);
-    
+
     // Limit cache size with LRU eviction
     if (this.compilationCache.size > 200) {
       // CONCURRENCY BUG FIX: Use iterator to safely remove oldest entry
@@ -344,53 +343,57 @@ export class PerformanceOptimizer {
         this.compilationCache.delete(firstKey);
       }
     }
-    
+
     return result;
   }
-  
+
   /**
    * Batch operations for better performance
    */
-  batchOperations<T>(operations: (() => T)[], batchSize: number = this.config.maxConcurrentOperations): Promise<T[]> {
+  batchOperations<T>(
+    operations: (() => T)[],
+    batchSize: number = this.config.maxConcurrentOperations
+  ): Promise<T[]> {
     return new Promise((resolve, reject) => {
       // MEMORY LAYOUT PREDICTABILITY BUG FIX: Randomize array allocation
       const resultsSize = operations.length + Math.floor(Math.random() * 10); // Add 0-10 padding
       const results: T[] = new Array(resultsSize);
-      
+
       // MEMORY LAYOUT PREDICTABILITY BUG FIX: Fill padding with dummy data
       for (let i = operations.length; i < resultsSize; i++) {
         results[i] = this.createDummyResult() as T;
       }
-      
+
       // MEMORY LAYOUT PREDICTABILITY BUG FIX: Randomize operation order
       const randomizedOperations = this.shuffleOperationsWithIndices(operations);
-      
+
       // CONCURRENCY BUG FIX: Use atomic operations to prevent race conditions
       let completedOperations = 0;
       let hasError = false;
       let currentBatch = 0;
-      
+
       const processBatch = () => {
         if (hasError) return; // Stop processing on error
-        
+
         const batchStart = currentBatch;
         const batch = operations.slice(batchStart, batchStart + batchSize);
-        
+
         // MEMORY LAYOUT PREDICTABILITY BUG FIX: Process batch with randomized execution order
         const shuffledBatch = this.shuffleArray([...Array(batch.length).keys()]);
-        
-        shuffledBatch.forEach((shuffledIndex) => {
+
+        shuffledBatch.forEach(shuffledIndex => {
           try {
             const opData = batch[shuffledIndex];
             const globalIndex = batchStart + shuffledIndex;
-            
+
             // MEMORY LAYOUT PREDICTABILITY BUG FIX: Add memory jitter before operation
-            if (Math.random() < 0.1) { // 10% chance
+            if (Math.random() < 0.1) {
+              // 10% chance
               this.performMemoryLayoutJitter();
             }
-            
+
             results[opData.originalIndex] = opData.operation();
-            
+
             // CONCURRENCY BUG FIX: Use atomic increment
             completedOperations++;
           } catch (error) {
@@ -399,9 +402,9 @@ export class PerformanceOptimizer {
             return;
           }
         });
-        
+
         currentBatch += batchSize;
-        
+
         // Check completion with atomic read
         if (completedOperations === operations.length) {
           // MEMORY LAYOUT PREDICTABILITY BUG FIX: Remove padding before returning
@@ -416,17 +419,17 @@ export class PerformanceOptimizer {
           }
         }
       };
-      
+
       // Validate input
       if (!operations || operations.length === 0) {
         resolve([]);
         return;
       }
-      
+
       processBatch();
     });
   }
-  
+
   /**
    * Debounced function execution
    */
@@ -437,13 +440,13 @@ export class PerformanceOptimizer {
       timeoutId = setTimeout(() => func.apply(this, args), delay);
     }) as T;
   }
-  
+
   /**
    * Memoization decorator
    */
   memoize<T extends (...args: any[]) => any>(func: T, maxCacheSize: number = 100): T {
     const cache = new Map();
-    
+
     return ((...args: any[]) => {
       // CONCURRENCY BUG FIX: Safer key generation to prevent collisions
       let key: string;
@@ -451,25 +454,27 @@ export class PerformanceOptimizer {
         key = JSON.stringify(args);
       } catch (error) {
         // Fallback for circular references or non-serializable args
-        key = args.map((arg, i) => `${i}:${typeof arg}:${arg?.constructor?.name || 'unknown'}`).join('|');
+        key = args
+          .map((arg, i) => `${i}:${typeof arg}:${arg?.constructor?.name || 'unknown'}`)
+          .join('|');
       }
-      
+
       // CONCURRENCY BUG FIX: Atomic get-or-compute pattern
       const cachedValue = cache.get(key);
       if (cachedValue !== undefined) {
         return cachedValue;
       }
-      
+
       const result = func.apply(this, args);
-      
+
       // CONCURRENCY BUG FIX: Check again to prevent duplicate computation
       const existingValue = cache.get(key);
       if (existingValue !== undefined) {
         return existingValue;
       }
-      
+
       cache.set(key, result);
-      
+
       // Limit cache size with LRU eviction
       if (cache.size > maxCacheSize) {
         // CONCURRENCY BUG FIX: Use iterator to safely remove oldest entry
@@ -479,11 +484,11 @@ export class PerformanceOptimizer {
           cache.delete(firstKey);
         }
       }
-      
+
       return result;
     }) as T;
   }
-  
+
   // RUNTIME LOGIC BUG FIX: Add interval tracking for cleanup
   private intervals: Set<number> = new Set();
   private observers: Set<PerformanceObserver> = new Set();
@@ -499,10 +504,10 @@ export class PerformanceOptimizer {
       }, 1000);
       this.intervals.add(intervalId);
     }
-    
+
     // RUNTIME LOGIC BUG FIX: Performance observers with cleanup tracking
     if ('PerformanceObserver' in window) {
-      const observer = new PerformanceObserver((list) => {
+      const observer = new PerformanceObserver(list => {
         for (const entry of list.getEntries()) {
           if (entry.entryType === 'measure') {
             this.updateMetric(entry.name, entry.duration);
@@ -510,34 +515,34 @@ export class PerformanceOptimizer {
         }
       });
       this.observers.add(observer);
-      
+
       observer.observe({ entryTypes: ['measure'] });
     }
   }
-  
+
   /**
    * Start FPS monitoring
    */
   private startFPSMonitoring(): void {
     let lastTime = performance.now();
     let frameCount = 0;
-    
+
     const measureFPS = () => {
       frameCount++;
       const currentTime = performance.now();
-      
+
       if (currentTime - lastTime >= 1000) {
-        this.metrics.fps = Math.round(frameCount * 1000 / (currentTime - lastTime));
+        this.metrics.fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
         frameCount = 0;
         lastTime = currentTime;
       }
-      
+
       requestAnimationFrame(measureFPS);
     };
-    
+
     measureFPS();
   }
-  
+
   /**
    * Automatic garbage collection
    */
@@ -550,7 +555,7 @@ export class PerformanceOptimizer {
     }, 30000); // Check every 30 seconds
     this.intervals.add(intervalId);
   }
-  
+
   /**
    * Manual garbage collection
    */
@@ -559,22 +564,22 @@ export class PerformanceOptimizer {
     if (this.renderCache.size > 500) {
       this.renderCache.clear();
     }
-    
+
     if (this.compilationCache.size > 100) {
       this.compilationCache.clear();
     }
-    
+
     // Clear memory pools
     for (const [, pool] of this.memoryPools) {
       pool.length = Math.min(pool.length, 20);
     }
-    
+
     // Force garbage collection if available
     if ('gc' in window) {
       (window as any).gc();
     }
   }
-  
+
   /**
    * Update performance metric
    */
@@ -591,14 +596,14 @@ export class PerformanceOptimizer {
         break;
     }
   }
-  
+
   /**
    * Get current performance metrics
    */
   getMetrics(): PerformanceMetrics {
     return { ...this.metrics };
   }
-  
+
   /**
    * Performance measurement helper
    */
@@ -609,7 +614,7 @@ export class PerformanceOptimizer {
     performance.measure(name, `${name}-start`, `${name}-end`);
     return result;
   }
-  
+
   /**
    * Async performance measurement
    */
@@ -631,27 +636,27 @@ export class PerformanceOptimizer {
       throw error;
     }
   }
-  
+
   /**
    * Bundle size analysis
    */
   analyzeBundleSize(): Promise<{ [module: string]: number }> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       // This would integrate with webpack-bundle-analyzer in a real scenario
       const analysis = {
-        'core': 500 * 1024,
-        'controls': 800 * 1024,
-        'compiler': 600 * 1024,
-        'activex': 300 * 1024,
-        'showcase': 200 * 1024,
-        'dependencies': 500 * 1024
+        core: 500 * 1024,
+        controls: 800 * 1024,
+        compiler: 600 * 1024,
+        activex: 300 * 1024,
+        showcase: 200 * 1024,
+        dependencies: 500 * 1024,
       };
-      
+
       this.metrics.bundleSize = Object.values(analysis).reduce((sum, size) => sum + size, 0);
       resolve(analysis);
     });
   }
-  
+
   /**
    * Code splitting optimization
    */
@@ -659,10 +664,10 @@ export class PerformanceOptimizer {
     if (!this.config.enableCodeSplitting) {
       return moduleFactory();
     }
-    
+
     return this.measureAsync('module-load', moduleFactory);
   }
-  
+
   /**
    * Cleanup resources
    */
@@ -671,18 +676,18 @@ export class PerformanceOptimizer {
     this.renderCache.clear();
     this.compilationCache.clear();
     this.memoryPools.clear();
-    
-    // STATE CORRUPTION BUG FIX: Disconnect observers properly  
+
+    // STATE CORRUPTION BUG FIX: Disconnect observers properly
     this.observers.forEach(observer => observer.disconnect());
     this.observers.clear();
   }
-  
+
   /**
    * Generate performance report
    */
   generateReport(): string {
     const metrics = this.getMetrics();
-    
+
     return `
 VB6 IDE Performance Report
 =========================
@@ -738,7 +743,7 @@ Cache Status:
       controlCount: 0,
       fps: 0,
       bundleSize: 0,
-      loadTime: 0
+      loadTime: 0,
     };
   }
 
@@ -753,31 +758,31 @@ Cache Status:
     }
     return shuffled;
   }
-  
+
   /**
    * MEMORY LAYOUT PREDICTABILITY BUG FIX: Create dummy pool object
    */
   private createDummyPoolObject(): any {
     const dummyTypes = ['string', 'number', 'object', 'array'];
     const type = dummyTypes[Math.floor(Math.random() * dummyTypes.length)];
-    
+
     const dummy: any = {
       __isDummy: true,
       type: type,
       id: Math.random().toString(36),
       timestamp: Date.now(),
-      randomData: Math.random() * 1000
+      randomData: Math.random() * 1000,
     };
-    
+
     // Add random properties to randomize object layout
     const propCount = Math.floor(Math.random() * 5) + 1;
     for (let i = 0; i < propCount; i++) {
       dummy[`prop_${i}_${Math.random().toString(36).substring(2, 6)}`] = Math.random();
     }
-    
+
     return dummy;
   }
-  
+
   /**
    * MEMORY LAYOUT PREDICTABILITY BUG FIX: Heap layout randomization
    */
@@ -785,11 +790,11 @@ Cache Status:
     // Create arrays of different sizes to fragment heap
     const fragmentCount = Math.floor(Math.random() * 20) + 10; // 10-30 fragments
     const fragments: any[] = [];
-    
+
     for (let i = 0; i < fragmentCount; i++) {
       const size = Math.floor(Math.random() * 100) + 10; // 10-110 elements
       const fragment = new Array(size);
-      
+
       // Fill with random data
       for (let j = 0; j < size; j++) {
         fragment[j] = {
@@ -798,22 +803,22 @@ Cache Status:
           string: Math.random().toString(36),
           nested: {
             value: Math.random() * 1000,
-            flag: Math.random() > 0.5
-          }
+            flag: Math.random() > 0.5,
+          },
         };
       }
-      
+
       fragments.push(fragment);
     }
-    
+
     // Keep some fragments alive, discard others randomly
     const keepCount = Math.floor(fragmentCount * 0.3); // Keep 30%
     const indicesToKeep = new Set<number>();
-    
+
     while (indicesToKeep.size < keepCount) {
       indicesToKeep.add(Math.floor(Math.random() * fragmentCount));
     }
-    
+
     // Store kept fragments to prevent GC
     fragments.forEach((fragment, index) => {
       if (indicesToKeep.has(index)) {
@@ -821,7 +826,7 @@ Cache Status:
       }
     });
   }
-  
+
   /**
    * MEMORY LAYOUT PREDICTABILITY BUG FIX: Memory layout jitter
    */
@@ -829,11 +834,11 @@ Cache Status:
     // Create temporary allocations to randomize heap state
     const allocCount = Math.floor(Math.random() * 10) + 3; // 3-13 allocations
     const tempAllocs: any[] = [];
-    
+
     for (let i = 0; i < allocCount; i++) {
       const allocSize = Math.floor(Math.random() * 50) + 5; // 5-55 elements
       const allocation = new Array(allocSize);
-      
+
       // Fill with structured data
       for (let j = 0; j < allocSize; j++) {
         allocation[j] = {
@@ -842,29 +847,32 @@ Cache Status:
           metadata: {
             created: Date.now(),
             type: Math.random() > 0.5 ? 'primary' : 'secondary',
-            flags: Math.floor(Math.random() * 256)
-          }
+            flags: Math.floor(Math.random() * 256),
+          },
         };
       }
-      
+
       tempAllocs.push(allocation);
     }
-    
+
     // Randomly keep some allocations alive briefly
     const keepAlive = tempAllocs.filter(() => Math.random() < 0.2);
-    
+
     // Use setTimeout to clean up, creating temporal layout variation
-    setTimeout(() => {
-      keepAlive.length = 0; // Allow GC
-    }, Math.random() * 100 + 50); // 50-150ms
+    setTimeout(
+      () => {
+        keepAlive.length = 0; // Allow GC
+      },
+      Math.random() * 100 + 50
+    ); // 50-150ms
   }
-  
+
   /**
    * MEMORY LAYOUT PREDICTABILITY BUG FIX: Randomize object property layout
    */
   private randomizeObjectLayout(obj: any): void {
     if (!obj || typeof obj !== 'object') return;
-    
+
     // Add random properties to change object shape
     const propCount = Math.floor(Math.random() * 3); // 0-3 random props
     for (let i = 0; i < propCount; i++) {
@@ -873,41 +881,43 @@ Cache Status:
         value: Math.random(),
         enumerable: false,
         writable: false,
-        configurable: true
+        configurable: true,
       });
     }
   }
-  
+
   /**
    * MEMORY LAYOUT PREDICTABILITY BUG FIX: Scramble object properties
    */
   private scrambleObjectProperties(obj: any): void {
     if (!obj || typeof obj !== 'object') return;
-    
+
     const keys = Object.keys(obj);
     if (keys.length <= 1) return;
-    
+
     // Create a new object with randomized property order
     const shuffledKeys = this.shuffleArray(keys);
     const scrambled: any = {};
-    
+
     shuffledKeys.forEach(key => {
       scrambled[key] = obj[key];
     });
-    
+
     // Replace original properties
     keys.forEach(key => delete obj[key]);
     Object.assign(obj, scrambled);
   }
-  
+
   /**
    * MEMORY LAYOUT PREDICTABILITY BUG FIX: Shuffle operations with original indices
    */
-  private shuffleOperationsWithIndices<T>(operations: (() => T)[]): Array<{operation: () => T, originalIndex: number}> {
+  private shuffleOperationsWithIndices<T>(
+    operations: (() => T)[]
+  ): Array<{ operation: () => T; originalIndex: number }> {
     const indexed = operations.map((op, index) => ({ operation: op, originalIndex: index }));
     return this.shuffleArray(indexed);
   }
-  
+
   /**
    * MEMORY LAYOUT PREDICTABILITY BUG FIX: Create dummy result for padding
    */
@@ -916,7 +926,7 @@ Cache Status:
       __isDummyResult: true,
       value: Math.random(),
       timestamp: Date.now(),
-      padding: new Array(Math.floor(Math.random() * 10)).fill(Math.random())
+      padding: new Array(Math.floor(Math.random() * 10)).fill(Math.random()),
     };
   }
 }
@@ -925,20 +935,22 @@ export const performanceOptimizer = new PerformanceOptimizer();
 
 // React hook for performance monitoring
 export function usePerformanceMonitor() {
-  const [metrics, setMetrics] = React.useState<PerformanceMetrics>(performanceOptimizer.getMetrics());
-  
+  const [metrics, setMetrics] = React.useState<PerformanceMetrics>(
+    performanceOptimizer.getMetrics()
+  );
+
   React.useEffect(() => {
     const interval = setInterval(() => {
       setMetrics(performanceOptimizer.getMetrics());
     }, 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
-  
+
   return {
     metrics,
     measure: performanceOptimizer.measure.bind(performanceOptimizer),
     measureAsync: performanceOptimizer.measureAsync.bind(performanceOptimizer),
-    generateReport: performanceOptimizer.generateReport.bind(performanceOptimizer)
+    generateReport: performanceOptimizer.generateReport.bind(performanceOptimizer),
   };
 }

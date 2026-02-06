@@ -1,5 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Plus, Trash2, Key, Link, Database, AlertTriangle, FileCode, Copy, Upload, Download, CheckSquare, Shield, Clock, Zap } from 'lucide-react';
+import {
+  X,
+  Save,
+  Plus,
+  Trash2,
+  Key,
+  Link,
+  Database,
+  AlertTriangle,
+  FileCode,
+  Copy,
+  Upload,
+  Download,
+  CheckSquare,
+  Shield,
+  Clock,
+  Zap,
+} from 'lucide-react';
 
 // Types
 export enum DataType {
@@ -15,7 +32,7 @@ export enum DataType {
   SMALLMONEY = 'smallmoney',
   FLOAT = 'float',
   REAL = 'real',
-  
+
   // Character types
   CHAR = 'char',
   VARCHAR = 'varchar',
@@ -23,7 +40,7 @@ export enum DataType {
   NCHAR = 'nchar',
   NVARCHAR = 'nvarchar',
   NTEXT = 'ntext',
-  
+
   // Date/Time types
   DATE = 'date',
   TIME = 'time',
@@ -32,12 +49,12 @@ export enum DataType {
   SMALLDATETIME = 'smalldatetime',
   DATETIMEOFFSET = 'datetimeoffset',
   TIMESTAMP = 'timestamp',
-  
+
   // Binary types
   BINARY = 'binary',
   VARBINARY = 'varbinary',
   IMAGE = 'image',
-  
+
   // Other types
   UNIQUEIDENTIFIER = 'uniqueidentifier',
   XML = 'xml',
@@ -45,7 +62,7 @@ export enum DataType {
   HIERARCHYID = 'hierarchyid',
   GEOGRAPHY = 'geography',
   GEOMETRY = 'geometry',
-  SQL_VARIANT = 'sql_variant'
+  SQL_VARIANT = 'sql_variant',
 }
 
 export enum ConstraintType {
@@ -54,7 +71,7 @@ export enum ConstraintType {
   UNIQUE = 'UNIQUE',
   CHECK = 'CHECK',
   DEFAULT = 'DEFAULT',
-  NOT_NULL = 'NOT NULL'
+  NOT_NULL = 'NOT NULL',
 }
 
 export enum IndexType {
@@ -66,7 +83,7 @@ export enum IndexType {
   COLUMNSTORE_CLUSTERED = 'CLUSTERED COLUMNSTORE',
   FULLTEXT = 'FULLTEXT',
   SPATIAL = 'SPATIAL',
-  XML = 'XML'
+  XML = 'XML',
 }
 
 export enum TriggerType {
@@ -75,7 +92,7 @@ export enum TriggerType {
   AFTER_DELETE = 'AFTER DELETE',
   INSTEAD_OF_INSERT = 'INSTEAD OF INSERT',
   INSTEAD_OF_UPDATE = 'INSTEAD OF UPDATE',
-  INSTEAD_OF_DELETE = 'INSTEAD OF DELETE'
+  INSTEAD_OF_DELETE = 'INSTEAD OF DELETE',
 }
 
 export interface TableColumn {
@@ -168,23 +185,23 @@ interface TableDesignerProps {
   onSave?: (table: Table) => void;
 }
 
-export const TableDesigner: React.FC<TableDesignerProps> = ({
-  isOpen,
-  onClose,
-  table,
-  onSave
-}) => {
-  const [activeTab, setActiveTab] = useState<'columns' | 'constraints' | 'indexes' | 'triggers' | 'permissions' | 'sql'>('columns');
-  const [editedTable, setEditedTable] = useState<Table>(() => table || {
-    id: `table-${Date.now()}`,
-    name: 'NewTable',
-    schema: 'dbo',
-    columns: [],
-    constraints: [],
-    indexes: [],
-    triggers: [],
-    permissions: []
-  });
+export const TableDesigner: React.FC<TableDesignerProps> = ({ isOpen, onClose, table, onSave }) => {
+  const [activeTab, setActiveTab] = useState<
+    'columns' | 'constraints' | 'indexes' | 'triggers' | 'permissions' | 'sql'
+  >('columns');
+  const [editedTable, setEditedTable] = useState<Table>(
+    () =>
+      table || {
+        id: `table-${Date.now()}`,
+        name: 'NewTable',
+        schema: 'dbo',
+        columns: [],
+        constraints: [],
+        indexes: [],
+        triggers: [],
+        permissions: [],
+      }
+  );
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
   const [showDataTypeHelp, setShowDataTypeHelp] = useState(false);
 
@@ -200,12 +217,12 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
       name: `Column${editedTable.columns.length + 1}`,
       dataType: DataType.VARCHAR,
       length: 50,
-      nullable: true
+      nullable: true,
     };
-    
+
     setEditedTable({
       ...editedTable,
-      columns: [...editedTable.columns, newColumn]
+      columns: [...editedTable.columns, newColumn],
     });
     setSelectedColumn(newColumn.id);
   };
@@ -213,9 +230,7 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
   const updateColumn = (columnId: string, updates: Partial<TableColumn>) => {
     setEditedTable({
       ...editedTable,
-      columns: editedTable.columns.map(col =>
-        col.id === columnId ? { ...col, ...updates } : col
-      )
+      columns: editedTable.columns.map(col => (col.id === columnId ? { ...col, ...updates } : col)),
     });
   };
 
@@ -228,13 +243,15 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
       ...editedTable,
       columns: editedTable.columns.filter(c => c.id !== columnId),
       constraints: editedTable.constraints.filter(c => !c.columns.includes(column.name)),
-      indexes: editedTable.indexes.map(idx => ({
-        ...idx,
-        columns: idx.columns.filter(c => c.name !== column.name),
-        includedColumns: idx.includedColumns?.filter(c => c !== column.name)
-      })).filter(idx => idx.columns.length > 0)
+      indexes: editedTable.indexes
+        .map(idx => ({
+          ...idx,
+          columns: idx.columns.filter(c => c.name !== column.name),
+          includedColumns: idx.includedColumns?.filter(c => c !== column.name),
+        }))
+        .filter(idx => idx.columns.length > 0),
     });
-    
+
     if (selectedColumn === columnId) {
       setSelectedColumn(null);
     }
@@ -245,12 +262,12 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
       id: `const-${Date.now()}`,
       name: `${type.replace(' ', '_')}_${editedTable.name}_${Date.now()}`,
       type,
-      columns: []
+      columns: [],
     };
-    
+
     setEditedTable({
       ...editedTable,
-      constraints: [...editedTable.constraints, newConstraint]
+      constraints: [...editedTable.constraints, newConstraint],
     });
   };
 
@@ -259,12 +276,12 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
       id: `idx-${Date.now()}`,
       name: `IX_${editedTable.name}_${Date.now()}`,
       type: IndexType.NONCLUSTERED,
-      columns: []
+      columns: [],
     };
-    
+
     setEditedTable({
       ...editedTable,
-      indexes: [...editedTable.indexes, newIndex]
+      indexes: [...editedTable.indexes, newIndex],
     });
   };
 
@@ -276,58 +293,58 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
       enabled: true,
       forReplication: false,
       notForReplication: false,
-      body: `-- Trigger body\nBEGIN\n    -- Your trigger logic here\nEND`
+      body: `-- Trigger body\nBEGIN\n    -- Your trigger logic here\nEND`,
     };
-    
+
     setEditedTable({
       ...editedTable,
-      triggers: [...editedTable.triggers, newTrigger]
+      triggers: [...editedTable.triggers, newTrigger],
     });
   };
 
   const generateSQL = (): string => {
     let sql = `-- Create table ${editedTable.schema}.${editedTable.name}\n`;
     sql += `CREATE TABLE [${editedTable.schema}].[${editedTable.name}] (\n`;
-    
+
     // Columns
     const columnDefs = editedTable.columns.map(col => {
       let def = `    [${col.name}] ${col.dataType.toUpperCase()}`;
-      
+
       if (col.length) def += `(${col.length})`;
       else if (col.precision) {
         def += `(${col.precision}`;
         if (col.scale) def += `, ${col.scale}`;
         def += ')';
       }
-      
+
       if (col.identity) {
         def += ` IDENTITY(${col.identity.seed}, ${col.identity.increment})`;
       }
-      
+
       def += col.nullable ? ' NULL' : ' NOT NULL';
-      
+
       if (col.defaultValue) {
         def += ` DEFAULT ${col.defaultValue}`;
       }
-      
+
       if (col.computed) {
         def = `    [${col.name}] AS ${col.computed.expression}`;
         if (col.computed.persisted) def += ' PERSISTED';
       }
-      
+
       return def;
     });
-    
+
     sql += columnDefs.join(',\n');
-    
+
     // Inline constraints
     const pkConstraint = editedTable.constraints.find(c => c.type === ConstraintType.PRIMARY_KEY);
     if (pkConstraint) {
       sql += `,\n    CONSTRAINT [${pkConstraint.name}] PRIMARY KEY (${pkConstraint.columns.map(c => `[${c}]`).join(', ')})`;
     }
-    
+
     sql += '\n);\n\n';
-    
+
     // Foreign keys
     editedTable.constraints
       .filter(c => c.type === ConstraintType.FOREIGN_KEY)
@@ -339,7 +356,7 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
         if (fk.onUpdate) sql += `    ON UPDATE ${fk.onUpdate}`;
         sql += ';\n\n';
       });
-    
+
     // Indexes
     editedTable.indexes.forEach(idx => {
       sql += `CREATE ${idx.type} INDEX [${idx.name}]\n`;
@@ -352,7 +369,7 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
       }
       sql += ';\n\n';
     });
-    
+
     // Triggers
     editedTable.triggers.forEach(trig => {
       sql += `CREATE TRIGGER [${trig.name}]\n`;
@@ -360,7 +377,7 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
       sql += `    ${trig.type}\n`;
       sql += `AS\n${trig.body}\n;\n\n`;
     });
-    
+
     return sql;
   };
 
@@ -394,11 +411,21 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
         <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm">
           <h4 className="font-semibold mb-2">Common Data Types:</h4>
           <ul className="space-y-1 text-xs">
-            <li><strong>INT:</strong> Whole numbers (-2^31 to 2^31-1)</li>
-            <li><strong>VARCHAR(n):</strong> Variable-length text up to n characters</li>
-            <li><strong>DATETIME:</strong> Date and time values</li>
-            <li><strong>DECIMAL(p,s):</strong> Fixed precision numbers</li>
-            <li><strong>BIT:</strong> Boolean values (0 or 1)</li>
+            <li>
+              <strong>INT:</strong> Whole numbers (-2^31 to 2^31-1)
+            </li>
+            <li>
+              <strong>VARCHAR(n):</strong> Variable-length text up to n characters
+            </li>
+            <li>
+              <strong>DATETIME:</strong> Date and time values
+            </li>
+            <li>
+              <strong>DECIMAL(p,s):</strong> Fixed precision numbers
+            </li>
+            <li>
+              <strong>BIT:</strong> Boolean values (0 or 1)
+            </li>
           </ul>
         </div>
       )}
@@ -427,17 +454,19 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                   <input
                     type="text"
                     value={column.name}
-                    onChange={(e) => updateColumn(column.id, { name: e.target.value })}
+                    onChange={e => updateColumn(column.id, { name: e.target.value })}
                     className="w-full px-1 py-0.5 border-0 bg-transparent"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={e => e.stopPropagation()}
                   />
                 </td>
                 <td className="border px-2 py-1">
                   <select
                     value={column.dataType}
-                    onChange={(e) => updateColumn(column.id, { dataType: e.target.value as DataType })}
+                    onChange={e =>
+                      updateColumn(column.id, { dataType: e.target.value as DataType })
+                    }
                     className="w-full px-1 py-0.5 border-0 bg-transparent text-sm"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={e => e.stopPropagation()}
                   >
                     <optgroup label="Numeric">
                       <option value={DataType.BIT}>bit</option>
@@ -474,35 +503,47 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                   </select>
                 </td>
                 <td className="border px-2 py-1">
-                  {(column.dataType === DataType.VARCHAR || column.dataType === DataType.CHAR || 
-                    column.dataType === DataType.NVARCHAR || column.dataType === DataType.NCHAR ||
-                    column.dataType === DataType.BINARY || column.dataType === DataType.VARBINARY) && (
+                  {(column.dataType === DataType.VARCHAR ||
+                    column.dataType === DataType.CHAR ||
+                    column.dataType === DataType.NVARCHAR ||
+                    column.dataType === DataType.NCHAR ||
+                    column.dataType === DataType.BINARY ||
+                    column.dataType === DataType.VARBINARY) && (
                     <input
                       type="number"
                       value={column.length || ''}
-                      onChange={(e) => updateColumn(column.id, { length: parseInt(e.target.value) || undefined })}
+                      onChange={e =>
+                        updateColumn(column.id, { length: parseInt(e.target.value) || undefined })
+                      }
                       className="w-full px-1 py-0.5 border-0 bg-transparent"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={e => e.stopPropagation()}
                     />
                   )}
-                  {(column.dataType === DataType.DECIMAL || column.dataType === DataType.NUMERIC) && (
+                  {(column.dataType === DataType.DECIMAL ||
+                    column.dataType === DataType.NUMERIC) && (
                     <div className="flex gap-1">
                       <input
                         type="number"
                         value={column.precision || ''}
-                        onChange={(e) => updateColumn(column.id, { precision: parseInt(e.target.value) || undefined })}
+                        onChange={e =>
+                          updateColumn(column.id, {
+                            precision: parseInt(e.target.value) || undefined,
+                          })
+                        }
                         className="w-12 px-1 py-0.5 border-0 bg-transparent"
                         placeholder="p"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={e => e.stopPropagation()}
                       />
                       <span>,</span>
                       <input
                         type="number"
                         value={column.scale || ''}
-                        onChange={(e) => updateColumn(column.id, { scale: parseInt(e.target.value) || undefined })}
+                        onChange={e =>
+                          updateColumn(column.id, { scale: parseInt(e.target.value) || undefined })
+                        }
                         className="w-12 px-1 py-0.5 border-0 bg-transparent"
                         placeholder="s"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={e => e.stopPropagation()}
                       />
                     </div>
                   )}
@@ -511,33 +552,37 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                   <input
                     type="checkbox"
                     checked={column.nullable}
-                    onChange={(e) => updateColumn(column.id, { nullable: e.target.checked })}
-                    onClick={(e) => e.stopPropagation()}
+                    onChange={e => updateColumn(column.id, { nullable: e.target.checked })}
+                    onClick={e => e.stopPropagation()}
                   />
                 </td>
                 <td className="border px-2 py-1">
                   <input
                     type="text"
                     value={column.defaultValue || ''}
-                    onChange={(e) => updateColumn(column.id, { defaultValue: e.target.value || undefined })}
+                    onChange={e =>
+                      updateColumn(column.id, { defaultValue: e.target.value || undefined })
+                    }
                     className="w-full px-1 py-0.5 border-0 bg-transparent text-sm"
                     placeholder="NULL"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={e => e.stopPropagation()}
                   />
                 </td>
                 <td className="border px-2 py-1 text-center">
                   <input
                     type="checkbox"
                     checked={!!column.identity}
-                    onChange={(e) => updateColumn(column.id, { 
-                      identity: e.target.checked ? { seed: 1, increment: 1 } : undefined 
-                    })}
-                    onClick={(e) => e.stopPropagation()}
+                    onChange={e =>
+                      updateColumn(column.id, {
+                        identity: e.target.checked ? { seed: 1, increment: 1 } : undefined,
+                      })
+                    }
+                    onClick={e => e.stopPropagation()}
                   />
                 </td>
                 <td className="border px-2 py-1">
                   <button
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       deleteColumn(column.id);
                     }}
@@ -558,7 +603,7 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
           {(() => {
             const column = editedTable.columns.find(c => c.id === selectedColumn);
             if (!column) return null;
-            
+
             return (
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
@@ -566,7 +611,9 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                   <input
                     type="text"
                     value={column.description || ''}
-                    onChange={(e) => updateColumn(column.id, { description: e.target.value || undefined })}
+                    onChange={e =>
+                      updateColumn(column.id, { description: e.target.value || undefined })
+                    }
                     className="w-full px-2 py-1 border rounded"
                     placeholder="Column description..."
                   />
@@ -578,9 +625,11 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                       <input
                         type="number"
                         value={column.identity.seed}
-                        onChange={(e) => updateColumn(column.id, { 
-                          identity: { ...column.identity!, seed: parseInt(e.target.value) || 1 }
-                        })}
+                        onChange={e =>
+                          updateColumn(column.id, {
+                            identity: { ...column.identity!, seed: parseInt(e.target.value) || 1 },
+                          })
+                        }
                         className="w-full px-2 py-1 border rounded"
                       />
                     </div>
@@ -589,9 +638,14 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                       <input
                         type="number"
                         value={column.identity.increment}
-                        onChange={(e) => updateColumn(column.id, { 
-                          identity: { ...column.identity!, increment: parseInt(e.target.value) || 1 }
-                        })}
+                        onChange={e =>
+                          updateColumn(column.id, {
+                            identity: {
+                              ...column.identity!,
+                              increment: parseInt(e.target.value) || 1,
+                            },
+                          })
+                        }
                         className="w-full px-2 py-1 border rounded"
                       />
                     </div>
@@ -602,9 +656,13 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                     <input
                       type="checkbox"
                       checked={!!column.computed}
-                      onChange={(e) => updateColumn(column.id, {
-                        computed: e.target.checked ? { expression: '', persisted: false } : undefined
-                      })}
+                      onChange={e =>
+                        updateColumn(column.id, {
+                          computed: e.target.checked
+                            ? { expression: '', persisted: false }
+                            : undefined,
+                        })
+                      }
                     />
                     Computed Column
                   </label>
@@ -612,9 +670,11 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                     <div className="mt-2 space-y-2">
                       <textarea
                         value={column.computed.expression}
-                        onChange={(e) => updateColumn(column.id, {
-                          computed: { ...column.computed!, expression: e.target.value }
-                        })}
+                        onChange={e =>
+                          updateColumn(column.id, {
+                            computed: { ...column.computed!, expression: e.target.value },
+                          })
+                        }
                         className="w-full px-2 py-1 border rounded font-mono text-xs"
                         rows={3}
                         placeholder="([FirstName] + ' ' + [LastName])"
@@ -623,9 +683,11 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                         <input
                           type="checkbox"
                           checked={column.computed.persisted}
-                          onChange={(e) => updateColumn(column.id, {
-                            computed: { ...column.computed!, persisted: e.target.checked }
-                          })}
+                          onChange={e =>
+                            updateColumn(column.id, {
+                              computed: { ...column.computed!, persisted: e.target.checked },
+                            })
+                          }
                         />
                         Persisted
                       </label>
@@ -676,60 +738,70 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
           <div key={constraint.id} className="p-3 border rounded">
             <div className="flex justify-between items-start mb-2">
               <div className="flex items-center gap-2">
-                {constraint.type === ConstraintType.PRIMARY_KEY && <Key className="w-4 h-4 text-yellow-600" />}
-                {constraint.type === ConstraintType.FOREIGN_KEY && <Link className="w-4 h-4 text-blue-600" />}
+                {constraint.type === ConstraintType.PRIMARY_KEY && (
+                  <Key className="w-4 h-4 text-yellow-600" />
+                )}
+                {constraint.type === ConstraintType.FOREIGN_KEY && (
+                  <Link className="w-4 h-4 text-blue-600" />
+                )}
                 <span className="font-semibold text-sm">{constraint.type}</span>
               </div>
               <button
-                onClick={() => setEditedTable({
-                  ...editedTable,
-                  constraints: editedTable.constraints.filter(c => c.id !== constraint.id)
-                })}
+                onClick={() =>
+                  setEditedTable({
+                    ...editedTable,
+                    constraints: editedTable.constraints.filter(c => c.id !== constraint.id),
+                  })
+                }
                 className="text-red-600 hover:text-red-800"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
-            
+
             <div className="space-y-2 text-sm">
               <div>
                 <label className="block mb-1">Name</label>
                 <input
                   type="text"
                   value={constraint.name}
-                  onChange={(e) => setEditedTable({
-                    ...editedTable,
-                    constraints: editedTable.constraints.map(c =>
-                      c.id === constraint.id ? { ...c, name: e.target.value } : c
-                    )
-                  })}
+                  onChange={e =>
+                    setEditedTable({
+                      ...editedTable,
+                      constraints: editedTable.constraints.map(c =>
+                        c.id === constraint.id ? { ...c, name: e.target.value } : c
+                      ),
+                    })
+                  }
                   className="w-full px-2 py-1 border rounded"
                 />
               </div>
-              
+
               <div>
                 <label className="block mb-1">Columns</label>
                 <select
                   multiple
                   value={constraint.columns}
-                  onChange={(e) => {
+                  onChange={e => {
                     const selected = Array.from(e.target.selectedOptions, option => option.value);
                     setEditedTable({
                       ...editedTable,
                       constraints: editedTable.constraints.map(c =>
                         c.id === constraint.id ? { ...c, columns: selected } : c
-                      )
+                      ),
                     });
                   }}
                   className="w-full px-2 py-1 border rounded"
                   size={3}
                 >
                   {editedTable.columns.map(col => (
-                    <option key={col.id} value={col.name}>{col.name}</option>
+                    <option key={col.id} value={col.name}>
+                      {col.name}
+                    </option>
                   ))}
                 </select>
               </div>
-              
+
               {constraint.type === ConstraintType.FOREIGN_KEY && (
                 <>
                   <div>
@@ -737,12 +809,14 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                     <input
                       type="text"
                       value={constraint.referencedTable || ''}
-                      onChange={(e) => setEditedTable({
-                        ...editedTable,
-                        constraints: editedTable.constraints.map(c =>
-                          c.id === constraint.id ? { ...c, referencedTable: e.target.value } : c
-                        )
-                      })}
+                      onChange={e =>
+                        setEditedTable({
+                          ...editedTable,
+                          constraints: editedTable.constraints.map(c =>
+                            c.id === constraint.id ? { ...c, referencedTable: e.target.value } : c
+                          ),
+                        })
+                      }
                       className="w-full px-2 py-1 border rounded"
                       placeholder="dbo.OtherTable"
                     />
@@ -752,12 +826,14 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                       <label className="block mb-1">On Delete</label>
                       <select
                         value={constraint.onDelete || 'NO ACTION'}
-                        onChange={(e) => setEditedTable({
-                          ...editedTable,
-                          constraints: editedTable.constraints.map(c =>
-                            c.id === constraint.id ? { ...c, onDelete: e.target.value as any } : c
-                          )
-                        })}
+                        onChange={e =>
+                          setEditedTable({
+                            ...editedTable,
+                            constraints: editedTable.constraints.map(c =>
+                              c.id === constraint.id ? { ...c, onDelete: e.target.value as any } : c
+                            ),
+                          })
+                        }
                         className="w-full px-2 py-1 border rounded"
                       >
                         <option>NO ACTION</option>
@@ -770,12 +846,14 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                       <label className="block mb-1">On Update</label>
                       <select
                         value={constraint.onUpdate || 'NO ACTION'}
-                        onChange={(e) => setEditedTable({
-                          ...editedTable,
-                          constraints: editedTable.constraints.map(c =>
-                            c.id === constraint.id ? { ...c, onUpdate: e.target.value as any } : c
-                          )
-                        })}
+                        onChange={e =>
+                          setEditedTable({
+                            ...editedTable,
+                            constraints: editedTable.constraints.map(c =>
+                              c.id === constraint.id ? { ...c, onUpdate: e.target.value as any } : c
+                            ),
+                          })
+                        }
                         className="w-full px-2 py-1 border rounded"
                       >
                         <option>NO ACTION</option>
@@ -787,18 +865,20 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                   </div>
                 </>
               )}
-              
+
               {constraint.type === ConstraintType.CHECK && (
                 <div>
                   <label className="block mb-1">Expression</label>
                   <textarea
                     value={constraint.definition || ''}
-                    onChange={(e) => setEditedTable({
-                      ...editedTable,
-                      constraints: editedTable.constraints.map(c =>
-                        c.id === constraint.id ? { ...c, definition: e.target.value } : c
-                      )
-                    })}
+                    onChange={e =>
+                      setEditedTable({
+                        ...editedTable,
+                        constraints: editedTable.constraints.map(c =>
+                          c.id === constraint.id ? { ...c, definition: e.target.value } : c
+                        ),
+                      })
+                    }
                     className="w-full px-2 py-1 border rounded font-mono text-xs"
                     rows={2}
                     placeholder="([Age] >= 18)"
@@ -830,16 +910,18 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
             <div className="flex justify-between items-start mb-2">
               <span className="font-semibold text-sm">{index.name}</span>
               <button
-                onClick={() => setEditedTable({
-                  ...editedTable,
-                  indexes: editedTable.indexes.filter(i => i.id !== index.id)
-                })}
+                onClick={() =>
+                  setEditedTable({
+                    ...editedTable,
+                    indexes: editedTable.indexes.filter(i => i.id !== index.id),
+                  })
+                }
                 className="text-red-600 hover:text-red-800"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
-            
+
             <div className="space-y-2 text-sm">
               <div className="grid grid-cols-2 gap-2">
                 <div>
@@ -847,12 +929,14 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                   <input
                     type="text"
                     value={index.name}
-                    onChange={(e) => setEditedTable({
-                      ...editedTable,
-                      indexes: editedTable.indexes.map(i =>
-                        i.id === index.id ? { ...i, name: e.target.value } : i
-                      )
-                    })}
+                    onChange={e =>
+                      setEditedTable({
+                        ...editedTable,
+                        indexes: editedTable.indexes.map(i =>
+                          i.id === index.id ? { ...i, name: e.target.value } : i
+                        ),
+                      })
+                    }
                     className="w-full px-2 py-1 border rounded"
                   />
                 </div>
@@ -860,12 +944,14 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                   <label className="block mb-1">Type</label>
                   <select
                     value={index.type}
-                    onChange={(e) => setEditedTable({
-                      ...editedTable,
-                      indexes: editedTable.indexes.map(i =>
-                        i.id === index.id ? { ...i, type: e.target.value as IndexType } : i
-                      )
-                    })}
+                    onChange={e =>
+                      setEditedTable({
+                        ...editedTable,
+                        indexes: editedTable.indexes.map(i =>
+                          i.id === index.id ? { ...i, type: e.target.value as IndexType } : i
+                        ),
+                      })
+                    }
                     className="w-full px-2 py-1 border rounded"
                   >
                     <option value={IndexType.CLUSTERED}>Clustered</option>
@@ -879,7 +965,7 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                   </select>
                 </div>
               </div>
-              
+
               <div>
                 <label className="block mb-1">Index Columns</label>
                 <div className="space-y-1">
@@ -887,35 +973,37 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                     <div key={colIdx} className="flex gap-2">
                       <select
                         value={col.name}
-                        onChange={(e) => {
+                        onChange={e => {
                           const newColumns = [...index.columns];
                           newColumns[colIdx] = { ...col, name: e.target.value };
                           setEditedTable({
                             ...editedTable,
                             indexes: editedTable.indexes.map(i =>
                               i.id === index.id ? { ...i, columns: newColumns } : i
-                            )
+                            ),
                           });
                         }}
                         className="flex-1 px-2 py-1 border rounded"
                       >
                         <option value="">Select column...</option>
                         {editedTable.columns.map(c => (
-                          <option key={c.id} value={c.name}>{c.name}</option>
+                          <option key={c.id} value={c.name}>
+                            {c.name}
+                          </option>
                         ))}
                       </select>
                       <label className="flex items-center gap-1">
                         <input
                           type="checkbox"
                           checked={col.descending}
-                          onChange={(e) => {
+                          onChange={e => {
                             const newColumns = [...index.columns];
                             newColumns[colIdx] = { ...col, descending: e.target.checked };
                             setEditedTable({
                               ...editedTable,
                               indexes: editedTable.indexes.map(i =>
                                 i.id === index.id ? { ...i, columns: newColumns } : i
-                              )
+                              ),
                             });
                           }}
                         />
@@ -928,7 +1016,7 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                             ...editedTable,
                             indexes: editedTable.indexes.map(i =>
                               i.id === index.id ? { ...i, columns: newColumns } : i
-                            )
+                            ),
                           });
                         }}
                         className="text-red-600 hover:text-red-800"
@@ -944,7 +1032,7 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                         ...editedTable,
                         indexes: editedTable.indexes.map(i =>
                           i.id === index.id ? { ...i, columns: newColumns } : i
-                        )
+                        ),
                       });
                     }}
                     className="text-blue-600 hover:text-blue-800 text-xs"
@@ -953,18 +1041,20 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                   </button>
                 </div>
               </div>
-              
+
               <div>
                 <label className="block mb-1">Filter</label>
                 <input
                   type="text"
                   value={index.filter || ''}
-                  onChange={(e) => setEditedTable({
-                    ...editedTable,
-                    indexes: editedTable.indexes.map(i =>
-                      i.id === index.id ? { ...i, filter: e.target.value || undefined } : i
-                    )
-                  })}
+                  onChange={e =>
+                    setEditedTable({
+                      ...editedTable,
+                      indexes: editedTable.indexes.map(i =>
+                        i.id === index.id ? { ...i, filter: e.target.value || undefined } : i
+                      ),
+                    })
+                  }
                   className="w-full px-2 py-1 border rounded font-mono text-xs"
                   placeholder="([IsActive] = 1)"
                 />
@@ -997,16 +1087,18 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                 <span className="font-semibold text-sm">{trigger.name}</span>
               </div>
               <button
-                onClick={() => setEditedTable({
-                  ...editedTable,
-                  triggers: editedTable.triggers.filter(t => t.id !== trigger.id)
-                })}
+                onClick={() =>
+                  setEditedTable({
+                    ...editedTable,
+                    triggers: editedTable.triggers.filter(t => t.id !== trigger.id),
+                  })
+                }
                 className="text-red-600 hover:text-red-800"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
-            
+
             <div className="space-y-2 text-sm">
               <div className="grid grid-cols-2 gap-2">
                 <div>
@@ -1014,12 +1106,14 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                   <input
                     type="text"
                     value={trigger.name}
-                    onChange={(e) => setEditedTable({
-                      ...editedTable,
-                      triggers: editedTable.triggers.map(t =>
-                        t.id === trigger.id ? { ...t, name: e.target.value } : t
-                      )
-                    })}
+                    onChange={e =>
+                      setEditedTable({
+                        ...editedTable,
+                        triggers: editedTable.triggers.map(t =>
+                          t.id === trigger.id ? { ...t, name: e.target.value } : t
+                        ),
+                      })
+                    }
                     className="w-full px-2 py-1 border rounded"
                   />
                 </div>
@@ -1027,12 +1121,14 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                   <label className="block mb-1">Type</label>
                   <select
                     value={trigger.type}
-                    onChange={(e) => setEditedTable({
-                      ...editedTable,
-                      triggers: editedTable.triggers.map(t =>
-                        t.id === trigger.id ? { ...t, type: e.target.value as TriggerType } : t
-                      )
-                    })}
+                    onChange={e =>
+                      setEditedTable({
+                        ...editedTable,
+                        triggers: editedTable.triggers.map(t =>
+                          t.id === trigger.id ? { ...t, type: e.target.value as TriggerType } : t
+                        ),
+                      })
+                    }
                     className="w-full px-2 py-1 border rounded"
                   >
                     <option value={TriggerType.AFTER_INSERT}>After Insert</option>
@@ -1044,33 +1140,37 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                   </select>
                 </div>
               </div>
-              
+
               <div>
                 <label className="flex items-center gap-2 mb-1">
                   <input
                     type="checkbox"
                     checked={trigger.enabled}
-                    onChange={(e) => setEditedTable({
-                      ...editedTable,
-                      triggers: editedTable.triggers.map(t =>
-                        t.id === trigger.id ? { ...t, enabled: e.target.checked } : t
-                      )
-                    })}
+                    onChange={e =>
+                      setEditedTable({
+                        ...editedTable,
+                        triggers: editedTable.triggers.map(t =>
+                          t.id === trigger.id ? { ...t, enabled: e.target.checked } : t
+                        ),
+                      })
+                    }
                   />
                   Enabled
                 </label>
               </div>
-              
+
               <div>
                 <label className="block mb-1">Trigger Body</label>
                 <textarea
                   value={trigger.body}
-                  onChange={(e) => setEditedTable({
-                    ...editedTable,
-                    triggers: editedTable.triggers.map(t =>
-                      t.id === trigger.id ? { ...t, body: e.target.value } : t
-                    )
-                  })}
+                  onChange={e =>
+                    setEditedTable({
+                      ...editedTable,
+                      triggers: editedTable.triggers.map(t =>
+                        t.id === trigger.id ? { ...t, body: e.target.value } : t
+                      ),
+                    })
+                  }
                   className="w-full px-2 py-1 border rounded font-mono text-xs"
                   rows={6}
                 />
@@ -1092,11 +1192,11 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
               principal: '',
               principalType: 'USER',
               permission: 'SELECT',
-              grantOption: false
+              grantOption: false,
             };
             setEditedTable({
               ...editedTable,
-              permissions: [...editedTable.permissions, newPermission]
+              permissions: [...editedTable.permissions, newPermission],
             });
           }}
           className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 flex items-center gap-1"
@@ -1124,12 +1224,14 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                   <input
                     type="text"
                     value={perm.principal}
-                    onChange={(e) => setEditedTable({
-                      ...editedTable,
-                      permissions: editedTable.permissions.map(p =>
-                        p.id === perm.id ? { ...p, principal: e.target.value } : p
-                      )
-                    })}
+                    onChange={e =>
+                      setEditedTable({
+                        ...editedTable,
+                        permissions: editedTable.permissions.map(p =>
+                          p.id === perm.id ? { ...p, principal: e.target.value } : p
+                        ),
+                      })
+                    }
                     className="w-full px-1 py-0.5 border-0 bg-transparent"
                     placeholder="username or role"
                   />
@@ -1137,12 +1239,14 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                 <td className="border px-2 py-1">
                   <select
                     value={perm.principalType}
-                    onChange={(e) => setEditedTable({
-                      ...editedTable,
-                      permissions: editedTable.permissions.map(p =>
-                        p.id === perm.id ? { ...p, principalType: e.target.value as any } : p
-                      )
-                    })}
+                    onChange={e =>
+                      setEditedTable({
+                        ...editedTable,
+                        permissions: editedTable.permissions.map(p =>
+                          p.id === perm.id ? { ...p, principalType: e.target.value as any } : p
+                        ),
+                      })
+                    }
                     className="w-full px-1 py-0.5 border-0 bg-transparent"
                   >
                     <option value="USER">User</option>
@@ -1153,12 +1257,14 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                 <td className="border px-2 py-1">
                   <select
                     value={perm.permission}
-                    onChange={(e) => setEditedTable({
-                      ...editedTable,
-                      permissions: editedTable.permissions.map(p =>
-                        p.id === perm.id ? { ...p, permission: e.target.value } : p
-                      )
-                    })}
+                    onChange={e =>
+                      setEditedTable({
+                        ...editedTable,
+                        permissions: editedTable.permissions.map(p =>
+                          p.id === perm.id ? { ...p, permission: e.target.value } : p
+                        ),
+                      })
+                    }
                     className="w-full px-1 py-0.5 border-0 bg-transparent"
                   >
                     <option value="SELECT">SELECT</option>
@@ -1174,20 +1280,24 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
                   <input
                     type="checkbox"
                     checked={perm.grantOption}
-                    onChange={(e) => setEditedTable({
-                      ...editedTable,
-                      permissions: editedTable.permissions.map(p =>
-                        p.id === perm.id ? { ...p, grantOption: e.target.checked } : p
-                      )
-                    })}
+                    onChange={e =>
+                      setEditedTable({
+                        ...editedTable,
+                        permissions: editedTable.permissions.map(p =>
+                          p.id === perm.id ? { ...p, grantOption: e.target.checked } : p
+                        ),
+                      })
+                    }
                   />
                 </td>
                 <td className="border px-2 py-1">
                   <button
-                    onClick={() => setEditedTable({
-                      ...editedTable,
-                      permissions: editedTable.permissions.filter(p => p.id !== perm.id)
-                    })}
+                    onClick={() =>
+                      setEditedTable({
+                        ...editedTable,
+                        permissions: editedTable.permissions.filter(p => p.id !== perm.id),
+                      })
+                    }
                     className="text-red-600 hover:text-red-800"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -1230,7 +1340,7 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
           </button>
         </div>
       </div>
-      
+
       <div className="bg-gray-900 text-gray-100 p-4 rounded overflow-x-auto">
         <pre className="text-xs font-mono whitespace-pre">{generateSQL()}</pre>
       </div>
@@ -1249,7 +1359,7 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
             <input
               type="text"
               value={editedTable.name}
-              onChange={(e) => setEditedTable({ ...editedTable, name: e.target.value })}
+              onChange={e => setEditedTable({ ...editedTable, name: e.target.value })}
               className="px-2 py-1 border rounded"
             />
           </div>
@@ -1261,10 +1371,7 @@ export const TableDesigner: React.FC<TableDesignerProps> = ({
               <Save className="w-4 h-4" />
               Save
             </button>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg"
-            >
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
               <X className="w-5 h-5" />
             </button>
           </div>

@@ -1,15 +1,15 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { 
-  Palette, 
-  Type, 
-  MoreHorizontal, 
+import {
+  Palette,
+  Type,
+  MoreHorizontal,
   FileImage,
   Settings,
   ChevronDown,
   X,
   Check,
   Eye,
-  Folder
+  Folder,
 } from 'lucide-react';
 
 // Color Picker Editor
@@ -20,7 +20,7 @@ export const ColorEditor: React.FC<{
 }> = ({ value, onChange, onFinish }) => {
   const [showPicker, setShowPicker] = useState(false);
   const [customColor, setCustomColor] = useState(value);
-  
+
   const vb6Colors = [
     { name: 'Black', value: '#000000', vbValue: '&H0&' },
     { name: 'Dark Red', value: '#800000', vbValue: '&H80&' },
@@ -37,7 +37,7 @@ export const ColorEditor: React.FC<{
     { name: 'Blue', value: '#0000ff', vbValue: '&HFF0000&' },
     { name: 'Magenta', value: '#ff00ff', vbValue: '&HFF00FF&' },
     { name: 'Cyan', value: '#00ffff', vbValue: '&HFFFF00&' },
-    { name: 'White', value: '#ffffff', vbValue: '&HFFFFFF&' }
+    { name: 'White', value: '#ffffff', vbValue: '&HFFFFFF&' },
   ];
 
   const systemColors = [
@@ -46,7 +46,7 @@ export const ColorEditor: React.FC<{
     { name: 'Window Background', value: '#ffffff', vbValue: '&H80000005&' },
     { name: 'Window Text', value: '#000000', vbValue: '&H80000008&' },
     { name: 'Highlight', value: '#316ac5', vbValue: '&H8000000D&' },
-    { name: 'Highlight Text', value: '#ffffff', vbValue: '&H8000000E&' }
+    { name: 'Highlight Text', value: '#ffffff', vbValue: '&H8000000E&' },
   ];
 
   const handleColorSelect = (colorValue: string) => {
@@ -57,7 +57,7 @@ export const ColorEditor: React.FC<{
 
   return (
     <div className="relative flex items-center">
-      <div 
+      <div
         className="w-6 h-4 border border-gray-400 cursor-pointer flex-shrink-0"
         style={{ backgroundColor: value }}
         onClick={() => setShowPicker(!showPicker)}
@@ -65,11 +65,11 @@ export const ColorEditor: React.FC<{
       <input
         type="text"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)}
         onBlur={onFinish}
         className="flex-1 ml-1 text-xs border-0 outline-none"
       />
-      
+
       {showPicker && (
         <div className="absolute top-full left-0 z-50 bg-white border border-gray-400 shadow-lg p-2">
           <div className="mb-2">
@@ -86,7 +86,7 @@ export const ColorEditor: React.FC<{
               ))}
             </div>
           </div>
-          
+
           <div className="mb-2">
             <div className="text-xs font-bold mb-1">System Colors</div>
             <div className="grid grid-cols-4 gap-1">
@@ -101,14 +101,14 @@ export const ColorEditor: React.FC<{
               ))}
             </div>
           </div>
-          
+
           <div className="border-t pt-2">
             <div className="text-xs font-bold mb-1">Custom Color</div>
             <div className="flex items-center gap-2">
               <input
                 type="color"
                 value={customColor}
-                onChange={(e) => setCustomColor(e.target.value)}
+                onChange={e => setCustomColor(e.target.value)}
                 className="w-8 h-6"
               />
               <button
@@ -144,13 +144,22 @@ export const FontEditor: React.FC<{
     bold: value?.bold || false,
     italic: value?.italic || false,
     underline: value?.underline || false,
-    strikethrough: value?.strikethrough || false
+    strikethrough: value?.strikethrough || false,
   });
 
   const fonts = [
-    'MS Sans Serif', 'Arial', 'Times New Roman', 'Courier New',
-    'Tahoma', 'Verdana', 'Georgia', 'Comic Sans MS',
-    'Impact', 'Trebuchet MS', 'Arial Black', 'Palatino'
+    'MS Sans Serif',
+    'Arial',
+    'Times New Roman',
+    'Courier New',
+    'Tahoma',
+    'Verdana',
+    'Georgia',
+    'Comic Sans MS',
+    'Impact',
+    'Trebuchet MS',
+    'Arial Black',
+    'Palatino',
   ];
 
   const sizes = [6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
@@ -174,7 +183,7 @@ export const FontEditor: React.FC<{
       >
         ...
       </button>
-      
+
       {showDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-gray-200 border border-gray-400 shadow-lg w-96">
@@ -188,7 +197,7 @@ export const FontEditor: React.FC<{
                 <X size={14} />
               </button>
             </div>
-            
+
             {/* Content */}
             <div className="p-3">
               <div className="grid grid-cols-2 gap-3 mb-3">
@@ -197,32 +206,38 @@ export const FontEditor: React.FC<{
                   <label className="text-xs font-bold">Font:</label>
                   <select
                     value={selectedFont.name}
-                    onChange={(e) => setSelectedFont({...selectedFont, name: e.target.value})}
+                    onChange={e => setSelectedFont({ ...selectedFont, name: e.target.value })}
                     className="w-full mt-1 text-xs border border-gray-400 p-1"
                     size={8}
                   >
                     {fonts.map(font => (
-                      <option key={font} value={font}>{font}</option>
+                      <option key={font} value={font}>
+                        {font}
+                      </option>
                     ))}
                   </select>
                 </div>
-                
+
                 {/* Font Size */}
                 <div>
                   <label className="text-xs font-bold">Size:</label>
                   <select
                     value={selectedFont.size}
-                    onChange={(e) => setSelectedFont({...selectedFont, size: parseInt(e.target.value)})}
+                    onChange={e =>
+                      setSelectedFont({ ...selectedFont, size: parseInt(e.target.value) })
+                    }
                     className="w-full mt-1 text-xs border border-gray-400 p-1"
                     size={8}
                   >
                     {sizes.map(size => (
-                      <option key={size} value={size}>{size}</option>
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
-              
+
               {/* Font Style */}
               <div className="mb-3">
                 <label className="text-xs font-bold">Font style:</label>
@@ -231,7 +246,7 @@ export const FontEditor: React.FC<{
                     <input
                       type="checkbox"
                       checked={selectedFont.bold}
-                      onChange={(e) => setSelectedFont({...selectedFont, bold: e.target.checked})}
+                      onChange={e => setSelectedFont({ ...selectedFont, bold: e.target.checked })}
                       className="mr-2"
                     />
                     Bold
@@ -240,7 +255,7 @@ export const FontEditor: React.FC<{
                     <input
                       type="checkbox"
                       checked={selectedFont.italic}
-                      onChange={(e) => setSelectedFont({...selectedFont, italic: e.target.checked})}
+                      onChange={e => setSelectedFont({ ...selectedFont, italic: e.target.checked })}
                       className="mr-2"
                     />
                     Italic
@@ -249,7 +264,9 @@ export const FontEditor: React.FC<{
                     <input
                       type="checkbox"
                       checked={selectedFont.underline}
-                      onChange={(e) => setSelectedFont({...selectedFont, underline: e.target.checked})}
+                      onChange={e =>
+                        setSelectedFont({ ...selectedFont, underline: e.target.checked })
+                      }
                       className="mr-2"
                     />
                     Underline
@@ -258,31 +275,34 @@ export const FontEditor: React.FC<{
                     <input
                       type="checkbox"
                       checked={selectedFont.strikethrough}
-                      onChange={(e) => setSelectedFont({...selectedFont, strikethrough: e.target.checked})}
+                      onChange={e =>
+                        setSelectedFont({ ...selectedFont, strikethrough: e.target.checked })
+                      }
                       className="mr-2"
                     />
                     Strikeout
                   </label>
                 </div>
               </div>
-              
+
               {/* Sample */}
               <div className="mb-3">
                 <label className="text-xs font-bold">Sample:</label>
-                <div 
+                <div
                   className="mt-1 p-2 border border-gray-400 bg-white text-center"
                   style={{
                     fontFamily: selectedFont.name,
                     fontSize: `${selectedFont.size}pt`,
                     fontWeight: selectedFont.bold ? 'bold' : 'normal',
                     fontStyle: selectedFont.italic ? 'italic' : 'normal',
-                    textDecoration: `${selectedFont.underline ? 'underline' : ''} ${selectedFont.strikethrough ? 'line-through' : ''}`.trim()
+                    textDecoration:
+                      `${selectedFont.underline ? 'underline' : ''} ${selectedFont.strikethrough ? 'line-through' : ''}`.trim(),
                   }}
                 >
                   AaBbYyZz
                 </div>
               </div>
-              
+
               {/* Buttons */}
               <div className="flex justify-end gap-2">
                 <button
@@ -323,7 +343,7 @@ export const PictureEditor: React.FC<{
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         const result = e.target?.result as string;
         onChange(result);
         setShowDialog(false);
@@ -350,7 +370,7 @@ export const PictureEditor: React.FC<{
       >
         ...
       </button>
-      
+
       <input
         ref={fileInputRef}
         type="file"
@@ -358,7 +378,7 @@ export const PictureEditor: React.FC<{
         onChange={handleFileSelect}
         className="hidden"
       />
-      
+
       {showDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-gray-200 border border-gray-400 shadow-lg w-80">
@@ -372,16 +392,16 @@ export const PictureEditor: React.FC<{
                 <X size={14} />
               </button>
             </div>
-            
+
             {/* Content */}
             <div className="p-3">
               <div className="mb-3">
                 <div className="text-xs mb-2">Current Picture:</div>
                 <div className="border border-gray-400 bg-white p-2 h-32 flex items-center justify-center">
                   {value ? (
-                    <img 
-                      src={value} 
-                      alt="Preview" 
+                    <img
+                      src={value}
+                      alt="Preview"
                       className="max-w-full max-h-full object-contain"
                     />
                   ) : (
@@ -389,7 +409,7 @@ export const PictureEditor: React.FC<{
                   )}
                 </div>
               </div>
-              
+
               {/* Buttons */}
               <div className="flex justify-center gap-2">
                 <button
@@ -451,14 +471,14 @@ export const EnumEditor: React.FC<{
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <div 
+      <div
         className="flex items-center justify-between cursor-pointer text-xs"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className="flex-1">{currentValue}</span>
         <ChevronDown size={12} className="ml-1" />
       </div>
-      
+
       {isOpen && (
         <div className="absolute top-full left-0 right-0 bg-white border border-gray-400 shadow-lg z-50 max-h-32 overflow-y-auto">
           {enumValues.map(enumValue => (
@@ -504,14 +524,14 @@ export const BooleanEditor: React.FC<{
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <div 
+      <div
         className="flex items-center justify-between cursor-pointer text-xs"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className="flex-1">{value ? 'True' : 'False'}</span>
         <ChevronDown size={12} className="ml-1" />
       </div>
-      
+
       {isOpen && (
         <div className="absolute top-full left-0 right-0 bg-white border border-gray-400 shadow-lg z-50">
           <div
@@ -569,7 +589,7 @@ export const StringEditor: React.FC<{
         <textarea
           ref={inputRef as React.RefObject<HTMLTextAreaElement>}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={e => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           onBlur={handleBlur}
           className="w-full text-xs border-0 outline-none resize-none"
@@ -582,7 +602,7 @@ export const StringEditor: React.FC<{
           ref={inputRef as React.RefObject<HTMLInputElement>}
           type="text"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={e => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           onBlur={handleBlur}
           className="w-full text-xs border-0 outline-none"
@@ -592,10 +612,7 @@ export const StringEditor: React.FC<{
   }
 
   return (
-    <div 
-      className="text-xs cursor-text flex-1"
-      onClick={() => setEditing(true)}
-    >
+    <div className="text-xs cursor-text flex-1" onClick={() => setEditing(true)}>
       {value || '\u00A0'}
     </div>
   );
@@ -652,7 +669,7 @@ export const NumberEditor: React.FC<{
         ref={inputRef}
         type="text"
         value={textValue}
-        onChange={(e) => setTextValue(e.target.value)}
+        onChange={e => setTextValue(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
         className="w-full text-xs border-0 outline-none"
@@ -661,10 +678,7 @@ export const NumberEditor: React.FC<{
   }
 
   return (
-    <div 
-      className="text-xs cursor-text flex-1"
-      onClick={() => setEditing(true)}
-    >
+    <div className="text-xs cursor-text flex-1" onClick={() => setEditing(true)}>
       {value}
     </div>
   );

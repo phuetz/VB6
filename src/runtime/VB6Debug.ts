@@ -8,7 +8,7 @@ export enum DebugOutputTarget {
   Console = 'console',
   ImmediateWindow = 'immediate',
   File = 'file',
-  Custom = 'custom'
+  Custom = 'custom',
 }
 
 // Debug output entry
@@ -49,60 +49,60 @@ export class VB6Debug {
     outputTarget: DebugOutputTarget.Console,
     maxHistorySize: 1000,
     includeTimestamp: true,
-    includeStackTrace: false
+    includeStackTrace: false,
   };
-  
+
   private constructor() {
     this.setupOutputHandlers();
   }
-  
+
   static getInstance(): VB6Debug {
     if (!VB6Debug.instance) {
       VB6Debug.instance = new VB6Debug();
     }
     return VB6Debug.instance;
   }
-  
+
   /**
    * Debug.Print - Output text to debug console
    * Supports multiple arguments and formatting
    */
   print(...args: any[]): void {
     if (!this.config.enabled) return;
-    
+
     // Convert arguments to strings
     const parts = args.map(arg => this.formatValue(arg));
     const message = parts.join(this.printSeparator);
-    
+
     // Create debug entry
     const entry: DebugEntry = {
       timestamp: Date.now(),
       message,
       type: 'print',
       source: this.getCallerInfo(),
-      lineNumber: this.getCallerLineNumber()
+      lineNumber: this.getCallerLineNumber(),
     };
-    
+
     if (this.config.includeStackTrace) {
       entry.stackTrace = this.getStackTrace();
     }
-    
+
     // Add to history
     this.addToHistory(entry);
-    
+
     // Output to target
     this.output(entry);
   }
-  
+
   /**
    * Debug.Assert - Assert a condition and break if false
    */
   assert(condition: boolean, message?: string): void {
     if (!this.assertionsEnabled || !this.config.enabled) return;
-    
+
     if (!condition) {
       const assertMessage = message || 'Assertion failed';
-      
+
       // Create assert entry
       const entry: DebugEntry = {
         timestamp: Date.now(),
@@ -110,59 +110,62 @@ export class VB6Debug {
         type: 'assert',
         source: this.getCallerInfo(),
         lineNumber: this.getCallerLineNumber(),
-        stackTrace: this.getStackTrace()
+        stackTrace: this.getStackTrace(),
       };
-      
+
       // Add to history
       this.addToHistory(entry);
-      
+
       // Output to target
       this.output(entry);
 
       // In debug mode, trigger debugger
-      if (typeof window !== 'undefined' && window.confirm(`Assertion Failed: ${assertMessage}\n\nBreak into debugger?`)) {
+      if (
+        typeof window !== 'undefined' &&
+        window.confirm(`Assertion Failed: ${assertMessage}\n\nBreak into debugger?`)
+      ) {
         // eslint-disable-next-line no-debugger
         debugger;
       }
     }
   }
-  
+
   /**
    * Clear debug output
    */
   clear(): void {
     this.history = [];
-    
+
     // Clear immediate window if connected
     if (this.immediateWindowCallback) {
       this.immediateWindowCallback('[Clear]');
     }
-    
+
     // Clear console
     if (this.config.outputTarget === DebugOutputTarget.Console && typeof console !== 'undefined') {
       console.clear();
     }
   }
-  
+
   /**
    * Get debug history
    */
   getHistory(): DebugEntry[] {
     return [...this.history];
   }
-  
+
   /**
    * Set configuration
    */
   configure(config: Partial<DebugConfig>): void {
     Object.assign(this.config, config);
-    
+
     // Update file handle if needed
     if (config.logToFile && config.logToFile !== this.config.logToFile) {
       this.openLogFile(config.logToFile);
     }
   }
-  
+
   /**
    * Connect to Immediate Window
    */
@@ -170,7 +173,7 @@ export class VB6Debug {
     this.immediateWindowCallback = callback;
     this.config.outputTarget = DebugOutputTarget.ImmediateWindow;
   }
-  
+
   /**
    * Disconnect from Immediate Window
    */
@@ -178,36 +181,36 @@ export class VB6Debug {
     this.immediateWindowCallback = undefined;
     this.config.outputTarget = DebugOutputTarget.Console;
   }
-  
+
   /**
    * Enable/disable assertions
    */
   setAssertionsEnabled(enabled: boolean): void {
     this.assertionsEnabled = enabled;
   }
-  
+
   /**
    * Set print separator (space, tab, comma, semicolon)
    */
   setPrintSeparator(separator: string): void {
     this.printSeparator = separator;
   }
-  
+
   /**
    * VB6-style formatting with zones
    * Semicolon (;) = no space, Comma (,) = tab to next zone
    */
   printWithFormat(format: string, ...args: any[]): void {
     if (!this.config.enabled) return;
-    
+
     let output = '';
     let argIndex = 0;
     let zone = 0;
     const zoneWidth = 14; // VB6 default zone width
-    
+
     for (let i = 0; i < format.length; i++) {
       const char = format[i];
-      
+
       if (char === '?' && argIndex < args.length) {
         // Replace ? with argument
         output += this.formatValue(args[argIndex++]);
@@ -227,15 +230,15 @@ export class VB6Debug {
         output += char;
       }
     }
-    
+
     // Add remaining arguments
     while (argIndex < args.length) {
       output += ' ' + this.formatValue(args[argIndex++]);
     }
-    
+
     this.print(output);
   }
-  
+
   /**
    * Print with timestamp
    */
@@ -243,35 +246,35 @@ export class VB6Debug {
     const timestamp = new Date().toISOString();
     this.print(`[${timestamp}]`, ...args);
   }
-  
+
   /**
    * Print object properties (like VB6 Debug.Print for objects)
    */
   printObject(obj: any, indent: number = 0): void {
     if (!this.config.enabled) return;
-    
+
     const spaces = ' '.repeat(indent * 2);
-    
+
     if (obj === null || obj === undefined) {
       this.print(spaces + String(obj));
       return;
     }
-    
+
     if (typeof obj !== 'object') {
       this.print(spaces + this.formatValue(obj));
       return;
     }
-    
+
     // Print object type
     const typeName = obj.constructor?.name || 'Object';
     this.print(spaces + `${typeName} {`);
-    
+
     // Print properties
     for (const key in obj) {
       // eslint-disable-next-line no-prototype-builtins
       if (obj.hasOwnProperty(key)) {
         const value = obj[key];
-        
+
         if (typeof value === 'object' && value !== null) {
           this.print(spaces + `  ${key}:`);
           this.printObject(value, indent + 2);
@@ -280,40 +283,40 @@ export class VB6Debug {
         }
       }
     }
-    
+
     this.print(spaces + '}');
   }
-  
+
   /**
    * Print array contents
    */
   printArray(arr: any[], name?: string): void {
     if (!this.config.enabled) return;
-    
+
     const header = name ? `${name}(${arr.length})` : `Array(${arr.length})`;
     this.print(header);
-    
+
     arr.forEach((item, index) => {
       this.print(`  [${index}] = ${this.formatValue(item)}`);
     });
   }
-  
+
   /**
    * Print table (2D array)
    */
   printTable(data: any[][], headers?: string[]): void {
     if (!this.config.enabled) return;
-    
+
     if (headers) {
       this.print(headers.join('\t'));
       this.print('-'.repeat(headers.join('\t').length));
     }
-    
+
     data.forEach(row => {
       this.print(row.map(cell => this.formatValue(cell)).join('\t'));
     });
   }
-  
+
   private formatValue(value: any): string {
     if (value === null) return 'Null';
     if (value === undefined) return 'Nothing';
@@ -331,37 +334,37 @@ export class VB6Debug {
     }
     return String(value);
   }
-  
+
   private addToHistory(entry: DebugEntry): void {
     this.history.push(entry);
-    
+
     // Trim history if needed
     if (this.history.length > this.config.maxHistorySize) {
       this.history = this.history.slice(-this.config.maxHistorySize);
     }
   }
-  
+
   private output(entry: DebugEntry): void {
     const handler = this.outputHandlers.get(this.config.outputTarget);
     if (handler) {
       handler(entry);
     }
-    
+
     // Custom handler
     if (this.config.customHandler) {
       this.config.customHandler(entry);
     }
   }
-  
+
   private setupOutputHandlers(): void {
     // Console handler
-    this.outputHandlers.set(DebugOutputTarget.Console, (entry) => {
+    this.outputHandlers.set(DebugOutputTarget.Console, entry => {
       if (typeof console === 'undefined') return;
-      
-      const prefix = this.config.includeTimestamp 
+
+      const prefix = this.config.includeTimestamp
         ? `[${new Date(entry.timestamp).toLocaleTimeString()}] `
         : '';
-      
+
       switch (entry.type) {
         case 'assert':
           console.error(prefix + entry.message);
@@ -374,35 +377,33 @@ export class VB6Debug {
           console.warn(prefix + entry.message);
           break;
         default:
-          console.log(prefix + entry.message);
       }
     });
-    
+
     // Immediate Window handler
-    this.outputHandlers.set(DebugOutputTarget.ImmediateWindow, (entry) => {
+    this.outputHandlers.set(DebugOutputTarget.ImmediateWindow, entry => {
       if (!this.immediateWindowCallback) return;
-      
-      const prefix = this.config.includeTimestamp 
+
+      const prefix = this.config.includeTimestamp
         ? `[${new Date(entry.timestamp).toLocaleTimeString()}] `
         : '';
-      
+
       this.immediateWindowCallback(prefix + entry.message);
-      
+
       if (entry.stackTrace && entry.type === 'assert') {
         this.immediateWindowCallback(entry.stackTrace);
       }
     });
-    
+
     // File handler
-    this.outputHandlers.set(DebugOutputTarget.File, (entry) => {
+    this.outputHandlers.set(DebugOutputTarget.File, entry => {
       if (!this.fileHandle) return;
-      
+
       const line = JSON.stringify(entry) + '\n';
       // In a real implementation, write to file
-      console.log('[Debug File]', line);
     });
   }
-  
+
   private getCallerInfo(): string {
     try {
       throw new Error();
@@ -416,7 +417,7 @@ export class VB6Debug {
     }
     return 'Unknown';
   }
-  
+
   private getCallerLineNumber(): number {
     try {
       throw new Error();
@@ -430,7 +431,7 @@ export class VB6Debug {
     }
     return 0;
   }
-  
+
   private getStackTrace(): string {
     try {
       throw new Error();
@@ -438,10 +439,9 @@ export class VB6Debug {
       return e.stack || '';
     }
   }
-  
+
   private openLogFile(filename: string): void {
     // In a real implementation, open file for writing
-    console.log(`[Debug] Opening log file: ${filename}`);
     this.fileHandle = filename;
   }
 }
@@ -502,46 +502,46 @@ export class VB6DebugExample {
     // Basic Debug.Print
     Debug.print('Hello from VB6 Debug');
     Debug.print('Value:', 42, 'Text:', 'Test');
-    
+
     // Print with formatting
     Debug.printWithFormat('Name: ? Age: ?', 'John', 30);
-    
+
     // Print with zones (VB6 style)
     Debug.setPrintSeparator(',');
     Debug.print('Zone1', 'Zone2', 'Zone3');
     Debug.setPrintSeparator(' ');
-    
+
     // Print object
     const obj = {
       name: 'Test Object',
       value: 123,
       nested: {
         prop1: 'value1',
-        prop2: 'value2'
-      }
+        prop2: 'value2',
+      },
     };
     Debug.printObject(obj);
-    
+
     // Print array
     const arr = [1, 2, 3, 4, 5];
     Debug.printArray(arr, 'Numbers');
-    
+
     // Print table
     const table = [
       ['Name', 'Age', 'City'],
       ['John', 30, 'New York'],
       ['Jane', 25, 'Boston'],
-      ['Bob', 35, 'Chicago']
+      ['Bob', 35, 'Chicago'],
     ];
     Debug.printTable(table.slice(1), table[0]);
-    
+
     // Assertions
     Debug.assert(1 + 1 === 2, 'Math works');
     Debug.assert(false, 'This will trigger');
-    
+
     // Print with timestamp
     Debug.printWithTime('Event occurred');
-    
+
     // Clear output
     // Debug.clear();
   }
@@ -559,5 +559,5 @@ export const VB6DebugAPI = {
   DebugPrintArray,
   Stop,
   VB6DebugExample,
-  DebugOutputTarget
+  DebugOutputTarget,
 };

@@ -8,7 +8,7 @@ export enum ProcedureType {
   Property = 'Property',
   Event = 'Event',
   Constructor = 'Constructor',
-  Destructor = 'Destructor'
+  Destructor = 'Destructor',
 }
 
 export enum CallType {
@@ -18,7 +18,7 @@ export enum CallType {
   Timer = 'Timer',
   DLL = 'DLL',
   COM = 'COM',
-  System = 'System'
+  System = 'System',
 }
 
 export enum StackFrameStatus {
@@ -26,7 +26,7 @@ export enum StackFrameStatus {
   Current = 'Current',
   Exception = 'Exception',
   System = 'System',
-  External = 'External'
+  External = 'External',
 }
 
 export interface StackFrame {
@@ -105,7 +105,7 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
   onNavigateToFrame,
   onNavigateToSource,
   onCopyStackTrace,
-  onSaveStackTrace
+  onSaveStackTrace,
 }) => {
   const [selectedFrame, setSelectedFrame] = useState<StackFrame | null>(null);
   const [expandedFrames, setExpandedFrames] = useState<Set<string>>(new Set());
@@ -121,14 +121,14 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
     highlightCurrentFrame: true,
     autoRefresh: true,
     fontSize: 11,
-    compactView: false
+    compactView: false,
   });
   const [searchText, setSearchText] = useState('');
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
   const [contextMenuFrame, setContextMenuFrame] = useState<StackFrame | null>(null);
   const [showSettings, setShowSettings] = useState(false);
-  
+
   const eventEmitter = useRef(new EventEmitter());
 
   // Initialize with sample call stack
@@ -137,7 +137,9 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
 
     // Simulate current frame selection
     if (debugSession.frames.length > 0) {
-      setSelectedFrame(debugSession.frames[debugSession.currentFrameIndex] || debugSession.frames[0]);
+      setSelectedFrame(
+        debugSession.frames[debugSession.currentFrameIndex] || debugSession.frames[0]
+      );
     }
   }, [debugSession]);
 
@@ -166,12 +168,12 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
         arguments: [],
         localVariables: [
           { name: 'intResult', value: 42, type: 'Integer' },
-          { name: 'strMessage', value: 'Hello World', type: 'String' }
+          { name: 'strMessage', value: 'Hello World', type: 'String' },
         ],
         timestamp: new Date(),
         isRecursive: false,
         hasException: false,
-        canNavigate: true
+        canNavigate: true,
       },
       {
         id: 'frame2',
@@ -186,17 +188,17 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
         callType: CallType.Direct,
         arguments: [
           { name: 'strInput', value: 'test data', type: 'String', byRef: false },
-          { name: 'intCount', value: 10, type: 'Integer', byRef: true }
+          { name: 'intCount', value: 10, type: 'Integer', byRef: true },
         ],
         localVariables: [
           { name: 'i', value: 5, type: 'Integer' },
-          { name: 'arrData', value: ['a', 'b', 'c'], type: 'String()' }
+          { name: 'arrData', value: ['a', 'b', 'c'], type: 'String()' },
         ],
         executionTime: 156.7,
         timestamp: new Date(Date.now() - 1000),
         isRecursive: false,
         hasException: false,
-        canNavigate: true
+        canNavigate: true,
       },
       {
         id: 'frame3',
@@ -210,18 +212,16 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
         callType: CallType.Direct,
         arguments: [
           { name: 'dblValue1', value: 15.5, type: 'Double', byRef: false },
-          { name: 'dblValue2', value: 23.8, type: 'Double', byRef: false }
+          { name: 'dblValue2', value: 23.8, type: 'Double', byRef: false },
         ],
-        localVariables: [
-          { name: 'dblTemp', value: 39.3, type: 'Double' }
-        ],
+        localVariables: [{ name: 'dblTemp', value: 39.3, type: 'Double' }],
         returnValue: 39.3,
         returnType: 'Double',
         executionTime: 89.2,
         timestamp: new Date(Date.now() - 2500),
         isRecursive: false,
         hasException: false,
-        canNavigate: true
+        canNavigate: true,
       },
       {
         id: 'frame4',
@@ -233,19 +233,15 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
         lineNumber: 34,
         status: StackFrameStatus.Active,
         callType: CallType.Direct,
-        arguments: [
-          { name: 'varInput', value: 'test', type: 'Variant', byRef: false }
-        ],
-        localVariables: [
-          { name: 'blnValid', value: true, type: 'Boolean' }
-        ],
+        arguments: [{ name: 'varInput', value: 'test', type: 'Variant', byRef: false }],
+        localVariables: [{ name: 'blnValid', value: true, type: 'Boolean' }],
         returnValue: true,
         returnType: 'Boolean',
         executionTime: 12.4,
         timestamp: new Date(Date.now() - 3000),
         isRecursive: false,
         hasException: false,
-        canNavigate: true
+        canNavigate: true,
       },
       {
         id: 'frame5',
@@ -257,12 +253,8 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
         lineNumber: 89,
         status: StackFrameStatus.Active,
         callType: CallType.Direct,
-        arguments: [
-          { name: 'intDepth', value: 3, type: 'Integer', byRef: false }
-        ],
-        localVariables: [
-          { name: 'intResult', value: 6, type: 'Integer' }
-        ],
+        arguments: [{ name: 'intDepth', value: 3, type: 'Integer', byRef: false }],
+        localVariables: [{ name: 'intResult', value: 6, type: 'Integer' }],
         returnValue: 6,
         returnType: 'Integer',
         executionTime: 45.1,
@@ -270,9 +262,9 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
         isRecursive: true,
         recursionDepth: 3,
         hasException: false,
-        canNavigate: true
-      }
-    ]
+        canNavigate: true,
+      },
+    ],
   };
 
   const currentSession = debugSession || sampleDebugSession;
@@ -282,10 +274,11 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
     if (!searchText) return currentSession.frames;
 
     const searchLower = searchText.toLowerCase();
-    return currentSession.frames.filter(frame =>
-      frame.procedureName.toLowerCase().includes(searchLower) ||
-      frame.moduleName.toLowerCase().includes(searchLower) ||
-      frame.fileName.toLowerCase().includes(searchLower)
+    return currentSession.frames.filter(
+      frame =>
+        frame.procedureName.toLowerCase().includes(searchLower) ||
+        frame.moduleName.toLowerCase().includes(searchLower) ||
+        frame.fileName.toLowerCase().includes(searchLower)
     );
   }, [currentSession.frames, searchText]);
 
@@ -303,33 +296,41 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
   }, []);
 
   // Navigate to specific frame
-  const navigateToFrame = useCallback((frame: StackFrame) => {
-    setSelectedFrame(frame);
-    onNavigateToFrame?.(frame);
-  }, [onNavigateToFrame]);
+  const navigateToFrame = useCallback(
+    (frame: StackFrame) => {
+      setSelectedFrame(frame);
+      onNavigateToFrame?.(frame);
+    },
+    [onNavigateToFrame]
+  );
 
   // Navigate to source code
-  const navigateToSource = useCallback((frame: StackFrame) => {
-    if (frame.canNavigate) {
-      onNavigateToSource?.(frame.fileName, frame.lineNumber);
-    }
-  }, [onNavigateToSource]);
+  const navigateToSource = useCallback(
+    (frame: StackFrame) => {
+      if (frame.canNavigate) {
+        onNavigateToSource?.(frame.fileName, frame.lineNumber);
+      }
+    },
+    [onNavigateToSource]
+  );
 
   // Copy stack trace to clipboard
   const copyStackTrace = useCallback(() => {
-    const stackTrace = filteredFrames.map(frame => {
-      let line = `${frame.level}: ${frame.procedureName} in ${frame.moduleName}`;
-      if (settings.showLineNumbers) {
-        line += `:${frame.lineNumber}`;
-      }
-      if (settings.showArguments && frame.arguments.length > 0) {
-        const args = frame.arguments.map(arg => 
-          `${arg.name}=${arg.value} (${arg.type}${arg.byRef ? ', ByRef' : ''})`
-        ).join(', ');
-        line += ` [${args}]`;
-      }
-      return line;
-    }).join('\n');
+    const stackTrace = filteredFrames
+      .map(frame => {
+        let line = `${frame.level}: ${frame.procedureName} in ${frame.moduleName}`;
+        if (settings.showLineNumbers) {
+          line += `:${frame.lineNumber}`;
+        }
+        if (settings.showArguments && frame.arguments.length > 0) {
+          const args = frame.arguments
+            .map(arg => `${arg.name}=${arg.value} (${arg.type}${arg.byRef ? ', ByRef' : ''})`)
+            .join(', ');
+          line += ` [${args}]`;
+        }
+        return line;
+      })
+      .join('\n');
 
     navigator.clipboard.writeText(stackTrace);
     onCopyStackTrace?.(filteredFrames);
@@ -340,7 +341,7 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
     if (frame.hasException) return '❌';
     if (frame.status === StackFrameStatus.Current) return '👉';
     if (frame.isRecursive) return '🔄';
-    
+
     switch (frame.callType) {
       case CallType.Event:
         return '⚡';
@@ -398,7 +399,11 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
             {frame.arguments.map((arg, index) => (
               <div key={index} className="ml-2 text-gray-600">
                 <span className="font-medium">{arg.name}</span>
-                <span className="text-gray-500"> ({arg.type}{arg.byRef ? ', ByRef' : ''})</span>
+                <span className="text-gray-500">
+                  {' '}
+                  ({arg.type}
+                  {arg.byRef ? ', ByRef' : ''})
+                </span>
                 <span> = </span>
                 <span className="font-mono">{formatArgValue(arg.value, arg.type)}</span>
               </div>
@@ -428,7 +433,9 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
             <div className="ml-2 text-gray-600">
               <span className="text-gray-500">({frame.returnType})</span>
               <span> = </span>
-              <span className="font-mono">{formatArgValue(frame.returnValue, frame.returnType || '')}</span>
+              <span className="font-mono">
+                {formatArgValue(frame.returnValue, frame.returnType || '')}
+              </span>
             </div>
           </div>
         )}
@@ -487,7 +494,7 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
           style={{ fontSize: `${settings.fontSize}px` }}
           onClick={() => navigateToFrame(frame)}
           onDoubleClick={() => navigateToSource(frame)}
-          onContextMenu={(e) => {
+          onContextMenu={e => {
             e.preventDefault();
             setContextMenuFrame(frame);
             setContextMenuPosition({ x: e.clientX, y: e.clientY });
@@ -496,7 +503,7 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
         >
           {/* Expand/Collapse Button */}
           <button
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               toggleFrameExpansion(frame.id);
             }}
@@ -506,9 +513,7 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
           </button>
 
           {/* Frame Level */}
-          <div className="w-8 text-center text-xs text-gray-500 font-mono">
-            {frame.level}
-          </div>
+          <div className="w-8 text-center text-xs text-gray-500 font-mono">{frame.level}</div>
 
           {/* Status Icon */}
           <span className="w-6 text-center">{getFrameStatusIcon(frame)}</span>
@@ -520,16 +525,17 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
           <div className="w-40 font-mono font-medium text-gray-800 truncate">
             {frame.procedureName}
             {frame.isRecursive && (
-              <span className="text-orange-600 ml-1" title={`Recursive (depth: ${frame.recursionDepth})`}>
+              <span
+                className="text-orange-600 ml-1"
+                title={`Recursive (depth: ${frame.recursionDepth})`}
+              >
                 ↻
               </span>
             )}
           </div>
 
           {/* Module Name */}
-          <div className="w-32 text-sm text-gray-600 truncate">
-            {frame.moduleName}
-          </div>
+          <div className="w-32 text-sm text-gray-600 truncate">{frame.moduleName}</div>
 
           {/* Location */}
           <div className="w-32 text-xs text-gray-500 font-mono">
@@ -546,9 +552,11 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
             <div className="flex-1 text-xs text-gray-600 truncate">
               {frame.arguments.length > 0 ? (
                 <span>
-                  ({frame.arguments.map(arg => 
-                    `${arg.name}=${formatArgValue(arg.value, arg.type)}`
-                  ).join(', ')})
+                  (
+                  {frame.arguments
+                    .map(arg => `${arg.name}=${formatArgValue(arg.value, arg.type)}`)
+                    .join(', ')}
+                  )
                 </span>
               ) : (
                 <span className="text-gray-400">No arguments</span>
@@ -581,12 +589,12 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
   const contextMenuItems = [
     {
       label: 'Navigate to Frame',
-      action: () => contextMenuFrame && navigateToFrame(contextMenuFrame)
+      action: () => contextMenuFrame && navigateToFrame(contextMenuFrame),
     },
     {
       label: 'Go to Source',
       enabled: contextMenuFrame?.canNavigate || false,
-      action: () => contextMenuFrame && navigateToSource(contextMenuFrame)
+      action: () => contextMenuFrame && navigateToSource(contextMenuFrame),
     },
     {
       label: 'Copy Frame Info',
@@ -594,19 +602,19 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
         if (!contextMenuFrame) return;
         const info = `${contextMenuFrame.procedureName} in ${contextMenuFrame.moduleName}:${contextMenuFrame.lineNumber}`;
         navigator.clipboard.writeText(info);
-      }
+      },
     },
     {
       label: 'Expand All',
       action: () => {
         const allFrameIds = new Set(filteredFrames.map(f => f.id));
         setExpandedFrames(allFrameIds);
-      }
+      },
     },
     {
       label: 'Collapse All',
-      action: () => setExpandedFrames(new Set())
-    }
+      action: () => setExpandedFrames(new Set()),
+    },
   ];
 
   return (
@@ -616,11 +624,13 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-medium text-gray-800">Call Stack</h3>
           {currentSession.isActive && (
-            <span className={`px-2 py-1 text-xs rounded ${
-              currentSession.isPaused 
-                ? 'bg-yellow-100 text-yellow-800' 
-                : 'bg-green-100 text-green-800'
-            }`}>
+            <span
+              className={`px-2 py-1 text-xs rounded ${
+                currentSession.isPaused
+                  ? 'bg-yellow-100 text-yellow-800'
+                  : 'bg-green-100 text-green-800'
+              }`}
+            >
               {currentSession.isPaused ? 'Paused' : 'Running'}
             </span>
           )}
@@ -634,10 +644,10 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
             type="text"
             placeholder="Search..."
             value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+            onChange={e => setSearchText(e.target.value)}
             className="px-2 py-1 text-xs border border-gray-300 rounded w-20"
           />
-          
+
           <button
             onClick={copyStackTrace}
             className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -645,7 +655,7 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
           >
             📋
           </button>
-          
+
           <button
             onClick={() => onSaveStackTrace?.(filteredFrames)}
             className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
@@ -653,7 +663,7 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
           >
             💾
           </button>
-          
+
           <button
             onClick={() => setShowSettings(!showSettings)}
             className="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
@@ -672,52 +682,60 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
               <input
                 type="checkbox"
                 checked={settings.showArguments}
-                onChange={(e) => setSettings(prev => ({ ...prev, showArguments: e.target.checked }))}
+                onChange={e => setSettings(prev => ({ ...prev, showArguments: e.target.checked }))}
               />
               Show Arguments
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={settings.showLocalVariables}
-                onChange={(e) => setSettings(prev => ({ ...prev, showLocalVariables: e.target.checked }))}
+                onChange={e =>
+                  setSettings(prev => ({ ...prev, showLocalVariables: e.target.checked }))
+                }
               />
               Local Variables
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={settings.showReturnValues}
-                onChange={(e) => setSettings(prev => ({ ...prev, showReturnValues: e.target.checked }))}
+                onChange={e =>
+                  setSettings(prev => ({ ...prev, showReturnValues: e.target.checked }))
+                }
               />
               Return Values
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={settings.showExecutionTime}
-                onChange={(e) => setSettings(prev => ({ ...prev, showExecutionTime: e.target.checked }))}
+                onChange={e =>
+                  setSettings(prev => ({ ...prev, showExecutionTime: e.target.checked }))
+                }
               />
               Execution Time
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={settings.compactView}
-                onChange={(e) => setSettings(prev => ({ ...prev, compactView: e.target.checked }))}
+                onChange={e => setSettings(prev => ({ ...prev, compactView: e.target.checked }))}
               />
               Compact View
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={settings.highlightCurrentFrame}
-                onChange={(e) => setSettings(prev => ({ ...prev, highlightCurrentFrame: e.target.checked }))}
+                onChange={e =>
+                  setSettings(prev => ({ ...prev, highlightCurrentFrame: e.target.checked }))
+                }
               />
               Highlight Current
             </label>
@@ -726,7 +744,7 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
       )}
 
       {/* Column Headers */}
-      <div 
+      <div
         className="flex items-center py-2 px-2 bg-gray-200 border-b border-gray-300 text-xs font-medium text-gray-700"
         style={{ fontSize: `${settings.fontSize}px` }}
       >
@@ -746,9 +764,9 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
       <div className="flex-1 overflow-y-auto">
         {currentSession.isActive ? (
           filteredFrames.length > 0 ? (
-            filteredFrames.slice(0, settings.maxFramesToShow).map((frame, index) => 
-              renderFrame(frame, index)
-            )
+            filteredFrames
+              .slice(0, settings.maxFramesToShow)
+              .map((frame, index) => renderFrame(frame, index))
           ) : (
             <div className="flex items-center justify-center h-full text-gray-500">
               <div className="text-center">
@@ -775,7 +793,7 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
           className="fixed bg-white border border-gray-300 shadow-lg z-50 py-1"
           style={{
             left: contextMenuPosition.x,
-            top: contextMenuPosition.y
+            top: contextMenuPosition.y,
           }}
           onMouseLeave={() => setShowContextMenu(false)}
         >
@@ -802,7 +820,9 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
       {/* Status Bar */}
       <div className="flex items-center justify-between p-1 bg-gray-100 border-t border-gray-300 text-xs text-gray-600">
         <div className="flex items-center gap-4">
-          <span>Frames: {filteredFrames.length}/{currentSession.totalDepth}</span>
+          <span>
+            Frames: {filteredFrames.length}/{currentSession.totalDepth}
+          </span>
           <span>Recursive: {filteredFrames.filter(f => f.isRecursive).length}</span>
           <span>Exceptions: {filteredFrames.filter(f => f.hasException).length}</span>
           {selectedFrame && (
@@ -814,9 +834,7 @@ export const CallStackWindow: React.FC<CallStackWindowProps> = ({
 
         <div className="flex items-center gap-2">
           <span>Updated: {currentSession.lastUpdated.toLocaleTimeString()}</span>
-          {currentSession.isActive && (
-            <span className="text-green-600">Active Session</span>
-          )}
+          {currentSession.isActive && <span className="text-green-600">Active Session</span>}
         </div>
       </div>
     </div>

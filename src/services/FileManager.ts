@@ -5,14 +5,49 @@ import { createLogger } from './LoggingService';
 
 const logger = createLogger('FileManager');
 
+// Type definitions for File System Access API
+interface FilePickerAcceptType {
+  description?: string;
+  accept: Record<string, string[]>;
+}
+
+interface FilePickerOptions {
+  types?: FilePickerAcceptType[];
+  excludeAcceptAllOption?: boolean;
+  multiple?: boolean;
+}
+
+interface SaveFilePickerOptions extends FilePickerOptions {
+  suggestedName?: string;
+}
+
+interface FileSystemFileHandle {
+  getFile(): Promise<File>;
+  createWritable(): Promise<FileSystemWritableFileStream>;
+}
+
+interface FileSystemWritableFileStream {
+  write(data: Blob | BufferSource | string): Promise<void>;
+  close(): Promise<void>;
+}
+
+interface WindowWithFileSystem extends Window {
+  showOpenFilePicker?: (options?: FilePickerOptions) => Promise<FileSystemFileHandle[]>;
+  showSaveFilePicker?: (options?: SaveFilePickerOptions) => Promise<FileSystemFileHandle>;
+}
+
 export class FileManager {
   static async openProject(): Promise<Project | null> {
     try {
       const getFile = async () => {
         // BROWSER COMPATIBILITY FIX: Feature detection with fallback
-        if ('showOpenFilePicker' in window && typeof (window as any).showOpenFilePicker === 'function') {
+        const windowWithFS = window as WindowWithFileSystem;
+        if (
+          'showOpenFilePicker' in window &&
+          typeof windowWithFS.showOpenFilePicker === 'function'
+        ) {
           try {
-            const fileHandle = await (window as any).showOpenFilePicker({
+            const [fileHandle] = await windowWithFS.showOpenFilePicker({
               types: [
                 {
                   description: 'VB6 Projects',
@@ -37,18 +72,18 @@ export class FileManager {
           input.accept = '.vbp,.vb6,.vb6z,.json,.zip';
           input.style.display = 'none';
           document.body.appendChild(input);
-          
+
           input.onchange = async e => {
             const file = (e.target as HTMLInputElement).files?.[0] || null;
             document.body.removeChild(input);
             resolve(file);
           };
-          
+
           input.oncancel = () => {
             document.body.removeChild(input);
             resolve(null);
           };
-          
+
           input.click();
         });
       };
@@ -59,7 +94,7 @@ export class FileManager {
       if (file.name.endsWith('.vb6z') || file.name.endsWith('.zip')) {
         const buffer = await file.arrayBuffer();
         const zip = await JSZip.loadAsync(buffer);
-        
+
         // PATH TRAVERSAL BUG FIX: Validate archive contents before extraction
         const fileNames = Object.keys(zip.files);
         for (const fileName of fileNames) {
@@ -67,16 +102,17 @@ export class FileManager {
             throw new Error(`Unsafe file path in archive: ${fileName}`);
           }
         }
-        
+
         const projectText = await zip.file('project.json')?.async('string');
         if (!projectText) throw new Error('Invalid project archive');
         return this.safeParseJSON(projectText);
       }
 
       const content = await file.text();
-      
+
       // RESOURCE EXHAUSTION BUG FIX: Limit content size
-      if (content.length > 10 * 1024 * 1024) { // 10MB text limit
+      if (content.length > 10 * 1024 * 1024) {
+        // 10MB text limit
         throw new Error('File content too large');
       }
 
@@ -169,9 +205,10 @@ export class FileManager {
       }
 
       // BROWSER COMPATIBILITY FIX: Feature detection with fallback
-      if ('showSaveFilePicker' in window && typeof (window as any).showSaveFilePicker === 'function') {
+      const windowWithFS = window as WindowWithFileSystem;
+      if ('showSaveFilePicker' in window && typeof windowWithFS.showSaveFilePicker === 'function') {
         try {
-          const fileHandle = await (window as any).showSaveFilePicker({
+          const fileHandle = await windowWithFS.showSaveFilePicker({
             suggestedName: `${project.name}.${extension}`,
             types: [
               {
@@ -190,7 +227,7 @@ export class FileManager {
           logger.warn('File System Access API failed, using fallback:', err);
         }
       }
-      
+
       // Fallback to download link
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -230,9 +267,10 @@ export class FileManager {
       const fileName = `${project.name}.vb6z`;
 
       // BROWSER COMPATIBILITY FIX: Feature detection with fallback
-      if ('showSaveFilePicker' in window && typeof (window as any).showSaveFilePicker === 'function') {
+      const windowWithFS = window as WindowWithFileSystem;
+      if ('showSaveFilePicker' in window && typeof windowWithFS.showSaveFilePicker === 'function') {
         try {
-          const fileHandle = await (window as any).showSaveFilePicker({
+          const fileHandle = await windowWithFS.showSaveFilePicker({
             suggestedName: fileName,
             types: [
               {
@@ -251,7 +289,7 @@ export class FileManager {
           logger.warn('File System Access API failed, using fallback:', err);
         }
       }
-      
+
       // Fallback to download link
       const url = URL.createObjectURL(content);
       const a = document.createElement('a');
@@ -294,9 +332,10 @@ export class FileManager {
       };
 
       // BROWSER COMPATIBILITY FIX: Feature detection with fallback
-      if ('showOpenFilePicker' in window && typeof (window as any).showOpenFilePicker === 'function') {
+      const windowWithFS = window as WindowWithFileSystem;
+      if ('showOpenFilePicker' in window && typeof windowWithFS.showOpenFilePicker === 'function') {
         try {
-          const fileHandle = await (window as any).showOpenFilePicker({
+          const [fileHandle] = await windowWithFS.showOpenFilePicker({
             types: [
               {
                 description: `VB6 ${type} files`,
@@ -314,7 +353,7 @@ export class FileManager {
           logger.warn('File System Access API failed, using fallback:', err);
         }
       }
-      
+
       // Fallback to traditional file input
       return new Promise(resolve => {
         const input = document.createElement('input');
@@ -325,7 +364,8 @@ export class FileManager {
           if (file) {
             const content = await file.text();
             // RESOURCE EXHAUSTION BUG FIX: Limit imported file size
-            if (content.length > 5 * 1024 * 1024) { // 5MB limit
+            if (content.length > 5 * 1024 * 1024) {
+              // 5MB limit
               throw new Error('Imported file too large');
             }
             resolve(content);
@@ -450,19 +490,21 @@ window.${project.name} = ${project.name};
   /**
    * PROTOTYPE POLLUTION BUG FIX: Safe JSON parsing with prototype pollution protection
    */
-  private static safeParseJSON(jsonString: string): any {
+  private static safeParseJSON(jsonString: string): Project {
     try {
-      const parsed = JSON.parse(jsonString);
-      return this.sanitizeObject(parsed);
+      const parsed = JSON.parse(jsonString) as unknown;
+      return this.sanitizeObject(parsed) as Project;
     } catch (error) {
-      throw new Error(`Invalid JSON content: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Invalid JSON content: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Recursively sanitize objects to remove dangerous properties
    */
-  private static sanitizeObject(obj: any): any {
+  private static sanitizeObject(obj: unknown): unknown {
     if (obj === null || typeof obj !== 'object') {
       return obj;
     }
@@ -473,25 +515,25 @@ window.${project.name} = ${project.name};
 
     // Remove dangerous prototype pollution properties
     const dangerousProperties = ['__proto__', 'constructor', 'prototype'];
-    
-    const sanitized: any = {};
+
+    const sanitized: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(obj)) {
       // Skip dangerous properties
       if (dangerousProperties.includes(key)) {
         logger.warn(`Blocked dangerous property in JSON: ${key}`);
         continue;
       }
-      
+
       // Validate property names - only allow safe characters
       if (!/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key) && key !== 'length') {
         logger.warn(`Blocked suspicious property name in JSON: ${key}`);
         continue;
       }
-      
+
       // Recursively sanitize nested objects
       sanitized[key] = this.sanitizeObject(value);
     }
-    
+
     return sanitized;
   }
 
@@ -501,55 +543,74 @@ window.${project.name} = ${project.name};
   private static isValidArchivePath(filePath: string): boolean {
     // Normalize path separators
     const normalizedPath = filePath.replace(/\\/g, '/');
-    
+
     // Check for dangerous patterns
     const dangerousPatterns = [
-      /\.\./,              // Directory traversal
-      /^[/\\]/,            // Absolute paths
-      /^[a-zA-Z]:/,        // Windows drive letters
-      /^\\\\[^\\]+\\/,     // UNC paths
-      /<[^>]*>/,           // HTML/XML tags
-      /[<>:"|?*]/,         // Invalid filename characters
-      /\0/,                // Null bytes
+      /\.\./, // Directory traversal
+      /^[/\\]/, // Absolute paths
+      /^[a-zA-Z]:/, // Windows drive letters
+      /^\\\\[^\\]+\\/, // UNC paths
+      /<[^>]*>/, // HTML/XML tags
+      /[<>:"|?*]/, // Invalid filename characters
+      /\0/, // Null bytes
     ];
-    
+
     // Reject paths matching dangerous patterns
     if (dangerousPatterns.some(pattern => pattern.test(normalizedPath))) {
       return false;
     }
-    
+
     // Only allow paths within reasonable subdirectories
     const pathParts = normalizedPath.split('/').filter(part => part !== '');
-    
+
     // Check each path component
     for (const part of pathParts) {
       // Reject empty parts, dots, or suspicious names
-      if (part === '' || part === '.' || part === '..' || 
-          part.startsWith('.') && part.length > 4) {
+      if (
+        part === '' ||
+        part === '.' ||
+        part === '..' ||
+        (part.startsWith('.') && part.length > 4)
+      ) {
         return false;
       }
-      
+
       // Limit path depth to prevent deep directory structures
       if (pathParts.length > 10) {
         return false;
       }
-      
+
       // Check for excessively long path components
       if (part.length > 255) {
         return false;
       }
     }
-    
+
     // Only allow common project file extensions
     const allowedExtensions = [
-      '.json', '.vbp', '.vb', '.frm', '.bas', '.cls', '.ctl', '.pag', '.dsr',
-      '.txt', '.md', '.css', '.js', '.html', '.xml', '.ini', '.cfg'
+      '.json',
+      '.vbp',
+      '.vb',
+      '.frm',
+      '.bas',
+      '.cls',
+      '.ctl',
+      '.pag',
+      '.dsr',
+      '.txt',
+      '.md',
+      '.css',
+      '.js',
+      '.html',
+      '.xml',
+      '.ini',
+      '.cfg',
     ];
-    
-    const hasValidExtension = allowedExtensions.some(ext => 
+
+    const hasValidExtension = allowedExtensions.some(ext =>
       normalizedPath.toLowerCase().endsWith(ext)
     );
-    
+
     // Allow directories (no extension) or files with valid extensions
     return !normalizedPath.includes('.') || hasValidExtension;
   }

@@ -45,7 +45,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     try {
       let user: User;
-      
+
       if (mode === 'login') {
         user = await authService.login(email, password);
       } else {
@@ -56,11 +56,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
 
       eventSystem.fire('Auth', 'Success', { user, mode });
-      
+
       if (onSuccess) {
         onSuccess(user);
       }
-      
+
       onClose();
     } catch (err: any) {
       setError(err.message || `${mode === 'login' ? 'Login' : 'Registration'} failed`);
@@ -107,7 +107,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
+            onClick={e => e.stopPropagation()}
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6 text-white">
@@ -117,8 +117,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     {mode === 'login' ? 'Welcome Back' : 'Create Account'}
                   </h2>
                   <p className="text-purple-100">
-                    {mode === 'login' 
-                      ? 'Sign in to access all features' 
+                    {mode === 'login'
+                      ? 'Sign in to access all features'
                       : 'Join the VB6 Studio community'}
                   </p>
                 </div>
@@ -158,7 +158,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <input
                     type="text"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={e => setName(e.target.value)}
                     className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-800"
                     placeholder="John Doe"
                     required={mode === 'register'}
@@ -171,7 +171,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-800"
                   placeholder="you@example.com"
                   required
@@ -184,7 +184,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={e => setPassword(e.target.value)}
                     className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-800 pr-10"
                     placeholder="••••••••"
                     required
@@ -215,8 +215,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
                     {mode === 'login' ? 'Signing in...' : 'Creating account...'}
                   </span>
+                ) : mode === 'login' ? (
+                  'Sign In'
                 ) : (
-                  mode === 'login' ? 'Sign In' : 'Create Account'
+                  'Create Account'
                 )}
               </button>
             </form>

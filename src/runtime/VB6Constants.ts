@@ -120,7 +120,7 @@ export const VB6KeyboardConstants = {
   vbKeyLWin: 91,
   vbKeyRWin: 92,
   vbKeyApps: 93,
-  
+
   // Lock keys
   vbKeyNumLock: 144,
   vbKeyScrollLock: 145,
@@ -160,18 +160,18 @@ export const VB6KeyboardConstants = {
   vbKeyLaunchApp2: 183,
 
   // OEM keys
-  vbKeyOem1: 186,        // ';:' for US
+  vbKeyOem1: 186, // ';:' for US
   vbKeySemicolon: 186,
-  vbKeyOemPlus: 187,     // '+=' for any country
-  vbKeyOemComma: 188,    // ',<' for any country
-  vbKeyOemMinus: 189,    // '-_' for any country
-  vbKeyOemPeriod: 190,   // '.>' for any country
-  vbKeyOem2: 191,        // '/?' for US
-  vbKeyOem3: 192,        // '`~' for US
-  vbKeyOem4: 219,        // '[{' for US
-  vbKeyOem5: 220,        // '\|' for US
-  vbKeyOem6: 221,        // ']}' for US
-  vbKeyOem7: 222,        // ''"' for US
+  vbKeyOemPlus: 187, // '+=' for any country
+  vbKeyOemComma: 188, // ',<' for any country
+  vbKeyOemMinus: 189, // '-_' for any country
+  vbKeyOemPeriod: 190, // '.>' for any country
+  vbKeyOem2: 191, // '/?' for US
+  vbKeyOem3: 192, // '`~' for US
+  vbKeyOem4: 219, // '[{' for US
+  vbKeyOem5: 220, // '\|' for US
+  vbKeyOem6: 221, // ']}' for US
+  vbKeyOem7: 222, // ''"' for US
   vbKeyOem8: 223,
 
   // Special processing keys
@@ -185,7 +185,7 @@ export const VB6KeyboardConstants = {
   vbKeyZoom: 251,
   vbKeyNoname: 252,
   vbKeyPa1: 253,
-  vbKeyOemClear: 254
+  vbKeyOemClear: 254,
 };
 
 // ============================================================================
@@ -225,7 +225,7 @@ export const VB6MouseConstants = {
   // Drag constants
   vbEnter: 0,
   vbLeave: 1,
-  vbOver: 2
+  vbOver: 2,
 };
 
 // ============================================================================
@@ -234,14 +234,14 @@ export const VB6MouseConstants = {
 
 export const VB6ColorConstants = {
   // Basic colors (in BGR format: 0x00BBGGRR)
-  vbBlack: 0x000000,      // Black (R:0, G:0, B:0)
-  vbRed: 0x0000FF,        // Red (R:255, G:0, B:0)
-  vbGreen: 0x00FF00,      // Green (R:0, G:255, B:0)
-  vbYellow: 0x00FFFF,     // Yellow (R:255, G:255, B:0)
-  vbBlue: 0xFF0000,       // Blue (R:0, G:0, B:255)
-  vbMagenta: 0xFF00FF,    // Magenta (R:255, G:0, B:255)
-  vbCyan: 0xFFFF00,       // Cyan (R:0, G:255, B:255)
-  vbWhite: 0xFFFFFF,      // White (R:255, G:255, B:255)
+  vbBlack: 0x000000, // Black (R:0, G:0, B:0)
+  vbRed: 0x0000ff, // Red (R:255, G:0, B:0)
+  vbGreen: 0x00ff00, // Green (R:0, G:255, B:0)
+  vbYellow: 0x00ffff, // Yellow (R:255, G:255, B:0)
+  vbBlue: 0xff0000, // Blue (R:0, G:0, B:255)
+  vbMagenta: 0xff00ff, // Magenta (R:255, G:0, B:255)
+  vbCyan: 0xffff00, // Cyan (R:0, G:255, B:255)
+  vbWhite: 0xffffff, // White (R:255, G:255, B:255)
 
   // System colors
   vbScrollBars: 0x80000000,
@@ -254,13 +254,13 @@ export const VB6ColorConstants = {
   vbMenuText: 0x80000007,
   vbWindowText: 0x80000008,
   vbTitleBarText: 0x80000009,
-  vbActiveBorder: 0x8000000A,
-  vbInactiveBorder: 0x8000000B,
-  vbApplicationWorkspace: 0x8000000C,
-  vbHighlight: 0x8000000D,
-  vbHighlightText: 0x8000000E,
-  vbButtonFace: 0x8000000F,
-  vb3DFace: 0x8000000F,
+  vbActiveBorder: 0x8000000a,
+  vbInactiveBorder: 0x8000000b,
+  vbApplicationWorkspace: 0x8000000c,
+  vbHighlight: 0x8000000d,
+  vbHighlightText: 0x8000000e,
+  vbButtonFace: 0x8000000f,
+  vb3DFace: 0x8000000f,
   vbButtonShadow: 0x80000010,
   vb3DShadow: 0x80000010,
   vbGrayText: 0x80000011,
@@ -274,15 +274,15 @@ export const VB6ColorConstants = {
   vbInfoBackground: 0x80000018,
 
   // Extended system colors (Windows 95+)
-  vbHotLight: 0x8000001A,
-  vbGradientActiveTitle: 0x8000001B,
-  vbGradientInactiveTitle: 0x8000001C,
-  vbMenuHighlight: 0x8000001D,
-  vbMenuHighlightText: 0x8000001E,
+  vbHotLight: 0x8000001a,
+  vbGradientActiveTitle: 0x8000001b,
+  vbGradientInactiveTitle: 0x8000001c,
+  vbMenuHighlight: 0x8000001d,
+  vbMenuHighlightText: 0x8000001e,
 
   // Special color values
   vbMsgBox: 0x01000000,
-  vbMsgBoxText: 0x01000001
+  vbMsgBoxText: 0x01000001,
 };
 
 // ============================================================================
@@ -309,7 +309,7 @@ export const VB6AlignmentConstants = {
 
   // List alignment
   vbListAlignLeft: 0,
-  vbListAlignRight: 1
+  vbListAlignRight: 1,
 };
 
 // ============================================================================
@@ -378,7 +378,7 @@ export const VB6FormConstants = {
   vbUpwardDiagonal: 4,
   vbDownwardDiagonal: 5,
   vbCross: 6,
-  vbDiagonalCross: 7
+  vbDiagonalCross: 7,
 };
 
 // ============================================================================
@@ -412,7 +412,7 @@ export const VB6FileConstants = {
   vbShared: 1,
   vbLockRead: 2,
   vbLockWrite: 3,
-  vbLockReadWrite: 4
+  vbLockReadWrite: 4,
 };
 
 // ============================================================================
@@ -447,7 +447,7 @@ export const VB6ControlConstants = {
 
   // MultiLine
   vbMultiLine: -1,
-  vbSingleLine: 0
+  vbSingleLine: 0,
 };
 
 // ============================================================================
@@ -495,7 +495,7 @@ export const VB6DatabaseConstants = {
   vbFieldDecimal: 20,
   vbFieldFloat: 21,
   vbFieldTime: 22,
-  vbFieldTimeStamp: 23
+  vbFieldTimeStamp: 23,
 };
 
 // ============================================================================
@@ -545,7 +545,7 @@ export const VB6PrinterConstants = {
   vbPRBNLargeFmt: 10,
   vbPRBNLargeCapacity: 11,
   vbPRBNCassette: 14,
-  vbPRBNFormSource: 15
+  vbPRBNFormSource: 15,
 };
 
 // ============================================================================
@@ -591,7 +591,7 @@ export const VB6SpecialFolderConstants = {
   vbPictures: 39,
   vbProfile: 40,
   vbSystemX86: 41,
-  vbProgramFilesX86: 42
+  vbProgramFilesX86: 42,
 };
 
 // ============================================================================
@@ -630,7 +630,7 @@ export const VB6ObjectConstants = {
   vbDropEffectCopy: 1,
   vbDropEffectMove: 2,
   vbDropEffectLink: 4,
-  vbDropEffectScroll: -2147483648
+  vbDropEffectScroll: -2147483648,
 };
 
 // ============================================================================
@@ -655,7 +655,7 @@ export const VB6ListViewConstants = {
 
   // Sort order
   lvwAscending: 0,
-  lvwDescending: 1
+  lvwDescending: 1,
 };
 
 export const VB6TreeViewConstants = {
@@ -664,7 +664,7 @@ export const VB6TreeViewConstants = {
   tvwLast: 1,
   tvwNext: 2,
   tvwPrevious: 3,
-  tvwChild: 4
+  tvwChild: 4,
 };
 
 // ============================================================================
@@ -684,11 +684,11 @@ export const VB6MenuConstants = {
   vbPopupMenuCenterAlign: 4,
   vbPopupMenuRightAlign: 8,
   vbPopupMenuLeftButton: 0,
-  vbPopupMenuRightButton: 2
+  vbPopupMenuRightButton: 2,
 };
 
 // ============================================================================
-// SYSTEM METRIC CONSTANTS  
+// SYSTEM METRIC CONSTANTS
 // ============================================================================
 
 export const VB6SystemMetricConstants = {
@@ -774,7 +774,7 @@ export const VB6SystemMetricConstants = {
   SM_CXVIRTUALSCREEN: 78,
   SM_CYVIRTUALSCREEN: 79,
   SM_CMONITORS: 80,
-  SM_SAMEDISPLAYFORMAT: 81
+  SM_SAMEDISPLAYFORMAT: 81,
 };
 
 // ============================================================================
@@ -796,18 +796,15 @@ export const VB6AllConstants = {
   ...VB6ListViewConstants,
   ...VB6TreeViewConstants,
   ...VB6MenuConstants,
-  ...VB6SystemMetricConstants
+  ...VB6SystemMetricConstants,
 };
 
 // Make all constants globally available
 if (typeof window !== 'undefined') {
   const globalAny = window as any;
-  
+
   // Add all constants to global scope
   Object.assign(globalAny, VB6AllConstants);
-  
-  console.log('[VB6] Complete constants library loaded - 400+ constants available globally');
-  console.log('[VB6] Keyboard constants, mouse constants, colors, alignment, and system constants all loaded');
 }
 
 export default VB6AllConstants;

@@ -15,7 +15,7 @@ export enum ResourceType {
   Manifest = 'Manifest',
   RCData = 'RCData',
   HTML = 'HTML',
-  Custom = 'Custom'
+  Custom = 'Custom',
 }
 
 export enum ResourceFormat {
@@ -23,7 +23,7 @@ export enum ResourceFormat {
   RES = 'RES',
   ICO = 'ICO',
   BMP = 'BMP',
-  CUR = 'CUR'
+  CUR = 'CUR',
 }
 
 // Resource Item
@@ -136,7 +136,7 @@ interface ResourceEditorProps {
 export const ResourceEditor: React.FC<ResourceEditorProps> = ({
   resourceFile,
   onResourceChange,
-  onSave
+  onSave,
 }) => {
   const [resources, setResources] = useState<ResourceItem[]>([]);
   const [selectedResource, setSelectedResource] = useState<ResourceItem | null>(null);
@@ -146,104 +146,114 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
   const [previewData, setPreviewData] = useState<string | null>(null);
   const [searchFilter, setSearchFilter] = useState('');
   const [isDirty, setIsDirty] = useState(false);
-  
+
   const eventEmitter = useRef(new EventEmitter());
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Group resources by type
-  const groupedResources = resources.reduce((groups, resource) => {
-    if (!groups[resource.type]) {
-      groups[resource.type] = [];
-    }
-    groups[resource.type].push(resource);
-    return groups;
-  }, {} as Record<ResourceType, ResourceItem[]>);
+  const groupedResources = resources.reduce(
+    (groups, resource) => {
+      if (!groups[resource.type]) {
+        groups[resource.type] = [];
+      }
+      groups[resource.type].push(resource);
+      return groups;
+    },
+    {} as Record<ResourceType, ResourceItem[]>
+  );
 
   // Filter resources based on search
   const filteredResources = searchFilter
-    ? resources.filter(r => 
-        r.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
-        r.id.toString().includes(searchFilter)
+    ? resources.filter(
+        r =>
+          r.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+          r.id.toString().includes(searchFilter)
       )
     : resources;
 
   // Load resource file
-  const loadResourceFile = useCallback(async (file: File) => {
-    const arrayBuffer = await file.arrayBuffer();
-    const uint8Array = new Uint8Array(arrayBuffer);
-    
-    // Parse resource file (simplified - actual implementation would parse PE/COFF format)
-    const loadedResources: ResourceItem[] = [];
-    
-    // For demonstration, create some sample resources
-    if (file.name.endsWith('.ico')) {
-      loadedResources.push({
-        id: 1,
-        name: file.name.replace('.ico', ''),
-        type: ResourceType.Icon,
-        language: 'en-US',
-        size: arrayBuffer.byteLength,
-        data: arrayBuffer,
-        properties: { width: 32, height: 32, colors: 256 },
-        modified: false,
-        created: new Date(),
-        lastModified: new Date()
-      });
-    } else if (file.name.endsWith('.bmp')) {
-      loadedResources.push({
-        id: 1,
-        name: file.name.replace('.bmp', ''),
-        type: ResourceType.Bitmap,
-        language: 'en-US',
-        size: arrayBuffer.byteLength,
-        data: arrayBuffer,
-        properties: { width: 0, height: 0, colors: 0 },
-        modified: false,
-        created: new Date(),
-        lastModified: new Date()
-      });
-    }
-    
-    setResources(loadedResources);
-    onResourceChange?.(loadedResources);
-  }, [onResourceChange]);
+  const loadResourceFile = useCallback(
+    async (file: File) => {
+      const arrayBuffer = await file.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+
+      // Parse resource file (simplified - actual implementation would parse PE/COFF format)
+      const loadedResources: ResourceItem[] = [];
+
+      // For demonstration, create some sample resources
+      if (file.name.endsWith('.ico')) {
+        loadedResources.push({
+          id: 1,
+          name: file.name.replace('.ico', ''),
+          type: ResourceType.Icon,
+          language: 'en-US',
+          size: arrayBuffer.byteLength,
+          data: arrayBuffer,
+          properties: { width: 32, height: 32, colors: 256 },
+          modified: false,
+          created: new Date(),
+          lastModified: new Date(),
+        });
+      } else if (file.name.endsWith('.bmp')) {
+        loadedResources.push({
+          id: 1,
+          name: file.name.replace('.bmp', ''),
+          type: ResourceType.Bitmap,
+          language: 'en-US',
+          size: arrayBuffer.byteLength,
+          data: arrayBuffer,
+          properties: { width: 0, height: 0, colors: 0 },
+          modified: false,
+          created: new Date(),
+          lastModified: new Date(),
+        });
+      }
+
+      setResources(loadedResources);
+      onResourceChange?.(loadedResources);
+    },
+    [onResourceChange]
+  );
 
   // Add new resource
-  const addResource = useCallback((type: ResourceType, file?: File) => {
-    const newId = Math.max(0, ...resources.map(r => typeof r.id === 'number' ? r.id : 0)) + 1;
-    
-    const newResource: ResourceItem = {
-      id: newId,
-      name: `${type}_${newId}`,
-      type,
-      language: 'en-US',
-      size: 0,
-      data: file ? new ArrayBuffer(0) : '',
-      properties: getDefaultProperties(type),
-      modified: true,
-      created: new Date(),
-      lastModified: new Date()
-    };
+  const addResource = useCallback(
+    (type: ResourceType, file?: File) => {
+      const newId = Math.max(0, ...resources.map(r => (typeof r.id === 'number' ? r.id : 0))) + 1;
 
-    if (file) {
-      file.arrayBuffer().then(buffer => {
-        newResource.data = buffer;
-        newResource.size = buffer.byteLength;
-        
+      const newResource: ResourceItem = {
+        id: newId,
+        name: `${type}_${newId}`,
+        type,
+        language: 'en-US',
+        size: 0,
+        data: file ? new ArrayBuffer(0) : '',
+        properties: getDefaultProperties(type),
+        modified: true,
+        created: new Date(),
+        lastModified: new Date(),
+      };
+
+      if (file) {
+        file.arrayBuffer().then(buffer => {
+          newResource.data = buffer;
+          newResource.size = buffer.byteLength;
+
+          setResources(prev => [...prev, newResource]);
+          setSelectedResource(newResource);
+          setIsDirty(true);
+          onResourceChange?.([...resources, newResource]);
+        });
+      } else {
         setResources(prev => [...prev, newResource]);
         setSelectedResource(newResource);
         setIsDirty(true);
         onResourceChange?.([...resources, newResource]);
-      });
-    } else {
-      setResources(prev => [...prev, newResource]);
-      setSelectedResource(newResource);
-      setIsDirty(true);
-      onResourceChange?.([...resources, newResource]);
-    }
-    
-    setShowAddDialog(false);
-  }, [resources, onResourceChange]);
+      }
+
+      setShowAddDialog(false);
+    },
+    [resources, onResourceChange]
+  );
 
   // Get default properties for resource type
   const getDefaultProperties = (type: ResourceType): Record<string, any> => {
@@ -285,36 +295,42 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
       originalFilename: '',
       productName: '',
       productVersion: '1.0.0.0',
-      comments: ''
+      comments: '',
     },
     varFileInfo: {
-      translation: [{ language: 0x0409, codePage: 1252 }] // English US, Windows-1252
-    }
+      translation: [{ language: 0x0409, codePage: 1252 }], // English US, Windows-1252
+    },
   });
 
   // Delete resource
-  const deleteResource = useCallback((resourceId: string | number) => {
-    setResources(prev => prev.filter(r => r.id !== resourceId));
-    if (selectedResource?.id === resourceId) {
-      setSelectedResource(null);
-    }
-    setIsDirty(true);
-  }, [selectedResource]);
+  const deleteResource = useCallback(
+    (resourceId: string | number) => {
+      setResources(prev => prev.filter(r => r.id !== resourceId));
+      if (selectedResource?.id === resourceId) {
+        setSelectedResource(null);
+      }
+      setIsDirty(true);
+    },
+    [selectedResource]
+  );
 
   // Update resource
-  const updateResource = useCallback((resourceId: string | number, updates: Partial<ResourceItem>) => {
-    setResources(prev => prev.map(r => 
-      r.id === resourceId 
-        ? { ...r, ...updates, modified: true, lastModified: new Date() }
-        : r
-    ));
-    
-    if (selectedResource?.id === resourceId) {
-      setSelectedResource(prev => prev ? { ...prev, ...updates } : null);
-    }
-    
-    setIsDirty(true);
-  }, [selectedResource]);
+  const updateResource = useCallback(
+    (resourceId: string | number, updates: Partial<ResourceItem>) => {
+      setResources(prev =>
+        prev.map(r =>
+          r.id === resourceId ? { ...r, ...updates, modified: true, lastModified: new Date() } : r
+        )
+      );
+
+      if (selectedResource?.id === resourceId) {
+        setSelectedResource(prev => (prev ? { ...prev, ...updates } : null));
+      }
+
+      setIsDirty(true);
+    },
+    [selectedResource]
+  );
 
   // Generate preview for resource
   const generatePreview = useCallback((resource: ResourceItem) => {
@@ -338,7 +354,7 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
     // Create download link
     let blob: Blob;
     let filename: string;
-    
+
     if (format === ResourceFormat.ICO && resource.type === ResourceType.Icon) {
       blob = new Blob([resource.data as ArrayBuffer]);
       filename = `${resource.name}.ico`;
@@ -353,7 +369,7 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
     } else {
       return;
     }
-    
+
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -365,7 +381,7 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
   // Generate RC file content
   const generateRCContent = (resourceList: ResourceItem[]): string => {
     let content = '// Generated by VB6 Resource Editor\n\n';
-    
+
     resourceList.forEach(resource => {
       switch (resource.type) {
         case ResourceType.StringTable: {
@@ -377,15 +393,15 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
           content += 'END\n\n';
           break;
         }
-          
+
         case ResourceType.Icon:
           content += `${resource.id} ICON "${resource.name}.ico"\n\n`;
           break;
-          
+
         case ResourceType.Bitmap:
           content += `${resource.id} BITMAP "${resource.name}.bmp"\n\n`;
           break;
-          
+
         case ResourceType.Dialog: {
           const dialog = resource.properties as DialogResource;
           content += `${resource.id} DIALOG ${dialog.x}, ${dialog.y}, ${dialog.width}, ${dialog.height}\n`;
@@ -401,24 +417,27 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
         }
       }
     });
-    
+
     return content;
   };
 
   // Handle file drop
-  const handleFileDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    const files = Array.from(e.dataTransfer.files);
-    files.forEach(file => {
-      if (file.name.endsWith('.ico')) {
-        addResource(ResourceType.Icon, file);
-      } else if (file.name.endsWith('.bmp')) {
-        addResource(ResourceType.Bitmap, file);
-      } else if (file.name.endsWith('.cur')) {
-        addResource(ResourceType.Cursor, file);
-      }
-    });
-  }, [addResource]);
+  const handleFileDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      const files = Array.from(e.dataTransfer.files);
+      files.forEach(file => {
+        if (file.name.endsWith('.ico')) {
+          addResource(ResourceType.Icon, file);
+        } else if (file.name.endsWith('.bmp')) {
+          addResource(ResourceType.Bitmap, file);
+        } else if (file.name.endsWith('.cur')) {
+          addResource(ResourceType.Cursor, file);
+        }
+      });
+    },
+    [addResource]
+  );
 
   // Toggle tree node expansion
   const toggleTreeNode = (nodeId: string) => {
@@ -446,11 +465,11 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
           type="text"
           placeholder="Search resources..."
           value={searchFilter}
-          onChange={(e) => setSearchFilter(e.target.value)}
+          onChange={e => setSearchFilter(e.target.value)}
           className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
         />
       </div>
-      
+
       <div className="px-2">
         {Object.entries(groupedResources).map(([type, items]) => (
           <div key={type} className="mb-2">
@@ -458,19 +477,19 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
               className="flex items-center gap-1 py-1 px-2 hover:bg-gray-100 cursor-pointer rounded"
               onClick={() => toggleTreeNode(type)}
             >
-              <span className="text-xs">
-                {treeExpanded.has(type) ? '▼' : '▶'}
-              </span>
+              <span className="text-xs">{treeExpanded.has(type) ? '▼' : '▶'}</span>
               <span className="text-sm font-medium">{type}</span>
               <span className="text-xs text-gray-500">({items.length})</span>
             </div>
-            
+
             {treeExpanded.has(type) && (
               <div className="ml-4">
                 {items
-                  .filter(item => !searchFilter || 
-                    item.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
-                    item.id.toString().includes(searchFilter)
+                  .filter(
+                    item =>
+                      !searchFilter ||
+                      item.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+                      item.id.toString().includes(searchFilter)
                   )
                   .map(item => (
                     <div
@@ -486,7 +505,7 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
                         {item.modified && <span className="text-xs text-orange-500">*</span>}
                       </div>
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           deleteResource(item.id);
                         }}
@@ -500,7 +519,7 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
             )}
           </div>
         ))}
-        
+
         {Object.keys(groupedResources).length === 0 && (
           <div className="text-center py-8 text-gray-500">
             <p className="text-sm">No resources loaded</p>
@@ -513,16 +532,26 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
 
   const getResourceIcon = (type: ResourceType): string => {
     switch (type) {
-      case ResourceType.Icon: return '🎯';
-      case ResourceType.Bitmap: return '🖼️';
-      case ResourceType.Cursor: return '👆';
-      case ResourceType.Dialog: return '🪟';
-      case ResourceType.StringTable: return '📃';
-      case ResourceType.Menu: return '📋';
-      case ResourceType.Accelerator: return '⌨️';
-      case ResourceType.Version: return 'ℹ️';
-      case ResourceType.Manifest: return '📄';
-      default: return '📦';
+      case ResourceType.Icon:
+        return '🎯';
+      case ResourceType.Bitmap:
+        return '🖼️';
+      case ResourceType.Cursor:
+        return '👆';
+      case ResourceType.Dialog:
+        return '🪟';
+      case ResourceType.StringTable:
+        return '📃';
+      case ResourceType.Menu:
+        return '📋';
+      case ResourceType.Accelerator:
+        return '⌨️';
+      case ResourceType.Version:
+        return 'ℹ️';
+      case ResourceType.Manifest:
+        return '📄';
+      default:
+        return '📦';
     }
   };
 
@@ -533,7 +562,9 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
           <div className="text-center">
             <div className="text-4xl mb-4">📦</div>
             <p className="text-lg">Select a resource to edit</p>
-            <p className="text-sm mt-2">Choose a resource from the tree to view and edit its properties</p>
+            <p className="text-sm mt-2">
+              Choose a resource from the tree to view and edit its properties
+            </p>
           </div>
         </div>
       );
@@ -553,12 +584,17 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
               >
                 Export RC
               </button>
-              {(selectedResource.type === ResourceType.Icon || selectedResource.type === ResourceType.Bitmap) && (
+              {(selectedResource.type === ResourceType.Icon ||
+                selectedResource.type === ResourceType.Bitmap) && (
                 <button
-                  onClick={() => exportResource(
-                    selectedResource, 
-                    selectedResource.type === ResourceType.Icon ? ResourceFormat.ICO : ResourceFormat.BMP
-                  )}
+                  onClick={() =>
+                    exportResource(
+                      selectedResource,
+                      selectedResource.type === ResourceType.Icon
+                        ? ResourceFormat.ICO
+                        : ResourceFormat.BMP
+                    )
+                  }
                   className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
                 >
                   Export {selectedResource.type === ResourceType.Icon ? 'ICO' : 'BMP'}
@@ -566,7 +602,7 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
               )}
             </div>
           </div>
-          
+
           {/* Resource Properties */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div>
@@ -574,7 +610,7 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
               <input
                 type="text"
                 value={selectedResource.id}
-                onChange={(e) => updateResource(selectedResource.id, { id: e.target.value })}
+                onChange={e => updateResource(selectedResource.id, { id: e.target.value })}
                 className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
               />
             </div>
@@ -583,7 +619,7 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
               <input
                 type="text"
                 value={selectedResource.name}
-                onChange={(e) => updateResource(selectedResource.id, { name: e.target.value })}
+                onChange={e => updateResource(selectedResource.id, { name: e.target.value })}
                 className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
               />
             </div>
@@ -591,7 +627,7 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
               <select
                 value={selectedResource.language}
-                onChange={(e) => updateResource(selectedResource.id, { language: e.target.value })}
+                onChange={e => updateResource(selectedResource.id, { language: e.target.value })}
                 className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
               >
                 <option value="en-US">English (US)</option>
@@ -634,11 +670,13 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
                         <input
                           type="number"
                           value={entry.id}
-                          onChange={(e) => {
-                            const entries = [...(selectedResource.properties.entries as StringTableEntry[])];
+                          onChange={e => {
+                            const entries = [
+                              ...(selectedResource.properties.entries as StringTableEntry[]),
+                            ];
                             entries[index].id = Number(e.target.value);
-                            updateResource(selectedResource.id, { 
-                              properties: { ...selectedResource.properties, entries }
+                            updateResource(selectedResource.id, {
+                              properties: { ...selectedResource.properties, entries },
                             });
                           }}
                           className="w-full px-1 py-1 text-xs border border-gray-300 rounded"
@@ -648,11 +686,13 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
                         <input
                           type="text"
                           value={entry.value}
-                          onChange={(e) => {
-                            const entries = [...(selectedResource.properties.entries as StringTableEntry[])];
+                          onChange={e => {
+                            const entries = [
+                              ...(selectedResource.properties.entries as StringTableEntry[]),
+                            ];
                             entries[index].value = e.target.value;
-                            updateResource(selectedResource.id, { 
-                              properties: { ...selectedResource.properties, entries }
+                            updateResource(selectedResource.id, {
+                              properties: { ...selectedResource.properties, entries },
                             });
                           }}
                           className="w-full px-1 py-1 text-xs border border-gray-300 rounded"
@@ -661,10 +701,11 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
                       <div className="col-span-2">
                         <button
                           onClick={() => {
-                            const entries = (selectedResource.properties.entries as StringTableEntry[])
-                              .filter((_, i) => i !== index);
-                            updateResource(selectedResource.id, { 
-                              properties: { ...selectedResource.properties, entries }
+                            const entries = (
+                              selectedResource.properties.entries as StringTableEntry[]
+                            ).filter((_, i) => i !== index);
+                            updateResource(selectedResource.id, {
+                              properties: { ...selectedResource.properties, entries },
                             });
                           }}
                           className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
@@ -679,11 +720,13 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
               <div className="p-2 border-t border-gray-300">
                 <button
                   onClick={() => {
-                    const entries = [...(selectedResource.properties.entries as StringTableEntry[])];
+                    const entries = [
+                      ...(selectedResource.properties.entries as StringTableEntry[]),
+                    ];
                     const newId = Math.max(0, ...entries.map(e => e.id)) + 1;
                     entries.push({ id: newId, value: '' });
-                    updateResource(selectedResource.id, { 
-                      properties: { ...selectedResource.properties, entries }
+                    updateResource(selectedResource.id, {
+                      properties: { ...selectedResource.properties, entries },
                     });
                   }}
                   className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
@@ -701,68 +744,80 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">File Version</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    File Version
+                  </label>
                   <input
                     type="text"
                     value={(selectedResource.properties as VersionInfo).fileVersion}
-                    onChange={(e) => updateResource(selectedResource.id, {
-                      properties: { 
-                        ...selectedResource.properties, 
-                        fileVersion: e.target.value,
-                        stringFileInfo: {
-                          ...(selectedResource.properties as VersionInfo).stringFileInfo,
-                          fileVersion: e.target.value
-                        }
-                      }
-                    })}
+                    onChange={e =>
+                      updateResource(selectedResource.id, {
+                        properties: {
+                          ...selectedResource.properties,
+                          fileVersion: e.target.value,
+                          stringFileInfo: {
+                            ...(selectedResource.properties as VersionInfo).stringFileInfo,
+                            fileVersion: e.target.value,
+                          },
+                        },
+                      })
+                    }
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Product Version</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Product Version
+                  </label>
                   <input
                     type="text"
                     value={(selectedResource.properties as VersionInfo).productVersion}
-                    onChange={(e) => updateResource(selectedResource.id, {
-                      properties: { 
-                        ...selectedResource.properties, 
-                        productVersion: e.target.value,
-                        stringFileInfo: {
-                          ...(selectedResource.properties as VersionInfo).stringFileInfo,
-                          productVersion: e.target.value
-                        }
-                      }
-                    })}
+                    onChange={e =>
+                      updateResource(selectedResource.id, {
+                        properties: {
+                          ...selectedResource.properties,
+                          productVersion: e.target.value,
+                          stringFileInfo: {
+                            ...(selectedResource.properties as VersionInfo).stringFileInfo,
+                            productVersion: e.target.value,
+                          },
+                        },
+                      })
+                    }
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                   />
                 </div>
               </div>
-              
+
               {/* String File Info */}
               <div>
                 <h5 className="font-medium text-gray-700 mb-2">String Information</h5>
                 <div className="grid grid-cols-2 gap-4">
-                  {Object.entries((selectedResource.properties as VersionInfo).stringFileInfo).map(([key, value]) => (
-                    <div key={key}>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                      </label>
-                      <input
-                        type="text"
-                        value={value as string}
-                        onChange={(e) => updateResource(selectedResource.id, {
-                          properties: {
-                            ...selectedResource.properties,
-                            stringFileInfo: {
-                              ...(selectedResource.properties as VersionInfo).stringFileInfo,
-                              [key]: e.target.value
-                            }
+                  {Object.entries((selectedResource.properties as VersionInfo).stringFileInfo).map(
+                    ([key, value]) => (
+                      <div key={key}>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                        </label>
+                        <input
+                          type="text"
+                          value={value as string}
+                          onChange={e =>
+                            updateResource(selectedResource.id, {
+                              properties: {
+                                ...selectedResource.properties,
+                                stringFileInfo: {
+                                  ...(selectedResource.properties as VersionInfo).stringFileInfo,
+                                  [key]: e.target.value,
+                                },
+                              },
+                            })
                           }
-                        })}
-                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                      />
-                    </div>
-                  ))}
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                        />
+                      </div>
+                    )
+                  )}
                 </div>
               </div>
             </div>
@@ -774,9 +829,10 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
           <div className="mt-6">
             <h4 className="font-medium text-gray-700 mb-2">Preview</h4>
             <div className="border border-gray-300 rounded p-4 bg-gray-50">
-              {selectedResource.type === ResourceType.Icon || selectedResource.type === ResourceType.Bitmap ? (
-                <img 
-                  src={previewData} 
+              {selectedResource.type === ResourceType.Icon ||
+              selectedResource.type === ResourceType.Bitmap ? (
+                <img
+                  src={previewData}
                   alt={selectedResource.name}
                   className="max-w-full max-h-64 object-contain"
                 />
@@ -804,7 +860,7 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
               ref={fileInputRef}
               type="file"
               accept=".ico,.bmp,.cur,.rc,.res"
-              onChange={(e) => {
+              onChange={e => {
                 const file = e.target.files?.[0];
                 if (file) loadResourceFile(file);
               }}
@@ -856,16 +912,14 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
           <div className="p-2 bg-gray-50 border-b border-gray-200">
             <h3 className="font-medium text-gray-700">Resources</h3>
           </div>
-          <div className="flex-1">
-            {renderResourceTree()}
-          </div>
+          <div className="flex-1">{renderResourceTree()}</div>
         </div>
 
         {/* Resource Editor */}
-        <div 
+        <div
           className="flex-1 overflow-hidden"
           onDrop={handleFileDrop}
-          onDragOver={(e) => e.preventDefault()}
+          onDragOver={e => e.preventDefault()}
         >
           {renderResourceEditor()}
         </div>
@@ -876,20 +930,22 @@ export const ResourceEditor: React.FC<ResourceEditorProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96">
             <h3 className="text-lg font-medium mb-4">Add New Resource</h3>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">Resource Type</label>
               <select
                 value={selectedResourceType}
-                onChange={(e) => setSelectedResourceType(e.target.value as ResourceType)}
+                onChange={e => setSelectedResourceType(e.target.value as ResourceType)}
                 className="w-full px-3 py-2 border border-gray-300 rounded"
               >
                 {Object.values(ResourceType).map(type => (
-                  <option key={type} value={type}>{type}</option>
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
                 ))}
               </select>
             </div>
-            
+
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowAddDialog(false)}

@@ -30,7 +30,7 @@ const vb6StandardControls = [
   { name: 'Timer', vb6: '✅', ours: '✅', notes: 'Précision milliseconde, invisible' },
   { name: 'ScrollBars', vb6: '✅', ours: '✅', notes: 'Min, Max, SmallChange, LargeChange' },
   { name: 'Shape', vb6: '✅', ours: '✅', notes: '6 formes, BorderStyle, FillStyle' },
-  { name: 'Line', vb6: '✅', ours: '✅', notes: 'Toutes orientations' }
+  { name: 'Line', vb6: '✅', ours: '✅', notes: 'Toutes orientations' },
 ];
 
 const vb6ProfessionalControls = [
@@ -45,7 +45,7 @@ const vb6ProfessionalControls = [
   { name: 'TabStrip', vb6: '✅ Pro', ours: '✅', notes: 'MultiRow, HotTrack' },
   { name: 'RichTextBox', vb6: '✅ Pro', ours: '✅', notes: 'RTF, Find, formatting' },
   { name: 'MaskedEdit', vb6: '✅ Pro', ours: '✅', notes: 'Mask patterns, validation' },
-  { name: 'Animation', vb6: '✅ Pro', ours: '✅', notes: 'AVI playback' }
+  { name: 'Animation', vb6: '✅ Pro', ours: '✅', notes: 'AVI playback' },
 ];
 
 const vb6DataControls = [
@@ -54,7 +54,7 @@ const vb6DataControls = [
   { name: 'MSFlexGrid', vb6: '✅', ours: '✅', notes: 'Hierarchical, custom draw' },
   { name: 'DataGrid', vb6: '✅', ours: '✅', notes: 'Colonnes, tri, filtrage' },
   { name: 'DataCombo', vb6: '✅', ours: '✅', notes: 'Data binding, RowSource' },
-  { name: 'DataList', vb6: '✅', ours: '✅', notes: 'ListField, BoundColumn' }
+  { name: 'DataList', vb6: '✅', ours: '✅', notes: 'ListField, BoundColumn' },
 ];
 
 const vb6SpecializedControls = [
@@ -66,30 +66,34 @@ const vb6SpecializedControls = [
   { name: 'Menu', vb6: '✅', ours: '✅', notes: 'Menu Editor, raccourcis, hiérarchie' },
   { name: 'Winsock', vb6: '✅', ours: '✅', notes: 'TCP/UDP via WebSocket' },
   { name: 'Internet Transfer', vb6: '✅', ours: '✅', notes: 'HTTP/FTP via fetch API' },
-  { name: 'MultiMedia MCI', vb6: '✅', ours: '✅', notes: 'Audio/Video via HTML5' }
+  { name: 'MultiMedia MCI', vb6: '✅', ours: '✅', notes: 'Audio/Video via HTML5' },
 ];
 
 console.log('📦 CONTRÔLES STANDARD:');
 vb6StandardControls.forEach(ctrl => {
-  const status = ctrl.ours === '✅' ? '✅ PARFAIT' : ctrl.ours === '⚠️' ? '⚠️ PARTIEL' : '❌ MANQUE';
+  const status =
+    ctrl.ours === '✅' ? '✅ PARFAIT' : ctrl.ours === '⚠️' ? '⚠️ PARTIEL' : '❌ MANQUE';
   console.log(`   ${ctrl.name.padEnd(18)} ${status.padEnd(12)} ${ctrl.notes}`);
 });
 
 console.log('\n📦 CONTRÔLES PROFESSIONNELS:');
 vb6ProfessionalControls.forEach(ctrl => {
-  const status = ctrl.ours === '✅' ? '✅ PARFAIT' : ctrl.ours === '⚠️' ? '⚠️ PARTIEL' : '❌ MANQUE';
+  const status =
+    ctrl.ours === '✅' ? '✅ PARFAIT' : ctrl.ours === '⚠️' ? '⚠️ PARTIEL' : '❌ MANQUE';
   console.log(`   ${ctrl.name.padEnd(18)} ${status.padEnd(12)} ${ctrl.notes}`);
 });
 
 console.log('\n📦 CONTRÔLES DATA:');
 vb6DataControls.forEach(ctrl => {
-  const status = ctrl.ours === '✅' ? '✅ PARFAIT' : ctrl.ours === '⚠️' ? '⚠️ PARTIEL' : '❌ MANQUE';
+  const status =
+    ctrl.ours === '✅' ? '✅ PARFAIT' : ctrl.ours === '⚠️' ? '⚠️ PARTIEL' : '❌ MANQUE';
   console.log(`   ${ctrl.name.padEnd(18)} ${status.padEnd(12)} ${ctrl.notes}`);
 });
 
 console.log('\n📦 CONTRÔLES SPÉCIALISÉS:');
 vb6SpecializedControls.forEach(ctrl => {
-  const status = ctrl.ours === '✅' ? '✅ PARFAIT' : ctrl.ours === '⚠️' ? '⚠️ PARTIEL' : '❌ MANQUE';
+  const status =
+    ctrl.ours === '✅' ? '✅ PARFAIT' : ctrl.ours === '⚠️' ? '⚠️ PARTIEL' : '❌ MANQUE';
   console.log(`   ${ctrl.name.padEnd(18)} ${status.padEnd(12)} ${ctrl.notes}`);
 });
 
@@ -101,11 +105,21 @@ console.log('\n\n🚀 2. CONTRÔLES AVANCÉS (AMÉLIORATIONS vs VB6)');
 console.log('-'.repeat(50));
 
 const advancedControls = [
-  { name: 'DHTML Page Designer', vb6: '⚠️ Limité', ours: '✅', notes: 'Éditeur WYSIWYG complet, execCommand' },
+  {
+    name: 'DHTML Page Designer',
+    vb6: '⚠️ Limité',
+    ours: '✅',
+    notes: 'Éditeur WYSIWYG complet, execCommand',
+  },
   { name: 'Script Control', vb6: '✅ ActiveX', ours: '✅', notes: 'VBScript + JScript intégré' },
-  { name: 'Remote Data Control', vb6: '✅ Enterprise', ours: '✅', notes: 'RDO simulation, async queries' },
+  {
+    name: 'Remote Data Control',
+    vb6: '✅ Enterprise',
+    ours: '✅',
+    notes: 'RDO simulation, async queries',
+  },
   { name: 'Equation Editor', vb6: '✅ ActiveX', ours: '✅', notes: 'Canvas rendering, LaTeX-like' },
-  { name: 'Crystal Reports', vb6: '✅ ActiveX', ours: '✅', notes: 'Report designer intégré' }
+  { name: 'Crystal Reports', vb6: '✅ ActiveX', ours: '✅', notes: 'Report designer intégré' },
 ];
 
 advancedControls.forEach(ctrl => {
@@ -132,11 +146,12 @@ const ideFeatures = [
   { feature: 'Debug Window', vb6: '✅', ours: '✅', notes: 'Immediate, locals, watch' },
   { feature: 'Class Builder', vb6: '✅ Add-in', ours: '⚠️', notes: 'Code generation assisté' },
   { feature: 'API Viewer', vb6: '✅ Add-in', ours: '⚠️', notes: 'Win32 API browser' },
-  { feature: 'Package & Deploy', vb6: '✅', ours: '⚠️', notes: 'Web deployment moderne' }
+  { feature: 'Package & Deploy', vb6: '✅', ours: '⚠️', notes: 'Web deployment moderne' },
 ];
 
 ideFeatures.forEach(feat => {
-  const ourStatus = feat.ours === '✅' ? '✅ PARFAIT' : feat.ours === '⚠️' ? '⚠️ MODERNE' : '❌ MANQUE';
+  const ourStatus =
+    feat.ours === '✅' ? '✅ PARFAIT' : feat.ours === '⚠️' ? '⚠️ MODERNE' : '❌ MANQUE';
   console.log(`   ${feat.feature.padEnd(18)} ${ourStatus.padEnd(12)} ${feat.notes}`);
 });
 
@@ -160,11 +175,12 @@ const languageFeatures = [
   { feature: 'Date Functions', vb6: '✅', ours: '✅', notes: 'Now, Date, Time, DateAdd' },
   { feature: 'Type Conversion', vb6: '✅', ours: '✅', notes: 'CInt, CStr, CBool, etc.' },
   { feature: 'Error Handling', vb6: '✅', ours: '✅', notes: 'On Error GoTo, Resume' },
-  { feature: 'API Calls', vb6: '✅', ours: '⚠️', notes: 'Web API simulation' }
+  { feature: 'API Calls', vb6: '✅', ours: '⚠️', notes: 'Web API simulation' },
 ];
 
 languageFeatures.forEach(feat => {
-  const ourStatus = feat.ours === '✅' ? '✅ PARFAIT' : feat.ours === '⚠️' ? '⚠️ ADAPTÉ' : '❌ MANQUE';
+  const ourStatus =
+    feat.ours === '✅' ? '✅ PARFAIT' : feat.ours === '⚠️' ? '⚠️ ADAPTÉ' : '❌ MANQUE';
   console.log(`   ${feat.feature.padEnd(18)} ${ourStatus.padEnd(12)} ${feat.notes}`);
 });
 
@@ -183,7 +199,7 @@ const globalObjects = [
   { object: 'Forms', vb6: '✅', ours: '✅', notes: 'Collection avec Count, Item' },
   { object: 'Printers', vb6: '✅', ours: '✅', notes: 'Collection, Print methods' },
   { object: 'Clipboard', vb6: '✅', ours: '✅', notes: 'GetText, SetText, formats' },
-  { object: 'FileSystem', vb6: '✅', ours: '✅', notes: 'Dir, MkDir, RmDir, Kill' }
+  { object: 'FileSystem', vb6: '✅', ours: '✅', notes: 'Dir, MkDir, RmDir, Kill' },
 ];
 
 globalObjects.forEach(obj => {
@@ -207,7 +223,7 @@ const fileFormats = [
   { format: '.CLS (Class)', vb6: '✅', ours: '✅', notes: 'Class modules' },
   { format: '.CTL (UserControl)', vb6: '✅', ours: '✅', notes: 'Custom controls' },
   { format: '.RES (Resource)', vb6: '✅', ours: '✅', notes: 'Binary resources' },
-  { format: '.TLB (Type Library)', vb6: '✅', ours: '✅', notes: 'COM interfaces' }
+  { format: '.TLB (Type Library)', vb6: '✅', ours: '✅', notes: 'COM interfaces' },
 ];
 
 fileFormats.forEach(fmt => {
@@ -229,14 +245,14 @@ const advantages = [
   '⚡ Performance JS moderne vs P-Code VB6',
   '🎨 Interface moderne avec CSS3/animations',
   '🔗 Intégration native avec APIs Web',
-  '📦 Déploiement web instantané (pas d\'installation)',
+  "📦 Déploiement web instantané (pas d'installation)",
   '🔄 Updates temps réel sans redémarrage',
   '💾 Sauvegarde cloud automatique',
   '🔍 Debug moderne avec DevTools navigateur',
   '📊 Analytics et monitoring intégrés',
   '🎯 Accessibilité Web standards',
   '🌐 Internationalisation native',
-  '🔒 Sécurité moderne (CSP, HTTPS, sandboxing)'
+  '🔒 Sécurité moderne (CSP, HTTPS, sandboxing)',
 ];
 
 advantages.forEach(adv => console.log(`   ${adv}`));
@@ -249,7 +265,7 @@ console.log('\n\n⚠️ 8. LIMITATIONS vs VB6 ORIGINAL');
 console.log('-'.repeat(50));
 
 const limitations = [
-  '🚫 Pas d\'accès direct Win32 API (sécurité navigateur)',
+  "🚫 Pas d'accès direct Win32 API (sécurité navigateur)",
   '💾 Système de fichiers limité (sandboxing)',
   '🖨️ Impression limitée aux APIs navigateur',
   '📡 Réseau limité à HTTP/WebSocket (pas UDP brut)',
@@ -257,7 +273,7 @@ const limitations = [
   '🗃️ Base de données via Web APIs (pas ODBC direct)',
   '🎭 Threading limité (Web Workers)',
   '📋 Clipboard avec restrictions sécurité',
-  '🔧 Pas de registre Windows (localStorage)'
+  '🔧 Pas de registre Windows (localStorage)',
 ];
 
 limitations.forEach(lim => console.log(`   ${lim}`));
@@ -274,25 +290,29 @@ const scores = {
   'Contrôles Pro': { vb6: 100, ours: 100, note: 'Parfait' },
   'Environnement IDE': { vb6: 100, ours: 95, note: 'Excellent' },
   'Langage VB6': { vb6: 100, ours: 95, note: 'Excellent' },
-  'Runtime': { vb6: 100, ours: 90, note: 'Très bon' },
+  Runtime: { vb6: 100, ours: 90, note: 'Très bon' },
   'Objets Globaux': { vb6: 100, ours: 100, note: 'Parfait' },
   'Formats Fichiers': { vb6: 100, ours: 100, note: 'Parfait' },
-  'Modernité': { vb6: 40, ours: 100, note: 'Révolutionnaire' },
-  'Sécurité': { vb6: 50, ours: 95, note: 'Excellent' },
-  'Portabilité': { vb6: 20, ours: 100, note: 'Parfait' }
+  Modernité: { vb6: 40, ours: 100, note: 'Révolutionnaire' },
+  Sécurité: { vb6: 50, ours: 95, note: 'Excellent' },
+  Portabilité: { vb6: 20, ours: 100, note: 'Parfait' },
 };
 
-let totalVB6 = 0, totalOurs = 0, count = 0;
+let totalVB6 = 0,
+  totalOurs = 0,
+  count = 0;
 
 Object.entries(scores).forEach(([category, score]) => {
   totalVB6 += score.vb6;
   totalOurs += score.ours;
   count++;
-  
+
   const diff = score.ours - score.vb6;
   const indicator = diff > 0 ? '📈' : diff < 0 ? '📉' : '➡️';
-  
-  console.log(`   ${category.padEnd(18)} VB6: ${score.vb6}%  NOUS: ${score.ours}%  ${indicator} ${score.note}`);
+
+  console.log(
+    `   ${category.padEnd(18)} VB6: ${score.vb6}%  NOUS: ${score.ours}%  ${indicator} ${score.note}`
+  );
 });
 
 const avgVB6 = Math.round(totalVB6 / count);
@@ -316,7 +336,7 @@ console.log('');
 console.log('🏆 POINTS FORTS:');
 console.log('   • 100% des contrôles VB6 implémentés avec toutes leurs propriétés');
 console.log('   • IDE moderne et réactif dans le navigateur');
-console.log('   • Runtime JavaScript haute performance'); 
+console.log('   • Runtime JavaScript haute performance');
 console.log('   • Multi-plateforme et déploiement instantané');
 console.log('   • Sécurité et modernité supérieures à VB6');
 console.log('');

@@ -1,6 +1,6 @@
 /**
  * VB6 ImageCombo Control Implementation
- * 
+ *
  * Complete implementation of ImageCombo control with icons for each item
  * Combines ComboBox functionality with ImageList integration
  */
@@ -23,24 +23,24 @@ export interface ImageComboControl {
   top: number;
   width: number;
   height: number;
-  
+
   // Data Properties
   items: ImageComboItem[];
   imageList?: string; // Reference to ImageList control
   selectedItem: number; // Index of selected item (-1 = none)
   text: string; // Current text value
-  
+
   // Behavior Properties
   style: number; // 0=Dropdown Combo, 1=Simple Combo, 2=Dropdown List
   sorted: boolean; // Sort items alphabetically
   locked: boolean; // Prevent editing
   maxLength: number; // Maximum text length
-  
+
   // Display Properties
   itemHeight: number; // Height of each item in pixels
   visibleItems: number; // Number of visible items in dropdown
   indent: number; // Indentation for hierarchical items
-  
+
   // Appearance Properties
   appearance: number; // 0=Flat, 1=3D
   borderStyle: number; // 0=None, 1=Fixed Single
@@ -51,14 +51,14 @@ export interface ImageComboControl {
   fontBold: boolean;
   fontItalic: boolean;
   fontUnderline: boolean;
-  
+
   // State Properties
   enabled: boolean;
   visible: boolean;
   tabStop: boolean;
   tabIndex: number;
   tag: string;
-  
+
   // Events
   onClick?: string;
   onComboClick?: string;
@@ -80,7 +80,7 @@ export const ImageComboControl: React.FC<ImageComboControlProps> = ({
   control,
   isDesignMode = false,
   onPropertyChange,
-  onEvent
+  onEvent,
 }) => {
   const {
     name,
@@ -112,7 +112,7 @@ export const ImageComboControl: React.FC<ImageComboControlProps> = ({
     visible = true,
     tabStop = true,
     tabIndex = 0,
-    tag = ''
+    tag = '',
   } = control;
 
   const [isDroppedDown, setIsDroppedDown] = useState(false);
@@ -176,100 +176,109 @@ export const ImageComboControl: React.FC<ImageComboControlProps> = ({
   }, [isDroppedDown]);
 
   // VB6-compatible methods
-  const imageComboMethods = useCallback(() => ({
-    // Item management
-    addItem: (text: string, imageIndex: number = -1, key?: string, tag?: string, indentation?: number) => {
-      const newItem: ImageComboItem = {
-        key: key || `item_${Date.now()}`,
-        text,
-        imageIndex,
-        tag,
-        indentation
-      };
-      
-      const newItems = [...items, newItem];
-      onPropertyChange?.('items', newItems);
-      return newItems.length - 1; // Return new item index
-    },
-    
-    removeItem: (index: number) => {
-      if (index >= 0 && index < items.length) {
-        const newItems = items.filter((_, i) => i !== index);
+  const imageComboMethods = useCallback(
+    () => ({
+      // Item management
+      addItem: (
+        text: string,
+        imageIndex: number = -1,
+        key?: string,
+        tag?: string,
+        indentation?: number
+      ) => {
+        const newItem: ImageComboItem = {
+          key: key || `item_${Date.now()}`,
+          text,
+          imageIndex,
+          tag,
+          indentation,
+        };
+
+        const newItems = [...items, newItem];
         onPropertyChange?.('items', newItems);
-        
-        // Adjust selected item if necessary
-        if (selectedItem === index) {
-          onPropertyChange?.('selectedItem', -1);
-          onPropertyChange?.('text', '');
-        } else if (selectedItem > index) {
-          onPropertyChange?.('selectedItem', selectedItem - 1);
+        return newItems.length - 1; // Return new item index
+      },
+
+      removeItem: (index: number) => {
+        if (index >= 0 && index < items.length) {
+          const newItems = items.filter((_, i) => i !== index);
+          onPropertyChange?.('items', newItems);
+
+          // Adjust selected item if necessary
+          if (selectedItem === index) {
+            onPropertyChange?.('selectedItem', -1);
+            onPropertyChange?.('text', '');
+          } else if (selectedItem > index) {
+            onPropertyChange?.('selectedItem', selectedItem - 1);
+          }
         }
-      }
-    },
-    
-    clear: () => {
-      onPropertyChange?.('items', []);
-      onPropertyChange?.('selectedItem', -1);
-      onPropertyChange?.('text', '');
-    },
-    
-    // Selection methods
-    selectItem: (index: number) => {
-      if (index >= -1 && index < items.length) {
-        onPropertyChange?.('selectedItem', index);
-        if (index >= 0) {
-          onPropertyChange?.('text', items[index].text);
-          setInputText(items[index].text);
-        } else {
-          onPropertyChange?.('text', '');
-          setInputText('');
+      },
+
+      clear: () => {
+        onPropertyChange?.('items', []);
+        onPropertyChange?.('selectedItem', -1);
+        onPropertyChange?.('text', '');
+      },
+
+      // Selection methods
+      selectItem: (index: number) => {
+        if (index >= -1 && index < items.length) {
+          onPropertyChange?.('selectedItem', index);
+          if (index >= 0) {
+            onPropertyChange?.('text', items[index].text);
+            setInputText(items[index].text);
+          } else {
+            onPropertyChange?.('text', '');
+            setInputText('');
+          }
         }
-      }
-    },
-    
-    findItem: (text: string, startIndex: number = 0) => {
-      for (let i = startIndex; i < items.length; i++) {
-        if (items[i].text.toLowerCase().includes(text.toLowerCase())) {
-          return i;
+      },
+
+      findItem: (text: string, startIndex: number = 0) => {
+        for (let i = startIndex; i < items.length; i++) {
+          if (items[i].text.toLowerCase().includes(text.toLowerCase())) {
+            return i;
+          }
         }
-      }
-      return -1;
-    },
-    
-    // Dropdown methods
-    dropdown: () => {
-      if (enabled && !locked) {
-        setIsDroppedDown(true);
-        onEvent?.('DropDown');
-      }
-    },
-    
-    closeup: () => {
-      setIsDroppedDown(false);
-    },
-    
-    // Text methods
-    setText: (newText: string) => {
-      const limitedText = maxLength > 0 ? newText.substring(0, maxLength) : newText;
-      setInputText(limitedText);
-      onPropertyChange?.('text', limitedText);
-    },
-    
-    getText: () => inputText,
-    
-    // Utility methods
-    refresh: () => {
-      // Force re-render by updating a dummy state
-      setFocusedIndex(prev => prev);
-    }
-  }), [items, selectedItem, enabled, locked, maxLength, inputText, onPropertyChange, onEvent]);
+        return -1;
+      },
+
+      // Dropdown methods
+      dropdown: () => {
+        if (enabled && !locked) {
+          setIsDroppedDown(true);
+          onEvent?.('DropDown');
+        }
+      },
+
+      closeup: () => {
+        setIsDroppedDown(false);
+      },
+
+      // Text methods
+      setText: (newText: string) => {
+        const limitedText = maxLength > 0 ? newText.substring(0, maxLength) : newText;
+        setInputText(limitedText);
+        onPropertyChange?.('text', limitedText);
+      },
+
+      getText: () => inputText,
+
+      // Utility methods
+      refresh: () => {
+        // Force re-render by updating a dummy state
+        setFocusedIndex(prev => prev);
+      },
+    }),
+    [items, selectedItem, enabled, locked, maxLength, inputText, onPropertyChange, onEvent]
+  );
 
   // Expose methods globally for VB6 compatibility
   useEffect(() => {
     const global = window as any;
     if (!global.VB6Controls) global.VB6Controls = {};
     global.VB6Controls[name] = imageComboMethods();
-    
+
     return () => {
       if (global.VB6Controls) {
         delete global.VB6Controls[name];
@@ -278,20 +287,23 @@ export const ImageComboControl: React.FC<ImageComboControlProps> = ({
   }, [name, imageComboMethods]);
 
   // Event handlers
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (locked || !enabled) return;
-    
-    const newValue = e.target.value;
-    const limitedValue = maxLength > 0 ? newValue.substring(0, maxLength) : newValue;
-    
-    setInputText(limitedValue);
-    onPropertyChange?.('text', limitedValue);
-    onEvent?.('Change', { text: limitedValue });
-  }, [locked, enabled, maxLength, onPropertyChange, onEvent]);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (locked || !enabled) return;
+
+      const newValue = e.target.value;
+      const limitedValue = maxLength > 0 ? newValue.substring(0, maxLength) : newValue;
+
+      setInputText(limitedValue);
+      onPropertyChange?.('text', limitedValue);
+      onEvent?.('Change', { text: limitedValue });
+    },
+    [locked, enabled, maxLength, onPropertyChange, onEvent]
+  );
 
   const handleInputClick = useCallback(() => {
     if (!enabled) return;
-    
+
     onEvent?.('Click');
     if (control.onClick) {
       onEvent?.('Execute', { code: control.onClick });
@@ -300,7 +312,7 @@ export const ImageComboControl: React.FC<ImageComboControlProps> = ({
 
   const handleDropdownToggle = useCallback(() => {
     if (!enabled || style === 1) return; // Simple combo doesn't have dropdown
-    
+
     if (isDroppedDown) {
       setIsDroppedDown(false);
     } else {
@@ -312,68 +324,83 @@ export const ImageComboControl: React.FC<ImageComboControlProps> = ({
     }
   }, [enabled, style, isDroppedDown, control.onDropDown, onEvent]);
 
-  const handleItemClick = useCallback((index: number) => {
-    if (!enabled) return;
-    
-    const item = processedItems[index];
-    if (item) {
-      setInputText(item.text);
-      onPropertyChange?.('selectedItem', index);
-      onPropertyChange?.('text', item.text);
-      setIsDroppedDown(false);
-      
-      onEvent?.('ComboClick', { index, item });
-      if (control.onComboClick) {
-        onEvent?.('Execute', { code: control.onComboClick });
-      }
-      
-      onEvent?.('Change', { text: item.text });
-      if (control.onChange) {
-        onEvent?.('Execute', { code: control.onChange });
-      }
-    }
-  }, [enabled, processedItems, onPropertyChange, onEvent, control.onComboClick, control.onChange]);
+  const handleItemClick = useCallback(
+    (index: number) => {
+      if (!enabled) return;
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (!enabled) return;
-    
-    switch (e.key) {
-      case 'ArrowDown':
-        if (isDroppedDown) {
-          e.preventDefault();
-          setFocusedIndex(prev => Math.min(prev + 1, processedItems.length - 1));
-        } else if (style !== 1) {
-          setIsDroppedDown(true);
+      const item = processedItems[index];
+      if (item) {
+        setInputText(item.text);
+        onPropertyChange?.('selectedItem', index);
+        onPropertyChange?.('text', item.text);
+        setIsDroppedDown(false);
+
+        onEvent?.('ComboClick', { index, item });
+        if (control.onComboClick) {
+          onEvent?.('Execute', { code: control.onComboClick });
         }
-        break;
-        
-      case 'ArrowUp':
-        if (isDroppedDown) {
-          e.preventDefault();
-          setFocusedIndex(prev => Math.max(prev - 1, 0));
+
+        onEvent?.('Change', { text: item.text });
+        if (control.onChange) {
+          onEvent?.('Execute', { code: control.onChange });
         }
-        break;
-        
-      case 'Enter':
-        if (isDroppedDown && focusedIndex >= 0) {
-          e.preventDefault();
-          handleItemClick(focusedIndex);
-        }
-        break;
-        
-      case 'Escape':
-        if (isDroppedDown) {
-          e.preventDefault();
-          setIsDroppedDown(false);
-        }
-        break;
-    }
-    
-    onEvent?.('KeyDown', { key: e.key, keyCode: e.keyCode });
-    if (control.onKeyDown) {
-      onEvent?.('Execute', { code: control.onKeyDown });
-    }
-  }, [enabled, isDroppedDown, focusedIndex, processedItems.length, style, handleItemClick, onEvent, control.onKeyDown]);
+      }
+    },
+    [enabled, processedItems, onPropertyChange, onEvent, control.onComboClick, control.onChange]
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!enabled) return;
+
+      switch (e.key) {
+        case 'ArrowDown':
+          if (isDroppedDown) {
+            e.preventDefault();
+            setFocusedIndex(prev => Math.min(prev + 1, processedItems.length - 1));
+          } else if (style !== 1) {
+            setIsDroppedDown(true);
+          }
+          break;
+
+        case 'ArrowUp':
+          if (isDroppedDown) {
+            e.preventDefault();
+            setFocusedIndex(prev => Math.max(prev - 1, 0));
+          }
+          break;
+
+        case 'Enter':
+          if (isDroppedDown && focusedIndex >= 0) {
+            e.preventDefault();
+            handleItemClick(focusedIndex);
+          }
+          break;
+
+        case 'Escape':
+          if (isDroppedDown) {
+            e.preventDefault();
+            setIsDroppedDown(false);
+          }
+          break;
+      }
+
+      onEvent?.('KeyDown', { key: e.key, keyCode: e.keyCode });
+      if (control.onKeyDown) {
+        onEvent?.('Execute', { code: control.onKeyDown });
+      }
+    },
+    [
+      enabled,
+      isDroppedDown,
+      focusedIndex,
+      processedItems.length,
+      style,
+      handleItemClick,
+      onEvent,
+      control.onKeyDown,
+    ]
+  );
 
   if (!visible) {
     return null;
@@ -389,7 +416,7 @@ export const ImageComboControl: React.FC<ImageComboControlProps> = ({
     fontSize: `${fontSize}pt`,
     fontWeight: fontBold ? 'bold' : 'normal',
     fontStyle: fontItalic ? 'italic' : 'normal',
-    textDecoration: fontUnderline ? 'underline' : 'none'
+    textDecoration: fontUnderline ? 'underline' : 'none',
   });
 
   const containerStyle: React.CSSProperties = {
@@ -398,7 +425,7 @@ export const ImageComboControl: React.FC<ImageComboControlProps> = ({
     top: `${top}px`,
     width: `${width}px`,
     height: `${height}px`,
-    outline: isDesignMode ? '1px dotted #333' : 'none'
+    outline: isDesignMode ? '1px dotted #333' : 'none',
   };
 
   const inputContainerStyle: React.CSSProperties = {
@@ -407,7 +434,7 @@ export const ImageComboControl: React.FC<ImageComboControlProps> = ({
     height: '100%',
     border: getBorderStyle(),
     backgroundColor: enabled ? backColor : '#f0f0f0',
-    opacity: enabled ? 1 : 0.6
+    opacity: enabled ? 1 : 0.6,
   };
 
   const inputStyle: React.CSSProperties = {
@@ -418,7 +445,7 @@ export const ImageComboControl: React.FC<ImageComboControlProps> = ({
     backgroundColor: 'transparent',
     color: foreColor,
     ...getFontStyle(),
-    readOnly: style === 2 // Dropdown List is read-only
+    readOnly: style === 2, // Dropdown List is read-only
   };
 
   const dropdownButtonStyle: React.CSSProperties = {
@@ -430,7 +457,7 @@ export const ImageComboControl: React.FC<ImageComboControlProps> = ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '10px'
+    fontSize: '10px',
   };
 
   const dropdownStyle: React.CSSProperties = {
@@ -443,7 +470,7 @@ export const ImageComboControl: React.FC<ImageComboControlProps> = ({
     border: '1px solid #808080',
     borderTop: 'none',
     zIndex: 1000,
-    overflowY: 'auto'
+    overflowY: 'auto',
   };
 
   const renderItem = (item: ImageComboItem, index: number) => {
@@ -460,7 +487,7 @@ export const ImageComboControl: React.FC<ImageComboControlProps> = ({
       backgroundColor: isSelected ? '#0078d4' : isFocused ? '#e5f3ff' : 'transparent',
       color: isSelected ? 'white' : foreColor,
       cursor: 'pointer',
-      ...getFontStyle()
+      ...getFontStyle(),
     };
 
     return (
@@ -477,7 +504,7 @@ export const ImageComboControl: React.FC<ImageComboControlProps> = ({
             style={{
               width: '16px',
               height: '16px',
-              marginRight: '4px'
+              marginRight: '4px',
             }}
           />
         )}
@@ -507,7 +534,7 @@ export const ImageComboControl: React.FC<ImageComboControlProps> = ({
           readOnly={locked || style === 2}
           tabIndex={tabStop ? tabIndex : -1}
         />
-        
+
         {style !== 1 && ( // Hide dropdown button for Simple combo
           <button
             style={dropdownButtonStyle}
@@ -524,14 +551,16 @@ export const ImageComboControl: React.FC<ImageComboControlProps> = ({
       {isDroppedDown && style !== 1 && (
         <div ref={dropdownRef} style={dropdownStyle}>
           {processedItems.map((item, index) => renderItem(item, index))}
-          
+
           {processedItems.length === 0 && (
-            <div style={{
-              padding: '8px',
-              color: '#666',
-              fontStyle: 'italic',
-              textAlign: 'center'
-            }}>
+            <div
+              style={{
+                padding: '8px',
+                color: '#666',
+                fontStyle: 'italic',
+                textAlign: 'center',
+              }}
+            >
               No items
             </div>
           )}
@@ -551,7 +580,7 @@ export const ImageComboControl: React.FC<ImageComboControlProps> = ({
             padding: '2px',
             border: '1px solid #ccc',
             whiteSpace: 'nowrap',
-            zIndex: 1001
+            zIndex: 1001,
           }}
         >
           {name} ({processedItems.length} items)
@@ -589,20 +618,25 @@ export const ImageComboDefaults: Partial<ImageComboControl> = {
   visible: true,
   tabStop: true,
   tabIndex: 0,
-  tag: ''
+  tag: '',
 };
 
 // Helper functions for ImageCombo management
 export const ImageComboHelpers = {
-  createItem: (text: string, imageIndex: number = -1, key?: string, tag?: string): ImageComboItem => ({
+  createItem: (
+    text: string,
+    imageIndex: number = -1,
+    key?: string,
+    tag?: string
+  ): ImageComboItem => ({
     key: key || `item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     text,
     imageIndex,
-    tag
+    tag,
   }),
 
   findItemByText: (items: ImageComboItem[], text: string, exact: boolean = false): number => {
-    return items.findIndex(item => 
+    return items.findIndex(item =>
       exact ? item.text === text : item.text.toLowerCase().includes(text.toLowerCase())
     );
   },
@@ -613,7 +647,7 @@ export const ImageComboHelpers = {
 
   sortItems: (items: ImageComboItem[]): ImageComboItem[] => {
     return [...items].sort((a, b) => a.text.localeCompare(b.text));
-  }
+  },
 };
 
 export default ImageComboControl;

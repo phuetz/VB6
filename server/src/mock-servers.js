@@ -25,20 +25,20 @@ dbApp.post('/api/ado/connection', (req, res) => {
   if (database && typeof database !== 'string') {
     return res.status(400).json({ error: 'Database name must be a string' });
   }
-  
+
   if (database && database.length > 100) {
     return res.status(400).json({ error: 'Database name too long (max 100 characters)' });
   }
-  
+
   // Sanitize database name - only allow alphanumeric and underscores
   const sanitizedDatabase = database ? database.replace(/[^a-zA-Z0-9_]/g, '') : 'MockDB';
-  
+
   // CRYPTOGRAPHIC BUG FIX: Use cryptographically secure ID generation
   const secureId = crypto.randomBytes(16).toString('hex');
-  res.json({ 
+  res.json({
     connectionId: 'mock-conn-' + secureId,
     status: 'connected',
-    database: sanitizedDatabase
+    database: sanitizedDatabase,
   });
 });
 
@@ -46,9 +46,9 @@ dbApp.post('/api/ado/query', (req, res) => {
   res.json({
     data: [
       { id: 1, name: 'John Doe', email: 'john@example.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com' }
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
     ],
-    rowCount: 2
+    rowCount: 2,
   });
 });
 
@@ -61,7 +61,7 @@ dbApp.listen(dbPort, () => {
 const collabApp = express();
 const collabServer = createServer(collabApp);
 const io = new Server(collabServer, {
-  cors: corsOptions
+  cors: corsOptions,
 });
 
 collabApp.use(cors(corsOptions));
@@ -71,10 +71,10 @@ collabApp.get('/health', (req, res) => {
   res.json({ status: 'ok', server: 'collaboration', timestamp: new Date() });
 });
 
-io.on('connection', (socket) => {
+io.on('connection', socket => {
   console.log('New collaboration client connected:', socket.id);
-  
-  socket.on('session:create', (data) => {
+
+  socket.on('session:create', data => {
     const sessionId = 'SESSION-' + Math.random().toString(36).substr(2, 8).toUpperCase();
     socket.join(sessionId);
     socket.emit('session:joined', {
@@ -83,7 +83,7 @@ io.on('connection', (socket) => {
         name: data.name,
         participants: [],
       },
-      user: data.owner
+      user: data.owner,
     });
   });
 
@@ -108,22 +108,22 @@ aiApp.get('/health', (req, res) => {
 
 aiApp.post('/api/ai/generate', (req, res) => {
   const { request } = req.body;
-  
+
   // DATA VALIDATION BUG FIX: Validate AI request input
   if (!request || typeof request !== 'string') {
     return res.status(400).json({ error: 'Request must be a non-empty string' });
   }
-  
+
   if (request.length > 10000) {
     return res.status(400).json({ error: 'Request too long (max 10000 characters)' });
   }
-  
+
   // Sanitize request to prevent injection attacks
   const sanitizedRequest = request.replace(/[<>&"']/g, ''); // Remove common XSS characters
-  
+
   // Mock AI response
   const suggestions = [];
-  
+
   if (sanitizedRequest.includes('button')) {
     suggestions.push({
       type: 'completion',
@@ -132,10 +132,10 @@ aiApp.post('/api/ai/generate', (req, res) => {
       code: `Private Sub Command1_Click()
     MsgBox "Button clicked!"
 End Sub`,
-      confidence: 0.9
+      confidence: 0.9,
     });
   }
-  
+
   res.json({ suggestions });
 });
 
@@ -146,9 +146,9 @@ aiApp.post('/api/ai/analyze', (req, res) => {
         line: 1,
         type: 'info',
         message: 'Code analysis complete',
-        suggestion: 'No issues found'
-      }
-    ]
+        suggestion: 'No issues found',
+      },
+    ],
   });
 });
 

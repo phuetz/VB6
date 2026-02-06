@@ -14,26 +14,56 @@ import {
   VB6ArrayList,
   VB6SortedList,
   CreateCollection,
-  CreateDictionary
+  CreateDictionary,
 } from '../../runtime/VB6EnhancedCollections';
 
-import {
-  VB6CallStackManager,
-  globalCallStack
-} from '../../runtime/VB6CallStackManager';
+import { VB6CallStackManager, globalCallStack } from '../../runtime/VB6CallStackManager';
 
 import {
-  Abs, Sgn, Int, Fix, Round, Sqr, Exp, Log,
-  Sin, Cos, Tan, Atn,
-  Pmt, PV, FV, NPer, SLN, SYD,
-  Min, Max, Mod, Power
+  Abs,
+  Sgn,
+  Int,
+  Fix,
+  Round,
+  Sqr,
+  Exp,
+  Log,
+  Sin,
+  Cos,
+  Tan,
+  Atn,
+  Pmt,
+  PV,
+  FV,
+  NPer,
+  SLN,
+  SYD,
+  Min,
+  Max,
+  Mod,
+  Power,
 } from '../../runtime/VB6ComprehensiveMathFunctions';
 
 import {
-  Asc, Chr, LCase, UCase,
-  Left, Right, Mid, Len, LTrim, RTrim, Trim,
-  Space, InStr, InStrRev, StrComp, StrReverse,
-  Replace, Split, Join
+  Asc,
+  Chr,
+  LCase,
+  UCase,
+  Left,
+  Right,
+  Mid,
+  Len,
+  LTrim,
+  RTrim,
+  Trim,
+  Space,
+  InStr,
+  InStrRev,
+  StrComp,
+  StrReverse,
+  Replace,
+  Split,
+  Join,
 } from '../../runtime/VB6ComprehensiveStringFunctions';
 
 // ============================================================================

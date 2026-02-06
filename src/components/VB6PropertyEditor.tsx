@@ -1,11 +1,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { 
-  Settings, 
-  Eye, 
-  Edit3, 
-  Save, 
-  X, 
-  Plus, 
+import {
+  Settings,
+  Eye,
+  Edit3,
+  Save,
+  X,
+  Plus,
   Trash2,
   ChevronDown,
   ChevronRight,
@@ -13,9 +13,13 @@ import {
   Code,
   Type,
   Lock,
-  Unlock
+  Unlock,
 } from 'lucide-react';
-import { vb6PropertySystem, VB6PropertyDescriptor, VB6PropertyType } from '../services/VB6PropertySystem';
+import {
+  vb6PropertySystem,
+  VB6PropertyDescriptor,
+  VB6PropertyType,
+} from '../services/VB6PropertySystem';
 
 interface VB6PropertyEditorProps {
   className?: string;
@@ -38,7 +42,7 @@ const VB6PropertyEditor: React.FC<VB6PropertyEditorProps> = ({
   instanceId,
   visible = true,
   onClose,
-  onPropertyChanged
+  onPropertyChanged,
 }) => {
   const [properties, setProperties] = useState<PropertyGroup[]>([]);
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
@@ -58,7 +62,7 @@ const VB6PropertyEditor: React.FC<VB6PropertyEditorProps> = ({
         if (!propertyGroups.has(prop.name)) {
           propertyGroups.set(prop.name, {
             name: prop.name,
-            expanded: false
+            expanded: false,
           });
         }
 
@@ -76,56 +80,67 @@ const VB6PropertyEditor: React.FC<VB6PropertyEditorProps> = ({
         }
       }
 
-      setProperties(Array.from(propertyGroups.values()).sort((a, b) => a.name.localeCompare(b.name)));
+      setProperties(
+        Array.from(propertyGroups.values()).sort((a, b) => a.name.localeCompare(b.name))
+      );
     };
 
     loadProperties();
   }, [className]);
 
   // Get current property value
-  const getPropertyValue = useCallback((propertyName: string): any => {
-    if (!instanceId) return undefined;
-    
-    try {
-      return vb6PropertySystem.getProperty(instanceId, propertyName);
-    } catch (error) {
-      console.warn(`Could not get property ${propertyName}:`, error);
-      return undefined;
-    }
-  }, [instanceId]);
+  const getPropertyValue = useCallback(
+    (propertyName: string): any => {
+      if (!instanceId) return undefined;
+
+      try {
+        return vb6PropertySystem.getProperty(instanceId, propertyName);
+      } catch (error) {
+        console.warn(`Could not get property ${propertyName}:`, error);
+        return undefined;
+      }
+    },
+    [instanceId]
+  );
 
   // Set property value
-  const setPropertyValue = useCallback((propertyName: string, value: any, isObjectAssignment: boolean = false) => {
-    if (!instanceId) return;
+  const setPropertyValue = useCallback(
+    (propertyName: string, value: any, isObjectAssignment: boolean = false) => {
+      if (!instanceId) return;
 
-    try {
-      if (isObjectAssignment) {
-        vb6PropertySystem.setProperty(instanceId, propertyName, value);
-      } else {
-        vb6PropertySystem.letProperty(instanceId, propertyName, value);
+      try {
+        if (isObjectAssignment) {
+          vb6PropertySystem.setProperty(instanceId, propertyName, value);
+        } else {
+          vb6PropertySystem.letProperty(instanceId, propertyName, value);
+        }
+
+        if (onPropertyChanged) {
+          onPropertyChanged(propertyName, value);
+        }
+      } catch (error) {
+        console.error(`Could not set property ${propertyName}:`, error);
       }
-      
-      if (onPropertyChanged) {
-        onPropertyChanged(propertyName, value);
-      }
-    } catch (error) {
-      console.error(`Could not set property ${propertyName}:`, error);
-    }
-  }, [instanceId, onPropertyChanged]);
+    },
+    [instanceId, onPropertyChanged]
+  );
 
   // Toggle property group expansion
   const toggleExpanded = useCallback((propertyName: string) => {
-    setProperties(prev => prev.map(prop => 
-      prop.name === propertyName ? { ...prop, expanded: !prop.expanded } : prop
-    ));
+    setProperties(prev =>
+      prev.map(prop => (prop.name === propertyName ? { ...prop, expanded: !prop.expanded } : prop))
+    );
   }, []);
 
   // Start editing a property
-  const startEdit = useCallback((propertyName: string) => {
-    const currentValue = getPropertyValue(propertyName);
-    setEditingProperty(propertyName);
-    setEditValue(formatValueForEdit(currentValue));
-  }, [getPropertyValue]);
+  const startEdit = useCallback(
+    (propertyName: string) => {
+      const currentValue = getPropertyValue(propertyName);
+      setEditingProperty(propertyName);
+      setEditValue(formatValueForEdit(currentValue));
+    },
+    [getPropertyValue]
+  );
 
   // Save edited property
   const saveEdit = useCallback(() => {
@@ -170,34 +185,34 @@ const VB6PropertyEditor: React.FC<VB6PropertyEditorProps> = ({
   // Parse edited value
   const parseEditValue = useCallback((editValue: string): any => {
     if (editValue === '') return null;
-    
+
     // Try to parse as JSON first
     try {
       return JSON.parse(editValue);
     } catch {
       // If not JSON, try other formats
       const trimmed = editValue.trim();
-      
+
       // Boolean
       if (trimmed.toLowerCase() === 'true') return true;
       if (trimmed.toLowerCase() === 'false') return false;
-      
+
       // Number
       const numValue = parseFloat(trimmed);
       if (!isNaN(numValue)) return numValue;
-      
+
       // Date
       const dateValue = new Date(trimmed);
       if (!isNaN(dateValue.getTime())) return dateValue;
-      
+
       // Default to string
       return trimmed;
     }
   }, []);
 
   // Filter properties
-  const filteredProperties = properties.filter(prop =>
-    filter === '' || prop.name.toLowerCase().includes(filter.toLowerCase())
+  const filteredProperties = properties.filter(
+    prop => filter === '' || prop.name.toLowerCase().includes(filter.toLowerCase())
   );
 
   // Get property type info
@@ -225,7 +240,7 @@ const VB6PropertyEditor: React.FC<VB6PropertyEditorProps> = ({
           <span className="font-medium text-sm">VB6 Property Editor</span>
           <span className="text-xs text-gray-500">({className})</span>
         </div>
-        
+
         <div className="flex items-center gap-1">
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
@@ -234,13 +249,9 @@ const VB6PropertyEditor: React.FC<VB6PropertyEditorProps> = ({
           >
             <Code size={14} />
           </button>
-          
+
           {onClose && (
-            <button
-              onClick={onClose}
-              className="p-1 hover:bg-gray-200 rounded"
-              title="Close"
-            >
+            <button onClick={onClose} className="p-1 hover:bg-gray-200 rounded" title="Close">
               <X size={14} />
             </button>
           )}
@@ -253,7 +264,7 @@ const VB6PropertyEditor: React.FC<VB6PropertyEditorProps> = ({
           type="text"
           placeholder="Filter properties..."
           value={filter}
-          onChange={(e) => setFilter(e.target.value)}
+          onChange={e => setFilter(e.target.value)}
           className="w-full text-sm border border-gray-300 rounded px-2 py-1"
         />
       </div>
@@ -272,9 +283,9 @@ const VB6PropertyEditor: React.FC<VB6PropertyEditorProps> = ({
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
-            {filteredProperties.map((group) => (
+            {filteredProperties.map(group => (
               <div key={group.name} className="p-2">
-                <div 
+                <div
                   className={`flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-1 rounded ${
                     selectedProperty === group.name ? 'bg-blue-50' : ''
                   }`}
@@ -311,9 +322,9 @@ const VB6PropertyEditor: React.FC<VB6PropertyEditorProps> = ({
                           <input
                             type="text"
                             value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
+                            onChange={e => setEditValue(e.target.value)}
                             className="text-xs border border-blue-300 rounded px-1 py-0.5 w-20"
-                            onKeyDown={(e) => {
+                            onKeyDown={e => {
                               if (e.key === 'Enter') saveEdit();
                               if (e.key === 'Escape') cancelEdit();
                             }}
@@ -337,7 +348,7 @@ const VB6PropertyEditor: React.FC<VB6PropertyEditorProps> = ({
                           {formatValue(getPropertyValue(group.name))}
                           {!isReadOnly(group) && (
                             <button
-                              onClick={(e) => {
+                              onClick={e => {
                                 e.stopPropagation();
                                 startEdit(group.name);
                               }}
@@ -363,12 +374,13 @@ const VB6PropertyEditor: React.FC<VB6PropertyEditorProps> = ({
                         </div>
                         {group.get.parameters.length > 0 && (
                           <div className="text-gray-600">
-                            Parameters: {group.get.parameters.map(p => `${p.name}: ${p.type}`).join(', ')}
+                            Parameters:{' '}
+                            {group.get.parameters.map(p => `${p.name}: ${p.type}`).join(', ')}
                           </div>
                         )}
                       </div>
                     )}
-                    
+
                     {group.let && (
                       <div className="bg-blue-50 p-2 rounded">
                         <div className="font-medium text-blue-700">Property Let</div>
@@ -377,21 +389,21 @@ const VB6PropertyEditor: React.FC<VB6PropertyEditorProps> = ({
                         </div>
                         {group.let.parameters.length > 0 && (
                           <div className="text-gray-600">
-                            Parameters: {group.let.parameters.map(p => `${p.name}: ${p.type}`).join(', ')}
+                            Parameters:{' '}
+                            {group.let.parameters.map(p => `${p.name}: ${p.type}`).join(', ')}
                           </div>
                         )}
                       </div>
                     )}
-                    
+
                     {group.set && (
                       <div className="bg-purple-50 p-2 rounded">
                         <div className="font-medium text-purple-700">Property Set</div>
-                        <div className="text-gray-600">
-                          Accepts object references
-                        </div>
+                        <div className="text-gray-600">Accepts object references</div>
                         {group.set.parameters.length > 0 && (
                           <div className="text-gray-600">
-                            Parameters: {group.set.parameters.map(p => `${p.name}: ${p.type}`).join(', ')}
+                            Parameters:{' '}
+                            {group.set.parameters.map(p => `${p.name}: ${p.type}`).join(', ')}
                           </div>
                         )}
                       </div>
@@ -410,9 +422,7 @@ const VB6PropertyEditor: React.FC<VB6PropertyEditorProps> = ({
           {filteredProperties.length} properties
           {instanceId && ` | Instance: ${instanceId.split('_')[0]}`}
         </span>
-        <span>
-          {editingProperty ? 'Editing...' : 'Click to expand, double-click to edit'}
-        </span>
+        <span>{editingProperty ? 'Editing...' : 'Click to expand, double-click to edit'}</span>
       </div>
     </div>
   );

@@ -60,7 +60,8 @@ export class ErrorBoundaryService {
   private maxErrorHistory = 100;
   private sessionId: string;
   private originalFetch?: typeof window.fetch;
-  private eventHandlers: Array<{element: EventTarget; event: string; handler: EventListener}> = [];
+  private eventHandlers: Array<{ element: EventTarget; event: string; handler: EventListener }> =
+    [];
 
   constructor() {
     this.sessionId = this.generateSessionId();
@@ -82,7 +83,7 @@ export class ErrorBoundaryService {
       message,
       category,
       level,
-      data
+      data,
     };
 
     this.breadcrumbs.push(breadcrumb);
@@ -109,11 +110,11 @@ export class ErrorBoundaryService {
       userAgent: navigator.userAgent,
       buildVersion: appVersion,
       feature,
-      props
+      props,
     };
 
     const report = this.createErrorReport(error, errorInfo, context);
-    
+
     // Add to history
     this.errorHistory.push(report);
     if (this.errorHistory.length > this.maxErrorHistory) {
@@ -121,12 +122,10 @@ export class ErrorBoundaryService {
     }
 
     // Add error breadcrumb
-    this.addBreadcrumb(
-      `Error in ${feature}: ${error.message}`,
-      'console',
-      'error',
-      { stack: error.stack, props }
-    );
+    this.addBreadcrumb(`Error in ${feature}: ${error.message}`, 'console', 'error', {
+      stack: error.stack,
+      props,
+    });
 
     // Notify listeners
     this.errorListeners.forEach(listener => {
@@ -139,7 +138,7 @@ export class ErrorBoundaryService {
 
     // Try recovery strategies
     const recovered = await this.attemptRecovery(error, context);
-    
+
     // Log error if not recovered
     if (!recovered) {
       this.logError(report);
@@ -160,7 +159,7 @@ export class ErrorBoundaryService {
    */
   addErrorListener(listener: (report: ErrorReport) => void): () => void {
     this.errorListeners.push(listener);
-    
+
     // Return unsubscribe function
     return () => {
       const index = this.errorListeners.indexOf(listener);
@@ -186,12 +185,10 @@ export class ErrorBoundaryService {
 
     this.errorHistory.forEach(report => {
       // By feature
-      errorsByFeature[report.context.feature] = 
-        (errorsByFeature[report.context.feature] || 0) + 1;
+      errorsByFeature[report.context.feature] = (errorsByFeature[report.context.feature] || 0) + 1;
 
       // By severity
-      errorsBySeverity[report.severity] = 
-        (errorsBySeverity[report.severity] || 0) + 1;
+      errorsBySeverity[report.severity] = (errorsBySeverity[report.severity] || 0) + 1;
 
       // Recoverable count
       if (report.recoverable) {
@@ -204,7 +201,7 @@ export class ErrorBoundaryService {
       errorsByFeature,
       errorsBySeverity,
       recoverableErrors,
-      recentErrors: this.errorHistory.slice(-10)
+      recentErrors: this.errorHistory.slice(-10),
     };
   }
 
@@ -225,7 +222,7 @@ export class ErrorBoundaryService {
       errors: this.errorHistory,
       breadcrumbs: this.breadcrumbs,
       statistics: this.getErrorStatistics(),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     return JSON.stringify(data, null, 2);
@@ -242,65 +239,93 @@ export class ErrorBoundaryService {
     return ({ error, errorInfo, retry }) => {
       const [showDebug, setShowDebug] = React.useState(false);
 
-      return React.createElement('div', {
-        style: {
-          padding: '20px',
-          border: '1px solid #ff6b6b',
-          borderRadius: '8px',
-          backgroundColor: '#ffe0e0',
-          margin: '20px',
-          fontFamily: 'Arial, sans-serif'
-        }
-      }, [
-        React.createElement('h2', { key: 'title', style: { color: '#d63031', marginTop: 0 } }, title),
-        React.createElement('p', { key: 'message', style: { color: '#2d3436' } }, message),
-        
-        retry && React.createElement('button', {
-          key: 'retry',
-          onClick: retry,
+      return React.createElement(
+        'div',
+        {
           style: {
-            padding: '8px 16px',
-            backgroundColor: '#0984e3',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            marginRight: '10px'
-          }
-        }, 'Try Again'),
+            padding: '20px',
+            border: '1px solid #ff6b6b',
+            borderRadius: '8px',
+            backgroundColor: '#ffe0e0',
+            margin: '20px',
+            fontFamily: 'Arial, sans-serif',
+          },
+        },
+        [
+          React.createElement(
+            'h2',
+            { key: 'title', style: { color: '#d63031', marginTop: 0 } },
+            title
+          ),
+          React.createElement('p', { key: 'message', style: { color: '#2d3436' } }, message),
 
-        showDetails && React.createElement('button', {
-          key: 'debug',
-          onClick: () => setShowDebug(!showDebug),
-          style: {
-            padding: '8px 16px',
-            backgroundColor: '#636e72',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }
-        }, showDebug ? 'Hide Details' : 'Show Details'),
+          retry &&
+            React.createElement(
+              'button',
+              {
+                key: 'retry',
+                onClick: retry,
+                style: {
+                  padding: '8px 16px',
+                  backgroundColor: '#0984e3',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  marginRight: '10px',
+                },
+              },
+              'Try Again'
+            ),
 
-        showDebug && error && React.createElement('details', {
-          key: 'details',
-          style: { marginTop: '15px' }
-        }, [
-          React.createElement('summary', { key: 'summary' }, 'Error Details'),
-          React.createElement('pre', {
-            key: 'stack',
-            style: {
-              backgroundColor: '#2d3436',
-              color: '#ddd',
-              padding: '10px',
-              borderRadius: '4px',
-              overflow: 'auto',
-              fontSize: '12px',
-              marginTop: '10px'
-            }
-          }, error.stack)
-        ])
-      ]);
+          showDetails &&
+            React.createElement(
+              'button',
+              {
+                key: 'debug',
+                onClick: () => setShowDebug(!showDebug),
+                style: {
+                  padding: '8px 16px',
+                  backgroundColor: '#636e72',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                },
+              },
+              showDebug ? 'Hide Details' : 'Show Details'
+            ),
+
+          showDebug &&
+            error &&
+            React.createElement(
+              'details',
+              {
+                key: 'details',
+                style: { marginTop: '15px' },
+              },
+              [
+                React.createElement('summary', { key: 'summary' }, 'Error Details'),
+                React.createElement(
+                  'pre',
+                  {
+                    key: 'stack',
+                    style: {
+                      backgroundColor: '#2d3436',
+                      color: '#ddd',
+                      padding: '10px',
+                      borderRadius: '4px',
+                      overflow: 'auto',
+                      fontSize: '12px',
+                      marginTop: '10px',
+                    },
+                  },
+                  error.stack
+                ),
+              ]
+            ),
+        ]
+      );
     };
   }
 
@@ -319,7 +344,11 @@ export class ErrorBoundaryService {
       this.handleError(error, { componentStack: '' }, 'promise-rejection');
     };
     window.addEventListener('unhandledrejection', unhandledRejectionHandler);
-    this.eventHandlers.push({element: window, event: 'unhandledrejection', handler: unhandledRejectionHandler as EventListener});
+    this.eventHandlers.push({
+      element: window,
+      event: 'unhandledrejection',
+      handler: unhandledRejectionHandler as EventListener,
+    });
 
     // Global JavaScript errors
     const errorHandler = (event: ErrorEvent) => {
@@ -329,44 +358,44 @@ export class ErrorBoundaryService {
       this.handleError(error, { componentStack: '' }, 'global-error', {
         filename: event.filename,
         lineno: event.lineno,
-        colno: event.colno
+        colno: event.colno,
       });
     };
     window.addEventListener('error', errorHandler);
-    this.eventHandlers.push({element: window, event: 'error', handler: errorHandler as EventListener});
+    this.eventHandlers.push({
+      element: window,
+      event: 'error',
+      handler: errorHandler as EventListener,
+    });
 
     // Navigation tracking
     const popstateHandler = () => {
       this.addBreadcrumb('Navigation: popstate', 'navigation', 'info', {
-        url: window.location.href
+        url: window.location.href,
       });
     };
     window.addEventListener('popstate', popstateHandler);
-    this.eventHandlers.push({element: window, event: 'popstate', handler: popstateHandler});
+    this.eventHandlers.push({ element: window, event: 'popstate', handler: popstateHandler });
 
     // Network error tracking
     this.originalFetch = window.fetch;
     window.fetch = async (...args) => {
       try {
         const response = await this.originalFetch!(...args);
-        
+
         if (!response.ok) {
-          this.addBreadcrumb(
-            `Network error: ${response.status}`,
-            'network',
-            'error',
-            { url: args[0], status: response.status }
-          );
+          this.addBreadcrumb(`Network error: ${response.status}`, 'network', 'error', {
+            url: args[0],
+            status: response.status,
+          });
         }
 
         return response;
       } catch (error) {
-        this.addBreadcrumb(
-          `Network failure: ${error.message}`,
-          'network',
-          'error',
-          { url: args[0], error: error.message }
-        );
+        this.addBreadcrumb(`Network failure: ${error.message}`, 'network', 'error', {
+          url: args[0],
+          error: error.message,
+        });
         throw error;
       }
     };
@@ -388,34 +417,36 @@ export class ErrorBoundaryService {
       severity,
       recoverable,
       stackTrace: error.stack || '',
-      breadcrumbs: [...this.breadcrumbs]
+      breadcrumbs: [...this.breadcrumbs],
     };
   }
 
   private determineErrorSeverity(error: Error, context: ErrorContext): ErrorReport['severity'] {
     // Critical errors
-    if (error.message.includes('ChunkLoadError') || 
-        error.message.includes('Loading chunk') ||
-        error.name === 'ChunkLoadError') {
+    if (
+      error.message.includes('ChunkLoadError') ||
+      error.message.includes('Loading chunk') ||
+      error.name === 'ChunkLoadError'
+    ) {
       return 'critical';
     }
 
     // Network-related errors
-    if (error.message.includes('NetworkError') || 
-        error.message.includes('fetch')) {
+    if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
       return 'medium';
     }
 
     // Component errors in core features
-    if (context.feature.includes('compiler') || 
-        context.feature.includes('designer') ||
-        context.feature.includes('editor')) {
+    if (
+      context.feature.includes('compiler') ||
+      context.feature.includes('designer') ||
+      context.feature.includes('editor')
+    ) {
       return 'high';
     }
 
     // UI-related errors
-    if (context.feature.includes('ui') || 
-        context.feature.includes('panel')) {
+    if (context.feature.includes('ui') || context.feature.includes('panel')) {
       return 'medium';
     }
 
@@ -424,14 +455,12 @@ export class ErrorBoundaryService {
 
   private isErrorRecoverable(error: Error, context: ErrorContext): boolean {
     // Network errors are often recoverable
-    if (error.message.includes('NetworkError') || 
-        error.message.includes('fetch')) {
+    if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
       return true;
     }
 
     // Component-specific errors in non-critical areas
-    if (!context.feature.includes('compiler') && 
-        !context.feature.includes('core')) {
+    if (!context.feature.includes('compiler') && !context.feature.includes('core')) {
       return true;
     }
 
@@ -449,12 +478,9 @@ export class ErrorBoundaryService {
         try {
           const recovered = await strategy.recover(error, context);
           if (recovered) {
-            this.addBreadcrumb(
-              `Recovery successful: ${strategy.name}`,
-              'console',
-              'info',
-              { strategy: strategy.id }
-            );
+            this.addBreadcrumb(`Recovery successful: ${strategy.name}`, 'console', 'info', {
+              strategy: strategy.id,
+            });
             return true;
           }
         } catch (recoveryError) {
@@ -471,41 +497,43 @@ export class ErrorBoundaryService {
     this.registerRecoveryStrategy({
       id: 'chunk-reload',
       name: 'Chunk Reload Recovery',
-      condition: (error) => error.name === 'ChunkLoadError' || error.message.includes('Loading chunk'),
+      condition: error =>
+        error.name === 'ChunkLoadError' || error.message.includes('Loading chunk'),
       recover: async () => {
         window.location.reload();
         return true;
-      }
+      },
     });
 
     // Network error retry
     this.registerRecoveryStrategy({
       id: 'network-retry',
       name: 'Network Retry Recovery',
-      condition: (error) => error.message.includes('NetworkError') || error.message.includes('fetch'),
+      condition: error => error.message.includes('NetworkError') || error.message.includes('fetch'),
       recover: async (error, context) => {
         // Wait a bit and retry the action
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         // If there's a retry action in context, use it
         if (context.action === 'retry') {
           return true;
         }
-        
+
         return false;
-      }
+      },
     });
 
     // Component reset recovery
     this.registerRecoveryStrategy({
       id: 'component-reset',
       name: 'Component Reset Recovery',
-      condition: (error, context) => !context.feature.includes('compiler') && !context.feature.includes('core'),
+      condition: (error, context) =>
+        !context.feature.includes('compiler') && !context.feature.includes('core'),
       recover: async () => {
         // Reset component state by forcing re-render
         // This would be implemented by the actual error boundary
         return true;
-      }
+      },
     });
   }
 
@@ -514,9 +542,14 @@ export class ErrorBoundaryService {
   }
 
   private logError(report: ErrorReport): void {
-    const logLevel = report.severity === 'critical' ? 'error' : 
-                     report.severity === 'high' ? 'error' :
-                     report.severity === 'medium' ? 'warn' : 'info';
+    const logLevel =
+      report.severity === 'critical'
+        ? 'error'
+        : report.severity === 'high'
+          ? 'error'
+          : report.severity === 'medium'
+            ? 'warn'
+            : 'info';
 
     console[logLevel]('VB6 Studio Error Report:', {
       id: report.id,
@@ -525,7 +558,7 @@ export class ErrorBoundaryService {
       message: report.error.message,
       stack: report.stackTrace,
       context: report.context,
-      breadcrumbs: report.breadcrumbs.slice(-5) // Last 5 breadcrumbs
+      breadcrumbs: report.breadcrumbs.slice(-5), // Last 5 breadcrumbs
     });
 
     // In production, send to error reporting service
@@ -556,13 +589,13 @@ export class ErrorBoundaryService {
       element.removeEventListener(event, handler);
     });
     this.eventHandlers = [];
-    
+
     // Restore original fetch
     if (this.originalFetch) {
       window.fetch = this.originalFetch;
       this.originalFetch = undefined;
     }
-    
+
     // Clear data
     this.errorHistory = [];
     this.breadcrumbs = [];
@@ -601,10 +634,10 @@ export class VB6ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorB
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({ errorInfo });
-    
+
     // Handle error through service
     errorBoundaryService.handleError(error, errorInfo, this.props.feature);
-    
+
     // Call custom error handler
     this.props.onError?.(error, errorInfo);
   }
@@ -615,7 +648,8 @@ export class VB6ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorB
 
   render() {
     if (this.state.hasError) {
-      const FallbackComponent = this.props.fallback || 
+      const FallbackComponent =
+        this.props.fallback ||
         errorBoundaryService.createErrorFallback(
           `Error in ${this.props.feature}`,
           'This component encountered an error and could not render.',
@@ -625,23 +659,23 @@ export class VB6ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorB
       return React.createElement(FallbackComponent, {
         error: this.state.error,
         errorInfo: this.state.errorInfo,
-        retry: this.retry
-    });
-
-    // Emit structured client log (non-blocking)
-    try {
-      logEvent('errors', 'error', report.error.message, {
-        id: report.id,
-        severity: report.severity,
-        recoverable: report.recoverable,
-        feature: report.context.feature,
-        url: report.context.url,
-        stack: report.stackTrace?.slice(0, 2000),
+        retry: this.retry,
       });
-    } catch {
-      // Error reporting failed, ignore
+
+      // Emit structured client log (non-blocking)
+      try {
+        logEvent('errors', 'error', report.error.message, {
+          id: report.id,
+          severity: report.severity,
+          recoverable: report.recoverable,
+          feature: report.context.feature,
+          url: report.context.url,
+          stack: report.stackTrace?.slice(0, 2000),
+        });
+      } catch {
+        // Error reporting failed, ignore
+      }
     }
-  }
 
     return this.props.children;
   }

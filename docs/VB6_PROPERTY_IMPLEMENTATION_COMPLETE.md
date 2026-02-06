@@ -191,6 +191,7 @@ set Value(value) {
 ```
 
 **Pour Property Set (objets)**:
+
 ```javascript
 // VB6 Property Set
 // Property Set Font(ByVal vNewFont As Object)
@@ -244,6 +245,7 @@ interface MyClass {
 **44 tests implémentés et passés (100%)**:
 
 ### Suite 1: Property Processor - Parsing (12 tests)
+
 - ✅ Parse simple Property Get
 - ✅ Parse Property Let
 - ✅ Parse Property Set
@@ -258,6 +260,7 @@ interface MyClass {
 - ✅ Parse indexed Property Let
 
 ### Suite 2: Property Processor - Registration (6 tests)
+
 - ✅ Register and retrieve Property Get
 - ✅ Register Property Get and Let together
 - ✅ Identify read-only property
@@ -266,6 +269,7 @@ interface MyClass {
 - ✅ Get module properties
 
 ### Suite 3: Property Processor - Code Generation (7 tests)
+
 - ✅ Generate JavaScript for simple property
 - ✅ Generate JavaScript for read-only property
 - ✅ Generate JavaScript for object property
@@ -275,6 +279,7 @@ interface MyClass {
 - ✅ Map VB6 types to TypeScript correctly
 
 ### Suite 4: Property Processor - Validation (5 tests)
+
 - ✅ Validate type consistency between Get and Let
 - ✅ Detect type mismatch between Get and Let
 - ✅ Allow Variant type compatibility
@@ -282,10 +287,12 @@ interface MyClass {
 - ✅ Warn if Let is used with Object types
 
 ### Suite 5: Property Processor - Export/Import (2 tests)
+
 - ✅ Export and import property data
 - ✅ Clear all properties
 
 ### Suite 6: Real-World VB6 Property Scenarios (6 tests)
+
 - ✅ Handle simple value property
 - ✅ Handle validated property
 - ✅ Handle indexed property
@@ -294,6 +301,7 @@ interface MyClass {
 - ✅ Handle read-only Count property
 
 ### Suite 7: Edge Cases (6 tests)
+
 - ✅ Handle property with no return type
 - ✅ Handle property with multiple parameters
 - ✅ Handle case-insensitive keywords
@@ -306,11 +314,13 @@ interface MyClass {
 ## 📊 Statistiques
 
 ### Fichiers Créés/Modifiés
+
 - ✅ `src/compiler/VB6PropertySupport.ts` - 488 lignes
 - ✅ `src/runtime/VB6PropertyProcedures.ts` - 336 lignes
 - ✅ `src/test/compiler/VB6Property.test.ts` - 570 lignes (44 tests)
 
 ### Couverture Fonctionnelle
+
 - **Parsing**: 100%
 - **Code Generation**: 100%
 - **Type Validation**: 100%
@@ -333,15 +343,9 @@ const processor = new VB6PropertyProcessor();
 processor.setCurrentModule('MyModule');
 
 // Parse Property declaration
-const getter = processor.parsePropertyDeclaration(
-  'Property Get Value() As Long',
-  1
-);
+const getter = processor.parsePropertyDeclaration('Property Get Value() As Long', 1);
 
-const letter = processor.parsePropertyDeclaration(
-  'Property Let Value(ByVal vNewValue As Long)',
-  2
-);
+const letter = processor.parsePropertyDeclaration('Property Let Value(ByVal vNewValue As Long)', 2);
 
 // Register properties
 processor.registerProperty(getter!);
@@ -378,19 +382,34 @@ import { VB6PropertyManager } from '@/runtime/VB6PropertyProcedures';
 const manager = new VB6PropertyManager();
 
 // Define Property Get
-manager.definePropertyGet('MyClass', 'Value', function() {
-  return this._value;
-}, 'Long');
+manager.definePropertyGet(
+  'MyClass',
+  'Value',
+  function () {
+    return this._value;
+  },
+  'Long'
+);
 
 // Define Property Let
-manager.definePropertyLet('MyClass', 'Value', function(value: number) {
-  this._value = value;
-}, 'Long');
+manager.definePropertyLet(
+  'MyClass',
+  'Value',
+  function (value: number) {
+    this._value = value;
+  },
+  'Long'
+);
 
 // Define Property Set
-manager.definePropertySet('MyClass', 'Font', function(font: any) {
-  this._font = font;
-}, 'Object');
+manager.definePropertySet(
+  'MyClass',
+  'Font',
+  function (font: any) {
+    this._font = font;
+  },
+  'Object'
+);
 
 // Use properties
 const instance: any = {};
@@ -628,11 +647,11 @@ Debug.Print rect.Perimeter  ' 30
 
 ### ⚠️ Différences avec VB6 Natif
 
-| Feature | VB6 Natif | VB6 Web | Impact |
-|---------|-----------|---------|--------|
-| Paramètres ByRef | Modifications persistantes | Émulé | **Faible** - La plupart des cas couverts |
-| Property Default | Attribute VB_UserMemID = 0 | Configuration manuelle | **Faible** - Peut être implémenté |
-| Property arrays | Automatique avec paramètres | Nécessite indexation | **Négligeable** |
+| Feature          | VB6 Natif                   | VB6 Web                | Impact                                   |
+| ---------------- | --------------------------- | ---------------------- | ---------------------------------------- |
+| Paramètres ByRef | Modifications persistantes  | Émulé                  | **Faible** - La plupart des cas couverts |
+| Property Default | Attribute VB_UserMemID = 0  | Configuration manuelle | **Faible** - Peut être implémenté        |
+| Property arrays  | Automatique avec paramètres | Nécessite indexation   | **Négligeable**                          |
 
 ### 🔄 Pattern Let vs Set
 
@@ -655,6 +674,7 @@ Set obj.Font = font   ' Appelle Property Set
 ```
 
 **En JavaScript/Web**:
+
 - Un seul setter unifié distingue automatiquement objets vs valeurs
 - Type checking pour Property Set (doit être objet)
 - Warning si Property Let utilisé avec Object
@@ -681,17 +701,20 @@ Property Get/Let/Set support est maintenant complet. Phase 1 continue avec:
 ## 📚 Ressources
 
 ### Documentation
+
 - `src/compiler/VB6PropertySupport.ts` - Compiler avec documentation inline
 - `src/runtime/VB6PropertyProcedures.ts` - Runtime avec exemples
 - `src/test/compiler/VB6Property.test.ts` - 44 tests avec exemples d'usage
 
 ### Références VB6
+
 - Microsoft VB6 Language Reference - Property Procedures
 - VB6 Programming Best Practices - Properties
 
 ### Exemples de Code
 
 Le fichier `VB6PropertySupport.ts` contient plusieurs exemples complets:
+
 - Simple property avec backing field
 - Read-only property
 - Object property avec Set

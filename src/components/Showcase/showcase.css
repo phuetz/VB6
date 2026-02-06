@@ -23,7 +23,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -58,7 +59,7 @@
 
 /* Grid pattern for form designer */
 .bg-grid-pattern {
-  background-image: 
+  background-image:
     linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
   background-size: 20px 20px;
@@ -239,7 +240,7 @@
   .showcase-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .control-grid {
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   }
@@ -252,18 +253,28 @@
     max-height: 200px;
     overflow-y: auto;
   }
-  
+
   .showcase-content {
     height: calc(100vh - 280px);
   }
 }
 
 /* Animation delays for staggered effects */
-.delay-100 { animation-delay: 0.1s; }
-.delay-200 { animation-delay: 0.2s; }
-.delay-300 { animation-delay: 0.3s; }
-.delay-400 { animation-delay: 0.4s; }
-.delay-500 { animation-delay: 0.5s; }
+.delay-100 {
+  animation-delay: 0.1s;
+}
+.delay-200 {
+  animation-delay: 0.2s;
+}
+.delay-300 {
+  animation-delay: 0.3s;
+}
+.delay-400 {
+  animation-delay: 0.4s;
+}
+.delay-500 {
+  animation-delay: 0.5s;
+}
 
 /* Loading states */
 .loading-shimmer {
@@ -297,7 +308,7 @@
     border-width: 2px;
     border-color: currentColor;
   }
-  
+
   .status-indicator {
     border: 2px solid currentColor;
   }

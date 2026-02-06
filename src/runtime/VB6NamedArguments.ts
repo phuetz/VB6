@@ -45,18 +45,18 @@ export interface FunctionSignature {
 export class VB6NamedArgumentsManager {
   private static instance: VB6NamedArgumentsManager;
   private functionSignatures: Map<string, FunctionSignature> = new Map();
-  
+
   constructor() {
     this.registerBuiltInFunctions();
   }
-  
+
   static getInstance(): VB6NamedArgumentsManager {
     if (!VB6NamedArgumentsManager.instance) {
       VB6NamedArgumentsManager.instance = new VB6NamedArgumentsManager();
     }
     return VB6NamedArgumentsManager.instance;
   }
-  
+
   /**
    * Register a function signature
    * @param signature Function signature
@@ -64,7 +64,7 @@ export class VB6NamedArgumentsManager {
   registerFunction(signature: FunctionSignature): void {
     this.functionSignatures.set(signature.name, signature);
   }
-  
+
   /**
    * Parse named arguments from a function call
    * @param functionName Function name
@@ -76,12 +76,12 @@ export class VB6NamedArgumentsManager {
       // If no signature registered, return args as-is
       return args;
     }
-    
+
     // Separate positional and named arguments
     const positionalArgs: any[] = [];
     const namedArgs: NamedArgument[] = [];
     let foundNamed = false;
-    
+
     for (const arg of args) {
       if (this.isNamedArgument(arg)) {
         foundNamed = true;
@@ -92,28 +92,28 @@ export class VB6NamedArgumentsManager {
         positionalArgs.push(arg);
       }
     }
-    
+
     // Build final argument array
     const finalArgs: any[] = [...positionalArgs];
-    
+
     // Fill in named arguments
     for (const namedArg of namedArgs) {
       const paramIndex = signature.parameters.findIndex(
         p => p.name.toLowerCase() === namedArg.name.toLowerCase()
       );
-      
+
       if (paramIndex === -1) {
         throw new Error(`Named argument not found: ${namedArg.name}`);
       }
-      
+
       // Ensure array is long enough
       while (finalArgs.length <= paramIndex) {
         finalArgs.push(undefined);
       }
-      
+
       finalArgs[paramIndex] = namedArg.value;
     }
-    
+
     // Fill in default values for missing optional parameters
     for (let i = 0; i < signature.parameters.length; i++) {
       if (finalArgs[i] === undefined) {
@@ -125,20 +125,24 @@ export class VB6NamedArgumentsManager {
         }
       }
     }
-    
+
     return finalArgs;
   }
-  
+
   /**
    * Check if an argument is a named argument
    * @param arg Argument to check
    */
   private isNamedArgument(arg: any): boolean {
-    return arg && typeof arg === 'object' && 
-           'name' in arg && 'value' in arg &&
-           arg.constructor === Object;
+    return (
+      arg &&
+      typeof arg === 'object' &&
+      'name' in arg &&
+      'value' in arg &&
+      arg.constructor === Object
+    );
   }
-  
+
   /**
    * Register built-in VB6 functions with their signatures
    */
@@ -151,11 +155,11 @@ export class VB6NamedArgumentsManager {
         { name: 'Buttons', type: 'Integer', optional: true, defaultValue: 0 },
         { name: 'Title', type: 'String', optional: true },
         { name: 'HelpFile', type: 'String', optional: true },
-        { name: 'Context', type: 'Long', optional: true }
+        { name: 'Context', type: 'Long', optional: true },
       ],
-      returnType: 'Integer'
+      returnType: 'Integer',
     });
-    
+
     // InputBox function
     this.registerFunction({
       name: 'InputBox',
@@ -166,11 +170,11 @@ export class VB6NamedArgumentsManager {
         { name: 'XPos', type: 'Single', optional: true },
         { name: 'YPos', type: 'Single', optional: true },
         { name: 'HelpFile', type: 'String', optional: true },
-        { name: 'Context', type: 'Long', optional: true }
+        { name: 'Context', type: 'Long', optional: true },
       ],
-      returnType: 'String'
+      returnType: 'String',
     });
-    
+
     // Format function
     this.registerFunction({
       name: 'Format',
@@ -178,22 +182,22 @@ export class VB6NamedArgumentsManager {
         { name: 'Expression', type: 'Variant' },
         { name: 'Format', type: 'String', optional: true },
         { name: 'FirstDayOfWeek', type: 'Integer', optional: true, defaultValue: 1 },
-        { name: 'FirstWeekOfYear', type: 'Integer', optional: true, defaultValue: 1 }
+        { name: 'FirstWeekOfYear', type: 'Integer', optional: true, defaultValue: 1 },
       ],
-      returnType: 'String'
+      returnType: 'String',
     });
-    
+
     // DateAdd function
     this.registerFunction({
       name: 'DateAdd',
       parameters: [
         { name: 'Interval', type: 'String' },
         { name: 'Number', type: 'Double' },
-        { name: 'Date', type: 'Date' }
+        { name: 'Date', type: 'Date' },
       ],
-      returnType: 'Date'
+      returnType: 'Date',
     });
-    
+
     // InStr function
     this.registerFunction({
       name: 'InStr',
@@ -201,11 +205,11 @@ export class VB6NamedArgumentsManager {
         { name: 'Start', type: 'Long', optional: true, defaultValue: 1 },
         { name: 'String1', type: 'String' },
         { name: 'String2', type: 'String' },
-        { name: 'Compare', type: 'Integer', optional: true, defaultValue: 0 }
+        { name: 'Compare', type: 'Integer', optional: true, defaultValue: 0 },
       ],
-      returnType: 'Long'
+      returnType: 'Long',
     });
-    
+
     // Replace function
     this.registerFunction({
       name: 'Replace',
@@ -215,50 +219,50 @@ export class VB6NamedArgumentsManager {
         { name: 'Replace', type: 'String' },
         { name: 'Start', type: 'Long', optional: true, defaultValue: 1 },
         { name: 'Count', type: 'Long', optional: true, defaultValue: -1 },
-        { name: 'Compare', type: 'Integer', optional: true, defaultValue: 0 }
+        { name: 'Compare', type: 'Integer', optional: true, defaultValue: 0 },
       ],
-      returnType: 'String'
+      returnType: 'String',
     });
-    
+
     // Mid function
     this.registerFunction({
       name: 'Mid',
       parameters: [
         { name: 'String', type: 'String' },
         { name: 'Start', type: 'Long' },
-        { name: 'Length', type: 'Long', optional: true }
+        { name: 'Length', type: 'Long', optional: true },
       ],
-      returnType: 'String'
+      returnType: 'String',
     });
-    
+
     // CreateObject function
     this.registerFunction({
       name: 'CreateObject',
       parameters: [
         { name: 'Class', type: 'String' },
-        { name: 'ServerName', type: 'String', optional: true }
+        { name: 'ServerName', type: 'String', optional: true },
       ],
-      returnType: 'Object'
+      returnType: 'Object',
     });
-    
+
     // Shell function
     this.registerFunction({
       name: 'Shell',
       parameters: [
         { name: 'PathName', type: 'String' },
-        { name: 'WindowStyle', type: 'Integer', optional: true, defaultValue: 1 }
+        { name: 'WindowStyle', type: 'Integer', optional: true, defaultValue: 1 },
       ],
-      returnType: 'Double'
+      returnType: 'Double',
     });
-    
+
     // Round function
     this.registerFunction({
       name: 'Round',
       parameters: [
         { name: 'Number', type: 'Double' },
-        { name: 'NumDigitsAfterDecimal', type: 'Integer', optional: true, defaultValue: 0 }
+        { name: 'NumDigitsAfterDecimal', type: 'Integer', optional: true, defaultValue: 0 },
       ],
-      returnType: 'Double'
+      returnType: 'Double',
     });
   }
 }
@@ -304,10 +308,10 @@ export function CallWithNamedArgs(func: Function, functionName: string, ...args:
 /**
  * Named argument operator (:=)
  * Creates a named argument from a name-value pair
- * 
+ *
  * Usage in transpiled code:
  * MsgBox("Hello", Named("Title", "Greeting"))
- * 
+ *
  * Original VB6:
  * MsgBox "Hello", Title:="Greeting"
  */
@@ -322,8 +326,8 @@ export function Named(name: string, value: any): NamedArgument {
  * @param returnType Return type (optional)
  */
 export function RegisterFunctionSignature(
-  name: string, 
-  params: ParameterDescriptor[], 
+  name: string,
+  params: ParameterDescriptor[],
   returnType?: string
 ): void {
   const manager = VB6NamedArgumentsManager.getInstance();
@@ -339,12 +343,19 @@ export function RegisterFunctionSignature(
  */
 export function MsgBoxNamed(...args: any[]): number {
   const [prompt, buttons, title, helpFile, context] = ParseNamedArgs('MsgBox', ...args);
-  
+
   // Call the original MsgBox (assuming it exists)
-  if (typeof (global as any).MsgBox === 'function') {
-    return (global as any).MsgBox(prompt, buttons, title, helpFile, context);
+  const globalObj = globalThis as Record<string, unknown>;
+  if (typeof globalObj.MsgBox === 'function') {
+    return (globalObj.MsgBox as (...args: unknown[]) => number)(
+      prompt,
+      buttons,
+      title,
+      helpFile,
+      context
+    );
   }
-  
+
   // Fallback implementation
   alert(prompt);
   return 1; // vbOK
@@ -354,14 +365,25 @@ export function MsgBoxNamed(...args: any[]): number {
  * Enhanced InputBox with named argument support
  */
 export function InputBoxNamed(...args: any[]): string {
-  const [prompt, title, defaultVal, xPos, yPos, helpFile, context] = 
-    ParseNamedArgs('InputBox', ...args);
-  
+  const [prompt, title, defaultVal, xPos, yPos, helpFile, context] = ParseNamedArgs(
+    'InputBox',
+    ...args
+  );
+
   // Call the original InputBox
-  if (typeof (global as any).InputBox === 'function') {
-    return (global as any).InputBox(prompt, title, defaultVal, xPos, yPos, helpFile, context);
+  const globalObj = globalThis as Record<string, unknown>;
+  if (typeof globalObj.InputBox === 'function') {
+    return (globalObj.InputBox as (...args: unknown[]) => string)(
+      prompt,
+      title,
+      defaultVal,
+      xPos,
+      yPos,
+      helpFile,
+      context
+    );
   }
-  
+
   // Fallback implementation
   return window.prompt(prompt, defaultVal) || '';
 }
@@ -370,14 +392,19 @@ export function InputBoxNamed(...args: any[]): string {
  * Enhanced Format with named argument support
  */
 export function FormatNamed(...args: any[]): string {
-  const [expression, format, firstDayOfWeek, firstWeekOfYear] = 
-    ParseNamedArgs('Format', ...args);
-  
+  const [expression, format, firstDayOfWeek, firstWeekOfYear] = ParseNamedArgs('Format', ...args);
+
   // Call the original Format
-  if (typeof (global as any).Format === 'function') {
-    return (global as any).Format(expression, format, firstDayOfWeek, firstWeekOfYear);
+  const globalObj = globalThis as Record<string, unknown>;
+  if (typeof globalObj.Format === 'function') {
+    return (globalObj.Format as (...args: unknown[]) => string)(
+      expression,
+      format,
+      firstDayOfWeek,
+      firstWeekOfYear
+    );
   }
-  
+
   // Fallback
   return String(expression);
 }
@@ -395,30 +422,27 @@ export const VB6NamedArguments = {
   RegisterFunctionSignature,
   MsgBoxNamed,
   InputBoxNamed,
-  FormatNamed
+  FormatNamed,
 };
 
 // Make functions globally available
 if (typeof window !== 'undefined') {
-  const globalAny = window as any;
-  
+  const vb6Window = window as unknown as Record<string, unknown>;
+
   // Named argument functions
-  globalAny.NamedArg = NamedArg;
-  globalAny.Named = Named;
-  globalAny.ParseNamedArgs = ParseNamedArgs;
-  globalAny.CallWithNamedArgs = CallWithNamedArgs;
-  globalAny.RegisterFunctionSignature = RegisterFunctionSignature;
-  
+  vb6Window.NamedArg = NamedArg;
+  vb6Window.Named = Named;
+  vb6Window.ParseNamedArgs = ParseNamedArgs;
+  vb6Window.CallWithNamedArgs = CallWithNamedArgs;
+  vb6Window.RegisterFunctionSignature = RegisterFunctionSignature;
+
   // Enhanced functions with named argument support
-  globalAny.MsgBoxNamed = MsgBoxNamed;
-  globalAny.InputBoxNamed = InputBoxNamed;
-  globalAny.FormatNamed = FormatNamed;
-  
+  vb6Window.MsgBoxNamed = MsgBoxNamed;
+  vb6Window.InputBoxNamed = InputBoxNamed;
+  vb6Window.FormatNamed = FormatNamed;
+
   // Manager instance
-  globalAny.VB6NamedArgumentsManager = VB6NamedArgumentsManager.getInstance();
-  
-  console.log('[VB6] Named arguments loaded - := operator support');
-  console.log('[VB6] Use Named("paramName", value) for named arguments');
+  vb6Window.VB6NamedArgumentsManager = VB6NamedArgumentsManager.getInstance();
 }
 
 export default VB6NamedArguments;

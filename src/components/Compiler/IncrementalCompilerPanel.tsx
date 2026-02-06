@@ -1,28 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  incrementalCompiler, 
-  CompilationResult 
-} from '../../services/IncrementalCompiler';
+import { incrementalCompiler, CompilationResult } from '../../services/IncrementalCompiler';
 import { useVB6Store } from '../../stores/vb6Store';
-import { 
-  Zap, 
-  Play, 
-  Pause, 
-  RefreshCw, 
-  AlertCircle, 
+import {
+  Zap,
+  Play,
+  Pause,
+  RefreshCw,
+  AlertCircle,
   CheckCircle,
   FileText,
   Activity,
-  Trash2
+  Trash2,
 } from 'lucide-react';
 
 interface IncrementalCompilerPanelProps {
   className?: string;
 }
 
-const IncrementalCompilerPanel: React.FC<IncrementalCompilerPanelProps> = ({ 
-  className = '' 
-}) => {
+const IncrementalCompilerPanel: React.FC<IncrementalCompilerPanelProps> = ({ className = '' }) => {
   const [isWatching, setIsWatching] = useState(false);
   const [lastResult, setLastResult] = useState<CompilationResult | null>(null);
   const [stats, setStats] = useState(incrementalCompiler.getStats());
@@ -30,60 +25,63 @@ const IncrementalCompilerPanel: React.FC<IncrementalCompilerPanelProps> = ({
   const { controls, eventCode, forms } = useVB6Store();
 
   // Generate form code
-  const generateFormCode = useCallback((form: any, formControls: any[]): string => {
-    const lines: string[] = [];
-    
-    lines.push(`VERSION 5.00`);
-    lines.push(`Begin VB.Form ${form.name}`);
-    lines.push(`   Caption = "${form.caption}"`);
-    lines.push(`   ClientHeight = 3195`);
-    lines.push(`   ClientWidth = 4680`);
-    lines.push(`   ScaleHeight = 3195`);
-    lines.push(`   ScaleWidth = 4680`);
-    
-    // Add controls
-    formControls.forEach(control => {
-      lines.push(`   Begin VB.${control.type} ${control.name}`);
-      Object.entries(control.properties).forEach(([prop, value]) => {
-        if (prop !== 'Name' && prop !== 'Type') {
-          lines.push(`      ${prop} = ${JSON.stringify(value)}`);
+  const generateFormCode = useCallback(
+    (form: any, formControls: any[]): string => {
+      const lines: string[] = [];
+
+      lines.push(`VERSION 5.00`);
+      lines.push(`Begin VB.Form ${form.name}`);
+      lines.push(`   Caption = "${form.caption}"`);
+      lines.push(`   ClientHeight = 3195`);
+      lines.push(`   ClientWidth = 4680`);
+      lines.push(`   ScaleHeight = 3195`);
+      lines.push(`   ScaleWidth = 4680`);
+
+      // Add controls
+      formControls.forEach(control => {
+        lines.push(`   Begin VB.${control.type} ${control.name}`);
+        Object.entries(control.properties).forEach(([prop, value]) => {
+          if (prop !== 'Name' && prop !== 'Type') {
+            lines.push(`      ${prop} = ${JSON.stringify(value)}`);
+          }
+        });
+        lines.push(`   End`);
+      });
+
+      lines.push(`End`);
+
+      // Add form code
+      const formCode = eventCode[`${form.name}_(General)_(Declarations)`] || '';
+      if (formCode) {
+        lines.push('');
+        lines.push(formCode);
+      }
+
+      // Add event handlers
+      Object.entries(eventCode).forEach(([key, code]) => {
+        if (key.startsWith(form.name) && key !== `${form.name}_(General)_(Declarations)`) {
+          lines.push('');
+          const [, eventName] = key.split('_');
+          lines.push(`Private Sub ${key.replace('_', '_')}()`);
+          lines.push(code as string);
+          lines.push('End Sub');
         }
       });
-      lines.push(`   End`);
-    });
-    
-    lines.push(`End`);
-    
-    // Add form code
-    const formCode = eventCode[`${form.name}_(General)_(Declarations)`] || '';
-    if (formCode) {
-      lines.push('');
-      lines.push(formCode);
-    }
-    
-    // Add event handlers
-    Object.entries(eventCode).forEach(([key, code]) => {
-      if (key.startsWith(form.name) && key !== `${form.name}_(General)_(Declarations)`) {
-        lines.push('');
-        const [, eventName] = key.split('_');
-        lines.push(`Private Sub ${key.replace('_', '_')}()`);
-        lines.push(code as string);
-        lines.push('End Sub');
-      }
-    });
-    
-    return lines.join('\n');
-  }, [eventCode]);
+
+      return lines.join('\n');
+    },
+    [eventCode]
+  );
 
   // Generate module code
   const generateModuleCode = useCallback((eventCode: Record<string, string>): string => {
     const generalCode = eventCode['(General)_(Declarations)'];
     if (!generalCode) return '';
-    
+
     const lines: string[] = [];
     lines.push(`Attribute VB_Name = "Module1"`);
     lines.push(generalCode);
-    
+
     return lines.join('\n');
   }, []);
 
@@ -91,7 +89,10 @@ const IncrementalCompilerPanel: React.FC<IncrementalCompilerPanelProps> = ({
   useEffect(() => {
     // Add form files
     forms.forEach(form => {
-      const formContent = generateFormCode(form, controls.filter(c => c.formId === form.id));
+      const formContent = generateFormCode(
+        form,
+        controls.filter(c => c.formId === form.id)
+      );
       incrementalCompiler.addFile(`${form.name}.frm`, formContent);
     });
 
@@ -105,7 +106,7 @@ const IncrementalCompilerPanel: React.FC<IncrementalCompilerPanelProps> = ({
   // Handle compilation
   const handleCompile = useCallback(async () => {
     setIsCompiling(true);
-    
+
     try {
       const result = await incrementalCompiler.compile();
       setLastResult(result);
@@ -123,7 +124,7 @@ const IncrementalCompilerPanel: React.FC<IncrementalCompilerPanelProps> = ({
       incrementalCompiler.stopWatch();
       setIsWatching(false);
     } else {
-      incrementalCompiler.watch((result) => {
+      incrementalCompiler.watch(result => {
         setLastResult(result);
         setStats(incrementalCompiler.getStats());
       });
@@ -142,7 +143,7 @@ const IncrementalCompilerPanel: React.FC<IncrementalCompilerPanelProps> = ({
     const interval = setInterval(() => {
       setStats(incrementalCompiler.getStats());
     }, 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -161,11 +162,7 @@ const IncrementalCompilerPanel: React.FC<IncrementalCompilerPanelProps> = ({
             className="p-1 hover:bg-blue-700 rounded disabled:opacity-50"
             title="Compile"
           >
-            {isCompiling ? (
-              <RefreshCw size={14} className="animate-spin" />
-            ) : (
-              <Play size={14} />
-            )}
+            {isCompiling ? <RefreshCw size={14} className="animate-spin" /> : <Play size={14} />}
           </button>
           <button
             onClick={toggleWatch}
@@ -203,9 +200,7 @@ const IncrementalCompilerPanel: React.FC<IncrementalCompilerPanelProps> = ({
             </div>
             <div className="bg-gray-100 p-2 rounded">
               <div className="text-gray-600">Cache Hit Rate</div>
-              <div className="font-semibold">
-                {(stats.cacheHitRate * 100).toFixed(1)}%
-              </div>
+              <div className="font-semibold">{(stats.cacheHitRate * 100).toFixed(1)}%</div>
             </div>
           </div>
           {stats.lastCompilation > 0 && (
@@ -220,9 +215,7 @@ const IncrementalCompilerPanel: React.FC<IncrementalCompilerPanelProps> = ({
           <div className="mb-4 p-2 bg-green-50 border border-green-200 rounded text-xs">
             <div className="flex items-center gap-2">
               <Activity size={14} className="text-green-600" />
-              <span className="text-green-700">
-                Watching for changes...
-              </span>
+              <span className="text-green-700">Watching for changes...</span>
             </div>
           </div>
         )}
@@ -231,13 +224,15 @@ const IncrementalCompilerPanel: React.FC<IncrementalCompilerPanelProps> = ({
         {lastResult && (
           <div className="mb-4">
             <h3 className="text-sm font-semibold mb-2">Last Compilation</h3>
-            
+
             {/* Status */}
-            <div className={`p-2 rounded mb-2 text-xs ${
-              lastResult.success 
-                ? 'bg-green-50 border border-green-200' 
-                : 'bg-red-50 border border-red-200'
-            }`}>
+            <div
+              className={`p-2 rounded mb-2 text-xs ${
+                lastResult.success
+                  ? 'bg-green-50 border border-green-200'
+                  : 'bg-red-50 border border-red-200'
+              }`}
+            >
               <div className="flex items-center gap-2">
                 {lastResult.success ? (
                   <CheckCircle size={14} className="text-green-600" />
@@ -247,9 +242,7 @@ const IncrementalCompilerPanel: React.FC<IncrementalCompilerPanelProps> = ({
                 <span className={lastResult.success ? 'text-green-700' : 'text-red-700'}>
                   {lastResult.success ? 'Compilation Successful' : 'Compilation Failed'}
                 </span>
-                <span className="ml-auto text-gray-600">
-                  {lastResult.duration}ms
-                </span>
+                <span className="ml-auto text-gray-600">{lastResult.duration}ms</span>
               </div>
             </div>
 
@@ -261,8 +254,8 @@ const IncrementalCompilerPanel: React.FC<IncrementalCompilerPanelProps> = ({
                 </h4>
                 <div className="space-y-1">
                   {lastResult.errors.map((error, index) => (
-                    <div 
-                      key={index} 
+                    <div
+                      key={index}
                       className="bg-red-50 border border-red-200 p-2 rounded text-xs"
                     >
                       <div className="flex items-start gap-2">
@@ -273,9 +266,7 @@ const IncrementalCompilerPanel: React.FC<IncrementalCompilerPanelProps> = ({
                           </div>
                           <div className="text-red-700">{error.message}</div>
                           {error.code && (
-                            <div className="text-red-600 text-xs">
-                              Code: {error.code}
-                            </div>
+                            <div className="text-red-600 text-xs">Code: {error.code}</div>
                           )}
                         </div>
                       </div>
@@ -293,8 +284,8 @@ const IncrementalCompilerPanel: React.FC<IncrementalCompilerPanelProps> = ({
                 </h4>
                 <div className="space-y-1">
                   {lastResult.warnings.map((warning, index) => (
-                    <div 
-                      key={index} 
+                    <div
+                      key={index}
                       className="bg-yellow-50 border border-yellow-200 p-2 rounded text-xs"
                     >
                       <div className="flex items-start gap-2">

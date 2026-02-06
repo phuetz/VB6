@@ -196,19 +196,13 @@ describe('TASK-006: LoggingService', () => {
       const extraArg = { foo: 'bar' };
       logger.log('Message with args', extraArg);
 
-      expect(console.log).toHaveBeenCalledWith(
-        expect.any(String),
-        extraArg
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.any(String), extraArg);
     });
 
     it('devrait gérer plusieurs arguments', () => {
       logger.log('Multiple args', 1, 2, 3);
 
-      expect(console.log).toHaveBeenCalledWith(
-        expect.any(String),
-        1, 2, 3
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.any(String), 1, 2, 3);
     });
   });
 

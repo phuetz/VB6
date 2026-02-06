@@ -16,7 +16,7 @@ export enum SourceSafeOperation {
   Merge = 'Merge',
   Label = 'Label',
   Pin = 'Pin',
-  Properties = 'Properties'
+  Properties = 'Properties',
 }
 
 // File Status
@@ -29,7 +29,7 @@ export enum FileStatus {
   Merged = 'Merged',
   Conflict = 'Conflict',
   Deleted = 'Deleted',
-  Added = 'Added'
+  Added = 'Added',
 }
 
 // Version Info
@@ -121,7 +121,7 @@ interface SourceSafeIntegrationProps {
 export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
   onProjectOpen,
   onFileOperation,
-  onError
+  onError,
 }) => {
   const [connected, setConnected] = useState(false);
   const [currentProject, setCurrentProject] = useState<SourceSafeProject | null>(null);
@@ -136,7 +136,7 @@ export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
     files: [],
     globalComment: '',
     applyToAll: false,
-    operation: 'checkin'
+    operation: 'checkin',
   });
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [mergeConflicts, setMergeConflicts] = useState<MergeConflict[]>([]);
@@ -144,7 +144,7 @@ export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
     database: '',
     user: '',
     password: '',
-    workingFolder: ''
+    workingFolder: '',
   });
   const [statusMessage, setStatusMessage] = useState('');
   const [refreshing, setRefreshing] = useState(false);
@@ -196,7 +196,7 @@ export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
                 serverVersion: 5,
                 checkedOutBy: 'developer',
                 checkedOutDate: new Date(),
-                isDirectory: false
+                isDirectory: false,
               },
               {
                 id: generateId(),
@@ -205,9 +205,9 @@ export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
                 status: FileStatus.Outdated,
                 localVersion: 3,
                 serverVersion: 4,
-                isDirectory: false
-              }
-            ]
+                isDirectory: false,
+              },
+            ],
           },
           {
             id: generateId(),
@@ -227,9 +227,9 @@ export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
                 serverVersion: 2,
                 checkedOutBy: 'other_dev',
                 checkedOutDate: new Date(Date.now() - 86400000),
-                isDirectory: false
-              }
-            ]
+                isDirectory: false,
+              },
+            ],
           },
           {
             id: generateId(),
@@ -238,11 +238,11 @@ export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
             status: FileStatus.Controlled,
             localVersion: 10,
             serverVersion: 10,
-            isDirectory: false
-          }
-        ]
-      }
-    ]
+            isDirectory: false,
+          },
+        ],
+      },
+    ],
   };
 
   // Connect to Source Safe
@@ -253,7 +253,7 @@ export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
     }
 
     setStatusMessage('Connecting to Visual SourceSafe...');
-    
+
     // Simulate connection
     setTimeout(() => {
       setConnected(true);
@@ -289,164 +289,178 @@ export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
   }, []);
 
   // Get latest version
-  const getLatest = useCallback((files: SourceSafeFile[]) => {
-    setStatusMessage(`Getting latest version of ${files.length} file(s)...`);
-    
-    files.forEach(file => {
-      if (!file.isDirectory) {
-        file.localVersion = file.serverVersion;
-        file.status = FileStatus.Controlled;
-      }
-    });
+  const getLatest = useCallback(
+    (files: SourceSafeFile[]) => {
+      setStatusMessage(`Getting latest version of ${files.length} file(s)...`);
 
-    setStatusMessage(`Got latest version of ${files.length} file(s)`);
-    onFileOperation?.(SourceSafeOperation.GetLatest, files);
-    eventEmitter.current.emit('getLatest', files);
-  }, [onFileOperation]);
+      files.forEach(file => {
+        if (!file.isDirectory) {
+          file.localVersion = file.serverVersion;
+          file.status = FileStatus.Controlled;
+        }
+      });
+
+      setStatusMessage(`Got latest version of ${files.length} file(s)`);
+      onFileOperation?.(SourceSafeOperation.GetLatest, files);
+      eventEmitter.current.emit('getLatest', files);
+    },
+    [onFileOperation]
+  );
 
   // Check out files
-  const checkOut = useCallback((files: SourceSafeFile[], comment: string = '') => {
-    const checkOutFiles = files.filter(f => 
-      !f.isDirectory && 
-      f.status !== FileStatus.CheckedOut && 
-      f.status !== FileStatus.CheckedOutByOther
-    );
+  const checkOut = useCallback(
+    (files: SourceSafeFile[], comment: string = '') => {
+      const checkOutFiles = files.filter(
+        f =>
+          !f.isDirectory &&
+          f.status !== FileStatus.CheckedOut &&
+          f.status !== FileStatus.CheckedOutByOther
+      );
 
-    if (checkOutFiles.length === 0) {
-      onError?.('No files available for check out');
-      return;
-    }
+      if (checkOutFiles.length === 0) {
+        onError?.('No files available for check out');
+        return;
+      }
 
-    setStatusMessage(`Checking out ${checkOutFiles.length} file(s)...`);
+      setStatusMessage(`Checking out ${checkOutFiles.length} file(s)...`);
 
-    checkOutFiles.forEach(file => {
-      file.status = FileStatus.CheckedOut;
-      file.checkedOutBy = currentProject?.user || 'developer';
-      file.checkedOutDate = new Date();
-      file.comment = comment;
-    });
+      checkOutFiles.forEach(file => {
+        file.status = FileStatus.CheckedOut;
+        file.checkedOutBy = currentProject?.user || 'developer';
+        file.checkedOutDate = new Date();
+        file.comment = comment;
+      });
 
-    setStatusMessage(`Checked out ${checkOutFiles.length} file(s)`);
-    onFileOperation?.(SourceSafeOperation.CheckOut, checkOutFiles);
-    eventEmitter.current.emit('checkOut', checkOutFiles);
-    setShowCheckOutDialog(false);
-  }, [currentProject, onFileOperation, onError]);
+      setStatusMessage(`Checked out ${checkOutFiles.length} file(s)`);
+      onFileOperation?.(SourceSafeOperation.CheckOut, checkOutFiles);
+      eventEmitter.current.emit('checkOut', checkOutFiles);
+      setShowCheckOutDialog(false);
+    },
+    [currentProject, onFileOperation, onError]
+  );
 
   // Check in files
-  const checkIn = useCallback((files: SourceSafeFile[], comment: string = '', keepCheckedOut: boolean = false) => {
-    const checkInFiles = files.filter(f => 
-      !f.isDirectory && 
-      f.status === FileStatus.CheckedOut
-    );
+  const checkIn = useCallback(
+    (files: SourceSafeFile[], comment: string = '', keepCheckedOut: boolean = false) => {
+      const checkInFiles = files.filter(f => !f.isDirectory && f.status === FileStatus.CheckedOut);
 
-    if (checkInFiles.length === 0) {
-      onError?.('No files to check in');
-      return;
-    }
+      if (checkInFiles.length === 0) {
+        onError?.('No files to check in');
+        return;
+      }
 
-    setStatusMessage(`Checking in ${checkInFiles.length} file(s)...`);
+      setStatusMessage(`Checking in ${checkInFiles.length} file(s)...`);
 
-    checkInFiles.forEach(file => {
-      file.serverVersion++;
-      file.localVersion = file.serverVersion;
-      file.status = keepCheckedOut ? FileStatus.CheckedOut : FileStatus.Controlled;
-      if (!keepCheckedOut) {
+      checkInFiles.forEach(file => {
+        file.serverVersion++;
+        file.localVersion = file.serverVersion;
+        file.status = keepCheckedOut ? FileStatus.CheckedOut : FileStatus.Controlled;
+        if (!keepCheckedOut) {
+          file.checkedOutBy = undefined;
+          file.checkedOutDate = undefined;
+          file.comment = undefined;
+        }
+      });
+
+      // Add to history
+      const historyEntry: HistoryEntry = {
+        version: checkInFiles[0].serverVersion,
+        date: new Date(),
+        user: currentProject?.user || 'developer',
+        action: 'Check In',
+        comment: comment,
+        files: checkInFiles.map(f => ({
+          path: f.path,
+          change: 'modified' as const,
+        })),
+      };
+      setHistory(prev => [historyEntry, ...prev]);
+
+      setStatusMessage(`Checked in ${checkInFiles.length} file(s)`);
+      onFileOperation?.(SourceSafeOperation.CheckIn, checkInFiles);
+      eventEmitter.current.emit('checkIn', checkInFiles);
+      setShowCheckInDialog(false);
+    },
+    [currentProject, onFileOperation, onError]
+  );
+
+  // Undo check out
+  const undoCheckOut = useCallback(
+    (files: SourceSafeFile[]) => {
+      const undoFiles = files.filter(f => !f.isDirectory && f.status === FileStatus.CheckedOut);
+
+      if (undoFiles.length === 0) {
+        onError?.('No files to undo check out');
+        return;
+      }
+
+      if (
+        !window.confirm(
+          `Undo check out for ${undoFiles.length} file(s)? Local changes will be lost.`
+        )
+      ) {
+        return;
+      }
+
+      setStatusMessage(`Undoing check out for ${undoFiles.length} file(s)...`);
+
+      undoFiles.forEach(file => {
+        file.status = FileStatus.Controlled;
         file.checkedOutBy = undefined;
         file.checkedOutDate = undefined;
         file.comment = undefined;
-      }
-    });
+        file.localVersion = file.serverVersion;
+      });
 
-    // Add to history
-    const historyEntry: HistoryEntry = {
-      version: checkInFiles[0].serverVersion,
-      date: new Date(),
-      user: currentProject?.user || 'developer',
-      action: 'Check In',
-      comment: comment,
-      files: checkInFiles.map(f => ({
-        path: f.path,
-        change: 'modified' as const
-      }))
-    };
-    setHistory(prev => [historyEntry, ...prev]);
-
-    setStatusMessage(`Checked in ${checkInFiles.length} file(s)`);
-    onFileOperation?.(SourceSafeOperation.CheckIn, checkInFiles);
-    eventEmitter.current.emit('checkIn', checkInFiles);
-    setShowCheckInDialog(false);
-  }, [currentProject, onFileOperation, onError]);
-
-  // Undo check out
-  const undoCheckOut = useCallback((files: SourceSafeFile[]) => {
-    const undoFiles = files.filter(f => 
-      !f.isDirectory && 
-      f.status === FileStatus.CheckedOut
-    );
-
-    if (undoFiles.length === 0) {
-      onError?.('No files to undo check out');
-      return;
-    }
-
-    if (!window.confirm(`Undo check out for ${undoFiles.length} file(s)? Local changes will be lost.`)) {
-      return;
-    }
-
-    setStatusMessage(`Undoing check out for ${undoFiles.length} file(s)...`);
-
-    undoFiles.forEach(file => {
-      file.status = FileStatus.Controlled;
-      file.checkedOutBy = undefined;
-      file.checkedOutDate = undefined;
-      file.comment = undefined;
-      file.localVersion = file.serverVersion;
-    });
-
-    setStatusMessage(`Undid check out for ${undoFiles.length} file(s)`);
-    onFileOperation?.(SourceSafeOperation.UndoCheckOut, undoFiles);
-    eventEmitter.current.emit('undoCheckOut', undoFiles);
-  }, [onFileOperation, onError]);
+      setStatusMessage(`Undid check out for ${undoFiles.length} file(s)`);
+      onFileOperation?.(SourceSafeOperation.UndoCheckOut, undoFiles);
+      eventEmitter.current.emit('undoCheckOut', undoFiles);
+    },
+    [onFileOperation, onError]
+  );
 
   // Show history
-  const showHistory = useCallback((file: SourceSafeFile) => {
-    if (file.isDirectory) {
-      onError?.('Cannot show history for directories');
-      return;
-    }
-
-    // Generate sample history
-    const sampleHistory: HistoryEntry[] = [
-      {
-        version: file.serverVersion,
-        date: new Date(),
-        user: 'developer',
-        action: 'Check In',
-        comment: 'Fixed form layout issues',
-        files: [{ path: file.path, change: 'modified' }]
-      },
-      {
-        version: file.serverVersion - 1,
-        date: new Date(Date.now() - 86400000),
-        user: 'other_dev',
-        action: 'Check In',
-        comment: 'Added new controls',
-        label: 'Version 1.2',
-        files: [{ path: file.path, change: 'modified' }]
-      },
-      {
-        version: file.serverVersion - 2,
-        date: new Date(Date.now() - 172800000),
-        user: 'developer',
-        action: 'Add',
-        comment: 'Initial version',
-        files: [{ path: file.path, change: 'added' }]
+  const showHistory = useCallback(
+    (file: SourceSafeFile) => {
+      if (file.isDirectory) {
+        onError?.('Cannot show history for directories');
+        return;
       }
-    ];
 
-    setHistory(sampleHistory);
-    setShowHistoryDialog(true);
-  }, [onError]);
+      // Generate sample history
+      const sampleHistory: HistoryEntry[] = [
+        {
+          version: file.serverVersion,
+          date: new Date(),
+          user: 'developer',
+          action: 'Check In',
+          comment: 'Fixed form layout issues',
+          files: [{ path: file.path, change: 'modified' }],
+        },
+        {
+          version: file.serverVersion - 1,
+          date: new Date(Date.now() - 86400000),
+          user: 'other_dev',
+          action: 'Check In',
+          comment: 'Added new controls',
+          label: 'Version 1.2',
+          files: [{ path: file.path, change: 'modified' }],
+        },
+        {
+          version: file.serverVersion - 2,
+          date: new Date(Date.now() - 172800000),
+          user: 'developer',
+          action: 'Add',
+          comment: 'Initial version',
+          files: [{ path: file.path, change: 'added' }],
+        },
+      ];
+
+      setHistory(sampleHistory);
+      setShowHistoryDialog(true);
+    },
+    [onError]
+  );
 
   // Refresh status
   const refreshStatus = useCallback(() => {
@@ -466,7 +480,7 @@ export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
   // Get file icon based on status
   const getFileIcon = useCallback((file: SourceSafeFile): string => {
     if (file.isDirectory) return '📁';
-    
+
     switch (file.status) {
       case FileStatus.CheckedOut:
         return '✏️';
@@ -506,54 +520,53 @@ export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
   }, []);
 
   // Render file tree
-  const renderFileTree = useCallback((files: SourceSafeFile[], level: number = 0): React.ReactNode => {
-    return files.map(file => {
-      const isExpanded = expandedFolders.has(file.path);
-      const isSelected = selectedFiles.some(f => f.id === file.id);
+  const renderFileTree = useCallback(
+    (files: SourceSafeFile[], level: number = 0): React.ReactNode => {
+      return files.map(file => {
+        const isExpanded = expandedFolders.has(file.path);
+        const isSelected = selectedFiles.some(f => f.id === file.id);
 
-      return (
-        <div key={file.id}>
-          <div
-            className={`flex items-center gap-2 py-1 px-2 hover:bg-gray-100 cursor-pointer ${
-              isSelected ? 'bg-blue-100' : ''
-            }`}
-            style={{ paddingLeft: `${level * 20 + 8}px` }}
-            onClick={() => {
-              if (file.isDirectory) {
-                toggleFolder(file.path);
-              } else {
-                setSelectedFiles(prev => {
-                  const exists = prev.some(f => f.id === file.id);
-                  if (exists) {
-                    return prev.filter(f => f.id !== file.id);
-                  } else {
-                    return [...prev, file];
-                  }
-                });
-              }
-            }}
-          >
-            {file.isDirectory && (
-              <span className="text-xs">{isExpanded ? '▼' : '▶'}</span>
-            )}
-            <span className="text-lg">{getFileIcon(file)}</span>
-            <span className="flex-1 text-sm">{file.name}</span>
-            {!file.isDirectory && (
-              <span className={`text-xs ${getStatusColor(file.status)}`}>
-                {file.status}
-              </span>
-            )}
-            {file.checkedOutBy && file.checkedOutBy !== currentProject?.user && (
-              <span className="text-xs text-gray-500">({file.checkedOutBy})</span>
+        return (
+          <div key={file.id}>
+            <div
+              className={`flex items-center gap-2 py-1 px-2 hover:bg-gray-100 cursor-pointer ${
+                isSelected ? 'bg-blue-100' : ''
+              }`}
+              style={{ paddingLeft: `${level * 20 + 8}px` }}
+              onClick={() => {
+                if (file.isDirectory) {
+                  toggleFolder(file.path);
+                } else {
+                  setSelectedFiles(prev => {
+                    const exists = prev.some(f => f.id === file.id);
+                    if (exists) {
+                      return prev.filter(f => f.id !== file.id);
+                    } else {
+                      return [...prev, file];
+                    }
+                  });
+                }
+              }}
+            >
+              {file.isDirectory && <span className="text-xs">{isExpanded ? '▼' : '▶'}</span>}
+              <span className="text-lg">{getFileIcon(file)}</span>
+              <span className="flex-1 text-sm">{file.name}</span>
+              {!file.isDirectory && (
+                <span className={`text-xs ${getStatusColor(file.status)}`}>{file.status}</span>
+              )}
+              {file.checkedOutBy && file.checkedOutBy !== currentProject?.user && (
+                <span className="text-xs text-gray-500">({file.checkedOutBy})</span>
+              )}
+            </div>
+            {file.isDirectory && isExpanded && file.children && (
+              <div>{renderFileTree(file.children, level + 1)}</div>
             )}
           </div>
-          {file.isDirectory && isExpanded && file.children && (
-            <div>{renderFileTree(file.children, level + 1)}</div>
-          )}
-        </div>
-      );
-    });
-  }, [expandedFolders, selectedFiles, currentProject, getFileIcon, getStatusColor, toggleFolder]);
+        );
+      });
+    },
+    [expandedFolders, selectedFiles, currentProject, getFileIcon, getStatusColor, toggleFolder]
+  );
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -591,31 +604,27 @@ export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
                 <input
                   type="text"
                   value={connectionForm.database}
-                  onChange={(e) => setConnectionForm(prev => ({ ...prev, database: e.target.value }))}
+                  onChange={e => setConnectionForm(prev => ({ ...prev, database: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="\\server\VSS\Database"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  User Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">User Name</label>
                 <input
                   type="text"
                   value={connectionForm.user}
-                  onChange={(e) => setConnectionForm(prev => ({ ...prev, user: e.target.value }))}
+                  onChange={e => setConnectionForm(prev => ({ ...prev, user: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="developer"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Password
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
                 <input
                   type="password"
                   value={connectionForm.password}
-                  onChange={(e) => setConnectionForm(prev => ({ ...prev, password: e.target.value }))}
+                  onChange={e => setConnectionForm(prev => ({ ...prev, password: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -626,7 +635,9 @@ export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
                 <input
                   type="text"
                   value={connectionForm.workingFolder}
-                  onChange={(e) => setConnectionForm(prev => ({ ...prev, workingFolder: e.target.value }))}
+                  onChange={e =>
+                    setConnectionForm(prev => ({ ...prev, workingFolder: e.target.value }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="C:\Projects\MyApp"
                 />
@@ -715,14 +726,14 @@ export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[600px] max-h-[80vh] overflow-y-auto">
             <h2 className="text-lg font-medium mb-4">Check In Files</h2>
-            
+
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Comment
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Comment</label>
               <textarea
                 value={checkInOutState.globalComment}
-                onChange={(e) => setCheckInOutState(prev => ({ ...prev, globalComment: e.target.value }))}
+                onChange={e =>
+                  setCheckInOutState(prev => ({ ...prev, globalComment: e.target.value }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded"
                 rows={3}
                 placeholder="Enter check-in comment..."
@@ -732,16 +743,21 @@ export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
             <div className="mb-4">
               <h3 className="font-medium mb-2">Files to check in:</h3>
               <div className="space-y-2">
-                {selectedFiles.filter(f => !f.isDirectory && f.status === FileStatus.CheckedOut).map(file => (
-                  <div key={file.id} className="flex items-center gap-2 p-2 border border-gray-200 rounded">
-                    <input type="checkbox" defaultChecked />
-                    <span className="flex-1 text-sm">{file.path}</span>
-                    <label className="flex items-center gap-1 text-sm">
-                      <input type="checkbox" />
-                      Keep checked out
-                    </label>
-                  </div>
-                ))}
+                {selectedFiles
+                  .filter(f => !f.isDirectory && f.status === FileStatus.CheckedOut)
+                  .map(file => (
+                    <div
+                      key={file.id}
+                      className="flex items-center gap-2 p-2 border border-gray-200 rounded"
+                    >
+                      <input type="checkbox" defaultChecked />
+                      <span className="flex-1 text-sm">{file.path}</span>
+                      <label className="flex items-center gap-1 text-sm">
+                        <input type="checkbox" />
+                        Keep checked out
+                      </label>
+                    </div>
+                  ))}
               </div>
             </div>
 
@@ -768,14 +784,16 @@ export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[600px]">
             <h2 className="text-lg font-medium mb-4">Check Out Files</h2>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Comment (optional)
               </label>
               <textarea
                 value={checkInOutState.globalComment}
-                onChange={(e) => setCheckInOutState(prev => ({ ...prev, globalComment: e.target.value }))}
+                onChange={e =>
+                  setCheckInOutState(prev => ({ ...prev, globalComment: e.target.value }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded"
                 rows={3}
                 placeholder="Enter check-out comment..."
@@ -785,12 +803,17 @@ export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
             <div className="mb-4">
               <h3 className="font-medium mb-2">Files to check out:</h3>
               <div className="space-y-2">
-                {selectedFiles.filter(f => !f.isDirectory && f.status !== FileStatus.CheckedOut).map(file => (
-                  <div key={file.id} className="flex items-center gap-2 p-2 border border-gray-200 rounded">
-                    <input type="checkbox" defaultChecked />
-                    <span className="text-sm">{file.path}</span>
-                  </div>
-                ))}
+                {selectedFiles
+                  .filter(f => !f.isDirectory && f.status !== FileStatus.CheckedOut)
+                  .map(file => (
+                    <div
+                      key={file.id}
+                      className="flex items-center gap-2 p-2 border border-gray-200 rounded"
+                    >
+                      <input type="checkbox" defaultChecked />
+                      <span className="text-sm">{file.path}</span>
+                    </div>
+                  ))}
               </div>
             </div>
 
@@ -817,7 +840,7 @@ export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[700px] max-h-[80vh] overflow-y-auto">
             <h2 className="text-lg font-medium mb-4">File History</h2>
-            
+
             <div className="space-y-4">
               {history.map((entry, index) => (
                 <div key={index} className="border border-gray-200 rounded p-4">
@@ -837,7 +860,9 @@ export const SourceSafeIntegration: React.FC<SourceSafeIntegrationProps> = ({
                     <strong>{entry.action}:</strong> {entry.comment || 'No comment'}
                   </div>
                   <div className="mt-2 flex gap-2">
-                    <button className="text-xs text-blue-600 hover:underline">Get This Version</button>
+                    <button className="text-xs text-blue-600 hover:underline">
+                      Get This Version
+                    </button>
                     <button className="text-xs text-blue-600 hover:underline">View</button>
                     <button className="text-xs text-blue-600 hover:underline">Diff</button>
                     <button className="text-xs text-blue-600 hover:underline">Report</button>

@@ -13,7 +13,7 @@ export enum AddInType {
   ImportExport = 'Import/Export',
   Documentation = 'Documentation',
   Testing = 'Testing',
-  Deployment = 'Deployment'
+  Deployment = 'Deployment',
 }
 
 export enum AddInStatus {
@@ -22,21 +22,21 @@ export enum AddInStatus {
   Error = 'Error',
   Disabled = 'Disabled',
   Loading = 'Loading',
-  Unloading = 'Unloading'
+  Unloading = 'Unloading',
 }
 
 export enum AddInTrustLevel {
   Trusted = 'Trusted',
   Untrusted = 'Untrusted',
   Sandboxed = 'Sandboxed',
-  Restricted = 'Restricted'
+  Restricted = 'Restricted',
 }
 
 export enum AddInConnectMode {
   Startup = 'Startup',
   Manual = 'Manual',
   OnDemand = 'OnDemand',
-  External = 'External'
+  External = 'External',
 }
 
 // Add-in Interface
@@ -163,9 +163,11 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
   onAddInLoaded,
   onAddInUnloaded,
   onAddInError,
-  onCommand
+  onCommand,
 }) => {
-  const [selectedTab, setSelectedTab] = useState<'installed' | 'available' | 'develop' | 'settings'>('installed');
+  const [selectedTab, setSelectedTab] = useState<
+    'installed' | 'available' | 'develop' | 'settings'
+  >('installed');
   const [addIns, setAddIns] = useState<AddInInfo[]>([]);
   const [selectedAddIn, setSelectedAddIn] = useState<AddInInfo | null>(null);
   const [availableAddIns, setAvailableAddIns] = useState<AddInInfo[]>([]);
@@ -183,7 +185,7 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
     enablePerformanceMonitoring: true,
     sandboxUntrustedAddIns: true,
     trustedPublishers: [],
-    blockedAddIns: []
+    blockedAddIns: [],
   });
   const [developerForm, setDeveloperForm] = useState<Partial<AddInInfo>>({
     type: AddInType.IDEExtension,
@@ -194,7 +196,7 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
     toolbarButtons: [],
     settings: {},
     permissions: [],
-    dependencies: []
+    dependencies: [],
   });
   const [events, setEvents] = useState<AddInEvent[]>([]);
   const [isDebugging, setIsDebugging] = useState(false);
@@ -239,30 +241,28 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
               name: 'FormatCode',
               parameters: [
                 { name: 'code', type: 'String', optional: false },
-                { name: 'options', type: 'FormatOptions', optional: true }
+                { name: 'options', type: 'FormatOptions', optional: true },
               ],
               returnType: 'String',
-              description: 'Formats the provided VB6 code'
-            }
+              description: 'Formats the provided VB6 code',
+            },
           ],
           events: [
             {
               name: 'FormatComplete',
-              parameters: [
-                { name: 'result', type: 'String' }
-              ],
-              description: 'Fired when formatting is complete'
-            }
+              parameters: [{ name: 'result', type: 'String' }],
+              description: 'Fired when formatting is complete',
+            },
           ],
           properties: [
             {
               name: 'IndentSize',
               type: 'Long',
               readonly: false,
-              description: 'Number of spaces for indentation'
-            }
-          ]
-        }
+              description: 'Number of spaces for indentation',
+            },
+          ],
+        },
       ],
       menuItems: [
         {
@@ -270,8 +270,8 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
           command: 'FormatCurrentFile',
           shortcut: 'Ctrl+Shift+F',
           enabled: true,
-          visible: true
-        }
+          visible: true,
+        },
       ],
       toolbarButtons: [
         {
@@ -280,31 +280,31 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
           icon: 'format_icon.bmp',
           tooltip: 'Format current code file',
           enabled: true,
-          visible: true
-        }
+          visible: true,
+        },
       ],
       settings: {
         indentSize: 4,
         preserveComments: true,
-        alignAssignments: false
+        alignAssignments: false,
       },
       permissions: [
         {
           name: 'FileSystem.Read',
           granted: true,
-          description: 'Read source code files'
+          description: 'Read source code files',
         },
         {
           name: 'FileSystem.Write',
           granted: true,
-          description: 'Write formatted code back to files'
-        }
+          description: 'Write formatted code back to files',
+        },
       ],
       performance: {
         startupTime: 250,
         memoryUsage: 2048,
-        cpuUsage: 1.2
-      }
+        cpuUsage: 1.2,
+      },
     },
     {
       id: 'addon_2',
@@ -333,54 +333,50 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
           methods: [
             {
               name: 'CheckOut',
-              parameters: [
-                { name: 'filename', type: 'String', optional: false }
-              ],
+              parameters: [{ name: 'filename', type: 'String', optional: false }],
               returnType: 'Boolean',
-              description: 'Checks out a file from source control'
+              description: 'Checks out a file from source control',
             },
             {
               name: 'CheckIn',
               parameters: [
                 { name: 'filename', type: 'String', optional: false },
-                { name: 'comment', type: 'String', optional: true }
+                { name: 'comment', type: 'String', optional: true },
               ],
               returnType: 'Boolean',
-              description: 'Checks in a file to source control'
-            }
+              description: 'Checks in a file to source control',
+            },
           ],
           events: [
             {
               name: 'FileCheckedOut',
-              parameters: [
-                { name: 'filename', type: 'String' }
-              ],
-              description: 'Fired when a file is checked out'
-            }
+              parameters: [{ name: 'filename', type: 'String' }],
+              description: 'Fired when a file is checked out',
+            },
           ],
           properties: [
             {
               name: 'Database',
               type: 'String',
               readonly: false,
-              description: 'Path to SourceSafe database'
-            }
-          ]
-        }
+              description: 'Path to SourceSafe database',
+            },
+          ],
+        },
       ],
       menuItems: [
         {
           caption: 'Check &Out',
           command: 'CheckOutFile',
           enabled: true,
-          visible: true
+          visible: true,
         },
         {
           caption: 'Check &In',
           command: 'CheckInFile',
           enabled: true,
-          visible: true
-        }
+          visible: true,
+        },
       ],
       toolbarButtons: [
         {
@@ -389,36 +385,36 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
           icon: 'vss_icon.bmp',
           tooltip: 'Show Visual SourceSafe Explorer',
           enabled: true,
-          visible: true
-        }
+          visible: true,
+        },
       ],
       settings: {
         database: 'C:\\VSS\\srcsafe.ini',
         autoCheckOut: false,
-        promptForComments: true
+        promptForComments: true,
       },
       permissions: [
         {
           name: 'FileSystem.Read',
           granted: true,
-          description: 'Read project files'
+          description: 'Read project files',
         },
         {
           name: 'FileSystem.Write',
           granted: true,
-          description: 'Update file status'
+          description: 'Update file status',
         },
         {
           name: 'Network.Access',
           granted: true,
-          description: 'Access SourceSafe database'
-        }
+          description: 'Access SourceSafe database',
+        },
       ],
       performance: {
         startupTime: 500,
         memoryUsage: 4096,
-        cpuUsage: 0.8
-      }
+        cpuUsage: 0.8,
+      },
     },
     {
       id: 'addon_3',
@@ -446,34 +442,34 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
           command: 'ShowAPIHelper',
           shortcut: 'Ctrl+F1',
           enabled: true,
-          visible: true
-        }
+          visible: true,
+        },
       ],
       toolbarButtons: [],
       settings: {
         showOnStartup: false,
-        cacheDeclarations: true
+        cacheDeclarations: true,
       },
       permissions: [
         {
           name: 'IDE.Access',
           granted: false,
-          description: 'Access to IDE object model'
-        }
+          description: 'Access to IDE object model',
+        },
       ],
       performance: {
         startupTime: 0,
         memoryUsage: 0,
-        cpuUsage: 0
-      }
-    }
+        cpuUsage: 0,
+      },
+    },
   ];
 
   // Initialize add-ins
   useEffect(() => {
     setAddIns(sampleAddIns);
     setAvailableAddIns([]);
-    
+
     // Load startup add-ins
     if (settings.autoLoadOnStartup) {
       sampleAddIns
@@ -488,137 +484,149 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
 
   // Filter add-ins
   const filteredAddIns = addIns.filter(addIn => {
-    const matchesSearch = !searchFilter || 
+    const matchesSearch =
+      !searchFilter ||
       addIn.displayName.toLowerCase().includes(searchFilter.toLowerCase()) ||
       addIn.description.toLowerCase().includes(searchFilter.toLowerCase()) ||
       addIn.author.toLowerCase().includes(searchFilter.toLowerCase());
-    
+
     const matchesStatus = statusFilter === 'All' || addIn.status === statusFilter;
     const matchesType = typeFilter === 'All' || addIn.type === typeFilter;
-    
+
     return matchesSearch && matchesStatus && matchesType;
   });
 
   // Load add-in
-  const loadAddIn = useCallback(async (addInId: string) => {
-    const addIn = addIns.find(a => a.id === addInId);
-    if (!addIn || addIn.status === AddInStatus.Loaded) return;
+  const loadAddIn = useCallback(
+    async (addInId: string) => {
+      const addIn = addIns.find(a => a.id === addInId);
+      if (!addIn || addIn.status === AddInStatus.Loaded) return;
 
-    // Update status to loading
-    setAddIns(prev => prev.map(a => 
-      a.id === addInId 
-        ? { ...a, status: AddInStatus.Loading }
-        : a
-    ));
+      // Update status to loading
+      setAddIns(prev =>
+        prev.map(a => (a.id === addInId ? { ...a, status: AddInStatus.Loading } : a))
+      );
 
-    try {
-      // Simulate loading delay
-      const startTime = Date.now();
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const loadTime = Date.now() - startTime;
+      try {
+        // Simulate loading delay
+        const startTime = Date.now();
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const loadTime = Date.now() - startTime;
 
-      // Security check
-      if (settings.enableSecurityChecks && addIn.trustLevel === AddInTrustLevel.Untrusted && !settings.allowUntrustedAddIns) {
-        throw new Error('Untrusted add-in not allowed by security policy');
+        // Security check
+        if (
+          settings.enableSecurityChecks &&
+          addIn.trustLevel === AddInTrustLevel.Untrusted &&
+          !settings.allowUntrustedAddIns
+        ) {
+          throw new Error('Untrusted add-in not allowed by security policy');
+        }
+
+        // Check dependencies
+        const missingDeps = addIn.dependencies.filter(dep => {
+          // Simulate dependency check
+          return Math.random() > 0.9; // 10% chance of missing dependency
+        });
+
+        if (missingDeps.length > 0) {
+          throw new Error(`Missing dependencies: ${missingDeps.join(', ')}`);
+        }
+
+        // Update status to loaded
+        setAddIns(prev =>
+          prev.map(a =>
+            a.id === addInId
+              ? {
+                  ...a,
+                  status: AddInStatus.Loaded,
+                  loadTime,
+                  performance: {
+                    ...a.performance,
+                    startupTime: loadTime,
+                    memoryUsage: Math.floor(Math.random() * 5000) + 1000,
+                    cpuUsage: Math.random() * 2,
+                  },
+                }
+              : a
+          )
+        );
+
+        onAddInLoaded?.(addIn);
+        eventEmitter.current.emit('addInLoaded', addIn);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+        setAddIns(prev =>
+          prev.map(a =>
+            a.id === addInId ? { ...a, status: AddInStatus.Error, lastError: errorMessage } : a
+          )
+        );
+
+        onAddInError?.(addIn, errorMessage);
+        eventEmitter.current.emit('addInError', addIn, errorMessage);
       }
-
-      // Check dependencies
-      const missingDeps = addIn.dependencies.filter(dep => {
-        // Simulate dependency check
-        return Math.random() > 0.9; // 10% chance of missing dependency
-      });
-
-      if (missingDeps.length > 0) {
-        throw new Error(`Missing dependencies: ${missingDeps.join(', ')}`);
-      }
-
-      // Update status to loaded
-      setAddIns(prev => prev.map(a => 
-        a.id === addInId 
-          ? { 
-              ...a, 
-              status: AddInStatus.Loaded,
-              loadTime,
-              performance: {
-                ...a.performance,
-                startupTime: loadTime,
-                memoryUsage: Math.floor(Math.random() * 5000) + 1000,
-                cpuUsage: Math.random() * 2
-              }
-            }
-          : a
-      ));
-
-      onAddInLoaded?.(addIn);
-      eventEmitter.current.emit('addInLoaded', addIn);
-
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      
-      setAddIns(prev => prev.map(a => 
-        a.id === addInId 
-          ? { ...a, status: AddInStatus.Error, lastError: errorMessage }
-          : a
-      ));
-
-      onAddInError?.(addIn, errorMessage);
-      eventEmitter.current.emit('addInError', addIn, errorMessage);
-    }
-  }, [addIns, settings, onAddInLoaded, onAddInError]);
+    },
+    [addIns, settings, onAddInLoaded, onAddInError]
+  );
 
   // Unload add-in
-  const unloadAddIn = useCallback(async (addInId: string) => {
-    const addIn = addIns.find(a => a.id === addInId);
-    if (!addIn || addIn.status !== AddInStatus.Loaded) return;
+  const unloadAddIn = useCallback(
+    async (addInId: string) => {
+      const addIn = addIns.find(a => a.id === addInId);
+      if (!addIn || addIn.status !== AddInStatus.Loaded) return;
 
-    setAddIns(prev => prev.map(a => 
-      a.id === addInId 
-        ? { ...a, status: AddInStatus.Unloading }
-        : a
-    ));
+      setAddIns(prev =>
+        prev.map(a => (a.id === addInId ? { ...a, status: AddInStatus.Unloading } : a))
+      );
 
-    try {
-      // Simulate unloading delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      try {
+        // Simulate unloading delay
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-      setAddIns(prev => prev.map(a => 
-        a.id === addInId 
-          ? { 
-              ...a, 
-              status: AddInStatus.Unloaded,
-              performance: {
-                ...a.performance,
-                memoryUsage: 0,
-                cpuUsage: 0
-              }
-            }
-          : a
-      ));
+        setAddIns(prev =>
+          prev.map(a =>
+            a.id === addInId
+              ? {
+                  ...a,
+                  status: AddInStatus.Unloaded,
+                  performance: {
+                    ...a.performance,
+                    memoryUsage: 0,
+                    cpuUsage: 0,
+                  },
+                }
+              : a
+          )
+        );
 
-      onAddInUnloaded?.(addIn);
-      eventEmitter.current.emit('addInUnloaded', addIn);
+        onAddInUnloaded?.(addIn);
+        eventEmitter.current.emit('addInUnloaded', addIn);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unload failed';
 
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unload failed';
-      
-      setAddIns(prev => prev.map(a => 
-        a.id === addInId 
-          ? { ...a, status: AddInStatus.Error, lastError: errorMessage }
-          : a
-      ));
+        setAddIns(prev =>
+          prev.map(a =>
+            a.id === addInId ? { ...a, status: AddInStatus.Error, lastError: errorMessage } : a
+          )
+        );
 
-      onAddInError?.(addIn, errorMessage);
-    }
-  }, [addIns, onAddInUnloaded, onAddInError]);
+        onAddInError?.(addIn, errorMessage);
+      }
+    },
+    [addIns, onAddInUnloaded, onAddInError]
+  );
 
   // Execute add-in command
-  const executeCommand = useCallback((command: string, addInId: string) => {
-    const addIn = addIns.find(a => a.id === addInId);
-    if (!addIn || addIn.status !== AddInStatus.Loaded) return;
+  const executeCommand = useCallback(
+    (command: string, addInId: string) => {
+      const addIn = addIns.find(a => a.id === addInId);
+      if (!addIn || addIn.status !== AddInStatus.Loaded) return;
 
-    onCommand?.(command, addIn);
-    eventEmitter.current.emit('command', command, addIn);
-  }, [addIns, onCommand]);
+      onCommand?.(command, addIn);
+      eventEmitter.current.emit('command', command, addIn);
+    },
+    [addIns, onCommand]
+  );
 
   // Create new add-in
   const createAddIn = useCallback(() => {
@@ -656,8 +664,8 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
       performance: {
         startupTime: 0,
         memoryUsage: 0,
-        cpuUsage: 0
-      }
+        cpuUsage: 0,
+      },
     };
 
     setAddIns(prev => [...prev, newAddIn]);
@@ -671,7 +679,7 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
       toolbarButtons: [],
       settings: {},
       permissions: [],
-      dependencies: []
+      dependencies: [],
     });
   }, [developerForm, generateId]);
 
@@ -687,27 +695,31 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
                 type="text"
                 placeholder="Search add-ins..."
                 value={searchFilter}
-                onChange={(e) => setSearchFilter(e.target.value)}
+                onChange={e => setSearchFilter(e.target.value)}
                 className="px-3 py-1 border border-gray-300 rounded w-64"
               />
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as AddInStatus | 'All')}
+                onChange={e => setStatusFilter(e.target.value as AddInStatus | 'All')}
                 className="px-2 py-1 border border-gray-300 rounded"
               >
                 <option value="All">All Status</option>
                 {Object.values(AddInStatus).map(status => (
-                  <option key={status} value={status}>{status}</option>
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
                 ))}
               </select>
               <select
                 value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value as AddInType | 'All')}
+                onChange={e => setTypeFilter(e.target.value as AddInType | 'All')}
                 className="px-2 py-1 border border-gray-300 rounded"
               >
                 <option value="All">All Types</option>
                 {Object.values(AddInType).map(type => (
-                  <option key={type} value={type}>{type}</option>
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
                 ))}
               </select>
             </div>
@@ -736,7 +748,7 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
             { key: 'installed', label: 'Installed Add-ins', count: addIns.length },
             { key: 'available', label: 'Available', count: availableAddIns.length },
             { key: 'develop', label: 'Developer', count: 0 },
-            { key: 'settings', label: 'Settings', count: 0 }
+            { key: 'settings', label: 'Settings', count: 0 },
           ].map(tab => (
             <button
               key={tab.key}
@@ -776,10 +788,14 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className={`px-2 py-1 rounded text-xs ${getStatusColor(addIn.status)}`}>
+                        <span
+                          className={`px-2 py-1 rounded text-xs ${getStatusColor(addIn.status)}`}
+                        >
                           {addIn.status}
                         </span>
-                        <span className={`px-2 py-1 rounded text-xs ${getTrustColor(addIn.trustLevel)}`}>
+                        <span
+                          className={`px-2 py-1 rounded text-xs ${getTrustColor(addIn.trustLevel)}`}
+                        >
                           {addIn.trustLevel}
                         </span>
                       </div>
@@ -804,7 +820,10 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
                       ) : (
                         <button
                           onClick={() => loadAddIn(addIn.id)}
-                          disabled={addIn.status === AddInStatus.Loading || addIn.status === AddInStatus.Error}
+                          disabled={
+                            addIn.status === AddInStatus.Loading ||
+                            addIn.status === AddInStatus.Error
+                          }
                           className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
                         >
                           {addIn.status === AddInStatus.Loading ? 'Loading...' : 'Load'}
@@ -812,32 +831,34 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
                       )}
                     </div>
                   </div>
-                  
+
                   {addIn.lastError && (
                     <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded">
                       <span className="text-sm text-red-700">{addIn.lastError}</span>
                     </div>
                   )}
-                  
+
                   {addIn.status === AddInStatus.Loaded && addIn.menuItems.length > 0 && (
                     <div className="mt-3">
                       <h4 className="text-sm font-medium mb-2">Menu Items:</h4>
                       <div className="flex flex-wrap gap-2">
-                        {addIn.menuItems.filter(m => m.enabled).map((item, index) => (
-                          <button
-                            key={index}
-                            onClick={() => executeCommand(item.command, addIn.id)}
-                            className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs hover:bg-blue-200"
-                          >
-                            {item.caption} {item.shortcut && `(${item.shortcut})`}
-                          </button>
-                        ))}
+                        {addIn.menuItems
+                          .filter(m => m.enabled)
+                          .map((item, index) => (
+                            <button
+                              key={index}
+                              onClick={() => executeCommand(item.command, addIn.id)}
+                              className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs hover:bg-blue-200"
+                            >
+                              {item.caption} {item.shortcut && `(${item.shortcut})`}
+                            </button>
+                          ))}
                       </div>
                     </div>
                   )}
                 </div>
               ))}
-              
+
               {filteredAddIns.length === 0 && (
                 <div className="text-center py-12 text-gray-500">
                   <div className="text-4xl mb-4">🔌</div>
@@ -863,7 +884,7 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
           <div className="flex-1 p-6">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-2xl font-bold mb-6">Add-in Development</h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="border border-gray-300 rounded-lg p-6">
                   <h3 className="text-lg font-medium mb-4">🛠️ Create New Add-in</h3>
@@ -877,7 +898,7 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
                     New Add-in Project
                   </button>
                 </div>
-                
+
                 <div className="border border-gray-300 rounded-lg p-6">
                   <h3 className="text-lg font-medium mb-4">📚 Documentation</h3>
                   <p className="text-gray-600 mb-4">
@@ -887,7 +908,7 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
                     View Docs
                   </button>
                 </div>
-                
+
                 <div className="border border-gray-300 rounded-lg p-6">
                   <h3 className="text-lg font-medium mb-4">🧪 Test Environment</h3>
                   <p className="text-gray-600 mb-4">
@@ -896,15 +917,15 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
                   <button
                     onClick={() => setIsDebugging(!isDebugging)}
                     className={`px-4 py-2 rounded ${
-                      isDebugging 
-                        ? 'bg-red-500 hover:bg-red-600 text-white' 
+                      isDebugging
+                        ? 'bg-red-500 hover:bg-red-600 text-white'
                         : 'bg-yellow-500 hover:bg-yellow-600 text-white'
                     }`}
                   >
                     {isDebugging ? 'Stop Debugging' : 'Start Debug Mode'}
                   </button>
                 </div>
-                
+
                 <div className="border border-gray-300 rounded-lg p-6">
                   <h3 className="text-lg font-medium mb-4">📦 Package & Deploy</h3>
                   <p className="text-gray-600 mb-4">
@@ -923,7 +944,7 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
           <div className="flex-1 p-6">
             <div className="max-w-2xl mx-auto">
               <h2 className="text-2xl font-bold mb-6">Add-in Manager Settings</h2>
-              
+
               <div className="space-y-6">
                 <div className="border border-gray-300 rounded-lg p-4">
                   <h3 className="text-lg font-medium mb-4">General Settings</h3>
@@ -932,20 +953,27 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
                       <input
                         type="checkbox"
                         checked={settings.autoLoadOnStartup}
-                        onChange={(e) => setSettings(prev => ({ ...prev, autoLoadOnStartup: e.target.checked }))}
+                        onChange={e =>
+                          setSettings(prev => ({ ...prev, autoLoadOnStartup: e.target.checked }))
+                        }
                       />
                       <span>Auto-load add-ins on startup</span>
                     </label>
-                    
+
                     <label className="flex items-center gap-3">
                       <input
                         type="checkbox"
                         checked={settings.enablePerformanceMonitoring}
-                        onChange={(e) => setSettings(prev => ({ ...prev, enablePerformanceMonitoring: e.target.checked }))}
+                        onChange={e =>
+                          setSettings(prev => ({
+                            ...prev,
+                            enablePerformanceMonitoring: e.target.checked,
+                          }))
+                        }
                       />
                       <span>Enable performance monitoring</span>
                     </label>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Maximum load time (ms)
@@ -953,13 +981,15 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
                       <input
                         type="number"
                         value={settings.maxLoadTime}
-                        onChange={(e) => setSettings(prev => ({ ...prev, maxLoadTime: Number(e.target.value) }))}
+                        onChange={e =>
+                          setSettings(prev => ({ ...prev, maxLoadTime: Number(e.target.value) }))
+                        }
                         className="w-32 px-3 py-2 border border-gray-300 rounded"
                       />
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="border border-gray-300 rounded-lg p-4">
                   <h3 className="text-lg font-medium mb-4">Security Settings</h3>
                   <div className="space-y-3">
@@ -967,25 +997,34 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
                       <input
                         type="checkbox"
                         checked={settings.enableSecurityChecks}
-                        onChange={(e) => setSettings(prev => ({ ...prev, enableSecurityChecks: e.target.checked }))}
+                        onChange={e =>
+                          setSettings(prev => ({ ...prev, enableSecurityChecks: e.target.checked }))
+                        }
                       />
                       <span>Enable security checks</span>
                     </label>
-                    
+
                     <label className="flex items-center gap-3">
                       <input
                         type="checkbox"
                         checked={settings.allowUntrustedAddIns}
-                        onChange={(e) => setSettings(prev => ({ ...prev, allowUntrustedAddIns: e.target.checked }))}
+                        onChange={e =>
+                          setSettings(prev => ({ ...prev, allowUntrustedAddIns: e.target.checked }))
+                        }
                       />
                       <span>Allow untrusted add-ins</span>
                     </label>
-                    
+
                     <label className="flex items-center gap-3">
                       <input
                         type="checkbox"
                         checked={settings.sandboxUntrustedAddIns}
-                        onChange={(e) => setSettings(prev => ({ ...prev, sandboxUntrustedAddIns: e.target.checked }))}
+                        onChange={e =>
+                          setSettings(prev => ({
+                            ...prev,
+                            sandboxUntrustedAddIns: e.target.checked,
+                          }))
+                        }
                       />
                       <span>Sandbox untrusted add-ins</span>
                     </label>
@@ -1002,75 +1041,96 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[600px] max-h-[80vh] overflow-y-auto">
             <h3 className="text-lg font-medium mb-4">Create New Add-in</h3>
-            
+
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Internal Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Internal Name
+                  </label>
                   <input
                     type="text"
                     value={developerForm.name || ''}
-                    onChange={(e) => setDeveloperForm(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={e => setDeveloperForm(prev => ({ ...prev, name: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                     placeholder="MyAddIn"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Display Name
+                  </label>
                   <input
                     type="text"
                     value={developerForm.displayName || ''}
-                    onChange={(e) => setDeveloperForm(prev => ({ ...prev, displayName: e.target.value }))}
+                    onChange={e =>
+                      setDeveloperForm(prev => ({ ...prev, displayName: e.target.value }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                     placeholder="My VB6 Add-in"
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
                   value={developerForm.description || ''}
-                  onChange={(e) => setDeveloperForm(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={e =>
+                    setDeveloperForm(prev => ({ ...prev, description: e.target.value }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   rows={3}
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
                   <select
                     value={developerForm.type}
-                    onChange={(e) => setDeveloperForm(prev => ({ ...prev, type: e.target.value as AddInType }))}
+                    onChange={e =>
+                      setDeveloperForm(prev => ({ ...prev, type: e.target.value as AddInType }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   >
                     {Object.values(AddInType).map(type => (
-                      <option key={type} value={type}>{type}</option>
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Connect Mode</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Connect Mode
+                  </label>
                   <select
                     value={developerForm.connectMode}
-                    onChange={(e) => setDeveloperForm(prev => ({ ...prev, connectMode: e.target.value as AddInConnectMode }))}
+                    onChange={e =>
+                      setDeveloperForm(prev => ({
+                        ...prev,
+                        connectMode: e.target.value as AddInConnectMode,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   >
                     {Object.values(AddInConnectMode).map(mode => (
-                      <option key={mode} value={mode}>{mode}</option>
+                      <option key={mode} value={mode}>
+                        {mode}
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Author</label>
                   <input
                     type="text"
                     value={developerForm.author || ''}
-                    onChange={(e) => setDeveloperForm(prev => ({ ...prev, author: e.target.value }))}
+                    onChange={e => setDeveloperForm(prev => ({ ...prev, author: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   />
                 </div>
@@ -1079,14 +1139,14 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
                   <input
                     type="text"
                     value={developerForm.version || ''}
-                    onChange={(e) => setDeveloperForm(prev => ({ ...prev, version: e.target.value }))}
+                    onChange={e => setDeveloperForm(prev => ({ ...prev, version: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                     placeholder="1.0.0"
                   />
                 </div>
               </div>
             </div>
-            
+
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => setShowDeveloperDialog(false)}
@@ -1110,40 +1170,64 @@ export const AddInSystem: React.FC<AddInSystemProps> = ({
 
   function getAddInIcon(type: AddInType): string {
     switch (type) {
-      case AddInType.IDEExtension: return '🔧';
-      case AddInType.CodeGenerator: return '⚡';
-      case AddInType.Debugger: return '🐛';
-      case AddInType.SourceControl: return '📚';
-      case AddInType.Designer: return '🎨';
-      case AddInType.Wizard: return '🪄';
-      case AddInType.Utility: return '🛠️';
-      case AddInType.ImportExport: return '📁';
-      case AddInType.Documentation: return '📖';
-      case AddInType.Testing: return '🧪';
-      case AddInType.Deployment: return '🚀';
-      default: return '🔌';
+      case AddInType.IDEExtension:
+        return '🔧';
+      case AddInType.CodeGenerator:
+        return '⚡';
+      case AddInType.Debugger:
+        return '🐛';
+      case AddInType.SourceControl:
+        return '📚';
+      case AddInType.Designer:
+        return '🎨';
+      case AddInType.Wizard:
+        return '🪄';
+      case AddInType.Utility:
+        return '🛠️';
+      case AddInType.ImportExport:
+        return '📁';
+      case AddInType.Documentation:
+        return '📖';
+      case AddInType.Testing:
+        return '🧪';
+      case AddInType.Deployment:
+        return '🚀';
+      default:
+        return '🔌';
     }
   }
 
   function getStatusColor(status: AddInStatus): string {
     switch (status) {
-      case AddInStatus.Loaded: return 'bg-green-100 text-green-800';
-      case AddInStatus.Unloaded: return 'bg-gray-100 text-gray-800';
-      case AddInStatus.Error: return 'bg-red-100 text-red-800';
-      case AddInStatus.Disabled: return 'bg-yellow-100 text-yellow-800';
-      case AddInStatus.Loading: return 'bg-blue-100 text-blue-800';
-      case AddInStatus.Unloading: return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case AddInStatus.Loaded:
+        return 'bg-green-100 text-green-800';
+      case AddInStatus.Unloaded:
+        return 'bg-gray-100 text-gray-800';
+      case AddInStatus.Error:
+        return 'bg-red-100 text-red-800';
+      case AddInStatus.Disabled:
+        return 'bg-yellow-100 text-yellow-800';
+      case AddInStatus.Loading:
+        return 'bg-blue-100 text-blue-800';
+      case AddInStatus.Unloading:
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   }
 
   function getTrustColor(trustLevel: AddInTrustLevel): string {
     switch (trustLevel) {
-      case AddInTrustLevel.Trusted: return 'bg-green-100 text-green-800';
-      case AddInTrustLevel.Untrusted: return 'bg-red-100 text-red-800';
-      case AddInTrustLevel.Sandboxed: return 'bg-yellow-100 text-yellow-800';
-      case AddInTrustLevel.Restricted: return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case AddInTrustLevel.Trusted:
+        return 'bg-green-100 text-green-800';
+      case AddInTrustLevel.Untrusted:
+        return 'bg-red-100 text-red-800';
+      case AddInTrustLevel.Sandboxed:
+        return 'bg-yellow-100 text-yellow-800';
+      case AddInTrustLevel.Restricted:
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   }
 };

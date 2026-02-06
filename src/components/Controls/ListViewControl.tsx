@@ -37,7 +37,7 @@ interface ListViewProps extends VB6ControlPropsEnhanced {
   // View modes
   view: 0 | 1 | 2 | 3; // lvwIcon, lvwSmallIcon, lvwList, lvwReport
   arrange: 0 | 1 | 2; // lvwNone, lvwAutoLeft, lvwAutoTop
-  
+
   // Appearance
   appearance: 0 | 1; // ccFlat, cc3D
   borderStyle: 0 | 1; // ccNone, ccFixedSingle
@@ -47,7 +47,7 @@ interface ListViewProps extends VB6ControlPropsEnhanced {
   hideSelection: boolean;
   hotTracking: boolean;
   hoverSelection: boolean;
-  
+
   // Behavior
   allowColumnReorder: boolean;
   checkboxes: boolean;
@@ -57,22 +57,22 @@ interface ListViewProps extends VB6ControlPropsEnhanced {
   sorted: boolean;
   sortKey: number;
   sortOrder: 0 | 1; // lvwAscending, lvwDescending
-  
+
   // Icons
   icons?: any; // Large icons ImageList
   smallIcons?: any; // Small icons ImageList
   columnHeaderIcons?: any; // Column header icons ImageList
-  
+
   // Font and colors
   font: any;
   foreColor: string;
   backColor: string;
   textBackground: 0 | 1; // lvwTransparent, lvwOpaque
-  
+
   // OLE Drag/Drop
   oleDragMode: 0 | 1;
   oleDropMode: 0 | 1 | 2;
-  
+
   // Picture (background)
   picture?: string;
   pictureAlignment: 0 | 1 | 2 | 3 | 4; // Various alignments
@@ -80,7 +80,14 @@ interface ListViewProps extends VB6ControlPropsEnhanced {
 
 export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
   const {
-    id, name, left, top, width, height, visible, enabled,
+    id,
+    name,
+    left,
+    top,
+    width,
+    height,
+    visible,
+    enabled,
     view = 3, // Default to report view
     arrange = 0,
     appearance = 1,
@@ -129,7 +136,7 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
   const [columnWidths, setColumnWidths] = useState<number[]>([]);
   const [draggedItem, setDraggedItem] = useState<ListItem | null>(null);
   const [dropTarget, setDropTarget] = useState<ListItem | null>(null);
-  
+
   const listRef = useRef<HTMLDivElement>(null);
   const { fireEvent, updateControl } = useVB6Store();
 
@@ -141,87 +148,86 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
   }, [view]);
 
   // Item management
-  const addItem = useCallback((
-    key: string,
-    text: string,
-    icon?: number,
-    smallIcon?: number
-  ): ListItem => {
-    const newItem: ListItem = {
-      key,
-      text,
-      icon,
-      smallIcon,
-      subItems: [],
-      selected: false,
-      checked: false,
-    };
-    
-    const newItems = new Map(items);
-    newItems.set(key, newItem);
-    
-    if (sorted) {
-      sortItems(newItems);
-    }
-    
-    setItems(newItems);
-    fireEvent(name, 'ItemAdd', { item: newItem });
-    
-    return newItem;
-  }, [items, sorted, name, fireEvent]);
+  const addItem = useCallback(
+    (key: string, text: string, icon?: number, smallIcon?: number): ListItem => {
+      const newItem: ListItem = {
+        key,
+        text,
+        icon,
+        smallIcon,
+        subItems: [],
+        selected: false,
+        checked: false,
+      };
 
-  const removeItem = useCallback((key: string) => {
-    const newItems = new Map(items);
-    const item = newItems.get(key);
-    
-    if (item) {
-      newItems.delete(key);
-      setItems(newItems);
-      
-      selectedItems.delete(key);
-      setSelectedItems(new Set(selectedItems));
-      
-      checkedItems.delete(key);
-      setCheckedItems(new Set(checkedItems));
-      
-      if (focusedItem === key) {
-        setFocusedItem(null);
+      const newItems = new Map(items);
+      newItems.set(key, newItem);
+
+      if (sorted) {
+        sortItems(newItems);
       }
-      
-      fireEvent(name, 'ItemRemove', { key });
-    }
-  }, [items, selectedItems, checkedItems, focusedItem, name, fireEvent]);
 
-  const addColumnHeader = useCallback((
-    text: string,
-    width: number,
-    alignment: 0 | 1 | 2 = 0,
-    icon?: number
-  ): ColumnHeader => {
-    const key = `col_${columnHeaders.length}`;
-    const newColumn: ColumnHeader = {
-      key,
-      text,
-      width,
-      alignment,
-      icon,
-      position: columnHeaders.length,
-    };
-    
-    setColumnHeaders([...columnHeaders, newColumn]);
-    setColumnWidths([...columnWidths, width]);
-    
-    return newColumn;
-  }, [columnHeaders, columnWidths]);
+      setItems(newItems);
+      fireEvent(name, 'ItemAdd', { item: newItem });
+
+      return newItem;
+    },
+    [items, sorted, name, fireEvent]
+  );
+
+  const removeItem = useCallback(
+    (key: string) => {
+      const newItems = new Map(items);
+      const item = newItems.get(key);
+
+      if (item) {
+        newItems.delete(key);
+        setItems(newItems);
+
+        selectedItems.delete(key);
+        setSelectedItems(new Set(selectedItems));
+
+        checkedItems.delete(key);
+        setCheckedItems(new Set(checkedItems));
+
+        if (focusedItem === key) {
+          setFocusedItem(null);
+        }
+
+        fireEvent(name, 'ItemRemove', { key });
+      }
+    },
+    [items, selectedItems, checkedItems, focusedItem, name, fireEvent]
+  );
+
+  const addColumnHeader = useCallback(
+    (text: string, width: number, alignment: 0 | 1 | 2 = 0, icon?: number): ColumnHeader => {
+      const key = `col_${columnHeaders.length}`;
+      const newColumn: ColumnHeader = {
+        key,
+        text,
+        width,
+        alignment,
+        icon,
+        position: columnHeaders.length,
+      };
+
+      setColumnHeaders([...columnHeaders, newColumn]);
+      setColumnWidths([...columnWidths, width]);
+
+      return newColumn;
+    },
+    [columnHeaders, columnWidths]
+  );
 
   // Sorting
   const sortItems = (itemsMap: Map<string, ListItem>) => {
     const itemsArray = Array.from(itemsMap.values());
-    
+
     itemsArray.sort((a, b) => {
       let aValue: string;
       let bValue: string;
-      
+
       if (sortColumn === 0 || view !== 3) {
         aValue = a.text;
         bValue = b.text;
@@ -229,109 +235,129 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
         aValue = a.subItems[sortColumn - 1] || '';
         bValue = b.subItems[sortColumn - 1] || '';
       }
-      
+
       const result = aValue.localeCompare(bValue);
       return sortAscending ? result : -result;
     });
-    
+
     // Rebuild map in sorted order
     const sortedMap = new Map<string, ListItem>();
     itemsArray.forEach(item => sortedMap.set(item.key, item));
-    
+
     return sortedMap;
   };
 
   // Event handlers
-  const handleItemClick = useCallback((item: ListItem, e: React.MouseEvent) => {
-    if (!enabled) return;
-    
-    const ctrlKey = e.ctrlKey || e.metaKey;
-    const shiftKey = e.shiftKey;
-    
-    if (multiSelect) {
-      if (ctrlKey) {
-        // Toggle selection
-        const newSelectedItems = new Set(selectedItems);
-        if (newSelectedItems.has(item.key)) {
-          newSelectedItems.delete(item.key);
-          item.selected = false;
-        } else {
-          newSelectedItems.add(item.key);
-          item.selected = true;
-        }
-        setSelectedItems(newSelectedItems);
-      } else if (shiftKey && focusedItem) {
-        // Range selection
-        const itemsArray = Array.from(items.values());
-        const startIndex = itemsArray.findIndex(i => i.key === focusedItem);
-        const endIndex = itemsArray.findIndex(i => i.key === item.key);
-        
-        if (startIndex !== -1 && endIndex !== -1) {
-          const newSelectedItems = new Set<string>();
-          const [start, end] = startIndex < endIndex ? [startIndex, endIndex] : [endIndex, startIndex];
-          
-          for (let i = start; i <= end; i++) {
-            const rangeItem = itemsArray[i];
-            newSelectedItems.add(rangeItem.key);
-            rangeItem.selected = true;
+  const handleItemClick = useCallback(
+    (item: ListItem, e: React.MouseEvent) => {
+      if (!enabled) return;
+
+      const ctrlKey = e.ctrlKey || e.metaKey;
+      const shiftKey = e.shiftKey;
+
+      if (multiSelect) {
+        if (ctrlKey) {
+          // Toggle selection
+          const newSelectedItems = new Set(selectedItems);
+          if (newSelectedItems.has(item.key)) {
+            newSelectedItems.delete(item.key);
+            item.selected = false;
+          } else {
+            newSelectedItems.add(item.key);
+            item.selected = true;
           }
-          
           setSelectedItems(newSelectedItems);
+        } else if (shiftKey && focusedItem) {
+          // Range selection
+          const itemsArray = Array.from(items.values());
+          const startIndex = itemsArray.findIndex(i => i.key === focusedItem);
+          const endIndex = itemsArray.findIndex(i => i.key === item.key);
+
+          if (startIndex !== -1 && endIndex !== -1) {
+            const newSelectedItems = new Set<string>();
+            const [start, end] =
+              startIndex < endIndex ? [startIndex, endIndex] : [endIndex, startIndex];
+
+            for (let i = start; i <= end; i++) {
+              const rangeItem = itemsArray[i];
+              newSelectedItems.add(rangeItem.key);
+              rangeItem.selected = true;
+            }
+
+            setSelectedItems(newSelectedItems);
+          }
+        } else {
+          // Single selection
+          clearSelection();
+          item.selected = true;
+          setSelectedItems(new Set([item.key]));
         }
       } else {
-        // Single selection
+        // Single select mode
         clearSelection();
         item.selected = true;
         setSelectedItems(new Set([item.key]));
       }
-    } else {
-      // Single select mode
-      clearSelection();
-      item.selected = true;
-      setSelectedItems(new Set([item.key]));
-    }
-    
-    setFocusedItem(item.key);
-    updateControl(id, 'selectedItem', item);
-    fireEvent(name, 'ItemClick', { item });
-    
-    // Handle checkbox click
-    const target = e.target as HTMLElement;
-    if (checkboxes && target.classList.contains('list-checkbox')) {
-      const newCheckedItems = new Set(checkedItems);
-      if (newCheckedItems.has(item.key)) {
-        newCheckedItems.delete(item.key);
-        item.checked = false;
-      } else {
-        newCheckedItems.add(item.key);
-        item.checked = true;
-      }
-      setCheckedItems(newCheckedItems);
-      fireEvent(name, 'ItemCheck', { item });
-    }
-  }, [enabled, multiSelect, selectedItems, focusedItem, items, checkboxes, checkedItems, id, name, fireEvent, updateControl]);
 
-  const handleItemDoubleClick = useCallback((item: ListItem) => {
-    if (!enabled) return;
-    
-    fireEvent(name, 'DblClick', {});
-    
-    if (labelEdit === 0) { // lvwAutomatic
-      startEditing(item);
-    }
-  }, [enabled, labelEdit, name, fireEvent]);
+      setFocusedItem(item.key);
+      updateControl(id, 'selectedItem', item);
+      fireEvent(name, 'ItemClick', { item });
+
+      // Handle checkbox click
+      const target = e.target as HTMLElement;
+      if (checkboxes && target.classList.contains('list-checkbox')) {
+        const newCheckedItems = new Set(checkedItems);
+        if (newCheckedItems.has(item.key)) {
+          newCheckedItems.delete(item.key);
+          item.checked = false;
+        } else {
+          newCheckedItems.add(item.key);
+          item.checked = true;
+        }
+        setCheckedItems(newCheckedItems);
+        fireEvent(name, 'ItemCheck', { item });
+      }
+    },
+    [
+      enabled,
+      multiSelect,
+      selectedItems,
+      focusedItem,
+      items,
+      checkboxes,
+      checkedItems,
+      id,
+      name,
+      fireEvent,
+      updateControl,
+    ]
+  );
+
+  const handleItemDoubleClick = useCallback(
+    (item: ListItem) => {
+      if (!enabled) return;
+
+      fireEvent(name, 'DblClick', {});
+
+      if (labelEdit === 0) {
+        // lvwAutomatic
+        startEditing(item);
+      }
+    },
+    [enabled, labelEdit, name, fireEvent]
+  );
 
   const clearSelection = () => {
-    items.forEach(item => item.selected = false);
+    items.forEach(item => (item.selected = false));
     setSelectedItems(new Set());
   };
 
   const startEditing = (item: ListItem) => {
     if (labelEdit === 2) return; // lvwManual
-    
+
     const cancelEdit = { cancel: false };
     fireEvent(name, 'BeforeLabelEdit', { item, ...cancelEdit });
-    
+
     if (!cancelEdit.cancel) {
       setEditingItem(item);
       setEditText(item.text);
@@ -340,172 +366,197 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
 
   const finishEditing = (save: boolean) => {
     if (!editingItem) return;
-    
+
     if (save && editText.trim()) {
       const cancelEdit = { cancel: false, newText: editText };
       fireEvent(name, 'AfterLabelEdit', { item: editingItem, ...cancelEdit });
-      
+
       if (!cancelEdit.cancel) {
         editingItem.text = cancelEdit.newText || editText;
         setItems(new Map(items));
       }
     }
-    
+
     setEditingItem(null);
     setEditText('');
   };
 
   // Column click handler
-  const handleColumnClick = useCallback((colIndex: number) => {
-    if (view !== 3) return;
-    
-    if (colIndex === sortColumn) {
-      setSortAscending(!sortAscending);
-    } else {
-      setSortColumn(colIndex);
-      setSortAscending(true);
-    }
-    
-    const sortedItems = sortItems(items);
-    setItems(sortedItems);
-    
-    fireEvent(name, 'ColumnClick', { columnHeader: columnHeaders[colIndex] });
-  }, [view, sortColumn, sortAscending, items, columnHeaders, name, fireEvent]);
+  const handleColumnClick = useCallback(
+    (colIndex: number) => {
+      if (view !== 3) return;
+
+      if (colIndex === sortColumn) {
+        setSortAscending(!sortAscending);
+      } else {
+        setSortColumn(colIndex);
+        setSortAscending(true);
+      }
+
+      const sortedItems = sortItems(items);
+      setItems(sortedItems);
+
+      fireEvent(name, 'ColumnClick', { columnHeader: columnHeaders[colIndex] });
+    },
+    [view, sortColumn, sortAscending, items, columnHeaders, name, fireEvent]
+  );
 
   // Keyboard navigation
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (!enabled) return;
-    
-    const itemsArray = Array.from(items.values());
-    const focusIndex = focusedItem ? itemsArray.findIndex(i => i.key === focusedItem) : -1;
-    
-    let handled = true;
-    let newFocusIndex = focusIndex;
-    
-    switch (e.key) {
-      case 'ArrowUp':
-        newFocusIndex = Math.max(0, focusIndex - 1);
-        break;
-      case 'ArrowDown':
-        newFocusIndex = Math.min(itemsArray.length - 1, focusIndex + 1);
-        break;
-      case 'ArrowLeft':
-        if (view === 0 || view === 1) { // Icon views
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!enabled) return;
+
+      const itemsArray = Array.from(items.values());
+      const focusIndex = focusedItem ? itemsArray.findIndex(i => i.key === focusedItem) : -1;
+
+      let handled = true;
+      let newFocusIndex = focusIndex;
+
+      switch (e.key) {
+        case 'ArrowUp':
           newFocusIndex = Math.max(0, focusIndex - 1);
-        }
-        break;
-      case 'ArrowRight':
-        if (view === 0 || view === 1) { // Icon views
+          break;
+        case 'ArrowDown':
           newFocusIndex = Math.min(itemsArray.length - 1, focusIndex + 1);
-        }
-        break;
-      case 'Home':
-        newFocusIndex = 0;
-        break;
-      case 'End':
-        newFocusIndex = itemsArray.length - 1;
-        break;
-      case 'PageUp':
-        newFocusIndex = Math.max(0, focusIndex - 10);
-        break;
-      case 'PageDown':
-        newFocusIndex = Math.min(itemsArray.length - 1, focusIndex + 10);
-        break;
-      case ' ':
-        if (checkboxes && focusedItem) {
-          const item = items.get(focusedItem);
-          if (item) {
-            const newCheckedItems = new Set(checkedItems);
-            if (newCheckedItems.has(item.key)) {
-              newCheckedItems.delete(item.key);
-              item.checked = false;
-            } else {
-              newCheckedItems.add(item.key);
-              item.checked = true;
+          break;
+        case 'ArrowLeft':
+          if (view === 0 || view === 1) {
+            // Icon views
+            newFocusIndex = Math.max(0, focusIndex - 1);
+          }
+          break;
+        case 'ArrowRight':
+          if (view === 0 || view === 1) {
+            // Icon views
+            newFocusIndex = Math.min(itemsArray.length - 1, focusIndex + 1);
+          }
+          break;
+        case 'Home':
+          newFocusIndex = 0;
+          break;
+        case 'End':
+          newFocusIndex = itemsArray.length - 1;
+          break;
+        case 'PageUp':
+          newFocusIndex = Math.max(0, focusIndex - 10);
+          break;
+        case 'PageDown':
+          newFocusIndex = Math.min(itemsArray.length - 1, focusIndex + 10);
+          break;
+        case ' ':
+          if (checkboxes && focusedItem) {
+            const item = items.get(focusedItem);
+            if (item) {
+              const newCheckedItems = new Set(checkedItems);
+              if (newCheckedItems.has(item.key)) {
+                newCheckedItems.delete(item.key);
+                item.checked = false;
+              } else {
+                newCheckedItems.add(item.key);
+                item.checked = true;
+              }
+              setCheckedItems(newCheckedItems);
+              fireEvent(name, 'ItemCheck', { item });
             }
-            setCheckedItems(newCheckedItems);
-            fireEvent(name, 'ItemCheck', { item });
+          } else if (focusedItem) {
+            const item = items.get(focusedItem);
+            if (item) {
+              handleItemClick(item, e as any);
+            }
           }
-        } else if (focusedItem) {
-          const item = items.get(focusedItem);
-          if (item) {
-            handleItemClick(item, e as any);
+          break;
+        case 'Enter':
+          if (focusedItem && labelEdit === 0) {
+            const item = items.get(focusedItem);
+            if (item) {
+              startEditing(item);
+            }
           }
-        }
-        break;
-      case 'Enter':
-        if (focusedItem && labelEdit === 0) {
-          const item = items.get(focusedItem);
-          if (item) {
-            startEditing(item);
+          break;
+        case 'F2':
+          if (focusedItem && labelEdit !== 2) {
+            const item = items.get(focusedItem);
+            if (item) {
+              startEditing(item);
+            }
           }
-        }
-        break;
-      case 'F2':
-        if (focusedItem && labelEdit !== 2) {
-          const item = items.get(focusedItem);
-          if (item) {
-            startEditing(item);
+          break;
+        default:
+          handled = false;
+      }
+
+      if (handled) {
+        e.preventDefault();
+
+        if (
+          newFocusIndex !== focusIndex &&
+          newFocusIndex >= 0 &&
+          newFocusIndex < itemsArray.length
+        ) {
+          const newFocusItem = itemsArray[newFocusIndex];
+          setFocusedItem(newFocusItem.key);
+
+          if (!e.ctrlKey && !e.shiftKey) {
+            handleItemClick(newFocusItem, e as any);
           }
-        }
-        break;
-      default:
-        handled = false;
-    }
-    
-    if (handled) {
-      e.preventDefault();
-      
-      if (newFocusIndex !== focusIndex && newFocusIndex >= 0 && newFocusIndex < itemsArray.length) {
-        const newFocusItem = itemsArray[newFocusIndex];
-        setFocusedItem(newFocusItem.key);
-        
-        if (!e.ctrlKey && !e.shiftKey) {
-          handleItemClick(newFocusItem, e as any);
         }
       }
-    }
-  }, [enabled, items, focusedItem, checkboxes, checkedItems, labelEdit, view, name, fireEvent]);
+    },
+    [enabled, items, focusedItem, checkboxes, checkedItems, labelEdit, view, name, fireEvent]
+  );
 
   // Drag and drop
-  const handleDragStart = useCallback((item: ListItem, e: React.DragEvent) => {
-    if (oleDragMode === 0) return;
-    
-    setDraggedItem(item);
-    e.dataTransfer.effectAllowed = 'move';
-    fireEvent(name, 'OLEStartDrag', { item });
-  }, [oleDragMode, name, fireEvent]);
+  const handleDragStart = useCallback(
+    (item: ListItem, e: React.DragEvent) => {
+      if (oleDragMode === 0) return;
 
-  const handleDragOver = useCallback((item: ListItem, e: React.DragEvent) => {
-    if (oleDropMode === 0 || !draggedItem) return;
-    
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    setDropTarget(item);
-  }, [oleDropMode, draggedItem]);
+      setDraggedItem(item);
+      e.dataTransfer.effectAllowed = 'move';
+      fireEvent(name, 'OLEStartDrag', { item });
+    },
+    [oleDragMode, name, fireEvent]
+  );
 
-  const handleDrop = useCallback((item: ListItem, e: React.DragEvent) => {
-    e.preventDefault();
-    if (oleDropMode === 0 || !draggedItem || draggedItem === item) return;
-    
-    const allowDrop = { cancel: false };
-    fireEvent(name, 'OLEDragDrop', { source: draggedItem, target: item, ...allowDrop });
-    
-    if (!allowDrop.cancel) {
-      // Implement reorder logic
-    }
-    
-    setDraggedItem(null);
-    setDropTarget(null);
-  }, [oleDropMode, draggedItem, name, fireEvent]);
+  const handleDragOver = useCallback(
+    (item: ListItem, e: React.DragEvent) => {
+      if (oleDropMode === 0 || !draggedItem) return;
+
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      setDropTarget(item);
+    },
+    [oleDropMode, draggedItem]
+  );
+
+  const handleDrop = useCallback(
+    (item: ListItem, e: React.DragEvent) => {
+      e.preventDefault();
+      if (oleDropMode === 0 || !draggedItem || draggedItem === item) return;
+
+      const allowDrop = { cancel: false };
+      fireEvent(name, 'OLEDragDrop', { source: draggedItem, target: item, ...allowDrop });
+
+      if (!allowDrop.cancel) {
+        // Implement reorder logic
+      }
+
+      setDraggedItem(null);
+      setDropTarget(null);
+    },
+    [oleDropMode, draggedItem, name, fireEvent]
+  );
 
   // Expose methods through ref
   useEffect(() => {
     if (ref && typeof ref !== 'function') {
       ref.current = {
         // Properties
-        get ListItems() { return items; },
-        get ColumnHeaders() { return columnHeaders; },
+        get ListItems() {
+          return items;
+        },
+        get ColumnHeaders() {
+          return columnHeaders;
+        },
         get SelectedItem() {
           if (selectedItems.size > 0) {
             const firstKey = selectedItems.values().next().value;
@@ -521,26 +572,30 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
             setFocusedItem(item.key);
           }
         },
-        get DropHighlight() { return dropTarget; },
-        set DropHighlight(item: ListItem) { setDropTarget(item); },
-        
+        get DropHighlight() {
+          return dropTarget;
+        },
+        set DropHighlight(item: ListItem) {
+          setDropTarget(item);
+        },
+
         // Methods
         Add(index?: number, key?: string, text?: string, icon?: number, smallIcon?: number) {
           const newKey = key || `item_${Date.now()}`;
           return addItem(newKey, text || newKey, icon, smallIcon);
         },
-        
+
         Remove(key: string) {
           removeItem(key);
         },
-        
+
         Clear() {
           setItems(new Map());
           setSelectedItems(new Set());
           setCheckedItems(new Set());
           setFocusedItem(null);
         },
-        
+
         FindItem(searchString: string, where?: number, index?: number) {
           // Implement search logic
           for (const [key, item] of items) {
@@ -550,12 +605,12 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
           }
           return null;
         },
-        
+
         GetFirstVisible() {
           const itemsArray = Array.from(items.values());
           return itemsArray[0] || null;
         },
-        
+
         StartLabelEdit() {
           if (focusedItem && labelEdit !== 2) {
             const item = items.get(focusedItem);
@@ -564,16 +619,16 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
             }
           }
         },
-        
+
         HitTest(x: number, y: number) {
           // Would need to implement hit testing
           return null;
         },
-        
+
         EnsureVisible(item: ListItem) {
           // Would need to implement scrolling
         },
-        
+
         Arrange() {
           // Implement auto-arrange for icon views
           if (view === 0 || view === 1) {
@@ -582,13 +637,26 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
         },
       };
     }
-  }, [ref, items, columnHeaders, selectedItems, dropTarget, focusedItem, labelEdit, view, name, fireEvent, addItem, removeItem]);
+  }, [
+    ref,
+    items,
+    columnHeaders,
+    selectedItems,
+    dropTarget,
+    focusedItem,
+    labelEdit,
+    view,
+    name,
+    fireEvent,
+    addItem,
+    removeItem,
+  ]);
 
   // Render functions
   const renderIconView = () => {
     const itemSize = view === 0 ? 75 : 50; // Large vs small icons
     const itemsPerRow = Math.floor(width / itemSize);
-    
+
     return (
       <div style={{ display: 'flex', flexWrap: 'wrap', padding: 8 }}>
         {Array.from(items.values()).map((item, index) => (
@@ -608,14 +676,14 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
               borderRadius: 4,
               opacity: item.ghosted ? 0.5 : 1,
             }}
-            onClick={(e) => handleItemClick(item, e)}
+            onClick={e => handleItemClick(item, e)}
             onDoubleClick={() => handleItemDoubleClick(item)}
             onMouseEnter={() => hotTracking && setHoveredItem(item.key)}
             onMouseLeave={() => hotTracking && setHoveredItem(null)}
             draggable={oleDragMode === 1}
-            onDragStart={(e) => handleDragStart(item, e)}
-            onDragOver={(e) => handleDragOver(item, e)}
-            onDrop={(e) => handleDrop(item, e)}
+            onDragStart={e => handleDragStart(item, e)}
+            onDragOver={e => handleDragOver(item, e)}
+            onDrop={e => handleDrop(item, e)}
           >
             {checkboxes && (
               <input
@@ -638,9 +706,9 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
               <input
                 type="text"
                 value={editText}
-                onChange={(e) => setEditText(e.target.value)}
+                onChange={e => setEditText(e.target.value)}
                 onBlur={() => finishEditing(true)}
-                onKeyDown={(e) => {
+                onKeyDown={e => {
                   if (e.key === 'Enter') finishEditing(true);
                   if (e.key === 'Escape') finishEditing(false);
                   e.stopPropagation();
@@ -653,7 +721,7 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
                   color: '#000',
                 }}
                 autoFocus
-                onClick={(e) => e.stopPropagation()}
+                onClick={e => e.stopPropagation()}
               />
             ) : (
               <span
@@ -678,7 +746,7 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
 
   const renderListView = () => (
     <div style={{ padding: 4 }}>
-      {Array.from(items.values()).map((item) => (
+      {Array.from(items.values()).map(item => (
         <div
           key={item.key}
           style={{
@@ -691,7 +759,7 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
             display: 'flex',
             alignItems: 'center',
           }}
-          onClick={(e) => handleItemClick(item, e)}
+          onClick={e => handleItemClick(item, e)}
           onDoubleClick={() => handleItemDoubleClick(item)}
           onMouseEnter={() => hotTracking && setHoveredItem(item.key)}
           onMouseLeave={() => hotTracking && setHoveredItem(null)}
@@ -712,16 +780,16 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
             <input
               type="text"
               value={editText}
-              onChange={(e) => setEditText(e.target.value)}
+              onChange={e => setEditText(e.target.value)}
               onBlur={() => finishEditing(true)}
-              onKeyDown={(e) => {
+              onKeyDown={e => {
                 if (e.key === 'Enter') finishEditing(true);
                 if (e.key === 'Escape') finishEditing(false);
                 e.stopPropagation();
               }}
               style={{ flex: 1, border: '1px solid #000' }}
               autoFocus
-              onClick={(e) => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}
             />
           ) : (
             <span>{item.text}</span>
@@ -754,7 +822,8 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
                 cursor: 'pointer',
                 userSelect: 'none',
                 position: 'relative',
-                textAlign: header.alignment === 1 ? 'right' : header.alignment === 2 ? 'center' : 'left',
+                textAlign:
+                  header.alignment === 1 ? 'right' : header.alignment === 2 ? 'center' : 'left',
               }}
               onClick={() => handleColumnClick(index)}
             >
@@ -772,28 +841,28 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
                   width: 4,
                   cursor: 'col-resize',
                 }}
-                onMouseDown={(e) => {
+                onMouseDown={e => {
                   e.stopPropagation();
                   const startX = e.clientX;
                   const startWidth = columnWidths[index];
-                  
+
                   const handleMove = (e: MouseEvent) => {
                     const delta = e.clientX - startX;
                     const newWidth = Math.max(20, startWidth + delta);
                     const newWidths = [...columnWidths];
                     newWidths[index] = newWidth;
                     setColumnWidths(newWidths);
-                    
+
                     const newHeaders = [...columnHeaders];
                     newHeaders[index].width = newWidth;
                     setColumnHeaders(newHeaders);
                   };
-                  
+
                   const handleUp = () => {
                     document.removeEventListener('mousemove', handleMove);
                     document.removeEventListener('mouseup', handleUp);
                   };
-                  
+
                   document.addEventListener('mousemove', handleMove);
                   document.addEventListener('mouseup', handleUp);
                 }}
@@ -802,22 +871,25 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
           ))}
         </div>
       )}
-      
+
       <div style={{ flex: 1, overflow: 'auto' }}>
-        {Array.from(items.values()).map((item) => (
+        {Array.from(items.values()).map(item => (
           <div
             key={item.key}
             style={{
               display: 'flex',
               borderBottom: gridLines ? '1px solid #E0E0E0' : 'none',
-              backgroundColor: dropTarget?.key === item.key ? '#E3F2FD' :
-                              item.selected ? '#0078D7' :
-                              item.backColor || 'transparent',
+              backgroundColor:
+                dropTarget?.key === item.key
+                  ? '#E3F2FD'
+                  : item.selected
+                    ? '#0078D7'
+                    : item.backColor || 'transparent',
               color: item.selected ? '#FFFFFF' : item.foreColor || foreColor,
               cursor: 'pointer',
               opacity: item.ghosted ? 0.5 : 1,
             }}
-            onClick={(e) => handleItemClick(item, e)}
+            onClick={e => handleItemClick(item, e)}
             onDoubleClick={() => handleItemDoubleClick(item)}
             onMouseEnter={() => {
               if (hotTracking) setHoveredItem(item.key);
@@ -829,12 +901,19 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
             }}
             onMouseLeave={() => hotTracking && setHoveredItem(null)}
             draggable={oleDragMode === 1}
-            onDragStart={(e) => handleDragStart(item, e)}
-            onDragOver={(e) => handleDragOver(item, e)}
-            onDrop={(e) => handleDrop(item, e)}
+            onDragStart={e => handleDragStart(item, e)}
+            onDragOver={e => handleDragOver(item, e)}
+            onDrop={e => handleDrop(item, e)}
           >
             {checkboxes && (
-              <div style={{ width: 30, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div
+                style={{
+                  width: 30,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
                 <input
                   type="checkbox"
                   className="list-checkbox"
@@ -853,11 +932,18 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
                   fontWeight: item.bold ? 'bold' : 'normal',
-                  textAlign: header.alignment === 1 ? 'right' : header.alignment === 2 ? 'center' : 'left',
-                  backgroundColor: fullRowSelect ? 'transparent' : 
-                                 (item.selected && colIndex === 0 ? '#0078D7' : 'transparent'),
-                  color: fullRowSelect ? 'inherit' :
-                        (item.selected && colIndex === 0 ? '#FFFFFF' : 'inherit'),
+                  textAlign:
+                    header.alignment === 1 ? 'right' : header.alignment === 2 ? 'center' : 'left',
+                  backgroundColor: fullRowSelect
+                    ? 'transparent'
+                    : item.selected && colIndex === 0
+                      ? '#0078D7'
+                      : 'transparent',
+                  color: fullRowSelect
+                    ? 'inherit'
+                    : item.selected && colIndex === 0
+                      ? '#FFFFFF'
+                      : 'inherit',
                 }}
               >
                 {colIndex === 0 ? (
@@ -865,20 +951,30 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
                     <input
                       type="text"
                       value={editText}
-                      onChange={(e) => setEditText(e.target.value)}
+                      onChange={e => setEditText(e.target.value)}
                       onBlur={() => finishEditing(true)}
-                      onKeyDown={(e) => {
+                      onKeyDown={e => {
                         if (e.key === 'Enter') finishEditing(true);
                         if (e.key === 'Escape') finishEditing(false);
                         e.stopPropagation();
                       }}
                       style={{ width: '100%', border: '1px solid #000' }}
                       autoFocus
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={e => e.stopPropagation()}
                     />
                   ) : (
                     <>
-                      {smallIcons && <span style={{ width: 16, height: 16, backgroundColor: '#ccc', marginRight: 4, display: 'inline-block' }} />}
+                      {smallIcons && (
+                        <span
+                          style={{
+                            width: 16,
+                            height: 16,
+                            backgroundColor: '#ccc',
+                            marginRight: 4,
+                            display: 'inline-block',
+                          }}
+                        />
+                      )}
                       {item.text}
                     </>
                   )
@@ -903,13 +999,16 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
     display: visible ? 'block' : 'none',
     backgroundColor: backColor,
     color: foreColor,
-    border: borderStyle === 1 ? (appearance === 0 ? '1px solid #808080' : '2px inset #C0C0C0') : 'none',
+    border:
+      borderStyle === 1 ? (appearance === 0 ? '1px solid #808080' : '2px inset #C0C0C0') : 'none',
     overflow: 'hidden',
     outline: 'none',
     fontFamily: font.name,
     fontSize: `${font.size}pt`,
     backgroundImage: picture ? `url(${picture})` : undefined,
-    backgroundPosition: ['left top', 'right top', 'left bottom', 'right bottom', 'center'][pictureAlignment],
+    backgroundPosition: ['left top', 'right top', 'left bottom', 'right bottom', 'center'][
+      pictureAlignment
+    ],
     backgroundRepeat: 'no-repeat',
   };
 
@@ -924,9 +1023,11 @@ export const ListViewControl = forwardRef<any, ListViewProps>((props, ref) => {
       data-tag={tag}
       {...rest}
     >
-      {view === 0 || view === 1 ? renderIconView() :
-       view === 2 ? renderListView() :
-       renderReportView()}
+      {view === 0 || view === 1
+        ? renderIconView()
+        : view === 2
+          ? renderListView()
+          : renderReportView()}
     </div>
   );
 });

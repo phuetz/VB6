@@ -54,21 +54,21 @@ End Type
 
 ### ✅ 2. Types de Champs Supportés
 
-| Type VB6 | Taille | Support |
-|----------|--------|---------|
-| Byte | 1 byte | ✅ Complet |
-| Boolean | 2 bytes | ✅ Complet |
-| Integer | 2 bytes | ✅ Complet |
-| Long | 4 bytes | ✅ Complet |
-| Single | 4 bytes | ✅ Complet |
-| Double | 8 bytes | ✅ Complet |
-| Currency | 8 bytes | ✅ Complet |
-| Date | 8 bytes | ✅ Complet |
-| String (variable) | 4 bytes (ptr) | ✅ Complet |
-| String * N (fixe) | N bytes | ✅ Complet |
-| Variant | 16 bytes | ✅ Complet |
-| Object | 4 bytes (ptr) | ✅ Complet |
-| UDT imbriqué | Variable | ✅ Complet |
+| Type VB6           | Taille        | Support    |
+| ------------------ | ------------- | ---------- |
+| Byte               | 1 byte        | ✅ Complet |
+| Boolean            | 2 bytes       | ✅ Complet |
+| Integer            | 2 bytes       | ✅ Complet |
+| Long               | 4 bytes       | ✅ Complet |
+| Single             | 4 bytes       | ✅ Complet |
+| Double             | 8 bytes       | ✅ Complet |
+| Currency           | 8 bytes       | ✅ Complet |
+| Date               | 8 bytes       | ✅ Complet |
+| String (variable)  | 4 bytes (ptr) | ✅ Complet |
+| String \* N (fixe) | N bytes       | ✅ Complet |
+| Variant            | 16 bytes      | ✅ Complet |
+| Object             | 4 bytes (ptr) | ✅ Complet |
+| UDT imbriqué       | Variable      | ✅ Complet |
 
 ### ✅ 3. Fixed-Length Strings
 
@@ -85,6 +85,7 @@ emp.LastName = "Doe"          ' Padded to 30 chars
 ```
 
 **Implémentation**:
+
 - Classe `VB6FixedString` avec padding automatique
 - Méthode `trimmed()` pour récupérer la valeur sans espaces
 - Troncature automatique si valeur trop longue
@@ -103,6 +104,7 @@ End Type
 ```
 
 **Support complet**:
+
 - Arrays 1D, 2D, 3D+
 - Bounds explicites (`1 To 10`)
 - Bounds implicites (`10` = `0 To 10`)
@@ -126,6 +128,7 @@ End Type
 ```
 
 **Support complet**:
+
 - Imbrication de profondeur arbitraire
 - Copy correcte (deep copy)
 - Comparaison correcte (deep compare)
@@ -177,31 +180,36 @@ End Type
 ### ✅ 7. Opérations Runtime
 
 **Création d'instance**:
+
 ```typescript
 const emp = CreateUDT('Employee', {
-    ID: 1001,
-    Name: new VB6FixedString(50, 'John Doe'),
-    Salary: 75000
+  ID: 1001,
+  Name: new VB6FixedString(50, 'John Doe'),
+  Salary: 75000,
 });
 ```
 
 **Création d'array**:
+
 ```typescript
-const employees = CreateUDTArray('Employee', 10);  // 1D
-const grid = CreateUDTArray('Cell', 5, 5);         // 2D
+const employees = CreateUDTArray('Employee', 10); // 1D
+const grid = CreateUDTArray('Cell', 5, 5); // 2D
 ```
 
 **Copy (deep copy)**:
+
 ```typescript
 const copy = UDTRegistry.copyInstance(original, 'Employee');
 ```
 
 **Compare (deep compare)**:
+
 ```typescript
 const equal = UDTRegistry.compareInstances(emp1, emp2, 'Employee');
 ```
 
 **Calcul de taille**:
+
 ```typescript
 const size = UDTRegistry.calculateSize('Employee');
 ```
@@ -213,6 +221,7 @@ const size = UDTRegistry.calculateSize('Employee');
 **37 tests implémentés et passés**:
 
 ### Suite de Tests 1: UDT Processor - Parsing
+
 - ✅ Parse simple Type declaration
 - ✅ Parse Public Type declaration
 - ✅ Parse Private Type declaration
@@ -225,10 +234,12 @@ const size = UDTRegistry.calculateSize('Employee');
 - ✅ Process complete Type with multiple fields
 
 ### Suite de Tests 2: UDT Processor - Code Generation
+
 - ✅ Generate JavaScript class for simple UDT
 - ✅ Generate TypeScript interface for UDT
 
 ### Suite de Tests 3: UDT Runtime - Registry
+
 - ✅ Register and create simple UDT
 - ✅ Initialize UDT with values
 - ✅ Handle fixed-length strings
@@ -238,14 +249,17 @@ const size = UDTRegistry.calculateSize('Employee');
 - ✅ Compare UDT instances
 
 ### Suite de Tests 4: UDT Runtime - Nested Types
+
 - ✅ Handle nested UDTs
 - ✅ Copy nested UDTs correctly
 
 ### Suite de Tests 5: UDT Runtime - Arrays in UDTs
+
 - ✅ Handle array fields in UDTs
 - ✅ Initialize array fields correctly
 
 ### Suite de Tests 6: VB6 Fixed-Length Strings
+
 - ✅ Create fixed-length string
 - ✅ Truncate strings that are too long
 - ✅ Pad strings that are too short
@@ -253,6 +267,7 @@ const size = UDTRegistry.calculateSize('Employee');
 - ✅ Update value correctly
 
 ### Suite de Tests 7: Windows API System Types
+
 - ✅ Provide RECT type
 - ✅ Provide POINT type
 - ✅ Provide SIZE type
@@ -260,6 +275,7 @@ const size = UDTRegistry.calculateSize('Employee');
 - ✅ Provide FILETIME type
 
 ### Suite de Tests 8: Complex Scenarios
+
 - ✅ Handle complete Employee example
 - ✅ Handle complete Customer example
 - ✅ Handle Matrix3x3 example
@@ -270,11 +286,13 @@ const size = UDTRegistry.calculateSize('Employee');
 ## 📊 Statistiques d'Implémentation
 
 ### Fichiers Créés/Modifiés
+
 - ✅ `src/compiler/VB6UDTSupport.ts` - 493 lignes
 - ✅ `src/runtime/VB6UserDefinedTypes.ts` - 624 lignes
 - ✅ `src/test/compiler/VB6UDT.test.ts` - 613 lignes (37 tests)
 
 ### Couverture Fonctionnelle
+
 - **Parsing**: 100%
 - **Code Generation**: 100%
 - **Runtime Operations**: 100%
@@ -323,7 +341,7 @@ import { DefineType, CreateUDT, CreateUDTArray, UDTRegistry } from '@/runtime/VB
 DefineType('Employee', [
   { name: 'ID', type: 'Long' },
   { name: 'Name', type: 'String', isFixedString: true, size: 50 },
-  { name: 'Salary', type: 'Currency' }
+  { name: 'Salary', type: 'Currency' },
 ]);
 
 // Create instance
@@ -427,12 +445,12 @@ Next i
 
 ### ⚠️ Différences avec VB6 Natif
 
-| Feature | VB6 Natif | VB6 Web | Impact |
-|---------|-----------|---------|--------|
-| Stockage binaire | Binaire exact | JavaScript Object | Faible - transparent pour l'utilisateur |
-| Accès fichiers binaires | Get/Put direct | Via API | Moyen - nécessite API backend |
-| Pointeurs/AddressOf | Supporté | Émulé | Faible - la plupart des cas d'usage couverts |
-| Alignment mémoire | Strict | Flexible | Négligeable |
+| Feature                 | VB6 Natif      | VB6 Web           | Impact                                       |
+| ----------------------- | -------------- | ----------------- | -------------------------------------------- |
+| Stockage binaire        | Binaire exact  | JavaScript Object | Faible - transparent pour l'utilisateur      |
+| Accès fichiers binaires | Get/Put direct | Via API           | Moyen - nécessite API backend                |
+| Pointeurs/AddressOf     | Supporté       | Émulé             | Faible - la plupart des cas d'usage couverts |
+| Alignment mémoire       | Strict         | Flexible          | Négligeable                                  |
 
 ---
 
@@ -456,11 +474,13 @@ Le support UDT est maintenant complet. Les prochaines fonctionnalités à implé
 ## 📚 Ressources
 
 ### Documentation
+
 - `src/compiler/VB6UDTSupport.ts` - Code source avec documentation inline
 - `src/runtime/VB6UserDefinedTypes.ts` - Runtime avec exemples
 - `src/test/compiler/VB6UDT.test.ts` - 37 tests avec exemples d'utilisation
 
 ### Références VB6
+
 - Microsoft VB6 Language Reference - User-Defined Data Types
 - Windows API Types - MSDN Documentation
 

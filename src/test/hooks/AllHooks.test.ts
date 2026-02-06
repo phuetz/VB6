@@ -86,7 +86,7 @@ describe('useAutoSave Hook', () => {
 
       React.useEffect(() => {
         if (!options.enabled) return;
-        
+
         if (JSON.stringify(data) !== JSON.stringify(previousDataRef.current)) {
           if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
@@ -110,7 +110,7 @@ describe('useAutoSave Hook', () => {
     const initialData = { name: 'Test', value: 1 };
     let currentData = initialData;
 
-    const { rerender } = renderHook(() => 
+    const { rerender } = renderHook(() =>
       useAutoSave(currentData, mockSaveFunction, {
         delay: 1000,
         enabled: true,
@@ -139,7 +139,7 @@ describe('useAutoSave Hook', () => {
 
       React.useEffect(() => {
         if (!options.enabled) return;
-        
+
         if (JSON.stringify(data) !== JSON.stringify(previousDataRef.current)) {
           timeoutRef.current = setTimeout(() => {
             saveFunction(data);
@@ -151,7 +151,7 @@ describe('useAutoSave Hook', () => {
 
     let currentData = { name: 'Test', value: 1 };
 
-    const { rerender } = renderHook(() => 
+    const { rerender } = renderHook(() =>
       useAutoSave(currentData, mockSaveFunction, {
         delay: 1000,
         enabled: false,
@@ -176,7 +176,7 @@ describe('useAutoSave Hook', () => {
 
       React.useEffect(() => {
         if (!options.enabled) return;
-        
+
         if (JSON.stringify(data) !== JSON.stringify(previousDataRef.current)) {
           if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
@@ -192,7 +192,7 @@ describe('useAutoSave Hook', () => {
 
     let currentData = { value: 1 };
 
-    const { rerender } = renderHook(() => 
+    const { rerender } = renderHook(() =>
       useAutoSave(currentData, mockSaveFunction, {
         delay: 1000,
         enabled: true,
@@ -221,14 +221,9 @@ describe('useAutoSave Hook', () => {
 
 describe('useUndoRedo Hook', () => {
   it('should manage undo/redo state correctly', () => {
-    const useUndoRedo = <T>(initialState: T): [
-      T,
-      (newState: T) => void,
-      () => void,
-      () => void,
-      boolean,
-      boolean
-    ] => {
+    const useUndoRedo = <T>(
+      initialState: T
+    ): [T, (newState: T) => void, () => void, () => void, boolean, boolean] => {
       const [state, setState] = React.useState<UndoRedoState<T>>({
         current: initialState,
         history: [initialState],
@@ -246,7 +241,7 @@ describe('useUndoRedo Hook', () => {
       const undo = React.useCallback(() => {
         setState(prev => {
           if (prev.history.length <= 1) return prev;
-          
+
           const previousState = prev.history[prev.history.length - 1];
           return {
             current: previousState,
@@ -259,7 +254,7 @@ describe('useUndoRedo Hook', () => {
       const redo = React.useCallback(() => {
         setState(prev => {
           if (prev.future.length === 0) return prev;
-          
+
           const nextState = prev.future[0];
           return {
             current: nextState,
@@ -320,14 +315,9 @@ describe('useUndoRedo Hook', () => {
   });
 
   it('should clear future when new state is added after undo', () => {
-    const useUndoRedo = <T>(initialState: T): [
-      T,
-      (newState: T) => void,
-      () => void,
-      () => void,
-      boolean,
-      boolean
-    ] => {
+    const useUndoRedo = <T>(
+      initialState: T
+    ): [T, (newState: T) => void, () => void, () => void, boolean, boolean] => {
       const [state, setState] = React.useState<UndoRedoState<T>>({
         current: initialState,
         history: [initialState],
@@ -345,7 +335,7 @@ describe('useUndoRedo Hook', () => {
       const undo = React.useCallback(() => {
         setState(prev => {
           if (prev.history.length <= 1) return prev;
-          
+
           const previousState = prev.history[prev.history.length - 1];
           return {
             current: previousState,
@@ -358,7 +348,7 @@ describe('useUndoRedo Hook', () => {
       const redo = React.useCallback(() => {
         setState(prev => {
           if (prev.future.length === 0) return prev;
-          
+
           const nextState = prev.future[0];
           return {
             current: nextState,
@@ -377,13 +367,23 @@ describe('useUndoRedo Hook', () => {
     const { result } = renderHook(() => useUndoRedo(0));
 
     // Build up some history
-    act(() => { result.current[1](1); });
-    act(() => { result.current[1](2); });
-    act(() => { result.current[1](3); });
+    act(() => {
+      result.current[1](1);
+    });
+    act(() => {
+      result.current[1](2);
+    });
+    act(() => {
+      result.current[1](3);
+    });
 
     // Undo twice
-    act(() => { result.current[2](); }); // 3 -> 2
-    act(() => { result.current[2](); }); // 2 -> 1
+    act(() => {
+      result.current[2]();
+    }); // 3 -> 2
+    act(() => {
+      result.current[2]();
+    }); // 2 -> 1
 
     expect(result.current[0]).toBe(1);
     expect(result.current[5]).toBe(true); // can redo
@@ -474,9 +474,7 @@ describe('useKeyboardShortcuts Hook', () => {
 
     const mockCallback = vi.fn();
 
-    const shortcuts: KeyboardShortcut[] = [
-      { key: 's', ctrlKey: true, callback: mockCallback },
-    ];
+    const shortcuts: KeyboardShortcut[] = [{ key: 's', ctrlKey: true, callback: mockCallback }];
 
     renderHook(() => useKeyboardShortcuts(shortcuts));
 
@@ -494,71 +492,72 @@ describe('useKeyboardShortcuts Hook', () => {
 describe('useControlManipulation Hook', () => {
   it('should handle control movement with grid snapping', () => {
     const useControlManipulation = (gridSize: number, snapToGrid: boolean) => {
-      const moveControl = React.useCallback((control: VB6Control, deltaX: number, deltaY: number) => {
-        let newLeft = control.left + deltaX;
-        let newTop = control.top + deltaY;
+      const moveControl = React.useCallback(
+        (control: VB6Control, deltaX: number, deltaY: number) => {
+          let newLeft = control.left + deltaX;
+          let newTop = control.top + deltaY;
 
-        if (snapToGrid) {
-          newLeft = Math.round(newLeft / gridSize) * gridSize;
-          newTop = Math.round(newTop / gridSize) * gridSize;
-        }
+          if (snapToGrid) {
+            newLeft = Math.round(newLeft / gridSize) * gridSize;
+            newTop = Math.round(newTop / gridSize) * gridSize;
+          }
 
-        return {
-          ...control,
-          left: Math.max(0, newLeft),
-          top: Math.max(0, newTop),
-        };
-      }, [gridSize, snapToGrid]);
+          return {
+            ...control,
+            left: Math.max(0, newLeft),
+            top: Math.max(0, newTop),
+          };
+        },
+        [gridSize, snapToGrid]
+      );
 
-      const resizeControl = React.useCallback((
-        control: VB6Control, 
-        direction: string, 
-        deltaX: number, 
-        deltaY: number
-      ) => {
-        let newWidth = control.width;
-        let newHeight = control.height;
-        let newLeft = control.left;
-        let newTop = control.top;
+      const resizeControl = React.useCallback(
+        (control: VB6Control, direction: string, deltaX: number, deltaY: number) => {
+          let newWidth = control.width;
+          let newHeight = control.height;
+          let newLeft = control.left;
+          let newTop = control.top;
 
-        switch (direction) {
-          case 'se': // Southeast
-            newWidth = Math.max(20, control.width + deltaX);
-            newHeight = Math.max(20, control.height + deltaY);
-            break;
-          case 'nw': // Northwest
-            newWidth = Math.max(20, control.width - deltaX);
-            newHeight = Math.max(20, control.height - deltaY);
-            newLeft = control.left + deltaX;
-            newTop = control.top + deltaY;
-            break;
-          case 'ne': // Northeast
-            newWidth = Math.max(20, control.width + deltaX);
-            newHeight = Math.max(20, control.height - deltaY);
-            newTop = control.top + deltaY;
-            break;
-          case 'sw': // Southwest
-            newWidth = Math.max(20, control.width - deltaX);
-            newHeight = Math.max(20, control.height + deltaY);
-            newLeft = control.left + deltaX;
-            break;
-        }
+          switch (direction) {
+            case 'se': // Southeast
+              newWidth = Math.max(20, control.width + deltaX);
+              newHeight = Math.max(20, control.height + deltaY);
+              break;
+            case 'nw': // Northwest
+              newWidth = Math.max(20, control.width - deltaX);
+              newHeight = Math.max(20, control.height - deltaY);
+              newLeft = control.left + deltaX;
+              newTop = control.top + deltaY;
+              break;
+            case 'ne': // Northeast
+              newWidth = Math.max(20, control.width + deltaX);
+              newHeight = Math.max(20, control.height - deltaY);
+              newTop = control.top + deltaY;
+              break;
+            case 'sw': // Southwest
+              newWidth = Math.max(20, control.width - deltaX);
+              newHeight = Math.max(20, control.height + deltaY);
+              newLeft = control.left + deltaX;
+              break;
+          }
 
-        if (snapToGrid) {
-          newLeft = Math.round(newLeft / gridSize) * gridSize;
-          newTop = Math.round(newTop / gridSize) * gridSize;
-          newWidth = Math.round(newWidth / gridSize) * gridSize;
-          newHeight = Math.round(newHeight / gridSize) * gridSize;
-        }
+          if (snapToGrid) {
+            newLeft = Math.round(newLeft / gridSize) * gridSize;
+            newTop = Math.round(newTop / gridSize) * gridSize;
+            newWidth = Math.round(newWidth / gridSize) * gridSize;
+            newHeight = Math.round(newHeight / gridSize) * gridSize;
+          }
 
-        return {
-          ...control,
-          left: Math.max(0, newLeft),
-          top: Math.max(0, newTop),
-          width: newWidth,
-          height: newHeight,
-        };
-      }, [gridSize, snapToGrid]);
+          return {
+            ...control,
+            left: Math.max(0, newLeft),
+            top: Math.max(0, newTop),
+            width: newWidth,
+            height: newHeight,
+          };
+        },
+        [gridSize, snapToGrid]
+      );
 
       return { moveControl, resizeControl };
     };
@@ -581,7 +580,7 @@ describe('useControlManipulation Hook', () => {
     const movedControl = result.current.moveControl(testControl, 13, 7); // Should snap to grid
 
     expect(movedControl.left).toBe(112); // 113 snapped to 8-pixel grid
-    expect(movedControl.top).toBe(56);  // 57 snapped to 8-pixel grid
+    expect(movedControl.top).toBe(56); // 57 snapped to 8-pixel grid
 
     // Test resize
     const resizedControl = result.current.resizeControl(testControl, 'se', 20, 10);
@@ -592,28 +591,26 @@ describe('useControlManipulation Hook', () => {
 
   it('should enforce minimum control sizes', () => {
     const useControlManipulation = (gridSize: number, snapToGrid: boolean) => {
-      const resizeControl = React.useCallback((
-        control: VB6Control, 
-        direction: string, 
-        deltaX: number, 
-        deltaY: number
-      ) => {
-        let newWidth = control.width;
-        let newHeight = control.height;
+      const resizeControl = React.useCallback(
+        (control: VB6Control, direction: string, deltaX: number, deltaY: number) => {
+          let newWidth = control.width;
+          let newHeight = control.height;
 
-        switch (direction) {
-          case 'se':
-            newWidth = Math.max(20, control.width + deltaX);
-            newHeight = Math.max(20, control.height + deltaY);
-            break;
-        }
+          switch (direction) {
+            case 'se':
+              newWidth = Math.max(20, control.width + deltaX);
+              newHeight = Math.max(20, control.height + deltaY);
+              break;
+          }
 
-        return {
-          ...control,
-          width: newWidth,
-          height: newHeight,
-        };
-      }, [gridSize, snapToGrid]);
+          return {
+            ...control,
+            width: newWidth,
+            height: newHeight,
+          };
+        },
+        [gridSize, snapToGrid]
+      );
 
       return { resizeControl };
     };
@@ -658,14 +655,17 @@ describe('useLocalStorage Hook', () => {
         }
       });
 
-      const setValue = React.useCallback((value: T) => {
-        try {
-          setStoredValue(value);
-          window.localStorage.setItem(key, JSON.stringify(value));
-        } catch (error) {
-          console.error('Error saving to localStorage:', error);
-        }
-      }, [key]);
+      const setValue = React.useCallback(
+        (value: T) => {
+          try {
+            setStoredValue(value);
+            window.localStorage.setItem(key, JSON.stringify(value));
+          } catch (error) {
+            console.error('Error saving to localStorage:', error);
+          }
+        },
+        [key]
+      );
 
       return [storedValue, setValue];
     };
@@ -689,14 +689,17 @@ describe('useLocalStorage Hook', () => {
         }
       });
 
-      const setValue = React.useCallback((value: T) => {
-        try {
-          setStoredValue(value);
-          window.localStorage.setItem(key, JSON.stringify(value));
-        } catch (error) {
-          console.error('Error saving to localStorage:', error);
-        }
-      }, [key]);
+      const setValue = React.useCallback(
+        (value: T) => {
+          try {
+            setStoredValue(value);
+            window.localStorage.setItem(key, JSON.stringify(value));
+          } catch (error) {
+            console.error('Error saving to localStorage:', error);
+          }
+        },
+        [key]
+      );
 
       return [storedValue, setValue];
     };
@@ -719,14 +722,17 @@ describe('useLocalStorage Hook', () => {
         }
       });
 
-      const setValue = React.useCallback((value: T) => {
-        try {
-          setStoredValue(value);
-          window.localStorage.setItem(key, JSON.stringify(value));
-        } catch (error) {
-          console.error('Error saving to localStorage:', error);
-        }
-      }, [key]);
+      const setValue = React.useCallback(
+        (value: T) => {
+          try {
+            setStoredValue(value);
+            window.localStorage.setItem(key, JSON.stringify(value));
+          } catch (error) {
+            console.error('Error saving to localStorage:', error);
+          }
+        },
+        [key]
+      );
 
       return [storedValue, setValue];
     };
@@ -737,10 +743,7 @@ describe('useLocalStorage Hook', () => {
       result.current[1]('new value');
     });
 
-    expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
-      'testKey',
-      JSON.stringify('new value')
-    );
+    expect(mockLocalStorage.setItem).toHaveBeenCalledWith('testKey', JSON.stringify('new value'));
     expect(result.current[0]).toBe('new value');
   });
 });
@@ -933,11 +936,11 @@ describe('usePrevious Hook', () => {
   it('should return previous value', () => {
     const usePrevious = <T>(value: T): T | undefined => {
       const ref = useRef<T>();
-      
+
       React.useEffect(() => {
         ref.current = value;
       });
-      
+
       return ref.current;
     };
 
@@ -963,11 +966,11 @@ describe('useToggle Hook', () => {
   it('should toggle boolean value', () => {
     const useToggle = (initialValue = false): [boolean, () => void] => {
       const [value, setValue] = React.useState(initialValue);
-      
+
       const toggle = React.useCallback(() => {
         setValue(v => !v);
       }, []);
-      
+
       return [value, toggle];
     };
 
@@ -991,11 +994,11 @@ describe('useToggle Hook', () => {
   it('should accept initial value', () => {
     const useToggle = (initialValue = false): [boolean, () => void] => {
       const [value, setValue] = React.useState(initialValue);
-      
+
       const toggle = React.useCallback(() => {
         setValue(v => !v);
       }, []);
-      
+
       return [value, toggle];
     };
 
@@ -1007,10 +1010,7 @@ describe('useToggle Hook', () => {
 
 describe('useAsyncEffect Hook', () => {
   it('should handle async operations in useEffect', async () => {
-    const useAsyncEffect = (
-      asyncFunction: () => Promise<void>,
-      deps?: React.DependencyList
-    ) => {
+    const useAsyncEffect = (asyncFunction: () => Promise<void>, deps?: React.DependencyList) => {
       const [loading, setLoading] = React.useState(false);
       const [error, setError] = React.useState<Error | null>(null);
 
@@ -1061,10 +1061,7 @@ describe('useAsyncEffect Hook', () => {
   });
 
   it('should handle async errors', async () => {
-    const useAsyncEffect = (
-      asyncFunction: () => Promise<void>,
-      deps?: React.DependencyList
-    ) => {
+    const useAsyncEffect = (asyncFunction: () => Promise<void>, deps?: React.DependencyList) => {
       const [loading, setLoading] = React.useState(false);
       const [error, setError] = React.useState<Error | null>(null);
 
@@ -1119,7 +1116,7 @@ describe('useElementSize Hook', () => {
       React.useEffect(() => {
         if (!ref.current) return;
 
-        const resizeObserver = new ResizeObserver((entries) => {
+        const resizeObserver = new ResizeObserver(entries => {
           for (const entry of entries) {
             setSize({
               width: entry.contentRect.width,
@@ -1214,7 +1211,7 @@ describe('useClickOutside Hook', () => {
     // Create a mock element and set it as the ref
     const insideElement = document.createElement('div');
     document.body.appendChild(insideElement);
-    
+
     // Mock the ref to point to our element
     Object.defineProperty(result.current, 'current', {
       value: insideElement,
@@ -1244,7 +1241,7 @@ const React = {
 };
 
 // Mock implementations for basic React hooks
-React.useState.mockImplementation((initial) => {
+React.useState.mockImplementation(initial => {
   let state = initial;
   const setState = (newState: any) => {
     state = typeof newState === 'function' ? newState(state) : newState;
@@ -1256,6 +1253,6 @@ React.useEffect.mockImplementation((fn, deps) => {
   fn();
 });
 
-React.useCallback.mockImplementation((fn) => fn);
+React.useCallback.mockImplementation(fn => fn);
 
-React.useRef.mockImplementation((initial) => ({ current: initial }));
+React.useRef.mockImplementation(initial => ({ current: initial }));

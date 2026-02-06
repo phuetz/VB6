@@ -19,7 +19,7 @@ describe('VB6 Parser and Lexer Tests', () => {
       it('should tokenize keywords', () => {
         const code = 'Public Sub Private Function End If Then Else';
         const tokens = lexer.tokenize(code);
-        
+
         expect(tokens).toContainEqual({ type: 'KEYWORD', value: 'Public' });
         expect(tokens).toContainEqual({ type: 'KEYWORD', value: 'Sub' });
         expect(tokens).toContainEqual({ type: 'KEYWORD', value: 'Private' });
@@ -33,7 +33,7 @@ describe('VB6 Parser and Lexer Tests', () => {
       it('should tokenize identifiers', () => {
         const code = 'myVariable userName123 _privateVar';
         const tokens = lexer.tokenize(code);
-        
+
         expect(tokens).toContainEqual({ type: 'IDENTIFIER', value: 'myVariable' });
         expect(tokens).toContainEqual({ type: 'IDENTIFIER', value: 'userName123' });
         expect(tokens).toContainEqual({ type: 'IDENTIFIER', value: '_privateVar' });
@@ -42,7 +42,7 @@ describe('VB6 Parser and Lexer Tests', () => {
       it('should tokenize numbers', () => {
         const code = '42 3.14 -10 1.5E10 &HFF &O77';
         const tokens = lexer.tokenize(code);
-        
+
         expect(tokens).toContainEqual({ type: 'NUMBER', value: '42' });
         expect(tokens).toContainEqual({ type: 'NUMBER', value: '3.14' });
         expect(tokens).toContainEqual({ type: 'NUMBER', value: '-10' });
@@ -54,7 +54,7 @@ describe('VB6 Parser and Lexer Tests', () => {
       it('should tokenize strings', () => {
         const code = '"Hello World" "With ""quotes""" ""';
         const tokens = lexer.tokenize(code);
-        
+
         expect(tokens).toContainEqual({ type: 'STRING', value: '"Hello World"' });
         expect(tokens).toContainEqual({ type: 'STRING', value: '"With ""quotes"""' });
         expect(tokens).toContainEqual({ type: 'STRING', value: '""' });
@@ -63,7 +63,7 @@ describe('VB6 Parser and Lexer Tests', () => {
       it('should tokenize operators', () => {
         const code = '+ - * / \\ Mod ^ = <> < > <= >= And Or Not Xor';
         const tokens = lexer.tokenize(code);
-        
+
         expect(tokens).toContainEqual({ type: 'OPERATOR', value: '+' });
         expect(tokens).toContainEqual({ type: 'OPERATOR', value: '-' });
         expect(tokens).toContainEqual({ type: 'OPERATOR', value: '*' });
@@ -86,7 +86,7 @@ describe('VB6 Parser and Lexer Tests', () => {
       it('should tokenize delimiters', () => {
         const code = '( ) [ ] { } , . : ;';
         const tokens = lexer.tokenize(code);
-        
+
         expect(tokens).toContainEqual({ type: 'LPAREN', value: '(' });
         expect(tokens).toContainEqual({ type: 'RPAREN', value: ')' });
         expect(tokens).toContainEqual({ type: 'LBRACKET', value: '[' });
@@ -107,7 +107,7 @@ describe('VB6 Parser and Lexer Tests', () => {
           x = 10
         `;
         const tokens = lexer.tokenize(code);
-        
+
         expect(tokens).toContainEqual({ type: 'COMMENT', value: "' This is a comment" });
         expect(tokens).toContainEqual({ type: 'COMMENT', value: "' Inline comment" });
         expect(tokens).toContainEqual({ type: 'COMMENT', value: 'REM This is also a comment' });
@@ -121,7 +121,7 @@ describe('VB6 Parser and Lexer Tests', () => {
             "that continues on multiple lines"
         `;
         const tokens = lexer.tokenize(code);
-        
+
         expect(tokens).toContainEqual({ type: 'LINE_CONTINUATION', value: '_' });
         expect(tokens.filter(t => t.type === 'LINE_CONTINUATION')).toHaveLength(2);
       });
@@ -129,7 +129,7 @@ describe('VB6 Parser and Lexer Tests', () => {
       it('should handle dates', () => {
         const code = '#1/1/2024# #12/31/2023 11:59:59 PM#';
         const tokens = lexer.tokenize(code);
-        
+
         expect(tokens).toContainEqual({ type: 'DATE', value: '#1/1/2024#' });
         expect(tokens).toContainEqual({ type: 'DATE', value: '#12/31/2023 11:59:59 PM#' });
       });
@@ -137,7 +137,7 @@ describe('VB6 Parser and Lexer Tests', () => {
       it('should handle type suffixes', () => {
         const code = 'myInt% myLong& mySingle! myDouble# myString$ myCurrency@';
         const tokens = lexer.tokenize(code);
-        
+
         expect(tokens).toContainEqual({ type: 'IDENTIFIER', value: 'myInt', suffix: '%' });
         expect(tokens).toContainEqual({ type: 'IDENTIFIER', value: 'myLong', suffix: '&' });
         expect(tokens).toContainEqual({ type: 'IDENTIFIER', value: 'mySingle', suffix: '!' });
@@ -150,13 +150,13 @@ describe('VB6 Parser and Lexer Tests', () => {
     describe('Error Handling', () => {
       it('should report unterminated strings', () => {
         const code = '"unterminated string';
-        
+
         expect(() => lexer.tokenize(code)).toThrow('Unterminated string');
       });
 
       it('should report invalid characters', () => {
         const code = 'valid £invalid';
-        
+
         expect(() => lexer.tokenize(code)).toThrow('Invalid character: £');
       });
 
@@ -164,7 +164,7 @@ describe('VB6 Parser and Lexer Tests', () => {
         const code = `Line1
 Line2
   Error Here §`;
-        
+
         try {
           lexer.tokenize(code);
         } catch (error: any) {
@@ -178,7 +178,7 @@ Line2
       it('should handle array declarations', () => {
         const code = 'Dim arr(10) As Integer';
         const tokens = lexer.tokenize(code);
-        
+
         expect(tokens).toContainEqual({ type: 'KEYWORD', value: 'Dim' });
         expect(tokens).toContainEqual({ type: 'IDENTIFIER', value: 'arr' });
         expect(tokens).toContainEqual({ type: 'LPAREN', value: '(' });
@@ -189,7 +189,7 @@ Line2
       it('should handle property procedures', () => {
         const code = 'Property Get Value() As Integer';
         const tokens = lexer.tokenize(code);
-        
+
         expect(tokens).toContainEqual({ type: 'KEYWORD', value: 'Property' });
         expect(tokens).toContainEqual({ type: 'KEYWORD', value: 'Get' });
         expect(tokens).toContainEqual({ type: 'IDENTIFIER', value: 'Value' });
@@ -198,7 +198,7 @@ Line2
       it('should handle with blocks', () => {
         const code = 'With obj\n  .Property = value\nEnd With';
         const tokens = lexer.tokenize(code);
-        
+
         expect(tokens).toContainEqual({ type: 'KEYWORD', value: 'With' });
         expect(tokens).toContainEqual({ type: 'DOT', value: '.' });
         expect(tokens).toContainEqual({ type: 'IDENTIFIER', value: 'Property' });
@@ -211,7 +211,7 @@ Line2
       it('should parse variable declarations', () => {
         const tokens = lexer.tokenize('Dim x As Integer');
         const ast = parser.parse(tokens);
-        
+
         expect(ast.type).toBe('Program');
         expect(ast.body[0].type).toBe('VariableDeclaration');
         expect(ast.body[0].name).toBe('x');
@@ -221,7 +221,7 @@ Line2
       it('should parse multiple variable declarations', () => {
         const tokens = lexer.tokenize('Dim x As Integer, y As String, z');
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].declarations).toHaveLength(3);
         expect(ast.body[0].declarations[0].name).toBe('x');
         expect(ast.body[0].declarations[1].name).toBe('y');
@@ -232,7 +232,7 @@ Line2
       it('should parse array declarations', () => {
         const tokens = lexer.tokenize('Dim arr(10) As Integer');
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].type).toBe('ArrayDeclaration');
         expect(ast.body[0].dimensions[0]).toBe(10);
       });
@@ -240,7 +240,7 @@ Line2
       it('should parse constant declarations', () => {
         const tokens = lexer.tokenize('Const PI As Double = 3.14159');
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].type).toBe('ConstantDeclaration');
         expect(ast.body[0].name).toBe('PI');
         expect(ast.body[0].value).toBe(3.14159);
@@ -255,7 +255,7 @@ Line2
         `;
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].type).toBe('TypeDeclaration');
         expect(ast.body[0].name).toBe('Person');
         expect(ast.body[0].fields).toHaveLength(2);
@@ -271,7 +271,7 @@ Line2
         `;
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].type).toBe('EnumDeclaration');
         expect(ast.body[0].name).toBe('Colors');
         expect(ast.body[0].members).toHaveLength(3);
@@ -287,7 +287,7 @@ Line2
         `;
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].type).toBe('SubroutineDeclaration');
         expect(ast.body[0].name).toBe('MySub');
         expect(ast.body[0].visibility).toBe('Public');
@@ -302,7 +302,7 @@ Line2
         `;
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].type).toBe('FunctionDeclaration');
         expect(ast.body[0].name).toBe('Add');
         expect(ast.body[0].returnType).toBe('Integer');
@@ -313,7 +313,7 @@ Line2
         const code = 'Sub Test(Optional x As Integer = 10)';
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].parameters[0].optional).toBe(true);
         expect(ast.body[0].parameters[0].defaultValue).toBe(10);
       });
@@ -322,7 +322,7 @@ Line2
         const code = 'Sub Test(ByVal x As Integer, ByRef y As String)';
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].parameters[0].passingMode).toBe('ByVal');
         expect(ast.body[0].parameters[1].passingMode).toBe('ByRef');
       });
@@ -331,7 +331,7 @@ Line2
         const code = 'Sub Test(ParamArray args() As Variant)';
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].parameters[0].isParamArray).toBe(true);
       });
     });
@@ -349,7 +349,7 @@ Line2
         `;
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].type).toBe('IfStatement');
         expect(ast.body[0].condition.type).toBe('BinaryExpression');
         expect(ast.body[0].elseIf).toHaveLength(1);
@@ -360,7 +360,7 @@ Line2
         const code = 'If x > 10 Then y = 1 Else y = 2';
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].type).toBe('IfStatement');
         expect(ast.body[0].singleLine).toBe(true);
       });
@@ -380,7 +380,7 @@ Line2
         `;
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].type).toBe('SelectStatement');
         expect(ast.body[0].cases).toHaveLength(4);
         expect(ast.body[0].cases[0].values).toEqual([1, 2, 3]);
@@ -396,7 +396,7 @@ Line2
         `;
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].type).toBe('ForLoop');
         expect(ast.body[0].variable).toBe('i');
         expect(ast.body[0].start).toBe(1);
@@ -412,7 +412,7 @@ Line2
         `;
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].type).toBe('ForEachLoop');
         expect(ast.body[0].variable).toBe('item');
         expect(ast.body[0].collection).toBe('collection');
@@ -426,7 +426,7 @@ Line2
         `;
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].type).toBe('WhileLoop');
         expect(ast.body[0].condition.type).toBe('BinaryExpression');
       });
@@ -442,14 +442,14 @@ Line2
             x = x + 1
           Loop Until x >= 10
         `;
-        
+
         const ast1 = parser.parse(lexer.tokenize(code1));
         const ast2 = parser.parse(lexer.tokenize(code2));
-        
+
         expect(ast1.body[0].type).toBe('DoLoop');
         expect(ast1.body[0].testPosition).toBe('beginning');
         expect(ast1.body[0].testType).toBe('While');
-        
+
         expect(ast2.body[0].type).toBe('DoLoop');
         expect(ast2.body[0].testPosition).toBe('end');
         expect(ast2.body[0].testType).toBe('Until');
@@ -461,7 +461,7 @@ Line2
         const code = 'x = 10 + 20 * 30';
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].type).toBe('Assignment');
         expect(ast.body[0].value.type).toBe('BinaryExpression');
         expect(ast.body[0].value.operator).toBe('+');
@@ -472,7 +472,7 @@ Line2
         const code = 'x = 1 + 2 * 3 ^ 4';
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         // Should parse as: 1 + (2 * (3 ^ 4))
         const expr = ast.body[0].value;
         expect(expr.operator).toBe('+');
@@ -484,7 +484,7 @@ Line2
         const code = 'x = -10 + Not flag';
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         const expr = ast.body[0].value;
         expect(expr.left.type).toBe('UnaryExpression');
         expect(expr.left.operator).toBe('-');
@@ -496,7 +496,7 @@ Line2
         const code = 'result = Calculate(10, 20, "test")';
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         const call = ast.body[0].value;
         expect(call.type).toBe('CallExpression');
         expect(call.name).toBe('Calculate');
@@ -507,7 +507,7 @@ Line2
         const code = 'value = obj.Property.SubProperty';
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         const access = ast.body[0].value;
         expect(access.type).toBe('MemberExpression');
         expect(access.property).toBe('SubProperty');
@@ -519,7 +519,7 @@ Line2
         const code = 'value = arr(10, 20)';
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         const access = ast.body[0].value;
         expect(access.type).toBe('ArrayAccess');
         expect(access.array).toBe('arr');
@@ -530,7 +530,7 @@ Line2
         const code = 'text = "Hello" & " " & "World"';
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         const expr = ast.body[0].value;
         expect(expr.type).toBe('BinaryExpression');
         expect(expr.operator).toBe('&');
@@ -554,7 +554,7 @@ Line2
         `;
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].type).toBe('ClassDeclaration');
         expect(ast.body[0].name).toBe('MyClass');
         expect(ast.body[0].members).toHaveLength(3);
@@ -573,10 +573,10 @@ Line2
         `;
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         expect(ast.attributes).toContainEqual({
           name: 'VB_Name',
-          value: 'Module1'
+          value: 'Module1',
         });
         expect(ast.options).toContain('Explicit');
       });
@@ -593,7 +593,7 @@ Line2
         `;
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
-        
+
         expect(ast.body[0].implements).toContain('IInterface');
       });
     });
@@ -611,7 +611,7 @@ Line2
         `;
         const tokens = lexer.tokenize(code);
         const ast = parser.parseWithRecovery(tokens);
-        
+
         expect(ast.errors).toHaveLength(1);
         expect(ast.errors[0].message).toContain('Missing End Sub');
         expect(ast.body).toHaveLength(2); // Still parsed both subs
@@ -625,7 +625,7 @@ Line2
         `;
         const tokens = lexer.tokenize(code);
         const ast = parser.parseWithRecovery(tokens);
-        
+
         expect(ast.errors).toHaveLength(1);
         expect(ast.body).toHaveLength(3); // All statements parsed
       });
@@ -633,7 +633,7 @@ Line2
       it('should provide helpful error messages', () => {
         const code = 'If x > 10';
         const tokens = lexer.tokenize(code);
-        
+
         try {
           parser.parse(tokens);
         } catch (error: any) {
@@ -656,11 +656,11 @@ Line2
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
         const errors = analyzer.analyze(ast);
-        
+
         expect(errors).toContainEqual(
           expect.objectContaining({
             type: 'TypeMismatch',
-            message: expect.stringContaining('Cannot assign String to Integer')
+            message: expect.stringContaining('Cannot assign String to Integer'),
           })
         );
       });
@@ -674,7 +674,7 @@ Line2
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
         const errors = analyzer.analyze(ast);
-        
+
         expect(errors).toHaveLength(0);
       });
 
@@ -687,11 +687,11 @@ Line2
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
         const errors = analyzer.analyze(ast);
-        
+
         expect(errors).toContainEqual(
           expect.objectContaining({
             type: 'TypeMismatch',
-            message: expect.stringContaining('Function must return Integer')
+            message: expect.stringContaining('Function must return Integer'),
           })
         );
       });
@@ -704,11 +704,11 @@ Line2
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
         const errors = analyzer.analyze(ast);
-        
+
         expect(errors).toContainEqual(
           expect.objectContaining({
             type: 'DimensionMismatch',
-            message: expect.stringContaining('Expected 1 dimension')
+            message: expect.stringContaining('Expected 1 dimension'),
           })
         );
       });
@@ -725,11 +725,11 @@ Line2
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
         const errors = analyzer.analyze(ast);
-        
+
         expect(errors).toContainEqual(
           expect.objectContaining({
             type: 'UndefinedVariable',
-            message: expect.stringContaining('Variable x is not defined')
+            message: expect.stringContaining('Variable x is not defined'),
           })
         );
       });
@@ -747,10 +747,10 @@ Line2
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
         const errors = analyzer.analyze(ast);
-        
+
         expect(errors).toContainEqual(
           expect.objectContaining({
-            type: 'UndefinedVariable'
+            type: 'UndefinedVariable',
           })
         );
       });
@@ -770,7 +770,7 @@ Line2
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
         const errors = analyzer.analyze(ast);
-        
+
         expect(errors).toHaveLength(0);
       });
 
@@ -782,11 +782,11 @@ Line2
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
         const errors = analyzer.analyze(ast);
-        
+
         expect(errors).toContainEqual(
           expect.objectContaining({
             type: 'DuplicateDeclaration',
-            message: expect.stringContaining('x is already declared')
+            message: expect.stringContaining('x is already declared'),
           })
         );
       });
@@ -803,11 +803,11 @@ Line2
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
         const warnings = analyzer.analyze(ast, { includeWarnings: true });
-        
+
         expect(warnings).toContainEqual(
           expect.objectContaining({
             type: 'UnreachableCode',
-            severity: 'warning'
+            severity: 'warning',
           })
         );
       });
@@ -821,11 +821,11 @@ Line2
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
         const warnings = analyzer.analyze(ast, { includeWarnings: true });
-        
+
         expect(warnings).toContainEqual(
           expect.objectContaining({
             type: 'LoopVariableModified',
-            severity: 'warning'
+            severity: 'warning',
           })
         );
       });
@@ -842,11 +842,11 @@ Line2
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
         const warnings = analyzer.analyze(ast, { includeWarnings: true });
-        
+
         expect(warnings).toContainEqual(
           expect.objectContaining({
             type: 'MissingReturn',
-            message: expect.stringContaining('Not all paths return a value')
+            message: expect.stringContaining('Not all paths return a value'),
           })
         );
       });
@@ -860,12 +860,12 @@ Line2
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
         const warnings = analyzer.analyze(ast, { includeWarnings: true });
-        
+
         expect(warnings).toContainEqual(
           expect.objectContaining({
             type: 'ImplicitVariant',
             severity: 'warning',
-            message: expect.stringContaining('Consider specifying a type')
+            message: expect.stringContaining('Consider specifying a type'),
           })
         );
       });
@@ -879,11 +879,11 @@ Line2
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
         const warnings = analyzer.analyze(ast, { includeWarnings: true });
-        
+
         expect(warnings).toContainEqual(
           expect.objectContaining({
             type: 'MissingOptionExplicit',
-            severity: 'warning'
+            severity: 'warning',
           })
         );
       });
@@ -900,11 +900,11 @@ Line2
         const tokens = lexer.tokenize(code);
         const ast = parser.parse(tokens);
         const warnings = analyzer.analyze(ast, { includeWarnings: true });
-        
+
         expect(warnings).toContainEqual(
           expect.objectContaining({
             type: 'UnusedVariable',
-            message: expect.stringContaining('unused')
+            message: expect.stringContaining('unused'),
           })
         );
       });

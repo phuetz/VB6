@@ -1,6 +1,6 @@
 /**
  * VB6 File System Implementation
- * 
+ *
  * Complete implementation of VB6 file I/O operations using browser storage
  * Emulates file operations with virtual file system in localStorage/IndexedDB
  */
@@ -13,14 +13,14 @@ export enum VB6FileMode {
   Output = 2,
   Random = 4,
   Append = 8,
-  Binary = 32
+  Binary = 32,
 }
 
 // File access constants
 export enum VB6FileAccess {
   Read = 1,
   Write = 2,
-  ReadWrite = 3
+  ReadWrite = 3,
 }
 
 // File lock constants
@@ -28,7 +28,7 @@ export enum VB6FileLock {
   Shared = 1,
   LockRead = 2,
   LockWrite = 3,
-  LockReadWrite = 4
+  LockReadWrite = 4,
 }
 
 // File attributes
@@ -40,7 +40,7 @@ export enum VB6FileAttribute {
   vbVolume = 8,
   vbDirectory = 16,
   vbArchive = 32,
-  vbAlias = 64
+  vbAlias = 64,
 }
 
 // Virtual File System Entry
@@ -130,21 +130,21 @@ class VirtualFileSystem {
   private normalizePath(path: string): string {
     // Convert Windows-style paths to Unix-style
     let normalized = path.replace(/\\/g, '/');
-    
+
     // PATH TRAVERSAL BUG FIX: Reject absolute paths and drive letters
     if (/^([a-zA-Z]:|\/)/.test(path) && !normalized.startsWith('/')) {
       throw new Error('Absolute paths not allowed in virtual file system');
     }
-    
+
     // Handle relative paths
     if (!normalized.startsWith('/')) {
       normalized = this.currentDirectory + '/' + normalized;
     }
-    
+
     // Remove double slashes and resolve . and ..
     const parts = normalized.split('/').filter(p => p !== '' && p !== '.');
     const resolved: string[] = [];
-    
+
     for (const part of parts) {
       if (part === '..') {
         // PATH TRAVERSAL BUG FIX: Prevent escaping VFS root
@@ -161,13 +161,13 @@ class VirtualFileSystem {
         }
       }
     }
-    
+
     // PATH TRAVERSAL BUG FIX: Always ensure we stay within VFS root
     const result = '/' + resolved.join('/');
     if (!result.startsWith('/') || result.includes('..')) {
       throw new Error('Path traversal attempt detected');
     }
-    
+
     return result;
   }
 
@@ -176,31 +176,31 @@ class VirtualFileSystem {
    */
   private isValidPathComponent(component: string): boolean {
     if (!component || component.length === 0) return false;
-    
+
     // Reject dangerous characters and patterns
     const dangerousPatterns = [
-      /[<>:"|?*\0]/,       // Invalid filename characters
-      /^\.+$/,             // Only dots
-      /^\s*$/,             // Only whitespace
-      /\\$/,               // Ends with backslash
+      /[<>:"|?*\0]/, // Invalid filename characters
+      /^\.+$/, // Only dots
+      /^\s*$/, // Only whitespace
+      /\\$/, // Ends with backslash
     ];
-    
+
     if (dangerousPatterns.some(pattern => pattern.test(component))) {
       return false;
     }
-    
+
     // Limit component length
     if (component.length > 255) {
       return false;
     }
-    
+
     return true;
   }
 
   createFile(path: string, content: string = ''): VFSEntry {
     const normalizedPath = this.normalizePath(path);
     const now = new Date();
-    
+
     const entry: VFSEntry = {
       name: normalizedPath.split('/').pop() || '',
       path: normalizedPath,
@@ -210,19 +210,19 @@ class VirtualFileSystem {
       size: content.length,
       created: now,
       modified: now,
-      accessed: now
+      accessed: now,
     };
-    
+
     this.files.set(normalizedPath, entry);
     this.saveToStorage();
-    
+
     return entry;
   }
 
   createDirectory(path: string): VFSEntry {
     const normalizedPath = this.normalizePath(path);
     const now = new Date();
-    
+
     const entry: VFSEntry = {
       name: normalizedPath.split('/').pop() || '',
       path: normalizedPath,
@@ -231,31 +231,31 @@ class VirtualFileSystem {
       size: 0,
       created: now,
       modified: now,
-      accessed: now
+      accessed: now,
     };
-    
+
     this.files.set(normalizedPath, entry);
     this.saveToStorage();
-    
+
     return entry;
   }
 
   getEntry(path: string): VFSEntry | null {
     const normalizedPath = this.normalizePath(path);
     const entry = this.files.get(normalizedPath);
-    
+
     if (entry) {
       entry.accessed = new Date();
       this.saveToStorage();
     }
-    
+
     return entry || null;
   }
 
   deleteEntry(path: string): boolean {
     const normalizedPath = this.normalizePath(path);
     const result = this.files.delete(normalizedPath);
-    
+
     if (result) {
       // Delete all children if directory
       const prefix = normalizedPath + '/';
@@ -264,33 +264,39 @@ class VirtualFileSystem {
           this.files.delete(key);
         }
       });
-      
+
       this.saveToStorage();
     }
-    
+
     return result;
   }
 
   listDirectory(path: string): VFSEntry[] {
     const normalizedPath = this.normalizePath(path);
     const entries: VFSEntry[] = [];
-    
+
     this.files.forEach((entry, entryPath) => {
       const parentPath = entryPath.substring(0, entryPath.lastIndexOf('/'));
       if (parentPath === normalizedPath || (normalizedPath === '/' && parentPath === '')) {
         entries.push(entry);
       }
     });
-    
+
     return entries;
   }
 
-  openFile(path: string, mode: VB6FileMode, access: VB6FileAccess, lock: VB6FileLock, recordLength?: number): number {
+  openFile(
+    path: string,
+    mode: VB6FileMode,
+    access: VB6FileAccess,
+    lock: VB6FileLock,
+    recordLength?: number
+  ): number {
     const normalizedPath = this.normalizePath(path);
-    
+
     // Check if file exists
     let entry = this.getEntry(normalizedPath);
-    
+
     if (mode === VB6FileMode.Input || mode === VB6FileMode.Binary || mode === VB6FileMode.Random) {
       if (!entry) {
         throw new Error(`File not found: ${path}`);
@@ -304,10 +310,10 @@ class VirtualFileSystem {
         entry = this.createFile(normalizedPath, '');
       }
     }
-    
+
     // Get next available file number
     const fileNumber = this.getNextFileNumber();
-    
+
     // Create file handle
     const handle: FileHandle = {
       fileNumber,
@@ -315,14 +321,14 @@ class VirtualFileSystem {
       mode,
       access,
       lock,
-      position: mode === VB6FileMode.Append ? (entry!.size || 0) : 0,
+      position: mode === VB6FileMode.Append ? entry!.size || 0 : 0,
       recordLength,
       buffer: '',
-      isOpen: true
+      isOpen: true,
     };
-    
+
     this.openFiles.set(fileNumber, handle);
-    
+
     return fileNumber;
   }
 
@@ -331,13 +337,13 @@ class VirtualFileSystem {
     if (!handle) {
       throw new Error(`Bad file number: ${fileNumber}`);
     }
-    
+
     // Flush any remaining buffer
     if (handle.buffer) {
       this.writeToFile(handle, handle.buffer);
       handle.buffer = '';
     }
-    
+
     handle.isOpen = false;
     this.openFiles.delete(fileNumber);
   }
@@ -354,17 +360,17 @@ class VirtualFileSystem {
     if (!handle || !handle.isOpen) {
       throw new Error(`Bad file number: ${fileNumber}`);
     }
-    
+
     const entry = this.getEntry(handle.path);
     if (!entry || entry.type !== 'file') {
       throw new Error('File not found');
     }
-    
-    const content = entry.content as string || '';
-    
+
+    const content = (entry.content as string) || '';
+
     if (handle.mode === VB6FileMode.Binary) {
       // Binary mode - read exact bytes
-      const bytesToRead = length || (content.length - handle.position);
+      const bytesToRead = length || content.length - handle.position;
       const result = content.substring(handle.position, handle.position + bytesToRead);
       handle.position += result.length;
       return result;
@@ -378,7 +384,7 @@ class VirtualFileSystem {
         // Read line
         const remainingContent = content.substring(handle.position);
         const lineEnd = remainingContent.indexOf('\n');
-        
+
         if (lineEnd === -1) {
           handle.position = content.length;
           return remainingContent;
@@ -395,7 +401,7 @@ class VirtualFileSystem {
       handle.position += recordLen;
       return result.padEnd(recordLen, ' ');
     }
-    
+
     return '';
   }
 
@@ -404,9 +410,9 @@ class VirtualFileSystem {
     if (!entry || entry.type !== 'file') {
       throw new Error('File not found');
     }
-    
-    let content = entry.content as string || '';
-    
+
+    let content = (entry.content as string) || '';
+
     if (handle.mode === VB6FileMode.Output || handle.mode === VB6FileMode.Append) {
       // Sequential write
       content = content.substring(0, handle.position) + data;
@@ -426,11 +432,11 @@ class VirtualFileSystem {
       content = before + paddedData + after;
       handle.position += recordLen;
     }
-    
+
     entry.content = content;
     entry.size = content.length;
     entry.modified = new Date();
-    
+
     this.saveToStorage();
   }
 
@@ -439,7 +445,7 @@ class VirtualFileSystem {
     if (!handle || !handle.isOpen) {
       throw new Error(`Bad file number: ${fileNumber}`);
     }
-    
+
     handle.position = Math.max(0, position);
   }
 
@@ -448,7 +454,7 @@ class VirtualFileSystem {
     if (!handle || !handle.isOpen) {
       throw new Error(`Bad file number: ${fileNumber}`);
     }
-    
+
     return handle.position;
   }
 
@@ -457,12 +463,12 @@ class VirtualFileSystem {
     if (!handle || !handle.isOpen) {
       throw new Error(`Bad file number: ${fileNumber}`);
     }
-    
+
     const entry = this.getEntry(handle.path);
     if (!entry || entry.type !== 'file') {
       return true;
     }
-    
+
     return handle.position >= (entry.size || 0);
   }
 
@@ -471,12 +477,12 @@ class VirtualFileSystem {
     if (!handle || !handle.isOpen) {
       throw new Error(`Bad file number: ${fileNumber}`);
     }
-    
+
     const entry = this.getEntry(handle.path);
     if (!entry || entry.type !== 'file') {
       return 0;
     }
-    
+
     return entry.size || 0;
   }
 }
@@ -500,14 +506,14 @@ export function FreeFile(rangeNumber?: number): number {
     } catch {
       // Not in use
     }
-    
+
     if (!inUse) {
       return fileNumber;
     }
-    
+
     fileNumber++;
   }
-  
+
   throw new Error('Too many files open');
 }
 
@@ -525,8 +531,7 @@ export function Open(
   try {
     const actualFileNumber = fileNumber || FreeFile();
     vfs['openFile'](pathname, mode, access, lock, recordLength);
-    
-    console.log(`[VB6 FileSystem] Opened file "${pathname}" as #${actualFileNumber}`);
+
     return actualFileNumber;
   } catch (error) {
     errorHandler.raiseError(53, 'File not found', 'Open');
@@ -547,8 +552,6 @@ export function Close(...fileNumbers: number[]): void {
       // Close specific files
       fileNumbers.forEach(num => vfs['closeFile'](num));
     }
-    
-    console.log(`[VB6 FileSystem] Closed files: ${fileNumbers.join(', ') || 'all'}`);
   } catch (error) {
     errorHandler.raiseError(52, 'Bad file name or number', 'Close');
   }
@@ -594,7 +597,7 @@ export function Print(fileNumber: number, ...expressions: any[]): void {
     if (!handle) {
       throw new Error('Bad file number');
     }
-    
+
     const output = expressions.map(expr => String(expr)).join('\t') + '\n';
     vfs['writeToFile'](handle, output);
   } catch (error) {
@@ -611,19 +614,22 @@ export function Write(fileNumber: number, ...expressions: any[]): void {
     if (!handle) {
       throw new Error('Bad file number');
     }
-    
-    const output = expressions.map(expr => {
-      if (typeof expr === 'string') {
-        return `"${expr}"`;
-      } else if (expr === null) {
-        return '#NULL#';
-      } else if (expr instanceof Date) {
-        return `#${expr.toISOString()}#`;
-      } else {
-        return String(expr);
-      }
-    }).join(',') + '\n';
-    
+
+    const output =
+      expressions
+        .map(expr => {
+          if (typeof expr === 'string') {
+            return `"${expr}"`;
+          } else if (expr === null) {
+            return '#NULL#';
+          } else if (expr instanceof Date) {
+            return `#${expr.toISOString()}#`;
+          } else {
+            return String(expr);
+          }
+        })
+        .join(',') + '\n';
+
     vfs['writeToFile'](handle, output);
   } catch (error) {
     errorHandler.raiseError(52, 'Bad file name or number', 'Write');
@@ -639,13 +645,13 @@ export function Get(fileNumber: number, recordNumber?: number): any {
     if (!handle) {
       throw new Error('Bad file number');
     }
-    
+
     if (recordNumber !== undefined && handle.mode === VB6FileMode.Random) {
       // Seek to record position
       const recordLen = handle.recordLength || 128;
       vfs['seekFile'](fileNumber, (recordNumber - 1) * recordLen);
     }
-    
+
     return vfs['readFromFile'](fileNumber);
   } catch (error) {
     errorHandler.raiseError(52, 'Bad file name or number', 'Get');
@@ -662,13 +668,13 @@ export function Put(fileNumber: number, recordNumber: number | undefined, data: 
     if (!handle) {
       throw new Error('Bad file number');
     }
-    
+
     if (recordNumber !== undefined && handle.mode === VB6FileMode.Random) {
       // Seek to record position
       const recordLen = handle.recordLength || 128;
       vfs['seekFile'](fileNumber, (recordNumber - 1) * recordLen);
     }
-    
+
     const dataStr = typeof data === 'object' ? JSON.stringify(data) : String(data);
     vfs['writeToFile'](handle, dataStr);
   } catch (error) {
@@ -800,13 +806,12 @@ export function Kill(pathname: string): void {
     if (!entry || entry.type !== 'file') {
       throw new Error('File not found');
     }
-    
+
     if (entry.attributes & VB6FileAttribute.vbReadOnly) {
       throw new Error('Access denied');
     }
-    
+
     vfs.deleteEntry(pathname);
-    console.log(`[VB6 FileSystem] Deleted file: ${pathname}`);
   } catch (error) {
     errorHandler.raiseError(53, error.message || 'File not found', 'Kill');
   }
@@ -821,11 +826,9 @@ export function FileCopy(source: string, destination: string): void {
     if (!sourceEntry || sourceEntry.type !== 'file') {
       throw new Error('Source file not found');
     }
-    
-    const content = sourceEntry.content as string || '';
+
+    const content = (sourceEntry.content as string) || '';
     vfs.createFile(destination, content);
-    
-    console.log(`[VB6 FileSystem] Copied ${source} to ${destination}`);
   } catch (error) {
     errorHandler.raiseError(53, error.message || 'File not found', 'FileCopy');
   }
@@ -840,18 +843,16 @@ export function Name(oldPath: string, newPath: string): void {
     if (!entry) {
       throw new Error('Path not found');
     }
-    
+
     // Create new entry
     if (entry.type === 'file') {
       vfs.createFile(newPath, entry.content as string);
     } else {
       vfs.createDirectory(newPath);
     }
-    
+
     // Delete old entry
     vfs.deleteEntry(oldPath);
-    
-    console.log(`[VB6 FileSystem] Renamed ${oldPath} to ${newPath}`);
   } catch (error) {
     errorHandler.raiseError(53, error.message || 'Path not found', 'Name');
   }
@@ -866,9 +867,8 @@ export function MkDir(path: string): void {
     if (existing) {
       throw new Error('Path already exists');
     }
-    
+
     vfs.createDirectory(path);
-    console.log(`[VB6 FileSystem] Created directory: ${path}`);
   } catch (error) {
     errorHandler.raiseError(75, error.message || 'Path/File access error', 'MkDir');
   }
@@ -883,15 +883,14 @@ export function RmDir(path: string): void {
     if (!entry || entry.type !== 'directory') {
       throw new Error('Path not found');
     }
-    
+
     // Check if directory is empty
     const contents = vfs.listDirectory(path);
     if (contents.length > 0) {
       throw new Error('Directory not empty');
     }
-    
+
     vfs.deleteEntry(path);
-    console.log(`[VB6 FileSystem] Removed directory: ${path}`);
   } catch (error) {
     errorHandler.raiseError(75, error.message || 'Path/File access error', 'RmDir');
   }
@@ -906,9 +905,8 @@ export function ChDir(path: string): void {
     if (!entry || entry.type !== 'directory') {
       throw new Error('Path not found');
     }
-    
+
     vfs['currentDirectory'] = vfs['normalizePath'](path);
-    console.log(`[VB6 FileSystem] Changed directory to: ${path}`);
   } catch (error) {
     errorHandler.raiseError(76, 'Path not found', 'ChDir');
   }
@@ -927,7 +925,6 @@ export function CurDir(drive?: string): string {
  */
 export function ChDrive(drive: string): void {
   // No-op in browser environment
-  console.log(`[VB6 FileSystem] ChDrive ignored in browser: ${drive}`);
 }
 
 /**
@@ -936,40 +933,34 @@ export function ChDrive(drive: string): void {
 const dirState = {
   pattern: '',
   entries: [] as VFSEntry[],
-  index: 0
+  index: 0,
 };
 
-export function Dir(
-  pathname?: string,
-  attributes: number = VB6FileAttribute.vbNormal
-): string {
+export function Dir(pathname?: string, attributes: number = VB6FileAttribute.vbNormal): string {
   if (pathname !== undefined) {
     // Initialize new search
     dirState.pattern = pathname;
     dirState.index = 0;
-    
+
     // Parse pattern
     const lastSlash = pathname.lastIndexOf('/');
     const directory = lastSlash >= 0 ? pathname.substring(0, lastSlash) : vfs['currentDirectory'];
     const pattern = lastSlash >= 0 ? pathname.substring(lastSlash + 1) : pathname;
-    
+
     // Convert DOS wildcards to regex
     const regex = new RegExp(
-      '^' + pattern
-        .replace(/\./g, '\\.')
-        .replace(/\*/g, '.*')
-        .replace(/\?/g, '.') + '$',
+      '^' + pattern.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.') + '$',
       'i'
     );
-    
+
     // Get all entries in directory
     const allEntries = vfs.listDirectory(directory);
-    
+
     // Filter by pattern and attributes
     dirState.entries = allEntries.filter(entry => {
       // Check pattern match
       if (!regex.test(entry.name)) return false;
-      
+
       // Check attributes
       if (attributes === VB6FileAttribute.vbNormal) {
         return entry.type === 'file';
@@ -978,12 +969,12 @@ export function Dir(
       }
     });
   }
-  
+
   // Return next entry
   if (dirState.index < dirState.entries.length) {
     return dirState.entries[dirState.index++].name;
   }
-  
+
   return '';
 }
 
@@ -1004,7 +995,7 @@ export const VB6FileSystemAPI = {
   EOF,
   LOF,
   Loc,
-  
+
   // File management
   FileLen,
   FileDateTime,
@@ -1013,7 +1004,7 @@ export const VB6FileSystemAPI = {
   Kill,
   FileCopy,
   Name,
-  
+
   // Directory operations
   MkDir,
   RmDir,
@@ -1021,13 +1012,13 @@ export const VB6FileSystemAPI = {
   CurDir,
   ChDrive,
   Dir,
-  
+
   // Constants
   VB6FileMode,
   VB6FileAccess,
   VB6FileLock,
   VB6FileAttribute,
-  
+
   // Virtual file system
-  vfs
+  vfs,
 };

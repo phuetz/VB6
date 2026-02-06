@@ -37,7 +37,7 @@ export enum D3DRENDERSTATETYPE {
   D3DRS_DIFFUSEMATERIALSOURCE = 145,
   D3DRS_SPECULARMATERIALSOURCE = 146,
   D3DRS_AMBIENTMATERIALSOURCE = 147,
-  D3DRS_EMISSIVEMATERIALSOURCE = 148
+  D3DRS_EMISSIVEMATERIALSOURCE = 148,
 }
 
 export enum D3DPRIMITIVETYPE {
@@ -46,7 +46,7 @@ export enum D3DPRIMITIVETYPE {
   D3DPT_LINESTRIP = 3,
   D3DPT_TRIANGLELIST = 4,
   D3DPT_TRIANGLESTRIP = 5,
-  D3DPT_TRIANGLEFAN = 6
+  D3DPT_TRIANGLEFAN = 6,
 }
 
 export enum DDSURFACEDESC2_FLAGS {
@@ -65,7 +65,7 @@ export enum DDSURFACEDESC2_FLAGS {
   DDSD_CKSRCBLT = 0x10000,
   DDSD_MIPMAPCOUNT = 0x20000,
   DDSD_REFRESHRATE = 0x40000,
-  DDSD_LINEARSIZE = 0x80000
+  DDSD_LINEARSIZE = 0x80000,
 }
 
 export enum DDSCAPS2_FLAGS {
@@ -98,7 +98,7 @@ export enum DDSCAPS2_FLAGS {
   DDSCAPS_LOCALVIDMEM = 0x10000000,
   DDSCAPS_NONLOCALVIDMEM = 0x20000000,
   DDSCAPS_STANDARDVGAMODE = 0x40000000,
-  DDSCAPS_OPTIMIZED = 0x80000000
+  DDSCAPS_OPTIMIZED = 0x80000000,
 }
 
 export enum DSBCAPS_FLAGS {
@@ -116,7 +116,7 @@ export enum DSBCAPS_FLAGS {
   DSBCAPS_GLOBALFOCUS = 0x8000,
   DSBCAPS_GETCURRENTPOSITION2 = 0x10000,
   DSBCAPS_MUTE3DATMAXDISTANCE = 0x20000,
-  DSBCAPS_LOCDEFER = 0x40000
+  DSBCAPS_LOCDEFER = 0x40000,
 }
 
 // DirectX Structures
@@ -139,10 +139,22 @@ export interface D3DVECTOR {
 }
 
 export interface D3DMATRIX {
-  _11: number; _12: number; _13: number; _14: number;
-  _21: number; _22: number; _23: number; _24: number;
-  _31: number; _32: number; _33: number; _34: number;
-  _41: number; _42: number; _43: number; _44: number;
+  _11: number;
+  _12: number;
+  _13: number;
+  _14: number;
+  _21: number;
+  _22: number;
+  _23: number;
+  _24: number;
+  _31: number;
+  _32: number;
+  _33: number;
+  _34: number;
+  _41: number;
+  _42: number;
+  _43: number;
+  _44: number;
 }
 
 export interface D3DVERTEX {
@@ -211,14 +223,14 @@ export class DirectDrawSurface extends COMObject {
     this._width = width;
     this._height = height;
     this._bitDepth = bitDepth;
-    
+
     // Create canvas for surface
     this._canvas = document.createElement('canvas');
     this._canvas.width = width;
     this._canvas.height = height;
     this._context = this._canvas.getContext('2d')!;
     this._imageData = this._context.createImageData(width, height);
-    
+
     this.setupSurfaceMethods();
   }
 
@@ -229,7 +241,7 @@ export class DirectDrawSurface extends COMObject {
         this._imageData = this._context.getImageData(0, 0, this._width, this._height);
         return 0; // DD_OK
       }
-      return 0x8876017C; // DDERR_SURFACEBUSY
+      return 0x8876017c; // DDERR_SURFACEBUSY
     });
 
     this.addMethod('Unlock', (destRect?: RECT) => {
@@ -238,30 +250,48 @@ export class DirectDrawSurface extends COMObject {
         this._locked = false;
         return 0; // DD_OK
       }
-      return 0x887601A2; // DDERR_NOTLOCKED
+      return 0x887601a2; // DDERR_NOTLOCKED
     });
 
-    this.addMethod('Blt', (destRect: RECT, srcSurface: DirectDrawSurface, srcRect: RECT, flags: number) => {
-      if (srcSurface && srcSurface._canvas) {
-        this._context.drawImage(
-          srcSurface._canvas,
-          srcRect.left, srcRect.top, srcRect.right - srcRect.left, srcRect.bottom - srcRect.top,
-          destRect.left, destRect.top, destRect.right - destRect.left, destRect.bottom - destRect.top
-        );
+    this.addMethod(
+      'Blt',
+      (destRect: RECT, srcSurface: DirectDrawSurface, srcRect: RECT, flags: number) => {
+        if (srcSurface && srcSurface._canvas) {
+          this._context.drawImage(
+            srcSurface._canvas,
+            srcRect.left,
+            srcRect.top,
+            srcRect.right - srcRect.left,
+            srcRect.bottom - srcRect.top,
+            destRect.left,
+            destRect.top,
+            destRect.right - destRect.left,
+            destRect.bottom - destRect.top
+          );
+        }
+        return 0; // DD_OK
       }
-      return 0; // DD_OK
-    });
+    );
 
-    this.addMethod('BltFast', (x: number, y: number, srcSurface: DirectDrawSurface, srcRect: RECT, flags: number) => {
-      if (srcSurface && srcSurface._canvas) {
-        this._context.drawImage(
-          srcSurface._canvas,
-          srcRect.left, srcRect.top, srcRect.right - srcRect.left, srcRect.bottom - srcRect.top,
-          x, y, srcRect.right - srcRect.left, srcRect.bottom - srcRect.top
-        );
+    this.addMethod(
+      'BltFast',
+      (x: number, y: number, srcSurface: DirectDrawSurface, srcRect: RECT, flags: number) => {
+        if (srcSurface && srcSurface._canvas) {
+          this._context.drawImage(
+            srcSurface._canvas,
+            srcRect.left,
+            srcRect.top,
+            srcRect.right - srcRect.left,
+            srcRect.bottom - srcRect.top,
+            x,
+            y,
+            srcRect.right - srcRect.left,
+            srcRect.bottom - srcRect.top
+          );
+        }
+        return 0; // DD_OK
       }
-      return 0; // DD_OK
-    });
+    );
 
     this.addMethod('GetDC', () => {
       // Return canvas context handle (simplified)
@@ -286,7 +316,10 @@ export class DirectDrawSurface extends COMObject {
     this.addMethod('GetSurfaceDesc', () => {
       const desc: DDSURFACEDESC2 = {
         dwSize: 124,
-        dwFlags: DDSURFACEDESC2_FLAGS.DDSD_WIDTH | DDSURFACEDESC2_FLAGS.DDSD_HEIGHT | DDSURFACEDESC2_FLAGS.DDSD_CAPS,
+        dwFlags:
+          DDSURFACEDESC2_FLAGS.DDSD_WIDTH |
+          DDSURFACEDESC2_FLAGS.DDSD_HEIGHT |
+          DDSURFACEDESC2_FLAGS.DDSD_CAPS,
         dwHeight: this._height,
         dwWidth: this._width,
         lPitch: this._width * (this._bitDepth / 8),
@@ -300,13 +333,13 @@ export class DirectDrawSurface extends COMObject {
         ddckCKSrcOverlay: null,
         ddckCKSrcBlt: null,
         ddpfPixelFormat: null,
-        ddsCaps: this._caps
+        ddsCaps: this._caps,
       };
       return desc;
     });
 
     this.addMethod('IsLost', () => {
-      return this._lost ? 0x876024C5 : 0; // DDERR_SURFACELOST : DD_OK
+      return this._lost ? 0x876024c5 : 0; // DDERR_SURFACELOST : DD_OK
     });
 
     this.addMethod('Restore', () => {
@@ -335,12 +368,24 @@ export class DirectDrawSurface extends COMObject {
     });
   }
 
-  get Canvas(): HTMLCanvasElement { return this._canvas; }
-  get Context(): CanvasRenderingContext2D { return this._context; }
-  get Width(): number { return this._width; }
-  get Height(): number { return this._height; }
-  get BitDepth(): number { return this._bitDepth; }
-  get IsLocked(): boolean { return this._locked; }
+  get Canvas(): HTMLCanvasElement {
+    return this._canvas;
+  }
+  get Context(): CanvasRenderingContext2D {
+    return this._context;
+  }
+  get Width(): number {
+    return this._width;
+  }
+  get Height(): number {
+    return this._height;
+  }
+  get BitDepth(): number {
+    return this._bitDepth;
+  }
+  get IsLocked(): boolean {
+    return this._locked;
+  }
 }
 
 // DirectDraw Implementation
@@ -356,7 +401,7 @@ export class DirectDraw extends COMObject {
       width: window.screen.width,
       height: window.screen.height,
       bitDepth: 32,
-      refreshRate: 60
+      refreshRate: 60,
     };
     this.setupDirectDrawMethods();
   }
@@ -371,23 +416,26 @@ export class DirectDraw extends COMObject {
       return 0; // DD_OK
     });
 
-    this.addMethod('SetDisplayMode', (width: number, height: number, bitDepth: number, refreshRate?: number, flags?: number) => {
-      this._displayMode = { width, height, bitDepth, refreshRate: refreshRate || 60 };
-      
-      // In browser, we can't actually change display mode, so we simulate it
-      if (this._primarySurface) {
-        this._primarySurface = new DirectDrawSurface(width, height, bitDepth);
+    this.addMethod(
+      'SetDisplayMode',
+      (width: number, height: number, bitDepth: number, refreshRate?: number, flags?: number) => {
+        this._displayMode = { width, height, bitDepth, refreshRate: refreshRate || 60 };
+
+        // In browser, we can't actually change display mode, so we simulate it
+        if (this._primarySurface) {
+          this._primarySurface = new DirectDrawSurface(width, height, bitDepth);
+        }
+
+        return 0; // DD_OK
       }
-      
-      return 0; // DD_OK
-    });
+    );
 
     this.addMethod('RestoreDisplayMode', () => {
       this._displayMode = {
         width: window.screen.width,
         height: window.screen.height,
         bitDepth: 32,
-        refreshRate: 60
+        refreshRate: 60,
       };
       return 0; // DD_OK
     });
@@ -398,9 +446,9 @@ export class DirectDraw extends COMObject {
         surfaceDesc.dwHeight || this._displayMode.height,
         this._displayMode.bitDepth
       );
-      
+
       newSurface['_caps'] = surfaceDesc.ddsCaps;
-      
+
       if (surfaceDesc.ddsCaps & DDSCAPS2_FLAGS.DDSCAPS_PRIMARYSURFACE) {
         this._primarySurface = newSurface;
         // For primary surface in browser, attach to document body
@@ -410,50 +458,64 @@ export class DirectDraw extends COMObject {
         newSurface.Canvas.style.left = '0';
         newSurface.Canvas.style.zIndex = '1000';
       }
-      
+
       this._surfaces.push(newSurface);
       return newSurface;
     });
 
-    this.addMethod('EnumDisplayModes', (flags: number, surfaceDesc: DDSURFACEDESC2, context: any, callback: (mode: any, context: any) => void) => {
-      // Enumerate display modes (simplified)
-      const modes = [
-        { width: 640, height: 480, bitDepth: 32, refreshRate: 60 },
-        { width: 800, height: 600, bitDepth: 32, refreshRate: 60 },
-        { width: 1024, height: 768, bitDepth: 32, refreshRate: 60 },
-        { width: 1280, height: 1024, bitDepth: 32, refreshRate: 60 },
-        { width: 1920, height: 1080, bitDepth: 32, refreshRate: 60 }
-      ];
-      
-      modes.forEach(mode => {
-        const desc: DDSURFACEDESC2 = {
-          dwSize: 124,
-          dwFlags: DDSURFACEDESC2_FLAGS.DDSD_WIDTH | DDSURFACEDESC2_FLAGS.DDSD_HEIGHT | DDSURFACEDESC2_FLAGS.DDSD_REFRESHRATE,
-          dwHeight: mode.height,
-          dwWidth: mode.width,
-          lPitch: 0,
-          dwBackBufferCount: 0,
-          dwMipMapCount: 0,
-          dwAlphaBitDepth: 0,
-          dwReserved: 0,
-          lpSurface: null,
-          ddckCKDestOverlay: null,
-          ddckCKDestBlt: null,
-          ddckCKSrcOverlay: null,
-          ddckCKSrcBlt: null,
-          ddpfPixelFormat: null,
-          ddsCaps: null
-        };
-        callback(desc, context);
-      });
-      
-      return 0; // DD_OK
-    });
+    this.addMethod(
+      'EnumDisplayModes',
+      (
+        flags: number,
+        surfaceDesc: DDSURFACEDESC2,
+        context: any,
+        callback: (mode: any, context: any) => void
+      ) => {
+        // Enumerate display modes (simplified)
+        const modes = [
+          { width: 640, height: 480, bitDepth: 32, refreshRate: 60 },
+          { width: 800, height: 600, bitDepth: 32, refreshRate: 60 },
+          { width: 1024, height: 768, bitDepth: 32, refreshRate: 60 },
+          { width: 1280, height: 1024, bitDepth: 32, refreshRate: 60 },
+          { width: 1920, height: 1080, bitDepth: 32, refreshRate: 60 },
+        ];
+
+        modes.forEach(mode => {
+          const desc: DDSURFACEDESC2 = {
+            dwSize: 124,
+            dwFlags:
+              DDSURFACEDESC2_FLAGS.DDSD_WIDTH |
+              DDSURFACEDESC2_FLAGS.DDSD_HEIGHT |
+              DDSURFACEDESC2_FLAGS.DDSD_REFRESHRATE,
+            dwHeight: mode.height,
+            dwWidth: mode.width,
+            lPitch: 0,
+            dwBackBufferCount: 0,
+            dwMipMapCount: 0,
+            dwAlphaBitDepth: 0,
+            dwReserved: 0,
+            lpSurface: null,
+            ddckCKDestOverlay: null,
+            ddckCKDestBlt: null,
+            ddckCKSrcOverlay: null,
+            ddckCKSrcBlt: null,
+            ddpfPixelFormat: null,
+            ddsCaps: null,
+          };
+          callback(desc, context);
+        });
+
+        return 0; // DD_OK
+      }
+    );
 
     this.addMethod('GetDisplayMode', () => {
       const desc: DDSURFACEDESC2 = {
         dwSize: 124,
-        dwFlags: DDSURFACEDESC2_FLAGS.DDSD_WIDTH | DDSURFACEDESC2_FLAGS.DDSD_HEIGHT | DDSURFACEDESC2_FLAGS.DDSD_REFRESHRATE,
+        dwFlags:
+          DDSURFACEDESC2_FLAGS.DDSD_WIDTH |
+          DDSURFACEDESC2_FLAGS.DDSD_HEIGHT |
+          DDSURFACEDESC2_FLAGS.DDSD_REFRESHRATE,
         dwHeight: this._displayMode.height,
         dwWidth: this._displayMode.width,
         lPitch: 0,
@@ -467,7 +529,7 @@ export class DirectDraw extends COMObject {
         ddckCKSrcOverlay: null,
         ddckCKSrcBlt: null,
         ddpfPixelFormat: null,
-        ddsCaps: null
+        ddsCaps: null,
       };
       return desc;
     });
@@ -495,14 +557,20 @@ export class DirectDraw extends COMObject {
       // Return simulated video memory info
       return {
         dwTotal: 256 * 1024 * 1024, // 256 MB
-        dwFree: 128 * 1024 * 1024   // 128 MB
+        dwFree: 128 * 1024 * 1024, // 128 MB
       };
     });
   }
 
-  get PrimarySurface(): DirectDrawSurface | null { return this._primarySurface; }
-  get DisplayMode() { return this._displayMode; }
-  get Surfaces(): DirectDrawSurface[] { return this._surfaces; }
+  get PrimarySurface(): DirectDrawSurface | null {
+    return this._primarySurface;
+  }
+  get DisplayMode() {
+    return this._displayMode;
+  }
+  get Surfaces(): DirectDrawSurface[] {
+    return this._surfaces;
+  }
 
   /**
    * MEMORY LEAK BUG FIX: Clean up DOM elements to prevent memory leaks
@@ -541,12 +609,12 @@ export class DirectSoundBuffer extends COMObject {
     this._audioContext = audioContext;
     this._format = desc.lpwfxFormat;
     this._bufferSize = desc.dwBufferBytes;
-    
+
     this._gainNode = audioContext.createGain();
     this._panNode = audioContext.createStereoPanner();
     this._gainNode.connect(this._panNode);
     this._panNode.connect(audioContext.destination);
-    
+
     this.setupBufferMethods();
   }
 
@@ -556,17 +624,17 @@ export class DirectSoundBuffer extends COMObject {
         this._source = this._audioContext.createBufferSource();
         this._source.buffer = this._audioBuffer;
         this._source.connect(this._gainNode);
-        
+
         this._source.onended = () => {
           this._isPlaying = false;
           this._position = 0;
         };
-        
+
         this._source.start(0);
         this._isPlaying = true;
         return 0; // DS_OK
       }
-      return 0x8878000A; // DSERR_BUFFERLOST
+      return 0x8878000a; // DSERR_BUFFERLOST
     });
 
     this.addMethod('Stop', () => {
@@ -618,7 +686,7 @@ export class DirectSoundBuffer extends COMObject {
     this.addMethod('GetCurrentPosition', () => {
       return {
         dwPlay: this._position,
-        dwWrite: this._position
+        dwWrite: this._position,
       };
     });
 
@@ -629,30 +697,38 @@ export class DirectSoundBuffer extends COMObject {
         lpvAudioPtr1: buffer1,
         dwAudioBytes1: bytes,
         lpvAudioPtr2: null,
-        dwAudioBytes2: 0
+        dwAudioBytes2: 0,
       };
     });
 
-    this.addMethod('Unlock', (audioPtr1: ArrayBuffer, audioBytes1: number, audioPtr2?: ArrayBuffer, audioBytes2?: number) => {
-      // Convert the raw audio data to AudioBuffer
-      if (audioPtr1) {
-        const channels = this._format.nChannels;
-        const sampleRate = this._format.nSamplesPerSec;
-        const frames = audioBytes1 / (this._format.wBitsPerSample / 8) / channels;
-        
-        this._audioBuffer = this._audioContext.createBuffer(channels, frames, sampleRate);
-        
-        // Copy audio data (simplified - assumes 16-bit PCM)
-        const view = new Int16Array(audioPtr1);
-        for (let channel = 0; channel < channels; channel++) {
-          const channelData = this._audioBuffer.getChannelData(channel);
-          for (let frame = 0; frame < frames; frame++) {
-            channelData[frame] = view[frame * channels + channel] / 32768;
+    this.addMethod(
+      'Unlock',
+      (
+        audioPtr1: ArrayBuffer,
+        audioBytes1: number,
+        audioPtr2?: ArrayBuffer,
+        audioBytes2?: number
+      ) => {
+        // Convert the raw audio data to AudioBuffer
+        if (audioPtr1) {
+          const channels = this._format.nChannels;
+          const sampleRate = this._format.nSamplesPerSec;
+          const frames = audioBytes1 / (this._format.wBitsPerSample / 8) / channels;
+
+          this._audioBuffer = this._audioContext.createBuffer(channels, frames, sampleRate);
+
+          // Copy audio data (simplified - assumes 16-bit PCM)
+          const view = new Int16Array(audioPtr1);
+          for (let channel = 0; channel < channels; channel++) {
+            const channelData = this._audioBuffer.getChannelData(channel);
+            for (let frame = 0; frame < frames; frame++) {
+              channelData[frame] = view[frame * channels + channel] / 32768;
+            }
           }
         }
+        return 0; // DS_OK
       }
-      return 0; // DS_OK
-    });
+    );
 
     this.addMethod('GetStatus', () => {
       let status = 0;
@@ -666,15 +742,23 @@ export class DirectSoundBuffer extends COMObject {
         dwFlags: 0,
         dwBufferBytes: this._bufferSize,
         dwUnlockTransferRate: 0,
-        dwPlayCpuOverhead: 0
+        dwPlayCpuOverhead: 0,
       };
     });
   }
 
-  get IsPlaying(): boolean { return this._isPlaying; }
-  get Volume(): number { return this._volume; }
-  get Pan(): number { return this._pan; }
-  get Frequency(): number { return this._frequency; }
+  get IsPlaying(): boolean {
+    return this._isPlaying;
+  }
+  get Volume(): number {
+    return this._volume;
+  }
+  get Pan(): number {
+    return this._pan;
+  }
+  get Frequency(): number {
+    return this._frequency;
+  }
 }
 
 // DirectSound Implementation
@@ -702,11 +786,11 @@ export class DirectSound extends COMObject {
 
     this.addMethod('CreateSoundBuffer', (desc: DSBUFFERDESC, buffer?: DirectSoundBuffer) => {
       const newBuffer = new DirectSoundBuffer(this._audioContext, desc);
-      
+
       if (desc.dwFlags & DSBCAPS_FLAGS.DSBCAPS_PRIMARYBUFFER) {
         this._primaryBuffer = newBuffer;
       }
-      
+
       this._buffers.push(newBuffer);
       return newBuffer;
     });
@@ -736,7 +820,7 @@ export class DirectSound extends COMObject {
         dwUnlockTransferRateHwBuffers: 0,
         dwPlayCpuOverheadSwBuffers: 0,
         dwReserved1: 0,
-        dwReserved2: 0
+        dwReserved2: 0,
       };
     });
 
@@ -753,9 +837,15 @@ export class DirectSound extends COMObject {
     });
   }
 
-  get AudioContext(): AudioContext { return this._audioContext; }
-  get PrimaryBuffer(): DirectSoundBuffer | null { return this._primaryBuffer; }
-  get Buffers(): DirectSoundBuffer[] { return this._buffers; }
+  get AudioContext(): AudioContext {
+    return this._audioContext;
+  }
+  get PrimaryBuffer(): DirectSoundBuffer | null {
+    return this._primaryBuffer;
+  }
+  get Buffers(): DirectSoundBuffer[] {
+    return this._buffers;
+  }
 }
 
 // DirectInput Device Implementation
@@ -766,9 +856,17 @@ export class DirectInputDevice extends COMObject {
   private _dataFormat: any = null;
   private _cooperativeLevel: number = 0;
   private _keyboardState: Uint8Array = new Uint8Array(256);
-  private _mouseState: { x: number; y: number; buttons: number[] } = { x: 0, y: 0, buttons: [0, 0, 0] };
+  private _mouseState: { x: number; y: number; buttons: number[] } = {
+    x: 0,
+    y: 0,
+    buttons: [0, 0, 0],
+  };
   private _joystickState: any = null;
-  private _eventListeners: Array<{element: Element | Document; event: string; handler: EventListener}> = [];
+  private _eventListeners: Array<{
+    element: Element | Document;
+    event: string;
+    handler: EventListener;
+  }> = [];
 
   constructor(deviceType: number, deviceGuid: string) {
     super('{DIRECTINPUT-DEVICE-CLSID}', 'DirectInput.Device');
@@ -800,13 +898,15 @@ export class DirectInputDevice extends COMObject {
     });
 
     this.addMethod('GetDeviceState', (stateSize: number, state: any) => {
-      if (!this._acquired) return 0x8007001E; // DIERR_NOTACQUIRED
-      
-      if (this._deviceType === 2) { // Keyboard
+      if (!this._acquired) return 0x8007001e; // DIERR_NOTACQUIRED
+
+      if (this._deviceType === 2) {
+        // Keyboard
         if (state instanceof Uint8Array) {
           state.set(this._keyboardState);
         }
-      } else if (this._deviceType === 3) { // Mouse
+      } else if (this._deviceType === 3) {
+        // Mouse
         if (state && typeof state === 'object') {
           state.lX = this._mouseState.x;
           state.lY = this._mouseState.y;
@@ -814,14 +914,17 @@ export class DirectInputDevice extends COMObject {
           state.rgbButtons = this._mouseState.buttons;
         }
       }
-      
+
       return 0; // DI_OK
     });
 
-    this.addMethod('GetDeviceData', (objectSize: number, data: any[], numElements: number, flags: number) => {
-      // Return buffered input data (simplified)
-      return 0; // DI_OK
-    });
+    this.addMethod(
+      'GetDeviceData',
+      (objectSize: number, data: any[], numElements: number, flags: number) => {
+        // Return buffered input data (simplified)
+        return 0; // DI_OK
+      }
+    );
 
     this.addMethod('SetProperty', (property: string, header: any) => {
       return 0; // DI_OK
@@ -837,13 +940,13 @@ export class DirectInputDevice extends COMObject {
         dwFlags: 0,
         dwDevType: this._deviceType,
         dwAxes: this._deviceType === 3 ? 3 : 0, // Mouse has 3 axes
-        dwButtons: this._deviceType === 3 ? 3 : (this._deviceType === 2 ? 256 : 0),
+        dwButtons: this._deviceType === 3 ? 3 : this._deviceType === 2 ? 256 : 0,
         dwPOVs: 0,
         dwFFSamplePeriod: 0,
         dwFFMinTimeResolution: 0,
         dwFirmwareRevision: 0,
         dwHardwareRevision: 0,
-        dwFFDriverVersion: 0
+        dwFFDriverVersion: 0,
       };
     });
 
@@ -867,13 +970,14 @@ export class DirectInputDevice extends COMObject {
         wUsage: 0,
         dwDimension: 0,
         wExponent: 0,
-        wReportId: 0
+        wReportId: 0,
       };
     });
   }
 
   private setupEventListeners(): void {
-    if (this._deviceType === 2) { // Keyboard
+    if (this._deviceType === 2) {
+      // Keyboard
       const keydownHandler = (e: Event) => {
         if (this._acquired) {
           this._keyboardState[(e as KeyboardEvent).keyCode] = 0x80;
@@ -884,15 +988,16 @@ export class DirectInputDevice extends COMObject {
           this._keyboardState[(e as KeyboardEvent).keyCode] = 0x00;
         }
       };
-      
+
       document.addEventListener('keydown', keydownHandler);
       document.addEventListener('keyup', keyupHandler);
-      
+
       this._eventListeners.push(
         { element: document, event: 'keydown', handler: keydownHandler },
         { element: document, event: 'keyup', handler: keyupHandler }
       );
-    } else if (this._deviceType === 3) { // Mouse
+    } else if (this._deviceType === 3) {
+      // Mouse
       const mousemoveHandler = (e: Event) => {
         if (this._acquired) {
           const mouseEvent = e as MouseEvent;
@@ -910,11 +1015,11 @@ export class DirectInputDevice extends COMObject {
           this._mouseState.buttons[(e as MouseEvent).button] = 0x00;
         }
       };
-      
+
       document.addEventListener('mousemove', mousemoveHandler);
       document.addEventListener('mousedown', mousedownHandler);
       document.addEventListener('mouseup', mouseupHandler);
-      
+
       this._eventListeners.push(
         { element: document, event: 'mousemove', handler: mousemoveHandler },
         { element: document, event: 'mousedown', handler: mousedownHandler },
@@ -929,14 +1034,20 @@ export class DirectInputDevice extends COMObject {
       element.removeEventListener(event, handler);
     });
     this._eventListeners = [];
-    
+
     // Release the device
     this._acquired = false;
   }
 
-  get DeviceType(): number { return this._deviceType; }
-  get DeviceGuid(): string { return this._deviceGuid; }
-  get IsAcquired(): boolean { return this._acquired; }
+  get DeviceType(): number {
+    return this._deviceType;
+  }
+  get DeviceGuid(): string {
+    return this._deviceGuid;
+  }
+  get IsAcquired(): boolean {
+    return this._acquired;
+  }
 }
 
 // DirectInput Implementation
@@ -955,32 +1066,45 @@ export class DirectInput extends COMObject {
       return 0; // DI_OK
     });
 
-    this.addMethod('EnumDevices', (deviceType: number, callback: (device: any, ref: any) => void, ref: any, flags: number) => {
-      // Enumerate input devices
-      const devices = [
-        { deviceType: 2, guid: '{SYS-KEYBOARD}', instanceName: 'System Keyboard', productName: 'Keyboard' },
-        { deviceType: 3, guid: '{SYS-MOUSE}', instanceName: 'System Mouse', productName: 'Mouse' }
-      ];
+    this.addMethod(
+      'EnumDevices',
+      (deviceType: number, callback: (device: any, ref: any) => void, ref: any, flags: number) => {
+        // Enumerate input devices
+        const devices = [
+          {
+            deviceType: 2,
+            guid: '{SYS-KEYBOARD}',
+            instanceName: 'System Keyboard',
+            productName: 'Keyboard',
+          },
+          {
+            deviceType: 3,
+            guid: '{SYS-MOUSE}',
+            instanceName: 'System Mouse',
+            productName: 'Mouse',
+          },
+        ];
 
-      devices.forEach(device => {
-        if (deviceType === 0 || deviceType === device.deviceType) {
-          const deviceInstance = {
-            dwSize: 268,
-            guidInstance: device.guid,
-            guidProduct: device.guid,
-            dwDevType: device.deviceType,
-            tszInstanceName: device.instanceName,
-            tszProductName: device.productName,
-            guidFFDriver: '',
-            wUsagePage: 0,
-            wUsage: 0
-          };
-          callback(deviceInstance, ref);
-        }
-      });
+        devices.forEach(device => {
+          if (deviceType === 0 || deviceType === device.deviceType) {
+            const deviceInstance = {
+              dwSize: 268,
+              guidInstance: device.guid,
+              guidProduct: device.guid,
+              dwDevType: device.deviceType,
+              tszInstanceName: device.instanceName,
+              tszProductName: device.productName,
+              guidFFDriver: '',
+              wUsagePage: 0,
+              wUsage: 0,
+            };
+            callback(deviceInstance, ref);
+          }
+        });
 
-      return 0; // DI_OK
-    });
+        return 0; // DI_OK
+      }
+    );
 
     this.addMethod('CreateDevice', (guid: string, device?: DirectInputDevice, outer?: any) => {
       let deviceType = 0;
@@ -1000,19 +1124,29 @@ export class DirectInput extends COMObject {
 
     this.addMethod('RunControlPanel', (hWnd: any, flags: number) => {
       // Open DirectInput control panel (simplified)
-      console.log('DirectInput Control Panel would open here');
       return 0; // DI_OK
     });
   }
 
-  get Devices(): DirectInputDevice[] { return this._devices; }
-  get Version(): number { return this._version; }
+  get Devices(): DirectInputDevice[] {
+    return this._devices;
+  }
+  get Version(): number {
+    return this._version;
+  }
 }
 
 // Direct3D Device Implementation
 export class Direct3DDevice extends COMObject {
   private _renderTarget: DirectDrawSurface | null = null;
-  private _viewport: { x: number; y: number; width: number; height: number; minZ: number; maxZ: number };
+  private _viewport: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    minZ: number;
+    maxZ: number;
+  };
   private _worldMatrix: D3DMATRIX;
   private _viewMatrix: D3DMATRIX;
   private _projectionMatrix: D3DMATRIX;
@@ -1039,17 +1173,20 @@ export class Direct3DDevice extends COMObject {
       return 0; // D3D_OK
     });
 
-    this.addMethod('Clear', (count: number, rects: RECT[], flags: number, color: number, z: number, stencil: number) => {
-      if (this._renderTarget && this._renderTarget.Context) {
-        const ctx = this._renderTarget.Context;
-        const r = (color >> 16) & 0xFF;
-        const g = (color >> 8) & 0xFF;
-        const b = color & 0xFF;
-        ctx.fillStyle = `rgb(${r},${g},${b})`;
-        ctx.fillRect(0, 0, this._renderTarget.Width, this._renderTarget.Height);
+    this.addMethod(
+      'Clear',
+      (count: number, rects: RECT[], flags: number, color: number, z: number, stencil: number) => {
+        if (this._renderTarget && this._renderTarget.Context) {
+          const ctx = this._renderTarget.Context;
+          const r = (color >> 16) & 0xff;
+          const g = (color >> 8) & 0xff;
+          const b = color & 0xff;
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+          ctx.fillRect(0, 0, this._renderTarget.Width, this._renderTarget.Height);
+        }
+        return 0; // D3D_OK
       }
-      return 0; // D3D_OK
-    });
+    );
 
     this.addMethod('SetRenderTarget', (renderTarget: DirectDrawSurface) => {
       this._renderTarget = renderTarget;
@@ -1086,10 +1223,14 @@ export class Direct3DDevice extends COMObject {
 
     this.addMethod('GetTransform', (transformType: number) => {
       switch (transformType) {
-        case 256: return this._worldMatrix;
-        case 2: return this._viewMatrix;
-        case 3: return this._projectionMatrix;
-        default: return this.createIdentityMatrix();
+        case 256:
+          return this._worldMatrix;
+        case 2:
+          return this._viewMatrix;
+        case 3:
+          return this._projectionMatrix;
+        default:
+          return this.createIdentityMatrix();
       }
     });
 
@@ -1102,14 +1243,14 @@ export class Direct3DDevice extends COMObject {
 
     this.addMethod('SetRenderState', (state: D3DRENDERSTATETYPE, value: any) => {
       this._renderStates.set(state, value);
-      
+
       // Handle specific render states
       if (state === D3DRENDERSTATETYPE.D3DRS_LIGHTING) {
         this._lighting = !!value;
       } else if (state === D3DRENDERSTATETYPE.D3DRS_ZENABLE) {
         this._zbuffer = !!value;
       }
-      
+
       return 0; // D3D_OK
     });
 
@@ -1117,38 +1258,64 @@ export class Direct3DDevice extends COMObject {
       return this._renderStates.get(state);
     });
 
-    this.addMethod('DrawPrimitive', (primitiveType: D3DPRIMITIVETYPE, vertexType: number, vertices: D3DVERTEX[], vertexCount: number, flags: number) => {
-      // Simplified primitive drawing using canvas
-      if (this._renderTarget && this._renderTarget.Context) {
-        const ctx = this._renderTarget.Context;
-        ctx.beginPath();
-        
-        switch (primitiveType) {
-          case D3DPRIMITIVETYPE.D3DPT_TRIANGLELIST:
-            this.drawTriangles(ctx, vertices, vertexCount);
-            break;
-          case D3DPRIMITIVETYPE.D3DPT_LINELIST:
-            this.drawLines(ctx, vertices, vertexCount);
-            break;
-          case D3DPRIMITIVETYPE.D3DPT_POINTLIST:
-            this.drawPoints(ctx, vertices, vertexCount);
-            break;
-        }
-        
-        ctx.stroke();
-      }
-      return 0; // D3D_OK
-    });
+    this.addMethod(
+      'DrawPrimitive',
+      (
+        primitiveType: D3DPRIMITIVETYPE,
+        vertexType: number,
+        vertices: D3DVERTEX[],
+        vertexCount: number,
+        flags: number
+      ) => {
+        // Simplified primitive drawing using canvas
+        if (this._renderTarget && this._renderTarget.Context) {
+          const ctx = this._renderTarget.Context;
+          ctx.beginPath();
 
-    this.addMethod('DrawIndexedPrimitive', (primitiveType: D3DPRIMITIVETYPE, vertexType: number, vertices: D3DVERTEX[], vertexCount: number, indices: number[], indexCount: number, flags: number) => {
-      // Draw indexed primitives
-      const indexedVertices: D3DVERTEX[] = [];
-      for (let i = 0; i < indexCount; i++) {
-        indexedVertices.push(vertices[indices[i]]);
+          switch (primitiveType) {
+            case D3DPRIMITIVETYPE.D3DPT_TRIANGLELIST:
+              this.drawTriangles(ctx, vertices, vertexCount);
+              break;
+            case D3DPRIMITIVETYPE.D3DPT_LINELIST:
+              this.drawLines(ctx, vertices, vertexCount);
+              break;
+            case D3DPRIMITIVETYPE.D3DPT_POINTLIST:
+              this.drawPoints(ctx, vertices, vertexCount);
+              break;
+          }
+
+          ctx.stroke();
+        }
+        return 0; // D3D_OK
       }
-      
-      return this.getMethod('DrawPrimitive')(primitiveType, vertexType, indexedVertices, indexCount, flags);
-    });
+    );
+
+    this.addMethod(
+      'DrawIndexedPrimitive',
+      (
+        primitiveType: D3DPRIMITIVETYPE,
+        vertexType: number,
+        vertices: D3DVERTEX[],
+        vertexCount: number,
+        indices: number[],
+        indexCount: number,
+        flags: number
+      ) => {
+        // Draw indexed primitives
+        const indexedVertices: D3DVERTEX[] = [];
+        for (let i = 0; i < indexCount; i++) {
+          indexedVertices.push(vertices[indices[i]]);
+        }
+
+        return this.getMethod('DrawPrimitive')(
+          primitiveType,
+          vertexType,
+          indexedVertices,
+          indexCount,
+          flags
+        );
+      }
+    );
 
     this.addMethod('SetTexture', (stage: number, texture: any) => {
       // Set texture for texture stage (simplified)
@@ -1185,10 +1352,22 @@ export class Direct3DDevice extends COMObject {
 
   private createIdentityMatrix(): D3DMATRIX {
     return {
-      _11: 1, _12: 0, _13: 0, _14: 0,
-      _21: 0, _22: 1, _23: 0, _24: 0,
-      _31: 0, _32: 0, _33: 1, _34: 0,
-      _41: 0, _42: 0, _43: 0, _44: 1
+      _11: 1,
+      _12: 0,
+      _13: 0,
+      _14: 0,
+      _21: 0,
+      _22: 1,
+      _23: 0,
+      _24: 0,
+      _31: 0,
+      _32: 0,
+      _33: 1,
+      _34: 0,
+      _41: 0,
+      _42: 0,
+      _43: 0,
+      _44: 1,
     };
   }
 
@@ -1209,7 +1388,7 @@ export class Direct3DDevice extends COMObject {
       _41: a._41 * b._11 + a._42 * b._21 + a._43 * b._31 + a._44 * b._41,
       _42: a._41 * b._12 + a._42 * b._22 + a._43 * b._32 + a._44 * b._42,
       _43: a._41 * b._13 + a._42 * b._23 + a._43 * b._33 + a._44 * b._43,
-      _44: a._41 * b._14 + a._42 * b._24 + a._43 * b._34 + a._44 * b._44
+      _44: a._41 * b._14 + a._42 * b._24 + a._43 * b._34 + a._44 * b._44,
     };
   }
 
@@ -1221,12 +1400,16 @@ export class Direct3DDevice extends COMObject {
     this._renderStates.set(D3DRENDERSTATETYPE.D3DRS_FILLMODE, 3); // Solid
   }
 
-  private drawTriangles(ctx: CanvasRenderingContext2D, vertices: D3DVERTEX[], vertexCount: number): void {
+  private drawTriangles(
+    ctx: CanvasRenderingContext2D,
+    vertices: D3DVERTEX[],
+    vertexCount: number
+  ): void {
     for (let i = 0; i < vertexCount; i += 3) {
       const v1 = this.projectVertex(vertices[i]);
       const v2 = this.projectVertex(vertices[i + 1]);
       const v3 = this.projectVertex(vertices[i + 2]);
-      
+
       ctx.moveTo(v1.x, v1.y);
       ctx.lineTo(v2.x, v2.y);
       ctx.lineTo(v3.x, v3.y);
@@ -1234,17 +1417,25 @@ export class Direct3DDevice extends COMObject {
     }
   }
 
-  private drawLines(ctx: CanvasRenderingContext2D, vertices: D3DVERTEX[], vertexCount: number): void {
+  private drawLines(
+    ctx: CanvasRenderingContext2D,
+    vertices: D3DVERTEX[],
+    vertexCount: number
+  ): void {
     for (let i = 0; i < vertexCount; i += 2) {
       const v1 = this.projectVertex(vertices[i]);
       const v2 = this.projectVertex(vertices[i + 1]);
-      
+
       ctx.moveTo(v1.x, v1.y);
       ctx.lineTo(v2.x, v2.y);
     }
   }
 
-  private drawPoints(ctx: CanvasRenderingContext2D, vertices: D3DVERTEX[], vertexCount: number): void {
+  private drawPoints(
+    ctx: CanvasRenderingContext2D,
+    vertices: D3DVERTEX[],
+    vertexCount: number
+  ): void {
     for (let i = 0; i < vertexCount; i++) {
       const v = this.projectVertex(vertices[i]);
       ctx.rect(v.x - 1, v.y - 1, 2, 2);
@@ -1253,16 +1444,26 @@ export class Direct3DDevice extends COMObject {
 
   private projectVertex(vertex: D3DVERTEX): { x: number; y: number } {
     // Simplified vertex projection
-    const x = (vertex.x + 1) * this._viewport.width / 2 + this._viewport.x;
-    const y = (1 - vertex.y) * this._viewport.height / 2 + this._viewport.y;
+    const x = ((vertex.x + 1) * this._viewport.width) / 2 + this._viewport.x;
+    const y = ((1 - vertex.y) * this._viewport.height) / 2 + this._viewport.y;
     return { x, y };
   }
 
-  get RenderTarget(): DirectDrawSurface | null { return this._renderTarget; }
-  get Viewport() { return this._viewport; }
-  get WorldMatrix(): D3DMATRIX { return this._worldMatrix; }
-  get ViewMatrix(): D3DMATRIX { return this._viewMatrix; }
-  get ProjectionMatrix(): D3DMATRIX { return this._projectionMatrix; }
+  get RenderTarget(): DirectDrawSurface | null {
+    return this._renderTarget;
+  }
+  get Viewport() {
+    return this._viewport;
+  }
+  get WorldMatrix(): D3DMATRIX {
+    return this._worldMatrix;
+  }
+  get ViewMatrix(): D3DMATRIX {
+    return this._viewMatrix;
+  }
+  get ProjectionMatrix(): D3DMATRIX {
+    return this._projectionMatrix;
+  }
 }
 
 // Direct3D Implementation
@@ -1288,14 +1489,14 @@ export class Direct3D extends COMObject {
           guid: '{D7B71E3E-4340-11CF-B063-0020AFC2CD35}',
           description: 'Software Rasterizer',
           name: 'RGB Software Emulation',
-          hardware: false
+          hardware: false,
         },
         {
           guid: '{D7B71EE0-4340-11CF-B063-0020AFC2CD35}',
           description: 'Hardware Accelerated',
           name: 'Hardware T&L',
-          hardware: true
-        }
+          hardware: true,
+        },
       ];
 
       devices.forEach(device => {
@@ -1305,12 +1506,12 @@ export class Direct3D extends COMObject {
           lpszDeviceDesc: device.description,
           lpszDeviceName: device.name,
           dcmColorModel: 1,
-          dwDevCaps: 0x1FF,
-          dtcTransformCaps: { dwSize: 32, dwCaps: 0xFFFF },
+          dwDevCaps: 0x1ff,
+          dtcTransformCaps: { dwSize: 32, dwCaps: 0xffff },
           bClipping: true,
-          dlcLightingCaps: { dwSize: 16, dwCaps: 0xFF, dwLightingModel: 1, dwNumLights: 8 },
-          dpcLineCaps: { dwSize: 88, dwMiscCaps: 0xFF, dwRasterCaps: 0xFF, dwZCmpCaps: 0xFF },
-          dpcTriCaps: { dwSize: 88, dwMiscCaps: 0xFF, dwRasterCaps: 0xFF, dwZCmpCaps: 0xFF }
+          dlcLightingCaps: { dwSize: 16, dwCaps: 0xff, dwLightingModel: 1, dwNumLights: 8 },
+          dpcLineCaps: { dwSize: 88, dwMiscCaps: 0xff, dwRasterCaps: 0xff, dwZCmpCaps: 0xff },
+          dpcTriCaps: { dwSize: 88, dwMiscCaps: 0xff, dwRasterCaps: 0xff, dwZCmpCaps: 0xff },
         };
         callback(deviceDesc, context);
       });
@@ -1318,12 +1519,15 @@ export class Direct3D extends COMObject {
       return 0; // D3D_OK
     });
 
-    this.addMethod('CreateDevice', (deviceGuid: string, surface: DirectDrawSurface, device?: Direct3DDevice) => {
-      const newDevice = new Direct3DDevice();
-      newDevice.getMethod('SetRenderTarget')(surface);
-      this._devices.push(newDevice);
-      return newDevice;
-    });
+    this.addMethod(
+      'CreateDevice',
+      (deviceGuid: string, surface: DirectDrawSurface, device?: Direct3DDevice) => {
+        const newDevice = new Direct3DDevice();
+        newDevice.getMethod('SetRenderTarget')(surface);
+        this._devices.push(newDevice);
+        return newDevice;
+      }
+    );
 
     this.addMethod('CreateViewport', (viewport?: any) => {
       return {
@@ -1337,7 +1541,7 @@ export class Direct3D extends COMObject {
         dvMaxX: 1.0,
         dvMaxY: 1.0,
         dvMinZ: 0.0,
-        dvMaxZ: 1.0
+        dvMaxZ: 1.0,
       };
     });
 
@@ -1356,7 +1560,7 @@ export class Direct3D extends COMObject {
         dvAttenuation1: 0.0,
         dvAttenuation2: 0.0,
         dvTheta: 0.0,
-        dvPhi: 0.0
+        dvPhi: 0.0,
       };
     });
 
@@ -1369,7 +1573,7 @@ export class Direct3D extends COMObject {
         dcvEmissive: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
         dvPower: 20.0,
         hTexture: null,
-        dwRampSize: 256
+        dwRampSize: 256,
       };
     });
 
@@ -1379,7 +1583,7 @@ export class Direct3D extends COMObject {
         dwSize: 20,
         dwCaps: 0x1000, // D3DTEXTURECAPS_PERSPECTIVE
         dwWidth: surface.Width,
-        dwHeight: surface.Height
+        dwHeight: surface.Height,
       };
     });
 
@@ -1390,10 +1594,10 @@ export class Direct3D extends COMObject {
         lpszDeviceDesc: 'Hardware Accelerated',
         lpszDeviceName: 'Hardware T&L',
         dcmColorModel: 1,
-        dwDevCaps: 0x1FF,
-        dtcTransformCaps: { dwSize: 32, dwCaps: 0xFFFF },
+        dwDevCaps: 0x1ff,
+        dtcTransformCaps: { dwSize: 32, dwCaps: 0xffff },
         bClipping: true,
-        dlcLightingCaps: { dwSize: 16, dwCaps: 0xFF, dwLightingModel: 1, dwNumLights: 8 }
+        dlcLightingCaps: { dwSize: 16, dwCaps: 0xff, dwLightingModel: 1, dwNumLights: 8 },
       };
     });
   }
@@ -1408,18 +1612,22 @@ export class Direct3D extends COMObject {
           DeviceName: '\\\\.\\DISPLAY1',
           DriverVersion: { HighPart: 1, LowPart: 0 },
           VendorId: 0x1414,
-          DeviceId: 0x008C,
+          DeviceId: 0x008c,
           SubSysId: 0,
           Revision: 0,
           DeviceIdentifier: '{12345678-1234-1234-1234-123456789012}',
-          WHQLLevel: 1
-        }
-      }
+          WHQLLevel: 1,
+        },
+      },
     ];
   }
 
-  get Devices(): Direct3DDevice[] { return this._devices; }
-  get Adapters(): any[] { return this._adapters; }
+  get Devices(): Direct3DDevice[] {
+    return this._devices;
+  }
+  get Adapters(): any[] {
+    return this._adapters;
+  }
 }
 
 // DirectPlay Implementation (Simplified for Networking)
@@ -1441,63 +1649,75 @@ export class DirectPlay extends COMObject {
       return 0; // DP_OK
     });
 
-    this.addMethod('EnumConnections', (callback: (connection: any, context: any) => void, context: any, flags: number) => {
-      // Enumerate available connection types
-      const connections = [
-        {
-          dwSize: 80,
-          dwFlags: 0,
-          guid: '{36E95EE0-8577-11CF-960C-0080C7534E83}',
-          lpszName: 'WebSocket Connection',
-          lpszLocalName: 'Local WebSocket'
-        },
-        {
-          dwSize: 80,
-          dwFlags: 0,
-          guid: '{685BC400-9D2C-11CF-A9CD-00AA006886E3}',
-          lpszName: 'HTTP Connection',
-          lpszLocalName: 'Local HTTP'
-        }
-      ];
+    this.addMethod(
+      'EnumConnections',
+      (callback: (connection: any, context: any) => void, context: any, flags: number) => {
+        // Enumerate available connection types
+        const connections = [
+          {
+            dwSize: 80,
+            dwFlags: 0,
+            guid: '{36E95EE0-8577-11CF-960C-0080C7534E83}',
+            lpszName: 'WebSocket Connection',
+            lpszLocalName: 'Local WebSocket',
+          },
+          {
+            dwSize: 80,
+            dwFlags: 0,
+            guid: '{685BC400-9D2C-11CF-A9CD-00AA006886E3}',
+            lpszName: 'HTTP Connection',
+            lpszLocalName: 'Local HTTP',
+          },
+        ];
 
-      connections.forEach(conn => callback(conn, context));
-      return 0; // DP_OK
-    });
+        connections.forEach(conn => callback(conn, context));
+        return 0; // DP_OK
+      }
+    );
 
     this.addMethod('InitializeConnection', (connectionData: any, flags: number) => {
       this._connectionInfo = connectionData;
       return 0; // DP_OK
     });
 
-    this.addMethod('EnumSessions', (sessionDesc: any, timeout: number, callback: (session: any, context: any) => void, context: any, flags: number) => {
-      // Enumerate available sessions (simplified)
-      const sessions = [
-        {
-          dwSize: 80,
-          dwFlags: 0,
-          guidInstance: '{12345678-1234-1234-1234-123456789012}',
-          guidApplication: '{87654321-4321-4321-4321-210987654321}',
-          dwMaxPlayers: 8,
-          dwCurrentPlayers: 2,
-          lpszSessionNameA: 'Test Game Session',
-          lpszPasswordA: '',
-          dwReserved1: 0,
-          dwReserved2: 0,
-          dwUser1: 0,
-          dwUser2: 0,
-          dwUser3: 0,
-          dwUser4: 0
-        }
-      ];
+    this.addMethod(
+      'EnumSessions',
+      (
+        sessionDesc: any,
+        timeout: number,
+        callback: (session: any, context: any) => void,
+        context: any,
+        flags: number
+      ) => {
+        // Enumerate available sessions (simplified)
+        const sessions = [
+          {
+            dwSize: 80,
+            dwFlags: 0,
+            guidInstance: '{12345678-1234-1234-1234-123456789012}',
+            guidApplication: '{87654321-4321-4321-4321-210987654321}',
+            dwMaxPlayers: 8,
+            dwCurrentPlayers: 2,
+            lpszSessionNameA: 'Test Game Session',
+            lpszPasswordA: '',
+            dwReserved1: 0,
+            dwReserved2: 0,
+            dwUser1: 0,
+            dwUser2: 0,
+            dwUser3: 0,
+            dwUser4: 0,
+          },
+        ];
 
-      sessions.forEach(session => callback(session, context, flags));
-      return 0; // DP_OK
-    });
+        sessions.forEach(session => callback(session, context, flags));
+        return 0; // DP_OK
+      }
+    );
 
     this.addMethod('Open', (sessionDesc: any, flags: number) => {
       this._sessionInfo = sessionDesc;
       this._isHost = !!(flags & 0x1); // DPOPEN_CREATE
-      
+
       // Simulate network connection
       if (sessionDesc.lpszSessionNameA && sessionDesc.lpszSessionNameA.includes('ws://')) {
         try {
@@ -1505,7 +1725,7 @@ export class DirectPlay extends COMObject {
           this._webSocket.onopen = () => {
             this.fireEvent('Connected', { session: sessionDesc });
           };
-          this._webSocket.onmessage = (event) => {
+          this._webSocket.onmessage = event => {
             this.fireEvent('MessageReceived', { data: event.data });
           };
           this._webSocket.onclose = () => {
@@ -1515,7 +1735,7 @@ export class DirectPlay extends COMObject {
           console.warn('WebSocket connection failed:', error);
         }
       }
-      
+
       return 0; // DP_OK
     });
 
@@ -1531,23 +1751,26 @@ export class DirectPlay extends COMObject {
       return 0; // DP_OK
     });
 
-    this.addMethod('CreatePlayer', (playerID: number, playerName: string, event?: any, data?: any) => {
-      const player = {
-        dwID: playerID,
-        dwFlags: 0,
-        lpszShortNameA: playerName,
-        lpszLongNameA: playerName,
-        lpData: data
-      };
-      
-      this._playerInfo.set(playerID, player);
-      if (this._localPlayerID === 0) {
-        this._localPlayerID = playerID;
+    this.addMethod(
+      'CreatePlayer',
+      (playerID: number, playerName: string, event?: any, data?: any) => {
+        const player = {
+          dwID: playerID,
+          dwFlags: 0,
+          lpszShortNameA: playerName,
+          lpszLongNameA: playerName,
+          lpData: data,
+        };
+
+        this._playerInfo.set(playerID, player);
+        if (this._localPlayerID === 0) {
+          this._localPlayerID = playerID;
+        }
+
+        this.fireEvent('PlayerCreated', { player });
+        return 0; // DP_OK
       }
-      
-      this.fireEvent('PlayerCreated', { player });
-      return 0; // DP_OK
-    });
+    );
 
     this.addMethod('DestroyPlayer', (playerID: number) => {
       const player = this._playerInfo.get(playerID);
@@ -1559,12 +1782,19 @@ export class DirectPlay extends COMObject {
       return 0x80158110; // DPERR_INVALIDPLAYER
     });
 
-    this.addMethod('EnumPlayers', (callback: (id: number, playerType: number, player: any, context: any) => void, context: any, flags: number) => {
-      for (const [id, player] of this._playerInfo) {
-        callback(id, 0, player, context);
+    this.addMethod(
+      'EnumPlayers',
+      (
+        callback: (id: number, playerType: number, player: any, context: any) => void,
+        context: any,
+        flags: number
+      ) => {
+        for (const [id, player] of this._playerInfo) {
+          callback(id, 0, player, context);
+        }
+        return 0; // DP_OK
       }
-      return 0; // DP_OK
-    });
+    );
 
     this.addMethod('Send', (fromPlayerID: number, toPlayerID: number, flags: number, data: any) => {
       if (this._webSocket && this._webSocket.readyState === WebSocket.OPEN) {
@@ -1573,7 +1803,7 @@ export class DirectPlay extends COMObject {
           to: toPlayerID,
           flags: flags,
           data: data,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         };
         this._webSocket.send(JSON.stringify(message));
         return 0; // DP_OK
@@ -1581,10 +1811,13 @@ export class DirectPlay extends COMObject {
       return 0x80158050; // DPERR_GENERIC
     });
 
-    this.addMethod('Receive', (fromPlayerID: number, toPlayerID: number, flags: number, data: any) => {
-      // Simplified receive - in real implementation would return queued messages
-      return 0; // DP_OK
-    });
+    this.addMethod(
+      'Receive',
+      (fromPlayerID: number, toPlayerID: number, flags: number, data: any) => {
+        // Simplified receive - in real implementation would return queued messages
+        return 0; // DP_OK
+      }
+    );
 
     this.addMethod('GetCaps', () => {
       return {
@@ -1597,7 +1830,7 @@ export class DirectPlay extends COMObject {
         dwLatency: 100,
         dwMaxLocalPlayers: 8,
         dwHeaderLength: 16,
-        dwTimeout: 5000
+        dwTimeout: 5000,
       };
     });
 
@@ -1607,7 +1840,7 @@ export class DirectPlay extends COMObject {
         dwFlags: 0,
         dwLatency: 50,
         dwBandwidth: 56000,
-        dwMaxQueueSize: 64
+        dwMaxQueueSize: 64,
       };
     });
 
@@ -1626,11 +1859,21 @@ export class DirectPlay extends COMObject {
     });
   }
 
-  get SessionInfo(): any { return this._sessionInfo; }
-  get Players(): Map<number, any> { return this._playerInfo; }
-  get LocalPlayerID(): number { return this._localPlayerID; }
-  get IsHost(): boolean { return this._isHost; }
-  get WebSocket(): WebSocket | null { return this._webSocket; }
+  get SessionInfo(): any {
+    return this._sessionInfo;
+  }
+  get Players(): Map<number, any> {
+    return this._playerInfo;
+  }
+  get LocalPlayerID(): number {
+    return this._localPlayerID;
+  }
+  get IsHost(): boolean {
+    return this._isHost;
+  }
+  get WebSocket(): WebSocket | null {
+    return this._webSocket;
+  }
 }
 
 // Register DirectX classes with COM registry
@@ -1697,7 +1940,7 @@ export const DirectX = {
   DirectSound: () => new DirectSound(),
   DirectInput: () => new DirectInput(),
   Direct3D: () => new Direct3D(),
-  DirectPlay: () => new DirectPlay()
+  DirectPlay: () => new DirectPlay(),
 };
 
 export {
@@ -1709,7 +1952,7 @@ export {
   DirectDrawSurface,
   DirectSoundBuffer,
   DirectInputDevice,
-  Direct3DDevice
+  Direct3DDevice,
 };
 
 export default DirectX;

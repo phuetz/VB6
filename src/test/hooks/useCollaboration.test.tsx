@@ -16,7 +16,7 @@ describe('useCollaboration Hook', () => {
     userId: 'test-user-123',
     userName: 'Test User',
     userColor: '#FF6B6B',
-    enabled: true
+    enabled: true,
   };
 
   let mockEngine: any;
@@ -24,7 +24,7 @@ describe('useCollaboration Hook', () => {
   beforeEach(() => {
     // Reset all mocks
     vi.clearAllMocks();
-    
+
     // Create mock engine instance
     mockEngine = {
       createSession: vi.fn(),
@@ -36,7 +36,7 @@ describe('useCollaboration Hook', () => {
       getCollaborators: vi.fn().mockReturnValue([]),
       destroy: vi.fn(),
       on: vi.fn(),
-      off: vi.fn()
+      off: vi.fn(),
     };
 
     // Mock the VB6CollaborationEngine constructor
@@ -62,13 +62,10 @@ describe('useCollaboration Hook', () => {
     it('should create collaboration engine with correct parameters', () => {
       renderHook(() => useCollaboration(mockOptions));
 
-      expect(VB6CollaborationEngine).toHaveBeenCalledWith(
-        'test-user-123',
-        {
-          name: 'Test User',
-          color: '#FF6B6B'
-        }
-      );
+      expect(VB6CollaborationEngine).toHaveBeenCalledWith('test-user-123', {
+        name: 'Test User',
+        color: '#FF6B6B',
+      });
     });
 
     it('should set up event listeners on engine', () => {
@@ -107,14 +104,14 @@ describe('useCollaboration Hook', () => {
       await act(async () => {
         sessionId = await actions.createSession('Test Session', {
           isPrivate: true,
-          maxParticipants: 5
+          maxParticipants: 5,
         });
       });
 
       expect(sessionId).toBe('session-123');
       expect(mockEngine.createSession).toHaveBeenCalledWith('Test Session', {
         isPrivate: true,
-        maxParticipants: 5
+        maxParticipants: 5,
       });
     });
 
@@ -131,8 +128,11 @@ describe('useCollaboration Hook', () => {
       });
 
       expect(sessionId).toBeNull();
-      expect(consoleSpy).toHaveBeenCalledWith('Failed to create collaboration session:', expect.any(Error));
-      
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to create collaboration session:',
+        expect.any(Error)
+      );
+
       consoleSpy.mockRestore();
     });
 
@@ -164,8 +164,11 @@ describe('useCollaboration Hook', () => {
       });
 
       expect(success).toBe(false);
-      expect(consoleSpy).toHaveBeenCalledWith('Failed to join collaboration session:', expect.any(Error));
-      
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to join collaboration session:',
+        expect.any(Error)
+      );
+
       consoleSpy.mockRestore();
     });
 
@@ -197,7 +200,7 @@ describe('useCollaboration Hook', () => {
       expect(mockEngine.applyOperation).toHaveBeenCalledWith('doc1', {
         type: 'insert',
         position: 10,
-        content: 'hello'
+        content: 'hello',
       });
     });
 
@@ -257,7 +260,7 @@ describe('useCollaboration Hook', () => {
       const mockSession = {
         id: 'session-123',
         name: 'Test Session',
-        participants: new Set(['user1', 'user2'])
+        participants: new Set(['user1', 'user2']),
       };
 
       act(() => {
@@ -279,7 +282,7 @@ describe('useCollaboration Hook', () => {
       const mockSession = {
         id: 'session-456',
         name: 'Joined Session',
-        participants: new Set(['user1'])
+        participants: new Set(['user1']),
       };
 
       act(() => {
@@ -330,7 +333,7 @@ describe('useCollaboration Hook', () => {
         name: 'New User',
         color: '#00FF00',
         isOnline: true,
-        lastSeen: Date.now()
+        lastSeen: Date.now(),
       };
 
       act(() => {
@@ -356,7 +359,7 @@ describe('useCollaboration Hook', () => {
         name: 'User',
         color: '#00FF00',
         isOnline: true,
-        lastSeen: Date.now()
+        lastSeen: Date.now(),
       };
 
       // Add collaborator
@@ -388,7 +391,7 @@ describe('useCollaboration Hook', () => {
         name: 'User',
         color: '#00FF00',
         isOnline: true,
-        lastSeen: Date.now()
+        lastSeen: Date.now(),
       };
 
       // Add collaborator
@@ -400,7 +403,7 @@ describe('useCollaboration Hook', () => {
       const updatedCollaborator = {
         ...mockCollaborator,
         name: 'Updated User',
-        cursor: { line: 5, column: 10, documentId: 'doc1' }
+        cursor: { line: 5, column: 10, documentId: 'doc1' },
       };
 
       act(() => {
@@ -441,7 +444,7 @@ describe('useCollaboration Hook', () => {
       const mockData = {
         documentId: 'doc1',
         document: { content: 'updated content' },
-        operation: { type: 'insert', author: 'user2' }
+        operation: { type: 'insert', author: 'user2' },
       };
 
       act(() => {
@@ -451,7 +454,7 @@ describe('useCollaboration Hook', () => {
       expect(dispatchEventSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'collaborationDocumentUpdated',
-          detail: mockData
+          detail: mockData,
         })
       );
 
@@ -463,7 +466,13 @@ describe('useCollaboration Hook', () => {
     it('should update collaborators periodically', async () => {
       const mockCollaborators = [
         { id: 'user1', name: 'User 1', color: '#FF0000', isOnline: true, lastSeen: Date.now() },
-        { id: 'user2', name: 'User 2', color: '#00FF00', isOnline: false, lastSeen: Date.now() - 60000 }
+        {
+          id: 'user2',
+          name: 'User 2',
+          color: '#00FF00',
+          isOnline: false,
+          lastSeen: Date.now() - 60000,
+        },
       ];
 
       mockEngine.getCollaborators.mockReturnValue(mockCollaborators);
@@ -537,7 +546,7 @@ describe('useCollaboration Hook', () => {
       const [state] = result.current;
 
       expect(state.engine).toBeNull();
-      
+
       consoleSpy.mockRestore();
     });
 

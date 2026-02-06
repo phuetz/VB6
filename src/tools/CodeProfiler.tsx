@@ -128,9 +128,11 @@ interface CodeProfilerProps {
 export const CodeProfiler: React.FC<CodeProfilerProps> = ({
   onProfilingStart,
   onProfilingStop,
-  onIssueDetected
+  onIssueDetected,
 }) => {
-  const [selectedTab, setSelectedTab] = useState<'overview' | 'functions' | 'memory' | 'timeline' | 'issues' | 'suggestions'>('overview');
+  const [selectedTab, setSelectedTab] = useState<
+    'overview' | 'functions' | 'memory' | 'timeline' | 'issues' | 'suggestions'
+  >('overview');
   const [isRunning, setIsRunning] = useState(false);
   const [currentSession, setCurrentSession] = useState<ProfilingSession | null>(null);
   const [sessions, setSessions] = useState<ProfilingSession[]>([]);
@@ -148,11 +150,13 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
     filterNativeCalls: false,
     minFunctionTime: 1,
     autoDetectIssues: true,
-    generateSuggestions: true
+    generateSuggestions: true,
   });
   const [selectedFunction, setSelectedFunction] = useState<FunctionProfile | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'tree' | 'flame'>('table');
-  const [sortBy, setSortBy] = useState<'totalTime' | 'callCount' | 'averageTime' | 'percentage'>('totalTime');
+  const [sortBy, setSortBy] = useState<'totalTime' | 'callCount' | 'averageTime' | 'percentage'>(
+    'totalTime'
+  );
   const [filterText, setFilterText] = useState('');
 
   const eventEmitter = useRef(new EventEmitter());
@@ -180,8 +184,8 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
       callers: [],
       callees: [
         { name: 'InitializeComponents', callCount: 1, totalTime: 120.3 },
-        { name: 'LoadData', callCount: 1, totalTime: 85.0 }
-      ]
+        { name: 'LoadData', callCount: 1, totalTime: 85.0 },
+      ],
     },
     {
       name: 'ProcessRecords',
@@ -196,13 +200,11 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
       selfTime: 890.3,
       childTime: 360.5,
       percentage: 78.9,
-      callers: [
-        { name: 'MainLoop', callCount: 1547, totalTime: 1250.8 }
-      ],
+      callers: [{ name: 'MainLoop', callCount: 1547, totalTime: 1250.8 }],
       callees: [
         { name: 'ValidateRecord', callCount: 1547, totalTime: 180.2 },
-        { name: 'SaveRecord', callCount: 1245, totalTime: 180.3 }
-      ]
+        { name: 'SaveRecord', callCount: 1245, totalTime: 180.3 },
+      ],
     },
     {
       name: 'StringConcatenation',
@@ -217,11 +219,9 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
       selfTime: 89.4,
       childTime: 0,
       percentage: 5.6,
-      callers: [
-        { name: 'ProcessRecords', callCount: 15470, totalTime: 89.4 }
-      ],
-      callees: []
-    }
+      callers: [{ name: 'ProcessRecords', callCount: 15470, totalTime: 89.4 }],
+      callees: [],
+    },
   ];
 
   // Sample performance issues
@@ -231,54 +231,56 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
       type: 'CPU Hotspot',
       severity: 'High',
       title: 'String concatenation in tight loop',
-      description: 'Function StringConcatenation is consuming 78.9% of total execution time due to inefficient string operations in a loop.',
+      description:
+        'Function StringConcatenation is consuming 78.9% of total execution time due to inefficient string operations in a loop.',
       location: {
         function: 'ProcessRecords',
         module: 'DataModule.bas',
-        line: 45
+        line: 45,
       },
       impact: {
         performance: 85,
         memory: 40,
-        stability: 10
+        stability: 10,
       },
       suggestions: [
         'Use StringBuilder or array concatenation instead of string concatenation',
         'Consider processing records in batches',
-        'Cache frequently accessed strings'
+        'Cache frequently accessed strings',
       ],
       evidence: {
         metrics: ['High CPU usage during string operations', 'Excessive string allocations'],
         stackTrace: ['ProcessRecords', 'StringConcatenation', 'String.Concat'],
-        samples: 1547
-      }
+        samples: 1547,
+      },
     },
     {
       id: 'issue_2',
       type: 'Memory Leak',
       severity: 'Medium',
       title: 'Possible memory leak in Form_Load',
-      description: 'Objects allocated in Form_Load are not being properly disposed, leading to gradual memory increase.',
+      description:
+        'Objects allocated in Form_Load are not being properly disposed, leading to gradual memory increase.',
       location: {
         function: 'Form_Load',
         module: 'Form1.frm',
-        line: 15
+        line: 15,
       },
       impact: {
         performance: 30,
         memory: 75,
-        stability: 60
+        stability: 60,
       },
       suggestions: [
         'Ensure all objects are properly disposed in Form_Unload',
         'Use Set obj = Nothing for all object variables',
-        'Check for circular references'
+        'Check for circular references',
       ],
       evidence: {
         metrics: ['Growing heap size', 'Unreleased object references'],
-        samples: 1
-      }
-    }
+        samples: 1,
+      },
+    },
   ];
 
   // Sample optimization suggestions
@@ -292,19 +294,20 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
       effort: 'Easy',
       before: `Dim result As String\nFor i = 1 To 1000\n    result = result & "item" & i\nNext i`,
       after: `Dim parts() As String\nReDim parts(1000)\nFor i = 1 To 1000\n    parts(i) = "item" & i\nNext i\nresult = Join(parts, "")`,
-      expectedGain: '70-80% reduction in string operation time'
+      expectedGain: '70-80% reduction in string operation time',
     },
     {
       id: 'opt_2',
       title: 'Implement object pooling for frequently created objects',
-      description: 'Reuse objects instead of creating new ones to reduce garbage collection pressure.',
+      description:
+        'Reuse objects instead of creating new ones to reduce garbage collection pressure.',
       category: 'Memory',
       impact: 'Medium',
       effort: 'Medium',
       before: `For Each record In records\n    Dim processor As New RecordProcessor\n    processor.Process record\n    Set processor = Nothing\nNext`,
       after: `Dim processor As RecordProcessor\nSet processor = GetPooledProcessor()\nFor Each record In records\n    processor.Process record\nNext\nReturnToPool processor`,
-      expectedGain: '40-50% reduction in object allocation overhead'
-    }
+      expectedGain: '40-50% reduction in object allocation overhead',
+    },
   ];
 
   // Start profiling
@@ -327,8 +330,8 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
         trackCalls: settings.trackCalls,
         trackExceptions: settings.trackExceptions,
         filterNativeCalls: settings.filterNativeCalls,
-        minFunctionTime: settings.minFunctionTime
-      }
+        minFunctionTime: settings.minFunctionTime,
+      },
     };
 
     setCurrentSession(newSession);
@@ -351,7 +354,7 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
         gcCollections: Math.floor(Math.random() * 5),
         workingSet: Math.random() * 1024 * 1024 * 256,
         privateMemory: Math.random() * 1024 * 1024 * 128,
-        virtualMemory: Math.random() * 1024 * 1024 * 1024
+        virtualMemory: Math.random() * 1024 * 1024 * 1024,
       };
 
       setPerformanceMetrics(prev => [...prev, newMetric]);
@@ -383,15 +386,15 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
           timestamp: currentSession.startTime.getTime(),
           type: 'Session Start',
           description: 'Profiling session started',
-          impact: 'Low'
+          impact: 'Low',
         },
         {
           timestamp: endTime.getTime(),
           type: 'Session End',
           description: 'Profiling session completed',
-          impact: 'Low'
-        }
-      ]
+          impact: 'Low',
+        },
+      ],
     };
 
     setSessions(prev => [...prev, finalSession]);
@@ -400,13 +403,21 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
 
     onProfilingStop?.(finalSession);
     eventEmitter.current.emit('profilingStopped', finalSession);
-  }, [currentSession, isRunning, performanceMetrics, functionProfiles, memoryAllocations, onProfilingStop]);
+  }, [
+    currentSession,
+    isRunning,
+    performanceMetrics,
+    functionProfiles,
+    memoryAllocations,
+    onProfilingStop,
+  ]);
 
   // Filter functions
-  const filteredFunctions = functionProfiles.filter(func =>
-    !filterText || 
-    func.name.toLowerCase().includes(filterText.toLowerCase()) ||
-    func.module.toLowerCase().includes(filterText.toLowerCase())
+  const filteredFunctions = functionProfiles.filter(
+    func =>
+      !filterText ||
+      func.name.toLowerCase().includes(filterText.toLowerCase()) ||
+      func.module.toLowerCase().includes(filterText.toLowerCase())
   );
 
   // Sort functions
@@ -437,12 +448,12 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
     const units = ['B', 'KB', 'MB', 'GB'];
     let size = bytes;
     let unitIndex = 0;
-    
+
     while (size >= 1024 && unitIndex < units.length - 1) {
       size /= 1024;
       unitIndex++;
     }
-    
+
     return `${size.toFixed(2)} ${units[unitIndex]}`;
   };
 
@@ -468,7 +479,7 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
           <div className="flex items-center gap-2">
             <select
               value={selectedSession?.id || ''}
-              onChange={(e) => {
+              onChange={e => {
                 const session = sessions.find(s => s.id === e.target.value);
                 setSelectedSession(session || null);
               }}
@@ -510,7 +521,7 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
             { key: 'memory', label: 'Memory', count: memoryAllocations.length },
             { key: 'timeline', label: 'Timeline', count: performanceMetrics.length },
             { key: 'issues', label: 'Issues', count: issues.length },
-            { key: 'suggestions', label: 'Suggestions', count: suggestions.length }
+            { key: 'suggestions', label: 'Suggestions', count: suggestions.length },
           ].map(tab => (
             <button
               key={tab.key}
@@ -548,15 +559,11 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
                     <div className="text-sm text-green-800">Functions Profiled</div>
                   </div>
                   <div className="bg-yellow-50 p-4 rounded-lg">
-                    <div className="text-2xl font-bold text-yellow-600">
-                      {issues.length}
-                    </div>
+                    <div className="text-2xl font-bold text-yellow-600">{issues.length}</div>
                     <div className="text-sm text-yellow-800">Issues Detected</div>
                   </div>
                   <div className="bg-purple-50 p-4 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600">
-                      {suggestions.length}
-                    </div>
+                    <div className="text-2xl font-bold text-purple-600">{suggestions.length}</div>
                     <div className="text-sm text-purple-800">Optimizations</div>
                   </div>
                 </div>
@@ -576,14 +583,19 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
                     </div>
                     <div>
                       <h4 className="font-medium mb-2">Critical Issues</h4>
-                      {issues.filter(i => i.severity === 'High' || i.severity === 'Critical').slice(0, 3).map((issue, index) => (
-                        <div key={index} className="flex items-center gap-2 py-1">
-                          <span className={`w-2 h-2 rounded-full ${
-                            issue.severity === 'Critical' ? 'bg-red-500' : 'bg-orange-500'
-                          }`}></span>
-                          <span className="text-sm truncate">{issue.title}</span>
-                        </div>
-                      ))}
+                      {issues
+                        .filter(i => i.severity === 'High' || i.severity === 'Critical')
+                        .slice(0, 3)
+                        .map((issue, index) => (
+                          <div key={index} className="flex items-center gap-2 py-1">
+                            <span
+                              className={`w-2 h-2 rounded-full ${
+                                issue.severity === 'Critical' ? 'bg-red-500' : 'bg-orange-500'
+                              }`}
+                            ></span>
+                            <span className="text-sm truncate">{issue.title}</span>
+                          </div>
+                        ))}
                     </div>
                   </div>
                 </div>
@@ -592,7 +604,9 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
               <div className="text-center py-12 text-gray-500">
                 <div className="text-4xl mb-4">📊</div>
                 <p className="text-lg">No profiling session selected</p>
-                <p className="text-sm mt-2">Start profiling or select an existing session to view performance data</p>
+                <p className="text-sm mt-2">
+                  Start profiling or select an existing session to view performance data
+                </p>
               </div>
             )}
           </div>
@@ -608,12 +622,12 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
                     type="text"
                     placeholder="Filter functions..."
                     value={filterText}
-                    onChange={(e) => setFilterText(e.target.value)}
+                    onChange={e => setFilterText(e.target.value)}
                     className="px-3 py-1 border border-gray-300 rounded w-64"
                   />
                   <select
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as any)}
+                    onChange={e => setSortBy(e.target.value as any)}
                     className="px-2 py-1 border border-gray-300 rounded"
                   >
                     <option value="totalTime">Sort by Total Time</option>
@@ -670,11 +684,21 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
                         >
                           <td className="p-3 font-mono text-sm">{func.name}</td>
                           <td className="p-3 text-sm text-gray-600">{func.module}</td>
-                          <td className="p-3 text-right font-mono text-sm">{func.callCount.toLocaleString()}</td>
-                          <td className="p-3 text-right font-mono text-sm">{formatTime(func.totalTime)}</td>
-                          <td className="p-3 text-right font-mono text-sm">{formatTime(func.averageTime)}</td>
-                          <td className="p-3 text-right font-mono text-sm">{formatTime(func.selfTime)}</td>
-                          <td className="p-3 text-right font-mono text-sm">{func.percentage.toFixed(1)}%</td>
+                          <td className="p-3 text-right font-mono text-sm">
+                            {func.callCount.toLocaleString()}
+                          </td>
+                          <td className="p-3 text-right font-mono text-sm">
+                            {formatTime(func.totalTime)}
+                          </td>
+                          <td className="p-3 text-right font-mono text-sm">
+                            {formatTime(func.averageTime)}
+                          </td>
+                          <td className="p-3 text-right font-mono text-sm">
+                            {formatTime(func.selfTime)}
+                          </td>
+                          <td className="p-3 text-right font-mono text-sm">
+                            {func.percentage.toFixed(1)}%
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -697,7 +721,9 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
                   <div className="text-center py-12 text-gray-500">
                     <div className="text-4xl mb-4">🔥</div>
                     <p className="text-lg">Flame Graph</p>
-                    <p className="text-sm mt-2">Interactive flame graph visualization coming soon</p>
+                    <p className="text-sm mt-2">
+                      Interactive flame graph visualization coming soon
+                    </p>
                   </div>
                 </div>
               )}
@@ -732,17 +758,29 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
                 <div key={issue.id} className="border border-gray-300 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
-                      <span className={`w-3 h-3 rounded-full ${
-                        issue.severity === 'Critical' ? 'bg-red-500' :
-                        issue.severity === 'High' ? 'bg-orange-500' :
-                        issue.severity === 'Medium' ? 'bg-yellow-500' : 'bg-blue-500'
-                      }`}></span>
+                      <span
+                        className={`w-3 h-3 rounded-full ${
+                          issue.severity === 'Critical'
+                            ? 'bg-red-500'
+                            : issue.severity === 'High'
+                              ? 'bg-orange-500'
+                              : issue.severity === 'Medium'
+                                ? 'bg-yellow-500'
+                                : 'bg-blue-500'
+                        }`}
+                      ></span>
                       <h3 className="font-medium text-lg">{issue.title}</h3>
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        issue.severity === 'Critical' ? 'bg-red-100 text-red-800' :
-                        issue.severity === 'High' ? 'bg-orange-100 text-orange-800' :
-                        issue.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 rounded text-xs ${
+                          issue.severity === 'Critical'
+                            ? 'bg-red-100 text-red-800'
+                            : issue.severity === 'High'
+                              ? 'bg-orange-100 text-orange-800'
+                              : issue.severity === 'Medium'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-blue-100 text-blue-800'
+                        }`}
+                      >
                         {issue.severity}
                       </span>
                       <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
@@ -750,13 +788,14 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
                       </span>
                     </div>
                   </div>
-                  
+
                   <p className="text-gray-700 mb-3">{issue.description}</p>
-                  
+
                   <div className="text-sm text-gray-600 mb-3">
-                    <strong>Location:</strong> {issue.location.function} in {issue.location.module}:{issue.location.line}
+                    <strong>Location:</strong> {issue.location.function} in {issue.location.module}:
+                    {issue.location.line}
                   </div>
-                  
+
                   <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
                     <div>
                       <strong>Performance Impact:</strong> {issue.impact.performance}%
@@ -768,7 +807,7 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
                       <strong>Stability Impact:</strong> {issue.impact.stability}%
                     </div>
                   </div>
-                  
+
                   <div>
                     <strong>Suggestions:</strong>
                     <ul className="list-disc list-inside mt-1 text-sm text-gray-700">
@@ -779,7 +818,7 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
                   </div>
                 </div>
               ))}
-              
+
               {issues.length === 0 && (
                 <div className="text-center py-12 text-gray-500">
                   <div className="text-4xl mb-4">✅</div>
@@ -799,16 +838,26 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-medium text-lg">{suggestion.title}</h3>
                     <div className="flex gap-2">
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        suggestion.impact === 'High' ? 'bg-green-100 text-green-800' :
-                        suggestion.impact === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 rounded text-xs ${
+                          suggestion.impact === 'High'
+                            ? 'bg-green-100 text-green-800'
+                            : suggestion.impact === 'Medium'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-blue-100 text-blue-800'
+                        }`}
+                      >
                         {suggestion.impact} Impact
                       </span>
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        suggestion.effort === 'Easy' ? 'bg-green-100 text-green-800' :
-                        suggestion.effort === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 rounded text-xs ${
+                          suggestion.effort === 'Easy'
+                            ? 'bg-green-100 text-green-800'
+                            : suggestion.effort === 'Medium'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-red-100 text-red-800'
+                        }`}
+                      >
                         {suggestion.effort} Effort
                       </span>
                       <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
@@ -816,9 +865,9 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
                       </span>
                     </div>
                   </div>
-                  
+
                   <p className="text-gray-700 mb-4">{suggestion.description}</p>
-                  
+
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <h4 className="font-medium mb-2">Before:</h4>
@@ -833,13 +882,13 @@ export const CodeProfiler: React.FC<CodeProfilerProps> = ({
                       </pre>
                     </div>
                   </div>
-                  
+
                   <div className="bg-blue-50 p-3 rounded">
                     <strong>Expected Gain:</strong> {suggestion.expectedGain}
                   </div>
                 </div>
               ))}
-              
+
               {suggestions.length === 0 && (
                 <div className="text-center py-12 text-gray-500">
                   <div className="text-4xl mb-4">💡</div>

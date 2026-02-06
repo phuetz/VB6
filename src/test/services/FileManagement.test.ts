@@ -9,7 +9,7 @@ const mockFileSystem = {
   mkdir: vi.fn(),
   unlink: vi.fn(),
   exists: vi.fn(),
-  stat: vi.fn()
+  stat: vi.fn(),
 };
 
 // Mock File API
@@ -110,7 +110,7 @@ Begin VB.Form Form1
 End`;
 
       const parsed = await fileManager.parseVB6Form(frmContent);
-      
+
       expect(parsed.name).toBe('Form1');
       expect(parsed.properties.Caption).toBe('Test Form');
       expect(parsed.properties.ClientWidth).toBe(4560);
@@ -159,7 +159,7 @@ ThreadPerObject=0
 MaxNumberOfThreads=1`;
 
       const parsed = await fileManager.parseVB6Project(vbpContent);
-      
+
       expect(parsed.type).toBe('Exe');
       expect(parsed.name).toBe('TestProject');
       expect(parsed.title).toBe('Test Project');
@@ -189,7 +189,7 @@ Public Sub Main()
 End Sub`;
 
       const parsed = await fileManager.parseVB6Module(basContent);
-      
+
       expect(parsed.name).toBe('Module1');
       expect(parsed.hasOptionExplicit).toBe(true);
       expect(parsed.constants).toHaveLength(1);
@@ -233,7 +233,7 @@ Public Function Calculate(ByVal x As Integer) As Integer
 End Function`;
 
       const parsed = await fileManager.parseVB6Class(clsContent);
-      
+
       expect(parsed.name).toBe('Class1');
       expect(parsed.multiUse).toBe(true);
       expect(parsed.creatable).toBe(true);
@@ -250,11 +250,11 @@ End Function`;
       const projectFiles = [
         new File([`Type=Exe\nName="TestProject"`], 'TestProject.vbp'),
         new File([`VERSION 5.00\nBegin VB.Form Form1\nEnd`], 'Form1.frm'),
-        new File([`Attribute VB_Name = "Module1"`], 'Module1.bas')
+        new File([`Attribute VB_Name = "Module1"`], 'Module1.bas'),
       ];
 
       const imported = await fileManager.importVB6Project(projectFiles);
-      
+
       expect(imported.name).toBe('TestProject');
       expect(imported.forms).toHaveLength(1);
       expect(imported.modules).toHaveLength(1);
@@ -264,33 +264,35 @@ End Function`;
       const project = {
         name: 'TestProject',
         type: 'Exe',
-        forms: [{
-          name: 'Form1',
-          caption: 'Main Form',
-          controls: []
-        }],
-        modules: [{
-          name: 'Module1',
-          code: 'Public Sub Main()\nEnd Sub'
-        }]
+        forms: [
+          {
+            name: 'Form1',
+            caption: 'Main Form',
+            controls: [],
+          },
+        ],
+        modules: [
+          {
+            name: 'Module1',
+            code: 'Public Sub Main()\nEnd Sub',
+          },
+        ],
       };
 
       const exported = await fileManager.exportVB6Project(project);
-      
+
       expect(exported).toHaveProperty('TestProject.vbp');
       expect(exported).toHaveProperty('Form1.frm');
       expect(exported).toHaveProperty('Module1.bas');
     });
 
     it('should handle binary resource files', async () => {
-      const resourceFile = new File(
-        [new Uint8Array([0x00, 0x01, 0x02, 0x03])],
-        'resource.res',
-        { type: 'application/octet-stream' }
-      );
+      const resourceFile = new File([new Uint8Array([0x00, 0x01, 0x02, 0x03])], 'resource.res', {
+        type: 'application/octet-stream',
+      });
 
       const imported = await fileManager.importBinaryResource(resourceFile);
-      
+
       expect(imported.name).toBe('resource.res');
       expect(imported.data).toBeInstanceOf(ArrayBuffer);
       expect(imported.size).toBe(4);
@@ -298,9 +300,8 @@ End Function`;
 
     it('should validate file formats on import', async () => {
       const invalidFile = new File(['invalid content'], 'test.xyz');
-      
-      await expect(fileManager.importFile(invalidFile))
-        .rejects.toThrow('Unsupported file format');
+
+      await expect(fileManager.importFile(invalidFile)).rejects.toThrow('Unsupported file format');
     });
   });
 
@@ -310,14 +311,14 @@ End Function`;
         name: 'TestProject',
         forms: [],
         modules: [],
-        lastModified: Date.now()
+        lastModified: Date.now(),
       };
 
       await fileManager.saveProject(project);
-      
+
       const saved = localStorage.getItem('vb6_project_TestProject');
       expect(saved).toBeTruthy();
-      
+
       const parsed = JSON.parse(saved!);
       expect(parsed.name).toBe('TestProject');
     });
@@ -326,11 +327,11 @@ End Function`;
       const project = {
         name: 'TestProject',
         forms: [],
-        modules: []
+        modules: [],
       };
 
       localStorage.setItem('vb6_project_TestProject', JSON.stringify(project));
-      
+
       const loaded = await fileManager.loadProject('TestProject');
       expect(loaded.name).toBe('TestProject');
     });
@@ -341,7 +342,7 @@ End Function`;
       localStorage.setItem('other_key', 'other_value');
 
       const projects = await fileManager.listProjects();
-      
+
       expect(projects).toHaveLength(2);
       expect(projects).toContain('Project1');
       expect(projects).toContain('Project2');
@@ -349,9 +350,9 @@ End Function`;
 
     it('should delete project', async () => {
       localStorage.setItem('vb6_project_TestProject', JSON.stringify({ name: 'TestProject' }));
-      
+
       await fileManager.deleteProject('TestProject');
-      
+
       expect(localStorage.getItem('vb6_project_TestProject')).toBeNull();
     });
 
@@ -359,15 +360,15 @@ End Function`;
       const project = {
         name: 'TestProject',
         version: '1.0.0',
-        forms: []
+        forms: [],
       };
 
       await fileManager.saveProject(project);
-      
+
       // Modifier et sauvegarder une nouvelle version
       project.version = '1.1.0';
       await fileManager.saveProjectVersion(project);
-      
+
       const versions = await fileManager.getProjectVersions('TestProject');
       expect(versions).toContain('1.0.0');
       expect(versions).toContain('1.1.0');
@@ -377,9 +378,9 @@ End Function`;
   describe('File System Operations', () => {
     it('should create directory structure', async () => {
       await fileManager.createProjectStructure('NewProject');
-      
+
       const structure = await fileManager.getProjectStructure('NewProject');
-      
+
       expect(structure.directories).toContain('Forms');
       expect(structure.directories).toContain('Modules');
       expect(structure.directories).toContain('Classes');
@@ -388,9 +389,9 @@ End Function`;
 
     it('should handle file uploads', async () => {
       const uploadedFile = new File(['content'], 'upload.txt');
-      
+
       const result = await fileManager.uploadFile(uploadedFile, '/uploads');
-      
+
       expect(result.path).toBe('/uploads/upload.txt');
       expect(result.size).toBe(7);
       expect(result.success).toBe(true);
@@ -400,20 +401,20 @@ End Function`;
       const files = [
         new File(['content1'], 'file1.txt'),
         new File(['content2'], 'file2.txt'),
-        new File(['content3'], 'file3.txt')
+        new File(['content3'], 'file3.txt'),
       ];
 
       const results = await fileManager.uploadBatch(files);
-      
+
       expect(results).toHaveLength(3);
       expect(results.every(r => r.success)).toBe(true);
     });
 
     it('should calculate file checksums', async () => {
       const file = new File(['test content'], 'test.txt');
-      
+
       const checksum = await fileManager.calculateChecksum(file);
-      
+
       expect(checksum).toBeDefined();
       expect(checksum).toHaveLength(64); // SHA-256 hex string
     });
@@ -421,10 +422,10 @@ End Function`;
     it('should detect file changes', async () => {
       const file1 = new File(['content1'], 'test.txt');
       const file2 = new File(['content2'], 'test.txt');
-      
+
       const checksum1 = await fileManager.calculateChecksum(file1);
       const checksum2 = await fileManager.calculateChecksum(file2);
-      
+
       expect(checksum1).not.toBe(checksum2);
     });
   });
@@ -434,31 +435,31 @@ End Function`;
       const project = {
         name: 'TestProject',
         autoSave: true,
-        forms: []
+        forms: [],
       };
 
       fileManager.enableAutoSave(project, 1000); // 1 second interval
-      
+
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       const saved = localStorage.getItem('vb6_autosave_TestProject');
       expect(saved).toBeTruthy();
-      
+
       fileManager.disableAutoSave();
     });
 
     it('should create backup before saving', async () => {
       const project = {
         name: 'TestProject',
-        forms: []
+        forms: [],
       };
 
       await fileManager.saveProject(project);
-      
+
       // Modifier et sauvegarder à nouveau
       project.forms.push({ name: 'Form1' } as any);
       await fileManager.saveProject(project);
-      
+
       const backup = await fileManager.getBackup('TestProject');
       expect(backup.forms).toHaveLength(0); // Version précédente
     });
@@ -467,31 +468,37 @@ End Function`;
       const autoSaveData = {
         name: 'TestProject',
         forms: [{ name: 'Form1' }],
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       localStorage.setItem('vb6_autosave_TestProject', JSON.stringify(autoSaveData));
-      
+
       const recovered = await fileManager.recoverAutoSave('TestProject');
-      
+
       expect(recovered).toBeDefined();
       expect(recovered.forms).toHaveLength(1);
     });
 
     it('should clean old auto-saves', async () => {
       // Créer des auto-saves anciennes
-      const oldDate = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 jours
-      
-      localStorage.setItem('vb6_autosave_OldProject', JSON.stringify({
-        timestamp: oldDate
-      }));
-      
-      localStorage.setItem('vb6_autosave_NewProject', JSON.stringify({
-        timestamp: Date.now()
-      }));
+      const oldDate = Date.now() - 7 * 24 * 60 * 60 * 1000; // 7 jours
+
+      localStorage.setItem(
+        'vb6_autosave_OldProject',
+        JSON.stringify({
+          timestamp: oldDate,
+        })
+      );
+
+      localStorage.setItem(
+        'vb6_autosave_NewProject',
+        JSON.stringify({
+          timestamp: Date.now(),
+        })
+      );
 
       await fileManager.cleanOldAutoSaves();
-      
+
       expect(localStorage.getItem('vb6_autosave_OldProject')).toBeNull();
       expect(localStorage.getItem('vb6_autosave_NewProject')).toBeTruthy();
     });
@@ -501,24 +508,24 @@ End Function`;
     it('should compress project for export', async () => {
       const project = {
         name: 'TestProject',
-        forms: Array(10).fill({ name: 'Form', data: 'x'.repeat(1000) })
+        forms: Array(10).fill({ name: 'Form', data: 'x'.repeat(1000) }),
       };
 
       const compressed = await fileManager.compressProject(project);
       const original = JSON.stringify(project);
-      
+
       expect(compressed.length).toBeLessThan(original.length);
     });
 
     it('should decompress imported projects', async () => {
       const project = {
         name: 'TestProject',
-        data: 'test'
+        data: 'test',
       };
 
       const compressed = await fileManager.compressProject(project);
       const decompressed = await fileManager.decompressProject(compressed);
-      
+
       expect(decompressed.name).toBe('TestProject');
       expect(decompressed.data).toBe('test');
     });
@@ -547,10 +554,10 @@ End Function`;
     it('should check for file corruption', async () => {
       const file = new File(['content'], 'test.txt');
       const checksum = await fileManager.calculateChecksum(file);
-      
+
       // Simuler une corruption
       const corruptedFile = new File(['corrupted'], 'test.txt');
-      
+
       const isValid = await fileManager.verifyFileIntegrity(corruptedFile, checksum);
       expect(isValid).toBe(false);
     });
@@ -560,12 +567,12 @@ End Function`;
         name: 'TestProject',
         type: 'Exe',
         forms: [],
-        modules: []
+        modules: [],
       };
 
       const invalidProject = {
         name: '', // Nom manquant
-        forms: []
+        forms: [],
       };
 
       expect(fileManager.validateProjectStructure(validProject)).toBe(true);
@@ -577,9 +584,9 @@ End Function`;
     it('should track recently opened files', async () => {
       await fileManager.addToRecent('Project1.vbp');
       await fileManager.addToRecent('Project2.vbp');
-      
+
       const recent = await fileManager.getRecentFiles();
-      
+
       expect(recent).toHaveLength(2);
       expect(recent[0]).toBe('Project2.vbp'); // Plus récent en premier
       expect(recent[1]).toBe('Project1.vbp');
@@ -597,9 +604,9 @@ End Function`;
     it('should remove deleted files from recent', async () => {
       await fileManager.addToRecent('Project1.vbp');
       await fileManager.addToRecent('Project2.vbp');
-      
+
       await fileManager.removeFromRecent('Project1.vbp');
-      
+
       const recent = await fileManager.getRecentFiles();
       expect(recent).not.toContain('Project1.vbp');
     });
@@ -607,9 +614,9 @@ End Function`;
     it('should clear recent files', async () => {
       await fileManager.addToRecent('Project1.vbp');
       await fileManager.addToRecent('Project2.vbp');
-      
+
       await fileManager.clearRecentFiles();
-      
+
       const recent = await fileManager.getRecentFiles();
       expect(recent).toHaveLength(0);
     });
@@ -618,39 +625,39 @@ End Function`;
   describe('File Watching', () => {
     it('should watch for file changes', async () => {
       const callback = vi.fn();
-      
+
       fileManager.watchFile('test.txt', callback);
-      
+
       // Simuler un changement de fichier
       await fileManager.triggerFileChange('test.txt', { type: 'modified' });
-      
+
       expect(callback).toHaveBeenCalledWith({
         file: 'test.txt',
-        type: 'modified'
+        type: 'modified',
       });
     });
 
     it('should stop watching files', async () => {
       const callback = vi.fn();
-      
+
       const unwatch = fileManager.watchFile('test.txt', callback);
       unwatch();
-      
+
       await fileManager.triggerFileChange('test.txt', { type: 'modified' });
-      
+
       expect(callback).not.toHaveBeenCalled();
     });
 
     it('should watch directory for changes', async () => {
       const callback = vi.fn();
-      
+
       fileManager.watchDirectory('/project', callback);
-      
+
       await fileManager.triggerFileChange('/project/new.txt', { type: 'created' });
-      
+
       expect(callback).toHaveBeenCalledWith({
         file: '/project/new.txt',
-        type: 'created'
+        type: 'created',
       });
     });
   });
@@ -658,7 +665,7 @@ End Function`;
   describe('File Templates', () => {
     it('should provide file templates', async () => {
       const templates = await fileManager.getTemplates();
-      
+
       expect(templates).toHaveProperty('form');
       expect(templates).toHaveProperty('module');
       expect(templates).toHaveProperty('class');
@@ -668,7 +675,7 @@ End Function`;
     it('should create file from template', async () => {
       const file = await fileManager.createFromTemplate('module', {
         name: 'MyModule',
-        author: 'Test User'
+        author: 'Test User',
       });
 
       expect(file.name).toBe('MyModule.bas');
@@ -680,13 +687,13 @@ End Function`;
       const customTemplate = {
         name: 'CustomForm',
         extension: '.frm',
-        content: 'VERSION 5.00\nBegin VB.Form {{name}}\nEnd'
+        content: 'VERSION 5.00\nBegin VB.Form {{name}}\nEnd',
       };
 
       fileManager.registerTemplate('customForm', customTemplate);
-      
+
       const file = await fileManager.createFromTemplate('customForm', {
-        name: 'MyForm'
+        name: 'MyForm',
       });
 
       expect(file.content).toContain('Begin VB.Form MyForm');
@@ -696,12 +703,12 @@ End Function`;
   describe('Error Handling', () => {
     it('should handle file read errors gracefully', async () => {
       const errorFile = new File([''], 'error.txt');
-      
+
       // Simuler une erreur de lecture
       vi.spyOn(errorFile, 'text').mockRejectedValue(new Error('Read error'));
-      
+
       const result = await fileManager.readFile(errorFile).catch(err => err);
-      
+
       expect(result).toBeInstanceOf(Error);
       expect(result.message).toContain('Read error');
     });
@@ -709,10 +716,9 @@ End Function`;
     it('should handle quota exceeded errors', async () => {
       // Simuler le dépassement du quota localStorage
       const largeData = 'x'.repeat(10 * 1024 * 1024); // 10MB
-      
-      const result = await fileManager.saveToStorage('large', largeData)
-        .catch(err => err);
-      
+
+      const result = await fileManager.saveToStorage('large', largeData).catch(err => err);
+
       expect(result).toBeInstanceOf(Error);
       expect(result.message).toContain('quota');
     });
@@ -721,12 +727,12 @@ End Function`;
       // Simuler un navigateur sans File API
       const originalFile = global.File;
       global.File = undefined as any;
-      
+
       const manager = new FileManager();
       const canUseFileAPI = manager.isFileAPISupported();
-      
+
       expect(canUseFileAPI).toBe(false);
-      
+
       global.File = originalFile;
     });
   });

@@ -16,7 +16,7 @@ export enum ConnectModeEnum {
   adModeShareDenyWrite = 8,
   adModeShareExclusive = 12,
   adModeShareDenyNone = 16,
-  adModeRecursive = 0x400000
+  adModeRecursive = 0x400000,
 }
 
 export enum CursorTypeEnum {
@@ -24,7 +24,7 @@ export enum CursorTypeEnum {
   adOpenForwardOnly = 0,
   adOpenKeyset = 1,
   adOpenDynamic = 2,
-  adOpenStatic = 3
+  adOpenStatic = 3,
 }
 
 export enum LockTypeEnum {
@@ -32,7 +32,7 @@ export enum LockTypeEnum {
   adLockReadOnly = 1,
   adLockPessimistic = 2,
   adLockOptimistic = 3,
-  adLockBatchOptimistic = 4
+  adLockBatchOptimistic = 4,
 }
 
 export enum CommandTypeEnum {
@@ -42,7 +42,7 @@ export enum CommandTypeEnum {
   adCmdTable = 2,
   adCmdStoredProc = 4,
   adCmdFile = 256,
-  adCmdTableDirect = 512
+  adCmdTableDirect = 512,
 }
 
 export enum ParameterDirectionEnum {
@@ -50,7 +50,7 @@ export enum ParameterDirectionEnum {
   adParamInput = 1,
   adParamOutput = 2,
   adParamInputOutput = 3,
-  adParamReturnValue = 4
+  adParamReturnValue = 4,
 }
 
 export enum DataTypeEnum {
@@ -93,7 +93,7 @@ export enum DataTypeEnum {
   adFileTime = 64,
   adPropVariant = 138,
   adVarNumeric = 139,
-  adArray = 0x2000
+  adArray = 0x2000,
 }
 
 export enum ObjectStateEnum {
@@ -101,14 +101,14 @@ export enum ObjectStateEnum {
   adStateOpen = 1,
   adStateConnecting = 2,
   adStateExecuting = 4,
-  adStateFetching = 8
+  adStateFetching = 8,
 }
 
 export enum EditModeEnum {
   adEditNone = 0,
   adEditInProgress = 1,
   adEditAdd = 2,
-  adEditDelete = 4
+  adEditDelete = 4,
 }
 
 export enum RecordStatusEnum {
@@ -129,7 +129,7 @@ export enum RecordStatusEnum {
   adRecOutOfMemory = 32768,
   adRecPermissionDenied = 65536,
   adRecSchemaViolation = 131072,
-  adRecDBDeleted = 262144
+  adRecDBDeleted = 262144,
 }
 
 export interface ADOError {
@@ -239,12 +239,15 @@ export class ADOFields extends COMObject {
       }
     });
 
-    this.addMethod('Append', (name: string, type: DataTypeEnum, definedSize?: number, attrib?: number) => {
-      const field = new ADOField(name, type);
-      this._fields.push(field);
-      this._items.set(name, field);
-      this.setProperty('Count', this._fields.length);
-    });
+    this.addMethod(
+      'Append',
+      (name: string, type: DataTypeEnum, definedSize?: number, attrib?: number) => {
+        const field = new ADOField(name, type);
+        this._fields.push(field);
+        this._items.set(name, field);
+        this.setProperty('Count', this._fields.length);
+      }
+    );
 
     this.addMethod('Delete', (index: number | string) => {
       if (typeof index === 'number') {
@@ -296,7 +299,11 @@ export class ADOParameter extends COMObject {
   private _precision: number;
   private _numericScale: number;
 
-  constructor(name: string = '', type: DataTypeEnum = DataTypeEnum.adVarChar, direction: ParameterDirectionEnum = ParameterDirectionEnum.adParamInput) {
+  constructor(
+    name: string = '',
+    type: DataTypeEnum = DataTypeEnum.adVarChar,
+    direction: ParameterDirectionEnum = ParameterDirectionEnum.adParamInput
+  ) {
     super('{ADODB.Parameter}', 'ADODB.Parameter');
     this._name = name;
     this._type = type;
@@ -436,33 +443,35 @@ export class ADOConnection extends COMObject {
     this.setProperty('Provider', this._provider);
     this.setProperty('Version', this._version);
 
-    this.addMethod('Open', (connectionString?: string, userID?: string, password?: string, options?: number) => {
-      if (connectionString) {
-        this._connectionString = connectionString;
-        this.setProperty('ConnectionString', connectionString);
-      }
+    this.addMethod(
+      'Open',
+      (connectionString?: string, userID?: string, password?: string, options?: number) => {
+        if (connectionString) {
+          this._connectionString = connectionString;
+          this.setProperty('ConnectionString', connectionString);
+        }
 
-      try {
-        this._state = ObjectStateEnum.adStateConnecting;
-        this.setProperty('State', this._state);
-        this.fireEvent('WillConnect', { connectionString, userID, password, options });
-
-        // Simulate connection process
-        setTimeout(() => {
-          this._state = ObjectStateEnum.adStateOpen;
+        try {
+          this._state = ObjectStateEnum.adStateConnecting;
           this.setProperty('State', this._state);
-          this._database = this.createSimulatedDatabase();
-          this.fireEvent('ConnectComplete', { error: null, status: 0, connection: this });
-        }, 100);
+          this.fireEvent('WillConnect', { connectionString, userID, password, options });
 
-      } catch (error) {
-        this._state = ObjectStateEnum.adStateClosed;
-        this.setProperty('State', this._state);
-        this.addError('Connection failed', error);
-        this.fireEvent('ConnectComplete', { error, status: -1, connection: this });
-        throw error;
+          // Simulate connection process
+          setTimeout(() => {
+            this._state = ObjectStateEnum.adStateOpen;
+            this.setProperty('State', this._state);
+            this._database = this.createSimulatedDatabase();
+            this.fireEvent('ConnectComplete', { error: null, status: 0, connection: this });
+          }, 100);
+        } catch (error) {
+          this._state = ObjectStateEnum.adStateClosed;
+          this.setProperty('State', this._state);
+          this.addError('Connection failed', error);
+          this.fireEvent('ConnectComplete', { error, status: -1, connection: this });
+          throw error;
+        }
       }
-    });
+    );
 
     this.addMethod('Close', () => {
       if (this._state !== ObjectStateEnum.adStateClosed) {
@@ -479,29 +488,54 @@ export class ADOConnection extends COMObject {
         throw new Error('Connection is not open');
       }
 
-      this.fireEvent('WillExecute', { source: commandText, cursorType: 0, lockType: 0, options, connection: this });
+      this.fireEvent('WillExecute', {
+        source: commandText,
+        cursorType: 0,
+        lockType: 0,
+        options,
+        connection: this,
+      });
 
       try {
         // Simulate SQL execution
         const result = this.executeSQL(commandText);
-        
+
         if (recordsAffected && recordsAffected.value !== undefined) {
           recordsAffected.value = result.recordsAffected || 0;
         }
 
-        this.fireEvent('ExecuteComplete', { recordsAffected: result.recordsAffected, error: null, status: 0, command: null, recordset: result.recordset, connection: this });
-        
+        this.fireEvent('ExecuteComplete', {
+          recordsAffected: result.recordsAffected,
+          error: null,
+          status: 0,
+          command: null,
+          recordset: result.recordset,
+          connection: this,
+        });
+
         return result.recordset;
       } catch (error) {
         this.addError('Execute failed', error);
-        this.fireEvent('ExecuteComplete', { recordsAffected: 0, error, status: -1, command: null, recordset: null, connection: this });
+        this.fireEvent('ExecuteComplete', {
+          recordsAffected: 0,
+          error,
+          status: -1,
+          command: null,
+          recordset: null,
+          connection: this,
+        });
         throw error;
       }
     });
 
     this.addMethod('BeginTrans', () => {
       // Begin transaction
-      this.fireEvent('BeginTransComplete', { transactionLevel: 1, error: null, status: 0, connection: this });
+      this.fireEvent('BeginTransComplete', {
+        transactionLevel: 1,
+        error: null,
+        status: 0,
+        connection: this,
+      });
       return 1;
     });
 
@@ -527,27 +561,33 @@ export class ADOConnection extends COMObject {
     // Create a simple in-memory database simulation
     return {
       tables: new Map([
-        ['Users', [
-          { ID: 1, Name: 'John Doe', Email: 'john@example.com', Age: 30 },
-          { ID: 2, Name: 'Jane Smith', Email: 'jane@example.com', Age: 25 },
-          { ID: 3, Name: 'Bob Johnson', Email: 'bob@example.com', Age: 35 }
-        ]],
-        ['Products', [
-          { ID: 1, Name: 'Widget A', Price: 19.99, Category: 'Widgets' },
-          { ID: 2, Name: 'Gadget B', Price: 29.99, Category: 'Gadgets' },
-          { ID: 3, Name: 'Tool C', Price: 39.99, Category: 'Tools' }
-        ]]
-      ])
+        [
+          'Users',
+          [
+            { ID: 1, Name: 'John Doe', Email: 'john@example.com', Age: 30 },
+            { ID: 2, Name: 'Jane Smith', Email: 'jane@example.com', Age: 25 },
+            { ID: 3, Name: 'Bob Johnson', Email: 'bob@example.com', Age: 35 },
+          ],
+        ],
+        [
+          'Products',
+          [
+            { ID: 1, Name: 'Widget A', Price: 19.99, Category: 'Widgets' },
+            { ID: 2, Name: 'Gadget B', Price: 29.99, Category: 'Gadgets' },
+            { ID: 3, Name: 'Tool C', Price: 39.99, Category: 'Tools' },
+          ],
+        ],
+      ]),
     };
   }
 
-  private executeSQL(sql: string): { recordset?: ADORecordset, recordsAffected?: number } {
+  private executeSQL(sql: string): { recordset?: ADORecordset; recordsAffected?: number } {
     if (!this._database) {
       throw new Error('Database not connected');
     }
 
     const sqlUpper = sql.trim().toUpperCase();
-    
+
     if (sqlUpper.startsWith('SELECT')) {
       return this.executeSelect(sql);
     } else if (sqlUpper.startsWith('INSERT')) {
@@ -564,29 +604,30 @@ export class ADOConnection extends COMObject {
 
   private executeSelect(sql: string): { recordset: ADORecordset } {
     const recordset = new ADORecordset();
-    
+
     // Simple SQL parsing (very basic)
     const fromMatch = sql.match(/FROM\s+(\w+)/i);
     if (fromMatch) {
       const tableName = fromMatch[1];
       const tableData = this._database.tables.get(tableName);
-      
+
       if (tableData) {
         // Create fields based on first record
         if (tableData.length > 0) {
           const firstRecord = tableData[0];
           for (const [key, value] of Object.entries(firstRecord)) {
-            const dataType = typeof value === 'number' ? DataTypeEnum.adInteger : DataTypeEnum.adVarChar;
+            const dataType =
+              typeof value === 'number' ? DataTypeEnum.adInteger : DataTypeEnum.adVarChar;
             const field = new ADOField(key, dataType, value);
             recordset.Fields.addField(field);
           }
         }
-        
+
         // Add records
         recordset.loadData(tableData);
       }
     }
-    
+
     return { recordset };
   }
 
@@ -613,7 +654,7 @@ export class ADOConnection extends COMObject {
       nativeError: 0,
       number: error?.code || -1,
       source: 'ADODB.Connection',
-      sqlState: ''
+      sqlState: '',
     };
     this._errors.push(adoError);
   }
@@ -680,16 +721,25 @@ export class ADOCommand extends COMObject {
       return this._activeConnection.Execute(sql, recordsAffected, options);
     });
 
-    this.addMethod('CreateParameter', (name?: string, type?: DataTypeEnum, direction?: ParameterDirectionEnum, size?: number, value?: any) => {
-      const param = new ADOParameter(name, type, direction);
-      if (size !== undefined) {
-        param.setProperty('Size', size);
+    this.addMethod(
+      'CreateParameter',
+      (
+        name?: string,
+        type?: DataTypeEnum,
+        direction?: ParameterDirectionEnum,
+        size?: number,
+        value?: any
+      ) => {
+        const param = new ADOParameter(name, type, direction);
+        if (size !== undefined) {
+          param.setProperty('Size', size);
+        }
+        if (value !== undefined) {
+          param.Value = value;
+        }
+        return param;
       }
-      if (value !== undefined) {
-        param.Value = value;
-      }
-      return param;
-    });
+    );
 
     this.addMethod('Prepare', () => {
       this._prepared = true;
@@ -782,29 +832,43 @@ export class ADORecordset extends COMObject {
     this.setProperty('AbsolutePage', this._absolutePage);
     this.setProperty('AbsolutePosition', this._absolutePosition);
 
-    this.addMethod('Open', (source?: string | ADOCommand, activeConnection?: ADOConnection, cursorType?: CursorTypeEnum, lockType?: LockTypeEnum, options?: number) => {
-      this._source = source || null;
-      this._activeConnection = activeConnection || null;
-      this._cursorType = cursorType || CursorTypeEnum.adOpenForwardOnly;
-      this._lockType = lockType || LockTypeEnum.adLockReadOnly;
-      
-      this.setProperty('Source', this._source);
-      this.setProperty('ActiveConnection', this._activeConnection);
-      this.setProperty('CursorType', this._cursorType);
-      this.setProperty('LockType', this._lockType);
+    this.addMethod(
+      'Open',
+      (
+        source?: string | ADOCommand,
+        activeConnection?: ADOConnection,
+        cursorType?: CursorTypeEnum,
+        lockType?: LockTypeEnum,
+        options?: number
+      ) => {
+        this._source = source || null;
+        this._activeConnection = activeConnection || null;
+        this._cursorType = cursorType || CursorTypeEnum.adOpenForwardOnly;
+        this._lockType = lockType || LockTypeEnum.adLockReadOnly;
 
-      if (typeof source === 'string' && this._activeConnection) {
-        // Execute SQL and populate recordset
-        const result = this._activeConnection.Execute(source);
-        if (result) {
-          this.copyFrom(result);
+        this.setProperty('Source', this._source);
+        this.setProperty('ActiveConnection', this._activeConnection);
+        this.setProperty('CursorType', this._cursorType);
+        this.setProperty('LockType', this._lockType);
+
+        if (typeof source === 'string' && this._activeConnection) {
+          // Execute SQL and populate recordset
+          const result = this._activeConnection.Execute(source);
+          if (result) {
+            this.copyFrom(result);
+          }
         }
-      }
 
-      this._state = ObjectStateEnum.adStateOpen;
-      this.setProperty('State', this._state);
-      this.fireEvent('RecordsetChangeComplete', { adReason: 0, error: null, status: 0, recordset: this });
-    });
+        this._state = ObjectStateEnum.adStateOpen;
+        this.setProperty('State', this._state);
+        this.fireEvent('RecordsetChangeComplete', {
+          adReason: 0,
+          error: null,
+          status: 0,
+          recordset: this,
+        });
+      }
+    );
 
     this.addMethod('Close', () => {
       this._state = ObjectStateEnum.adStateClosed;
@@ -871,7 +935,7 @@ export class ADORecordset extends COMObject {
     this.addMethod('AddNew', (fieldList?: any[], values?: any[]) => {
       this._editMode = EditModeEnum.adEditAdd;
       this.setProperty('EditMode', this._editMode);
-      
+
       if (fieldList && values) {
         for (let i = 0; i < fieldList.length && i < values.length; i++) {
           const field = this._fields.Item(fieldList[i]);
@@ -880,7 +944,7 @@ export class ADORecordset extends COMObject {
           }
         }
       }
-      
+
       this.fireEvent('WillChangeRecord', { adReason: 0, cRecords: 1, status: 0, recordset: this });
     });
 
@@ -916,39 +980,59 @@ export class ADORecordset extends COMObject {
 
       this._editMode = EditModeEnum.adEditNone;
       this.setProperty('EditMode', this._editMode);
-      this.fireEvent('RecordChangeComplete', { adReason: 0, cRecords: 1, error: null, status: 0, recordset: this });
+      this.fireEvent('RecordChangeComplete', {
+        adReason: 0,
+        cRecords: 1,
+        error: null,
+        status: 0,
+        recordset: this,
+      });
     });
 
     this.addMethod('Delete', (affectRecords?: number) => {
       if (this._currentRecord >= 0 && this._currentRecord < this._records.length) {
-        this.fireEvent('WillChangeRecord', { adReason: 0, cRecords: 1, status: 0, recordset: this });
+        this.fireEvent('WillChangeRecord', {
+          adReason: 0,
+          cRecords: 1,
+          status: 0,
+          recordset: this,
+        });
         this._records.splice(this._currentRecord, 1);
         this._recordCount = this._records.length;
-        
+
         if (this._currentRecord >= this._records.length) {
           this._currentRecord = this._records.length - 1;
         }
-        
+
         this.updateCurrentRecord();
         this.setProperty('RecordCount', this._recordCount);
-        this.fireEvent('RecordChangeComplete', { adReason: 0, cRecords: 1, error: null, status: 0, recordset: this });
+        this.fireEvent('RecordChangeComplete', {
+          adReason: 0,
+          cRecords: 1,
+          error: null,
+          status: 0,
+          recordset: this,
+        });
       }
     });
 
-    this.addMethod('Find', (criteria: string, skipRecords?: number, searchDirection?: number, start?: any) => {
-      // Simple find implementation
-      const startPos = skipRecords || 0;
-      for (let i = startPos; i < this._records.length; i++) {
-        // Very basic criteria matching (would need proper SQL WHERE parsing)
-        if (this.matchesCriteria(this._records[i], criteria)) {
-          this._currentRecord = i;
-          this.updateCurrentRecord();
-          return;
+    this.addMethod(
+      'Find',
+      (criteria: string, skipRecords?: number, searchDirection?: number, start?: any) => {
+        // Simple find implementation
+        const startPos = skipRecords || 0;
+        for (let i = startPos; i < this._records.length; i++) {
+          // Very basic criteria matching (would need proper SQL WHERE parsing)
+          if (this.matchesCriteria(this._records[i], criteria)) {
+            this._currentRecord = i;
+            this.updateCurrentRecord();
+            return;
+          }
         }
+        this._eof = true;
+        this.setProperty('EOF', true);
       }
-      this._eof = true;
-      this.setProperty('EOF', true);
-    });
+    );
 
     this.addMethod('Requery', (options?: number) => {
       if (this._source && this._activeConnection) {
@@ -989,7 +1073,7 @@ export class ADORecordset extends COMObject {
   private parseCriteria(record: any, criteria: string): boolean {
     // Handle basic comparison operators
     const operators = ['>=', '<=', '<>', '=', '>', '<'];
-    
+
     for (const op of operators) {
       if (criteria.includes(op)) {
         const parts = criteria.split(op).map(p => p.trim());
@@ -997,7 +1081,7 @@ export class ADORecordset extends COMObject {
           const [left, right] = parts;
           const leftValue = this.getValue(record, left);
           const rightValue = this.getValue(record, right);
-          
+
           switch (op) {
             case '=':
               return leftValue == rightValue;
@@ -1015,18 +1099,18 @@ export class ADORecordset extends COMObject {
         }
       }
     }
-    
+
     // Handle AND/OR operators
     if (criteria.includes(' AND ')) {
       const parts = criteria.split(' AND ');
       return parts.every(part => this.parseCriteria(record, part.trim()));
     }
-    
+
     if (criteria.includes(' OR ')) {
       const parts = criteria.split(' OR ');
       return parts.some(part => this.parseCriteria(record, part.trim()));
     }
-    
+
     // Handle LIKE operator
     if (criteria.includes(' LIKE ')) {
       const parts = criteria.split(' LIKE ').map(p => p.trim());
@@ -1037,7 +1121,7 @@ export class ADORecordset extends COMObject {
         return new RegExp('^' + regexPattern + '$').test(fieldValue);
       }
     }
-    
+
     return false;
   }
 
@@ -1064,11 +1148,11 @@ export class ADORecordset extends COMObject {
     this._currentRecord = this._records.length > 0 ? 0 : -1;
     this._bof = this._records.length === 0;
     this._eof = this._records.length === 0;
-    
+
     this.setProperty('RecordCount', this._recordCount);
     this.setProperty('BOF', this._bof);
     this.setProperty('EOF', this._eof);
-    
+
     if (this._records.length > 0) {
       this.updateCurrentRecord();
     }
@@ -1081,7 +1165,7 @@ export class ADORecordset extends COMObject {
     this._currentRecord = other._currentRecord;
     this._bof = other._bof;
     this._eof = other._eof;
-    
+
     this.setProperty('Fields', this._fields);
     this.setProperty('RecordCount', this._recordCount);
     this.setProperty('BOF', this._bof);
@@ -1119,5 +1203,5 @@ export default {
   Parameter: ADOParameter,
   Field: ADOField,
   Fields: ADOFields,
-  Parameters: ADOParameters
+  Parameters: ADOParameters,
 };

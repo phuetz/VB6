@@ -54,7 +54,14 @@ export interface ReportField {
 }
 
 export interface ReportSection {
-  type: 'ReportHeader' | 'PageHeader' | 'GroupHeader' | 'Details' | 'GroupFooter' | 'ReportFooter' | 'PageFooter';
+  type:
+    | 'ReportHeader'
+    | 'PageHeader'
+    | 'GroupHeader'
+    | 'Details'
+    | 'GroupFooter'
+    | 'ReportFooter'
+    | 'PageFooter';
   name: string;
   height: number;
   visible: boolean;
@@ -186,7 +193,16 @@ export interface ConditionalFormatting {
 
 export interface ReportFilter {
   field: string;
-  operator: 'equals' | 'notEquals' | 'greaterThan' | 'lessThan' | 'contains' | 'startsWith' | 'endsWith' | 'between' | 'in';
+  operator:
+    | 'equals'
+    | 'notEquals'
+    | 'greaterThan'
+    | 'lessThan'
+    | 'contains'
+    | 'startsWith'
+    | 'endsWith'
+    | 'between'
+    | 'in';
   value: any;
   values?: any[];
 }
@@ -202,7 +218,15 @@ export interface ReportGroup {
 
 export interface ReportSummary {
   field: string;
-  operation: 'sum' | 'average' | 'count' | 'distinctCount' | 'maximum' | 'minimum' | 'standardDeviation' | 'variance';
+  operation:
+    | 'sum'
+    | 'average'
+    | 'count'
+    | 'distinctCount'
+    | 'maximum'
+    | 'minimum'
+    | 'standardDeviation'
+    | 'variance';
   scope: 'report' | 'group' | 'page';
   groupName?: string;
 }
@@ -244,14 +268,14 @@ export class CrystalReportsService {
    */
   async initialize(): Promise<void> {
     this.logger.info('Initialisation du service Crystal Reports...');
-    
+
     try {
       // Créer les dossiers nécessaires
       await this.ensureDirectories();
-      
+
       // Charger les rapports existants
       await this.loadReports();
-      
+
       this.logger.info('Service Crystal Reports initialisé');
     } catch (error) {
       this.logger.error('Erreur initialisation Crystal Reports:', error);
@@ -265,7 +289,7 @@ export class CrystalReportsService {
   async createReport(report: Partial<CrystalReport>): Promise<string> {
     try {
       const reportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
       const newReport: CrystalReport = {
         id: reportId,
         name: report.name || 'Nouveau Rapport',
@@ -309,9 +333,9 @@ export class CrystalReportsService {
         throw new Error(`Rapport non trouvé: ${reportId}`);
       }
 
-      this.logger.info(`Génération rapport: ${reportId}`, { 
+      this.logger.info(`Génération rapport: ${reportId}`, {
         format: exportOptions.format,
-        parameters 
+        parameters,
       });
 
       // Valider les paramètres
@@ -364,9 +388,9 @@ export class CrystalReportsService {
       await fs.mkdir(path.dirname(filePath), { recursive: true });
       await fs.writeFile(filePath, buffer);
 
-      this.logger.info(`Rapport généré: ${filePath}`, { 
+      this.logger.info(`Rapport généré: ${filePath}`, {
         size: buffer.length,
-        format: exportOptions.format 
+        format: exportOptions.format,
       });
 
       return { filePath, buffer };
@@ -468,7 +492,7 @@ export class CrystalReportsService {
   async deleteReport(reportId: string): Promise<void> {
     try {
       this.reportsCache.delete(reportId);
-      
+
       const reportPath = path.join(process.cwd(), 'reports', 'definitions', `${reportId}.json`);
       await fs.unlink(reportPath).catch(() => {
         // Ignore if file doesn't exist - this is expected behavior
@@ -484,12 +508,7 @@ export class CrystalReportsService {
   // Méthodes privées
 
   private async ensureDirectories(): Promise<void> {
-    const dirs = [
-      'reports/definitions',
-      'reports/output',
-      'reports/templates',
-      'reports/cache'
-    ];
+    const dirs = ['reports/definitions', 'reports/output', 'reports/templates', 'reports/cache'];
 
     for (const dir of dirs) {
       await fs.mkdir(path.join(process.cwd(), dir), { recursive: true });
@@ -521,7 +540,10 @@ export class CrystalReportsService {
     await fs.writeFile(filePath, JSON.stringify(report, null, 2));
   }
 
-  private validateParameters(reportParams: ReportParameter[], userParams: Record<string, any>): void {
+  private validateParameters(
+    reportParams: ReportParameter[],
+    userParams: Record<string, any>
+  ): void {
     for (const param of reportParams) {
       if (param.required && !(param.name in userParams)) {
         throw new Error(`Paramètre requis manquant: ${param.displayName}`);
@@ -535,7 +557,10 @@ export class CrystalReportsService {
     }
   }
 
-  private async fetchReportData(report: CrystalReport, parameters: Record<string, any>): Promise<ReportData> {
+  private async fetchReportData(
+    report: CrystalReport,
+    parameters: Record<string, any>
+  ): Promise<ReportData> {
     const reportData: ReportData = {};
 
     for (const dataSource of report.dataSources) {
@@ -708,47 +733,51 @@ export class CrystalReportsService {
 
     switch (obj.type) {
       case 'text':
-        doc.fontSize(obj.formatting.font.size)
-           .font(obj.formatting.font.bold ? 'Helvetica-Bold' : 'Helvetica')
-           .fillColor(obj.formatting.font.color)
-           .text(obj.content || '', x, y, {
-             width: obj.width,
-             align: obj.formatting.alignment,
-           });
+        doc
+          .fontSize(obj.formatting.font.size)
+          .font(obj.formatting.font.bold ? 'Helvetica-Bold' : 'Helvetica')
+          .fillColor(obj.formatting.font.color)
+          .text(obj.content || '', x, y, {
+            width: obj.width,
+            align: obj.formatting.alignment,
+          });
         break;
 
       case 'field':
         if (obj.fieldName && data.currentRecord) {
           const value = data.currentRecord[obj.fieldName] || '';
-          doc.fontSize(obj.formatting.font.size)
-             .font(obj.formatting.font.bold ? 'Helvetica-Bold' : 'Helvetica')
-             .fillColor(obj.formatting.font.color)
-             .text(String(value), x, y, {
-               width: obj.width,
-               align: obj.formatting.alignment,
-             });
+          doc
+            .fontSize(obj.formatting.font.size)
+            .font(obj.formatting.font.bold ? 'Helvetica-Bold' : 'Helvetica')
+            .fillColor(obj.formatting.font.color)
+            .text(String(value), x, y, {
+              width: obj.width,
+              align: obj.formatting.alignment,
+            });
         }
         break;
 
       case 'formula':
         if (obj.formulaName) {
           const value = this.formulaEngine.evaluate(obj.formulaName, data, parameters);
-          doc.fontSize(obj.formatting.font.size)
-             .font(obj.formatting.font.bold ? 'Helvetica-Bold' : 'Helvetica')
-             .fillColor(obj.formatting.font.color)
-             .text(String(value), x, y, {
-               width: obj.width,
-               align: obj.formatting.alignment,
-             });
+          doc
+            .fontSize(obj.formatting.font.size)
+            .font(obj.formatting.font.bold ? 'Helvetica-Bold' : 'Helvetica')
+            .fillColor(obj.formatting.font.color)
+            .text(String(value), x, y, {
+              width: obj.width,
+              align: obj.formatting.alignment,
+            });
         }
         break;
 
       case 'line':
-        doc.strokeColor(obj.border.top.color)
-           .lineWidth(obj.border.top.width)
-           .moveTo(x, y)
-           .lineTo(x + obj.width, y + obj.height)
-           .stroke();
+        doc
+          .strokeColor(obj.border.top.color)
+          .lineWidth(obj.border.top.width)
+          .moveTo(x, y)
+          .lineTo(x + obj.width, y + obj.height)
+          .stroke();
         break;
 
       case 'box':
@@ -800,7 +829,7 @@ export class CrystalReportsService {
       column.width = 15;
     });
 
-    return await workbook.xlsx.writeBuffer() as Buffer;
+    return (await workbook.xlsx.writeBuffer()) as Buffer;
   }
 
   private async generateWord(
@@ -831,21 +860,24 @@ export class CrystalReportsService {
               rows: [
                 // En-tête
                 new TableRow({
-                  children: mainData.fields.map(field => 
-                    new TableCell({
-                      children: [new Paragraph(field.name || field)],
-                    })
+                  children: mainData.fields.map(
+                    field =>
+                      new TableCell({
+                        children: [new Paragraph(field.name || field)],
+                      })
                   ),
                 }),
                 // Données
-                ...mainData.records.map(record =>
-                  new TableRow({
-                    children: mainData.fields.map(field =>
-                      new TableCell({
-                        children: [new Paragraph(String(record[field.name || field] || ''))],
-                      })
-                    ),
-                  })
+                ...mainData.records.map(
+                  record =>
+                    new TableRow({
+                      children: mainData.fields.map(
+                        field =>
+                          new TableCell({
+                            children: [new Paragraph(String(record[field.name || field] || ''))],
+                          })
+                      ),
+                    })
                 ),
               ],
             }),
@@ -1082,7 +1114,11 @@ class FormulaEngine {
     }
   }
 
-  private evaluateFormula(formulaText: string, data: ReportData, parameters: Record<string, any>): any {
+  private evaluateFormula(
+    formulaText: string,
+    data: ReportData,
+    parameters: Record<string, any>
+  ): any {
     // Implémentation basique pour les formules courantes
     if (formulaText.includes('Sum(')) {
       // Extraire le champ et calculer la somme

@@ -1,6 +1,6 @@
 /**
  * VB6 Collection and Dictionary Objects Implementation
- * 
+ *
  * Complete implementation of VB6 Collection object and Microsoft Scripting Dictionary
  * Provides full compatibility with VB6 data structure operations
  */
@@ -67,7 +67,7 @@ export class VB6Collection {
       const collectionItem: VB6CollectionItem = {
         value: item,
         key: key,
-        index: this.nextIndex++
+        index: this.nextIndex++,
       };
 
       // Insert item at specified position
@@ -80,8 +80,6 @@ export class VB6Collection {
 
       // Update key mappings for items after insertion point
       this.updateKeyMappings();
-
-      console.log(`[VB6 Collection] Added item${key ? ` with key "${key}"` : ''} at position ${insertIndex + 1}`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Collection.Add');
     }
@@ -111,8 +109,6 @@ export class VB6Collection {
 
       // Update key mappings
       this.updateKeyMappings();
-
-      console.log(`[VB6 Collection] Removed item at position ${itemIndex}`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Collection.Remove');
     }
@@ -146,7 +142,6 @@ export class VB6Collection {
     this.items = [];
     this.keyMap.clear();
     this.nextIndex = 1;
-    console.log('[VB6 Collection] Cleared all items');
   }
 
   /**
@@ -161,9 +156,7 @@ export class VB6Collection {
    * Keys Method - Returns array of all keys
    */
   get Keys(): string[] {
-    return this.items
-      .filter(item => item.key !== undefined)
-      .map(item => item.key!);
+    return this.items.filter(item => item.key !== undefined).map(item => item.key!);
   }
 
   /**
@@ -250,7 +243,11 @@ export class VB6Dictionary {
 
   set CompareMode(value: number) {
     if (this.items.size > 0) {
-      errorHandler.raiseError(5, 'Cannot change CompareMode when dictionary contains items', 'Dictionary.CompareMode');
+      errorHandler.raiseError(
+        5,
+        'Cannot change CompareMode when dictionary contains items',
+        'Dictionary.CompareMode'
+      );
       return;
     }
     this._compareMode = value;
@@ -264,20 +261,18 @@ export class VB6Dictionary {
   Add(key: any, item: any): void {
     try {
       const keyStr = this.normalizeKey(String(key));
-      
+
       if (this.items.has(keyStr)) {
         errorHandler.raiseError(457, `Key "${key}" already exists`, 'Dictionary.Add');
         return;
       }
 
       this.items.set(keyStr, item);
-      
+
       // Store original key for case-insensitive mode
       if (this._compareMode === 1) {
         this.originalKeys.set(keyStr, String(key));
       }
-
-      console.log(`[VB6 Dictionary] Added key "${key}" with value`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Dictionary.Add');
     }
@@ -290,19 +285,17 @@ export class VB6Dictionary {
   Remove(key: any): void {
     try {
       const keyStr = this.normalizeKey(String(key));
-      
+
       if (!this.items.has(keyStr)) {
         errorHandler.raiseError(32811, `Key "${key}" not found`, 'Dictionary.Remove');
         return;
       }
 
       this.items.delete(keyStr);
-      
+
       if (this._compareMode === 1) {
         this.originalKeys.delete(keyStr);
       }
-
-      console.log(`[VB6 Dictionary] Removed key "${key}"`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Dictionary.Remove');
     }
@@ -316,11 +309,11 @@ export class VB6Dictionary {
   Item(key: any, value: any): void;
   Item(key: any, value?: any): any {
     const keyStr = this.normalizeKey(String(key));
-    
+
     if (value !== undefined) {
       // Setter
       this.items.set(keyStr, value);
-      
+
       if (this._compareMode === 1 && !this.originalKeys.has(keyStr)) {
         this.originalKeys.set(keyStr, String(key));
       }
@@ -349,9 +342,7 @@ export class VB6Dictionary {
   Keys(): any[] {
     if (this._compareMode === 1) {
       // Return original keys for case-insensitive mode
-      return Array.from(this.items.keys()).map(key => 
-        this.originalKeys.get(key) || key
-      );
+      return Array.from(this.items.keys()).map(key => this.originalKeys.get(key) || key);
     } else {
       return Array.from(this.items.keys());
     }
@@ -370,7 +361,6 @@ export class VB6Dictionary {
   RemoveAll(): void {
     this.items.clear();
     this.originalKeys.clear();
-    console.log('[VB6 Dictionary] Removed all items');
   }
 
   /**
@@ -382,12 +372,12 @@ export class VB6Dictionary {
     try {
       const oldKeyStr = this.normalizeKey(String(oldKey));
       const newKeyStr = this.normalizeKey(String(newKey));
-      
+
       if (!this.items.has(oldKeyStr)) {
         errorHandler.raiseError(32811, `Key "${oldKey}" not found`, 'Dictionary.Key');
         return;
       }
-      
+
       if (this.items.has(newKeyStr) && oldKeyStr !== newKeyStr) {
         errorHandler.raiseError(457, `Key "${newKey}" already exists`, 'Dictionary.Key');
         return;
@@ -396,17 +386,15 @@ export class VB6Dictionary {
       // Get the value and remove old key
       const value = this.items.get(oldKeyStr);
       this.items.delete(oldKeyStr);
-      
+
       // Add with new key
       this.items.set(newKeyStr, value);
-      
+
       // Update original keys mapping
       if (this._compareMode === 1) {
         this.originalKeys.delete(oldKeyStr);
         this.originalKeys.set(newKeyStr, String(newKey));
       }
-
-      console.log(`[VB6 Dictionary] Changed key from "${oldKey}" to "${newKey}"`);
     } catch (error) {
       errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Dictionary.Key');
     }
@@ -475,14 +463,14 @@ export function CreateCollectionObject(progId: string): any {
     case 'vb.collection':
     case 'collection':
       return new VB6Collection();
-    
+
     case 'scripting.dictionary':
     case 'dictionary':
       return new VB6Dictionary();
-    
+
     case 'scripting.filesystemobject.dictionary':
       return new VB6FileSystemDictionary();
-    
+
     default:
       console.warn(`[VB6 Collections] Unknown collection object: ${progId}`);
       return null;
@@ -498,17 +486,17 @@ export class VB6CollectionUtils {
    */
   static fromArray(array: any[], keyProperty?: string): VB6Collection {
     const collection = new VB6Collection();
-    
+
     array.forEach((item, index) => {
       let key: string | undefined = undefined;
-      
+
       if (keyProperty && typeof item === 'object' && item[keyProperty]) {
         key = String(item[keyProperty]);
       }
-      
+
       collection.Add(item, key);
     });
-    
+
     return collection;
   }
 
@@ -524,11 +512,11 @@ export class VB6CollectionUtils {
    */
   static fromObject(obj: { [key: string]: any }): VB6Dictionary {
     const dictionary = new VB6Dictionary();
-    
+
     for (const [key, value] of Object.entries(obj)) {
       dictionary.Add(key, value);
     }
-    
+
     return dictionary;
   }
 
@@ -538,11 +526,11 @@ export class VB6CollectionUtils {
   static toObject(dictionary: VB6Dictionary): { [key: string]: any } {
     const obj: { [key: string]: any } = {};
     const keys = dictionary.Keys();
-    
+
     keys.forEach(key => {
       obj[key] = dictionary.Item(key);
     });
-    
+
     return obj;
   }
 
@@ -552,27 +540,30 @@ export class VB6CollectionUtils {
   static find(collection: VB6Collection, predicate: (item: any, index: number) => boolean): any[] {
     const results: any[] = [];
     const items = collection.Items;
-    
+
     items.forEach((item, index) => {
       if (predicate(item, index)) {
         results.push(item);
       }
     });
-    
+
     return results;
   }
 
   /**
    * Sort Collection items
    */
-  static sort(collection: VB6Collection, compareFunction?: (a: any, b: any) => number): VB6Collection {
+  static sort(
+    collection: VB6Collection,
+    compareFunction?: (a: any, b: any) => number
+  ): VB6Collection {
     const sortedItems = collection.Items.sort(compareFunction);
     const newCollection = new VB6Collection();
-    
+
     sortedItems.forEach(item => {
       newCollection.Add(item);
     });
-    
+
     return newCollection;
   }
 }
@@ -601,14 +592,14 @@ export const VB6CollectionObjects = {
   VB6Collection,
   VB6Dictionary,
   VB6FileSystemDictionary,
-  
+
   // Factory functions
   CreateCollection,
   CreateDictionary,
   CreateCollectionObject,
-  
+
   // Utilities
-  VB6CollectionUtils
+  VB6CollectionUtils,
 };
 
 // Example usage patterns
@@ -662,5 +653,5 @@ Dim key As Variant
 For Each key In myDict.Keys()
     Debug.Print key & " = " & myDict.Item(key)
 Next key
-`
+`,
 };

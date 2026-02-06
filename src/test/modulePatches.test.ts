@@ -21,28 +21,30 @@ describe('Module Patches', () => {
     it('should provide working debuglog function', () => {
       const debugFn = window.util.debuglog('test-section');
       expect(typeof debugFn).toBe('function');
-      
+
       // La fonction debuglog devrait retourner une fonction noop par défaut
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      
+
       debugFn('test message');
       // Par défaut, debuglog ne devrait pas logger (enabled = false dans setup.ts)
       expect(consoleSpy).not.toHaveBeenCalled();
-      
+
       consoleSpy.mockRestore();
     });
 
     it('should inspect objects correctly', () => {
       const obj = { name: 'test', nested: { value: 42 } };
       const result = window.util.inspect(obj);
-      
+
       expect(typeof result).toBe('string');
       expect(result).toContain('test');
       expect(result).toContain('42');
     });
 
     it('should format strings with placeholders', () => {
-      const result = window.util.format('Hello %s, number: %d, json: %j', 'world', 42, { key: 'value' });
+      const result = window.util.format('Hello %s, number: %d, json: %j', 'world', 42, {
+        key: 'value',
+      });
       expect(result).toBe('Hello world, number: 42, json: {"key":"value"}');
     });
 
@@ -57,10 +59,12 @@ describe('Module Patches', () => {
     it('should provide inherits function for prototype chain', () => {
       function Child() {}
       function Parent() {}
-      Parent.prototype.parentMethod = function() { return 'parent'; };
-      
+      Parent.prototype.parentMethod = function () {
+        return 'parent';
+      };
+
       window.util.inherits(Child, Parent);
-      
+
       expect(Child.super_).toBe(Parent);
       expect(Child.prototype.constructor).toBe(Child);
       expect(Object.getPrototypeOf(Child.prototype)).toBe(Parent.prototype);
@@ -68,20 +72,20 @@ describe('Module Patches', () => {
 
     it('should provide deprecate function', () => {
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      
+
       const originalFn = vi.fn(() => 'result');
       const deprecatedFn = window.util.deprecate(originalFn, 'This function is deprecated');
-      
+
       const result = deprecatedFn();
       expect(result).toBe('result');
       expect(originalFn).toHaveBeenCalled();
       expect(warnSpy).toHaveBeenCalledWith('(node) This function is deprecated');
-      
+
       // Should only warn once
       warnSpy.mockClear();
       deprecatedFn();
       expect(warnSpy).not.toHaveBeenCalled();
-      
+
       warnSpy.mockRestore();
     });
   });
@@ -97,7 +101,7 @@ describe('Module Patches', () => {
     it('should generate random bytes', () => {
       const bytes = new Uint8Array(16);
       window.crypto.getRandomValues(bytes);
-      
+
       expect(bytes.length).toBe(16);
       // Vérifier qu'au moins un byte n'est pas 0 (très improbable que tous soient 0)
       expect(bytes.some(b => b !== 0)).toBe(true);
@@ -137,11 +141,11 @@ describe('Module Patches', () => {
     it('should create buffer from various sources', () => {
       const fromString = window.Buffer.from('hello');
       expect(fromString).toBeInstanceOf(Uint8Array);
-      
+
       const fromArray = window.Buffer.from([1, 2, 3, 4]);
       expect(fromArray).toBeInstanceOf(Uint8Array);
       expect(fromArray.length).toBe(4);
-      
+
       const allocated = window.Buffer.alloc(10);
       expect(allocated).toBeInstanceOf(Uint8Array);
       expect(allocated.length).toBe(10);
@@ -154,12 +158,12 @@ describe('Module Patches', () => {
       if (typeof PerformanceObserver !== 'undefined') {
         const observerCallback = vi.fn();
         const observer = new PerformanceObserver(observerCallback);
-        
+
         // Tester avec des types d'entrées supportés
         expect(() => {
           observer.observe({ entryTypes: ['measure', 'navigation'] });
         }).not.toThrow();
-        
+
         observer.disconnect();
       } else {
         // Si PerformanceObserver n'est pas disponible, le test passe
@@ -191,22 +195,22 @@ describe('Module Patches', () => {
   describe('Object.defineProperty Patches', () => {
     it('should handle defineProperty on null/undefined safely', () => {
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      
+
       // Ces opérations devraient lancer des erreurs normalement
       expect(() => {
         Object.defineProperty(null as any, 'prop', { value: 1 });
       }).toThrow();
-      
+
       expect(() => {
         Object.defineProperty(undefined as any, 'prop', { value: 1 });
       }).toThrow();
-      
+
       warnSpy.mockRestore();
     });
 
     it('should handle defineProperty errors gracefully', () => {
       const obj = Object.freeze({});
-      
+
       // Essayer de définir une propriété sur un objet gelé devrait lancer une erreur
       expect(() => {
         Object.defineProperty(obj, 'newProp', { value: 1 });
@@ -219,17 +223,17 @@ describe('Module Patches', () => {
       // Dans un environnement navigateur, require n'existe pas
       // On simule un système de modules simple
       const modules = {
-        'util': window.util,
-        'buffer': { Buffer: window.Buffer }
+        util: window.util,
+        buffer: { Buffer: window.Buffer },
       };
-      
+
       const require = (name: string) => {
         if (name in modules) {
           return modules[name as keyof typeof modules];
         }
         throw new Error(`Module not found: ${name}`);
       };
-      
+
       expect(require('util')).toBe(window.util);
       expect(require('buffer').Buffer).toBe(window.Buffer);
     });
@@ -238,7 +242,7 @@ describe('Module Patches', () => {
       const require = (name: string) => {
         throw new Error(`Module not found: ${name}`);
       };
-      
+
       expect(() => require('unknown-module')).toThrow('Module not found: unknown-module');
     });
   });
@@ -251,7 +255,7 @@ describe('Module Patches', () => {
         const Buffer = window.Buffer;
         const crypto = window.crypto;
         const performance = window.performance;
-        
+
         // Utilisation basique
         util.format('test %s', 'string');
         Buffer.from('test');

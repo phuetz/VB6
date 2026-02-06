@@ -1,6 +1,6 @@
 /**
  * Property History Manager for VB6 Properties Window
- * 
+ *
  * Manages undo/redo functionality for property changes
  * with efficient storage and batch operations
  */
@@ -46,7 +46,7 @@ export class PropertyHistory {
       propertyName,
       oldValue,
       newValue,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     if (batchWithPrevious) {
@@ -72,7 +72,7 @@ export class PropertyHistory {
       this.currentBatch[existingIndex] = {
         ...this.currentBatch[existingIndex],
         newValue: change.newValue,
-        timestamp: change.timestamp
+        timestamp: change.timestamp,
       };
     } else {
       this.currentBatch.push(change);
@@ -82,7 +82,7 @@ export class PropertyHistory {
     if (this.batchTimeout) {
       clearTimeout(this.batchTimeout);
     }
-    
+
     this.batchTimeout = window.setTimeout(() => {
       this.commitBatch();
     }, this.batchDelay);
@@ -109,7 +109,7 @@ export class PropertyHistory {
       id: this.generateBatchId(),
       changes: [...this.currentBatch],
       timestamp: Date.now(),
-      description
+      description,
     };
 
     this.history.push(batch);
@@ -167,11 +167,13 @@ export class PropertyHistory {
     this.currentIndex--;
 
     // Return changes in reverse order for undo
-    return batch.changes.map(change => ({
-      ...change,
-      oldValue: change.newValue,
-      newValue: change.oldValue
-    })).reverse();
+    return batch.changes
+      .map(change => ({
+        ...change,
+        oldValue: change.newValue,
+        newValue: change.oldValue,
+      }))
+      .reverse();
   }
 
   /**
@@ -241,7 +243,7 @@ export class PropertyHistory {
       totalBatches: this.history.length,
       totalChanges,
       currentIndex: this.currentIndex,
-      memoryUsage
+      memoryUsage,
     };
   }
 
@@ -249,11 +251,15 @@ export class PropertyHistory {
    * Export history for debugging
    */
   exportHistory(): string {
-    return JSON.stringify({
-      history: this.history,
-      currentIndex: this.currentIndex,
-      stats: this.getStats()
-    }, null, 2);
+    return JSON.stringify(
+      {
+        history: this.history,
+        currentIndex: this.currentIndex,
+        stats: this.getStats(),
+      },
+      null,
+      2
+    );
   }
 
   /**
@@ -299,7 +305,7 @@ export class PropertyHistory {
    */
   findPropertyChanges(objectId: string, propertyName: string): PropertyChange[] {
     const changes: PropertyChange[] = [];
-    
+
     for (const batch of this.history) {
       for (const change of batch.changes) {
         if (change.objectId === objectId && change.propertyName === propertyName) {
@@ -307,7 +313,7 @@ export class PropertyHistory {
         }
       }
     }
-    
+
     return changes;
   }
 
@@ -316,7 +322,7 @@ export class PropertyHistory {
    */
   getPropertyValueAt(objectId: string, propertyName: string, batchIndex: number): any {
     let value: any = undefined;
-    
+
     for (let i = 0; i <= batchIndex && i < this.history.length; i++) {
       const batch = this.history[i];
       for (const change of batch.changes) {
@@ -325,7 +331,7 @@ export class PropertyHistory {
         }
       }
     }
-    
+
     return value;
   }
 }

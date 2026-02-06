@@ -7,10 +7,10 @@ interface DebugToolbarProps {
   onBreakpointToggle?: (filename: string, line: number) => void;
 }
 
-export const DebugToolbar: React.FC<DebugToolbarProps> = ({ 
-  debugEngine, 
+export const DebugToolbar: React.FC<DebugToolbarProps> = ({
+  debugEngine,
   currentFile = 'Module1.bas',
-  onBreakpointToggle 
+  onBreakpointToggle,
 }) => {
   const [debugSession, setDebugSession] = useState<VB6DebugSession | null>(null);
   const [isDebugging, setIsDebugging] = useState(false);
@@ -85,16 +85,18 @@ export const DebugToolbar: React.FC<DebugToolbarProps> = ({
   // Update execution time
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    
+
     if (debugSession && debugSession.state === DebugState.Running) {
       interval = setInterval(() => {
         const elapsed = Date.now() - debugSession.startTime.getTime();
         const seconds = Math.floor(elapsed / 1000) % 60;
         const minutes = Math.floor(elapsed / 60000);
-        setExecutionTime(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+        setExecutionTime(
+          `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+        );
       }, 1000);
     }
-    
+
     return () => {
       if (interval) {
         clearInterval(interval);
@@ -107,10 +109,10 @@ export const DebugToolbar: React.FC<DebugToolbarProps> = ({
       if (!debugSession) {
         debugEngine.createSession();
       }
-      
+
       // Initialize mock data for demonstration
       debugEngine.initializeMockData();
-      
+
       debugEngine.startDebug(currentFile);
     } catch (error) {
       console.error('Error starting debug:', error);
@@ -329,18 +331,10 @@ export const DebugToolbar: React.FC<DebugToolbarProps> = ({
       {/* Status Info */}
       <div className="flex items-center gap-4 ml-auto">
         {/* Current Location */}
-        {currentLine > 0 && (
-          <div className="text-sm text-gray-600">
-            Line: {currentLine}
-          </div>
-        )}
+        {currentLine > 0 && <div className="text-sm text-gray-600">Line: {currentLine}</div>}
 
         {/* Execution Time */}
-        {isDebugging && (
-          <div className="text-sm text-gray-600">
-            Time: {executionTime}
-          </div>
-        )}
+        {isDebugging && <div className="text-sm text-gray-600">Time: {executionTime}</div>}
 
         {/* Debug State */}
         <div className={`flex items-center gap-1 text-sm ${getStateColor()}`}>
@@ -350,9 +344,7 @@ export const DebugToolbar: React.FC<DebugToolbarProps> = ({
 
         {/* Session Info */}
         {debugSession && (
-          <div className="text-xs text-gray-500">
-            Session: {debugSession.id.slice(-8)}
-          </div>
+          <div className="text-xs text-gray-500">Session: {debugSession.id.slice(-8)}</div>
         )}
       </div>
     </div>

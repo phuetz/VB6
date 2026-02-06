@@ -15,7 +15,7 @@ export enum VB6ComponentType {
   ADDON = 'addon',
   TEMPLATE = 'template',
   SNIPPET = 'snippet',
-  REFERENCE = 'reference'
+  REFERENCE = 'reference',
 }
 
 export enum VB6ComponentCategory {
@@ -28,7 +28,7 @@ export enum VB6ComponentCategory {
   SYSTEM = 'system',
   THIRD_PARTY = 'third_party',
   CUSTOM = 'custom',
-  DEVELOPMENT_TOOLS = 'development_tools'
+  DEVELOPMENT_TOOLS = 'development_tools',
 }
 
 export enum VB6ComponentStatus {
@@ -38,7 +38,7 @@ export enum VB6ComponentStatus {
   BROKEN = 'broken',
   NEEDS_UPDATE = 'needs_update',
   DOWNLOADING = 'downloading',
-  INSTALLING = 'installing'
+  INSTALLING = 'installing',
 }
 
 export interface VB6ComponentInfo {
@@ -50,56 +50,56 @@ export interface VB6ComponentInfo {
   type: VB6ComponentType;
   category: VB6ComponentCategory;
   status: VB6ComponentStatus;
-  
+
   // File information
   fileName: string;
   filePath?: string;
   fileSize: number;
   checksum: string;
-  
+
   // Registration information
   clsid?: string;
   progId?: string;
   typeLibId?: string;
   interfaces?: string[];
-  
+
   // Dependencies
   dependencies: VB6ComponentDependency[];
   requiredRuntime?: string[];
-  
+
   // Metadata
   created: Date;
   modified: Date;
   installed?: Date;
-  
+
   // Properties and methods
   properties?: VB6ComponentProperty[];
   methods?: VB6ComponentMethod[];
   events?: VB6ComponentEvent[];
-  
+
   // Documentation
   helpFile?: string;
   helpUrl?: string;
   documentation?: string;
   examples?: VB6ComponentExample[];
-  
+
   // Licensing
   license?: string;
   commercial: boolean;
   trialVersion: boolean;
-  
+
   // Compatibility
   vb6Version: string[];
   windowsVersion: string[];
   platformSupport: ('x86' | 'x64' | 'arm')[];
-  
+
   // Gallery metadata
   downloadCount: number;
   rating: number;
   reviews: VB6ComponentReview[];
   tags: string[];
   screenshots?: string[];
-  
+
   // Installation data
   registryEntries?: VB6RegistryEntry[];
   fileReferences?: string[];
@@ -232,20 +232,42 @@ export class VB6ComponentGallery {
       reviews: [],
       tags: ['input', 'text', 'standard', 'microsoft'],
       properties: [
-        { name: 'Text', type: 'String', description: 'The text displayed in the control', readOnly: false },
-        { name: 'MaxLength', type: 'Integer', description: 'Maximum number of characters', readOnly: false },
-        { name: 'MultiLine', type: 'Boolean', description: 'Allow multiple lines', readOnly: false }
+        {
+          name: 'Text',
+          type: 'String',
+          description: 'The text displayed in the control',
+          readOnly: false,
+        },
+        {
+          name: 'MaxLength',
+          type: 'Integer',
+          description: 'Maximum number of characters',
+          readOnly: false,
+        },
+        {
+          name: 'MultiLine',
+          type: 'Boolean',
+          description: 'Allow multiple lines',
+          readOnly: false,
+        },
       ],
       methods: [
-        { name: 'SetFocus', description: 'Sets focus to the control', parameters: [], returnType: 'Void' },
-        { name: 'Clear', description: 'Clears the text', parameters: [], returnType: 'Void' }
+        {
+          name: 'SetFocus',
+          description: 'Sets focus to the control',
+          parameters: [],
+          returnType: 'Void',
+        },
+        { name: 'Clear', description: 'Clears the text', parameters: [], returnType: 'Void' },
       ],
       events: [
         { name: 'Change', description: 'Fired when text changes', parameters: [] },
-        { name: 'KeyPress', description: 'Fired when key is pressed', parameters: [
-          { name: 'KeyAscii', type: 'Integer', optional: false }
-        ]}
-      ]
+        {
+          name: 'KeyPress',
+          description: 'Fired when key is pressed',
+          parameters: [{ name: 'KeyAscii', type: 'Integer', optional: false }],
+        },
+      ],
     });
 
     // Microsoft Common Controls
@@ -277,18 +299,28 @@ export class VB6ComponentGallery {
       tags: ['treeview', 'listview', 'imagelist', 'progressbar', 'microsoft'],
       properties: [
         { name: 'Nodes', type: 'Nodes', description: 'Collection of tree nodes', readOnly: true },
-        { name: 'ImageList', type: 'Object', description: 'Associated ImageList control', readOnly: false }
+        {
+          name: 'ImageList',
+          type: 'Object',
+          description: 'Associated ImageList control',
+          readOnly: false,
+        },
       ],
       methods: [
-        { name: 'Expand', description: 'Expands a node', parameters: [
-          { name: 'Node', type: 'Node', optional: false }
-        ], returnType: 'Void' }
+        {
+          name: 'Expand',
+          description: 'Expands a node',
+          parameters: [{ name: 'Node', type: 'Node', optional: false }],
+          returnType: 'Void',
+        },
       ],
       events: [
-        { name: 'NodeClick', description: 'Fired when node is clicked', parameters: [
-          { name: 'Node', type: 'Node', optional: false }
-        ]}
-      ]
+        {
+          name: 'NodeClick',
+          description: 'Fired when node is clicked',
+          parameters: [{ name: 'Node', type: 'Node', optional: false }],
+        },
+      ],
     });
 
     // ADO Data Control
@@ -307,7 +339,13 @@ export class VB6ComponentGallery {
       clsid: '{67397AA1-7FB1-11D0-B148-00A0C922E820}',
       progId: 'ADODB.Connection',
       dependencies: [
-        { name: 'Microsoft ActiveX Data Objects 2.8 Library', version: '2.8', type: VB6ComponentType.TYPE_LIBRARY, required: true, available: true }
+        {
+          name: 'Microsoft ActiveX Data Objects 2.8 Library',
+          version: '2.8',
+          type: VB6ComponentType.TYPE_LIBRARY,
+          required: true,
+          available: true,
+        },
       ],
       created: new Date('1999-01-01'),
       modified: new Date('2002-01-01'),
@@ -321,15 +359,28 @@ export class VB6ComponentGallery {
       reviews: [],
       tags: ['ado', 'database', 'data', 'binding', 'microsoft'],
       properties: [
-        { name: 'ConnectionString', type: 'String', description: 'Database connection string', readOnly: false },
-        { name: 'RecordSource', type: 'String', description: 'SQL query or table name', readOnly: false }
+        {
+          name: 'ConnectionString',
+          type: 'String',
+          description: 'Database connection string',
+          readOnly: false,
+        },
+        {
+          name: 'RecordSource',
+          type: 'String',
+          description: 'SQL query or table name',
+          readOnly: false,
+        },
       ],
       methods: [
-        { name: 'Refresh', description: 'Refreshes the recordset', parameters: [], returnType: 'Void' }
+        {
+          name: 'Refresh',
+          description: 'Refreshes the recordset',
+          parameters: [],
+          returnType: 'Void',
+        },
       ],
-      events: [
-        { name: 'WillChangeRecord', description: 'Before record changes', parameters: [] }
-      ]
+      events: [{ name: 'WillChangeRecord', description: 'Before record changes', parameters: [] }],
     });
 
     // Microsoft FlexGrid Control
@@ -362,14 +413,12 @@ export class VB6ComponentGallery {
       properties: [
         { name: 'Rows', type: 'Long', description: 'Number of rows', readOnly: false },
         { name: 'Cols', type: 'Long', description: 'Number of columns', readOnly: false },
-        { name: 'Text', type: 'String', description: 'Text in current cell', readOnly: false }
+        { name: 'Text', type: 'String', description: 'Text in current cell', readOnly: false },
       ],
       methods: [
-        { name: 'Clear', description: 'Clears all data', parameters: [], returnType: 'Void' }
+        { name: 'Clear', description: 'Clears all data', parameters: [], returnType: 'Void' },
       ],
-      events: [
-        { name: 'Click', description: 'Cell clicked', parameters: [] }
-      ]
+      events: [{ name: 'Click', description: 'Cell clicked', parameters: [] }],
     });
 
     // Winsock Control
@@ -402,21 +451,41 @@ export class VB6ComponentGallery {
       properties: [
         { name: 'RemoteHost', type: 'String', description: 'Remote host address', readOnly: false },
         { name: 'RemotePort', type: 'Long', description: 'Remote port number', readOnly: false },
-        { name: 'Protocol', type: 'ProtocolConstants', description: 'TCP or UDP protocol', readOnly: false }
+        {
+          name: 'Protocol',
+          type: 'ProtocolConstants',
+          description: 'TCP or UDP protocol',
+          readOnly: false,
+        },
       ],
       methods: [
-        { name: 'Connect', description: 'Connect to remote host', parameters: [], returnType: 'Void' },
-        { name: 'Listen', description: 'Listen for connections', parameters: [], returnType: 'Void' },
-        { name: 'SendData', description: 'Send data', parameters: [
-          { name: 'Data', type: 'Variant', optional: false }
-        ], returnType: 'Void' }
+        {
+          name: 'Connect',
+          description: 'Connect to remote host',
+          parameters: [],
+          returnType: 'Void',
+        },
+        {
+          name: 'Listen',
+          description: 'Listen for connections',
+          parameters: [],
+          returnType: 'Void',
+        },
+        {
+          name: 'SendData',
+          description: 'Send data',
+          parameters: [{ name: 'Data', type: 'Variant', optional: false }],
+          returnType: 'Void',
+        },
       ],
       events: [
         { name: 'Connect', description: 'Connection established', parameters: [] },
-        { name: 'DataArrival', description: 'Data received', parameters: [
-          { name: 'bytesTotal', type: 'Long', optional: false }
-        ]}
-      ]
+        {
+          name: 'DataArrival',
+          description: 'Data received',
+          parameters: [{ name: 'bytesTotal', type: 'Long', optional: false }],
+        },
+      ],
     });
 
     this.isInitialized = true;
@@ -425,16 +494,18 @@ export class VB6ComponentGallery {
   // Component Management
   addComponent(component: VB6ComponentInfo): void {
     this.components.set(component.id, component);
-    
+
     // Add to category
     if (!this.categories.has(component.category)) {
       this.categories.set(component.category, []);
     }
     this.categories.get(component.category)!.push(component);
-    
+
     // Add to installed if status is installed
-    if (component.status === VB6ComponentStatus.INSTALLED || 
-        component.status === VB6ComponentStatus.REGISTERED) {
+    if (
+      component.status === VB6ComponentStatus.INSTALLED ||
+      component.status === VB6ComponentStatus.REGISTERED
+    ) {
       this.installedComponents.set(component.id, component);
     }
   }
@@ -484,17 +555,20 @@ export class VB6ComponentGallery {
     }
 
     if (filter.tags && filter.tags.length > 0) {
-      results = results.filter(c => 
-        filter.tags!.some(tag => c.tags.some(ctag => ctag.toLowerCase().includes(tag.toLowerCase())))
+      results = results.filter(c =>
+        filter.tags!.some(tag =>
+          c.tags.some(ctag => ctag.toLowerCase().includes(tag.toLowerCase()))
+        )
       );
     }
 
     if (filter.searchText) {
       const searchLower = filter.searchText.toLowerCase();
-      results = results.filter(c => 
-        c.name.toLowerCase().includes(searchLower) ||
-        c.description.toLowerCase().includes(searchLower) ||
-        c.tags.some(tag => tag.toLowerCase().includes(searchLower))
+      results = results.filter(
+        c =>
+          c.name.toLowerCase().includes(searchLower) ||
+          c.description.toLowerCase().includes(searchLower) ||
+          c.tags.some(tag => tag.toLowerCase().includes(searchLower))
       );
     }
 
@@ -502,13 +576,16 @@ export class VB6ComponentGallery {
   }
 
   // Component Installation
-  async installComponent(componentId: string, options: VB6ComponentInstallOptions = {
-    registerComponent: true,
-    addToToolbox: true,
-    createShortcuts: false,
-    installDependencies: true,
-    backupExisting: true
-  }): Promise<boolean> {
+  async installComponent(
+    componentId: string,
+    options: VB6ComponentInstallOptions = {
+      registerComponent: true,
+      addToToolbox: true,
+      createShortcuts: false,
+      installDependencies: true,
+      backupExisting: true,
+    }
+  ): Promise<boolean> {
     const component = this.getComponent(componentId);
     if (!component) {
       throw new Error(`Component ${componentId} not found`);
@@ -526,15 +603,15 @@ export class VB6ComponentGallery {
 
       // Update status
       component.status = VB6ComponentStatus.INSTALLING;
-      
+
       // Simulate installation process
       await this.simulateInstallation(component, options);
-      
+
       // Mark as installed
       component.status = VB6ComponentStatus.INSTALLED;
       component.installed = new Date();
       this.installedComponents.set(componentId, component);
-      
+
       return true;
     } catch (error) {
       component.status = VB6ComponentStatus.BROKEN;
@@ -552,17 +629,19 @@ export class VB6ComponentGallery {
       // Check if other components depend on this one
       const dependentComponents = this.findDependentComponents(componentId);
       if (dependentComponents.length > 0) {
-        throw new Error(`Cannot uninstall ${component.name} because it is required by: ${dependentComponents.map(c => c.name).join(', ')}`);
+        throw new Error(
+          `Cannot uninstall ${component.name} because it is required by: ${dependentComponents.map(c => c.name).join(', ')}`
+        );
       }
 
       // Simulate uninstallation
       await this.simulateUninstallation(component);
-      
+
       // Update status
       component.status = VB6ComponentStatus.AVAILABLE;
       component.installed = undefined;
       this.installedComponents.delete(componentId);
-      
+
       return true;
     } catch (error) {
       component.status = VB6ComponentStatus.BROKEN;
@@ -603,20 +682,20 @@ export class VB6ComponentGallery {
 
   findDependentComponents(componentId: string): VB6ComponentInfo[] {
     const dependentComponents: VB6ComponentInfo[] = [];
-    
+
     for (const component of this.components.values()) {
       if (component.dependencies.some(dep => dep.name === componentId)) {
         dependentComponents.push(component);
       }
     }
-    
+
     return dependentComponents;
   }
 
   // Component Statistics
-  getComponentStats(): { 
-    total: number; 
-    installed: number; 
+  getComponentStats(): {
+    total: number;
+    installed: number;
     byCategory: Map<VB6ComponentCategory, number>;
     byType: Map<VB6ComponentType, number>;
   } {
@@ -624,14 +703,14 @@ export class VB6ComponentGallery {
       total: this.components.size,
       installed: this.installedComponents.size,
       byCategory: new Map<VB6ComponentCategory, number>(),
-      byType: new Map<VB6ComponentType, number>()
+      byType: new Map<VB6ComponentType, number>(),
     };
 
     for (const component of this.components.values()) {
       // Count by category
       const catCount = stats.byCategory.get(component.category) || 0;
       stats.byCategory.set(component.category, catCount + 1);
-      
+
       // Count by type
       const typeCount = stats.byType.get(component.type) || 0;
       stats.byType.set(component.type, typeCount + 1);
@@ -641,7 +720,10 @@ export class VB6ComponentGallery {
   }
 
   // Utility Methods
-  private async simulateInstallation(component: VB6ComponentInfo, options: VB6ComponentInstallOptions): Promise<void> {
+  private async simulateInstallation(
+    component: VB6ComponentInfo,
+    options: VB6ComponentInstallOptions
+  ): Promise<void> {
     return new Promise(resolve => {
       setTimeout(() => {
         logger.debug(`Installing component: ${component.name}`);
@@ -681,9 +763,9 @@ export class VB6ComponentGallery {
     const exportData = {
       version: '1.0',
       exported: new Date().toISOString(),
-      components: Array.from(this.components.values())
+      components: Array.from(this.components.values()),
     };
-    
+
     return JSON.stringify(exportData, null, 2);
   }
 
@@ -691,14 +773,14 @@ export class VB6ComponentGallery {
     try {
       const importData = JSON.parse(jsonData);
       let importCount = 0;
-      
+
       if (importData.components && Array.isArray(importData.components)) {
         for (const componentData of importData.components) {
           this.addComponent(componentData);
           importCount++;
         }
       }
-      
+
       return importCount;
     } catch (error) {
       throw new Error(`Error importing component list: ${error}`);

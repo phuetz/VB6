@@ -3,6 +3,7 @@
 ## 📊 État Actuel : 60% de Compatibilité
 
 ### ✅ Ce qui est déjà implémenté
+
 - **Form Designer** : Ultra-optimisé avec drag & drop professionnel
 - **Code Editor** : Monaco avec coloration syntaxique VB6
 - **40+ Contrôles** : TextBox, Label, CommandButton, ListBox, TreeView, etc.
@@ -11,6 +12,7 @@
 - **IDE Moderne** : Architecture React/TypeScript performante
 
 ### ❌ Ce qui manque (40%)
+
 - **Compilateur natif** : Pas de génération d'EXE Windows
 - **Support ActiveX/COM** : Critique pour l'écosystème VB6
 - **60+ Contrôles** : Line, Shape, WebBrowser, RichTextBox, etc.
@@ -30,19 +32,20 @@
 // Architecture proposée
 interface VB6Compiler {
   frontend: {
-    lexer: VB6Lexer;         // ✅ Existant
-    parser: VB6Parser;       // ✅ Existant
-    semantic: VB6Semantic;   // ✅ Existant
+    lexer: VB6Lexer; // ✅ Existant
+    parser: VB6Parser; // ✅ Existant
+    semantic: VB6Semantic; // ✅ Existant
   };
   backend: {
-    ilGenerator: MSIL_Generator;     // ❌ À créer
-    exeBuilder: PE_Builder;          // ❌ À créer
-    linker: VB6_Linker;             // ❌ À créer
+    ilGenerator: MSIL_Generator; // ❌ À créer
+    exeBuilder: PE_Builder; // ❌ À créer
+    linker: VB6_Linker; // ❌ À créer
   };
 }
 ```
 
 **Implémentation suggérée** :
+
 1. Utiliser .NET Core pour générer du MSIL
 2. Créer un runtime VB6 en C++/CLI
 3. Packager avec ILMerge ou équivalent
@@ -70,6 +73,7 @@ interface ActiveXSupport {
 ```
 
 **Technologies** :
+
 - WebAssembly pour le bridge COM
 - Proxy Pattern pour l'interop
 - Génération automatique de wrappers React
@@ -87,8 +91,8 @@ export const LineControl: React.FC<LineProps> = ({
 }) => {
   return (
     <svg style={{ position: 'absolute', overflow: 'visible' }}>
-      <line 
-        x1={x1} y1={y1} 
+      <line
+        x1={x1} y1={y1}
         x2={x2} y2={y2}
         stroke={borderColor}
         strokeWidth={borderWidth}
@@ -98,7 +102,7 @@ export const LineControl: React.FC<LineProps> = ({
   );
 };
 
-// Shape Control  
+// Shape Control
 export const ShapeControl: React.FC<ShapeProps> = ({
   shape, fillColor, fillStyle, borderColor, ...props
 }) => {
@@ -109,7 +113,7 @@ export const ShapeControl: React.FC<ShapeProps> = ({
       case 'RoundedRect': return <rect rx="10" {...props} />;
     }
   };
-  
+
   return (
     <svg style={{ position: 'absolute' }}>
       {renderShape()}
@@ -131,7 +135,7 @@ interface VB6Debugger {
     remove(id: string): void;
     evaluate(condition: string): boolean;
   };
-  
+
   execution: {
     stepInto(): Promise<void>;
     stepOver(): Promise<void>;
@@ -139,14 +143,14 @@ interface VB6Debugger {
     continue(): Promise<void>;
     pause(): void;
   };
-  
+
   inspection: {
     getCallStack(): StackFrame[];
     getLocals(): Variable[];
     evaluateExpression(expr: string): any;
     modifyVariable(name: string, value: any): void;
   };
-  
+
   editAndContinue: {
     applyCodeChange(change: CodeEdit): boolean;
     recompileMethod(method: string): void;
@@ -155,6 +159,7 @@ interface VB6Debugger {
 ```
 
 **Features clés** :
+
 - Breakpoints conditionnels avec expressions
 - Modification de variables en temps réel
 - Edit & Continue via hot module replacement
@@ -176,7 +181,7 @@ export const WebBrowserControl: React.FC<WebBrowserProps> = ({
   navigate, documentComplete, onNavigateError
 }) => {
   return (
-    <iframe 
+    <iframe
       src={url}
       onLoad={() => documentComplete?.()}
       onError={(e) => onNavigateError?.(e)}
@@ -202,12 +207,13 @@ export const WinsockControl: React.FC<WinsockProps> = ({
     ws.onmessage = (e) => onDataArrival?.(e.data);
     return () => ws.close();
   }, [remoteHost, remotePort]);
-  
+
   return null; // Contrôle invisible
 };
 ```
 
 **Liste complète** :
+
 1. WebBrowser (iframe wrapper)
 2. RichTextBox (Quill.js integration)
 3. Winsock (WebSocket wrapper)
@@ -229,13 +235,13 @@ export const WinsockControl: React.FC<WinsockProps> = ({
 // ADO Implementation
 class ADOConnection {
   private db: IDBDatabase | WebSQL | IndexedDB;
-  
+
   async open(connectionString: string): Promise<void> {
     // Parser la connection string
     // Supporter : Access, SQL Server, Oracle, MySQL
     // Via IndexedDB pour local, API REST pour remote
   }
-  
+
   execute(sql: string, params?: any[]): ADORecordset {
     // Transpiler SQL en opérations IndexedDB/API
     return new ADORecordset(results);
@@ -244,14 +250,15 @@ class ADOConnection {
 
 // Support des providers
 enum ADOProvider {
-  JET = "Microsoft.Jet.OLEDB.4.0",      // Access
-  SQLOLEDB = "SQLOLEDB",                // SQL Server  
-  MSDAORA = "MSDAORA",                  // Oracle
-  MSDASQL = "MSDASQL"                   // ODBC
+  JET = 'Microsoft.Jet.OLEDB.4.0', // Access
+  SQLOLEDB = 'SQLOLEDB', // SQL Server
+  MSDAORA = 'MSDAORA', // Oracle
+  MSDASQL = 'MSDASQL', // ODBC
 }
 ```
 
 **Features** :
+
 - Connection pooling
 - Transactions distribuées
 - Cursors (client/server side)
@@ -271,13 +278,13 @@ interface DeploymentWizard {
     registry: RegistryEntry[];
     files: FileEntry[];
   };
-  
+
   package: {
     createMSI(): MSIPackage;
     createSetupEXE(): SetupExecutable;
     createCAB(): CABFile;
   };
-  
+
   deploy: {
     toWebServer(url: string): void;
     toNetworkShare(path: string): void;
@@ -287,6 +294,7 @@ interface DeploymentWizard {
 ```
 
 **Technologies** :
+
 - Electron Builder pour EXE
 - WiX Toolset pour MSI
 - Auto-update via Squirrel
@@ -305,7 +313,7 @@ interface DeploymentWizard {
 // Support des déclarations VB6
 declare function MessageBox lib "user32" alias "MessageBoxA" (
   hWnd: number,
-  text: string, 
+  text: string,
   caption: string,
   type: number
 ): number;
@@ -325,6 +333,7 @@ const MessageBox = async (hWnd, text, caption, type) => {
 ```
 
 **APIs à supporter** :
+
 - User32.dll (UI, messages)
 - Kernel32.dll (système, fichiers)
 - GDI32.dll (graphiques)
@@ -341,13 +350,13 @@ class CrystalReportsEngine {
     // Parser le format .rpt
     // Extraire : data sources, formules, layout
   }
-  
+
   async generateReport(format: 'PDF' | 'Excel' | 'Word'): Promise<Blob> {
     // Utiliser jsPDF, ExcelJS, ou docx
     // Appliquer formules Crystal
     // Respecter la mise en page exacte
   }
-  
+
   preview(): ReactComponent {
     // Composant de prévisualisation interactive
     // Support zoom, navigation pages
@@ -360,8 +369,9 @@ class CrystalReportsEngine {
 ### 3.3 Source Control Integration
 
 **Support natif pour** :
+
 - Git
-- SVN  
+- SVN
 - Team Foundation Server
 - SourceSafe (legacy)
 
@@ -384,6 +394,7 @@ interface SourceControl {
 ### 4.1 Optimisations Avancées
 
 **Compilateur** :
+
 - Optimisations SSA (Static Single Assignment)
 - Dead code elimination
 - Loop unrolling
@@ -391,6 +402,7 @@ interface SourceControl {
 - Vectorisation SIMD
 
 **Runtime** :
+
 - JIT compilation pour code critique
 - Memory pooling
 - Lazy loading de composants
@@ -400,6 +412,7 @@ interface SourceControl {
 ### 4.2 Compatibilité 100%
 
 **Edge cases VB6** :
+
 - Variants avec comportements spéciaux
 - Coercions de types implicites
 - Default properties
@@ -412,12 +425,14 @@ interface SourceControl {
 ### 4.3 Outils Développeur Avancés
 
 **Profiler intégré** :
+
 - CPU profiling
-- Memory profiling  
+- Memory profiling
 - UI performance analysis
 - Database query analyzer
 
 **Refactoring tools** :
+
 - Extract method/variable
 - Rename symbol
 - Move type to file
@@ -430,12 +445,14 @@ interface SourceControl {
 ## 📅 TIMELINE GLOBALE
 
 ### Année 1 : Fondations
+
 - **Q1** : Compilateur natif + ActiveX minimal
 - **Q2** : Débogueur complet + Contrôles essentiels
 - **Q3** : ADO/DAO + Package Wizard
 - **Q4** : Intégration système + APIs Windows
 
-### Année 2 : Excellence  
+### Année 2 : Excellence
+
 - **Q1** : Crystal Reports + Source Control
 - **Q2** : Optimisations + Edge cases
 - **Q3** : Testing exhaustif + Bug fixes
@@ -446,6 +463,7 @@ interface SourceControl {
 ## 💰 RESSOURCES NÉCESSAIRES
 
 ### Équipe minimale
+
 - **2 Architectes Senior** : Compilateur & Runtime
 - **3 Développeurs Full-Stack** : Contrôles & IDE
 - **1 Expert Windows/COM** : ActiveX & APIs
@@ -453,6 +471,7 @@ interface SourceControl {
 - **1 Technical Writer** : Documentation
 
 ### Budget estimé
+
 - **Développement** : 12-15 mois × 7 personnes
 - **Licences** : Outils, composants tiers
 - **Infrastructure** : Serveurs, CI/CD
@@ -463,6 +482,7 @@ interface SourceControl {
 ## 🎯 OBJECTIF FINAL
 
 Créer le **premier IDE VB6 100% compatible** qui :
+
 - ✅ Compile en vrais EXE Windows
 - ✅ Supporte TOUS les contrôles VB6
 - ✅ Importe/exécute n'importe quel projet VB6
@@ -474,4 +494,4 @@ Créer le **premier IDE VB6 100% compatible** qui :
 
 ---
 
-*Roadmap créée avec analyse approfondie de l'écosystème VB6 complet*
+_Roadmap créée avec analyse approfondie de l'écosystème VB6 complet_

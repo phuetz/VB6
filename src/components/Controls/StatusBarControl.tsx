@@ -10,13 +10,13 @@ import { useVB6Store } from '../../stores/vb6Store';
 // StatusBar Constants
 export enum SbrStyle {
   sbrNormal = 0,
-  sbrSimple = 1
+  sbrSimple = 1,
 }
 
 export enum SbrAlignment {
   sbrLeft = 0,
   sbrCenter = 1,
-  sbrRight = 2
+  sbrRight = 2,
 }
 
 export enum SbrContentsType {
@@ -27,7 +27,7 @@ export enum SbrContentsType {
   sbrScrl = 4,
   sbrTime = 5,
   sbrDate = 6,
-  sbrKana = 7
+  sbrKana = 7,
 }
 
 export interface StatusBarPanel {
@@ -51,11 +51,11 @@ export interface StatusBarProps extends VB6ControlPropsEnhanced {
   // Style properties
   style?: SbrStyle;
   showTips?: boolean;
-  
+
   // Panel properties
   panels?: StatusBarPanel[];
   simpleText?: string;
-  
+
   // Events
   onPanelClick?: (panel: StatusBarPanel) => void;
   onPanelDblClick?: (panel: StatusBarPanel) => void;
@@ -105,7 +105,7 @@ export const StatusBarControl = forwardRef<HTMLDivElement, StatusBarProps>((prop
           enabled: true,
           visible: true,
           style: SbrContentsType.sbrText,
-          tag: ''
+          tag: '',
         },
         {
           index: 1,
@@ -120,7 +120,7 @@ export const StatusBarControl = forwardRef<HTMLDivElement, StatusBarProps>((prop
           enabled: true,
           visible: true,
           style: SbrContentsType.sbrCaps,
-          tag: ''
+          tag: '',
         },
         {
           index: 2,
@@ -135,7 +135,7 @@ export const StatusBarControl = forwardRef<HTMLDivElement, StatusBarProps>((prop
           enabled: true,
           visible: true,
           style: SbrContentsType.sbrNum,
-          tag: ''
+          tag: '',
         },
         {
           index: 3,
@@ -150,8 +150,8 @@ export const StatusBarControl = forwardRef<HTMLDivElement, StatusBarProps>((prop
           enabled: true,
           visible: true,
           style: SbrContentsType.sbrTime,
-          tag: ''
-        }
+          tag: '',
+        },
       ];
       setCurrentPanels(defaultPanels);
     } else {
@@ -189,7 +189,7 @@ export const StatusBarControl = forwardRef<HTMLDivElement, StatusBarProps>((prop
         enabled: true,
         visible: true,
         style: SbrContentsType.sbrText,
-        tag: ''
+        tag: '',
       };
 
       const newPanels = [...currentPanels];
@@ -208,10 +208,10 @@ export const StatusBarControl = forwardRef<HTMLDivElement, StatusBarProps>((prop
     },
 
     RemovePanel: (indexOrKey: number | string) => {
-      const newPanels = currentPanels.filter(panel => 
+      const newPanels = currentPanels.filter(panel =>
         typeof indexOrKey === 'number' ? panel.index !== indexOrKey : panel.key !== indexOrKey
       );
-      
+
       // Update indices
       newPanels.forEach((panel, i) => {
         panel.index = i;
@@ -222,14 +222,18 @@ export const StatusBarControl = forwardRef<HTMLDivElement, StatusBarProps>((prop
     },
 
     GetPanel: (indexOrKey: number | string): StatusBarPanel | null => {
-      return currentPanels.find(panel => 
-        typeof indexOrKey === 'number' ? panel.index === indexOrKey : panel.key === indexOrKey
-      ) || null;
+      return (
+        currentPanels.find(panel =>
+          typeof indexOrKey === 'number' ? panel.index === indexOrKey : panel.key === indexOrKey
+        ) || null
+      );
     },
 
     SetPanelText: (indexOrKey: number | string, text: string) => {
       const newPanels = currentPanels.map(panel => {
-        if (typeof indexOrKey === 'number' ? panel.index === indexOrKey : panel.key === indexOrKey) {
+        if (
+          typeof indexOrKey === 'number' ? panel.index === indexOrKey : panel.key === indexOrKey
+        ) {
           return { ...panel, text };
         }
         return panel;
@@ -239,7 +243,9 @@ export const StatusBarControl = forwardRef<HTMLDivElement, StatusBarProps>((prop
 
     SetPanelWidth: (indexOrKey: number | string, width: number) => {
       const newPanels = currentPanels.map(panel => {
-        if (typeof indexOrKey === 'number' ? panel.index === indexOrKey : panel.key === indexOrKey) {
+        if (
+          typeof indexOrKey === 'number' ? panel.index === indexOrKey : panel.key === indexOrKey
+        ) {
           return { ...panel, width };
         }
         return panel;
@@ -257,7 +263,7 @@ export const StatusBarControl = forwardRef<HTMLDivElement, StatusBarProps>((prop
 
     HidePanels: () => {
       updateControl(id, 'Style', SbrStyle.sbrSimple);
-    }
+    },
   };
 
   const updateKeyboardStatus = useCallback(() => {
@@ -351,7 +357,7 @@ export const StatusBarControl = forwardRef<HTMLDivElement, StatusBarProps>((prop
     const contentPanels = currentPanels.filter(p => p.autoSize === 2 && p.visible);
 
     let usedWidth = 0;
-    
+
     // Calculate fixed widths
     fixedPanels.forEach(panel => {
       usedWidth += panel.width;
@@ -366,8 +372,9 @@ export const StatusBarControl = forwardRef<HTMLDivElement, StatusBarProps>((prop
 
     // Distribute remaining space among spring panels
     const remainingWidth = Math.max(0, totalWidth - usedWidth);
-    const springWidth = springPanels.length > 0 ? Math.max(50, remainingWidth / springPanels.length) : 0;
-    
+    const springWidth =
+      springPanels.length > 0 ? Math.max(50, remainingWidth / springPanels.length) : 0;
+
     springPanels.forEach(panel => {
       panel.width = Math.max(panel.minWidth, springWidth);
     });
@@ -411,7 +418,7 @@ export const StatusBarControl = forwardRef<HTMLDivElement, StatusBarProps>((prop
         alignItems: 'center',
         fontFamily: 'MS Sans Serif',
         fontSize: '8pt',
-        opacity: enabled ? 1 : 0.5
+        opacity: enabled ? 1 : 0.5,
       }}
       {...rest}
     >
@@ -425,7 +432,7 @@ export const StatusBarControl = forwardRef<HTMLDivElement, StatusBarProps>((prop
             alignItems: 'center',
             paddingLeft: '4px',
             paddingRight: '4px',
-            ...getBevelStyle(1)
+            ...getBevelStyle(1),
           }}
         >
           {currentSimpleText}
@@ -445,11 +452,11 @@ export const StatusBarControl = forwardRef<HTMLDivElement, StatusBarProps>((prop
               cursor: enabled && panel.enabled ? 'default' : 'not-allowed',
               opacity: panel.enabled ? 1 : 0.5,
               backgroundColor: hoveredPanel === panel.index ? '#e0e0e0' : 'transparent',
-              ...getBevelStyle(panel.bevel)
+              ...getBevelStyle(panel.bevel),
             }}
             title={showTips ? panel.toolTipText : ''}
-            onClick={(e) => handlePanelClick(panel, e)}
-            onDoubleClick={(e) => handlePanelDoubleClick(panel, e)}
+            onClick={e => handlePanelClick(panel, e)}
+            onDoubleClick={e => handlePanelDoubleClick(panel, e)}
             onMouseEnter={() => setHoveredPanel(panel.index)}
             onMouseLeave={() => setHoveredPanel(null)}
           >
@@ -460,7 +467,7 @@ export const StatusBarControl = forwardRef<HTMLDivElement, StatusBarProps>((prop
                 style={{
                   width: '16px',
                   height: '16px',
-                  marginRight: panel.text ? '4px' : '0'
+                  marginRight: panel.text ? '4px' : '0',
                 }}
               />
             )}
@@ -470,7 +477,7 @@ export const StatusBarControl = forwardRef<HTMLDivElement, StatusBarProps>((prop
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
                 fontSize: '8pt',
-                color: panel.enabled ? '#000000' : '#808080'
+                color: panel.enabled ? '#000000' : '#808080',
               }}
             >
               {getPanelText(panel)}
@@ -478,7 +485,7 @@ export const StatusBarControl = forwardRef<HTMLDivElement, StatusBarProps>((prop
           </div>
         ))
       )}
-      
+
       {/* Resize grip (for design-time) */}
       <div
         style={{
@@ -494,7 +501,7 @@ export const StatusBarControl = forwardRef<HTMLDivElement, StatusBarProps>((prop
             )
           `,
           marginLeft: 'auto',
-          cursor: 'se-resize'
+          cursor: 'se-resize',
         }}
       />
     </div>

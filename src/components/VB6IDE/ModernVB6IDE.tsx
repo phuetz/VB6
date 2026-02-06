@@ -5,13 +5,13 @@ import MenuBar from '../Layout/MenuBar';
 import Toolbar from '../Layout/Toolbar';
 import StatusBar from '../Layout/StatusBar';
 import DialogManager from '../Dialogs/DialogManager';
-import ModernToolbox from '../Panels/Toolbox/ModernToolbox';
+import Toolbox from '../Panels/Toolbox/Toolbox';
 import DragDropCanvas from '../Designer/DragDropCanvas';
 import LazyMonacoEditor from '../Editor/LazyMonacoEditor';
 import ProjectExplorer from '../Panels/ProjectExplorer/ProjectExplorer';
 import PropertiesWindow from '../Panels/PropertiesWindow/PropertiesWindow';
 import ImmediateWindow from '../Panels/ImmediateWindow/ImmediateWindow';
-import { useVB6Store } from '../../stores/vb6Store';
+import { useWindowStore } from '../../stores/windowStore';
 import { shallow } from 'zustand/shallow';
 
 const ModernMainContent: React.FC = () => {
@@ -22,8 +22,8 @@ const ModernMainContent: React.FC = () => {
     showProjectExplorer,
     showPropertiesWindow,
     showImmediateWindow,
-  } = useVB6Store(
-    (state) => ({
+  } = useWindowStore(
+    state => ({
       showToolbox: state.showToolbox,
       showCodeEditor: state.showCodeEditor,
       showProjectExplorer: state.showProjectExplorer,
@@ -36,7 +36,7 @@ const ModernMainContent: React.FC = () => {
   return (
     <div className="flex-1 flex overflow-hidden">
       {/* Left Panel - Toolbox */}
-      {showToolbox && <ModernToolbox />}
+      {showToolbox && <Toolbox />}
 
       {/* Center Panel - Form Designer or Code Editor */}
       <div className="flex-1 flex flex-col bg-gray-300 overflow-hidden">

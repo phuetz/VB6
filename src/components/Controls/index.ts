@@ -86,9 +86,9 @@ export const createControl = (type: string, id: number, props?: any) => {
     console.warn(`Control type "${type}" not found in factory`);
     return null;
   }
-  
+
   const defaults = factory.defaults(id);
   const finalProps = { ...defaults, ...props };
-  
+
   return React.createElement(factory.component, finalProps);
 };

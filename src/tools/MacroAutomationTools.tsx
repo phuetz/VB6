@@ -9,7 +9,7 @@ export enum MacroActionType {
   FileSave = 'File.Save',
   FileSaveAs = 'File.SaveAs',
   FileClose = 'File.Close',
-  
+
   // Edit Operations
   EditCut = 'Edit.Cut',
   EditCopy = 'Edit.Copy',
@@ -19,7 +19,7 @@ export enum MacroActionType {
   EditFind = 'Edit.Find',
   EditReplace = 'Edit.Replace',
   EditSelectAll = 'Edit.SelectAll',
-  
+
   // Code Operations
   CodeComment = 'Code.Comment',
   CodeUncomment = 'Code.Uncomment',
@@ -27,30 +27,30 @@ export enum MacroActionType {
   CodeOutdent = 'Code.Outdent',
   CodeFormat = 'Code.Format',
   CodeComplete = 'Code.Complete',
-  
+
   // Debug Operations
   DebugStart = 'Debug.Start',
   DebugStop = 'Debug.Stop',
   DebugStepInto = 'Debug.StepInto',
   DebugStepOver = 'Debug.StepOver',
   DebugToggleBreakpoint = 'Debug.ToggleBreakpoint',
-  
+
   // Build Operations
   BuildCompile = 'Build.Compile',
   BuildMakeExe = 'Build.MakeExe',
   BuildRun = 'Build.Run',
-  
+
   // UI Operations
   UINavigate = 'UI.Navigate',
   UIClick = 'UI.Click',
   UIType = 'UI.Type',
   UISelect = 'UI.Select',
   UIWait = 'UI.Wait',
-  
+
   // Custom Operations
   CustomScript = 'Custom.Script',
   CustomCommand = 'Custom.Command',
-  CustomFunction = 'Custom.Function'
+  CustomFunction = 'Custom.Function',
 }
 
 // Macro Action
@@ -127,14 +127,14 @@ interface MacroAutomationToolsProps {
 export const MacroAutomationTools: React.FC<MacroAutomationToolsProps> = ({
   onMacroRun,
   onMacroRecord,
-  onAutomationComplete
+  onAutomationComplete,
 }) => {
   const [macros, setMacros] = useState<Macro[]>([]);
   const [selectedMacro, setSelectedMacro] = useState<Macro | null>(null);
   const [recordingState, setRecordingState] = useState<RecordingState>({
     isRecording: false,
     startTime: new Date(),
-    actions: []
+    actions: [],
   });
   const [executionState, setExecutionState] = useState<ExecutionState>({
     isRunning: false,
@@ -143,9 +143,11 @@ export const MacroAutomationTools: React.FC<MacroAutomationToolsProps> = ({
     variables: {},
     output: [],
     errors: [],
-    status: 'idle'
+    status: 'idle',
   });
-  const [selectedTab, setSelectedTab] = useState<'macros' | 'recorder' | 'editor' | 'templates'>('macros');
+  const [selectedTab, setSelectedTab] = useState<'macros' | 'recorder' | 'editor' | 'templates'>(
+    'macros'
+  );
   const [showMacroDialog, setShowMacroDialog] = useState(false);
   const [showActionDialog, setShowActionDialog] = useState(false);
   const [editingMacro, setEditingMacro] = useState<Partial<Macro>>({
@@ -154,13 +156,13 @@ export const MacroAutomationTools: React.FC<MacroAutomationToolsProps> = ({
     category: 'General',
     actions: [],
     variables: {},
-    tags: []
+    tags: [],
   });
   const [editingAction, setEditingAction] = useState<Partial<MacroAction>>({
     type: MacroActionType.FileOpen,
     description: '',
     parameters: {},
-    delay: 0
+    delay: 0,
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -186,26 +188,26 @@ export const MacroAutomationTools: React.FC<MacroAutomationToolsProps> = ({
           id: generateId(),
           type: MacroActionType.FileNew,
           description: 'Create new project',
-          parameters: { projectType: 'Standard EXE' }
+          parameters: { projectType: 'Standard EXE' },
         },
         {
           id: generateId(),
           type: MacroActionType.FileNew,
           description: 'Add new module',
-          parameters: { itemType: 'Module', name: 'modMain' }
+          parameters: { itemType: 'Module', name: 'modMain' },
         },
         {
           id: generateId(),
           type: MacroActionType.CodeComment,
           description: 'Add header comment',
-          parameters: { 
-            text: '\'=================================\n\' Project: ${ProjectName}\n\' Created: ${Date}\n\'================================='
-          }
-        }
+          parameters: {
+            text: "'=================================\n' Project: ${ProjectName}\n' Created: ${Date}\n'=================================",
+          },
+        },
       ],
       variables: {
         ProjectName: 'MyProject',
-        Date: new Date().toLocaleDateString()
+        Date: new Date().toLocaleDateString(),
       },
       hotkey: 'Ctrl+Shift+N',
       icon: '📁',
@@ -213,7 +215,7 @@ export const MacroAutomationTools: React.FC<MacroAutomationToolsProps> = ({
       createdDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
       modifiedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
       author: 'Developer',
-      tags: ['project', 'setup', 'template']
+      tags: ['project', 'setup', 'template'],
     },
     {
       id: generateId(),
@@ -225,25 +227,25 @@ export const MacroAutomationTools: React.FC<MacroAutomationToolsProps> = ({
           id: generateId(),
           type: MacroActionType.EditSelectAll,
           description: 'Select all code',
-          parameters: {}
+          parameters: {},
         },
         {
           id: generateId(),
           type: MacroActionType.CodeFormat,
           description: 'Format code',
-          parameters: { style: 'default' }
+          parameters: { style: 'default' },
         },
         {
           id: generateId(),
           type: MacroActionType.EditFind,
           description: 'Remove trailing spaces',
-          parameters: { 
-            find: ' +$', 
-            replace: '', 
+          parameters: {
+            find: ' +$',
+            replace: '',
             useRegex: true,
-            replaceAll: true
-          }
-        }
+            replaceAll: true,
+          },
+        },
       ],
       variables: {},
       hotkey: 'Ctrl+Shift+F',
@@ -252,7 +254,7 @@ export const MacroAutomationTools: React.FC<MacroAutomationToolsProps> = ({
       createdDate: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
       modifiedDate: new Date(),
       author: 'Developer',
-      tags: ['code', 'format', 'cleanup']
+      tags: ['code', 'format', 'cleanup'],
     },
     {
       id: generateId(),
@@ -264,26 +266,26 @@ export const MacroAutomationTools: React.FC<MacroAutomationToolsProps> = ({
           id: generateId(),
           type: MacroActionType.FileSave,
           description: 'Save all files',
-          parameters: { saveAll: true }
+          parameters: { saveAll: true },
         },
         {
           id: generateId(),
           type: MacroActionType.BuildCompile,
           description: 'Compile project',
-          parameters: { configuration: 'Release' }
+          parameters: { configuration: 'Release' },
         },
         {
           id: generateId(),
           type: MacroActionType.CustomCommand,
           description: 'Copy to deployment',
-          parameters: { 
-            command: 'xcopy /Y "${OutputFile}" "${DeployPath}"'
-          }
-        }
+          parameters: {
+            command: 'xcopy /Y "${OutputFile}" "${DeployPath}"',
+          },
+        },
       ],
       variables: {
         OutputFile: 'bin\\Release\\MyApp.exe',
-        DeployPath: 'C:\\Deploy\\'
+        DeployPath: 'C:\\Deploy\\',
       },
       hotkey: 'F6',
       icon: '🚀',
@@ -291,8 +293,8 @@ export const MacroAutomationTools: React.FC<MacroAutomationToolsProps> = ({
       createdDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
       modifiedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
       author: 'Developer',
-      tags: ['build', 'deploy', 'release']
-    }
+      tags: ['build', 'deploy', 'release'],
+    },
   ];
 
   // Automation templates
@@ -317,19 +319,19 @@ On Error GoTo ErrorHandler
 Exit Sub
 ErrorHandler:
     MsgBox "Error " & Err.Number & ": " & Err.Description, vbCritical, "${ProcedureName}"
-    Resume Next`
-            }
-          }
-        ]
+    Resume Next`,
+            },
+          },
+        ],
       },
       parameters: [
         {
           name: 'ProcedureName',
           type: 'string',
           description: 'Name of the procedure',
-          required: true
-        }
-      ]
+          required: true,
+        },
+      ],
     },
     {
       id: 'template_2',
@@ -352,27 +354,27 @@ End Property
 
 Public Property Let ${PropertyName}(ByVal value As ${PropertyType})
     m_${PropertyName} = value
-End Property`
-            }
-          }
-        ]
+End Property`,
+            },
+          },
+        ],
       },
       parameters: [
         {
           name: 'PropertyName',
           type: 'string',
           description: 'Property name',
-          required: true
+          required: true,
         },
         {
           name: 'PropertyType',
           type: 'string',
           description: 'Property data type',
           defaultValue: 'String',
-          required: true
-        }
-      ]
-    }
+          required: true,
+        },
+      ],
+    },
   ];
 
   // Initialize with sample macros
@@ -385,14 +387,14 @@ End Property`
     setRecordingState({
       isRecording: true,
       startTime: new Date(),
-      actions: []
+      actions: [],
     });
 
     // Simulate recording timer
     recordingInterval.current = setInterval(() => {
       setRecordingState(prev => ({
         ...prev,
-        actions: [...prev.actions]
+        actions: [...prev.actions],
       }));
     }, 1000);
 
@@ -410,7 +412,7 @@ End Property`
     setRecordingState({
       isRecording: false,
       startTime: new Date(),
-      actions: []
+      actions: [],
     });
 
     if (actions.length > 0) {
@@ -421,7 +423,7 @@ End Property`
         category: 'Recorded',
         actions: actions,
         variables: {},
-        tags: ['recorded']
+        tags: ['recorded'],
       };
       setEditingMacro(newMacro);
       setShowMacroDialog(true);
@@ -432,75 +434,81 @@ End Property`
   }, [recordingState.actions, onMacroRecord]);
 
   // Add recorded action
-  const addRecordedAction = useCallback((action: Partial<MacroAction>) => {
-    if (!recordingState.isRecording) return;
+  const addRecordedAction = useCallback(
+    (action: Partial<MacroAction>) => {
+      if (!recordingState.isRecording) return;
 
-    const newAction: MacroAction = {
-      id: generateId(),
-      type: action.type || MacroActionType.CustomCommand,
-      description: action.description || '',
-      parameters: action.parameters || {},
-      delay: action.delay
-    };
+      const newAction: MacroAction = {
+        id: generateId(),
+        type: action.type || MacroActionType.CustomCommand,
+        description: action.description || '',
+        parameters: action.parameters || {},
+        delay: action.delay,
+      };
 
-    setRecordingState(prev => ({
-      ...prev,
-      actions: [...prev.actions, newAction]
-    }));
-  }, [recordingState.isRecording, generateId]);
+      setRecordingState(prev => ({
+        ...prev,
+        actions: [...prev.actions, newAction],
+      }));
+    },
+    [recordingState.isRecording, generateId]
+  );
 
   // Run macro
-  const runMacro = useCallback(async (macro: Macro) => {
-    setExecutionState({
-      isRunning: true,
-      currentAction: 0,
-      startTime: new Date(),
-      variables: { ...macro.variables },
-      output: [`Starting macro: ${macro.name}`],
-      errors: [],
-      status: 'running'
-    });
+  const runMacro = useCallback(
+    async (macro: Macro) => {
+      setExecutionState({
+        isRunning: true,
+        currentAction: 0,
+        startTime: new Date(),
+        variables: { ...macro.variables },
+        output: [`Starting macro: ${macro.name}`],
+        errors: [],
+        status: 'running',
+      });
 
-    // Simulate macro execution
-    for (let i = 0; i < macro.actions.length; i++) {
-      const action = macro.actions[i];
-      
-      setExecutionState(prev => ({
-        ...prev,
-        currentAction: i,
-        output: [...prev.output, `Executing: ${action.description}`]
-      }));
+      // Simulate macro execution
+      for (let i = 0; i < macro.actions.length; i++) {
+        const action = macro.actions[i];
 
-      // Simulate action execution
-      await new Promise(resolve => setTimeout(resolve, action.delay || 500));
-
-      // Simulate random errors for demo
-      if (Math.random() < 0.1) {
         setExecutionState(prev => ({
           ...prev,
-          errors: [...prev.errors, `Error in action ${i + 1}: Simulated error`],
-          status: action.errorHandling === 'stop' ? 'failed' : 'running'
+          currentAction: i,
+          output: [...prev.output, `Executing: ${action.description}`],
         }));
-        
-        if (action.errorHandling === 'stop') break;
+
+        // Simulate action execution
+        await new Promise(resolve => setTimeout(resolve, action.delay || 500));
+
+        // Simulate random errors for demo
+        if (Math.random() < 0.1) {
+          setExecutionState(prev => ({
+            ...prev,
+            errors: [...prev.errors, `Error in action ${i + 1}: Simulated error`],
+            status: action.errorHandling === 'stop' ? 'failed' : 'running',
+          }));
+
+          if (action.errorHandling === 'stop') break;
+        }
       }
-    }
 
-    // Update macro run count
-    const updatedMacro = { ...macro, runCount: macro.runCount + 1, lastRun: new Date() };
-    setMacros(prev => prev.map(m => m.id === macro.id ? updatedMacro : m));
+      // Update macro run count
+      const updatedMacro = { ...macro, runCount: macro.runCount + 1, lastRun: new Date() };
+      setMacros(prev => prev.map(m => (m.id === macro.id ? updatedMacro : m)));
 
-    setExecutionState(prev => ({
-      ...prev,
-      isRunning: false,
-      status: prev.errors.length > 0 ? 'failed' : 'completed',
-      output: [...prev.output, `Macro completed: ${macro.name}`]
-    }));
+      setExecutionState(prev => ({
+        ...prev,
+        isRunning: false,
+        status: prev.errors.length > 0 ? 'failed' : 'completed',
+        output: [...prev.output, `Macro completed: ${macro.name}`],
+      }));
 
-    onMacroRun?.(macro);
-    onAutomationComplete?.({ macro, status: 'completed' });
-    eventEmitter.current.emit('macroCompleted', macro);
-  }, [onMacroRun, onAutomationComplete]);
+      onMacroRun?.(macro);
+      onAutomationComplete?.({ macro, status: 'completed' });
+      eventEmitter.current.emit('macroCompleted', macro);
+    },
+    [onMacroRun, onAutomationComplete]
+  );
 
   // Save macro
   const saveMacro = useCallback(() => {
@@ -519,11 +527,11 @@ End Property`
       createdDate: selectedMacro?.createdDate || new Date(),
       modifiedDate: new Date(),
       author: 'Developer',
-      tags: editingMacro.tags || []
+      tags: editingMacro.tags || [],
     };
 
     if (selectedMacro) {
-      setMacros(prev => prev.map(m => m.id === selectedMacro.id ? newMacro : m));
+      setMacros(prev => prev.map(m => (m.id === selectedMacro.id ? newMacro : m)));
     } else {
       setMacros(prev => [...prev, newMacro]);
     }
@@ -535,7 +543,7 @@ End Property`
       category: 'General',
       actions: [],
       variables: {},
-      tags: []
+      tags: [],
     });
     setSelectedMacro(null);
 
@@ -543,16 +551,19 @@ End Property`
   }, [editingMacro, selectedMacro, generateId]);
 
   // Delete macro
-  const deleteMacro = useCallback((macro: Macro) => {
-    if (!window.confirm(`Delete macro "${macro.name}"?`)) return;
+  const deleteMacro = useCallback(
+    (macro: Macro) => {
+      if (!window.confirm(`Delete macro "${macro.name}"?`)) return;
 
-    setMacros(prev => prev.filter(m => m.id !== macro.id));
-    if (selectedMacro?.id === macro.id) {
-      setSelectedMacro(null);
-    }
+      setMacros(prev => prev.filter(m => m.id !== macro.id));
+      if (selectedMacro?.id === macro.id) {
+        setSelectedMacro(null);
+      }
 
-    eventEmitter.current.emit('macroDeleted', macro);
-  }, [selectedMacro]);
+      eventEmitter.current.emit('macroDeleted', macro);
+    },
+    [selectedMacro]
+  );
 
   // Add action to macro
   const addAction = useCallback(() => {
@@ -565,12 +576,12 @@ End Property`
       parameters: editingAction.parameters || {},
       delay: editingAction.delay,
       condition: editingAction.condition,
-      errorHandling: editingAction.errorHandling
+      errorHandling: editingAction.errorHandling,
     };
 
     setEditingMacro(prev => ({
       ...prev,
-      actions: [...(prev.actions || []), newAction]
+      actions: [...(prev.actions || []), newAction],
     }));
 
     setShowActionDialog(false);
@@ -578,19 +589,20 @@ End Property`
       type: MacroActionType.FileOpen,
       description: '',
       parameters: {},
-      delay: 0
+      delay: 0,
     });
   }, [editingAction, generateId]);
 
   // Filter macros
   const filteredMacros = macros.filter(macro => {
-    const matchesSearch = !searchTerm || 
+    const matchesSearch =
+      !searchTerm ||
       macro.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       macro.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       macro.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+
     const matchesCategory = selectedCategory === 'All' || macro.category === selectedCategory;
-    
+
     return matchesSearch && matchesCategory;
   });
 
@@ -602,7 +614,7 @@ End Property`
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
-    
+
     if (hours > 0) return `${hours}h ${minutes % 60}m`;
     if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
     return `${seconds}s`;
@@ -623,7 +635,7 @@ End Property`
       [MacroActionType.BuildCompile]: '🔨',
       [MacroActionType.UIClick]: '👆',
       [MacroActionType.UIType]: '⌨️',
-      [MacroActionType.CustomScript]: '📜'
+      [MacroActionType.CustomScript]: '📜',
     };
     return iconMap[type] || '⚡';
   };
@@ -658,7 +670,7 @@ End Property`
                   category: 'General',
                   actions: [],
                   variables: {},
-                  tags: []
+                  tags: [],
                 });
                 setSelectedMacro(null);
                 setShowMacroDialog(true);
@@ -728,17 +740,19 @@ End Property`
                 <input
                   type="text"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={e => setSearchTerm(e.target.value)}
                   placeholder="Search macros..."
                   className="w-full px-3 py-2 border border-gray-300 rounded mb-2"
                 />
                 <select
                   value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  onChange={e => setSelectedCategory(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 >
                   {categories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -770,9 +784,7 @@ End Property`
                     <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                       <span>{macro.actions.length} actions</span>
                       <span>Run {macro.runCount} times</span>
-                      {macro.lastRun && (
-                        <span>Last: {macro.lastRun.toLocaleDateString()}</span>
-                      )}
+                      {macro.lastRun && <span>Last: {macro.lastRun.toLocaleDateString()}</span>}
                     </div>
                   </div>
                 ))}
@@ -839,9 +851,7 @@ End Property`
                               <div className="text-xs text-gray-500">{action.type}</div>
                             </div>
                             {action.delay && (
-                              <span className="text-xs text-gray-500">
-                                Delay: {action.delay}ms
-                              </span>
+                              <span className="text-xs text-gray-500">Delay: {action.delay}ms</span>
                             )}
                           </div>
                         ))}
@@ -891,10 +901,14 @@ End Property`
                       <h3 className="font-medium mb-2">Execution Output</h3>
                       <div className="text-sm font-mono space-y-1 max-h-32 overflow-y-auto">
                         {executionState.output.map((line, index) => (
-                          <div key={index} className="text-gray-700">{line}</div>
+                          <div key={index} className="text-gray-700">
+                            {line}
+                          </div>
                         ))}
                         {executionState.errors.map((error, index) => (
-                          <div key={index} className="text-red-600">{error}</div>
+                          <div key={index} className="text-red-600">
+                            {error}
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -919,10 +933,8 @@ End Property`
                 <div className="text-center">
                   <div className="text-6xl mb-4 animate-pulse">⏺️</div>
                   <h2 className="text-2xl font-medium mb-2">Recording...</h2>
-                  <p className="text-gray-600 mb-6">
-                    Perform actions in the IDE to record them
-                  </p>
-                  
+                  <p className="text-gray-600 mb-6">Perform actions in the IDE to record them</p>
+
                   <div className="mb-6">
                     <div className="text-4xl font-mono">
                       {formatDuration(Date.now() - recordingState.startTime.getTime())}
@@ -938,7 +950,10 @@ End Property`
                       <h3 className="font-medium mb-3">Recorded Actions</h3>
                       <div className="space-y-2 max-h-64 overflow-y-auto">
                         {recordingState.actions.map((action, index) => (
-                          <div key={action.id} className="flex items-center gap-3 p-2 bg-gray-50 rounded">
+                          <div
+                            key={action.id}
+                            className="flex items-center gap-3 p-2 bg-gray-50 rounded"
+                          >
                             <span className="text-sm font-mono">#{index + 1}</span>
                             <span>{getActionIcon(action.type)}</span>
                             <span className="text-sm">{action.description || action.type}</span>
@@ -962,7 +977,7 @@ End Property`
                   <p className="text-gray-600 mb-6">
                     Record your actions to create reusable macros
                   </p>
-                  
+
                   <div className="bg-gray-50 rounded-lg p-6 mb-6">
                     <h3 className="font-medium mb-3">How it works:</h3>
                     <ol className="text-left space-y-2 text-sm">
@@ -990,18 +1005,16 @@ End Property`
             {editingMacro && (
               <div className="max-w-4xl mx-auto">
                 <h2 className="text-xl font-medium mb-4">Macro Editor</h2>
-                
+
                 <div className="space-y-4">
                   {/* Basic Info */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Name
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                       <input
                         type="text"
                         value={editingMacro.name || ''}
-                        onChange={(e) => setEditingMacro(prev => ({ ...prev, name: e.target.value }))}
+                        onChange={e => setEditingMacro(prev => ({ ...prev, name: e.target.value }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded"
                       />
                     </div>
@@ -1012,7 +1025,9 @@ End Property`
                       <input
                         type="text"
                         value={editingMacro.category || ''}
-                        onChange={(e) => setEditingMacro(prev => ({ ...prev, category: e.target.value }))}
+                        onChange={e =>
+                          setEditingMacro(prev => ({ ...prev, category: e.target.value }))
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded"
                       />
                     </div>
@@ -1024,7 +1039,9 @@ End Property`
                     </label>
                     <textarea
                       value={editingMacro.description || ''}
-                      onChange={(e) => setEditingMacro(prev => ({ ...prev, description: e.target.value }))}
+                      onChange={e =>
+                        setEditingMacro(prev => ({ ...prev, description: e.target.value }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                       rows={2}
                     />
@@ -1032,25 +1049,23 @@ End Property`
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Hotkey
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Hotkey</label>
                       <input
                         type="text"
                         value={editingMacro.hotkey || ''}
-                        onChange={(e) => setEditingMacro(prev => ({ ...prev, hotkey: e.target.value }))}
+                        onChange={e =>
+                          setEditingMacro(prev => ({ ...prev, hotkey: e.target.value }))
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded"
                         placeholder="e.g., Ctrl+Shift+M"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Icon
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Icon</label>
                       <input
                         type="text"
                         value={editingMacro.icon || ''}
-                        onChange={(e) => setEditingMacro(prev => ({ ...prev, icon: e.target.value }))}
+                        onChange={e => setEditingMacro(prev => ({ ...prev, icon: e.target.value }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded"
                         placeholder="e.g., 📁"
                       />
@@ -1070,7 +1085,10 @@ End Property`
                     </div>
                     <div className="space-y-2">
                       {editingMacro.actions?.map((action, index) => (
-                        <div key={action.id} className="flex items-center gap-3 p-3 border border-gray-200 rounded">
+                        <div
+                          key={action.id}
+                          className="flex items-center gap-3 p-3 border border-gray-200 rounded"
+                        >
                           <span className="text-xl">{getActionIcon(action.type)}</span>
                           <div className="flex-1">
                             <div className="font-medium text-sm">{action.description}</div>
@@ -1080,7 +1098,7 @@ End Property`
                             onClick={() => {
                               setEditingMacro(prev => ({
                                 ...prev,
-                                actions: prev.actions?.filter(a => a.id !== action.id)
+                                actions: prev.actions?.filter(a => a.id !== action.id),
                               }));
                             }}
                             className="text-red-500 hover:text-red-700"
@@ -1106,9 +1124,7 @@ End Property`
                     <div className="space-y-1">
                       {Object.entries(editingMacro.variables || {}).map(([key, value]) => (
                         <div key={key} className="flex items-center gap-2 text-sm">
-                          <span className="font-mono bg-gray-100 px-2 py-1 rounded">
-                            ${key}
-                          </span>
+                          <span className="font-mono bg-gray-100 px-2 py-1 rounded">${key}</span>
                           <span className="text-gray-600">=</span>
                           <span className="text-gray-700">{String(value)}</span>
                           <button
@@ -1135,7 +1151,7 @@ End Property`
                           category: 'General',
                           actions: [],
                           variables: {},
-                          tags: []
+                          tags: [],
                         });
                       }}
                       className="px-4 py-2 text-gray-600 hover:text-gray-800"
@@ -1159,13 +1175,14 @@ End Property`
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {automationTemplates.map(template => (
-                <div key={template.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow">
+                <div
+                  key={template.id}
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
+                >
                   <h3 className="font-medium mb-2">{template.name}</h3>
                   <p className="text-sm text-gray-600 mb-4">{template.description}</p>
-                  
-                  <div className="text-xs text-gray-500 mb-4">
-                    Category: {template.category}
-                  </div>
+
+                  <div className="text-xs text-gray-500 mb-4">Category: {template.category}</div>
 
                   {template.parameters.length > 0 && (
                     <div className="mb-4">
@@ -1186,7 +1203,7 @@ End Property`
                         ...template.macro,
                         name: template.name,
                         description: template.description,
-                        category: template.category
+                        category: template.category,
                       });
                       setSelectedTab('editor');
                     }}
@@ -1208,27 +1225,25 @@ End Property`
             <h2 className="text-lg font-medium mb-4">
               {selectedMacro ? 'Edit Macro' : 'New Macro'}
             </h2>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                 <input
                   type="text"
                   value={editingMacro.name || ''}
-                  onChange={(e) => setEditingMacro(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => setEditingMacro(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
                   value={editingMacro.description || ''}
-                  onChange={(e) => setEditingMacro(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={e =>
+                    setEditingMacro(prev => ({ ...prev, description: e.target.value }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   rows={3}
                 />
@@ -1236,24 +1251,20 @@ End Property`
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Category
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                   <input
                     type="text"
                     value={editingMacro.category || ''}
-                    onChange={(e) => setEditingMacro(prev => ({ ...prev, category: e.target.value }))}
+                    onChange={e => setEditingMacro(prev => ({ ...prev, category: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Hotkey
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Hotkey</label>
                   <input
                     type="text"
                     value={editingMacro.hotkey || ''}
-                    onChange={(e) => setEditingMacro(prev => ({ ...prev, hotkey: e.target.value }))}
+                    onChange={e => setEditingMacro(prev => ({ ...prev, hotkey: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                     placeholder="e.g., Ctrl+Shift+M"
                   />
@@ -1267,10 +1278,15 @@ End Property`
                 <input
                   type="text"
                   value={editingMacro.tags?.join(', ') || ''}
-                  onChange={(e) => setEditingMacro(prev => ({ 
-                    ...prev, 
-                    tags: e.target.value.split(',').map(t => t.trim()).filter(t => t)
-                  }))}
+                  onChange={e =>
+                    setEditingMacro(prev => ({
+                      ...prev,
+                      tags: e.target.value
+                        .split(',')
+                        .map(t => t.trim())
+                        .filter(t => t),
+                    }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 />
               </div>
@@ -1300,43 +1316,45 @@ End Property`
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[500px]">
             <h2 className="text-lg font-medium mb-4">Add Action</h2>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Action Type
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Action Type</label>
                 <select
                   value={editingAction.type}
-                  onChange={(e) => setEditingAction(prev => ({ ...prev, type: e.target.value as MacroActionType }))}
+                  onChange={e =>
+                    setEditingAction(prev => ({ ...prev, type: e.target.value as MacroActionType }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 >
                   {Object.entries(MacroActionType).map(([key, value]) => (
-                    <option key={key} value={value}>{value}</option>
+                    <option key={key} value={value}>
+                      {value}
+                    </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <input
                   type="text"
                   value={editingAction.description || ''}
-                  onChange={(e) => setEditingAction(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={e =>
+                    setEditingAction(prev => ({ ...prev, description: e.target.value }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Delay (ms)
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Delay (ms)</label>
                 <input
                   type="number"
                   value={editingAction.delay || 0}
-                  onChange={(e) => setEditingAction(prev => ({ ...prev, delay: parseInt(e.target.value) || 0 }))}
+                  onChange={e =>
+                    setEditingAction(prev => ({ ...prev, delay: parseInt(e.target.value) || 0 }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 />
               </div>
@@ -1347,7 +1365,9 @@ End Property`
                 </label>
                 <select
                   value={editingAction.errorHandling || 'stop'}
-                  onChange={(e) => setEditingAction(prev => ({ ...prev, errorHandling: e.target.value as any }))}
+                  onChange={e =>
+                    setEditingAction(prev => ({ ...prev, errorHandling: e.target.value as any }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 >
                   <option value="stop">Stop on Error</option>
@@ -1380,29 +1400,25 @@ End Property`
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[400px]">
             <h2 className="text-lg font-medium mb-4">Add Variable</h2>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                 <input
                   type="text"
                   value={variableForm.name}
-                  onChange={(e) => setVariableForm(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => setVariableForm(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="VariableName"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Value
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Value</label>
                 <input
                   type="text"
                   value={variableForm.value}
-                  onChange={(e) => setVariableForm(prev => ({ ...prev, value: e.target.value }))}
+                  onChange={e => setVariableForm(prev => ({ ...prev, value: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 />
               </div>
@@ -1422,8 +1438,8 @@ End Property`
                       ...prev,
                       variables: {
                         ...prev.variables,
-                        [variableForm.name]: variableForm.value
-                      }
+                        [variableForm.name]: variableForm.value,
+                      },
                     }));
                     setVariableForm({ name: '', value: '', type: 'string' });
                     setShowVariableDialog(false);

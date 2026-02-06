@@ -1,7 +1,7 @@
 /**
  * Lazy-loaded Monaco Editor wrapper component
  * This component uses React.lazy() and code splitting to load Monaco Editor
- * only when needed, reducing initial bundle size by ~10MB
+ * only when needed, reducing initial bundle size by ~4.7MB
  */
 import React, { Suspense } from 'react';
 
@@ -22,14 +22,55 @@ const EditorLoadingFallback: React.FC = () => (
 );
 
 /**
- * Lazy Monaco Editor with Suspense boundary
- * This component automatically handles code splitting and lazy loading
+ * Error boundary for Monaco loading failures
+ */
+class MonacoErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex-1 bg-gray-100 flex items-center justify-center p-8">
+          <div className="text-center max-w-md">
+            <h3 className="text-red-600 text-lg font-semibold mb-2">Failed to Load Code Editor</h3>
+            <p className="text-gray-600 text-sm mb-4">
+              {this.state.error?.message || 'Unknown error occurred'}
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Reload Application
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+/**
+ * Lazy Monaco Editor with Suspense boundary and error handling
  */
 const LazyMonacoEditor: React.FC = () => {
   return (
-    <Suspense fallback={<EditorLoadingFallback />}>
-      <MonacoCodeEditor />
-    </Suspense>
+    <MonacoErrorBoundary>
+      <Suspense fallback={<EditorLoadingFallback />}>
+        <MonacoCodeEditor />
+      </Suspense>
+    </MonacoErrorBoundary>
   );
 };
 

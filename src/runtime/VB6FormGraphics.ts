@@ -12,63 +12,63 @@
  * DrawMode constants
  */
 export enum VB6DrawMode {
-  vbBlackness = 1,      // Black
-  vbNotMergePen = 2,    // Not Merge Pen
-  vbMaskNotPen = 3,     // Mask Not Pen
-  vbNotCopyPen = 4,     // Not Copy Pen
-  vbMaskPenNot = 5,     // Mask Pen Not
-  vbInvert = 6,         // Invert
-  vbXorPen = 7,         // XOR Pen
-  vbNotMaskPen = 8,     // Not Mask Pen
-  vbMaskPen = 9,        // Mask Pen
-  vbNotXorPen = 10,     // Not XOR Pen
-  vbNop = 11,           // No Operation
-  vbMergeNotPen = 12,   // Merge Not Pen
-  vbCopyPen = 13,       // Copy Pen (default)
-  vbMergePenNot = 14,   // Merge Pen Not
-  vbMergePen = 15,      // Merge Pen
-  vbWhiteness = 16      // White
+  vbBlackness = 1, // Black
+  vbNotMergePen = 2, // Not Merge Pen
+  vbMaskNotPen = 3, // Mask Not Pen
+  vbNotCopyPen = 4, // Not Copy Pen
+  vbMaskPenNot = 5, // Mask Pen Not
+  vbInvert = 6, // Invert
+  vbXorPen = 7, // XOR Pen
+  vbNotMaskPen = 8, // Not Mask Pen
+  vbMaskPen = 9, // Mask Pen
+  vbNotXorPen = 10, // Not XOR Pen
+  vbNop = 11, // No Operation
+  vbMergeNotPen = 12, // Merge Not Pen
+  vbCopyPen = 13, // Copy Pen (default)
+  vbMergePenNot = 14, // Merge Pen Not
+  vbMergePen = 15, // Merge Pen
+  vbWhiteness = 16, // White
 }
 
 /**
  * DrawStyle constants
  */
 export enum VB6DrawStyle {
-  vbSolid = 0,          // Solid line
-  vbDash = 1,           // Dashed line
-  vbDot = 2,            // Dotted line
-  vbDashDot = 3,        // Dash-dot line
-  vbDashDotDot = 4,     // Dash-dot-dot line
-  vbInvisible = 5,      // Invisible line
-  vbInsideSolid = 6     // Inside solid
+  vbSolid = 0, // Solid line
+  vbDash = 1, // Dashed line
+  vbDot = 2, // Dotted line
+  vbDashDot = 3, // Dash-dot line
+  vbDashDotDot = 4, // Dash-dot-dot line
+  vbInvisible = 5, // Invisible line
+  vbInsideSolid = 6, // Inside solid
 }
 
 /**
  * FillStyle constants
  */
 export enum VB6FillStyle {
-  vbFSSolid = 0,              // Solid fill
-  vbFSTransparent = 1,        // Transparent (no fill)
-  vbHorizontalLine = 2,       // Horizontal lines
-  vbVerticalLine = 3,         // Vertical lines
-  vbUpwardDiagonal = 4,       // Upward diagonal lines
-  vbDownwardDiagonal = 5,     // Downward diagonal lines
-  vbCross = 6,                // Cross pattern
-  vbDiagonalCross = 7         // Diagonal cross pattern
+  vbFSSolid = 0, // Solid fill
+  vbFSTransparent = 1, // Transparent (no fill)
+  vbHorizontalLine = 2, // Horizontal lines
+  vbVerticalLine = 3, // Vertical lines
+  vbUpwardDiagonal = 4, // Upward diagonal lines
+  vbDownwardDiagonal = 5, // Downward diagonal lines
+  vbCross = 6, // Cross pattern
+  vbDiagonalCross = 7, // Diagonal cross pattern
 }
 
 /**
  * ScaleMode constants
  */
 export enum VB6ScaleMode {
-  vbUser = 0,           // User-defined
-  vbTwips = 1,          // Twips (default)
-  vbPoints = 2,         // Points
-  vbPixels = 3,         // Pixels
-  vbCharacters = 4,     // Characters
-  vbInches = 5,         // Inches
-  vbMillimeters = 6,    // Millimeters
-  vbCentimeters = 7     // Centimeters
+  vbUser = 0, // User-defined
+  vbTwips = 1, // Twips (default)
+  vbPoints = 2, // Points
+  vbPixels = 3, // Pixels
+  vbCharacters = 4, // Characters
+  vbInches = 5, // Inches
+  vbMillimeters = 6, // Millimeters
+  vbCentimeters = 7, // Centimeters
 }
 
 // ============================================================================
@@ -88,7 +88,7 @@ export class VB6GraphicsContext {
   get canvas(): HTMLCanvasElement | null {
     return this._canvas;
   }
-  
+
   // Graphics properties
   public CurrentX: number = 0;
   public CurrentY: number = 0;
@@ -111,16 +111,16 @@ export class VB6GraphicsContext {
   public ScaleWidth: number = 0;
   public ScaleHeight: number = 0;
   public AutoRedraw: boolean = false;
-  
+
   // Text metrics cache
   private textMetricsCache: Map<string, TextMetrics> = new Map();
-  
+
   constructor(elementId?: string) {
     if (elementId) {
       this.attachToElement(elementId);
     }
   }
-  
+
   /**
    * Attach graphics context to an HTML element
    * @param elementId Element ID or element
@@ -131,11 +131,11 @@ export class VB6GraphicsContext {
     } else {
       this.element = elementId;
     }
-    
+
     if (!this.element) {
       throw new Error(`Element not found: ${elementId}`);
     }
-    
+
     // Create or get canvas
     let canvas = this.element.querySelector('canvas') as HTMLCanvasElement;
     if (!canvas) {
@@ -148,10 +148,10 @@ export class VB6GraphicsContext {
       canvas.style.pointerEvents = 'none';
       this.element.appendChild(canvas);
     }
-    
+
     this._canvas = canvas;
     this.ctx = canvas.getContext('2d');
-    
+
     // Set default scale
     if (this.ScaleWidth === 0) {
       this.ScaleWidth = this.pixelsToUnits(canvas.width);
@@ -160,7 +160,7 @@ export class VB6GraphicsContext {
       this.ScaleHeight = this.pixelsToUnits(canvas.height);
     }
   }
-  
+
   /**
    * Print text at current position
    * @param text Text to print
@@ -168,27 +168,27 @@ export class VB6GraphicsContext {
    */
   Print(...args: any[]): void {
     if (!this.ctx) return;
-    
+
     // Save context
     this.ctx.save();
-    
+
     // Set font
     this.applyFont();
-    
+
     // Set colors
     this.ctx.fillStyle = this.ForeColor;
-    
+
     // Convert position to pixels
     const x = this.unitsToPixels(this.CurrentX, true);
     const y = this.unitsToPixels(this.CurrentY, false);
-    
+
     // Process arguments
     let text = '';
     let newLine = true;
-    
+
     for (let i = 0; i < args.length; i++) {
       const arg = args[i];
-      
+
       if (arg === ';') {
         // Semicolon - no spacing, no newline
         newLine = false;
@@ -199,7 +199,7 @@ export class VB6GraphicsContext {
         this.CurrentX = zones * 14;
         continue;
       }
-      
+
       // Convert to string
       let str = '';
       if (typeof arg === 'string') {
@@ -214,29 +214,29 @@ export class VB6GraphicsContext {
       } else if (arg != null) {
         str = String(arg);
       }
-      
+
       text += str;
     }
-    
+
     // Draw text
     if (text) {
       this.ctx.fillText(text, x, y);
-      
+
       // Update CurrentX
       const metrics = this.ctx.measureText(text);
       this.CurrentX += this.pixelsToUnits(metrics.width, true);
     }
-    
+
     // Move to next line if needed
     if (newLine) {
       this.CurrentX = 0;
       this.CurrentY += this.pixelsToUnits(this.FontSize * 1.5, false);
     }
-    
+
     // Restore context
     this.ctx.restore();
   }
-  
+
   /**
    * Clear the drawing surface
    */
@@ -251,40 +251,40 @@ export class VB6GraphicsContext {
       this.ctx.fillStyle = this.BackColor;
       this.ctx.fillRect(0, 0, this._canvas.width, this._canvas.height);
     }
-    
+
     // Reset position
     this.CurrentX = 0;
     this.CurrentY = 0;
   }
-  
+
   /**
    * Get the width of text in current font
    * @param text Text to measure
    */
   TextWidth(text: string): number {
     if (!this.ctx) return 0;
-    
+
     // Check cache
     const cacheKey = `${this.FontName}-${this.FontSize}-${this.FontBold}-${this.FontItalic}-${text}`;
     let metrics = this.textMetricsCache.get(cacheKey);
-    
+
     if (!metrics) {
       // Save and apply font
       this.ctx.save();
       this.applyFont();
-      
+
       // Measure text
       metrics = this.ctx.measureText(text);
       this.textMetricsCache.set(cacheKey, metrics);
-      
+
       // Restore
       this.ctx.restore();
     }
-    
+
     // Convert pixels to current scale units
     return this.pixelsToUnits(metrics.width, true);
   }
-  
+
   /**
    * Get the height of text in current font
    * @param text Text to measure (optional, uses font height)
@@ -295,7 +295,7 @@ export class VB6GraphicsContext {
     const heightPixels = this.FontSize * 1.5;
     return this.pixelsToUnits(heightPixels, false);
   }
-  
+
   /**
    * Draw a line
    * @param x1 Start X
@@ -307,26 +307,26 @@ export class VB6GraphicsContext {
    */
   Line(x1: number, y1: number, x2: number, y2: number, color?: string, style?: string): void {
     if (!this.ctx) return;
-    
+
     this.ctx.save();
-    
+
     // Convert coordinates
     const px1 = this.unitsToPixels(x1, true);
     const py1 = this.unitsToPixels(y1, false);
     const px2 = this.unitsToPixels(x2, true);
     const py2 = this.unitsToPixels(y2, false);
-    
+
     // Set color
     const drawColor = color || this.ForeColor;
-    
+
     // Apply draw style
     this.applyDrawStyle();
-    
+
     if (style === 'B' || style === 'BF') {
       // Draw box
       const width = px2 - px1;
       const height = py2 - py1;
-      
+
       if (style === 'BF') {
         // Filled box
         this.ctx.fillStyle = drawColor;
@@ -346,14 +346,14 @@ export class VB6GraphicsContext {
       this.ctx.lineTo(px2, py2);
       this.ctx.stroke();
     }
-    
+
     // Update current position
     this.CurrentX = x2;
     this.CurrentY = y2;
-    
+
     this.ctx.restore();
   }
-  
+
   /**
    * Draw a circle
    * @param x Center X
@@ -364,7 +364,15 @@ export class VB6GraphicsContext {
    * @param end End angle in radians (optional)
    * @param aspect Aspect ratio (optional)
    */
-  Circle(x: number, y: number, radius: number, color?: string, start?: number, end?: number, aspect?: number): void {
+  Circle(
+    x: number,
+    y: number,
+    radius: number,
+    color?: string,
+    start?: number,
+    end?: number,
+    aspect?: number
+  ): void {
     if (!this.ctx || !this._canvas) return;
 
     this.ctx.save();
@@ -420,7 +428,7 @@ export class VB6GraphicsContext {
 
     this.ctx.restore();
   }
-  
+
   /**
    * Set a pixel
    * @param x X coordinate
@@ -429,18 +437,18 @@ export class VB6GraphicsContext {
    */
   PSet(x: number, y: number, color?: string): void {
     if (!this.ctx) return;
-    
+
     const px = this.unitsToPixels(x, true);
     const py = this.unitsToPixels(y, false);
     const drawColor = color || this.ForeColor;
-    
+
     this.ctx.fillStyle = drawColor;
     this.ctx.fillRect(px, py, 1, 1);
-    
+
     this.CurrentX = x;
     this.CurrentY = y;
   }
-  
+
   /**
    * Get pixel color at point
    * @param x X coordinate
@@ -448,36 +456,36 @@ export class VB6GraphicsContext {
    */
   Point(x: number, y: number): number {
     if (!this.ctx) return 0;
-    
+
     const px = this.unitsToPixels(x, true);
     const py = this.unitsToPixels(y, false);
-    
+
     const imageData = this.ctx.getImageData(px, py, 1, 1);
     const data = imageData.data;
-    
+
     // Convert RGBA to VB6 color (BGR format)
     return (data[2] << 16) | (data[1] << 8) | data[0];
   }
-  
+
   /**
    * Apply font settings to context
    */
   private applyFont(): void {
     if (!this.ctx) return;
-    
+
     let font = '';
-    
+
     if (this.FontItalic) font += 'italic ';
     if (this.FontBold) font += 'bold ';
-    
+
     font += `${this.FontSize}px "${this.FontName}"`;
-    
+
     this.ctx.font = font;
-    
+
     // Apply underline and strikethrough using decorations
     // (Canvas doesn't support these natively)
   }
-  
+
   /**
    * Apply draw style to context
    */
@@ -563,7 +571,7 @@ export class VB6GraphicsContext {
 
   private drawHorizontalLinePattern(x: number, y: number, size: number): void {
     if (!this.ctx) return;
-    const pattern = this.createPatternCanvas(4, 4, (patternCtx) => {
+    const pattern = this.createPatternCanvas(4, 4, patternCtx => {
       patternCtx.strokeStyle = this.FillColor;
       patternCtx.lineWidth = 1;
       patternCtx.beginPath();
@@ -576,7 +584,7 @@ export class VB6GraphicsContext {
 
   private drawVerticalLinePattern(x: number, y: number, size: number): void {
     if (!this.ctx) return;
-    const pattern = this.createPatternCanvas(4, 4, (patternCtx) => {
+    const pattern = this.createPatternCanvas(4, 4, patternCtx => {
       patternCtx.strokeStyle = this.FillColor;
       patternCtx.lineWidth = 1;
       patternCtx.beginPath();
@@ -589,7 +597,7 @@ export class VB6GraphicsContext {
 
   private drawUpwardDiagonalPattern(x: number, y: number, size: number): void {
     if (!this.ctx) return;
-    const pattern = this.createPatternCanvas(4, 4, (patternCtx) => {
+    const pattern = this.createPatternCanvas(4, 4, patternCtx => {
       patternCtx.strokeStyle = this.FillColor;
       patternCtx.lineWidth = 1;
       patternCtx.beginPath();
@@ -602,7 +610,7 @@ export class VB6GraphicsContext {
 
   private drawDownwardDiagonalPattern(x: number, y: number, size: number): void {
     if (!this.ctx) return;
-    const pattern = this.createPatternCanvas(4, 4, (patternCtx) => {
+    const pattern = this.createPatternCanvas(4, 4, patternCtx => {
       patternCtx.strokeStyle = this.FillColor;
       patternCtx.lineWidth = 1;
       patternCtx.beginPath();
@@ -615,7 +623,7 @@ export class VB6GraphicsContext {
 
   private drawCrossPattern(x: number, y: number, size: number): void {
     if (!this.ctx) return;
-    const pattern = this.createPatternCanvas(4, 4, (patternCtx) => {
+    const pattern = this.createPatternCanvas(4, 4, patternCtx => {
       patternCtx.strokeStyle = this.FillColor;
       patternCtx.lineWidth = 1;
       // Horizontal line
@@ -634,7 +642,7 @@ export class VB6GraphicsContext {
 
   private drawDiagonalCrossPattern(x: number, y: number, size: number): void {
     if (!this.ctx) return;
-    const pattern = this.createPatternCanvas(4, 4, (patternCtx) => {
+    const pattern = this.createPatternCanvas(4, 4, patternCtx => {
       patternCtx.strokeStyle = this.FillColor;
       patternCtx.lineWidth = 1;
       // Upward diagonal
@@ -654,7 +662,11 @@ export class VB6GraphicsContext {
   /**
    * Create a pattern canvas for fill patterns
    */
-  private createPatternCanvas(width: number, height: number, drawFn: (ctx: CanvasRenderingContext2D) => void): HTMLCanvasElement {
+  private createPatternCanvas(
+    width: number,
+    height: number,
+    drawFn: (ctx: CanvasRenderingContext2D) => void
+  ): HTMLCanvasElement {
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -666,7 +678,7 @@ export class VB6GraphicsContext {
     }
     return canvas;
   }
-  
+
   /**
    * Convert units to pixels
    */
@@ -696,7 +708,7 @@ export class VB6GraphicsContext {
         return value;
     }
   }
-  
+
   /**
    * Convert pixels to units
    */
@@ -737,30 +749,30 @@ export class VB6GraphicsContext {
 export class VB6GraphicsManager {
   private static instance: VB6GraphicsManager;
   private contexts: Map<string, VB6GraphicsContext> = new Map();
-  
+
   static getInstance(): VB6GraphicsManager {
     if (!VB6GraphicsManager.instance) {
       VB6GraphicsManager.instance = new VB6GraphicsManager();
     }
     return VB6GraphicsManager.instance;
   }
-  
+
   /**
    * Get or create graphics context for an element
    * @param elementId Element ID or element
    */
   getContext(elementId: string | HTMLElement): VB6GraphicsContext {
     const id = typeof elementId === 'string' ? elementId : elementId.id;
-    
+
     if (!this.contexts.has(id)) {
       const context = new VB6GraphicsContext();
       context.attachToElement(elementId);
       this.contexts.set(id, context);
     }
-    
+
     return this.contexts.get(id)!;
   }
-  
+
   /**
    * Remove graphics context
    * @param elementId Element ID
@@ -783,28 +795,25 @@ export const VB6FormGraphics = {
   VB6DrawStyle,
   VB6FillStyle,
   VB6ScaleMode,
-  graphicsManager
+  graphicsManager,
 };
 
 // Make functions globally available
 if (typeof window !== 'undefined') {
   const globalAny = window as any;
-  
+
   // Graphics classes
   globalAny.VB6GraphicsContext = VB6GraphicsContext;
   globalAny.VB6GraphicsManager = graphicsManager;
-  
+
   // Enums
   globalAny.VB6DrawMode = VB6DrawMode;
   globalAny.VB6DrawStyle = VB6DrawStyle;
   globalAny.VB6FillStyle = VB6FillStyle;
   globalAny.VB6ScaleMode = VB6ScaleMode;
-  
+
   // Helper function to get graphics context
   globalAny.GetGraphics = (elementId: string) => graphicsManager.getContext(elementId);
-  
-  console.log('[VB6] Form graphics loaded - Print, TextWidth, TextHeight, Line, Circle, PSet');
-  console.log('[VB6] Graphics properties - CurrentX/Y, DrawMode, FillStyle, ScaleMode');
 }
 
 export default VB6FormGraphics;

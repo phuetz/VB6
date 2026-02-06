@@ -90,17 +90,32 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
     if (dragState.isResizing) {
       const handle = dragState.currentHandle;
       switch (handle) {
-        case 'nw': case 'se': return 'nw-resize';
-        case 'ne': case 'sw': return 'ne-resize';
-        case 'n': case 's': return 'n-resize';
-        case 'e': case 'w': return 'w-resize';
-        default: return 'resize';
+        case 'nw':
+        case 'se':
+          return 'nw-resize';
+        case 'ne':
+        case 'sw':
+          return 'ne-resize';
+        case 'n':
+        case 's':
+          return 'n-resize';
+        case 'e':
+        case 'w':
+          return 'w-resize';
+        default:
+          return 'resize';
       }
     }
     if (dragState.isDragging) return 'grabbing';
     if (isToolboxDragging) return 'copy';
     return 'default';
-  }, [selectionBox.active, dragState.isResizing, dragState.isDragging, dragState.currentHandle, isToolboxDragging]);
+  }, [
+    selectionBox.active,
+    dragState.isResizing,
+    dragState.isDragging,
+    dragState.currentHandle,
+    isToolboxDragging,
+  ]);
 
   // Event listeners globaux pour le système de manipulation
   useEffect(() => {
@@ -389,39 +404,40 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
 
           {/* Guides d'alignement unifiés */}
           {/* Guides rouges pour le drag depuis la toolbox */}
-          {isToolboxDragging && snapGuides.map((guide, index) => (
-            <div
-              key={`toolbox-guide-${index}`}
-              className="absolute pointer-events-none z-50"
-              style={{
-                ...(guide.x !== undefined && {
-                  left: guide.x,
-                  top: 0,
-                  width: 2,
-                  height: '100%',
-                  backgroundColor: '#ff4444',
-                  opacity: 0.8,
-                  zIndex: 1000,
-                }),
-                ...(guide.y !== undefined && {
-                  left: 0,
-                  top: guide.y,
-                  width: '100%',
-                  height: 2,
-                  backgroundColor: '#ff4444',
-                  opacity: 0.8,
-                  zIndex: 1000,
-                }),
-              }}
-            >
-              {guide.controlId && (
-                <div className="absolute text-xs bg-red-600 text-white px-1 rounded">
-                  {guide.x !== undefined ? 'x' : 'y'}: {guide.x ?? guide.y}
-                </div>
-              )}
-            </div>
-          ))}
-          
+          {isToolboxDragging &&
+            snapGuides.map((guide, index) => (
+              <div
+                key={`toolbox-guide-${index}`}
+                className="absolute pointer-events-none z-50"
+                style={{
+                  ...(guide.x !== undefined && {
+                    left: guide.x,
+                    top: 0,
+                    width: 2,
+                    height: '100%',
+                    backgroundColor: '#ff4444',
+                    opacity: 0.8,
+                    zIndex: 1000,
+                  }),
+                  ...(guide.y !== undefined && {
+                    left: 0,
+                    top: guide.y,
+                    width: '100%',
+                    height: 2,
+                    backgroundColor: '#ff4444',
+                    opacity: 0.8,
+                    zIndex: 1000,
+                  }),
+                }}
+              >
+                {guide.controlId && (
+                  <div className="absolute text-xs bg-red-600 text-white px-1 rounded">
+                    {guide.x !== undefined ? 'x' : 'y'}: {guide.x ?? guide.y}
+                  </div>
+                )}
+              </div>
+            ))}
+
           {/* Guides verts pour la manipulation de contrôles existants */}
           {(dragState.isDragging || dragState.isResizing) && (
             <>
@@ -467,8 +483,8 @@ const CanvasContent: React.FC<AdvancedDragDropCanvasProps> = ({
               isActive={selectedControls.some(sc => sc.id === control.id)}
             >
               <AnimatedDrop isVisible={control.visible} delay={control.id * 50}>
-                <ControlRenderer 
-                  control={control} 
+                <ControlRenderer
+                  control={control}
                   onStartDrag={startDrag}
                   onStartResize={startResize}
                   dragState={dragState}

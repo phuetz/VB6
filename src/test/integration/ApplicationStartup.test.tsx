@@ -9,20 +9,20 @@ import React from 'react';
 
 // Mock des composants pour éviter les erreurs de dépendances
 vi.mock('../../App', () => ({
-  default: () => <div data-testid="app">App Component</div>
+  default: () => <div data-testid="app">App Component</div>,
 }));
 
 vi.mock('../../components/ErrorBoundary', () => ({
-  default: ({ children }: any) => <div data-testid="error-boundary">{children}</div>
+  default: ({ children }: any) => <div data-testid="error-boundary">{children}</div>,
 }));
 
 describe('Application Startup Integration Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Reset DOM
     document.body.innerHTML = '';
-    
+
     // Reset localStorage
     window.localStorage.clear();
   });
@@ -67,7 +67,7 @@ describe('Application Startup Integration Tests', () => {
       const preferences = {
         theme: 'dark',
         showGrid: false,
-        zoomLevel: 1.5
+        zoomLevel: 1.5,
       };
 
       // Store preferences in localStorage
@@ -109,16 +109,16 @@ describe('Application Startup Integration Tests', () => {
     it('should disable advanced features in safe mode', () => {
       // En mode safe, certaines fonctionnalités devraient être désactivées
       const safeMode = true;
-      
+
       expect(safeMode).toBe(true);
-      
+
       // Vérifier que les fonctionnalités avancées ne sont pas chargées
       const advancedFeatures = {
         collaboration: false,
         aiAssistant: false,
-        cloudSync: false
+        cloudSync: false,
       };
-      
+
       expect(advancedFeatures.collaboration).toBe(false);
       expect(advancedFeatures.aiAssistant).toBe(false);
       expect(advancedFeatures.cloudSync).toBe(false);
@@ -128,7 +128,7 @@ describe('Application Startup Integration Tests', () => {
   describe('Error Handling During Startup', () => {
     it('should catch and display startup errors', () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      
+
       // Simuler une erreur au démarrage
       const ErrorComponent = () => {
         throw new Error('Startup failed');
@@ -156,7 +156,7 @@ describe('Application Startup Integration Tests', () => {
       };
 
       expect(renderWithErrorBoundary).not.toThrow();
-      
+
       consoleErrorSpy.mockRestore();
     });
 
@@ -179,20 +179,20 @@ describe('Application Startup Integration Tests', () => {
   describe('Performance Monitoring', () => {
     it('should track startup time', async () => {
       const startTime = performance.now();
-      
+
       // Simuler le démarrage de l'application
       await new Promise(resolve => setTimeout(resolve, 10));
-      
+
       const endTime = performance.now();
       const startupTime = endTime - startTime;
-      
+
       expect(startupTime).toBeGreaterThan(0);
       expect(startupTime).toBeLessThan(1000); // Le démarrage devrait être rapide
     });
 
     it('should monitor memory usage', () => {
       const memoryInfo = window.performance.memory;
-      
+
       expect(memoryInfo).toBeDefined();
       expect(memoryInfo.usedJSHeapSize).toBeGreaterThan(0);
       expect(memoryInfo.totalJSHeapSize).toBeGreaterThan(0);
@@ -208,7 +208,7 @@ describe('Application Startup Integration Tests', () => {
         webWorkers: typeof Worker !== 'undefined',
         promises: typeof Promise !== 'undefined',
         fetch: typeof fetch !== 'undefined',
-        customElements: typeof customElements !== 'undefined'
+        customElements: typeof customElements !== 'undefined',
       };
 
       expect(requiredFeatures.localStorage).toBe(true);
@@ -233,8 +233,8 @@ describe('Application Startup Integration Tests', () => {
         features: {
           collaboration: true,
           aiAssistant: true,
-          debugging: true
-        }
+          debugging: true,
+        },
       };
 
       expect(config.appName).toBe('VB6 Web IDE');
@@ -245,7 +245,7 @@ describe('Application Startup Integration Tests', () => {
     it('should validate environment variables', () => {
       const env = {
         NODE_ENV: process.env.NODE_ENV || 'test',
-        VITE_API_URL: process.env.VITE_API_URL || 'http://localhost:3001'
+        VITE_API_URL: process.env.VITE_API_URL || 'http://localhost:3001',
       };
 
       expect(env.NODE_ENV).toBe('test');
@@ -257,7 +257,7 @@ describe('Application Startup Integration Tests', () => {
     it('should attempt to register service worker in production', () => {
       // En production, un service worker devrait être enregistré
       const isProduction = process.env.NODE_ENV === 'production';
-      
+
       if (isProduction && 'serviceWorker' in navigator) {
         expect(navigator.serviceWorker).toBeDefined();
       } else {
@@ -276,7 +276,7 @@ describe('Application Startup Integration Tests', () => {
     it('should handle deep links', () => {
       // Simuler un deep link
       const deepLink = '/project/123/form/MainForm';
-      
+
       // En réalité, le routeur gérerait cela
       expect(deepLink).toMatch(/^\/project\/\d+\/form\/\w+$/);
     });
@@ -305,9 +305,9 @@ describe('Application Startup Integration Tests', () => {
     it('should support keyboard navigation', () => {
       const KeyboardApp = () => {
         const [focused, setFocused] = React.useState(false);
-        
+
         return (
-          <button 
+          <button
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             data-testid="focusable"
@@ -318,10 +318,10 @@ describe('Application Startup Integration Tests', () => {
       };
 
       render(<KeyboardApp />);
-      
+
       const button = screen.getByTestId('focusable');
       expect(button).toBeInTheDocument();
-      
+
       // Le focus peut être testé mais nécessite des événements DOM
       button.focus();
       expect(document.activeElement).toBe(button);

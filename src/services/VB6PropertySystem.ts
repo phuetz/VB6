@@ -11,7 +11,7 @@ const logger = createLogger('PropertySystem');
 export enum VB6PropertyType {
   Get = 'Get',
   Let = 'Let',
-  Set = 'Set'
+  Set = 'Set',
 }
 
 export interface VB6PropertyDescriptor {
@@ -77,7 +77,7 @@ export class VB6PropertySystem {
    */
   createInstance(className: string, instanceId?: string): string {
     const id = instanceId || `${className}_${this.nextInstanceId++}`;
-    
+
     if (!this.propertyValues.has(id)) {
       this.propertyValues.set(id, new Map<string, VB6PropertyValue>());
     }
@@ -93,7 +93,11 @@ export class VB6PropertySystem {
         // Find Get property to determine initial value
         const getProperty = overloads.find(p => p.propertyType === VB6PropertyType.Get);
         if (getProperty) {
-          this.setPropertyValue(id, propertyName, this.getDefaultValue(getProperty.returnType || 'Variant'));
+          this.setPropertyValue(
+            id,
+            propertyName,
+            this.getDefaultValue(getProperty.returnType || 'Variant')
+          );
         }
       }
     }
@@ -119,9 +123,8 @@ export class VB6PropertySystem {
     }
 
     const propertyOverloads = classProperties.get(propertyName)!;
-    const getProperty = propertyOverloads.find(p => 
-      p.propertyType === VB6PropertyType.Get && 
-      this.matchParameters(p.parameters, args)
+    const getProperty = propertyOverloads.find(
+      p => p.propertyType === VB6PropertyType.Get && this.matchParameters(p.parameters, args)
     );
 
     if (!getProperty) {
@@ -131,7 +134,7 @@ export class VB6PropertySystem {
     // Check if there's a custom accessor
     const instanceAccessors = this.propertyAccessors.get(instanceId);
     const accessorKey = `${propertyName}_Get`;
-    
+
     if (instanceAccessors && instanceAccessors.has(accessorKey)) {
       const accessor = instanceAccessors.get(accessorKey);
       return accessor(...args);
@@ -140,7 +143,7 @@ export class VB6PropertySystem {
     // Default behavior - return stored value
     const key = this.getPropertyKey(propertyName, args);
     const propertyValue = instanceValues.get(key);
-    
+
     if (propertyValue) {
       propertyValue.accessCount++;
       return propertyValue.value;
@@ -166,9 +169,8 @@ export class VB6PropertySystem {
     }
 
     const propertyOverloads = classProperties.get(propertyName)!;
-    const letProperty = propertyOverloads.find(p => 
-      p.propertyType === VB6PropertyType.Let && 
-      this.matchLetSetParameters(p.parameters, args)
+    const letProperty = propertyOverloads.find(
+      p => p.propertyType === VB6PropertyType.Let && this.matchLetSetParameters(p.parameters, args)
     );
 
     if (!letProperty) {
@@ -182,7 +184,7 @@ export class VB6PropertySystem {
     // Check if there's a custom accessor
     const instanceAccessors = this.propertyAccessors.get(instanceId);
     const accessorKey = `${propertyName}_Let`;
-    
+
     if (instanceAccessors && instanceAccessors.has(accessorKey)) {
       const accessor = instanceAccessors.get(accessorKey);
       accessor(value, ...args);
@@ -210,9 +212,8 @@ export class VB6PropertySystem {
     }
 
     const propertyOverloads = classProperties.get(propertyName)!;
-    const setProperty = propertyOverloads.find(p => 
-      p.propertyType === VB6PropertyType.Set && 
-      this.matchLetSetParameters(p.parameters, args)
+    const setProperty = propertyOverloads.find(
+      p => p.propertyType === VB6PropertyType.Set && this.matchLetSetParameters(p.parameters, args)
     );
 
     if (!setProperty) {
@@ -226,7 +227,7 @@ export class VB6PropertySystem {
     // Check if there's a custom accessor
     const instanceAccessors = this.propertyAccessors.get(instanceId);
     const accessorKey = `${propertyName}_Set`;
-    
+
     if (instanceAccessors && instanceAccessors.has(accessorKey)) {
       const accessor = instanceAccessors.get(accessorKey);
       accessor(objectRef, ...args);
@@ -240,8 +241,12 @@ export class VB6PropertySystem {
   /**
    * Register a custom property accessor function
    */
-  registerPropertyAccessor(instanceId: string, propertyName: string, 
-                          propertyType: VB6PropertyType, accessor: (...args: any[]) => any): void {
+  registerPropertyAccessor(
+    instanceId: string,
+    propertyName: string,
+    propertyType: VB6PropertyType,
+    accessor: (...args: any[]) => any
+  ): void {
     const instanceAccessors = this.propertyAccessors.get(instanceId);
     if (!instanceAccessors) {
       throw new Error(`Instance not found: ${instanceId}`);
@@ -300,13 +305,17 @@ export class VB6PropertySystem {
   /**
    * Validate property assignment
    */
-  validatePropertyAssignment(className: string, propertyName: string, 
-                           value: any, isObjectAssignment: boolean = false): boolean {
+  validatePropertyAssignment(
+    className: string,
+    propertyName: string,
+    value: any,
+    isObjectAssignment: boolean = false
+  ): boolean {
     const propertyInfo = this.getPropertyInfo(className, propertyName);
-    
+
     const targetPropertyType = isObjectAssignment ? VB6PropertyType.Set : VB6PropertyType.Let;
     const property = propertyInfo.find(p => p.propertyType === targetPropertyType);
-    
+
     if (!property) {
       return false;
     }
@@ -351,16 +360,16 @@ export class VB6PropertySystem {
     const requiredParams = expectedParams.filter(p => !p.isOptional);
     const actualParamCount = actualArgs.length;
     const expectedParamCount = expectedParams.length;
-    
+
     // If no parameters expected and none provided, it's a match
     if (expectedParamCount === 0 && actualParamCount === 0) {
       return true;
     }
-    
+
     // For Property Get, match exact parameter count
     const minRequired = requiredParams.length;
     const maxAllowed = expectedParamCount;
-    
+
     // Check minimum required parameters
     if (actualParamCount < minRequired) {
       return false;
@@ -378,21 +387,24 @@ export class VB6PropertySystem {
    * Check if parameters match a Property Let/Set signature
    * For Let/Set, the last parameter is the value being assigned and is handled separately
    */
-  private matchLetSetParameters(expectedParams: VB6PropertyParameter[], actualArgs: any[]): boolean {
+  private matchLetSetParameters(
+    expectedParams: VB6PropertyParameter[],
+    actualArgs: any[]
+  ): boolean {
     // For Property Let/Set, exclude the value parameter from matching
     const propertyParams = expectedParams.slice(0, -1); // Remove last parameter (the value)
     const actualParamCount = actualArgs.length;
     const expectedParamCount = propertyParams.length;
-    
+
     // If no property parameters expected and none provided, it's a match
     if (expectedParamCount === 0 && actualParamCount === 0) {
       return true;
     }
-    
+
     const requiredParams = propertyParams.filter(p => !p.isOptional);
     const minRequired = requiredParams.length;
     const maxAllowed = expectedParamCount;
-    
+
     // Check minimum required parameters
     if (actualParamCount < minRequired) {
       return false;
@@ -409,17 +421,22 @@ export class VB6PropertySystem {
   /**
    * Set property value with type information
    */
-  private setPropertyValue(instanceId: string, propertyName: string, 
-                          value: any, args: any[] = [], isObject: boolean = false): void {
+  private setPropertyValue(
+    instanceId: string,
+    propertyName: string,
+    value: any,
+    args: any[] = [],
+    isObject: boolean = false
+  ): void {
     const instanceValues = this.propertyValues.get(instanceId)!;
     const key = this.getPropertyKey(propertyName, args);
-    
+
     const propertyValue: VB6PropertyValue = {
       value,
       type: this.getValueType(value),
       isObject,
       lastModified: new Date(),
-      accessCount: 0
+      accessCount: 0,
     };
 
     instanceValues.set(key, propertyValue);
@@ -432,7 +449,7 @@ export class VB6PropertySystem {
     if (args.length === 0) {
       return propertyName;
     }
-    
+
     const argString = args.map(arg => String(arg)).join(',');
     return `${propertyName}[${argString}]`;
   }
@@ -495,7 +512,7 @@ export class VB6PropertySystem {
       instanceId,
       propertyCount: instanceValues.size,
       totalAccesses: 0,
-      properties: [] as any[]
+      properties: [] as any[],
     };
 
     for (const [key, value] of instanceValues) {
@@ -505,7 +522,7 @@ export class VB6PropertySystem {
         type: value.type,
         isObject: value.isObject,
         accessCount: value.accessCount,
-        lastModified: value.lastModified
+        lastModified: value.lastModified,
       });
     }
 
@@ -532,7 +549,7 @@ export function Property(target: any, propertyName: string): PropertyDescriptor 
       }
     },
     enumerable: true,
-    configurable: true
+    configurable: true,
   };
 }
 

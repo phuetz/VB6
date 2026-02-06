@@ -45,12 +45,18 @@ export class VB6EventSystem {
   }
 
   // Register event handler
-  on(controlName: string, eventName: string, handler: (event: VB6Event) => void | boolean, options?: {
-    priority?: number;
-    once?: boolean;
-    id?: string;
-  }): string {
-    const handlerId = options?.id || `handler_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  on(
+    controlName: string,
+    eventName: string,
+    handler: (event: VB6Event) => void | boolean,
+    options?: {
+      priority?: number;
+      once?: boolean;
+      id?: string;
+    }
+  ): string {
+    const handlerId =
+      options?.id || `handler_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const eventHandler: EventHandler = {
       id: handlerId,
       controlName,
@@ -63,22 +69,27 @@ export class VB6EventSystem {
     const key = this.getEventKey(controlName, eventName);
     const handlers = this.handlers.get(key) || [];
     handlers.push(eventHandler);
-    
+
     // Sort by priority (higher priority first)
     handlers.sort((a, b) => (b.priority || 0) - (a.priority || 0));
-    
+
     this.handlers.set(key, handlers);
-    
+
     return handlerId;
   }
 
   // Register global event handler (catches all events of a type)
-  onGlobal(eventName: string, handler: (event: VB6Event) => void | boolean, options?: {
-    priority?: number;
-    once?: boolean;
-    id?: string;
-  }): string {
-    const handlerId = options?.id || `global_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  onGlobal(
+    eventName: string,
+    handler: (event: VB6Event) => void | boolean,
+    options?: {
+      priority?: number;
+      once?: boolean;
+      id?: string;
+    }
+  ): string {
+    const handlerId =
+      options?.id || `global_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const eventHandler: EventHandler = {
       id: handlerId,
       controlName: '*',
@@ -92,7 +103,7 @@ export class VB6EventSystem {
     handlers.push(eventHandler);
     handlers.sort((a, b) => (b.priority || 0) - (a.priority || 0));
     this.globalHandlers.set(eventName, handlers);
-    
+
     return handlerId;
   }
 
@@ -143,11 +154,16 @@ export class VB6EventSystem {
   }
 
   // Fire an event
-  fire(controlName: string, eventName: string, data?: any, options?: {
-    bubbles?: boolean;
-    cancelable?: boolean;
-    async?: boolean;
-  }): boolean {
+  fire(
+    controlName: string,
+    eventName: string,
+    data?: any,
+    options?: {
+      bubbles?: boolean;
+      cancelable?: boolean;
+      async?: boolean;
+    }
+  ): boolean {
     const event: VB6Event = {
       name: eventName,
       sender: controlName,
@@ -185,7 +201,7 @@ export class VB6EventSystem {
           cancelled = true;
           break;
         }
-        
+
         if (handler.once) {
           this.off(handler.id);
         }
@@ -198,7 +214,7 @@ export class VB6EventSystem {
       // Process specific handlers
       const key = this.getEventKey(event.sender, event.name);
       const handlers = this.handlers.get(key) || [];
-      
+
       for (const handler of handlers) {
         try {
           const result = handler.handler(event);
@@ -207,7 +223,7 @@ export class VB6EventSystem {
             cancelled = true;
             break;
           }
-          
+
           if (handler.once) {
             this.off(handler.id);
           }
@@ -265,9 +281,16 @@ export class VB6EventSystem {
   private getDefaultCancelable(eventName: string): boolean {
     // Many VB6 events are cancelable
     const cancelableEvents = [
-      'QueryUnload', 'Unload', 'Validate', 'BeforeUpdate',
-      'BeforeLabelEdit', 'BeforeColEdit', 'OLEDragDrop',
-      'BeforeDelete', 'BeforeInsert', 'BeforeNavigate'
+      'QueryUnload',
+      'Unload',
+      'Validate',
+      'BeforeUpdate',
+      'BeforeLabelEdit',
+      'BeforeColEdit',
+      'OLEDragDrop',
+      'BeforeDelete',
+      'BeforeInsert',
+      'BeforeNavigate',
     ];
     return cancelableEvents.includes(eventName);
   }
@@ -331,18 +354,18 @@ export class VB6EventSystem {
     MouseMove: 'MouseMove',
     MouseEnter: 'MouseEnter',
     MouseLeave: 'MouseLeave',
-    
+
     // Keyboard Events
     KeyDown: 'KeyDown',
     KeyUp: 'KeyUp',
     KeyPress: 'KeyPress',
-    
+
     // Focus Events
     GotFocus: 'GotFocus',
     LostFocus: 'LostFocus',
     Enter: 'Enter',
     Exit: 'Exit',
-    
+
     // Form Events
     Load: 'Load',
     Unload: 'Unload',
@@ -353,14 +376,14 @@ export class VB6EventSystem {
     Terminate: 'Terminate',
     Resize: 'Resize',
     Paint: 'Paint',
-    
+
     // Data Events
     Change: 'Change',
     Validate: 'Validate',
     Updated: 'Updated',
     BeforeUpdate: 'BeforeUpdate',
     AfterUpdate: 'AfterUpdate',
-    
+
     // List/Grid Events
     ItemClick: 'ItemClick',
     ItemCheck: 'ItemCheck',
@@ -369,7 +392,7 @@ export class VB6EventSystem {
     ColumnClick: 'ColumnClick',
     HeadClick: 'HeadClick',
     RowColChange: 'RowColChange',
-    
+
     // Tree Events
     NodeClick: 'NodeClick',
     NodeCheck: 'NodeCheck',
@@ -377,7 +400,7 @@ export class VB6EventSystem {
     Collapse: 'Collapse',
     BeforeLabelEdit: 'BeforeLabelEdit',
     AfterLabelEdit: 'AfterLabelEdit',
-    
+
     // OLE Events
     OLEStartDrag: 'OLEStartDrag',
     OLEDragOver: 'OLEDragOver',
@@ -385,10 +408,10 @@ export class VB6EventSystem {
     OLECompleteDrag: 'OLECompleteDrag',
     OLEGiveFeedback: 'OLEGiveFeedback',
     OLESetData: 'OLESetData',
-    
+
     // Timer Event
     Timer: 'Timer',
-    
+
     // Error Event
     Error: 'Error',
   };
@@ -397,7 +420,7 @@ export class VB6EventSystem {
   createMouseEvent(button: number, shift: number, x: number, y: number): any {
     return {
       button, // 1=Left, 2=Right, 4=Middle
-      shift,  // 1=Shift, 2=Ctrl, 4=Alt
+      shift, // 1=Shift, 2=Ctrl, 4=Alt
       x,
       y,
     };
@@ -426,7 +449,7 @@ export class VB6EventSystem {
   batch(callback: () => void): void {
     const originalAsync = this.eventQueue.length > 0;
     const batchedEvents: VB6Event[] = [];
-    
+
     // Temporarily redirect events to batch
     const originalFire = this.fire.bind(this);
     this.fire = (controlName, eventName, data, options) => {

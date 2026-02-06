@@ -13,42 +13,46 @@ import natural from 'natural';
 const app = express();
 
 // CONFIGURATION VULNERABILITY BUG FIX: Secure CORS configuration
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or Postman)
-    if (!origin) return callback(null, true);
-    
-    // CONFIGURATION VULNERABILITY BUG FIX: Whitelist allowed origins only
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001', 
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:3001',
-      // Add production domains here when deploying
-      // 'https://your-production-domain.com'
-    ];
-    
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      console.warn(`CORS blocked request from unauthorized origin: ${origin}`);
-      return callback(new Error('CORS policy violation: Origin not allowed'), false);
-    }
-  },
-  credentials: true, // Allow cookies/auth headers
-  optionsSuccessStatus: 200 // Support legacy browsers
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or Postman)
+      if (!origin) return callback(null, true);
+
+      // CONFIGURATION VULNERABILITY BUG FIX: Whitelist allowed origins only
+      const allowedOrigins = [
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:3001',
+        // Add production domains here when deploying
+        // 'https://your-production-domain.com'
+      ];
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        console.warn(`CORS blocked request from unauthorized origin: ${origin}`);
+        return callback(new Error('CORS policy violation: Origin not allowed'), false);
+      }
+    },
+    credentials: true, // Allow cookies/auth headers
+    optionsSuccessStatus: 200, // Support legacy browsers
+  })
+);
 
 app.use(express.json());
 
 // AI Models configuration
 const aiModels = {
   // OpenAI for advanced code generation (requires API key)
-  openai: process.env.OPENAI_API_KEY ? new OpenAIApi(
-    new Configuration({
-      apiKey: process.env.OPENAI_API_KEY,
-    })
-  ) : null,
+  openai: process.env.OPENAI_API_KEY
+    ? new OpenAIApi(
+        new Configuration({
+          apiKey: process.env.OPENAI_API_KEY,
+        })
+      )
+    : null,
 
   // TensorFlow.js for pattern recognition
   patternModel: null as tf.LayersModel | null,
@@ -150,23 +154,23 @@ function trainClassifier() {
     { text: 'while loop', label: 'loop' },
     { text: 'add button', label: 'control' },
     { text: 'create button', label: 'control' },
-    { text: 'add textbox', label: 'control' }
+    { text: 'add textbox', label: 'control' },
   ];
-  
+
   // AI/ML MODEL POISONING BUG FIX: Validate each training sample
   const validatedData = trainingData.filter(sample => validateTrainingData(sample));
-  
+
   if (validatedData.length < trainingData.length * 0.8) {
     throw new Error('Training data integrity compromised - too many invalid samples');
   }
-  
+
   // Add validated training data
   validatedData.forEach(sample => {
     aiModels.classifier.addDocument(sample.text, sample.label);
   });
-  
+
   aiModels.classifier.train();
-  
+
   // AI/ML MODEL POISONING BUG FIX: Verify model after training
   if (!validateTrainedModel()) {
     throw new Error('Model validation failed after training - possible poisoning detected');
@@ -181,37 +185,37 @@ async function initializeAI() {
     console.error('Training failed:', error);
     throw error;
   }
-  
+
   // AI/ML MODEL POISONING BUG FIX: Secure model loading with integrity verification
   try {
     const modelPath = './models/vb6-pattern-model';
     const fs = await import('fs');
     const crypto = await import('crypto');
-    
+
     if (fs.existsSync(modelPath)) {
       // AI/ML MODEL POISONING BUG FIX: Verify model file integrity
       const modelFile = `${modelPath}/model.json`;
       const checksumFile = `${modelPath}/model.json.sha256`;
-      
+
       if (fs.existsSync(checksumFile)) {
         const expectedChecksum = fs.readFileSync(checksumFile, 'utf8').trim();
         const modelContent = fs.readFileSync(modelFile);
         const actualChecksum = crypto.createHash('sha256').update(modelContent).digest('hex');
-        
+
         if (expectedChecksum !== actualChecksum) {
           throw new Error('Model file integrity check failed - possible tampering detected');
         }
       } else {
         console.warn('Model checksum file not found - integrity cannot be verified');
       }
-      
+
       aiModels.patternModel = await tf.loadLayersModel(`file://${modelPath}/model.json`);
-      
+
       // AI/ML MODEL POISONING BUG FIX: Validate loaded model structure
       if (!validateModelStructure(aiModels.patternModel)) {
         throw new Error('Loaded model structure validation failed');
       }
-      
+
       console.log('Pattern recognition model loaded and verified');
     }
   } catch (error) {
@@ -226,53 +230,53 @@ async function generateCode(request: string, context: any): Promise<any> {
   if (!validateInputForAdversarialPatterns(request)) {
     throw new Error('Adversarial input pattern detected');
   }
-  
+
   const intent = aiModels.classifier.classify(request);
-  
+
   // AI/ML MODEL POISONING BUG FIX: Validate classification output
   if (!validateClassificationOutput(intent, request)) {
     console.warn('Suspicious classification result, using safe fallback');
     return generateSafeFallback(request, context);
   }
-  
+
   // Use OpenAI if available for complex requests
   if (aiModels.openai && isComplexRequest(request)) {
     try {
       // AI/ML MODEL POISONING BUG FIX: Enhanced prompt injection prevention
       const sanitizedRequest = sanitizeInput(request);
       const sanitizedContext = sanitizeContext(context);
-      
+
       // AI/ML MODEL POISONING BUG FIX: Use structured prompt template to prevent injection
       const prompt = buildSecurePrompt(sanitizedRequest, sanitizedContext);
-      
+
       const completion = await aiModels.openai.createCompletion({
-        model: "text-davinci-003",
+        model: 'text-davinci-003',
         prompt: prompt,
         temperature: 0.3, // AI/ML MODEL POISONING BUG FIX: Lower temperature for more deterministic output
         max_tokens: 500,
         stop: ['END_GENERATION'], // AI/ML MODEL POISONING BUG FIX: Add stop sequence
       });
-      
+
       const generatedCode = completion.data.choices[0].text;
-      
+
       // AI/ML MODEL POISONING BUG FIX: Validate AI-generated output
       if (!validateGeneratedCode(generatedCode)) {
         console.warn('AI generated suspicious code, using pattern-based fallback');
         return generateFromPatterns(request, intent, context);
       }
-      
+
       return {
         code: generatedCode,
         suggestions: [],
         confidence: 0.95,
         source: 'ai_generated',
-        validated: true
+        validated: true,
       };
     } catch (error) {
       console.error('OpenAI API error:', error);
     }
   }
-  
+
   // Fallback to pattern-based generation
   return generateFromPatterns(request, intent, context);
 }
@@ -280,7 +284,7 @@ async function generateCode(request: string, context: any): Promise<any> {
 // Generate code from patterns
 function generateFromPatterns(request: string, intent: string, context: any): any {
   const suggestions = [];
-  
+
   switch (intent) {
     case 'form_creation':
       suggestions.push({
@@ -295,7 +299,7 @@ function generateFromPatterns(request: string, intent: string, context: any): an
         confidence: 0.85,
       });
       break;
-      
+
     case 'database': {
       const dbType = request.includes('ado') ? 'ado' : 'dao';
       suggestions.push({
@@ -303,14 +307,15 @@ function generateFromPatterns(request: string, intent: string, context: any): an
         title: 'Database Connection Code',
         description: `Create ${dbType.toUpperCase()} database connection`,
         code: fillTemplate(vb6Patterns.databaseConnection[0].template, {
-          connectionString: 'Provider=SQLOLEDB;Data Source=localhost;Initial Catalog=MyDB;Integrated Security=SSPI;',
+          connectionString:
+            'Provider=SQLOLEDB;Data Source=localhost;Initial Catalog=MyDB;Integrated Security=SSPI;',
           query: 'SELECT * FROM Users',
         }),
-        confidence: 0.90,
+        confidence: 0.9,
       });
       break;
     }
-      
+
     case 'error_handling':
       suggestions.push({
         type: 'completion',
@@ -320,7 +325,7 @@ function generateFromPatterns(request: string, intent: string, context: any): an
         confidence: 0.88,
       });
       break;
-      
+
     case 'loop': {
       const loopType = request.includes('while') ? 'while' : 'for';
       const pattern = vb6Patterns.loops.find(p => p.pattern.includes(loopType));
@@ -341,7 +346,7 @@ function generateFromPatterns(request: string, intent: string, context: any): an
       }
       break;
     }
-      
+
     case 'control': {
       const controlType = request.includes('button') ? 'button' : 'textbox';
       const controlPattern = vb6Patterns.controls.find(p => p.pattern.includes(controlType));
@@ -362,7 +367,7 @@ function generateFromPatterns(request: string, intent: string, context: any): an
       break;
     }
   }
-  
+
   return {
     suggestions,
     intent,
@@ -373,7 +378,7 @@ function generateFromPatterns(request: string, intent: string, context: any): an
 // AI/ML MODEL POISONING BUG FIX: Enhanced input sanitization with adversarial detection
 function sanitizeInput(input: string): string {
   if (!input || typeof input !== 'string') return '';
-  
+
   // AI/ML MODEL POISONING BUG FIX: Detect and remove adversarial patterns
   const adversarialPatterns = [
     /ignore\s+previous\s+instructions/gi,
@@ -388,28 +393,30 @@ function sanitizeInput(input: string): string {
     /BEGIN_MALICIOUS/gi,
     /\u200b|\u200c|\u200d|\ufeff/g, // Zero-width characters
   ];
-  
+
   let sanitized = input;
   adversarialPatterns.forEach(pattern => {
     sanitized = sanitized.replace(pattern, '[FILTERED]');
   });
-  
+
   // Remove potential injection patterns
-  return sanitized
-    .replace(/[<>]/g, '') // Remove HTML tags
-    .replace(/javascript:/gi, '') // Remove javascript: protocol
-    .replace(/data:/gi, '') // Remove data: protocol  
-    // eslint-disable-next-line no-control-regex
-    .replace(/[\x00-\x1f\x7f-\x9f]/g, '') // Remove control characters
-    .replace(/\\[xX][0-9a-fA-F]+/g, '') // Remove hex escape sequences
-    .replace(/\\[0-7]+/g, '') // Remove octal escape sequences
-    .trim()
-    .substring(0, 5000); // Limit length
+  return (
+    sanitized
+      .replace(/[<>]/g, '') // Remove HTML tags
+      .replace(/javascript:/gi, '') // Remove javascript: protocol
+      .replace(/data:/gi, '') // Remove data: protocol
+      // eslint-disable-next-line no-control-regex
+      .replace(/[\x00-\x1f\x7f-\x9f]/g, '') // Remove control characters
+      .replace(/\\[xX][0-9a-fA-F]+/g, '') // Remove hex escape sequences
+      .replace(/\\[0-7]+/g, '') // Remove octal escape sequences
+      .trim()
+      .substring(0, 5000)
+  ); // Limit length
 }
 
 function sanitizeContext(context: any): any {
   if (!context || typeof context !== 'object') return {};
-  
+
   const sanitized: any = {};
   Object.entries(context).forEach(([key, value]) => {
     // Only allow safe keys
@@ -424,7 +431,7 @@ function sanitizeContext(context: any): any {
       // Ignore other types for security
     }
   });
-  
+
   return sanitized;
 }
 
@@ -456,11 +463,11 @@ function extractName(request: string): string {
   if (!request || typeof request !== 'string' || request.length > 1000) {
     return '';
   }
-  
+
   // Escape special regex characters to prevent regex injection
   const safeRequest = request.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const nameMatch = safeRequest.match(/named?\s+["']?(\w+)["']?/i);
-  
+
   // Validate extracted name - only allow alphanumeric and underscore
   if (nameMatch && nameMatch[1] && /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(nameMatch[1])) {
     return nameMatch[1];
@@ -471,22 +478,22 @@ function extractName(request: string): string {
 // INJECTION ATTACK BUG FIX: Secure template filling with input validation
 function fillTemplate(template: string, values: Record<string, any>): string {
   let filled = template;
-  
+
   Object.entries(values).forEach(([key, value]) => {
     // Validate key to prevent injection
     if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)) {
       console.warn(`Invalid template key: ${key}`);
       return;
     }
-    
+
     // Sanitize value to prevent code injection
     const sanitizedValue = sanitizeTemplateValue(value);
-    
+
     // Use safe replacement - escape special regex characters in key
     const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     filled = filled.replace(new RegExp(`{${escapedKey}}`, 'g'), sanitizedValue);
   });
-  
+
   return filled;
 }
 
@@ -496,16 +503,16 @@ function fillTemplate(template: string, values: Record<string, any>): string {
 app.post('/api/ai/generate', async (req, res) => {
   try {
     const { request, context } = req.body;
-    
+
     // Input validation
     if (!request || typeof request !== 'string') {
       return res.status(400).json({ error: 'Request must be a non-empty string' });
     }
-    
+
     if (request.length > 10000) {
       return res.status(400).json({ error: 'Request too long (max 10000 characters)' });
     }
-    
+
     const result = await generateCode(request, context);
     res.json(result);
   } catch (error) {
@@ -519,20 +526,20 @@ app.post('/api/ai/generate', async (req, res) => {
 app.post('/api/ai/analyze', async (req, res) => {
   try {
     const { code } = req.body;
-    
+
     // Input validation
     if (!code || typeof code !== 'string') {
       return res.status(400).json({ error: 'Code must be a non-empty string' });
     }
-    
+
     if (code.length > 50000) {
       return res.status(400).json({ error: 'Code too long (max 50000 characters)' });
     }
-    
+
     // Analyze code for issues
     const issues = [];
     const lines = code.split('\n');
-    
+
     // Check for common VB6 issues
     lines.forEach((line, index) => {
       // Check for undeclared variables
@@ -544,10 +551,11 @@ app.post('/api/ai/analyze', async (req, res) => {
           suggestion: 'Add Dim statement for the variable',
         });
       }
-      
+
       // Check for missing error handling
       if (line.includes('Open') || line.includes('Execute')) {
-        const hasErrorHandling = lines.slice(Math.max(0, index - 5), index)
+        const hasErrorHandling = lines
+          .slice(Math.max(0, index - 5), index)
           .some(l => l.includes('On Error'));
         if (!hasErrorHandling) {
           issues.push({
@@ -559,7 +567,7 @@ app.post('/api/ai/analyze', async (req, res) => {
         }
       }
     });
-    
+
     res.json({ issues });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -570,10 +578,10 @@ app.post('/api/ai/analyze', async (req, res) => {
 app.post('/api/ai/optimize', async (req, res) => {
   try {
     const { code } = req.body;
-    
+
     const optimizations = [];
     const lines = code.split('\n');
-    
+
     // Look for optimization opportunities
     lines.forEach((line, index) => {
       // String concatenation in loops
@@ -586,7 +594,7 @@ app.post('/api/ai/optimize', async (req, res) => {
           optimizedCode: '// Use StringBuilder instead',
         });
       }
-      
+
       // Repeated object access
       const objectAccess = line.match(/(\w+\.\w+\.\w+)/g);
       if (objectAccess && objectAccess.length > 1) {
@@ -598,7 +606,7 @@ app.post('/api/ai/optimize', async (req, res) => {
         });
       }
     });
-    
+
     res.json({ optimizations });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -609,10 +617,10 @@ app.post('/api/ai/optimize', async (req, res) => {
 app.post('/api/ai/convert', async (req, res) => {
   try {
     const { code, targetLanguage } = req.body;
-    
+
     // Simple conversion logic (extend for real implementation)
     let convertedCode = code;
-    
+
     switch (targetLanguage) {
       case 'csharp':
         convertedCode = convertToCSharp(code);
@@ -624,7 +632,7 @@ app.post('/api/ai/convert', async (req, res) => {
         convertedCode = convertToPython(code);
         break;
     }
-    
+
     res.json({
       convertedCode,
       language: targetLanguage,
@@ -638,39 +646,39 @@ app.post('/api/ai/convert', async (req, res) => {
 // Conversion helpers
 function convertToCSharp(vb6Code: string): string {
   let cs = vb6Code;
-  
+
   // Basic conversions
   cs = cs.replace(/Dim\s+(\w+)\s+As\s+(\w+)/g, '$2 $1;');
   cs = cs.replace(/Private Sub\s+(\w+)\s*\((.*?)\)/g, 'private void $1($2)');
   cs = cs.replace(/End Sub/g, '}');
   cs = cs.replace(/MsgBox/g, 'MessageBox.Show');
   cs = cs.replace(/vbCrLf/g, '\\n');
-  
+
   return cs;
 }
 
 function convertToTypeScript(vb6Code: string): string {
   let ts = vb6Code;
-  
+
   // Basic conversions
   ts = ts.replace(/Dim\s+(\w+)\s+As\s+String/g, 'let $1: string;');
   ts = ts.replace(/Dim\s+(\w+)\s+As\s+Integer/g, 'let $1: number;');
   ts = ts.replace(/Private Sub\s+(\w+)\s*\((.*?)\)/g, 'function $1($2): void {');
   ts = ts.replace(/End Sub/g, '}');
   ts = ts.replace(/MsgBox/g, 'alert');
-  
+
   return ts;
 }
 
 function convertToPython(vb6Code: string): string {
   let py = vb6Code;
-  
+
   // Basic conversions
   py = py.replace(/Dim\s+(\w+)\s+As\s+\w+/g, '$1 = None');
   py = py.replace(/Private Sub\s+(\w+)\s*\((.*?)\)/g, 'def $1($2):');
   py = py.replace(/End Sub/g, '');
   py = py.replace(/MsgBox/g, 'print');
-  
+
   return py;
 }
 
@@ -715,30 +723,28 @@ initializeAI().then(() => {
  */
 function validateTrainingData(sample: { text: string; label: string }): boolean {
   // Check for valid structure
-  if (!sample.text || !sample.label || typeof sample.text !== 'string' || typeof sample.label !== 'string') {
+  if (
+    !sample.text ||
+    !sample.label ||
+    typeof sample.text !== 'string' ||
+    typeof sample.label !== 'string'
+  ) {
     return false;
   }
-  
+
   // Check for reasonable length
   if (sample.text.length > 1000 || sample.label.length > 50) {
     return false;
   }
-  
+
   // Check for valid characters only
   if (!/^[a-zA-Z0-9\s._-]+$/.test(sample.text) || !/^[a-zA-Z_]+$/.test(sample.label)) {
     return false;
   }
-  
+
   // Check against known malicious patterns
-  const maliciousPatterns = [
-    /script/gi,
-    /eval/gi,
-    /exec/gi,
-    /system/gi,
-    /cmd/gi,
-    /shell/gi
-  ];
-  
+  const maliciousPatterns = [/script/gi, /eval/gi, /exec/gi, /system/gi, /cmd/gi, /shell/gi];
+
   return !maliciousPatterns.some(pattern => pattern.test(sample.text));
 }
 
@@ -749,14 +755,16 @@ function validateTrainedModel(): boolean {
   const testSamples = [
     { input: 'create a form', expected: 'form_creation' },
     { input: 'database connection', expected: 'database' },
-    { input: 'error handling', expected: 'error_handling' }
+    { input: 'error handling', expected: 'error_handling' },
   ];
-  
+
   try {
     for (const sample of testSamples) {
       const result = aiModels.classifier.classify(sample.input);
       if (result !== sample.expected) {
-        console.warn(`Model validation failed: ${sample.input} -> ${result} (expected ${sample.expected})`);
+        console.warn(
+          `Model validation failed: ${sample.input} -> ${result} (expected ${sample.expected})`
+        );
         return false;
       }
     }
@@ -772,20 +780,20 @@ function validateTrainedModel(): boolean {
  */
 function validateModelStructure(model: tf.LayersModel | null): boolean {
   if (!model) return false;
-  
+
   try {
     // Check model has expected structure
     const inputShape = model.inputs[0].shape;
     const outputShape = model.outputs[0].shape;
-    
+
     // Validate input/output dimensions are reasonable
     if (!inputShape || !outputShape) return false;
     if (inputShape.length < 2 || outputShape.length < 2) return false;
-    
+
     // Check model summary doesn't contain suspicious layers
     const modelConfig = model.toJSON();
     const suspiciousLayerTypes = ['Lambda', 'Activation']; // Could be used for backdoors
-    
+
     return !JSON.stringify(modelConfig).includes('malicious');
   } catch (error) {
     console.error('Model structure validation error:', error);
@@ -812,7 +820,7 @@ function validateInputForAdversarialPatterns(input: string): boolean {
     /\\u[0-9a-f]{4}/gi, // Unicode encoding
     /\u200b|\u200c|\u200d/g, // Zero-width characters
   ];
-  
+
   return !adversarialPatterns.some(pattern => pattern.test(input));
 }
 
@@ -825,19 +833,19 @@ function validateClassificationOutput(intent: string, originalInput: string): bo
   if (!validIntents.includes(intent)) {
     return false;
   }
-  
+
   // Basic sanity check - intent should somewhat match input
   const intentKeywords = {
     form_creation: ['form', 'create', 'make'],
     database: ['database', 'connection', 'ado', 'dao'],
     error_handling: ['error', 'handle', 'exception'],
     loop: ['loop', 'for', 'while', 'do'],
-    control: ['button', 'textbox', 'control', 'add']
+    control: ['button', 'textbox', 'control', 'add'],
   };
-  
+
   const keywords = intentKeywords[intent as keyof typeof intentKeywords] || [];
   const inputLower = originalInput.toLowerCase();
-  
+
   return keywords.some(keyword => inputLower.includes(keyword));
 }
 
@@ -846,16 +854,18 @@ function validateClassificationOutput(intent: string, originalInput: string): bo
  */
 function generateSafeFallback(request: string, context: any): any {
   return {
-    suggestions: [{
-      type: 'completion',
-      title: 'Safe Code Template',
-      description: 'Basic VB6 code structure',
-      code: `' Safe code template\nPrivate Sub Procedure()\n    ' Add your code here\nEnd Sub`,
-      confidence: 0.5
-    }],
+    suggestions: [
+      {
+        type: 'completion',
+        title: 'Safe Code Template',
+        description: 'Basic VB6 code structure',
+        code: `' Safe code template\nPrivate Sub Procedure()\n    ' Add your code here\nEnd Sub`,
+        confidence: 0.5,
+      },
+    ],
     intent: 'unknown',
     confidence: 0.5,
-    source: 'safe_fallback'
+    source: 'safe_fallback',
   };
 }
 
@@ -880,7 +890,7 @@ END_GENERATION`;
  */
 function validateGeneratedCode(code: string): boolean {
   if (!code || typeof code !== 'string') return false;
-  
+
   // Check for malicious patterns in generated code
   const maliciousPatterns = [
     /eval\s*\(/gi,
@@ -892,18 +902,18 @@ function validateGeneratedCode(code: string): boolean {
     /javascript:/gi,
     /on\w+\s*=/gi, // HTML event handlers
     /\\x[0-9a-f]/gi, // Hex escape sequences
-    /\\u[0-9a-f]/gi // Unicode escape sequences
+    /\\u[0-9a-f]/gi, // Unicode escape sequences
   ];
-  
+
   if (maliciousPatterns.some(pattern => pattern.test(code))) {
     return false;
   }
-  
+
   // Check for reasonable VB6 code structure
   const vb6Patterns = [
-    /\b(Sub|Function|Private|Public|Dim|End|If|Then|For|Next|While|Wend|Do|Loop)\b/i
+    /\b(Sub|Function|Private|Public|Dim|End|If|Then|For|Next|While|Wend|Do|Loop)\b/i,
   ];
-  
+
   // Should contain at least some VB6 keywords
   return vb6Patterns.some(pattern => pattern.test(code));
 }

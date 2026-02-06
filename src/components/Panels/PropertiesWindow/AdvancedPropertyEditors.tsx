@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
+import {
   Calendar,
   Clock,
   Database,
@@ -20,7 +20,7 @@ import {
   Check,
   Plus,
   Minus,
-  Edit3
+  Edit3,
 } from 'lucide-react';
 
 // Menu Editor for VB6 forms
@@ -41,7 +41,7 @@ export const MenuEditor: React.FC<{
       visible: true,
       checked: false,
       shortcut: '',
-      level: 0
+      level: 0,
     };
     setMenuItems([...menuItems, newItem]);
   };
@@ -89,7 +89,10 @@ export const MenuEditor: React.FC<{
           <div className="bg-gray-200 border border-gray-400 shadow-lg w-[600px] h-[400px]">
             <div className="bg-blue-600 text-white px-2 py-1 flex justify-between items-center text-sm">
               <span>Menu Editor</span>
-              <button onClick={() => setShowDialog(false)} className="text-white hover:bg-blue-700 px-1">
+              <button
+                onClick={() => setShowDialog(false)}
+                className="text-white hover:bg-blue-700 px-1"
+              >
                 <X size={14} />
               </button>
             </div>
@@ -117,22 +120,22 @@ export const MenuEditor: React.FC<{
                   <button onClick={addMenuItem} className="vb6-button text-xs">
                     <Plus size={12} /> Add
                   </button>
-                  <button 
-                    onClick={() => selectedItem !== null && removeMenuItem(selectedItem)} 
+                  <button
+                    onClick={() => selectedItem !== null && removeMenuItem(selectedItem)}
                     className="vb6-button text-xs"
                     disabled={selectedItem === null}
                   >
                     <Minus size={12} /> Remove
                   </button>
-                  <button 
-                    onClick={() => selectedItem !== null && moveItemUp(selectedItem)} 
+                  <button
+                    onClick={() => selectedItem !== null && moveItemUp(selectedItem)}
                     className="vb6-button text-xs"
                     disabled={selectedItem === null || selectedItem === 0}
                   >
                     ↑
                   </button>
-                  <button 
-                    onClick={() => selectedItem !== null && moveItemDown(selectedItem)} 
+                  <button
+                    onClick={() => selectedItem !== null && moveItemDown(selectedItem)}
                     className="vb6-button text-xs"
                     disabled={selectedItem === null || selectedItem === menuItems.length - 1}
                   >
@@ -151,7 +154,7 @@ export const MenuEditor: React.FC<{
                       <input
                         type="text"
                         value={menuItems[selectedItem]?.caption || ''}
-                        onChange={(e) => {
+                        onChange={e => {
                           const newItems = [...menuItems];
                           newItems[selectedItem].caption = e.target.value;
                           setMenuItems(newItems);
@@ -164,7 +167,7 @@ export const MenuEditor: React.FC<{
                       <input
                         type="text"
                         value={menuItems[selectedItem]?.name || ''}
-                        onChange={(e) => {
+                        onChange={e => {
                           const newItems = [...menuItems];
                           newItems[selectedItem].name = e.target.value;
                           setMenuItems(newItems);
@@ -177,7 +180,7 @@ export const MenuEditor: React.FC<{
                         <input
                           type="checkbox"
                           checked={menuItems[selectedItem]?.enabled || false}
-                          onChange={(e) => {
+                          onChange={e => {
                             const newItems = [...menuItems];
                             newItems[selectedItem].enabled = e.target.checked;
                             setMenuItems(newItems);
@@ -192,7 +195,7 @@ export const MenuEditor: React.FC<{
                         <input
                           type="checkbox"
                           checked={menuItems[selectedItem]?.visible || false}
-                          onChange={(e) => {
+                          onChange={e => {
                             const newItems = [...menuItems];
                             newItems[selectedItem].visible = e.target.checked;
                             setMenuItems(newItems);
@@ -207,7 +210,7 @@ export const MenuEditor: React.FC<{
                         <input
                           type="checkbox"
                           checked={menuItems[selectedItem]?.checked || false}
-                          onChange={(e) => {
+                          onChange={e => {
                             const newItems = [...menuItems];
                             newItems[selectedItem].checked = e.target.checked;
                             setMenuItems(newItems);
@@ -223,8 +226,12 @@ export const MenuEditor: React.FC<{
             </div>
 
             <div className="border-t p-2 flex justify-end gap-2">
-              <button onClick={handleSave} className="vb6-button">OK</button>
-              <button onClick={() => setShowDialog(false)} className="vb6-button">Cancel</button>
+              <button onClick={handleSave} className="vb6-button">
+                OK
+              </button>
+              <button onClick={() => setShowDialog(false)} className="vb6-button">
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -271,8 +278,8 @@ export const TabOrderEditor: React.FC<{
           ...updatedControls[controlIndex],
           properties: {
             ...updatedControls[controlIndex].properties,
-            TabIndex: index
-          }
+            TabIndex: index,
+          },
         };
       }
     });
@@ -298,7 +305,10 @@ export const TabOrderEditor: React.FC<{
           <div className="bg-gray-200 border border-gray-400 shadow-lg w-80">
             <div className="bg-blue-600 text-white px-2 py-1 flex justify-between items-center text-sm">
               <span>Tab Order</span>
-              <button onClick={() => setShowDialog(false)} className="text-white hover:bg-blue-700 px-1">
+              <button
+                onClick={() => setShowDialog(false)}
+                className="text-white hover:bg-blue-700 px-1"
+              >
                 <X size={14} />
               </button>
             </div>
@@ -332,8 +342,12 @@ export const TabOrderEditor: React.FC<{
             </div>
 
             <div className="border-t p-2 flex justify-end gap-2">
-              <button onClick={handleSave} className="vb6-button">OK</button>
-              <button onClick={() => setShowDialog(false)} className="vb6-button">Cancel</button>
+              <button onClick={handleSave} className="vb6-button">
+                OK
+              </button>
+              <button onClick={() => setShowDialog(false)} className="vb6-button">
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -358,7 +372,7 @@ export const DataSourceEditor: React.FC<{
     'Microsoft.ACE.OLEDB.12.0',
     'MSDASQL.1',
     'MySQLProv',
-    'OraOLEDB.Oracle'
+    'OraOLEDB.Oracle',
   ];
 
   const handleSave = () => {
@@ -384,7 +398,10 @@ export const DataSourceEditor: React.FC<{
           <div className="bg-gray-200 border border-gray-400 shadow-lg w-96">
             <div className="bg-blue-600 text-white px-2 py-1 flex justify-between items-center text-sm">
               <span>Data Link Properties</span>
-              <button onClick={() => setShowDialog(false)} className="text-white hover:bg-blue-700 px-1">
+              <button
+                onClick={() => setShowDialog(false)}
+                className="text-white hover:bg-blue-700 px-1"
+              >
                 <X size={14} />
               </button>
             </div>
@@ -394,11 +411,13 @@ export const DataSourceEditor: React.FC<{
                 <label className="text-xs font-bold">Provider:</label>
                 <select
                   value={selectedProvider}
-                  onChange={(e) => setSelectedProvider(e.target.value)}
+                  onChange={e => setSelectedProvider(e.target.value)}
                   className="w-full mt-1 text-xs border border-gray-400 p-1"
                 >
                   {providers.map(provider => (
-                    <option key={provider} value={provider}>{provider}</option>
+                    <option key={provider} value={provider}>
+                      {provider}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -407,7 +426,7 @@ export const DataSourceEditor: React.FC<{
                 <label className="text-xs font-bold">Connection String:</label>
                 <textarea
                   value={connectionString}
-                  onChange={(e) => setConnectionString(e.target.value)}
+                  onChange={e => setConnectionString(e.target.value)}
                   className="w-full mt-1 text-xs border border-gray-400 p-1 h-20"
                   placeholder="Provider=Microsoft.Jet.OLEDB.4.0;Data Source=..."
                 />
@@ -425,8 +444,12 @@ export const DataSourceEditor: React.FC<{
             </div>
 
             <div className="border-t p-2 flex justify-end gap-2">
-              <button onClick={handleSave} className="vb6-button">OK</button>
-              <button onClick={() => setShowDialog(false)} className="vb6-button">Cancel</button>
+              <button onClick={handleSave} className="vb6-button">
+                OK
+              </button>
+              <button onClick={() => setShowDialog(false)} className="vb6-button">
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -446,27 +469,30 @@ export const IconEditor: React.FC<{
   const [selectedIcon, setSelectedIcon] = useState(value);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const systemIcons = type === 'icon' ? [
-    { name: 'Application', value: 'app.ico' },
-    { name: 'Question', value: 'question.ico' },
-    { name: 'Exclamation', value: 'exclamation.ico' },
-    { name: 'Information', value: 'information.ico' },
-    { name: 'Stop', value: 'stop.ico' }
-  ] : [
-    { name: 'Default', value: 'default.cur' },
-    { name: 'Arrow', value: 'arrow.cur' },
-    { name: 'Cross', value: 'cross.cur' },
-    { name: 'I-Beam', value: 'ibeam.cur' },
-    { name: 'Hand', value: 'hand.cur' },
-    { name: 'SizeAll', value: 'sizeall.cur' },
-    { name: 'Wait', value: 'wait.cur' }
-  ];
+  const systemIcons =
+    type === 'icon'
+      ? [
+          { name: 'Application', value: 'app.ico' },
+          { name: 'Question', value: 'question.ico' },
+          { name: 'Exclamation', value: 'exclamation.ico' },
+          { name: 'Information', value: 'information.ico' },
+          { name: 'Stop', value: 'stop.ico' },
+        ]
+      : [
+          { name: 'Default', value: 'default.cur' },
+          { name: 'Arrow', value: 'arrow.cur' },
+          { name: 'Cross', value: 'cross.cur' },
+          { name: 'I-Beam', value: 'ibeam.cur' },
+          { name: 'Hand', value: 'hand.cur' },
+          { name: 'SizeAll', value: 'sizeall.cur' },
+          { name: 'Wait', value: 'wait.cur' },
+        ];
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         const result = e.target?.result as string;
         setSelectedIcon(result);
       };
@@ -505,14 +531,19 @@ export const IconEditor: React.FC<{
           <div className="bg-gray-200 border border-gray-400 shadow-lg w-80">
             <div className="bg-blue-600 text-white px-2 py-1 flex justify-between items-center text-sm">
               <span>Load {type === 'icon' ? 'Icon' : 'Cursor'}</span>
-              <button onClick={() => setShowDialog(false)} className="text-white hover:bg-blue-700 px-1">
+              <button
+                onClick={() => setShowDialog(false)}
+                className="text-white hover:bg-blue-700 px-1"
+              >
                 <X size={14} />
               </button>
             </div>
 
             <div className="p-3">
               <div className="mb-3">
-                <div className="text-xs font-bold mb-2">System {type === 'icon' ? 'Icons' : 'Cursors'}:</div>
+                <div className="text-xs font-bold mb-2">
+                  System {type === 'icon' ? 'Icons' : 'Cursors'}:
+                </div>
                 <div className="border border-gray-400 bg-white h-32 overflow-y-auto">
                   {systemIcons.map(item => (
                     <div
@@ -529,27 +560,25 @@ export const IconEditor: React.FC<{
               </div>
 
               <div className="mb-3">
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="vb6-button w-full"
-                >
+                <button onClick={() => fileInputRef.current?.click()} className="vb6-button w-full">
                   Browse for Custom {type === 'icon' ? 'Icon' : 'Cursor'}...
                 </button>
               </div>
 
               <div className="mb-3">
-                <button
-                  onClick={() => setSelectedIcon('')}
-                  className="vb6-button w-full"
-                >
+                <button onClick={() => setSelectedIcon('')} className="vb6-button w-full">
                   Clear
                 </button>
               </div>
             </div>
 
             <div className="border-t p-2 flex justify-end gap-2">
-              <button onClick={handleSave} className="vb6-button">OK</button>
-              <button onClick={() => setShowDialog(false)} className="vb6-button">Cancel</button>
+              <button onClick={handleSave} className="vb6-button">
+                OK
+              </button>
+              <button onClick={() => setShowDialog(false)} className="vb6-button">
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -591,7 +620,10 @@ export const CodeEditor: React.FC<{
           <div className="bg-gray-200 border border-gray-400 shadow-lg w-[600px] h-[400px]">
             <div className="bg-blue-600 text-white px-2 py-1 flex justify-between items-center text-sm">
               <span>Code Editor</span>
-              <button onClick={() => setShowDialog(false)} className="text-white hover:bg-blue-700 px-1">
+              <button
+                onClick={() => setShowDialog(false)}
+                className="text-white hover:bg-blue-700 px-1"
+              >
                 <X size={14} />
               </button>
             </div>
@@ -599,15 +631,19 @@ export const CodeEditor: React.FC<{
             <div className="p-3 h-full flex flex-col">
               <textarea
                 value={code}
-                onChange={(e) => setCode(e.target.value)}
+                onChange={e => setCode(e.target.value)}
                 className="flex-1 w-full text-xs font-mono border border-gray-400 p-2 resize-none"
                 placeholder="Enter your code here..."
               />
             </div>
 
             <div className="border-t p-2 flex justify-end gap-2">
-              <button onClick={handleSave} className="vb6-button">OK</button>
-              <button onClick={() => setShowDialog(false)} className="vb6-button">Cancel</button>
+              <button onClick={handleSave} className="vb6-button">
+                OK
+              </button>
+              <button onClick={() => setShowDialog(false)} className="vb6-button">
+                Cancel
+              </button>
             </div>
           </div>
         </div>

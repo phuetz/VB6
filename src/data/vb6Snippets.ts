@@ -23,8 +23,8 @@ export const vb6Snippets: VB6Snippet[] = [
     body: 'Dim ${1:variableName} As ${2:String}',
     placeholders: [
       { id: '1', label: 'Variable Name', defaultValue: 'variableName' },
-      { id: '2', label: 'Data Type', defaultValue: 'String' }
-    ]
+      { id: '2', label: 'Data Type', defaultValue: 'String' },
+    ],
   },
   {
     id: 'const',
@@ -36,8 +36,8 @@ export const vb6Snippets: VB6Snippet[] = [
     placeholders: [
       { id: '1', label: 'Constant Name', defaultValue: 'CONSTANT_NAME' },
       { id: '2', label: 'Data Type', defaultValue: 'String' },
-      { id: '3', label: 'Value', defaultValue: 'value' }
-    ]
+      { id: '3', label: 'Value', defaultValue: 'value' },
+    ],
   },
   {
     id: 'global',
@@ -48,8 +48,8 @@ export const vb6Snippets: VB6Snippet[] = [
     body: 'Global ${1:variableName} As ${2:String}',
     placeholders: [
       { id: '1', label: 'Variable Name', defaultValue: 'variableName' },
-      { id: '2', label: 'Data Type', defaultValue: 'String' }
-    ]
+      { id: '2', label: 'Data Type', defaultValue: 'String' },
+    ],
   },
   {
     id: 'public',
@@ -60,8 +60,8 @@ export const vb6Snippets: VB6Snippet[] = [
     body: 'Public ${1:variableName} As ${2:String}',
     placeholders: [
       { id: '1', label: 'Variable Name', defaultValue: 'variableName' },
-      { id: '2', label: 'Data Type', defaultValue: 'String' }
-    ]
+      { id: '2', label: 'Data Type', defaultValue: 'String' },
+    ],
   },
   {
     id: 'enum',
@@ -74,8 +74,8 @@ export const vb6Snippets: VB6Snippet[] = [
       { id: '1', label: 'Enum Name', defaultValue: 'EnumName' },
       { id: '2', label: 'First Value', defaultValue: 'FirstValue' },
       { id: '3', label: 'Second Value', defaultValue: 'SecondValue' },
-      { id: '4', label: 'Third Value', defaultValue: 'ThirdValue' }
-    ]
+      { id: '4', label: 'Third Value', defaultValue: 'ThirdValue' },
+    ],
   },
   {
     id: 'type',
@@ -89,8 +89,8 @@ export const vb6Snippets: VB6Snippet[] = [
       { id: '2', label: 'Field 1 Name', defaultValue: 'Field1' },
       { id: '3', label: 'Field 1 Type', defaultValue: 'String' },
       { id: '4', label: 'Field 2 Name', defaultValue: 'Field2' },
-      { id: '5', label: 'Field 2 Type', defaultValue: 'Integer' }
-    ]
+      { id: '5', label: 'Field 2 Type', defaultValue: 'Integer' },
+    ],
   },
 
   // Functions
@@ -104,8 +104,8 @@ export const vb6Snippets: VB6Snippet[] = [
     placeholders: [
       { id: '1', label: 'Procedure Name', defaultValue: 'ProcedureName' },
       { id: '2', label: 'Parameters', defaultValue: '' },
-      { id: '3', label: 'Code', defaultValue: "'Code here" }
-    ]
+      { id: '3', label: 'Code', defaultValue: "'Code here" },
+    ],
   },
   {
     id: 'func',
@@ -119,8 +119,8 @@ export const vb6Snippets: VB6Snippet[] = [
       { id: '2', label: 'Parameters', defaultValue: '' },
       { id: '3', label: 'Return Type', defaultValue: 'String' },
       { id: '4', label: 'Code', defaultValue: "'Code here" },
-      { id: '5', label: 'Return Value', defaultValue: 'result' }
-    ]
+      { id: '5', label: 'Return Value', defaultValue: 'result' },
+    ],
   },
   {
     id: 'prop',
@@ -132,8 +132,8 @@ export const vb6Snippets: VB6Snippet[] = [
     placeholders: [
       { id: '1', label: 'Property Name', defaultValue: 'PropertyName' },
       { id: '2', label: 'Return Type', defaultValue: 'String' },
-      { id: '3', label: 'Member Variable', defaultValue: 'm_PropertyName' }
-    ]
+      { id: '3', label: 'Member Variable', defaultValue: 'm_PropertyName' },
+    ],
   },
   {
     id: 'proplet',
@@ -146,8 +146,8 @@ export const vb6Snippets: VB6Snippet[] = [
       { id: '1', label: 'Property Name', defaultValue: 'PropertyName' },
       { id: '2', label: 'Parameter Name', defaultValue: 'value' },
       { id: '3', label: 'Parameter Type', defaultValue: 'String' },
-      { id: '4', label: 'Member Variable', defaultValue: 'm_PropertyName' }
-    ]
+      { id: '4', label: 'Member Variable', defaultValue: 'm_PropertyName' },
+    ],
   },
   {
     id: 'propset',
@@ -160,8 +160,8 @@ export const vb6Snippets: VB6Snippet[] = [
       { id: '1', label: 'Property Name', defaultValue: 'PropertyName' },
       { id: '2', label: 'Parameter Name', defaultValue: 'value' },
       { id: '3', label: 'Parameter Type', defaultValue: 'Object' },
-      { id: '4', label: 'Member Variable', defaultValue: 'm_PropertyName' }
-    ]
+      { id: '4', label: 'Member Variable', defaultValue: 'm_PropertyName' },
+    ],
   },
 
   // Conditions
@@ -174,8 +174,8 @@ export const vb6Snippets: VB6Snippet[] = [
     body: 'If ${1:condition} Then\\n    ${2:Code here}\\nEnd If',
     placeholders: [
       { id: '1', label: 'Condition', defaultValue: 'condition' },
-      { id: '2', label: 'Code', defaultValue: "'Code here" }
-    ]
+      { id: '2', label: 'Code', defaultValue: "'Code here" },
+    ],
   },
   {
     id: 'ifelse',
@@ -187,8 +187,8 @@ export const vb6Snippets: VB6Snippet[] = [
     placeholders: [
       { id: '1', label: 'Condition', defaultValue: 'condition' },
       { id: '2', label: 'True Code', defaultValue: "'True code" },
-      { id: '3', label: 'False Code', defaultValue: "'False code" }
-    ]
+      { id: '3', label: 'False Code', defaultValue: "'False code" },
+    ],
   },
   {
     id: 'ifelseif',
@@ -202,8 +202,8 @@ export const vb6Snippets: VB6Snippet[] = [
       { id: '2', label: 'First Code', defaultValue: "'Code 1" },
       { id: '3', label: 'Second Condition', defaultValue: 'condition2' },
       { id: '4', label: 'Second Code', defaultValue: "'Code 2" },
-      { id: '5', label: 'Default Code', defaultValue: "'Default code" }
-    ]
+      { id: '5', label: 'Default Code', defaultValue: "'Default code" },
+    ],
   },
   {
     id: 'select',
@@ -218,8 +218,8 @@ export const vb6Snippets: VB6Snippet[] = [
       { id: '3', label: 'Code 1', defaultValue: "'Code 1" },
       { id: '4', label: 'Value 2', defaultValue: 'value2' },
       { id: '5', label: 'Code 2', defaultValue: "'Code 2" },
-      { id: '6', label: 'Default Code', defaultValue: "'Default code" }
-    ]
+      { id: '6', label: 'Default Code', defaultValue: "'Default code" },
+    ],
   },
 
   // Loops
@@ -234,8 +234,8 @@ export const vb6Snippets: VB6Snippet[] = [
       { id: '1', label: 'Counter Variable', defaultValue: 'i' },
       { id: '2', label: 'Start Value', defaultValue: '1' },
       { id: '3', label: 'End Value', defaultValue: '10' },
-      { id: '4', label: 'Code', defaultValue: "'Code here" }
-    ]
+      { id: '4', label: 'Code', defaultValue: "'Code here" },
+    ],
   },
   {
     id: 'forstep',
@@ -249,8 +249,8 @@ export const vb6Snippets: VB6Snippet[] = [
       { id: '2', label: 'Start Value', defaultValue: '1' },
       { id: '3', label: 'End Value', defaultValue: '10' },
       { id: '4', label: 'Step Value', defaultValue: '2' },
-      { id: '5', label: 'Code', defaultValue: "'Code here" }
-    ]
+      { id: '5', label: 'Code', defaultValue: "'Code here" },
+    ],
   },
   {
     id: 'foreach',
@@ -262,8 +262,8 @@ export const vb6Snippets: VB6Snippet[] = [
     placeholders: [
       { id: '1', label: 'Item Variable', defaultValue: 'item' },
       { id: '2', label: 'Collection', defaultValue: 'collection' },
-      { id: '3', label: 'Code', defaultValue: "'Code here" }
-    ]
+      { id: '3', label: 'Code', defaultValue: "'Code here" },
+    ],
   },
   {
     id: 'while',
@@ -274,8 +274,8 @@ export const vb6Snippets: VB6Snippet[] = [
     body: 'While ${1:condition}\\n    ${2:Code here}\\nWend',
     placeholders: [
       { id: '1', label: 'Condition', defaultValue: 'condition' },
-      { id: '2', label: 'Code', defaultValue: "'Code here" }
-    ]
+      { id: '2', label: 'Code', defaultValue: "'Code here" },
+    ],
   },
   {
     id: 'dowhile',
@@ -286,8 +286,8 @@ export const vb6Snippets: VB6Snippet[] = [
     body: 'Do While ${1:condition}\\n    ${2:Code here}\\nLoop',
     placeholders: [
       { id: '1', label: 'Condition', defaultValue: 'condition' },
-      { id: '2', label: 'Code', defaultValue: "'Code here" }
-    ]
+      { id: '2', label: 'Code', defaultValue: "'Code here" },
+    ],
   },
   {
     id: 'dountil',
@@ -298,8 +298,8 @@ export const vb6Snippets: VB6Snippet[] = [
     body: 'Do Until ${1:condition}\\n    ${2:Code here}\\nLoop',
     placeholders: [
       { id: '1', label: 'Condition', defaultValue: 'condition' },
-      { id: '2', label: 'Code', defaultValue: "'Code here" }
-    ]
+      { id: '2', label: 'Code', defaultValue: "'Code here" },
+    ],
   },
 
   // Error Handling
@@ -312,8 +312,8 @@ export const vb6Snippets: VB6Snippet[] = [
     body: 'On Error GoTo ErrorHandler\\n\\n${1:Main code here}\\n\\nExit Sub\\n\\nErrorHandler:\\n    ${2:Error handling code}',
     placeholders: [
       { id: '1', label: 'Main Code', defaultValue: "'Main code here" },
-      { id: '2', label: 'Error Handling Code', defaultValue: "'Error handling code" }
-    ]
+      { id: '2', label: 'Error Handling Code', defaultValue: "'Error handling code" },
+    ],
   },
   {
     id: 'onerrorresume',
@@ -324,8 +324,8 @@ export const vb6Snippets: VB6Snippet[] = [
     body: 'On Error Resume Next\\n${1:Code here}\\nIf Err.Number <> 0 Then\\n    ${2:Handle error}\\nEnd If',
     placeholders: [
       { id: '1', label: 'Code', defaultValue: "'Code here" },
-      { id: '2', label: 'Error Handling', defaultValue: "'Handle error" }
-    ]
+      { id: '2', label: 'Error Handling', defaultValue: "'Handle error" },
+    ],
   },
   {
     id: 'errorhandler',
@@ -337,8 +337,8 @@ export const vb6Snippets: VB6Snippet[] = [
     placeholders: [
       { id: '1', label: 'Error Number', defaultValue: 'errorNumber' },
       { id: '2', label: 'Specific Error Code', defaultValue: "'Handle specific error" },
-      { id: '3', label: 'General Error Code', defaultValue: "'Handle general error" }
-    ]
+      { id: '3', label: 'General Error Code', defaultValue: "'Handle general error" },
+    ],
   },
 
   // Control Events
@@ -349,9 +349,7 @@ export const vb6Snippets: VB6Snippet[] = [
     description: 'Form Load event handler',
     category: 'control',
     body: 'Private Sub Form_Load()\\n    ${1:Initialization code}\\nEnd Sub',
-    placeholders: [
-      { id: '1', label: 'Initialization Code', defaultValue: "'Initialization code" }
-    ]
+    placeholders: [{ id: '1', label: 'Initialization Code', defaultValue: "'Initialization code" }],
   },
   {
     id: 'click',
@@ -362,8 +360,8 @@ export const vb6Snippets: VB6Snippet[] = [
     body: 'Private Sub ${1:Command1}_Click()\\n    ${2:Click code}\\nEnd Sub',
     placeholders: [
       { id: '1', label: 'Control Name', defaultValue: 'Command1' },
-      { id: '2', label: 'Click Code', defaultValue: "'Click code" }
-    ]
+      { id: '2', label: 'Click Code', defaultValue: "'Click code" },
+    ],
   },
   {
     id: 'change',
@@ -374,8 +372,8 @@ export const vb6Snippets: VB6Snippet[] = [
     body: 'Private Sub ${1:Text1}_Change()\\n    ${2:Change code}\\nEnd Sub',
     placeholders: [
       { id: '1', label: 'Control Name', defaultValue: 'Text1' },
-      { id: '2', label: 'Change Code', defaultValue: "'Change code" }
-    ]
+      { id: '2', label: 'Change Code', defaultValue: "'Change code" },
+    ],
   },
   {
     id: 'listclick',
@@ -386,8 +384,8 @@ export const vb6Snippets: VB6Snippet[] = [
     body: 'Private Sub ${1:List1}_Click()\\n    If ${1:List1}.ListIndex >= 0 Then\\n        ${2:Handle selection}\\n    End If\\nEnd Sub',
     placeholders: [
       { id: '1', label: 'List Control Name', defaultValue: 'List1' },
-      { id: '2', label: 'Selection Code', defaultValue: "'Handle selection" }
-    ]
+      { id: '2', label: 'Selection Code', defaultValue: "'Handle selection" },
+    ],
   },
 
   // File Operations
@@ -400,8 +398,8 @@ export const vb6Snippets: VB6Snippet[] = [
     body: 'Dim fileNum As Integer\\nDim fileContent As String\\nfileNum = FreeFile\\nOpen "${1:filename.txt}" For Input As #fileNum\\n${2:Read file content}\\nClose #fileNum',
     placeholders: [
       { id: '1', label: 'Filename', defaultValue: 'filename.txt' },
-      { id: '2', label: 'File Processing Code', defaultValue: "'Read file content" }
-    ]
+      { id: '2', label: 'File Processing Code', defaultValue: "'Read file content" },
+    ],
   },
   {
     id: 'filewrite',
@@ -412,8 +410,8 @@ export const vb6Snippets: VB6Snippet[] = [
     body: 'Dim fileNum As Integer\\nfileNum = FreeFile\\nOpen "${1:filename.txt}" For Output As #fileNum\\nPrint #fileNum, "${2:content}"\\nClose #fileNum',
     placeholders: [
       { id: '1', label: 'Filename', defaultValue: 'filename.txt' },
-      { id: '2', label: 'Content', defaultValue: 'content' }
-    ]
+      { id: '2', label: 'Content', defaultValue: 'content' },
+    ],
   },
   {
     id: 'fileappend',
@@ -424,8 +422,8 @@ export const vb6Snippets: VB6Snippet[] = [
     body: 'Dim fileNum As Integer\\nfileNum = FreeFile\\nOpen "${1:filename.txt}" For Append As #fileNum\\nPrint #fileNum, "${2:content}"\\nClose #fileNum',
     placeholders: [
       { id: '1', label: 'Filename', defaultValue: 'filename.txt' },
-      { id: '2', label: 'Content', defaultValue: 'content' }
-    ]
+      { id: '2', label: 'Content', defaultValue: 'content' },
+    ],
   },
 
   // Database Operations
@@ -438,8 +436,8 @@ export const vb6Snippets: VB6Snippet[] = [
     body: 'Dim conn As ADODB.Connection\\nSet conn = New ADODB.Connection\\nconn.ConnectionString = "${1:connection_string}"\\nconn.Open\\n${2:Database operations}\\nconn.Close\\nSet conn = Nothing',
     placeholders: [
       { id: '1', label: 'Connection String', defaultValue: 'connection_string' },
-      { id: '2', label: 'Database Operations', defaultValue: "'Database operations" }
-    ]
+      { id: '2', label: 'Database Operations', defaultValue: "'Database operations" },
+    ],
   },
   {
     id: 'adorecordset',
@@ -450,8 +448,8 @@ export const vb6Snippets: VB6Snippet[] = [
     body: 'Dim rs As ADODB.Recordset\\nSet rs = New ADODB.Recordset\\nrs.Open "${1:SELECT * FROM table}", conn, adOpenStatic, adLockReadOnly\\nDo While Not rs.EOF\\n    ${2:Process record}\\n    rs.MoveNext\\nLoop\\nrs.Close\\nSet rs = Nothing',
     placeholders: [
       { id: '1', label: 'SQL Query', defaultValue: 'SELECT * FROM table' },
-      { id: '2', label: 'Record Processing', defaultValue: "'Process record" }
-    ]
+      { id: '2', label: 'Record Processing', defaultValue: "'Process record" },
+    ],
   },
 
   // Common Functions
@@ -464,8 +462,8 @@ export const vb6Snippets: VB6Snippet[] = [
     body: 'MsgBox "${1:message}", vbInformation, "${2:title}"',
     placeholders: [
       { id: '1', label: 'Message', defaultValue: 'message' },
-      { id: '2', label: 'Title', defaultValue: 'title' }
-    ]
+      { id: '2', label: 'Title', defaultValue: 'title' },
+    ],
   },
   {
     id: 'inputbox',
@@ -478,8 +476,8 @@ export const vb6Snippets: VB6Snippet[] = [
       { id: '1', label: 'Variable Name', defaultValue: 'userInput' },
       { id: '2', label: 'Prompt', defaultValue: 'prompt' },
       { id: '3', label: 'Title', defaultValue: 'title' },
-      { id: '4', label: 'Default Value', defaultValue: 'default' }
-    ]
+      { id: '4', label: 'Default Value', defaultValue: 'default' },
+    ],
   },
 
   // API Declarations
@@ -493,8 +491,8 @@ export const vb6Snippets: VB6Snippet[] = [
     placeholders: [
       { id: '1', label: 'Function Name', defaultValue: 'FunctionName' },
       { id: '2', label: 'Library', defaultValue: 'library' },
-      { id: '3', label: 'Parameters', defaultValue: 'parameters' }
-    ]
+      { id: '3', label: 'Parameters', defaultValue: 'parameters' },
+    ],
   },
   {
     id: 'sleepapi',
@@ -502,8 +500,8 @@ export const vb6Snippets: VB6Snippet[] = [
     prefix: 'sleepapi',
     description: 'Windows Sleep API declaration',
     category: 'api',
-    body: 'Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)'
-  }
+    body: 'Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)',
+  },
 ];
 
 // Helper functions
@@ -513,11 +511,12 @@ export function getSnippetsByCategory(category: string): VB6Snippet[] {
 
 export function searchSnippets(query: string): VB6Snippet[] {
   const lowercaseQuery = query.toLowerCase();
-  return vb6Snippets.filter(snippet =>
-    snippet.name.toLowerCase().includes(lowercaseQuery) ||
-    snippet.prefix.toLowerCase().includes(lowercaseQuery) ||
-    snippet.description.toLowerCase().includes(lowercaseQuery) ||
-    snippet.body.toLowerCase().includes(lowercaseQuery)
+  return vb6Snippets.filter(
+    snippet =>
+      snippet.name.toLowerCase().includes(lowercaseQuery) ||
+      snippet.prefix.toLowerCase().includes(lowercaseQuery) ||
+      snippet.description.toLowerCase().includes(lowercaseQuery) ||
+      snippet.body.toLowerCase().includes(lowercaseQuery)
   );
 }
 

@@ -8,7 +8,7 @@ export enum RegistryHive {
   HKEY_USERS = 0x80000003,
   HKEY_PERFORMANCE_DATA = 0x80000004,
   HKEY_CURRENT_CONFIG = 0x80000005,
-  HKEY_DYN_DATA = 0x80000006
+  HKEY_DYN_DATA = 0x80000006,
 }
 
 export enum RegistryValueType {
@@ -23,7 +23,7 @@ export enum RegistryValueType {
   REG_RESOURCE_LIST = 8,
   REG_FULL_RESOURCE_DESCRIPTOR = 9,
   REG_RESOURCE_REQUIREMENTS_LIST = 10,
-  REG_QWORD = 11
+  REG_QWORD = 11,
 }
 
 export enum RegistryAccess {
@@ -39,7 +39,7 @@ export enum RegistryAccess {
   KEY_READ = 0x20019,
   KEY_WRITE = 0x20006,
   KEY_EXECUTE = 0x20020,
-  KEY_ALL_ACCESS = 0xF003F
+  KEY_ALL_ACCESS = 0xf003f,
 }
 
 export enum RegistryOptions {
@@ -47,12 +47,12 @@ export enum RegistryOptions {
   REG_OPTION_VOLATILE = 0x00000001,
   REG_OPTION_CREATE_LINK = 0x00000002,
   REG_OPTION_BACKUP_RESTORE = 0x00000004,
-  REG_OPTION_OPEN_LINK = 0x00000008
+  REG_OPTION_OPEN_LINK = 0x00000008,
 }
 
 export enum RegistryDisposition {
   REG_CREATED_NEW_KEY = 0x00000001,
-  REG_OPENED_EXISTING_KEY = 0x00000002
+  REG_OPENED_EXISTING_KEY = 0x00000002,
 }
 
 export enum RegistryErrorCode {
@@ -63,7 +63,7 @@ export enum RegistryErrorCode {
   ERROR_INVALID_PARAMETER = 87,
   ERROR_MORE_DATA = 234,
   ERROR_NO_MORE_ITEMS = 259,
-  ERROR_KEY_DELETED = 1018
+  ERROR_KEY_DELETED = 1018,
 }
 
 // Registry Value
@@ -97,30 +97,30 @@ export class RegistryAPI extends EventEmitter {
   private sessionStorage: Storage | null = null;
   private handles: Map<number, RegistryKeyHandle> = new Map();
   private nextHandle = 1;
-  
+
   // Simulated registry structure
   private registry: Map<string, Map<string, RegistryValue>> = new Map();
-  
+
   private constructor() {
     super();
-    
+
     // Use browser storage as registry backend
     if (typeof window !== 'undefined') {
       this.localStorage = window.localStorage;
       this.sessionStorage = window.sessionStorage;
     }
-    
+
     // Initialize with some default registry entries
     this.initializeDefaultRegistry();
   }
-  
+
   public static getInstance(): RegistryAPI {
     if (!RegistryAPI.instance) {
       RegistryAPI.instance = new RegistryAPI();
     }
     return RegistryAPI.instance;
   }
-  
+
   private initializeDefaultRegistry(): void {
     // HKEY_CURRENT_USER\Software
     this.setRegistryValue(
@@ -129,7 +129,7 @@ export class RegistryAPI extends EventEmitter {
       RegistryValueType.REG_SZ,
       '6.0.0.0'
     );
-    
+
     // HKEY_LOCAL_MACHINE\Software
     this.setRegistryValue(
       `${RegistryHive.HKEY_LOCAL_MACHINE}\\Software\\Microsoft\\Windows\\CurrentVersion`,
@@ -137,14 +137,14 @@ export class RegistryAPI extends EventEmitter {
       RegistryValueType.REG_SZ,
       'C:\\Program Files'
     );
-    
+
     this.setRegistryValue(
       `${RegistryHive.HKEY_LOCAL_MACHINE}\\Software\\Microsoft\\Windows\\CurrentVersion`,
       'Version',
       RegistryValueType.REG_SZ,
       '10.0'
     );
-    
+
     // HKEY_CLASSES_ROOT file associations
     this.setRegistryValue(
       `${RegistryHive.HKEY_CLASSES_ROOT}\\.txt`,
@@ -152,7 +152,7 @@ export class RegistryAPI extends EventEmitter {
       RegistryValueType.REG_SZ,
       'txtfile'
     );
-    
+
     this.setRegistryValue(
       `${RegistryHive.HKEY_CLASSES_ROOT}\\txtfile`,
       '',
@@ -160,36 +160,41 @@ export class RegistryAPI extends EventEmitter {
       'Text Document'
     );
   }
-  
+
   private getFullKeyPath(hKey: number | RegistryHive, subKey: string): string {
     if (this.handles.has(hKey as number)) {
       const handle = this.handles.get(hKey as number)!;
       return subKey ? `${handle.path}\\${subKey}` : handle.path;
     }
-    
+
     // It's a predefined hive
     return subKey ? `${hKey}\\${subKey}` : `${hKey}`;
   }
-  
+
   private getStorageKey(path: string): string {
     return `VB6_REG_${path.replace(/\\/g, '_')}`;
   }
-  
-  private setRegistryValue(keyPath: string, valueName: string, type: RegistryValueType, data: any): void {
+
+  private setRegistryValue(
+    keyPath: string,
+    valueName: string,
+    type: RegistryValueType,
+    data: any
+  ): void {
     if (!this.registry.has(keyPath)) {
       this.registry.set(keyPath, new Map());
     }
-    
+
     const key = this.registry.get(keyPath)!;
     key.set(valueName, { name: valueName, type, data });
-    
+
     // Also persist to localStorage
     if (this.localStorage) {
       const storageKey = this.getStorageKey(`${keyPath}\\${valueName}`);
       this.localStorage.setItem(storageKey, JSON.stringify({ type, data }));
     }
   }
-  
+
   private getRegistryValue(keyPath: string, valueName: string): RegistryValue | null {
     // First check in-memory registry
     const key = this.registry.get(keyPath);
@@ -197,7 +202,7 @@ export class RegistryAPI extends EventEmitter {
       const value = key.get(valueName);
       if (value) return value;
     }
-    
+
     // Check localStorage
     if (this.localStorage) {
       const storageKey = this.getStorageKey(`${keyPath}\\${valueName}`);
@@ -211,10 +216,10 @@ export class RegistryAPI extends EventEmitter {
         }
       }
     }
-    
+
     return null;
   }
-  
+
   // RegOpenKeyEx - Open registry key
   public RegOpenKeyEx(
     hKey: number | RegistryHive,
@@ -225,15 +230,17 @@ export class RegistryAPI extends EventEmitter {
     try {
       const fullPath = this.getFullKeyPath(hKey, lpSubKey);
       const handle = this.nextHandle++;
-      
+
       this.handles.set(handle, {
-        hive: typeof hKey === 'number' && hKey > 1000 ? 
-          this.handles.get(hKey)!.hive : hKey as RegistryHive,
+        hive:
+          typeof hKey === 'number' && hKey > 1000
+            ? this.handles.get(hKey)!.hive
+            : (hKey as RegistryHive),
         path: fullPath,
         access: samDesired,
-        handle
+        handle,
       });
-      
+
       this.emit('keyOpened', { handle, path: fullPath });
       return { phkResult: handle, errorCode: RegistryErrorCode.ERROR_SUCCESS };
     } catch (error) {
@@ -241,7 +248,7 @@ export class RegistryAPI extends EventEmitter {
       return { phkResult: 0, errorCode: RegistryErrorCode.ERROR_ACCESS_DENIED };
     }
   }
-  
+
   // RegCreateKeyEx - Create registry key
   public RegCreateKeyEx(
     hKey: number | RegistryHive,
@@ -253,48 +260,50 @@ export class RegistryAPI extends EventEmitter {
   ): { phkResult: number; lpdwDisposition: RegistryDisposition; errorCode: RegistryErrorCode } {
     try {
       const fullPath = this.getFullKeyPath(hKey, lpSubKey);
-      
+
       // Check if key already exists
       const exists = this.registry.has(fullPath);
-      
+
       if (!exists) {
         this.registry.set(fullPath, new Map());
-        
+
         // Store key existence in localStorage
         if (this.localStorage) {
           const storageKey = this.getStorageKey(fullPath);
           this.localStorage.setItem(storageKey, 'KEY');
         }
       }
-      
+
       const handle = this.nextHandle++;
       this.handles.set(handle, {
-        hive: typeof hKey === 'number' && hKey > 1000 ? 
-          this.handles.get(hKey)!.hive : hKey as RegistryHive,
+        hive:
+          typeof hKey === 'number' && hKey > 1000
+            ? this.handles.get(hKey)!.hive
+            : (hKey as RegistryHive),
         path: fullPath,
         access: samDesired,
-        handle
+        handle,
       });
-      
+
       this.emit('keyCreated', { handle, path: fullPath, created: !exists });
-      
+
       return {
         phkResult: handle,
-        lpdwDisposition: exists ? 
-          RegistryDisposition.REG_OPENED_EXISTING_KEY : 
-          RegistryDisposition.REG_CREATED_NEW_KEY,
-        errorCode: RegistryErrorCode.ERROR_SUCCESS
+        lpdwDisposition: exists
+          ? RegistryDisposition.REG_OPENED_EXISTING_KEY
+          : RegistryDisposition.REG_CREATED_NEW_KEY,
+        errorCode: RegistryErrorCode.ERROR_SUCCESS,
       };
     } catch (error) {
       this.emit('error', error);
       return {
         phkResult: 0,
         lpdwDisposition: RegistryDisposition.REG_OPENED_EXISTING_KEY,
-        errorCode: RegistryErrorCode.ERROR_ACCESS_DENIED
+        errorCode: RegistryErrorCode.ERROR_ACCESS_DENIED,
       };
     }
   }
-  
+
   // RegCloseKey - Close registry key
   public RegCloseKey(hKey: number): RegistryErrorCode {
     try {
@@ -308,7 +317,7 @@ export class RegistryAPI extends EventEmitter {
       return RegistryErrorCode.ERROR_INVALID_HANDLE;
     }
   }
-  
+
   // RegSetValueEx - Set registry value
   public RegSetValueEx(
     hKey: number,
@@ -320,14 +329,14 @@ export class RegistryAPI extends EventEmitter {
     try {
       const handle = this.handles.get(hKey);
       if (!handle) return RegistryErrorCode.ERROR_INVALID_HANDLE;
-      
+
       if (!(handle.access & RegistryAccess.KEY_SET_VALUE)) {
         return RegistryErrorCode.ERROR_ACCESS_DENIED;
       }
-      
+
       const valueName = lpValueName || '';
       this.setRegistryValue(handle.path, valueName, dwType, lpData);
-      
+
       this.emit('valueSet', { key: handle.path, name: valueName, type: dwType, data: lpData });
       return RegistryErrorCode.ERROR_SUCCESS;
     } catch (error) {
@@ -335,7 +344,7 @@ export class RegistryAPI extends EventEmitter {
       return RegistryErrorCode.ERROR_ACCESS_DENIED;
     }
   }
-  
+
   // RegQueryValueEx - Query registry value
   public RegQueryValueEx(
     hKey: number,
@@ -345,51 +354,67 @@ export class RegistryAPI extends EventEmitter {
     try {
       const handle = this.handles.get(hKey);
       if (!handle) {
-        return { lpType: RegistryValueType.REG_NONE, lpData: null, errorCode: RegistryErrorCode.ERROR_INVALID_HANDLE };
+        return {
+          lpType: RegistryValueType.REG_NONE,
+          lpData: null,
+          errorCode: RegistryErrorCode.ERROR_INVALID_HANDLE,
+        };
       }
-      
+
       if (!(handle.access & RegistryAccess.KEY_QUERY_VALUE)) {
-        return { lpType: RegistryValueType.REG_NONE, lpData: null, errorCode: RegistryErrorCode.ERROR_ACCESS_DENIED };
+        return {
+          lpType: RegistryValueType.REG_NONE,
+          lpData: null,
+          errorCode: RegistryErrorCode.ERROR_ACCESS_DENIED,
+        };
       }
-      
+
       const valueName = lpValueName || '';
       const value = this.getRegistryValue(handle.path, valueName);
-      
+
       if (!value) {
-        return { lpType: RegistryValueType.REG_NONE, lpData: null, errorCode: RegistryErrorCode.ERROR_FILE_NOT_FOUND };
+        return {
+          lpType: RegistryValueType.REG_NONE,
+          lpData: null,
+          errorCode: RegistryErrorCode.ERROR_FILE_NOT_FOUND,
+        };
       }
-      
+
       this.emit('valueQueried', { key: handle.path, name: valueName });
       return { lpType: value.type, lpData: value.data, errorCode: RegistryErrorCode.ERROR_SUCCESS };
     } catch (error) {
       this.emit('error', error);
-      return { lpType: RegistryValueType.REG_NONE, lpData: null, errorCode: RegistryErrorCode.ERROR_ACCESS_DENIED };
+      return {
+        lpType: RegistryValueType.REG_NONE,
+        lpData: null,
+        errorCode: RegistryErrorCode.ERROR_ACCESS_DENIED,
+      };
     }
   }
-  
+
   // RegDeleteValue - Delete registry value
   public RegDeleteValue(hKey: number, lpValueName: string): RegistryErrorCode {
     try {
       const handle = this.handles.get(hKey);
       if (!handle) return RegistryErrorCode.ERROR_INVALID_HANDLE;
-      
+
       if (!(handle.access & RegistryAccess.KEY_SET_VALUE)) {
         return RegistryErrorCode.ERROR_ACCESS_DENIED;
       }
-      
+
       const key = this.registry.get(handle.path);
       if (!key) return RegistryErrorCode.ERROR_FILE_NOT_FOUND;
-      
+
       if (!key.delete(lpValueName)) {
         return RegistryErrorCode.ERROR_FILE_NOT_FOUND;
       }
-      
+
       // Remove from localStorage
       if (this.localStorage) {
         const storageKey = this.getStorageKey(`${handle.path}\\${lpValueName}`);
         this.localStorage.removeItem(storageKey);
       }
-      
+
       this.emit('valueDeleted', { key: handle.path, name: lpValueName });
       return RegistryErrorCode.ERROR_SUCCESS;
     } catch (error) {
@@ -397,32 +422,32 @@ export class RegistryAPI extends EventEmitter {
       return RegistryErrorCode.ERROR_ACCESS_DENIED;
     }
   }
-  
+
   // RegDeleteKey - Delete registry key
   public RegDeleteKey(hKey: number | RegistryHive, lpSubKey: string): RegistryErrorCode {
     try {
       const fullPath = this.getFullKeyPath(hKey, lpSubKey);
-      
+
       if (!this.registry.delete(fullPath)) {
         return RegistryErrorCode.ERROR_FILE_NOT_FOUND;
       }
-      
+
       // Remove from localStorage
       if (this.localStorage) {
         // Remove all values under this key
         const prefix = this.getStorageKey(fullPath);
         const keysToRemove: string[] = [];
-        
+
         for (let i = 0; i < this.localStorage.length; i++) {
           const key = this.localStorage.key(i);
           if (key && key.startsWith(prefix)) {
             keysToRemove.push(key);
           }
         }
-        
+
         keysToRemove.forEach(key => this.localStorage!.removeItem(key));
       }
-      
+
       this.emit('keyDeleted', { path: fullPath });
       return RegistryErrorCode.ERROR_SUCCESS;
     } catch (error) {
@@ -430,7 +455,7 @@ export class RegistryAPI extends EventEmitter {
       return RegistryErrorCode.ERROR_ACCESS_DENIED;
     }
   }
-  
+
   // RegEnumKeyEx - Enumerate subkeys
   public RegEnumKeyEx(
     hKey: number,
@@ -441,117 +466,153 @@ export class RegistryAPI extends EventEmitter {
       if (!handle) {
         return { lpName: null, errorCode: RegistryErrorCode.ERROR_INVALID_HANDLE };
       }
-      
+
       if (!(handle.access & RegistryAccess.KEY_ENUMERATE_SUB_KEYS)) {
         return { lpName: null, errorCode: RegistryErrorCode.ERROR_ACCESS_DENIED };
       }
-      
+
       // Find all subkeys
       const subkeys: string[] = [];
       const prefix = handle.path + '\\';
-      
+
       this.registry.forEach((_, keyPath) => {
         if (keyPath.startsWith(prefix)) {
           const relative = keyPath.substring(prefix.length);
           const firstBackslash = relative.indexOf('\\');
           const subkey = firstBackslash >= 0 ? relative.substring(0, firstBackslash) : relative;
-          
+
           if (subkey && !subkeys.includes(subkey)) {
             subkeys.push(subkey);
           }
         }
       });
-      
+
       if (dwIndex >= subkeys.length) {
         return { lpName: null, errorCode: RegistryErrorCode.ERROR_NO_MORE_ITEMS };
       }
-      
+
       return { lpName: subkeys[dwIndex], errorCode: RegistryErrorCode.ERROR_SUCCESS };
     } catch (error) {
       this.emit('error', error);
       return { lpName: null, errorCode: RegistryErrorCode.ERROR_ACCESS_DENIED };
     }
   }
-  
+
   // RegEnumValue - Enumerate values
   public RegEnumValue(
     hKey: number,
     dwIndex: number
-  ): { lpValueName: string | null; lpType: RegistryValueType; lpData: any; errorCode: RegistryErrorCode } {
+  ): {
+    lpValueName: string | null;
+    lpType: RegistryValueType;
+    lpData: any;
+    errorCode: RegistryErrorCode;
+  } {
     try {
       const handle = this.handles.get(hKey);
       if (!handle) {
-        return { lpValueName: null, lpType: RegistryValueType.REG_NONE, lpData: null, errorCode: RegistryErrorCode.ERROR_INVALID_HANDLE };
+        return {
+          lpValueName: null,
+          lpType: RegistryValueType.REG_NONE,
+          lpData: null,
+          errorCode: RegistryErrorCode.ERROR_INVALID_HANDLE,
+        };
       }
-      
+
       if (!(handle.access & RegistryAccess.KEY_QUERY_VALUE)) {
-        return { lpValueName: null, lpType: RegistryValueType.REG_NONE, lpData: null, errorCode: RegistryErrorCode.ERROR_ACCESS_DENIED };
+        return {
+          lpValueName: null,
+          lpType: RegistryValueType.REG_NONE,
+          lpData: null,
+          errorCode: RegistryErrorCode.ERROR_ACCESS_DENIED,
+        };
       }
-      
+
       const key = this.registry.get(handle.path);
       if (!key) {
-        return { lpValueName: null, lpType: RegistryValueType.REG_NONE, lpData: null, errorCode: RegistryErrorCode.ERROR_FILE_NOT_FOUND };
+        return {
+          lpValueName: null,
+          lpType: RegistryValueType.REG_NONE,
+          lpData: null,
+          errorCode: RegistryErrorCode.ERROR_FILE_NOT_FOUND,
+        };
       }
-      
+
       const values = Array.from(key.values());
       if (dwIndex >= values.length) {
-        return { lpValueName: null, lpType: RegistryValueType.REG_NONE, lpData: null, errorCode: RegistryErrorCode.ERROR_NO_MORE_ITEMS };
+        return {
+          lpValueName: null,
+          lpType: RegistryValueType.REG_NONE,
+          lpData: null,
+          errorCode: RegistryErrorCode.ERROR_NO_MORE_ITEMS,
+        };
       }
-      
+
       const value = values[dwIndex];
       return {
         lpValueName: value.name,
         lpType: value.type,
         lpData: value.data,
-        errorCode: RegistryErrorCode.ERROR_SUCCESS
+        errorCode: RegistryErrorCode.ERROR_SUCCESS,
       };
     } catch (error) {
       this.emit('error', error);
-      return { lpValueName: null, lpType: RegistryValueType.REG_NONE, lpData: null, errorCode: RegistryErrorCode.ERROR_ACCESS_DENIED };
+      return {
+        lpValueName: null,
+        lpType: RegistryValueType.REG_NONE,
+        lpData: null,
+        errorCode: RegistryErrorCode.ERROR_ACCESS_DENIED,
+      };
     }
   }
-  
+
   // RegQueryInfoKey - Get key information
-  public RegQueryInfoKey(hKey: number): { info: RegistryKeyInfo | null; errorCode: RegistryErrorCode } {
+  public RegQueryInfoKey(hKey: number): {
+    info: RegistryKeyInfo | null;
+    errorCode: RegistryErrorCode;
+  } {
     try {
       const handle = this.handles.get(hKey);
       if (!handle) {
         return { info: null, errorCode: RegistryErrorCode.ERROR_INVALID_HANDLE };
       }
-      
+
       const key = this.registry.get(handle.path);
       const values = key ? Array.from(key.values()) : [];
-      
+
       // Count subkeys
       let subKeyCount = 0;
       let maxSubKeyLength = 0;
       const prefix = handle.path + '\\';
-      
+
       this.registry.forEach((_, keyPath) => {
         if (keyPath.startsWith(prefix)) {
           const relative = keyPath.substring(prefix.length);
           const firstBackslash = relative.indexOf('\\');
-          
+
           if (firstBackslash === -1) {
             subKeyCount++;
             maxSubKeyLength = Math.max(maxSubKeyLength, relative.length);
           }
         }
       });
-      
+
       const info: RegistryKeyInfo = {
         subKeyCount,
         maxSubKeyLength,
         valueCount: values.length,
         maxValueNameLength: Math.max(0, ...values.map(v => v.name.length)),
-        maxValueDataLength: Math.max(0, ...values.map(v => {
-          if (typeof v.data === 'string') return v.data.length;
-          if (v.data instanceof Uint8Array) return v.data.length;
-          return 4; // DWORD size
-        })),
-        lastWriteTime: new Date()
+        maxValueDataLength: Math.max(
+          0,
+          ...values.map(v => {
+            if (typeof v.data === 'string') return v.data.length;
+            if (v.data instanceof Uint8Array) return v.data.length;
+            return 4; // DWORD size
+          })
+        ),
+        lastWriteTime: new Date(),
       };
-      
+
       return { info, errorCode: RegistryErrorCode.ERROR_SUCCESS };
     } catch (error) {
       this.emit('error', error);
@@ -563,7 +624,7 @@ export class RegistryAPI extends EventEmitter {
 // VB6-compatible Registry functions
 export class Registry {
   private static api = RegistryAPI.getInstance();
-  
+
   // Read string value
   public static GetSetting(
     appName: string,
@@ -572,34 +633,30 @@ export class Registry {
     defaultValue: string = ''
   ): string {
     const keyPath = `${RegistryHive.HKEY_CURRENT_USER}\\Software\\VB and VBA Program Settings\\${appName}\\${section}`;
-    
+
     const openResult = this.api.RegOpenKeyEx(
       RegistryHive.HKEY_CURRENT_USER,
       `Software\\VB and VBA Program Settings\\${appName}\\${section}`,
       0,
       RegistryAccess.KEY_READ
     );
-    
+
     if (openResult.errorCode !== RegistryErrorCode.ERROR_SUCCESS) {
       return defaultValue;
     }
-    
+
     try {
       const result = this.api.RegQueryValueEx(openResult.phkResult, key, 0);
-      return result.errorCode === RegistryErrorCode.ERROR_SUCCESS ? 
-        String(result.lpData) : defaultValue;
+      return result.errorCode === RegistryErrorCode.ERROR_SUCCESS
+        ? String(result.lpData)
+        : defaultValue;
     } finally {
       this.api.RegCloseKey(openResult.phkResult);
     }
   }
-  
+
   // Write string value
-  public static SaveSetting(
-    appName: string,
-    section: string,
-    key: string,
-    value: string
-  ): void {
+  public static SaveSetting(appName: string, section: string, key: string, value: string): void {
     const createResult = this.api.RegCreateKeyEx(
       RegistryHive.HKEY_CURRENT_USER,
       `Software\\VB and VBA Program Settings\\${appName}\\${section}`,
@@ -608,11 +665,11 @@ export class Registry {
       RegistryOptions.REG_OPTION_NON_VOLATILE,
       RegistryAccess.KEY_WRITE
     );
-    
+
     if (createResult.errorCode !== RegistryErrorCode.ERROR_SUCCESS) {
       throw new Error(`Failed to create registry key: ${createResult.errorCode}`);
     }
-    
+
     try {
       const result = this.api.RegSetValueEx(
         createResult.phkResult,
@@ -621,7 +678,7 @@ export class Registry {
         RegistryValueType.REG_SZ,
         value
       );
-      
+
       if (result !== RegistryErrorCode.ERROR_SUCCESS) {
         throw new Error(`Failed to set registry value: ${result}`);
       }
@@ -629,13 +686,9 @@ export class Registry {
       this.api.RegCloseKey(createResult.phkResult);
     }
   }
-  
+
   // Delete setting
-  public static DeleteSetting(
-    appName: string,
-    section?: string,
-    key?: string
-  ): void {
+  public static DeleteSetting(appName: string, section?: string, key?: string): void {
     if (!section) {
       // Delete entire app
       this.api.RegDeleteKey(
@@ -656,7 +709,7 @@ export class Registry {
         0,
         RegistryAccess.KEY_WRITE
       );
-      
+
       if (openResult.errorCode === RegistryErrorCode.ERROR_SUCCESS) {
         try {
           this.api.RegDeleteValue(openResult.phkResult, key);
@@ -666,31 +719,28 @@ export class Registry {
       }
     }
   }
-  
+
   // Get all settings
-  public static GetAllSettings(
-    appName: string,
-    section: string
-  ): Array<[string, string]> {
+  public static GetAllSettings(appName: string, section: string): Array<[string, string]> {
     const settings: Array<[string, string]> = [];
-    
+
     const openResult = this.api.RegOpenKeyEx(
       RegistryHive.HKEY_CURRENT_USER,
       `Software\\VB and VBA Program Settings\\${appName}\\${section}`,
       0,
       RegistryAccess.KEY_READ
     );
-    
+
     if (openResult.errorCode !== RegistryErrorCode.ERROR_SUCCESS) {
       return settings;
     }
-    
+
     try {
       let index = 0;
       while (true) {
         const result = this.api.RegEnumValue(openResult.phkResult, index++);
         if (result.errorCode !== RegistryErrorCode.ERROR_SUCCESS) break;
-        
+
         if (result.lpValueName !== null && result.lpType === RegistryValueType.REG_SZ) {
           settings.push([result.lpValueName, String(result.lpData)]);
         }
@@ -698,10 +748,10 @@ export class Registry {
     } finally {
       this.api.RegCloseKey(openResult.phkResult);
     }
-    
+
     return settings;
   }
-  
+
   // Read registry value (any hive)
   public static ReadValue(
     hive: RegistryHive,
@@ -710,20 +760,19 @@ export class Registry {
     defaultValue: any = null
   ): any {
     const openResult = this.api.RegOpenKeyEx(hive, keyPath, 0, RegistryAccess.KEY_READ);
-    
+
     if (openResult.errorCode !== RegistryErrorCode.ERROR_SUCCESS) {
       return defaultValue;
     }
-    
+
     try {
       const result = this.api.RegQueryValueEx(openResult.phkResult, valueName, 0);
-      return result.errorCode === RegistryErrorCode.ERROR_SUCCESS ? 
-        result.lpData : defaultValue;
+      return result.errorCode === RegistryErrorCode.ERROR_SUCCESS ? result.lpData : defaultValue;
     } finally {
       this.api.RegCloseKey(openResult.phkResult);
     }
   }
-  
+
   // Write registry value (any hive)
   public static WriteValue(
     hive: RegistryHive,
@@ -740,20 +789,14 @@ export class Registry {
       RegistryOptions.REG_OPTION_NON_VOLATILE,
       RegistryAccess.KEY_WRITE
     );
-    
+
     if (createResult.errorCode !== RegistryErrorCode.ERROR_SUCCESS) {
       throw new Error(`Failed to create registry key: ${createResult.errorCode}`);
     }
-    
+
     try {
-      const result = this.api.RegSetValueEx(
-        createResult.phkResult,
-        valueName,
-        0,
-        valueType,
-        value
-      );
-      
+      const result = this.api.RegSetValueEx(createResult.phkResult, valueName, 0, valueType, value);
+
       if (result !== RegistryErrorCode.ERROR_SUCCESS) {
         throw new Error(`Failed to set registry value: ${result}`);
       }
@@ -761,35 +804,35 @@ export class Registry {
       this.api.RegCloseKey(createResult.phkResult);
     }
   }
-  
+
   // Check if key exists
   public static KeyExists(hive: RegistryHive, keyPath: string): boolean {
     const openResult = this.api.RegOpenKeyEx(hive, keyPath, 0, RegistryAccess.KEY_READ);
-    
+
     if (openResult.errorCode === RegistryErrorCode.ERROR_SUCCESS) {
       this.api.RegCloseKey(openResult.phkResult);
       return true;
     }
-    
+
     return false;
   }
-  
+
   // Enumerate subkeys
   public static EnumKeys(hive: RegistryHive, keyPath: string): string[] {
     const keys: string[] = [];
-    
+
     const openResult = this.api.RegOpenKeyEx(hive, keyPath, 0, RegistryAccess.KEY_READ);
-    
+
     if (openResult.errorCode !== RegistryErrorCode.ERROR_SUCCESS) {
       return keys;
     }
-    
+
     try {
       let index = 0;
       while (true) {
         const result = this.api.RegEnumKeyEx(openResult.phkResult, index++);
         if (result.errorCode !== RegistryErrorCode.ERROR_SUCCESS) break;
-        
+
         if (result.lpName) {
           keys.push(result.lpName);
         }
@@ -797,7 +840,7 @@ export class Registry {
     } finally {
       this.api.RegCloseKey(openResult.phkResult);
     }
-    
+
     return keys;
   }
 }

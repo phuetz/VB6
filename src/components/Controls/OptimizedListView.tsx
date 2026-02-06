@@ -49,11 +49,13 @@ const OptimizedListView: React.FC<OptimizedListViewProps> = ({
   const columns = useMemo<VirtualTableColumn<ListViewItem>[]>(() => {
     const cols = control.properties.ColumnHeaders || [];
     if (cols.length === 0) {
-      return [{
-        key: 'text',
-        title: 'Name',
-        width: control.properties.Width,
-      }];
+      return [
+        {
+          key: 'text',
+          title: 'Name',
+          width: control.properties.Width,
+        },
+      ];
     }
 
     return cols.map((col: any, index: number) => ({
@@ -68,8 +70,8 @@ const OptimizedListView: React.FC<OptimizedListViewProps> = ({
                 <input
                   type="checkbox"
                   checked={item.checked}
-                  onChange={(e) => handleCheckChange(item.key, e.target.checked)}
-                  onClick={(e) => e.stopPropagation()}
+                  onChange={e => handleCheckChange(item.key, e.target.checked)}
+                  onClick={e => e.stopPropagation()}
                   className="w-3 h-3"
                 />
               )}
@@ -83,7 +85,12 @@ const OptimizedListView: React.FC<OptimizedListViewProps> = ({
         return item.subItems[index - 1] || '';
       },
     }));
-  }, [control.properties.ColumnHeaders, control.properties.Width, control.properties.Checkboxes, control.properties.SmallIcons]);
+  }, [
+    control.properties.ColumnHeaders,
+    control.properties.Width,
+    control.properties.Checkboxes,
+    control.properties.SmallIcons,
+  ]);
 
   // Sort items
   const sortedItems = useMemo(() => {
@@ -105,7 +112,7 @@ const OptimizedListView: React.FC<OptimizedListViewProps> = ({
       // Try numeric comparison first
       const aNum = parseFloat(aValue);
       const bNum = parseFloat(bValue);
-      
+
       if (!isNaN(aNum) && !isNaN(bNum)) {
         return sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
       }
@@ -117,91 +124,107 @@ const OptimizedListView: React.FC<OptimizedListViewProps> = ({
   }, [items, sortColumn, sortDirection]);
 
   // Handle item selection
-  const handleItemClick = useCallback((item: ListViewItem, index: number, e: React.MouseEvent) => {
-    if (!isRunning) {
-      onSelect();
-      return;
-    }
+  const handleItemClick = useCallback(
+    (item: ListViewItem, index: number, e: React.MouseEvent) => {
+      if (!isRunning) {
+        onSelect();
+        return;
+      }
 
-    const multiSelect = control.properties.MultiSelect !== false;
-    
-    if (e.ctrlKey && multiSelect) {
-      // Ctrl+Click: Toggle selection
-      const newSelected = new Set(selectedIndices);
-      if (newSelected.has(index)) {
-        newSelected.delete(index);
+      const multiSelect = control.properties.MultiSelect !== false;
+
+      if (e.ctrlKey && multiSelect) {
+        // Ctrl+Click: Toggle selection
+        const newSelected = new Set(selectedIndices);
+        if (newSelected.has(index)) {
+          newSelected.delete(index);
+        } else {
+          newSelected.add(index);
+        }
+        setSelectedIndices(newSelected);
+      } else if (e.shiftKey && multiSelect && lastSelectedIndex >= 0) {
+        // Shift+Click: Range selection
+        const newSelected = new Set(selectedIndices);
+        const start = Math.min(lastSelectedIndex, index);
+        const end = Math.max(lastSelectedIndex, index);
+
+        for (let i = start; i <= end; i++) {
+          newSelected.add(i);
+        }
+        setSelectedIndices(newSelected);
       } else {
-        newSelected.add(index);
+        // Regular click: Single selection
+        setSelectedIndices(new Set([index]));
       }
-      setSelectedIndices(newSelected);
-    } else if (e.shiftKey && multiSelect && lastSelectedIndex >= 0) {
-      // Shift+Click: Range selection
-      const newSelected = new Set(selectedIndices);
-      const start = Math.min(lastSelectedIndex, index);
-      const end = Math.max(lastSelectedIndex, index);
-      
-      for (let i = start; i <= end; i++) {
-        newSelected.add(i);
-      }
-      setSelectedIndices(newSelected);
-    } else {
-      // Regular click: Single selection
-      setSelectedIndices(new Set([index]));
-    }
 
-    setLastSelectedIndex(index);
+      setLastSelectedIndex(index);
 
-    // Fire ItemClick event
-    if (control.events?.ItemClick) {
-      try {
-        const fn = new Function('Item', control.events.ItemClick);
-        fn(item);
-      } catch (error) {
-        console.error('Error in ItemClick event:', error);
-      }
-    }
-  }, [isRunning, control.properties.MultiSelect, control.events?.ItemClick, selectedIndices, lastSelectedIndex, onSelect]);
-
-  // Handle column header click for sorting
-  const handleColumnClick = useCallback((columnKey: string) => {
-    if (columnKey === sortColumn) {
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortColumn(columnKey);
-      setSortDirection('asc');
-    }
-
-    // Fire ColumnClick event
-    if (control.events?.ColumnClick) {
-      try {
-        const fn = new Function('ColumnHeader', control.events.ColumnClick);
-        fn({ key: columnKey });
-      } catch (error) {
-        console.error('Error in ColumnClick event:', error);
-      }
-    }
-  }, [sortColumn, control.events?.ColumnClick]);
-
-  // Handle checkbox change
-  const handleCheckChange = useCallback((itemKey: string, checked: boolean) => {
-    const updatedItems = [...items];
-    const itemIndex = updatedItems.findIndex(item => item.key === itemKey);
-    
-    if (itemIndex >= 0) {
-      updatedItems[itemIndex] = { ...updatedItems[itemIndex], checked };
-      onUpdate({ ListItems: updatedItems });
-
-      // Fire ItemCheck event
-      if (control.events?.ItemCheck) {
+      // Fire ItemClick event
+      if (control.events?.ItemClick) {
         try {
-          const fn = new Function('Item', control.events.ItemCheck);
-          fn(updatedItems[itemIndex]);
+          const fn = new Function('Item', control.events.ItemClick);
+          fn(item);
         } catch (error) {
-          console.error('Error in ItemCheck event:', error);
+          console.error('Error in ItemClick event:', error);
         }
       }
-    }
-  }, [items, onUpdate, control.events?.ItemCheck]);
+    },
+    [
+      isRunning,
+      control.properties.MultiSelect,
+      control.events?.ItemClick,
+      selectedIndices,
+      lastSelectedIndex,
+      onSelect,
+    ]
+  );
+
+  // Handle column header click for sorting
+  const handleColumnClick = useCallback(
+    (columnKey: string) => {
+      if (columnKey === sortColumn) {
+        setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
+      } else {
+        setSortColumn(columnKey);
+        setSortDirection('asc');
+      }
+
+      // Fire ColumnClick event
+      if (control.events?.ColumnClick) {
+        try {
+          const fn = new Function('ColumnHeader', control.events.ColumnClick);
+          fn({ key: columnKey });
+        } catch (error) {
+          console.error('Error in ColumnClick event:', error);
+        }
+      }
+    },
+    [sortColumn, control.events?.ColumnClick]
+  );
+
+  // Handle checkbox change
+  const handleCheckChange = useCallback(
+    (itemKey: string, checked: boolean) => {
+      const updatedItems = [...items];
+      const itemIndex = updatedItems.findIndex(item => item.key === itemKey);
+
+      if (itemIndex >= 0) {
+        updatedItems[itemIndex] = { ...updatedItems[itemIndex], checked };
+        onUpdate({ ListItems: updatedItems });
+
+        // Fire ItemCheck event
+        if (control.events?.ItemCheck) {
+          try {
+            const fn = new Function('Item', control.events.ItemCheck);
+            fn(updatedItems[itemIndex]);
+          } catch (error) {
+            console.error('Error in ItemCheck event:', error);
+          }
+        }
+      }
+    },
+    [items, onUpdate, control.events?.ItemCheck]
+  );
 
   // Track performance
   useEffect(() => {
@@ -220,9 +243,7 @@ const OptimizedListView: React.FC<OptimizedListViewProps> = ({
         >
           <span>{col.title}</span>
           {sortColumn === col.key && (
-            <span className="text-xs">
-              {sortDirection === 'asc' ? '▲' : '▼'}
-            </span>
+            <span className="text-xs">{sortDirection === 'asc' ? '▲' : '▼'}</span>
           )}
         </div>
       ),
@@ -260,7 +281,7 @@ const OptimizedListView: React.FC<OptimizedListViewProps> = ({
                 className={`p-1 m-1 cursor-pointer rounded ${
                   selectedIndices.has(index) ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'
                 }`}
-                onClick={(e) => handleItemClick(item, index, e)}
+                onClick={e => handleItemClick(item, index, e)}
                 style={{ width: '100px' }}
               >
                 <div className="truncate text-xs">{item.text}</div>
@@ -280,11 +301,11 @@ const OptimizedListView: React.FC<OptimizedListViewProps> = ({
                 className={`flex flex-col items-center p-2 m-1 cursor-pointer rounded ${
                   selectedIndices.has(index) ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'
                 }`}
-                onClick={(e) => handleItemClick(item, index, e)}
+                onClick={e => handleItemClick(item, index, e)}
                 style={{ width: iconSize + 32 }}
               >
-                <div 
-                  className="bg-gray-300 rounded mb-1" 
+                <div
+                  className="bg-gray-300 rounded mb-1"
                   style={{ width: iconSize, height: iconSize }}
                 />
                 <div className="text-xs text-center truncate w-full">{item.text}</div>
@@ -307,7 +328,7 @@ const OptimizedListView: React.FC<OptimizedListViewProps> = ({
       }}
     >
       {renderContent()}
-      
+
       {/* Performance indicator in development */}
       {process.env.NODE_ENV === 'development' && (
         <div className="absolute bottom-0 right-0 text-xs bg-black bg-opacity-50 text-white p-1">

@@ -12,7 +12,7 @@ export enum DatabaseType {
   Text = 'Text Files',
   dBase = 'dBASE',
   Paradox = 'Paradox',
-  FoxPro = 'FoxPro'
+  FoxPro = 'FoxPro',
 }
 
 // Field Data Types
@@ -28,7 +28,7 @@ export enum FieldDataType {
   Hyperlink = 'Hyperlink',
   Lookup = 'Lookup Wizard',
   Binary = 'Binary',
-  GUID = 'Replication ID'
+  GUID = 'Replication ID',
 }
 
 // Index Types
@@ -36,14 +36,14 @@ export enum IndexType {
   Primary = 'Primary',
   Unique = 'Unique',
   Duplicates_OK = 'Duplicates OK',
-  Foreign = 'Foreign Key'
+  Foreign = 'Foreign Key',
 }
 
 // Relationship Types
 export enum RelationshipType {
   OneToOne = '1:1',
   OneToMany = '1:M',
-  ManyToMany = 'M:M'
+  ManyToMany = 'M:M',
 }
 
 // Database Field
@@ -176,12 +176,14 @@ interface VisualDataManagerProps {
 export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
   onDatabaseOpen,
   onQueryExecute,
-  onClose
+  onClose,
 }) => {
   const [currentSchema, setCurrentSchema] = useState<DatabaseSchema | null>(null);
   const [selectedTable, setSelectedTable] = useState<DatabaseTable | null>(null);
   const [selectedQuery, setSelectedQuery] = useState<DatabaseQuery | null>(null);
-  const [activeTab, setActiveTab] = useState<'tables' | 'queries' | 'relationships' | 'data' | 'sql'>('tables');
+  const [activeTab, setActiveTab] = useState<
+    'tables' | 'queries' | 'relationships' | 'data' | 'sql'
+  >('tables');
   const [tableData, setTableData] = useState<Record<string, any>[] | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
@@ -208,7 +210,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
       filePath: 'C:\\Program Files\\Microsoft Office\\Office\\Samples\\Northwind.mdb',
       connected: true,
       version: '4.0',
-      provider: 'Microsoft.Jet.OLEDB.4.0'
+      provider: 'Microsoft.Jet.OLEDB.4.0',
     },
     tables: [
       {
@@ -225,7 +227,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             required: true,
             allowZeroLength: false,
             indexed: true,
-            description: 'Unique customer identifier'
+            description: 'Unique customer identifier',
           },
           {
             name: 'CompanyName',
@@ -234,7 +236,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             required: true,
             allowZeroLength: false,
             indexed: false,
-            description: 'Customer company name'
+            description: 'Customer company name',
           },
           {
             name: 'ContactName',
@@ -243,7 +245,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             required: false,
             allowZeroLength: true,
             indexed: false,
-            description: 'Primary contact name'
+            description: 'Primary contact name',
           },
           {
             name: 'ContactTitle',
@@ -252,7 +254,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             required: false,
             allowZeroLength: true,
             indexed: false,
-            description: 'Contact person title'
+            description: 'Contact person title',
           },
           {
             name: 'Address',
@@ -261,7 +263,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             required: false,
             allowZeroLength: true,
             indexed: false,
-            description: 'Street address'
+            description: 'Street address',
           },
           {
             name: 'City',
@@ -270,7 +272,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             required: false,
             allowZeroLength: true,
             indexed: false,
-            description: 'City name'
+            description: 'City name',
           },
           {
             name: 'Region',
@@ -279,7 +281,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             required: false,
             allowZeroLength: true,
             indexed: false,
-            description: 'State or region'
+            description: 'State or region',
           },
           {
             name: 'PostalCode',
@@ -288,7 +290,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             required: false,
             allowZeroLength: true,
             indexed: false,
-            description: 'Postal or ZIP code'
+            description: 'Postal or ZIP code',
           },
           {
             name: 'Country',
@@ -297,7 +299,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             required: false,
             allowZeroLength: true,
             indexed: false,
-            description: 'Country name'
+            description: 'Country name',
           },
           {
             name: 'Phone',
@@ -306,7 +308,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             required: false,
             allowZeroLength: true,
             indexed: false,
-            description: 'Phone number'
+            description: 'Phone number',
           },
           {
             name: 'Fax',
@@ -315,8 +317,8 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             required: false,
             allowZeroLength: true,
             indexed: false,
-            description: 'Fax number'
-          }
+            description: 'Fax number',
+          },
         ],
         indexes: [
           {
@@ -327,7 +329,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             ignoreNulls: false,
             clustered: false,
             foreign: false,
-            required: true
+            required: true,
           },
           {
             name: 'City',
@@ -337,9 +339,9 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             ignoreNulls: true,
             clustered: false,
             foreign: false,
-            required: false
-          }
-        ]
+            required: false,
+          },
+        ],
       },
       {
         name: 'Orders',
@@ -355,7 +357,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             required: true,
             allowZeroLength: false,
             indexed: true,
-            description: 'Unique order identifier'
+            description: 'Unique order identifier',
           },
           {
             name: 'CustomerID',
@@ -364,7 +366,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             required: false,
             allowZeroLength: true,
             indexed: true,
-            description: 'Customer identifier'
+            description: 'Customer identifier',
           },
           {
             name: 'EmployeeID',
@@ -373,7 +375,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             required: false,
             allowZeroLength: false,
             indexed: true,
-            description: 'Employee identifier'
+            description: 'Employee identifier',
           },
           {
             name: 'OrderDate',
@@ -382,7 +384,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             required: false,
             allowZeroLength: false,
             indexed: false,
-            description: 'Order date'
+            description: 'Order date',
           },
           {
             name: 'RequiredDate',
@@ -391,7 +393,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             required: false,
             allowZeroLength: false,
             indexed: false,
-            description: 'Required delivery date'
+            description: 'Required delivery date',
           },
           {
             name: 'ShippedDate',
@@ -400,7 +402,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             required: false,
             allowZeroLength: false,
             indexed: false,
-            description: 'Actual ship date'
+            description: 'Actual ship date',
           },
           {
             name: 'Freight',
@@ -409,8 +411,8 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             required: false,
             allowZeroLength: false,
             indexed: false,
-            description: 'Shipping cost'
-          }
+            description: 'Shipping cost',
+          },
         ],
         indexes: [
           {
@@ -421,7 +423,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             ignoreNulls: false,
             clustered: false,
             foreign: false,
-            required: true
+            required: true,
           },
           {
             name: 'CustomerID',
@@ -431,10 +433,10 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
             ignoreNulls: true,
             clustered: false,
             foreign: true,
-            required: false
-          }
-        ]
-      }
+            required: false,
+          },
+        ],
+      },
     ],
     queries: [
       {
@@ -444,7 +446,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
         description: 'List of orders by customer',
         parameters: [],
         returnsRecords: true,
-        replicable: true
+        replicable: true,
       },
       {
         name: 'Orders by Date Range',
@@ -453,26 +455,24 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
         description: 'Orders within a date range',
         parameters: [
           { name: '@StartDate', dataType: 'Date/Time' },
-          { name: '@EndDate', dataType: 'Date/Time' }
+          { name: '@EndDate', dataType: 'Date/Time' },
         ],
         returnsRecords: true,
-        replicable: true
-      }
+        replicable: true,
+      },
     ],
     relationships: [
       {
         name: 'CustomersOrders',
         table: 'Customers',
         foreignTable: 'Orders',
-        fields: [
-          { name: 'CustomerID', foreignName: 'CustomerID' }
-        ],
+        fields: [{ name: 'CustomerID', foreignName: 'CustomerID' }],
         type: RelationshipType.OneToMany,
         enforceReferentialIntegrity: true,
         cascadeUpdates: false,
         cascadeDeletes: false,
-        attributes: []
-      }
+        attributes: [],
+      },
     ],
     properties: {
       version: '4.0',
@@ -486,8 +486,8 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
       allowFullMenus: true,
       allowBreakIntoCode: true,
       allowSpecialKeys: true,
-      useAccessSpecialKeys: true
-    }
+      useAccessSpecialKeys: true,
+    },
   };
 
   // Initialize with sample data
@@ -497,118 +497,202 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
   }, [onDatabaseOpen]);
 
   // Generate sample table data
-  const generateSampleData = useCallback((table: DatabaseTable, page: number = 1, size: number = 50): Record<string, any>[] => {
-    const data: Record<string, any>[] = [];
-    const startIndex = (page - 1) * size;
-    
-    if (table.name === 'Customers') {
-      const customers = [
-        { CustomerID: 'ALFKI', CompanyName: 'Alfreds Futterkiste', ContactName: 'Maria Anders', ContactTitle: 'Sales Representative', Address: 'Obere Str. 57', City: 'Berlin', Region: null, PostalCode: '12209', Country: 'Germany', Phone: '030-0074321', Fax: '030-0076545' },
-        { CustomerID: 'ANATR', CompanyName: 'Ana Trujillo Emparedados y helados', ContactName: 'Ana Trujillo', ContactTitle: 'Owner', Address: 'Avda. de la Constitución 2222', City: 'México D.F.', Region: null, PostalCode: '05021', Country: 'Mexico', Phone: '(5) 555-4729', Fax: '(5) 555-3745' },
-        { CustomerID: 'ANTON', CompanyName: 'Antonio Moreno Taquería', ContactName: 'Antonio Moreno', ContactTitle: 'Owner', Address: 'Mataderos 2312', City: 'México D.F.', Region: null, PostalCode: '05023', Country: 'Mexico', Phone: '(5) 555-3932', Fax: null },
-        { CustomerID: 'AROUT', CompanyName: 'Around the Horn', ContactName: 'Thomas Hardy', ContactTitle: 'Sales Representative', Address: '120 Hanover Sq.', City: 'London', Region: null, PostalCode: 'WA1 1DP', Country: 'UK', Phone: '(171) 555-7788', Fax: '(171) 555-6750' },
-        { CustomerID: 'BERGS', CompanyName: 'Berglunds snabbköp', ContactName: 'Christina Berglund', ContactTitle: 'Order Administrator', Address: 'Berguvsvägen 8', City: 'Luleå', Region: null, PostalCode: 'S-958 22', Country: 'Sweden', Phone: '0921-12 34 65', Fax: '0921-12 34 67' }
-      ];
-      
-      for (let i = startIndex; i < Math.min(startIndex + size, customers.length * 10); i++) {
-        const baseCustomer = customers[i % customers.length];
-        data.push({
-          ...baseCustomer,
-          CustomerID: `${baseCustomer.CustomerID}${Math.floor(i / customers.length)}`,
-          CompanyName: `${baseCustomer.CompanyName} ${Math.floor(i / customers.length) > 0 ? `(${Math.floor(i / customers.length)})` : ''}`
-        });
+  const generateSampleData = useCallback(
+    (table: DatabaseTable, page: number = 1, size: number = 50): Record<string, any>[] => {
+      const data: Record<string, any>[] = [];
+      const startIndex = (page - 1) * size;
+
+      if (table.name === 'Customers') {
+        const customers = [
+          {
+            CustomerID: 'ALFKI',
+            CompanyName: 'Alfreds Futterkiste',
+            ContactName: 'Maria Anders',
+            ContactTitle: 'Sales Representative',
+            Address: 'Obere Str. 57',
+            City: 'Berlin',
+            Region: null,
+            PostalCode: '12209',
+            Country: 'Germany',
+            Phone: '030-0074321',
+            Fax: '030-0076545',
+          },
+          {
+            CustomerID: 'ANATR',
+            CompanyName: 'Ana Trujillo Emparedados y helados',
+            ContactName: 'Ana Trujillo',
+            ContactTitle: 'Owner',
+            Address: 'Avda. de la Constitución 2222',
+            City: 'México D.F.',
+            Region: null,
+            PostalCode: '05021',
+            Country: 'Mexico',
+            Phone: '(5) 555-4729',
+            Fax: '(5) 555-3745',
+          },
+          {
+            CustomerID: 'ANTON',
+            CompanyName: 'Antonio Moreno Taquería',
+            ContactName: 'Antonio Moreno',
+            ContactTitle: 'Owner',
+            Address: 'Mataderos 2312',
+            City: 'México D.F.',
+            Region: null,
+            PostalCode: '05023',
+            Country: 'Mexico',
+            Phone: '(5) 555-3932',
+            Fax: null,
+          },
+          {
+            CustomerID: 'AROUT',
+            CompanyName: 'Around the Horn',
+            ContactName: 'Thomas Hardy',
+            ContactTitle: 'Sales Representative',
+            Address: '120 Hanover Sq.',
+            City: 'London',
+            Region: null,
+            PostalCode: 'WA1 1DP',
+            Country: 'UK',
+            Phone: '(171) 555-7788',
+            Fax: '(171) 555-6750',
+          },
+          {
+            CustomerID: 'BERGS',
+            CompanyName: 'Berglunds snabbköp',
+            ContactName: 'Christina Berglund',
+            ContactTitle: 'Order Administrator',
+            Address: 'Berguvsvägen 8',
+            City: 'Luleå',
+            Region: null,
+            PostalCode: 'S-958 22',
+            Country: 'Sweden',
+            Phone: '0921-12 34 65',
+            Fax: '0921-12 34 67',
+          },
+        ];
+
+        for (let i = startIndex; i < Math.min(startIndex + size, customers.length * 10); i++) {
+          const baseCustomer = customers[i % customers.length];
+          data.push({
+            ...baseCustomer,
+            CustomerID: `${baseCustomer.CustomerID}${Math.floor(i / customers.length)}`,
+            CompanyName: `${baseCustomer.CompanyName} ${Math.floor(i / customers.length) > 0 ? `(${Math.floor(i / customers.length)})` : ''}`,
+          });
+        }
+      } else if (table.name === 'Orders') {
+        for (let i = startIndex; i < Math.min(startIndex + size, 830); i++) {
+          data.push({
+            OrderID: 10248 + i,
+            CustomerID: `ALFKI${i % 5}`,
+            EmployeeID: (i % 9) + 1,
+            OrderDate: new Date(1996, 6, 4 + i),
+            RequiredDate: new Date(1996, 7, 1 + i),
+            ShippedDate: new Date(1996, 6, 16 + i),
+            Freight: Math.round((Math.random() * 500 + 10) * 100) / 100,
+          });
+        }
       }
-    } else if (table.name === 'Orders') {
-      for (let i = startIndex; i < Math.min(startIndex + size, 830); i++) {
-        data.push({
-          OrderID: 10248 + i,
-          CustomerID: `ALFKI${i % 5}`,
-          EmployeeID: (i % 9) + 1,
-          OrderDate: new Date(1996, 6, 4 + i),
-          RequiredDate: new Date(1996, 7, 1 + i),
-          ShippedDate: new Date(1996, 6, 16 + i),
-          Freight: Math.round((Math.random() * 500 + 10) * 100) / 100
-        });
-      }
-    }
-    
-    return data;
-  }, []);
+
+      return data;
+    },
+    []
+  );
 
   // Load table data
-  const loadTableData = useCallback((table: DatabaseTable, page: number = 1) => {
-    setTableData(generateSampleData(table, page, pageSize));
-  }, [generateSampleData, pageSize]);
+  const loadTableData = useCallback(
+    (table: DatabaseTable, page: number = 1) => {
+      setTableData(generateSampleData(table, page, pageSize));
+    },
+    [generateSampleData, pageSize]
+  );
 
   // Execute SQL query
-  const executeQuery = useCallback(async (sql: string) => {
-    setIsExecuting(true);
-    setQueryResult(null);
-    
-    // Simulate query execution
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    try {
-      // Mock query result
-      const mockResult: QueryResult = {
-        fields: [
-          { name: 'CompanyName', type: 'Text', size: 40 },
-          { name: 'OrderID', type: 'AutoNumber', size: 4 },
-          { name: 'OrderDate', type: 'Date/Time', size: 8 },
-          { name: 'Freight', type: 'Currency', size: 8 }
-        ],
-        records: [
-          { CompanyName: 'Alfreds Futterkiste', OrderID: 10643, OrderDate: new Date('1997-08-25'), Freight: 29.46 },
-          { CompanyName: 'Alfreds Futterkiste', OrderID: 10692, OrderDate: new Date('1997-10-03'), Freight: 61.02 },
-          { CompanyName: 'Ana Trujillo Emparedados y helados', OrderID: 10308, OrderDate: new Date('1996-09-18'), Freight: 1.61 }
-        ],
-        recordCount: 3,
-        executionTime: 45,
-        error: sql.toLowerCase().includes('error') ? 'Invalid SQL syntax' : undefined
-      };
-      
-      setQueryResult(mockResult);
-      onQueryExecute?.(sql, mockResult);
-      eventEmitter.current.emit('queryExecuted', { sql, result: mockResult });
-    } catch (error) {
-      setQueryResult({
-        fields: [],
-        records: [],
-        recordCount: 0,
-        executionTime: 0,
-        error: error instanceof Error ? error.message : 'Query execution failed'
-      });
-    } finally {
-      setIsExecuting(false);
-    }
-  }, [onQueryExecute]);
+  const executeQuery = useCallback(
+    async (sql: string) => {
+      setIsExecuting(true);
+      setQueryResult(null);
+
+      // Simulate query execution
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      try {
+        // Mock query result
+        const mockResult: QueryResult = {
+          fields: [
+            { name: 'CompanyName', type: 'Text', size: 40 },
+            { name: 'OrderID', type: 'AutoNumber', size: 4 },
+            { name: 'OrderDate', type: 'Date/Time', size: 8 },
+            { name: 'Freight', type: 'Currency', size: 8 },
+          ],
+          records: [
+            {
+              CompanyName: 'Alfreds Futterkiste',
+              OrderID: 10643,
+              OrderDate: new Date('1997-08-25'),
+              Freight: 29.46,
+            },
+            {
+              CompanyName: 'Alfreds Futterkiste',
+              OrderID: 10692,
+              OrderDate: new Date('1997-10-03'),
+              Freight: 61.02,
+            },
+            {
+              CompanyName: 'Ana Trujillo Emparedados y helados',
+              OrderID: 10308,
+              OrderDate: new Date('1996-09-18'),
+              Freight: 1.61,
+            },
+          ],
+          recordCount: 3,
+          executionTime: 45,
+          error: sql.toLowerCase().includes('error') ? 'Invalid SQL syntax' : undefined,
+        };
+
+        setQueryResult(mockResult);
+        onQueryExecute?.(sql, mockResult);
+        eventEmitter.current.emit('queryExecuted', { sql, result: mockResult });
+      } catch (error) {
+        setQueryResult({
+          fields: [],
+          records: [],
+          recordCount: 0,
+          executionTime: 0,
+          error: error instanceof Error ? error.message : 'Query execution failed',
+        });
+      } finally {
+        setIsExecuting(false);
+      }
+    },
+    [onQueryExecute]
+  );
 
   // Filter and sort table data
   const processedTableData = useMemo(() => {
     if (!tableData) return [];
-    
+
     let filtered = tableData;
-    
+
     // Apply filter
     if (filter) {
       const filterLower = filter.toLowerCase();
       filtered = tableData.filter(record =>
-        Object.values(record).some(value =>
-          value && value.toString().toLowerCase().includes(filterLower)
+        Object.values(record).some(
+          value => value && value.toString().toLowerCase().includes(filterLower)
         )
       );
     }
-    
+
     // Apply sort
     if (sortField) {
       filtered = [...filtered].sort((a, b) => {
         const aVal = a[sortField];
         const bVal = b[sortField];
-        
+
         if (aVal == null && bVal == null) return 0;
         if (aVal == null) return 1;
         if (bVal == null) return -1;
-        
+
         let comparison = 0;
         if (typeof aVal === 'string' && typeof bVal === 'string') {
           comparison = aVal.localeCompare(bVal);
@@ -617,22 +701,25 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
         } else {
           comparison = Number(aVal) - Number(bVal);
         }
-        
+
         return sortDirection === 'desc' ? -comparison : comparison;
       });
     }
-    
+
     return filtered;
   }, [tableData, filter, sortField, sortDirection]);
 
   // Handle table selection
-  const handleTableSelect = useCallback((table: DatabaseTable) => {
-    setSelectedTable(table);
-    setSelectedQuery(null);
-    setCurrentPage(1);
-    loadTableData(table, 1);
-    setActiveTab('data');
-  }, [loadTableData]);
+  const handleTableSelect = useCallback(
+    (table: DatabaseTable) => {
+      setSelectedTable(table);
+      setSelectedQuery(null);
+      setCurrentPage(1);
+      loadTableData(table, 1);
+      setActiveTab('data');
+    },
+    [loadTableData]
+  );
 
   // Handle query selection
   const handleQuerySelect = useCallback((query: DatabaseQuery) => {
@@ -643,22 +730,28 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
   }, []);
 
   // Handle page change
-  const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page);
-    if (selectedTable) {
-      loadTableData(selectedTable, page);
-    }
-  }, [selectedTable, loadTableData]);
+  const handlePageChange = useCallback(
+    (page: number) => {
+      setCurrentPage(page);
+      if (selectedTable) {
+        loadTableData(selectedTable, page);
+      }
+    },
+    [selectedTable, loadTableData]
+  );
 
   // Handle sort
-  const handleSort = useCallback((field: string) => {
-    if (sortField === field) {
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  }, [sortField]);
+  const handleSort = useCallback(
+    (field: string) => {
+      if (sortField === field) {
+        setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
+      } else {
+        setSortField(field);
+        setSortDirection('asc');
+      }
+    },
+    [sortField]
+  );
 
   // Get total pages
   const totalPages = selectedTable ? Math.ceil(selectedTable.recordCount / pageSize) : 0;
@@ -683,7 +776,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
               Close Database
             </button>
           </div>
-          
+
           {currentSchema && (
             <div className="flex gap-1">
               <button
@@ -699,26 +792,27 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                 New Query
               </button>
               <button
-                onClick={() => {/* Compact database */}}
+                onClick={() => {
+                  /* Compact database */
+                }}
                 className="px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700"
               >
                 Compact
               </button>
               <button
-                onClick={() => {/* Repair database */}}
+                onClick={() => {
+                  /* Repair database */
+                }}
                 className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
               >
                 Repair
               </button>
             </div>
           )}
-          
+
           <div className="flex-1"></div>
-          
-          <button
-            onClick={onClose}
-            className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
-          >
+
+          <button onClick={onClose} className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800">
             Close
           </button>
         </div>
@@ -729,15 +823,19 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
           {/* Left Panel - Database Objects */}
           <div className="w-1/4 border-r border-gray-200 overflow-hidden">
             <div className="p-3 border-b border-gray-200 bg-gray-50">
-              <h3 className="font-medium text-gray-700">Database: {currentSchema.connection.name}</h3>
+              <h3 className="font-medium text-gray-700">
+                Database: {currentSchema.connection.name}
+              </h3>
               <p className="text-xs text-gray-600">{currentSchema.connection.type}</p>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-2">
               {/* Tables */}
               <div className="mb-4">
                 <div className="flex items-center gap-1 mb-2">
-                  <span className="text-sm font-medium text-gray-700">📋 Tables ({currentSchema.tables.length})</span>
+                  <span className="text-sm font-medium text-gray-700">
+                    📋 Tables ({currentSchema.tables.length})
+                  </span>
                 </div>
                 <div className="space-y-1">
                   {currentSchema.tables.map(table => (
@@ -745,7 +843,9 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                       key={table.name}
                       onClick={() => handleTableSelect(table)}
                       className={`p-2 text-sm cursor-pointer rounded hover:bg-gray-100 ${
-                        selectedTable?.name === table.name ? 'bg-blue-100 border-l-2 border-blue-500' : ''
+                        selectedTable?.name === table.name
+                          ? 'bg-blue-100 border-l-2 border-blue-500'
+                          : ''
                       }`}
                     >
                       <div className="font-medium">{table.name}</div>
@@ -754,11 +854,13 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                   ))}
                 </div>
               </div>
-              
+
               {/* Queries */}
               <div className="mb-4">
                 <div className="flex items-center gap-1 mb-2">
-                  <span className="text-sm font-medium text-gray-700">🔍 Queries ({currentSchema.queries.length})</span>
+                  <span className="text-sm font-medium text-gray-700">
+                    🔍 Queries ({currentSchema.queries.length})
+                  </span>
                 </div>
                 <div className="space-y-1">
                   {currentSchema.queries.map(query => (
@@ -766,7 +868,9 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                       key={query.name}
                       onClick={() => handleQuerySelect(query)}
                       className={`p-2 text-sm cursor-pointer rounded hover:bg-gray-100 ${
-                        selectedQuery?.name === query.name ? 'bg-blue-100 border-l-2 border-blue-500' : ''
+                        selectedQuery?.name === query.name
+                          ? 'bg-blue-100 border-l-2 border-blue-500'
+                          : ''
                       }`}
                     >
                       <div className="font-medium">{query.name}</div>
@@ -775,17 +879,21 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                   ))}
                 </div>
               </div>
-              
+
               {/* Relationships */}
               <div>
                 <div className="flex items-center gap-1 mb-2">
-                  <span className="text-sm font-medium text-gray-700">🔗 Relationships ({currentSchema.relationships.length})</span>
+                  <span className="text-sm font-medium text-gray-700">
+                    🔗 Relationships ({currentSchema.relationships.length})
+                  </span>
                 </div>
                 <div className="space-y-1">
                   {currentSchema.relationships.map(rel => (
                     <div key={rel.name} className="p-2 text-sm rounded hover:bg-gray-100">
                       <div className="font-medium">{rel.name}</div>
-                      <div className="text-xs text-gray-600">{rel.table} → {rel.foreignTable}</div>
+                      <div className="text-xs text-gray-600">
+                        {rel.table} → {rel.foreignTable}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -835,11 +943,13 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                           </button>
                         </div>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-6">
                         {/* Fields */}
                         <div>
-                          <h4 className="font-medium mb-2">Fields ({selectedTable.fields.length})</h4>
+                          <h4 className="font-medium mb-2">
+                            Fields ({selectedTable.fields.length})
+                          </h4>
                           <div className="border border-gray-200 rounded">
                             <div className="bg-gray-50 px-3 py-2 border-b border-gray-200 text-sm font-medium">
                               <div className="grid grid-cols-3 gap-2">
@@ -850,43 +960,73 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                             </div>
                             <div className="max-h-64 overflow-y-auto">
                               {selectedTable.fields.map((field, index) => (
-                                <div key={index} className="px-3 py-2 border-b border-gray-200 text-sm hover:bg-gray-50">
+                                <div
+                                  key={index}
+                                  className="px-3 py-2 border-b border-gray-200 text-sm hover:bg-gray-50"
+                                >
                                   <div className="grid grid-cols-3 gap-2">
                                     <span className="font-medium">{field.name}</span>
                                     <span>{field.dataType}</span>
                                     <span>{field.size}</span>
                                   </div>
                                   {field.description && (
-                                    <div className="text-xs text-gray-600 mt-1">{field.description}</div>
+                                    <div className="text-xs text-gray-600 mt-1">
+                                      {field.description}
+                                    </div>
                                   )}
                                   <div className="flex gap-1 mt-1">
-                                    {field.required && <span className="text-xs bg-red-100 text-red-800 px-1 rounded">Required</span>}
-                                    {field.indexed && <span className="text-xs bg-blue-100 text-blue-800 px-1 rounded">Indexed</span>}
+                                    {field.required && (
+                                      <span className="text-xs bg-red-100 text-red-800 px-1 rounded">
+                                        Required
+                                      </span>
+                                    )}
+                                    {field.indexed && (
+                                      <span className="text-xs bg-blue-100 text-blue-800 px-1 rounded">
+                                        Indexed
+                                      </span>
+                                    )}
                                   </div>
                                 </div>
                               ))}
                             </div>
                           </div>
                         </div>
-                        
+
                         {/* Indexes */}
                         <div>
-                          <h4 className="font-medium mb-2">Indexes ({selectedTable.indexes.length})</h4>
+                          <h4 className="font-medium mb-2">
+                            Indexes ({selectedTable.indexes.length})
+                          </h4>
                           <div className="border border-gray-200 rounded">
                             <div className="bg-gray-50 px-3 py-2 border-b border-gray-200 text-sm font-medium">
                               Index Properties
                             </div>
                             <div className="max-h-64 overflow-y-auto">
                               {selectedTable.indexes.map((index, i) => (
-                                <div key={i} className="p-3 border-b border-gray-200 hover:bg-gray-50">
+                                <div
+                                  key={i}
+                                  className="p-3 border-b border-gray-200 hover:bg-gray-50"
+                                >
                                   <div className="font-medium text-sm">{index.name}</div>
                                   <div className="text-xs text-gray-600 mt-1">
                                     Fields: {index.fields.join(', ')}
                                   </div>
                                   <div className="flex gap-1 mt-1">
-                                    {index.primary && <span className="text-xs bg-yellow-100 text-yellow-800 px-1 rounded">Primary</span>}
-                                    {index.unique && <span className="text-xs bg-green-100 text-green-800 px-1 rounded">Unique</span>}
-                                    {index.foreign && <span className="text-xs bg-purple-100 text-purple-800 px-1 rounded">Foreign</span>}
+                                    {index.primary && (
+                                      <span className="text-xs bg-yellow-100 text-yellow-800 px-1 rounded">
+                                        Primary
+                                      </span>
+                                    )}
+                                    {index.unique && (
+                                      <span className="text-xs bg-green-100 text-green-800 px-1 rounded">
+                                        Unique
+                                      </span>
+                                    )}
+                                    {index.foreign && (
+                                      <span className="text-xs bg-purple-100 text-purple-800 px-1 rounded">
+                                        Foreign
+                                      </span>
+                                    )}
                                   </div>
                                 </div>
                               ))}
@@ -894,23 +1034,35 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Table Properties */}
                       <div className="mt-6">
                         <h4 className="font-medium mb-2">Properties</h4>
                         <div className="bg-gray-50 border border-gray-200 rounded p-3 text-sm">
                           <div className="grid grid-cols-2 gap-4">
-                            <div><strong>Record Count:</strong> {selectedTable.recordCount}</div>
-                            <div><strong>Type:</strong> {selectedTable.type}</div>
+                            <div>
+                              <strong>Record Count:</strong> {selectedTable.recordCount}
+                            </div>
+                            <div>
+                              <strong>Type:</strong> {selectedTable.type}
+                            </div>
                             {selectedTable.dateCreated && (
-                              <div><strong>Created:</strong> {selectedTable.dateCreated.toLocaleDateString()}</div>
+                              <div>
+                                <strong>Created:</strong>{' '}
+                                {selectedTable.dateCreated.toLocaleDateString()}
+                              </div>
                             )}
                             {selectedTable.lastUpdated && (
-                              <div><strong>Modified:</strong> {selectedTable.lastUpdated.toLocaleDateString()}</div>
+                              <div>
+                                <strong>Modified:</strong>{' '}
+                                {selectedTable.lastUpdated.toLocaleDateString()}
+                              </div>
                             )}
                           </div>
                           {selectedTable.description && (
-                            <div className="mt-2"><strong>Description:</strong> {selectedTable.description}</div>
+                            <div className="mt-2">
+                              <strong>Description:</strong> {selectedTable.description}
+                            </div>
                           )}
                         </div>
                       </div>
@@ -923,7 +1075,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                   )}
                 </div>
               )}
-              
+
               {activeTab === 'data' && (
                 <div className="flex flex-col h-full">
                   {selectedTable && tableData ? (
@@ -937,13 +1089,15 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                               type="text"
                               placeholder="Filter records..."
                               value={filter}
-                              onChange={(e) => setFilter(e.target.value)}
+                              onChange={e => setFilter(e.target.value)}
                               className="px-3 py-1 border border-gray-300 rounded text-sm"
                             />
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="text-sm text-gray-600">
-                              {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, selectedTable.recordCount)} of {selectedTable.recordCount}
+                              {(currentPage - 1) * pageSize + 1}-
+                              {Math.min(currentPage * pageSize, selectedTable.recordCount)} of{' '}
+                              {selectedTable.recordCount}
                             </span>
                             <button
                               onClick={() => handlePageChange(currentPage - 1)}
@@ -952,7 +1106,9 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                             >
                               ←
                             </button>
-                            <span className="text-sm">{currentPage} / {totalPages}</span>
+                            <span className="text-sm">
+                              {currentPage} / {totalPages}
+                            </span>
                             <button
                               onClick={() => handlePageChange(currentPage + 1)}
                               disabled={currentPage >= totalPages}
@@ -963,7 +1119,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Data Table */}
                       <div className="flex-1 overflow-auto">
                         <table className="w-full text-sm">
@@ -995,15 +1151,21 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                                     {record[field.name] === null ? (
                                       <span className="text-gray-400 italic">null</span>
                                     ) : field.dataType === FieldDataType.DateTime ? (
-                                      record[field.name] instanceof Date 
-                                        ? record[field.name].toLocaleDateString()
-                                        : record[field.name]
+                                      record[field.name] instanceof Date ? (
+                                        record[field.name].toLocaleDateString()
+                                      ) : (
+                                        record[field.name]
+                                      )
                                     ) : field.dataType === FieldDataType.Currency ? (
-                                      typeof record[field.name] === 'number'
-                                        ? `$${record[field.name].toFixed(2)}`
-                                        : record[field.name]
+                                      typeof record[field.name] === 'number' ? (
+                                        `$${record[field.name].toFixed(2)}`
+                                      ) : (
+                                        record[field.name]
+                                      )
+                                    ) : record[field.name] ? (
+                                      Object.prototype.toString.call(record[field.name])
                                     ) : (
-                                      record[field.name] ? Object.prototype.toString.call(record[field.name]) : ''
+                                      ''
                                     )}
                                   </td>
                                 ))}
@@ -1021,7 +1183,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                   )}
                 </div>
               )}
-              
+
               {activeTab === 'sql' && (
                 <div className="flex flex-col h-full">
                   {/* SQL Editor */}
@@ -1046,12 +1208,12 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                     </div>
                     <textarea
                       value={sqlQuery}
-                      onChange={(e) => setSqlQuery(e.target.value)}
+                      onChange={e => setSqlQuery(e.target.value)}
                       className="w-full h-24 px-3 py-2 border border-gray-300 rounded font-mono text-sm resize-none"
                       placeholder="Enter your SQL query here..."
                     />
                   </div>
-                  
+
                   {/* Query Results */}
                   <div className="flex-1 overflow-auto p-4">
                     {queryResult ? (
@@ -1062,11 +1224,13 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                             {queryResult.error ? (
                               <span className="text-red-600">Error</span>
                             ) : (
-                              <span>{queryResult.recordCount} records in {queryResult.executionTime}ms</span>
+                              <span>
+                                {queryResult.recordCount} records in {queryResult.executionTime}ms
+                              </span>
                             )}
                           </div>
                         </div>
-                        
+
                         {queryResult.error ? (
                           <div className="p-3 bg-red-50 border border-red-200 rounded text-red-800">
                             {queryResult.error}
@@ -1077,7 +1241,10 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                               <thead className="bg-gray-50">
                                 <tr>
                                   {queryResult.fields.map(field => (
-                                    <th key={field.name} className="px-3 py-2 text-left border-b border-gray-200">
+                                    <th
+                                      key={field.name}
+                                      className="px-3 py-2 text-left border-b border-gray-200"
+                                    >
                                       {field.name}
                                     </th>
                                   ))}
@@ -1085,13 +1252,18 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                               </thead>
                               <tbody>
                                 {queryResult.records.map((record, index) => (
-                                  <tr key={index} className="hover:bg-gray-50 border-b border-gray-200">
+                                  <tr
+                                    key={index}
+                                    className="hover:bg-gray-50 border-b border-gray-200"
+                                  >
                                     {queryResult.fields.map(field => (
                                       <td key={field.name} className="px-3 py-2">
                                         {record[field.name] === null ? (
                                           <span className="text-gray-400 italic">null</span>
+                                        ) : record[field.name] ? (
+                                          Object.prototype.toString.call(record[field.name])
                                         ) : (
-                                          record[field.name] ? Object.prototype.toString.call(record[field.name]) : ''
+                                          ''
                                         )}
                                       </td>
                                     ))}
@@ -1111,7 +1283,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                   </div>
                 </div>
               )}
-              
+
               {activeTab === 'relationships' && (
                 <div className="p-4 overflow-y-auto">
                   <h3 className="text-lg font-medium mb-4">Relationships</h3>
@@ -1124,7 +1296,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                             {rel.type}
                           </span>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <div className="font-medium text-gray-700">Parent Table</div>
@@ -1135,16 +1307,18 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                             <div>{rel.foreignTable}</div>
                           </div>
                         </div>
-                        
+
                         <div className="mt-3">
-                          <div className="font-medium text-gray-700 text-sm mb-1">Field Relationships</div>
+                          <div className="font-medium text-gray-700 text-sm mb-1">
+                            Field Relationships
+                          </div>
                           {rel.fields.map((field, index) => (
                             <div key={index} className="text-sm text-gray-600">
                               {field.name} → {field.foreignName}
                             </div>
                           ))}
                         </div>
-                        
+
                         <div className="mt-3 flex gap-4 text-xs">
                           {rel.enforceReferentialIntegrity && (
                             <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
@@ -1164,7 +1338,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                         </div>
                       </div>
                     ))}
-                    
+
                     {currentSchema.relationships.length === 0 && (
                       <div className="text-center py-8 text-gray-500">
                         <div className="text-4xl mb-4">🔗</div>
@@ -1174,7 +1348,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                   </div>
                 </div>
               )}
-              
+
               {activeTab === 'queries' && (
                 <div className="p-4 overflow-y-auto">
                   {selectedQuery ? (
@@ -1196,28 +1370,35 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                           </button>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-4">
                         <div>
                           <h4 className="font-medium mb-2">Properties</h4>
                           <div className="bg-gray-50 border border-gray-200 rounded p-3 text-sm">
                             <div className="grid grid-cols-2 gap-4">
-                              <div><strong>Type:</strong> {selectedQuery.type}</div>
-                              <div><strong>Returns Records:</strong> {selectedQuery.returnsRecords ? 'Yes' : 'No'}</div>
+                              <div>
+                                <strong>Type:</strong> {selectedQuery.type}
+                              </div>
+                              <div>
+                                <strong>Returns Records:</strong>{' '}
+                                {selectedQuery.returnsRecords ? 'Yes' : 'No'}
+                              </div>
                             </div>
                             {selectedQuery.description && (
-                              <div className="mt-2"><strong>Description:</strong> {selectedQuery.description}</div>
+                              <div className="mt-2">
+                                <strong>Description:</strong> {selectedQuery.description}
+                              </div>
                             )}
                           </div>
                         </div>
-                        
+
                         <div>
                           <h4 className="font-medium mb-2">SQL Statement</h4>
                           <pre className="bg-gray-50 border border-gray-200 rounded p-3 text-sm font-mono overflow-x-auto">
                             {selectedQuery.sql}
                           </pre>
                         </div>
-                        
+
                         {selectedQuery.parameters.length > 0 && (
                           <div>
                             <h4 className="font-medium mb-2">Parameters</h4>
@@ -1230,7 +1411,10 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                                 </div>
                               </div>
                               {selectedQuery.parameters.map((param, index) => (
-                                <div key={index} className="px-3 py-2 border-b border-gray-200 text-sm">
+                                <div
+                                  key={index}
+                                  className="px-3 py-2 border-b border-gray-200 text-sm"
+                                >
                                   <div className="grid grid-cols-3 gap-2">
                                     <span className="font-medium">{param.name}</span>
                                     <span>{param.dataType}</span>
@@ -1275,19 +1459,25 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[500px]">
             <h2 className="text-lg font-bold mb-4">Open Database</h2>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Database Type</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Database Type
+                </label>
                 <select className="w-full px-3 py-2 border border-gray-300 rounded">
                   {Object.values(DatabaseType).map(type => (
-                    <option key={type} value={type}>{type}</option>
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
                   ))}
                 </select>
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Database File</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Database File
+                </label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -1300,7 +1490,7 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
                 </div>
               </div>
             </div>
-            
+
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => setShowConnectionDialog(false)}
@@ -1326,11 +1516,9 @@ export const VisualDataManager: React.FC<VisualDataManagerProps> = ({
       <div className="p-2 border-t border-gray-200 bg-gray-50 text-xs text-gray-600">
         <div className="flex justify-between">
           <span>
-            {currentSchema ? (
-              `Database: ${currentSchema.connection.name} | Tables: ${currentSchema.tables.length} | Queries: ${currentSchema.queries.length}`
-            ) : (
-              'No database open'
-            )}
+            {currentSchema
+              ? `Database: ${currentSchema.connection.name} | Tables: ${currentSchema.tables.length} | Queries: ${currentSchema.queries.length}`
+              : 'No database open'}
             {isModified && ' • Modified'}
           </span>
           <span>Visual Data Manager v6.0</span>

@@ -28,7 +28,7 @@ export enum MCIDeviceType {
   Sequencer = 'Sequencer',
   VCR = 'VCR',
   VideoDisc = 'VideoDisc',
-  WaveAudio = 'WaveAudio'
+  WaveAudio = 'WaveAudio',
 }
 
 // MCI Modes
@@ -39,14 +39,14 @@ export enum MCIMode {
   mciModeRecord = 527,
   mciModeSeek = 528,
   mciModePause = 529,
-  mciModeReady = 530
+  mciModeReady = 530,
 }
 
 // Button states
 export enum ButtonState {
   Invisible = 0,
   Disabled = 1,
-  Enabled = 2
+  Enabled = 2,
 }
 
 // Time formats
@@ -61,19 +61,19 @@ export enum MCITimeFormat {
   mciFormatSmpte30Drop = 7,
   mciFormatBytes = 8,
   mciFormatSamples = 9,
-  mciFormatTmsf = 10
+  mciFormatTmsf = 10,
 }
 
 // Record modes
 export enum MCIRecordMode {
   mciRecordInsert = 0,
-  mciRecordOverwrite = 1
+  mciRecordOverwrite = 1,
 }
 
 // Orientation
 export enum MCIOrientation {
   mciOrientHorz = 0,
-  mciOrientVert = 1
+  mciOrientVert = 1,
 }
 
 // Button types
@@ -86,7 +86,7 @@ export enum MCIButton {
   Step = 'step',
   Back = 'back',
   Record = 'record',
-  Eject = 'eject'
+  Eject = 'eject',
 }
 
 export interface MCIError {
@@ -117,7 +117,7 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const progressBarRef = useRef<HTMLDivElement>(null);
     const updateIntervalRef = useRef<NodeJS.Timeout>();
-    
+
     // Control properties
     const [deviceType, setDeviceType] = useState<MCIDeviceType>(
       control.deviceType || MCIDeviceType.WaveAudio
@@ -141,7 +141,7 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
     const [updateInterval, setUpdateInterval] = useState(control.updateInterval || 1000);
     const [borderStyle, setBorderStyle] = useState(control.borderStyle ?? 1);
     const [usesWindows, setUsesWindows] = useState(control.usesWindows !== false);
-    
+
     // Button visibility states
     const [playEnabled, setPlayEnabled] = useState(control.playEnabled ?? ButtonState.Enabled);
     const [pauseEnabled, setPauseEnabled] = useState(control.pauseEnabled ?? ButtonState.Enabled);
@@ -150,9 +150,11 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
     const [prevEnabled, setPrevEnabled] = useState(control.prevEnabled ?? ButtonState.Enabled);
     const [stepEnabled, setStepEnabled] = useState(control.stepEnabled ?? ButtonState.Enabled);
     const [backEnabled, setBackEnabled] = useState(control.backEnabled ?? ButtonState.Enabled);
-    const [recordEnabled, setRecordEnabled] = useState(control.recordEnabled ?? ButtonState.Enabled);
+    const [recordEnabled, setRecordEnabled] = useState(
+      control.recordEnabled ?? ButtonState.Enabled
+    );
     const [ejectEnabled, setEjectEnabled] = useState(control.ejectEnabled ?? ButtonState.Enabled);
-    
+
     // Status
     const [status, setStatus] = useState<MCIStatus>({
       mode: MCIMode.mciModeNotOpen,
@@ -168,18 +170,25 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
       frameRate: 0,
       frames: 0,
       tracks: 1,
-      currentTrack: 1
+      currentTrack: 1,
     });
-    
+
     const [error, setError] = useState<MCIError | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
     // Determine media type
     const getMediaType = useCallback(() => {
       const ext = fileName.toLowerCase().split('.').pop();
-      if (['mp4', 'avi', 'wmv', 'mov', 'webm', 'ogg', 'ogv'].includes(ext || '') ||
-          [MCIDeviceType.AVIVideo, MCIDeviceType.DigitalVideo, MCIDeviceType.MMMovie, 
-           MCIDeviceType.Overlay, MCIDeviceType.VideoDisc].includes(deviceType)) {
+      if (
+        ['mp4', 'avi', 'wmv', 'mov', 'webm', 'ogg', 'ogv'].includes(ext || '') ||
+        [
+          MCIDeviceType.AVIVideo,
+          MCIDeviceType.DigitalVideo,
+          MCIDeviceType.MMMovie,
+          MCIDeviceType.Overlay,
+          MCIDeviceType.VideoDisc,
+        ].includes(deviceType)
+      ) {
         return 'video';
       }
       return 'audio';
@@ -190,12 +199,12 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
       if (fileName && !isDesignMode) {
         loadMedia();
       }
-      
+
       return () => {
         if (updateIntervalRef.current) {
           clearInterval(updateIntervalRef.current);
         }
-        
+
         // Remove event listeners to prevent memory leaks
         if (mediaRef.current) {
           mediaRef.current.removeEventListener('play', handlePlay);
@@ -216,7 +225,7 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
           clearInterval(updateIntervalRef.current);
         }
       }
-      
+
       return () => {
         if (updateIntervalRef.current) {
           clearInterval(updateIntervalRef.current);
@@ -228,16 +237,16 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
       try {
         setIsLoading(true);
         setError(null);
-        
+
         const mediaType = getMediaType();
-        
+
         // Create appropriate media element
         if (mediaType === 'video') {
           const video = document.createElement('video');
           video.src = fileName;
           video.load();
           mediaRef.current = video;
-          
+
           video.addEventListener('loadedmetadata', () => {
             setStatus(prev => ({
               ...prev,
@@ -248,7 +257,7 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
               frameRate: 30, // Default estimate
               frames: Math.floor(video.duration * 30),
               canPlay: true,
-              canStep: true
+              canStep: true,
             }));
             setIsLoading(false);
           });
@@ -257,7 +266,7 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
           audio.src = fileName;
           audio.load();
           mediaRef.current = audio;
-          
+
           audio.addEventListener('loadedmetadata', () => {
             setStatus(prev => ({
               ...prev,
@@ -265,12 +274,12 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
               length: Math.floor(audio.duration * 1000),
               hasAudio: true,
               hasVideo: false,
-              canPlay: true
+              canPlay: true,
             }));
             setIsLoading(false);
           });
         }
-        
+
         // Add common event listeners
         if (mediaRef.current) {
           mediaRef.current.addEventListener('play', handlePlay);
@@ -279,7 +288,7 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
           mediaRef.current.addEventListener('error', handleMediaError);
           mediaRef.current.addEventListener('timeupdate', handleTimeUpdate);
         }
-        
+
         onChange?.({ event: 'OpenCompleted' });
       } catch (err) {
         handleError(1000, `Failed to load media: ${err}`);
@@ -314,7 +323,7 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
       const target = e.target as HTMLMediaElement;
       let errorCode = 1001;
       let errorMsg = 'Unknown media error';
-      
+
       if (target.error) {
         switch (target.error.code) {
           case target.error.MEDIA_ERR_ABORTED:
@@ -335,7 +344,7 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
             break;
         }
       }
-      
+
       handleError(errorCode, errorMsg);
     };
 
@@ -356,26 +365,36 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
     // VB6 Methods implementation
     const vb6Methods = {
       // Properties
-      get DeviceType() { return deviceType; },
+      get DeviceType() {
+        return deviceType;
+      },
       set DeviceType(value: MCIDeviceType) {
         setDeviceType(value);
         control.deviceType = value;
       },
 
-      get FileName() { return fileName; },
+      get FileName() {
+        return fileName;
+      },
       set FileName(value: string) {
         setFileName(value);
         control.fileName = value;
       },
 
-      get Command() { return command; },
+      get Command() {
+        return command;
+      },
       set Command(value: string) {
         setCommand(value);
         executeCommand(value);
       },
 
-      get Mode() { return status.mode; },
-      get Position() { return status.position; },
+      get Mode() {
+        return status.mode;
+      },
+      get Position() {
+        return status.position;
+      },
       set Position(value: number) {
         if (mediaRef.current) {
           mediaRef.current.currentTime = value / 1000;
@@ -383,63 +402,123 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
         }
       },
 
-      get Length() { return status.length; },
-      get Start() { return status.start; },
+      get Length() {
+        return status.length;
+      },
+      get Start() {
+        return status.start;
+      },
       set Start(value: number) {
         setStatus(prev => ({ ...prev, start: value }));
       },
 
-      get Tracks() { return status.tracks; },
-      get Track() { return status.currentTrack; },
+      get Tracks() {
+        return status.tracks;
+      },
+      get Track() {
+        return status.currentTrack;
+      },
       set Track(value: number) {
         setStatus(prev => ({ ...prev, currentTrack: value }));
       },
 
-      get CanPlay() { return status.canPlay; },
-      get CanRecord() { return status.canRecord; },
-      get CanEject() { return status.canEject; },
-      get CanStep() { return status.canStep; },
+      get CanPlay() {
+        return status.canPlay;
+      },
+      get CanRecord() {
+        return status.canRecord;
+      },
+      get CanEject() {
+        return status.canEject;
+      },
+      get CanStep() {
+        return status.canStep;
+      },
 
-      get TimeFormat() { return timeFormat; },
+      get TimeFormat() {
+        return timeFormat;
+      },
       set TimeFormat(value: MCITimeFormat) {
         setTimeFormat(value);
       },
 
-      get UpdateInterval() { return updateInterval; },
+      get UpdateInterval() {
+        return updateInterval;
+      },
       set UpdateInterval(value: number) {
         setUpdateInterval(value);
       },
 
-      get Error() { return error; },
-      get ErrorString() { return error?.description || ''; },
+      get Error() {
+        return error;
+      },
+      get ErrorString() {
+        return error?.description || '';
+      },
 
       // Button properties
-      get PlayEnabled() { return playEnabled; },
-      set PlayEnabled(value: ButtonState) { setPlayEnabled(value); },
+      get PlayEnabled() {
+        return playEnabled;
+      },
+      set PlayEnabled(value: ButtonState) {
+        setPlayEnabled(value);
+      },
 
-      get PauseEnabled() { return pauseEnabled; },
-      set PauseEnabled(value: ButtonState) { setPauseEnabled(value); },
+      get PauseEnabled() {
+        return pauseEnabled;
+      },
+      set PauseEnabled(value: ButtonState) {
+        setPauseEnabled(value);
+      },
 
-      get StopEnabled() { return stopEnabled; },
-      set StopEnabled(value: ButtonState) { setStopEnabled(value); },
+      get StopEnabled() {
+        return stopEnabled;
+      },
+      set StopEnabled(value: ButtonState) {
+        setStopEnabled(value);
+      },
 
-      get NextEnabled() { return nextEnabled; },
-      set NextEnabled(value: ButtonState) { setNextEnabled(value); },
+      get NextEnabled() {
+        return nextEnabled;
+      },
+      set NextEnabled(value: ButtonState) {
+        setNextEnabled(value);
+      },
 
-      get PrevEnabled() { return prevEnabled; },
-      set PrevEnabled(value: ButtonState) { setPrevEnabled(value); },
+      get PrevEnabled() {
+        return prevEnabled;
+      },
+      set PrevEnabled(value: ButtonState) {
+        setPrevEnabled(value);
+      },
 
-      get StepEnabled() { return stepEnabled; },
-      set StepEnabled(value: ButtonState) { setStepEnabled(value); },
+      get StepEnabled() {
+        return stepEnabled;
+      },
+      set StepEnabled(value: ButtonState) {
+        setStepEnabled(value);
+      },
 
-      get BackEnabled() { return backEnabled; },
-      set BackEnabled(value: ButtonState) { setBackEnabled(value); },
+      get BackEnabled() {
+        return backEnabled;
+      },
+      set BackEnabled(value: ButtonState) {
+        setBackEnabled(value);
+      },
 
-      get RecordEnabled() { return recordEnabled; },
-      set RecordEnabled(value: ButtonState) { setRecordEnabled(value); },
+      get RecordEnabled() {
+        return recordEnabled;
+      },
+      set RecordEnabled(value: ButtonState) {
+        setRecordEnabled(value);
+      },
 
-      get EjectEnabled() { return ejectEnabled; },
-      set EjectEnabled(value: ButtonState) { setEjectEnabled(value); },
+      get EjectEnabled() {
+        return ejectEnabled;
+      },
+      set EjectEnabled(value: ButtonState) {
+        setEjectEnabled(value);
+      },
 
       // Methods
       AboutBox: () => {
@@ -498,7 +577,6 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
 
       Record: () => {
         // Recording would require WebRTC APIs
-        console.log('Recording not implemented in web environment');
         onChange?.({ event: 'RecordCompleted' });
       },
 
@@ -520,7 +598,7 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
             frameRate: 0,
             frames: 0,
             tracks: 1,
-            currentTrack: 1
+            currentTrack: 1,
           });
           onChange?.({ event: 'EjectCompleted' });
         }
@@ -546,14 +624,14 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
             const seconds = Math.floor((time % 60000) / 1000);
             return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
           }
-          
+
           case MCITimeFormat.mciFormatMsf: {
             const mins = Math.floor(time / 60000);
             const secs = Math.floor((time % 60000) / 1000);
             const frames = Math.floor((time % 1000) / (1000 / 75)); // CD audio frames
             return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}:${frames.toString().padStart(2, '0')}`;
           }
-          
+
           default:
             return time.toString();
         }
@@ -565,22 +643,22 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
             const [h, m, s] = timeStr.split(':').map(Number);
             return (h * 3600 + m * 60 + s) * 1000;
           }
-          
+
           case MCITimeFormat.mciFormatMsf: {
             const [min, sec, frame] = timeStr.split(':').map(Number);
-            return (min * 60 + sec) * 1000 + (frame * 1000 / 75);
+            return (min * 60 + sec) * 1000 + (frame * 1000) / 75;
           }
-          
+
           default:
             return parseInt(timeStr) || 0;
         }
-      }
+      },
     };
 
     // Command execution
     const executeCommand = (cmd: string) => {
       const cmdLower = cmd.toLowerCase();
-      
+
       if (cmdLower.includes('play')) {
         vb6Methods.Play();
       } else if (cmdLower.includes('pause')) {
@@ -602,7 +680,7 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
     // Button click handlers
     const handleButtonClick = (button: MCIButton) => {
       if (isDesignMode) return;
-      
+
       switch (button) {
         case MCIButton.Play:
           vb6Methods.Play();
@@ -659,7 +737,7 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
       fontSize: '8pt',
       cursor: isDesignMode ? 'default' : 'auto',
       opacity: control.visible !== false ? 1 : 0,
-      zIndex: control.zIndex || 'auto'
+      zIndex: control.zIndex || 'auto',
     };
 
     const buttonStyle = (enabled: ButtonState): React.CSSProperties => ({
@@ -675,7 +753,7 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
       fontWeight: 'bold',
       opacity: enabled === ButtonState.Disabled ? 0.5 : 1,
       boxShadow: 'inset 1px 1px 0 #ffffff, inset -1px -1px 0 #808080',
-      userSelect: 'none'
+      userSelect: 'none',
     });
 
     const progressStyle: React.CSSProperties = {
@@ -685,7 +763,7 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
       backgroundColor: '#000000',
       border: '1px solid #808080',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'hidden',
     };
 
     const progressBarStyle: React.CSSProperties = {
@@ -695,7 +773,7 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
       bottom: 0,
       width: status.length > 0 ? `${(status.position / status.length) * 100}%` : '0%',
       backgroundColor: '#00FF00',
-      transition: 'width 0.1s linear'
+      transition: 'width 0.1s linear',
     };
 
     const renderButton = (button: MCIButton, enabled: ButtonState, symbol: string) => (
@@ -728,20 +806,22 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
         {renderButton(MCIButton.Next, nextEnabled, '▶|')}
         {renderButton(MCIButton.Record, recordEnabled, '●')}
         {renderButton(MCIButton.Eject, ejectEnabled, '⏏')}
-        
+
         {/* Progress bar */}
         <div style={progressStyle}>
           <div ref={progressBarRef} style={progressBarStyle} />
           {isLoading && (
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#FFFFFF',
-              fontSize: '10px'
-            }}>
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#FFFFFF',
+                fontSize: '10px',
+              }}
+            >
               Loading...
             </div>
           )}
@@ -749,15 +829,9 @@ export const MCIMultimediaControl = forwardRef<HTMLDivElement, MCIMultimediaCont
 
         {/* Hidden media element */}
         {status.hasVideo && usesWindows ? (
-          <video
-            ref={mediaRef as React.RefObject<HTMLVideoElement>}
-            style={{ display: 'none' }}
-          />
+          <video ref={mediaRef as React.RefObject<HTMLVideoElement>} style={{ display: 'none' }} />
         ) : (
-          <audio
-            ref={mediaRef as React.RefObject<HTMLAudioElement>}
-            style={{ display: 'none' }}
-          />
+          <audio ref={mediaRef as React.RefObject<HTMLAudioElement>} style={{ display: 'none' }} />
         )}
       </div>
     );

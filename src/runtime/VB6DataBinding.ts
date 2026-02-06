@@ -9,7 +9,16 @@
 
 export interface DataField {
   name: string;
-  type: 'String' | 'Integer' | 'Long' | 'Single' | 'Double' | 'Currency' | 'Date' | 'Boolean' | 'Variant';
+  type:
+    | 'String'
+    | 'Integer'
+    | 'Long'
+    | 'Single'
+    | 'Double'
+    | 'Currency'
+    | 'Date'
+    | 'Boolean'
+    | 'Variant';
   value: any;
   originalValue?: any;
   isNull: boolean;
@@ -204,7 +213,7 @@ export class VB6Recordset {
       eventType: 'WillChangeField',
       field: fieldName,
       oldValue,
-      newValue: value
+      newValue: value,
     };
     this.raiseEvent('WillChangeField', args);
 
@@ -222,7 +231,7 @@ export class VB6Recordset {
       eventType: 'FieldChangeComplete',
       field: fieldName,
       oldValue,
-      newValue: value
+      newValue: value,
     });
   }
 
@@ -266,7 +275,7 @@ export class VB6Recordset {
     // Fire WillMove event
     const args: DataBindingEventArgs = {
       eventType: 'WillMove',
-      recordIndex: index
+      recordIndex: index,
     };
     this.raiseEvent('WillMove', args);
 
@@ -283,13 +292,13 @@ export class VB6Recordset {
     // Fire MoveComplete/Reposition events
     this.raiseEvent('MoveComplete', {
       eventType: 'MoveComplete',
-      recordIndex: this._currentIndex
+      recordIndex: this._currentIndex,
     });
 
     if (oldIndex !== this._currentIndex) {
       this.raiseEvent('Reposition', {
         eventType: 'Reposition',
-        recordIndex: this._currentIndex
+        recordIndex: this._currentIndex,
       });
     }
   }
@@ -319,7 +328,7 @@ export class VB6Recordset {
 
     this.raiseEvent('WillChangeRecord', {
       eventType: 'WillChangeRecord',
-      recordIndex: -1
+      recordIndex: -1,
     });
   }
 
@@ -333,7 +342,7 @@ export class VB6Recordset {
 
     // Fire Validate event
     const validateArgs: DataBindingEventArgs = {
-      eventType: 'Validate'
+      eventType: 'Validate',
     };
     this.raiseEvent('Validate', validateArgs);
 
@@ -346,9 +355,10 @@ export class VB6Recordset {
       this.applyFilter();
       this._currentIndex = this.getFilteredRecords().length - 1;
     } else {
-      const actualIndex = this._filteredIndices.length > 0
-        ? this._filteredIndices[this._currentIndex]
-        : this._currentIndex;
+      const actualIndex =
+        this._filteredIndices.length > 0
+          ? this._filteredIndices[this._currentIndex]
+          : this._currentIndex;
       this._records[actualIndex] = this._pendingRecord;
     }
 
@@ -358,7 +368,7 @@ export class VB6Recordset {
 
     this.raiseEvent('RecordChangeComplete', {
       eventType: 'RecordChangeComplete',
-      recordIndex: this._currentIndex
+      recordIndex: this._currentIndex,
     });
   }
 
@@ -381,15 +391,16 @@ export class VB6Recordset {
 
     const args: DataBindingEventArgs = {
       eventType: 'WillChangeRecord',
-      recordIndex: this._currentIndex
+      recordIndex: this._currentIndex,
     };
     this.raiseEvent('WillChangeRecord', args);
 
     if (args.cancel) return;
 
-    const actualIndex = this._filteredIndices.length > 0
-      ? this._filteredIndices[this._currentIndex]
-      : this._currentIndex;
+    const actualIndex =
+      this._filteredIndices.length > 0
+        ? this._filteredIndices[this._currentIndex]
+        : this._currentIndex;
 
     this._records.splice(actualIndex, 1);
     this.applyFilter();
@@ -400,7 +411,7 @@ export class VB6Recordset {
 
     this.raiseEvent('RecordChangeComplete', {
       eventType: 'RecordChangeComplete',
-      recordIndex: this._currentIndex
+      recordIndex: this._currentIndex,
     });
   }
 
@@ -417,7 +428,7 @@ export class VB6Recordset {
       type,
       value: null,
       isNull: true,
-      ...options
+      ...options,
     };
     this._fields.set(name, field);
   }
@@ -490,9 +501,14 @@ export class VB6Recordset {
   /**
    * Find record matching criteria
    */
-  Find(criteria: string, skipRecords: number = 0, searchDirection: 'Forward' | 'Backward' = 'Forward'): boolean {
+  Find(
+    criteria: string,
+    skipRecords: number = 0,
+    searchDirection: 'Forward' | 'Backward' = 'Forward'
+  ): boolean {
     const records = this.getFilteredRecords();
-    const startIndex = this._currentIndex + (searchDirection === 'Forward' ? skipRecords + 1 : -skipRecords - 1);
+    const startIndex =
+      this._currentIndex + (searchDirection === 'Forward' ? skipRecords + 1 : -skipRecords - 1);
 
     // Simple criteria parser (field = value)
     const match = criteria.match(/^(\w+)\s*(=|<>|<|>|<=|>=|LIKE)\s*(.+)$/i);
@@ -628,16 +644,17 @@ export class VB6Recordset {
       if (match) {
         sortFields.push({
           field: match[1],
-          descending: match[2]?.toUpperCase() === 'DESC'
+          descending: match[2]?.toUpperCase() === 'DESC',
         });
       }
     }
 
     if (sortFields.length === 0) return;
 
-    const indicesToSort = this._filteredIndices.length > 0
-      ? [...this._filteredIndices]
-      : this._records.map((_, i) => i);
+    const indicesToSort =
+      this._filteredIndices.length > 0
+        ? [...this._filteredIndices]
+        : this._records.map((_, i) => i);
 
     indicesToSort.sort((a, b) => {
       for (const { field, descending } of sortFields) {
@@ -660,12 +677,18 @@ export class VB6Recordset {
 
   private matchesCriteria(value: any, operator: string, target: any): boolean {
     switch (operator.toUpperCase()) {
-      case '=': return value === target;
-      case '<>': return value !== target;
-      case '<': return value < target;
-      case '>': return value > target;
-      case '<=': return value <= target;
-      case '>=': return value >= target;
+      case '=':
+        return value === target;
+      case '<>':
+        return value !== target;
+      case '<':
+        return value < target;
+      case '>':
+        return value > target;
+      case '<=':
+        return value <= target;
+      case '>=':
+        return value >= target;
       case 'LIKE':
         const pattern = String(target)
           .replace(/%/g, '.*')
@@ -680,8 +703,10 @@ export class VB6Recordset {
 
   private parseValue(valueStr: string): any {
     // String literal
-    if ((valueStr.startsWith("'") && valueStr.endsWith("'")) ||
-        (valueStr.startsWith('"') && valueStr.endsWith('"'))) {
+    if (
+      (valueStr.startsWith("'") && valueStr.endsWith("'")) ||
+      (valueStr.startsWith('"') && valueStr.endsWith('"'))
+    ) {
       return valueStr.slice(1, -1);
     }
 
@@ -722,15 +747,23 @@ export class VB6Recordset {
     if (value === null || value === undefined) return null;
 
     switch (type) {
-      case 'String': return String(value);
-      case 'Integer': return Math.round(Math.max(-32768, Math.min(32767, Number(value))));
-      case 'Long': return Math.round(Number(value));
+      case 'String':
+        return String(value);
+      case 'Integer':
+        return Math.round(Math.max(-32768, Math.min(32767, Number(value))));
+      case 'Long':
+        return Math.round(Number(value));
       case 'Single':
-      case 'Double': return Number(value);
-      case 'Currency': return Math.round(Number(value) * 10000) / 10000;
-      case 'Boolean': return Boolean(value);
-      case 'Date': return value instanceof Date ? value : new Date(value);
-      default: return value;
+      case 'Double':
+        return Number(value);
+      case 'Currency':
+        return Math.round(Number(value) * 10000) / 10000;
+      case 'Boolean':
+        return Boolean(value);
+      case 'Date':
+        return value instanceof Date ? value : new Date(value);
+      default:
+        return value;
     }
   }
 
@@ -744,15 +777,20 @@ export class VB6Recordset {
 
   private getDefaultValue(type: DataField['type']): any {
     switch (type) {
-      case 'String': return '';
+      case 'String':
+        return '';
       case 'Integer':
       case 'Long':
       case 'Single':
       case 'Double':
-      case 'Currency': return 0;
-      case 'Boolean': return false;
-      case 'Date': return new Date();
-      default: return null;
+      case 'Currency':
+        return 0;
+      case 'Boolean':
+        return false;
+      case 'Date':
+        return new Date();
+      default:
+        return null;
     }
   }
 }
@@ -774,7 +812,7 @@ export class VB6DataSource {
 
     // Set up recordset event handlers
     this._recordset.On('Reposition', () => this.updateBoundControls());
-    this._recordset.On('FieldChangeComplete', (args) => {
+    this._recordset.On('FieldChangeComplete', args => {
       if (args.field) {
         this.updateBoundControl(args.field);
       }
@@ -953,7 +991,7 @@ export class VB6DataBindingManager {
       updateMode,
       getValue,
       setValue,
-      setEnabled
+      setEnabled,
     };
 
     dataSource.BindControl(boundControl);
@@ -1128,5 +1166,5 @@ export default {
   DataAddNew,
   DataDelete,
   DataUpdate,
-  DataRefresh
+  DataRefresh,
 };

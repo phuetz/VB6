@@ -15,7 +15,7 @@ export enum DataConnectionType {
   ADO = 'ado',
   DAO = 'dao',
   RDO = 'rdo',
-  DIRECT = 'direct'
+  DIRECT = 'direct',
 }
 
 export enum DataCommandType {
@@ -23,20 +23,20 @@ export enum DataCommandType {
   VIEW = 'view',
   STORED_PROCEDURE = 'stored_procedure',
   SQL_STATEMENT = 'sql_statement',
-  COMMAND_TEXT = 'command_text'
+  COMMAND_TEXT = 'command_text',
 }
 
 export enum DataRelationType {
   ONE_TO_ONE = 'one_to_one',
   ONE_TO_MANY = 'one_to_many',
-  MANY_TO_MANY = 'many_to_many'
+  MANY_TO_MANY = 'many_to_many',
 }
 
 export enum ParameterDirection {
   INPUT = 'input',
   OUTPUT = 'output',
   INPUT_OUTPUT = 'input_output',
-  RETURN_VALUE = 'return_value'
+  RETURN_VALUE = 'return_value',
 }
 
 export interface DataConnection {
@@ -44,7 +44,7 @@ export interface DataConnection {
   name: string;
   displayName: string;
   type: DataConnectionType;
-  
+
   // Connection properties
   provider: string;
   dataSource: string;
@@ -52,31 +52,31 @@ export interface DataConnection {
   serverName?: string;
   databaseName?: string;
   fileName?: string;
-  
+
   // Authentication
   userId?: string;
   password?: string;
   integratedSecurity: boolean;
   persistSecurityInfo: boolean;
-  
+
   // Connection options
   connectionTimeout: number;
   commandTimeout: number;
   cursorLocation: 'client' | 'server';
   lockType: 'optimistic' | 'pessimistic' | 'readonly' | 'batch_optimistic';
-  
+
   // Status
   state: 'closed' | 'open' | 'connecting' | 'executing' | 'fetching' | 'broken';
   lastError?: string;
-  
+
   // Connection string
   connectionString: string;
-  
+
   // Metadata
   created: Date;
   modified: Date;
   lastUsed?: Date;
-  
+
   // Commands and relations
   commands: DataCommand[];
   relations: DataRelation[];
@@ -88,26 +88,26 @@ export interface DataCommand {
   displayName: string;
   type: DataCommandType;
   connectionId: string;
-  
+
   // Command definition
   commandText: string;
   tableName?: string;
   storedProcedureName?: string;
-  
+
   // Parameters
   parameters: DataParameter[];
-  
+
   // Recordset properties
   cursorType: 'forward_only' | 'keyset' | 'dynamic' | 'static';
   lockType: 'readonly' | 'pessimistic' | 'optimistic' | 'batch_optimistic';
-  
+
   // Options
   prepared: boolean;
   activeConnection?: string;
-  
+
   // Fields information
   fields: DataField[];
-  
+
   // Metadata
   created: Date;
   modified: Date;
@@ -176,27 +176,27 @@ export enum DataFieldType {
   LONGVARWCHAR = 'longvarwchar',
   BINARY = 'binary',
   VARBINARY = 'varbinary',
-  LONGVARBINARY = 'longvarbinary'
+  LONGVARBINARY = 'longvarbinary',
 }
 
 export interface DataRelation {
   id: string;
   name: string;
   type: DataRelationType;
-  
+
   // Parent command/table
   parentCommandId: string;
   parentFields: string[];
-  
+
   // Child command/table
   childCommandId: string;
   childFields: string[];
-  
+
   // Relation properties
   cascadeUpdate: boolean;
   cascadeDelete: boolean;
   enforceConstraints: boolean;
-  
+
   // Metadata
   created: Date;
   modified: Date;
@@ -207,11 +207,11 @@ export interface DataEnvironment {
   name: string;
   description: string;
   version: string;
-  
+
   // Connections
   connections: Map<string, DataConnection>;
   defaultConnection?: string;
-  
+
   // Global settings
   settings: {
     autoCommit: boolean;
@@ -220,7 +220,7 @@ export interface DataEnvironment {
     loginTimeout: number;
     queryTimeout: number;
   };
-  
+
   // Metadata
   created: Date;
   modified: Date;
@@ -228,7 +228,13 @@ export interface DataEnvironment {
 }
 
 export interface DataEnvironmentEvent {
-  type: 'connection_open' | 'connection_close' | 'command_execute' | 'recordset_open' | 'recordset_close' | 'error';
+  type:
+    | 'connection_open'
+    | 'connection_close'
+    | 'command_execute'
+    | 'recordset_open'
+    | 'recordset_close'
+    | 'error';
   source: string;
   data: DataEnvEventPayload;
   timestamp: Date;
@@ -270,11 +276,11 @@ export class VB6DataEnvironment {
         cursorLocation: 'client',
         isolationLevel: 'read_committed',
         loginTimeout: 15,
-        queryTimeout: 30
+        queryTimeout: 30,
       },
       created: new Date('2002-01-01'),
       modified: new Date(),
-      author: 'System'
+      author: 'System',
     };
 
     // Create sample connection
@@ -292,11 +298,12 @@ export class VB6DataEnvironment {
       cursorLocation: 'client',
       lockType: 'optimistic',
       state: 'closed',
-      connectionString: 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\\Program Files\\Microsoft Visual Studio\\VB98\\Nwind.mdb;Persist Security Info=False',
+      connectionString:
+        'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\\Program Files\\Microsoft Visual Studio\\VB98\\Nwind.mdb;Persist Security Info=False',
       created: new Date('2002-01-01'),
       modified: new Date(),
       commands: [],
-      relations: []
+      relations: [],
     };
 
     // Create sample commands
@@ -313,20 +320,97 @@ export class VB6DataEnvironment {
       lockType: 'optimistic',
       prepared: false,
       fields: [
-        { name: 'CustomerID', type: DataFieldType.CHAR, size: 5, allowNull: false, primaryKey: true, autoIncrement: false },
-        { name: 'CompanyName', type: DataFieldType.VARCHAR, size: 40, allowNull: false, primaryKey: false, autoIncrement: false },
-        { name: 'ContactName', type: DataFieldType.VARCHAR, size: 30, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'ContactTitle', type: DataFieldType.VARCHAR, size: 30, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'Address', type: DataFieldType.VARCHAR, size: 60, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'City', type: DataFieldType.VARCHAR, size: 15, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'Region', type: DataFieldType.VARCHAR, size: 15, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'PostalCode', type: DataFieldType.VARCHAR, size: 10, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'Country', type: DataFieldType.VARCHAR, size: 15, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'Phone', type: DataFieldType.VARCHAR, size: 24, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'Fax', type: DataFieldType.VARCHAR, size: 24, allowNull: true, primaryKey: false, autoIncrement: false }
+        {
+          name: 'CustomerID',
+          type: DataFieldType.CHAR,
+          size: 5,
+          allowNull: false,
+          primaryKey: true,
+          autoIncrement: false,
+        },
+        {
+          name: 'CompanyName',
+          type: DataFieldType.VARCHAR,
+          size: 40,
+          allowNull: false,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'ContactName',
+          type: DataFieldType.VARCHAR,
+          size: 30,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'ContactTitle',
+          type: DataFieldType.VARCHAR,
+          size: 30,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'Address',
+          type: DataFieldType.VARCHAR,
+          size: 60,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'City',
+          type: DataFieldType.VARCHAR,
+          size: 15,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'Region',
+          type: DataFieldType.VARCHAR,
+          size: 15,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'PostalCode',
+          type: DataFieldType.VARCHAR,
+          size: 10,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'Country',
+          type: DataFieldType.VARCHAR,
+          size: 15,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'Phone',
+          type: DataFieldType.VARCHAR,
+          size: 24,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'Fax',
+          type: DataFieldType.VARCHAR,
+          size: 24,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
       ],
       created: new Date('2002-01-01'),
-      modified: new Date()
+      modified: new Date(),
     };
 
     const ordersCommand: DataCommand = {
@@ -342,23 +426,122 @@ export class VB6DataEnvironment {
       lockType: 'optimistic',
       prepared: false,
       fields: [
-        { name: 'OrderID', type: DataFieldType.INTEGER, size: 4, allowNull: false, primaryKey: true, autoIncrement: true },
-        { name: 'CustomerID', type: DataFieldType.CHAR, size: 5, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'EmployeeID', type: DataFieldType.INTEGER, size: 4, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'OrderDate', type: DataFieldType.DBTIMESTAMP, size: 8, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'RequiredDate', type: DataFieldType.DBTIMESTAMP, size: 8, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'ShippedDate', type: DataFieldType.DBTIMESTAMP, size: 8, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'ShipVia', type: DataFieldType.INTEGER, size: 4, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'Freight', type: DataFieldType.CURRENCY, size: 8, allowNull: true, primaryKey: false, autoIncrement: false, defaultValue: 0 },
-        { name: 'ShipName', type: DataFieldType.VARCHAR, size: 40, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'ShipAddress', type: DataFieldType.VARCHAR, size: 60, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'ShipCity', type: DataFieldType.VARCHAR, size: 15, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'ShipRegion', type: DataFieldType.VARCHAR, size: 15, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'ShipPostalCode', type: DataFieldType.VARCHAR, size: 10, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'ShipCountry', type: DataFieldType.VARCHAR, size: 15, allowNull: true, primaryKey: false, autoIncrement: false }
+        {
+          name: 'OrderID',
+          type: DataFieldType.INTEGER,
+          size: 4,
+          allowNull: false,
+          primaryKey: true,
+          autoIncrement: true,
+        },
+        {
+          name: 'CustomerID',
+          type: DataFieldType.CHAR,
+          size: 5,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'EmployeeID',
+          type: DataFieldType.INTEGER,
+          size: 4,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'OrderDate',
+          type: DataFieldType.DBTIMESTAMP,
+          size: 8,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'RequiredDate',
+          type: DataFieldType.DBTIMESTAMP,
+          size: 8,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'ShippedDate',
+          type: DataFieldType.DBTIMESTAMP,
+          size: 8,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'ShipVia',
+          type: DataFieldType.INTEGER,
+          size: 4,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'Freight',
+          type: DataFieldType.CURRENCY,
+          size: 8,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+          defaultValue: 0,
+        },
+        {
+          name: 'ShipName',
+          type: DataFieldType.VARCHAR,
+          size: 40,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'ShipAddress',
+          type: DataFieldType.VARCHAR,
+          size: 60,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'ShipCity',
+          type: DataFieldType.VARCHAR,
+          size: 15,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'ShipRegion',
+          type: DataFieldType.VARCHAR,
+          size: 15,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'ShipPostalCode',
+          type: DataFieldType.VARCHAR,
+          size: 10,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'ShipCountry',
+          type: DataFieldType.VARCHAR,
+          size: 15,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
       ],
       created: new Date('2002-01-01'),
-      modified: new Date()
+      modified: new Date(),
     };
 
     const customerOrdersCommand: DataCommand = {
@@ -378,21 +561,56 @@ export class VB6DataEnvironment {
           type: DataFieldType.CHAR,
           size: 5,
           allowNull: false,
-          defaultValue: 'ALFKI'
-        }
+          defaultValue: 'ALFKI',
+        },
       ],
       cursorType: 'forward_only',
       lockType: 'readonly',
       prepared: true,
       fields: [
-        { name: 'CompanyName', type: DataFieldType.VARCHAR, size: 40, allowNull: false, primaryKey: false, autoIncrement: false },
-        { name: 'ContactName', type: DataFieldType.VARCHAR, size: 30, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'OrderID', type: DataFieldType.INTEGER, size: 4, allowNull: false, primaryKey: false, autoIncrement: false },
-        { name: 'OrderDate', type: DataFieldType.DBTIMESTAMP, size: 8, allowNull: true, primaryKey: false, autoIncrement: false },
-        { name: 'Freight', type: DataFieldType.CURRENCY, size: 8, allowNull: true, primaryKey: false, autoIncrement: false }
+        {
+          name: 'CompanyName',
+          type: DataFieldType.VARCHAR,
+          size: 40,
+          allowNull: false,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'ContactName',
+          type: DataFieldType.VARCHAR,
+          size: 30,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'OrderID',
+          type: DataFieldType.INTEGER,
+          size: 4,
+          allowNull: false,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'OrderDate',
+          type: DataFieldType.DBTIMESTAMP,
+          size: 8,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
+        {
+          name: 'Freight',
+          type: DataFieldType.CURRENCY,
+          size: 8,
+          allowNull: true,
+          primaryKey: false,
+          autoIncrement: false,
+        },
       ],
       created: new Date('2002-01-01'),
-      modified: new Date()
+      modified: new Date(),
     };
 
     // Add commands to connection
@@ -411,7 +629,7 @@ export class VB6DataEnvironment {
       cascadeDelete: false,
       enforceConstraints: true,
       created: new Date('2002-01-01'),
-      modified: new Date()
+      modified: new Date(),
     };
 
     northwindConnection.relations = [customerOrdersRelation];
@@ -438,11 +656,11 @@ export class VB6DataEnvironment {
         cursorLocation: 'client',
         isolationLevel: 'read_committed',
         loginTimeout: 15,
-        queryTimeout: 30
+        queryTimeout: 30,
       },
       created: new Date(),
       modified: new Date(),
-      author
+      author,
     };
 
     this.environments.set(environment.id, environment);
@@ -491,7 +709,9 @@ export class VB6DataEnvironment {
   }
 
   // Connection Management
-  addConnection(connection: Omit<DataConnection, 'id' | 'created' | 'modified' | 'commands' | 'relations'>): DataConnection {
+  addConnection(
+    connection: Omit<DataConnection, 'id' | 'created' | 'modified' | 'commands' | 'relations'>
+  ): DataConnection {
     if (!this.currentEnvironment) {
       throw new Error('No environment is currently open');
     }
@@ -502,7 +722,7 @@ export class VB6DataEnvironment {
       created: new Date(),
       modified: new Date(),
       commands: [],
-      relations: []
+      relations: [],
     };
 
     this.currentEnvironment.connections.set(newConnection.id, newConnection);
@@ -543,10 +763,10 @@ export class VB6DataEnvironment {
 
     try {
       connection.state = 'connecting';
-      
+
       // Simulate connection process
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       connection.state = 'open';
       connection.lastUsed = new Date();
 
@@ -574,7 +794,7 @@ export class VB6DataEnvironment {
   }
 
   testConnection(connectionId: string): Promise<boolean> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const connection = this.getConnection(connectionId);
       if (!connection) {
         resolve(false);
@@ -598,7 +818,10 @@ export class VB6DataEnvironment {
   }
 
   // Command Management
-  addCommand(connectionId: string, command: Omit<DataCommand, 'id' | 'connectionId' | 'created' | 'modified'>): DataCommand {
+  addCommand(
+    connectionId: string,
+    command: Omit<DataCommand, 'id' | 'connectionId' | 'created' | 'modified'>
+  ): DataCommand {
     const connection = this.getConnection(connectionId);
     if (!connection) {
       throw new Error(`Connection ${connectionId} not found`);
@@ -609,12 +832,12 @@ export class VB6DataEnvironment {
       id: `cmd-${Date.now()}`,
       connectionId,
       created: new Date(),
-      modified: new Date()
+      modified: new Date(),
     };
 
     connection.commands.push(newCommand);
     connection.modified = new Date();
-    
+
     if (this.currentEnvironment) {
       this.currentEnvironment.modified = new Date();
     }
@@ -631,7 +854,7 @@ export class VB6DataEnvironment {
 
     connection.commands.splice(commandIndex, 1);
     connection.modified = new Date();
-    
+
     if (this.currentEnvironment) {
       this.currentEnvironment.modified = new Date();
     }
@@ -642,14 +865,18 @@ export class VB6DataEnvironment {
   getCommand(connectionId: string, commandId: string): DataCommand | null {
     const connection = this.getConnection(connectionId);
     if (!connection) return null;
-    
+
     return connection.commands.find(cmd => cmd.id === commandId) || null;
   }
 
-  async executeCommand(connectionId: string, commandId: string, parameters?: Map<string, DataParameterValue>): Promise<DataEnvRecord[]> {
+  async executeCommand(
+    connectionId: string,
+    commandId: string,
+    parameters?: Map<string, DataParameterValue>
+  ): Promise<DataEnvRecord[]> {
     const connection = this.getConnection(connectionId);
     const command = this.getCommand(connectionId, commandId);
-    
+
     if (!connection || !command) {
       throw new Error('Connection or command not found');
     }
@@ -668,7 +895,9 @@ export class VB6DataEnvironment {
       // Set parameters if provided
       if (parameters) {
         for (const [paramName, value] of parameters) {
-          const param = command.parameters.find(p => p.name === paramName || p.name === `@${paramName}`);
+          const param = command.parameters.find(
+            p => p.name === paramName || p.name === `@${paramName}`
+          );
           if (param) {
             param.value = value;
           }
@@ -683,7 +912,11 @@ export class VB6DataEnvironment {
       command.recordCount = sampleData.length;
 
       connection.state = 'open';
-      this.fireEvent('command_execute', commandId, { command, connection, recordCount: sampleData.length });
+      this.fireEvent('command_execute', commandId, {
+        command,
+        connection,
+        recordCount: sampleData.length,
+      });
 
       logger.info(`Executed command: ${command.name} (${sampleData.length} records)`);
       return sampleData;
@@ -739,7 +972,11 @@ export class VB6DataEnvironment {
       case DataFieldType.CHAR:
       case DataFieldType.BSTR: {
         const strings = ['Sample', 'Test', 'Data', 'Value', 'Example', 'Demo', 'Item'];
-        return strings[Math.floor(Math.random() * strings.length)] + ' ' + (Math.floor(Math.random() * 100) + 1);
+        return (
+          strings[Math.floor(Math.random() * strings.length)] +
+          ' ' +
+          (Math.floor(Math.random() * 100) + 1)
+        );
       }
 
       default:
@@ -757,7 +994,7 @@ export class VB6DataEnvironment {
       ...relation,
       id: `rel-${Date.now()}`,
       created: new Date(),
-      modified: new Date()
+      modified: new Date(),
     };
 
     // Add relation to appropriate connection
@@ -817,12 +1054,16 @@ export class VB6DataEnvironment {
     }
   }
 
-  private fireEvent(type: DataEnvironmentEvent['type'], source: string, data: DataEnvEventPayload): void {
+  private fireEvent(
+    type: DataEnvironmentEvent['type'],
+    source: string,
+    data: DataEnvEventPayload
+  ): void {
     const event: DataEnvironmentEvent = {
       type,
       source,
       data,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     const handlers = this.eventHandlers.get(type);
@@ -891,7 +1132,9 @@ export class VB6DataEnvironment {
     const hasValidStarter = validStarters.some(starter => sqlUpper.startsWith(starter));
 
     if (!hasValidStarter) {
-      errors.push('SQL statement must start with a valid command (SELECT, INSERT, UPDATE, DELETE, EXEC)');
+      errors.push(
+        'SQL statement must start with a valid command (SELECT, INSERT, UPDATE, DELETE, EXEC)'
+      );
     }
 
     // Check for balanced parentheses
@@ -909,12 +1152,7 @@ export class VB6DataEnvironment {
     }
 
     // Check for basic SQL injection patterns (simple check)
-    const suspiciousPatterns = [
-      /;\s*(DROP|DELETE|TRUNCATE)/i,
-      /UNION\s+SELECT/i,
-      /--/,
-      /\/\*/
-    ];
+    const suspiciousPatterns = [/;\s*(DROP|DELETE|TRUNCATE)/i, /UNION\s+SELECT/i, /--/, /\/\*/];
 
     for (const pattern of suspiciousPatterns) {
       if (pattern.test(sql)) {
@@ -941,7 +1179,7 @@ export class VB6DataEnvironment {
       totalCommands: 0,
       totalRelations: 0,
       connectionsByType: new Map<DataConnectionType, number>(),
-      commandsByType: new Map<DataCommandType, number>()
+      commandsByType: new Map<DataCommandType, number>(),
     };
 
     for (const env of this.environments.values()) {
@@ -986,7 +1224,7 @@ export class VB6DataEnvironment {
             cursorLocation: 'client',
             lockType: 'optimistic',
             state: 'closed',
-            connectionString
+            connectionString,
           });
 
           return {
@@ -994,18 +1232,20 @@ export class VB6DataEnvironment {
             ConnectionString: connection.connectionString,
             Open: () => this.openConnection(connection.id),
             Close: () => this.closeConnection(connection.id),
-            Execute: (sql: string) => this.executeCommand(connection.id, sql)
+            Execute: (sql: string) => this.executeCommand(connection.id, sql),
           };
         },
 
         Item: (name: string) => {
           const connection = this.getAllConnections().find(c => c.name === name);
-          return connection ? {
-            Name: connection.name,
-            ConnectionString: connection.connectionString,
-            State: connection.state
-          } : null;
-        }
+          return connection
+            ? {
+                Name: connection.name,
+                ConnectionString: connection.connectionString,
+                State: connection.state,
+              }
+            : null;
+        },
       },
 
       Commands: {
@@ -1022,16 +1262,17 @@ export class VB6DataEnvironment {
             cursorType: 'forward_only',
             lockType: 'readonly',
             prepared: false,
-            fields: []
+            fields: [],
           });
 
           return {
             Name: command.name,
             CommandText: command.commandText,
-            Execute: (_params?: DataParameterValue[]) => this.executeCommand(connection.id, command.id)
+            Execute: (_params?: DataParameterValue[]) =>
+              this.executeCommand(connection.id, command.id),
           };
-        }
-      }
+        },
+      },
     };
   }
 }

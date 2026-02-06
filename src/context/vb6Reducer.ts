@@ -42,28 +42,6 @@ export const initialState: VB6State = {
   showAlignmentGuides: true,
   alignmentGuides: { x: [], y: [] },
 
-  // Windows visibility
-  showProjectExplorer: true,
-  showPropertiesWindow: true,
-  showControlTree: false,
-  showToolbox: true,
-  showImmediateWindow: false,
-  showFormLayout: false,
-  showObjectBrowser: false,
-  showWatchWindow: false,
-  showLocalsWindow: false,
-  showCallStack: false,
-  showErrorList: false,
-
-  // Dialogs
-  showMenuEditor: false,
-  showNewProjectDialog: false,
-  showReferences: false,
-  showComponents: false,
-  showTabOrder: false,
-  showUserControlDesigner: false,
-  showOptionsDialog: false,
-
   // Code Editor
   selectedEvent: 'Click',
   eventCode: {},
@@ -331,8 +309,10 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
 
     case 'ADD_FORM': {
       // BUFFER OVERFLOW FIX: Avoid spread operator with large arrays that could cause stack overflow
-      const newId = state.forms.length > 0 ? 
-        state.forms.reduce((maxId, form) => Math.max(maxId, form.id), 0) + 1 : 1;
+      const newId =
+        state.forms.length > 0
+          ? state.forms.reduce((maxId, form) => Math.max(maxId, form.id), 0) + 1
+          : 1;
       const name = action.payload.name;
       const newForm = { id: newId, name, caption: name, controls: [] };
       return {
@@ -381,10 +361,10 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
     case 'UNDO': {
       // LOGIC BUG FIX: Implement actual undo functionality
       if (state.historyIndex <= 0) return state;
-      
+
       const prevIndex = state.historyIndex - 1;
       const snapshot = state.history[prevIndex];
-      
+
       return {
         ...state,
         controls: snapshot.controls.map(c => ({ ...c })),
@@ -403,10 +383,10 @@ export const vb6Reducer = (state: VB6State, action: VB6Action): VB6State => {
     case 'REDO': {
       // LOGIC BUG FIX: Implement actual redo functionality
       if (state.historyIndex >= state.history.length - 1) return state;
-      
+
       const nextIndex = state.historyIndex + 1;
       const snapshot = state.history[nextIndex];
-      
+
       return {
         ...state,
         controls: snapshot.controls.map(c => ({ ...c })),

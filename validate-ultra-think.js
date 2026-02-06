@@ -32,7 +32,9 @@ const keywords = ['Option', 'Explicit', 'Public', 'Function', 'As', 'Integer', '
 const identifiers = ['Add', 'ProcessText', 'a', 'b', 'text'];
 const operators = ['=', '+'];
 
-console.log('✅ Lexer: ' + (keywords.length + identifiers.length + operators.length) + ' tokens identifiés');
+console.log(
+  '✅ Lexer: ' + (keywords.length + identifiers.length + operators.length) + ' tokens identifiés'
+);
 
 // Parsing
 const functions = ['Add', 'ProcessText'];
@@ -98,7 +100,7 @@ console.log('🚀 RECOMMANDATION: PRODUCTION READY');
 console.log('='.repeat(50));
 
 // Démonstration de l'utilisation
-console.log('\n🎮 Démonstration d\'utilisation:');
+console.log("\n🎮 Démonstration d'utilisation:");
 console.log(`
 const { VB6CompilerCore } = require('./src/compiler/VB6CompilerCore');
 const { VB6RuntimeBridge } = require('./src/compiler/VB6RuntimeIntegration');

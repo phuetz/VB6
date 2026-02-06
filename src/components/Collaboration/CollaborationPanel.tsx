@@ -1,6 +1,6 @@
 /**
  * Collaboration Panel - Real-time collaboration UI
- * 
+ *
  * Features:
  * - Live collaborator presence with avatars and status
  * - Session management (create, join, leave)
@@ -10,8 +10,20 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Users, Wifi, WifiOff, Activity, MessageCircle, Settings, UserPlus, LogOut } from 'lucide-react';
-import VB6CollaborationEngine, { CollaboratorInfo, CollaborationSession } from '../../services/VB6CollaborationEngine';
+import {
+  Users,
+  Wifi,
+  WifiOff,
+  Activity,
+  MessageCircle,
+  Settings,
+  UserPlus,
+  LogOut,
+} from 'lucide-react';
+import VB6CollaborationEngine, {
+  CollaboratorInfo,
+  CollaborationSession,
+} from '../../services/VB6CollaborationEngine';
 
 interface CollaborationPanelProps {
   collaborationEngine: VB6CollaborationEngine | null;
@@ -39,7 +51,7 @@ const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
     isConnected: false,
     participantCount: 0,
     latency: 0,
-    lastSync: 0
+    lastSync: 0,
   });
   const [joinSessionId, setJoinSessionId] = useState('');
   const [showJoinDialog, setShowJoinDialog] = useState(false);
@@ -61,7 +73,7 @@ const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
     };
 
     const handleCollaboratorUpdated = (collaborator: CollaboratorInfo) => {
-      setCollaborators(prev => prev.map(c => c.id === collaborator.id ? collaborator : c));
+      setCollaborators(prev => prev.map(c => (c.id === collaborator.id ? collaborator : c)));
     };
 
     const handleSessionCreated = (session: CollaborationSession) => {
@@ -69,7 +81,7 @@ const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
       setConnectionStatus(prev => ({
         ...prev,
         isConnected: true,
-        participantCount: session.participants.size
+        participantCount: session.participants.size,
       }));
     };
 
@@ -78,7 +90,7 @@ const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
       setConnectionStatus(prev => ({
         ...prev,
         isConnected: true,
-        participantCount: session.participants.size
+        participantCount: session.participants.size,
       }));
     };
 
@@ -89,18 +101,15 @@ const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
         isConnected: false,
         participantCount: 0,
         latency: 0,
-        lastSync: 0
+        lastSync: 0,
       });
     };
 
     const handlePeerConnected = (peerId: string) => {
-      console.log(`Peer connected: ${peerId}`);
       setConnectionStatus(prev => ({ ...prev, isConnected: true }));
     };
 
-    const handlePeerDisconnected = (peerId: string) => {
-      console.log(`Peer disconnected: ${peerId}`);
-    };
+    const handlePeerDisconnected = (peerId: string) => {};
 
     // Subscribe to events
     collaborationEngine.on('collaboratorJoined', handleCollaboratorJoined);
@@ -145,9 +154,8 @@ const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
     try {
       const sessionId = await collaborationEngine.createSession(newSessionName, {
         isPrivate: isPrivateSession,
-        maxParticipants
+        maxParticipants,
       });
-      console.log(`Created session: ${sessionId}`);
       setShowCreateDialog(false);
       setNewSessionName('');
       onCreateSession();
@@ -206,9 +214,7 @@ const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
           ) : (
             <WifiOff className="w-4 h-4 text-red-500" />
           )}
-          <span className="text-xs text-gray-500">
-            {connectionStatus.participantCount}
-          </span>
+          <span className="text-xs text-gray-500">{connectionStatus.participantCount}</span>
         </div>
       </div>
 
@@ -217,9 +223,7 @@ const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
         {currentSession ? (
           <div className="space-y-2">
             <div className="text-sm">
-              <div className="font-medium text-gray-900 truncate">
-                {currentSession.name}
-              </div>
+              <div className="font-medium text-gray-900 truncate">{currentSession.name}</div>
               <div className="text-xs text-gray-500">
                 {currentSession.participants.size} participants
               </div>
@@ -285,7 +289,7 @@ const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
             Collaborators ({collaborators.length})
           </div>
           <div className="space-y-2">
-            {collaborators.map((collaborator) => (
+            {collaborators.map(collaborator => (
               <div
                 key={collaborator.id}
                 className="flex items-center space-x-2 p-2 rounded hover:bg-gray-50"
@@ -314,26 +318,23 @@ const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
                     {collaborator.name}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {collaborator.isOnline ? (
-                      collaborator.cursor ? (
-                        `Line ${collaborator.cursor.line}`
-                      ) : (
-                        'Active'
-                      )
-                    ) : (
-                      formatLastSeen(collaborator.lastSeen)
-                    )}
+                    {collaborator.isOnline
+                      ? collaborator.cursor
+                        ? `Line ${collaborator.cursor.line}`
+                        : 'Active'
+                      : formatLastSeen(collaborator.lastSeen)}
                   </div>
                 </div>
                 {collaborator.cursor && (
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: collaborator.color }} />
+                  <div
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: collaborator.color }}
+                  />
                 )}
               </div>
             ))}
             {collaborators.length === 0 && (
-              <div className="text-center text-gray-500 text-sm py-4">
-                No collaborators yet
-              </div>
+              <div className="text-center text-gray-500 text-sm py-4">No collaborators yet</div>
             )}
           </div>
         </div>
@@ -346,13 +347,11 @@ const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
             <h3 className="text-lg font-medium mb-4">Create Collaboration Session</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Session Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Session Name</label>
                 <input
                   type="text"
                   value={newSessionName}
-                  onChange={(e) => setNewSessionName(e.target.value)}
+                  onChange={e => setNewSessionName(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter session name..."
                 />
@@ -362,7 +361,7 @@ const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
                   type="checkbox"
                   id="private"
                   checked={isPrivateSession}
-                  onChange={(e) => setIsPrivateSession(e.target.checked)}
+                  onChange={e => setIsPrivateSession(e.target.checked)}
                   className="mr-2"
                 />
                 <label htmlFor="private" className="text-sm text-gray-700">
@@ -376,7 +375,7 @@ const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
                 <input
                   type="number"
                   value={maxParticipants}
-                  onChange={(e) => setMaxParticipants(parseInt(e.target.value) || 10)}
+                  onChange={e => setMaxParticipants(parseInt(e.target.value) || 10)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   min="2"
                   max="50"
@@ -409,13 +408,11 @@ const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
             <h3 className="text-lg font-medium mb-4">Join Collaboration Session</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Session ID
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Session ID</label>
                 <input
                   type="text"
                   value={joinSessionId}
-                  onChange={(e) => setJoinSessionId(e.target.value)}
+                  onChange={e => setJoinSessionId(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter session ID..."
                 />

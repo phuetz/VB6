@@ -1,6 +1,6 @@
 /**
  * Demo Runner - Automated VB6 IDE Demonstrations
- * 
+ *
  * This component provides automated demonstrations of VB6 IDE capabilities
  * with realistic scenarios and interactive examples.
  */
@@ -31,7 +31,7 @@ export const DemoRunner: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
-  
+
   const {
     controls,
     addControl,
@@ -39,7 +39,7 @@ export const DemoRunner: React.FC = () => {
     selectedControls,
     setSelectedControls,
     forms,
-    currentForm
+    currentForm,
   } = useVB6Store();
 
   const demoScenarios: DemoScenario[] = [
@@ -55,7 +55,7 @@ export const DemoRunner: React.FC = () => {
           action: 'createForm',
           description: 'Create new form for calculator',
           duration: 2000,
-          data: { name: 'Calculator', width: 300, height: 400 }
+          data: { name: 'Calculator', width: 300, height: 400 },
         },
         {
           id: 'add-display',
@@ -71,8 +71,8 @@ export const DemoRunner: React.FC = () => {
             height: 40,
             text: '0',
             alignment: 1,
-            fontSize: 16
-          }
+            fontSize: 16,
+          },
         },
         {
           id: 'add-buttons',
@@ -99,9 +99,9 @@ export const DemoRunner: React.FC = () => {
               { text: '+', x: 230, y: 230, name: 'btnAdd' },
               { text: '0', x: 20, y: 280, name: 'btn0', width: 120 },
               { text: '.', x: 160, y: 280, name: 'btnDecimal' },
-              { text: '=', x: 230, y: 280, name: 'btnEquals' }
-            ]
-          }
+              { text: '=', x: 230, y: 280, name: 'btnEquals' },
+            ],
+          },
         },
         {
           id: 'add-code',
@@ -179,8 +179,8 @@ Private Sub PerformOperation()
     
     txtDisplay.Text = CStr(currentValue)
 End Sub
-`
-          }
+`,
+          },
         },
         {
           id: 'test-app',
@@ -188,17 +188,17 @@ End Sub
           description: 'Test calculator functionality',
           duration: 10000,
           data: {
-            testSequence: ['5', '+', '3', '=', 'C', '1', '0', '*', '2', '=']
-          }
+            testSequence: ['5', '+', '3', '=', 'C', '1', '0', '*', '2', '='],
+          },
         },
         {
           id: 'compile-app',
           action: 'compileApplication',
           description: 'Compile to executable',
           duration: 5000,
-          data: { target: 'native', optimization: 'O2' }
-        }
-      ]
+          data: { target: 'native', optimization: 'O2' },
+        },
+      ],
     },
     {
       id: 'data-grid-demo',
@@ -212,7 +212,7 @@ End Sub
           action: 'createForm',
           description: 'Create data entry form',
           duration: 2000,
-          data: { name: 'CustomerData', width: 600, height: 500 }
+          data: { name: 'CustomerData', width: 600, height: 500 },
         },
         {
           id: 'add-data-controls',
@@ -228,9 +228,9 @@ End Sub
               { type: 'TextBox', name: 'txtEmail', x: 360, y: 340, width: 200 },
               { type: 'CommandButton', name: 'btnAdd', x: 20, y: 380, caption: 'Add' },
               { type: 'CommandButton', name: 'btnUpdate', x: 100, y: 380, caption: 'Update' },
-              { type: 'CommandButton', name: 'btnDelete', x: 180, y: 380, caption: 'Delete' }
-            ]
-          }
+              { type: 'CommandButton', name: 'btnDelete', x: 180, y: 380, caption: 'Delete' },
+            ],
+          },
         },
         {
           id: 'setup-grid',
@@ -242,9 +242,9 @@ End Sub
             data: [
               [1, 'John Doe', 'john@email.com', '555-1234', 'New York'],
               [2, 'Jane Smith', 'jane@email.com', '555-5678', 'Los Angeles'],
-              [3, 'Bob Johnson', 'bob@email.com', '555-9012', 'Chicago']
-            ]
-          }
+              [3, 'Bob Johnson', 'bob@email.com', '555-9012', 'Chicago'],
+            ],
+          },
         },
         {
           id: 'add-data-code',
@@ -329,10 +329,10 @@ Private Sub btnAdd_Click()
         MsgBox "Please enter name and email.", vbExclamation
     End If
 End Sub
-`
-          }
-        }
-      ]
+`,
+          },
+        },
+      ],
     },
     {
       id: 'activex-showcase',
@@ -346,7 +346,7 @@ End Sub
           action: 'createForm',
           description: 'Create ActiveX demonstration form',
           duration: 2000,
-          data: { name: 'ActiveXDemo', width: 800, height: 600 }
+          data: { name: 'ActiveXDemo', width: 800, height: 600 },
         },
         {
           id: 'add-msflexgrid',
@@ -360,8 +360,8 @@ End Sub
             y: 20,
             width: 350,
             height: 200,
-            clsid: '{5F4DF280-531B-11CF-91F6-C2863C385E30}'
-          }
+            clsid: '{5F4DF280-531B-11CF-91F6-C2863C385E30}',
+          },
         },
         {
           id: 'add-mschart',
@@ -375,8 +375,8 @@ End Sub
             y: 20,
             width: 350,
             height: 200,
-            clsid: '{3A2B370C-BA0A-11D1-B137-0000F8753F5D}'
-          }
+            clsid: '{3A2B370C-BA0A-11D1-B137-0000F8753F5D}',
+          },
         },
         {
           id: 'add-webbrowser',
@@ -390,8 +390,8 @@ End Sub
             y: 250,
             width: 730,
             height: 300,
-            clsid: '{8856F961-340A-11D0-A96B-00C04FD705A2}'
-          }
+            clsid: '{8856F961-340A-11D0-A96B-00C04FD705A2}',
+          },
         },
         {
           id: 'configure-activex',
@@ -406,19 +406,19 @@ End Sub
                 ['Product', 'Price', 'Quantity', 'Total'],
                 ['Widget A', '$10.00', '5', '$50.00'],
                 ['Widget B', '$15.00', '3', '$45.00'],
-                ['Widget C', '$8.50', '10', '$85.00']
-              ]
+                ['Widget C', '$8.50', '10', '$85.00'],
+              ],
             },
             chart: {
               chartType: 'Bar',
               data: [10, 25, 15, 30, 20],
-              title: 'Sales Data'
+              title: 'Sales Data',
             },
             browser: {
               url: 'about:blank',
-              html: '<h1>VB6 Web IDE</h1><p>ActiveX WebBrowser Control Demo</p>'
-            }
-          }
+              html: '<h1>VB6 Web IDE</h1><p>ActiveX WebBrowser Control Demo</p>',
+            },
+          },
         },
         {
           id: 'test-activex',
@@ -426,11 +426,11 @@ End Sub
           description: 'Test ActiveX functionality',
           duration: 5000,
           data: {
-            tests: ['grid-selection', 'chart-update', 'browser-navigation']
-          }
-        }
-      ]
-    }
+            tests: ['grid-selection', 'chart-update', 'browser-navigation'],
+          },
+        },
+      ],
+    },
   ];
 
   const runDemo = useCallback(async () => {
@@ -439,18 +439,18 @@ End Sub
     setCurrentStep(0);
 
     const scenario = demoScenarios[currentScenario];
-    
+
     for (let i = 0; i < scenario.steps.length; i++) {
       setCurrentStep(i);
       const step = scenario.steps[i];
-      
+
       // Execute step action
       await executeStep(step);
-      
+
       // Wait for step duration
       await new Promise(resolve => setTimeout(resolve, step.duration));
     }
-    
+
     setIsComplete(true);
     setIsRunning(false);
   }, [currentScenario, demoScenarios]);
@@ -460,7 +460,7 @@ End Sub
       case 'createForm':
         // Simulate form creation
         break;
-        
+
       case 'addControl': {
         // Add a single control
         const control: Control = {
@@ -471,12 +471,12 @@ End Sub
           y: step.data.y,
           width: step.data.width,
           height: step.data.height,
-          ...step.data
+          ...step.data,
         };
         addControl(control);
         break;
       }
-        
+
       case 'addButtons':
         // Add multiple buttons
         for (const buttonData of step.data.buttons) {
@@ -488,26 +488,25 @@ End Sub
             y: buttonData.y,
             width: buttonData.width || 60,
             height: buttonData.height || 40,
-            caption: buttonData.text
+            caption: buttonData.text,
           };
           addControl(button);
           await new Promise(resolve => setTimeout(resolve, 200));
         }
         break;
-        
+
       case 'addCode':
         // Simulate code addition
         break;
-        
+
       case 'testApplication':
         // Simulate application testing
-        console.log('Testing application with sequence:', step.data.testSequence);
         break;
-        
+
       case 'compileApplication':
         // Simulate compilation
         break;
-        
+
       case 'addActiveXControl': {
         // Add ActiveX control
         const activeXControl: Control = {
@@ -518,12 +517,12 @@ End Sub
           y: step.data.y,
           width: step.data.width,
           height: step.data.height,
-          clsid: step.data.clsid
+          clsid: step.data.clsid,
         };
         addControl(activeXControl);
         break;
       }
-        
+
       default:
     }
   };
@@ -534,13 +533,13 @@ End Sub
   }, []);
 
   const nextScenario = useCallback(() => {
-    setCurrentScenario((prev) => (prev + 1) % demoScenarios.length);
+    setCurrentScenario(prev => (prev + 1) % demoScenarios.length);
     setCurrentStep(0);
     setIsComplete(false);
   }, [demoScenarios.length]);
 
   const prevScenario = useCallback(() => {
-    setCurrentScenario((prev) => (prev - 1 + demoScenarios.length) % demoScenarios.length);
+    setCurrentScenario(prev => (prev - 1 + demoScenarios.length) % demoScenarios.length);
     setCurrentStep(0);
     setIsComplete(false);
   }, [demoScenarios.length]);
@@ -558,7 +557,7 @@ End Sub
         {/* Scenario Selection */}
         <div className="bg-gray-800 rounded-lg p-4">
           <h2 className="text-xl font-bold mb-4">Demo Scenarios</h2>
-          
+
           <div className="space-y-3 mb-6">
             {demoScenarios.map((scenario, index) => (
               <div
@@ -578,20 +577,18 @@ End Sub
               </div>
             ))}
           </div>
-          
+
           <div className="space-y-2">
             <button
               onClick={runDemo}
               disabled={isRunning}
               className={`w-full py-2 px-4 rounded font-semibold transition-all ${
-                isRunning
-                  ? 'bg-gray-600 cursor-not-allowed'
-                  : 'bg-green-600 hover:bg-green-700'
+                isRunning ? 'bg-gray-600 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
               }`}
             >
               {isRunning ? 'Running...' : 'Start Demo'}
             </button>
-            
+
             {isRunning && (
               <button
                 onClick={stopDemo}
@@ -607,22 +604,24 @@ End Sub
         <div className="bg-gray-800 rounded-lg p-4">
           <h2 className="text-xl font-bold mb-4">{currentScenarioData.title}</h2>
           <p className="text-gray-300 mb-4">{currentScenarioData.description}</p>
-          
+
           <div className="mb-4">
             <div className="flex justify-between text-sm mb-2">
               <span>Progress</span>
-              <span>{currentStep + 1} / {currentScenarioData.steps.length}</span>
+              <span>
+                {currentStep + 1} / {currentScenarioData.steps.length}
+              </span>
             </div>
             <div className="w-full bg-gray-700 rounded-full h-2">
               <div
                 className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                 style={{
-                  width: `${((currentStep + 1) / currentScenarioData.steps.length) * 100}%`
+                  width: `${((currentStep + 1) / currentScenarioData.steps.length) * 100}%`,
                 }}
               />
             </div>
           </div>
-          
+
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {currentScenarioData.steps.map((step, index) => (
               <div
@@ -631,8 +630,8 @@ End Sub
                   index < currentStep
                     ? 'bg-green-600 bg-opacity-30 text-green-400'
                     : index === currentStep && isRunning
-                    ? 'bg-yellow-600 bg-opacity-30 text-yellow-400 animate-pulse'
-                    : 'bg-gray-700 text-gray-400'
+                      ? 'bg-yellow-600 bg-opacity-30 text-yellow-400 animate-pulse'
+                      : 'bg-gray-700 text-gray-400'
                 }`}
               >
                 <div className="font-semibold">{step.description}</div>
@@ -642,7 +641,7 @@ End Sub
               </div>
             ))}
           </div>
-          
+
           {isComplete && (
             <div className="mt-4 p-3 bg-green-600 bg-opacity-30 rounded text-green-400 text-center">
               ✓ Demo completed successfully!
@@ -653,12 +652,12 @@ End Sub
         {/* Demo Output/Preview */}
         <div className="bg-gray-800 rounded-lg p-4">
           <h2 className="text-xl font-bold mb-4">Demo Preview</h2>
-          
+
           <div className="bg-gray-700 rounded p-4 h-64 overflow-hidden relative">
             {isRunning && (
               <div className="absolute inset-0 bg-blue-600 bg-opacity-10 animate-pulse" />
             )}
-            
+
             <div className="text-center text-gray-400">
               <div className="mb-4">
                 <div className="w-16 h-16 bg-blue-600 rounded-full mx-auto flex items-center justify-center text-2xl">
@@ -671,7 +670,7 @@ End Sub
               </div>
             </div>
           </div>
-          
+
           <div className="mt-4 grid grid-cols-2 gap-2">
             <button
               onClick={prevScenario}
@@ -686,7 +685,7 @@ End Sub
               Next →
             </button>
           </div>
-          
+
           <div className="mt-4 text-xs text-gray-400">
             <div>Current Controls: {controls.length}</div>
             <div>Selected: {selectedControls.length}</div>

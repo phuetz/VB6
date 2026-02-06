@@ -361,20 +361,21 @@ export function StrConv(str: string, conversion: number, LCID?: number): string 
   }
   // vbProperCase = 3
   if ((conversion & 3) === 3) {
-    result = result.replace(/\w\S*/g, txt =>
-      txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+    result = result.replace(
+      /\w\S*/g,
+      txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
     );
   }
   // vbWide = 4 (half-width to full-width)
   if (conversion & 4) {
     result = result.replace(/[\x21-\x7E]/g, char =>
-      String.fromCharCode(char.charCodeAt(0) + 0xFEE0)
+      String.fromCharCode(char.charCodeAt(0) + 0xfee0)
     );
   }
   // vbNarrow = 8 (full-width to half-width)
   if (conversion & 8) {
     result = result.replace(/[\uFF01-\uFF5E]/g, char =>
-      String.fromCharCode(char.charCodeAt(0) - 0xFEE0)
+      String.fromCharCode(char.charCodeAt(0) - 0xfee0)
     );
   }
   // vbKatakana = 16
@@ -637,7 +638,12 @@ function formatDate(
     case 'general date':
       return date.toLocaleString();
     case 'long date':
-      return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      return date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
     case 'medium date':
       return date.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
     case 'short date':
@@ -647,31 +653,35 @@ function formatDate(
     case 'medium time':
       return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     case 'short time':
-      return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+      return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
   }
 
   // Custom format
   const pad = (n: number, len: number = 2) => n.toString().padStart(len, '0');
 
   const replacements: Record<string, string> = {
-    'yyyy': date.getFullYear().toString(),
-    'yy': (date.getFullYear() % 100).toString().padStart(2, '0'),
-    'mmmm': date.toLocaleDateString('en-US', { month: 'long' }),
-    'mmm': date.toLocaleDateString('en-US', { month: 'short' }),
-    'mm': pad(date.getMonth() + 1),
-    'm': (date.getMonth() + 1).toString(),
-    'dddd': date.toLocaleDateString('en-US', { weekday: 'long' }),
-    'ddd': date.toLocaleDateString('en-US', { weekday: 'short' }),
-    'dd': pad(date.getDate()),
-    'd': date.getDate().toString(),
-    'hh': pad(date.getHours()),
-    'h': date.getHours().toString(),
-    'nn': pad(date.getMinutes()),
-    'n': date.getMinutes().toString(),
-    'ss': pad(date.getSeconds()),
-    's': date.getSeconds().toString(),
+    yyyy: date.getFullYear().toString(),
+    yy: (date.getFullYear() % 100).toString().padStart(2, '0'),
+    mmmm: date.toLocaleDateString('en-US', { month: 'long' }),
+    mmm: date.toLocaleDateString('en-US', { month: 'short' }),
+    mm: pad(date.getMonth() + 1),
+    m: (date.getMonth() + 1).toString(),
+    dddd: date.toLocaleDateString('en-US', { weekday: 'long' }),
+    ddd: date.toLocaleDateString('en-US', { weekday: 'short' }),
+    dd: pad(date.getDate()),
+    d: date.getDate().toString(),
+    hh: pad(date.getHours()),
+    h: date.getHours().toString(),
+    nn: pad(date.getMinutes()),
+    n: date.getMinutes().toString(),
+    ss: pad(date.getSeconds()),
+    s: date.getSeconds().toString(),
     'am/pm': date.getHours() < 12 ? 'AM' : 'PM',
-    'a/p': date.getHours() < 12 ? 'A' : 'P'
+    'a/p': date.getHours() < 12 ? 'A' : 'P',
   };
 
   let result = format;
@@ -705,7 +715,7 @@ export function FormatCurrency(
     currency: 'USD',
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
-    useGrouping
+    useGrouping,
   };
 
   let result = new Intl.NumberFormat('en-US', options).format(Math.abs(expression));
@@ -738,7 +748,7 @@ export function FormatNumber(
   if (useGrouping) {
     result = absValue.toLocaleString('en-US', {
       minimumFractionDigits: digits,
-      maximumFractionDigits: digits
+      maximumFractionDigits: digits,
     });
   } else {
     result = absValue.toFixed(digits);
@@ -784,17 +794,19 @@ export function FormatPercent(
 /**
  * FormatDateTime - Format date/time
  */
-export function FormatDateTime(
-  date: Date | string | number,
-  namedFormat?: number
-): string {
+export function FormatDateTime(date: Date | string | number, namedFormat?: number): string {
   const d = date instanceof Date ? date : new Date(date);
 
   switch (namedFormat) {
     case 0: // vbGeneralDate
       return d.toLocaleString();
     case 1: // vbLongDate
-      return d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      return d.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
     case 2: // vbShortDate
       return d.toLocaleDateString('en-US');
     case 3: // vbLongTime
@@ -846,7 +858,7 @@ export const VB6StringFunctions = {
   FormatCurrency,
   FormatNumber,
   FormatPercent,
-  FormatDateTime
+  FormatDateTime,
 };
 
 export default VB6StringFunctions;

@@ -10,7 +10,7 @@ export enum TypeKind {
   Dispatch = 'Dispatch',
   CoClass = 'CoClass',
   Alias = 'Alias',
-  Union = 'Union'
+  Union = 'Union',
 }
 
 export enum MemberKind {
@@ -18,14 +18,14 @@ export enum MemberKind {
   Method = 'Method',
   Event = 'Event',
   Constant = 'Constant',
-  Variable = 'Variable'
+  Variable = 'Variable',
 }
 
 export enum ParameterDirection {
   In = 'In',
   Out = 'Out',
   InOut = 'InOut',
-  RetVal = 'RetVal'
+  RetVal = 'RetVal',
 }
 
 export enum VariantType {
@@ -46,7 +46,7 @@ export enum VariantType {
   Decimal = 'Decimal',
   Byte = 'Byte',
   Array = 'Array',
-  ByRef = 'ByRef'
+  ByRef = 'ByRef',
 }
 
 export interface TypeLibraryInfo {
@@ -150,7 +150,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
   onGenerateCode,
   onAddReference,
   onRemoveReference,
-  onShowHelp
+  onShowHelp,
 }) => {
   const [typeLibraries, setTypeLibraries] = useState<TypeLibrary[]>([]);
   const [selectedLibrary, setSelectedLibrary] = useState<TypeLibrary | null>(null);
@@ -167,7 +167,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
     showHidden: false,
     showRestricted: false,
     searchText: '',
-    typeFilter: 'All'
+    typeFilter: 'All',
   });
   const [activeTab, setActiveTab] = useState<'types' | 'members' | 'details' | 'code'>('types');
   const [showLoadDialog, setShowLoadDialog] = useState(false);
@@ -190,7 +190,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
           majorVersion: 2,
           minorVersion: 0,
           lcid: 0,
-          flags: 0
+          flags: 0,
         },
         types: [
           {
@@ -208,8 +208,18 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                 type: VariantType.Long,
                 returnType: VariantType.Long,
                 parameters: [
-                  { name: 'riid', type: VariantType.ByRef, direction: ParameterDirection.In, optional: false },
-                  { name: 'ppvObject', type: VariantType.ByRef, direction: ParameterDirection.Out, optional: false }
+                  {
+                    name: 'riid',
+                    type: VariantType.ByRef,
+                    direction: ParameterDirection.In,
+                    optional: false,
+                  },
+                  {
+                    name: 'ppvObject',
+                    type: VariantType.ByRef,
+                    direction: ParameterDirection.Out,
+                    optional: false,
+                  },
                 ],
                 description: 'Queries the object for a specific interface',
                 dispId: -1,
@@ -217,7 +227,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                 isRestricted: false,
                 isHidden: false,
                 isSource: false,
-                isDefaultMember: false
+                isDefaultMember: false,
               },
               {
                 id: 'AddRef',
@@ -232,7 +242,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                 isRestricted: false,
                 isHidden: false,
                 isSource: false,
-                isDefaultMember: false
+                isDefaultMember: false,
               },
               {
                 id: 'Release',
@@ -247,12 +257,12 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                 isRestricted: false,
                 isHidden: false,
                 isSource: false,
-                isDefaultMember: false
-              }
+                isDefaultMember: false,
+              },
             ],
             implementedInterfaces: [],
             version: 1,
-            attributes: {}
+            attributes: {},
           },
           {
             id: 'IDispatch',
@@ -270,7 +280,12 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                 type: VariantType.Long,
                 returnType: VariantType.Long,
                 parameters: [
-                  { name: 'pctinfo', type: VariantType.ByRef, direction: ParameterDirection.Out, optional: false }
+                  {
+                    name: 'pctinfo',
+                    type: VariantType.ByRef,
+                    direction: ParameterDirection.Out,
+                    optional: false,
+                  },
                 ],
                 description: 'Gets the number of type information interfaces',
                 dispId: -1,
@@ -278,7 +293,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                 isRestricted: false,
                 isHidden: false,
                 isSource: false,
-                isDefaultMember: false
+                isDefaultMember: false,
               },
               {
                 id: 'GetTypeInfo',
@@ -287,9 +302,24 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                 type: VariantType.Long,
                 returnType: VariantType.Long,
                 parameters: [
-                  { name: 'iTInfo', type: VariantType.Integer, direction: ParameterDirection.In, optional: false },
-                  { name: 'lcid', type: VariantType.Long, direction: ParameterDirection.In, optional: false },
-                  { name: 'ppTInfo', type: VariantType.ByRef, direction: ParameterDirection.Out, optional: false }
+                  {
+                    name: 'iTInfo',
+                    type: VariantType.Integer,
+                    direction: ParameterDirection.In,
+                    optional: false,
+                  },
+                  {
+                    name: 'lcid',
+                    type: VariantType.Long,
+                    direction: ParameterDirection.In,
+                    optional: false,
+                  },
+                  {
+                    name: 'ppTInfo',
+                    type: VariantType.ByRef,
+                    direction: ParameterDirection.Out,
+                    optional: false,
+                  },
                 ],
                 description: 'Gets type information for an object',
                 dispId: -1,
@@ -297,20 +327,35 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                 isRestricted: false,
                 isHidden: false,
                 isSource: false,
-                isDefaultMember: false
-              }
+                isDefaultMember: false,
+              },
             ],
             implementedInterfaces: ['IUnknown'],
             version: 1,
-            attributes: {}
-          }
+            attributes: {},
+          },
         ],
         constants: [
-          { name: 'vbTrue', value: -1, type: VariantType.Boolean, description: 'Boolean True value' },
-          { name: 'vbFalse', value: 0, type: VariantType.Boolean, description: 'Boolean False value' },
-          { name: 'vbNullString', value: '', type: VariantType.String, description: 'Null string constant' }
+          {
+            name: 'vbTrue',
+            value: -1,
+            type: VariantType.Boolean,
+            description: 'Boolean True value',
+          },
+          {
+            name: 'vbFalse',
+            value: 0,
+            type: VariantType.Boolean,
+            description: 'Boolean False value',
+          },
+          {
+            name: 'vbNullString',
+            value: '',
+            type: VariantType.String,
+            description: 'Null string constant',
+          },
         ],
-        modules: []
+        modules: [],
       },
       {
         info: {
@@ -322,7 +367,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
           majorVersion: 2,
           minorVersion: 8,
           lcid: 0,
-          flags: 0
+          flags: 0,
         },
         types: [
           {
@@ -336,7 +381,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
             members: [],
             implementedInterfaces: ['_Connection', 'ConnectionEvents'],
             version: 1,
-            attributes: {}
+            attributes: {},
           },
           {
             id: '_Connection',
@@ -359,7 +404,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                 isRestricted: false,
                 isHidden: false,
                 isSource: false,
-                isDefaultMember: false
+                isDefaultMember: false,
               },
               {
                 id: 'Open',
@@ -367,10 +412,31 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                 kind: MemberKind.Method,
                 type: VariantType.Empty,
                 parameters: [
-                  { name: 'ConnectionString', type: VariantType.String, direction: ParameterDirection.In, optional: true },
-                  { name: 'UserID', type: VariantType.String, direction: ParameterDirection.In, optional: true },
-                  { name: 'Password', type: VariantType.String, direction: ParameterDirection.In, optional: true },
-                  { name: 'Options', type: VariantType.Long, direction: ParameterDirection.In, optional: true, defaultValue: -1 }
+                  {
+                    name: 'ConnectionString',
+                    type: VariantType.String,
+                    direction: ParameterDirection.In,
+                    optional: true,
+                  },
+                  {
+                    name: 'UserID',
+                    type: VariantType.String,
+                    direction: ParameterDirection.In,
+                    optional: true,
+                  },
+                  {
+                    name: 'Password',
+                    type: VariantType.String,
+                    direction: ParameterDirection.In,
+                    optional: true,
+                  },
+                  {
+                    name: 'Options',
+                    type: VariantType.Long,
+                    direction: ParameterDirection.In,
+                    optional: true,
+                    defaultValue: -1,
+                  },
                 ],
                 description: 'Opens a connection to a data source',
                 dispId: 1,
@@ -378,7 +444,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                 isRestricted: false,
                 isHidden: false,
                 isSource: false,
-                isDefaultMember: false
+                isDefaultMember: false,
               },
               {
                 id: 'Close',
@@ -392,17 +458,17 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                 isRestricted: false,
                 isHidden: false,
                 isSource: false,
-                isDefaultMember: false
-              }
+                isDefaultMember: false,
+              },
             ],
             implementedInterfaces: ['IDispatch'],
             version: 1,
-            attributes: {}
-          }
+            attributes: {},
+          },
         ],
         constants: [],
-        modules: []
-      }
+        modules: [],
+      },
     ];
 
     setTypeLibraries(commonLibraries);
@@ -432,8 +498,10 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
       // Search filter
       if (filter.searchText) {
         const searchLower = filter.searchText.toLowerCase();
-        return type.name.toLowerCase().includes(searchLower) ||
-               (type.description && type.description.toLowerCase().includes(searchLower));
+        return (
+          type.name.toLowerCase().includes(searchLower) ||
+          (type.description && type.description.toLowerCase().includes(searchLower))
+        );
       }
 
       return true;
@@ -452,8 +520,10 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
       // Search filter
       if (filter.searchText) {
         const searchLower = filter.searchText.toLowerCase();
-        return member.name.toLowerCase().includes(searchLower) ||
-               (member.description && member.description.toLowerCase().includes(searchLower));
+        return (
+          member.name.toLowerCase().includes(searchLower) ||
+          (member.description && member.description.toLowerCase().includes(searchLower))
+        );
       }
 
       return true;
@@ -474,17 +544,20 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
   }, []);
 
   // Load type library
-  const loadTypeLibrary = useCallback(async (fileName: string) => {
-    if (!onLoadTypeLibrary) return;
+  const loadTypeLibrary = useCallback(
+    async (fileName: string) => {
+      if (!onLoadTypeLibrary) return;
 
-    try {
-      const typeLibrary = await onLoadTypeLibrary(fileName);
-      setTypeLibraries(prev => [...prev, typeLibrary]);
-      setSelectedLibrary(typeLibrary);
-    } catch (error) {
-      console.error('Failed to load type library:', error);
-    }
-  }, [onLoadTypeLibrary]);
+      try {
+        const typeLibrary = await onLoadTypeLibrary(fileName);
+        setTypeLibraries(prev => [...prev, typeLibrary]);
+        setSelectedLibrary(typeLibrary);
+      } catch (error) {
+        console.error('Failed to load type library:', error);
+      }
+    },
+    [onLoadTypeLibrary]
+  );
 
   // Generate code for selected type
   const generateCode = useCallback(() => {
@@ -539,20 +612,22 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
 
   // Format parameter signature
   const formatParameterSignature = (parameters: TypeParameter[]): string => {
-    return parameters.map(param => {
-      let sig = '';
-      if (param.direction === ParameterDirection.Out) sig += 'ByRef ';
-      if (param.optional) sig += 'Optional ';
-      sig += `${param.name} As ${param.type}`;
-      if (param.defaultValue !== undefined) sig += ` = ${param.defaultValue}`;
-      return sig;
-    }).join(', ');
+    return parameters
+      .map(param => {
+        let sig = '';
+        if (param.direction === ParameterDirection.Out) sig += 'ByRef ';
+        if (param.optional) sig += 'Optional ';
+        sig += `${param.name} As ${param.type}`;
+        if (param.defaultValue !== undefined) sig += ` = ${param.defaultValue}`;
+        return sig;
+      })
+      .join(', ');
   };
 
   // Format member signature
   const formatMemberSignature = (member: TypeMember): string => {
     let sig = '';
-    
+
     switch (member.kind) {
       case MemberKind.Method:
         if (member.returnType && member.returnType !== VariantType.Empty) {
@@ -574,7 +649,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
         sig = `Dim ${member.name} As ${member.type}`;
         break;
     }
-    
+
     return sig;
   };
 
@@ -585,7 +660,9 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-medium text-gray-800">Type Library Browser</h3>
           {selectedLibrary && (
-            <span className="text-xs text-gray-500">({selectedLibrary.info.name} v{selectedLibrary.info.version})</span>
+            <span className="text-xs text-gray-500">
+              ({selectedLibrary.info.name} v{selectedLibrary.info.version})
+            </span>
           )}
         </div>
 
@@ -597,7 +674,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
           >
             📂
           </button>
-          
+
           <button
             onClick={() => selectedLibrary && onAddReference?.(selectedLibrary)}
             disabled={!selectedLibrary}
@@ -606,7 +683,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
           >
             ➕
           </button>
-          
+
           <button
             onClick={generateCode}
             disabled={!selectedType}
@@ -615,7 +692,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
           >
             💻
           </button>
-          
+
           <button
             onClick={() => setShowSettings(!showSettings)}
             className="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
@@ -630,7 +707,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
       <div className="flex items-center gap-2 p-2 bg-gray-50 border-b border-gray-200">
         <select
           value={selectedLibrary?.info.guid || ''}
-          onChange={(e) => {
+          onChange={e => {
             const library = typeLibraries.find(lib => lib.info.guid === e.target.value);
             setSelectedLibrary(library || null);
             setSelectedType(null);
@@ -650,18 +727,22 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
           type="text"
           placeholder="Search..."
           value={filter.searchText}
-          onChange={(e) => setFilter(prev => ({ ...prev, searchText: e.target.value }))}
+          onChange={e => setFilter(prev => ({ ...prev, searchText: e.target.value }))}
           className="px-2 py-1 text-xs border border-gray-300 rounded w-32"
         />
 
         <select
           value={filter.typeFilter}
-          onChange={(e) => setFilter(prev => ({ ...prev, typeFilter: e.target.value as TypeKind | 'All' }))}
+          onChange={e =>
+            setFilter(prev => ({ ...prev, typeFilter: e.target.value as TypeKind | 'All' }))
+          }
           className="px-2 py-1 text-xs border border-gray-300 rounded"
         >
           <option value="All">All Types</option>
           {Object.values(TypeKind).map(kind => (
-            <option key={kind} value={kind}>{kind}</option>
+            <option key={kind} value={kind}>
+              {kind}
+            </option>
           ))}
         </select>
       </div>
@@ -674,52 +755,52 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
               <input
                 type="checkbox"
                 checked={filter.showInterfaces}
-                onChange={(e) => setFilter(prev => ({ ...prev, showInterfaces: e.target.checked }))}
+                onChange={e => setFilter(prev => ({ ...prev, showInterfaces: e.target.checked }))}
               />
               Interfaces
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={filter.showCoClasses}
-                onChange={(e) => setFilter(prev => ({ ...prev, showCoClasses: e.target.checked }))}
+                onChange={e => setFilter(prev => ({ ...prev, showCoClasses: e.target.checked }))}
               />
               CoClasses
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={filter.showEnums}
-                onChange={(e) => setFilter(prev => ({ ...prev, showEnums: e.target.checked }))}
+                onChange={e => setFilter(prev => ({ ...prev, showEnums: e.target.checked }))}
               />
               Enums
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={filter.showModules}
-                onChange={(e) => setFilter(prev => ({ ...prev, showModules: e.target.checked }))}
+                onChange={e => setFilter(prev => ({ ...prev, showModules: e.target.checked }))}
               />
               Modules
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={filter.showHidden}
-                onChange={(e) => setFilter(prev => ({ ...prev, showHidden: e.target.checked }))}
+                onChange={e => setFilter(prev => ({ ...prev, showHidden: e.target.checked }))}
               />
               Hidden
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={filter.showRestricted}
-                onChange={(e) => setFilter(prev => ({ ...prev, showRestricted: e.target.checked }))}
+                onChange={e => setFilter(prev => ({ ...prev, showRestricted: e.target.checked }))}
               />
               Restricted
             </label>
@@ -733,7 +814,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
           { key: 'types', label: 'Types', icon: '📋' },
           { key: 'members', label: 'Members', icon: '🔧' },
           { key: 'details', label: 'Details', icon: 'ℹ️' },
-          { key: 'code', label: 'Code', icon: '💻' }
+          { key: 'code', label: 'Code', icon: '💻' },
         ].map(tab => (
           <button
             key={tab.key}
@@ -774,7 +855,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                           }}
                         >
                           <button
-                            onClick={(e) => {
+                            onClick={e => {
                               e.stopPropagation();
                               toggleExpanded(type.id);
                             }}
@@ -788,13 +869,13 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-sm truncate">{type.name}</div>
                             {type.description && (
-                              <div className="text-xs text-gray-600 truncate">{type.description}</div>
+                              <div className="text-xs text-gray-600 truncate">
+                                {type.description}
+                              </div>
                             )}
                           </div>
 
-                          <div className="text-xs text-gray-500">
-                            {type.kind}
-                          </div>
+                          <div className="text-xs text-gray-500">{type.kind}</div>
                         </div>
 
                         {/* Type Members */}
@@ -816,7 +897,9 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                                   </div>
                                 </div>
                                 {member.isHidden && <span className="text-red-600 text-xs">H</span>}
-                                {member.isRestricted && <span className="text-orange-600 text-xs">R</span>}
+                                {member.isRestricted && (
+                                  <span className="text-orange-600 text-xs">R</span>
+                                )}
                               </div>
                             ))}
                           </div>
@@ -848,7 +931,9 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                     <div
                       key={member.id}
                       className={`p-2 border rounded cursor-pointer hover:bg-gray-50 ${
-                        selectedMember?.id === member.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                        selectedMember?.id === member.id
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200'
                       }`}
                       onClick={() => setSelectedMember(member)}
                     >
@@ -857,18 +942,22 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                         <div className="font-medium">{member.name}</div>
                         <div className="text-xs text-gray-500">({member.kind})</div>
                         {member.isHidden && <span className="text-red-600 text-xs">Hidden</span>}
-                        {member.isRestricted && <span className="text-orange-600 text-xs">Restricted</span>}
-                        {member.isDefaultMember && <span className="text-green-600 text-xs">Default</span>}
+                        {member.isRestricted && (
+                          <span className="text-orange-600 text-xs">Restricted</span>
+                        )}
+                        {member.isDefaultMember && (
+                          <span className="text-green-600 text-xs">Default</span>
+                        )}
                       </div>
-                      
+
                       <div className="text-sm font-mono text-gray-700 bg-gray-100 p-2 rounded">
                         {formatMemberSignature(member)}
                       </div>
-                      
+
                       {member.description && (
                         <div className="text-xs text-gray-600 mt-2">{member.description}</div>
                       )}
-                      
+
                       {member.dispId !== undefined && (
                         <div className="text-xs text-gray-500 mt-1">DispID: {member.dispId}</div>
                       )}
@@ -935,7 +1024,9 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                       <label className="font-medium text-gray-700">Implemented Interfaces:</label>
                       <div className="text-sm mt-1">
                         {selectedType.implementedInterfaces.map(iface => (
-                          <div key={iface} className="py-1">{iface}</div>
+                          <div key={iface} className="py-1">
+                            {iface}
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -947,11 +1038,16 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                       <div className="text-sm mt-1">
                         {selectedType.helpFile}
                         {selectedType.helpContext && (
-                          <span className="ml-2 text-gray-500">(Context: {selectedType.helpContext})</span>
+                          <span className="ml-2 text-gray-500">
+                            (Context: {selectedType.helpContext})
+                          </span>
                         )}
                         <button
-                          onClick={() => selectedType.helpFile && selectedType.helpContext && 
-                                        onShowHelp?.(selectedType.helpFile, selectedType.helpContext)}
+                          onClick={() =>
+                            selectedType.helpFile &&
+                            selectedType.helpContext &&
+                            onShowHelp?.(selectedType.helpFile, selectedType.helpContext)
+                          }
                           className="ml-2 text-blue-600 hover:underline"
                         >
                           View Help
@@ -986,7 +1082,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                 <label className="text-sm font-medium">Language:</label>
                 <select
                   value={codeLanguage}
-                  onChange={(e) => setCodeLanguage(e.target.value as 'VB6' | 'C++' | 'IDL')}
+                  onChange={e => setCodeLanguage(e.target.value as 'VB6' | 'C++' | 'IDL')}
                   className="px-2 py-1 text-xs border border-gray-300 rounded"
                 >
                   <option value="VB6">Visual Basic 6</option>
@@ -1002,7 +1098,7 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
                 </button>
               </div>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-4">
               {generatedCode ? (
                 <pre className="text-sm font-mono bg-gray-100 p-4 rounded border overflow-x-auto">
@@ -1028,19 +1124,21 @@ export const TypeLibraryBrowser: React.FC<TypeLibraryBrowserProps> = ({
           <span>Libraries: {typeLibraries.length}</span>
           {selectedLibrary && (
             <>
-              <span>Types: {filteredTypes.length}/{selectedLibrary.types.length}</span>
+              <span>
+                Types: {filteredTypes.length}/{selectedLibrary.types.length}
+              </span>
               <span>Constants: {selectedLibrary.constants.length}</span>
             </>
           )}
           {selectedType && (
-            <span>Members: {filteredMembers.length}/{selectedType.members.length}</span>
+            <span>
+              Members: {filteredMembers.length}/{selectedType.members.length}
+            </span>
           )}
         </div>
 
         <div className="flex items-center gap-2">
-          {selectedLibrary && (
-            <span>GUID: {selectedLibrary.info.guid}</span>
-          )}
+          {selectedLibrary && <span>GUID: {selectedLibrary.info.guid}</span>}
         </div>
       </div>
     </div>

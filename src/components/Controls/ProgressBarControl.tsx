@@ -1,6 +1,6 @@
 /**
  * VB6 ProgressBar Control Implementation
- * 
+ *
  * Progress indicator control with full VB6 compatibility
  */
 
@@ -13,28 +13,28 @@ export interface ProgressBarControl {
   top: number;
   width: number;
   height: number;
-  
+
   // Progress Properties
   min: number;
   max: number;
   value: number;
-  
+
   // Appearance
   backColor: string;
   foreColor: string;
   scrolling: number; // 0=Standard, 1=Smooth
   orientation: number; // 0=Horizontal, 1=Vertical
-  
+
   // Behavior
   enabled: boolean;
   visible: boolean;
-  
+
   // Appearance
   appearance: number; // 0=Flat, 1=3D
   borderStyle: number; // 0=None, 1=Fixed Single
   mousePointer: number;
   tag: string;
-  
+
   // Events
   onChange?: string;
 }
@@ -50,7 +50,7 @@ export const ProgressBarControl: React.FC<ProgressBarControlProps> = ({
   control,
   isDesignMode = false,
   onPropertyChange,
-  onEvent
+  onEvent,
 }) => {
   const {
     name,
@@ -70,7 +70,7 @@ export const ProgressBarControl: React.FC<ProgressBarControlProps> = ({
     appearance = 1,
     borderStyle = 1,
     mousePointer = 0,
-    tag = ''
+    tag = '',
   } = control;
 
   const [currentValue, setCurrentValue] = useState(value);
@@ -88,18 +88,18 @@ export const ProgressBarControl: React.FC<ProgressBarControlProps> = ({
       const animate = () => {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        
+
         // Easing function (ease-out)
         const easedProgress = 1 - Math.pow(1 - progress, 3);
-        
+
         const interpolatedValue = startValue + (endValue - startValue) * easedProgress;
         setCurrentValue(interpolatedValue);
-        
+
         if (progress < 1) {
           requestAnimationFrame(animate);
         }
       };
-      
+
       requestAnimationFrame(animate);
     } else {
       setCurrentValue(value);
@@ -112,12 +112,15 @@ export const ProgressBarControl: React.FC<ProgressBarControlProps> = ({
   const percentage = range > 0 ? ((clampedValue - min) / range) * 100 : 0;
 
   // Handle value change
-  const handleValueChange = useCallback((newValue: number) => {
-    const clampedNewValue = Math.max(min, Math.min(max, newValue));
-    setCurrentValue(clampedNewValue);
-    onPropertyChange?.('value', clampedNewValue);
-    onEvent?.('Change');
-  }, [min, max, onPropertyChange, onEvent]);
+  const handleValueChange = useCallback(
+    (newValue: number) => {
+      const clampedNewValue = Math.max(min, Math.min(max, newValue));
+      setCurrentValue(clampedNewValue);
+      onPropertyChange?.('value', clampedNewValue);
+      onEvent?.('Change');
+    },
+    [min, max, onPropertyChange, onEvent]
+  );
 
   if (!visible) {
     return null;
@@ -130,9 +133,21 @@ export const ProgressBarControl: React.FC<ProgressBarControlProps> = ({
 
   const getCursorStyle = () => {
     const cursors = [
-      'default', 'auto', 'crosshair', 'text', 'wait', 'help',
-      'pointer', 'not-allowed', 'move', 'col-resize', 'row-resize',
-      'n-resize', 's-resize', 'e-resize', 'w-resize'
+      'default',
+      'auto',
+      'crosshair',
+      'text',
+      'wait',
+      'help',
+      'pointer',
+      'not-allowed',
+      'move',
+      'col-resize',
+      'row-resize',
+      'n-resize',
+      's-resize',
+      'e-resize',
+      'w-resize',
     ];
     return cursors[mousePointer] || 'default';
   };
@@ -150,7 +165,7 @@ export const ProgressBarControl: React.FC<ProgressBarControlProps> = ({
     cursor: getCursorStyle(),
     opacity: enabled ? 1 : 0.5,
     outline: isDesignMode ? '1px dotted #333' : 'none',
-    overflow: 'hidden'
+    overflow: 'hidden',
   };
 
   const progressStyle = {
@@ -159,14 +174,16 @@ export const ProgressBarControl: React.FC<ProgressBarControlProps> = ({
     left: 0,
     backgroundColor: foreColor,
     transition: scrolling === 1 ? 'all 0.3s ease-out' : 'none',
-    ...(isHorizontal ? {
-      width: `${percentage}%`,
-      height: '100%'
-    } : {
-      width: '100%',
-      height: `${percentage}%`,
-      top: `${100 - percentage}%`
-    })
+    ...(isHorizontal
+      ? {
+          width: `${percentage}%`,
+          height: '100%',
+        }
+      : {
+          width: '100%',
+          height: `${percentage}%`,
+          top: `${100 - percentage}%`,
+        }),
   };
 
   // Chunked progress bar style (Windows classic)
@@ -175,7 +192,7 @@ export const ProgressBarControl: React.FC<ProgressBarControlProps> = ({
     const chunkSpacing = 2;
     const totalSize = isHorizontal ? width - 4 : height - 4;
     const availableSize = (totalSize * percentage) / 100;
-    
+
     const numChunks = Math.floor(availableSize / (chunkSize + chunkSpacing));
     const chunks = [];
 
@@ -183,22 +200,22 @@ export const ProgressBarControl: React.FC<ProgressBarControlProps> = ({
       const chunkStyle = {
         position: 'absolute' as const,
         backgroundColor: foreColor,
-        ...(isHorizontal ? {
-          left: `${2 + i * (chunkSize + chunkSpacing)}px`,
-          top: '2px',
-          width: `${chunkSize}px`,
-          height: `${height - 4}px`
-        } : {
-          left: '2px',
-          bottom: `${2 + i * (chunkSize + chunkSpacing)}px`,
-          width: `${width - 4}px`,
-          height: `${chunkSize}px`
-        })
+        ...(isHorizontal
+          ? {
+              left: `${2 + i * (chunkSize + chunkSpacing)}px`,
+              top: '2px',
+              width: `${chunkSize}px`,
+              height: `${height - 4}px`,
+            }
+          : {
+              left: '2px',
+              bottom: `${2 + i * (chunkSize + chunkSpacing)}px`,
+              width: `${width - 4}px`,
+              height: `${chunkSize}px`,
+            }),
       };
 
-      chunks.push(
-        <div key={i} style={chunkStyle} />
-      );
+      chunks.push(<div key={i} style={chunkStyle} />);
     }
 
     return chunks;
@@ -232,7 +249,7 @@ export const ProgressBarControl: React.FC<ProgressBarControlProps> = ({
             color: percentage > 50 ? backColor : foreColor,
             fontWeight: 'bold',
             pointerEvents: 'none',
-            textShadow: '1px 1px 1px rgba(0,0,0,0.5)'
+            textShadow: '1px 1px 1px rgba(0,0,0,0.5)',
           }}
         >
           {Math.round(percentage)}%
@@ -252,7 +269,7 @@ export const ProgressBarControl: React.FC<ProgressBarControlProps> = ({
             padding: '2px',
             border: '1px solid #ccc',
             whiteSpace: 'nowrap',
-            zIndex: 1000
+            zIndex: 1000,
           }}
         >
           {name} ({currentValue.toFixed(0)}/{max})

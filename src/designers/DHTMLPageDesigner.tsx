@@ -18,7 +18,7 @@ export enum DHTMLElementType {
   Form = 'form',
   IFrame = 'iframe',
   Script = 'script',
-  Style = 'style'
+  Style = 'style',
 }
 
 // DHTML Element Properties
@@ -50,7 +50,7 @@ export enum DesignMode {
   Design = 'design',
   Source = 'source',
   Preview = 'preview',
-  Split = 'split'
+  Split = 'split',
 }
 
 interface DHTMLPageDesignerProps {
@@ -62,20 +62,22 @@ interface DHTMLPageDesignerProps {
 export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
   initialPage,
   onSave,
-  onPreview
+  onPreview,
 }) => {
-  const [page, setPage] = useState<DHTMLPage>(initialPage || {
-    name: 'DHTMLPage1',
-    title: 'DHTML Page',
-    elements: [],
-    scripts: [],
-    styles: [],
-    meta: {
-      charset: 'UTF-8',
-      viewport: 'width=device-width, initial-scale=1.0'
-    },
-    docType: '<!DOCTYPE html>'
-  });
+  const [page, setPage] = useState<DHTMLPage>(
+    initialPage || {
+      name: 'DHTMLPage1',
+      title: 'DHTML Page',
+      elements: [],
+      scripts: [],
+      styles: [],
+      meta: {
+        charset: 'UTF-8',
+        viewport: 'width=device-width, initial-scale=1.0',
+      },
+      docType: '<!DOCTYPE html>',
+    }
+  );
 
   const [selectedElement, setSelectedElement] = useState<DHTMLElement | null>(null);
   const [designMode, setDesignMode] = useState<DesignMode>(DesignMode.Design);
@@ -83,7 +85,7 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [draggedElement, setDraggedElement] = useState<DHTMLElementType | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
-  
+
   const designerRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLIFrameElement>(null);
   const eventEmitter = useRef(new EventEmitter());
@@ -110,22 +112,44 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
         .replace(/'/g, '&#x27;')
         .replace(/\//g, '&#x2F;');
     },
-    
+
     // Attribute name validation
     validateAttributeName: (name: string): boolean => {
       // Only allow safe attribute names
       const safePattern = /^[a-zA-Z][a-zA-Z0-9-_]*$/;
       const dangerousAttrs = [
-        'onabort', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onerror',
-        'onfocus', 'onkeydown', 'onkeypress', 'onkeyup', 'onload', 'onmousedown',
-        'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onreset',
-        'onresize', 'onselect', 'onsubmit', 'onunload', 'javascript:', 'vbscript:',
-        'data:', 'srcdoc', 'sandbox', 'allow'
+        'onabort',
+        'onblur',
+        'onchange',
+        'onclick',
+        'ondblclick',
+        'onerror',
+        'onfocus',
+        'onkeydown',
+        'onkeypress',
+        'onkeyup',
+        'onload',
+        'onmousedown',
+        'onmousemove',
+        'onmouseout',
+        'onmouseover',
+        'onmouseup',
+        'onreset',
+        'onresize',
+        'onselect',
+        'onsubmit',
+        'onunload',
+        'javascript:',
+        'vbscript:',
+        'data:',
+        'srcdoc',
+        'sandbox',
+        'allow',
       ];
-      
+
       return safePattern.test(name) && !dangerousAttrs.includes(name.toLowerCase());
     },
-    
+
     // CSS validation
     validateCSSProperty: (property: string, value: string): boolean => {
       // Block dangerous CSS
@@ -135,45 +159,62 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
         /url\s*\(/i,
         /import/i,
         /@/i,
-        /behavior\s*:/i
+        /behavior\s*:/i,
       ];
-      
-      return !dangerousPatterns.some(pattern => 
-        pattern.test(property) || pattern.test(value)
-      );
+
+      return !dangerousPatterns.some(pattern => pattern.test(property) || pattern.test(value));
     },
-    
+
     // Safe ID generation
     generateSafeId: (originalId: string): string => {
       // Ensure ID doesn't conflict with global objects
       const dangerousIds = [
-        'window', 'document', 'location', 'navigator', 'history', 'screen',
-        'parent', 'top', 'frames', 'self', 'opener', 'closed', 'length',
-        'name', 'status', 'defaultStatus', 'toolbar', 'menubar', 'scrollbars',
-        'locationbar', 'statusbar', 'directories', 'personalbar'
+        'window',
+        'document',
+        'location',
+        'navigator',
+        'history',
+        'screen',
+        'parent',
+        'top',
+        'frames',
+        'self',
+        'opener',
+        'closed',
+        'length',
+        'name',
+        'status',
+        'defaultStatus',
+        'toolbar',
+        'menubar',
+        'scrollbars',
+        'locationbar',
+        'statusbar',
+        'directories',
+        'personalbar',
       ];
-      
+
       let safeId = originalId.replace(/[^a-zA-Z0-9_-]/g, '_');
       if (dangerousIds.includes(safeId.toLowerCase())) {
         safeId = `safe_${safeId}`;
       }
-      
+
       return safeId;
-    }
+    },
   };
 
   // Generate HTML from page
   const generateHTML = useCallback((): string => {
     const lines: string[] = [];
-    
+
     // DocType
     lines.push(page.docType);
     lines.push('<html>');
     lines.push('<head>');
-    
+
     // Title - DOM CLOBBERING BUG FIX: Escape title content
     lines.push(`  <title>${domClobberingProtection.escapeHtml(page.title)}</title>`);
-    
+
     // Meta tags - DOM CLOBBERING BUG FIX: Validate and escape meta attributes
     Object.entries(page.meta).forEach(([name, content]) => {
       if (domClobberingProtection.validateAttributeName(name)) {
@@ -184,27 +225,27 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
         console.warn(`Unsafe meta attribute blocked: ${name}`);
       }
     });
-    
+
     // Styles
     if (page.styles.length > 0) {
       lines.push('  <style>');
       page.styles.forEach(style => lines.push(`    ${style}`));
       lines.push('  </style>');
     }
-    
+
     lines.push('</head>');
     lines.push('<body>');
-    
+
     // Render elements - DOM CLOBBERING BUG FIX: Secure element rendering
     const renderElement = (element: DHTMLElement, indent: string = '  '): void => {
       const attrs: string[] = [];
-      
+
       // Add ID - DOM CLOBBERING BUG FIX: Generate safe ID
       if (element.id) {
         const safeId = domClobberingProtection.generateSafeId(element.id);
         attrs.push(`id="${domClobberingProtection.escapeHtml(safeId)}"`);
       }
-      
+
       // Add properties - DOM CLOBBERING BUG FIX: Validate and escape attributes
       Object.entries(element.properties).forEach(([key, value]) => {
         if (value !== null && value !== undefined) {
@@ -217,7 +258,7 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
           }
         }
       });
-      
+
       // Add inline styles - DOM CLOBBERING BUG FIX: Validate CSS properties
       const safeStyles: string[] = [];
       Object.entries(element.styles).forEach(([key, value]) => {
@@ -229,51 +270,51 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
           console.warn(`Unsafe CSS property blocked: ${key}: ${value}`);
         }
       });
-      
+
       if (safeStyles.length > 0) {
         attrs.push(`style="${safeStyles.join('; ')}"`);
       }
-      
+
       // Block event handlers - DOM CLOBBERING BUG FIX: Event handlers are XSS vectors
       if (Object.keys(element.events).length > 0) {
         console.warn('Event handlers blocked for security - use React event handlers instead');
       }
-      
+
       const attrStr = attrs.length > 0 ? ' ' + attrs.join(' ') : '';
-      
+
       // Self-closing tags
       const selfClosing = ['img', 'br', 'hr', 'input', 'meta', 'link'];
       if (selfClosing.includes(element.tagName)) {
         lines.push(`${indent}<${element.tagName}${attrStr} />`);
       } else {
         lines.push(`${indent}<${element.tagName}${attrStr}>`);
-        
+
         // Content - DOM CLOBBERING BUG FIX: Escape content
         if (element.content) {
           const safeContent = domClobberingProtection.escapeHtml(element.content);
           lines.push(`${indent}  ${safeContent}`);
         }
-        
+
         // Children
         element.children.forEach(child => {
           renderElement(child, indent + '  ');
         });
-        
+
         lines.push(`${indent}</${element.tagName}>`);
       }
     };
-    
+
     page.elements.forEach(element => renderElement(element));
-    
+
     // Scripts - DOM CLOBBERING BUG FIX: Block inline scripts for security
     if (page.scripts.length > 0) {
       console.warn('Inline scripts blocked for security - use external script files instead');
       lines.push('  <!-- Inline scripts blocked for security -->');
     }
-    
+
     lines.push('</body>');
     lines.push('</html>');
-    
+
     return lines.join('\n');
   }, [page]);
 
@@ -305,7 +346,7 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
       properties: {},
       styles: {},
       events: {},
-      children: []
+      children: [],
     };
 
     // Set tag name and default properties based on type
@@ -350,7 +391,7 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
           styles: {},
           events: {},
           children: [],
-          content: 'Option 1'
+          content: 'Option 1',
         });
         break;
       case DHTMLElementType.CheckBox:
@@ -373,16 +414,18 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
           properties: {},
           styles: {},
           events: {},
-          children: [{
-            id: `${id}_td1`,
-            type: DHTMLElementType.Text,
-            tagName: 'td',
-            properties: {},
-            styles: {},
-            events: {},
-            children: [],
-            content: 'Cell'
-          }]
+          children: [
+            {
+              id: `${id}_td1`,
+              type: DHTMLElementType.Text,
+              tagName: 'td',
+              properties: {},
+              styles: {},
+              events: {},
+              children: [],
+              content: 'Cell',
+            },
+          ],
         };
         baseElement.children.push(tr);
         break;
@@ -412,87 +455,96 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
     return baseElement;
   }, []);
 
-  const addElement = useCallback((type: DHTMLElementType, parentId?: string) => {
-    const newElement = createElement(type);
-    
-    setPage(prev => {
-      const updated = { ...prev };
-      
-      if (parentId) {
-        // Add as child of parent
-        const findAndAdd = (elements: DHTMLElement[]): boolean => {
-          for (const el of elements) {
-            if (el.id === parentId) {
-              el.children.push({ ...newElement, parent: parentId });
+  const addElement = useCallback(
+    (type: DHTMLElementType, parentId?: string) => {
+      const newElement = createElement(type);
+
+      setPage(prev => {
+        const updated = { ...prev };
+
+        if (parentId) {
+          // Add as child of parent
+          const findAndAdd = (elements: DHTMLElement[]): boolean => {
+            for (const el of elements) {
+              if (el.id === parentId) {
+                el.children.push({ ...newElement, parent: parentId });
+                return true;
+              }
+              if (findAndAdd(el.children)) return true;
+            }
+            return false;
+          };
+          findAndAdd(updated.elements);
+        } else {
+          // Add to root
+          updated.elements.push(newElement);
+        }
+
+        return updated;
+      });
+
+      setSelectedElement(newElement);
+      eventEmitter.current.emit('elementAdded', newElement);
+    },
+    [createElement]
+  );
+
+  const updateElement = useCallback(
+    (elementId: string, updates: Partial<DHTMLElement>) => {
+      setPage(prev => {
+        const updated = { ...prev };
+
+        const findAndUpdate = (elements: DHTMLElement[]): boolean => {
+          for (let i = 0; i < elements.length; i++) {
+            if (elements[i].id === elementId) {
+              elements[i] = { ...elements[i], ...updates };
+              if (selectedElement?.id === elementId) {
+                setSelectedElement(elements[i]);
+              }
               return true;
             }
-            if (findAndAdd(el.children)) return true;
+            if (findAndUpdate(elements[i].children)) return true;
           }
           return false;
         };
-        findAndAdd(updated.elements);
-      } else {
-        // Add to root
-        updated.elements.push(newElement);
-      }
-      
-      return updated;
-    });
-    
-    setSelectedElement(newElement);
-    eventEmitter.current.emit('elementAdded', newElement);
-  }, [createElement]);
 
-  const updateElement = useCallback((elementId: string, updates: Partial<DHTMLElement>) => {
-    setPage(prev => {
-      const updated = { ...prev };
-      
-      const findAndUpdate = (elements: DHTMLElement[]): boolean => {
-        for (let i = 0; i < elements.length; i++) {
-          if (elements[i].id === elementId) {
-            elements[i] = { ...elements[i], ...updates };
-            if (selectedElement?.id === elementId) {
-              setSelectedElement(elements[i]);
+        findAndUpdate(updated.elements);
+        return updated;
+      });
+
+      eventEmitter.current.emit('elementUpdated', { elementId, updates });
+    },
+    [selectedElement]
+  );
+
+  const deleteElement = useCallback(
+    (elementId: string) => {
+      setPage(prev => {
+        const updated = { ...prev };
+
+        const findAndDelete = (elements: DHTMLElement[]): boolean => {
+          for (let i = 0; i < elements.length; i++) {
+            if (elements[i].id === elementId) {
+              elements.splice(i, 1);
+              return true;
             }
-            return true;
+            if (findAndDelete(elements[i].children)) return true;
           }
-          if (findAndUpdate(elements[i].children)) return true;
-        }
-        return false;
-      };
-      
-      findAndUpdate(updated.elements);
-      return updated;
-    });
-    
-    eventEmitter.current.emit('elementUpdated', { elementId, updates });
-  }, [selectedElement]);
+          return false;
+        };
 
-  const deleteElement = useCallback((elementId: string) => {
-    setPage(prev => {
-      const updated = { ...prev };
-      
-      const findAndDelete = (elements: DHTMLElement[]): boolean => {
-        for (let i = 0; i < elements.length; i++) {
-          if (elements[i].id === elementId) {
-            elements.splice(i, 1);
-            return true;
-          }
-          if (findAndDelete(elements[i].children)) return true;
-        }
-        return false;
-      };
-      
-      findAndDelete(updated.elements);
-      return updated;
-    });
-    
-    if (selectedElement?.id === elementId) {
-      setSelectedElement(null);
-    }
-    
-    eventEmitter.current.emit('elementDeleted', elementId);
-  }, [selectedElement]);
+        findAndDelete(updated.elements);
+        return updated;
+      });
+
+      if (selectedElement?.id === elementId) {
+        setSelectedElement(null);
+      }
+
+      eventEmitter.current.emit('elementDeleted', elementId);
+    },
+    [selectedElement]
+  );
 
   const handleDragStart = useCallback((type: DHTMLElementType) => {
     // ATOMIC STATE UPDATE: Prevent torn reads by batching all related state changes
@@ -511,13 +563,16 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
     });
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent, parentId?: string) => {
-    e.preventDefault();
-    if (draggedElement) {
-      addElement(draggedElement, parentId);
-    }
-    handleDragEnd();
-  }, [draggedElement, addElement, handleDragEnd]);
+  const handleDrop = useCallback(
+    (e: React.DragEvent, parentId?: string) => {
+      e.preventDefault();
+      if (draggedElement) {
+        addElement(draggedElement, parentId);
+      }
+      handleDragEnd();
+    },
+    [draggedElement, addElement, handleDragEnd]
+  );
 
   const handleSave = useCallback(() => {
     onSave?.(page);
@@ -527,7 +582,7 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
   const handlePreview = useCallback(() => {
     const html = generateHTML();
     onPreview?.(html);
-    
+
     // Open in new window
     const previewWindow = window.open('', '_blank');
     if (previewWindow) {
@@ -539,28 +594,28 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
   const renderElement = (element: DHTMLElement): React.ReactNode => {
     const isSelected = selectedElement?.id === element.id;
     const isDropTarget = dropTarget === element.id;
-    
+
     return (
       <div
         key={element.id}
         className={`dhtml-element ${isSelected ? 'selected' : ''} ${isDropTarget ? 'drop-target' : ''}`}
-        onClick={(e) => {
+        onClick={e => {
           e.stopPropagation();
           setSelectedElement(element);
         }}
-        onDragOver={(e) => {
+        onDragOver={e => {
           e.preventDefault();
           if (isDragging) setDropTarget(element.id);
         }}
         onDragLeave={() => setDropTarget(null)}
-        onDrop={(e) => handleDrop(e, element.id)}
+        onDrop={e => handleDrop(e, element.id)}
         style={{
           border: isSelected ? '2px solid #0066cc' : '1px dashed #ccc',
           padding: '5px',
           margin: '5px',
           backgroundColor: isDropTarget ? '#e6f2ff' : 'transparent',
           minHeight: '30px',
-          position: 'relative'
+          position: 'relative',
         }}
       >
         <div style={{ pointerEvents: 'none' }}>
@@ -568,10 +623,10 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
           {element.content && <div>{element.content}</div>}
           {element.children.map(child => renderElement(child))}
         </div>
-        
+
         {isSelected && (
           <button
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               deleteElement(element.id);
             }}
@@ -586,7 +641,7 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
               width: 20,
               height: 20,
               cursor: 'pointer',
-              fontSize: '12px'
+              fontSize: '12px',
             }}
           >
             ×
@@ -606,7 +661,7 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
             <input
               type="text"
               value={page.name}
-              onChange={(e) => setPage(prev => ({ ...prev, name: e.target.value }))}
+              onChange={e => setPage(prev => ({ ...prev, name: e.target.value }))}
               className="px-2 py-1 border border-gray-300 rounded"
             />
           </div>
@@ -669,8 +724,8 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
             <div
               ref={designerRef}
               className={`${designMode === DesignMode.Split ? 'h-1/2' : 'h-full'} overflow-auto bg-white p-4`}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => handleDrop(e)}
+              onDragOver={e => e.preventDefault()}
+              onDrop={e => handleDrop(e)}
             >
               <div className="min-h-full">
                 {page.elements.length === 0 ? (
@@ -685,10 +740,12 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
           )}
 
           {(designMode === DesignMode.Source || designMode === DesignMode.Split) && (
-            <div className={`${designMode === DesignMode.Split ? 'h-1/2 border-t' : 'h-full'} border-gray-200`}>
+            <div
+              className={`${designMode === DesignMode.Split ? 'h-1/2 border-t' : 'h-full'} border-gray-200`}
+            >
               <textarea
                 value={sourceCode}
-                onChange={(e) => setSourceCode(e.target.value)}
+                onChange={e => setSourceCode(e.target.value)}
                 className="w-full h-full p-4 font-mono text-sm resize-none focus:outline-none"
                 placeholder="HTML source code..."
               />
@@ -696,11 +753,7 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
           )}
 
           {designMode === DesignMode.Preview && (
-            <iframe
-              ref={previewRef}
-              className="w-full h-full bg-white"
-              title="Preview"
-            />
+            <iframe ref={previewRef} className="w-full h-full bg-white" title="Preview" />
           )}
         </div>
 
@@ -709,36 +762,36 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
           <div className="w-80 bg-white border-l border-gray-200 overflow-y-auto">
             <div className="p-4">
               <h3 className="font-medium text-gray-700 mb-3">Properties</h3>
-              
+
               {/* Element Info */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-600">Type</label>
                 <div className="text-sm text-gray-800">{selectedElement.type}</div>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-600">ID</label>
                 <input
                   type="text"
                   value={selectedElement.id}
-                  onChange={(e) => updateElement(selectedElement.id, { id: e.target.value })}
+                  onChange={e => updateElement(selectedElement.id, { id: e.target.value })}
                   className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                 />
               </div>
-              
+
               {/* Content */}
               {selectedElement.content !== undefined && (
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-600">Content</label>
                   <textarea
                     value={selectedElement.content}
-                    onChange={(e) => updateElement(selectedElement.id, { content: e.target.value })}
+                    onChange={e => updateElement(selectedElement.id, { content: e.target.value })}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     rows={3}
                   />
                 </div>
               )}
-              
+
               {/* Properties */}
               <div className="mb-4">
                 <h4 className="text-sm font-medium text-gray-600 mb-2">Attributes</h4>
@@ -748,15 +801,17 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
                     <input
                       type="text"
                       value={value}
-                      onChange={(e) => updateElement(selectedElement.id, {
-                        properties: { ...selectedElement.properties, [key]: e.target.value }
-                      })}
+                      onChange={e =>
+                        updateElement(selectedElement.id, {
+                          properties: { ...selectedElement.properties, [key]: e.target.value },
+                        })
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     />
                   </div>
                 ))}
               </div>
-              
+
               {/* Styles */}
               <div className="mb-4">
                 <h4 className="text-sm font-medium text-gray-600 mb-2">Styles</h4>
@@ -766,9 +821,11 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
                     <input
                       type="text"
                       value={selectedElement.styles.width || ''}
-                      onChange={(e) => updateElement(selectedElement.id, {
-                        styles: { ...selectedElement.styles, width: e.target.value }
-                      })}
+                      onChange={e =>
+                        updateElement(selectedElement.id, {
+                          styles: { ...selectedElement.styles, width: e.target.value },
+                        })
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       placeholder="e.g., 100px, 50%"
                     />
@@ -778,9 +835,11 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
                     <input
                       type="text"
                       value={selectedElement.styles.height || ''}
-                      onChange={(e) => updateElement(selectedElement.id, {
-                        styles: { ...selectedElement.styles, height: e.target.value }
-                      })}
+                      onChange={e =>
+                        updateElement(selectedElement.id, {
+                          styles: { ...selectedElement.styles, height: e.target.value },
+                        })
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       placeholder="e.g., 100px, auto"
                     />
@@ -790,9 +849,11 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
                     <input
                       type="text"
                       value={selectedElement.styles.background || ''}
-                      onChange={(e) => updateElement(selectedElement.id, {
-                        styles: { ...selectedElement.styles, background: e.target.value }
-                      })}
+                      onChange={e =>
+                        updateElement(selectedElement.id, {
+                          styles: { ...selectedElement.styles, background: e.target.value },
+                        })
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       placeholder="e.g., #ffffff, red"
                     />
@@ -802,16 +863,18 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
                     <input
                       type="text"
                       value={selectedElement.styles.color || ''}
-                      onChange={(e) => updateElement(selectedElement.id, {
-                        styles: { ...selectedElement.styles, color: e.target.value }
-                      })}
+                      onChange={e =>
+                        updateElement(selectedElement.id, {
+                          styles: { ...selectedElement.styles, color: e.target.value },
+                        })
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       placeholder="e.g., #000000, blue"
                     />
                   </div>
                 </div>
               </div>
-              
+
               {/* Events */}
               <div>
                 <h4 className="text-sm font-medium text-gray-600 mb-2">Events</h4>
@@ -821,9 +884,11 @@ export const DHTMLPageDesigner: React.FC<DHTMLPageDesignerProps> = ({
                     <input
                       type="text"
                       value={selectedElement.events.click || ''}
-                      onChange={(e) => updateElement(selectedElement.id, {
-                        events: { ...selectedElement.events, click: e.target.value }
-                      })}
+                      onChange={e =>
+                        updateElement(selectedElement.id, {
+                          events: { ...selectedElement.events, click: e.target.value },
+                        })
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       placeholder="JavaScript code"
                     />

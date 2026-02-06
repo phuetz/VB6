@@ -74,7 +74,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ control, onPropert
       {properties.map(prop => (
         <div key={prop} className="text-xs flex flex-col gap-1 mb-1">
           <label className="font-medium capitalize">{prop}</label>
-          {renderInput(prop, (control as any)[prop])}
+          {renderInput(prop, (control as Record<string, unknown>)[prop])}
         </div>
       ))}
     </div>

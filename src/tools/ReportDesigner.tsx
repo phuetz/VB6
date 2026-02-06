@@ -10,7 +10,7 @@ export enum ReportControlType {
   Shape = 'Shape',
   Chart = 'Chart',
   Barcode = 'Barcode',
-  Subreport = 'Subreport'
+  Subreport = 'Subreport',
 }
 
 export enum ReportSectionType {
@@ -20,7 +20,7 @@ export enum ReportSectionType {
   Detail = 'Detail',
   GroupFooter = 'GroupFooter',
   PageFooter = 'PageFooter',
-  ReportFooter = 'ReportFooter'
+  ReportFooter = 'ReportFooter',
 }
 
 export enum DataFieldType {
@@ -30,7 +30,7 @@ export enum DataFieldType {
   Boolean = 'Boolean',
   Currency = 'Currency',
   Image = 'Image',
-  Memo = 'Memo'
+  Memo = 'Memo',
 }
 
 export enum AggregateFunction {
@@ -40,12 +40,12 @@ export enum AggregateFunction {
   Min = 'Min',
   Max = 'Max',
   StdDev = 'StdDev',
-  Variance = 'Variance'
+  Variance = 'Variance',
 }
 
 export enum SortOrder {
   Ascending = 'Ascending',
-  Descending = 'Descending'
+  Descending = 'Descending',
 }
 
 export interface ReportControl {
@@ -185,7 +185,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
   onGenerateReport,
   onPreviewReport,
   onExportReport,
-  onSaveProject
+  onSaveProject,
 }) => {
   const [project, setProject] = useState<ReportProject>({
     id: 'report1',
@@ -209,12 +209,12 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
       showGrid: true,
       snapToGrid: true,
       units: 'Inches',
-      zoom: 100
+      zoom: 100,
     },
     dataSources: [],
     sections: [],
     groups: [],
-    lastModified: new Date()
+    lastModified: new Date(),
   });
 
   const [selectedSection, setSelectedSection] = useState<ReportSection | null>(null);
@@ -239,50 +239,50 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
       type: ReportControlType.Label,
       name: 'Label',
       icon: '📝',
-      defaultSize: { width: 80, height: 20 }
+      defaultSize: { width: 80, height: 20 },
     },
     {
       type: ReportControlType.TextBox,
       name: 'TextBox',
       icon: '📄',
-      defaultSize: { width: 100, height: 20 }
+      defaultSize: { width: 100, height: 20 },
     },
     {
       type: ReportControlType.Image,
       name: 'Image',
       icon: '🖼️',
-      defaultSize: { width: 80, height: 60 }
+      defaultSize: { width: 80, height: 60 },
     },
     {
       type: ReportControlType.Line,
       name: 'Line',
       icon: '➖',
-      defaultSize: { width: 100, height: 1 }
+      defaultSize: { width: 100, height: 1 },
     },
     {
       type: ReportControlType.Shape,
       name: 'Shape',
       icon: '🔲',
-      defaultSize: { width: 60, height: 60 }
+      defaultSize: { width: 60, height: 60 },
     },
     {
       type: ReportControlType.Chart,
       name: 'Chart',
       icon: '📊',
-      defaultSize: { width: 200, height: 150 }
+      defaultSize: { width: 200, height: 150 },
     },
     {
       type: ReportControlType.Barcode,
       name: 'Barcode',
       icon: '🔢',
-      defaultSize: { width: 120, height: 40 }
+      defaultSize: { width: 120, height: 40 },
     },
     {
       type: ReportControlType.Subreport,
       name: 'Subreport',
       icon: '📋',
-      defaultSize: { width: 200, height: 100 }
-    }
+      defaultSize: { width: 200, height: 100 },
+    },
   ];
 
   // Initialize project
@@ -306,7 +306,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
           groupOn: '',
           groupInterval: 1,
           sortOrder: SortOrder.Ascending,
-          controls: []
+          controls: [],
         },
         {
           id: 'pageheader',
@@ -322,7 +322,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
           groupOn: '',
           groupInterval: 1,
           sortOrder: SortOrder.Ascending,
-          controls: []
+          controls: [],
         },
         {
           id: 'detail',
@@ -338,7 +338,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
           groupOn: '',
           groupInterval: 1,
           sortOrder: SortOrder.Ascending,
-          controls: []
+          controls: [],
         },
         {
           id: 'pagefooter',
@@ -354,7 +354,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
           groupOn: '',
           groupInterval: 1,
           sortOrder: SortOrder.Ascending,
-          controls: []
+          controls: [],
         },
         {
           id: 'reportfooter',
@@ -370,8 +370,8 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
           groupOn: '',
           groupInterval: 1,
           sortOrder: SortOrder.Ascending,
-          controls: []
-        }
+          controls: [],
+        },
       ];
 
       // Create sample data source
@@ -382,24 +382,114 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
         connectionString: '',
         commandText: 'SELECT * FROM Customers',
         fields: [
-          { name: 'CustomerID', type: DataFieldType.Text, caption: 'Customer ID', description: 'Unique customer identifier', length: 10, precision: 0, required: true, defaultValue: '' },
-          { name: 'CompanyName', type: DataFieldType.Text, caption: 'Company Name', description: 'Customer company name', length: 50, precision: 0, required: true, defaultValue: '' },
-          { name: 'ContactName', type: DataFieldType.Text, caption: 'Contact Name', description: 'Primary contact name', length: 30, precision: 0, required: false, defaultValue: '' },
-          { name: 'ContactTitle', type: DataFieldType.Text, caption: 'Contact Title', description: 'Contact job title', length: 30, precision: 0, required: false, defaultValue: '' },
-          { name: 'Address', type: DataFieldType.Text, caption: 'Address', description: 'Street address', length: 60, precision: 0, required: false, defaultValue: '' },
-          { name: 'City', type: DataFieldType.Text, caption: 'City', description: 'City name', length: 30, precision: 0, required: false, defaultValue: '' },
-          { name: 'Region', type: DataFieldType.Text, caption: 'Region', description: 'State or region', length: 15, precision: 0, required: false, defaultValue: '' },
-          { name: 'PostalCode', type: DataFieldType.Text, caption: 'Postal Code', description: 'ZIP or postal code', length: 10, precision: 0, required: false, defaultValue: '' },
-          { name: 'Country', type: DataFieldType.Text, caption: 'Country', description: 'Country name', length: 20, precision: 0, required: false, defaultValue: '' },
-          { name: 'Phone', type: DataFieldType.Text, caption: 'Phone', description: 'Phone number', length: 24, precision: 0, required: false, defaultValue: '' }
+          {
+            name: 'CustomerID',
+            type: DataFieldType.Text,
+            caption: 'Customer ID',
+            description: 'Unique customer identifier',
+            length: 10,
+            precision: 0,
+            required: true,
+            defaultValue: '',
+          },
+          {
+            name: 'CompanyName',
+            type: DataFieldType.Text,
+            caption: 'Company Name',
+            description: 'Customer company name',
+            length: 50,
+            precision: 0,
+            required: true,
+            defaultValue: '',
+          },
+          {
+            name: 'ContactName',
+            type: DataFieldType.Text,
+            caption: 'Contact Name',
+            description: 'Primary contact name',
+            length: 30,
+            precision: 0,
+            required: false,
+            defaultValue: '',
+          },
+          {
+            name: 'ContactTitle',
+            type: DataFieldType.Text,
+            caption: 'Contact Title',
+            description: 'Contact job title',
+            length: 30,
+            precision: 0,
+            required: false,
+            defaultValue: '',
+          },
+          {
+            name: 'Address',
+            type: DataFieldType.Text,
+            caption: 'Address',
+            description: 'Street address',
+            length: 60,
+            precision: 0,
+            required: false,
+            defaultValue: '',
+          },
+          {
+            name: 'City',
+            type: DataFieldType.Text,
+            caption: 'City',
+            description: 'City name',
+            length: 30,
+            precision: 0,
+            required: false,
+            defaultValue: '',
+          },
+          {
+            name: 'Region',
+            type: DataFieldType.Text,
+            caption: 'Region',
+            description: 'State or region',
+            length: 15,
+            precision: 0,
+            required: false,
+            defaultValue: '',
+          },
+          {
+            name: 'PostalCode',
+            type: DataFieldType.Text,
+            caption: 'Postal Code',
+            description: 'ZIP or postal code',
+            length: 10,
+            precision: 0,
+            required: false,
+            defaultValue: '',
+          },
+          {
+            name: 'Country',
+            type: DataFieldType.Text,
+            caption: 'Country',
+            description: 'Country name',
+            length: 20,
+            precision: 0,
+            required: false,
+            defaultValue: '',
+          },
+          {
+            name: 'Phone',
+            type: DataFieldType.Text,
+            caption: 'Phone',
+            description: 'Phone number',
+            length: 24,
+            precision: 0,
+            required: false,
+            defaultValue: '',
+          },
         ],
-        parameters: []
+        parameters: [],
       };
 
       setProject(prev => ({
         ...prev,
         sections: defaultSections,
-        dataSources: [sampleDataSource]
+        dataSources: [sampleDataSource],
       }));
 
       setSelectedSection(defaultSections[2]); // Select Detail section by default
@@ -412,76 +502,79 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
   }, [project, onProjectChange]);
 
   // Add control to section
-  const addControlToSection = useCallback((sectionId: string, controlType: ReportControlType, x: number, y: number) => {
-    const template = controlTemplates.find(t => t.type === controlType);
-    if (!template) return;
+  const addControlToSection = useCallback(
+    (sectionId: string, controlType: ReportControlType, x: number, y: number) => {
+      const template = controlTemplates.find(t => t.type === controlType);
+      if (!template) return;
 
-    // Convert coordinates based on units and zoom
-    const actualX = x * (100 / project.settings.zoom);
-    const actualY = y * (100 / project.settings.zoom);
+      // Convert coordinates based on units and zoom
+      const actualX = x * (100 / project.settings.zoom);
+      const actualY = y * (100 / project.settings.zoom);
 
-    // Snap to grid if enabled
-    let snapX = actualX;
-    let snapY = actualY;
-    if (project.settings.snapToGrid) {
-      const gridSizeX = project.settings.pageWidth / project.settings.gridsX;
-      const gridSizeY = project.settings.pageHeight / project.settings.gridsY;
-      snapX = Math.round(actualX / gridSizeX) * gridSizeX;
-      snapY = Math.round(actualY / gridSizeY) * gridSizeY;
-    }
+      // Snap to grid if enabled
+      let snapX = actualX;
+      let snapY = actualY;
+      if (project.settings.snapToGrid) {
+        const gridSizeX = project.settings.pageWidth / project.settings.gridsX;
+        const gridSizeY = project.settings.pageHeight / project.settings.gridsY;
+        snapX = Math.round(actualX / gridSizeX) * gridSizeX;
+        snapY = Math.round(actualY / gridSizeY) * gridSizeY;
+      }
 
-    const controlCount = project.sections
-      .flatMap(s => s.controls)
-      .filter(c => c.type === controlType).length;
+      const controlCount = project.sections
+        .flatMap(s => s.controls)
+        .filter(c => c.type === controlType).length;
 
-    const newControl: ReportControl = {
-      id: `control_${Date.now()}`,
-      name: `${template.name}${controlCount + 1}`,
-      type: controlType,
-      left: snapX,
-      top: snapY,
-      width: template.defaultSize.width / 72, // Convert to inches
-      height: template.defaultSize.height / 72,
-      visible: true,
-      canGrow: false,
-      canShrink: false,
-      hideIfDuplicate: false,
-      suppressIfZero: false,
-      text: template.name,
-      dataField: '',
-      format: '',
-      fontName: 'Arial',
-      fontSize: 10,
-      fontBold: false,
-      fontItalic: false,
-      fontUnderline: false,
-      foreColor: '#000000',
-      backColor: 'transparent',
-      borderStyle: 'None',
-      borderWidth: 1,
-      borderColor: '#000000',
-      alignment: 'Left',
-      verticalAlignment: 'Top',
-      wordWrap: false,
-      hyperlink: '',
-      tooltip: '',
-      tag: '',
-      runningSum: false,
-      resetAfterGroup: ''
-    };
+      const newControl: ReportControl = {
+        id: `control_${Date.now()}`,
+        name: `${template.name}${controlCount + 1}`,
+        type: controlType,
+        left: snapX,
+        top: snapY,
+        width: template.defaultSize.width / 72, // Convert to inches
+        height: template.defaultSize.height / 72,
+        visible: true,
+        canGrow: false,
+        canShrink: false,
+        hideIfDuplicate: false,
+        suppressIfZero: false,
+        text: template.name,
+        dataField: '',
+        format: '',
+        fontName: 'Arial',
+        fontSize: 10,
+        fontBold: false,
+        fontItalic: false,
+        fontUnderline: false,
+        foreColor: '#000000',
+        backColor: 'transparent',
+        borderStyle: 'None',
+        borderWidth: 1,
+        borderColor: '#000000',
+        alignment: 'Left',
+        verticalAlignment: 'Top',
+        wordWrap: false,
+        hyperlink: '',
+        tooltip: '',
+        tag: '',
+        runningSum: false,
+        resetAfterGroup: '',
+      };
 
-    setProject(prev => ({
-      ...prev,
-      sections: prev.sections.map(section =>
-        section.id === sectionId
-          ? { ...section, controls: [...section.controls, newControl] }
-          : section
-      ),
-      lastModified: new Date()
-    }));
+      setProject(prev => ({
+        ...prev,
+        sections: prev.sections.map(section =>
+          section.id === sectionId
+            ? { ...section, controls: [...section.controls, newControl] }
+            : section
+        ),
+        lastModified: new Date(),
+      }));
 
-    setSelectedControl(newControl);
-  }, [project.settings, controlTemplates]);
+      setSelectedControl(newControl);
+    },
+    [project.settings, controlTemplates]
+  );
 
   // Update control
   const updateControl = useCallback((controlId: string, updates: Partial<ReportControl>) => {
@@ -491,27 +584,30 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
         ...section,
         controls: section.controls.map(control =>
           control.id === controlId ? { ...control, ...updates } : control
-        )
+        ),
       })),
-      lastModified: new Date()
+      lastModified: new Date(),
     }));
   }, []);
 
   // Delete control
-  const deleteControl = useCallback((controlId: string) => {
-    setProject(prev => ({
-      ...prev,
-      sections: prev.sections.map(section => ({
-        ...section,
-        controls: section.controls.filter(control => control.id !== controlId)
-      })),
-      lastModified: new Date()
-    }));
+  const deleteControl = useCallback(
+    (controlId: string) => {
+      setProject(prev => ({
+        ...prev,
+        sections: prev.sections.map(section => ({
+          ...section,
+          controls: section.controls.filter(control => control.id !== controlId),
+        })),
+        lastModified: new Date(),
+      }));
 
-    if (selectedControl?.id === controlId) {
-      setSelectedControl(null);
-    }
-  }, [selectedControl]);
+      if (selectedControl?.id === controlId) {
+        setSelectedControl(null);
+      }
+    },
+    [selectedControl]
+  );
 
   // Update section
   const updateSection = useCallback((sectionId: string, updates: Partial<ReportSection>) => {
@@ -520,25 +616,28 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
       sections: prev.sections.map(section =>
         section.id === sectionId ? { ...section, ...updates } : section
       ),
-      lastModified: new Date()
+      lastModified: new Date(),
     }));
   }, []);
 
   // Handle canvas drop
-  const handleCanvasDrop = useCallback((e: React.DragEvent, sectionId: string) => {
-    e.preventDefault();
-    if (!draggedControlType) return;
+  const handleCanvasDrop = useCallback(
+    (e: React.DragEvent, sectionId: string) => {
+      e.preventDefault();
+      if (!draggedControlType) return;
 
-    const section = project.sections.find(s => s.id === sectionId);
-    if (!section) return;
+      const section = project.sections.find(s => s.id === sectionId);
+      if (!section) return;
 
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
 
-    addControlToSection(sectionId, draggedControlType, x, y);
-    setDraggedControlType(null);
-  }, [draggedControlType, project.sections, addControlToSection]);
+      addControlToSection(sectionId, draggedControlType, x, y);
+      setDraggedControlType(null);
+    },
+    [draggedControlType, project.sections, addControlToSection]
+  );
 
   // Handle control mouse down
   const handleControlMouseDown = useCallback((e: React.MouseEvent, control: ReportControl) => {
@@ -556,12 +655,15 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
   }, []);
 
   // Handle mouse move
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isDragging || !selectedControl) return;
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!isDragging || !selectedControl) return;
 
-    // Implementation for moving controls would go here
-    // This would involve calculating new position and updating the control
-  }, [isDragging, selectedControl]);
+      // Implementation for moving controls would go here
+      // This would involve calculating new position and updating the control
+    },
+    [isDragging, selectedControl]
+  );
 
   // Handle mouse up
   const handleMouseUp = useCallback(() => {
@@ -598,30 +700,14 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
     // Vertical lines
     for (let x = 0; x <= width; x += gridSizeX) {
       gridLines.push(
-        <line
-          key={`v${x}`}
-          x1={x}
-          y1={0}
-          x2={x}
-          y2={height}
-          stroke="#E0E0E0"
-          strokeWidth="0.5"
-        />
+        <line key={`v${x}`} x1={x} y1={0} x2={x} y2={height} stroke="#E0E0E0" strokeWidth="0.5" />
       );
     }
 
     // Horizontal lines
     for (let y = 0; y <= height; y += gridSizeY) {
       gridLines.push(
-        <line
-          key={`h${y}`}
-          x1={0}
-          y1={y}
-          x2={width}
-          y2={y}
-          stroke="#E0E0E0"
-          strokeWidth="0.5"
-        />
+        <line key={`h${y}`} x1={0} y1={y} x2={width} y2={y} stroke="#E0E0E0" strokeWidth="0.5" />
       );
     }
 
@@ -649,10 +735,13 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
       textDecoration: control.fontUnderline ? 'underline' : 'none',
       color: control.foreColor,
       backgroundColor: control.backColor === 'transparent' ? 'transparent' : control.backColor,
-      textAlign: control.alignment.toLowerCase() as any,
-      border: control.borderStyle !== 'None' ? `${control.borderWidth}px ${control.borderStyle.toLowerCase()} ${control.borderColor}` : 'none',
+      textAlign: control.alignment.toLowerCase() as React.CSSProperties['textAlign'],
+      border:
+        control.borderStyle !== 'None'
+          ? `${control.borderWidth}px ${control.borderStyle.toLowerCase()} ${control.borderColor}`
+          : 'none',
       overflow: control.wordWrap ? 'visible' : 'hidden',
-      whiteSpace: control.wordWrap ? 'normal' : 'nowrap'
+      whiteSpace: control.wordWrap ? 'normal' : 'nowrap',
     };
 
     return (
@@ -660,14 +749,14 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
         key={control.id}
         className={`absolute cursor-pointer ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
         style={style}
-        onMouseDown={(e) => handleControlMouseDown(e, control)}
+        onMouseDown={e => handleControlMouseDown(e, control)}
       >
         <div className="w-full h-full flex items-center">
-          {control.type === ReportControlType.Label && (
-            <span>{control.text || control.name}</span>
-          )}
+          {control.type === ReportControlType.Label && <span>{control.text || control.name}</span>}
           {control.type === ReportControlType.TextBox && (
-            <span>{control.dataField ? `{${control.dataField}}` : control.text || '[TextBox]'}</span>
+            <span>
+              {control.dataField ? `{${control.dataField}}` : control.text || '[TextBox]'}
+            </span>
           )}
           {control.type === ReportControlType.Image && (
             <div className="w-full h-full bg-gray-100 border border-dashed border-gray-400 flex items-center justify-center text-xs">
@@ -740,10 +829,10 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
           style={{
             width: pageWidth,
             height: sectionHeight,
-            backgroundColor: getSectionBackgroundColor(section)
+            backgroundColor: getSectionBackgroundColor(section),
           }}
-          onDrop={(e) => handleCanvasDrop(e, section.id)}
-          onDragOver={(e) => e.preventDefault()}
+          onDrop={e => handleCanvasDrop(e, section.id)}
+          onDragOver={e => e.preventDefault()}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
         >
@@ -771,7 +860,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
           >
             👁️
           </button>
-          
+
           <button
             onClick={() => onExportReport?.(project, 'PDF')}
             className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
@@ -779,7 +868,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
           >
             📄
           </button>
-          
+
           <button
             onClick={() => setShowReportSettings(true)}
             className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -787,7 +876,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
           >
             ⚙️
           </button>
-          
+
           <button
             onClick={() => onSaveProject?.(project)}
             className="px-2 py-1 text-xs bg-purple-500 text-white rounded hover:bg-purple-600"
@@ -795,13 +884,15 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
           >
             💾
           </button>
-          
+
           <select
             value={project.settings.zoom}
-            onChange={(e) => setProject(prev => ({
-              ...prev,
-              settings: { ...prev.settings, zoom: parseInt(e.target.value) }
-            }))}
+            onChange={e =>
+              setProject(prev => ({
+                ...prev,
+                settings: { ...prev.settings, zoom: parseInt(e.target.value) },
+              }))
+            }
             className="px-2 py-1 text-xs border border-gray-300 rounded"
           >
             <option value={25}>25%</option>
@@ -819,7 +910,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
         {[
           { key: 'design', label: 'Design', icon: '🎨' },
           { key: 'preview', label: 'Preview', icon: '👁️' },
-          { key: 'data', label: 'Data', icon: '🗃️' }
+          { key: 'data', label: 'Data', icon: '🗃️' },
         ].map(tab => (
           <button
             key={tab.key}
@@ -844,7 +935,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
             <div className="p-2 bg-gray-50 border-b border-gray-200">
               <h4 className="font-medium text-gray-700">Toolbox</h4>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-2">
               <div className="grid grid-cols-2 gap-1">
                 {controlTemplates.map(template => (
@@ -852,7 +943,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
                     key={template.type}
                     className="flex flex-col items-center p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-100"
                     draggable
-                    onDragStart={(e) => {
+                    onDragStart={e => {
                       setDraggedControlType(template.type);
                       e.dataTransfer.effectAllowed = 'copy';
                     }}
@@ -874,7 +965,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
             <div className="p-2 bg-gray-50 border-b border-gray-200">
               <h4 className="font-medium text-gray-700">Field List</h4>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-2">
               {project.dataSources.map(dataSource => (
                 <div key={dataSource.id} className="mb-4">
@@ -885,7 +976,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
                         key={field.name}
                         className="text-xs p-1 rounded cursor-pointer hover:bg-gray-100"
                         draggable
-                        onDragStart={(e) => {
+                        onDragStart={e => {
                           // Set data for creating a bound textbox
                           e.dataTransfer.setData('field', field.name);
                           setDraggedControlType(ReportControlType.TextBox);
@@ -911,7 +1002,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
                 className="bg-white shadow-lg border border-gray-400"
                 style={{
                   width: project.settings.pageWidth * 72 * (project.settings.zoom / 100),
-                  minHeight: project.settings.pageHeight * 72 * (project.settings.zoom / 100)
+                  minHeight: project.settings.pageHeight * 72 * (project.settings.zoom / 100),
                 }}
               >
                 {project.sections.filter(s => s.visible).map(renderSection)}
@@ -927,7 +1018,9 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
               <div className="text-center text-gray-500">
                 <div className="text-4xl mb-4">👁️</div>
                 <p className="text-lg">Report Preview</p>
-                <p className="text-sm mt-2">Preview functionality would render the report with actual data</p>
+                <p className="text-sm mt-2">
+                  Preview functionality would render the report with actual data
+                </p>
               </div>
             </div>
           </div>
@@ -964,7 +1057,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
             <div className="p-2 bg-gray-50 border-b border-gray-200">
               <h4 className="font-medium text-gray-700">Properties</h4>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-2">
               {selectedControl && (
                 <div className="space-y-3">
@@ -973,37 +1066,43 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
                     <input
                       type="text"
                       value={selectedControl.name}
-                      onChange={(e) => updateControl(selectedControl.id, { name: e.target.value })}
+                      onChange={e => updateControl(selectedControl.id, { name: e.target.value })}
                       className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Text</label>
                     <input
                       type="text"
                       value={selectedControl.text}
-                      onChange={(e) => updateControl(selectedControl.id, { text: e.target.value })}
+                      onChange={e => updateControl(selectedControl.id, { text: e.target.value })}
                       className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Data Field</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Data Field
+                    </label>
                     <select
                       value={selectedControl.dataField}
-                      onChange={(e) => updateControl(selectedControl.id, { dataField: e.target.value })}
+                      onChange={e =>
+                        updateControl(selectedControl.id, { dataField: e.target.value })
+                      }
                       className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                     >
                       <option value="">None</option>
-                      {project.dataSources.flatMap(ds => 
+                      {project.dataSources.flatMap(ds =>
                         ds.fields.map(field => (
-                          <option key={field.name} value={field.name}>{field.name}</option>
+                          <option key={field.name} value={field.name}>
+                            {field.name}
+                          </option>
                         ))
                       )}
                     </select>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">Left</label>
@@ -1011,7 +1110,9 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
                         type="number"
                         step="0.01"
                         value={selectedControl.left}
-                        onChange={(e) => updateControl(selectedControl.id, { left: parseFloat(e.target.value) })}
+                        onChange={e =>
+                          updateControl(selectedControl.id, { left: parseFloat(e.target.value) })
+                        }
                         className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                       />
                     </div>
@@ -1021,12 +1122,14 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
                         type="number"
                         step="0.01"
                         value={selectedControl.top}
-                        onChange={(e) => updateControl(selectedControl.id, { top: parseFloat(e.target.value) })}
+                        onChange={e =>
+                          updateControl(selectedControl.id, { top: parseFloat(e.target.value) })
+                        }
                         className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                       />
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">Width</label>
@@ -1034,7 +1137,9 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
                         type="number"
                         step="0.01"
                         value={selectedControl.width}
-                        onChange={(e) => updateControl(selectedControl.id, { width: parseFloat(e.target.value) })}
+                        onChange={e =>
+                          updateControl(selectedControl.id, { width: parseFloat(e.target.value) })
+                        }
                         className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                       />
                     </div>
@@ -1044,17 +1149,21 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
                         type="number"
                         step="0.01"
                         value={selectedControl.height}
-                        onChange={(e) => updateControl(selectedControl.id, { height: parseFloat(e.target.value) })}
+                        onChange={e =>
+                          updateControl(selectedControl.id, { height: parseFloat(e.target.value) })
+                        }
                         className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                       />
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Font</label>
                     <select
                       value={selectedControl.fontName}
-                      onChange={(e) => updateControl(selectedControl.id, { fontName: e.target.value })}
+                      onChange={e =>
+                        updateControl(selectedControl.id, { fontName: e.target.value })
+                      }
                       className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                     >
                       <option value="Arial">Arial</option>
@@ -1063,43 +1172,53 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
                       <option value="Verdana">Verdana</option>
                     </select>
                   </div>
-                  
+
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Font Size</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Font Size
+                    </label>
                     <input
                       type="number"
                       min="6"
                       max="72"
                       value={selectedControl.fontSize}
-                      onChange={(e) => updateControl(selectedControl.id, { fontSize: parseInt(e.target.value) })}
+                      onChange={e =>
+                        updateControl(selectedControl.id, { fontSize: parseInt(e.target.value) })
+                      }
                       className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="flex items-center gap-2 text-xs">
                       <input
                         type="checkbox"
                         checked={selectedControl.fontBold}
-                        onChange={(e) => updateControl(selectedControl.id, { fontBold: e.target.checked })}
+                        onChange={e =>
+                          updateControl(selectedControl.id, { fontBold: e.target.checked })
+                        }
                       />
                       Bold
                     </label>
-                    
+
                     <label className="flex items-center gap-2 text-xs">
                       <input
                         type="checkbox"
                         checked={selectedControl.fontItalic}
-                        onChange={(e) => updateControl(selectedControl.id, { fontItalic: e.target.checked })}
+                        onChange={e =>
+                          updateControl(selectedControl.id, { fontItalic: e.target.checked })
+                        }
                       />
                       Italic
                     </label>
-                    
+
                     <label className="flex items-center gap-2 text-xs">
                       <input
                         type="checkbox"
                         checked={selectedControl.visible}
-                        onChange={(e) => updateControl(selectedControl.id, { visible: e.target.checked })}
+                        onChange={e =>
+                          updateControl(selectedControl.id, { visible: e.target.checked })
+                        }
                       />
                       Visible
                     </label>
@@ -1114,56 +1233,68 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
                     <input
                       type="text"
                       value={selectedSection.name}
-                      onChange={(e) => updateSection(selectedSection.id, { name: e.target.value })}
+                      onChange={e => updateSection(selectedSection.id, { name: e.target.value })}
                       className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Height (inches)</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Height (inches)
+                    </label>
                     <input
                       type="number"
                       step="0.1"
                       min="0.1"
                       value={selectedSection.height}
-                      onChange={(e) => updateSection(selectedSection.id, { height: parseFloat(e.target.value) })}
+                      onChange={e =>
+                        updateSection(selectedSection.id, { height: parseFloat(e.target.value) })
+                      }
                       className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="flex items-center gap-2 text-xs">
                       <input
                         type="checkbox"
                         checked={selectedSection.visible}
-                        onChange={(e) => updateSection(selectedSection.id, { visible: e.target.checked })}
+                        onChange={e =>
+                          updateSection(selectedSection.id, { visible: e.target.checked })
+                        }
                       />
                       Visible
                     </label>
-                    
+
                     <label className="flex items-center gap-2 text-xs">
                       <input
                         type="checkbox"
                         checked={selectedSection.keepTogether}
-                        onChange={(e) => updateSection(selectedSection.id, { keepTogether: e.target.checked })}
+                        onChange={e =>
+                          updateSection(selectedSection.id, { keepTogether: e.target.checked })
+                        }
                       />
                       Keep Together
                     </label>
-                    
+
                     <label className="flex items-center gap-2 text-xs">
                       <input
                         type="checkbox"
                         checked={selectedSection.canGrow}
-                        onChange={(e) => updateSection(selectedSection.id, { canGrow: e.target.checked })}
+                        onChange={e =>
+                          updateSection(selectedSection.id, { canGrow: e.target.checked })
+                        }
                       />
                       Can Grow
                     </label>
-                    
+
                     <label className="flex items-center gap-2 text-xs">
                       <input
                         type="checkbox"
                         checked={selectedSection.canShrink}
-                        onChange={(e) => updateSection(selectedSection.id, { canShrink: e.target.checked })}
+                        onChange={e =>
+                          updateSection(selectedSection.id, { canShrink: e.target.checked })
+                        }
                       />
                       Can Shrink
                     </label>
@@ -1179,11 +1310,14 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
       <div className="flex items-center justify-between p-1 bg-gray-100 border-t border-gray-300 text-xs text-gray-600">
         <div className="flex items-center gap-4">
           <span>Sections: {project.sections.length}</span>
-          <span>Controls: {project.sections.reduce((total, s) => total + s.controls.length, 0)}</span>
+          <span>
+            Controls: {project.sections.reduce((total, s) => total + s.controls.length, 0)}
+          </span>
           <span>Data Sources: {project.dataSources.length}</span>
           {selectedControl && (
             <span>
-              Selected: {selectedControl.name} ({selectedControl.left.toFixed(2)}", {selectedControl.top.toFixed(2)}")
+              Selected: {selectedControl.name} ({selectedControl.left.toFixed(2)}",{' '}
+              {selectedControl.top.toFixed(2)}")
             </span>
           )}
         </div>
@@ -1191,7 +1325,9 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
         <div className="flex items-center gap-2">
           <span>Zoom: {project.settings.zoom}%</span>
           <span>Units: {project.settings.units}</span>
-          <span>Page: {project.settings.pageWidth}"×{project.settings.pageHeight}"</span>
+          <span>
+            Page: {project.settings.pageWidth}"×{project.settings.pageHeight}"
+          </span>
         </div>
       </div>
     </div>

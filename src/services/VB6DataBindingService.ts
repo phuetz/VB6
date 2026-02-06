@@ -40,7 +40,12 @@ export class VB6DataBindingService {
 
     // Create update callback
     const updateCallback = (value: any) => {
-      this.updateControlValue(options.controlName, value, options.validateOnChange, options.validationRule);
+      this.updateControlValue(
+        options.controlName,
+        value,
+        options.validateOnChange,
+        options.validationRule
+      );
     };
 
     // Bind to recordset
@@ -52,7 +57,7 @@ export class VB6DataBindingService {
       fieldName: options.fieldName,
       recordset,
       isValid: true,
-      lastValue: null
+      lastValue: null,
     });
 
     this.updateCallbacks.set(bindingKey, updateCallback);
@@ -150,9 +155,7 @@ export class VB6DataBindingService {
    * Collects values from all bound controls and updates the recordset
    */
   collectFromControls(recordset: DAORecordset): void {
-    const bindings = Array.from(this.bindings.values()).filter(
-      (b) => b.recordset === recordset
-    );
+    const bindings = Array.from(this.bindings.values()).filter(b => b.recordset === recordset);
 
     for (const binding of bindings) {
       const value = this.getControlValue(binding.controlName);
@@ -172,7 +175,7 @@ export class VB6DataBindingService {
    * Gets all bindings for a recordset
    */
   getBindings(recordset: DAORecordset): ControlBinding[] {
-    return Array.from(this.bindings.values()).filter((b) => b.recordset === recordset);
+    return Array.from(this.bindings.values()).filter(b => b.recordset === recordset);
   }
 
   /**

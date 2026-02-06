@@ -845,16 +845,16 @@ export class CrystalReportsController {
     } catch (error) {
       this.logger.warn('Erreur évaluation formule de sélection:', error);
       return true;
-    }  
+    }
   }
 
   private parseConditionSafely(condition: string, record: any): boolean {
     // Parser sécurisé pour les conditions Crystal Reports
     const trimmed = condition.trim();
-    
+
     // Opérateurs de comparaison supportés
     const operators = ['>=', '<=', '<>', '!=', '=', '>', '<'];
-    
+
     for (const op of operators) {
       if (trimmed.includes(op)) {
         const parts = trimmed.split(op).map(p => p.trim());
@@ -862,7 +862,7 @@ export class CrystalReportsController {
           const [left, right] = parts;
           const leftValue = this.parseValue(left);
           const rightValue = this.parseValue(right);
-          
+
           switch (op) {
             case '=':
               return leftValue == rightValue;
@@ -881,45 +881,47 @@ export class CrystalReportsController {
         }
       }
     }
-    
+
     // Opérateurs logiques
     if (trimmed.includes(' AND ') || trimmed.includes(' and ')) {
       const parts = trimmed.split(/ AND | and /i);
       return parts.every(part => this.parseConditionSafely(part.trim(), record));
     }
-    
+
     if (trimmed.includes(' OR ') || trimmed.includes(' or ')) {
       const parts = trimmed.split(/ OR | or /i);
       return parts.some(part => this.parseConditionSafely(part.trim(), record));
     }
-    
+
     // Valeurs booléennes directes
     if (trimmed.toLowerCase() === 'true') return true;
     if (trimmed.toLowerCase() === 'false') return false;
-    
+
     // Par défaut, considérer comme vrai si la condition ne peut pas être parsée
     return true;
   }
 
   private parseValue(value: string): any {
     const trimmed = value.trim();
-    
+
     // Chaînes entre guillemets
-    if ((trimmed.startsWith('"') && trimmed.endsWith('"')) ||
-        (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+    if (
+      (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+      (trimmed.startsWith("'") && trimmed.endsWith("'"))
+    ) {
       return trimmed.slice(1, -1);
     }
-    
+
     // Nombres
     if (/^-?\d+(\.\d+)?$/.test(trimmed)) {
       return parseFloat(trimmed);
     }
-    
+
     // Booléens
     if (trimmed.toLowerCase() === 'true') return true;
     if (trimmed.toLowerCase() === 'false') return false;
     if (trimmed.toLowerCase() === 'null') return null;
-    
+
     // Valeur littérale
     return trimmed;
   }

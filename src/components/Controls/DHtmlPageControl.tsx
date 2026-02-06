@@ -60,7 +60,7 @@ export enum DHtmlEventType {
   onstart = 'onstart',
   onstop = 'onstop',
   onsubmit = 'onsubmit',
-  onunload = 'onunload'
+  onunload = 'onunload',
 }
 
 // DHTML Document properties
@@ -105,7 +105,7 @@ export const DHtmlPageControl = forwardRef<HTMLDivElement, DHtmlPageControlProps
       alinkColor: control.alinkColor || '#FF0000',
       vlinkColor: control.vlinkColor || '#800080',
       charset: control.charset || 'UTF-8',
-      designMode: isDesignMode ? 'on' : 'off'
+      designMode: isDesignMode ? 'on' : 'off',
     });
 
     // Initialize DHTML document
@@ -114,7 +114,9 @@ export const DHtmlPageControl = forwardRef<HTMLDivElement, DHtmlPageControlProps
         const doc = iframeRef.current.contentDocument;
         if (doc) {
           // Set up initial HTML structure
-          const initialHtml = control.html || `
+          const initialHtml =
+            control.html ||
+            `
             <!DOCTYPE html>
             <html>
             <head>
@@ -141,7 +143,7 @@ export const DHtmlPageControl = forwardRef<HTMLDivElement, DHtmlPageControlProps
             </body>
             </html>
           `;
-          
+
           doc.open();
           doc.write(initialHtml);
           doc.close();
@@ -165,7 +167,7 @@ export const DHtmlPageControl = forwardRef<HTMLDivElement, DHtmlPageControlProps
               childList: true,
               subtree: true,
               attributes: true,
-              characterData: true
+              characterData: true,
             });
 
             return () => {
@@ -310,8 +312,8 @@ export const DHtmlPageControl = forwardRef<HTMLDivElement, DHtmlPageControlProps
         },
         setData: (format: string, data: string) => {
           // Set data for transfer
-        }
-      }
+        },
+      },
     };
 
     // Expose methods to parent
@@ -328,12 +330,15 @@ export const DHtmlPageControl = forwardRef<HTMLDivElement, DHtmlPageControlProps
       width: control.width || 400,
       height: control.height || 300,
       backgroundColor: control.backColor || '#FFFFFF',
-      border: control.borderStyle ? `${control.borderWidth || 1}px solid ${control.borderColor || '#000000'}` : 'none',
-      boxShadow: control.appearance === '3D' ? 'inset -1px -1px #404040, inset 1px 1px #ffffff' : 'none',
+      border: control.borderStyle
+        ? `${control.borderWidth || 1}px solid ${control.borderColor || '#000000'}`
+        : 'none',
+      boxShadow:
+        control.appearance === '3D' ? 'inset -1px -1px #404040, inset 1px 1px #ffffff' : 'none',
       overflow: 'hidden',
       cursor: isDesignMode ? 'default' : 'auto',
       opacity: control.visible !== false ? 1 : 0,
-      zIndex: control.zIndex || 'auto'
+      zIndex: control.zIndex || 'auto',
     };
 
     return (
@@ -346,18 +351,20 @@ export const DHtmlPageControl = forwardRef<HTMLDivElement, DHtmlPageControlProps
         data-control-name={control.name}
       >
         {isDesignMode && !control.src ? (
-          <div style={{
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#f0f0f0',
-            border: '2px dashed #808080',
-            color: '#404040',
-            fontSize: '14px',
-            fontFamily: 'Arial, sans-serif'
-          }}>
+          <div
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#f0f0f0',
+              border: '2px dashed #808080',
+              color: '#404040',
+              fontSize: '14px',
+              fontFamily: 'Arial, sans-serif',
+            }}
+          >
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '32px', marginBottom: '8px' }}>🌐</div>
               <div>DHTML Page Designer</div>
@@ -373,26 +380,28 @@ export const DHtmlPageControl = forwardRef<HTMLDivElement, DHtmlPageControlProps
             style={{
               width: '100%',
               height: '100%',
-              border: 'none'
+              border: 'none',
             }}
             sandbox={control.sandbox || 'allow-scripts allow-same-origin allow-forms'}
             title={control.name || 'DHTML Page'}
           />
         )}
         {control.showStatusBar && (
-          <div style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '20px',
-            backgroundColor: '#f0f0f0',
-            borderTop: '1px solid #808080',
-            fontSize: '11px',
-            padding: '2px 4px',
-            display: 'flex',
-            alignItems: 'center'
-          }}>
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '20px',
+              backgroundColor: '#f0f0f0',
+              borderTop: '1px solid #808080',
+              fontSize: '11px',
+              padding: '2px 4px',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
             <span>{isReady ? 'Ready' : 'Loading...'}</span>
           </div>
         )}

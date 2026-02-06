@@ -1,10 +1,10 @@
 /**
  * VB6 OptionButton Control - Radio Button natif VB6
- * 
+ *
  * Contrôle critique manquant pour 95%+ compatibilité
  * Implémente le comportement exact OptionButton VB6:
  * - Groupement automatique dans conteneurs (Frame, Form)
- * - Propriété Value exclusive (True/False) 
+ * - Propriété Value exclusive (True/False)
  * - Événements Click, GotFocus, LostFocus
  * - Style VB6 authentique
  */
@@ -58,7 +58,7 @@ export const VB6OptionButton: React.FC<VB6OptionButtonProps> = ({
   backgroundColor = '#C0C0C0',
   foregroundColor = '#000000',
   font = { name: 'MS Sans Serif', size: 8, bold: false, italic: false },
-  onEvents = {}
+  onEvents = {},
 }) => {
   const { state, dispatch, runtime } = useContext(VB6Context);
   const [localState, setLocalState] = useState<VB6OptionButtonState>({
@@ -68,9 +68,9 @@ export const VB6OptionButton: React.FC<VB6OptionButtonProps> = ({
     caption,
     groupName: groupName || name || '',
     hasFocus: false,
-    mouseDown: false
+    mouseDown: false,
   });
-  
+
   const optionButtonRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -85,14 +85,14 @@ export const VB6OptionButton: React.FC<VB6OptionButtonProps> = ({
    */
   const getGroupName = (): string => {
     if (localState.groupName) return localState.groupName;
-    
+
     // Dans VB6, les OptionButtons dans le même conteneur forment un groupe automatiquement
     const parent = optionButtonRef.current?.parentElement;
     if (parent) {
       const containerId = parent.getAttribute('data-vb6-container') || 'default';
       return `group_${containerId}`;
     }
-    
+
     return 'default_group';
   };
 
@@ -102,17 +102,17 @@ export const VB6OptionButton: React.FC<VB6OptionButtonProps> = ({
   const unselectOtherOptions = () => {
     const actualGroupName = getGroupName();
     const allOptions = document.querySelectorAll(`input[type="radio"][name="${actualGroupName}"]`);
-    
+
     allOptions.forEach((option: Element) => {
       const radioInput = option as HTMLInputElement;
       if (radioInput !== inputRef.current) {
         radioInput.checked = false;
-        
+
         // Déclencher événement Click sur les autres pour compatibilité VB6
         const otherContainer = radioInput.closest('.vb6-option-button');
         if (otherContainer) {
-          const event = new CustomEvent('vb6-value-changed', { 
-            detail: { value: false } 
+          const event = new CustomEvent('vb6-value-changed', {
+            detail: { value: false },
           });
           otherContainer.dispatchEvent(event);
         }
@@ -125,7 +125,7 @@ export const VB6OptionButton: React.FC<VB6OptionButtonProps> = ({
    */
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    
+
     if (!localState.enabled) return;
 
     // Si déjà sélectionné, ne rien faire (comportement VB6)
@@ -133,10 +133,10 @@ export const VB6OptionButton: React.FC<VB6OptionButtonProps> = ({
 
     // Sélectionner cette option
     setLocalState(prev => ({ ...prev, value: true }));
-    
+
     // Déselectionner autres options du groupe
     unselectOtherOptions();
-    
+
     // Déclencher événement Click VB6
     if (onEvents.Click) {
       try {
@@ -153,8 +153,8 @@ export const VB6OptionButton: React.FC<VB6OptionButtonProps> = ({
         payload: {
           controlId: name,
           property: 'Value',
-          value: true
-        }
+          value: true,
+        },
       });
     }
   };
@@ -164,7 +164,7 @@ export const VB6OptionButton: React.FC<VB6OptionButtonProps> = ({
    */
   const handleFocus = () => {
     setLocalState(prev => ({ ...prev, hasFocus: true }));
-    
+
     if (onEvents.GotFocus) {
       try {
         onEvents.GotFocus();
@@ -176,7 +176,7 @@ export const VB6OptionButton: React.FC<VB6OptionButtonProps> = ({
 
   const handleBlur = () => {
     setLocalState(prev => ({ ...prev, hasFocus: false }));
-    
+
     if (onEvents.LostFocus) {
       try {
         onEvents.LostFocus();
@@ -191,11 +191,11 @@ export const VB6OptionButton: React.FC<VB6OptionButtonProps> = ({
    */
   const handleMouseDown = (e: React.MouseEvent) => {
     setLocalState(prev => ({ ...prev, mouseDown: true }));
-    
+
     if (onEvents.MouseDown) {
       const button = e.button === 0 ? 1 : e.button === 1 ? 4 : 2;
       const shift = (e.shiftKey ? 1 : 0) + (e.ctrlKey ? 2 : 0) + (e.altKey ? 4 : 0);
-      
+
       try {
         onEvents.MouseDown(button, shift, e.clientX, e.clientY);
       } catch (error) {
@@ -206,11 +206,11 @@ export const VB6OptionButton: React.FC<VB6OptionButtonProps> = ({
 
   const handleMouseUp = (e: React.MouseEvent) => {
     setLocalState(prev => ({ ...prev, mouseDown: false }));
-    
+
     if (onEvents.MouseUp) {
       const button = e.button === 0 ? 1 : e.button === 1 ? 4 : 2;
       const shift = (e.shiftKey ? 1 : 0) + (e.ctrlKey ? 2 : 0) + (e.altKey ? 4 : 0);
-      
+
       try {
         onEvents.MouseUp(button, shift, e.clientX, e.clientY);
       } catch (error) {
@@ -226,10 +226,13 @@ export const VB6OptionButton: React.FC<VB6OptionButtonProps> = ({
     if (e.key === ' ' || e.key === 'Enter') {
       handleClick(e as any);
     }
-    
+
     if (onEvents.KeyDown) {
       try {
-        onEvents.KeyDown(e.keyCode, (e.shiftKey ? 1 : 0) + (e.ctrlKey ? 2 : 0) + (e.altKey ? 4 : 0));
+        onEvents.KeyDown(
+          e.keyCode,
+          (e.shiftKey ? 1 : 0) + (e.ctrlKey ? 2 : 0) + (e.altKey ? 4 : 0)
+        );
       } catch (error) {
         console.error('OptionButton KeyDown event error:', error);
       }
@@ -243,7 +246,7 @@ export const VB6OptionButton: React.FC<VB6OptionButtonProps> = ({
       value,
       enabled,
       visible,
-      caption
+      caption,
     }));
   }, [value, enabled, visible, caption]);
 
@@ -260,7 +263,12 @@ export const VB6OptionButton: React.FC<VB6OptionButtonProps> = ({
     fontSize: `${font.size}pt`,
     fontWeight: font.bold ? 'bold' : 'normal',
     fontStyle: font.italic ? 'italic' : 'normal',
-    border: appearance === '3D' ? (localState.hasFocus ? '1px dotted #000' : 'none') : '1px solid #808080',
+    border:
+      appearance === '3D'
+        ? localState.hasFocus
+          ? '1px dotted #000'
+          : 'none'
+        : '1px solid #808080',
     display: localState.visible ? 'flex' : 'none',
     alignItems: 'center',
     cursor: localState.enabled ? 'pointer' : 'default',
@@ -268,7 +276,7 @@ export const VB6OptionButton: React.FC<VB6OptionButtonProps> = ({
     userSelect: 'none',
     outline: 'none',
     padding: '2px',
-    boxSizing: 'border-box'
+    boxSizing: 'border-box',
   };
 
   const radioStyle: React.CSSProperties = {
@@ -277,7 +285,7 @@ export const VB6OptionButton: React.FC<VB6OptionButtonProps> = ({
     width: '13px',
     height: '13px',
     accentColor: foregroundColor,
-    cursor: localState.enabled ? 'pointer' : 'default'
+    cursor: localState.enabled ? 'pointer' : 'default',
   };
 
   const captionStyle: React.CSSProperties = {
@@ -286,7 +294,7 @@ export const VB6OptionButton: React.FC<VB6OptionButtonProps> = ({
     order: alignment === 'LeftJustify' ? 2 : 1,
     whiteSpace: 'nowrap',
     overflow: 'hidden',
-    textOverflow: 'ellipsis'
+    textOverflow: 'ellipsis',
   };
 
   if (!localState.visible) {
@@ -318,13 +326,10 @@ export const VB6OptionButton: React.FC<VB6OptionButtonProps> = ({
         style={radioStyle}
         tabIndex={-1}
         onChange={() => {}} // Géré par onClick
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       />
-      
-      <label 
-        style={captionStyle}
-        onClick={handleClick}
-      >
+
+      <label style={captionStyle} onClick={handleClick}>
         {localState.caption}
       </label>
     </div>
@@ -349,12 +354,12 @@ export const VB6OptionButtonUtils = {
     const selectedOption = document.querySelector(
       `input[type="radio"][name="${groupName}"]:checked`
     ) as HTMLInputElement;
-    
+
     if (selectedOption) {
       const container = selectedOption.closest('.vb6-option-button');
       return container?.getAttribute('data-vb6-name') || null;
     }
-    
+
     return null;
   },
 
@@ -365,7 +370,7 @@ export const VB6OptionButtonUtils = {
     const targetOption = document.querySelector(
       `.vb6-option-button[data-vb6-name="${optionName}"] input[type="radio"][name="${groupName}"]`
     ) as HTMLInputElement;
-    
+
     if (targetOption) {
       targetOption.click();
     }
@@ -375,15 +380,15 @@ export const VB6OptionButtonUtils = {
    * Obtenir tous les OptionButtons d'un groupe
    */
   getGroupOptions: (groupName: string): string[] => {
-    const options = document.querySelectorAll(
-      `input[type="radio"][name="${groupName}"]`
-    );
-    
-    return Array.from(options).map(option => {
-      const container = option.closest('.vb6-option-button');
-      return container?.getAttribute('data-vb6-name') || '';
-    }).filter(name => name !== '');
-  }
+    const options = document.querySelectorAll(`input[type="radio"][name="${groupName}"]`);
+
+    return Array.from(options)
+      .map(option => {
+        const container = option.closest('.vb6-option-button');
+        return container?.getAttribute('data-vb6-name') || '';
+      })
+      .filter(name => name !== '');
+  },
 };
 
 export default VB6OptionButton;

@@ -22,6 +22,7 @@ form.Cls();
 ```
 
 **Features:**
+
 - Clears entire canvas
 - Fills with BackColor if specified
 - Resets CurrentX and CurrentY to 0
@@ -32,17 +33,19 @@ Draws a line from point (x1, y1) to (x2, y2).
 
 ```javascript
 form.Line(10, 10, 100, 100, vbRed);
-form.Line(50, 50, 150, 150, vbBlue, "B");      // Box outline
-form.Line(50, 50, 150, 150, vbGreen, "BF");    // Filled box
+form.Line(50, 50, 150, 150, vbBlue, 'B'); // Box outline
+form.Line(50, 50, 150, 150, vbGreen, 'BF'); // Filled box
 ```
 
 **Parameters:**
+
 - `x1, y1` - Starting coordinates
 - `x2, y2` - Ending coordinates
 - `color` - Optional RGB color (default: ForeColor)
 - `style` - Optional: "B" for box outline, "BF" for filled box
 
 **Features:**
+
 - Updates CurrentX/Y to endpoint
 - Supports draw styles (solid, dash, dot, dash-dot)
 - Supports draw modes (copy, XOR, invert)
@@ -52,13 +55,14 @@ form.Line(50, 50, 150, 150, vbGreen, "BF");    // Filled box
 Draws a circle, ellipse, or arc at center (x, y) with specified radius.
 
 ```javascript
-form.Circle(320, 240, 50);                          // Simple circle
-form.Circle(320, 240, 50, vbRed);                   // Red circle
-form.Circle(320, 240, 50, vbBlue, 0, Math.PI);      // Arc (semi-circle)
+form.Circle(320, 240, 50); // Simple circle
+form.Circle(320, 240, 50, vbRed); // Red circle
+form.Circle(320, 240, 50, vbBlue, 0, Math.PI); // Arc (semi-circle)
 form.Circle(320, 240, 50, vbGreen, undefined, undefined, 1.5); // Ellipse
 ```
 
 **Parameters:**
+
 - `x, y` - Center coordinates
 - `radius` - Circle radius
 - `color` - Optional drawing color (default: ForeColor)
@@ -67,6 +71,7 @@ form.Circle(320, 240, 50, vbGreen, undefined, undefined, 1.5); // Ellipse
 - `aspect` - Optional aspect ratio for ellipses (default: 1.0)
 
 **Features:**
+
 - Full circle, arc, and ellipse support
 - Respects FillStyle (solid, transparent, or hatched patterns)
 - Respects FillColor for fills
@@ -79,14 +84,16 @@ Sets a single pixel at coordinates (x, y) to the specified color.
 
 ```javascript
 form.PSet(100, 100, vbBlack);
-form.PSet(200, 200);  // Uses ForeColor
+form.PSet(200, 200); // Uses ForeColor
 ```
 
 **Parameters:**
+
 - `x, y` - Pixel coordinates
 - `color` - Optional pixel color (default: ForeColor)
 
 **Features:**
+
 - Updates CurrentX/Y to the pixel position
 - Respects coordinate scaling
 
@@ -99,9 +106,11 @@ const color = form.Point(100, 100);
 ```
 
 **Return Value:**
+
 - Integer representing the pixel color in BGR format (0x00BBGGRR)
 
 **Features:**
+
 - Reads directly from canvas image data
 - Respects coordinate scaling
 - Returns 0 for transparent/empty areas
@@ -121,34 +130,34 @@ form.CurrentY = 200;
 
 Controls how drawing operations interact with existing pixels.
 
-| Constant | Value | Description |
-|----------|-------|-------------|
-| vbBlackness | 1 | Always black |
-| vbCopyPen | 13 | Copy (default) |
-| vbXorPen | 7 | XOR with existing pixels |
-| vbInvert | 6 | Invert pixels |
-| vbMergePen | 15 | Merge with AND operation |
+| Constant    | Value | Description              |
+| ----------- | ----- | ------------------------ |
+| vbBlackness | 1     | Always black             |
+| vbCopyPen   | 13    | Copy (default)           |
+| vbXorPen    | 7     | XOR with existing pixels |
+| vbInvert    | 6     | Invert pixels            |
+| vbMergePen  | 15    | Merge with AND operation |
 
 ```javascript
-form.DrawMode = vbXorPen;  // XOR drawing mode
+form.DrawMode = vbXorPen; // XOR drawing mode
 ```
 
 ### DrawStyle
 
 Controls the pattern of drawn lines.
 
-| Constant | Value | Description |
-|----------|-------|-------------|
-| vbSolid | 0 | Solid line (default) |
-| vbDash | 1 | Dashed line (--) |
-| vbDot | 2 | Dotted line (..) |
-| vbDashDot | 3 | Dash-dot line (-.-) |
-| vbDashDotDot | 4 | Dash-dot-dot (-.-..) |
-| vbInvisible | 5 | Invisible |
+| Constant     | Value | Description          |
+| ------------ | ----- | -------------------- |
+| vbSolid      | 0     | Solid line (default) |
+| vbDash       | 1     | Dashed line (--)     |
+| vbDot        | 2     | Dotted line (..)     |
+| vbDashDot    | 3     | Dash-dot line (-.-)  |
+| vbDashDotDot | 4     | Dash-dot-dot (-.-..) |
+| vbInvisible  | 5     | Invisible            |
 
 ```javascript
 form.DrawStyle = vbDash;
-form.Line(0, 0, 100, 100);  // Dashed line
+form.Line(0, 0, 100, 100); // Dashed line
 ```
 
 ### DrawWidth
@@ -156,7 +165,7 @@ form.Line(0, 0, 100, 100);  // Dashed line
 Controls the width (thickness) of drawn lines.
 
 ```javascript
-form.DrawWidth = 2;  // 2-pixel wide lines
+form.DrawWidth = 2; // 2-pixel wide lines
 ```
 
 ### ForeColor and BackColor
@@ -166,53 +175,53 @@ Set the foreground (drawing) and background colors.
 ```javascript
 form.ForeColor = vbRed;
 form.BackColor = vbWhite;
-form.Cls();  // Clear with white background
+form.Cls(); // Clear with white background
 ```
 
 ### FillColor and FillStyle
 
 Control how shapes are filled.
 
-| Constant | Value | Description |
-|----------|-------|-------------|
-| vbFSSolid | 0 | Solid fill |
-| vbFSTransparent | 1 | No fill (transparent) |
-| vbHorizontalLine | 2 | Horizontal line pattern |
-| vbVerticalLine | 3 | Vertical line pattern |
-| vbUpwardDiagonal | 4 | Upward diagonal lines |
-| vbDownwardDiagonal | 5 | Downward diagonal lines |
-| vbCross | 6 | Cross pattern (+ + +) |
-| vbDiagonalCross | 7 | Diagonal cross (XXX) |
+| Constant           | Value | Description             |
+| ------------------ | ----- | ----------------------- |
+| vbFSSolid          | 0     | Solid fill              |
+| vbFSTransparent    | 1     | No fill (transparent)   |
+| vbHorizontalLine   | 2     | Horizontal line pattern |
+| vbVerticalLine     | 3     | Vertical line pattern   |
+| vbUpwardDiagonal   | 4     | Upward diagonal lines   |
+| vbDownwardDiagonal | 5     | Downward diagonal lines |
+| vbCross            | 6     | Cross pattern (+ + +)   |
+| vbDiagonalCross    | 7     | Diagonal cross (XXX)    |
 
 ```javascript
 form.FillStyle = vbHorizontalLine;
 form.FillColor = vbBlue;
-form.Circle(320, 240, 50);  // Circle with horizontal line fill
+form.Circle(320, 240, 50); // Circle with horizontal line fill
 ```
 
 ### ScaleMode and Coordinate Systems
 
 Controls the coordinate system used for graphics operations.
 
-| Constant | Value | Description |
-|----------|-------|-------------|
-| vbUser | 0 | User-defined coordinates |
-| vbTwips | 1 | Twips (1/1440 inch) - DEFAULT |
-| vbPoints | 2 | Points (1/72 inch) |
-| vbPixels | 3 | Pixels |
-| vbCharacters | 4 | Character units |
-| vbInches | 5 | Inches |
-| vbMillimeters | 6 | Millimeters |
-| vbCentimeters | 7 | Centimeters |
+| Constant      | Value | Description                   |
+| ------------- | ----- | ----------------------------- |
+| vbUser        | 0     | User-defined coordinates      |
+| vbTwips       | 1     | Twips (1/1440 inch) - DEFAULT |
+| vbPoints      | 2     | Points (1/72 inch)            |
+| vbPixels      | 3     | Pixels                        |
+| vbCharacters  | 4     | Character units               |
+| vbInches      | 5     | Inches                        |
+| vbMillimeters | 6     | Millimeters                   |
+| vbCentimeters | 7     | Centimeters                   |
 
 ```javascript
 // Use pixels as coordinate system
 form.ScaleMode = vbPixels;
-form.Line(0, 0, 100, 100);  // 100-pixel line
+form.Line(0, 0, 100, 100); // 100-pixel line
 
 // Use twips (VB6 default)
 form.ScaleMode = vbTwips;
-form.Line(0, 0, 1440, 1440);  // 1 inch line
+form.Line(0, 0, 1440, 1440); // 1 inch line
 ```
 
 ### ScaleLeft, ScaleTop, ScaleWidth, ScaleHeight
@@ -233,21 +242,22 @@ form.ScaleHeight = 100;
 Colors are specified in BGR format (0x00BBGGRR):
 
 ```javascript
-vbBlack   = 0x000000    // RGB(0, 0, 0)
-vbRed     = 0x0000FF    // RGB(255, 0, 0)
-vbGreen   = 0x00FF00    // RGB(0, 255, 0)
-vbYellow  = 0x00FFFF    // RGB(255, 255, 0)
-vbBlue    = 0xFF0000    // RGB(0, 0, 255)
-vbMagenta = 0xFF00FF    // RGB(255, 0, 255)
-vbCyan    = 0xFFFF00    // RGB(0, 255, 255)
-vbWhite   = 0xFFFFFF    // RGB(255, 255, 255)
+vbBlack = 0x000000; // RGB(0, 0, 0)
+vbRed = 0x0000ff; // RGB(255, 0, 0)
+vbGreen = 0x00ff00; // RGB(0, 255, 0)
+vbYellow = 0x00ffff; // RGB(255, 255, 0)
+vbBlue = 0xff0000; // RGB(0, 0, 255)
+vbMagenta = 0xff00ff; // RGB(255, 0, 255)
+vbCyan = 0xffff00; // RGB(0, 255, 255)
+vbWhite = 0xffffff; // RGB(255, 255, 255)
 ```
 
 Custom colors can be created using RGB values:
+
 ```javascript
 // Create custom color (R, G, B)
-const myColor = (B * 256 * 256) + (G * 256) + R;
-const purple = (128 * 256 * 256) + (0 * 256) + 128;  // RGB(128, 0, 128)
+const myColor = B * 256 * 256 + G * 256 + R;
+const purple = 128 * 256 * 256 + 0 * 256 + 128; // RGB(128, 0, 128)
 ```
 
 ## Example Programs
@@ -329,7 +339,7 @@ form.Line(0, 0, 640, 480);
 
 // Use inches
 form.ScaleMode = vbInches;
-form.Line(0, 0, 6, 3);  // Draw 6" x 3" diagonal
+form.Line(0, 0, 6, 3); // Draw 6" x 3" diagonal
 
 // User-defined coordinates (0-100 mapping)
 form.ScaleMode = vbUser;
@@ -337,7 +347,7 @@ form.ScaleLeft = 0;
 form.ScaleTop = 0;
 form.ScaleWidth = 100;
 form.ScaleHeight = 100;
-form.Circle(50, 50, 25);  // Circle in center of custom coordinate system
+form.Circle(50, 50, 25); // Circle in center of custom coordinate system
 ```
 
 ## Internal Implementation
@@ -345,6 +355,7 @@ form.Circle(50, 50, 25);  // Circle in center of custom coordinate system
 ### VB6GraphicsContext Class
 
 The main graphics context class provides:
+
 - Canvas attachment and management
 - Graphics property storage
 - All drawing methods
@@ -355,6 +366,7 @@ The main graphics context class provides:
 ### VB6GraphicsManager Singleton
 
 Manages graphics contexts for multiple forms/controls:
+
 ```javascript
 const manager = VB6GraphicsManager.getInstance();
 const context = manager.getContext('formId');
@@ -384,6 +396,7 @@ const context = manager.getContext('formId');
 ## Testing
 
 Comprehensive test suite in `src/test/runtime/VB6Graphics.test.ts` covers:
+
 - All graphics methods (Cls, Line, Circle, PSet, Point)
 - All graphics properties
 - Fill patterns and draw modes
@@ -392,6 +405,7 @@ Comprehensive test suite in `src/test/runtime/VB6Graphics.test.ts` covers:
 - Integration scenarios
 
 Run tests:
+
 ```bash
 npm run test:run -- src/test/runtime/VB6Graphics.test.ts
 ```

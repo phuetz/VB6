@@ -22,21 +22,21 @@ La classe principale pour compiler du code VB6.
 
 ```typescript
 class VB6Compiler {
-  constructor(options?: CompilerOptions)
-  
+  constructor(options?: CompilerOptions);
+
   // Méthodes principales
-  compile(source: string): CompilationResult
-  compileFile(filePath: string): Promise<CompilationResult>
-  compileProject(projectPath: string): Promise<ProjectCompilationResult>
-  
+  compile(source: string): CompilationResult;
+  compileFile(filePath: string): Promise<CompilationResult>;
+  compileProject(projectPath: string): Promise<ProjectCompilationResult>;
+
   // Configuration
-  setOptions(options: Partial<CompilerOptions>): void
-  getOptions(): CompilerOptions
-  
+  setOptions(options: Partial<CompilerOptions>): void;
+  getOptions(): CompilerOptions;
+
   // Diagnostics
-  validate(source: string): ValidationResult
-  getAST(source: string): ProgramNode
-  getTokens(source: string): Token[]
+  validate(source: string): ValidationResult;
+  getAST(source: string): ProgramNode;
+  getTokens(source: string): Token[];
 }
 ```
 
@@ -49,22 +49,22 @@ interface CompilerOptions {
   strict: boolean;
   optimize: boolean;
   generateSourceMaps: boolean;
-  
+
   // Options de comportement VB6
   optionExplicit: boolean;
   optionBase: 0 | 1;
   optionCompare: 'Binary' | 'Text';
-  
+
   // Options de runtime
   includeRuntime: boolean;
   runtimePath?: string;
   polyfills: string[];
-  
+
   // Options de debug
   debug: boolean;
   verboseLogging: boolean;
   preserveComments: boolean;
-  
+
   // Options de performance
   memoryLimit: number;
   timeoutMs: number;
@@ -80,12 +80,12 @@ interface CompilationResult {
   source: string;
   transpiledCode: string;
   sourceMap?: string;
-  
+
   // Diagnostics
   errors: CompilerError[];
   warnings: CompilerWarning[];
   metrics: CompilationMetrics;
-  
+
   // AST et métadonnées
   ast?: ProgramNode;
   symbols?: SymbolTable;
@@ -98,11 +98,11 @@ interface CompilationMetrics {
   analyzeTime: number;
   transpileTime: number;
   totalTime: number;
-  
+
   sourceLines: number;
   outputLines: number;
   memoryUsed: number;
-  
+
   tokensCount: number;
   astNodesCount: number;
   symbolsCount: number;
@@ -115,15 +115,15 @@ Analyseur lexical pour tokeniser le code VB6.
 
 ```typescript
 class VB6Lexer {
-  constructor(source: string, options?: LexerOptions)
-  
-  tokenize(): Token[]
-  nextToken(): Token
-  peek(offset?: number): Token
-  
-  getCurrentPosition(): Position
-  hasError(): boolean
-  getErrors(): LexerError[]
+  constructor(source: string, options?: LexerOptions);
+
+  tokenize(): Token[];
+  nextToken(): Token;
+  peek(offset?: number): Token;
+
+  getCurrentPosition(): Position;
+  hasError(): boolean;
+  getErrors(): LexerError[];
 }
 
 interface Token {
@@ -136,14 +136,14 @@ interface Token {
 enum TokenType {
   // Identifiers et literals
   IDENTIFIER = 'IDENTIFIER',
-  NUMBER = 'NUMBER', 
+  NUMBER = 'NUMBER',
   STRING = 'STRING',
   DATE = 'DATE',
   BOOLEAN = 'BOOLEAN',
-  
+
   // Mots-clés
   KEYWORD = 'KEYWORD',
-  
+
   // Opérateurs
   PLUS = 'PLUS',
   MINUS = 'MINUS',
@@ -153,7 +153,7 @@ enum TokenType {
   MODULO = 'MODULO',
   POWER = 'POWER',
   CONCATENATE = 'CONCATENATE',
-  
+
   // Comparaison
   EQUALS = 'EQUALS',
   NOT_EQUALS = 'NOT_EQUALS',
@@ -161,7 +161,7 @@ enum TokenType {
   GREATER_THAN = 'GREATER_THAN',
   LESS_EQUAL = 'LESS_EQUAL',
   GREATER_EQUAL = 'GREATER_EQUAL',
-  
+
   // Logique
   AND = 'AND',
   OR = 'OR',
@@ -169,7 +169,7 @@ enum TokenType {
   XOR = 'XOR',
   EQV = 'EQV',
   IMP = 'IMP',
-  
+
   // Délimiteurs
   LPAREN = 'LPAREN',
   RPAREN = 'RPAREN',
@@ -177,12 +177,12 @@ enum TokenType {
   DOT = 'DOT',
   COLON = 'COLON',
   SEMICOLON = 'SEMICOLON',
-  
+
   // Structure
   NEWLINE = 'NEWLINE',
   WHITESPACE = 'WHITESPACE',
   COMMENT = 'COMMENT',
-  EOF = 'EOF'
+  EOF = 'EOF',
 }
 
 interface Position {
@@ -198,16 +198,16 @@ Analyseur syntaxique pour construire l'AST.
 
 ```typescript
 class VB6Parser {
-  constructor(tokens: Token[], options?: ParserOptions)
-  
-  parse(): ProgramNode
-  parseStatement(): StatementNode
-  parseExpression(): ExpressionNode
-  parseDeclaration(): DeclarationNode
-  
-  hasError(): boolean
-  getErrors(): ParserError[]
-  getWarnings(): ParserWarning[]
+  constructor(tokens: Token[], options?: ParserOptions);
+
+  parse(): ProgramNode;
+  parseStatement(): StatementNode;
+  parseExpression(): ExpressionNode;
+  parseDeclaration(): DeclarationNode;
+
+  hasError(): boolean;
+  getErrors(): ParserError[];
+  getWarnings(): ParserWarning[];
 }
 
 interface ParserOptions {
@@ -224,14 +224,14 @@ Analyseur sémantique pour la vérification de types et de cohérence.
 
 ```typescript
 class VB6SemanticAnalyzer {
-  constructor(options?: AnalyzerOptions)
-  
-  analyze(ast: ProgramNode): AnalysisResult
-  checkTypes(node: ASTNode): TypeCheckResult
-  resolveSymbols(ast: ProgramNode): SymbolTable
-  
-  addBuiltinSymbols(): void
-  defineCustomType(name: string, definition: TypeDefinition): void
+  constructor(options?: AnalyzerOptions);
+
+  analyze(ast: ProgramNode): AnalysisResult;
+  checkTypes(node: ASTNode): TypeCheckResult;
+  resolveSymbols(ast: ProgramNode): SymbolTable;
+
+  addBuiltinSymbols(): void;
+  defineCustomType(name: string, definition: TypeDefinition): void;
 }
 
 interface AnalysisResult {
@@ -272,7 +272,7 @@ enum SymbolKind {
   TYPE = 'TYPE',
   ENUM = 'ENUM',
   CLASS = 'CLASS',
-  MODULE = 'MODULE'
+  MODULE = 'MODULE',
 }
 ```
 
@@ -282,15 +282,15 @@ Générateur de code JavaScript.
 
 ```typescript
 class VB6Transpiler {
-  constructor(options?: TranspilerOptions)
-  
-  transpile(ast: ProgramNode): TranspileResult
-  transpileNode(node: ASTNode): string
-  transpileExpression(expr: ExpressionNode): string
-  transpileStatement(stmt: StatementNode): string
-  
-  setTemplate(nodeType: string, template: CodeTemplate): void
-  addRuntime(runtimeModule: string): void
+  constructor(options?: TranspilerOptions);
+
+  transpile(ast: ProgramNode): TranspileResult;
+  transpileNode(node: ASTNode): string;
+  transpileExpression(expr: ExpressionNode): string;
+  transpileStatement(stmt: StatementNode): string;
+
+  setTemplate(nodeType: string, template: CodeTemplate): void;
+  addRuntime(runtimeModule: string): void;
 }
 
 interface TranspileResult {
@@ -326,7 +326,7 @@ class VB6Runtime {
   static Array: VB6ArrayFunctions;
   static Debug: VB6DebugFunctions;
   static Err: VB6ErrorObject;
-  
+
   static initialize(): void;
   static cleanup(): void;
   static getVersion(): string;
@@ -342,54 +342,84 @@ interface VB6StringFunctions {
   Left(str: string, length: number): string;
   Right(str: string, length: number): string;
   Mid(str: string, start: number, length?: number): string;
-  
+
   // Recherche et remplacement
   InStr(start: number, str1: string, str2: string, compare?: CompareMethod): number;
   InStr(str1: string, str2: string, compare?: CompareMethod): number;
   InStrRev(str1: string, str2: string, start?: number, compare?: CompareMethod): number;
-  Replace(expr: string, find: string, replace: string, start?: number, count?: number, compare?: CompareMethod): string;
-  
+  Replace(
+    expr: string,
+    find: string,
+    replace: string,
+    start?: number,
+    count?: number,
+    compare?: CompareMethod
+  ): string;
+
   // Transformation
   UCase(str: string): string;
   LCase(str: string): string;
   Trim(str: string): string;
   LTrim(str: string): string;
   RTrim(str: string): string;
-  
+
   // Génération
   Space(number: number): string;
   String(number: number, character: string | number): string;
-  
+
   // Manipulation
   StrReverse(str: string): string;
   StrConv(str: string, conversion: VbStrConv, localeID?: number): string;
-  
+
   // Arrays
   Split(expression: string, delimiter?: string, limit?: number, compare?: CompareMethod): string[];
   Join(sourceArray: string[], delimiter?: string): string;
-  Filter(sourceArray: string[], match: string, include?: boolean, compare?: CompareMethod): string[];
-  
+  Filter(
+    sourceArray: string[],
+    match: string,
+    include?: boolean,
+    compare?: CompareMethod
+  ): string[];
+
   // Comparaison
   StrComp(str1: string, str2: string, compare?: CompareMethod): CompareResult;
   Like(str: string, pattern: string): boolean;
-  
+
   // Conversion
   Asc(str: string): number;
   AscW(str: string): number;
   Chr(charCode: number): string;
   ChrW(charCode: number): string;
-  
+
   // Formatage
   Format(expression: any, format?: string): string;
-  FormatCurrency(expression: number, numDigitsAfterDecimal?: number, includeLeadingDigit?: TriState, useParensForNegativeNumbers?: TriState, groupDigits?: TriState): string;
+  FormatCurrency(
+    expression: number,
+    numDigitsAfterDecimal?: number,
+    includeLeadingDigit?: TriState,
+    useParensForNegativeNumbers?: TriState,
+    groupDigits?: TriState
+  ): string;
   FormatDateTime(date: Date, namedFormat?: VbDateTimeFormat): string;
-  FormatNumber(expression: number, numDigitsAfterDecimal?: number, includeLeadingDigit?: TriState, useParensForNegativeNumbers?: TriState, groupDigits?: TriState): string;
-  FormatPercent(expression: number, numDigitsAfterDecimal?: number, includeLeadingDigit?: TriState, useParensForNegativeNumbers?: TriState, groupDigits?: TriState): string;
+  FormatNumber(
+    expression: number,
+    numDigitsAfterDecimal?: number,
+    includeLeadingDigit?: TriState,
+    useParensForNegativeNumbers?: TriState,
+    groupDigits?: TriState
+  ): string;
+  FormatPercent(
+    expression: number,
+    numDigitsAfterDecimal?: number,
+    includeLeadingDigit?: TriState,
+    useParensForNegativeNumbers?: TriState,
+    groupDigits?: TriState
+  ): string;
 }
 
 enum CompareMethod {
   Binary = 0,
-  Text = 1
+  Text = 1,
 }
 ```
 
@@ -401,26 +431,26 @@ interface VB6MathFunctions {
   Abs(number: number): number;
   Sgn(number: number): number;
   Sqr(number: number): number;
-  
+
   // Fonctions trigonométriques
   Sin(number: number): number;
   Cos(number: number): number;
   Tan(number: number): number;
   Atn(number: number): number;
-  
+
   // Fonctions exponentielles et logarithmiques
   Exp(number: number): number;
   Log(number: number): number;
-  
+
   // Fonctions de troncature
   Int(number: number): number;
   Fix(number: number): number;
   Round(number: number, numDigitsAfterDecimal?: number): number;
-  
+
   // Fonctions aléatoires
   Rnd(number?: number): number;
   Randomize(number?: number): void;
-  
+
   // Utilitaires
   Timer(): number;
 }
@@ -434,7 +464,7 @@ interface VB6DateTimeFunctions {
   Now(): Date;
   Date(): Date;
   Time(): Date;
-  
+
   // Extraction de composants
   Year(date: Date): number;
   Month(date: Date): number;
@@ -443,21 +473,32 @@ interface VB6DateTimeFunctions {
   Minute(date: Date): number;
   Second(date: Date): number;
   Weekday(date: Date, firstDayOfWeek?: VbDayOfWeek): number;
-  
+
   // Construction de dates
   DateSerial(year: number, month: number, day: number): Date;
   TimeSerial(hour: number, minute: number, second: number): Date;
   DateValue(date: string): Date;
   TimeValue(time: string): Date;
-  
+
   // Manipulation de dates
   DateAdd(interval: string, number: number, date: Date): Date;
-  DateDiff(interval: string, date1: Date, date2: Date, firstDayOfWeek?: VbDayOfWeek, firstWeekOfYear?: VbFirstWeekOfYear): number;
-  DatePart(interval: string, date: Date, firstDayOfWeek?: VbDayOfWeek, firstWeekOfYear?: VbFirstWeekOfYear): number;
-  
+  DateDiff(
+    interval: string,
+    date1: Date,
+    date2: Date,
+    firstDayOfWeek?: VbDayOfWeek,
+    firstWeekOfYear?: VbFirstWeekOfYear
+  ): number;
+  DatePart(
+    interval: string,
+    date: Date,
+    firstDayOfWeek?: VbDayOfWeek,
+    firstWeekOfYear?: VbFirstWeekOfYear
+  ): number;
+
   // Validation
   IsDate(expression: any): boolean;
-  
+
   // Formatage
   MonthName(month: number, abbreviate?: boolean): string;
   WeekdayName(weekday: VbDayOfWeek, abbreviate?: boolean, firstDayOfWeek?: VbDayOfWeek): string;
@@ -471,7 +512,7 @@ enum VbDayOfWeek {
   vbWednesday = 4,
   vbThursday = 5,
   vbFriday = 6,
-  vbSaturday = 7
+  vbSaturday = 7,
 }
 ```
 
@@ -487,20 +528,20 @@ interface VB6ConversionFunctions {
   CDbl(expression: any): number;
   CCur(expression: any): number;
   CDec(expression: any): number;
-  
+
   // Conversions de type
   CBool(expression: any): boolean;
   CDate(expression: any): Date;
   CStr(expression: any): string;
   CVar(expression: any): any;
   CVErr(errorNumber: number): Error;
-  
+
   // Fonctions de conversion texte/nombre
   Val(string: string): number;
   Str(number: number): string;
   Hex(number: number): string;
   Oct(number: number): string;
-  
+
   // Validation de type
   IsArray(varname: any): boolean;
   IsDate(expression: any): boolean;
@@ -510,7 +551,7 @@ interface VB6ConversionFunctions {
   IsNull(expression: any): boolean;
   IsNumeric(expression: any): boolean;
   IsObject(expression: any): boolean;
-  
+
   // Informations de type
   TypeName(varname: any): string;
   VarType(varname: any): VbVarType;
@@ -534,7 +575,7 @@ enum VbVarType {
   vbDecimal = 14,
   vbByte = 17,
   vbUserDefinedType = 36,
-  vbArray = 8192
+  vbArray = 8192,
 }
 ```
 
@@ -545,15 +586,15 @@ interface VB6ArrayFunctions {
   // Informations sur les arrays
   UBound(arrayName: any[], dimension?: number): number;
   LBound(arrayName: any[], dimension?: number): number;
-  
+
   // Manipulation d'arrays
   ReDim<T>(arrayName: T[], ...bounds: number[]): void;
   ReDimPreserve<T>(arrayName: T[], ...bounds: number[]): void;
   Erase(...arrays: any[][]): void;
-  
+
   // Création d'arrays
   Array(...values: any[]): any[];
-  
+
   // Utilitaires
   IsArray(varname: any): boolean;
 }
@@ -568,39 +609,45 @@ interface VB6FileSystemFunctions {
   ChDir(path: string): void;
   ChDrive(drive: string): void;
   CurDir(drive?: string): string;
-  
+
   // Informations de fichiers
   FileLen(pathName: string): number;
   FileDateTime(pathName: string): Date;
   FileExists(pathName: string): boolean;
   GetAttr(pathName: string): VbFileAttribute;
   SetAttr(pathName: string, attributes: VbFileAttribute): void;
-  
+
   // Opérations sur fichiers
   Kill(pathName: string): void;
   Name(oldPathName: string, newPathName: string): void;
   MkDir(path: string): void;
   RmDir(path: string): void;
-  
+
   // I/O de fichiers
   FreeFile(rangeNumber?: number): number;
-  Open(pathName: string, mode: VbIOMode, access?: VbAccessMode, lock?: VbLockType, fileNumber?: number): void;
+  Open(
+    pathName: string,
+    mode: VbIOMode,
+    access?: VbAccessMode,
+    lock?: VbLockType,
+    fileNumber?: number
+  ): void;
   Close(...fileNumbers: number[]): void;
   Reset(): void;
-  
+
   // Lecture/Écriture
   EOF(fileNumber: number): boolean;
   LOF(fileNumber: number): number;
   Loc(fileNumber: number): number;
   Seek(fileNumber: number, position?: number): number;
-  
+
   Input(length: number, fileNumber: number): string;
   LineInput(fileNumber: number): string;
   InputB(length: number, fileNumber: number): any;
-  
+
   Print(fileNumber: number, ...outputList: any[]): void;
   Write(fileNumber: number, ...outputList: any[]): void;
-  
+
   // Fonctions spéciales
   Spc(n: number): string;
   Tab(n?: number): string;
@@ -612,7 +659,7 @@ enum VbFileAttribute {
   vbHidden = 2,
   vbSystem = 4,
   vbDirectory = 16,
-  vbArchive = 32
+  vbArchive = 32,
 }
 
 enum VbIOMode {
@@ -620,7 +667,7 @@ enum VbIOMode {
   Output = 2,
   Random = 3,
   Append = 4,
-  Binary = 5
+  Binary = 5,
 }
 ```
 
@@ -821,14 +868,14 @@ enum CompilerPhase {
   Lexical = 'lexical',
   Syntactic = 'syntactic',
   Semantic = 'semantic',
-  CodeGeneration = 'codeGeneration'
+  CodeGeneration = 'codeGeneration',
 }
 
 enum ErrorSeverity {
   Error = 'error',
   Warning = 'warning',
   Information = 'information',
-  Hint = 'hint'
+  Hint = 'hint',
 }
 ```
 
@@ -856,24 +903,27 @@ interface CompilerPlugin {
   name: string;
   version: string;
   description?: string;
-  
+
   // Lifecycle hooks
   initialize?(compiler: VB6Compiler): void;
   finalize?(compiler: VB6Compiler): void;
-  
+
   // Compilation phase hooks
   onPreLex?(source: string): string;
   onPostLex?(tokens: Token[]): Token[];
-  
+
   onPreParse?(tokens: Token[]): Token[];
   onPostParse?(ast: ProgramNode): ProgramNode;
-  
+
   onPreAnalyze?(ast: ProgramNode): ProgramNode;
-  onPostAnalyze?(ast: ProgramNode, symbolTable: SymbolTable): { ast: ProgramNode; symbolTable: SymbolTable };
-  
+  onPostAnalyze?(
+    ast: ProgramNode,
+    symbolTable: SymbolTable
+  ): { ast: ProgramNode; symbolTable: SymbolTable };
+
   onPreTranspile?(ast: ProgramNode): ProgramNode;
   onPostTranspile?(code: string): string;
-  
+
   // Custom transformations
   transformNode?(node: ASTNode): ASTNode;
   addBuiltinFunctions?(): { [name: string]: Function };
@@ -885,7 +935,7 @@ class PluginManager {
   unregister(pluginName: string): void;
   getPlugin(name: string): CompilerPlugin | undefined;
   getPlugins(): CompilerPlugin[];
-  
+
   executeHook<T>(hookName: string, ...args: any[]): T[];
 }
 ```
@@ -900,16 +950,16 @@ interface CompilerConfig {
   projectName: string;
   projectVersion: string;
   outputDirectory: string;
-  
+
   // Compilation options
   compiler: CompilerOptions;
-  
+
   // Runtime options
   runtime: RuntimeOptions;
-  
+
   // Development options
   development: DevelopmentOptions;
-  
+
   // Plugin configuration
   plugins: PluginConfig[];
 }
@@ -937,7 +987,7 @@ class ConfigurationManager {
   static save(config: CompilerConfig, configPath: string): void;
   static validate(config: CompilerConfig): ValidationResult;
   static merge(base: CompilerConfig, override: Partial<CompilerConfig>): CompilerConfig;
-  
+
   static getDefault(): CompilerConfig;
   static createTemplate(projectType: ProjectType): CompilerConfig;
 }
@@ -947,7 +997,7 @@ enum ProjectType {
   ActiveXExe = 'activeXExe',
   ActiveXDll = 'activeXDll',
   ActiveXControl = 'activeXControl',
-  WebApplication = 'webApplication'
+  WebApplication = 'webApplication',
 }
 ```
 
@@ -964,7 +1014,7 @@ interface SourceMapGenerator {
 
 class SourceMapConsumer {
   constructor(sourceMap: string);
-  
+
   originalPositionFor(position: Position): Position | null;
   generatedPositionFor(position: Position): Position | null;
   sourceContentFor(source: string): string | null;
@@ -979,7 +1029,7 @@ interface PerformanceProfiler {
   end(name: string): number;
   mark(name: string): void;
   measure(name: string, startMark?: string, endMark?: string): number;
-  
+
   getReport(): PerformanceReport;
   reset(): void;
 }
@@ -1010,7 +1060,7 @@ interface Debugger {
   stepInto(): void;
   stepOut(): void;
   continue(): void;
-  
+
   evaluateExpression(expression: string): any;
   getVariables(scope?: string): Variable[];
   getCallStack(): CallFrame[];
@@ -1025,11 +1075,11 @@ interface VersionInfo {
   buildDate: string;
   buildNumber: number;
   gitCommit?: string;
-  
+
   // Compatibility
   vb6Compatibility: string; // "95%+"
   jsTarget: string; // "ES2020"
-  
+
   // Features
   supportedFeatures: string[];
   experimentalFeatures: string[];

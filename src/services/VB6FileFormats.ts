@@ -3,13 +3,13 @@ import { EventEmitter } from 'events';
 // VB6 File Format Constants
 export enum VB6FileType {
   FRX = '.frx',
-  CTX = '.ctx', 
+  CTX = '.ctx',
   OCA = '.oca',
   VBG = '.vbg',
   FRM = '.frm',
   BAS = '.bas',
   CLS = '.cls',
-  VBP = '.vbp'
+  VBP = '.vbp',
 }
 
 // VB6 Property Types for binary files
@@ -18,7 +18,7 @@ export enum VB6PropertyType {
   Picture = 14,
   Binary = 17,
   Font = 18,
-  Color = 19
+  Color = 19,
 }
 
 // VB6 Picture Format Constants
@@ -26,7 +26,7 @@ export enum VB6PictureFormat {
   Bitmap = 1,
   Metafile = 2,
   Icon = 3,
-  EnhancedMetafile = 4
+  EnhancedMetafile = 4,
 }
 
 // FRX/CTX Property Structure
@@ -96,7 +96,7 @@ export class VB6FileFormats extends EventEmitter {
         properties.set(index, {
           size,
           type,
-          data: propData
+          data: propData,
         });
       }
 
@@ -182,14 +182,14 @@ export class VB6FileFormats extends EventEmitter {
         if (line.startsWith('Project=')) {
           const projectLine = line.substring(8);
           const parts = projectLine.split(';');
-          
+
           if (parts.length >= 2) {
             groups.push({
               type: 'Project',
               reference: '',
               project: parts[0],
               package: parts[1] || '',
-              startMode: 0
+              startMode: 0,
             });
           }
         }
@@ -197,7 +197,7 @@ export class VB6FileFormats extends EventEmitter {
         if (line.startsWith('Package=')) {
           const packageLine = line.substring(8);
           const parts = packageLine.split(';');
-          
+
           if (parts.length >= 2 && groups.length > 0) {
             const lastGroup = groups[groups.length - 1];
             lastGroup.package = parts[0];
@@ -217,7 +217,7 @@ export class VB6FileFormats extends EventEmitter {
   public generateVBGFile(groups: VB6ProjectGroup[]): string {
     try {
       const lines: string[] = [];
-      
+
       lines.push('VBGROUP 5.0');
       lines.push('StartupProject=(None)');
       lines.push('');
@@ -226,13 +226,13 @@ export class VB6FileFormats extends EventEmitter {
         if (group.reference) {
           lines.push(`Reference=${group.reference}`);
         }
-        
+
         lines.push(`Project=${group.project};${group.package}`);
-        
+
         if (group.package) {
           lines.push(`Package=${group.package};${group.startMode}`);
         }
-        
+
         lines.push('');
       });
 
@@ -281,9 +281,7 @@ export class VB6FileFormats extends EventEmitter {
         offset += 4;
 
         // Read version string
-        const versionStr = new TextDecoder().decode(
-          new Uint8Array(data, offset, versionLen)
-        );
+        const versionStr = new TextDecoder().decode(new Uint8Array(data, offset, versionLen));
         offset += versionLen;
 
         // Read LCID
@@ -295,9 +293,7 @@ export class VB6FileFormats extends EventEmitter {
         offset += 4;
 
         // Read description
-        const description = new TextDecoder().decode(
-          new Uint8Array(data, offset, descLen)
-        );
+        const description = new TextDecoder().decode(new Uint8Array(data, offset, descLen));
         offset += descLen;
 
         // Read help file length
@@ -305,9 +301,7 @@ export class VB6FileFormats extends EventEmitter {
         offset += 4;
 
         // Read help file
-        const helpFile = new TextDecoder().decode(
-          new Uint8Array(data, offset, helpFileLen)
-        );
+        const helpFile = new TextDecoder().decode(new Uint8Array(data, offset, helpFileLen));
         offset += helpFileLen;
 
         // Read help context
@@ -325,7 +319,7 @@ export class VB6FileFormats extends EventEmitter {
           description,
           helpFile,
           helpContext,
-          flags
+          flags,
         });
       }
 
@@ -341,7 +335,7 @@ export class VB6FileFormats extends EventEmitter {
     try {
       // Calculate total size
       let totalSize = 12; // Header: signature(4) + version(4) + count(4)
-      
+
       entries.forEach(entry => {
         totalSize += 16; // GUID
         totalSize += 4 + entry.version.length; // Version string
@@ -430,7 +424,7 @@ export class VB6FileFormats extends EventEmitter {
       const url = URL.createObjectURL(blob);
       const img = new Image();
       img.src = url;
-      
+
       return img;
     } catch (error) {
       this.emit('error', `Error extracting image: ${error}`);
@@ -442,7 +436,7 @@ export class VB6FileFormats extends EventEmitter {
     return {
       size: imageData.length,
       type: VB6PropertyType.Picture,
-      data: imageData
+      data: imageData,
     };
   }
 
@@ -451,16 +445,21 @@ export class VB6FileFormats extends EventEmitter {
     return {
       size: data.length,
       type: VB6PropertyType.String,
-      data
+      data,
     };
   }
 
-  public createFontProperty(fontName: string, fontSize: number, bold: boolean = false, italic: boolean = false): VB6BinaryProperty {
+  public createFontProperty(
+    fontName: string,
+    fontSize: number,
+    bold: boolean = false,
+    italic: boolean = false
+  ): VB6BinaryProperty {
     // VB6 Font property format (simplified)
     const fontData = new ArrayBuffer(64);
     const view = new DataView(fontData);
     const nameBytes = new TextEncoder().encode(fontName);
-    
+
     // Font structure
     view.setFloat32(0, fontSize, true); // Size
     view.setUint32(4, bold ? 700 : 400, true); // Weight
@@ -468,20 +467,20 @@ export class VB6FileFormats extends EventEmitter {
     view.setUint8(9, 0); // Underline
     view.setUint8(10, 0); // Strikethrough
     view.setUint8(11, 1); // Charset
-    
+
     // Font name (starting at offset 12)
     new Uint8Array(fontData, 12, Math.min(nameBytes.length, 32)).set(nameBytes);
-    
+
     return {
       size: 64,
       type: VB6PropertyType.Font,
-      data: new Uint8Array(fontData)
+      data: new Uint8Array(fontData),
     };
   }
 
   public validateFileFormat(filename: string, data: ArrayBuffer | string): boolean {
     const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
-    
+
     try {
       switch (ext) {
         case VB6FileType.FRX:
@@ -489,17 +488,17 @@ export class VB6FileFormats extends EventEmitter {
           if (typeof data === 'string') return false;
           this.parseFRXFile(data);
           return true;
-          
+
         case VB6FileType.VBG:
           if (typeof data !== 'string') return false;
           this.parseVBGFile(data);
           return true;
-          
+
         case VB6FileType.OCA:
           if (typeof data === 'string') return false;
           this.parseOCAFile(data);
           return true;
-          
+
         default:
           return false;
       }
@@ -511,7 +510,7 @@ export class VB6FileFormats extends EventEmitter {
   // File I/O Integration
   public async loadFile(filename: string): Promise<ArrayBuffer | string> {
     const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
-    
+
     try {
       if (ext === VB6FileType.VBG) {
         // Text file
@@ -530,7 +529,7 @@ export class VB6FileFormats extends EventEmitter {
 
   public saveFile(filename: string, data: ArrayBuffer | string): Blob {
     const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
-    
+
     if (ext === VB6FileType.VBG && typeof data === 'string') {
       return new Blob([data], { type: 'text/plain' });
     } else if (data instanceof ArrayBuffer) {

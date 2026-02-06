@@ -1,3 +1,9 @@
+/**
+ * @deprecated Legacy regex-based parser. Use VB6RecursiveDescentParser from
+ * src/compiler/VB6RecursiveDescentParser.ts for new code. This parser is kept
+ * for backward compatibility with existing consumers.
+ */
+
 export interface VB6Parameter {
   name: string;
   type: string | null;
@@ -45,25 +51,27 @@ export interface VB6ModuleAST {
 
 function parseParams(paramStr?: string): VB6Parameter[] {
   if (!paramStr) return [];
-  
+
   // PARSER BUG FIX: Add bounds checking to prevent DoS
   if (paramStr.length > 1000) {
     throw new Error('Parameter string too long');
   }
-  
+
   const cleaned = paramStr.replace(/[()]/g, '').trim();
   if (!cleaned) return [];
-  
+
   // PARSER BUG FIX: Limit number of parameters to prevent DoS
   const params = cleaned.split(',');
   if (params.length > 50) {
     throw new Error('Too many parameters');
   }
-  
+
   return params.map(p => {
     // PARSER BUG FIX: Use safer regex with bounds
     const trimmedParam = p.trim().substring(0, 100);
-    const m = trimmedParam.match(/^([a-zA-Z_][a-zA-Z0-9_]{0,63})(?:\s+As\s+([a-zA-Z_][a-zA-Z0-9_]{0,63}))?$/i);
+    const m = trimmedParam.match(
+      /^([a-zA-Z_][a-zA-Z0-9_]{0,63})(?:\s+As\s+([a-zA-Z_][a-zA-Z0-9_]{0,63}))?$/i
+    );
     return {
       name: m ? m[1] : trimmedParam.split(/\s+/)[0] || 'invalid',
       type: m && m[2] ? m[2] : null,
@@ -77,13 +85,13 @@ function parseParams(paramStr?: string): VB6Parameter[] {
 // VB6Parser class wrapper for compatibility
 export class VB6Parser {
   constructor() {}
-  
+
   parse(code: string, name = 'Module1') {
     const ast = parseVB6Module(code, name);
     return {
       success: true,
       ast,
-      errors: []
+      errors: [],
     };
   }
 }
@@ -93,7 +101,8 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
   if (typeof code !== 'string') {
     throw new Error('Invalid code input');
   }
-  if (code.length > 1000000) { // 1MB limit
+  if (code.length > 1000000) {
+    // 1MB limit
     throw new Error('Code too large to parse');
   }
   if (typeof name !== 'string' || name.length > 100) {
@@ -142,7 +151,9 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
 
     // variable declaration (module level)
     // PARSER BUG FIX: Use bounded regex to prevent ReDoS
-    const varMatch = trimmed.match(/^(Public|Private)?\s*Dim\s+([a-zA-Z_][a-zA-Z0-9_]{0,63})(?:\s+As\s+([a-zA-Z_][a-zA-Z0-9_]{0,63}))?$/i);
+    const varMatch = trimmed.match(
+      /^(Public|Private)?\s*Dim\s+([a-zA-Z_][a-zA-Z0-9_]{0,63})(?:\s+As\s+([a-zA-Z_][a-zA-Z0-9_]{0,63}))?$/i
+    );
     if (varMatch && !current) {
       variables.push({ name: varMatch[2], varType: varMatch[3] || null });
       continue;
@@ -150,7 +161,9 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
 
     // event declaration
     // PARSER BUG FIX: Bounded regex with limited parentheses content
-    const eventMatch = trimmed.match(/^(Public|Private)?\s*Event\s+([a-zA-Z_][a-zA-Z0-9_]{0,63})\s*(\([^)]{0,500}\))?$/i);
+    const eventMatch = trimmed.match(
+      /^(Public|Private)?\s*Event\s+([a-zA-Z_][a-zA-Z0-9_]{0,63})\s*(\([^)]{0,500}\))?$/i
+    );
     if (eventMatch && !current) {
       events.push({
         name: eventMatch[2],
@@ -162,7 +175,9 @@ export function parseVB6Module(code: string, name = 'Module1'): VB6ModuleAST {
 
     // procedure start
     // PARSER BUG FIX: Bounded regex patterns
-    const subMatch = trimmed.match(/^(Public|Private)?\s*Sub\s+([a-zA-Z_][a-zA-Z0-9_]{0,63})\s*(\([^)]{0,500}\))?$/i);
+    const subMatch = trimmed.match(
+      /^(Public|Private)?\s*Sub\s+([a-zA-Z_][a-zA-Z0-9_]{0,63})\s*(\([^)]{0,500}\))?$/i
+    );
     if (subMatch) {
       pushCurrent();
       current = {
@@ -256,7 +271,7 @@ export const vb6Parser = {
         procedures: result.procedures,
         variables: result.variables,
         events: result.events,
-        properties: result.properties
+        properties: result.properties,
       };
     } catch (error) {
       return {
@@ -265,8 +280,8 @@ export const vb6Parser = {
         procedures: [],
         variables: [],
         events: [],
-        properties: []
+        properties: [],
       };
     }
-  }
+  },
 };

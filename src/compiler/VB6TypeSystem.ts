@@ -5,7 +5,7 @@
 
 export enum VB6PrimitiveType {
   Byte = 'Byte',
-  Boolean = 'Boolean', 
+  Boolean = 'Boolean',
   Integer = 'Integer',
   Long = 'Long',
   Single = 'Single',
@@ -19,7 +19,7 @@ export enum VB6PrimitiveType {
   Empty = 'Empty',
   Null = 'Null',
   Nothing = 'Nothing',
-  Any = 'Any'
+  Any = 'Any',
 }
 
 export interface VB6TypeInfo {
@@ -88,13 +88,13 @@ export class VB6TypeSystem {
   private userDefinedTypes: Map<string, VB6UserDefinedType>;
   private enums: Map<string, VB6Enum>;
   private typeAliases: Map<string, string>;
-  
+
   constructor() {
     this.primitiveTypes = new Map();
     this.userDefinedTypes = new Map();
     this.enums = new Map();
     this.typeAliases = new Map();
-    
+
     this.registerPrimitiveTypes();
     this.registerTypeAliases();
   }
@@ -109,7 +109,7 @@ export class VB6TypeSystem {
       primitive: VB6PrimitiveType.Byte,
       size: 1,
       range: [0, 255],
-      defaultValue: 0
+      defaultValue: 0,
     });
 
     this.primitiveTypes.set('Boolean', {
@@ -117,7 +117,7 @@ export class VB6TypeSystem {
       primitive: VB6PrimitiveType.Boolean,
       size: 2,
       range: [-1, 0], // True = -1, False = 0 in VB6
-      defaultValue: false
+      defaultValue: false,
     });
 
     this.primitiveTypes.set('Integer', {
@@ -125,7 +125,7 @@ export class VB6TypeSystem {
       primitive: VB6PrimitiveType.Integer,
       size: 2,
       range: [-32768, 32767],
-      defaultValue: 0
+      defaultValue: 0,
     });
 
     this.primitiveTypes.set('Long', {
@@ -133,7 +133,7 @@ export class VB6TypeSystem {
       primitive: VB6PrimitiveType.Long,
       size: 4,
       range: [-2147483648, 2147483647],
-      defaultValue: 0
+      defaultValue: 0,
     });
 
     this.primitiveTypes.set('Single', {
@@ -142,7 +142,7 @@ export class VB6TypeSystem {
       size: 4,
       precision: 7,
       range: [-3.402823e38, 3.402823e38],
-      defaultValue: 0.0
+      defaultValue: 0.0,
     });
 
     this.primitiveTypes.set('Double', {
@@ -151,7 +151,7 @@ export class VB6TypeSystem {
       size: 8,
       precision: 15,
       range: [-Number.MAX_VALUE, Number.MAX_VALUE],
-      defaultValue: 0.0
+      defaultValue: 0.0,
     });
 
     this.primitiveTypes.set('Currency', {
@@ -160,8 +160,8 @@ export class VB6TypeSystem {
       size: 8,
       precision: 4,
       fixed: true,
-      range: [-9.223372036854776e+15, 9.223372036854776e+15],
-      defaultValue: 0
+      range: [-9.223372036854776e15, 9.223372036854776e15],
+      defaultValue: 0,
     });
 
     this.primitiveTypes.set('Decimal', {
@@ -169,7 +169,7 @@ export class VB6TypeSystem {
       primitive: VB6PrimitiveType.Decimal,
       size: 14,
       precision: 28,
-      defaultValue: 0
+      defaultValue: 0,
     });
 
     this.primitiveTypes.set('Date', {
@@ -177,7 +177,7 @@ export class VB6TypeSystem {
       primitive: VB6PrimitiveType.Date,
       size: 8,
       range: [new Date('1/1/100').getTime(), new Date('12/31/9999').getTime()],
-      defaultValue: new Date(0)
+      defaultValue: new Date(0),
     });
 
     // Types chaîne et objet
@@ -186,7 +186,7 @@ export class VB6TypeSystem {
       primitive: VB6PrimitiveType.String,
       size: 'variable',
       encoding: 'UTF-16',
-      defaultValue: ''
+      defaultValue: '',
     });
 
     this.primitiveTypes.set('Object', {
@@ -195,7 +195,7 @@ export class VB6TypeSystem {
       size: 4,
       reference: true,
       nullable: true,
-      defaultValue: null
+      defaultValue: null,
     });
 
     this.primitiveTypes.set('Variant', {
@@ -203,7 +203,7 @@ export class VB6TypeSystem {
       primitive: VB6PrimitiveType.Variant,
       size: 16,
       dynamic: true,
-      defaultValue: null
+      defaultValue: null,
     });
 
     // Types spéciaux
@@ -211,7 +211,7 @@ export class VB6TypeSystem {
       name: 'Empty',
       primitive: VB6PrimitiveType.Empty,
       size: 0,
-      defaultValue: undefined
+      defaultValue: undefined,
     });
 
     this.primitiveTypes.set('Null', {
@@ -219,7 +219,7 @@ export class VB6TypeSystem {
       primitive: VB6PrimitiveType.Null,
       size: 0,
       nullable: true,
-      defaultValue: null
+      defaultValue: null,
     });
 
     this.primitiveTypes.set('Nothing', {
@@ -228,7 +228,7 @@ export class VB6TypeSystem {
       size: 4,
       reference: true,
       nullable: true,
-      defaultValue: null
+      defaultValue: null,
     });
 
     this.primitiveTypes.set('Any', {
@@ -236,7 +236,7 @@ export class VB6TypeSystem {
       primitive: VB6PrimitiveType.Any,
       size: 'variable',
       dynamic: true,
-      defaultValue: undefined
+      defaultValue: undefined,
     });
   }
 
@@ -273,7 +273,7 @@ export class VB6TypeSystem {
         name: udt.name,
         size: udt.size,
         reference: true,
-        defaultValue: null
+        defaultValue: null,
       };
     }
 
@@ -283,7 +283,7 @@ export class VB6TypeSystem {
       return {
         name: enumType.name,
         size: 4, // Enums are Long in VB6
-        defaultValue: 0
+        defaultValue: 0,
       };
     }
 
@@ -304,7 +304,7 @@ export class VB6TypeSystem {
       VB6PrimitiveType.Single,
       VB6PrimitiveType.Double,
       VB6PrimitiveType.Currency,
-      VB6PrimitiveType.Decimal
+      VB6PrimitiveType.Decimal,
     ];
 
     return numericTypes.includes(typeInfo.primitive);
@@ -313,14 +313,17 @@ export class VB6TypeSystem {
   /**
    * Vérifier la compatibilité entre deux types
    */
-  public checkTypeCompatibility(source: VB6TypeInfo | string, target: VB6TypeInfo | string): TypeCheckResult {
+  public checkTypeCompatibility(
+    source: VB6TypeInfo | string,
+    target: VB6TypeInfo | string
+  ): TypeCheckResult {
     const sourceType = typeof source === 'string' ? this.getType(source) : source;
     const targetType = typeof target === 'string' ? this.getType(target) : target;
 
     if (!sourceType || !targetType) {
       return {
         valid: false,
-        error: 'Unknown type'
+        error: 'Unknown type',
       };
     }
 
@@ -350,7 +353,7 @@ export class VB6TypeSystem {
         valid: true,
         runtime: true,
         warning: 'Type mismatch: String to numeric conversion at runtime',
-        conversion: 'Val'
+        conversion: 'Val',
       };
     }
 
@@ -359,28 +362,37 @@ export class VB6TypeSystem {
       return {
         valid: true,
         lossless: true,
-        conversion: 'CStr'
+        conversion: 'CStr',
       };
     }
 
     // Boolean conversions
-    if (sourceType.primitive === VB6PrimitiveType.Boolean || targetType.primitive === VB6PrimitiveType.Boolean) {
+    if (
+      sourceType.primitive === VB6PrimitiveType.Boolean ||
+      targetType.primitive === VB6PrimitiveType.Boolean
+    ) {
       return this.checkBooleanCompatibility(sourceType, targetType);
     }
 
     // Object compatibility
-    if (sourceType.primitive === VB6PrimitiveType.Object || targetType.primitive === VB6PrimitiveType.Object) {
+    if (
+      sourceType.primitive === VB6PrimitiveType.Object ||
+      targetType.primitive === VB6PrimitiveType.Object
+    ) {
       return this.checkObjectCompatibility(sourceType, targetType);
     }
 
     // Date conversions
-    if (sourceType.primitive === VB6PrimitiveType.Date || targetType.primitive === VB6PrimitiveType.Date) {
+    if (
+      sourceType.primitive === VB6PrimitiveType.Date ||
+      targetType.primitive === VB6PrimitiveType.Date
+    ) {
       return this.checkDateCompatibility(sourceType, targetType);
     }
 
     return {
       valid: false,
-      error: `Cannot convert ${sourceType.name} to ${targetType.name}`
+      error: `Cannot convert ${sourceType.name} to ${targetType.name}`,
     };
   }
 
@@ -401,7 +413,7 @@ export class VB6TypeSystem {
       // Conversion avec risque d'overflow
       return {
         valid: true,
-        warning: `Possible overflow: ${source.name} (${sourceMin} to ${sourceMax}) to ${target.name} (${targetMin} to ${targetMax})`
+        warning: `Possible overflow: ${source.name} (${sourceMin} to ${sourceMax}) to ${target.name} (${targetMin} to ${targetMax})`,
       };
     }
 
@@ -410,7 +422,7 @@ export class VB6TypeSystem {
       if (source.precision > target.precision) {
         return {
           valid: true,
-          warning: `Precision loss: ${source.name} (${source.precision} digits) to ${target.name} (${target.precision} digits)`
+          warning: `Precision loss: ${source.name} (${source.precision} digits) to ${target.name} (${target.precision} digits)`,
         };
       }
     }
@@ -428,7 +440,7 @@ export class VB6TypeSystem {
       return {
         valid: true,
         lossless: true,
-        conversion: 'CBool'
+        conversion: 'CBool',
       };
     }
 
@@ -437,17 +449,20 @@ export class VB6TypeSystem {
       return {
         valid: true,
         warning: 'Non-zero values become True',
-        conversion: 'CBool'
+        conversion: 'CBool',
       };
     }
 
     // String vers Boolean
-    if (source.primitive === VB6PrimitiveType.String && target.primitive === VB6PrimitiveType.Boolean) {
+    if (
+      source.primitive === VB6PrimitiveType.String &&
+      target.primitive === VB6PrimitiveType.Boolean
+    ) {
       return {
         valid: true,
         runtime: true,
         warning: 'String to Boolean conversion at runtime',
-        conversion: 'CBool'
+        conversion: 'CBool',
       };
     }
 
@@ -459,22 +474,28 @@ export class VB6TypeSystem {
    */
   private checkObjectCompatibility(source: VB6TypeInfo, target: VB6TypeInfo): TypeCheckResult {
     // Nothing peut être assigné à n'importe quel Object
-    if (source.primitive === VB6PrimitiveType.Nothing && target.primitive === VB6PrimitiveType.Object) {
+    if (
+      source.primitive === VB6PrimitiveType.Nothing &&
+      target.primitive === VB6PrimitiveType.Object
+    ) {
       return { valid: true, lossless: true };
     }
 
     // Object vers Object (nécessite vérification runtime)
-    if (source.primitive === VB6PrimitiveType.Object && target.primitive === VB6PrimitiveType.Object) {
+    if (
+      source.primitive === VB6PrimitiveType.Object &&
+      target.primitive === VB6PrimitiveType.Object
+    ) {
       return {
         valid: true,
         runtime: true,
-        warning: 'Object type compatibility checked at runtime'
+        warning: 'Object type compatibility checked at runtime',
       };
     }
 
     return {
       valid: false,
-      error: 'Object type mismatch'
+      error: 'Object type mismatch',
     };
   }
 
@@ -483,21 +504,27 @@ export class VB6TypeSystem {
    */
   private checkDateCompatibility(source: VB6TypeInfo, target: VB6TypeInfo): TypeCheckResult {
     // String vers Date
-    if (source.primitive === VB6PrimitiveType.String && target.primitive === VB6PrimitiveType.Date) {
+    if (
+      source.primitive === VB6PrimitiveType.String &&
+      target.primitive === VB6PrimitiveType.Date
+    ) {
       return {
         valid: true,
         runtime: true,
         warning: 'String to Date conversion at runtime',
-        conversion: 'CDate'
+        conversion: 'CDate',
       };
     }
 
     // Date vers String
-    if (source.primitive === VB6PrimitiveType.Date && target.primitive === VB6PrimitiveType.String) {
+    if (
+      source.primitive === VB6PrimitiveType.Date &&
+      target.primitive === VB6PrimitiveType.String
+    ) {
       return {
         valid: true,
         lossless: true,
-        conversion: 'Format'
+        conversion: 'Format',
       };
     }
 
@@ -505,7 +532,7 @@ export class VB6TypeSystem {
     if (this.isNumeric(source) && target.primitive === VB6PrimitiveType.Date) {
       return {
         valid: true,
-        conversion: 'CDate'
+        conversion: 'CDate',
       };
     }
 
@@ -513,7 +540,7 @@ export class VB6TypeSystem {
     if (source.primitive === VB6PrimitiveType.Date && this.isNumeric(target)) {
       return {
         valid: true,
-        conversion: 'CDbl'
+        conversion: 'CDbl',
       };
     }
 
@@ -573,7 +600,7 @@ export class VB6TypeSystem {
     return [
       ...Array.from(this.primitiveTypes.keys()),
       ...Array.from(this.userDefinedTypes.keys()),
-      ...Array.from(this.enums.keys())
+      ...Array.from(this.enums.keys()),
     ];
   }
 
@@ -589,7 +616,7 @@ export class VB6TypeSystem {
     return {
       elementType: typeInfo,
       dimensions,
-      dynamic: dimensions.some(d => d === -1) // -1 indicates dynamic dimension
+      dynamic: dimensions.some(d => d === -1), // -1 indicates dynamic dimension
     };
   }
 
@@ -602,7 +629,7 @@ export class VB6TypeSystem {
       primitive: VB6PrimitiveType.String,
       size: length * 2, // UTF-16 encoding
       encoding: 'UTF-16',
-      defaultValue: ' '.repeat(length)
+      defaultValue: ' '.repeat(length),
     };
   }
 }

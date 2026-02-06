@@ -29,15 +29,23 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // Manual chunk splitting for better caching
-        manualChunks: {
-          // React core
-          'react-vendor': ['react', 'react-dom'],
-          // Monaco Editor (large dependency)
-          monaco: ['monaco-editor'],
-          // Zustand state management
-          zustand: ['zustand'],
-          // UI libraries
-          'ui-libs': ['lucide-react', '@dnd-kit/core'],
+        manualChunks(id) {
+          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) {
+            return 'react-vendor';
+          }
+          if (id.includes('node_modules/monaco-editor')) {
+            return 'monaco';
+          }
+          if (id.includes('node_modules/zustand')) {
+            return 'zustand';
+          }
+          if (id.includes('node_modules/lucide-react') || id.includes('node_modules/@dnd-kit')) {
+            return 'ui-libs';
+          }
+          // VB6 runtime in separate chunk (72 files, loaded on demand)
+          if (id.includes('/src/runtime/')) {
+            return 'vb6-runtime';
+          }
         },
       },
     },

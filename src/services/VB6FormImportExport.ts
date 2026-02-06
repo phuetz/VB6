@@ -51,11 +51,13 @@ export class VB6FormImportExport {
       if (!line || line.startsWith("'")) continue;
 
       // Detect code section
-      if (line === 'Attribute VB_Exposed = False' || 
-          line.startsWith('Private Sub') || 
-          line.startsWith('Public Sub') ||
-          line.startsWith('Private Function') ||
-          line.startsWith('Public Function')) {
+      if (
+        line === 'Attribute VB_Exposed = False' ||
+        line.startsWith('Private Sub') ||
+        line.startsWith('Public Sub') ||
+        line.startsWith('Private Function') ||
+        line.startsWith('Public Function')
+      ) {
         inCodeSection = true;
       }
 
@@ -74,7 +76,7 @@ export class VB6FormImportExport {
         const match = line.match(/Begin (\w+\.?\w+) (\w+)/);
         if (match) {
           const [, controlType, controlName] = match;
-          
+
           if (controlType === 'VB.Form') {
             // This is the form itself
             formProperties.Name = controlName;
@@ -85,7 +87,7 @@ export class VB6FormImportExport {
               type: this.normalizeControlType(controlType),
               name: controlName,
               properties: {},
-              position: { left: 0, top: 0, width: 100, height: 30 }
+              position: { left: 0, top: 0, width: 100, height: 30 },
             };
             currentSection = 'control';
           }
@@ -105,7 +107,7 @@ export class VB6FormImportExport {
 
           if (currentSection === 'form') {
             formProperties[propName] = parsedValue;
-            
+
             // Handle special form properties
             if (propName === 'ScaleWidth') {
               formProperties.Width = parsedValue;
@@ -114,7 +116,7 @@ export class VB6FormImportExport {
             }
           } else if (currentControl && currentSection === 'control') {
             currentControl.properties![propName] = parsedValue;
-            
+
             // Handle position properties
             if (propName === 'Left') {
               currentControl.position!.left = this.twipsToPixels(parsedValue);
@@ -137,7 +139,7 @@ export class VB6FormImportExport {
       height: formProperties.Height || 400,
       properties: formProperties,
       controls,
-      code: codeSection
+      code: codeSection,
     };
   }
 
@@ -171,7 +173,7 @@ export class VB6FormImportExport {
     // Controls
     formDef.controls.forEach(control => {
       content += `   Begin ${this.getVB6ControlType(control.type)} ${control.name}\n`;
-      
+
       // Position properties
       content += `      Height          =   ${this.pixelsToTwips(control.position.height)}\n`;
       content += `      Left            =   ${this.pixelsToTwips(control.position.left)}\n`;
@@ -221,14 +223,14 @@ export class VB6FormImportExport {
         TabIndex: control.TabIndex || 0,
         Visible: control.Visible !== false,
         Enabled: control.Enabled !== false,
-        ...this.extractControlProperties(control)
+        ...this.extractControlProperties(control),
       },
       position: {
         left: control.Left,
         top: control.Top,
         width: control.Width,
-        height: control.Height
-      }
+        height: control.Height,
+      },
     }));
 
     return {
@@ -238,7 +240,7 @@ export class VB6FormImportExport {
       height: formProperties.Height || 400,
       properties: formProperties,
       controls: formControls,
-      code
+      code,
     };
   }
 
@@ -268,7 +270,7 @@ export class VB6FormImportExport {
       ForeColor: control.properties.ForeColor || '#000000',
       BackColor: control.properties.BackColor || '#F0F0F0',
       BorderStyle: control.properties.BorderStyle || 0,
-      ...this.mapAdditionalProperties(control)
+      ...this.mapAdditionalProperties(control),
     }));
   }
 
@@ -316,7 +318,7 @@ export class VB6FormImportExport {
       'MSComctlLib.StatusBar': 'StatusBar',
       'MSComctlLib.Toolbar': 'Toolbar',
       'MSFlexGridLib.MSFlexGrid': 'MSFlexGrid',
-      'RichTextLib.RichTextBox': 'RichTextBox'
+      'RichTextLib.RichTextBox': 'RichTextBox',
     };
 
     return typeMap[vb6Type] || vb6Type.replace('VB.', '');
@@ -324,27 +326,27 @@ export class VB6FormImportExport {
 
   private getVB6ControlType(normalizedType: string): string {
     const reverseMap: Record<string, string> = {
-      'CommandButton': 'VB.CommandButton',
-      'Label': 'VB.Label',
-      'TextBox': 'VB.TextBox',
-      'CheckBox': 'VB.CheckBox',
-      'OptionButton': 'VB.OptionButton',
-      'ListBox': 'VB.ListBox',
-      'ComboBox': 'VB.ComboBox',
-      'Frame': 'VB.Frame',
-      'PictureBox': 'VB.PictureBox',
-      'Image': 'VB.Image',
-      'Timer': 'VB.Timer',
-      'HScrollBar': 'VB.HScrollBar',
-      'VScrollBar': 'VB.VScrollBar',
-      'TreeView': 'MSComctlLib.TreeView',
-      'ListView': 'MSComctlLib.ListView',
-      'TabStrip': 'MSComctlLib.TabStrip',
-      'ProgressBar': 'MSComctlLib.ProgressBar',
-      'StatusBar': 'MSComctlLib.StatusBar',
-      'Toolbar': 'MSComctlLib.Toolbar',
-      'MSFlexGrid': 'MSFlexGridLib.MSFlexGrid',
-      'RichTextBox': 'RichTextLib.RichTextBox'
+      CommandButton: 'VB.CommandButton',
+      Label: 'VB.Label',
+      TextBox: 'VB.TextBox',
+      CheckBox: 'VB.CheckBox',
+      OptionButton: 'VB.OptionButton',
+      ListBox: 'VB.ListBox',
+      ComboBox: 'VB.ComboBox',
+      Frame: 'VB.Frame',
+      PictureBox: 'VB.PictureBox',
+      Image: 'VB.Image',
+      Timer: 'VB.Timer',
+      HScrollBar: 'VB.HScrollBar',
+      VScrollBar: 'VB.VScrollBar',
+      TreeView: 'MSComctlLib.TreeView',
+      ListView: 'MSComctlLib.ListView',
+      TabStrip: 'MSComctlLib.TabStrip',
+      ProgressBar: 'MSComctlLib.ProgressBar',
+      StatusBar: 'MSComctlLib.StatusBar',
+      Toolbar: 'MSComctlLib.Toolbar',
+      MSFlexGrid: 'MSFlexGridLib.MSFlexGrid',
+      RichTextBox: 'RichTextLib.RichTextBox',
     };
 
     return reverseMap[normalizedType] || `VB.${normalizedType}`;
@@ -501,13 +503,13 @@ End
       return {
         success: true,
         form: formDefinition,
-        fileName
+        fileName,
       };
     } catch (error) {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Import failed',
-        fileName
+        fileName,
       };
     }
   }

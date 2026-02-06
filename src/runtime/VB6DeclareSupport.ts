@@ -26,10 +26,19 @@ export interface VB6Parameter {
   isArray?: boolean;
 }
 
-export type VB6DataType = 
-  | 'Long' | 'Integer' | 'Byte' | 'Boolean'
-  | 'String' | 'Single' | 'Double' | 'Currency'
-  | 'Date' | 'Variant' | 'Object' | 'Any';
+export type VB6DataType =
+  | 'Long'
+  | 'Integer'
+  | 'Byte'
+  | 'Boolean'
+  | 'String'
+  | 'Single'
+  | 'Double'
+  | 'Currency'
+  | 'Date'
+  | 'Variant'
+  | 'Object'
+  | 'Any';
 
 /**
  * VB6 Windows API Declarations Registry
@@ -44,7 +53,7 @@ export class VB6DeclareRegistry {
   static registerDeclare(declare: VB6DeclareFunction): void {
     const key = `${declare.library}.${declare.alias || declare.name}`;
     this.declarations.set(key, declare);
-    
+
     // Register implementation based on known APIs
     this.registerAPIImplementation(declare);
   }
@@ -55,7 +64,7 @@ export class VB6DeclareRegistry {
   static callDeclaredFunction(name: string, library: string, ...args: any[]): any {
     const key = `${library}.${name}`;
     const declaration = this.declarations.get(key);
-    
+
     if (!declaration) {
       throw new Error(`Undeclared external function: ${name} in ${library}`);
     }
@@ -86,7 +95,7 @@ export class VB6DeclareRegistry {
           const windowTexts = new Map([
             [1, 'Main Window'],
             [2, 'Dialog Box'],
-            [3, 'Message Box']
+            [3, 'Message Box'],
           ]);
           const text = windowTexts.get(hwnd) || '';
           return text.length;
@@ -95,15 +104,19 @@ export class VB6DeclareRegistry {
 
       case 'user32.MessageBox':
       case 'user32.MessageBoxA':
-        this.apiImplementations.set(key, (hwnd: number, text: string, caption: string, type: number) => {
-          // Browser-based message box
-          if (type & 0x01) { // MB_OKCANCEL
-            return confirm(`${caption}\n\n${text}`) ? 1 : 2;
-          } else {
-            alert(`${caption}\n\n${text}`);
-            return 1; // IDOK
+        this.apiImplementations.set(
+          key,
+          (hwnd: number, text: string, caption: string, type: number) => {
+            // Browser-based message box
+            if (type & 0x01) {
+              // MB_OKCANCEL
+              return confirm(`${caption}\n\n${text}`) ? 1 : 2;
+            } else {
+              alert(`${caption}\n\n${text}`);
+              return 1; // IDOK
+            }
           }
-        });
+        );
         break;
 
       case 'user32.FindWindow':
@@ -119,7 +132,6 @@ export class VB6DeclareRegistry {
       case 'user32.SetWindowText':
       case 'user32.SetWindowTextA':
         this.apiImplementations.set(key, (hwnd: number, text: string) => {
-          console.log(`SetWindowText(${hwnd}, "${text}")`);
           return 1; // TRUE
         });
         break;
@@ -127,13 +139,13 @@ export class VB6DeclareRegistry {
       case 'user32.GetSystemMetrics':
         this.apiImplementations.set(key, (index: number) => {
           const metrics: Record<number, number> = {
-            0: window.screen.width,   // SM_CXSCREEN
-            1: window.screen.height,  // SM_CYSCREEN
-            2: 18,  // SM_CXVSCROLL
-            3: 18,  // SM_CYHSCROLL
-            4: 32,  // SM_CYCAPTION
-            5: 1,   // SM_CXBORDER
-            6: 1,   // SM_CYBORDER
+            0: window.screen.width, // SM_CXSCREEN
+            1: window.screen.height, // SM_CYSCREEN
+            2: 18, // SM_CXVSCROLL
+            3: 18, // SM_CYHSCROLL
+            4: 32, // SM_CYCAPTION
+            5: 1, // SM_CXBORDER
+            6: 1, // SM_CYBORDER
           };
           return metrics[index] || 0;
         });
@@ -142,7 +154,7 @@ export class VB6DeclareRegistry {
       // Kernel32.dll APIs
       case 'kernel32.GetTickCount':
         this.apiImplementations.set(key, () => {
-          return Date.now() & 0xFFFFFFFF; // Return as 32-bit value
+          return Date.now() & 0xffffffff; // Return as 32-bit value
         });
         break;
 
@@ -179,27 +191,35 @@ export class VB6DeclareRegistry {
       // Shell32.dll APIs
       case 'shell32.ShellExecute':
       case 'shell32.ShellExecuteA':
-        this.apiImplementations.set(key, (hwnd: number, operation: string, file: string, 
-                                         parameters: string, directory: string, showCmd: number) => {
-          if (operation === 'open' && file.startsWith('http')) {
-            window.open(file, '_blank');
-            return 42; // Success (> 32)
+        this.apiImplementations.set(
+          key,
+          (
+            hwnd: number,
+            operation: string,
+            file: string,
+            parameters: string,
+            directory: string,
+            showCmd: number
+          ) => {
+            if (operation === 'open' && file.startsWith('http')) {
+              window.open(file, '_blank');
+              return 42; // Success (> 32)
+            }
+            return 42;
           }
-          console.log(`ShellExecute: ${operation} ${file}`);
-          return 42;
-        });
+        );
         break;
 
       // GDI32.dll APIs
       case 'gdi32.CreatePen':
         this.apiImplementations.set(key, (style: number, width: number, color: number) => {
-          return { style, width, color, handle: Math.random() * 1000 | 0 };
+          return { style, width, color, handle: (Math.random() * 1000) | 0 };
         });
         break;
 
       case 'gdi32.CreateSolidBrush':
         this.apiImplementations.set(key, (color: number) => {
-          return { color, handle: Math.random() * 1000 | 0 };
+          return { color, handle: (Math.random() * 1000) | 0 };
         });
         break;
 
@@ -207,7 +227,6 @@ export class VB6DeclareRegistry {
       case 'winmm.PlaySound':
       case 'winmm.PlaySoundA':
         this.apiImplementations.set(key, (soundName: string, hmod: number, flags: number) => {
-          console.log(`PlaySound: ${soundName}`);
           // Could use Web Audio API here
           return 1; // TRUE
         });
@@ -215,11 +234,12 @@ export class VB6DeclareRegistry {
 
       case 'winmm.mciSendString':
       case 'winmm.mciSendStringA':
-        this.apiImplementations.set(key, (command: string, returnString: string, 
-                                          returnSize: number, hwndCallback: number) => {
-          console.log(`MCI Command: ${command}`);
-          return 0; // Success
-        });
+        this.apiImplementations.set(
+          key,
+          (command: string, returnString: string, returnSize: number, hwndCallback: number) => {
+            return 0; // Success
+          }
+        );
         break;
     }
   }
@@ -258,13 +278,14 @@ export class VB6DeclareRegistry {
    */
   static parseDeclareStatement(statement: string): VB6DeclareFunction | null {
     // Regex for parsing Declare statements
-    const declareRegex = /Declare\s+(Function|Sub)\s+(\w+)\s+Lib\s+"([^"]+)"(?:\s+Alias\s+"([^"]+)")?\s*\(([^)]*)\)(?:\s+As\s+(\w+))?/i;
-    
+    const declareRegex =
+      /Declare\s+(Function|Sub)\s+(\w+)\s+Lib\s+"([^"]+)"(?:\s+Alias\s+"([^"]+)")?\s*\(([^)]*)\)(?:\s+As\s+(\w+))?/i;
+
     const match = statement.match(declareRegex);
     if (!match) return null;
 
     const [, type, name, library, alias, params, returnType] = match;
-    
+
     // Parse parameters
     const parameters = this.parseParameters(params);
 
@@ -274,7 +295,7 @@ export class VB6DeclareRegistry {
       alias,
       parameters,
       returnType: (returnType as VB6DataType) || 'Variant',
-      isFunction: type.toLowerCase() === 'function'
+      isFunction: type.toLowerCase() === 'function',
     };
   }
 
@@ -288,9 +309,10 @@ export class VB6DeclareRegistry {
     const paramParts = paramString.split(',');
 
     for (const part of paramParts) {
-      const paramRegex = /(?:(ByVal|ByRef)\s+)?(?:(Optional)\s+)?(\w+)(?:\(\))?(?:\s+As\s+(\w+))?(?:\s*=\s*(.+))?/i;
+      const paramRegex =
+        /(?:(ByVal|ByRef)\s+)?(?:(Optional)\s+)?(\w+)(?:\(\))?(?:\s+As\s+(\w+))?(?:\s*=\s*(.+))?/i;
       const match = part.trim().match(paramRegex);
-      
+
       if (match) {
         const [, passingMode, optional, name, type, defaultValue] = match;
         params.push({
@@ -298,8 +320,10 @@ export class VB6DeclareRegistry {
           type: (type as VB6DataType) || 'Variant',
           byRef: passingMode?.toLowerCase() !== 'byval',
           optional: optional?.toLowerCase() === 'optional',
-          defaultValue: defaultValue ? this.parseDefaultValue(defaultValue, type as VB6DataType) : undefined,
-          isArray: part.includes('()')
+          defaultValue: defaultValue
+            ? this.parseDefaultValue(defaultValue, type as VB6DataType)
+            : undefined,
+          isArray: part.includes('()'),
         });
       }
     }
@@ -312,7 +336,7 @@ export class VB6DeclareRegistry {
    */
   private static parseDefaultValue(value: string, type: VB6DataType): any {
     value = value.trim();
-    
+
     switch (type) {
       case 'String':
         return value.replace(/^"|"$/g, '');
@@ -347,7 +371,7 @@ export const VB6APIConstants = {
   MB_ICONQUESTION: 0x00000020,
   MB_ICONEXCLAMATION: 0x00000030,
   MB_ICONASTERISK: 0x00000040,
-  
+
   // ShowWindow constants
   SW_HIDE: 0,
   SW_SHOWNORMAL: 1,
@@ -360,7 +384,7 @@ export const VB6APIConstants = {
   SW_SHOWNA: 8,
   SW_RESTORE: 9,
   SW_SHOWDEFAULT: 10,
-  
+
   // GetSystemMetrics constants
   SM_CXSCREEN: 0,
   SM_CYSCREEN: 1,
@@ -369,17 +393,17 @@ export const VB6APIConstants = {
   SM_CYCAPTION: 4,
   SM_CXBORDER: 5,
   SM_CYBORDER: 6,
-  
+
   // Virtual Key Codes
   VK_BACK: 0x08,
   VK_TAB: 0x09,
-  VK_RETURN: 0x0D,
+  VK_RETURN: 0x0d,
   VK_SHIFT: 0x10,
   VK_CONTROL: 0x11,
   VK_MENU: 0x12,
   VK_PAUSE: 0x13,
   VK_CAPITAL: 0x14,
-  VK_ESCAPE: 0x1B,
+  VK_ESCAPE: 0x1b,
   VK_SPACE: 0x20,
   VK_END: 0x23,
   VK_HOME: 0x24,
@@ -387,9 +411,9 @@ export const VB6APIConstants = {
   VK_UP: 0x26,
   VK_RIGHT: 0x27,
   VK_DOWN: 0x28,
-  VK_INSERT: 0x2D,
-  VK_DELETE: 0x2E,
-  
+  VK_INSERT: 0x2d,
+  VK_DELETE: 0x2e,
+
   // File attributes
   FILE_ATTRIBUTE_NORMAL: 0x80,
   FILE_ATTRIBUTE_HIDDEN: 0x02,

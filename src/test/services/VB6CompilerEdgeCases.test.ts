@@ -482,17 +482,17 @@ describe('VB6 Compiler - Error Handling Edge Cases', () => {
 
   it('should handle syntax errors gracefully', () => {
     const syntaxErrors = [
-      'Dim x As',              // Incomplete declaration
+      'Dim x As', // Incomplete declaration
       'If x Then\nEnd Function', // Mismatched block endings
-      'For i = 1 To\nNext i',  // Incomplete For loop
+      'For i = 1 To\nNext i', // Incomplete For loop
       'Select Case\nEnd Select', // Missing expression
-      'Do\nLoop Until',        // Missing condition
+      'Do\nLoop Until', // Missing condition
       'Function Test()\nEnd Sub', // Mismatched procedure endings
     ];
 
     syntaxErrors.forEach(code => {
       const result = compiler.compile(code);
-      
+
       expect(result.success).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
       expect(result.errors[0]).toMatchObject({
@@ -506,16 +506,16 @@ describe('VB6 Compiler - Error Handling Edge Cases', () => {
 
   it('should detect semantic errors', () => {
     const semanticErrors = [
-      'Dim x As Integer\nx = "string"',           // Type mismatch
+      'Dim x As Integer\nx = "string"', // Type mismatch
       'Function Test()\nTest = 5\nEnd Function\nDim y As String\ny = Test(5)', // Wrong parameter count
-      'Dim arr(5) As Integer\narr(10) = 5',      // Array bounds exceeded
-      'Call UndefinedFunction()',                 // Undefined function
-      'Dim x As Integer\nDim x As String',        // Duplicate declaration
+      'Dim arr(5) As Integer\narr(10) = 5', // Array bounds exceeded
+      'Call UndefinedFunction()', // Undefined function
+      'Dim x As Integer\nDim x As String', // Duplicate declaration
     ];
 
     semanticErrors.forEach(code => {
       const result = compiler.compile(code);
-      
+
       expect(result.success).toBe(false);
       expect(result.errors).toContainEqual(
         expect.objectContaining({
@@ -542,7 +542,7 @@ describe('VB6 Compiler - Error Handling Edge Cases', () => {
     `;
 
     const result = compiler.compile(circularCode);
-    
+
     expect(result.warnings).toContainEqual(
       expect.objectContaining({
         code: 'WARN_CIRCULAR_DEPENDENCY',
@@ -565,7 +565,7 @@ describe('VB6 Compiler - Error Handling Edge Cases', () => {
     `;
 
     const result = compiler.compile(incompleteCode);
-    
+
     expect(result.success).toBe(false);
     expect(result.errors).toContainEqual(
       expect.objectContaining({
@@ -591,7 +591,7 @@ describe('VB6 Compiler - Error Handling Edge Cases', () => {
     `;
 
     const result = compiler.compile(malformedCode);
-    
+
     expect(result.success).toBe(false);
     expect(result.errors).toContainEqual(
       expect.objectContaining({
@@ -625,7 +625,7 @@ describe('VB6 Compiler - Error Handling Edge Cases', () => {
     `;
 
     const result = compiler.compile(multipleErrorsCode);
-    
+
     expect(result.success).toBe(false);
     expect(result.errors.length).toBeGreaterThanOrEqual(3); // At least 3 errors
     expect(result.javascript).toContain('ValidSub'); // Should still compile valid parts
@@ -662,7 +662,7 @@ describe('VB6 Compiler - Optimization Features', () => {
     `;
 
     const result = compiler.compile(constantCode);
-    
+
     expect(result.success).toBe(true);
     expect(result.javascript).toContain('= 10'); // Optimized arithmetic
     expect(result.javascript).toContain('"Hello World"'); // Optimized concatenation
@@ -695,7 +695,7 @@ describe('VB6 Compiler - Optimization Features', () => {
     `;
 
     const result = compiler.compile(deadCode);
-    
+
     expect(result.success).toBe(true);
     expect(result.javascript).not.toContain('This will never execute');
     expect(result.javascript).not.toContain('This is dead code');
@@ -726,7 +726,7 @@ describe('VB6 Compiler - Optimization Features', () => {
     `;
 
     const result = compiler.compile(smallLoopCode);
-    
+
     expect(result.success).toBe(true);
     expect(result.optimizations).toContain('loop-unrolling');
     // Should contain unrolled statements instead of loop
@@ -754,7 +754,7 @@ describe('VB6 Compiler - Optimization Features', () => {
     `;
 
     const result = compiler.compile(inlineCode);
-    
+
     expect(result.success).toBe(true);
     expect(result.optimizations).toContain('function-inlining');
     // Should contain inlined expressions
@@ -780,7 +780,7 @@ describe('VB6 Compiler - Optimization Features', () => {
     `;
 
     const result = compiler.compile(stringCode);
-    
+
     expect(result.success).toBe(true);
     expect(result.optimizations).toContain('string-optimization');
     expect(result.javascript).toContain('"ABCDE"'); // Concatenated constants
@@ -812,10 +812,10 @@ describe('VB6 Compiler - Source Map Generation', () => {
     `;
 
     const result = compiler.compile(sourceCode);
-    
+
     expect(result.success).toBe(true);
     expect(result.sourceMap).toBeDefined();
-    
+
     const sourceMap = JSON.parse(result.sourceMap);
     expect(sourceMap.version).toBe(3);
     expect(sourceMap.sources).toContain('source.vb');
@@ -833,10 +833,10 @@ describe('VB6 Compiler - Source Map Generation', () => {
     `;
 
     const result = compiler.compile(complexCode);
-    
+
     expect(result.success).toBe(true);
     expect(result.sourceMap).toBeDefined();
-    
+
     // Verify source map contains mappings for each line
     const sourceMap = JSON.parse(result.sourceMap);
     expect(sourceMap.mappings.split(';')).toHaveLength(5); // 5 lines including function declaration
@@ -863,7 +863,7 @@ function createVB6Compiler(options: CompilerOptions) {
       try {
         // Simulate compilation process
         const result = compileVB6ToJavaScript(sourceCode, options);
-        
+
         return {
           success: result.errors.length === 0,
           javascript: result.javascript,
@@ -1015,10 +1015,10 @@ function compileVB6ToJavaScript(sourceCode: string, options: CompilerOptions): C
 
   // Generate JavaScript based on patterns
   let javascript = '';
-  
+
   if (sourceCode.includes('Private Sub') && errors.length === 0) {
     javascript += 'function TestFunction() {\n';
-    
+
     if (sourceCode.includes('For i = 1 To 10')) {
       javascript += '  for (let i = 1; i <= 10; i++) {\n';
       if (sourceCode.includes('If i Mod 2 = 0')) {
@@ -1040,7 +1040,8 @@ function compileVB6ToJavaScript(sourceCode: string, options: CompilerOptions): C
     }
 
     if (sourceCode.includes('Sin(3.14159')) {
-      javascript += '  result = ((5 + 3) * 2 - 1) / Math.pow(3, 2) + Math.sin(3.14159 / 2) * Math.cos(0) - Math.tan(0.5);\n';
+      javascript +=
+        '  result = ((5 + 3) * 2 - 1) / Math.pow(3, 2) + Math.sin(3.14159 / 2) * Math.cos(0) - Math.tan(0.5);\n';
     }
 
     if (sourceCode.includes('And') || sourceCode.includes('Or')) {

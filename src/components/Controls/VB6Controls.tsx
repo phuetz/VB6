@@ -18,38 +18,38 @@ export { ActiveXControl } from './ActiveXControl';
  */
 function isValidImageURL(url: string): boolean {
   if (typeof url !== 'string' || url.length === 0) return false;
-  
+
   try {
     const urlObj = new URL(url, window.location.origin);
-    
+
     // Only allow safe protocols
     if (!['http:', 'https:', 'data:', 'blob:'].includes(urlObj.protocol)) {
       return false;
     }
-    
+
     // For data URLs, only allow image types
     if (urlObj.protocol === 'data:') {
       if (!url.toLowerCase().startsWith('data:image/')) {
         return false;
       }
     }
-    
+
     // Check for common image file extensions
     const validExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.bmp', '.ico'];
-    const hasValidExtension = validExtensions.some(ext => 
+    const hasValidExtension = validExtensions.some(ext =>
       urlObj.pathname.toLowerCase().endsWith(ext)
     );
-    
+
     // Allow data URLs and blob URLs even without extensions
     if (urlObj.protocol === 'data:' || urlObj.protocol === 'blob:') {
       return true;
     }
-    
+
     // Basic length check (prevent CSS bombs)
     if (url.length > 2000) {
       return false;
     }
-    
+
     return hasValidExtension;
   } catch (e) {
     return false;
@@ -70,7 +70,35 @@ export interface VB6ControlProps {
   tabStop: boolean;
   tag: string;
   toolTipText: string;
-  [key: string]: any;
+  // Common optional properties (typed instead of index signature)
+  caption?: string;
+  text?: string;
+  value?: unknown;
+  backColor?: string;
+  foreColor?: string;
+  font?: { name: string; size: number; bold: boolean; italic: boolean; underline: boolean };
+  locked?: boolean;
+  alignment?: number | string;
+  borderStyle?: number | string;
+  autoSize?: boolean;
+  multiLine?: boolean;
+  scrollBars?: number;
+  maxLength?: number;
+  passwordChar?: string;
+  style?: number | string;
+  sorted?: boolean;
+  items?: unknown[];
+  picture?: string | null;
+  stretch?: boolean;
+  interval?: number;
+  min?: number;
+  max?: number;
+  default?: boolean;
+  cancel?: boolean;
+  properties?: Record<string, unknown>;
+  type?: string;
+  // Allow additional props from control-specific defaults
+  [key: string]: unknown;
 }
 
 // CommandButton - Compatible 100% VB6
@@ -106,7 +134,7 @@ export const CommandButton = forwardRef<HTMLButtonElement, VB6ControlProps>((pro
   const [isPressed, setIsPressed] = useState(false);
   // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
   const { fireEvent, updateControl } = useVB6Store(
-    (state) => ({ fireEvent: state.fireEvent, updateControl: state.updateControl }),
+    state => ({ fireEvent: state.fireEvent, updateControl: state.updateControl }),
     shallow
   );
 
@@ -116,29 +144,35 @@ export const CommandButton = forwardRef<HTMLButtonElement, VB6ControlProps>((pro
     }
   }, [enabled, fireEvent, name]);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (enabled) {
-      setIsPressed(true);
-      fireEvent(name, 'MouseDown', {
-        button: e.button + 1, // VB6 uses 1-based indexing
-        shift: (e.shiftKey ? 1 : 0) | (e.ctrlKey ? 2 : 0) | (e.altKey ? 4 : 0),
-        x: e.clientX,
-        y: e.clientY,
-      });
-    }
-  }, [enabled, fireEvent, name]);
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (enabled) {
+        setIsPressed(true);
+        fireEvent(name, 'MouseDown', {
+          button: e.button + 1, // VB6 uses 1-based indexing
+          shift: (e.shiftKey ? 1 : 0) | (e.ctrlKey ? 2 : 0) | (e.altKey ? 4 : 0),
+          x: e.clientX,
+          y: e.clientY,
+        });
+      }
+    },
+    [enabled, fireEvent, name]
+  );
 
-  const handleMouseUp = useCallback((e: React.MouseEvent) => {
-    setIsPressed(false);
-    if (enabled) {
-      fireEvent(name, 'MouseUp', {
-        button: e.button + 1,
-        shift: (e.shiftKey ? 1 : 0) | (e.ctrlKey ? 2 : 0) | (e.altKey ? 4 : 0),
-        x: e.clientX,
-        y: e.clientY,
-      });
-    }
-  }, [enabled, fireEvent, name]);
+  const handleMouseUp = useCallback(
+    (e: React.MouseEvent) => {
+      setIsPressed(false);
+      if (enabled) {
+        fireEvent(name, 'MouseUp', {
+          button: e.button + 1,
+          shift: (e.shiftKey ? 1 : 0) | (e.ctrlKey ? 2 : 0) | (e.altKey ? 4 : 0),
+          x: e.clientX,
+          y: e.clientY,
+        });
+      }
+    },
+    [enabled, fireEvent, name]
+  );
 
   const buttonStyle: React.CSSProperties = {
     position: 'absolute',
@@ -159,7 +193,8 @@ export const CommandButton = forwardRef<HTMLButtonElement, VB6ControlProps>((pro
     fontStyle: font?.italic ? 'italic' : 'normal',
     textDecoration: font?.underline ? 'underline' : 'none',
     // CSS INJECTION BUG FIX: Validate picture URL before using in CSS
-    backgroundImage: picture && style === 'Graphical' && isValidImageURL(picture) ? `url(${picture})` : undefined,
+    backgroundImage:
+      picture && style === 'Graphical' && isValidImageURL(picture) ? `url(${picture})` : undefined,
     backgroundSize: 'contain',
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center',
@@ -185,7 +220,16 @@ export const CommandButton = forwardRef<HTMLButtonElement, VB6ControlProps>((pro
     >
       {style === 'Standard' && caption}
       {/* ACCESSIBILITY FIX: Hidden description for screen readers */}
-      <span id={`${name}-desc`} style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
+      <span
+        id={`${name}-desc`}
+        style={{
+          position: 'absolute',
+          left: '-9999px',
+          width: '1px',
+          height: '1px',
+          overflow: 'hidden',
+        }}
+      >
         VB6 Command Button {enabled ? 'enabled' : 'disabled'}
       </span>
     </button>
@@ -228,7 +272,7 @@ export const TextBox = forwardRef<HTMLInputElement, VB6ControlProps>((props, ref
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
   // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
   const { fireEvent, updateControl } = useVB6Store(
-    (state) => ({ fireEvent: state.fireEvent, updateControl: state.updateControl }),
+    state => ({ fireEvent: state.fireEvent, updateControl: state.updateControl }),
     shallow
   );
 
@@ -252,7 +296,7 @@ export const TextBox = forwardRef<HTMLInputElement, VB6ControlProps>((props, ref
     (e: React.KeyboardEvent) => {
       const keyAscii = e.key.charCodeAt(0);
       fireEvent(name, 'KeyPress', { keyAscii });
-      
+
       if (passwordChar && e.key.length === 1) {
         e.preventDefault();
         // Handle password character display
@@ -279,16 +323,30 @@ export const TextBox = forwardRef<HTMLInputElement, VB6ControlProps>((props, ref
     textDecoration: font?.underline ? 'underline' : 'none',
     resize: 'none',
     outline: 'none',
-    overflow: scrollBars === 'None' ? 'hidden' : 
-              scrollBars === 'Vertical' ? 'scroll' :
-              scrollBars === 'Horizontal' ? 'scroll' : 'auto',
+    overflow:
+      scrollBars === 'None'
+        ? 'hidden'
+        : scrollBars === 'Vertical'
+          ? 'scroll'
+          : scrollBars === 'Horizontal'
+            ? 'scroll'
+            : 'auto',
   };
 
   if (multiLine) {
     return (
       <>
         {/* ACCESSIBILITY FIX: Add label for screen readers */}
-        <label htmlFor={`textbox-${name}`} style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
+        <label
+          htmlFor={`textbox-${name}`}
+          style={{
+            position: 'absolute',
+            left: '-9999px',
+            width: '1px',
+            height: '1px',
+            overflow: 'hidden',
+          }}
+        >
           {name} Multi-line Text Input {passwordChar ? '(Password)' : ''}
         </label>
         <textarea
@@ -312,8 +370,18 @@ export const TextBox = forwardRef<HTMLInputElement, VB6ControlProps>((props, ref
           {...rest}
         />
         {/* ACCESSIBILITY FIX: Hidden description for screen readers */}
-        <span id={`${name}-textbox-desc`} style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
-          VB6 TextBox control (multi-line) {enabled ? 'enabled' : 'disabled'} {locked ? 'read-only' : 'editable'}
+        <span
+          id={`${name}-textbox-desc`}
+          style={{
+            position: 'absolute',
+            left: '-9999px',
+            width: '1px',
+            height: '1px',
+            overflow: 'hidden',
+          }}
+        >
+          VB6 TextBox control (multi-line) {enabled ? 'enabled' : 'disabled'}{' '}
+          {locked ? 'read-only' : 'editable'}
         </span>
       </>
     );
@@ -322,7 +390,16 @@ export const TextBox = forwardRef<HTMLInputElement, VB6ControlProps>((props, ref
   return (
     <>
       {/* ACCESSIBILITY FIX: Add label for screen readers */}
-      <label htmlFor={`textbox-${name}`} style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
+      <label
+        htmlFor={`textbox-${name}`}
+        style={{
+          position: 'absolute',
+          left: '-9999px',
+          width: '1px',
+          height: '1px',
+          overflow: 'hidden',
+        }}
+      >
         {name} Text Input {passwordChar ? '(Password)' : ''}
       </label>
       <input
@@ -347,7 +424,16 @@ export const TextBox = forwardRef<HTMLInputElement, VB6ControlProps>((props, ref
         {...rest}
       />
       {/* ACCESSIBILITY FIX: Hidden description for screen readers */}
-      <span id={`${name}-textbox-desc`} style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
+      <span
+        id={`${name}-textbox-desc`}
+        style={{
+          position: 'absolute',
+          left: '-9999px',
+          width: '1px',
+          height: '1px',
+          overflow: 'hidden',
+        }}
+      >
         VB6 TextBox control {enabled ? 'enabled' : 'disabled'} {locked ? 'read-only' : 'editable'}
       </span>
     </>
@@ -388,7 +474,8 @@ export const Label = forwardRef<HTMLDivElement, VB6ControlProps>((props, ref) =>
     height: autoSize ? 'auto' : height,
     display: visible ? 'flex' : 'none',
     alignItems: 'center',
-    justifyContent: alignment === 'Center' ? 'center' : alignment === 'Right' ? 'flex-end' : 'flex-start',
+    justifyContent:
+      alignment === 'Center' ? 'center' : alignment === 'Right' ? 'flex-end' : 'flex-start',
     backgroundColor: backStyle === 'Opaque' ? backColor : 'transparent',
     color: foreColor,
     border: borderStyle === 'Fixed Single' ? '2px inset #C0C0C0' : 'none',
@@ -403,14 +490,7 @@ export const Label = forwardRef<HTMLDivElement, VB6ControlProps>((props, ref) =>
   };
 
   return (
-    <div
-      ref={ref}
-      style={labelStyle}
-      title={toolTipText}
-      data-name={name}
-      data-tag={tag}
-      {...rest}
-    >
+    <div ref={ref} style={labelStyle} title={toolTipText} data-name={name} data-tag={tag} {...rest}>
       {caption}
     </div>
   );
@@ -447,7 +527,7 @@ export const CheckBox = forwardRef<HTMLDivElement, VB6ControlProps>((props, ref)
   const [checkValue, setCheckValue] = useState(value);
   // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
   const { fireEvent, updateControl } = useVB6Store(
-    (state) => ({ fireEvent: state.fireEvent, updateControl: state.updateControl }),
+    state => ({ fireEvent: state.fireEvent, updateControl: state.updateControl }),
     shallow
   );
 
@@ -535,7 +615,11 @@ export const OptionButton = forwardRef<HTMLDivElement, VB6ControlProps>((props, 
   const [selected, setSelected] = useState(value);
   // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
   const { fireEvent, updateControl, controls } = useVB6Store(
-    (state) => ({ fireEvent: state.fireEvent, updateControl: state.updateControl, controls: state.controls }),
+    state => ({
+      fireEvent: state.fireEvent,
+      updateControl: state.updateControl,
+      controls: state.controls,
+    }),
     shallow
   );
 
@@ -547,7 +631,7 @@ export const OptionButton = forwardRef<HTMLDivElement, VB6ControlProps>((props, 
           updateControl(control.id, 'value', false);
         }
       });
-      
+
       setSelected(true);
       updateControl(id, 'value', true);
       fireEvent(name, 'Click', { value: true });
@@ -639,7 +723,7 @@ export const ListBox = forwardRef<HTMLSelectElement, VB6ControlProps>((props, re
   const [items, setItems] = useState(sorted ? [...list].sort() : list);
   // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
   const { fireEvent, updateControl } = useVB6Store(
-    (state) => ({ fireEvent: state.fireEvent, updateControl: state.updateControl }),
+    state => ({ fireEvent: state.fireEvent, updateControl: state.updateControl }),
     shallow
   );
 
@@ -723,7 +807,7 @@ export const ComboBox = forwardRef<HTMLSelectElement, VB6ControlProps>((props, r
   const [items] = useState(sorted ? [...list].sort() : list);
   // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
   const { fireEvent, updateControl } = useVB6Store(
-    (state) => ({ fireEvent: state.fireEvent, updateControl: state.updateControl }),
+    state => ({ fireEvent: state.fireEvent, updateControl: state.updateControl }),
     shallow
   );
 
@@ -826,14 +910,7 @@ export const Frame = forwardRef<HTMLDivElement, VB6ControlProps>((props, ref) =>
   };
 
   return (
-    <div
-      ref={ref}
-      style={frameStyle}
-      title={toolTipText}
-      data-name={name}
-      data-tag={tag}
-      {...rest}
-    >
+    <div ref={ref} style={frameStyle} title={toolTipText} data-name={name} data-tag={tag} {...rest}>
       {caption && <div style={captionStyle}>{caption}</div>}
       {children}
     </div>
@@ -865,7 +942,7 @@ export const PictureBox = forwardRef<HTMLDivElement, VB6ControlProps>((props, re
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
-  const fireEvent = useVB6Store((state) => state.fireEvent);
+  const fireEvent = useVB6Store(state => state.fireEvent);
 
   const pictureStyle: React.CSSProperties = {
     position: 'absolute',
@@ -895,12 +972,7 @@ export const PictureBox = forwardRef<HTMLDivElement, VB6ControlProps>((props, re
       data-tag={tag}
       {...rest}
     >
-      <canvas
-        ref={canvasRef}
-        width={width - 4}
-        height={height - 4}
-        style={{ display: 'block' }}
-      />
+      <canvas ref={canvasRef} width={width - 4} height={height - 4} style={{ display: 'block' }} />
       {picture && (
         <img
           src={picture}
@@ -920,18 +992,11 @@ export const PictureBox = forwardRef<HTMLDivElement, VB6ControlProps>((props, re
 
 // Timer - Compatible 100% VB6
 export const Timer = forwardRef<HTMLDivElement, VB6ControlProps>((props, ref) => {
-  const {
-    id,
-    name,
-    interval = 0,
-    enabled: timerEnabled = false,
-    tag,
-    ...rest
-  } = props;
+  const { id, name, interval = 0, enabled: timerEnabled = false, tag, ...rest } = props;
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
-  const fireEvent = useVB6Store((state) => state.fireEvent);
+  const fireEvent = useVB6Store(state => state.fireEvent);
 
   useEffect(() => {
     if (timerEnabled && interval > 0) {

@@ -22,374 +22,374 @@ export const VB6CompletionReport: VB6FeatureImplementation[] = [
   // CORE LANGUAGE FEATURES - 100% COMPLETE
   // ========================================================================
   {
-    category: "Core Language",
-    feature: "Property Procedures (Get/Let/Set)",
+    category: 'Core Language',
+    feature: 'Property Procedures (Get/Let/Set)',
     implemented: true,
-    fileLocation: "VB6PropertyProcedures.ts",
-    description: "Complete Property Get/Let/Set support with decorators"
+    fileLocation: 'VB6PropertyProcedures.ts',
+    description: 'Complete Property Get/Let/Set support with decorators',
   },
   {
-    category: "Core Language", 
-    feature: "WithEvents Support",
+    category: 'Core Language',
+    feature: 'WithEvents Support',
     implemented: true,
-    fileLocation: "VB6WithEventsSupport.ts",
-    description: "Full WithEvents and RaiseEvent implementation"
+    fileLocation: 'VB6WithEventsSupport.ts',
+    description: 'Full WithEvents and RaiseEvent implementation',
   },
   {
-    category: "Core Language",
-    feature: "User Defined Types (UDTs)",
+    category: 'Core Language',
+    feature: 'User Defined Types (UDTs)',
     implemented: true,
-    fileLocation: "VB6UserDefinedTypes.ts", 
-    description: "Complete UDT support with fixed-length strings"
+    fileLocation: 'VB6UserDefinedTypes.ts',
+    description: 'Complete UDT support with fixed-length strings',
   },
   {
-    category: "Core Language",
-    feature: "Implements Statement",
+    category: 'Core Language',
+    feature: 'Implements Statement',
     implemented: true,
-    fileLocation: "VB6Implements.ts",
-    description: "Interface implementation with full COM support"
+    fileLocation: 'VB6Implements.ts',
+    description: 'Interface implementation with full COM support',
   },
   {
-    category: "Core Language",
-    feature: "Optional Parameters",
+    category: 'Core Language',
+    feature: 'Optional Parameters',
     implemented: true,
-    fileLocation: "VB6OptionalParams.ts",
-    description: "Optional parameters with default values"
+    fileLocation: 'VB6OptionalParams.ts',
+    description: 'Optional parameters with default values',
   },
   {
-    category: "Core Language",
-    feature: "Line Numbers & Labels",
+    category: 'Core Language',
+    feature: 'Line Numbers & Labels',
     implemented: true,
-    fileLocation: "VB6LineNumbers.ts",
-    description: "GoTo/GoSub line number and label support"
+    fileLocation: 'VB6LineNumbers.ts',
+    description: 'GoTo/GoSub line number and label support',
   },
   {
-    category: "Core Language",
-    feature: "DoEvents Function",
+    category: 'Core Language',
+    feature: 'DoEvents Function',
     implemented: true,
-    fileLocation: "VB6DoEvents.ts",
-    description: "Complete DoEvents implementation for UI responsiveness"
+    fileLocation: 'VB6DoEvents.ts',
+    description: 'Complete DoEvents implementation for UI responsiveness',
   },
 
   // ========================================================================
   // RUNTIME FUNCTIONS - 100% COMPLETE (211 Functions)
   // ========================================================================
   {
-    category: "String Functions",
-    feature: "Complete String Library",
+    category: 'String Functions',
+    feature: 'Complete String Library',
     implemented: true,
-    fileLocation: "VB6StringFunctions.ts + VB6AdvancedStringFunctions.ts",
+    fileLocation: 'VB6StringFunctions.ts + VB6AdvancedStringFunctions.ts',
     functionCount: 35,
-    description: "All VB6 string functions: Left, Right, Mid, Len, InStr, Replace, etc."
+    description: 'All VB6 string functions: Left, Right, Mid, Len, InStr, Replace, etc.',
   },
   {
-    category: "Math Functions", 
-    feature: "Mathematical Operations",
+    category: 'Math Functions',
+    feature: 'Mathematical Operations',
     implemented: true,
-    fileLocation: "VB6MathFunctions.ts",
+    fileLocation: 'VB6MathFunctions.ts',
     functionCount: 42,
-    description: "All VB6 math functions: Sin, Cos, Tan, Abs, Sqr, Log, Rnd, etc."
+    description: 'All VB6 math functions: Sin, Cos, Tan, Abs, Sqr, Log, Rnd, etc.',
   },
   {
-    category: "Conversion Functions",
-    feature: "Type Conversion",
+    category: 'Conversion Functions',
+    feature: 'Type Conversion',
     implemented: true,
-    fileLocation: "VB6ConversionFunctions.ts",
+    fileLocation: 'VB6ConversionFunctions.ts',
     functionCount: 26,
-    description: "All conversion functions: CInt, CLng, CStr, CDate, CDbl, etc."
+    description: 'All conversion functions: CInt, CLng, CStr, CDate, CDbl, etc.',
   },
   {
-    category: "Date/Time Functions",
-    feature: "Date & Time Operations", 
+    category: 'Date/Time Functions',
+    feature: 'Date & Time Operations',
     implemented: true,
-    fileLocation: "VB6DateTimeFunctions.ts",
+    fileLocation: 'VB6DateTimeFunctions.ts',
     functionCount: 23,
-    description: "Complete date/time library: DateAdd, DateDiff, Format, Timer, etc."
+    description: 'Complete date/time library: DateAdd, DateDiff, Format, Timer, etc.',
   },
   {
-    category: "Array Functions",
-    feature: "Array Manipulation",
+    category: 'Array Functions',
+    feature: 'Array Manipulation',
     implemented: true,
-    fileLocation: "VB6ArrayFunctions.ts",
+    fileLocation: 'VB6ArrayFunctions.ts',
     functionCount: 31,
-    description: "All array functions: ReDim, UBound, LBound, Filter, Split, Join, etc."
+    description: 'All array functions: ReDim, UBound, LBound, Filter, Split, Join, etc.',
   },
   {
-    category: "File Functions",
-    feature: "File I/O Operations",
+    category: 'File Functions',
+    feature: 'File I/O Operations',
     implemented: true,
-    fileLocation: "VB6FileFunctions.ts",
+    fileLocation: 'VB6FileFunctions.ts',
     functionCount: 25,
-    description: "Complete file I/O: Open, Close, Print, Write, Dir, Kill, etc."
+    description: 'Complete file I/O: Open, Close, Print, Write, Dir, Kill, etc.',
   },
   {
-    category: "System Functions",
-    feature: "System Interaction",
+    category: 'System Functions',
+    feature: 'System Interaction',
     implemented: true,
-    fileLocation: "VB6SystemFunctions.ts + VB6SystemInteraction.ts",
+    fileLocation: 'VB6SystemFunctions.ts + VB6SystemInteraction.ts',
     functionCount: 29,
-    description: "System functions: MsgBox, InputBox, Shell, Beep, GetSetting, etc."
+    description: 'System functions: MsgBox, InputBox, Shell, Beep, GetSetting, etc.',
   },
 
   // ========================================================================
   // ULTIMATE MISSING FUNCTIONS - 100% COMPLETE
   // ========================================================================
   {
-    category: "Ultimate Missing",
-    feature: "Error Functions",
+    category: 'Ultimate Missing',
+    feature: 'Error Functions',
     implemented: true,
-    fileLocation: "VB6UltimateMissingFunctions.ts",
+    fileLocation: 'VB6UltimateMissingFunctions.ts',
     functionCount: 2,
-    description: "Error$ and Error functions for error message retrieval"
+    description: 'Error$ and Error functions for error message retrieval',
   },
   {
-    category: "Ultimate Missing",
-    feature: "Pointer Functions", 
+    category: 'Ultimate Missing',
+    feature: 'Pointer Functions',
     implemented: true,
-    fileLocation: "VB6UltimateMissingFunctions.ts",
+    fileLocation: 'VB6UltimateMissingFunctions.ts',
     functionCount: 4,
-    description: "StrPtr, ObjPtr, VarPtr, StrPtrArray with memory simulation"
+    description: 'StrPtr, ObjPtr, VarPtr, StrPtrArray with memory simulation',
   },
   {
-    category: "Ultimate Missing",
-    feature: "IME Functions",
-    implemented: true, 
-    fileLocation: "VB6UltimateMissingFunctions.ts",
+    category: 'Ultimate Missing',
+    feature: 'IME Functions',
+    implemented: true,
+    fileLocation: 'VB6UltimateMissingFunctions.ts',
     functionCount: 1,
-    description: "IMEStatus function for East Asian language input"
+    description: 'IMEStatus function for East Asian language input',
   },
   {
-    category: "Ultimate Missing",
-    feature: "DDE System",
+    category: 'Ultimate Missing',
+    feature: 'DDE System',
     implemented: true,
-    fileLocation: "VB6UltimateMissingFunctions.ts", 
+    fileLocation: 'VB6UltimateMissingFunctions.ts',
     functionCount: 4,
-    description: "Complete Dynamic Data Exchange with LinkExecute, LinkPoke, etc."
+    description: 'Complete Dynamic Data Exchange with LinkExecute, LinkPoke, etc.',
   },
   {
-    category: "Ultimate Missing",
-    feature: "Financial Functions",
+    category: 'Ultimate Missing',
+    feature: 'Financial Functions',
     implemented: true,
-    fileLocation: "VB6FinancialFunctions.ts",
+    fileLocation: 'VB6FinancialFunctions.ts',
     functionCount: 15,
-    description: "All 15 VB6 financial functions: PV, FV, PMT, NPV, IRR, DDB, etc."
+    description: 'All 15 VB6 financial functions: PV, FV, PMT, NPV, IRR, DDB, etc.',
   },
   {
-    category: "Ultimate Missing", 
-    feature: "AutoServer Functions",
+    category: 'Ultimate Missing',
+    feature: 'AutoServer Functions',
     implemented: true,
-    fileLocation: "VB6UltimateMissingFunctions.ts",
+    fileLocation: 'VB6UltimateMissingFunctions.ts',
     functionCount: 2,
-    description: "GetAutoServerSettings/SetAutoServerSettings for OLE automation"
+    description: 'GetAutoServerSettings/SetAutoServerSettings for OLE automation',
   },
 
   // ========================================================================
-  // DATA ACCESS - 100% COMPLETE  
+  // DATA ACCESS - 100% COMPLETE
   // ========================================================================
   {
-    category: "Database Access",
-    feature: "DAO (Data Access Objects)",
+    category: 'Database Access',
+    feature: 'DAO (Data Access Objects)',
     implemented: true,
-    fileLocation: "VB6DAOSupport.ts",
-    description: "Complete DAO hierarchy: Database, Recordset, Field, QueryDef, etc."
+    fileLocation: 'VB6DAOSupport.ts',
+    description: 'Complete DAO hierarchy: Database, Recordset, Field, QueryDef, etc.',
   },
   {
-    category: "Database Access",
-    feature: "ADO Support",
+    category: 'Database Access',
+    feature: 'ADO Support',
     implemented: true,
-    fileLocation: "ADOSystem.ts", 
-    description: "ActiveX Data Objects with Connection, Recordset, Command"
+    fileLocation: 'ADOSystem.ts',
+    description: 'ActiveX Data Objects with Connection, Recordset, Command',
   },
   {
-    category: "Database Access",
-    feature: "RDO Support",  
+    category: 'Database Access',
+    feature: 'RDO Support',
     implemented: true,
-    fileLocation: "RDO.ts",
-    description: "Remote Data Objects for ODBC connectivity"
+    fileLocation: 'RDO.ts',
+    description: 'Remote Data Objects for ODBC connectivity',
   },
 
   // ========================================================================
   // GRAPHICS & MULTIMEDIA - 100% COMPLETE
   // ========================================================================
   {
-    category: "Graphics",
-    feature: "Drawing Functions",
+    category: 'Graphics',
+    feature: 'Drawing Functions',
     implemented: true,
-    fileLocation: "VB6GraphicsFunctions.ts",
-    description: "All drawing: Line, Circle, PSet, Print, PaintPicture"
+    fileLocation: 'VB6GraphicsFunctions.ts',
+    description: 'All drawing: Line, Circle, PSet, Print, PaintPicture',
   },
   {
-    category: "Graphics", 
-    feature: "Graphics API",
+    category: 'Graphics',
+    feature: 'Graphics API',
     implemented: true,
-    fileLocation: "VB6GraphicsAPI.ts",
-    description: "Complete graphics context and coordinate system"
+    fileLocation: 'VB6GraphicsAPI.ts',
+    description: 'Complete graphics context and coordinate system',
   },
   {
-    category: "Graphics",
-    feature: "Picture Object",
+    category: 'Graphics',
+    feature: 'Picture Object',
     implemented: true,
-    fileLocation: "VB6Picture.ts", 
-    description: "LoadPicture, SavePicture with multiple format support"
+    fileLocation: 'VB6Picture.ts',
+    description: 'LoadPicture, SavePicture with multiple format support',
   },
 
   // ========================================================================
   // SYSTEM INTEGRATION - 100% COMPLETE
   // ========================================================================
   {
-    category: "System Integration",
-    feature: "Registry Functions",
-    implemented: true, 
-    fileLocation: "VB6RegistryFunctions.ts",
-    description: "GetSetting, SaveSetting, DeleteSetting with localStorage simulation"
+    category: 'System Integration',
+    feature: 'Registry Functions',
+    implemented: true,
+    fileLocation: 'VB6RegistryFunctions.ts',
+    description: 'GetSetting, SaveSetting, DeleteSetting with localStorage simulation',
   },
   {
-    category: "System Integration",
-    feature: "Windows APIs",
+    category: 'System Integration',
+    feature: 'Windows APIs',
     implemented: true,
-    fileLocation: "VB6WindowsAPIs.ts",
-    description: "Essential Windows API functions for file/system operations"
+    fileLocation: 'VB6WindowsAPIs.ts',
+    description: 'Essential Windows API functions for file/system operations',
   },
   {
-    category: "System Integration",
-    feature: "Process Management",
+    category: 'System Integration',
+    feature: 'Process Management',
     implemented: true,
-    fileLocation: "VB6ProcessManagement.ts",
-    description: "Process and memory management functions"
+    fileLocation: 'VB6ProcessManagement.ts',
+    description: 'Process and memory management functions',
   },
   {
-    category: "System Integration", 
-    feature: "Clipboard Operations",
+    category: 'System Integration',
+    feature: 'Clipboard Operations',
     implemented: true,
-    fileLocation: "VB6ClipboardOperations.ts",
-    description: "Complete clipboard access with multiple format support"
+    fileLocation: 'VB6ClipboardOperations.ts',
+    description: 'Complete clipboard access with multiple format support',
   },
   {
-    category: "System Integration",
-    feature: "Printer Support",
+    category: 'System Integration',
+    feature: 'Printer Support',
     implemented: true,
-    fileLocation: "VB6PrinterObject.ts",
-    description: "Printer object with full printing capabilities"
+    fileLocation: 'VB6PrinterObject.ts',
+    description: 'Printer object with full printing capabilities',
   },
 
   // ========================================================================
   // CONSTANTS & ENUMS - 100% COMPLETE (400+ Constants)
   // ========================================================================
   {
-    category: "Constants",
-    feature: "Complete Constants Library", 
+    category: 'Constants',
+    feature: 'Complete Constants Library',
     implemented: true,
-    fileLocation: "VB6Constants.ts",
+    fileLocation: 'VB6Constants.ts',
     functionCount: 400,
-    description: "ALL VB6 constants: keyboard, mouse, colors, alignment, system, etc."
+    description: 'ALL VB6 constants: keyboard, mouse, colors, alignment, system, etc.',
   },
   {
-    category: "Constants",
-    feature: "Keyboard Constants",
+    category: 'Constants',
+    feature: 'Keyboard Constants',
     implemented: true,
-    fileLocation: "VB6Constants.ts",
+    fileLocation: 'VB6Constants.ts',
     functionCount: 120,
-    description: "All virtual key codes: vbKeyF1-F16, vbKeyReturn, vbKeyEscape, etc."
+    description: 'All virtual key codes: vbKeyF1-F16, vbKeyReturn, vbKeyEscape, etc.',
   },
   {
-    category: "Constants", 
-    feature: "Mouse Constants",
+    category: 'Constants',
+    feature: 'Mouse Constants',
     implemented: true,
-    fileLocation: "VB6Constants.ts", 
+    fileLocation: 'VB6Constants.ts',
     functionCount: 25,
-    description: "Mouse buttons, pointer shapes, drag constants"
+    description: 'Mouse buttons, pointer shapes, drag constants',
   },
   {
-    category: "Constants",
-    feature: "Color Constants",
+    category: 'Constants',
+    feature: 'Color Constants',
     implemented: true,
-    fileLocation: "VB6Constants.ts",
+    fileLocation: 'VB6Constants.ts',
     functionCount: 40,
-    description: "All color constants: vbBlack, vbRed, vbBlue, system colors, etc."
+    description: 'All color constants: vbBlack, vbRed, vbBlue, system colors, etc.',
   },
   {
-    category: "Constants",
-    feature: "System Constants", 
+    category: 'Constants',
+    feature: 'System Constants',
     implemented: true,
-    fileLocation: "VB6Constants.ts",
+    fileLocation: 'VB6Constants.ts',
     functionCount: 200,
-    description: "Form, control, file, database, printer, and system metric constants"
+    description: 'Form, control, file, database, printer, and system metric constants',
   },
 
   // ========================================================================
   // ERROR HANDLING - 100% COMPLETE
   // ========================================================================
   {
-    category: "Error Handling",
-    feature: "Advanced Error Handling",
+    category: 'Error Handling',
+    feature: 'Advanced Error Handling',
     implemented: true,
-    fileLocation: "VB6AdvancedErrorHandling.ts",
-    description: "On Error GoTo, Resume Next, Err object with complete functionality"
+    fileLocation: 'VB6AdvancedErrorHandling.ts',
+    description: 'On Error GoTo, Resume Next, Err object with complete functionality',
   },
   {
-    category: "Error Handling",
-    feature: "Debug Functions",
+    category: 'Error Handling',
+    feature: 'Debug Functions',
     implemented: true,
-    fileLocation: "VB6Debug.ts", 
-    description: "Debug.Print, Debug.Assert, Stop statement"
+    fileLocation: 'VB6Debug.ts',
+    description: 'Debug.Print, Debug.Assert, Stop statement',
   },
 
   // ========================================================================
   // GLOBAL RUNTIME OBJECTS - 100% COMPLETE
   // ========================================================================
   {
-    category: "Global Objects",
-    feature: "App Object",
+    category: 'Global Objects',
+    feature: 'App Object',
     implemented: true,
-    fileLocation: "VB6Runtime.ts",
-    description: "Complete App object with all properties and methods"
+    fileLocation: 'VB6Runtime.ts',
+    description: 'Complete App object with all properties and methods',
   },
   {
-    category: "Global Objects",
-    feature: "Screen Object", 
+    category: 'Global Objects',
+    feature: 'Screen Object',
     implemented: true,
-    fileLocation: "VB6Runtime.ts",
-    description: "Screen object with coordinate conversion and properties"
+    fileLocation: 'VB6Runtime.ts',
+    description: 'Screen object with coordinate conversion and properties',
   },
   {
-    category: "Global Objects",
-    feature: "Printer Object",
+    category: 'Global Objects',
+    feature: 'Printer Object',
     implemented: true,
-    fileLocation: "VB6PrinterObject.ts",
-    description: "Printer and Printers collection with full functionality"
+    fileLocation: 'VB6PrinterObject.ts',
+    description: 'Printer and Printers collection with full functionality',
   },
   {
-    category: "Global Objects",
-    feature: "Collection Object",
+    category: 'Global Objects',
+    feature: 'Collection Object',
     implemented: true,
-    fileLocation: "VB6CollectionObjects.ts",
-    description: "VB6 Collection with Add, Remove, Item, Count methods"
+    fileLocation: 'VB6CollectionObjects.ts',
+    description: 'VB6 Collection with Add, Remove, Item, Count methods',
   },
 
   // ========================================================================
   // ADVANCED FEATURES - 100% COMPLETE
   // ========================================================================
   {
-    category: "Advanced Features", 
-    feature: "Late Binding",
+    category: 'Advanced Features',
+    feature: 'Late Binding',
     implemented: true,
-    fileLocation: "VB6LateBinding.ts",
-    description: "CreateObject, GetObject with COM simulation"
+    fileLocation: 'VB6LateBinding.ts',
+    description: 'CreateObject, GetObject with COM simulation',
   },
   {
-    category: "Advanced Features",
-    feature: "Type System", 
+    category: 'Advanced Features',
+    feature: 'Type System',
     implemented: true,
-    fileLocation: "VB6TypeSystem.ts",
-    description: "Complete VB6 type system with variant handling"
+    fileLocation: 'VB6TypeSystem.ts',
+    description: 'Complete VB6 type system with variant handling',
   },
   {
-    category: "Advanced Features",
-    feature: "AddressOf & Callbacks",
+    category: 'Advanced Features',
+    feature: 'AddressOf & Callbacks',
     implemented: true,
-    fileLocation: "VB6AdvancedOOP.ts",
-    description: "AddressOf function pointers and callback simulation"
-  }
+    fileLocation: 'VB6AdvancedOOP.ts',
+    description: 'AddressOf function pointers and callback simulation',
+  },
 ];
 
 // ========================================================================
@@ -403,7 +403,7 @@ export const VB6CompletionStats = {
   totalFunctions: VB6CompletionReport.reduce((sum, f) => sum + (f.functionCount || 0), 0),
   totalConstants: 400,
   compatibilityPercentage: 100,
-  
+
   // Calculate completion rate
   getCompletionRate(): number {
     const implemented = this.implementedFeatures;
@@ -431,13 +431,13 @@ export const VB6CompletionStats = {
 
     // Group by category
     const categories = [...new Set(VB6CompletionReport.map(f => f.category))];
-    
+
     categories.forEach(category => {
       const features = VB6CompletionReport.filter(f => f.category === category);
       const implemented = features.filter(f => f.implemented).length;
-      
+
       report.push(`  📁 ${category} (${implemented}/${features.length}):`);
-      
+
       features.forEach(feature => {
         const status = feature.implemented ? '✅' : '❌';
         const functionInfo = feature.functionCount ? ` (${feature.functionCount} functions)` : '';
@@ -456,7 +456,7 @@ export const VB6CompletionStats = {
     report.push('═══════════════════════════════════════════════════════════════');
 
     return report.join('\n');
-  }
+  },
 };
 
 // ========================================================================
@@ -469,38 +469,82 @@ export const VB6CompletionStats = {
 export function verifyGlobalVB6Functions(): { [key: string]: boolean } {
   const criticalFunctions = [
     // Core functions
-    'MsgBox', 'InputBox', 'CreateObject', 'GetObject',
-    
-    // String functions  
-    'Left', 'Right', 'Mid', 'Len', 'InStr', 'Replace', 'Trim',
-    
+    'MsgBox',
+    'InputBox',
+    'CreateObject',
+    'GetObject',
+
+    // String functions
+    'Left',
+    'Right',
+    'Mid',
+    'Len',
+    'InStr',
+    'Replace',
+    'Trim',
+
     // Math functions
-    'Abs', 'Sin', 'Cos', 'Tan', 'Log', 'Exp', 'Sqr', 'Rnd',
-    
+    'Abs',
+    'Sin',
+    'Cos',
+    'Tan',
+    'Log',
+    'Exp',
+    'Sqr',
+    'Rnd',
+
     // Conversion functions
-    'CInt', 'CLng', 'CStr', 'CDate', 'CDbl', 'CBool',
-    
+    'CInt',
+    'CLng',
+    'CStr',
+    'CDate',
+    'CDbl',
+    'CBool',
+
     // Date functions
-    'DateAdd', 'DateDiff', 'Format', 'Timer', 'Now',
-    
+    'DateAdd',
+    'DateDiff',
+    'Format',
+    'Timer',
+    'Now',
+
     // File functions
-    'Dir', 'Kill', 'Open', 'Close', 'FreeFile',
-    
+    'Dir',
+    'Kill',
+    'Open',
+    'Close',
+    'FreeFile',
+
     // Array functions
-    'UBound', 'LBound', 'ReDim', 'Filter', 'Split', 'Join',
-    
+    'UBound',
+    'LBound',
+    'ReDim',
+    'Filter',
+    'Split',
+    'Join',
+
     // Ultimate missing functions
-    'StrPtr', 'ObjPtr', 'VarPtr', 'Error', 'IMEStatus',
-    
+    'StrPtr',
+    'ObjPtr',
+    'VarPtr',
+    'Error',
+    'IMEStatus',
+
     // Financial functions
-    'PV', 'FV', 'PMT', 'NPV', 'IRR', 'DDB',
-    
+    'PV',
+    'FV',
+    'PMT',
+    'NPV',
+    'IRR',
+    'DDB',
+
     // AutoServer functions
-    'GetAutoServerSettings', 'SetAutoServerSettings'
+    'GetAutoServerSettings',
+    'SetAutoServerSettings',
   ];
 
   const verification: { [key: string]: boolean } = {};
-  
+
   if (typeof window !== 'undefined') {
     criticalFunctions.forEach(func => {
       verification[func] = typeof (window as any)[func] === 'function';
@@ -511,7 +555,7 @@ export function verifyGlobalVB6Functions(): { [key: string]: boolean } {
       verification[func] = true;
     });
   }
-  
+
   return verification;
 }
 
@@ -521,26 +565,44 @@ export function verifyGlobalVB6Functions(): { [key: string]: boolean } {
 export function verifyGlobalVB6Constants(): { [key: string]: boolean } {
   const criticalConstants = [
     // Keyboard constants
-    'vbKeyReturn', 'vbKeyEscape', 'vbKeyF1', 'vbKeySpace',
-    
+    'vbKeyReturn',
+    'vbKeyEscape',
+    'vbKeyF1',
+    'vbKeySpace',
+
     // Mouse constants
-    'vbLeftButton', 'vbRightButton', 'vbMiddleButton',
-    
-    // Color constants  
-    'vbBlack', 'vbRed', 'vbGreen', 'vbBlue', 'vbWhite',
-    
+    'vbLeftButton',
+    'vbRightButton',
+    'vbMiddleButton',
+
+    // Color constants
+    'vbBlack',
+    'vbRed',
+    'vbGreen',
+    'vbBlue',
+    'vbWhite',
+
     // MsgBox constants
-    'vbOKOnly', 'vbOKCancel', 'vbYesNo', 'vbOK', 'vbCancel',
-    
+    'vbOKOnly',
+    'vbOKCancel',
+    'vbYesNo',
+    'vbOK',
+    'vbCancel',
+
     // File constants
-    'vbNormal', 'vbReadOnly', 'vbHidden', 'vbSystem',
-    
+    'vbNormal',
+    'vbReadOnly',
+    'vbHidden',
+    'vbSystem',
+
     // Form constants
-    'vbNormal', 'vbMinimized', 'vbMaximized'
+    'vbNormal',
+    'vbMinimized',
+    'vbMaximized',
   ];
 
   const verification: { [key: string]: boolean } = {};
-  
+
   if (typeof window !== 'undefined') {
     criticalConstants.forEach(constant => {
       verification[constant] = (window as any)[constant] !== undefined;
@@ -551,7 +613,7 @@ export function verifyGlobalVB6Constants(): { [key: string]: boolean } {
       verification[constant] = true;
     });
   }
-  
+
   return verification;
 }
 

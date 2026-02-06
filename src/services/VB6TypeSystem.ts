@@ -1,4 +1,10 @@
-import { VB6UDT, VB6Enum, VB6Const, VB6DeclareFunction, VB6ExtendedModuleAST } from '../utils/vb6ParserExtended';
+import {
+  VB6UDT,
+  VB6Enum,
+  VB6Const,
+  VB6DeclareFunction,
+  VB6ExtendedModuleAST,
+} from '../utils/vb6ParserExtended';
 
 /**
  * VB6 Type System - Manages UDTs, Enums, Constants, and Type Checking
@@ -8,7 +14,7 @@ export class VB6TypeSystem {
   private enums: Map<string, VB6Enum> = new Map();
   private constants: Map<string, VB6Const> = new Map();
   private declares: Map<string, VB6DeclareFunction> = new Map();
-  
+
   // Runtime type instances
   private udtInstances: Map<string, Map<string, any>> = new Map(); // instanceId -> fieldName -> value
   private enumValues: Map<string, Map<string, number>> = new Map(); // enumName -> valueName -> numericValue
@@ -32,7 +38,7 @@ export class VB6TypeSystem {
       { name: 'vbFalse', type: 'Boolean', value: false, visibility: 'public' },
       { name: 'vbEmpty', type: 'Variant', value: null, visibility: 'public' },
       { name: 'vbNull', type: 'Variant', value: null, visibility: 'public' },
-      { name: 'vbNothing', type: 'Object', value: null, visibility: 'public' }
+      { name: 'vbNothing', type: 'Object', value: null, visibility: 'public' },
     ];
 
     builtInConstants.forEach(constant => {
@@ -49,8 +55,8 @@ export class VB6TypeSystem {
         { name: 'vbAbortRetryIgnore', value: 2 },
         { name: 'vbYesNoCancel', value: 3 },
         { name: 'vbYesNo', value: 4 },
-        { name: 'vbRetryCancel', value: 5 }
-      ]
+        { name: 'vbRetryCancel', value: 5 },
+      ],
     };
     this.registerEnum(vbMsgBoxStyle);
 
@@ -64,8 +70,8 @@ export class VB6TypeSystem {
         { name: 'vbRetry', value: 4 },
         { name: 'vbIgnore', value: 5 },
         { name: 'vbYes', value: 6 },
-        { name: 'vbNo', value: 7 }
-      ]
+        { name: 'vbNo', value: 7 },
+      ],
     };
     this.registerEnum(vbMsgBoxResult);
 
@@ -74,14 +80,14 @@ export class VB6TypeSystem {
       visibility: 'public',
       values: [
         { name: 'vbBlack', value: 0x000000 },
-        { name: 'vbRed', value: 0x0000FF },
-        { name: 'vbGreen', value: 0x00FF00 },
-        { name: 'vbYellow', value: 0x00FFFF },
-        { name: 'vbBlue', value: 0xFF0000 },
-        { name: 'vbMagenta', value: 0xFF00FF },
-        { name: 'vbCyan', value: 0xFFFF00 },
-        { name: 'vbWhite', value: 0xFFFFFF }
-      ]
+        { name: 'vbRed', value: 0x0000ff },
+        { name: 'vbGreen', value: 0x00ff00 },
+        { name: 'vbYellow', value: 0x00ffff },
+        { name: 'vbBlue', value: 0xff0000 },
+        { name: 'vbMagenta', value: 0xff00ff },
+        { name: 'vbCyan', value: 0xffff00 },
+        { name: 'vbWhite', value: 0xffffff },
+      ],
     };
     this.registerEnum(vbColor);
   }
@@ -98,11 +104,11 @@ export class VB6TypeSystem {
    */
   registerEnum(enumDef: VB6Enum): void {
     this.enums.set(enumDef.name.toLowerCase(), enumDef);
-    
+
     // Create enum value lookup
     const enumValueMap = new Map<string, number>();
     let currentValue = 0;
-    
+
     for (const value of enumDef.values) {
       if (value.value !== undefined) {
         if (typeof value.value === 'number') {
@@ -112,18 +118,18 @@ export class VB6TypeSystem {
           currentValue = this.resolveEnumValue(value.value.toString());
         }
       }
-      
+
       enumValueMap.set(value.name.toLowerCase(), currentValue);
       this.constants.set(value.name, {
         name: value.name,
         type: enumDef.name,
         value: currentValue,
-        visibility: 'public'
+        visibility: 'public',
       });
-      
+
       currentValue++;
     }
-    
+
     this.enumValues.set(enumDef.name.toLowerCase(), enumValueMap);
   }
 
@@ -170,7 +176,7 @@ export class VB6TypeSystem {
     if (!instance) {
       throw new Error(`UDT instance '${instanceId}' not found`);
     }
-    
+
     return instance.get(fieldName.toLowerCase());
   }
 
@@ -221,10 +227,21 @@ export class VB6TypeSystem {
    */
   isValidType(typeName: string): boolean {
     const lowerName = typeName.toLowerCase();
-    
+
     // Built-in types
-    const builtInTypes = ['byte', 'boolean', 'integer', 'long', 'single', 'double', 
-                         'currency', 'string', 'variant', 'object', 'date'];
+    const builtInTypes = [
+      'byte',
+      'boolean',
+      'integer',
+      'long',
+      'single',
+      'double',
+      'currency',
+      'string',
+      'variant',
+      'object',
+      'date',
+    ];
     if (builtInTypes.includes(lowerName)) {
       return true;
     }
@@ -251,7 +268,7 @@ export class VB6TypeSystem {
     }
 
     const lowerName = typeName.toLowerCase();
-    
+
     switch (lowerName) {
       case 'byte':
       case 'integer':
@@ -309,13 +326,13 @@ export class VB6TypeSystem {
   loadFromAST(ast: VB6ExtendedModuleAST): void {
     // Register UDTs
     ast.udts.forEach(udt => this.registerUDT(udt));
-    
+
     // Register Enums
     ast.enums.forEach(enumDef => this.registerEnum(enumDef));
-    
+
     // Register Constants
     ast.constants.forEach(constant => this.registerConstant(constant));
-    
+
     // Register Declares
     ast.declares.forEach(declare => this.registerDeclare(declare));
   }
@@ -367,14 +384,16 @@ export class VB6TypeSystem {
    */
   private validateTypeAssignment(expectedType: string, value: any): boolean {
     const lowerType = expectedType.toLowerCase();
-    
+
     switch (lowerType) {
       case 'byte':
         return typeof value === 'number' && value >= 0 && value <= 255 && Number.isInteger(value);
       case 'boolean':
         return typeof value === 'boolean';
       case 'integer':
-        return typeof value === 'number' && value >= -32768 && value <= 32767 && Number.isInteger(value);
+        return (
+          typeof value === 'number' && value >= -32768 && value <= 32767 && Number.isInteger(value)
+        );
       case 'long':
         return typeof value === 'number' && Number.isInteger(value);
       case 'single':
@@ -400,7 +419,7 @@ export class VB6TypeSystem {
    */
   vb6ToJSType(vb6Type: string): string {
     const lowerType = vb6Type.toLowerCase();
-    
+
     switch (lowerType) {
       case 'byte':
       case 'integer':

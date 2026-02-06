@@ -62,11 +62,11 @@ export const projectTemplates: ProjectTemplate[] = [
 
 Private Sub Form_Load()
     ' Initialize your form here
-End Sub`
-      }
-    ]
+End Sub`,
+      },
+    ],
   },
-  
+
   {
     id: 'hello-world',
     name: 'Hello World',
@@ -91,7 +91,7 @@ End Sub`
             Width: 200,
             Height: 30,
             FontSize: 12,
-            Alignment: 2 // Center
+            Alignment: 2, // Center
           },
           {
             type: 'CommandButton',
@@ -100,8 +100,8 @@ End Sub`
             Left: 150,
             Top: 150,
             Width: 100,
-            Height: 40
-          }
+            Height: 40,
+          },
         ],
         code: `Option Explicit
 
@@ -112,9 +112,9 @@ End Sub
 
 Private Sub Form_Load()
     Me.Caption = "Hello World Demo"
-End Sub`
-      }
-    ]
+End Sub`,
+      },
+    ],
   },
 
   {
@@ -142,7 +142,7 @@ End Sub`
             Height: 40,
             FontSize: 18,
             Alignment: 1, // Right align
-            Locked: true
+            Locked: true,
           },
           // Number buttons
           ...Array.from({ length: 10 }, (_, i) => ({
@@ -153,7 +153,7 @@ End Sub`
             Top: 250 - Math.floor((i - 1) / 3) * 60,
             Width: 60,
             Height: 50,
-            FontSize: 16
+            FontSize: 16,
           })),
           // Operation buttons
           {
@@ -164,7 +164,7 @@ End Sub`
             Top: 70,
             Width: 60,
             Height: 50,
-            FontSize: 16
+            FontSize: 16,
           },
           {
             type: 'CommandButton',
@@ -174,7 +174,7 @@ End Sub`
             Top: 130,
             Width: 60,
             Height: 50,
-            FontSize: 16
+            FontSize: 16,
           },
           {
             type: 'CommandButton',
@@ -184,7 +184,7 @@ End Sub`
             Top: 190,
             Width: 60,
             Height: 50,
-            FontSize: 16
+            FontSize: 16,
           },
           {
             type: 'CommandButton',
@@ -194,7 +194,7 @@ End Sub`
             Top: 250,
             Width: 60,
             Height: 50,
-            FontSize: 16
+            FontSize: 16,
           },
           {
             type: 'CommandButton',
@@ -204,7 +204,7 @@ End Sub`
             Top: 310,
             Width: 130,
             Height: 50,
-            FontSize: 16
+            FontSize: 16,
           },
           {
             type: 'CommandButton',
@@ -214,7 +214,7 @@ End Sub`
             Top: 310,
             Width: 60,
             Height: 50,
-            FontSize: 16
+            FontSize: 16,
           },
           {
             type: 'CommandButton',
@@ -224,8 +224,8 @@ End Sub`
             Top: 310,
             Width: 60,
             Height: 50,
-            FontSize: 16
-          }
+            FontSize: 16,
+          },
         ],
         code: `Option Explicit
 
@@ -350,9 +350,9 @@ Private Sub cmdClear_Click()
     secondNumber = 0
     operation = ""
     isNewNumber = True
-End Sub`
-      }
-    ]
+End Sub`,
+      },
+    ],
   },
 
   {
@@ -380,7 +380,7 @@ End Sub`
             FixedCols: 0,
             FixedRows: 1,
             Cols: 5,
-            Rows: 2
+            Rows: 2,
           },
           {
             type: 'Label',
@@ -391,7 +391,7 @@ End Sub`
             Width: 400,
             Height: 30,
             FontSize: 16,
-            FontBold: true
+            FontBold: true,
           },
           {
             type: 'CommandButton',
@@ -400,7 +400,7 @@ End Sub`
             Left: 10,
             Top: 480,
             Width: 100,
-            Height: 40
+            Height: 40,
           },
           {
             type: 'CommandButton',
@@ -409,7 +409,7 @@ End Sub`
             Left: 120,
             Top: 480,
             Width: 100,
-            Height: 40
+            Height: 40,
           },
           {
             type: 'CommandButton',
@@ -418,7 +418,7 @@ End Sub`
             Left: 230,
             Top: 480,
             Width: 100,
-            Height: 40
+            Height: 40,
           },
           {
             type: 'CommandButton',
@@ -427,7 +427,7 @@ End Sub`
             Left: 340,
             Top: 480,
             Width: 100,
-            Height: 40
+            Height: 40,
           },
           {
             type: 'TextBox',
@@ -435,7 +435,7 @@ End Sub`
             Left: 550,
             Top: 20,
             Width: 200,
-            Height: 25
+            Height: 25,
           },
           {
             type: 'Label',
@@ -444,8 +444,8 @@ End Sub`
             Left: 490,
             Top: 23,
             Width: 50,
-            Height: 20
-          }
+            Height: 20,
+          },
         ],
         code: `Option Explicit
 
@@ -562,8 +562,8 @@ Private Sub txtSearch_Change()
     If Len(searchText) > 0 Then
         MsgBox "Searching for: " & searchText, vbInformation
     End If
-End Sub`
-      }
+End Sub`,
+      },
     ],
     modules: [
       {
@@ -585,9 +585,9 @@ End Function
 
 Public Sub CloseDatabase()
     ' Cleanup code
-End Sub`
-      }
-    ]
+End Sub`,
+      },
+    ],
   },
 
   {
@@ -611,7 +611,7 @@ End Sub`
             Left: 10,
             Top: 40,
             Width: 250,
-            Height: 500
+            Height: 500,
           },
           {
             type: 'ListView',
@@ -620,7 +620,7 @@ End Sub`
             Top: 40,
             Width: 620,
             Height: 500,
-            View: 3 // Report view
+            View: 3, // Report view
           },
           {
             type: 'Label',
@@ -630,7 +630,7 @@ End Sub`
             Top: 10,
             Width: 600,
             Height: 20,
-            FontBold: true
+            FontBold: true,
           },
           {
             type: 'CommandButton',
@@ -639,8 +639,8 @@ End Sub`
             Left: 800,
             Top: 5,
             Width: 80,
-            Height: 30
-          }
+            Height: 30,
+          },
         ],
         code: `Option Explicit
 
@@ -711,9 +711,9 @@ Private Sub lvFiles_DblClick()
     If Not lvFiles.SelectedItem Is Nothing Then
         MsgBox "Opening: " & lvFiles.SelectedItem.Text, vbInformation
     End If
-End Sub`
-      }
-    ]
+End Sub`,
+      },
+    ],
   },
 
   {
@@ -738,8 +738,8 @@ End Sub`
             Top: 10,
             Width: 690,
             Height: 500,
-            BackColor: 0xFFFFFF, // White
-            BorderStyle: 1
+            BackColor: 0xffffff, // White
+            BorderStyle: 1,
           },
           {
             type: 'Frame',
@@ -748,7 +748,7 @@ End Sub`
             Left: 10,
             Top: 10,
             Width: 80,
-            Height: 200
+            Height: 200,
           },
           {
             type: 'OptionButton',
@@ -758,7 +758,7 @@ End Sub`
             Top: 40,
             Width: 60,
             Height: 20,
-            Value: true
+            Value: true,
           },
           {
             type: 'OptionButton',
@@ -767,7 +767,7 @@ End Sub`
             Left: 20,
             Top: 70,
             Width: 60,
-            Height: 20
+            Height: 20,
           },
           {
             type: 'OptionButton',
@@ -776,7 +776,7 @@ End Sub`
             Left: 20,
             Top: 100,
             Width: 60,
-            Height: 20
+            Height: 20,
           },
           {
             type: 'OptionButton',
@@ -785,7 +785,7 @@ End Sub`
             Left: 20,
             Top: 130,
             Width: 60,
-            Height: 20
+            Height: 20,
           },
           {
             type: 'Frame',
@@ -794,7 +794,7 @@ End Sub`
             Left: 10,
             Top: 220,
             Width: 80,
-            Height: 200
+            Height: 200,
           },
           {
             type: 'Label',
@@ -804,37 +804,37 @@ End Sub`
             Top: 250,
             Width: 25,
             Height: 25,
-            BorderStyle: 1
+            BorderStyle: 1,
           },
           {
             type: 'Label',
             Name: 'lblColor2',
-            BackColor: 0xFF0000, // Red
+            BackColor: 0xff0000, // Red
             Left: 50,
             Top: 250,
             Width: 25,
             Height: 25,
-            BorderStyle: 1
+            BorderStyle: 1,
           },
           {
             type: 'Label',
             Name: 'lblColor3',
-            BackColor: 0x00FF00, // Green
+            BackColor: 0x00ff00, // Green
             Left: 20,
             Top: 280,
             Width: 25,
             Height: 25,
-            BorderStyle: 1
+            BorderStyle: 1,
           },
           {
             type: 'Label',
             Name: 'lblColor4',
-            BackColor: 0x0000FF, // Blue
+            BackColor: 0x0000ff, // Blue
             Left: 50,
             Top: 280,
             Width: 25,
             Height: 25,
-            BorderStyle: 1
+            BorderStyle: 1,
           },
           {
             type: 'CommandButton',
@@ -843,7 +843,7 @@ End Sub`
             Left: 10,
             Top: 520,
             Width: 80,
-            Height: 30
+            Height: 30,
           },
           {
             type: 'Label',
@@ -852,8 +852,8 @@ End Sub`
             Left: 100,
             Top: 525,
             Width: 200,
-            Height: 20
-          }
+            Height: 20,
+          },
         ],
         code: `Option Explicit
 
@@ -953,9 +953,9 @@ End Sub
 Private Sub cmdClear_Click()
     picCanvas.Cls
     lblStatus.Caption = "Canvas cleared"
-End Sub`
-      }
-    ]
+End Sub`,
+      },
+    ],
   },
 
   {
@@ -982,72 +982,72 @@ End Sub`
             Top: 0,
             Width: 700,
             Height: 450,
-            Text: ''
+            Text: '',
           },
           {
             type: 'Menu',
             Name: 'mnuFile',
-            Caption: '&File'
+            Caption: '&File',
           },
           {
             type: 'Menu',
             Name: 'mnuFileNew',
             Caption: '&New',
-            Parent: 'mnuFile'
+            Parent: 'mnuFile',
           },
           {
             type: 'Menu',
             Name: 'mnuFileOpen',
             Caption: '&Open...',
-            Parent: 'mnuFile'
+            Parent: 'mnuFile',
           },
           {
             type: 'Menu',
             Name: 'mnuFileSave',
             Caption: '&Save',
-            Parent: 'mnuFile'
+            Parent: 'mnuFile',
           },
           {
             type: 'Menu',
             Name: 'mnuFileSaveAs',
             Caption: 'Save &As...',
-            Parent: 'mnuFile'
+            Parent: 'mnuFile',
           },
           {
             type: 'Menu',
             Name: 'mnuFileSep',
             Caption: '-',
-            Parent: 'mnuFile'
+            Parent: 'mnuFile',
           },
           {
             type: 'Menu',
             Name: 'mnuFileExit',
             Caption: 'E&xit',
-            Parent: 'mnuFile'
+            Parent: 'mnuFile',
           },
           {
             type: 'Menu',
             Name: 'mnuEdit',
-            Caption: '&Edit'
+            Caption: '&Edit',
           },
           {
             type: 'Menu',
             Name: 'mnuEditCut',
             Caption: 'Cu&t',
-            Parent: 'mnuEdit'
+            Parent: 'mnuEdit',
           },
           {
             type: 'Menu',
             Name: 'mnuEditCopy',
             Caption: '&Copy',
-            Parent: 'mnuEdit'
+            Parent: 'mnuEdit',
           },
           {
             type: 'Menu',
             Name: 'mnuEditPaste',
             Caption: '&Paste',
-            Parent: 'mnuEdit'
-          }
+            Parent: 'mnuEdit',
+          },
         ],
         code: `Option Explicit
 
@@ -1167,10 +1167,10 @@ End Sub
 
 Private Sub mnuEditPaste_Click()
     txtEditor.SelText = Clipboard.GetText
-End Sub`
-      }
-    ]
-  }
+End Sub`,
+      },
+    ],
+  },
 ];
 
 export function getTemplateById(id: string): ProjectTemplate | undefined {
@@ -1187,9 +1187,10 @@ export function getTemplatesByDifficulty(difficulty: string): ProjectTemplate[] 
 
 export function searchTemplates(query: string): ProjectTemplate[] {
   const lowerQuery = query.toLowerCase();
-  return projectTemplates.filter(t => 
-    t.name.toLowerCase().includes(lowerQuery) ||
-    t.description.toLowerCase().includes(lowerQuery) ||
-    t.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
+  return projectTemplates.filter(
+    t =>
+      t.name.toLowerCase().includes(lowerQuery) ||
+      t.description.toLowerCase().includes(lowerQuery) ||
+      t.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
   );
 }

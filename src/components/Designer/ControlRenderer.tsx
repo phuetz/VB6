@@ -33,11 +33,11 @@ interface ControlRendererProps {
   };
 }
 
-const ControlRenderer: React.FC<ControlRendererProps> = ({ 
-  control, 
-  onStartDrag, 
-  onStartResize, 
-  dragState 
+const ControlRenderer: React.FC<ControlRendererProps> = ({
+  control,
+  onStartDrag,
+  onStartResize,
+  dragState,
 }) => {
   const { state, dispatch, updateControl, executeEvent } = useVB6();
 
@@ -135,7 +135,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({
     cursor: state.executionMode === 'run' ? 'default' : dragState?.isDragging ? 'grabbing' : 'move',
     userSelect: state.executionMode === 'run' ? 'auto' : 'none',
     opacity: control.enabled ? (dragState?.isDragging ? 0.5 : 1) : 0.5,
-    zIndex: dragState?.isDragging ? 1000 : (control.tabIndex || control.id),
+    zIndex: dragState?.isDragging ? 1000 : control.tabIndex || control.id,
     border: isSelected && state.executionMode === 'design' ? '1px dashed #0066cc' : undefined,
     transition: dragState?.isDragging ? 'none' : 'all 150ms ease',
   };
@@ -586,11 +586,9 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({
 
       case 'Image':
         return (
-          <div
-            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
-          >
-            <ImageControlComponent 
-              control={control} 
+          <div onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}>
+            <ImageControlComponent
+              control={control}
               isDesignMode={state.executionMode === 'design'}
               onClick={handleControlClick}
               onDoubleClick={handleControlDoubleClick}
@@ -630,11 +628,9 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({
 
       case 'Data':
         return (
-          <div
-            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
-          >
-            <DataControl 
-              control={control} 
+          <div onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}>
+            <DataControl
+              control={control}
               isDesignMode={state.executionMode === 'design'}
               onPropertyChange={(prop, value) => updateControl(control.id, prop, value)}
             />
@@ -643,11 +639,9 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({
 
       case 'OLE':
         return (
-          <div
-            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
-          >
-            <OLEControl 
-              control={control} 
+          <div onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}>
+            <OLEControl
+              control={control}
               isDesignMode={state.executionMode === 'design'}
               onPropertyChange={(prop, value) => updateControl(control.id, prop, value)}
             />
@@ -656,37 +650,31 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({
 
       case 'DriveListBox':
         return (
-          <div
-            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
-          >
-            <DriveListBox 
-              control={control} 
+          <div onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}>
+            <DriveListBox
+              control={control}
               isDesignMode={state.executionMode === 'design'}
               onPropertyChange={(prop, value) => updateControl(control.id, prop, value)}
             />
           </div>
         );
-        
+
       case 'DirListBox':
         return (
-          <div
-            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
-          >
-            <DirListBox 
-              control={control} 
+          <div onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}>
+            <DirListBox
+              control={control}
               isDesignMode={state.executionMode === 'design'}
               onPropertyChange={(prop, value) => updateControl(control.id, prop, value)}
             />
           </div>
         );
-        
+
       case 'FileListBox':
         return (
-          <div
-            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
-          >
-            <FileListBox 
-              control={control} 
+          <div onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}>
+            <FileListBox
+              control={control}
               isDesignMode={state.executionMode === 'design'}
               onPropertyChange={(prop, value) => updateControl(control.id, prop, value)}
             />
@@ -1017,11 +1005,9 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({
 
       case 'Shape':
         return (
-          <div
-            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
-          >
-            <ShapeControl 
-              control={control} 
+          <div onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}>
+            <ShapeControl
+              control={control}
               isDesignMode={state.executionMode === 'design'}
               onClick={handleControlClick}
               onDoubleClick={handleControlDoubleClick}
@@ -1031,11 +1017,9 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({
 
       case 'Line':
         return (
-          <div
-            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
-          >
-            <LineControl 
-              control={control} 
+          <div onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}>
+            <LineControl
+              control={control}
               isDesignMode={state.executionMode === 'design'}
               onClick={handleControlClick}
               onDoubleClick={handleControlDoubleClick}
@@ -1061,37 +1045,31 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({
 
       case 'Winsock':
         return (
-          <div
-            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
-          >
-            <WinsockControl 
-              control={control} 
+          <div onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}>
+            <WinsockControl
+              control={control}
               isDesignMode={state.executionMode === 'design'}
               onPropertyChange={(prop, value) => updateControl(control.id, prop, value)}
             />
           </div>
         );
-        
+
       case 'ADODataControl':
         return (
-          <div
-            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
-          >
-            <ADODataControl 
-              control={control} 
+          <div onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}>
+            <ADODataControl
+              control={control}
               isDesignMode={state.executionMode === 'design'}
               onPropertyChange={(prop, value) => updateControl(control.id, prop, value)}
             />
           </div>
         );
-        
+
       case 'Inet':
         return (
-          <div
-            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
-          >
-            <InetControl 
-              control={control} 
+          <div onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}>
+            <InetControl
+              control={control}
               isDesignMode={state.executionMode === 'design'}
               onPropertyChange={(prop, value) => updateControl(control.id, prop, value)}
             />
@@ -1213,7 +1191,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({
             <DBListControl
               control={{
                 type: 'DBList',
-                ...control
+                ...control,
               }}
               isDesignMode={state.executionMode === 'design'}
               onPropertyChange={(prop, val) => updateControl(control.id, prop, val)}
@@ -1237,7 +1215,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({
             <DBComboControl
               control={{
                 type: 'DBCombo',
-                ...control
+                ...control,
               }}
               isDesignMode={state.executionMode === 'design'}
               onPropertyChange={(prop, val) => updateControl(control.id, prop, val)}
@@ -1248,13 +1226,11 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({
 
       case 'DataRepeater':
         return (
-          <div
-            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
-          >
+          <div onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}>
             <DataRepeaterControl
               control={{
                 type: 'DataRepeater',
-                ...control
+                ...control,
               }}
               isDesignMode={state.executionMode === 'design'}
               onPropertyChange={(prop, val) => updateControl(control.id, prop, val)}
@@ -1306,7 +1282,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({
             <PictureClipControl
               control={{
                 type: 'PictureClip',
-                ...control
+                ...control,
               }}
               isDesignMode={state.executionMode === 'design'}
               onPropertyChange={(prop, val) => updateControl(control.id, prop, val)}
@@ -1355,9 +1331,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({
 
       case 'ActiveXControl':
         return (
-          <div
-            onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
-          >
+          <div onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}>
             <ActiveXControl
               id={control.id.toString()}
               name={control.name}
@@ -1405,7 +1379,7 @@ const ControlRenderer: React.FC<ControlRendererProps> = ({
   }
 
   return (
-    <div 
+    <div
       className="relative"
       onMouseDown={state.executionMode === 'design' ? handleControlMouseDown : undefined}
     >

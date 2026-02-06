@@ -19,15 +19,15 @@ export interface VB6MenuItem {
   NegotiatePosition: number; // Position pour négociation OLE
   HelpContextID: number;
   Tag: string;
-  
+
   // Hiérarchie
   Level: number; // Niveau d'indentation (0 = racine)
   Parent?: VB6MenuItem;
   Children: VB6MenuItem[];
-  
+
   // Apparence
   Separator: boolean; // Élément séparateur
-  
+
   // Événements
   onClick?: () => void;
 }
@@ -52,27 +52,27 @@ const VB6_SHORTCUTS: { [key: string]: string } = {
   'Ctrl+O': 'Ctrl+O',
   'Ctrl+N': 'Ctrl+N',
   'Ctrl+P': 'Ctrl+P',
-  'F1': 'F1',
-  'F2': 'F2',
-  'F3': 'F3',
-  'F4': 'F4',
-  'F5': 'F5',
-  'F6': 'F6',
-  'F7': 'F7',
-  'F8': 'F8',
-  'F9': 'F9',
-  'F10': 'F10',
-  'F11': 'F11',
-  'F12': 'F12',
+  F1: 'F1',
+  F2: 'F2',
+  F3: 'F3',
+  F4: 'F4',
+  F5: 'F5',
+  F6: 'F6',
+  F7: 'F7',
+  F8: 'F8',
+  F9: 'F9',
+  F10: 'F10',
+  F11: 'F11',
+  F12: 'F12',
   'Alt+F4': 'Alt+F4',
   'Shift+F1': 'Shift+F1',
   'Ctrl+F1': 'Ctrl+F1',
-  'Del': 'Delete',
-  'Ins': 'Insert',
-  'Home': 'Home',
-  'End': 'End',
-  'PgUp': 'Page Up',
-  'PgDn': 'Page Down'
+  Del: 'Delete',
+  Ins: 'Insert',
+  Home: 'Home',
+  End: 'End',
+  PgUp: 'Page Up',
+  PgDn: 'Page Down',
 };
 
 export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
@@ -123,7 +123,7 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
               HelpContextID: 0,
               Tag: '',
               Separator: false,
-              Children: []
+              Children: [],
             },
             {
               Name: 'mnuFileOpen',
@@ -139,7 +139,7 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
               HelpContextID: 0,
               Tag: '',
               Separator: false,
-              Children: []
+              Children: [],
             },
             {
               Name: 'mnuFileSep1',
@@ -155,7 +155,7 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
               HelpContextID: 0,
               Tag: '',
               Separator: true,
-              Children: []
+              Children: [],
             },
             {
               Name: 'mnuFileSave',
@@ -171,7 +171,7 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
               HelpContextID: 0,
               Tag: '',
               Separator: false,
-              Children: []
+              Children: [],
             },
             {
               Name: 'mnuFileSaveAs',
@@ -187,7 +187,7 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
               HelpContextID: 0,
               Tag: '',
               Separator: false,
-              Children: []
+              Children: [],
             },
             {
               Name: 'mnuFileSep2',
@@ -203,7 +203,7 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
               HelpContextID: 0,
               Tag: '',
               Separator: true,
-              Children: []
+              Children: [],
             },
             {
               Name: 'mnuFileExit',
@@ -219,9 +219,9 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
               HelpContextID: 0,
               Tag: '',
               Separator: false,
-              Children: []
-            }
-          ]
+              Children: [],
+            },
+          ],
         },
         {
           Name: 'mnuEdit',
@@ -252,7 +252,7 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
               HelpContextID: 0,
               Tag: '',
               Separator: false,
-              Children: []
+              Children: [],
             },
             {
               Name: 'mnuEditSep1',
@@ -268,7 +268,7 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
               HelpContextID: 0,
               Tag: '',
               Separator: true,
-              Children: []
+              Children: [],
             },
             {
               Name: 'mnuEditCut',
@@ -284,7 +284,7 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
               HelpContextID: 0,
               Tag: '',
               Separator: false,
-              Children: []
+              Children: [],
             },
             {
               Name: 'mnuEditCopy',
@@ -300,7 +300,7 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
               HelpContextID: 0,
               Tag: '',
               Separator: false,
-              Children: []
+              Children: [],
             },
             {
               Name: 'mnuEditPaste',
@@ -316,9 +316,9 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
               HelpContextID: 0,
               Tag: '',
               Separator: false,
-              Children: []
-            }
-          ]
+              Children: [],
+            },
+          ],
         },
         {
           Name: 'mnuHelp',
@@ -349,45 +349,48 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
               HelpContextID: 0,
               Tag: '',
               Separator: false,
-              Children: []
-            }
-          ]
-        }
+              Children: [],
+            },
+          ],
+        },
       ];
     };
 
     // Gestion des clics sur les éléments de menu
-    const handleMenuClick = useCallback((menuItem: VB6MenuItem, event: React.MouseEvent) => {
-      event.preventDefault();
-      event.stopPropagation();
+    const handleMenuClick = useCallback(
+      (menuItem: VB6MenuItem, event: React.MouseEvent) => {
+        event.preventDefault();
+        event.stopPropagation();
 
-      if (!menuItem.Enabled || menuItem.Separator) return;
+        if (!menuItem.Enabled || menuItem.Separator) return;
 
-      // Si l'élément a des enfants, basculer l'ouverture
-      if (menuItem.Children.length > 0) {
-        setOpenSubmenus(prev => {
-          const newSet = new Set(prev);
-          if (newSet.has(menuItem.Name)) {
-            newSet.delete(menuItem.Name);
-          } else {
-            newSet.add(menuItem.Name);
+        // Si l'élément a des enfants, basculer l'ouverture
+        if (menuItem.Children.length > 0) {
+          setOpenSubmenus(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(menuItem.Name)) {
+              newSet.delete(menuItem.Name);
+            } else {
+              newSet.add(menuItem.Name);
+            }
+            return newSet;
+          });
+        } else {
+          // Fermer tous les sous-menus
+          setOpenSubmenus(new Set());
+          setActiveMenu(null);
+
+          // Déclencher l'événement de clic
+          onMenuClick?.(menuItem);
+
+          // Déclencher l'événement VB6
+          if (menuItem.onClick) {
+            menuItem.onClick();
           }
-          return newSet;
-        });
-      } else {
-        // Fermer tous les sous-menus
-        setOpenSubmenus(new Set());
-        setActiveMenu(null);
-        
-        // Déclencher l'événement de clic
-        onMenuClick?.(menuItem);
-        
-        // Déclencher l'événement VB6
-        if (menuItem.onClick) {
-          menuItem.onClick();
         }
-      }
-    }, [onMenuClick]);
+      },
+      [onMenuClick]
+    );
 
     // Gestion des raccourcis clavier
     useEffect(() => {
@@ -395,7 +398,7 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
         if (isDesignMode) return;
 
         const key = getKeyString(event);
-        
+
         // Chercher l'élément de menu avec ce raccourci
         const findMenuWithShortcut = (menuItems: VB6MenuItem[]): VB6MenuItem | null => {
           for (const item of menuItems) {
@@ -422,11 +425,11 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
     // Convertir l'événement clavier en string VB6
     const getKeyString = (event: KeyboardEvent): string => {
       const parts: string[] = [];
-      
+
       if (event.ctrlKey) parts.push('Ctrl');
       if (event.altKey) parts.push('Alt');
       if (event.shiftKey) parts.push('Shift');
-      
+
       const key = event.key;
       if (key.startsWith('F') && key.length <= 3) {
         // Touches de fonction
@@ -436,14 +439,23 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
       } else {
         // Touches spéciales
         switch (key) {
-          case 'Delete': parts.push('Del'); break;
-          case 'Insert': parts.push('Ins'); break;
-          case 'PageUp': parts.push('PgUp'); break;
-          case 'PageDown': parts.push('PgDn'); break;
-          default: parts.push(key);
+          case 'Delete':
+            parts.push('Del');
+            break;
+          case 'Insert':
+            parts.push('Ins');
+            break;
+          case 'PageUp':
+            parts.push('PgUp');
+            break;
+          case 'PageDown':
+            parts.push('PgDn');
+            break;
+          default:
+            parts.push(key);
         }
       }
-      
+
       return parts.join('+');
     };
 
@@ -463,7 +475,7 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
               height: '1px',
               backgroundColor: '#C0C0C0',
               margin: '2px 0',
-              borderTop: '1px solid #808080'
+              borderTop: '1px solid #808080',
             }}
           />
         );
@@ -482,14 +494,14 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
         alignItems: 'center',
         justifyContent: 'space-between',
         minWidth: isTopLevel ? 'auto' : '120px',
-        userSelect: 'none'
+        userSelect: 'none',
       };
 
       return (
         <div key={item.Name} style={{ position: 'relative' }}>
           <div
             style={menuItemStyle}
-            onClick={(e) => handleMenuClick(item, e)}
+            onClick={e => handleMenuClick(item, e)}
             onMouseEnter={() => {
               if (item.Enabled) {
                 setActiveMenu(item.Name);
@@ -502,27 +514,23 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              {item.Checked && (
-                <span style={{ marginRight: '4px' }}>✓</span>
-              )}
-              <span>
-                {item.Caption.replace('&', '')}
-              </span>
+              {item.Checked && <span style={{ marginRight: '4px' }}>✓</span>}
+              <span>{item.Caption.replace('&', '')}</span>
             </div>
-            
+
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {item.Shortcut && (
-                <span style={{ 
-                  marginLeft: '16px', 
-                  fontSize: '7pt', 
-                  color: item.Enabled ? '#808080' : '#C0C0C0' 
-                }}>
+                <span
+                  style={{
+                    marginLeft: '16px',
+                    fontSize: '7pt',
+                    color: item.Enabled ? '#808080' : '#C0C0C0',
+                  }}
+                >
                   {item.Shortcut}
                 </span>
               )}
-              {hasChildren && !isTopLevel && (
-                <span style={{ marginLeft: '8px' }}>▶</span>
-              )}
+              {hasChildren && !isTopLevel && <span style={{ marginLeft: '8px' }}>▶</span>}
             </div>
           </div>
 
@@ -536,7 +544,7 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
                 border: '1px solid #808080',
                 boxShadow: '2px 2px 4px rgba(0, 0, 0, 0.2)',
                 zIndex: 1000,
-                minWidth: '140px'
+                minWidth: '140px',
               }}
             >
               {item.Children.map(child => renderMenuItem(child, false))}
@@ -560,7 +568,7 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
       fontFamily: 'MS Sans Serif, sans-serif',
       fontSize: '8pt',
       userSelect: 'none',
-      zIndex: control.zIndex || 100
+      zIndex: control.zIndex || 100,
     };
 
     // En mode design, afficher un indicateur
@@ -572,13 +580,15 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
           data-control-type="MenuControl"
           data-control-name={control.name}
         >
-          <div style={{ 
-            padding: '4px 8px', 
-            color: '#666', 
-            fontStyle: 'italic',
-            display: 'flex',
-            alignItems: 'center'
-          }}>
+          <div
+            style={{
+              padding: '4px 8px',
+              color: '#666',
+              fontStyle: 'italic',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
             📋 Menu Control - {items.length} top-level items
           </div>
         </div>
@@ -592,9 +602,9 @@ export const MenuControl = forwardRef<HTMLDivElement, MenuControlProps>(
         data-control-type="MenuControl"
         data-control-name={control.name}
       >
-        {items.filter(item => item.Level === 0 && item.Visible).map(item => 
-          renderMenuItem(item, true)
-        )}
+        {items
+          .filter(item => item.Level === 0 && item.Visible)
+          .map(item => renderMenuItem(item, true))}
       </div>
     );
   }
@@ -620,14 +630,14 @@ export const MenuEditorUtils = {
       HelpContextID: 0,
       Tag: '',
       Separator: caption === '-',
-      Children: []
+      Children: [],
     };
   },
 
   // Ajouter un élément à la hiérarchie
   addMenuItem(items: VB6MenuItem[], newItem: VB6MenuItem, parentName?: string): VB6MenuItem[] {
     const newItems = [...items];
-    
+
     if (parentName) {
       const parent = this.findMenuItem(newItems, parentName);
       if (parent) {
@@ -637,7 +647,7 @@ export const MenuEditorUtils = {
     } else {
       newItems.push(newItem);
     }
-    
+
     return newItems;
   },
 
@@ -654,7 +664,7 @@ export const MenuEditorUtils = {
   // Exporter la structure de menu en format VB6
   exportToVB6Format(items: VB6MenuItem[]): string {
     const lines: string[] = [];
-    
+
     const processItem = (item: VB6MenuItem, indent: number = 0) => {
       const indentStr = '    '.repeat(indent);
       lines.push(`${indentStr}Begin VB.Menu ${item.Name}`);
@@ -675,13 +685,13 @@ export const MenuEditorUtils = {
         lines.push(`${indentStr}   Checked         =   -1  'True`);
       }
       lines.push(`${indentStr}End`);
-      
+
       item.Children.forEach(child => processItem(child, indent + 1));
     };
-    
+
     items.forEach(item => processItem(item));
     return lines.join('\n');
-  }
+  },
 };
 
 export default MenuControl;

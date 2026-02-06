@@ -31,22 +31,28 @@ export const ShapeControl: React.FC<ShapeControlProps> = ({ control, isDesignMod
   // Convert VB6 border style to SVG stroke-dasharray
   const getStrokeDashArray = (style: number): string | undefined => {
     switch (style) {
-      case 0: return '0'; // Transparent
-      case 2: return '5,5'; // Dash
-      case 3: return '2,2'; // Dot
-      case 4: return '5,2,2,2'; // DashDot
-      case 5: return '5,2,2,2,2,2'; // DashDotDot
-      default: return undefined; // Solid or InsideSolid
+      case 0:
+        return '0'; // Transparent
+      case 2:
+        return '5,5'; // Dash
+      case 3:
+        return '2,2'; // Dot
+      case 4:
+        return '5,2,2,2'; // DashDot
+      case 5:
+        return '5,2,2,2,2,2'; // DashDotDot
+      default:
+        return undefined; // Solid or InsideSolid
     }
   };
 
   // Create fill pattern for different fill styles
   const getFillPattern = () => {
     if (fillStyle === 0 || fillStyle === 1) return null; // Solid or Transparent
-    
+
     const patternId = `pattern-${control.id}-${fillStyle}`;
     const strokeColor = fillStyle === 1 ? 'transparent' : borderColor;
-    
+
     switch (fillStyle) {
       case 2: // Horizontal Line
         return (
@@ -103,7 +109,7 @@ export const ShapeControl: React.FC<ShapeControlProps> = ({ control, isDesignMod
   const renderShape = () => {
     const strokeValue = borderStyle === 0 ? 'transparent' : borderColor;
     const strokeWidthValue = borderStyle === 6 ? borderWidth : borderWidth; // InsideSolid handled by vectorEffect
-    
+
     const commonProps = {
       fill: getFillValue(),
       stroke: strokeValue,
@@ -115,31 +121,57 @@ export const ShapeControl: React.FC<ShapeControlProps> = ({ control, isDesignMod
     switch (shape) {
       case 0: // Rectangle
         return <rect x={0} y={0} width={width} height={height} {...commonProps} />;
-      
-      case 1: { // Square
+
+      case 1: {
+        // Square
         const squareSize = Math.min(width, height);
         return <rect x={0} y={0} width={squareSize} height={squareSize} {...commonProps} />;
       }
-      
+
       case 2: // Oval
-        return <ellipse cx={width / 2} cy={height / 2} rx={width / 2} ry={height / 2} {...commonProps} />;
-      
-      case 3: { // Circle
+        return (
+          <ellipse cx={width / 2} cy={height / 2} rx={width / 2} ry={height / 2} {...commonProps} />
+        );
+
+      case 3: {
+        // Circle
         const radius = Math.min(width, height) / 2;
         return <circle cx={radius} cy={radius} r={radius} {...commonProps} />;
       }
-      
-      case 4: { // Rounded Rectangle
+
+      case 4: {
+        // Rounded Rectangle
         const roundRadius = Math.min(width, height) * 0.2;
-        return <rect x={0} y={0} width={width} height={height} rx={roundRadius} ry={roundRadius} {...commonProps} />;
+        return (
+          <rect
+            x={0}
+            y={0}
+            width={width}
+            height={height}
+            rx={roundRadius}
+            ry={roundRadius}
+            {...commonProps}
+          />
+        );
       }
-      
-      case 5: { // Rounded Square
+
+      case 5: {
+        // Rounded Square
         const roundSquareSize = Math.min(width, height);
         const roundSquareRadius = roundSquareSize * 0.2;
-        return <rect x={0} y={0} width={roundSquareSize} height={roundSquareSize} rx={roundSquareRadius} ry={roundSquareRadius} {...commonProps} />;
+        return (
+          <rect
+            x={0}
+            y={0}
+            width={roundSquareSize}
+            height={roundSquareSize}
+            rx={roundSquareRadius}
+            ry={roundSquareRadius}
+            {...commonProps}
+          />
+        );
       }
-      
+
       default:
         return <rect x={0} y={0} width={width} height={height} {...commonProps} />;
     }
@@ -148,23 +180,40 @@ export const ShapeControl: React.FC<ShapeControlProps> = ({ control, isDesignMod
   // Convert VB6 DrawMode to SVG mix-blend-mode
   const getBlendMode = (mode: number): string => {
     switch (mode) {
-      case 1: return 'normal'; // vbBlackness
-      case 2: return 'normal'; // vbNotMergePen
-      case 3: return 'multiply'; // vbMaskNotPen
-      case 4: return 'normal'; // vbNotCopyPen
-      case 5: return 'screen'; // vbMaskPenNot
-      case 6: return 'difference'; // vbInvert
-      case 7: return 'xor'; // vbXorPen
-      case 8: return 'normal'; // vbNotMaskPen
-      case 9: return 'multiply'; // vbMaskPen
-      case 10: return 'xor'; // vbNotXorPen
-      case 11: return 'normal'; // vbNop
-      case 12: return 'screen'; // vbMergeNotPen
-      case 13: return 'normal'; // vbCopyPen (default)
-      case 14: return 'lighten'; // vbMergePenNot
-      case 15: return 'lighten'; // vbMergePen
-      case 16: return 'normal'; // vbWhiteness
-      default: return 'normal';
+      case 1:
+        return 'normal'; // vbBlackness
+      case 2:
+        return 'normal'; // vbNotMergePen
+      case 3:
+        return 'multiply'; // vbMaskNotPen
+      case 4:
+        return 'normal'; // vbNotCopyPen
+      case 5:
+        return 'screen'; // vbMaskPenNot
+      case 6:
+        return 'difference'; // vbInvert
+      case 7:
+        return 'xor'; // vbXorPen
+      case 8:
+        return 'normal'; // vbNotMaskPen
+      case 9:
+        return 'multiply'; // vbMaskPen
+      case 10:
+        return 'xor'; // vbNotXorPen
+      case 11:
+        return 'normal'; // vbNop
+      case 12:
+        return 'screen'; // vbMergeNotPen
+      case 13:
+        return 'normal'; // vbCopyPen (default)
+      case 14:
+        return 'lighten'; // vbMergePenNot
+      case 15:
+        return 'lighten'; // vbMergePen
+      case 16:
+        return 'normal'; // vbWhiteness
+      default:
+        return 'normal';
     }
   };
 
@@ -184,12 +233,10 @@ export const ShapeControl: React.FC<ShapeControlProps> = ({ control, isDesignMod
       data-control-name={control.name}
       data-control-index={index}
     >
-      <defs>
-        {getFillPattern()}
-      </defs>
-      
+      <defs>{getFillPattern()}</defs>
+
       {renderShape()}
-      
+
       {/* Design mode selection indicators */}
       {isDesignMode && (
         <rect

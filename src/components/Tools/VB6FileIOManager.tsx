@@ -5,10 +5,10 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  VB6FileIO, 
-  VB6FileMode, 
-  VB6FileAccess, 
+import {
+  VB6FileIO,
+  VB6FileMode,
+  VB6FileAccess,
   VB6FileShare,
   FreeFile,
   Open,
@@ -27,7 +27,7 @@ import {
   Dir,
   FileCopy,
   Kill,
-  Name
+  Name,
 } from '../../services/VB6FileIOSystem';
 
 interface FileHandle {
@@ -45,16 +45,13 @@ interface VB6FileIOManagerProps {
   onClose: () => void;
 }
 
-export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
-  visible,
-  onClose
-}) => {
+export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({ visible, onClose }) => {
   const [openFiles, setOpenFiles] = useState<FileHandle[]>([]);
   const [virtualFiles, setVirtualFiles] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<string>('');
   const [selectedHandle, setSelectedHandle] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'files' | 'operations' | 'output' | 'stats'>('files');
-  
+
   // Operation states
   const [operation, setOperation] = useState<string>('');
   const [operationFile, setOperationFile] = useState<string>('');
@@ -63,7 +60,7 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
   const [operationData, setOperationData] = useState<string>('');
   const [operationPosition, setOperationPosition] = useState<number>(1);
   const [operationRecord, setOperationRecord] = useState<number>(1);
-  
+
   // Output and results
   const [output, setOutput] = useState<string[]>([]);
   const [lastResult, setLastResult] = useState<any>(null);
@@ -83,12 +80,14 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
     try {
       const files = VB6FileIO.listVirtualFiles();
       setVirtualFiles(files);
-      
+
       const handles = VB6FileIO.getOpenFiles();
       setOpenFiles(handles);
-      
+
       const stats = VB6FileIO.getFileSystemStats();
-      addOutput(`File system stats: ${stats.totalFiles} files, ${stats.openFiles} open, ${stats.totalBytesRead} bytes read, ${stats.totalBytesWritten} bytes written`);
+      addOutput(
+        `File system stats: ${stats.totalFiles} files, ${stats.openFiles} open, ${stats.totalBytesRead} bytes read, ${stats.totalBytesWritten} bytes written`
+      );
     } catch (err) {
       setError(`Error refreshing file info: ${err}`);
     }
@@ -111,7 +110,9 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
       }
 
       const fileNum = Open(operationFile, operationMode, operationAccess);
-      addOutput(`Opened file "${operationFile}" with handle ${fileNum} (Mode: ${VB6FileMode[operationMode]}, Access: ${VB6FileAccess[operationAccess]})`);
+      addOutput(
+        `Opened file "${operationFile}" with handle ${fileNum} (Mode: ${VB6FileMode[operationMode]}, Access: ${VB6FileAccess[operationAccess]})`
+      );
       setLastResult(fileNum);
       refreshFileInfo();
       setError('');
@@ -212,8 +213,14 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
         return;
       }
 
-      const result = Get(selectedHandle, operationRecord > 0 ? operationRecord : undefined, operationData || undefined);
-      addOutput(`Get from file handle ${selectedHandle} (record ${operationRecord}): ${typeof result === 'string' ? `"${result}"` : JSON.stringify(result)}`);
+      const result = Get(
+        selectedHandle,
+        operationRecord > 0 ? operationRecord : undefined,
+        operationData || undefined
+      );
+      addOutput(
+        `Get from file handle ${selectedHandle} (record ${operationRecord}): ${typeof result === 'string' ? `"${result}"` : JSON.stringify(result)}`
+      );
       setLastResult(result);
       setError('');
     } catch (err) {
@@ -229,7 +236,9 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
       }
 
       Put(selectedHandle, operationRecord > 0 ? operationRecord : undefined, operationData);
-      addOutput(`Put to file handle ${selectedHandle} (record ${operationRecord}): "${operationData}"`);
+      addOutput(
+        `Put to file handle ${selectedHandle} (record ${operationRecord}): "${operationData}"`
+      );
       refreshFileInfo();
       setError('');
     } catch (err) {
@@ -246,7 +255,9 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
 
       if (operationPosition > 0) {
         const result = Seek(selectedHandle, operationPosition);
-        addOutput(`Seek file handle ${selectedHandle} to position ${operationPosition}, result: ${result}`);
+        addOutput(
+          `Seek file handle ${selectedHandle} to position ${operationPosition}, result: ${result}`
+        );
         setLastResult(result);
       } else {
         const result = Seek(selectedHandle);
@@ -434,35 +445,41 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
   if (!visible) return null;
 
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000
-    }}>
-      <div style={{
-        width: '1200px',
-        height: '800px',
-        backgroundColor: '#F0F0F0',
-        border: '2px outset #C0C0C0',
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
         display: 'flex',
-        flexDirection: 'column',
-        fontFamily: 'MS Sans Serif',
-        fontSize: '8pt'
-      }}>
-        {/* Title Bar */}
-        <div style={{
-          backgroundColor: '#0080FF',
-          color: 'white',
-          padding: '2px 6px',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+      }}
+    >
+      <div
+        style={{
+          width: '1200px',
+          height: '800px',
+          backgroundColor: '#F0F0F0',
+          border: '2px outset #C0C0C0',
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          fontWeight: 'bold'
-        }}>
+          flexDirection: 'column',
+          fontFamily: 'MS Sans Serif',
+          fontSize: '8pt',
+        }}
+      >
+        {/* Title Bar */}
+        <div
+          style={{
+            backgroundColor: '#0080FF',
+            color: 'white',
+            padding: '2px 6px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            fontWeight: 'bold',
+          }}
+        >
           <span>VB6 File I/O Manager - Complete File Operations Testing</span>
           <button
             onClick={onClose}
@@ -472,7 +489,7 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
               color: 'white',
               cursor: 'pointer',
               padding: '0 4px',
-              fontSize: '12px'
+              fontSize: '12px',
             }}
           >
             ×
@@ -480,13 +497,15 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div style={{
-          backgroundColor: '#E0E0E0',
-          padding: '2px 4px',
-          borderBottom: '1px solid #C0C0C0',
-          display: 'flex',
-          gap: '0px'
-        }}>
+        <div
+          style={{
+            backgroundColor: '#E0E0E0',
+            padding: '2px 4px',
+            borderBottom: '1px solid #C0C0C0',
+            display: 'flex',
+            gap: '0px',
+          }}
+        >
           {['files', 'operations', 'output', 'stats'].map(tab => (
             <button
               key={tab}
@@ -498,28 +517,52 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
                 border: '1px outset #C0C0C0',
                 borderBottom: activeTab === tab ? '1px solid #FFFFFF' : '1px solid #C0C0C0',
                 cursor: 'pointer',
-                textTransform: 'capitalize'
+                textTransform: 'capitalize',
               }}
             >
-              {tab === 'files' ? 'Virtual Files' : 
-               tab === 'operations' ? 'File Operations' :
-               tab === 'output' ? 'Output Log' : 'Statistics'}
+              {tab === 'files'
+                ? 'Virtual Files'
+                : tab === 'operations'
+                  ? 'File Operations'
+                  : tab === 'output'
+                    ? 'Output Log'
+                    : 'Statistics'}
             </button>
           ))}
         </div>
 
         {/* Main Content */}
         <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
-          
           {/* Files Tab */}
           {activeTab === 'files' && (
             <div style={{ flex: 1, padding: '8px', display: 'flex', gap: '8px' }}>
               {/* Virtual Files List */}
-              <div style={{ flex: 1, backgroundColor: '#FFFFFF', border: '1px inset #C0C0C0', padding: '4px' }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '4px', backgroundColor: '#C0C0C0', padding: '2px' }}>
+              <div
+                style={{
+                  flex: 1,
+                  backgroundColor: '#FFFFFF',
+                  border: '1px inset #C0C0C0',
+                  padding: '4px',
+                }}
+              >
+                <div
+                  style={{
+                    fontWeight: 'bold',
+                    marginBottom: '4px',
+                    backgroundColor: '#C0C0C0',
+                    padding: '2px',
+                  }}
+                >
                   Virtual Files ({virtualFiles.length})
                 </div>
-                <div style={{ height: '200px', overflow: 'auto', border: '1px inset #C0C0C0', backgroundColor: '#FFFFFF' }}>
+                <div
+                  style={{
+                    height: '200px',
+                    overflow: 'auto',
+                    border: '1px inset #C0C0C0',
+                    backgroundColor: '#FFFFFF',
+                  }}
+                >
                   {virtualFiles.map(file => (
                     <div
                       key={file}
@@ -527,7 +570,7 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
                         padding: '2px 4px',
                         cursor: 'pointer',
                         backgroundColor: selectedFile === file ? '#0080FF' : 'transparent',
-                        color: selectedFile === file ? 'white' : 'black'
+                        color: selectedFile === file ? 'white' : 'black',
                       }}
                       onClick={() => setSelectedFile(file)}
                       onDoubleClick={() => handleViewFileContent(file)}
@@ -541,18 +584,34 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
                     type="text"
                     placeholder="New filename"
                     value={newFileName}
-                    onChange={(e) => setNewFileName(e.target.value)}
-                    style={{ width: '100%', marginBottom: '4px', padding: '2px', border: '1px inset #C0C0C0' }}
+                    onChange={e => setNewFileName(e.target.value)}
+                    style={{
+                      width: '100%',
+                      marginBottom: '4px',
+                      padding: '2px',
+                      border: '1px inset #C0C0C0',
+                    }}
                   />
                   <textarea
                     placeholder="File content"
                     value={newFileContent}
-                    onChange={(e) => setNewFileContent(e.target.value)}
-                    style={{ width: '100%', height: '60px', padding: '2px', border: '1px inset #C0C0C0', resize: 'none' }}
+                    onChange={e => setNewFileContent(e.target.value)}
+                    style={{
+                      width: '100%',
+                      height: '60px',
+                      padding: '2px',
+                      border: '1px inset #C0C0C0',
+                      resize: 'none',
+                    }}
                   />
                   <button
                     onClick={handleCreateFile}
-                    style={{ marginTop: '4px', padding: '4px 8px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}
+                    style={{
+                      marginTop: '4px',
+                      padding: '4px 8px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
                   >
                     Create File
                   </button>
@@ -560,11 +619,32 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
               </div>
 
               {/* Open Files List */}
-              <div style={{ flex: 1, backgroundColor: '#FFFFFF', border: '1px inset #C0C0C0', padding: '4px' }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '4px', backgroundColor: '#C0C0C0', padding: '2px' }}>
+              <div
+                style={{
+                  flex: 1,
+                  backgroundColor: '#FFFFFF',
+                  border: '1px inset #C0C0C0',
+                  padding: '4px',
+                }}
+              >
+                <div
+                  style={{
+                    fontWeight: 'bold',
+                    marginBottom: '4px',
+                    backgroundColor: '#C0C0C0',
+                    padding: '2px',
+                  }}
+                >
                   Open Files ({openFiles.length})
                 </div>
-                <div style={{ height: '300px', overflow: 'auto', border: '1px inset #C0C0C0', backgroundColor: '#FFFFFF' }}>
+                <div
+                  style={{
+                    height: '300px',
+                    overflow: 'auto',
+                    border: '1px inset #C0C0C0',
+                    backgroundColor: '#FFFFFF',
+                  }}
+                >
                   {openFiles.map(handle => (
                     <div
                       key={handle.fileNumber}
@@ -572,14 +652,17 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
                         padding: '4px',
                         borderBottom: '1px solid #E0E0E0',
                         cursor: 'pointer',
-                        backgroundColor: selectedHandle === handle.fileNumber ? '#E0E0FF' : 'transparent'
+                        backgroundColor:
+                          selectedHandle === handle.fileNumber ? '#E0E0FF' : 'transparent',
                       }}
                       onClick={() => setSelectedHandle(handle.fileNumber)}
                     >
                       <div style={{ fontWeight: 'bold' }}>Handle #{handle.fileNumber}</div>
                       <div style={{ fontSize: '7pt', color: '#666' }}>
-                        File: {handle.fileName}<br/>
-                        Mode: {handle.mode} | Size: {handle.size} bytes<br/>
+                        File: {handle.fileName}
+                        <br />
+                        Mode: {handle.mode} | Size: {handle.size} bytes
+                        <br />
                         Position: {handle.position} | Open: {handle.isOpen ? 'Yes' : 'No'}
                       </div>
                     </div>
@@ -593,17 +676,31 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
           {activeTab === 'operations' && (
             <div style={{ flex: 1, padding: '8px', display: 'flex', gap: '8px' }}>
               {/* File Operations */}
-              <div style={{ flex: 1, backgroundColor: '#FFFFFF', border: '1px inset #C0C0C0', padding: '4px' }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '4px', backgroundColor: '#C0C0C0', padding: '2px' }}>
+              <div
+                style={{
+                  flex: 1,
+                  backgroundColor: '#FFFFFF',
+                  border: '1px inset #C0C0C0',
+                  padding: '4px',
+                }}
+              >
+                <div
+                  style={{
+                    fontWeight: 'bold',
+                    marginBottom: '4px',
+                    backgroundColor: '#C0C0C0',
+                    padding: '2px',
+                  }}
+                >
                   File Operations
                 </div>
-                
+
                 <div style={{ marginBottom: '8px' }}>
                   <label>Filename:</label>
                   <input
                     type="text"
                     value={operationFile}
-                    onChange={(e) => setOperationFile(e.target.value)}
+                    onChange={e => setOperationFile(e.target.value)}
                     style={{ width: '100%', padding: '2px', border: '1px inset #C0C0C0' }}
                     placeholder="C:\TEMP\sample.txt"
                   />
@@ -614,7 +711,7 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
                     <label>Mode:</label>
                     <select
                       value={operationMode}
-                      onChange={(e) => setOperationMode(parseInt(e.target.value))}
+                      onChange={e => setOperationMode(parseInt(e.target.value))}
                       style={{ width: '100%', border: '1px inset #C0C0C0' }}
                     >
                       <option value={VB6FileMode.Input}>Input</option>
@@ -628,7 +725,7 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
                     <label>Access:</label>
                     <select
                       value={operationAccess}
-                      onChange={(e) => setOperationAccess(parseInt(e.target.value))}
+                      onChange={e => setOperationAccess(parseInt(e.target.value))}
                       style={{ width: '100%', border: '1px inset #C0C0C0' }}
                     >
                       <option value={VB6FileAccess.Read}>Read</option>
@@ -638,25 +735,74 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', marginBottom: '8px' }}>
-                  <button onClick={handleOpenFile} style={{ padding: '4px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '4px',
+                    marginBottom: '8px',
+                  }}
+                >
+                  <button
+                    onClick={handleOpenFile}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
+                  >
                     Open File
                   </button>
-                  <button onClick={handleCloseFile} style={{ padding: '4px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}>
+                  <button
+                    onClick={handleCloseFile}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
+                  >
                     Close File
                   </button>
-                  <button onClick={handleFreeFile} style={{ padding: '4px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}>
+                  <button
+                    onClick={handleFreeFile}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
+                  >
                     Free File #
                   </button>
-                  <button onClick={handleFileLenCheck} style={{ padding: '4px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}>
+                  <button
+                    onClick={handleFileLenCheck}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
+                  >
                     File Length
                   </button>
                 </div>
               </div>
 
               {/* I/O Operations */}
-              <div style={{ flex: 1, backgroundColor: '#FFFFFF', border: '1px inset #C0C0C0', padding: '4px' }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '4px', backgroundColor: '#C0C0C0', padding: '2px' }}>
+              <div
+                style={{
+                  flex: 1,
+                  backgroundColor: '#FFFFFF',
+                  border: '1px inset #C0C0C0',
+                  padding: '4px',
+                }}
+              >
+                <div
+                  style={{
+                    fontWeight: 'bold',
+                    marginBottom: '4px',
+                    backgroundColor: '#C0C0C0',
+                    padding: '2px',
+                  }}
+                >
                   I/O Operations (Handle #{selectedHandle || 'None'})
                 </div>
 
@@ -664,8 +810,14 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
                   <label>Data/Values:</label>
                   <textarea
                     value={operationData}
-                    onChange={(e) => setOperationData(e.target.value)}
-                    style={{ width: '100%', height: '60px', padding: '2px', border: '1px inset #C0C0C0', resize: 'none' }}
+                    onChange={e => setOperationData(e.target.value)}
+                    style={{
+                      width: '100%',
+                      height: '60px',
+                      padding: '2px',
+                      border: '1px inset #C0C0C0',
+                      resize: 'none',
+                    }}
                     placeholder="Enter data, comma-separated values, or record content"
                   />
                 </div>
@@ -676,7 +828,7 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
                     <input
                       type="number"
                       value={operationPosition}
-                      onChange={(e) => setOperationPosition(parseInt(e.target.value) || 1)}
+                      onChange={e => setOperationPosition(parseInt(e.target.value) || 1)}
                       style={{ width: '60px', padding: '2px', border: '1px inset #C0C0C0' }}
                     />
                   </div>
@@ -685,71 +837,206 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
                     <input
                       type="number"
                       value={operationRecord}
-                      onChange={(e) => setOperationRecord(parseInt(e.target.value) || 1)}
+                      onChange={e => setOperationRecord(parseInt(e.target.value) || 1)}
                       style={{ width: '60px', padding: '2px', border: '1px inset #C0C0C0' }}
                     />
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', marginBottom: '8px' }}>
-                  <button onClick={handlePrintToFile} style={{ padding: '4px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '4px',
+                    marginBottom: '8px',
+                  }}
+                >
+                  <button
+                    onClick={handlePrintToFile}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
+                  >
                     Print
                   </button>
-                  <button onClick={handleWriteToFile} style={{ padding: '4px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}>
+                  <button
+                    onClick={handleWriteToFile}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
+                  >
                     Write
                   </button>
-                  <button onClick={handleInputFromFile} style={{ padding: '4px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}>
+                  <button
+                    onClick={handleInputFromFile}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
+                  >
                     Input
                   </button>
-                  <button onClick={handleLineInputFromFile} style={{ padding: '4px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}>
+                  <button
+                    onClick={handleLineInputFromFile}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
+                  >
                     Line Input
                   </button>
-                  <button onClick={handleGetFromFile} style={{ padding: '4px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}>
+                  <button
+                    onClick={handleGetFromFile}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
+                  >
                     Get
                   </button>
-                  <button onClick={handlePutToFile} style={{ padding: '4px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}>
+                  <button
+                    onClick={handlePutToFile}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
+                  >
                     Put
                   </button>
-                  <button onClick={handleSeekFile} style={{ padding: '4px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}>
+                  <button
+                    onClick={handleSeekFile}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
+                  >
                     Seek
                   </button>
-                  <button onClick={handleEOFCheck} style={{ padding: '4px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}>
+                  <button
+                    onClick={handleEOFCheck}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
+                  >
                     EOF
                   </button>
-                  <button onClick={handleLOFCheck} style={{ padding: '4px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}>
+                  <button
+                    onClick={handleLOFCheck}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
+                  >
                     LOF
                   </button>
-                  <button onClick={handleLocCheck} style={{ padding: '4px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}>
+                  <button
+                    onClick={handleLocCheck}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
+                  >
                     Loc
                   </button>
                 </div>
               </div>
 
               {/* File Management */}
-              <div style={{ flex: 1, backgroundColor: '#FFFFFF', border: '1px inset #C0C0C0', padding: '4px' }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '4px', backgroundColor: '#C0C0C0', padding: '2px' }}>
+              <div
+                style={{
+                  flex: 1,
+                  backgroundColor: '#FFFFFF',
+                  border: '1px inset #C0C0C0',
+                  padding: '4px',
+                }}
+              >
+                <div
+                  style={{
+                    fontWeight: 'bold',
+                    marginBottom: '4px',
+                    backgroundColor: '#C0C0C0',
+                    padding: '2px',
+                  }}
+                >
                   File Management
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', marginBottom: '8px' }}>
-                  <button onClick={handleFileCopy} style={{ padding: '4px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '4px',
+                    marginBottom: '8px',
+                  }}
+                >
+                  <button
+                    onClick={handleFileCopy}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
+                  >
                     Copy File
                   </button>
-                  <button onClick={handleDeleteFile} style={{ padding: '4px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}>
+                  <button
+                    onClick={handleDeleteFile}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
+                  >
                     Kill File
                   </button>
-                  <button onClick={handleRenameFile} style={{ padding: '4px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}>
+                  <button
+                    onClick={handleRenameFile}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
+                  >
                     Rename File
                   </button>
-                  <button onClick={handleDirListing} style={{ padding: '4px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0' }}>
+                  <button
+                    onClick={handleDirListing}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: '#E0E0E0',
+                      border: '1px outset #C0C0C0',
+                    }}
+                  >
                     Dir Listing
                   </button>
                 </div>
 
                 {lastResult !== null && (
-                  <div style={{ marginTop: '8px', padding: '4px', backgroundColor: '#FFFFCC', border: '1px inset #C0C0C0' }}>
+                  <div
+                    style={{
+                      marginTop: '8px',
+                      padding: '4px',
+                      backgroundColor: '#FFFFCC',
+                      border: '1px inset #C0C0C0',
+                    }}
+                  >
                     <div style={{ fontWeight: 'bold', fontSize: '7pt' }}>Last Result:</div>
-                    <div style={{ fontSize: '7pt', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                    <div
+                      style={{ fontSize: '7pt', fontFamily: 'monospace', wordBreak: 'break-all' }}
+                    >
                       {typeof lastResult === 'string' ? lastResult : JSON.stringify(lastResult)}
                     </div>
                   </div>
@@ -761,25 +1048,39 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
           {/* Output Tab */}
           {activeTab === 'output' && (
             <div style={{ flex: 1, padding: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '8px',
+                }}
+              >
                 <div style={{ fontWeight: 'bold' }}>Operation Log ({output.length} entries)</div>
-                <button 
+                <button
                   onClick={clearOutput}
-                  style={{ padding: '4px 8px', backgroundColor: '#E0E0E0', border: '1px outset #C0C0C0', fontSize: '7pt' }}
+                  style={{
+                    padding: '4px 8px',
+                    backgroundColor: '#E0E0E0',
+                    border: '1px outset #C0C0C0',
+                    fontSize: '7pt',
+                  }}
                 >
                   Clear Log
                 </button>
               </div>
-              <div style={{
-                backgroundColor: '#000000',
-                color: '#00FF00',
-                padding: '8px',
-                height: 'calc(100% - 50px)',
-                overflow: 'auto',
-                fontFamily: 'monospace',
-                fontSize: '8pt',
-                border: '1px inset #C0C0C0'
-              }}>
+              <div
+                style={{
+                  backgroundColor: '#000000',
+                  color: '#00FF00',
+                  padding: '8px',
+                  height: 'calc(100% - 50px)',
+                  overflow: 'auto',
+                  fontFamily: 'monospace',
+                  fontSize: '8pt',
+                  border: '1px inset #C0C0C0',
+                }}
+              >
                 {output.map((line, index) => (
                   <div key={index} style={{ marginBottom: '2px' }}>
                     {line}
@@ -797,10 +1098,25 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
           {/* Stats Tab */}
           {activeTab === 'stats' && (
             <div style={{ flex: 1, padding: '8px' }}>
-              <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>VB6 File I/O System Statistics</div>
+              <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
+                VB6 File I/O System Statistics
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div style={{ backgroundColor: '#FFFFFF', border: '1px inset #C0C0C0', padding: '8px' }}>
-                  <div style={{ fontWeight: 'bold', marginBottom: '4px', backgroundColor: '#C0C0C0', padding: '2px' }}>
+                <div
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    border: '1px inset #C0C0C0',
+                    padding: '8px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: 'bold',
+                      marginBottom: '4px',
+                      backgroundColor: '#C0C0C0',
+                      padding: '2px',
+                    }}
+                  >
                     System Info
                   </div>
                   <div>Virtual Files: {virtualFiles.length}</div>
@@ -808,9 +1124,22 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
                   <div>Max File Handles: 511</div>
                   <div>Available Handles: {511 - openFiles.length}</div>
                 </div>
-                
-                <div style={{ backgroundColor: '#FFFFFF', border: '1px inset #C0C0C0', padding: '8px' }}>
-                  <div style={{ fontWeight: 'bold', marginBottom: '4px', backgroundColor: '#C0C0C0', padding: '2px' }}>
+
+                <div
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    border: '1px inset #C0C0C0',
+                    padding: '8px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: 'bold',
+                      marginBottom: '4px',
+                      backgroundColor: '#C0C0C0',
+                      padding: '2px',
+                    }}
+                  >
                     I/O Statistics
                   </div>
                   <div>Bytes Read: {VB6FileIO.getFileSystemStats().totalBytesRead}</div>
@@ -819,34 +1148,67 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
                   <div>Error Count: {VB6FileIO.getFileSystemStats().errorCount}</div>
                 </div>
 
-                <div style={{ backgroundColor: '#FFFFFF', border: '1px inset #C0C0C0', padding: '8px', gridColumn: 'span 2' }}>
-                  <div style={{ fontWeight: 'bold', marginBottom: '4px', backgroundColor: '#C0C0C0', padding: '2px' }}>
+                <div
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    border: '1px inset #C0C0C0',
+                    padding: '8px',
+                    gridColumn: 'span 2',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: 'bold',
+                      marginBottom: '4px',
+                      backgroundColor: '#C0C0C0',
+                      padding: '2px',
+                    }}
+                  >
                     Supported Operations
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', fontSize: '7pt' }}>
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr 1fr',
+                      gap: '8px',
+                      fontSize: '7pt',
+                    }}
+                  >
                     <div>
-                      <strong>File Management:</strong><br/>
-                      • Open, Close<br/>
-                      • FreeFile<br/>
-                      • Kill, Name<br/>
-                      • FileCopy<br/>
-                      • Dir, FileLen
+                      <strong>File Management:</strong>
+                      <br />
+                      • Open, Close
+                      <br />
+                      • FreeFile
+                      <br />
+                      • Kill, Name
+                      <br />
+                      • FileCopy
+                      <br />• Dir, FileLen
                     </div>
                     <div>
-                      <strong>Sequential I/O:</strong><br/>
-                      • Print, Write<br/>
-                      • Input, Line Input<br/>
-                      • EOF detection<br/>
-                      • Append mode<br/>
-                      • Text processing
+                      <strong>Sequential I/O:</strong>
+                      <br />
+                      • Print, Write
+                      <br />
+                      • Input, Line Input
+                      <br />
+                      • EOF detection
+                      <br />
+                      • Append mode
+                      <br />• Text processing
                     </div>
                     <div>
-                      <strong>Random/Binary I/O:</strong><br/>
-                      • Get, Put<br/>
-                      • Seek, Loc, LOF<br/>
-                      • Record-based access<br/>
-                      • Binary data handling<br/>
-                      • Position control
+                      <strong>Random/Binary I/O:</strong>
+                      <br />
+                      • Get, Put
+                      <br />
+                      • Seek, Loc, LOF
+                      <br />
+                      • Record-based access
+                      <br />
+                      • Binary data handling
+                      <br />• Position control
                     </div>
                   </div>
                 </div>
@@ -856,21 +1218,24 @@ export const VB6FileIOManager: React.FC<VB6FileIOManagerProps> = ({
         </div>
 
         {/* Status Bar */}
-        <div style={{
-          backgroundColor: '#E0E0E0',
-          padding: '2px 4px',
-          borderTop: '1px solid #C0C0C0',
-          fontSize: '8pt',
-          color: error ? '#FF0000' : '#000080',
-          display: 'flex',
-          justifyContent: 'space-between'
-        }}>
+        <div
+          style={{
+            backgroundColor: '#E0E0E0',
+            padding: '2px 4px',
+            borderTop: '1px solid #C0C0C0',
+            fontSize: '8pt',
+            color: error ? '#FF0000' : '#000080',
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
           <div>
-            {error || (selectedHandle ? `Selected Handle: ${selectedHandle}` : 'Ready - Select a file handle to perform I/O operations')}
+            {error ||
+              (selectedHandle
+                ? `Selected Handle: ${selectedHandle}`
+                : 'Ready - Select a file handle to perform I/O operations')}
           </div>
-          <div>
-            VB6 File I/O System - Complete Implementation
-          </div>
+          <div>VB6 File I/O System - Complete Implementation</div>
         </div>
       </div>
     </div>

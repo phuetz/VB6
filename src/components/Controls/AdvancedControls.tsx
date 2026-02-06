@@ -48,7 +48,12 @@ export const MSChart = forwardRef<HTMLDivElement, any>((props, ref) => {
     if (!ctx) return;
 
     // Function to draw bar chart
-    const drawBarChart = (ctx: CanvasRenderingContext2D, plotArea: any, data: any[], series: any[]) => {
+    const drawBarChart = (
+      ctx: CanvasRenderingContext2D,
+      plotArea: any,
+      data: any[],
+      series: any[]
+    ) => {
       if (!data.length || !series.length) return;
 
       const barWidth = plotArea.width / (data.length * series.length + data.length + 1);
@@ -58,7 +63,8 @@ export const MSChart = forwardRef<HTMLDivElement, any>((props, ref) => {
         series.forEach((serie, seriesIndex) => {
           const value = dataPoint[serie.name] || 0;
           const barHeight = (value / maxValue) * plotArea.height;
-          const x = plotArea.x + (dataIndex * (barWidth * series.length + barWidth)) + (seriesIndex * barWidth);
+          const x =
+            plotArea.x + dataIndex * (barWidth * series.length + barWidth) + seriesIndex * barWidth;
           const y = plotArea.y + plotArea.height - barHeight;
 
           ctx.fillStyle = serie.color || `hsl(${seriesIndex * 60}, 70%, 50%)`;
@@ -86,7 +92,12 @@ export const MSChart = forwardRef<HTMLDivElement, any>((props, ref) => {
     };
 
     // Function to draw line chart
-    const drawLineChart = (ctx: CanvasRenderingContext2D, plotArea: any, data: any[], series: any[]) => {
+    const drawLineChart = (
+      ctx: CanvasRenderingContext2D,
+      plotArea: any,
+      data: any[],
+      series: any[]
+    ) => {
       if (!data.length || !series.length) return;
 
       const pointSpacing = plotArea.width / (data.length - 1);
@@ -99,7 +110,7 @@ export const MSChart = forwardRef<HTMLDivElement, any>((props, ref) => {
 
         data.forEach((dataPoint, dataIndex) => {
           const value = dataPoint[serie.name] || 0;
-          const x = plotArea.x + (dataIndex * pointSpacing);
+          const x = plotArea.x + dataIndex * pointSpacing;
           const y = plotArea.y + plotArea.height - (value / maxValue) * plotArea.height;
 
           if (dataIndex === 0) {
@@ -120,7 +131,12 @@ export const MSChart = forwardRef<HTMLDivElement, any>((props, ref) => {
     };
 
     // Function to draw pie chart
-    const drawPieChart = (ctx: CanvasRenderingContext2D, plotArea: any, data: any[], series: any[]) => {
+    const drawPieChart = (
+      ctx: CanvasRenderingContext2D,
+      plotArea: any,
+      data: any[],
+      series: any[]
+    ) => {
       if (!data.length || !series.length) return;
 
       const centerX = plotArea.x + plotArea.width / 2;
@@ -158,7 +174,12 @@ export const MSChart = forwardRef<HTMLDivElement, any>((props, ref) => {
     };
 
     // Function to draw area chart
-    const drawAreaChart = (ctx: CanvasRenderingContext2D, plotArea: any, data: any[], series: any[]) => {
+    const drawAreaChart = (
+      ctx: CanvasRenderingContext2D,
+      plotArea: any,
+      data: any[],
+      series: any[]
+    ) => {
       if (!data.length || !series.length) return;
 
       const pointSpacing = plotArea.width / (data.length - 1);
@@ -173,7 +194,7 @@ export const MSChart = forwardRef<HTMLDivElement, any>((props, ref) => {
 
         data.forEach((dataPoint, dataIndex) => {
           const value = dataPoint[serie.name] || 0;
-          const x = plotArea.x + (dataIndex * pointSpacing);
+          const x = plotArea.x + dataIndex * pointSpacing;
           const y = plotArea.y + plotArea.height - (value / maxValue) * plotArea.height;
           ctx.lineTo(x, y);
         });
@@ -186,7 +207,13 @@ export const MSChart = forwardRef<HTMLDivElement, any>((props, ref) => {
     };
 
     // Function to draw legend
-    const drawLegend = (ctx: CanvasRenderingContext2D, series: any[], position: string, canvasWidth: number, canvasHeight: number) => {
+    const drawLegend = (
+      ctx: CanvasRenderingContext2D,
+      series: any[],
+      position: string,
+      canvasWidth: number,
+      canvasHeight: number
+    ) => {
       const legendItemHeight = 20;
       const legendItemWidth = 100;
 
@@ -213,7 +240,7 @@ export const MSChart = forwardRef<HTMLDivElement, any>((props, ref) => {
       }
 
       series.forEach((serie, index) => {
-        const itemY = legendY + (index * legendItemHeight);
+        const itemY = legendY + index * legendItemHeight;
 
         // Carré de couleur
         ctx.fillStyle = serie.color || `hsl(${index * 60}, 70%, 50%)`;
@@ -283,23 +310,40 @@ export const MSChart = forwardRef<HTMLDivElement, any>((props, ref) => {
     if (showLegend && series.length > 0) {
       drawLegend(ctx, series, legendPosition, canvas.width, canvas.height);
     }
-  }, [backgroundColor, borderStyle, title, titleFont, chartType, data, series, showLegend, legendPosition, plotAreaColor, showDataLabels]);
+  }, [
+    backgroundColor,
+    borderStyle,
+    title,
+    titleFont,
+    chartType,
+    data,
+    series,
+    showLegend,
+    legendPosition,
+    plotAreaColor,
+    showDataLabels,
+  ]);
 
+  const handleCanvasClick = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      if (!enabled) return;
 
-  const handleCanvasClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!enabled) return;
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
 
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    // Détecter le clic sur une série/point
-    fireEvent(name, 'SeriesSelected', { series: selectedSeries });
-    fireEvent(name, 'PointSelected', { series: selectedPoint.series, point: selectedPoint.point });
-  }, [enabled, name, fireEvent, selectedSeries, selectedPoint]);
+      // Détecter le clic sur une série/point
+      fireEvent(name, 'SeriesSelected', { series: selectedSeries });
+      fireEvent(name, 'PointSelected', {
+        series: selectedPoint.series,
+        point: selectedPoint.point,
+      });
+    },
+    [enabled, name, fireEvent, selectedSeries, selectedPoint]
+  );
 
   useEffect(() => {
     drawChart();
@@ -317,14 +361,7 @@ export const MSChart = forwardRef<HTMLDivElement, any>((props, ref) => {
   };
 
   return (
-    <div
-      ref={ref}
-      style={chartStyle}
-      title={toolTipText}
-      data-name={name}
-      data-tag={tag}
-      {...rest}
-    >
+    <div ref={ref} style={chartStyle} title={toolTipText} data-name={name} data-tag={tag} {...rest}>
       <canvas
         ref={canvasRef}
         width={width}
@@ -474,8 +511,18 @@ export const MonthView = forwardRef<HTMLDivElement, any>((props, ref) => {
 
   const daysOfWeek = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
   const months = [
-    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    'Janvier',
+    'Février',
+    'Mars',
+    'Avril',
+    'Mai',
+    'Juin',
+    'Juillet',
+    'Août',
+    'Septembre',
+    'Octobre',
+    'Novembre',
+    'Décembre',
   ];
 
   const getDaysInMonth = (date: Date) => {
@@ -510,12 +557,12 @@ export const MonthView = forwardRef<HTMLDivElement, any>((props, ref) => {
     const today = new Date();
 
     const days = [];
-    
+
     // Jours du mois précédent
     const prevMonth = new Date(currentDate);
     prevMonth.setMonth(prevMonth.getMonth() - 1);
     const daysInPrevMonth = getDaysInMonth(prevMonth);
-    
+
     for (let i = firstDay - 1; i >= 0; i--) {
       days.push(
         <div
@@ -535,8 +582,7 @@ export const MonthView = forwardRef<HTMLDivElement, any>((props, ref) => {
     // Jours du mois actuel
     for (let day = 1; day <= daysInMonth; day++) {
       const dayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-      const isToday = showToday && 
-        dayDate.toDateString() === today.toDateString();
+      const isToday = showToday && dayDate.toDateString() === today.toDateString();
       const isSelected = dayDate.toDateString() === selectedDate.toDateString();
 
       days.push(
@@ -651,7 +697,7 @@ export const MonthView = forwardRef<HTMLDivElement, any>((props, ref) => {
           backgroundColor: '#F0F0F0',
         }}
       >
-        {daysOfWeek.map((day) => (
+        {daysOfWeek.map(day => (
           <div
             key={day}
             style={{
@@ -730,40 +776,48 @@ export const Slider = forwardRef<HTMLDivElement, any>((props, ref) => {
   const sliderRef = useRef<HTMLDivElement>(null);
   const { fireEvent, updateControl } = useVB6Store();
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (!enabled) return;
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (!enabled) return;
 
-    setIsDragging(true);
-    const rect = sliderRef.current?.getBoundingClientRect();
-    if (!rect) return;
+      setIsDragging(true);
+      const rect = sliderRef.current?.getBoundingClientRect();
+      if (!rect) return;
 
-    const percentage = orientation === 'Horizontal' 
-      ? (e.clientX - rect.left) / rect.width
-      : 1 - (e.clientY - rect.top) / rect.height;
+      const percentage =
+        orientation === 'Horizontal'
+          ? (e.clientX - rect.left) / rect.width
+          : 1 - (e.clientY - rect.top) / rect.height;
 
-    const newValue = Math.round(min + (max - min) * percentage);
-    const clampedValue = Math.max(min, Math.min(max, newValue));
+      const newValue = Math.round(min + (max - min) * percentage);
+      const clampedValue = Math.max(min, Math.min(max, newValue));
 
-    setCurrentValue(clampedValue);
-    updateControl(id, 'value', clampedValue);
-    fireEvent(name, 'Change', { value: clampedValue });
-  }, [enabled, orientation, min, max, id, name, fireEvent, updateControl]);
+      setCurrentValue(clampedValue);
+      updateControl(id, 'value', clampedValue);
+      fireEvent(name, 'Change', { value: clampedValue });
+    },
+    [enabled, orientation, min, max, id, name, fireEvent, updateControl]
+  );
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging || !enabled || !sliderRef.current) return;
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isDragging || !enabled || !sliderRef.current) return;
 
-    const rect = sliderRef.current.getBoundingClientRect();
-    const percentage = orientation === 'Horizontal' 
-      ? (e.clientX - rect.left) / rect.width
-      : 1 - (e.clientY - rect.top) / rect.height;
+      const rect = sliderRef.current.getBoundingClientRect();
+      const percentage =
+        orientation === 'Horizontal'
+          ? (e.clientX - rect.left) / rect.width
+          : 1 - (e.clientY - rect.top) / rect.height;
 
-    const newValue = Math.round(min + (max - min) * percentage);
-    const clampedValue = Math.max(min, Math.min(max, newValue));
+      const newValue = Math.round(min + (max - min) * percentage);
+      const clampedValue = Math.max(min, Math.min(max, newValue));
 
-    setCurrentValue(clampedValue);
-    updateControl(id, 'value', clampedValue);
-    fireEvent(name, 'Scroll', { value: clampedValue });
-  }, [isDragging, enabled, orientation, min, max, id, name, fireEvent, updateControl]);
+      setCurrentValue(clampedValue);
+      updateControl(id, 'value', clampedValue);
+      fireEvent(name, 'Scroll', { value: clampedValue });
+    },
+    [isDragging, enabled, orientation, min, max, id, name, fireEvent, updateControl]
+  );
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -796,19 +850,21 @@ export const Slider = forwardRef<HTMLDivElement, any>((props, ref) => {
   const trackStyle: React.CSSProperties = {
     position: 'absolute',
     backgroundColor: '#808080',
-    ...(orientation === 'Horizontal' ? {
-      left: 4,
-      right: 4,
-      top: '50%',
-      height: 4,
-      transform: 'translateY(-50%)',
-    } : {
-      top: 4,
-      bottom: 4,
-      left: '50%',
-      width: 4,
-      transform: 'translateX(-50%)',
-    }),
+    ...(orientation === 'Horizontal'
+      ? {
+          left: 4,
+          right: 4,
+          top: '50%',
+          height: 4,
+          transform: 'translateY(-50%)',
+        }
+      : {
+          top: 4,
+          bottom: 4,
+          left: '50%',
+          width: 4,
+          transform: 'translateX(-50%)',
+        }),
   };
 
   const thumbPosition = ((currentValue - min) / (max - min)) * 100;
@@ -819,15 +875,17 @@ export const Slider = forwardRef<HTMLDivElement, any>((props, ref) => {
     backgroundColor: '#C0C0C0',
     border: '2px outset #C0C0C0',
     cursor: enabled ? 'grab' : 'default',
-    ...(orientation === 'Horizontal' ? {
-      left: `calc(${thumbPosition}% - 6px)`,
-      top: '50%',
-      transform: 'translateY(-50%)',
-    } : {
-      top: `calc(${100 - thumbPosition}% - 10px)`,
-      left: '50%',
-      transform: 'translateX(-50%)',
-    }),
+    ...(orientation === 'Horizontal'
+      ? {
+          left: `calc(${thumbPosition}% - 6px)`,
+          top: '50%',
+          transform: 'translateY(-50%)',
+        }
+      : {
+          top: `calc(${100 - thumbPosition}% - 10px)`,
+          left: '50%',
+          transform: 'translateX(-50%)',
+        }),
   };
 
   return (
@@ -842,14 +900,14 @@ export const Slider = forwardRef<HTMLDivElement, any>((props, ref) => {
       <div ref={sliderRef} style={{ width: '100%', height: '100%' }} onMouseDown={handleMouseDown}>
         <div style={trackStyle} />
         <div style={thumbStyle} />
-        
+
         {/* Ticks */}
         {tickStyle !== 'None' && (
           <div>
             {Array.from({ length: Math.floor((max - min) / tickFrequency) + 1 }, (_, i) => {
               const tickValue = min + i * tickFrequency;
               const tickPosition = ((tickValue - min) / (max - min)) * 100;
-              
+
               return (
                 <div
                   key={i}
@@ -858,15 +916,17 @@ export const Slider = forwardRef<HTMLDivElement, any>((props, ref) => {
                     width: 1,
                     height: 4,
                     backgroundColor: '#000000',
-                    ...(orientation === 'Horizontal' ? {
-                      left: `${tickPosition}%`,
-                      ...(tickStyle === 'Top' || tickStyle === 'Both' ? { top: 2 } : {}),
-                      ...(tickStyle === 'Bottom' || tickStyle === 'Both' ? { bottom: 2 } : {}),
-                    } : {
-                      top: `${100 - tickPosition}%`,
-                      ...(tickStyle === 'Top' || tickStyle === 'Both' ? { left: 2 } : {}),
-                      ...(tickStyle === 'Bottom' || tickStyle === 'Both' ? { right: 2 } : {}),
-                    }),
+                    ...(orientation === 'Horizontal'
+                      ? {
+                          left: `${tickPosition}%`,
+                          ...(tickStyle === 'Top' || tickStyle === 'Both' ? { top: 2 } : {}),
+                          ...(tickStyle === 'Bottom' || tickStyle === 'Both' ? { bottom: 2 } : {}),
+                        }
+                      : {
+                          top: `${100 - tickPosition}%`,
+                          ...(tickStyle === 'Top' || tickStyle === 'Both' ? { left: 2 } : {}),
+                          ...(tickStyle === 'Bottom' || tickStyle === 'Both' ? { right: 2 } : {}),
+                        }),
                   }}
                 />
               );
@@ -966,18 +1026,10 @@ export const UpDown = forwardRef<HTMLDivElement, any>((props, ref) => {
       data-tag={tag}
       {...rest}
     >
-      <button
-        style={buttonStyle}
-        onClick={handleIncrement}
-        disabled={!enabled}
-      >
+      <button style={buttonStyle} onClick={handleIncrement} disabled={!enabled}>
         {orientation === 'Vertical' ? '▲' : '▶'}
       </button>
-      <button
-        style={buttonStyle}
-        onClick={handleDecrement}
-        disabled={!enabled}
-      >
+      <button style={buttonStyle} onClick={handleDecrement} disabled={!enabled}>
         {orientation === 'Vertical' ? '▼' : '◀'}
       </button>
     </div>

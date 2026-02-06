@@ -49,6 +49,7 @@ Dim WithEvents frm As Form
 ```
 
 **Caractéristiques**:
+
 - Scope: Public, Private, Dim
 - Liaison automatique avec les event handlers
 - Support des classes et contrôles VB6
@@ -80,6 +81,7 @@ End Sub
 ```
 
 **Règles**:
+
 - Format: `[Private|Public] Sub objectName_EventName([params])`
 - L'objet doit être déclaré WithEvents
 - Paramètres par défaut: ByRef (comme VB6)
@@ -102,6 +104,7 @@ Event BeforeUpdate(ByRef Cancel As Boolean)
 ```
 
 **Caractéristiques**:
+
 - Public/Private scope
 - Paramètres: ByVal/ByRef (défaut: ByVal pour Events)
 - Support des paramètres optionnels
@@ -177,6 +180,7 @@ RaiseEvent Calculate(x + y, total * 2)
 **61 tests implémentés et passés (100%)**:
 
 ### Suite 1: WithEvents Declarations (7 tests)
+
 - ✅ Parse simple WithEvents declaration
 - ✅ Parse Public WithEvents declaration
 - ✅ Parse Dim WithEvents declaration
@@ -186,6 +190,7 @@ RaiseEvent Calculate(x + y, total * 2)
 - ✅ Handle case-insensitive keywords
 
 ### Suite 2: Event Handlers Parsing (10 tests)
+
 - ✅ Parse simple event handler
 - ✅ Parse event handler with parameters
 - ✅ Parse MouseMove event with multiple parameters
@@ -198,6 +203,7 @@ RaiseEvent Calculate(x + y, total * 2)
 - ✅ Return null if WithEvents variable not registered
 
 ### Suite 3: WithEvents Registration (5 tests)
+
 - ✅ Register and retrieve WithEvents variable
 - ✅ Register public WithEvents with global scope
 - ✅ Register private WithEvents with module scope
@@ -205,6 +211,7 @@ RaiseEvent Calculate(x + y, total * 2)
 - ✅ Get all module WithEvents variables
 
 ### Suite 4: JavaScript Generation (5 tests)
+
 - ✅ Generate JavaScript for WithEvents variable
 - ✅ Generate event handler JavaScript
 - ✅ Generate event wiring methods
@@ -212,12 +219,14 @@ RaiseEvent Calculate(x + y, total * 2)
 - ✅ Generate TypeScript definitions
 
 ### Suite 5: WithEvents Validation & Export (3 tests)
+
 - ✅ Validate WithEvents declaration
 - ✅ Export WithEvents data
 - ✅ Import WithEvents data
 - ✅ Clear all WithEvents data
 
 ### Suite 6: Event Declarations (6 tests)
+
 - ✅ Parse simple Event declaration
 - ✅ Parse Public Event declaration
 - ✅ Parse Event with multiple parameters
@@ -226,6 +235,7 @@ RaiseEvent Calculate(x + y, total * 2)
 - ✅ Handle Event with no parameters
 
 ### Suite 7: RaiseEvent Statements (8 tests)
+
 - ✅ Parse simple RaiseEvent
 - ✅ Parse RaiseEvent with parentheses
 - ✅ Parse RaiseEvent with single argument
@@ -236,12 +246,14 @@ RaiseEvent Calculate(x + y, total * 2)
 - ✅ Handle complex argument expressions
 
 ### Suite 8: Custom Events Registration (4 tests)
+
 - ✅ Register and retrieve Event
 - ✅ Register Event with class name
 - ✅ Get all module events
 - ✅ Register RaiseEvent statement
 
 ### Suite 9: Event Code Generation (5 tests)
+
 - ✅ Generate VB6EventEmitter base class
 - ✅ Generate Event declaration comment
 - ✅ Generate RaiseEvent JavaScript
@@ -249,12 +261,14 @@ RaiseEvent Calculate(x + y, total * 2)
 - ✅ Generate TypeScript definitions
 
 ### Suite 10: Validation & Export (3 tests)
+
 - ✅ Validate event usage
 - ✅ Export Event data
 - ✅ Import Event data
 - ✅ Clear all Event data
 
 ### Suite 11: Real-World Scenarios (3 tests)
+
 - ✅ CommandButton WithEvents
 - ✅ Custom Class with Events
 - ✅ Integration Scenario (WithEvents + Custom Events)
@@ -264,11 +278,13 @@ RaiseEvent Calculate(x + y, total * 2)
 ## 📊 Statistiques
 
 ### Fichiers
+
 - ✅ `src/compiler/VB6WithEventsSupport.ts` - 507 lignes
 - ✅ `src/compiler/VB6CustomEventsSupport.ts` - 787 lignes
 - ✅ `src/test/compiler/VB6WithEvents.test.ts` - 754 lignes (61 tests)
 
 ### Couverture
+
 - **WithEvents Parsing**: 100%
 - **Event Handlers**: 100%
 - **Custom Events**: 100%
@@ -528,12 +544,12 @@ End Sub
 
 ### ⚠️ Différences avec VB6 Natif
 
-| Feature | VB6 Natif | VB6 Web | Impact |
-|---------|-----------|---------|--------|
-| RaiseEvent syntax | `RaiseEvent Foo` ou `RaiseEvent Foo()` | Requiert `RaiseEvent Foo()` | Faible - ajout automatique de () possible |
-| Event parameter default | ByRef | ByVal (Events), ByRef (Handlers) | Moyen - respecte les spécifications VB6 |
-| Nested parentheses in RaiseEvent args | Supporté | Limité | Faible - cas rare |
-| WithEvents in Procedures | Non supporté | Non supporté | Aucun - identique |
+| Feature                               | VB6 Natif                              | VB6 Web                          | Impact                                    |
+| ------------------------------------- | -------------------------------------- | -------------------------------- | ----------------------------------------- |
+| RaiseEvent syntax                     | `RaiseEvent Foo` ou `RaiseEvent Foo()` | Requiert `RaiseEvent Foo()`      | Faible - ajout automatique de () possible |
+| Event parameter default               | ByRef                                  | ByVal (Events), ByRef (Handlers) | Moyen - respecte les spécifications VB6   |
+| Nested parentheses in RaiseEvent args | Supporté                               | Limité                           | Faible - cas rare                         |
+| WithEvents in Procedures              | Non supporté                           | Non supporté                     | Aucun - identique                         |
 
 ### 📌 Notes Importantes
 
@@ -569,11 +585,13 @@ WithEvents et Custom Events sont maintenant complets. Phase 1 continue avec:
 ## 📚 Ressources
 
 ### Documentation
+
 - `src/compiler/VB6WithEventsSupport.ts` - WithEvents parsing et code generation
 - `src/compiler/VB6CustomEventsSupport.ts` - Custom Events et RaiseEvent
 - `src/test/compiler/VB6WithEvents.test.ts` - 61 tests avec tous les cas d'usage
 
 ### Références VB6
+
 - Microsoft VB6 Language Reference - WithEvents Statement
 - Microsoft VB6 Language Reference - Event Statement
 - Microsoft VB6 Language Reference - RaiseEvent Statement

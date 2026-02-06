@@ -1,126 +1,158 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
+  <head>
     <title>Test Infinite Loop Fix</title>
     <style>
-        body { font-family: Arial; margin: 20px; background: #f0f0f0; }
-        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
-        .warning { background: #fff3cd; color: #856404; }
-        .info { background: #d1ecf1; color: #0c5460; }
-        iframe { width: 100%; height: 500px; border: 1px solid #ccc; margin: 20px 0; }
-        pre { background: #fff; padding: 10px; border-radius: 4px; overflow: auto; max-height: 200px; }
+      body {
+        font-family: Arial;
+        margin: 20px;
+        background: #f0f0f0;
+      }
+      .status {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+      }
+      .success {
+        background: #d4edda;
+        color: #155724;
+      }
+      .error {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      .warning {
+        background: #fff3cd;
+        color: #856404;
+      }
+      .info {
+        background: #d1ecf1;
+        color: #0c5460;
+      }
+      iframe {
+        width: 100%;
+        height: 500px;
+        border: 1px solid #ccc;
+        margin: 20px 0;
+      }
+      pre {
+        background: #fff;
+        padding: 10px;
+        border-radius: 4px;
+        overflow: auto;
+        max-height: 200px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>🔧 Test Correction Boucle Infinie</h1>
     <div id="status"></div>
     <div id="logs">
-        <h3>Console Logs:</h3>
-        <pre id="console-output"></pre>
+      <h3>Console Logs:</h3>
+      <pre id="console-output"></pre>
     </div>
-    
+
     <div>
-        <h3>Application Frame:</h3>
-        <iframe id="app-frame" src="http://localhost:8081/"></iframe>
+      <h3>Application Frame:</h3>
+      <iframe id="app-frame" src="http://localhost:8081/"></iframe>
     </div>
-    
+
     <script>
-        const statusDiv = document.getElementById('status');
-        const consoleOutput = document.getElementById('console-output');
-        const frame = document.getElementById('app-frame');
-        
-        function addStatus(message, type = 'info') {
-            const div = document.createElement('div');
-            div.className = `status ${type}`;
-            div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
-            statusDiv.appendChild(div);
+      const statusDiv = document.getElementById('status');
+      const consoleOutput = document.getElementById('console-output');
+      const frame = document.getElementById('app-frame');
+
+      function addStatus(message, type = 'info') {
+        const div = document.createElement('div');
+        div.className = `status ${type}`;
+        div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+        statusDiv.appendChild(div);
+      }
+
+      function addConsoleLog(message) {
+        consoleOutput.textContent += `${new Date().toLocaleTimeString()}: ${message}\n`;
+        consoleOutput.scrollTop = consoleOutput.scrollHeight;
+      }
+
+      // Override console methods
+      const originalError = console.error;
+      const originalWarn = console.warn;
+      const originalLog = console.log;
+
+      console.error = function (...args) {
+        const message = args.join(' ');
+        addConsoleLog(`[ERROR] ${message}`);
+        if (message.includes('Maximum update depth exceeded')) {
+          addStatus('❌ Erreur de boucle infinie détectée!', 'error');
         }
-        
-        function addConsoleLog(message) {
-            consoleOutput.textContent += `${new Date().toLocaleTimeString()}: ${message}\n`;
-            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        return originalError.apply(this, args);
+      };
+
+      console.warn = function (...args) {
+        const message = args.join(' ');
+        addConsoleLog(`[WARN] ${message}`);
+        return originalWarn.apply(this, args);
+      };
+
+      console.log = function (...args) {
+        const message = args.join(' ');
+        if (message.includes('✅') || message.includes('🔍') || message.includes('VB6')) {
+          addConsoleLog(`[LOG] ${message}`);
         }
-        
-        // Override console methods
-        const originalError = console.error;
-        const originalWarn = console.warn;
-        const originalLog = console.log;
-        
-        console.error = function(...args) {
-            const message = args.join(' ');
-            addConsoleLog(`[ERROR] ${message}`);
-            if (message.includes('Maximum update depth exceeded')) {
-                addStatus('❌ Erreur de boucle infinie détectée!', 'error');
+        return originalLog.apply(this, args);
+      };
+
+      // Error handlers
+      window.addEventListener('error', e => {
+        const message = `Global Error: ${e.message} at ${e.filename}:${e.lineno}`;
+        addStatus(message, 'error');
+        addConsoleLog(`[GLOBAL ERROR] ${message}`);
+      });
+
+      window.addEventListener('unhandledrejection', e => {
+        const message = `Promise Rejection: ${e.reason}`;
+        addStatus(message, 'error');
+        addConsoleLog(`[PROMISE REJECTION] ${message}`);
+      });
+
+      // Frame monitoring
+      frame.onload = () => {
+        addStatus('✅ Frame chargé avec succès', 'success');
+
+        // Wait a bit and check if we're still getting updates
+        let updateCount = 0;
+        const checkUpdates = setInterval(() => {
+          updateCount++;
+          if (updateCount > 20) {
+            // After 10 seconds
+            clearInterval(checkUpdates);
+            addStatus('✅ Aucune boucle infinie détectée après 10 secondes', 'success');
+          }
+        }, 500);
+
+        // Check for specific errors after a delay
+        setTimeout(() => {
+          try {
+            const errorElements = document.querySelectorAll('.status.error');
+            const hasInfiniteLoopError = Array.from(errorElements).some(el =>
+              el.textContent.includes('Maximum update depth exceeded')
+            );
+
+            if (!hasInfiniteLoopError) {
+              addStatus('✅ Correction de la boucle infinie réussie!', 'success');
             }
-            return originalError.apply(this, args);
-        };
-        
-        console.warn = function(...args) {
-            const message = args.join(' ');
-            addConsoleLog(`[WARN] ${message}`);
-            return originalWarn.apply(this, args);
-        };
-        
-        console.log = function(...args) {
-            const message = args.join(' ');
-            if (message.includes('✅') || message.includes('🔍') || message.includes('VB6')) {
-                addConsoleLog(`[LOG] ${message}`);
-            }
-            return originalLog.apply(this, args);
-        };
-        
-        // Error handlers
-        window.addEventListener('error', (e) => {
-            const message = `Global Error: ${e.message} at ${e.filename}:${e.lineno}`;
-            addStatus(message, 'error');
-            addConsoleLog(`[GLOBAL ERROR] ${message}`);
-        });
-        
-        window.addEventListener('unhandledrejection', (e) => {
-            const message = `Promise Rejection: ${e.reason}`;
-            addStatus(message, 'error');
-            addConsoleLog(`[PROMISE REJECTION] ${message}`);
-        });
-        
-        // Frame monitoring
-        frame.onload = () => {
-            addStatus('✅ Frame chargé avec succès', 'success');
-            
-            // Wait a bit and check if we're still getting updates
-            let updateCount = 0;
-            const checkUpdates = setInterval(() => {
-                updateCount++;
-                if (updateCount > 20) { // After 10 seconds
-                    clearInterval(checkUpdates);
-                    addStatus('✅ Aucune boucle infinie détectée après 10 secondes', 'success');
-                }
-            }, 500);
-            
-            // Check for specific errors after a delay
-            setTimeout(() => {
-                try {
-                    const errorElements = document.querySelectorAll('.status.error');
-                    const hasInfiniteLoopError = Array.from(errorElements).some(el => 
-                        el.textContent.includes('Maximum update depth exceeded')
-                    );
-                    
-                    if (!hasInfiniteLoopError) {
-                        addStatus('✅ Correction de la boucle infinie réussie!', 'success');
-                    }
-                } catch (e) {
-                    addStatus(`⚠️ Erreur de vérification: ${e.message}`, 'warning');
-                }
-            }, 5000);
-        };
-        
-        frame.onerror = () => {
-            addStatus('❌ Erreur de chargement du frame', 'error');
-        };
-        
-        addStatus('🔍 Test de correction de boucle infinie démarré...', 'info');
-        addStatus('🎯 Surveillant les erreurs "Maximum update depth exceeded"...', 'info');
+          } catch (e) {
+            addStatus(`⚠️ Erreur de vérification: ${e.message}`, 'warning');
+          }
+        }, 5000);
+      };
+
+      frame.onerror = () => {
+        addStatus('❌ Erreur de chargement du frame', 'error');
+      };
+
+      addStatus('🔍 Test de correction de boucle infinie démarré...', 'info');
+      addStatus('🎯 Surveillant les erreurs "Maximum update depth exceeded"...', 'info');
     </script>
-</body>
+  </body>
 </html>

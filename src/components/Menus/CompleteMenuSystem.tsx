@@ -54,19 +54,23 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { fireEvent } = useVB6Store();
 
-  const executeCommand = useCallback((commandId: string) => {
-    console.log(`Executing command: ${commandId}`);
-    fireEvent('MenuSystem', 'CommandExecuted', { commandId });
-  }, [fireEvent]);
+  const executeCommand = useCallback(
+    (commandId: string) => {
+      fireEvent('MenuSystem', 'CommandExecuted', { commandId });
+    },
+    [fireEvent]
+  );
 
   return (
-    <MenuContext.Provider value={{
-      activeMenu,
-      setActiveMenu,
-      executeCommand,
-      isMenuOpen,
-      setIsMenuOpen,
-    }}>
+    <MenuContext.Provider
+      value={{
+        activeMenu,
+        setActiveMenu,
+        executeCommand,
+        isMenuOpen,
+        setIsMenuOpen,
+      }}
+    >
       {children}
     </MenuContext.Provider>
   );
@@ -118,19 +122,22 @@ export const ContextMenu: React.FC<{
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  const handleItemClick = useCallback((item: MenuItem) => {
-    if (!item.enabled || item.separator) return;
+  const handleItemClick = useCallback(
+    (item: MenuItem) => {
+      if (!item.enabled || item.separator) return;
 
-    if (item.action) {
-      item.action();
-    } else if (item.id) {
-      executeCommand(item.id);
-    }
+      if (item.action) {
+        item.action();
+      } else if (item.id) {
+        executeCommand(item.id);
+      }
 
-    if (!item.submenu) {
-      onClose();
-    }
-  }, [executeCommand, onClose]);
+      if (!item.submenu) {
+        onClose();
+      }
+    },
+    [executeCommand, onClose]
+  );
 
   const handleItemHover = useCallback((item: MenuItem, event: React.MouseEvent) => {
     if (!item.enabled || item.separator) return;
@@ -141,84 +148,70 @@ export const ContextMenu: React.FC<{
       const rect = event.currentTarget.getBoundingClientRect();
       setSubmenuPosition({
         x: rect.right + 5,
-        y: rect.top
+        y: rect.top,
       });
     } else {
       setSubmenuPosition(null);
     }
   }, []);
 
-  const renderMenuItem = useCallback((item: MenuItem, index: number) => {
-    if (item.separator) {
+  const renderMenuItem = useCallback(
+    (item: MenuItem, index: number) => {
+      if (item.separator) {
+        return <div key={`sep-${index}`} className="h-px bg-gray-300 dark:bg-gray-600 my-1 mx-2" />;
+      }
+
+      const isHovered = hoveredItem === item.id;
+      const isDisabled = item.enabled === false;
+
       return (
-        <div
-          key={`sep-${index}`}
-          className="h-px bg-gray-300 dark:bg-gray-600 my-1 mx-2"
-        />
-      );
-    }
+        <motion.div
+          key={item.id}
+          className={`flex items-center justify-between px-3 py-2 cursor-pointer ${
+            isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+          } ${isHovered && !isDisabled ? (theme === 'dark' ? 'bg-blue-600' : 'bg-blue-100') : ''}`}
+          onClick={() => handleItemClick(item)}
+          onMouseEnter={e => handleItemHover(item, e)}
+          onMouseLeave={() => setHoveredItem(null)}
+          whileHover={
+            !isDisabled ? { backgroundColor: theme === 'dark' ? '#2563eb' : '#dbeafe' } : {}
+          }
+        >
+          <div className="flex items-center space-x-3">
+            {/* Icône de vérification */}
+            <div className="w-4 h-4 flex items-center justify-center">
+              {item.checked && <span className="text-green-500">✓</span>}
+            </div>
 
-    const isHovered = hoveredItem === item.id;
-    const isDisabled = item.enabled === false;
+            {/* Icône */}
+            {item.icon && <span className="text-base">{item.icon}</span>}
 
-    return (
-      <motion.div
-        key={item.id}
-        className={`flex items-center justify-between px-3 py-2 cursor-pointer ${
-          isDisabled ? 'opacity-50 cursor-not-allowed' : ''
-        } ${
-          isHovered && !isDisabled 
-            ? theme === 'dark' ? 'bg-blue-600' : 'bg-blue-100'
-            : ''
-        }`}
-        onClick={() => handleItemClick(item)}
-        onMouseEnter={(e) => handleItemHover(item, e)}
-        onMouseLeave={() => setHoveredItem(null)}
-        whileHover={!isDisabled ? { backgroundColor: theme === 'dark' ? '#2563eb' : '#dbeafe' } : {}}
-      >
-        <div className="flex items-center space-x-3">
-          {/* Icône de vérification */}
-          <div className="w-4 h-4 flex items-center justify-center">
-            {item.checked && (
-              <span className="text-green-500">✓</span>
+            {/* Texte */}
+            <span className={`text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              {item.text}
+            </span>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            {/* Raccourci clavier */}
+            {item.shortcut && (
+              <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                {item.shortcut}
+              </span>
+            )}
+
+            {/* Flèche de sous-menu */}
+            {item.submenu && (
+              <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                ▶
+              </span>
             )}
           </div>
-          
-          {/* Icône */}
-          {item.icon && (
-            <span className="text-base">{item.icon}</span>
-          )}
-          
-          {/* Texte */}
-          <span className={`text-sm ${
-            theme === 'dark' ? 'text-white' : 'text-gray-900'
-          }`}>
-            {item.text}
-          </span>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          {/* Raccourci clavier */}
-          {item.shortcut && (
-            <span className={`text-xs ${
-              theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-            }`}>
-              {item.shortcut}
-            </span>
-          )}
-          
-          {/* Flèche de sous-menu */}
-          {item.submenu && (
-            <span className={`text-xs ${
-              theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-            }`}>
-              ▶
-            </span>
-          )}
-        </div>
-      </motion.div>
-    );
-  }, [theme, hoveredItem, handleItemClick, handleItemHover]);
+        </motion.div>
+      );
+    },
+    [theme, hoveredItem, handleItemClick, handleItemHover]
+  );
 
   return (
     <>
@@ -268,31 +261,34 @@ export const MenuBar: React.FC<{
     position: MenuPosition;
   } | null>(null);
 
-  const handleMenuClick = useCallback((item: MenuBarItem) => {
-    if (!item.enabled) return;
+  const handleMenuClick = useCallback(
+    (item: MenuBarItem) => {
+      if (!item.enabled) return;
 
-    if (item.popup) {
-      // Calculer la position du menu contextuel
-      const rect = document.querySelector(`[data-menu-id="${item.id}"]`)?.getBoundingClientRect();
-      if (rect) {
-        setContextMenu({
-          items: item.popup,
-          position: {
-            x: rect.left,
-            y: rect.bottom + 2
-          }
-        });
-        setActiveMenu(item.id);
-        setIsMenuOpen(true);
+      if (item.popup) {
+        // Calculer la position du menu contextuel
+        const rect = document.querySelector(`[data-menu-id="${item.id}"]`)?.getBoundingClientRect();
+        if (rect) {
+          setContextMenu({
+            items: item.popup,
+            position: {
+              x: rect.left,
+              y: rect.bottom + 2,
+            },
+          });
+          setActiveMenu(item.id);
+          setIsMenuOpen(true);
+        }
+      } else if (item.action) {
+        item.action();
       }
-    } else if (item.action) {
-      item.action();
-    }
 
-    if (onItemClick) {
-      onItemClick(item);
-    }
-  }, [setActiveMenu, setIsMenuOpen, onItemClick]);
+      if (onItemClick) {
+        onItemClick(item);
+      }
+    },
+    [setActiveMenu, setIsMenuOpen, onItemClick]
+  );
 
   const closeContextMenu = useCallback(() => {
     setContextMenu(null);
@@ -302,19 +298,25 @@ export const MenuBar: React.FC<{
 
   return (
     <>
-      <div className={`flex items-center h-8 ${
-        theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'
-      } border-b border-gray-300 dark:border-gray-600 px-2`}>
-        {items.map((item) => (
+      <div
+        className={`flex items-center h-8 ${
+          theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'
+        } border-b border-gray-300 dark:border-gray-600 px-2`}
+      >
+        {items.map(item => (
           <motion.button
             key={item.id}
             data-menu-id={item.id}
             className={`px-3 py-1 text-sm rounded transition-colors ${
               item.enabled === false ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
             } ${
-              activeMenu === item.id 
-                ? theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-800'
-                : theme === 'dark' ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-200'
+              activeMenu === item.id
+                ? theme === 'dark'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-blue-100 text-blue-800'
+                : theme === 'dark'
+                  ? 'text-gray-200 hover:bg-gray-700'
+                  : 'text-gray-700 hover:bg-gray-200'
             }`}
             onClick={() => handleMenuClick(item)}
             disabled={item.enabled === false}
@@ -352,18 +354,21 @@ export const RightClickMenu: React.FC<{
     position: MenuPosition;
   } | null>(null);
 
-  const handleContextMenu = useCallback((event: React.MouseEvent) => {
-    if (disabled) return;
+  const handleContextMenu = useCallback(
+    (event: React.MouseEvent) => {
+      if (disabled) return;
 
-    event.preventDefault();
-    setContextMenu({
-      items,
-      position: {
-        x: event.clientX,
-        y: event.clientY
-      }
-    });
-  }, [items, disabled]);
+      event.preventDefault();
+      setContextMenu({
+        items,
+        position: {
+          x: event.clientX,
+          y: event.clientY,
+        },
+      });
+    },
+    [items, disabled]
+  );
 
   const closeContextMenu = useCallback(() => {
     setContextMenu(null);
@@ -371,9 +376,7 @@ export const RightClickMenu: React.FC<{
 
   return (
     <>
-      <div onContextMenu={handleContextMenu}>
-        {children}
-      </div>
+      <div onContextMenu={handleContextMenu}>{children}</div>
 
       <AnimatePresence>
         {contextMenu && (
@@ -436,132 +439,433 @@ export const CompleteMenuSystem: React.FC = () => {
       text: 'Fichier',
       icon: '📁',
       popup: [
-        { id: 'new', text: 'Nouveau', icon: '📄', shortcut: 'Ctrl+N', action: () => executeCommand('file.new') },
-        { id: 'open', text: 'Ouvrir', icon: '📂', shortcut: 'Ctrl+O', action: () => executeCommand('file.open') },
-        { id: 'save', text: 'Enregistrer', icon: '💾', shortcut: 'Ctrl+S', action: () => executeCommand('file.save') },
-        { id: 'saveas', text: 'Enregistrer sous...', icon: '💾', shortcut: 'Ctrl+Shift+S', action: () => executeCommand('file.saveas') },
+        {
+          id: 'new',
+          text: 'Nouveau',
+          icon: '📄',
+          shortcut: 'Ctrl+N',
+          action: () => executeCommand('file.new'),
+        },
+        {
+          id: 'open',
+          text: 'Ouvrir',
+          icon: '📂',
+          shortcut: 'Ctrl+O',
+          action: () => executeCommand('file.open'),
+        },
+        {
+          id: 'save',
+          text: 'Enregistrer',
+          icon: '💾',
+          shortcut: 'Ctrl+S',
+          action: () => executeCommand('file.save'),
+        },
+        {
+          id: 'saveas',
+          text: 'Enregistrer sous...',
+          icon: '💾',
+          shortcut: 'Ctrl+Shift+S',
+          action: () => executeCommand('file.saveas'),
+        },
         { separator: true },
-        { id: 'recent', text: 'Récents', icon: '🕐', submenu: [
-          { id: 'recent1', text: 'Projet1.vbp', action: () => executeCommand('file.recent.1') },
-          { id: 'recent2', text: 'Projet2.vbp', action: () => executeCommand('file.recent.2') },
-        ]},
+        {
+          id: 'recent',
+          text: 'Récents',
+          icon: '🕐',
+          submenu: [
+            { id: 'recent1', text: 'Projet1.vbp', action: () => executeCommand('file.recent.1') },
+            { id: 'recent2', text: 'Projet2.vbp', action: () => executeCommand('file.recent.2') },
+          ],
+        },
         { separator: true },
-        { id: 'exit', text: 'Quitter', icon: '🚪', shortcut: 'Alt+F4', action: () => executeCommand('file.exit') },
-      ]
+        {
+          id: 'exit',
+          text: 'Quitter',
+          icon: '🚪',
+          shortcut: 'Alt+F4',
+          action: () => executeCommand('file.exit'),
+        },
+      ],
     },
     {
       id: 'edit',
       text: 'Edition',
       icon: '✏️',
       popup: [
-        { id: 'undo', text: 'Annuler', icon: '↶', shortcut: 'Ctrl+Z', action: () => executeCommand('edit.undo') },
-        { id: 'redo', text: 'Rétablir', icon: '↷', shortcut: 'Ctrl+Y', action: () => executeCommand('edit.redo') },
+        {
+          id: 'undo',
+          text: 'Annuler',
+          icon: '↶',
+          shortcut: 'Ctrl+Z',
+          action: () => executeCommand('edit.undo'),
+        },
+        {
+          id: 'redo',
+          text: 'Rétablir',
+          icon: '↷',
+          shortcut: 'Ctrl+Y',
+          action: () => executeCommand('edit.redo'),
+        },
         { separator: true },
-        { id: 'cut', text: 'Couper', icon: '✂️', shortcut: 'Ctrl+X', action: () => executeCommand('edit.cut') },
-        { id: 'copy', text: 'Copier', icon: '📋', shortcut: 'Ctrl+C', action: () => executeCommand('edit.copy') },
-        { id: 'paste', text: 'Coller', icon: '📌', shortcut: 'Ctrl+V', action: () => executeCommand('edit.paste') },
+        {
+          id: 'cut',
+          text: 'Couper',
+          icon: '✂️',
+          shortcut: 'Ctrl+X',
+          action: () => executeCommand('edit.cut'),
+        },
+        {
+          id: 'copy',
+          text: 'Copier',
+          icon: '📋',
+          shortcut: 'Ctrl+C',
+          action: () => executeCommand('edit.copy'),
+        },
+        {
+          id: 'paste',
+          text: 'Coller',
+          icon: '📌',
+          shortcut: 'Ctrl+V',
+          action: () => executeCommand('edit.paste'),
+        },
         { separator: true },
-        { id: 'selectall', text: 'Tout sélectionner', icon: '🔘', shortcut: 'Ctrl+A', action: () => executeCommand('edit.selectall') },
-        { id: 'find', text: 'Rechercher', icon: '🔍', shortcut: 'Ctrl+F', action: () => executeCommand('edit.find') },
-        { id: 'replace', text: 'Remplacer', icon: '🔄', shortcut: 'Ctrl+H', action: () => executeCommand('edit.replace') },
-      ]
+        {
+          id: 'selectall',
+          text: 'Tout sélectionner',
+          icon: '🔘',
+          shortcut: 'Ctrl+A',
+          action: () => executeCommand('edit.selectall'),
+        },
+        {
+          id: 'find',
+          text: 'Rechercher',
+          icon: '🔍',
+          shortcut: 'Ctrl+F',
+          action: () => executeCommand('edit.find'),
+        },
+        {
+          id: 'replace',
+          text: 'Remplacer',
+          icon: '🔄',
+          shortcut: 'Ctrl+H',
+          action: () => executeCommand('edit.replace'),
+        },
+      ],
     },
     {
       id: 'view',
       text: 'Affichage',
       icon: '👁️',
       popup: [
-        { id: 'code', text: 'Code', icon: '💻', shortcut: 'F7', action: () => executeCommand('view.code') },
-        { id: 'object', text: 'Objet', icon: '🎨', shortcut: 'Shift+F7', action: () => executeCommand('view.object') },
+        {
+          id: 'code',
+          text: 'Code',
+          icon: '💻',
+          shortcut: 'F7',
+          action: () => executeCommand('view.code'),
+        },
+        {
+          id: 'object',
+          text: 'Objet',
+          icon: '🎨',
+          shortcut: 'Shift+F7',
+          action: () => executeCommand('view.object'),
+        },
         { separator: true },
-        { id: 'project', text: 'Explorateur de projet', icon: '📁', checked: true, action: () => executeCommand('view.project') },
-        { id: 'properties', text: 'Propriétés', icon: '⚙️', shortcut: 'F4', checked: true, action: () => executeCommand('view.properties') },
-        { id: 'toolbox', text: 'Boîte à outils', icon: '🧰', checked: true, action: () => executeCommand('view.toolbox') },
-        { id: 'immediate', text: 'Exécution', icon: '⚡', shortcut: 'Ctrl+G', action: () => executeCommand('view.immediate') },
+        {
+          id: 'project',
+          text: 'Explorateur de projet',
+          icon: '📁',
+          checked: true,
+          action: () => executeCommand('view.project'),
+        },
+        {
+          id: 'properties',
+          text: 'Propriétés',
+          icon: '⚙️',
+          shortcut: 'F4',
+          checked: true,
+          action: () => executeCommand('view.properties'),
+        },
+        {
+          id: 'toolbox',
+          text: 'Boîte à outils',
+          icon: '🧰',
+          checked: true,
+          action: () => executeCommand('view.toolbox'),
+        },
+        {
+          id: 'immediate',
+          text: 'Exécution',
+          icon: '⚡',
+          shortcut: 'Ctrl+G',
+          action: () => executeCommand('view.immediate'),
+        },
         { separator: true },
-        { id: 'toolbar', text: 'Barre d\'outils', icon: '🔧', checked: true, action: () => executeCommand('view.toolbar') },
-        { id: 'statusbar', text: 'Barre d\'état', icon: '📊', checked: true, action: () => executeCommand('view.statusbar') },
+        {
+          id: 'toolbar',
+          text: "Barre d'outils",
+          icon: '🔧',
+          checked: true,
+          action: () => executeCommand('view.toolbar'),
+        },
+        {
+          id: 'statusbar',
+          text: "Barre d'état",
+          icon: '📊',
+          checked: true,
+          action: () => executeCommand('view.statusbar'),
+        },
         { separator: true },
-        { id: 'zoom', text: 'Zoom', icon: '🔍', submenu: [
-          { id: 'zoom25', text: '25%', action: () => executeCommand('view.zoom.25') },
-          { id: 'zoom50', text: '50%', action: () => executeCommand('view.zoom.50') },
-          { id: 'zoom75', text: '75%', action: () => executeCommand('view.zoom.75') },
-          { id: 'zoom100', text: '100%', checked: true, action: () => executeCommand('view.zoom.100') },
-          { id: 'zoom150', text: '150%', action: () => executeCommand('view.zoom.150') },
-          { id: 'zoom200', text: '200%', action: () => executeCommand('view.zoom.200') },
-        ]},
-      ]
+        {
+          id: 'zoom',
+          text: 'Zoom',
+          icon: '🔍',
+          submenu: [
+            { id: 'zoom25', text: '25%', action: () => executeCommand('view.zoom.25') },
+            { id: 'zoom50', text: '50%', action: () => executeCommand('view.zoom.50') },
+            { id: 'zoom75', text: '75%', action: () => executeCommand('view.zoom.75') },
+            {
+              id: 'zoom100',
+              text: '100%',
+              checked: true,
+              action: () => executeCommand('view.zoom.100'),
+            },
+            { id: 'zoom150', text: '150%', action: () => executeCommand('view.zoom.150') },
+            { id: 'zoom200', text: '200%', action: () => executeCommand('view.zoom.200') },
+          ],
+        },
+      ],
     },
     {
       id: 'project',
       text: 'Projet',
       icon: '📦',
       popup: [
-        { id: 'addform', text: 'Ajouter une feuille', icon: '📄', action: () => executeCommand('project.addform') },
-        { id: 'addmodule', text: 'Ajouter un module', icon: '📜', action: () => executeCommand('project.addmodule') },
-        { id: 'addclass', text: 'Ajouter une classe', icon: '🏛️', action: () => executeCommand('project.addclass') },
+        {
+          id: 'addform',
+          text: 'Ajouter une feuille',
+          icon: '📄',
+          action: () => executeCommand('project.addform'),
+        },
+        {
+          id: 'addmodule',
+          text: 'Ajouter un module',
+          icon: '📜',
+          action: () => executeCommand('project.addmodule'),
+        },
+        {
+          id: 'addclass',
+          text: 'Ajouter une classe',
+          icon: '🏛️',
+          action: () => executeCommand('project.addclass'),
+        },
         { separator: true },
-        { id: 'references', text: 'Références', icon: '🔗', action: () => executeCommand('project.references') },
-        { id: 'components', text: 'Composants', icon: '🧩', action: () => executeCommand('project.components') },
+        {
+          id: 'references',
+          text: 'Références',
+          icon: '🔗',
+          action: () => executeCommand('project.references'),
+        },
+        {
+          id: 'components',
+          text: 'Composants',
+          icon: '🧩',
+          action: () => executeCommand('project.components'),
+        },
         { separator: true },
-        { id: 'properties', text: 'Propriétés du projet', icon: '⚙️', action: () => executeCommand('project.properties') },
+        {
+          id: 'properties',
+          text: 'Propriétés du projet',
+          icon: '⚙️',
+          action: () => executeCommand('project.properties'),
+        },
         { separator: true },
-        { id: 'compile', text: 'Compiler le projet', icon: '⚙️', shortcut: 'Ctrl+F5', action: () => executeCommand('project.compile') },
-        { id: 'make', text: 'Générer l\'EXE', icon: '📦', shortcut: 'F5', action: () => executeCommand('project.make') },
-      ]
+        {
+          id: 'compile',
+          text: 'Compiler le projet',
+          icon: '⚙️',
+          shortcut: 'Ctrl+F5',
+          action: () => executeCommand('project.compile'),
+        },
+        {
+          id: 'make',
+          text: "Générer l'EXE",
+          icon: '📦',
+          shortcut: 'F5',
+          action: () => executeCommand('project.make'),
+        },
+      ],
     },
     {
       id: 'debug',
       text: 'Débogage',
       icon: '🐛',
       popup: [
-        { id: 'start', text: 'Démarrer', icon: '▶️', shortcut: 'F5', action: () => executeCommand('debug.start') },
-        { id: 'restart', text: 'Redémarrer', icon: '🔄', shortcut: 'Ctrl+Shift+F5', action: () => executeCommand('debug.restart') },
-        { id: 'stop', text: 'Arrêter le débogage', icon: '⏹️', shortcut: 'Shift+F5', action: () => executeCommand('debug.stop') },
+        {
+          id: 'start',
+          text: 'Démarrer',
+          icon: '▶️',
+          shortcut: 'F5',
+          action: () => executeCommand('debug.start'),
+        },
+        {
+          id: 'restart',
+          text: 'Redémarrer',
+          icon: '🔄',
+          shortcut: 'Ctrl+Shift+F5',
+          action: () => executeCommand('debug.restart'),
+        },
+        {
+          id: 'stop',
+          text: 'Arrêter le débogage',
+          icon: '⏹️',
+          shortcut: 'Shift+F5',
+          action: () => executeCommand('debug.stop'),
+        },
         { separator: true },
-        { id: 'stepinto', text: 'Pas à pas détaillé', icon: '⤵️', shortcut: 'F8', action: () => executeCommand('debug.stepinto') },
-        { id: 'stepover', text: 'Pas à pas principal', icon: '⤴️', shortcut: 'Shift+F8', action: () => executeCommand('debug.stepover') },
-        { id: 'stepout', text: 'Sortir', icon: '⤴️', shortcut: 'Ctrl+Shift+F8', action: () => executeCommand('debug.stepout') },
+        {
+          id: 'stepinto',
+          text: 'Pas à pas détaillé',
+          icon: '⤵️',
+          shortcut: 'F8',
+          action: () => executeCommand('debug.stepinto'),
+        },
+        {
+          id: 'stepover',
+          text: 'Pas à pas principal',
+          icon: '⤴️',
+          shortcut: 'Shift+F8',
+          action: () => executeCommand('debug.stepover'),
+        },
+        {
+          id: 'stepout',
+          text: 'Sortir',
+          icon: '⤴️',
+          shortcut: 'Ctrl+Shift+F8',
+          action: () => executeCommand('debug.stepout'),
+        },
         { separator: true },
-        { id: 'breakpoint', text: 'Basculer le point d\'arrêt', icon: '🔴', shortcut: 'F9', action: () => executeCommand('debug.breakpoint') },
-        { id: 'deletebreakpoints', text: 'Supprimer tous les points d\'arrêt', icon: '🗑️', shortcut: 'Ctrl+Shift+F9', action: () => executeCommand('debug.deletebreakpoints') },
+        {
+          id: 'breakpoint',
+          text: "Basculer le point d'arrêt",
+          icon: '🔴',
+          shortcut: 'F9',
+          action: () => executeCommand('debug.breakpoint'),
+        },
+        {
+          id: 'deletebreakpoints',
+          text: "Supprimer tous les points d'arrêt",
+          icon: '🗑️',
+          shortcut: 'Ctrl+Shift+F9',
+          action: () => executeCommand('debug.deletebreakpoints'),
+        },
         { separator: true },
-        { id: 'quickwatch', text: 'Espion express', icon: '👁️', shortcut: 'Shift+F9', action: () => executeCommand('debug.quickwatch') },
-      ]
+        {
+          id: 'quickwatch',
+          text: 'Espion express',
+          icon: '👁️',
+          shortcut: 'Shift+F9',
+          action: () => executeCommand('debug.quickwatch'),
+        },
+      ],
     },
     {
       id: 'tools',
       text: 'Outils',
       icon: '🔧',
       popup: [
-        { id: 'menueditor', text: 'Éditeur de menus', icon: '📋', action: () => executeCommand('tools.menueditor') },
-        { id: 'options', text: 'Options', icon: '⚙️', action: () => executeCommand('tools.options') },
+        {
+          id: 'menueditor',
+          text: 'Éditeur de menus',
+          icon: '📋',
+          action: () => executeCommand('tools.menueditor'),
+        },
+        {
+          id: 'options',
+          text: 'Options',
+          icon: '⚙️',
+          action: () => executeCommand('tools.options'),
+        },
         { separator: true },
-        { id: 'macros', text: 'Macros', icon: '🤖', submenu: [
-          { id: 'record', text: 'Enregistrer une macro', action: () => executeCommand('tools.macros.record') },
-          { id: 'stop', text: 'Arrêter l\'enregistrement', action: () => executeCommand('tools.macros.stop') },
-          { id: 'play', text: 'Exécuter la macro', action: () => executeCommand('tools.macros.play') },
-        ]},
+        {
+          id: 'macros',
+          text: 'Macros',
+          icon: '🤖',
+          submenu: [
+            {
+              id: 'record',
+              text: 'Enregistrer une macro',
+              action: () => executeCommand('tools.macros.record'),
+            },
+            {
+              id: 'stop',
+              text: "Arrêter l'enregistrement",
+              action: () => executeCommand('tools.macros.stop'),
+            },
+            {
+              id: 'play',
+              text: 'Exécuter la macro',
+              action: () => executeCommand('tools.macros.play'),
+            },
+          ],
+        },
         { separator: true },
-        { id: 'addins', text: 'Gestionnaire de compléments', icon: '🔌', action: () => executeCommand('tools.addins') },
-      ]
+        {
+          id: 'addins',
+          text: 'Gestionnaire de compléments',
+          icon: '🔌',
+          action: () => executeCommand('tools.addins'),
+        },
+      ],
     },
     {
       id: 'help',
       text: 'Aide',
       icon: '❓',
       popup: [
-        { id: 'contents', text: 'Sommaire de l\'aide', icon: '📖', shortcut: 'F1', action: () => executeCommand('help.contents') },
-        { id: 'index', text: 'Index de l\'aide', icon: '📑', action: () => executeCommand('help.index') },
-        { id: 'search', text: 'Rechercher dans l\'aide', icon: '🔍', action: () => executeCommand('help.search') },
+        {
+          id: 'contents',
+          text: "Sommaire de l'aide",
+          icon: '📖',
+          shortcut: 'F1',
+          action: () => executeCommand('help.contents'),
+        },
+        {
+          id: 'index',
+          text: "Index de l'aide",
+          icon: '📑',
+          action: () => executeCommand('help.index'),
+        },
+        {
+          id: 'search',
+          text: "Rechercher dans l'aide",
+          icon: '🔍',
+          action: () => executeCommand('help.search'),
+        },
         { separator: true },
         { id: 'msdn', text: 'MSDN Online', icon: '🌐', action: () => executeCommand('help.msdn') },
-        { id: 'samples', text: 'Exemples', icon: '📚', action: () => executeCommand('help.samples') },
+        {
+          id: 'samples',
+          text: 'Exemples',
+          icon: '📚',
+          action: () => executeCommand('help.samples'),
+        },
         { separator: true },
-        { id: 'tipofday', text: 'Conseil du jour', icon: '💡', action: () => executeCommand('help.tipofday') },
-        { id: 'about', text: 'À propos de VB6 Studio', icon: 'ℹ️', action: () => executeCommand('help.about') },
-      ]
-    }
+        {
+          id: 'tipofday',
+          text: 'Conseil du jour',
+          icon: '💡',
+          action: () => executeCommand('help.tipofday'),
+        },
+        {
+          id: 'about',
+          text: 'À propos de VB6 Studio',
+          icon: 'ℹ️',
+          action: () => executeCommand('help.about'),
+        },
+      ],
+    },
   ];
 
   // Raccourcis clavier
@@ -578,12 +882,12 @@ export const CompleteMenuSystem: React.FC = () => {
     'ctrl+a': () => executeCommand('edit.selectall'),
     'ctrl+f': () => executeCommand('edit.find'),
     'ctrl+h': () => executeCommand('edit.replace'),
-    'f1': () => executeCommand('help.contents'),
-    'f4': () => executeCommand('view.properties'),
-    'f5': () => executeCommand('debug.start'),
-    'f7': () => executeCommand('view.code'),
-    'f8': () => executeCommand('debug.stepinto'),
-    'f9': () => executeCommand('debug.breakpoint'),
+    f1: () => executeCommand('help.contents'),
+    f4: () => executeCommand('view.properties'),
+    f5: () => executeCommand('debug.start'),
+    f7: () => executeCommand('view.code'),
+    f8: () => executeCommand('debug.stepinto'),
+    f9: () => executeCommand('debug.breakpoint'),
     'shift+f5': () => executeCommand('debug.stop'),
     'shift+f7': () => executeCommand('view.object'),
     'shift+f8': () => executeCommand('debug.stepover'),
@@ -600,20 +904,47 @@ export const CompleteMenuSystem: React.FC = () => {
     <div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} min-h-screen`}>
       <MenuBar items={menuItems} />
       <ShortcutManager shortcuts={shortcuts} />
-      
+
       {/* Contenu principal avec menu contextuel */}
       <div className="p-8">
         <RightClickMenu
           items={[
-            { id: 'cut', text: 'Couper', icon: '✂️', shortcut: 'Ctrl+X', action: () => executeCommand('edit.cut') },
-            { id: 'copy', text: 'Copier', icon: '📋', shortcut: 'Ctrl+C', action: () => executeCommand('edit.copy') },
-            { id: 'paste', text: 'Coller', icon: '📌', shortcut: 'Ctrl+V', action: () => executeCommand('edit.paste') },
+            {
+              id: 'cut',
+              text: 'Couper',
+              icon: '✂️',
+              shortcut: 'Ctrl+X',
+              action: () => executeCommand('edit.cut'),
+            },
+            {
+              id: 'copy',
+              text: 'Copier',
+              icon: '📋',
+              shortcut: 'Ctrl+C',
+              action: () => executeCommand('edit.copy'),
+            },
+            {
+              id: 'paste',
+              text: 'Coller',
+              icon: '📌',
+              shortcut: 'Ctrl+V',
+              action: () => executeCommand('edit.paste'),
+            },
             { separator: true },
-            { id: 'properties', text: 'Propriétés', icon: '⚙️', action: () => executeCommand('view.properties') },
+            {
+              id: 'properties',
+              text: 'Propriétés',
+              icon: '⚙️',
+              action: () => executeCommand('view.properties'),
+            },
           ]}
         >
-          <div className={`p-8 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg`}>
-            <h1 className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          <div
+            className={`p-8 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg`}
+          >
+            <h1
+              className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+            >
               Système de Menu Complet VB6 Studio
             </h1>
             <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} mb-4`}>
@@ -623,7 +954,9 @@ export const CompleteMenuSystem: React.FC = () => {
               <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                 Raccourcis disponibles :
               </p>
-              <ul className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} space-y-1`}>
+              <ul
+                className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} space-y-1`}
+              >
                 <li>• Ctrl+N - Nouveau fichier</li>
                 <li>• Ctrl+O - Ouvrir</li>
                 <li>• Ctrl+S - Enregistrer</li>

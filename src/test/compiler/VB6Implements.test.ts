@@ -284,7 +284,10 @@ describe('VB6 Implements - Interface Declarations', () => {
       const interfaceDecl = processor.parseInterfaceDeclaration('Interface IComparable', 1);
       processor.registerInterface(interfaceDecl!);
 
-      const method = processor.parseInterfaceMethod('Function CompareTo(obj As Object) As Integer', 2);
+      const method = processor.parseInterfaceMethod(
+        'Function CompareTo(obj As Object) As Integer',
+        2
+      );
       processor.addMethodToInterface('IComparable', method!);
 
       const retrieved = processor.getInterface('IComparable');
@@ -309,7 +312,10 @@ describe('VB6 Implements - Interface Declarations', () => {
       processor.registerInterface(interfaceDecl!);
 
       const propertyGet = processor.parseInterfaceProperty('Property Get Width() As Long', 2);
-      const propertyLet = processor.parseInterfaceProperty('Property Let Width(ByVal value As Long) As Long', 3);
+      const propertyLet = processor.parseInterfaceProperty(
+        'Property Let Width(ByVal value As Long) As Long',
+        3
+      );
 
       processor.addPropertyToInterface('IDrawable', propertyGet!);
       processor.addPropertyToInterface('IDrawable', propertyLet!);
@@ -371,7 +377,10 @@ describe('VB6 Implements - Interface Declarations', () => {
   describe('JavaScript Code Generation', () => {
     it('should generate JavaScript for Interface', () => {
       const interfaceDecl = processor.parseInterfaceDeclaration('Interface IComparable', 1);
-      const method = processor.parseInterfaceMethod('Function CompareTo(obj As Object) As Integer', 2);
+      const method = processor.parseInterfaceMethod(
+        'Function CompareTo(obj As Object) As Integer',
+        2
+      );
 
       interfaceDecl!.methods.push(method!);
 
@@ -399,7 +408,10 @@ describe('VB6 Implements - Interface Declarations', () => {
     it('should generate JavaScript implementation', () => {
       // Create interface
       const interfaceDecl = processor.parseInterfaceDeclaration('Interface IComparable', 1);
-      const method = processor.parseInterfaceMethod('Function CompareTo(obj As Object) As Integer', 2);
+      const method = processor.parseInterfaceMethod(
+        'Function CompareTo(obj As Object) As Integer',
+        2
+      );
       interfaceDecl!.methods.push(method!);
       processor.registerInterface(interfaceDecl!);
 
@@ -416,7 +428,10 @@ describe('VB6 Implements - Interface Declarations', () => {
 
     it('should generate TypeScript interface', () => {
       const interfaceDecl = processor.parseInterfaceDeclaration('Interface IComparable', 1);
-      const method = processor.parseInterfaceMethod('Function CompareTo(obj As Object) As Integer', 2);
+      const method = processor.parseInterfaceMethod(
+        'Function CompareTo(obj As Object) As Integer',
+        2
+      );
       interfaceDecl!.methods.push(method!);
 
       const ts = processor.generateTypeScript(interfaceDecl!);
@@ -437,7 +452,10 @@ describe('VB6 Implements - Interface Declarations', () => {
 
     it('should generate TypeScript with optional parameters', () => {
       const interfaceDecl = processor.parseInterfaceDeclaration('Interface IFormatter', 1);
-      const method = processor.parseInterfaceMethod('Function Format(text As String, Optional style As Integer) As String', 2);
+      const method = processor.parseInterfaceMethod(
+        'Function Format(text As String, Optional style As Integer) As String',
+        2
+      );
       interfaceDecl!.methods.push(method!);
 
       const ts = processor.generateTypeScript(interfaceDecl!);
@@ -450,7 +468,10 @@ describe('VB6 Implements - Interface Declarations', () => {
     it('should validate complete implementation', () => {
       // Create interface
       const interfaceDecl = processor.parseInterfaceDeclaration('Interface IComparable', 1);
-      const method = processor.parseInterfaceMethod('Function CompareTo(obj As Object) As Integer', 2);
+      const method = processor.parseInterfaceMethod(
+        'Function CompareTo(obj As Object) As Integer',
+        2
+      );
       interfaceDecl!.methods.push(method!);
       processor.registerInterface(interfaceDecl!);
 
@@ -469,7 +490,10 @@ describe('VB6 Implements - Interface Declarations', () => {
     it('should detect missing method implementation', () => {
       // Create interface
       const interfaceDecl = processor.parseInterfaceDeclaration('Interface IComparable', 1);
-      const method = processor.parseInterfaceMethod('Function CompareTo(obj As Object) As Integer', 2);
+      const method = processor.parseInterfaceMethod(
+        'Function CompareTo(obj As Object) As Integer',
+        2
+      );
       interfaceDecl!.methods.push(method!);
       processor.registerInterface(interfaceDecl!);
 
@@ -537,16 +561,16 @@ describe('VB6 Implements - Interface Declarations', () => {
     it('should import interface data', () => {
       const data = {
         interfaces: {
-          'IComparable': {
+          IComparable: {
             name: 'IComparable',
             methods: [],
             properties: [],
             public: true,
             module: 'TestModule',
-            line: 1
-          }
+            line: 1,
+          },
         },
-        implementations: {}
+        implementations: {},
       };
 
       processor.import(data);
@@ -566,9 +590,9 @@ describe('VB6 Implements - Interface Declarations', () => {
             implementedMethods: {},
             implementedProperties: {},
             module: 'TestModule',
-            line: 10
-          }
-        }
+            line: 10,
+          },
+        },
       };
 
       processor.import(data);
@@ -602,7 +626,10 @@ describe('VB6 Implements - Real-World Scenarios', () => {
     it('should handle complete IComparable implementation', () => {
       // Define interface
       const interfaceDecl = processor.parseInterfaceDeclaration('Public Interface IComparable', 1);
-      const method = processor.parseInterfaceMethod('Function CompareTo(obj As Object) As Integer', 2);
+      const method = processor.parseInterfaceMethod(
+        'Function CompareTo(obj As Object) As Integer',
+        2
+      );
       interfaceDecl!.methods.push(method!);
       processor.registerInterface(interfaceDecl!);
 
@@ -641,7 +668,10 @@ describe('VB6 Implements - Real-World Scenarios', () => {
 
       // Then add properties (which will be merged)
       const widthGet = processor.parseInterfaceProperty('Property Get Width() As Long', 2);
-      const widthLet = processor.parseInterfaceProperty('Property Let Width(ByVal value As Long) As Long', 3);
+      const widthLet = processor.parseInterfaceProperty(
+        'Property Let Width(ByVal value As Long) As Long',
+        3
+      );
       processor.addPropertyToInterface('IDrawable', widthGet!);
       processor.addPropertyToInterface('IDrawable', widthLet!);
 
@@ -659,7 +689,10 @@ describe('VB6 Implements - Real-World Scenarios', () => {
     it('should handle class implementing multiple interfaces', () => {
       // Define IComparable
       const iComparable = processor.parseInterfaceDeclaration('Public Interface IComparable', 1);
-      const compareMethod = processor.parseInterfaceMethod('Function CompareTo(obj As Object) As Integer', 2);
+      const compareMethod = processor.parseInterfaceMethod(
+        'Function CompareTo(obj As Object) As Integer',
+        2
+      );
       iComparable!.methods.push(compareMethod!);
       processor.registerInterface(iComparable!);
 
@@ -695,7 +728,10 @@ describe('VB6 Implements - Real-World Scenarios', () => {
 
       // Define IEnumerable
       const iEnumerable = processor.parseInterfaceDeclaration('Public Interface IEnumerable', 10);
-      const getEnumeratorMethod = processor.parseInterfaceMethod('Function GetEnumerator() As IEnumerator', 11);
+      const getEnumeratorMethod = processor.parseInterfaceMethod(
+        'Function GetEnumerator() As IEnumerator',
+        11
+      );
       iEnumerable!.methods.push(getEnumeratorMethod!);
       processor.registerInterface(iEnumerable!);
 

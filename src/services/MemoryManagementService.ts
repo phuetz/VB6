@@ -1,6 +1,6 @@
 /**
  * Memory Management Service for VB6 IDE
- * 
+ *
  * Provides memory optimization and monitoring capabilities
  */
 
@@ -31,8 +31,8 @@ export interface CacheEntry<T> {
 export class MemoryManagementService {
   private static instance: MemoryManagementService;
   private memoryMetrics: MemoryMetrics[] = [];
-  private caches: Map<string, Map<string, CacheEntry<any>>> = new Map();
-  private weakRefs: Map<string, WeakRef<any>> = new Map();
+  private caches: Map<string, Map<string, CacheEntry<unknown>>> = new Map();
+  private weakRefs: Map<string, WeakRef<object>> = new Map();
   private cleanupInterval: number | null = null;
   private maxMetricsHistory = 100;
   private maxCacheSize = 50 * 1024 * 1024; // 50MB
@@ -53,14 +53,24 @@ export class MemoryManagementService {
    * Get current memory usage
    */
   getMemoryUsage(): MemoryMetrics {
-    if (typeof window !== 'undefined' && (window.performance as any).memory) {
-      const memory = (window.performance as any).memory;
+    interface PerformanceMemory {
+      usedJSHeapSize: number;
+      totalJSHeapSize: number;
+      jsHeapSizeLimit: number;
+    }
+
+    if (
+      typeof window !== 'undefined' &&
+      'memory' in window.performance &&
+      window.performance.memory
+    ) {
+      const memory = window.performance.memory as PerformanceMemory;
       return {
         heapUsed: memory.usedJSHeapSize,
         heapTotal: memory.totalJSHeapSize,
         external: memory.jsHeapSizeLimit,
         arrayBuffers: 0,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
     } else {
       // Fallback for non-Chrome browsers
@@ -69,7 +79,7 @@ export class MemoryManagementService {
         heapTotal: 0,
         external: 0,
         arrayBuffers: 0,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
     }
   }
@@ -80,7 +90,7 @@ export class MemoryManagementService {
   trackMemoryUsage(): void {
     const metrics = this.getMemoryUsage();
     this.memoryMetrics.push(metrics);
-    
+
     // Keep only recent history
     if (this.memoryMetrics.length > this.maxMetricsHistory) {
       this.memoryMetrics.shift();
@@ -137,7 +147,7 @@ export class MemoryManagementService {
           data: value,
           timestamp: Date.now(),
           accessCount: 1,
-          size
+          size,
         });
 
         this.currentCacheSize += size;
@@ -158,7 +168,7 @@ export class MemoryManagementService {
         cache.clear();
       },
 
-      size: () => cache.size
+      size: () => cache.size,
     };
   }
 
@@ -227,7 +237,7 @@ export class MemoryManagementService {
       clear: () => {
         available.length = 0;
         inUse.clear();
-      }
+      },
     };
   }
 
@@ -247,7 +257,7 @@ export class MemoryManagementService {
           size: detachedElements.length * 100, // Estimate
           retainedSize: detachedElements.length * 500, // Estimate
           location: 'DOM Tree',
-          count: detachedElements.length
+          count: detachedElements.length,
         });
       }
     }
@@ -273,7 +283,7 @@ export class MemoryManagementService {
           size: totalSize,
           retainedSize: totalSize,
           location: `Cache: ${cacheName}`,
-          count: oldEntries
+          count: oldEntries,
         });
       }
     }
@@ -287,7 +297,7 @@ export class MemoryManagementService {
         size: listeners * 50, // Estimate
         retainedSize: listeners * 100, // Estimate
         location: 'Event System',
-        count: listeners
+        count: listeners,
       });
     }
 
@@ -298,8 +308,8 @@ export class MemoryManagementService {
    * Force garbage collection (if available)
    */
   forceGarbageCollection(): void {
-    if (typeof window !== 'undefined' && (window as any).gc) {
-      (window as any).gc();
+    if (typeof window !== 'undefined' && 'gc' in window && typeof window.gc === 'function') {
+      window.gc();
     }
   }
 
@@ -308,14 +318,14 @@ export class MemoryManagementService {
    */
   optimizeMemory(): number {
     const beforeSize = this.currentCacheSize;
-    
+
     // Clear old cache entries
     const now = Date.now();
     const maxAge = 30 * 60 * 1000; // 30 minutes
 
     for (const [cacheName, cache] of this.caches) {
       const toDelete: string[] = [];
-      
+
       for (const [key, entry] of cache) {
         if (now - entry.timestamp > maxAge && entry.accessCount < 5) {
           toDelete.push(key);
@@ -350,7 +360,9 @@ export class MemoryManagementService {
 
     // Check heap usage
     if (metrics.heapUsed > metrics.heapTotal * 0.9) {
-      suggestions.push('Memory usage is very high. Consider closing unused forms or clearing data.');
+      suggestions.push(
+        'Memory usage is very high. Consider closing unused forms or clearing data.'
+      );
     }
 
     // Check cache size
@@ -368,7 +380,8 @@ export class MemoryManagementService {
     if (this.memoryMetrics.length >= 10) {
       const oldMetrics = this.memoryMetrics[this.memoryMetrics.length - 10];
       const growth = metrics.heapUsed - oldMetrics.heapUsed;
-      if (growth > 10 * 1024 * 1024) { // 10MB growth
+      if (growth > 10 * 1024 * 1024) {
+        // 10MB growth
         suggestions.push('Memory usage has increased significantly. Monitor for memory leaks.');
       }
     }
@@ -380,20 +393,23 @@ export class MemoryManagementService {
 
   private startCleanupInterval(): void {
     // Run cleanup every 5 minutes
-    this.cleanupInterval = window.setInterval(() => {
-      this.trackMemoryUsage();
-      
-      // Auto-optimize if memory usage is high
-      const metrics = this.getMemoryUsage();
-      if (metrics.heapUsed > metrics.heapTotal * 0.95) {
-        this.optimizeMemory();
-      }
-    }, 5 * 60 * 1000);
+    this.cleanupInterval = window.setInterval(
+      () => {
+        this.trackMemoryUsage();
+
+        // Auto-optimize if memory usage is high
+        const metrics = this.getMemoryUsage();
+        if (metrics.heapUsed > metrics.heapTotal * 0.95) {
+          this.optimizeMemory();
+        }
+      },
+      5 * 60 * 1000
+    );
   }
 
   private evictLRU(): void {
-    let oldestEntry: { cache: string; key: string; entry: CacheEntry<any> } | null = null;
-    
+    let oldestEntry: { cache: string; key: string; entry: CacheEntry<unknown> } | null = null;
+
     for (const [cacheName, cache] of this.caches) {
       for (const [key, entry] of cache) {
         if (!oldestEntry || entry.timestamp < oldestEntry.entry.timestamp) {
@@ -413,7 +429,7 @@ export class MemoryManagementService {
 
   private findDetachedDOMElements(): Element[] {
     const detached: Element[] = [];
-    
+
     if (typeof document !== 'undefined') {
       // This is a simplified check - in reality, detecting detached DOM is complex
       const allElements = document.querySelectorAll('*');
@@ -430,7 +446,7 @@ export class MemoryManagementService {
   private countEventListeners(): number {
     // This is an approximation - actual counting would require browser internals
     let count = 0;
-    
+
     if (typeof document !== 'undefined') {
       const elements = document.querySelectorAll('*');
       // Estimate based on common event types
@@ -449,7 +465,7 @@ export class MemoryManagementService {
       clearInterval(this.cleanupInterval);
       this.cleanupInterval = null;
     }
-    
+
     this.caches.clear();
     this.weakRefs.clear();
     this.memoryMetrics = [];

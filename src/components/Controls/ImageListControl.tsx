@@ -13,7 +13,7 @@ export enum ImageListColorDepth {
   ccColorDepth8Bit = 1,
   ccColorDepth16Bit = 2,
   ccColorDepth24Bit = 3,
-  ccColorDepth32Bit = 4
+  ccColorDepth32Bit = 4,
 }
 
 export interface ListImage {
@@ -33,10 +33,10 @@ export interface ImageListProps extends VB6ControlPropsEnhanced {
   colorDepth?: ImageListColorDepth;
   maskColor?: string;
   useMaskColor?: boolean;
-  
+
   // Images collection
   listImages?: ListImage[];
-  
+
   // Events
   onImageAdded?: (image: ListImage) => void;
   onImageRemoved?: (index: number) => void;
@@ -65,7 +65,7 @@ export const ImageListControl = forwardRef<HTMLDivElement, ImageListProps>((prop
 
   const [listImages, setListImages] = useState<ListImage[]>(initialImages);
   const [previewImage, setPreviewImage] = useState<ListImage | null>(null);
-  
+
   const imageListRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { fireEvent, updateControl } = useVB6Store();
@@ -73,11 +73,16 @@ export const ImageListControl = forwardRef<HTMLDivElement, ImageListProps>((prop
   // VB6 Methods
   const vb6Methods = {
     // Add image from various sources
-    Add: (index?: number, key?: string, picture?: string | HTMLImageElement | File | Blob, maskColor?: string) => {
+    Add: (
+      index?: number,
+      key?: string,
+      picture?: string | HTMLImageElement | File | Blob,
+      maskColor?: string
+    ) => {
       return new Promise<ListImage>((resolve, reject) => {
         const newIndex = index ?? listImages.length + 1;
         const newKey = key || `Image${newIndex}`;
-        
+
         const createListImage = (imageData: string | HTMLImageElement | ImageData) => {
           const newImage: ListImage = {
             index: newIndex,
@@ -86,9 +91,9 @@ export const ImageListControl = forwardRef<HTMLDivElement, ImageListProps>((prop
             picture: imageData,
             width: imageWidth,
             height: imageHeight,
-            maskColor: maskColor || props.maskColor
+            maskColor: maskColor || props.maskColor,
           };
-          
+
           const updatedImages = [...listImages];
           if (index !== undefined && index <= listImages.length) {
             updatedImages.splice(index - 1, 0, newImage);
@@ -99,13 +104,13 @@ export const ImageListControl = forwardRef<HTMLDivElement, ImageListProps>((prop
           } else {
             updatedImages.push(newImage);
           }
-          
+
           setListImages(updatedImages);
           onImageAdded?.(newImage);
           fireEvent(name, 'ImageAdded', { image: newImage });
           resolve(newImage);
         };
-        
+
         if (typeof picture === 'string') {
           // URL or data URL
           const img = new Image();
@@ -116,7 +121,7 @@ export const ImageListControl = forwardRef<HTMLDivElement, ImageListProps>((prop
           createListImage(picture);
         } else if (picture instanceof File || picture instanceof Blob) {
           const reader = new FileReader();
-          reader.onload = (e) => {
+          reader.onload = e => {
             const img = new Image();
             img.onload = () => createListImage(img);
             img.onerror = () => reject(new Error('Failed to load image'));
@@ -132,22 +137,23 @@ export const ImageListControl = forwardRef<HTMLDivElement, ImageListProps>((prop
 
     // Remove image
     Remove: (indexOrKey: number | string) => {
-      const imageIndex = typeof indexOrKey === 'number' 
-        ? indexOrKey - 1 
-        : listImages.findIndex(img => img.key === indexOrKey);
-        
+      const imageIndex =
+        typeof indexOrKey === 'number'
+          ? indexOrKey - 1
+          : listImages.findIndex(img => img.key === indexOrKey);
+
       if (imageIndex < 0 || imageIndex >= listImages.length) {
         return false;
       }
-      
+
       const removedImage = listImages[imageIndex];
       const updatedImages = listImages.filter((_, i) => i !== imageIndex);
-      
+
       // Reindex remaining images
       updatedImages.forEach((img, i) => {
         img.index = i + 1;
       });
-      
+
       setListImages(updatedImages);
       onImageRemoved?.(removedImage.index);
       fireEvent(name, 'ImageRemoved', { image: removedImage });
@@ -170,33 +176,38 @@ export const ImageListControl = forwardRef<HTMLDivElement, ImageListProps>((prop
     },
 
     // Get image count
-    get Count() { return listImages.length; },
+    get Count() {
+      return listImages.length;
+    },
 
     // Extract image as canvas/data URL
-    ExtractImage: (indexOrKey: number | string, format: 'canvas' | 'dataURL' | 'blob' = 'dataURL') => {
+    ExtractImage: (
+      indexOrKey: number | string,
+      format: 'canvas' | 'dataURL' | 'blob' = 'dataURL'
+    ) => {
       const image = vb6Methods.Item(indexOrKey);
       if (!image) return null;
-      
+
       const canvas = document.createElement('canvas');
       canvas.width = imageWidth;
       canvas.height = imageHeight;
       const ctx = canvas.getContext('2d');
-      
+
       if (!ctx) return null;
-      
-      return new Promise((resolve) => {
+
+      return new Promise(resolve => {
         const drawImage = (img: HTMLImageElement) => {
           ctx.clearRect(0, 0, imageWidth, imageHeight);
-          
+
           // Apply mask color if enabled
           if (useMaskColor && image.maskColor) {
             ctx.fillStyle = image.maskColor;
             ctx.fillRect(0, 0, imageWidth, imageHeight);
             ctx.globalCompositeOperation = 'source-in';
           }
-          
+
           ctx.drawImage(img, 0, 0, imageWidth, imageHeight);
-          
+
           switch (format) {
             case 'canvas':
               resolve(canvas);
@@ -209,7 +220,7 @@ export const ImageListControl = forwardRef<HTMLDivElement, ImageListProps>((prop
               break;
           }
         };
-        
+
         if (image.picture instanceof HTMLImageElement) {
           drawImage(image.picture);
         } else if (typeof image.picture === 'string') {
@@ -221,13 +232,19 @@ export const ImageListControl = forwardRef<HTMLDivElement, ImageListProps>((prop
     },
 
     // Draw image to external canvas
-    Draw: (indexOrKey: number | string, canvas: HTMLCanvasElement, x: number, y: number, style?: number) => {
+    Draw: (
+      indexOrKey: number | string,
+      canvas: HTMLCanvasElement,
+      x: number,
+      y: number,
+      style?: number
+    ) => {
       const image = vb6Methods.Item(indexOrKey);
       if (!image || !canvas.getContext) return false;
-      
+
       const ctx = canvas.getContext('2d');
       if (!ctx) return false;
-      
+
       const drawImage = (img: HTMLImageElement) => {
         // Apply drawing style
         switch (style) {
@@ -241,22 +258,26 @@ export const ImageListControl = forwardRef<HTMLDivElement, ImageListProps>((prop
               tempCanvas.width = imageWidth;
               tempCanvas.height = imageHeight;
               const tempCtx = tempCanvas.getContext('2d');
-              
+
               if (tempCtx) {
                 tempCtx.drawImage(img, 0, 0, imageWidth, imageHeight);
                 const imageData = tempCtx.getImageData(0, 0, imageWidth, imageHeight);
                 const data = imageData.data;
-                
+
                 // Convert mask color to RGB
                 const maskRGB = hexToRgb(image.maskColor);
                 if (maskRGB) {
                   for (let i = 0; i < data.length; i += 4) {
-                    if (data[i] === maskRGB.r && data[i + 1] === maskRGB.g && data[i + 2] === maskRGB.b) {
+                    if (
+                      data[i] === maskRGB.r &&
+                      data[i + 1] === maskRGB.g &&
+                      data[i + 2] === maskRGB.b
+                    ) {
                       data[i + 3] = 0; // Make transparent
                     }
                   }
                 }
-                
+
                 tempCtx.putImageData(imageData, 0, 0);
                 ctx.drawImage(tempCanvas, x, y);
                 return true;
@@ -266,11 +287,11 @@ export const ImageListControl = forwardRef<HTMLDivElement, ImageListProps>((prop
           default:
             break;
         }
-        
+
         ctx.drawImage(img, x, y, imageWidth, imageHeight);
         return true;
       };
-      
+
       if (image.picture instanceof HTMLImageElement) {
         return drawImage(image.picture);
       } else if (typeof image.picture === 'string') {
@@ -279,7 +300,7 @@ export const ImageListControl = forwardRef<HTMLDivElement, ImageListProps>((prop
         img.src = image.picture as string;
         return true; // Async operation
       }
-      
+
       return false;
     },
 
@@ -287,21 +308,21 @@ export const ImageListControl = forwardRef<HTMLDivElement, ImageListProps>((prop
     Overlay: (indexOrKey: number | string, overlayIndex: number | string) => {
       const baseImage = vb6Methods.Item(indexOrKey);
       const overlayImage = vb6Methods.Item(overlayIndex);
-      
+
       if (!baseImage || !overlayImage) return null;
-      
+
       return vb6Methods.ExtractImage(indexOrKey, 'canvas').then((baseCanvas: any) => {
         if (!baseCanvas) return null;
-        
+
         const ctx = baseCanvas.getContext('2d');
         if (!ctx) return null;
-        
-        return new Promise((resolve) => {
+
+        return new Promise(resolve => {
           const drawOverlay = (overlayImg: HTMLImageElement) => {
             ctx.drawImage(overlayImg, 0, 0, imageWidth, imageHeight);
             resolve(baseCanvas.toDataURL());
           };
-          
+
           if (overlayImage.picture instanceof HTMLImageElement) {
             drawOverlay(overlayImage.picture);
           } else if (typeof overlayImage.picture === 'string') {
@@ -311,16 +332,18 @@ export const ImageListControl = forwardRef<HTMLDivElement, ImageListProps>((prop
           }
         });
       });
-    }
+    },
   };
 
   const hexToRgb = (hex: string) => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null;
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : null;
   };
 
   const handlePreviewHover = useCallback((image: ListImage | null) => {
@@ -353,7 +376,9 @@ export const ImageListControl = forwardRef<HTMLDivElement, ImageListProps>((prop
         ExtractImage: vb6Methods.ExtractImage,
         Draw: vb6Methods.Draw,
         Overlay: vb6Methods.Overlay,
-        get Count() { return vb6Methods.Count; }
+        get Count() {
+          return vb6Methods.Count;
+        },
       };
     }
   }, [name, vb6Methods]);
@@ -378,67 +403,74 @@ export const ImageListControl = forwardRef<HTMLDivElement, ImageListProps>((prop
         fontSize: '8pt',
         opacity: enabled ? 1 : 0.5,
         overflow: 'hidden',
-        cursor: 'default'
+        cursor: 'default',
       }}
       title={`ImageList: ${listImages.length} images (${imageWidth}x${imageHeight})`}
       {...rest}
     >
       {/* Design-time preview */}
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center'
-      }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+        }}
+      >
         {/* ImageList icon */}
-        <div style={{
-          width: '24px',
-          height: '24px',
-          backgroundImage: `linear-gradient(45deg, #808080 25%, transparent 25%, transparent 75%, #808080 75%, #808080),
+        <div
+          style={{
+            width: '24px',
+            height: '24px',
+            backgroundImage: `linear-gradient(45deg, #808080 25%, transparent 25%, transparent 75%, #808080 75%, #808080),
                            linear-gradient(45deg, #808080 25%, transparent 25%, transparent 75%, #808080 75%, #808080)`,
-          backgroundPosition: '0 0, 6px 6px',
-          backgroundSize: '12px 12px',
-          border: '1px solid #606060',
-          marginBottom: '2px'
-        }} />
-        
+            backgroundPosition: '0 0, 6px 6px',
+            backgroundSize: '12px 12px',
+            border: '1px solid #606060',
+            marginBottom: '2px',
+          }}
+        />
+
         {/* Control info */}
-        <div style={{
-          fontSize: '6pt',
-          color: '#666666',
-          lineHeight: '1.1'
-        }}>
+        <div
+          style={{
+            fontSize: '6pt',
+            color: '#666666',
+            lineHeight: '1.1',
+          }}
+        >
           <div>ImageList</div>
           <div>{listImages.length} images</div>
-          <div>{imageWidth}×{imageHeight}</div>
+          <div>
+            {imageWidth}×{imageHeight}
+          </div>
         </div>
       </div>
 
       {/* Hidden canvas for image processing */}
-      <canvas
-        ref={canvasRef}
-        width={imageWidth}
-        height={imageHeight}
-        style={{ display: 'none' }}
-      />
-      
+      <canvas ref={canvasRef} width={imageWidth} height={imageHeight} style={{ display: 'none' }} />
+
       {/* Image preview tooltip (if hovering over an image) */}
       {previewImage && (
-        <div style={{
-          position: 'fixed',
-          top: '10px',
-          right: '10px',
-          backgroundColor: 'white',
-          border: '1px solid #000000',
-          padding: '4px',
-          fontSize: '8pt',
-          zIndex: 9999,
-          pointerEvents: 'none'
-        }}>
+        <div
+          style={{
+            position: 'fixed',
+            top: '10px',
+            right: '10px',
+            backgroundColor: 'white',
+            border: '1px solid #000000',
+            padding: '4px',
+            fontSize: '8pt',
+            zIndex: 9999,
+            pointerEvents: 'none',
+          }}
+        >
           <div>Key: {previewImage.key}</div>
           <div>Index: {previewImage.index}</div>
-          <div>Size: {previewImage.width}×{previewImage.height}</div>
+          <div>
+            Size: {previewImage.width}×{previewImage.height}
+          </div>
           {previewImage.picture instanceof HTMLImageElement && (
             <img
               src={previewImage.picture.src}
@@ -446,7 +478,7 @@ export const ImageListControl = forwardRef<HTMLDivElement, ImageListProps>((prop
               style={{
                 width: Math.min(previewImage.width * 2, 64),
                 height: Math.min(previewImage.height * 2, 64),
-                imageRendering: 'pixelated'
+                imageRendering: 'pixelated',
               }}
             />
           )}

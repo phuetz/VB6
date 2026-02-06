@@ -7,12 +7,14 @@ The VB6 Web IDE now includes a comprehensive Visual Debugger that provides real-
 ## Features
 
 ### 1. **Grid Lines Overlay**
+
 - **Purpose**: Shows the snap-to-grid alignment guides
 - **Color**: Blue (#2196F3)
 - **Usage**: Helps align controls precisely on the form designer
 - **Toggle**: Enabled by default
 
 ### 2. **Control Bounds**
+
 - **Purpose**: Displays boundaries and information for all controls
 - **Color**: Green (#4CAF50)
 - **Information Shown**:
@@ -22,6 +24,7 @@ The VB6 Web IDE now includes a comprehensive Visual Debugger that provides real-
 - **Toggle**: Enabled by default
 
 ### 3. **Mouse Tracking**
+
 - **Purpose**: Shows real-time mouse position and crosshairs
 - **Color**: Orange (#FF9800)
 - **Features**:
@@ -30,6 +33,7 @@ The VB6 Web IDE now includes a comprehensive Visual Debugger that provides real-
   - Useful for precise positioning
 
 ### 4. **Render Performance**
+
 - **Purpose**: Monitors component rendering performance
 - **Color**: Red (#F44336)
 - **Metrics**:
@@ -43,6 +47,7 @@ The VB6 Web IDE now includes a comprehensive Visual Debugger that provides real-
   - Red: > 16ms (poor)
 
 ### 5. **Event Flow**
+
 - **Purpose**: Captures and displays DOM events in real-time
 - **Color**: Purple (#9C27B0)
 - **Events Tracked**:
@@ -53,6 +58,7 @@ The VB6 Web IDE now includes a comprehensive Visual Debugger that provides real-
 - **Display**: Shows last 20 events with fade effect
 
 ### 6. **State Updates**
+
 - **Purpose**: Tracks Zustand store state changes
 - **Color**: Cyan (#00BCD4)
 - **Information**:
@@ -65,10 +71,12 @@ The VB6 Web IDE now includes a comprehensive Visual Debugger that provides real-
 ## How to Use
 
 ### Activation
+
 1. Click the **eye icon** (👁️) button in the top-right corner
 2. The Visual Debugger panel will appear
 
 ### Control Panel
+
 - **Toggle Features**: Check/uncheck overlays as needed
 - **Minimize**: Click the eye-off icon to minimize
 - **Position**: Fixed at top-right of screen
@@ -96,16 +104,19 @@ The VB6 Web IDE now includes a comprehensive Visual Debugger that provides real-
 The Visual Debugger works seamlessly with:
 
 ### Diagnostic Dashboard
+
 - Provides system-wide metrics (FPS, memory)
 - Component health overview
 - Error tracking
 
 ### Recovery Panel
+
 - Save states when debugging
 - Restore to previous states
 - Export debug sessions
 
 ### Performance Monitor
+
 - Detailed timing metrics
 - Render loop detection
 - Performance history
@@ -136,6 +147,7 @@ The Visual Debugger works seamlessly with:
 ## Advanced Usage
 
 ### Custom Performance Marks
+
 The Visual Debugger automatically tracks components that use the performance monitor:
 
 ```typescript
@@ -145,13 +157,17 @@ perfMonitor.endMeasure('MyComponent-render');
 ```
 
 ### Event Filtering
+
 Future versions will support:
+
 - Event type filtering
 - Custom event patterns
 - Event breakpoints
 
 ### State Diff Viewer
+
 Planned features:
+
 - Before/after state comparison
 - State history timeline
 - State replay functionality
@@ -159,16 +175,19 @@ Planned features:
 ## Troubleshooting
 
 ### High CPU Usage
+
 - Disable unnecessary overlays
 - Reduce event tracking scope
 - Clear performance history
 
 ### Missing Overlays
+
 - Check browser console for errors
 - Ensure components are properly mounted
 - Verify z-index conflicts
 
 ### Performance Impact
+
 - The debugger itself is optimized for minimal impact
 - Disable when not actively debugging
 - Use selectively based on needs

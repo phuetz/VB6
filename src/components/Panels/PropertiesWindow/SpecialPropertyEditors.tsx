@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { 
+import {
   Monitor,
   Palette,
   Grid3X3,
@@ -29,7 +29,7 @@ import {
   Settings,
   Eye,
   List,
-  ChevronDown
+  ChevronDown,
 } from 'lucide-react';
 
 // Screen Position Editor for StartUpPosition property
@@ -45,7 +45,7 @@ export const ScreenPositionEditor: React.FC<{
     { value: '0 - Manual', label: 'Manual', icon: <Move size={16} /> },
     { value: '1 - CenterOwner', label: 'Center Owner', icon: <AlignCenter size={16} /> },
     { value: '2 - CenterScreen', label: 'Center Screen', icon: <Monitor size={16} /> },
-    { value: '3 - Windows Default', label: 'Windows Default', icon: <Settings size={16} /> }
+    { value: '3 - Windows Default', label: 'Windows Default', icon: <Settings size={16} /> },
   ];
 
   const handleSave = () => {
@@ -71,7 +71,10 @@ export const ScreenPositionEditor: React.FC<{
           <div className="bg-gray-200 border border-gray-400 shadow-lg w-80">
             <div className="bg-blue-600 text-white px-2 py-1 flex justify-between items-center text-sm">
               <span>Startup Position</span>
-              <button onClick={() => setShowDialog(false)} className="text-white hover:bg-blue-700 px-1">
+              <button
+                onClick={() => setShowDialog(false)}
+                className="text-white hover:bg-blue-700 px-1"
+              >
                 <X size={14} />
               </button>
             </div>
@@ -79,13 +82,16 @@ export const ScreenPositionEditor: React.FC<{
             <div className="p-3">
               <div className="space-y-2">
                 {positions.map(pos => (
-                  <label key={pos.value} className="flex items-center p-2 hover:bg-gray-100 cursor-pointer">
+                  <label
+                    key={pos.value}
+                    className="flex items-center p-2 hover:bg-gray-100 cursor-pointer"
+                  >
                     <input
                       type="radio"
                       name="position"
                       value={pos.value}
                       checked={selectedPosition === pos.value}
-                      onChange={(e) => setSelectedPosition(e.target.value)}
+                      onChange={e => setSelectedPosition(e.target.value)}
                       className="mr-3"
                     />
                     <span className="mr-2">{pos.icon}</span>
@@ -108,8 +114,12 @@ export const ScreenPositionEditor: React.FC<{
             </div>
 
             <div className="border-t p-2 flex justify-end gap-2">
-              <button onClick={handleSave} className="vb6-button">OK</button>
-              <button onClick={() => setShowDialog(false)} className="vb6-button">Cancel</button>
+              <button onClick={handleSave} className="vb6-button">
+                OK
+              </button>
+              <button onClick={() => setShowDialog(false)} className="vb6-button">
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -135,7 +145,7 @@ export const ScaleModeEditor: React.FC<{
     { value: '4 - Character', description: '120 twips horizontally, 240 twips vertically' },
     { value: '5 - Inch', description: 'Inch' },
     { value: '6 - Millimeter', description: 'Millimeter' },
-    { value: '7 - Centimeter', description: 'Centimeter' }
+    { value: '7 - Centimeter', description: 'Centimeter' },
   ];
 
   const handleSave = () => {
@@ -161,7 +171,10 @@ export const ScaleModeEditor: React.FC<{
           <div className="bg-gray-200 border border-gray-400 shadow-lg w-96">
             <div className="bg-blue-600 text-white px-2 py-1 flex justify-between items-center text-sm">
               <span>Scale Mode</span>
-              <button onClick={() => setShowDialog(false)} className="text-white hover:bg-blue-700 px-1">
+              <button
+                onClick={() => setShowDialog(false)}
+                className="text-white hover:bg-blue-700 px-1"
+              >
                 <X size={14} />
               </button>
             </div>
@@ -184,8 +197,12 @@ export const ScaleModeEditor: React.FC<{
             </div>
 
             <div className="border-t p-2 flex justify-end gap-2">
-              <button onClick={handleSave} className="vb6-button">OK</button>
-              <button onClick={() => setShowDialog(false)} className="vb6-button">Cancel</button>
+              <button onClick={handleSave} className="vb6-button">
+                OK
+              </button>
+              <button onClick={() => setShowDialog(false)} className="vb6-button">
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -214,7 +231,7 @@ export const FormatStringEditor: React.FC<{
     { format: 'Scientific', code: 'Scientific', example: '1.23E+02' },
     { format: 'Yes/No', code: 'Yes/No', example: 'Yes' },
     { format: 'True/False', code: 'True/False', example: 'True' },
-    { format: 'On/Off', code: 'On/Off', example: 'On' }
+    { format: 'On/Off', code: 'On/Off', example: 'On' },
   ];
 
   const dateFormats = [
@@ -224,20 +241,26 @@ export const FormatStringEditor: React.FC<{
     { format: 'Short Date', code: 'Short Date', example: '12/30/2023' },
     { format: 'Long Time', code: 'Long Time', example: '3:45:12 PM' },
     { format: 'Medium Time', code: 'Medium Time', example: '03:45 PM' },
-    { format: 'Short Time', code: 'Short Time', example: '15:45' }
+    { format: 'Short Time', code: 'Short Time', example: '15:45' },
   ];
 
-  const customPatterns = dataType === 'number' ? [
-    { pattern: '#,##0.00', description: 'Number with thousands separator and 2 decimals' },
-    { pattern: '0.00%', description: 'Percentage with 2 decimals' },
-    { pattern: '$#,##0.00;($#,##0.00)', description: 'Currency with negative in parentheses' },
-    { pattern: '#,##0;-#,##0;"Zero"', description: 'Positive, negative, and zero formats' }
-  ] : [
-    { pattern: 'yyyy-mm-dd', description: 'ISO date format' },
-    { pattern: 'dddd, mmmm dd, yyyy', description: 'Full date with day name' },
-    { pattern: 'hh:mm:ss AM/PM', description: '12-hour time with seconds' },
-    { pattern: 'yyyy-mm-dd hh:mm:ss', description: 'ISO datetime format' }
-  ];
+  const customPatterns =
+    dataType === 'number'
+      ? [
+          { pattern: '#,##0.00', description: 'Number with thousands separator and 2 decimals' },
+          { pattern: '0.00%', description: 'Percentage with 2 decimals' },
+          {
+            pattern: '$#,##0.00;($#,##0.00)',
+            description: 'Currency with negative in parentheses',
+          },
+          { pattern: '#,##0;-#,##0;"Zero"', description: 'Positive, negative, and zero formats' },
+        ]
+      : [
+          { pattern: 'yyyy-mm-dd', description: 'ISO date format' },
+          { pattern: 'dddd, mmmm dd, yyyy', description: 'Full date with day name' },
+          { pattern: 'hh:mm:ss AM/PM', description: '12-hour time with seconds' },
+          { pattern: 'yyyy-mm-dd hh:mm:ss', description: 'ISO datetime format' },
+        ];
 
   const formatOptions = dataType === 'date' ? dateFormats : numberFormats;
 
@@ -245,17 +268,41 @@ export const FormatStringEditor: React.FC<{
     // Simulate format preview
     const now = new Date();
     const sampleNumber = 1234.56;
-    
+
     switch (format) {
-      case 'Currency': setPreviewValue('$1,234.56'); break;
-      case 'Fixed': setPreviewValue('1234.56'); break;
-      case 'Standard': setPreviewValue('1,234.56'); break;
-      case 'Percent': setPreviewValue('123456.00%'); break;
-      case 'Scientific': setPreviewValue('1.23E+03'); break;
-      case 'Long Date': setPreviewValue(now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })); break;
-      case 'Short Date': setPreviewValue(now.toLocaleDateString()); break;
-      case 'Long Time': setPreviewValue(now.toLocaleTimeString()); break;
-      default: setPreviewValue(format || '1234.56');
+      case 'Currency':
+        setPreviewValue('$1,234.56');
+        break;
+      case 'Fixed':
+        setPreviewValue('1234.56');
+        break;
+      case 'Standard':
+        setPreviewValue('1,234.56');
+        break;
+      case 'Percent':
+        setPreviewValue('123456.00%');
+        break;
+      case 'Scientific':
+        setPreviewValue('1.23E+03');
+        break;
+      case 'Long Date':
+        setPreviewValue(
+          now.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })
+        );
+        break;
+      case 'Short Date':
+        setPreviewValue(now.toLocaleDateString());
+        break;
+      case 'Long Time':
+        setPreviewValue(now.toLocaleTimeString());
+        break;
+      default:
+        setPreviewValue(format || '1234.56');
     }
   };
 
@@ -287,7 +334,10 @@ export const FormatStringEditor: React.FC<{
           <div className="bg-gray-200 border border-gray-400 shadow-lg w-[500px]">
             <div className="bg-blue-600 text-white px-2 py-1 flex justify-between items-center text-sm">
               <span>Format</span>
-              <button onClick={() => setShowDialog(false)} className="text-white hover:bg-blue-700 px-1">
+              <button
+                onClick={() => setShowDialog(false)}
+                className="text-white hover:bg-blue-700 px-1"
+              >
                 <X size={14} />
               </button>
             </div>
@@ -336,7 +386,7 @@ export const FormatStringEditor: React.FC<{
                 <input
                   type="text"
                   value={formatString}
-                  onChange={(e) => {
+                  onChange={e => {
                     setFormatString(e.target.value);
                     updatePreview(e.target.value);
                   }}
@@ -355,8 +405,12 @@ export const FormatStringEditor: React.FC<{
             </div>
 
             <div className="border-t p-2 flex justify-end gap-2">
-              <button onClick={handleSave} className="vb6-button">OK</button>
-              <button onClick={() => setShowDialog(false)} className="vb6-button">Cancel</button>
+              <button onClick={handleSave} className="vb6-button">
+                OK
+              </button>
+              <button onClick={() => setShowDialog(false)} className="vb6-button">
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -430,7 +484,10 @@ export const ArrayEditor: React.FC<{
           <div className="bg-gray-200 border border-gray-400 shadow-lg w-96">
             <div className="bg-blue-600 text-white px-2 py-1 flex justify-between items-center text-sm">
               <span>String Collection Editor</span>
-              <button onClick={() => setShowDialog(false)} className="text-white hover:bg-blue-700 px-1">
+              <button
+                onClick={() => setShowDialog(false)}
+                className="text-white hover:bg-blue-700 px-1"
+              >
                 <X size={14} />
               </button>
             </div>
@@ -460,8 +517,8 @@ export const ArrayEditor: React.FC<{
                 <input
                   type="text"
                   value={newItem}
-                  onChange={(e) => setNewItem(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && addItem()}
+                  onChange={e => setNewItem(e.target.value)}
+                  onKeyPress={e => e.key === 'Enter' && addItem()}
                   placeholder="New item"
                   className="flex-1 text-xs border border-gray-400 p-1"
                 />
@@ -472,40 +529,41 @@ export const ArrayEditor: React.FC<{
 
               {/* Item Controls */}
               <div className="flex gap-1">
-                <button 
-                  onClick={() => selectedIndex !== null && removeItem(selectedIndex)} 
+                <button
+                  onClick={() => selectedIndex !== null && removeItem(selectedIndex)}
                   disabled={selectedIndex === null}
                   className="vb6-button"
                 >
                   <Minus size={12} />
                 </button>
-                <button 
-                  onClick={() => selectedIndex !== null && moveItemUp(selectedIndex)} 
+                <button
+                  onClick={() => selectedIndex !== null && moveItemUp(selectedIndex)}
                   disabled={selectedIndex === null || selectedIndex === 0}
                   className="vb6-button"
                 >
                   ↑
                 </button>
-                <button 
-                  onClick={() => selectedIndex !== null && moveItemDown(selectedIndex)} 
+                <button
+                  onClick={() => selectedIndex !== null && moveItemDown(selectedIndex)}
                   disabled={selectedIndex === null || selectedIndex === items.length - 1}
                   className="vb6-button"
                 >
                   ↓
                 </button>
                 <div className="flex-1" />
-                <button 
-                  onClick={() => setItems([])} 
-                  className="vb6-button"
-                >
+                <button onClick={() => setItems([])} className="vb6-button">
                   Clear All
                 </button>
               </div>
             </div>
 
             <div className="border-t p-2 flex justify-end gap-2">
-              <button onClick={handleSave} className="vb6-button">OK</button>
-              <button onClick={() => setShowDialog(false)} className="vb6-button">Cancel</button>
+              <button onClick={handleSave} className="vb6-button">
+                OK
+              </button>
+              <button onClick={() => setShowDialog(false)} className="vb6-button">
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -531,7 +589,7 @@ export const MaskEditor: React.FC<{
     { name: 'Date', mask: '00/00/0000', example: '12/31/2023' },
     { name: 'Time', mask: '00:00', example: '15:30' },
     { name: 'Credit Card', mask: '0000-0000-0000-0000', example: '1234-5678-9012-3456' },
-    { name: 'License Plate', mask: 'LLL-0000', example: 'ABC-1234' }
+    { name: 'License Plate', mask: 'LLL-0000', example: 'ABC-1234' },
   ];
 
   const maskChars = [
@@ -543,7 +601,7 @@ export const MaskEditor: React.FC<{
     { char: 'A', description: 'Alphanumeric (0-9 and A-Z, entry required)' },
     { char: 'a', description: 'Alphanumeric (0-9 and A-Z, entry not required)' },
     { char: '&', description: 'Any character or a space (entry required)' },
-    { char: 'C', description: 'Any character or a space (entry not required)' }
+    { char: 'C', description: 'Any character or a space (entry not required)' },
   ];
 
   const handleSave = () => {
@@ -569,7 +627,10 @@ export const MaskEditor: React.FC<{
           <div className="bg-gray-200 border border-gray-400 shadow-lg w-[500px]">
             <div className="bg-blue-600 text-white px-2 py-1 flex justify-between items-center text-sm">
               <span>Input Mask</span>
-              <button onClick={() => setShowDialog(false)} className="text-white hover:bg-blue-700 px-1">
+              <button
+                onClick={() => setShowDialog(false)}
+                className="text-white hover:bg-blue-700 px-1"
+              >
                 <X size={14} />
               </button>
             </div>
@@ -614,7 +675,7 @@ export const MaskEditor: React.FC<{
                 <input
                   type="text"
                   value={mask}
-                  onChange={(e) => setMask(e.target.value)}
+                  onChange={e => setMask(e.target.value)}
                   className="w-full text-xs border border-gray-400 p-1 font-mono"
                   placeholder="Enter mask pattern"
                 />
@@ -626,7 +687,7 @@ export const MaskEditor: React.FC<{
                 <input
                   type="text"
                   value={testInput}
-                  onChange={(e) => setTestInput(e.target.value)}
+                  onChange={e => setTestInput(e.target.value)}
                   className="w-full text-xs border border-gray-400 p-1"
                   placeholder="Test the mask here"
                 />
@@ -642,8 +703,12 @@ export const MaskEditor: React.FC<{
             </div>
 
             <div className="border-t p-2 flex justify-end gap-2">
-              <button onClick={handleSave} className="vb6-button">OK</button>
-              <button onClick={() => setShowDialog(false)} className="vb6-button">Cancel</button>
+              <button onClick={handleSave} className="vb6-button">
+                OK
+              </button>
+              <button onClick={() => setShowDialog(false)} className="vb6-button">
+                Cancel
+              </button>
             </div>
           </div>
         </div>

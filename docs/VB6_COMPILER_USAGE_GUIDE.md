@@ -1,6 +1,7 @@
 # VB6 Compiler - Guide d'Utilisation Pratique
 
 ## Version: 2.0
+
 ## Date: 2025-10-05
 
 ---
@@ -23,6 +24,7 @@
 Ce guide vous montrera comment utiliser le VB6 Compiler pour transpiler vos applications VB6 en JavaScript moderne.
 
 **Que vous soyez:**
+
 - ✅ Développeur VB6 migrant vers le web
 - ✅ Développeur JavaScript modernisant du legacy code
 - ✅ Étudiant apprenant la transpilation
@@ -70,6 +72,7 @@ console.log('✅ Compiler ready!');
 ### 1. Votre Premier Programme
 
 **Créer un fichier `hello.vb6`:**
+
 ```vb6
 Sub Main()
     MsgBox "Hello, World!"
@@ -77,6 +80,7 @@ End Sub
 ```
 
 **Compiler:**
+
 ```typescript
 import { VB6UnifiedASTTranspiler } from './compiler/VB6UnifiedASTTranspiler';
 import * as fs from 'fs';
@@ -102,14 +106,15 @@ if (result.success) {
 ```
 
 **Résultat (`hello.js`):**
-```javascript
-"use strict";
 
-import { VB6Runtime } from "./runtime/VB6UltraRuntime";
+```javascript
+'use strict';
+
+import { VB6Runtime } from './runtime/VB6UltraRuntime';
 const VB6 = new VB6Runtime();
 
 function Main() {
-  VB6.MsgBox("Hello, World!");
+  VB6.MsgBox('Hello, World!');
 }
 
 //# sourceMappingURL=hello.js.map
@@ -122,6 +127,7 @@ node hello.js
 ```
 
 **Output:**
+
 ```
 Hello, World!
 ```
@@ -133,6 +139,7 @@ Hello, World!
 ### Exemple 1: Calculatrice Simple
 
 **VB6 Code (`calculator.vb6`):**
+
 ```vb6
 ' Simple Calculator Module
 Option Explicit
@@ -172,11 +179,12 @@ End Sub
 ```
 
 **Compiler:**
+
 ```typescript
 const transpiler = new VB6UnifiedASTTranspiler({
   strict: true,
   optimize: true,
-  generateSourceMaps: true
+  generateSourceMaps: true,
 });
 
 const vb6Code = fs.readFileSync('calculator.vb6', 'utf-8');
@@ -194,6 +202,7 @@ if (result.success) {
 ### Exemple 2: Gestion de Contacts
 
 **VB6 Code (`contacts.vb6`):**
+
 ```vb6
 ' Contact Management System
 Option Explicit
@@ -288,13 +297,14 @@ End Sub
 ```
 
 **Compiler avec Options:**
+
 ```typescript
 const transpiler = new VB6UnifiedASTTranspiler({
   strict: true,
-  generateTypeScript: true,  // Générer TypeScript!
+  generateTypeScript: true, // Générer TypeScript!
   generateSourceMaps: true,
   optimize: true,
-  runtimeTarget: 'es2020'
+  runtimeTarget: 'es2020',
 });
 
 const result = transpiler.transpile(contactsCode, 'contacts.vb6');
@@ -308,6 +318,7 @@ if (result.success) {
 ### Exemple 3: Fichier de Configuration
 
 **VB6 Code (`config.vb6`):**
+
 ```vb6
 ' Configuration Manager
 Option Explicit
@@ -419,10 +430,11 @@ End Function
 ```
 
 **Compiler et Tester:**
+
 ```typescript
 const transpiler = new VB6UnifiedASTTranspiler({
   optimize: true,
-  generateSourceMaps: true
+  generateSourceMaps: true,
 });
 
 const result = transpiler.transpile(configCode, 'config.vb6');
@@ -444,6 +456,7 @@ if (result.success) {
 ### Pattern 1: Batch Compilation
 
 **Compiler plusieurs fichiers:**
+
 ```typescript
 import { VB6UnifiedASTTranspiler } from './compiler/VB6UnifiedASTTranspiler';
 import * as fs from 'fs';
@@ -452,11 +465,12 @@ import * as path from 'path';
 function compileDirectory(sourceDir: string, outputDir: string) {
   const transpiler = new VB6UnifiedASTTranspiler({
     optimize: true,
-    generateSourceMaps: true
+    generateSourceMaps: true,
   });
 
   // Get all .vb6 files
-  const files = fs.readdirSync(sourceDir)
+  const files = fs
+    .readdirSync(sourceDir)
     .filter(f => f.endsWith('.vb6') || f.endsWith('.bas') || f.endsWith('.cls'));
 
   console.log(`Found ${files.length} files to compile`);
@@ -500,20 +514,21 @@ compileDirectory('./vb6-src', './js-output');
 ### Pattern 2: Watch Mode
 
 **Recompiler automatiquement lors des changements:**
+
 ```typescript
 import * as chokidar from 'chokidar';
 
 function watchAndCompile(sourceDir: string, outputDir: string) {
   const transpiler = new VB6UnifiedASTTranspiler({
     optimize: true,
-    generateSourceMaps: true
+    generateSourceMaps: true,
   });
 
   const watcher = chokidar.watch(`${sourceDir}/**/*.vb6`, {
-    persistent: true
+    persistent: true,
   });
 
-  watcher.on('change', (filePath) => {
+  watcher.on('change', filePath => {
     console.log(`File changed: ${filePath}`);
 
     const vb6Code = fs.readFileSync(filePath, 'utf-8');
@@ -541,11 +556,12 @@ watchAndCompile('./vb6-src', './js-output');
 ### Pattern 3: Error Handling Complet
 
 **Gérer tous les cas d'erreur:**
+
 ```typescript
 function compileWithErrorHandling(vb6Code: string, fileName: string) {
   const transpiler = new VB6UnifiedASTTranspiler({
     strict: true,
-    optimize: true
+    optimize: true,
   });
 
   try {
@@ -566,7 +582,7 @@ function compileWithErrorHandling(vb6Code: string, fileName: string) {
         success: true,
         javascript: result.javascript,
         sourceMap: result.sourceMap,
-        metrics: result.metrics
+        metrics: result.metrics,
       };
     } else {
       // Compilation errors
@@ -598,7 +614,7 @@ function compileWithErrorHandling(vb6Code: string, fileName: string) {
 
       return {
         success: false,
-        errors: result.errors
+        errors: result.errors,
       };
     }
   } catch (e) {
@@ -606,12 +622,14 @@ function compileWithErrorHandling(vb6Code: string, fileName: string) {
     console.error('💥 Unexpected error:', e);
     return {
       success: false,
-      errors: [{
-        type: 'runtime',
-        message: e.message,
-        line: 0,
-        column: 0
-      }]
+      errors: [
+        {
+          type: 'runtime',
+          message: e.message,
+          line: 0,
+          column: 0,
+        },
+      ],
     };
   }
 }
@@ -620,6 +638,7 @@ function compileWithErrorHandling(vb6Code: string, fileName: string) {
 ### Pattern 4: Configuration Externe
 
 **Charger configuration depuis un fichier:**
+
 ```typescript
 // compiler-config.json
 {
@@ -658,7 +677,7 @@ function loadConfigAndCompile() {
 ```typescript
 // ❌ Mauvais:
 const result = transpiler.transpile(vb6Code);
-fs.writeFileSync('output.js', result.javascript);  // Peut échouer!
+fs.writeFileSync('output.js', result.javascript); // Peut échouer!
 
 // ✅ Bon:
 const result = transpiler.transpile(vb6Code);
@@ -675,14 +694,14 @@ if (result.success) {
 ```typescript
 // En développement:
 const transpiler = new VB6UnifiedASTTranspiler({
-  generateSourceMaps: true,  // ✅ Pour debugging
-  optimize: false            // ✅ Plus rapide
+  generateSourceMaps: true, // ✅ Pour debugging
+  optimize: false, // ✅ Plus rapide
 });
 
 // En production:
 const transpiler = new VB6UnifiedASTTranspiler({
-  generateSourceMaps: false,  // ✅ Taille réduite
-  optimize: true              // ✅ Meilleure performance
+  generateSourceMaps: false, // ✅ Taille réduite
+  optimize: true, // ✅ Meilleure performance
 });
 ```
 
@@ -714,7 +733,7 @@ function compileWithMetrics(vb6Code: string) {
 ```typescript
 function compileLargeFile(filePath: string) {
   // Pour très gros fichiers, compiler en chunks
-  const maxSize = 100 * 1024;  // 100KB chunks
+  const maxSize = 100 * 1024; // 100KB chunks
 
   const stats = fs.statSync(filePath);
 
@@ -726,7 +745,7 @@ function compileLargeFile(filePath: string) {
   const result = transpiler.transpile(fs.readFileSync(filePath, 'utf-8'));
 
   if (global.gc) {
-    global.gc();  // Force garbage collection
+    global.gc(); // Force garbage collection
   }
 
   return result;
@@ -763,6 +782,7 @@ build/
 **Symptôme:** Node.js crash avec erreur mémoire
 
 **Solution:**
+
 ```bash
 # Augmenter mémoire Node.js
 node --max-old-space-size=4096 compile.js
@@ -773,15 +793,16 @@ node --max-old-space-size=4096 compile.js
 **Symptôme:** Compilation prend > 10 secondes
 
 **Solution:**
+
 ```typescript
 // Désactiver optimisations
 const transpiler = new VB6UnifiedASTTranspiler({
-  optimize: false
+  optimize: false,
 });
 
 // Ou désactiver source maps
 const transpiler = new VB6UnifiedASTTranspiler({
-  generateSourceMaps: false
+  generateSourceMaps: false,
 });
 ```
 
@@ -790,9 +811,10 @@ const transpiler = new VB6UnifiedASTTranspiler({
 **Symptôme:** Caractères spéciaux mal affichés
 
 **Solution:**
+
 ```typescript
 // Spécifier encoding
-const vb6Code = fs.readFileSync('file.vb6', 'latin1');  // ou 'utf-8'
+const vb6Code = fs.readFileSync('file.vb6', 'latin1'); // ou 'utf-8'
 ```
 
 ### Problème: "Source Maps Ne Marchent Pas"
@@ -800,10 +822,11 @@ const vb6Code = fs.readFileSync('file.vb6', 'latin1');  // ou 'utf-8'
 **Symptôme:** Debugger ne trouve pas le code source
 
 **Solution:**
+
 ```typescript
 // 1. Vérifier que source maps sont activées
 const transpiler = new VB6UnifiedASTTranspiler({
-  generateSourceMaps: true
+  generateSourceMaps: true,
 });
 
 // 2. Sauvegarder la source map
@@ -821,6 +844,7 @@ fs.writeFileSync('output.js.map', result.sourceMap);
 ### Q: Puis-je compiler du code VB6 partiel?
 
 **R:** Oui! Le compilateur accepte des snippets:
+
 ```typescript
 const result = transpiler.transpile('Dim x As Integer');
 // Génère: let x = 0;
@@ -833,18 +857,20 @@ const result = transpiler.transpile('Dim x As Integer');
 ### Q: Puis-je compiler vers ES5 pour IE11?
 
 **R:** Oui:
+
 ```typescript
 const transpiler = new VB6UnifiedASTTranspiler({
-  runtimeTarget: 'es5'
+  runtimeTarget: 'es5',
 });
 ```
 
 ### Q: Comment débugger le code généré?
 
 **R:** Utilisez les source maps:
+
 ```typescript
 const transpiler = new VB6UnifiedASTTranspiler({
-  generateSourceMaps: true
+  generateSourceMaps: true,
 });
 // Le browser affichera le code VB6 original
 ```
@@ -860,14 +886,17 @@ const transpiler = new VB6UnifiedASTTranspiler({
 ### Q: Le compilateur est-il thread-safe?
 
 **R:** Oui, chaque instance de VB6UnifiedASTTranspiler est indépendante:
+
 ```typescript
 // Compiler en parallèle
 const files = ['file1.vb6', 'file2.vb6', 'file3.vb6'];
 
-Promise.all(files.map(file => {
-  const transpiler = new VB6UnifiedASTTranspiler();
-  return transpiler.transpile(fs.readFileSync(file, 'utf-8'));
-})).then(results => {
+Promise.all(
+  files.map(file => {
+    const transpiler = new VB6UnifiedASTTranspiler();
+    return transpiler.transpile(fs.readFileSync(file, 'utf-8'));
+  })
+).then(results => {
   console.log(`Compiled ${results.length} files`);
 });
 ```

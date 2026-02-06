@@ -8,7 +8,7 @@ class CacheService {
       stdTTL: 300, // 5 minutes par défaut
       checkperiod: 60, // Vérifier les expirations chaque minute
       useClones: false,
-      deleteOnExpire: true
+      deleteOnExpire: true,
     });
 
     this.redisClient = null;
@@ -17,7 +17,7 @@ class CacheService {
       hits: 0,
       misses: 0,
       sets: 0,
-      deletes: 0
+      deletes: 0,
     };
   }
 
@@ -27,17 +27,17 @@ class CacheService {
         this.redisClient = redis.createClient({
           url: process.env.REDIS_URL,
           socket: {
-            reconnectStrategy: (retries) => {
+            reconnectStrategy: retries => {
               if (retries > 10) {
                 logger.error('Redis connection failed after 10 retries');
                 return new Error('Too many retries');
               }
               return Math.min(retries * 100, 3000);
-            }
-          }
+            },
+          },
         });
 
-        this.redisClient.on('error', (err) => {
+        this.redisClient.on('error', err => {
           logger.error('Redis Client Error', err);
         });
 
@@ -159,7 +159,7 @@ class CacheService {
     const stats = {
       ...this.statistics,
       hitRate: this.statistics.hits / (this.statistics.hits + this.statistics.misses) || 0,
-      type: this.useRedis ? 'redis' : 'memory'
+      type: this.useRedis ? 'redis' : 'memory',
     };
 
     if (!this.useRedis) {
@@ -220,7 +220,7 @@ class CacheService {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32bit integer
     }
     return Math.abs(hash).toString(36);
@@ -229,11 +229,11 @@ class CacheService {
   // Cache avec tags pour invalidation groupée
   async setWithTags(key, value, tags = [], ttl = 300) {
     await this.set(key, value, ttl);
-    
+
     // Stocker les tags
     for (const tag of tags) {
       const tagKey = `tag:${tag}`;
-      const keys = await this.get(tagKey) || [];
+      const keys = (await this.get(tagKey)) || [];
       if (!keys.includes(key)) {
         keys.push(key);
         await this.set(tagKey, keys, 86400); // 24 heures
@@ -243,19 +243,19 @@ class CacheService {
 
   async invalidateTag(tag) {
     const tagKey = `tag:${tag}`;
-    const keys = await this.get(tagKey) || [];
-    
+    const keys = (await this.get(tagKey)) || [];
+
     for (const key of keys) {
       await this.delete(key);
     }
-    
+
     await this.delete(tagKey);
   }
 
   // Warmup du cache
   async warmup(queries = []) {
     logger.info('Starting cache warmup');
-    
+
     for (const query of queries) {
       try {
         // Ici on pourrait pré-charger des requêtes fréquentes
@@ -264,7 +264,7 @@ class CacheService {
         logger.error(`Warmup failed for ${query.name}:`, error);
       }
     }
-    
+
     logger.info('Cache warmup completed');
   }
 }

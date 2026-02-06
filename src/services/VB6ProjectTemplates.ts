@@ -18,12 +18,7 @@ export interface ProjectTemplate {
   controls: string[];
 }
 
-export type TemplateCategory =
-  | 'standard'
-  | 'database'
-  | 'internet'
-  | 'custom'
-  | 'activex';
+export type TemplateCategory = 'standard' | 'database' | 'internet' | 'custom' | 'activex';
 
 export interface ProjectFile {
   name: string;
@@ -48,62 +43,62 @@ const VB6_REFERENCES = {
     name: 'Microsoft DAO 3.6 Object Library',
     guid: '{00025E01-0000-0000-C000-000000000046}',
     version: '5.0',
-    description: 'DAO Database Access Objects'
+    description: 'DAO Database Access Objects',
   },
   ado: {
     name: 'Microsoft ActiveX Data Objects 2.8 Library',
     guid: '{EF53050B-882E-4776-B643-EDA472E8E3F2}',
     version: '2.8',
-    description: 'ADO Database Access'
+    description: 'ADO Database Access',
   },
   scripting: {
     name: 'Microsoft Scripting Runtime',
     guid: '{420B2830-E718-11CF-893D-00A0C9054228}',
     version: '1.0',
-    description: 'FileSystemObject and Dictionary'
+    description: 'FileSystemObject and Dictionary',
   },
   winsock: {
     name: 'Microsoft Winsock Control 6.0',
     guid: '{248DD890-BB45-11CF-9ABC-0080C7E7B78D}',
     version: '6.0',
-    description: 'TCP/IP Socket Control'
+    description: 'TCP/IP Socket Control',
   },
   inet: {
     name: 'Microsoft Internet Transfer Control 6.0',
     guid: '{48E59290-9880-11CF-9754-00AA00C00908}',
     version: '6.0',
-    description: 'Internet Transfer Control'
+    description: 'Internet Transfer Control',
   },
   webbrowser: {
     name: 'Microsoft Internet Controls',
     guid: '{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}',
     version: '1.1',
-    description: 'WebBrowser Control'
+    description: 'WebBrowser Control',
   },
   commonDialog: {
     name: 'Microsoft Common Dialog Control 6.0',
     guid: '{F9043C85-F6F2-101A-A3C9-08002B2F49FB}',
     version: '6.0',
-    description: 'Common Dialog Control'
+    description: 'Common Dialog Control',
   },
   msflexgrid: {
     name: 'Microsoft FlexGrid Control 6.0',
     guid: '{5E9E78A0-531B-11CF-91F6-C2863C385E30}',
     version: '6.0',
-    description: 'FlexGrid Control'
+    description: 'FlexGrid Control',
   },
   dataGrid: {
     name: 'Microsoft DataGrid Control 6.0',
     guid: '{CDE57A40-8B86-11D0-B3C6-00A0C90AEA82}',
     version: '6.0',
-    description: 'Data Grid Control'
+    description: 'Data Grid Control',
   },
   treeview: {
     name: 'Microsoft Windows Common Controls 6.0',
     guid: '{6B7E6392-850A-101B-AFC0-4210102A8DA7}',
     version: '6.0',
-    description: 'TreeView, ListView, ImageList, etc.'
-  }
+    description: 'TreeView, ListView, ImageList, etc.',
+  },
 };
 
 // ============================================================================
@@ -145,9 +140,9 @@ Option Explicit
 Private Sub Form_Load()
     ' Initialize your form here
 End Sub
-`
-    }
-  ]
+`,
+    },
+  ],
 };
 
 // ============================================================================
@@ -264,7 +259,7 @@ End Sub
 Private Sub mnuHelpAbout_Click()
     MsgBox "MDI Application" & vbCrLf & "Version 1.0", vbInformation, "About"
 End Sub
-`
+`,
     },
     {
       name: 'Form1.frm',
@@ -302,9 +297,9 @@ Private Sub Form_Resize()
         Text1.Move 0, 0, ScaleWidth, ScaleHeight
     End If
 End Sub
-`
-    }
-  ]
+`,
+    },
+  ],
 };
 
 // ============================================================================
@@ -481,7 +476,7 @@ Private Sub Form_Unload(Cancel As Integer)
     If Not rs Is Nothing Then rs.Close
     If Not db Is Nothing Then db.Close
 End Sub
-`
+`,
     },
     {
       name: 'modDatabase.bas',
@@ -526,9 +521,9 @@ Public Function RecordCount(rs As Recordset) As Long
         rs.MoveFirst
     End If
 End Function
-`
-    }
-  ]
+`,
+    },
+  ],
 };
 
 // ============================================================================
@@ -678,9 +673,9 @@ Private Sub WebBrowser1_NavigateComplete2(ByVal pDisp As Object, URL As Variant)
     txtURL.Text = URL
     Me.Caption = WebBrowser1.LocationName & " - Web Browser"
 End Sub
-`
-    }
-  ]
+`,
+    },
+  ],
 };
 
 // ============================================================================
@@ -774,9 +769,9 @@ Private Sub cmdExport_Click()
     ' DataReport1.ExportReport rptKeyHTML, App.Path & "\\report.html"
     MsgBox "Configure DataEnvironment and DataReport first", vbInformation
 End Sub
-`
-    }
-  ]
+`,
+    },
+  ],
 };
 
 // ============================================================================
@@ -883,9 +878,9 @@ Private Sub UserControl_WriteProperties(PropBag As PropertyBag)
     PropBag.WriteProperty "BackColor", m_BackColor, vbButtonFace
     PropBag.WriteProperty "Caption", m_Caption, "UserControl1"
 End Sub
-`
-    }
-  ]
+`,
+    },
+  ],
 };
 
 // ============================================================================
@@ -1023,9 +1018,9 @@ Private Sub cmdColor_Click()
         Me.BackColor = CommonDialog1.Color
     End If
 End Sub
-`
-    }
-  ]
+`,
+    },
+  ],
 };
 
 // ============================================================================
@@ -1039,7 +1034,7 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
   INTERNET_APPLICATION_TEMPLATE,
   DATA_REPORT_TEMPLATE,
   DIALOG_APPLICATION_TEMPLATE,
-  ACTIVEX_CONTROL_TEMPLATE
+  ACTIVEX_CONTROL_TEMPLATE,
 ];
 
 // ============================================================================
@@ -1079,19 +1074,22 @@ export class VB6ProjectTemplateManager {
   /**
    * Create a project from template
    */
-  createFromTemplate(templateId: string, projectName: string): { files: ProjectFile[]; references: ProjectReference[] } | null {
+  createFromTemplate(
+    templateId: string,
+    projectName: string
+  ): { files: ProjectFile[]; references: ProjectReference[] } | null {
     const template = this.templates.get(templateId);
     if (!template) return null;
 
     // Clone files and update project name
     const files = template.files.map(file => ({
       ...file,
-      content: file.content.replace(/Form1|frmMain|UserControl1/g, projectName)
+      content: file.content.replace(/Form1|frmMain|UserControl1/g, projectName),
     }));
 
     return {
       files,
-      references: [...template.references]
+      references: [...template.references],
     };
   }
 
@@ -1124,5 +1122,5 @@ export default {
   PROJECT_TEMPLATES,
   VB6ProjectTemplateManager,
   projectTemplateManager,
-  VB6_REFERENCES
+  VB6_REFERENCES,
 };

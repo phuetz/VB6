@@ -5,6 +5,7 @@ This document provides a comprehensive analysis of missing VB6 properties in the
 ## Summary
 
 The codebase has two property definition files:
+
 1. `VB6Properties.ts` - Contains a good set of properties but not exhaustive
 2. `VB6CompleteProperties.ts` - Contains more complete property definitions
 3. `controlDefaults.ts` - Contains only the most basic properties for runtime
@@ -12,9 +13,11 @@ The codebase has two property definition files:
 ## Missing Properties by Control
 
 ### Common Properties (Missing from all controls)
+
 Based on VB6CompleteProperties.ts common properties, these are missing from controlDefaults.ts:
+
 - `Container` - Parent container reference
-- `Parent` - Parent control reference  
+- `Parent` - Parent control reference
 - `RightToLeft` - Right-to-left reading support
 - `DataBindings` - Data binding configuration
 - `DataChanged` - Data modification flag
@@ -33,7 +36,9 @@ Based on VB6CompleteProperties.ts common properties, these are missing from cont
 - `CausesValidation` - Validation triggering
 
 ### CommandButton
+
 Missing properties from VB6CompleteProperties.ts:
+
 - `Appearance` - 3D/Flat appearance
 - `hWnd` - Window handle
 - `DisabledPicture` - Picture when disabled
@@ -44,7 +49,9 @@ Missing properties from VB6CompleteProperties.ts:
 - `Value` - Button state (for graphical style)
 
 ### TextBox
+
 Missing properties:
+
 - `Appearance` - 3D/Flat appearance
 - `hWnd` - Window handle
 - `LinkMode` - DDE link mode
@@ -57,7 +64,9 @@ Missing properties:
 - `SelText` - Selected text
 
 ### Label
+
 Missing properties:
+
 - `Appearance` - 3D/Flat appearance
 - `LinkMode` - DDE link mode
 - `LinkTopic` - DDE link topic
@@ -66,7 +75,9 @@ Missing properties:
 - `UseMnemonic` - Use mnemonic characters
 
 ### CheckBox
+
 Missing properties:
+
 - `Appearance` - 3D/Flat appearance
 - `hWnd` - Window handle
 - `Style` - Standard/Graphical style
@@ -77,7 +88,9 @@ Missing properties:
 - `UseMaskColor` - Use mask color flag
 
 ### OptionButton
+
 Missing properties:
+
 - `Appearance` - 3D/Flat appearance
 - `hWnd` - Window handle
 - `Style` - Standard/Graphical style
@@ -88,7 +101,9 @@ Missing properties:
 - `UseMaskColor` - Use mask color flag
 
 ### ListBox
+
 Missing properties:
+
 - `Appearance` - 3D/Flat appearance
 - `hWnd` - Window handle
 - `ListIndex` - Selected item index
@@ -102,7 +117,9 @@ Missing properties:
 - `Text` - Selected item text
 
 ### ComboBox
+
 Missing properties:
+
 - `Appearance` - 3D/Flat appearance
 - `hWnd` - Window handle
 - `ListIndex` - Selected item index
@@ -118,13 +135,17 @@ Missing properties:
 - `NewIndex` - Recently added item index
 
 ### Frame
+
 Missing properties:
+
 - `BorderStyle` - Border style
 - `ClipControls` - Clip child controls
 - `Appearance` - 3D/Flat appearance
 
 ### PictureBox
+
 Missing extensive properties including:
+
 - `Font` - Font settings
 - `ForeColor` - Text color
 - `Appearance` - 3D/Flat appearance
@@ -144,10 +165,13 @@ Missing extensive properties including:
 - `LinkMode/Topic/Item/Timeout` - DDE properties
 
 ### Timer
+
 Complete - has all essential properties
 
 ### Form
+
 Missing many properties including:
+
 - `BorderStyle` - Window border style
 - `Icon` - Window icon
 - `WindowState` - Normal/Minimized/Maximized
@@ -166,24 +190,31 @@ Missing many properties including:
 - Many others...
 
 ### Advanced Controls
+
 Many advanced controls have only basic properties implemented:
 
 #### TreeView
+
 Missing: Style, LineStyle, Appearance, BorderStyle, ImageList, Indentation, LabelEdit, PathSeparator, Sorted, SingleSel, HideSelection, HotTracking, FullRowSelect, Checkboxes, OLE properties, DropHighlight
 
-#### ListView  
+#### ListView
+
 Missing: View modes, Arrange, LabelEdit, Sort properties, MultiSelect, GridLines, FullRowSelect, HideSelection, HotTracking, HoverSelection, FlatScrollBar, Checkboxes, Appearance, BorderStyle, Icon lists, OLE properties
 
 #### MSFlexGrid
+
 Not implemented in controlDefaults.ts but has extensive properties in VB6CompleteProperties.ts
 
 #### DataGrid
+
 Basic implementation missing many data-binding and appearance properties
 
 #### ProgressBar
+
 Missing: Orientation, Scrolling mode, Appearance, BorderStyle, OLE properties
 
 #### Slider
+
 Missing: TickStyle, TickFrequency, LargeChange, SmallChange, SelectRange, Selection properties, BorderStyle, MousePointer/Icon, OLE properties
 
 ## Recommendations
@@ -217,7 +248,7 @@ Missing: TickStyle, TickFrequency, LargeChange, SmallChange, SelectRange, Select
 Based on comparison with VB6CompleteProperties.ts:
 
 - **CommandButton**: ~60% coverage (missing Appearance, handles, advanced picture props)
-- **TextBox**: ~70% coverage (missing Appearance, DDE, selection runtime props) 
+- **TextBox**: ~70% coverage (missing Appearance, DDE, selection runtime props)
 - **Label**: ~75% coverage (missing Appearance, DDE props)
 - **CheckBox**: ~65% coverage (missing Appearance, graphical style props)
 - **OptionButton**: ~65% coverage (missing Appearance, graphical style props)

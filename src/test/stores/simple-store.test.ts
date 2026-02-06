@@ -13,7 +13,7 @@ describe('Simple VB6 Store Tests', () => {
 
   it('should have initial values', () => {
     const store = useVB6Store.getState();
-    
+
     // Vérifier quelques valeurs initiales
     expect(store.currentCode).toBe('');
     expect(store.controls).toEqual([]);
@@ -23,9 +23,9 @@ describe('Simple VB6 Store Tests', () => {
 
   it('should update code', () => {
     const store = useVB6Store.getState();
-    
+
     store.updateCode('test code');
-    
+
     const newState = useVB6Store.getState();
     expect(newState.currentCode).toBe('test code');
     expect(newState.isDirty).toBe(true);
@@ -33,7 +33,7 @@ describe('Simple VB6 Store Tests', () => {
 
   it('should add control', () => {
     const store = useVB6Store.getState();
-    
+
     const control = {
       id: 'test1',
       type: 'TextBox' as const,
@@ -42,11 +42,11 @@ describe('Simple VB6 Store Tests', () => {
       top: 10,
       width: 100,
       height: 24,
-      properties: {}
+      properties: {},
     };
-    
+
     store.addControl(control);
-    
+
     const newState = useVB6Store.getState();
     expect(newState.controls).toHaveLength(1);
     expect(newState.controls[0].id).toBe('test1');
@@ -54,7 +54,7 @@ describe('Simple VB6 Store Tests', () => {
 
   it('should reset store', () => {
     const store = useVB6Store.getState();
-    
+
     // Ajouter des données
     store.updateCode('some code');
     store.addControl({
@@ -65,14 +65,14 @@ describe('Simple VB6 Store Tests', () => {
       top: 0,
       width: 50,
       height: 20,
-      properties: {}
+      properties: {},
     });
-    
+
     // Reset
     if (store.resetStore) {
       store.resetStore();
     }
-    
+
     const resetState = useVB6Store.getState();
     expect(resetState.currentCode).toBe('');
     expect(resetState.controls).toEqual([]);

@@ -8,7 +8,7 @@ export enum DatabaseType {
   Oracle = 'Oracle',
   MySQL = 'MySQL',
   PostgreSQL = 'PostgreSQL',
-  ODBC = 'ODBC'
+  ODBC = 'ODBC',
 }
 
 // Query Types
@@ -21,7 +21,7 @@ export enum QueryType {
   AlterTable = 'ALTER TABLE',
   DropTable = 'DROP TABLE',
   StoredProcedure = 'EXEC',
-  Custom = 'Custom'
+  Custom = 'Custom',
 }
 
 // Connection State
@@ -140,9 +140,11 @@ interface SQLEditorQueryDesignerProps {
 export const SQLEditorQueryDesigner: React.FC<SQLEditorQueryDesignerProps> = ({
   onQueryExecute,
   onQuerySave,
-  onConnectionChange
+  onConnectionChange,
 }) => {
-  const [selectedTab, setSelectedTab] = useState<'editor' | 'designer' | 'results' | 'plan'>('editor');
+  const [selectedTab, setSelectedTab] = useState<'editor' | 'designer' | 'results' | 'plan'>(
+    'editor'
+  );
   const [connections, setConnections] = useState<ConnectionInfo[]>([]);
   const [selectedConnection, setSelectedConnection] = useState<ConnectionInfo | null>(null);
   const [sqlText, setSqlText] = useState('');
@@ -157,14 +159,18 @@ export const SQLEditorQueryDesigner: React.FC<SQLEditorQueryDesignerProps> = ({
   const [queryForm, setQueryForm] = useState({
     name: '',
     description: '',
-    tags: ''
+    tags: '',
   });
-  
+
   // Query Designer State
   const [designerTables, setDesignerTables] = useState<QueryTable[]>([]);
   const [tableJoins, setTableJoins] = useState<TableJoin[]>([]);
   const [selectedTable, setSelectedTable] = useState<QueryTable | null>(null);
-  const [draggedTable, setDraggedTable] = useState<{ id: string; offsetX: number; offsetY: number } | null>(null);
+  const [draggedTable, setDraggedTable] = useState<{
+    id: string;
+    offsetX: number;
+    offsetY: number;
+  } | null>(null);
   const [showAddTableDialog, setShowAddTableDialog] = useState(false);
 
   const eventEmitter = useRef(new EventEmitter());
@@ -182,12 +188,51 @@ export const SQLEditorQueryDesigner: React.FC<SQLEditorQueryDesignerProps> = ({
       type: 'table',
       schema: 'dbo',
       columns: [
-        { name: 'CustomerID', dataType: 'int', isNullable: false, isPrimaryKey: true, isForeignKey: false, isIdentity: true },
-        { name: 'CompanyName', dataType: 'nvarchar', length: 50, isNullable: false, isPrimaryKey: false, isForeignKey: false, isIdentity: false },
-        { name: 'ContactName', dataType: 'nvarchar', length: 50, isNullable: true, isPrimaryKey: false, isForeignKey: false, isIdentity: false },
-        { name: 'Country', dataType: 'nvarchar', length: 20, isNullable: true, isPrimaryKey: false, isForeignKey: false, isIdentity: false },
-        { name: 'Phone', dataType: 'nvarchar', length: 20, isNullable: true, isPrimaryKey: false, isForeignKey: false, isIdentity: false }
-      ]
+        {
+          name: 'CustomerID',
+          dataType: 'int',
+          isNullable: false,
+          isPrimaryKey: true,
+          isForeignKey: false,
+          isIdentity: true,
+        },
+        {
+          name: 'CompanyName',
+          dataType: 'nvarchar',
+          length: 50,
+          isNullable: false,
+          isPrimaryKey: false,
+          isForeignKey: false,
+          isIdentity: false,
+        },
+        {
+          name: 'ContactName',
+          dataType: 'nvarchar',
+          length: 50,
+          isNullable: true,
+          isPrimaryKey: false,
+          isForeignKey: false,
+          isIdentity: false,
+        },
+        {
+          name: 'Country',
+          dataType: 'nvarchar',
+          length: 20,
+          isNullable: true,
+          isPrimaryKey: false,
+          isForeignKey: false,
+          isIdentity: false,
+        },
+        {
+          name: 'Phone',
+          dataType: 'nvarchar',
+          length: 20,
+          isNullable: true,
+          isPrimaryKey: false,
+          isForeignKey: false,
+          isIdentity: false,
+        },
+      ],
     },
     {
       id: generateId(),
@@ -195,12 +240,49 @@ export const SQLEditorQueryDesigner: React.FC<SQLEditorQueryDesignerProps> = ({
       type: 'table',
       schema: 'dbo',
       columns: [
-        { name: 'OrderID', dataType: 'int', isNullable: false, isPrimaryKey: true, isForeignKey: false, isIdentity: true },
-        { name: 'CustomerID', dataType: 'int', isNullable: false, isPrimaryKey: false, isForeignKey: true, isIdentity: false },
-        { name: 'OrderDate', dataType: 'datetime', isNullable: true, isPrimaryKey: false, isForeignKey: false, isIdentity: false },
-        { name: 'ShipCountry', dataType: 'nvarchar', length: 20, isNullable: true, isPrimaryKey: false, isForeignKey: false, isIdentity: false },
-        { name: 'Freight', dataType: 'money', isNullable: true, isPrimaryKey: false, isForeignKey: false, isIdentity: false, defaultValue: '0' }
-      ]
+        {
+          name: 'OrderID',
+          dataType: 'int',
+          isNullable: false,
+          isPrimaryKey: true,
+          isForeignKey: false,
+          isIdentity: true,
+        },
+        {
+          name: 'CustomerID',
+          dataType: 'int',
+          isNullable: false,
+          isPrimaryKey: false,
+          isForeignKey: true,
+          isIdentity: false,
+        },
+        {
+          name: 'OrderDate',
+          dataType: 'datetime',
+          isNullable: true,
+          isPrimaryKey: false,
+          isForeignKey: false,
+          isIdentity: false,
+        },
+        {
+          name: 'ShipCountry',
+          dataType: 'nvarchar',
+          length: 20,
+          isNullable: true,
+          isPrimaryKey: false,
+          isForeignKey: false,
+          isIdentity: false,
+        },
+        {
+          name: 'Freight',
+          dataType: 'money',
+          isNullable: true,
+          isPrimaryKey: false,
+          isForeignKey: false,
+          isIdentity: false,
+          defaultValue: '0',
+        },
+      ],
     },
     {
       id: generateId(),
@@ -208,12 +290,49 @@ export const SQLEditorQueryDesigner: React.FC<SQLEditorQueryDesignerProps> = ({
       type: 'table',
       schema: 'dbo',
       columns: [
-        { name: 'ProductID', dataType: 'int', isNullable: false, isPrimaryKey: true, isForeignKey: false, isIdentity: true },
-        { name: 'ProductName', dataType: 'nvarchar', length: 50, isNullable: false, isPrimaryKey: false, isForeignKey: false, isIdentity: false },
-        { name: 'UnitPrice', dataType: 'money', isNullable: true, isPrimaryKey: false, isForeignKey: false, isIdentity: false },
-        { name: 'UnitsInStock', dataType: 'smallint', isNullable: true, isPrimaryKey: false, isForeignKey: false, isIdentity: false },
-        { name: 'Discontinued', dataType: 'bit', isNullable: false, isPrimaryKey: false, isForeignKey: false, isIdentity: false, defaultValue: '0' }
-      ]
+        {
+          name: 'ProductID',
+          dataType: 'int',
+          isNullable: false,
+          isPrimaryKey: true,
+          isForeignKey: false,
+          isIdentity: true,
+        },
+        {
+          name: 'ProductName',
+          dataType: 'nvarchar',
+          length: 50,
+          isNullable: false,
+          isPrimaryKey: false,
+          isForeignKey: false,
+          isIdentity: false,
+        },
+        {
+          name: 'UnitPrice',
+          dataType: 'money',
+          isNullable: true,
+          isPrimaryKey: false,
+          isForeignKey: false,
+          isIdentity: false,
+        },
+        {
+          name: 'UnitsInStock',
+          dataType: 'smallint',
+          isNullable: true,
+          isPrimaryKey: false,
+          isForeignKey: false,
+          isIdentity: false,
+        },
+        {
+          name: 'Discontinued',
+          dataType: 'bit',
+          isNullable: false,
+          isPrimaryKey: false,
+          isForeignKey: false,
+          isIdentity: false,
+          defaultValue: '0',
+        },
+      ],
     },
     {
       id: generateId(),
@@ -223,9 +342,9 @@ export const SQLEditorQueryDesigner: React.FC<SQLEditorQueryDesignerProps> = ({
       parameters: [
         { name: '@CustomerID', dataType: 'int', direction: 'IN' },
         { name: '@StartDate', dataType: 'datetime', direction: 'IN', defaultValue: 'NULL' },
-        { name: '@EndDate', dataType: 'datetime', direction: 'IN', defaultValue: 'NULL' }
-      ]
-    }
+        { name: '@EndDate', dataType: 'datetime', direction: 'IN', defaultValue: 'NULL' },
+      ],
+    },
   ];
 
   // Sample saved queries
@@ -243,7 +362,7 @@ ORDER BY OrderCount DESC`,
       createdDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
       modifiedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
       tags: ['customers', 'orders', 'summary'],
-      isFavorite: true
+      isFavorite: true,
     },
     {
       id: generateId(),
@@ -257,8 +376,8 @@ ORDER BY UnitPrice DESC`,
       createdDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
       modifiedDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
       tags: ['products', 'pricing'],
-      isFavorite: false
-    }
+      isFavorite: false,
+    },
   ];
 
   // Initialize sample data
@@ -273,7 +392,7 @@ ORDER BY UnitPrice DESC`,
       username: '', // CONFIGURATION VULNERABILITY BUG FIX: Never hardcode credentials
       integratedSecurity: true, // CONFIGURATION VULNERABILITY BUG FIX: Use integrated security by default
       connectionString: 'Server=(local);Database=YourDatabase;Integrated Security=true;',
-      isConnected: false // CONFIGURATION VULNERABILITY BUG FIX: Don't assume connected state
+      isConnected: false, // CONFIGURATION VULNERABILITY BUG FIX: Don't assume connected state
     };
     setConnections([sampleConnection]);
     setSelectedConnection(sampleConnection);
@@ -287,7 +406,7 @@ ORDER BY UnitPrice DESC`,
 
     setIsExecuting(true);
     setQueryResults(null);
-    
+
     // Add to history
     setQueryHistory(prev => [sqlText, ...prev.filter(q => q !== sqlText)].slice(0, 20));
 
@@ -298,22 +417,24 @@ ORDER BY UnitPrice DESC`,
     const isSelect = sqlText.trim().toUpperCase().startsWith('SELECT');
     const result: QueryResult = {
       columns: isSelect ? ['CustomerID', 'CompanyName', 'Country', 'OrderCount'] : [],
-      rows: isSelect ? [
-        [1, 'Alfreds Futterkiste', 'Germany', 12],
-        [2, 'Ana Trujillo Emparedados', 'Mexico', 8],
-        [3, 'Antonio Moreno Taquería', 'Mexico', 15],
-        [4, 'Around the Horn', 'UK', 23],
-        [5, 'Berglunds snabbköp', 'Sweden', 18]
-      ] : [],
+      rows: isSelect
+        ? [
+            [1, 'Alfreds Futterkiste', 'Germany', 12],
+            [2, 'Ana Trujillo Emparedados', 'Mexico', 8],
+            [3, 'Antonio Moreno Taquería', 'Mexico', 15],
+            [4, 'Around the Horn', 'UK', 23],
+            [5, 'Berglunds snabbköp', 'Sweden', 18],
+          ]
+        : [],
       rowCount: isSelect ? 5 : Math.floor(Math.random() * 100),
       executionTime: 500 + Math.random() * 1500,
       messages: isSelect ? [] : [`(${Math.floor(Math.random() * 100)} row(s) affected)`],
-      error: Math.random() > 0.9 ? 'Syntax error near WHERE clause' : undefined
+      error: Math.random() > 0.9 ? 'Syntax error near WHERE clause' : undefined,
     };
 
     setQueryResults(result);
     setIsExecuting(false);
-    
+
     if (!result.error) {
       setSelectedTab('results');
     }
@@ -327,7 +448,7 @@ ORDER BY UnitPrice DESC`,
     if (designerTables.length === 0) return '';
 
     let sql = 'SELECT ';
-    
+
     // Selected columns
     const selectedColumns: string[] = [];
     designerTables.forEach(table => {
@@ -337,7 +458,7 @@ ORDER BY UnitPrice DESC`,
         }
       });
     });
-    
+
     sql += selectedColumns.length > 0 ? selectedColumns.join(', ') : '*';
     sql += '\nFROM ';
 
@@ -346,7 +467,7 @@ ORDER BY UnitPrice DESC`,
       sql += `${designerTables[0].tableName} ${designerTables[0].alias}`;
     } else {
       sql += `${designerTables[0].tableName} ${designerTables[0].alias}`;
-      
+
       tableJoins.forEach(join => {
         const toTable = designerTables.find(t => t.id === join.toTable);
         if (toTable) {
@@ -365,7 +486,7 @@ ORDER BY UnitPrice DESC`,
         }
       });
     });
-    
+
     if (criteria.length > 0) {
       sql += '\nWHERE ' + criteria.join(' AND ');
     }
@@ -379,7 +500,7 @@ ORDER BY UnitPrice DESC`,
         }
       });
     });
-    
+
     if (groupByColumns.length > 0) {
       sql += '\nGROUP BY ' + groupByColumns.join(', ');
     }
@@ -392,12 +513,12 @@ ORDER BY UnitPrice DESC`,
           orderByColumns.push({
             column: `${table.alias}.${col.name}`,
             order: col.sortOrder,
-            index: col.sortIndex
+            index: col.sortIndex,
           });
         }
       });
     });
-    
+
     if (orderByColumns.length > 0) {
       orderByColumns.sort((a, b) => a.index - b.index);
       sql += '\nORDER BY ' + orderByColumns.map(o => `${o.column} ${o.order}`).join(', ');
@@ -407,25 +528,29 @@ ORDER BY UnitPrice DESC`,
   }, [designerTables, tableJoins]);
 
   // Add table to designer
-  const addTableToDesigner = useCallback((tableName: string) => {
-    const tableObj = databaseObjects.find(obj => obj.name === tableName && obj.type === 'table');
-    if (!tableObj) return;
+  const addTableToDesigner = useCallback(
+    (tableName: string) => {
+      const tableObj = databaseObjects.find(obj => obj.name === tableName && obj.type === 'table');
+      if (!tableObj) return;
 
-    const newTable: QueryTable = {
-      id: generateId(),
-      tableName: tableObj.name,
-      alias: tableObj.name.charAt(0).toLowerCase(),
-      x: 50 + designerTables.length * 200,
-      y: 50,
-      columns: tableObj.columns?.map(col => ({
-        name: col.name,
-        selected: false
-      })) || []
-    };
+      const newTable: QueryTable = {
+        id: generateId(),
+        tableName: tableObj.name,
+        alias: tableObj.name.charAt(0).toLowerCase(),
+        x: 50 + designerTables.length * 200,
+        y: 50,
+        columns:
+          tableObj.columns?.map(col => ({
+            name: col.name,
+            selected: false,
+          })) || [],
+      };
 
-    setDesignerTables(prev => [...prev, newTable]);
-    setShowAddTableDialog(false);
-  }, [databaseObjects, designerTables, generateId]);
+      setDesignerTables(prev => [...prev, newTable]);
+      setShowAddTableDialog(false);
+    },
+    [databaseObjects, designerTables, generateId]
+  );
 
   // Save query
   const saveQuery = useCallback(() => {
@@ -439,8 +564,11 @@ ORDER BY UnitPrice DESC`,
       type: QueryType.Select, // Simplified - would parse SQL to determine
       createdDate: new Date(),
       modifiedDate: new Date(),
-      tags: queryForm.tags.split(',').map(t => t.trim()).filter(t => t),
-      isFavorite: false
+      tags: queryForm.tags
+        .split(',')
+        .map(t => t.trim())
+        .filter(t => t),
+      isFavorite: false,
     };
 
     setSavedQueries(prev => [...prev, newQuery]);
@@ -454,56 +582,76 @@ ORDER BY UnitPrice DESC`,
   // Format SQL
   const formatSQL = useCallback(() => {
     // Simple SQL formatter
-    const keywords = ['SELECT', 'FROM', 'WHERE', 'JOIN', 'LEFT JOIN', 'RIGHT JOIN', 
-                     'INNER JOIN', 'GROUP BY', 'ORDER BY', 'HAVING', 'INSERT', 
-                     'UPDATE', 'DELETE', 'CREATE', 'ALTER', 'DROP'];
-    
+    const keywords = [
+      'SELECT',
+      'FROM',
+      'WHERE',
+      'JOIN',
+      'LEFT JOIN',
+      'RIGHT JOIN',
+      'INNER JOIN',
+      'GROUP BY',
+      'ORDER BY',
+      'HAVING',
+      'INSERT',
+      'UPDATE',
+      'DELETE',
+      'CREATE',
+      'ALTER',
+      'DROP',
+    ];
+
     let formatted = sqlText;
     keywords.forEach(keyword => {
       const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
       formatted = formatted.replace(regex, `\n${keyword}`);
     });
-    
+
     // Clean up extra newlines
     formatted = formatted.trim().replace(/\n\s*\n/g, '\n');
     setSqlText(formatted);
   }, [sqlText]);
 
   // Insert snippet
-  const insertSnippet = useCallback((snippet: string) => {
-    if (editorRef.current) {
-      const start = editorRef.current.selectionStart;
-      const end = editorRef.current.selectionEnd;
-      const newText = sqlText.substring(0, start) + snippet + sqlText.substring(end);
-      setSqlText(newText);
-      
-      // Set cursor position after snippet
-      setTimeout(() => {
-        if (editorRef.current) {
-          editorRef.current.selectionStart = start + snippet.length;
-          editorRef.current.selectionEnd = start + snippet.length;
-          editorRef.current.focus();
-        }
-      }, 0);
-    }
-  }, [sqlText]);
+  const insertSnippet = useCallback(
+    (snippet: string) => {
+      if (editorRef.current) {
+        const start = editorRef.current.selectionStart;
+        const end = editorRef.current.selectionEnd;
+        const newText = sqlText.substring(0, start) + snippet + sqlText.substring(end);
+        setSqlText(newText);
+
+        // Set cursor position after snippet
+        setTimeout(() => {
+          if (editorRef.current) {
+            editorRef.current.selectionStart = start + snippet.length;
+            editorRef.current.selectionEnd = start + snippet.length;
+            editorRef.current.focus();
+          }
+        }, 0);
+      }
+    },
+    [sqlText]
+  );
 
   // Toggle column selection in designer
   const toggleColumnSelection = useCallback((tableId: string, columnName: string) => {
-    setDesignerTables(prev => prev.map(table => {
-      if (table.id === tableId) {
-        return {
-          ...table,
-          columns: table.columns.map(col => {
-            if (col.name === columnName) {
-              return { ...col, selected: !col.selected };
-            }
-            return col;
-          })
-        };
-      }
-      return table;
-    }));
+    setDesignerTables(prev =>
+      prev.map(table => {
+        if (table.id === tableId) {
+          return {
+            ...table,
+            columns: table.columns.map(col => {
+              if (col.name === columnName) {
+                return { ...col, selected: !col.selected };
+              }
+              return col;
+            }),
+          };
+        }
+        return table;
+      })
+    );
   }, []);
 
   // Update designer SQL
@@ -574,16 +722,20 @@ ORDER BY UnitPrice DESC`,
         </button>
         <div className="w-px h-6 bg-gray-300" />
         <select
-          onChange={(e) => insertSnippet(e.target.value)}
+          onChange={e => insertSnippet(e.target.value)}
           className="px-2 py-1 text-sm border border-gray-300 rounded"
           value=""
         >
           <option value="">Insert Snippet...</option>
           <option value="SELECT * FROM ">SELECT * FROM</option>
-          <option value="INSERT INTO table_name (column1, column2) VALUES (value1, value2)">INSERT INTO</option>
+          <option value="INSERT INTO table_name (column1, column2) VALUES (value1, value2)">
+            INSERT INTO
+          </option>
           <option value="UPDATE table_name SET column1 = value1 WHERE condition">UPDATE</option>
           <option value="DELETE FROM table_name WHERE condition">DELETE FROM</option>
-          <option value="CREATE TABLE table_name (\n  id INT PRIMARY KEY,\n  column1 VARCHAR(50)\n)">CREATE TABLE</option>
+          <option value="CREATE TABLE table_name (\n  id INT PRIMARY KEY,\n  column1 VARCHAR(50)\n)">
+            CREATE TABLE
+          </option>
           <option value="BEGIN TRANSACTION\n\nCOMMIT">Transaction</option>
         </select>
       </div>
@@ -645,47 +797,51 @@ ORDER BY UnitPrice DESC`,
             {/* Tables */}
             <div className="mb-4">
               <h4 className="text-xs font-medium text-gray-700 mb-1">Tables</h4>
-              {databaseObjects.filter(obj => obj.type === 'table').map(table => (
-                <div
-                  key={table.id}
-                  className={`p-2 text-sm hover:bg-gray-100 cursor-pointer rounded ${
-                    selectedObject?.id === table.id ? 'bg-blue-50' : ''
-                  }`}
-                  onClick={() => setSelectedObject(table)}
-                  onDoubleClick={() => {
-                    if (selectedTab === 'designer') {
-                      addTableToDesigner(table.name);
-                    } else {
-                      insertSnippet(table.name);
-                    }
-                  }}
-                >
-                  <div className="flex items-center gap-1">
-                    <span>📊</span>
-                    <span>{table.name}</span>
+              {databaseObjects
+                .filter(obj => obj.type === 'table')
+                .map(table => (
+                  <div
+                    key={table.id}
+                    className={`p-2 text-sm hover:bg-gray-100 cursor-pointer rounded ${
+                      selectedObject?.id === table.id ? 'bg-blue-50' : ''
+                    }`}
+                    onClick={() => setSelectedObject(table)}
+                    onDoubleClick={() => {
+                      if (selectedTab === 'designer') {
+                        addTableToDesigner(table.name);
+                      } else {
+                        insertSnippet(table.name);
+                      }
+                    }}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>📊</span>
+                      <span>{table.name}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
 
             {/* Stored Procedures */}
             <div className="mb-4">
               <h4 className="text-xs font-medium text-gray-700 mb-1">Stored Procedures</h4>
-              {databaseObjects.filter(obj => obj.type === 'procedure').map(proc => (
-                <div
-                  key={proc.id}
-                  className={`p-2 text-sm hover:bg-gray-100 cursor-pointer rounded ${
-                    selectedObject?.id === proc.id ? 'bg-blue-50' : ''
-                  }`}
-                  onClick={() => setSelectedObject(proc)}
-                  onDoubleClick={() => insertSnippet(`EXEC ${proc.name}`)}
-                >
-                  <div className="flex items-center gap-1">
-                    <span>⚡</span>
-                    <span>{proc.name}</span>
+              {databaseObjects
+                .filter(obj => obj.type === 'procedure')
+                .map(proc => (
+                  <div
+                    key={proc.id}
+                    className={`p-2 text-sm hover:bg-gray-100 cursor-pointer rounded ${
+                      selectedObject?.id === proc.id ? 'bg-blue-50' : ''
+                    }`}
+                    onClick={() => setSelectedObject(proc)}
+                    onDoubleClick={() => insertSnippet(`EXEC ${proc.name}`)}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>⚡</span>
+                      <span>{proc.name}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
 
             {/* Object Details */}
@@ -751,7 +907,7 @@ ORDER BY UnitPrice DESC`,
               <textarea
                 ref={editorRef}
                 value={sqlText}
-                onChange={(e) => setSqlText(e.target.value)}
+                onChange={e => setSqlText(e.target.value)}
                 className="w-full h-full p-4 font-mono text-sm border border-gray-300 rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter SQL query here..."
                 spellCheck={false}
@@ -788,7 +944,7 @@ ORDER BY UnitPrice DESC`,
                     className="absolute inset-0"
                     style={{
                       backgroundImage: 'radial-gradient(circle, #ddd 1px, transparent 1px)',
-                      backgroundSize: '20px 20px'
+                      backgroundSize: '20px 20px',
                     }}
                   />
 
@@ -800,13 +956,13 @@ ORDER BY UnitPrice DESC`,
                         selectedTable?.id === table.id ? 'border-blue-500' : 'border-gray-300'
                       }`}
                       style={{ left: table.x, top: table.y, minWidth: '200px' }}
-                      onMouseDown={(e) => {
+                      onMouseDown={e => {
                         setSelectedTable(table);
                         const rect = e.currentTarget.getBoundingClientRect();
                         setDraggedTable({
                           id: table.id,
                           offsetX: e.clientX - rect.left,
-                          offsetY: e.clientY - rect.top
+                          offsetY: e.clientY - rect.top,
                         });
                       }}
                     >
@@ -893,7 +1049,10 @@ ORDER BY UnitPrice DESC`,
                       <thead className="bg-gray-100 sticky top-0">
                         <tr>
                           {queryResults.columns.map((col, index) => (
-                            <th key={index} className="text-left p-2 border-b border-gray-300 font-medium text-sm">
+                            <th
+                              key={index}
+                              className="text-left p-2 border-b border-gray-300 font-medium text-sm"
+                            >
                               {col}
                             </th>
                           ))}
@@ -915,9 +1074,13 @@ ORDER BY UnitPrice DESC`,
                 ) : (
                   <div className="p-4">
                     <div className="bg-green-50 border border-green-200 rounded p-4">
-                      <h3 className="font-medium text-green-800 mb-2">Query Executed Successfully</h3>
+                      <h3 className="font-medium text-green-800 mb-2">
+                        Query Executed Successfully
+                      </h3>
                       {queryResults.messages.map((msg, index) => (
-                        <p key={index} className="text-green-700">{msg}</p>
+                        <p key={index} className="text-green-700">
+                          {msg}
+                        </p>
                       ))}
                       <p className="text-sm text-gray-600 mt-2">
                         Execution time: {queryResults.executionTime.toFixed(0)}ms
@@ -976,18 +1139,20 @@ ORDER BY UnitPrice DESC`,
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[400px]">
             <h2 className="text-lg font-medium mb-4">Add Table to Query</h2>
-            
+
             <div className="space-y-2 max-h-64 overflow-y-auto">
-              {databaseObjects.filter(obj => obj.type === 'table').map(table => (
-                <button
-                  key={table.id}
-                  onClick={() => addTableToDesigner(table.name)}
-                  className="w-full text-left p-2 hover:bg-gray-100 rounded flex items-center gap-2"
-                >
-                  <span>📊</span>
-                  <span>{table.name}</span>
-                </button>
-              ))}
+              {databaseObjects
+                .filter(obj => obj.type === 'table')
+                .map(table => (
+                  <button
+                    key={table.id}
+                    onClick={() => addTableToDesigner(table.name)}
+                    className="w-full text-left p-2 hover:bg-gray-100 rounded flex items-center gap-2"
+                  >
+                    <span>📊</span>
+                    <span>{table.name}</span>
+                  </button>
+                ))}
             </div>
 
             <div className="flex justify-end mt-4">
@@ -1007,28 +1172,24 @@ ORDER BY UnitPrice DESC`,
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[500px]">
             <h2 className="text-lg font-medium mb-4">Save Query</h2>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Query Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Query Name</label>
                 <input
                   type="text"
                   value={queryForm.name}
-                  onChange={(e) => setQueryForm(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => setQueryForm(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="My Query"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
                   value={queryForm.description}
-                  onChange={(e) => setQueryForm(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={e => setQueryForm(prev => ({ ...prev, description: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   rows={2}
                   placeholder="Query description..."
@@ -1042,7 +1203,7 @@ ORDER BY UnitPrice DESC`,
                 <input
                   type="text"
                   value={queryForm.tags}
-                  onChange={(e) => setQueryForm(prev => ({ ...prev, tags: e.target.value }))}
+                  onChange={e => setQueryForm(prev => ({ ...prev, tags: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="customers, orders, reports"
                 />

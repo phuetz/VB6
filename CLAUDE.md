@@ -26,6 +26,7 @@ npm test                 # Jest tests
 ## Development Commands
 
 ### Frontend
+
 ```bash
 npm run dev              # Start Vite dev server
 npm run build            # Production build with code splitting
@@ -50,6 +51,7 @@ npm run budget:check     # Check bundle size budget
 ```
 
 ### Backend Server
+
 ```bash
 cd server
 npm run dev              # Start with nodemon (auto-restart)
@@ -63,20 +65,24 @@ npm test                 # Jest tests
 ## Code Style & Conventions
 
 ### Formatting (Prettier)
+
 - 2 spaces indentation, semicolons, single quotes, width 100, LF line endings, trailing commas (es5)
 
 ### Naming
+
 - **React components**: `PascalCase` (e.g., `ModernApp.tsx`, `DesignerCanvas.tsx`)
 - **Utilities/scripts**: `kebab-case` (e.g., `fix-infinite-loop.ts`)
 - **Test files**: `*.test.ts` / `*.test.tsx`
 
 ### Commits (Conventional)
+
 - Format: `type(scope): description` (e.g., `feat(runtime): add DateAdd function`)
 - Types: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`
 
 ## Architecture Overview
 
 ### State Management (Dual Pattern)
+
 The project uses **two state management systems** that coexist:
 
 1. **Zustand Store** (`src/stores/vb6Store.ts`) - Global IDE state
@@ -90,10 +96,12 @@ The project uses **two state management systems** that coexist:
    - Uses reducer pattern (`src/context/vb6Reducer.ts`)
 
 **When adding features:**
+
 - Use **Zustand** for global IDE state (panels, debugging, performance)
 - Use **React Context** for form-specific operations (control manipulation, events)
 
 ### Component Architecture
+
 ```
 src/components/
 ├── Designer/      # Form designer (canvas, resize handles, alignment guides)
@@ -127,20 +135,22 @@ VB6 syntax changes require coordinated updates across all four stages. Test with
 
 ## Key Services
 
-| Service | Location | Purpose |
-|---------|----------|---------|
-| VB6Compiler | `src/services/VB6Compiler.ts` | Orchestrates compiler pipeline |
-| FileManager | `src/services/FileManager.ts` | VB6 file formats (.frm, .bas, .vbp) |
-| VB6Debugger | `src/services/VB6Debugger.ts` | Breakpoints, step execution |
-| ThemeManager | `src/services/ThemeManager.ts` | Classic VB6/Modern/Dark themes |
+| Service      | Location                       | Purpose                             |
+| ------------ | ------------------------------ | ----------------------------------- |
+| VB6Compiler  | `src/services/VB6Compiler.ts`  | Orchestrates compiler pipeline      |
+| FileManager  | `src/services/FileManager.ts`  | VB6 file formats (.frm, .bas, .vbp) |
+| VB6Debugger  | `src/services/VB6Debugger.ts`  | Breakpoints, step execution         |
+| ThemeManager | `src/services/ThemeManager.ts` | Classic VB6/Modern/Dark themes      |
 
 ## Form Designer
 
 ### Dual Drag & Drop System
+
 - **Toolbox → Canvas** (@dnd-kit): Creates new controls, red alignment guides
 - **Canvas manipulation** (native mouse): Moves existing controls, green alignment guides
 
 ### Control Manipulation
+
 - **Resize**: 8-direction handles (single selection only), Shift for aspect ratio
 - **Alignment**: O(n) memoized guides snapping to edges and centers
 - **Grid**: 8px default snapping
@@ -165,19 +175,22 @@ src/test/
 ## Development Patterns
 
 ### Key Hooks
-| Hook | Purpose |
-|------|---------|
+
+| Hook                        | Purpose                                           |
+| --------------------------- | ------------------------------------------------- |
 | `useControlManipulation.ts` | Control operations with memoized alignment guides |
-| `useAutoSave.ts` | Debounced auto-save to localStorage |
-| `useUndoRedo.ts` | History management with snapshots |
-| `useCollaboration.ts` | WebSocket real-time collaboration |
+| `useAutoSave.ts`            | Debounced auto-save to localStorage               |
+| `useUndoRedo.ts`            | History management with snapshots                 |
+| `useCollaboration.ts`       | WebSocket real-time collaboration                 |
 
 ### Control System
+
 - Properties: `Name`, `Left`, `Top`, `Width`, `Height`, `Caption`/`Text`
 - Events: `Click`, `MouseMove`, `KeyPress`, `Load`, `Resize`, etc.
 - Properties defined in `VB6CompleteProperties.ts`, defaults in `controlDefaults.ts`
 
 ### Adding New Controls
+
 1. Define interface in `src/context/types.ts`
 2. Implement component in `src/components/Controls/YourControl.tsx`
 3. Add defaults in `src/utils/controlDefaults.ts`
@@ -187,15 +200,18 @@ src/test/
 ## Build & Configuration
 
 ### Vite (`vite.config.ts`)
+
 - **Code splitting**: Manual chunks (react-vendor, editor-vendor, vb6-runtime, designer, controls)
 - **Bundle targets**: <1MB main, <500KB per chunk
 - **Monaco**: Lazy-loaded, excluded from optimizeDeps
 
 ### TypeScript
+
 - Strict mode enabled
 - Path alias: `@/` → `src/`
 
 ### Environment
+
 - Copy `.env.example` to `.env` (never commit secrets)
 - Frontend env: `src/config/env.ts`
 - Backend env: `server/.env`
@@ -227,6 +243,7 @@ npm run build
 ```
 
 **Workflow complet :**
+
 1. Modifier le code
 2. `npm run format` - Formater avec Prettier
 3. `npm run lint` - Vérifier ESLint
@@ -236,6 +253,7 @@ npm run build
 7. Si tout passe → valider
 
 **Tests spécifiques :**
+
 ```bash
 npm test -- src/test/compiler/vb6Lexer.test.ts   # Lexer
 npm test -- src/test/compiler/vb6Parser.test.ts  # Parser
@@ -244,6 +262,7 @@ npm run test:startup                              # Tests critiques
 ```
 
 **Couverture :**
+
 ```bash
 npm run test:coverage  # Seuil : 70%
 ```

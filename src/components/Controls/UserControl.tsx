@@ -7,14 +7,18 @@
 import React, { useState, useEffect, useRef, forwardRef, useCallback, useMemo } from 'react';
 import { VB6ControlPropsEnhanced } from './VB6ControlsEnhanced';
 import { useVB6Store } from '../../stores/vb6Store';
-import { VB6UserControlManagerInstance, UserControlDefinition, UserControlInstance } from '../../services/VB6UserControlManager';
+import {
+  VB6UserControlManagerInstance,
+  UserControlDefinition,
+  UserControlInstance,
+} from '../../services/VB6UserControlManager';
 import { Control } from '../../context/types';
 
 export interface UserControlProps extends VB6ControlPropsEnhanced {
   controlName: string; // Name of the registered user control
   initialProperties?: { [key: string]: any }; // Initial property values
   isDesignMode?: boolean;
-  
+
   // Event handlers
   onPropertyChanged?: (propertyName: string, value: any, oldValue: any) => void;
   onMethodCalled?: (methodName: string, args: any[], result: any) => void;
@@ -111,14 +115,18 @@ export const UserControl = forwardRef<HTMLDivElement, UserControlProps>((props, 
             onPropertyChanged?.(prop.name, value, oldValue);
             fireEvent(name, 'PropertyChanged', { propertyName: prop.name, value, oldValue });
           }
-        }
+        },
       });
     });
 
     // Custom methods
     definition.methods.forEach(method => {
       methods[method.name] = (...args: any[]) => {
-        const result = VB6UserControlManagerInstance.callUserControlMethod(instance.id, method.name, ...args);
+        const result = VB6UserControlManagerInstance.callUserControlMethod(
+          instance.id,
+          method.name,
+          ...args
+        );
         onMethodCalled?.(method.name, args, result);
         fireEvent(name, 'MethodCalled', { methodName: method.name, args, result });
         return result;
@@ -150,7 +158,11 @@ export const UserControl = forwardRef<HTMLDivElement, UserControlProps>((props, 
         if (newWidth !== undefined) containerRef.current.style.width = `${newWidth}px`;
         if (newHeight !== undefined) {
           containerRef.current.style.height = `${newHeight}px`;
-          VB6UserControlManagerInstance.resizeUserControl(instance.id, newWidth || width, newHeight);
+          VB6UserControlManagerInstance.resizeUserControl(
+            instance.id,
+            newWidth || width,
+            newHeight
+          );
         }
       }
     };
@@ -165,7 +177,17 @@ export const UserControl = forwardRef<HTMLDivElement, UserControlProps>((props, 
     };
 
     return methods;
-  }, [instance, definition, currentProperties, onPropertyChanged, onMethodCalled, fireEvent, name, width, height]);
+  }, [
+    instance,
+    definition,
+    currentProperties,
+    onPropertyChanged,
+    onMethodCalled,
+    fireEvent,
+    name,
+    width,
+    height,
+  ]);
 
   // Handle internal events from user control
   useEffect(() => {
@@ -185,7 +207,11 @@ export const UserControl = forwardRef<HTMLDivElement, UserControlProps>((props, 
     return () => {
       // Cleanup event handlers
       definition?.events.forEach(eventDef => {
-        VB6UserControlManagerInstance.removeEventHandler(instance.id, eventDef.name, eventForwarder);
+        VB6UserControlManagerInstance.removeEventHandler(
+          instance.id,
+          eventDef.name,
+          eventForwarder
+        );
       });
     };
   }, [instance, definition, onEventFired, fireEvent, name]);
@@ -223,45 +249,51 @@ export const UserControl = forwardRef<HTMLDivElement, UserControlProps>((props, 
   // Handle clicks and other events
   const handleClick = useCallback(() => {
     if (!enabled || !instance) return;
-    
+
     VB6UserControlManagerInstance.fireUserControlEvent(instance, 'Click', {});
     fireEvent(name, 'Click', {});
   }, [enabled, instance, fireEvent, name]);
 
   const handleDoubleClick = useCallback(() => {
     if (!enabled || !instance) return;
-    
+
     VB6UserControlManagerInstance.fireUserControlEvent(instance, 'DblClick', {});
     fireEvent(name, 'DblClick', {});
   }, [enabled, instance, fireEvent, name]);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (!enabled || !instance) return;
-    
-    const eventData = {
-      button: e.button,
-      shift: e.shiftKey,
-      x: e.clientX,
-      y: e.clientY
-    };
-    
-    VB6UserControlManagerInstance.fireUserControlEvent(instance, 'MouseDown', eventData);
-    fireEvent(name, 'MouseDown', eventData);
-  }, [enabled, instance, fireEvent, name]);
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (!enabled || !instance) return;
 
-  const handleMouseUp = useCallback((e: React.MouseEvent) => {
-    if (!enabled || !instance) return;
-    
-    const eventData = {
-      button: e.button,
-      shift: e.shiftKey,
-      x: e.clientX,
-      y: e.clientY
-    };
-    
-    VB6UserControlManagerInstance.fireUserControlEvent(instance, 'MouseUp', eventData);
-    fireEvent(name, 'MouseUp', eventData);
-  }, [enabled, instance, fireEvent, name]);
+      const eventData = {
+        button: e.button,
+        shift: e.shiftKey,
+        x: e.clientX,
+        y: e.clientY,
+      };
+
+      VB6UserControlManagerInstance.fireUserControlEvent(instance, 'MouseDown', eventData);
+      fireEvent(name, 'MouseDown', eventData);
+    },
+    [enabled, instance, fireEvent, name]
+  );
+
+  const handleMouseUp = useCallback(
+    (e: React.MouseEvent) => {
+      if (!enabled || !instance) return;
+
+      const eventData = {
+        button: e.button,
+        shift: e.shiftKey,
+        x: e.clientX,
+        y: e.clientY,
+      };
+
+      VB6UserControlManagerInstance.fireUserControlEvent(instance, 'MouseUp', eventData);
+      fireEvent(name, 'MouseUp', eventData);
+    },
+    [enabled, instance, fireEvent, name]
+  );
 
   if (!visible) return null;
 
@@ -284,7 +316,7 @@ export const UserControl = forwardRef<HTMLDivElement, UserControlProps>((props, 
           fontSize: '12px',
           color: '#CC0000',
           textAlign: 'center',
-          padding: '8px'
+          padding: '8px',
         }}
         {...rest}
       >
@@ -313,7 +345,7 @@ export const UserControl = forwardRef<HTMLDivElement, UserControlProps>((props, 
           alignItems: 'center',
           justifyContent: 'center',
           fontSize: '12px',
-          color: '#666666'
+          color: '#666666',
         }}
         {...rest}
       >
@@ -334,7 +366,7 @@ export const UserControl = forwardRef<HTMLDivElement, UserControlProps>((props, 
     overflow: 'hidden',
     opacity: enabled ? 1 : 0.5,
     cursor: enabled ? 'default' : 'not-allowed',
-    userSelect: 'none'
+    userSelect: 'none',
   };
 
   return (
@@ -371,7 +403,7 @@ export const UserControl = forwardRef<HTMLDivElement, UserControlProps>((props, 
             bottom: 0,
             pointerEvents: 'none',
             border: '2px dashed #0066CC',
-            backgroundColor: 'rgba(0, 102, 204, 0.1)'
+            backgroundColor: 'rgba(0, 102, 204, 0.1)',
           }}
         >
           <div
@@ -384,7 +416,7 @@ export const UserControl = forwardRef<HTMLDivElement, UserControlProps>((props, 
               padding: '2px 6px',
               fontSize: '10px',
               fontWeight: 'bold',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
             }}
           >
             {controlName}
@@ -403,7 +435,7 @@ export const UserControl = forwardRef<HTMLDivElement, UserControlProps>((props, 
             color: '#666666',
             backgroundColor: 'rgba(255, 255, 255, 0.8)',
             padding: '1px 3px',
-            borderRadius: '2px'
+            borderRadius: '2px',
           }}
         >
           {instance.id}
@@ -423,7 +455,7 @@ interface ConstituentControlRendererProps {
 const ConstituentControlRenderer: React.FC<ConstituentControlRendererProps> = ({
   control,
   isDesignMode,
-  userControlInstance
+  userControlInstance,
 }) => {
   // This would render the appropriate VB6 control based on the control type
   // For now, render a placeholder
@@ -441,7 +473,7 @@ const ConstituentControlRenderer: React.FC<ConstituentControlRendererProps> = ({
         alignItems: 'center',
         justifyContent: 'center',
         fontSize: '10px',
-        color: '#666666'
+        color: '#666666',
       }}
     >
       {control.type}: {control.name}
@@ -463,7 +495,7 @@ export const getUserControlDefaults = (id: number, controlName: string) => ({
   controlName,
   visible: true,
   enabled: true,
-  tabIndex: id
+  tabIndex: id,
 });
 
 export default UserControl;

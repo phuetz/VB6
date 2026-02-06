@@ -7,6 +7,7 @@ Ce guide vous accompagne dans l'installation et la configuration de VB6 Web IDE 
 ## 📋 Prérequis Système
 
 ### Configuration Minimale
+
 - **Node.js**: 16.x ou supérieur
 - **NPM**: 8.x ou supérieur
 - **RAM**: 4 GB minimum
@@ -14,6 +15,7 @@ Ce guide vous accompagne dans l'installation et la configuration de VB6 Web IDE 
 - **Navigateur**: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
 
 ### Configuration Recommandée
+
 - **Node.js**: 18.x ou 20.x
 - **NPM**: 9.x ou supérieur
 - **RAM**: 8 GB ou plus
@@ -87,6 +89,7 @@ npm run dev
 ### Installation sur Windows
 
 1. **Installer Node.js**
+
    ```powershell
    # Via Chocolatey
    choco install nodejs
@@ -95,6 +98,7 @@ npm run dev
    ```
 
 2. **Cloner et installer**
+
    ```powershell
    git clone https://github.com/your-org/vb6-web-ide.git
    cd vb6-web-ide
@@ -109,6 +113,7 @@ npm run dev
 ### Installation sur macOS
 
 1. **Installer Node.js**
+
    ```bash
    # Via Homebrew
    brew install node
@@ -120,6 +125,7 @@ npm run dev
    ```
 
 2. **Cloner et installer**
+
    ```bash
    git clone https://github.com/your-org/vb6-web-ide.git
    cd vb6-web-ide
@@ -134,6 +140,7 @@ npm run dev
 ### Installation sur Linux (Ubuntu/Debian)
 
 1. **Installer Node.js**
+
    ```bash
    # Via NodeSource
    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
@@ -147,12 +154,14 @@ npm run dev
    ```
 
 2. **Installer les dépendances système**
+
    ```bash
    sudo apt-get update
    sudo apt-get install -y git build-essential
    ```
 
 3. **Cloner et installer**
+
    ```bash
    git clone https://github.com/your-org/vb6-web-ide.git
    cd vb6-web-ide
@@ -197,7 +206,7 @@ services:
   vb6-ide:
     build: .
     ports:
-      - "8080:80"
+      - '8080:80'
     environment:
       - NODE_ENV=production
       - VITE_APP_ENV=production
@@ -388,6 +397,7 @@ npm run build
 ### Problème: WebAssembly non supporté
 
 Vérifier la compatibilité du navigateur:
+
 ```javascript
 if (typeof WebAssembly === 'object') {
   console.log('WebAssembly supporté');
@@ -428,16 +438,16 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'monaco': ['monaco-editor'],
-          'vendor': ['react', 'react-dom'],
-          'vb6': ['./src/compiler', './src/runtime']
-        }
-      }
-    }
+          monaco: ['monaco-editor'],
+          vendor: ['react', 'react-dom'],
+          vb6: ['./src/compiler', './src/runtime'],
+        },
+      },
+    },
   },
   optimizeDeps: {
-    include: ['monaco-editor', 'react', 'react-dom']
-  }
+    include: ['monaco-editor', 'react', 'react-dom'],
+  },
 });
 ```
 
@@ -503,6 +513,7 @@ npm run update-deps      # Mettre à jour les dépendances
 Félicitations! VB6 Web IDE est maintenant installé et prêt à l'emploi.
 
 🎯 **Prochaines étapes:**
+
 1. Lancez l'application avec `npm run dev`
 2. Accédez à http://localhost:5173
 3. Créez votre premier projet VB6

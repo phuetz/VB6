@@ -11,12 +11,9 @@ import {
   OnGoSub,
   SetLine,
   Erl,
-  LineTargetType
+  LineTargetType,
 } from '../../runtime/VB6LineNumbers';
-import {
-  VB6GoSubHandler,
-  GoSubHandler
-} from '../../runtime/VB6GoSubReturn';
+import { VB6GoSubHandler, GoSubHandler } from '../../runtime/VB6GoSubReturn';
 
 describe('VB6 GoTo/Labels - Line Number Manager', () => {
   let manager: VB6LineNumberManager;
@@ -461,7 +458,10 @@ describe('VB6 GoTo/Labels - GoSub Handler', () => {
     });
 
     it('should preserve local variables', () => {
-      const locals = new Map([['x', 10], ['y', 20]]);
+      const locals = new Map([
+        ['x', 10],
+        ['y', 20],
+      ]);
       handler.goSub('Sub1', 100, 'MainProc', locals);
 
       const context = handler.return();

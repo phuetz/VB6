@@ -35,35 +35,58 @@ export const LineControl: React.FC<LineControlProps> = ({ control, isDesignMode 
   // Convert VB6 border style to SVG stroke-dasharray
   const getStrokeDashArray = (style: number): string | undefined => {
     switch (style) {
-      case 0: return '0'; // Transparent
-      case 2: return '5,5'; // Dash
-      case 3: return '2,2'; // Dot
-      case 4: return '5,2,2,2'; // DashDot
-      case 5: return '5,2,2,2,2,2'; // DashDotDot
-      default: return undefined; // Solid
+      case 0:
+        return '0'; // Transparent
+      case 2:
+        return '5,5'; // Dash
+      case 3:
+        return '2,2'; // Dot
+      case 4:
+        return '5,2,2,2'; // DashDot
+      case 5:
+        return '5,2,2,2,2,2'; // DashDotDot
+      default:
+        return undefined; // Solid
     }
   };
 
   // Convert VB6 DrawMode to SVG mix-blend-mode
   const getBlendMode = (mode: number): string => {
     switch (mode) {
-      case 1: return 'normal'; // vbBlackness
-      case 2: return 'normal'; // vbNotMergePen
-      case 3: return 'multiply'; // vbMaskNotPen
-      case 4: return 'normal'; // vbNotCopyPen
-      case 5: return 'screen'; // vbMaskPenNot
-      case 6: return 'difference'; // vbInvert
-      case 7: return 'xor'; // vbXorPen
-      case 8: return 'normal'; // vbNotMaskPen
-      case 9: return 'multiply'; // vbMaskPen
-      case 10: return 'xor'; // vbNotXorPen
-      case 11: return 'normal'; // vbNop
-      case 12: return 'screen'; // vbMergeNotPen
-      case 13: return 'normal'; // vbCopyPen (default)
-      case 14: return 'lighten'; // vbMergePenNot
-      case 15: return 'lighten'; // vbMergePen
-      case 16: return 'normal'; // vbWhiteness
-      default: return 'normal';
+      case 1:
+        return 'normal'; // vbBlackness
+      case 2:
+        return 'normal'; // vbNotMergePen
+      case 3:
+        return 'multiply'; // vbMaskNotPen
+      case 4:
+        return 'normal'; // vbNotCopyPen
+      case 5:
+        return 'screen'; // vbMaskPenNot
+      case 6:
+        return 'difference'; // vbInvert
+      case 7:
+        return 'xor'; // vbXorPen
+      case 8:
+        return 'normal'; // vbNotMaskPen
+      case 9:
+        return 'multiply'; // vbMaskPen
+      case 10:
+        return 'xor'; // vbNotXorPen
+      case 11:
+        return 'normal'; // vbNop
+      case 12:
+        return 'screen'; // vbMergeNotPen
+      case 13:
+        return 'normal'; // vbCopyPen (default)
+      case 14:
+        return 'lighten'; // vbMergePenNot
+      case 15:
+        return 'lighten'; // vbMergePen
+      case 16:
+        return 'normal'; // vbWhiteness
+      default:
+        return 'normal';
     }
   };
 
@@ -106,7 +129,7 @@ export const LineControl: React.FC<LineControlProps> = ({ control, isDesignMode 
         strokeLinecap="square"
         vectorEffect="non-scaling-stroke"
       />
-      
+
       {/* Design mode selection handles */}
       {isDesignMode && (
         <>

@@ -155,7 +155,6 @@ export const FormLayout: React.FC<FormLayoutProps> = ({ visible, onClose }) => {
                   style={{ width: 60, height: 40 }}
                   onClick={() => {
                     // Add new form logic
-                    console.log('Add new form');
                   }}
                 >
                   <span className="text-gray-400 text-lg">+</span>

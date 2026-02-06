@@ -3,6 +3,7 @@
 ## Overview
 
 Complete implementation of VB6's advanced error handling system, including:
+
 - **On Error Resume Next** - Continue execution after errors
 - **On Error GoTo Label** - Jump to error handler on error
 - **On Error GoTo 0** - Disable error handling
@@ -26,6 +27,7 @@ Complete implementation of VB6's advanced error handling system, including:
 ### 1. On Error Statements
 
 #### On Error Resume Next
+
 Continues execution at the next statement when an error occurs.
 
 ```vb6
@@ -41,6 +43,7 @@ End If
 ```
 
 #### On Error GoTo Label
+
 Jumps to a specified error handler when an error occurs.
 
 ```vb6
@@ -60,6 +63,7 @@ End Sub
 ```
 
 #### On Error GoTo 0
+
 Disables error handling (errors will crash the program).
 
 ```vb6
@@ -74,6 +78,7 @@ On Error GoTo 0
 ### 2. Resume Statements
 
 #### Resume
+
 Retries the statement that caused the error.
 
 ```vb6
@@ -92,6 +97,7 @@ End Sub
 ```
 
 #### Resume Next
+
 Continues execution at the next statement.
 
 ```vb6
@@ -102,6 +108,7 @@ ErrorHandler:
 ```
 
 #### Resume Label
+
 Continues execution at a specific label.
 
 ```vb6
@@ -135,6 +142,7 @@ Err.Raise 1000, "MyApp", "Custom error message"
 ```
 
 **Err Object Properties:**
+
 - `Number` - Error code (0 = no error)
 - `Description` - Error description text
 - `Source` - Source of the error (procedure/module)
@@ -143,6 +151,7 @@ Err.Raise 1000, "MyApp", "Custom error message"
 - `LastDllError` - Last DLL error code
 
 **Err Object Methods:**
+
 - `Clear()` - Clear the current error
 - `Raise(number, source, description, helpFile, helpContext)` - Raise a new error
 
@@ -150,39 +159,39 @@ Err.Raise 1000, "MyApp", "Custom error message"
 
 All standard VB6 error codes are supported:
 
-| Code | Constant | Description |
-|------|----------|-------------|
-| 7 | OUT_OF_MEMORY | Out of memory |
-| 9 | SUBSCRIPT_OUT_OF_RANGE | Subscript out of range |
-| 11 | DIVISION_BY_ZERO | Division by zero |
-| 13 | TYPE_MISMATCH | Type mismatch |
-| 20 | RESUME_WITHOUT_ERROR | Resume without error |
-| 28 | OUT_OF_STACK_SPACE | Out of stack space |
-| 35 | SUB_OR_FUNCTION_NOT_DEFINED | Sub or Function not defined |
-| 53 | FILE_NOT_FOUND | File not found |
-| 91 | OBJECT_VARIABLE_OR_WITH_BLOCK_VARIABLE_NOT_SET | Object variable or With block variable not set |
-| ... | ... | (20+ error codes total) |
+| Code | Constant                                       | Description                                    |
+| ---- | ---------------------------------------------- | ---------------------------------------------- |
+| 7    | OUT_OF_MEMORY                                  | Out of memory                                  |
+| 9    | SUBSCRIPT_OUT_OF_RANGE                         | Subscript out of range                         |
+| 11   | DIVISION_BY_ZERO                               | Division by zero                               |
+| 13   | TYPE_MISMATCH                                  | Type mismatch                                  |
+| 20   | RESUME_WITHOUT_ERROR                           | Resume without error                           |
+| 28   | OUT_OF_STACK_SPACE                             | Out of stack space                             |
+| 35   | SUB_OR_FUNCTION_NOT_DEFINED                    | Sub or Function not defined                    |
+| 53   | FILE_NOT_FOUND                                 | File not found                                 |
+| 91   | OBJECT_VARIABLE_OR_WITH_BLOCK_VARIABLE_NOT_SET | Object variable or With block variable not set |
+| ...  | ...                                            | (20+ error codes total)                        |
 
 ### 5. JavaScript Error Translation
 
 Automatic translation of JavaScript errors to VB6 error codes:
 
-| JavaScript Error | VB6 Error Code | VB6 Error |
-|-----------------|----------------|-----------|
-| RangeError | 9 | Subscript out of range |
-| TypeError | 13 | Type mismatch |
-| ReferenceError | 35 | Sub or Function not defined |
-| RangeError (stack overflow) | 28 | Out of stack space |
-| Error (memory) | 7 | Out of memory |
+| JavaScript Error            | VB6 Error Code | VB6 Error                   |
+| --------------------------- | -------------- | --------------------------- |
+| RangeError                  | 9              | Subscript out of range      |
+| TypeError                   | 13             | Type mismatch               |
+| ReferenceError              | 35             | Sub or Function not defined |
+| RangeError (stack overflow) | 28             | Out of stack space          |
+| Error (memory)              | 7              | Out of memory               |
 
 ```typescript
 // JavaScript Code
 try {
-    const arr = [1, 2, 3];
-    console.log(arr[100]);  // RangeError
+  const arr = [1, 2, 3];
+  console.log(arr[100]); // RangeError
 } catch (jsError) {
-    const vb6Error = handler.translateJavaScriptError(jsError);
-    // vb6Error.number === 9 (SUBSCRIPT_OUT_OF_RANGE)
+  const vb6Error = handler.translateJavaScriptError(jsError);
+  // vb6Error.number === 9 (SUBSCRIPT_OUT_OF_RANGE)
 }
 ```
 
@@ -192,40 +201,45 @@ try {
 
 ```typescript
 class VB6AdvancedErrorHandler {
-    // Singleton instance
-    static getInstance(): VB6AdvancedErrorHandler;
+  // Singleton instance
+  static getInstance(): VB6AdvancedErrorHandler;
 
-    // Error handling modes
-    onErrorResumeNext(): void;
-    onErrorGoTo(label: string): void;
-    onErrorGoToZero(): void;
+  // Error handling modes
+  onErrorResumeNext(): void;
+  onErrorGoTo(label: string): void;
+  onErrorGoToZero(): void;
 
-    // Resume statements
-    resume(target?: string | number): void;
+  // Resume statements
+  resume(target?: string | number): void;
 
-    // Error management
-    raise(errorNumber: number, source?: string, description?: string,
-          helpFile?: string, helpContext?: number): never;
-    handleError(error: VB6ErrorInfo | Error | any): void;
-    translateJavaScriptError(jsError: any, source?: string): VB6ErrorInfo;
+  // Error management
+  raise(
+    errorNumber: number,
+    source?: string,
+    description?: string,
+    helpFile?: string,
+    helpContext?: number
+  ): never;
+  handleError(error: VB6ErrorInfo | Error | any): void;
+  translateJavaScriptError(jsError: any, source?: string): VB6ErrorInfo;
 
-    // Execution context
-    enterContext(procedureName: string, moduleName: string): void;
-    exitContext(): void;
-    setCurrentLine(lineNumber: number): void;
-    setStatementIndex(index: number): void;
-    registerLabel(label: string, statementIndex: number): void;
+  // Execution context
+  enterContext(procedureName: string, moduleName: string): void;
+  exitContext(): void;
+  setCurrentLine(lineNumber: number): void;
+  setStatementIndex(index: number): void;
+  registerLabel(label: string, statementIndex: number): void;
 
-    // Label handlers
-    registerLabelHandler(label: string, handler: () => void): void;
-    unregisterLabelHandler(label: string): void;
+  // Label handlers
+  registerLabelHandler(label: string, handler: () => void): void;
+  unregisterLabelHandler(label: string): void;
 
-    // Err object (getter)
-    get Err(): VB6ErrorInterface;
+  // Err object (getter)
+  get Err(): VB6ErrorInterface;
 
-    // Statistics
-    getStatistics(): ErrorStatistics;
-    reset(): void;
+  // Statistics
+  getStatistics(): ErrorStatistics;
+  reset(): void;
 }
 ```
 
@@ -247,38 +261,43 @@ const Err: VB6ErrorInterface;
 
 ```typescript
 interface VB6ErrorInfo {
-    number: number;
-    description: string;
-    source: string;
-    helpContext: number;
-    helpFile: string;
-    lastDllError: number;
-    line: number;
-    procedure: string;
-    module: string;
-    timestamp: number;
-    callStack: string[];
+  number: number;
+  description: string;
+  source: string;
+  helpContext: number;
+  helpFile: string;
+  lastDllError: number;
+  line: number;
+  procedure: string;
+  module: string;
+  timestamp: number;
+  callStack: string[];
 }
 
 interface VB6ErrorInterface {
-    Number: number;
-    Description: string;
-    Source: string;
-    HelpContext: number;
-    HelpFile: string;
-    LastDllError: number;
-    Clear(): void;
-    Raise(number: number, source?: string, description?: string,
-          helpFile?: string, helpContext?: number): never;
+  Number: number;
+  Description: string;
+  Source: string;
+  HelpContext: number;
+  HelpFile: string;
+  LastDllError: number;
+  Clear(): void;
+  Raise(
+    number: number,
+    source?: string,
+    description?: string,
+    helpFile?: string,
+    helpContext?: number
+  ): never;
 }
 
 interface ErrorContext {
-    procedureName: string;
-    moduleName: string;
-    lineNumber: number;
-    statementIndex: number;
-    variables: Map<string, any>;
-    labels: Map<string, number>;
+  procedureName: string;
+  moduleName: string;
+  lineNumber: number;
+  statementIndex: number;
+  variables: Map<string, any>;
+  labels: Map<string, number>;
 }
 
 type ErrorMode = 'none' | 'resumeNext' | 'gotoLabel' | 'gotoZero';
@@ -301,8 +320,8 @@ const result = someDangerousOperation();
 
 // Check for error
 if (handler.Err.Number !== 0) {
-    console.log(`Error ${handler.Err.Number}: ${handler.Err.Description}`);
-    handler.Err.Clear();
+  console.log(`Error ${handler.Err.Number}: ${handler.Err.Description}`);
+  handler.Err.Clear();
 }
 ```
 
@@ -313,15 +332,15 @@ const handler = VB6AdvancedErrorHandler.getInstance();
 
 // Register error handler
 handler.registerLabelHandler('ErrorHandler', () => {
-    console.log(`Error: ${handler.Err.Description}`);
-    handler.resume('Next');  // Continue with next statement
+  console.log(`Error: ${handler.Err.Description}`);
+  handler.resume('Next'); // Continue with next statement
 });
 
 // Enable error handler
 handler.onErrorGoTo('ErrorHandler');
 
 // Code that might error
-const file = openFile('data.txt');  // Might throw error 53
+const file = openFile('data.txt'); // Might throw error 53
 processFile(file);
 ```
 
@@ -334,20 +353,20 @@ let retryCount = 0;
 const maxRetries = 3;
 
 handler.registerLabelHandler('DBError', () => {
-    retryCount++;
-    if (retryCount < maxRetries) {
-        console.log(`Retry ${retryCount}...`);
-        handler.resume();  // Retry same operation
-    } else {
-        console.log('Max retries reached');
-        handler.resume('Next');  // Give up and continue
-    }
+  retryCount++;
+  if (retryCount < maxRetries) {
+    console.log(`Retry ${retryCount}...`);
+    handler.resume(); // Retry same operation
+  } else {
+    console.log('Max retries reached');
+    handler.resume('Next'); // Give up and continue
+  }
 });
 
 handler.onErrorGoTo('DBError');
 
 // Attempt database connection
-const conn = connectToDatabase();  // Might fail
+const conn = connectToDatabase(); // Might fail
 ```
 
 ### Example 4: File Operations with Cleanup
@@ -356,20 +375,20 @@ const conn = connectToDatabase();  // Might fail
 const handler = VB6AdvancedErrorHandler.getInstance();
 
 handler.registerLabelHandler('FileError', () => {
-    if (handler.Err.Number === 53) {
-        console.log('File not found, creating new file');
-        createFile('data.txt');
-        handler.resume('Next');
-    } else {
-        console.log(`Unexpected error: ${handler.Err.Description}`);
-        throw new Error('Fatal file error');
-    }
+  if (handler.Err.Number === 53) {
+    console.log('File not found, creating new file');
+    createFile('data.txt');
+    handler.resume('Next');
+  } else {
+    console.log(`Unexpected error: ${handler.Err.Description}`);
+    throw new Error('Fatal file error');
+  }
 });
 
 handler.onErrorGoTo('FileError');
 
 // File operations
-const file = openFile('data.txt');  // Might throw 53
+const file = openFile('data.txt'); // Might throw 53
 writeToFile(file, data);
 closeFile(file);
 ```
@@ -383,12 +402,12 @@ handler.onErrorResumeNext();
 
 // Validate input
 if (value < 0) {
-    handler.Err.Raise(1000, 'Validator', 'Value cannot be negative');
+  handler.Err.Raise(1000, 'Validator', 'Value cannot be negative');
 }
 
 // Check for error
 if (handler.Err.Number !== 0) {
-    console.log(`Validation error: ${handler.Err.Description}`);
+  console.log(`Validation error: ${handler.Err.Description}`);
 }
 ```
 
@@ -514,6 +533,7 @@ console.log('Call stack:', error.callStack);
 ## Next Steps
 
 With error handling complete, the next task is:
+
 - **Task 1.8**: GoTo/GoSub/Return and labels for regular control flow
 
 ## Conclusion

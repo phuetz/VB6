@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { 
-  vb6ActiveXService, 
-  IActiveXControl, 
+import {
+  vb6ActiveXService,
+  IActiveXControl,
   ActiveXControlType,
   MSChartControl,
-  WebBrowserControl
+  WebBrowserControl,
 } from '../../services/VB6ActiveXService';
 import { AlertTriangle, Loader } from 'lucide-react';
 
@@ -35,7 +35,7 @@ export const ActiveXControl: React.FC<ActiveXControlProps> = ({
   events = {},
   isDesignMode = true,
   onPropertyChange,
-  onEvent
+  onEvent,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [control, setControl] = useState<IActiveXControl | null>(null);
@@ -51,7 +51,7 @@ export const ActiveXControl: React.FC<ActiveXControlProps> = ({
 
         // Create control instance
         const activeXControl = await vb6ActiveXService.createControl(progId, id);
-        
+
         // Set initial properties
         Object.entries(properties).forEach(([key, value]) => {
           activeXControl.setProperty(key, value);
@@ -109,19 +109,18 @@ export const ActiveXControl: React.FC<ActiveXControlProps> = ({
     switch (control.type) {
       case ActiveXControlType.MSChart:
         return <MSChartRenderer control={control as MSChartControl} />;
-      
+
       case ActiveXControlType.WebBrowser:
-        return <WebBrowserRenderer 
-          control={control as WebBrowserControl} 
-          isDesignMode={isDesignMode} 
-        />;
-      
+        return (
+          <WebBrowserRenderer control={control as WebBrowserControl} isDesignMode={isDesignMode} />
+        );
+
       case ActiveXControlType.MSComm:
         return <MSCommRenderer control={control} isDesignMode={isDesignMode} />;
-      
+
       case ActiveXControlType.CommonDialog:
         return <CommonDialogRenderer control={control} isDesignMode={isDesignMode} />;
-      
+
       default:
         return <GenericActiveXRenderer control={control} isDesignMode={isDesignMode} />;
     }
@@ -135,7 +134,7 @@ export const ActiveXControl: React.FC<ActiveXControlProps> = ({
         left: `${left}px`,
         top: `${top}px`,
         width: `${width}px`,
-        height: `${height}px`
+        height: `${height}px`,
       }}
     >
       {isLoading && (
@@ -148,12 +147,8 @@ export const ActiveXControl: React.FC<ActiveXControlProps> = ({
       {error && (
         <div className="flex flex-col items-center justify-center h-full bg-red-50 p-2">
           <AlertTriangle className="text-red-500 mb-2" size={24} />
-          <div className="text-xs text-red-600 text-center">
-            {error}
-          </div>
-          <div className="text-xs text-gray-500 mt-1">
-            {progId}
-          </div>
+          <div className="text-xs text-red-600 text-center">{error}</div>
+          <div className="text-xs text-gray-500 mt-1">{progId}</div>
         </div>
       )}
 
@@ -190,8 +185,8 @@ const MSChartRenderer: React.FC<{ control: MSChartControl }> = ({ control }) => 
 };
 
 // WebBrowser Renderer
-const WebBrowserRenderer: React.FC<{ 
-  control: WebBrowserControl; 
+const WebBrowserRenderer: React.FC<{
+  control: WebBrowserControl;
   isDesignMode: boolean;
 }> = ({ control, isDesignMode }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -203,30 +198,31 @@ const WebBrowserRenderer: React.FC<{
       while (containerRef.current.firstChild) {
         containerRef.current.removeChild(containerRef.current.firstChild);
       }
-      
+
       if (isDesignMode) {
         // In design mode, show a preview using safe DOM creation
         const preview = document.createElement('div');
         preview.className = 'w-full h-full bg-gray-100 flex flex-col';
-        
+
         // Create header
         const header = document.createElement('div');
         header.className = 'bg-gray-200 p-1 flex items-center gap-1';
-        
+
         const urlBox = document.createElement('div');
         urlBox.className = 'bg-white rounded px-2 py-1 text-xs flex-1';
         urlBox.textContent = control.getProperty('LocationURL') || '';
         header.appendChild(urlBox);
-        
+
         // Create content area
         const content = document.createElement('div');
-        content.className = 'flex-1 bg-white border-t border-gray-300 flex items-center justify-center';
-        
+        content.className =
+          'flex-1 bg-white border-t border-gray-300 flex items-center justify-center';
+
         const label = document.createElement('div');
         label.className = 'text-gray-400 text-sm';
         label.textContent = 'Web Browser Control';
         content.appendChild(label);
-        
+
         preview.appendChild(header);
         preview.appendChild(content);
         containerRef.current.appendChild(preview);
@@ -244,8 +240,8 @@ const WebBrowserRenderer: React.FC<{
 };
 
 // MSComm Renderer
-const MSCommRenderer: React.FC<{ 
-  control: IActiveXControl; 
+const MSCommRenderer: React.FC<{
+  control: IActiveXControl;
   isDesignMode: boolean;
 }> = ({ control, isDesignMode }) => {
   const [status, setStatus] = useState('Disconnected');
@@ -260,7 +256,7 @@ const MSCommRenderer: React.FC<{
 
     updateStatus();
     control.events.on('PropertyChanged', updateStatus);
-    
+
     return () => {
       control.events.off('PropertyChanged', updateStatus);
     };
@@ -281,8 +277,8 @@ const MSCommRenderer: React.FC<{
 };
 
 // CommonDialog Renderer
-const CommonDialogRenderer: React.FC<{ 
-  control: IActiveXControl; 
+const CommonDialogRenderer: React.FC<{
+  control: IActiveXControl;
   isDesignMode: boolean;
 }> = ({ control, isDesignMode }) => {
   return (
@@ -292,31 +288,23 @@ const CommonDialogRenderer: React.FC<{
         <div className="text-xs text-gray-500 mt-1">
           {control.getProperty('DialogTitle') || 'File Dialog Control'}
         </div>
-        {isDesignMode && (
-          <div className="text-xs text-gray-400 mt-2">
-            (Invisible at runtime)
-          </div>
-        )}
+        {isDesignMode && <div className="text-xs text-gray-400 mt-2">(Invisible at runtime)</div>}
       </div>
     </div>
   );
 };
 
 // Generic ActiveX Renderer
-const GenericActiveXRenderer: React.FC<{ 
-  control: IActiveXControl; 
+const GenericActiveXRenderer: React.FC<{
+  control: IActiveXControl;
   isDesignMode: boolean;
 }> = ({ control, isDesignMode }) => {
   return (
     <div className="w-full h-full bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center p-2">
       <div className="text-center">
         <div className="text-sm font-medium text-gray-700">{control.type}</div>
-        <div className="text-xs text-gray-500 mt-1">
-          Version {control.version}
-        </div>
-        <div className="text-xs text-gray-400 mt-2">
-          ActiveX Control
-        </div>
+        <div className="text-xs text-gray-500 mt-1">Version {control.version}</div>
+        <div className="text-xs text-gray-400 mt-2">ActiveX Control</div>
       </div>
     </div>
   );

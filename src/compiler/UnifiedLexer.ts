@@ -51,16 +51,16 @@ export class UnifiedLexer {
       supportHexLiterals: true,
       maxTokens: 1000000,
       timeout: 5000,
-      ...options
+      ...options,
     };
 
     this.advancedLexer = new VB6AdvancedLexer();
-    
+
     this.performanceMetrics = {
       totalTokenized: 0,
       totalTime: 0,
       errors: 0,
-      fallbacks: 0
+      fallbacks: 0,
     };
   }
 
@@ -83,11 +83,11 @@ export class UnifiedLexer {
       }
     } catch (error) {
       this.performanceMetrics.errors++;
-      
+
       if (this.options.fallbackToBasic) {
         console.warn('Advanced lexer failed, falling back to basic lexer:', error);
         this.performanceMetrics.fallbacks++;
-        
+
         try {
           tokens = this.tokenizeWithBasic(code);
         } catch (basicError) {
@@ -100,7 +100,7 @@ export class UnifiedLexer {
     }
 
     const endTime = performance.now();
-    this.performanceMetrics.totalTime += (endTime - startTime);
+    this.performanceMetrics.totalTime += endTime - startTime;
     this.performanceMetrics.totalTokenized += tokens.length;
 
     return tokens;
@@ -132,7 +132,7 @@ export class UnifiedLexer {
       line: token.line,
       column: token.column,
       length: token.length,
-      raw: token.raw
+      raw: token.raw,
     }));
   }
 
@@ -145,7 +145,7 @@ export class UnifiedLexer {
       value: token.value,
       line: token.line,
       column: token.column,
-      length: token.value.length
+      length: token.value.length,
     }));
   }
 
@@ -172,7 +172,7 @@ export class UnifiedLexer {
       [VB6TokenType.FloatLiteral]: 'Float',
       [VB6TokenType.Label]: 'Label',
       [VB6TokenType.AttributeDeclaration]: 'Attribute',
-      [VB6TokenType.EOF]: 'EOF'
+      [VB6TokenType.EOF]: 'EOF',
     };
     return mapping[type] || 'Unknown';
   }
@@ -190,7 +190,7 @@ export class UnifiedLexer {
       [TokenType.Punctuation]: 'Punctuation',
       [TokenType.Comment]: 'Comment',
       [TokenType.NewLine]: 'NewLine',
-      [TokenType.Whitespace]: 'Whitespace'
+      [TokenType.Whitespace]: 'Whitespace',
     };
     return mapping[type] || 'Unknown';
   }
@@ -201,12 +201,14 @@ export class UnifiedLexer {
   public getMetrics() {
     return {
       ...this.performanceMetrics,
-      averageTokensPerMs: this.performanceMetrics.totalTime > 0 
-        ? this.performanceMetrics.totalTokenized / this.performanceMetrics.totalTime 
-        : 0,
-      fallbackRate: this.performanceMetrics.totalTokenized > 0
-        ? this.performanceMetrics.fallbacks / (this.performanceMetrics.errors || 1)
-        : 0
+      averageTokensPerMs:
+        this.performanceMetrics.totalTime > 0
+          ? this.performanceMetrics.totalTokenized / this.performanceMetrics.totalTime
+          : 0,
+      fallbackRate:
+        this.performanceMetrics.totalTokenized > 0
+          ? this.performanceMetrics.fallbacks / (this.performanceMetrics.errors || 1)
+          : 0,
     };
   }
 
@@ -218,7 +220,7 @@ export class UnifiedLexer {
       totalTokenized: 0,
       totalTime: 0,
       errors: 0,
-      fallbacks: 0
+      fallbacks: 0,
     };
   }
 
@@ -232,42 +234,44 @@ export class UnifiedLexer {
     try {
       const advancedTokens = this.tokenizeWithAdvanced(code);
       const basicTokens = this.tokenizeWithBasic(code);
-      
+
       const differences: string[] = [];
-      
+
       // Comparer le nombre de tokens (en ignorant whitespace)
-      const advancedFiltered = advancedTokens.filter(t => 
-        t.type !== 'Whitespace' && t.type !== 'NewLine'
+      const advancedFiltered = advancedTokens.filter(
+        t => t.type !== 'Whitespace' && t.type !== 'NewLine'
       );
-      const basicFiltered = basicTokens.filter(t => 
-        t.type !== 'Whitespace' && t.type !== 'NewLine'
+      const basicFiltered = basicTokens.filter(
+        t => t.type !== 'Whitespace' && t.type !== 'NewLine'
       );
-      
+
       if (advancedFiltered.length !== basicFiltered.length) {
-        differences.push(`Token count mismatch: ${advancedFiltered.length} vs ${basicFiltered.length}`);
+        differences.push(
+          `Token count mismatch: ${advancedFiltered.length} vs ${basicFiltered.length}`
+        );
       }
-      
+
       // Comparer token par token
       const minLength = Math.min(advancedFiltered.length, basicFiltered.length);
       for (let i = 0; i < minLength; i++) {
         const adv = advancedFiltered[i];
         const basic = basicFiltered[i];
-        
+
         if (adv.type !== basic.type || adv.value !== basic.value) {
           differences.push(
             `Token ${i}: [${adv.type}:${adv.value}] vs [${basic.type}:${basic.value}]`
           );
         }
       }
-      
+
       return {
         match: differences.length === 0,
-        differences
+        differences,
       };
     } catch (error) {
       return {
         match: false,
-        differences: [`Validation error: ${error}`]
+        differences: [`Validation error: ${error}`],
       };
     }
   }
@@ -298,9 +302,9 @@ export function createLegacyAdapter() {
         type: t.type as any,
         value: t.value,
         line: t.line,
-        column: t.column
+        column: t.column,
       }));
-    }
+    },
   };
 }
 

@@ -1,25 +1,16 @@
 /**
- * Index principal du système de compilation VB6 - Phase 1
- * 
- * Ce fichier centralise tous les exports du nouveau système de compilation
- * pour faciliter les imports et maintenir la compatibilité.
+ * Index principal du système de compilation VB6
+ *
+ * Ce fichier centralise tous les exports du système de compilation.
  */
 
 // ============================================================================
 // SYSTÈME DE TYPES VB6
 // ============================================================================
 
-export {
-  VB6TypeSystem,
-  vb6TypeSystem
-} from '../services/VB6TypeSystem';
+export { VB6TypeSystem, vb6TypeSystem } from '../services/VB6TypeSystem';
 
-export type {
-  VB6UDT,
-  VB6Enum,
-  VB6Const,
-  VB6DeclareFunction
-} from '../utils/vb6ParserExtended';
+export type { VB6UDT, VB6Enum, VB6Const, VB6DeclareFunction } from '../utils/vb6ParserExtended';
 
 // ============================================================================
 // LEXER UNIFIÉ
@@ -30,7 +21,7 @@ export {
   unifiedLexer,
   tokenizeUnified,
   lexVB6Unified,
-  LexerFactory
+  LexerFactory,
 } from './UnifiedLexer';
 
 export type {
@@ -40,7 +31,7 @@ export type {
   LegacyToken,
   LegacyTokenType,
   AdvancedToken,
-  AdvancedTokenType
+  AdvancedTokenType,
 } from './UnifiedLexer';
 
 // ============================================================================
@@ -53,22 +44,17 @@ export {
   VB6Keywords,
   VB6Operators,
   VB6TypeSuffixes,
-  VB6Punctuation
+  VB6Punctuation,
 } from './VB6AdvancedLexer';
 
-export {
-  VB6TokenType,
-  type VB6Token
-} from './VB6AdvancedLexer';
+export { VB6TokenType, type VB6Token } from './VB6AdvancedLexer';
 
 // ============================================================================
 // PARSER RÉCURSIF DESCENDANT
 // ============================================================================
 
-export {
-  VB6RecursiveDescentParser,
-  parseVB6Code
-} from './VB6RecursiveDescentParser';
+export { VB6RecursiveDescentParser, parseVB6Code } from './VB6RecursiveDescentParser';
+export { adaptToken, adaptTokens } from './tokenAdapter';
 
 export type {
   VB6ASTNode,
@@ -95,7 +81,7 @@ export type {
   VB6LiteralNode,
   VB6IdentifierNode,
   VB6ArgumentNode,
-  VB6CaseNode
+  VB6CaseNode,
 } from './VB6RecursiveDescentParser';
 
 // ============================================================================
@@ -104,7 +90,7 @@ export type {
 
 export {
   VB6AdvancedSemanticAnalyzer,
-  vb6AdvancedSemanticAnalyzer
+  vb6AdvancedSemanticAnalyzer,
 } from './VB6AdvancedSemanticAnalyzer';
 
 export type {
@@ -112,7 +98,7 @@ export type {
   SemanticError,
   TypeCompatibility,
   ControlFlowNode,
-  SemanticAnalysisResult
+  SemanticAnalysisResult,
 } from './VB6AdvancedSemanticAnalyzer';
 
 // ============================================================================
@@ -124,144 +110,50 @@ export {
   VB6ASTAdapter,
   vb6TranspilerIntegration,
   parseVB6WithIntegration,
-  createTranspilerAdapter
+  createTranspilerAdapter,
 } from './VB6TranspilerIntegration';
 
-export type {
-  TranspilerIntegrationConfig,
-  TranspilerResult
-} from './VB6TranspilerIntegration';
+export type { TranspilerIntegrationConfig, TranspilerResult } from './VB6TranspilerIntegration';
 
 // ============================================================================
-// MIGRATION ET COMPATIBILITÉ
+// COMPILATION AVANCÉE
 // ============================================================================
 
-export {
-  VB6LexerMigrationScript,
-  executeLexerMigration
-} from './MigrationScript';
+export { VB6AdvancedCompiler } from './VB6AdvancedCompiler';
 
-export type {
-  MigrationRule,
-  MigrationResult,
-  MigrationReport
-} from './MigrationScript';
+export { VB6IncrementalCache } from './VB6IncrementalCache';
 
-// ============================================================================
-// COMPILATION AVANCÉE (Production Ready)
-// ============================================================================
+export { VB6UltraJIT } from './VB6UltraJIT';
 
-export {
-  VB6AdvancedCompiler
-} from './VB6AdvancedCompiler';
-
-export {
-  VB6IncrementalCache
-} from './VB6IncrementalCache';
-
-export {
-  VB6UltraJIT
-} from './VB6UltraJIT';
-
-export {
-  VB6ProfileGuidedOptimizer
-} from './VB6ProfileGuidedOptimizer';
+export { VB6ProfileGuidedOptimizer } from './VB6ProfileGuidedOptimizer';
 
 // ============================================================================
 // COMPILATEUR NATIF
 // ============================================================================
 
-export {
-  VB6NativeCompiler
-} from './VB6NativeCompiler';
+export { VB6NativeCompiler } from './VB6NativeCompiler';
 
-export {
-  VB6BinaryTranslator
-} from './VB6BinaryTranslator';
-
-export {
-  VB6Linker
-} from './VB6Linker';
+export { VB6Linker } from './VB6Linker';
 
 // ============================================================================
 // FONCTIONNALITÉS DE LANGAGE AVANCÉES
 // ============================================================================
 
-export {
-  VB6AdvancedLanguageFeatures
-} from './VB6AdvancedLanguageFeatures';
+export { VB6AdvancedLanguageFeatures } from './VB6AdvancedLanguageFeatures';
 
-export {
-  VB6TypesAndEnums
-} from './VB6TypesAndEnums';
+export { VB6UDTSupport } from './VB6UDTSupport';
 
-export {
-  VB6UDTSupport
-} from './VB6UDTSupport';
+export { VB6EnumSupport } from './VB6EnumSupport';
 
-export {
-  VB6EnumSupport
-} from './VB6EnumSupport';
+export { VB6InterfaceSupport } from './VB6InterfaceSupport';
 
-export {
-  VB6InterfaceSupport
-} from './VB6InterfaceSupport';
+export { VB6PropertySupport } from './VB6PropertySupport';
 
-export {
-  VB6PropertySupport
-} from './VB6PropertySupport';
+export { VB6WithEventsSupport } from './VB6WithEventsSupport';
 
-export {
-  VB6WithEventsSupport
-} from './VB6WithEventsSupport';
+export { VB6CustomEventsSupport } from './VB6CustomEventsSupport';
 
-export {
-  VB6CustomEventsSupport
-} from './VB6CustomEventsSupport';
-
-export {
-  VB6DeclareSupport
-} from './VB6DeclareSupport';
-
-export {
-  VB6OptionalParametersSupport
-} from './VB6OptionalParametersSupport';
-
-export {
-  VB6StaticVariablesSupport
-} from './VB6StaticVariablesSupport';
-
-// ============================================================================
-// OPTIMISATIONS ET PERFORMANCES
-// ============================================================================
-
-export {
-  OptimizedVB6Compiler
-} from './OptimizedVB6Compiler';
-
-export {
-  VB6ZeroCostAbstractions
-} from './VB6ZeroCostAbstractions';
-
-// ============================================================================
-// WORKER ET BENCHMARKING
-// ============================================================================
-
-export {
-  VB6CompilerWorker
-} from './VB6CompilerWorker';
-
-export {
-  VB6CompilerBenchmark
-} from './VB6CompilerBenchmark';
-
-// ============================================================================
-// CODE GENERATION
-// ============================================================================
-
-export {
-  VB6CodeGenerator
-} from './VB6CodeGenerator';
+export { VB6DeclareSupport } from './VB6DeclareSupport';
 
 // ============================================================================
 // CONSTANTS ET UTILITIES
@@ -283,7 +175,7 @@ export const DEFAULT_COMPILER_CONFIG = {
   enableTypeChecking: true,
   enableDeadCodeElimination: true,
   target: 'es2020' as const,
-  debug: false
+  debug: false,
 } as const;
 
 /**
@@ -295,7 +187,7 @@ export const SUPPORTED_FILE_TYPES = {
   CLASS: ['.cls'],
   USER_CONTROL: ['.ctl'],
   PROPERTY_PAGE: ['.pag'],
-  USER_DOCUMENT: ['.dob']
+  USER_DOCUMENT: ['.dob'],
 } as const;
 
 /**
@@ -303,7 +195,7 @@ export const SUPPORTED_FILE_TYPES = {
  */
 export const VB6_BUILTIN_TYPES = [
   'Boolean',
-  'Byte', 
+  'Byte',
   'Integer',
   'Long',
   'Single',
@@ -314,21 +206,83 @@ export const VB6_BUILTIN_TYPES = [
   'String',
   'Variant',
   'Object',
-  'Any'
+  'Any',
 ] as const;
 
 /**
  * Mots-clés réservés VB6
  */
 export const VB6_RESERVED_KEYWORDS = [
-  'And', 'As', 'Boolean', 'ByRef', 'Byte', 'ByVal', 'Call', 'Case', 'Class',
-  'Const', 'Currency', 'Declare', 'Dim', 'Do', 'Double', 'Each', 'Else', 'ElseIf',
-  'End', 'Enum', 'Exit', 'False', 'For', 'Function', 'Get', 'GoTo', 'If', 'Implements',
-  'In', 'Integer', 'Is', 'Let', 'Like', 'Long', 'Loop', 'Me', 'Mod', 'New', 'Next',
-  'Not', 'Nothing', 'Object', 'On', 'Option', 'Optional', 'Or', 'ParamArray', 'Preserve',
-  'Private', 'Property', 'Public', 'RaiseEvent', 'Resume', 'Select', 'Set', 'Single',
-  'Static', 'String', 'Sub', 'Then', 'To', 'True', 'Type', 'Until', 'Variant', 'Wend',
-  'While', 'With', 'WithEvents', 'Xor'
+  'And',
+  'As',
+  'Boolean',
+  'ByRef',
+  'Byte',
+  'ByVal',
+  'Call',
+  'Case',
+  'Class',
+  'Const',
+  'Currency',
+  'Declare',
+  'Dim',
+  'Do',
+  'Double',
+  'Each',
+  'Else',
+  'ElseIf',
+  'End',
+  'Enum',
+  'Exit',
+  'False',
+  'For',
+  'Function',
+  'Get',
+  'GoTo',
+  'If',
+  'Implements',
+  'In',
+  'Integer',
+  'Is',
+  'Let',
+  'Like',
+  'Long',
+  'Loop',
+  'Me',
+  'Mod',
+  'New',
+  'Next',
+  'Not',
+  'Nothing',
+  'Object',
+  'On',
+  'Option',
+  'Optional',
+  'Or',
+  'ParamArray',
+  'Preserve',
+  'Private',
+  'Property',
+  'Public',
+  'RaiseEvent',
+  'Resume',
+  'Select',
+  'Set',
+  'Single',
+  'Static',
+  'String',
+  'Sub',
+  'Then',
+  'To',
+  'True',
+  'Type',
+  'Until',
+  'Variant',
+  'Wend',
+  'While',
+  'With',
+  'WithEvents',
+  'Xor',
 ] as const;
 
 // ============================================================================
@@ -339,20 +293,22 @@ export const VB6_RESERVED_KEYWORDS = [
  * Vérifier si une chaîne est un mot-clé VB6 réservé
  */
 export function isVB6ReservedKeyword(word: string): boolean {
-  return VB6_RESERVED_KEYWORDS.includes(word as any);
+  return (VB6_RESERVED_KEYWORDS as readonly string[]).includes(word);
 }
 
 /**
  * Vérifier si un type est un type VB6 intégré
  */
 export function isVB6BuiltinType(type: string): boolean {
-  return VB6_BUILTIN_TYPES.includes(type as any);
+  return (VB6_BUILTIN_TYPES as readonly string[]).includes(type);
 }
 
 /**
  * Obtenir l'extension de fichier appropriée pour un type de module
  */
-export function getFileExtensionForModuleType(moduleType: keyof typeof SUPPORTED_FILE_TYPES): string {
+export function getFileExtensionForModuleType(
+  moduleType: keyof typeof SUPPORTED_FILE_TYPES
+): string {
   return SUPPORTED_FILE_TYPES[moduleType][0];
 }
 
@@ -380,7 +336,7 @@ export function createOptimalLexer() {
     fallbackToLegacy: true,
     validateTokens: true,
     preserveComments: true,
-    preserveWhitespace: false
+    preserveWhitespace: false,
   });
 }
 
@@ -394,21 +350,21 @@ export default {
   VB6RecursiveDescentParser,
   VB6AdvancedSemanticAnalyzer,
   UnifiedLexer,
-  
+
   // Integration
   VB6TranspilerIntegration,
-  
+
   // Type System
   VB6TypeSystem,
-  
+
   // Utilities
   createDefaultVB6Compiler,
   createSemanticAnalyzer,
   createOptimalLexer,
-  
+
   // Constants
   VB6_COMPILER_VERSION,
   DEFAULT_COMPILER_CONFIG,
   VB6_BUILTIN_TYPES,
-  VB6_RESERVED_KEYWORDS
+  VB6_RESERVED_KEYWORDS,
 };

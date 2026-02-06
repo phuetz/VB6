@@ -104,7 +104,8 @@ describe('TASK-004: HTML Sanitizer', () => {
 
   describe('sanitizeReport', () => {
     it('devrait préserver les éléments de structure de rapport', () => {
-      const reportHtml = '<header>Title</header><section><p>Content</p></section><footer>Page 1</footer>';
+      const reportHtml =
+        '<header>Title</header><section><p>Content</p></section><footer>Page 1</footer>';
       const result = sanitizeReport(reportHtml);
       expect(result).toContain('<header>');
       expect(result).toContain('<section>');
@@ -257,7 +258,10 @@ describe('TASK-004: HTML Sanitizer', () => {
     it('CrystalReportViewer devrait utiliser sanitizeReport', async () => {
       const fs = await import('fs');
       const path = await import('path');
-      const filePath = path.resolve(__dirname, '../../components/CrystalReports/CrystalReportViewer.tsx');
+      const filePath = path.resolve(
+        __dirname,
+        '../../components/CrystalReports/CrystalReportViewer.tsx'
+      );
       const content = fs.readFileSync(filePath, 'utf-8');
 
       expect(content).toContain('import { sanitizeReport }');

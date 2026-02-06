@@ -27,7 +27,7 @@ describe('VB6 Built-in Functions Compatibility', () => {
       generateTypeScript: false,
       generateSourceMaps: false,
       optimize: false,
-      runtimeTarget: 'es2015'
+      runtimeTarget: 'es2015',
     });
   });
 

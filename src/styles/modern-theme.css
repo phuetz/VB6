@@ -6,50 +6,50 @@
   --primary-hover: #1d4ed8;
   --primary-light: #dbeafe;
   --primary-dark: #1e40af;
-  
+
   /* Secondary Colors */
   --secondary-color: #7c3aed;
   --secondary-hover: #6d28d9;
   --secondary-light: #ede9fe;
-  
+
   /* Accent Colors */
   --accent-color: #f59e0b;
   --accent-hover: #d97706;
   --accent-light: #fef3c7;
-  
+
   /* Status Colors */
   --success-color: #10b981;
   --warning-color: #f59e0b;
   --error-color: #ef4444;
   --info-color: #3b82f6;
-  
+
   /* Neutral Colors */
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
   --bg-tertiary: #f1f5f9;
   --bg-dark: #0f172a;
-  
+
   --text-primary: #1e293b;
   --text-secondary: #64748b;
   --text-tertiary: #94a3b8;
   --text-inverse: #ffffff;
-  
+
   --border-color: #e2e8f0;
   --border-hover: #cbd5e1;
   --border-focus: #3b82f6;
-  
+
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.3);
-  
+
   /* Animations */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  
+
   /* Spacing */
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
@@ -59,19 +59,19 @@
 }
 
 /* Dark Mode Variables */
-[data-theme="dark"] {
+[data-theme='dark'] {
   --bg-primary: #0f172a;
   --bg-secondary: #1e293b;
   --bg-tertiary: #334155;
   --bg-dark: #020617;
-  
+
   --text-primary: #f1f5f9;
   --text-secondary: #cbd5e1;
   --text-tertiary: #94a3b8;
-  
+
   --border-color: #334155;
   --border-hover: #475569;
-  
+
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
@@ -84,7 +84,19 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Roboto',
+    'Oxygen',
+    'Ubuntu',
+    'Cantarell',
+    'Fira Sans',
+    'Droid Sans',
+    'Helvetica Neue',
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--bg-secondary);
@@ -241,7 +253,9 @@ body {
   background: var(--primary-light);
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  transition: width var(--transition-normal), height var(--transition-normal);
+  transition:
+    width var(--transition-normal),
+    height var(--transition-normal);
 }
 
 .toolbar-button:hover {
@@ -653,7 +667,7 @@ body {
   flex: 1;
   position: relative;
   overflow: auto;
-  background-image: 
+  background-image:
     linear-gradient(var(--border-color) 1px, transparent 1px),
     linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
   background-size: 20px 20px;
@@ -761,14 +775,50 @@ body {
   background: var(--primary-hover);
 }
 
-.resize-handle.nw { top: -4px; left: -4px; cursor: nw-resize; }
-.resize-handle.n { top: -4px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
-.resize-handle.ne { top: -4px; right: -4px; cursor: ne-resize; }
-.resize-handle.e { top: 50%; right: -4px; transform: translateY(-50%); cursor: e-resize; }
-.resize-handle.se { bottom: -4px; right: -4px; cursor: se-resize; }
-.resize-handle.s { bottom: -4px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
-.resize-handle.sw { bottom: -4px; left: -4px; cursor: sw-resize; }
-.resize-handle.w { top: 50%; left: -4px; transform: translateY(-50%); cursor: w-resize; }
+.resize-handle.nw {
+  top: -4px;
+  left: -4px;
+  cursor: nw-resize;
+}
+.resize-handle.n {
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: n-resize;
+}
+.resize-handle.ne {
+  top: -4px;
+  right: -4px;
+  cursor: ne-resize;
+}
+.resize-handle.e {
+  top: 50%;
+  right: -4px;
+  transform: translateY(-50%);
+  cursor: e-resize;
+}
+.resize-handle.se {
+  bottom: -4px;
+  right: -4px;
+  cursor: se-resize;
+}
+.resize-handle.s {
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: s-resize;
+}
+.resize-handle.sw {
+  bottom: -4px;
+  left: -4px;
+  cursor: sw-resize;
+}
+.resize-handle.w {
+  top: 50%;
+  left: -4px;
+  transform: translateY(-50%);
+  cursor: w-resize;
+}
 
 /* Status Bar */
 .modern-status-bar {
@@ -814,9 +864,15 @@ body {
 }
 
 @keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 /* Buttons */
@@ -846,7 +902,9 @@ body {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  transition: width var(--transition-slow), height var(--transition-slow);
+  transition:
+    width var(--transition-slow),
+    height var(--transition-slow);
 }
 
 .modern-button:hover::before {
@@ -925,7 +983,9 @@ body {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Scrollbars */
@@ -953,7 +1013,7 @@ body {
   .modern-toolbox {
     width: 240px;
   }
-  
+
   .modern-properties {
     width: 280px;
   }
@@ -963,7 +1023,7 @@ body {
   .modern-panel {
     margin: 0.25rem;
   }
-  
+
   .panel-content {
     padding: 0.75rem;
   }
@@ -1046,7 +1106,9 @@ body {
   border-radius: inherit;
   padding: 1px;
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
@@ -1068,7 +1130,7 @@ body {
   .modern-vb6-ide {
     background: white;
   }
-  
+
   .modern-title-bar,
   .modern-menu-bar,
   .modern-toolbar,
@@ -1077,7 +1139,7 @@ body {
   .modern-properties {
     display: none !important;
   }
-  
+
   .modern-designer {
     margin: 0;
     box-shadow: none;

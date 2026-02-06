@@ -1,23 +1,24 @@
 /**
  * Property Validator for VB6 Controls
- * 
+ *
  * Provides comprehensive validation for all VB6 property types
  * with appropriate error messages and type coercion
  */
 
+export type ValidatableValue = string | number | boolean | null | undefined | object;
+
 export interface ValidationResult {
   isValid: boolean;
   errorMessage?: string;
-  correctedValue?: any;
+  correctedValue?: ValidatableValue;
   warnings?: string[];
 }
 
 export class PropertyValidator {
-  
   /**
    * Validate a color property
    */
-  static validateColor(value: any): ValidationResult {
+  static validateColor(value: ValidatableValue): ValidationResult {
     if (typeof value !== 'string') {
       return { isValid: false, errorMessage: 'Color must be a string' };
     }
@@ -44,24 +45,40 @@ export class PropertyValidator {
 
     // Named colors
     const namedColors = [
-      'black', 'white', 'red', 'green', 'blue', 'yellow', 'cyan', 'magenta',
-      'gray', 'grey', 'darkred', 'darkgreen', 'darkblue'
+      'black',
+      'white',
+      'red',
+      'green',
+      'blue',
+      'yellow',
+      'cyan',
+      'magenta',
+      'gray',
+      'grey',
+      'darkred',
+      'darkgreen',
+      'darkblue',
     ];
-    
+
     if (namedColors.includes(value.toLowerCase())) {
       return { isValid: true };
     }
 
-    return { 
-      isValid: false, 
-      errorMessage: 'Invalid color format. Use VB6 format (&HBBGGRR&) or HTML format (#RRGGBB)' 
+    return {
+      isValid: false,
+      errorMessage: 'Invalid color format. Use VB6 format (&HBBGGRR&) or HTML format (#RRGGBB)',
     };
   }
 
   /**
    * Validate a numeric property
    */
-  static validateNumber(value: any, min?: number, max?: number, allowFloat: boolean = true): ValidationResult {
+  static validateNumber(
+    value: ValidatableValue,
+    min?: number,
+    max?: number,
+    allowFloat: boolean = true
+  ): ValidationResult {
     let numValue: number;
 
     if (typeof value === 'number') {
@@ -69,10 +86,10 @@ export class PropertyValidator {
     } else if (typeof value === 'string') {
       // Handle VB6 numeric formats
       let cleanValue = value.trim();
-      
+
       // Remove VB6 type suffixes
       cleanValue = cleanValue.replace(/[%&!#@]$/, '');
-      
+
       numValue = parseFloat(cleanValue);
     } else {
       return { isValid: false, errorMessage: 'Must be a number' };
@@ -83,26 +100,26 @@ export class PropertyValidator {
     }
 
     if (!allowFloat && numValue !== Math.floor(numValue)) {
-      return { 
-        isValid: true, 
+      return {
+        isValid: true,
         correctedValue: Math.floor(numValue),
-        warnings: ['Decimal part truncated to integer']
+        warnings: ['Decimal part truncated to integer'],
       };
     }
 
     if (min !== undefined && numValue < min) {
-      return { 
-        isValid: true, 
+      return {
+        isValid: true,
         correctedValue: min,
-        warnings: [`Value adjusted to minimum of ${min}`]
+        warnings: [`Value adjusted to minimum of ${min}`],
       };
     }
 
     if (max !== undefined && numValue > max) {
-      return { 
-        isValid: true, 
+      return {
+        isValid: true,
         correctedValue: max,
-        warnings: [`Value adjusted to maximum of ${max}`]
+        warnings: [`Value adjusted to maximum of ${max}`],
       };
     }
 
@@ -112,7 +129,7 @@ export class PropertyValidator {
   /**
    * Validate a boolean property
    */
-  static validateBoolean(value: any): ValidationResult {
+  static validateBoolean(value: ValidatableValue): ValidationResult {
     if (typeof value === 'boolean') {
       return { isValid: true };
     }
@@ -137,7 +154,7 @@ export class PropertyValidator {
   /**
    * Validate an enumeration property
    */
-  static validateEnum(value: any, enumValues: string[]): ValidationResult {
+  static validateEnum(value: ValidatableValue, enumValues: string[]): ValidationResult {
     if (typeof value !== 'string') {
       return { isValid: false, errorMessage: 'Must be a string' };
     }
@@ -155,23 +172,27 @@ export class PropertyValidator {
     }
 
     // Try case-insensitive match
-    const caseInsensitiveMatch = enumValues.find(enumVal => 
-      enumVal.toLowerCase() === value.toLowerCase()
+    const caseInsensitiveMatch = enumValues.find(
+      enumVal => enumVal.toLowerCase() === value.toLowerCase()
     );
     if (caseInsensitiveMatch) {
       return { isValid: true, correctedValue: caseInsensitiveMatch };
     }
 
-    return { 
-      isValid: false, 
-      errorMessage: `Must be one of: ${enumValues.join(', ')}` 
+    return {
+      isValid: false,
+      errorMessage: `Must be one of: ${enumValues.join(', ')}`,
     };
   }
 
   /**
    * Validate a string property
    */
-  static validateString(value: any, maxLength?: number, pattern?: RegExp): ValidationResult {
+  static validateString(
+    value: ValidatableValue,
+    maxLength?: number,
+    pattern?: RegExp
+  ): ValidationResult {
     if (value === null || value === undefined) {
       return { isValid: true, correctedValue: '' };
     }
@@ -179,10 +200,10 @@ export class PropertyValidator {
     const stringValue = String(value);
 
     if (maxLength !== undefined && stringValue.length > maxLength) {
-      return { 
-        isValid: true, 
+      return {
+        isValid: true,
         correctedValue: stringValue.substring(0, maxLength),
-        warnings: [`Text truncated to ${maxLength} characters`]
+        warnings: [`Text truncated to ${maxLength} characters`],
       };
     }
 
@@ -196,7 +217,7 @@ export class PropertyValidator {
   /**
    * Validate a font property
    */
-  static validateFont(value: any): ValidationResult {
+  static validateFont(value: ValidatableValue): ValidationResult {
     if (typeof value === 'string') {
       try {
         const fontObj = JSON.parse(value);
@@ -213,7 +234,7 @@ export class PropertyValidator {
     return { isValid: false, errorMessage: 'Font must be an object or JSON string' };
   }
 
-  private static validateFontObject(fontObj: any): ValidationResult {
+  private static validateFontObject(fontObj: Record<string, unknown>): ValidationResult {
     const warnings: string[] = [];
     const correctedFont = { ...fontObj };
 
@@ -243,17 +264,17 @@ export class PropertyValidator {
       }
     });
 
-    return { 
-      isValid: true, 
+    return {
+      isValid: true,
       correctedValue: warnings.length > 0 ? correctedFont : undefined,
-      warnings: warnings.length > 0 ? warnings : undefined
+      warnings: warnings.length > 0 ? warnings : undefined,
     };
   }
 
   /**
    * Validate a picture property (base64 data URL)
    */
-  static validatePicture(value: any): ValidationResult {
+  static validatePicture(value: ValidatableValue): ValidationResult {
     if (!value || value === '') {
       return { isValid: true };
     }
@@ -287,7 +308,10 @@ export class PropertyValidator {
   /**
    * Validate VB6 control name
    */
-  static validateControlName(value: any, existingNames: string[] = []): ValidationResult {
+  static validateControlName(
+    value: ValidatableValue,
+    existingNames: string[] = []
+  ): ValidationResult {
     if (typeof value !== 'string') {
       return { isValid: false, errorMessage: 'Name must be a string' };
     }
@@ -301,9 +325,10 @@ export class PropertyValidator {
 
     // Check VB6 identifier rules
     if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(name)) {
-      return { 
-        isValid: false, 
-        errorMessage: 'Name must start with a letter and contain only letters, numbers, and underscores' 
+      return {
+        isValid: false,
+        errorMessage:
+          'Name must start with a letter and contain only letters, numbers, and underscores',
       };
     }
 
@@ -314,16 +339,86 @@ export class PropertyValidator {
 
     // Check for VB6 reserved words
     const reservedWords = [
-      'and', 'as', 'boolean', 'byref', 'byte', 'byval', 'call', 'case', 'class',
-      'const', 'currency', 'date', 'declare', 'dim', 'do', 'double', 'each',
-      'else', 'elseif', 'end', 'enum', 'event', 'exit', 'false', 'for', 'function',
-      'get', 'global', 'gosub', 'goto', 'if', 'implements', 'in', 'integer',
-      'is', 'let', 'lib', 'long', 'loop', 'me', 'mod', 'new', 'next', 'not',
-      'nothing', 'object', 'on', 'option', 'optional', 'or', 'paramarray',
-      'preserve', 'private', 'property', 'public', 'raiseevent', 'redim',
-      'rem', 'resume', 'return', 'select', 'set', 'single', 'static', 'step',
-      'stop', 'string', 'sub', 'then', 'to', 'true', 'type', 'typeof', 'until',
-      'variant', 'wend', 'while', 'with', 'withevents', 'xor'
+      'and',
+      'as',
+      'boolean',
+      'byref',
+      'byte',
+      'byval',
+      'call',
+      'case',
+      'class',
+      'const',
+      'currency',
+      'date',
+      'declare',
+      'dim',
+      'do',
+      'double',
+      'each',
+      'else',
+      'elseif',
+      'end',
+      'enum',
+      'event',
+      'exit',
+      'false',
+      'for',
+      'function',
+      'get',
+      'global',
+      'gosub',
+      'goto',
+      'if',
+      'implements',
+      'in',
+      'integer',
+      'is',
+      'let',
+      'lib',
+      'long',
+      'loop',
+      'me',
+      'mod',
+      'new',
+      'next',
+      'not',
+      'nothing',
+      'object',
+      'on',
+      'option',
+      'optional',
+      'or',
+      'paramarray',
+      'preserve',
+      'private',
+      'property',
+      'public',
+      'raiseevent',
+      'redim',
+      'rem',
+      'resume',
+      'return',
+      'select',
+      'set',
+      'single',
+      'static',
+      'step',
+      'stop',
+      'string',
+      'sub',
+      'then',
+      'to',
+      'true',
+      'type',
+      'typeof',
+      'until',
+      'variant',
+      'wend',
+      'while',
+      'with',
+      'withevents',
+      'xor',
     ];
 
     if (reservedWords.includes(name.toLowerCase())) {
@@ -341,9 +436,9 @@ export class PropertyValidator {
   /**
    * Validate a tab index
    */
-  static validateTabIndex(value: any, maxIndex?: number): ValidationResult {
+  static validateTabIndex(value: ValidatableValue, maxIndex?: number): ValidationResult {
     const numResult = this.validateNumber(value, 0, maxIndex, false);
-    
+
     if (!numResult.isValid) {
       return numResult;
     }
@@ -351,10 +446,10 @@ export class PropertyValidator {
     // Ensure it's an integer
     const intValue = Math.floor(Number(value));
     if (intValue !== Number(value)) {
-      return { 
-        isValid: true, 
+      return {
+        isValid: true,
         correctedValue: intValue,
-        warnings: ['Tab index corrected to integer value']
+        warnings: ['Tab index corrected to integer value'],
       };
     }
 
@@ -365,8 +460,8 @@ export class PropertyValidator {
    * Master validation function that routes to appropriate validators
    */
   static validateProperty(
-    propertyType: string, 
-    value: any, 
+    propertyType: string,
+    value: ValidatableValue,
     options: {
       enumValues?: string[];
       min?: number;
@@ -376,35 +471,34 @@ export class PropertyValidator {
       existingNames?: string[];
     } = {}
   ): ValidationResult {
-    
     switch (propertyType) {
       case 'color':
         return this.validateColor(value);
-        
+
       case 'number':
         return this.validateNumber(value, options.min, options.max);
-        
+
       case 'boolean':
         return this.validateBoolean(value);
-        
+
       case 'enum':
         return this.validateEnum(value, options.enumValues || []);
-        
+
       case 'string':
         return this.validateString(value, options.maxLength, options.pattern);
-        
+
       case 'font':
         return this.validateFont(value);
-        
+
       case 'picture':
         return this.validatePicture(value);
-        
+
       case 'name':
         return this.validateControlName(value, options.existingNames);
-        
+
       case 'tabindex':
         return this.validateTabIndex(value, options.max);
-        
+
       default:
         return { isValid: true };
     }
@@ -413,17 +507,17 @@ export class PropertyValidator {
   /**
    * Convert value to VB6 format for saving
    */
-  static formatForVB6(propertyType: string, value: any): string {
+  static formatForVB6(propertyType: string, value: ValidatableValue): string {
     switch (propertyType) {
       case 'boolean':
         return value ? 'True' : 'False';
-        
+
       case 'string':
         return `"${String(value).replace(/"/g, '""')}"`;
-        
+
       case 'number':
         return String(value);
-        
+
       case 'color':
         // Convert HTML color to VB6 format if needed
         if (typeof value === 'string' && value.startsWith('#')) {
@@ -437,13 +531,13 @@ export class PropertyValidator {
           }
         }
         return String(value);
-        
+
       case 'font':
         if (typeof value === 'object') {
           return JSON.stringify(value);
         }
         return String(value);
-        
+
       default:
         return String(value);
     }

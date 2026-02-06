@@ -1,5 +1,30 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, Database, Search, Filter, Plus, Trash2, Edit3, Save, RefreshCw, Download, Upload, Copy, Settings, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Eye, EyeOff, MoreHorizontal, FileText, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import {
+  X,
+  Database,
+  Search,
+  Filter,
+  Plus,
+  Trash2,
+  Edit3,
+  Save,
+  RefreshCw,
+  Download,
+  Upload,
+  Copy,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  ChevronDown,
+  Eye,
+  EyeOff,
+  MoreHorizontal,
+  FileText,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+} from 'lucide-react';
 
 // Types
 export enum DataType {
@@ -12,7 +37,7 @@ export enum DataType {
   BINARY = 'binary',
   JSON = 'json',
   XML = 'xml',
-  GUID = 'guid'
+  GUID = 'guid',
 }
 
 export enum FilterOperator {
@@ -29,19 +54,19 @@ export enum FilterOperator {
   IS_NOT_NULL = 'IS_NOT_NULL',
   IN = 'IN',
   NOT_IN = 'NOT_IN',
-  BETWEEN = 'BETWEEN'
+  BETWEEN = 'BETWEEN',
 }
 
 export enum SortDirection {
   ASC = 'ASC',
-  DESC = 'DESC'
+  DESC = 'DESC',
 }
 
 export enum RowStatus {
   UNCHANGED = 'unchanged',
   MODIFIED = 'modified',
   INSERTED = 'inserted',
-  DELETED = 'deleted'
+  DELETED = 'deleted',
 }
 
 export interface DataColumn {
@@ -130,7 +155,7 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
   onClose,
   connection,
   tableName = 'Users',
-  schema = 'dbo'
+  schema = 'dbo',
 }) => {
   const [config, setConfig] = useState<DataViewConfig>({
     tableName,
@@ -146,7 +171,7 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
     enableFiltering: true,
     enableGrouping: false,
     autoRefresh: false,
-    refreshInterval: 30
+    refreshInterval: 30,
   });
 
   const [columns, setColumns] = useState<DataColumn[]>([
@@ -160,7 +185,7 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
       readOnly: true,
       nullable: false,
       isPrimaryKey: true,
-      isForeignKey: false
+      isForeignKey: false,
     },
     {
       id: 'name',
@@ -176,8 +201,8 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
       validation: {
         required: true,
         minLength: 2,
-        maxLength: 100
-      }
+        maxLength: 100,
+      },
     },
     {
       id: 'email',
@@ -192,8 +217,8 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
       isForeignKey: false,
       validation: {
         required: true,
-        pattern: '^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$'
-      }
+        pattern: '^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$',
+      },
     },
     {
       id: 'age',
@@ -205,7 +230,7 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
       readOnly: false,
       nullable: true,
       isPrimaryKey: false,
-      isForeignKey: false
+      isForeignKey: false,
     },
     {
       id: 'isActive',
@@ -217,7 +242,7 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
       readOnly: false,
       nullable: false,
       isPrimaryKey: false,
-      isForeignKey: false
+      isForeignKey: false,
     },
     {
       id: 'createdDate',
@@ -230,7 +255,7 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
       nullable: false,
       isPrimaryKey: false,
       isForeignKey: false,
-      format: 'yyyy-MM-dd HH:mm:ss'
+      format: 'yyyy-MM-dd HH:mm:ss',
     },
     {
       id: 'departmentId',
@@ -244,38 +269,86 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
       isPrimaryKey: false,
       isForeignKey: true,
       foreignKeyTable: 'Departments',
-      foreignKeyColumn: 'ID'
-    }
+      foreignKeyColumn: 'ID',
+    },
   ]);
 
   const [rows, setRows] = useState<DataRow[]>([
     {
       id: '1',
       status: RowStatus.UNCHANGED,
-      data: { id: 1, name: 'John Doe', email: 'john@example.com', age: 30, isActive: true, createdDate: '2024-01-15 10:30:00', departmentId: 1 },
-      originalData: { id: 1, name: 'John Doe', email: 'john@example.com', age: 30, isActive: true, createdDate: '2024-01-15 10:30:00', departmentId: 1 },
+      data: {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        age: 30,
+        isActive: true,
+        createdDate: '2024-01-15 10:30:00',
+        departmentId: 1,
+      },
+      originalData: {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        age: 30,
+        isActive: true,
+        createdDate: '2024-01-15 10:30:00',
+        departmentId: 1,
+      },
       errors: {},
       isSelected: false,
-      isEditing: false
+      isEditing: false,
     },
     {
       id: '2',
       status: RowStatus.UNCHANGED,
-      data: { id: 2, name: 'Jane Smith', email: 'jane@example.com', age: 28, isActive: true, createdDate: '2024-01-16 14:20:00', departmentId: 2 },
-      originalData: { id: 2, name: 'Jane Smith', email: 'jane@example.com', age: 28, isActive: true, createdDate: '2024-01-16 14:20:00', departmentId: 2 },
+      data: {
+        id: 2,
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+        age: 28,
+        isActive: true,
+        createdDate: '2024-01-16 14:20:00',
+        departmentId: 2,
+      },
+      originalData: {
+        id: 2,
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+        age: 28,
+        isActive: true,
+        createdDate: '2024-01-16 14:20:00',
+        departmentId: 2,
+      },
       errors: {},
       isSelected: false,
-      isEditing: false
+      isEditing: false,
     },
     {
       id: '3',
       status: RowStatus.UNCHANGED,
-      data: { id: 3, name: 'Bob Johnson', email: 'bob@example.com', age: 35, isActive: false, createdDate: '2024-01-17 09:15:00', departmentId: 1 },
-      originalData: { id: 3, name: 'Bob Johnson', email: 'bob@example.com', age: 35, isActive: false, createdDate: '2024-01-17 09:15:00', departmentId: 1 },
+      data: {
+        id: 3,
+        name: 'Bob Johnson',
+        email: 'bob@example.com',
+        age: 35,
+        isActive: false,
+        createdDate: '2024-01-17 09:15:00',
+        departmentId: 1,
+      },
+      originalData: {
+        id: 3,
+        name: 'Bob Johnson',
+        email: 'bob@example.com',
+        age: 35,
+        isActive: false,
+        createdDate: '2024-01-17 09:15:00',
+        departmentId: 1,
+      },
       errors: {},
       isSelected: false,
-      isEditing: false
-    }
+      isEditing: false,
+    },
   ]);
 
   const [filters, setFilters] = useState<DataFilter[]>([]);
@@ -289,7 +362,7 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
   const [editingCell, setEditingCell] = useState<{ rowId: string; columnId: string } | null>(null);
 
   const visibleColumns = useMemo(() => columns.filter(col => col.visible), [columns]);
-  
+
   const filteredAndSortedRows = useMemo(() => {
     let result = [...rows];
 
@@ -305,13 +378,13 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
     // Apply filters
     filters.forEach(filter => {
       if (!filter.enabled) return;
-      
+
       const column = columns.find(c => c.id === filter.columnId);
       if (!column) return;
 
       result = result.filter(row => {
         const value = row.data[filter.columnId];
-        
+
         switch (filter.operator) {
           case FilterOperator.EQUALS:
             return value === filter.value;
@@ -349,11 +422,11 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
         for (const sort of sorts.sort((x, y) => x.priority - y.priority)) {
           const aValue = a.data[sort.columnId];
           const bValue = b.data[sort.columnId];
-          
+
           let comparison = 0;
           if (aValue < bValue) comparison = -1;
           else if (aValue > bValue) comparison = 1;
-          
+
           if (comparison !== 0) {
             return sort.direction === SortDirection.ASC ? comparison : -comparison;
           }
@@ -367,7 +440,7 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
 
   const paginatedRows = useMemo(() => {
     if (!config.enablePaging) return filteredAndSortedRows;
-    
+
     const startIndex = (currentPage - 1) * config.pageSize;
     return filteredAndSortedRows.slice(startIndex, startIndex + config.pageSize);
   }, [filteredAndSortedRows, currentPage, config.pageSize, config.enablePaging]);
@@ -380,15 +453,15 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
       columnId: columns[0]?.id || '',
       operator: FilterOperator.EQUALS,
       value: '',
-      enabled: true
+      enabled: true,
     };
     setFilters([...filters, newFilter]);
   };
 
   const updateFilter = (filterId: string, updates: Partial<DataFilter>) => {
-    setFilters(filters.map(filter =>
-      filter.id === filterId ? { ...filter, ...updates } : filter
-    ));
+    setFilters(
+      filters.map(filter => (filter.id === filterId ? { ...filter, ...updates } : filter))
+    );
   };
 
   const removeFilter = (filterId: string) => {
@@ -397,13 +470,13 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
 
   const toggleSort = (columnId: string) => {
     const existingSort = sorts.find(s => s.columnId === columnId);
-    
+
     if (!existingSort) {
       setSorts([...sorts, { columnId, direction: SortDirection.ASC, priority: sorts.length }]);
     } else if (existingSort.direction === SortDirection.ASC) {
-      setSorts(sorts.map(s =>
-        s.columnId === columnId ? { ...s, direction: SortDirection.DESC } : s
-      ));
+      setSorts(
+        sorts.map(s => (s.columnId === columnId ? { ...s, direction: SortDirection.DESC } : s))
+      );
     } else {
       setSorts(sorts.filter(s => s.columnId !== columnId));
     }
@@ -412,36 +485,38 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
   const startEditing = (rowId: string, columnId: string) => {
     const column = columns.find(c => c.id === columnId);
     if (column?.readOnly) return;
-    
+
     setEditingCell({ rowId, columnId });
-    setRows(rows.map(row =>
-      row.id === rowId ? { ...row, isEditing: true } : row
-    ));
+    setRows(rows.map(row => (row.id === rowId ? { ...row, isEditing: true } : row)));
   };
 
   const saveCell = (rowId: string, columnId: string, value: any) => {
-    setRows(rows.map(row => {
-      if (row.id !== rowId) return row;
-      
-      const newData = { ...row.data, [columnId]: value };
-      const hasChanges = JSON.stringify(newData) !== JSON.stringify(row.originalData);
-      
-      return {
-        ...row,
-        data: newData,
-        status: row.status === RowStatus.INSERTED ? RowStatus.INSERTED : 
-                hasChanges ? RowStatus.MODIFIED : RowStatus.UNCHANGED,
-        isEditing: false
-      };
-    }));
-    
+    setRows(
+      rows.map(row => {
+        if (row.id !== rowId) return row;
+
+        const newData = { ...row.data, [columnId]: value };
+        const hasChanges = JSON.stringify(newData) !== JSON.stringify(row.originalData);
+
+        return {
+          ...row,
+          data: newData,
+          status:
+            row.status === RowStatus.INSERTED
+              ? RowStatus.INSERTED
+              : hasChanges
+                ? RowStatus.MODIFIED
+                : RowStatus.UNCHANGED,
+          isEditing: false,
+        };
+      })
+    );
+
     setEditingCell(null);
   };
 
   const cancelEdit = (rowId: string) => {
-    setRows(rows.map(row =>
-      row.id === rowId ? { ...row, isEditing: false } : row
-    ));
+    setRows(rows.map(row => (row.id === rowId ? { ...row, isEditing: false } : row)));
     setEditingCell(null);
   };
 
@@ -449,26 +524,33 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
     const newRow: DataRow = {
       id: `new-${Date.now()}`,
       status: RowStatus.INSERTED,
-      data: columns.reduce((acc, col) => {
-        acc[col.id] = col.dataType === DataType.BOOLEAN ? false :
-                     col.dataType === DataType.NUMBER ? 0 :
-                     col.dataType === DataType.DATE || col.dataType === DataType.DATETIME ? new Date().toISOString() :
-                     '';
-        return acc;
-      }, {} as Record<string, any>),
+      data: columns.reduce(
+        (acc, col) => {
+          acc[col.id] =
+            col.dataType === DataType.BOOLEAN
+              ? false
+              : col.dataType === DataType.NUMBER
+                ? 0
+                : col.dataType === DataType.DATE || col.dataType === DataType.DATETIME
+                  ? new Date().toISOString()
+                  : '';
+          return acc;
+        },
+        {} as Record<string, any>
+      ),
       originalData: {},
       errors: {},
       isSelected: false,
-      isEditing: true
+      isEditing: true,
     };
-    
+
     setRows([newRow, ...rows]);
   };
 
   const deleteRows = (rowIds: string[]) => {
-    setRows(rows.map(row =>
-      rowIds.includes(row.id) ? { ...row, status: RowStatus.DELETED } : row
-    ));
+    setRows(
+      rows.map(row => (rowIds.includes(row.id) ? { ...row, status: RowStatus.DELETED } : row))
+    );
     setSelectedRows(new Set());
   };
 
@@ -486,13 +568,15 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
       ...filteredAndSortedRows
         .filter(row => row.status !== RowStatus.DELETED)
         .map(row =>
-          visibleColumns.map(col => {
-            const value = row.data[col.id];
-            return typeof value === 'string' && value.includes(',') ? `"${value}"` : value;
-          }).join(',')
-        )
+          visibleColumns
+            .map(col => {
+              const value = row.data[col.id];
+              return typeof value === 'string' && value.includes(',') ? `"${value}"` : value;
+            })
+            .join(',')
+        ),
     ].join('\n');
-    
+
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -518,22 +602,22 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
   const renderCell = (row: DataRow, column: DataColumn) => {
     const value = row.data[column.id];
     const isEditing = editingCell?.rowId === row.id && editingCell?.columnId === column.id;
-    
+
     if (isEditing) {
       return (
         <CellEditor
           value={value}
           column={column}
-          onSave={(newValue) => saveCell(row.id, column.id, newValue)}
+          onSave={newValue => saveCell(row.id, column.id, newValue)}
           onCancel={() => cancelEdit(row.id)}
         />
       );
     }
-    
+
     if (row.status === RowStatus.DELETED) {
       return <span className="text-gray-400 line-through">{formatCellValue(value, column)}</span>;
     }
-    
+
     return (
       <div
         className={`cursor-pointer hover:bg-gray-100 p-1 ${column.readOnly ? 'text-gray-600' : ''}`}
@@ -546,7 +630,7 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
 
   const formatCellValue = (value: any, column: DataColumn) => {
     if (value === null || value === undefined) return '';
-    
+
     switch (column.dataType) {
       case DataType.BOOLEAN:
         return value ? '✓' : '✗';
@@ -603,10 +687,7 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
             >
               <Download className="w-4 h-4" />
             </button>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg"
-            >
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -620,7 +701,7 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
               <input
                 type="text"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
                 placeholder="Search..."
                 className="pl-10 pr-4 py-2 border rounded text-sm w-64"
               />
@@ -628,7 +709,9 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={`px-3 py-2 rounded text-sm flex items-center gap-1 ${
-                showFilters ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                showFilters
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               <Filter className="w-4 h-4" />
@@ -653,7 +736,7 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
               </button>
             )}
           </div>
-          
+
           <div className="flex items-center gap-3 text-sm text-gray-600">
             <span>
               {filteredAndSortedRows.filter(r => r.status !== RowStatus.DELETED).length} rows
@@ -668,7 +751,9 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <span>Page {currentPage} of {totalPages}</span>
+                <span>
+                  Page {currentPage} of {totalPages}
+                </span>
                 <button
                   onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                   disabled={currentPage === totalPages}
@@ -678,7 +763,7 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
                 </button>
                 <select
                   value={config.pageSize}
-                  onChange={(e) => setConfig({ ...config, pageSize: parseInt(e.target.value) })}
+                  onChange={e => setConfig({ ...config, pageSize: parseInt(e.target.value) })}
                   className="px-2 py-1 border rounded text-sm"
                 >
                   <option value={25}>25</option>
@@ -709,20 +794,24 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
                   <input
                     type="checkbox"
                     checked={filter.enabled}
-                    onChange={(e) => updateFilter(filter.id, { enabled: e.target.checked })}
+                    onChange={e => updateFilter(filter.id, { enabled: e.target.checked })}
                   />
                   <select
                     value={filter.columnId}
-                    onChange={(e) => updateFilter(filter.id, { columnId: e.target.value })}
+                    onChange={e => updateFilter(filter.id, { columnId: e.target.value })}
                     className="px-2 py-1 border rounded"
                   >
                     {columns.map(col => (
-                      <option key={col.id} value={col.id}>{col.displayName}</option>
+                      <option key={col.id} value={col.id}>
+                        {col.displayName}
+                      </option>
                     ))}
                   </select>
                   <select
                     value={filter.operator}
-                    onChange={(e) => updateFilter(filter.id, { operator: e.target.value as FilterOperator })}
+                    onChange={e =>
+                      updateFilter(filter.id, { operator: e.target.value as FilterOperator })
+                    }
                     className="px-2 py-1 border rounded"
                   >
                     <option value={FilterOperator.EQUALS}>Equals</option>
@@ -735,15 +824,16 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
                     <option value={FilterOperator.IS_NULL}>Is Null</option>
                     <option value={FilterOperator.IS_NOT_NULL}>Is Not Null</option>
                   </select>
-                  {filter.operator !== FilterOperator.IS_NULL && filter.operator !== FilterOperator.IS_NOT_NULL && (
-                    <input
-                      type="text"
-                      value={filter.value || ''}
-                      onChange={(e) => updateFilter(filter.id, { value: e.target.value })}
-                      placeholder="Value..."
-                      className="px-2 py-1 border rounded"
-                    />
-                  )}
+                  {filter.operator !== FilterOperator.IS_NULL &&
+                    filter.operator !== FilterOperator.IS_NOT_NULL && (
+                      <input
+                        type="text"
+                        value={filter.value || ''}
+                        onChange={e => updateFilter(filter.id, { value: e.target.value })}
+                        placeholder="Value..."
+                        className="px-2 py-1 border rounded"
+                      />
+                    )}
                   <button
                     onClick={() => removeFilter(filter.id)}
                     className="text-red-600 hover:text-red-800"
@@ -765,7 +855,7 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
                   <input
                     type="checkbox"
                     checked={selectedRows.size === paginatedRows.length}
-                    onChange={(e) => {
+                    onChange={e => {
                       if (e.target.checked) {
                         setSelectedRows(new Set(paginatedRows.map(r => r.id)));
                       } else {
@@ -793,12 +883,10 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
                       <span>{column.displayName}</span>
                       {config.enableSorting && (
                         <div className="flex flex-col">
-                          {sorts.find(s => s.columnId === column.id)?.direction === SortDirection.ASC && (
-                            <ChevronUp className="w-3 h-3 text-blue-600" />
-                          )}
-                          {sorts.find(s => s.columnId === column.id)?.direction === SortDirection.DESC && (
-                            <ChevronDown className="w-3 h-3 text-blue-600" />
-                          )}
+                          {sorts.find(s => s.columnId === column.id)?.direction ===
+                            SortDirection.ASC && <ChevronUp className="w-3 h-3 text-blue-600" />}
+                          {sorts.find(s => s.columnId === column.id)?.direction ===
+                            SortDirection.DESC && <ChevronDown className="w-3 h-3 text-blue-600" />}
                         </div>
                       )}
                     </div>
@@ -820,7 +908,7 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
                     <input
                       type="checkbox"
                       checked={selectedRows.has(row.id)}
-                      onChange={(e) => {
+                      onChange={e => {
                         const newSelected = new Set(selectedRows);
                         if (e.target.checked) {
                           newSelected.add(row.id);
@@ -837,9 +925,7 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
                     </td>
                   )}
                   {config.showStatusColumn && (
-                    <td className="p-2 border-r text-center">
-                      {getStatusIcon(row.status)}
-                    </td>
+                    <td className="p-2 border-r text-center">{getStatusIcon(row.status)}</td>
                   )}
                   {visibleColumns.map(column => (
                     <td key={column.id} className="p-0 border-r" style={{ width: column.width }}>
@@ -860,9 +946,7 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
               {rows.filter(r => r.status === RowStatus.INSERTED).length} new,
               {rows.filter(r => r.status === RowStatus.DELETED).length} deleted
             </span>
-            {selectedRows.size > 0 && (
-              <span>{selectedRows.size} selected</span>
-            )}
+            {selectedRows.size > 0 && <span>{selectedRows.size} selected</span>}
           </div>
           <div className="flex items-center gap-4">
             {config.autoRefresh && (
@@ -896,10 +980,12 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
                     <input
                       type="checkbox"
                       checked={column.visible}
-                      onChange={(e) => {
-                        setColumns(columns.map(c =>
-                          c.id === column.id ? { ...c, visible: e.target.checked } : c
-                        ));
+                      onChange={e => {
+                        setColumns(
+                          columns.map(c =>
+                            c.id === column.id ? { ...c, visible: e.target.checked } : c
+                          )
+                        );
                       }}
                     />
                     <div className="flex-1">
@@ -909,10 +995,14 @@ export const DataViewWindow: React.FC<DataViewWindowProps> = ({
                     <input
                       type="number"
                       value={column.width}
-                      onChange={(e) => {
-                        setColumns(columns.map(c =>
-                          c.id === column.id ? { ...c, width: parseInt(e.target.value) || 100 } : c
-                        ));
+                      onChange={e => {
+                        setColumns(
+                          columns.map(c =>
+                            c.id === column.id
+                              ? { ...c, width: parseInt(e.target.value) || 100 }
+                              : c
+                          )
+                        );
                       }}
                       className="w-16 px-2 py-1 border rounded text-xs"
                       min="50"
@@ -963,7 +1053,7 @@ const CellEditor: React.FC<CellEditorProps> = ({ value, column, onSave, onCancel
         <select
           data-cell-editor
           value={editValue ? 'true' : 'false'}
-          onChange={(e) => {
+          onChange={e => {
             const newValue = e.target.value === 'true';
             setEditValue(newValue);
             onSave(newValue);
@@ -975,53 +1065,53 @@ const CellEditor: React.FC<CellEditorProps> = ({ value, column, onSave, onCancel
           <option value="false">No</option>
         </select>
       );
-    
+
     case DataType.NUMBER:
       return (
         <input
           data-cell-editor
           type="number"
           value={editValue || ''}
-          onChange={(e) => setEditValue(e.target.value ? parseFloat(e.target.value) : '')}
+          onChange={e => setEditValue(e.target.value ? parseFloat(e.target.value) : '')}
           onKeyDown={handleKeyDown}
           onBlur={() => onCancel()}
           className="w-full p-1 border rounded"
         />
       );
-    
+
     case DataType.DATE:
       return (
         <input
           data-cell-editor
           type="date"
           value={editValue ? new Date(editValue).toISOString().split('T')[0] : ''}
-          onChange={(e) => setEditValue(e.target.value)}
+          onChange={e => setEditValue(e.target.value)}
           onKeyDown={handleKeyDown}
           onBlur={() => onCancel()}
           className="w-full p-1 border rounded"
         />
       );
-    
+
     case DataType.DATETIME:
       return (
         <input
           data-cell-editor
           type="datetime-local"
           value={editValue ? new Date(editValue).toISOString().slice(0, 16) : ''}
-          onChange={(e) => setEditValue(e.target.value)}
+          onChange={e => setEditValue(e.target.value)}
           onKeyDown={handleKeyDown}
           onBlur={() => onCancel()}
           className="w-full p-1 border rounded"
         />
       );
-    
+
     default:
       return (
         <input
           data-cell-editor
           type="text"
           value={editValue || ''}
-          onChange={(e) => setEditValue(e.target.value)}
+          onChange={e => setEditValue(e.target.value)}
           onKeyDown={handleKeyDown}
           onBlur={() => onCancel()}
           className="w-full p-1 border rounded"

@@ -5,7 +5,7 @@ import { EventEmitter } from 'events';
 export enum APICategory {
   Functions = 'Functions',
   Constants = 'Constants',
-  Types = 'Types'
+  Types = 'Types',
 }
 
 export enum APILibrary {
@@ -18,7 +18,7 @@ export enum APILibrary {
   Comctl32 = 'comctl32.dll',
   Comdlg32 = 'comdlg32.dll',
   Wininet = 'wininet.dll',
-  Winsock = 'ws2_32.dll'
+  Winsock = 'ws2_32.dll',
 }
 
 // API Function Definition
@@ -79,21 +79,20 @@ interface APIViewerToolProps {
   onClose?: () => void;
 }
 
-export const APIViewerTool: React.FC<APIViewerToolProps> = ({
-  onInsertCode,
-  onClose
-}) => {
+export const APIViewerTool: React.FC<APIViewerToolProps> = ({ onInsertCode, onClose }) => {
   const [selectedCategory, setSelectedCategory] = useState<APICategory>(APICategory.Functions);
   const [selectedLibrary, setSelectedLibrary] = useState<APILibrary | 'All'>('All');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedItem, setSelectedItem] = useState<APIFunction | APIConstant | APIType | null>(null);
+  const [selectedItem, setSelectedItem] = useState<APIFunction | APIConstant | APIType | null>(
+    null
+  );
   const [showDeprecated, setShowDeprecated] = useState(false);
   const [showUnicodeOnly, setShowUnicodeOnly] = useState(false);
   const [generatedCode, setGeneratedCode] = useState('');
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
   const copyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const mountedRef = useRef(true);
-  
+
   const eventEmitter = useRef(new EventEmitter());
 
   // Cleanup on unmount
@@ -112,51 +111,57 @@ export const APIViewerTool: React.FC<APIViewerToolProps> = ({
       name: 'MessageBox',
       library: APILibrary.User32,
       description: 'Displays a modal dialog box that contains a system icon, text, and buttons.',
-      declaration: 'Public Declare Function MessageBox Lib "user32" Alias "MessageBoxA" (ByVal hWnd As Long, ByVal lpText As String, ByVal lpCaption As String, ByVal wType As Long) As Long',
+      declaration:
+        'Public Declare Function MessageBox Lib "user32" Alias "MessageBoxA" (ByVal hWnd As Long, ByVal lpText As String, ByVal lpCaption As String, ByVal wType As Long) As Long',
       parameters: [
         { name: 'hWnd', type: 'Long', description: 'Handle to the owner window' },
         { name: 'lpText', type: 'String', description: 'Message text to display' },
         { name: 'lpCaption', type: 'String', description: 'Dialog box title' },
-        { name: 'wType', type: 'Long', description: 'Contents and behavior of the dialog box' }
+        { name: 'wType', type: 'Long', description: 'Contents and behavior of the dialog box' },
       ],
       returnType: 'Long',
       returnDescription: 'Value indicating which button the user clicked',
       example: 'Dim result As Long\nresult = MessageBox(0, "Hello World!", "Example", MB_OK)',
       category: 'User Interface',
-      unicode: false
+      unicode: false,
     },
     {
       name: 'GetWindowText',
       library: APILibrary.User32,
-      description: 'Copies the text of the specified window\'s title bar into a buffer.',
-      declaration: 'Public Declare Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hWnd As Long, ByVal lpString As String, ByVal cch As Long) As Long',
+      description: "Copies the text of the specified window's title bar into a buffer.",
+      declaration:
+        'Public Declare Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hWnd As Long, ByVal lpString As String, ByVal cch As Long) As Long',
       parameters: [
         { name: 'hWnd', type: 'Long', description: 'Handle to the window' },
         { name: 'lpString', type: 'String', description: 'Buffer to receive the text' },
-        { name: 'cch', type: 'Long', description: 'Maximum number of characters to copy' }
+        { name: 'cch', type: 'Long', description: 'Maximum number of characters to copy' },
       ],
       returnType: 'Long',
       returnDescription: 'Number of characters copied',
-      category: 'Window Management'
+      category: 'Window Management',
     },
     {
       name: 'FindWindow',
       library: APILibrary.User32,
-      description: 'Retrieves a handle to the top-level window whose class name and window name match the specified strings.',
-      declaration: 'Public Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long',
+      description:
+        'Retrieves a handle to the top-level window whose class name and window name match the specified strings.',
+      declaration:
+        'Public Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long',
       parameters: [
         { name: 'lpClassName', type: 'String', description: 'Class name or null' },
-        { name: 'lpWindowName', type: 'String', description: 'Window name or null' }
+        { name: 'lpWindowName', type: 'String', description: 'Window name or null' },
       ],
       returnType: 'Long',
       returnDescription: 'Handle to the window, or zero if not found',
-      category: 'Window Management'
+      category: 'Window Management',
     },
     {
       name: 'SetWindowPos',
       library: APILibrary.User32,
-      description: 'Changes the size, position, and Z order of a child, pop-up, or top-level window.',
-      declaration: 'Public Declare Function SetWindowPos Lib "user32" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal X As Long, ByVal Y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long) As Long',
+      description:
+        'Changes the size, position, and Z order of a child, pop-up, or top-level window.',
+      declaration:
+        'Public Declare Function SetWindowPos Lib "user32" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal X As Long, ByVal Y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long) As Long',
       parameters: [
         { name: 'hWnd', type: 'Long', description: 'Handle to the window' },
         { name: 'hWndInsertAfter', type: 'Long', description: 'Placement-order handle' },
@@ -164,79 +169,180 @@ export const APIViewerTool: React.FC<APIViewerToolProps> = ({
         { name: 'Y', type: 'Long', description: 'Vertical position in client coordinates' },
         { name: 'cx', type: 'Long', description: 'Width of the window' },
         { name: 'cy', type: 'Long', description: 'Height of the window' },
-        { name: 'wFlags', type: 'Long', description: 'Window sizing and positioning flags' }
+        { name: 'wFlags', type: 'Long', description: 'Window sizing and positioning flags' },
       ],
       returnType: 'Long',
       returnDescription: 'Nonzero if successful',
-      category: 'Window Management'
+      category: 'Window Management',
     },
     {
       name: 'GetPrivateProfileString',
       library: APILibrary.Kernel32,
       description: 'Retrieves a string from the specified section in an initialization file.',
-      declaration: 'Public Declare Function GetPrivateProfileString Lib "kernel32" Alias "GetPrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As String, ByVal lpDefault As String, ByVal lpReturnedString As String, ByVal nSize As Long, ByVal lpFileName As String) As Long',
+      declaration:
+        'Public Declare Function GetPrivateProfileString Lib "kernel32" Alias "GetPrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As String, ByVal lpDefault As String, ByVal lpReturnedString As String, ByVal nSize As Long, ByVal lpFileName As String) As Long',
       parameters: [
         { name: 'lpApplicationName', type: 'String', description: 'Section name' },
         { name: 'lpKeyName', type: 'String', description: 'Key name' },
         { name: 'lpDefault', type: 'String', description: 'Default value' },
         { name: 'lpReturnedString', type: 'String', description: 'Buffer for returned string' },
         { name: 'nSize', type: 'Long', description: 'Size of the buffer' },
-        { name: 'lpFileName', type: 'String', description: 'Initialization file name' }
+        { name: 'lpFileName', type: 'String', description: 'Initialization file name' },
       ],
       returnType: 'Long',
       returnDescription: 'Number of characters copied',
-      category: 'File Operations'
+      category: 'File Operations',
     },
     {
       name: 'WritePrivateProfileString',
       library: APILibrary.Kernel32,
       description: 'Writes a string into the specified section of an initialization file.',
-      declaration: 'Public Declare Function WritePrivateProfileString Lib "kernel32" Alias "WritePrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As String, ByVal lpString As String, ByVal lpFileName As String) As Long',
+      declaration:
+        'Public Declare Function WritePrivateProfileString Lib "kernel32" Alias "WritePrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As String, ByVal lpString As String, ByVal lpFileName As String) As Long',
       parameters: [
         { name: 'lpApplicationName', type: 'String', description: 'Section name' },
         { name: 'lpKeyName', type: 'String', description: 'Key name' },
         { name: 'lpString', type: 'String', description: 'String to write' },
-        { name: 'lpFileName', type: 'String', description: 'Initialization file name' }
+        { name: 'lpFileName', type: 'String', description: 'Initialization file name' },
       ],
       returnType: 'Long',
       returnDescription: 'Nonzero if successful',
-      category: 'File Operations'
-    }
+      category: 'File Operations',
+    },
   ];
 
   // Sample API Constants
   const apiConstants: APIConstant[] = [
-    { name: 'MB_OK', value: '&H0', description: 'The message box contains one push button: OK.', category: 'MessageBox', type: 'Long' },
-    { name: 'MB_OKCANCEL', value: '&H1', description: 'The message box contains two push buttons: OK and Cancel.', category: 'MessageBox', type: 'Long' },
-    { name: 'MB_YESNO', value: '&H4', description: 'The message box contains two push buttons: Yes and No.', category: 'MessageBox', type: 'Long' },
-    { name: 'MB_YESNOCANCEL', value: '&H3', description: 'The message box contains three push buttons: Yes, No, and Cancel.', category: 'MessageBox', type: 'Long' },
-    { name: 'MB_ICONHAND', value: '&H10', description: 'A hand-shaped icon appears in the message box.', category: 'MessageBox', type: 'Long' },
-    { name: 'MB_ICONQUESTION', value: '&H20', description: 'A question-mark icon appears in the message box.', category: 'MessageBox', type: 'Long' },
-    { name: 'MB_ICONEXCLAMATION', value: '&H30', description: 'An exclamation-point icon appears in the message box.', category: 'MessageBox', type: 'Long' },
-    { name: 'MB_ICONASTERISK', value: '&H40', description: 'An icon consisting of a lowercase letter i in a circle appears in the message box.', category: 'MessageBox', type: 'Long' },
-    { name: 'HWND_TOP', value: '0', description: 'Places the window at the top of the Z order.', category: 'Window Position', type: 'Long' },
-    { name: 'HWND_BOTTOM', value: '1', description: 'Places the window at the bottom of the Z order.', category: 'Window Position', type: 'Long' },
-    { name: 'HWND_TOPMOST', value: '-1', description: 'Places the window above all non-topmost windows.', category: 'Window Position', type: 'Long' },
-    { name: 'HWND_NOTOPMOST', value: '-2', description: 'Places the window above all non-topmost windows but below topmost windows.', category: 'Window Position', type: 'Long' },
-    { name: 'SWP_NOSIZE', value: '&H1', description: 'Retains the current size.', category: 'Window Position', type: 'Long' },
-    { name: 'SWP_NOMOVE', value: '&H2', description: 'Retains the current position.', category: 'Window Position', type: 'Long' },
-    { name: 'SWP_SHOWWINDOW', value: '&H40', description: 'Displays the window.', category: 'Window Position', type: 'Long' },
-    { name: 'SWP_HIDEWINDOW', value: '&H80', description: 'Hides the window.', category: 'Window Position', type: 'Long' }
+    {
+      name: 'MB_OK',
+      value: '&H0',
+      description: 'The message box contains one push button: OK.',
+      category: 'MessageBox',
+      type: 'Long',
+    },
+    {
+      name: 'MB_OKCANCEL',
+      value: '&H1',
+      description: 'The message box contains two push buttons: OK and Cancel.',
+      category: 'MessageBox',
+      type: 'Long',
+    },
+    {
+      name: 'MB_YESNO',
+      value: '&H4',
+      description: 'The message box contains two push buttons: Yes and No.',
+      category: 'MessageBox',
+      type: 'Long',
+    },
+    {
+      name: 'MB_YESNOCANCEL',
+      value: '&H3',
+      description: 'The message box contains three push buttons: Yes, No, and Cancel.',
+      category: 'MessageBox',
+      type: 'Long',
+    },
+    {
+      name: 'MB_ICONHAND',
+      value: '&H10',
+      description: 'A hand-shaped icon appears in the message box.',
+      category: 'MessageBox',
+      type: 'Long',
+    },
+    {
+      name: 'MB_ICONQUESTION',
+      value: '&H20',
+      description: 'A question-mark icon appears in the message box.',
+      category: 'MessageBox',
+      type: 'Long',
+    },
+    {
+      name: 'MB_ICONEXCLAMATION',
+      value: '&H30',
+      description: 'An exclamation-point icon appears in the message box.',
+      category: 'MessageBox',
+      type: 'Long',
+    },
+    {
+      name: 'MB_ICONASTERISK',
+      value: '&H40',
+      description:
+        'An icon consisting of a lowercase letter i in a circle appears in the message box.',
+      category: 'MessageBox',
+      type: 'Long',
+    },
+    {
+      name: 'HWND_TOP',
+      value: '0',
+      description: 'Places the window at the top of the Z order.',
+      category: 'Window Position',
+      type: 'Long',
+    },
+    {
+      name: 'HWND_BOTTOM',
+      value: '1',
+      description: 'Places the window at the bottom of the Z order.',
+      category: 'Window Position',
+      type: 'Long',
+    },
+    {
+      name: 'HWND_TOPMOST',
+      value: '-1',
+      description: 'Places the window above all non-topmost windows.',
+      category: 'Window Position',
+      type: 'Long',
+    },
+    {
+      name: 'HWND_NOTOPMOST',
+      value: '-2',
+      description: 'Places the window above all non-topmost windows but below topmost windows.',
+      category: 'Window Position',
+      type: 'Long',
+    },
+    {
+      name: 'SWP_NOSIZE',
+      value: '&H1',
+      description: 'Retains the current size.',
+      category: 'Window Position',
+      type: 'Long',
+    },
+    {
+      name: 'SWP_NOMOVE',
+      value: '&H2',
+      description: 'Retains the current position.',
+      category: 'Window Position',
+      type: 'Long',
+    },
+    {
+      name: 'SWP_SHOWWINDOW',
+      value: '&H40',
+      description: 'Displays the window.',
+      category: 'Window Position',
+      type: 'Long',
+    },
+    {
+      name: 'SWP_HIDEWINDOW',
+      value: '&H80',
+      description: 'Hides the window.',
+      category: 'Window Position',
+      type: 'Long',
+    },
   ];
 
   // Sample API Types
   const apiTypes: APIType[] = [
     {
       name: 'RECT',
-      description: 'Defines the coordinates of the upper-left and lower-right corners of a rectangle.',
-      definition: 'Public Type RECT\n    Left As Long\n    Top As Long\n    Right As Long\n    Bottom As Long\nEnd Type',
+      description:
+        'Defines the coordinates of the upper-left and lower-right corners of a rectangle.',
+      definition:
+        'Public Type RECT\n    Left As Long\n    Top As Long\n    Right As Long\n    Bottom As Long\nEnd Type',
       category: 'Structures',
       members: [
         { name: 'Left', type: 'Long', description: 'x-coordinate of the upper-left corner' },
         { name: 'Top', type: 'Long', description: 'y-coordinate of the upper-left corner' },
         { name: 'Right', type: 'Long', description: 'x-coordinate of the lower-right corner' },
-        { name: 'Bottom', type: 'Long', description: 'y-coordinate of the lower-right corner' }
-      ]
+        { name: 'Bottom', type: 'Long', description: 'y-coordinate of the lower-right corner' },
+      ],
     },
     {
       name: 'POINT',
@@ -245,27 +351,41 @@ export const APIViewerTool: React.FC<APIViewerToolProps> = ({
       category: 'Structures',
       members: [
         { name: 'X', type: 'Long', description: 'x-coordinate of the point' },
-        { name: 'Y', type: 'Long', description: 'y-coordinate of the point' }
-      ]
+        { name: 'Y', type: 'Long', description: 'y-coordinate of the point' },
+      ],
     },
     {
       name: 'WINDOWPLACEMENT',
       description: 'Contains information about the placement of a window on the screen.',
-      definition: 'Public Type WINDOWPLACEMENT\n    Length As Long\n    Flags As Long\n    ShowCmd As Long\n    ptMinPosition As POINT\n    ptMaxPosition As POINT\n    rcNormalPosition As RECT\nEnd Type',
+      definition:
+        'Public Type WINDOWPLACEMENT\n    Length As Long\n    Flags As Long\n    ShowCmd As Long\n    ptMinPosition As POINT\n    ptMaxPosition As POINT\n    rcNormalPosition As RECT\nEnd Type',
       category: 'Structures',
       members: [
         { name: 'Length', type: 'Long', description: 'Size of the structure' },
         { name: 'Flags', type: 'Long', description: 'Flags that control the position' },
         { name: 'ShowCmd', type: 'Long', description: 'Current show state of the window' },
-        { name: 'ptMinPosition', type: 'POINT', description: 'Coordinates of the minimized window' },
-        { name: 'ptMaxPosition', type: 'POINT', description: 'Coordinates of the maximized window' },
-        { name: 'rcNormalPosition', type: 'RECT', description: 'Coordinates of the window in the restored state' }
-      ]
+        {
+          name: 'ptMinPosition',
+          type: 'POINT',
+          description: 'Coordinates of the minimized window',
+        },
+        {
+          name: 'ptMaxPosition',
+          type: 'POINT',
+          description: 'Coordinates of the maximized window',
+        },
+        {
+          name: 'rcNormalPosition',
+          type: 'RECT',
+          description: 'Coordinates of the window in the restored state',
+        },
+      ],
     },
     {
       name: 'WIN32_FIND_DATA',
       description: 'Contains information about a file or directory.',
-      definition: 'Public Type WIN32_FIND_DATA\n    dwFileAttributes As Long\n    ftCreationTime As FILETIME\n    ftLastAccessTime As FILETIME\n    ftLastWriteTime As FILETIME\n    nFileSizeHigh As Long\n    nFileSizeLow As Long\n    dwReserved0 As Long\n    dwReserved1 As Long\n    cFileName As String * 260\n    cAlternateFileName As String * 14\nEnd Type',
+      definition:
+        'Public Type WIN32_FIND_DATA\n    dwFileAttributes As Long\n    ftCreationTime As FILETIME\n    ftLastAccessTime As FILETIME\n    ftLastWriteTime As FILETIME\n    nFileSizeHigh As Long\n    nFileSizeLow As Long\n    dwReserved0 As Long\n    dwReserved1 As Long\n    cFileName As String * 260\n    cAlternateFileName As String * 14\nEnd Type',
       category: 'File System',
       members: [
         { name: 'dwFileAttributes', type: 'Long', description: 'File attributes' },
@@ -275,15 +395,19 @@ export const APIViewerTool: React.FC<APIViewerToolProps> = ({
         { name: 'nFileSizeHigh', type: 'Long', description: 'High-order portion of file size' },
         { name: 'nFileSizeLow', type: 'Long', description: 'Low-order portion of file size' },
         { name: 'cFileName', type: 'String * 260', description: 'Name of the file' },
-        { name: 'cAlternateFileName', type: 'String * 14', description: 'Alternative name of the file' }
-      ]
-    }
+        {
+          name: 'cAlternateFileName',
+          type: 'String * 14',
+          description: 'Alternative name of the file',
+        },
+      ],
+    },
   ];
 
   // Filter data based on search criteria
   const filteredData = useMemo(() => {
     let data: (APIFunction | APIConstant | APIType)[] = [];
-    
+
     switch (selectedCategory) {
       case APICategory.Functions:
         data = apiFunctions;
@@ -298,18 +422,17 @@ export const APIViewerTool: React.FC<APIViewerToolProps> = ({
 
     // Filter by library
     if (selectedLibrary !== 'All') {
-      data = data.filter(item => 
-        'library' in item && item.library === selectedLibrary
-      );
+      data = data.filter(item => 'library' in item && item.library === selectedLibrary);
     }
 
     // Filter by search term
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      data = data.filter(item =>
-        item.name.toLowerCase().includes(term) ||
-        item.description.toLowerCase().includes(term) ||
-        ('category' in item && item.category.toLowerCase().includes(term))
+      data = data.filter(
+        item =>
+          item.name.toLowerCase().includes(term) ||
+          item.description.toLowerCase().includes(term) ||
+          ('category' in item && item.category.toLowerCase().includes(term))
       );
     }
 
@@ -329,7 +452,7 @@ export const APIViewerTool: React.FC<APIViewerToolProps> = ({
   // Generate VB6 code for the selected item
   const generateCode = useCallback((item: APIFunction | APIConstant | APIType) => {
     let code = '';
-    
+
     if ('declaration' in item) {
       // API Function
       code = item.declaration;
@@ -340,7 +463,7 @@ export const APIViewerTool: React.FC<APIViewerToolProps> = ({
       // API Type
       code = item.definition;
     }
-    
+
     return code;
   }, []);
 
@@ -373,17 +496,23 @@ export const APIViewerTool: React.FC<APIViewerToolProps> = ({
   }, []);
 
   // Insert code into editor
-  const insertCode = useCallback((code: string) => {
-    onInsertCode?.(code);
-    eventEmitter.current.emit('codeInserted', { code });
-  }, [onInsertCode]);
+  const insertCode = useCallback(
+    (code: string) => {
+      onInsertCode?.(code);
+      eventEmitter.current.emit('codeInserted', { code });
+    },
+    [onInsertCode]
+  );
 
   // Handle item selection
-  const handleItemSelect = useCallback((item: APIFunction | APIConstant | APIType) => {
-    setSelectedItem(item);
-    const code = generateCode(item);
-    setGeneratedCode(code);
-  }, [generateCode]);
+  const handleItemSelect = useCallback(
+    (item: APIFunction | APIConstant | APIType) => {
+      setSelectedItem(item);
+      const code = generateCode(item);
+      setGeneratedCode(code);
+    },
+    [generateCode]
+  );
 
   // Get categories for current library
   const getCategories = useCallback((): string[] => {
@@ -403,12 +532,11 @@ export const APIViewerTool: React.FC<APIViewerToolProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-gray-900">API Viewer</h1>
-            <p className="text-sm text-gray-600">Browse Windows API functions, constants, and types</p>
+            <p className="text-sm text-gray-600">
+              Browse Windows API functions, constants, and types
+            </p>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600"
-          >
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600">
             ✕
           </button>
         </div>
@@ -439,35 +567,37 @@ export const APIViewerTool: React.FC<APIViewerToolProps> = ({
                   </button>
                 ))}
               </div>
-              
+
               <div className="flex gap-2">
                 <select
                   value={selectedLibrary}
-                  onChange={(e) => setSelectedLibrary(e.target.value as APILibrary | 'All')}
+                  onChange={e => setSelectedLibrary(e.target.value as APILibrary | 'All')}
                   className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
                 >
                   <option value="All">All Libraries</option>
                   {Object.values(APILibrary).map(lib => (
-                    <option key={lib} value={lib}>{lib}</option>
+                    <option key={lib} value={lib}>
+                      {lib}
+                    </option>
                   ))}
                 </select>
-                
+
                 <input
                   type="text"
                   placeholder="Search..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={e => setSearchTerm(e.target.value)}
                   className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
                 />
               </div>
-              
+
               {selectedCategory === APICategory.Functions && (
                 <div className="flex gap-3 text-xs">
                   <label className="flex items-center gap-1">
                     <input
                       type="checkbox"
                       checked={showDeprecated}
-                      onChange={(e) => setShowDeprecated(e.target.checked)}
+                      onChange={e => setShowDeprecated(e.target.checked)}
                     />
                     Show deprecated
                   </label>
@@ -475,7 +605,7 @@ export const APIViewerTool: React.FC<APIViewerToolProps> = ({
                     <input
                       type="checkbox"
                       checked={showUnicodeOnly}
-                      onChange={(e) => setShowUnicodeOnly(e.target.checked)}
+                      onChange={e => setShowUnicodeOnly(e.target.checked)}
                     />
                     Unicode only
                   </label>
@@ -517,7 +647,7 @@ export const APIViewerTool: React.FC<APIViewerToolProps> = ({
                 </div>
               ))}
             </div>
-            
+
             {filteredData.length === 0 && (
               <div className="p-8 text-center text-gray-500">
                 <div className="text-4xl mb-2">🔍</div>
@@ -545,8 +675,8 @@ export const APIViewerTool: React.FC<APIViewerToolProps> = ({
                         copyStatus === 'copied'
                           ? 'bg-green-100 text-green-800'
                           : copyStatus === 'error'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                       title="Copy to clipboard"
                     >
@@ -561,7 +691,7 @@ export const APIViewerTool: React.FC<APIViewerToolProps> = ({
                     </button>
                   </div>
                 </div>
-                
+
                 {/* Additional metadata */}
                 <div className="flex flex-wrap gap-2 text-xs">
                   {'library' in selectedItem && selectedItem.library && (
@@ -600,7 +730,9 @@ export const APIViewerTool: React.FC<APIViewerToolProps> = ({
                         <div key={index} className="bg-gray-50 p-3 rounded">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="font-medium text-sm">{param.name}</span>
-                            <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{param.type}</span>
+                            <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">
+                              {param.type}
+                            </span>
                             {param.optional && (
                               <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
                                 Optional
@@ -614,22 +746,26 @@ export const APIViewerTool: React.FC<APIViewerToolProps> = ({
                   </div>
                 )}
 
-                {'members' in selectedItem && selectedItem.members && selectedItem.members.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="text-sm font-medium text-gray-700 mb-3">Members</h3>
-                    <div className="space-y-2">
-                      {selectedItem.members.map((member, index) => (
-                        <div key={index} className="bg-gray-50 p-3 rounded">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-sm">{member.name}</span>
-                            <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{member.type}</span>
+                {'members' in selectedItem &&
+                  selectedItem.members &&
+                  selectedItem.members.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-sm font-medium text-gray-700 mb-3">Members</h3>
+                      <div className="space-y-2">
+                        {selectedItem.members.map((member, index) => (
+                          <div key={index} className="bg-gray-50 p-3 rounded">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-medium text-sm">{member.name}</span>
+                              <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">
+                                {member.type}
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-600">{member.description}</p>
                           </div>
-                          <p className="text-xs text-gray-600">{member.description}</p>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {'returnDescription' in selectedItem && (
                   <div className="mb-6">
@@ -655,7 +791,9 @@ export const APIViewerTool: React.FC<APIViewerToolProps> = ({
                     <div className="bg-gray-50 p-3 rounded">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-mono text-sm">{selectedItem.value}</span>
-                        <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{selectedItem.type}</span>
+                        <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">
+                          {selectedItem.type}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -667,10 +805,14 @@ export const APIViewerTool: React.FC<APIViewerToolProps> = ({
               <div>
                 <div className="text-4xl mb-4">📖</div>
                 <h3 className="text-lg font-medium mb-2">Select an API Item</h3>
-                <p className="text-sm">Choose a function, constant, or type from the list to view details</p>
+                <p className="text-sm">
+                  Choose a function, constant, or type from the list to view details
+                </p>
                 <div className="mt-4 text-xs text-gray-400">
                   <p>Total items: {filteredData.length}</p>
-                  <p>Current filter: {selectedCategory} • {selectedLibrary}</p>
+                  <p>
+                    Current filter: {selectedCategory} • {selectedLibrary}
+                  </p>
                 </div>
               </div>
             </div>

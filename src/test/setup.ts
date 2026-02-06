@@ -7,7 +7,7 @@ Object.defineProperty(Array, 'isArray', {
   value: _originalArrayIsArray,
   writable: true,
   configurable: true,
-  enumerable: false
+  enumerable: false,
 });
 
 // Also protect on globalThis
@@ -16,7 +16,7 @@ if (typeof globalThis !== 'undefined' && globalThis.Array) {
     value: _originalArrayIsArray,
     writable: true,
     configurable: true,
-    enumerable: false
+    enumerable: false,
   });
 }
 
@@ -42,7 +42,6 @@ ensureArrayIsArray();
 // Extend Vitest's expect with jest-dom matchers
 expect.extend(matchers);
 
-
 // Setup process global before anything else
 if (typeof global.process === 'undefined' || global.process.platform !== 'browser') {
   global.process = {
@@ -53,14 +52,14 @@ if (typeof global.process === 'undefined' || global.process.platform !== 'browse
     exit: () => {},
     versions: {
       node: '16.0.0',
-      v8: '9.0.0'
+      v8: '9.0.0',
     },
     platform: 'browser',
     pid: 1,
     title: 'browser',
     argv: [],
     hrtime: {
-      bigint: () => BigInt(Date.now() * 1000000)
+      bigint: () => BigInt(Date.now() * 1000000),
     },
     listeners: vi.fn().mockReturnValue([]),
     listenerCount: vi.fn().mockReturnValue(0),
@@ -85,10 +84,10 @@ if (typeof globalThis.import === 'undefined') {
     value: {
       meta: {
         url: 'file:///test/',
-        resolve: (id: string) => 'file:///test/' + id
-      }
+        resolve: (id: string) => 'file:///test/' + id,
+      },
     },
-    configurable: true
+    configurable: true,
   });
 }
 
@@ -137,7 +136,7 @@ global.Worker = WorkerMock as any;
   }
 
   // Add static methods to BufferPolyfill
-  BufferPolyfill.from = function(data: any, encoding?: string): Uint8Array {
+  BufferPolyfill.from = function (data: any, encoding?: string): Uint8Array {
     if (data === null || data === undefined) {
       return new Uint8Array(0);
     }
@@ -167,7 +166,7 @@ global.Worker = WorkerMock as any;
     }
   };
 
-  BufferPolyfill.alloc = function(size: number, fill?: number | string | Uint8Array): Uint8Array {
+  BufferPolyfill.alloc = function (size: number, fill?: number | string | Uint8Array): Uint8Array {
     const buffer = new Uint8Array(size);
 
     if (fill !== undefined) {
@@ -188,15 +187,15 @@ global.Worker = WorkerMock as any;
     return buffer;
   };
 
-  BufferPolyfill.allocUnsafe = function(size: number): Uint8Array {
+  BufferPolyfill.allocUnsafe = function (size: number): Uint8Array {
     return new Uint8Array(size);
   };
 
-  BufferPolyfill.isBuffer = function(obj: any): boolean {
+  BufferPolyfill.isBuffer = function (obj: any): boolean {
     return obj instanceof Uint8Array;
   };
 
-  BufferPolyfill.concat = function(buffers: Uint8Array[]): Uint8Array {
+  BufferPolyfill.concat = function (buffers: Uint8Array[]): Uint8Array {
     if (!Array.isArray(buffers) || buffers.length === 0) {
       return new Uint8Array(0);
     }
@@ -225,15 +224,19 @@ if (typeof global.util === 'undefined') {
       if (!format) return '';
       let result = format;
       let argIndex = 0;
-      result = result.replace(/%[sdj%]/g, (match) => {
+      result = result.replace(/%[sdj%]/g, match => {
         if (match === '%%') return '%';
         if (argIndex >= args.length) return match;
         const arg = args[argIndex++];
         switch (match) {
-          case '%s': return String(arg);
-          case '%d': return Number(arg).toString();
-          case '%j': return JSON.stringify(arg);
-          default: return match;
+          case '%s':
+            return String(arg);
+          case '%d':
+            return Number(arg).toString();
+          case '%j':
+            return JSON.stringify(arg);
+          default:
+            return match;
         }
       });
       if (args.length > argIndex) {
@@ -260,14 +263,14 @@ if (typeof global.util === 'undefined') {
             value: ctor,
             enumerable: false,
             writable: true,
-            configurable: true
-          }
+            configurable: true,
+          },
         });
       }
     },
     deprecate: (fn: (...args: any[]) => any, msg: string) => {
       const warned = new Set();
-      return function(...args: any[]) {
+      return function (...args: any[]) {
         const key = msg;
         if (!warned.has(key)) {
           warned.add(key);
@@ -278,10 +281,8 @@ if (typeof global.util === 'undefined') {
     },
     debuglog: (section: string) => {
       const enabled = false; // Could check DEBUG env var
-      return enabled 
-        ? (...args: any[]) => console.log(`${section} ${process.pid}:`, ...args)
-        : () => {};
-    }
+      return enabled ? (...args: any[]) => {} : () => {};
+    },
   } as any;
 }
 
@@ -306,13 +307,13 @@ beforeEach(() => {
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   }));
-  
+
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     configurable: true,
     value: matchMediaMock,
   });
-  
+
   // Also set on global for consistency
   if (typeof global !== 'undefined') {
     (global as any).matchMedia = matchMediaMock;
@@ -410,7 +411,9 @@ beforeEach(() => {
       }
 
       // Parse URL properly
-      const httpMatch = urlString.match(/^(https?):\/\/([^/?#:]+)(:\d+)?(\/[^?#]*)?(\?[^#]*)?(#.*)?$/);
+      const httpMatch = urlString.match(
+        /^(https?):\/\/([^/?#:]+)(:\d+)?(\/[^?#]*)?(\?[^#]*)?(#.*)?$/
+      );
       const fileMatch = urlString.match(/^file:\/\/\/(.*)/);
 
       if (httpMatch) {
@@ -439,7 +442,9 @@ beforeEach(() => {
         this.protocol = (baseUrl as any).protocol;
         this.hostname = (baseUrl as any).hostname;
         this.port = (baseUrl as any).port;
-        this.pathname = urlString.startsWith('/') ? urlString : (baseUrl as any).pathname + '/' + urlString;
+        this.pathname = urlString.startsWith('/')
+          ? urlString
+          : (baseUrl as any).pathname + '/' + urlString;
         this.search = '';
         this.hash = '';
         this.host = (baseUrl as any).host;
@@ -465,11 +470,11 @@ beforeEach(() => {
       }
     }
 
-    MockURL.prototype.toString = function() {
+    MockURL.prototype.toString = function () {
       return this.href;
     };
 
-    MockURL.prototype.toJSON = function() {
+    MockURL.prototype.toJSON = function () {
       return this.href;
     };
 
@@ -488,7 +493,7 @@ beforeEach(() => {
   // Mock crypto
   Object.defineProperty(global, 'crypto', {
     value: {
-      getRandomValues: vi.fn().mockImplementation((arr) => {
+      getRandomValues: vi.fn().mockImplementation(arr => {
         for (let i = 0; i < arr.length; i++) {
           arr[i] = Math.floor(Math.random() * 256);
         }
@@ -522,26 +527,26 @@ beforeEach(() => {
         getValue: vi.fn(() => ''),
         getModel: vi.fn(() => ({
           onDidChangeContent: vi.fn(),
-          dispose: vi.fn()
+          dispose: vi.fn(),
         })),
         dispose: vi.fn(),
         onDidChangeModelContent: vi.fn(),
         focus: vi.fn(),
-        updateOptions: vi.fn()
+        updateOptions: vi.fn(),
       })),
       defineTheme: vi.fn(),
-      setTheme: vi.fn()
+      setTheme: vi.fn(),
     },
     languages: {
       register: vi.fn(),
       setMonarchTokensProvider: vi.fn(),
       setLanguageConfiguration: vi.fn(),
-      registerCompletionItemProvider: vi.fn()
-    }
+      registerCompletionItemProvider: vi.fn(),
+    },
   };
-  
+
   // Mock requestAnimationFrame
-  global.requestAnimationFrame = vi.fn((cb) => {
+  global.requestAnimationFrame = vi.fn(cb => {
     setTimeout(cb, 16);
     return 1;
   });
@@ -557,7 +562,7 @@ beforeEach(() => {
           r: parseInt(hex.substring(0, 2), 16),
           g: parseInt(hex.substring(2, 4), 16),
           b: parseInt(hex.substring(4, 6), 16),
-          a: 255
+          a: 255,
         };
       }
     }
@@ -569,7 +574,7 @@ beforeEach(() => {
           r: Math.floor(parseFloat(match[0])),
           g: Math.floor(parseFloat(match[1])),
           b: Math.floor(parseFloat(match[2])),
-          a: match.length > 3 ? Math.floor(parseFloat(match[3]) * 255) : 255
+          a: match.length > 3 ? Math.floor(parseFloat(match[3]) * 255) : 255,
         };
       }
     }
@@ -582,7 +587,7 @@ beforeEach(() => {
   const canvasPixelData = new WeakMap<HTMLCanvasElement, Map<string, Uint8ClampedArray>>();
   const canvasContexts = new WeakMap<HTMLCanvasElement, any>();
 
-  const createMockContext = function(this: HTMLCanvasElement) {
+  const createMockContext = function (this: HTMLCanvasElement) {
     // Return cached context if it exists (same context instance for same canvas)
     if (canvasContexts.has(this)) {
       return canvasContexts.get(this)!;
@@ -603,7 +608,7 @@ beforeEach(() => {
       globalCompositeOperation: 'source-over',
       font: '10px sans-serif',
 
-      fillRect: vi.fn(function(x: number, y: number, w: number, h: number) {
+      fillRect: vi.fn(function (x: number, y: number, w: number, h: number) {
         // Store pixel color for fillRect calls (used by PSet)
         if (w === 1 && h === 1) {
           // This is likely a pixel fill from PSet
@@ -635,20 +640,20 @@ beforeEach(() => {
             data: pixelData.get(key)!,
             width: w,
             height: h,
-            colorSpace: 'srgb'
+            colorSpace: 'srgb',
           };
         }
         // Return default black pixel (0,0,0,255) in RGBA format
         const data = new Uint8ClampedArray(4);
-        data[0] = 0;  // R
-        data[1] = 0;  // G
-        data[2] = 0;  // B
+        data[0] = 0; // R
+        data[1] = 0; // G
+        data[2] = 0; // B
         data[3] = 255; // A
         return {
           data,
           width: w,
           height: h,
-          colorSpace: 'srgb'
+          colorSpace: 'srgb',
         };
       }),
       putImageData: vi.fn((imageData: any, x: number, y: number) => {
@@ -694,7 +699,7 @@ beforeEach(() => {
     return contextObj;
   };
 
-  HTMLCanvasElement.prototype.getContext = vi.fn(function(this: HTMLCanvasElement) {
+  HTMLCanvasElement.prototype.getContext = vi.fn(function (this: HTMLCanvasElement) {
     return createMockContext.call(this);
   });
 
@@ -818,27 +823,27 @@ beforeEach(() => {
   // Skip setup for tests that provide their own complete DOM mocks
   const testName = expect.getState().currentTestName || '';
   const hasCustomMock = testName.includes('ThemeManager');
-  
+
   if (hasCustomMock) {
     return; // Let ThemeManager use its own complete mock
   }
-  
+
   // PHASE 1: Complete document structure for other tests
   if (!document.documentElement) {
     const html = document.createElement('html');
     document.appendChild(html);
   }
-  
+
   if (!document.head) {
     const head = document.createElement('head');
     document.documentElement.appendChild(head);
   }
-  
+
   if (!document.body) {
     const body = document.createElement('body');
     document.documentElement.appendChild(body);
   }
-  
+
   // PHASE 2: Complete DOM APIs for VB6Runtime
   if (!document.documentElement.style) {
     document.documentElement.style = {
@@ -849,17 +854,17 @@ beforeEach(() => {
       length: 0,
     } as any;
   }
-  
+
   // Essential document methods for VB6Runtime
   if (!document.addEventListener) {
     document.addEventListener = vi.fn();
     document.removeEventListener = vi.fn();
     document.dispatchEvent = vi.fn();
   }
-  
+
   // Essential document query methods
   if (!document.getElementById) {
-    document.getElementById = vi.fn().mockImplementation((id) => {
+    document.getElementById = vi.fn().mockImplementation(id => {
       // Return existing element or create new one
       const existingElements = document.getElementsByTagName('div');
       for (let i = 0; i < existingElements.length; i++) {
@@ -876,12 +881,12 @@ beforeEach(() => {
       return div;
     });
   }
-  
+
   if (!document.querySelector) {
     document.querySelector = vi.fn().mockReturnValue(null);
     document.querySelectorAll = vi.fn().mockReturnValue([]);
   }
-  
+
   // Complete body with all needed properties
   if (document.body && !document.body.classList) {
     document.body.classList = {
@@ -893,10 +898,10 @@ beforeEach(() => {
     } as any;
     document.body.className = '';
   }
-  
+
   // Window APIs for VB6Runtime
   if (!global.window.matchMedia) {
-    global.window.matchMedia = vi.fn().mockImplementation((query) => ({
+    global.window.matchMedia = vi.fn().mockImplementation(query => ({
       matches: false,
       media: query,
       onchange: null,
@@ -906,7 +911,7 @@ beforeEach(() => {
       removeEventListener: vi.fn(),
     }));
   }
-  
+
   // PHASE 3: React root container for non-ThemeManager tests
   if (document.body && document.createElement) {
     const existing = document.getElementById('root');

@@ -25,7 +25,7 @@ const getInitialStore = () => ({
   gridSize: 8,
   showGrid: true,
   snapToGrid: true,
-  zoomLevel: 1
+  zoomLevel: 1,
 });
 
 describe('VB6 Store', () => {
@@ -47,18 +47,18 @@ describe('VB6 Store', () => {
       expect(state.isDesignMode).toBe(true);
       expect(state.selectedControlId).toBeNull();
       expect(state.clipboardData).toBeNull();
-      
+
       // UI state
       expect(state.showToolbox).toBe(true);
       expect(state.showProperties).toBe(true);
       expect(state.showProjectExplorer).toBe(true);
       expect(state.showImmediateWindow).toBe(false);
-      
+
       // Project state
       expect(state.projectName).toBe('VB6 Project');
       expect(state.isDirty).toBe(false);
       expect(state.lastSaved).toBeNull();
-      
+
       // Canvas state
       expect(state.canvasSize).toEqual({ width: 800, height: 600 });
       expect(state.gridSize).toBe(8);
@@ -73,19 +73,19 @@ describe('VB6 Store', () => {
       // Code actions
       expect(typeof state.updateCode).toBe('function');
       expect(typeof state.insertCode).toBe('function');
-      
+
       // Control actions
       expect(typeof state.addControl).toBe('function');
       expect(typeof state.updateControl).toBe('function');
       expect(typeof state.deleteControl).toBe('function');
       expect(typeof state.selectControl).toBe('function');
       expect(typeof state.duplicateControl).toBe('function');
-      
+
       // UI actions
       expect(typeof state.toggleDesignMode).toBe('function');
       expect(typeof state.togglePanel).toBe('function');
       expect(typeof state.setZoomLevel).toBe('function');
-      
+
       // Project actions
       expect(typeof state.newProject).toBe('function');
       expect(typeof state.saveProject).toBe('function');
@@ -101,7 +101,9 @@ describe('VB6 Store', () => {
         result.current.updateCode('Private Sub Form_Load()\n  Debug.Print "Hello World"\nEnd Sub');
       });
 
-      expect(result.current.currentCode).toBe('Private Sub Form_Load()\n  Debug.Print "Hello World"\nEnd Sub');
+      expect(result.current.currentCode).toBe(
+        'Private Sub Form_Load()\n  Debug.Print "Hello World"\nEnd Sub'
+      );
       expect(result.current.isDirty).toBe(true);
     });
 
@@ -144,7 +146,7 @@ describe('VB6 Store', () => {
         top: 10,
         width: 100,
         height: 24,
-        properties: {}
+        properties: {},
       };
 
       act(() => {
@@ -167,7 +169,7 @@ describe('VB6 Store', () => {
         top: 10,
         width: 100,
         height: 24,
-        properties: { Text: 'Initial' }
+        properties: { Text: 'Initial' },
       };
 
       act(() => {
@@ -192,7 +194,7 @@ describe('VB6 Store', () => {
         top: 10,
         width: 100,
         height: 24,
-        properties: {}
+        properties: {},
       };
 
       act(() => {
@@ -229,7 +231,7 @@ describe('VB6 Store', () => {
         top: 10,
         width: 100,
         height: 24,
-        properties: {}
+        properties: {},
       };
 
       act(() => {
@@ -308,7 +310,7 @@ describe('VB6 Store', () => {
           top: 10,
           width: 100,
           height: 24,
-          properties: {}
+          properties: {},
         });
       });
 
@@ -354,9 +356,9 @@ describe('VB6 Store', () => {
             top: 20,
             width: 75,
             height: 25,
-            properties: { Caption: 'Click Me' }
-          }
-        ]
+            properties: { Caption: 'Click Me' },
+          },
+        ],
       };
 
       act(() => {
@@ -382,7 +384,7 @@ describe('VB6 Store', () => {
         top: 10,
         width: 100,
         height: 24,
-        properties: {}
+        properties: {},
       };
 
       act(() => {
@@ -406,7 +408,7 @@ describe('VB6 Store', () => {
         top: 10,
         width: 100,
         height: 24,
-        properties: {}
+        properties: {},
       };
 
       act(() => {
@@ -468,7 +470,7 @@ describe('VB6 Store', () => {
   describe('Performance Monitoring', () => {
     it('should track performance metrics', () => {
       const state = useVB6Store.getState();
-      
+
       expect(state.performanceMetrics).toBeDefined();
       expect(state.performanceMetrics.renderTime).toBe(0);
       expect(state.performanceMetrics.memoryUsage).toBe(0);
@@ -480,7 +482,7 @@ describe('VB6 Store', () => {
       act(() => {
         result.current.updatePerformanceMetrics({
           renderTime: 16.5,
-          memoryUsage: 1024000
+          memoryUsage: 1024000,
         });
       });
 

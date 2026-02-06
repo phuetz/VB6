@@ -87,7 +87,12 @@ const TabOrderDialog: React.FC<TabOrderDialogProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white border-2 border-gray-400 w-96 h-96 flex flex-col shadow-lg">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Tab Order"
+        className="bg-white border-2 border-gray-400 w-96 h-96 flex flex-col shadow-lg"
+      >
         {/* Dialog Header */}
         <div className="bg-gradient-to-r from-blue-800 to-blue-900 text-white px-3 py-2 flex items-center justify-between">
           <span className="text-sm font-bold">Tab Order</span>

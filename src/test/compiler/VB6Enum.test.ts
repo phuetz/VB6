@@ -7,7 +7,6 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { VB6EnumProcessor, VB6BuiltinEnums } from '../../compiler/VB6EnumSupport';
 
 describe('VB6 Enum Support', () => {
-
   describe('Enum Processor - Parsing', () => {
     let processor: VB6EnumProcessor;
 
@@ -107,11 +106,7 @@ describe('VB6 Enum Support', () => {
       const enumDecl = processor.parseEnumDeclaration('Enum Colors', 1);
       expect(enumDecl).not.toBeNull();
 
-      const memberLines = [
-        'Red',
-        'Green',
-        'Blue'
-      ];
+      const memberLines = ['Red', 'Green', 'Blue'];
 
       const result = processor.processEnum(enumDecl!, memberLines);
 
@@ -129,12 +124,12 @@ describe('VB6 Enum Support', () => {
       expect(enumDecl).not.toBeNull();
 
       const memberLines = [
-        'Unknown',           // 0
-        'Pending',          // 1
-        'Active = 10',      // 10
-        'Paused',           // 11
-        'Completed = 100',  // 100
-        'Failed'            // 101
+        'Unknown', // 0
+        'Pending', // 1
+        'Active = 10', // 10
+        'Paused', // 11
+        'Completed = 100', // 100
+        'Failed', // 101
       ];
 
       const result = processor.processEnum(enumDecl!, memberLines);
@@ -158,7 +153,7 @@ describe('VB6 Enum Support', () => {
         'Write = 2',
         'Execute = 4',
         'Delete = 8',
-        'All = &HF'  // 15
+        'All = &HF', // 15
       ];
 
       const result = processor.processEnum(enumDecl!, memberLines);
@@ -314,11 +309,7 @@ describe('VB6 Enum Support', () => {
 
     it('should handle flag-style enum in JavaScript', () => {
       const enumDecl = processor.parseEnumDeclaration('Enum FileAccess', 1);
-      const memberLines = [
-        'Read = 1',
-        'Write = 2',
-        'ReadWrite = 3'
-      ];
+      const memberLines = ['Read = 1', 'Write = 2', 'ReadWrite = 3'];
       const processed = processor.processEnum(enumDecl!, memberLines);
 
       const jsCode = processor.generateJavaScript(processed);
@@ -403,10 +394,7 @@ describe('VB6 Enum Support', () => {
 
     it('should handle large enum values', () => {
       const enumDecl = processor.parseEnumDeclaration('Enum Large', 1);
-      const memberLines = [
-        'MaxInt = 2147483647',
-        'Next'
-      ];
+      const memberLines = ['MaxInt = 2147483647', 'Next'];
       const processed = processor.processEnum(enumDecl!, memberLines);
 
       expect(processed.members[0].value).toBe(2147483647);
@@ -431,11 +419,7 @@ describe('VB6 Enum Support', () => {
     });
 
     it('should handle whitespace variations', () => {
-      const codes = [
-        '   Value1',
-        '\tValue2   ',
-        '  Value3 = 5  '
-      ];
+      const codes = ['   Value1', '\tValue2   ', '  Value3 = 5  '];
 
       codes.forEach(code => {
         const result = processor.parseEnumMember(code);
@@ -490,7 +474,7 @@ describe('VB6 Enum Support', () => {
         'BadRequest = 400',
         'Unauthorized = 401',
         'NotFound = 404',
-        'ServerError = 500'
+        'ServerError = 500',
       ];
       const processed = processor.processEnum(enumDecl!, memberLines);
 
@@ -507,7 +491,7 @@ describe('VB6 Enum Support', () => {
         'Hidden = 2',
         'System = 4',
         'Archive = &H20',
-        'Temporary = &H100'
+        'Temporary = &H100',
       ];
       const processed = processor.processEnum(enumDecl!, memberLines);
 
@@ -524,7 +508,7 @@ describe('VB6 Enum Support', () => {
         'Wednesday',
         'Thursday',
         'Friday',
-        'Saturday'
+        'Saturday',
       ];
       const processed = processor.processEnum(enumDecl!, memberLines);
 
@@ -535,11 +519,7 @@ describe('VB6 Enum Support', () => {
 
     it('should handle comparison operators enum', () => {
       const enumDecl = processor.parseEnumDeclaration('Enum CompareMethod', 1);
-      const memberLines = [
-        'Binary = 0',
-        'Text = 1',
-        'DatabaseCompare = 2'
-      ];
+      const memberLines = ['Binary = 0', 'Text = 1', 'DatabaseCompare = 2'];
       const processed = processor.processEnum(enumDecl!, memberLines);
       processor.registerEnum(processed);
 
@@ -555,7 +535,7 @@ describe('VB6 Enum Support', () => {
         'FileNotFound = 53',
         'DeviceUnavailable = 68',
         'DiskFull = 61',
-        'EndOfFile = 62'
+        'EndOfFile = 62',
       ];
       const processed = processor.processEnum(enumDecl!, memberLines);
 

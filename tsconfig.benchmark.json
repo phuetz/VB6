@@ -8,8 +8,5 @@
     "moduleResolution": "node",
     "outDir": "./benchmark-dist"
   },
-  "include": [
-    "run-compiler-benchmarks.ts",
-    "benchmark-suite-performance.ts"
-  ]
+  "include": ["run-compiler-benchmarks.ts", "benchmark-suite-performance.ts"]
 }

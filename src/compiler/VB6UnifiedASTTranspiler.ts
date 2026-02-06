@@ -16,7 +16,23 @@
  * Phase: 2.2 - Générateur JavaScript optimisé avec AST
  */
 
-import { VB6RecursiveDescentParser, VB6ModuleNode, VB6ProcedureNode, VB6StatementNode, VB6ExpressionNode, VB6DeclarationNode } from './VB6RecursiveDescentParser';
+import {
+  VB6RecursiveDescentParser,
+  VB6ModuleNode,
+  VB6ProcedureNode,
+  VB6StatementNode,
+  VB6ExpressionNode,
+  VB6DeclarationNode,
+  VB6IfNode,
+  VB6ForNode,
+  VB6ForEachNode,
+  VB6DoNode,
+  VB6WithNode,
+  VB6SelectNode,
+  VB6AssignmentNode,
+  VB6BinaryOpNode,
+  VB6IdentifierNode,
+} from './VB6RecursiveDescentParser';
 import { tokenizeVB6, VB6Token } from './VB6AdvancedLexer';
 
 // Import Phase 1 feature processors
@@ -118,6 +134,44 @@ interface SourceMapEntry {
   originalColumn: number;
   source: string;
   name?: string; // Function or variable name for debugging
+}
+
+/**
+ * Symbol table entry for module-level symbols
+ */
+interface SymbolInfo {
+  type: string;
+  dataType: string;
+  visibility?: string;
+}
+
+/**
+ * Procedure signature information
+ */
+interface ProcedureSignatureInfo {
+  returnType: string;
+  parameters: Array<{ name: string; type: string; byRef: boolean; optional?: boolean }>;
+}
+
+/**
+ * Function inlining info
+ */
+interface FunctionInlineInfo {
+  proc: VB6ProcedureNode;
+  callCount: number;
+  canInline: boolean;
+  statementCount: number;
+}
+
+/**
+ * Chrome-specific performance with memory info
+ */
+interface PerformanceWithMemory extends Performance {
+  memory?: {
+    usedJSHeapSize: number;
+    totalJSHeapSize: number;
+    jsHeapSizeLimit: number;
+  };
 }
 
 /**
@@ -232,7 +286,6 @@ export class VB6UnifiedASTTranspiler {
         metrics: this.metrics,
         ast: optimizedAST,
       };
-
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.errors.push({
@@ -301,16 +354,19 @@ export class VB6UnifiedASTTranspiler {
         moduleSymbols.set(decl.name, {
           type: decl.declarationType,
           dataType: decl.dataType?.typeName || 'Variant',
-          visibility: decl.visibility || 'Private'
+          visibility: decl.visibility || 'Private',
         });
       }
     }
 
     // Collect procedure signatures
-    const procedureSignatures = new Map<string, {
-      returnType: string;
-      parameters: Array<{ name: string; type: string; byRef: boolean }>;
-    }>();
+    const procedureSignatures = new Map<
+      string,
+      {
+        returnType: string;
+        parameters: Array<{ name: string; type: string; byRef: boolean }>;
+      }
+    >();
 
     for (const proc of ast.procedures) {
       procedureSignatures.set(proc.name, {
@@ -318,8 +374,8 @@ export class VB6UnifiedASTTranspiler {
         parameters: proc.parameters.map(p => ({
           name: p.name,
           type: p.dataType?.typeName || 'Variant',
-          byRef: p.parameterType === 'ByRef' || (!p.parameterType && p.parameterType !== 'ByVal')
-        }))
+          byRef: p.parameterType === 'ByRef' || (!p.parameterType && p.parameterType !== 'ByVal'),
+        })),
       });
     }
 
@@ -337,8 +393,8 @@ export class VB6UnifiedASTTranspiler {
    */
   private analyzeProcedureSemantics(
     proc: VB6ProcedureNode,
-    moduleSymbols: Map<string, any>,
-    procedureSignatures: Map<string, any>,
+    moduleSymbols: Map<string, SymbolInfo>,
+    procedureSignatures: Map<string, ProcedureSignatureInfo>,
     ast: VB6ModuleNode
   ): void {
     // Build local symbol table
@@ -348,7 +404,7 @@ export class VB6UnifiedASTTranspiler {
     for (const param of proc.parameters) {
       localSymbols.set(param.name, {
         type: 'Parameter',
-        dataType: param.dataType?.typeName || 'Variant'
+        dataType: param.dataType?.typeName || 'Variant',
       });
     }
 
@@ -356,12 +412,18 @@ export class VB6UnifiedASTTranspiler {
     if (proc.procedureType === 'Function') {
       localSymbols.set(proc.name, {
         type: 'ReturnValue',
-        dataType: proc.returnType?.typeName || 'Variant'
+        dataType: proc.returnType?.typeName || 'Variant',
       });
     }
 
     // Analyze statements
-    this.analyzeStatementSemantics(proc.body, localSymbols, moduleSymbols, procedureSignatures, proc);
+    this.analyzeStatementSemantics(
+      proc.body,
+      localSymbols,
+      moduleSymbols,
+      procedureSignatures,
+      proc
+    );
   }
 
   /**
@@ -369,70 +431,92 @@ export class VB6UnifiedASTTranspiler {
    */
   private analyzeStatementSemantics(
     statements: VB6StatementNode[],
-    localSymbols: Map<string, any>,
-    moduleSymbols: Map<string, any>,
-    procedureSignatures: Map<string, any>,
+    localSymbols: Map<string, SymbolInfo>,
+    moduleSymbols: Map<string, SymbolInfo>,
+    procedureSignatures: Map<string, ProcedureSignatureInfo>,
     proc: VB6ProcedureNode
   ): void {
     for (const stmt of statements) {
       // Collect local variable declarations
       if (stmt.statementType === 'LocalVariable') {
-        const varStmt = stmt as any;
-        localSymbols.set(varStmt.name, {
+        localSymbols.set(stmt.name, {
           type: 'LocalVariable',
-          dataType: varStmt.dataType?.typeName || 'Variant'
+          dataType: stmt.dataType?.typeName || 'Variant',
         });
       }
 
       // Check variable references in assignments
       if (stmt.statementType === 'Assignment') {
-        const assignStmt = stmt as any;
+        const assignStmt = stmt as VB6AssignmentNode;
         this.checkVariableReference(assignStmt.target, localSymbols, moduleSymbols, stmt);
-        this.checkExpressionSemantics(assignStmt.value, localSymbols, moduleSymbols, procedureSignatures, stmt);
+        this.checkExpressionSemantics(
+          assignStmt.value,
+          localSymbols,
+          moduleSymbols,
+          procedureSignatures,
+          stmt
+        );
       }
 
       // Check function call arguments
       if (stmt.statementType === 'FunctionCall' || stmt.statementType === 'Call') {
-        const callStmt = stmt as any;
-        const procName = callStmt.name || callStmt.procedureName;
+        const procName = stmt.name || stmt.procedureName;
         const signature = procedureSignatures.get(procName);
 
         if (signature) {
-          const args = callStmt.arguments || [];
+          const args = stmt.arguments || [];
           // Check argument count
-          if (args.length < signature.parameters.filter((p: any) => !p.optional).length) {
+          if (args.length < signature.parameters.filter(p => !p.optional).length) {
             this.warnings.push({
               message: `Call to '${procName}' may have too few arguments`,
               line: stmt.line || 0,
               column: stmt.column || 0,
-              code: 'ARGUMENT_COUNT'
+              code: 'ARGUMENT_COUNT',
             });
           }
         }
       }
 
       // Recursively analyze nested statements
-      for (const key of ['thenStatements', 'elseStatements', 'body']) {
-        const nested = (stmt as any)[key];
+      for (const key of ['thenStatements', 'elseStatements', 'body'] as const) {
+        const nested = stmt[key];
         if (nested && Array.isArray(nested)) {
-          this.analyzeStatementSemantics(nested, localSymbols, moduleSymbols, procedureSignatures, proc);
+          this.analyzeStatementSemantics(
+            nested,
+            localSymbols,
+            moduleSymbols,
+            procedureSignatures,
+            proc
+          );
         }
       }
 
       // Analyze ElseIf clauses
-      if ((stmt as any).elseIfClauses) {
-        for (const clause of (stmt as any).elseIfClauses) {
+      if (stmt.elseIfClauses) {
+        for (const clause of stmt.elseIfClauses) {
           if (clause.statements) {
-            this.analyzeStatementSemantics(clause.statements, localSymbols, moduleSymbols, procedureSignatures, proc);
+            this.analyzeStatementSemantics(
+              clause.statements,
+              localSymbols,
+              moduleSymbols,
+              procedureSignatures,
+              proc
+            );
           }
         }
       }
 
       // Analyze Select Case clauses
-      if ((stmt as any).cases) {
-        for (const caseClause of (stmt as any).cases) {
+      if (stmt.cases) {
+        for (const caseClause of stmt.cases) {
           if (caseClause.statements) {
-            this.analyzeStatementSemantics(caseClause.statements, localSymbols, moduleSymbols, procedureSignatures, proc);
+            this.analyzeStatementSemantics(
+              caseClause.statements,
+              localSymbols,
+              moduleSymbols,
+              procedureSignatures,
+              proc
+            );
           }
         }
       }
@@ -443,9 +527,9 @@ export class VB6UnifiedASTTranspiler {
    * Check variable reference
    */
   private checkVariableReference(
-    target: any,
-    localSymbols: Map<string, any>,
-    moduleSymbols: Map<string, any>,
+    target: VB6ExpressionNode | string | null | undefined,
+    localSymbols: Map<string, SymbolInfo>,
+    moduleSymbols: Map<string, SymbolInfo>,
     stmt: VB6StatementNode
   ): void {
     if (!target) return;
@@ -462,7 +546,7 @@ export class VB6UnifiedASTTranspiler {
         message: `Variable '${varName}' may not be declared`,
         line: stmt.line || 0,
         column: stmt.column || 0,
-        code: 'UNDECLARED_VARIABLE'
+        code: 'UNDECLARED_VARIABLE',
       });
     }
   }
@@ -471,10 +555,10 @@ export class VB6UnifiedASTTranspiler {
    * Check expression semantics
    */
   private checkExpressionSemantics(
-    expr: any,
-    localSymbols: Map<string, any>,
-    moduleSymbols: Map<string, any>,
-    procedureSignatures: Map<string, any>,
+    expr: VB6ExpressionNode | null | undefined,
+    localSymbols: Map<string, SymbolInfo>,
+    moduleSymbols: Map<string, SymbolInfo>,
+    procedureSignatures: Map<string, ProcedureSignatureInfo>,
     stmt: VB6StatementNode
   ): void {
     if (!expr) return;
@@ -482,15 +566,28 @@ export class VB6UnifiedASTTranspiler {
     // Check identifier references
     if (expr.expressionType === 'Identifier') {
       const varName = expr.name;
-      if (!localSymbols.has(varName) && !moduleSymbols.has(varName) && !procedureSignatures.has(varName)) {
+      if (
+        !localSymbols.has(varName) &&
+        !moduleSymbols.has(varName) &&
+        !procedureSignatures.has(varName)
+      ) {
         // Check if it's a VB6 built-in constant or function
-        const builtIns = ['True', 'False', 'Nothing', 'Null', 'Empty', 'vbCrLf', 'vbTab', 'vbNullString'];
+        const builtIns = [
+          'True',
+          'False',
+          'Nothing',
+          'Null',
+          'Empty',
+          'vbCrLf',
+          'vbTab',
+          'vbNullString',
+        ];
         if (!builtIns.includes(varName)) {
           this.warnings.push({
             message: `Identifier '${varName}' may not be defined`,
             line: stmt.line || 0,
             column: stmt.column || 0,
-            code: 'UNDEFINED_IDENTIFIER'
+            code: 'UNDEFINED_IDENTIFIER',
           });
         }
       }
@@ -502,34 +599,118 @@ export class VB6UnifiedASTTranspiler {
       if (!procedureSignatures.has(funcName)) {
         // Check if it's a VB6 built-in function
         const builtInFunctions = [
-          'Len', 'Left', 'Right', 'Mid', 'Trim', 'LTrim', 'RTrim', 'UCase', 'LCase',
-          'Str', 'Val', 'Chr', 'Asc', 'InStr', 'Replace', 'Split', 'Join',
-          'CInt', 'CLng', 'CDbl', 'CSng', 'CStr', 'CBool', 'CDate',
-          'Int', 'Fix', 'Abs', 'Sgn', 'Sqr', 'Exp', 'Log', 'Sin', 'Cos', 'Tan',
-          'Array', 'LBound', 'UBound', 'IsArray', 'IsNumeric', 'IsDate', 'IsEmpty', 'IsNull',
-          'Date', 'Time', 'Now', 'Year', 'Month', 'Day', 'Hour', 'Minute', 'Second',
-          'DateAdd', 'DateDiff', 'DatePart', 'DateSerial', 'TimeSerial',
-          'MsgBox', 'InputBox', 'Format', 'RGB', 'QBColor',
-          'IIf', 'Choose', 'Switch', 'TypeName', 'VarType'
+          'Len',
+          'Left',
+          'Right',
+          'Mid',
+          'Trim',
+          'LTrim',
+          'RTrim',
+          'UCase',
+          'LCase',
+          'Str',
+          'Val',
+          'Chr',
+          'Asc',
+          'InStr',
+          'Replace',
+          'Split',
+          'Join',
+          'CInt',
+          'CLng',
+          'CDbl',
+          'CSng',
+          'CStr',
+          'CBool',
+          'CDate',
+          'Int',
+          'Fix',
+          'Abs',
+          'Sgn',
+          'Sqr',
+          'Exp',
+          'Log',
+          'Sin',
+          'Cos',
+          'Tan',
+          'Array',
+          'LBound',
+          'UBound',
+          'IsArray',
+          'IsNumeric',
+          'IsDate',
+          'IsEmpty',
+          'IsNull',
+          'Date',
+          'Time',
+          'Now',
+          'Year',
+          'Month',
+          'Day',
+          'Hour',
+          'Minute',
+          'Second',
+          'DateAdd',
+          'DateDiff',
+          'DatePart',
+          'DateSerial',
+          'TimeSerial',
+          'MsgBox',
+          'InputBox',
+          'Format',
+          'RGB',
+          'QBColor',
+          'IIf',
+          'Choose',
+          'Switch',
+          'TypeName',
+          'VarType',
         ];
         if (!builtInFunctions.includes(funcName)) {
           this.warnings.push({
             message: `Function '${funcName}' may not be defined`,
             line: stmt.line || 0,
             column: stmt.column || 0,
-            code: 'UNDEFINED_FUNCTION'
+            code: 'UNDEFINED_FUNCTION',
           });
         }
       }
     }
 
     // Recursively check sub-expressions
-    if (expr.left) this.checkExpressionSemantics(expr.left, localSymbols, moduleSymbols, procedureSignatures, stmt);
-    if (expr.right) this.checkExpressionSemantics(expr.right, localSymbols, moduleSymbols, procedureSignatures, stmt);
-    if (expr.operand) this.checkExpressionSemantics(expr.operand, localSymbols, moduleSymbols, procedureSignatures, stmt);
+    if (expr.left)
+      this.checkExpressionSemantics(
+        expr.left,
+        localSymbols,
+        moduleSymbols,
+        procedureSignatures,
+        stmt
+      );
+    if (expr.right)
+      this.checkExpressionSemantics(
+        expr.right,
+        localSymbols,
+        moduleSymbols,
+        procedureSignatures,
+        stmt
+      );
+    if (expr.operand)
+      this.checkExpressionSemantics(
+        expr.operand,
+        localSymbols,
+        moduleSymbols,
+        procedureSignatures,
+        stmt
+      );
     if (expr.arguments) {
       for (const arg of expr.arguments) {
-        this.checkExpressionSemantics(arg.value || arg, localSymbols, moduleSymbols, procedureSignatures, stmt);
+        this.checkExpressionSemantics(
+          arg.value || arg,
+          localSymbols,
+          moduleSymbols,
+          procedureSignatures,
+          stmt
+        );
       }
     }
   }
@@ -541,8 +722,10 @@ export class VB6UnifiedASTTranspiler {
     // Collect implemented interfaces
     const implementedInterfaces: string[] = [];
     for (const decl of ast.declarations) {
-      if (decl.declarationType === 'Implements') {
-        implementedInterfaces.push((decl as any).interfaceName || decl.name);
+      if (decl.declarationType === ('Implements' as string)) {
+        implementedInterfaces.push(
+          (decl as VB6DeclarationNode & { interfaceName?: string }).interfaceName || decl.name
+        );
       }
     }
 
@@ -567,7 +750,7 @@ export class VB6UnifiedASTTranspiler {
         message: `Class implements ${implementedInterfaces.join(', ')} but no interface methods found`,
         line: 0,
         column: 0,
-        code: 'MISSING_INTERFACE_METHODS'
+        code: 'MISSING_INTERFACE_METHODS',
       });
     }
   }
@@ -654,7 +837,10 @@ export class VB6UnifiedASTTranspiler {
   /**
    * Eliminate dead code in a list of statements
    */
-  private eliminateDeadCodeInStatements(statements: VB6StatementNode[]): { statements: VB6StatementNode[]; removed: number } {
+  private eliminateDeadCodeInStatements(statements: VB6StatementNode[]): {
+    statements: VB6StatementNode[];
+    removed: number;
+  } {
     let removed = 0;
     const newStatements: VB6StatementNode[] = [];
     let isUnreachable = false;
@@ -673,9 +859,11 @@ export class VB6UnifiedASTTranspiler {
       }
 
       // Check if this statement makes following code unreachable
-      if (stmt.statementType === 'Return' ||
-          stmt.statementType === 'GoTo' ||
-          (stmt.statementType === 'Exit' && ['Sub', 'Function', 'Property'].includes((stmt as any).exitType))) {
+      if (
+        stmt.statementType === 'Return' ||
+        stmt.statementType === 'GoTo' ||
+        (stmt.statementType === 'Exit' && ['Sub', 'Function', 'Property'].includes(stmt.exitType))
+      ) {
         newStatements.push(stmt);
         isUnreachable = true;
         continue;
@@ -683,7 +871,7 @@ export class VB6UnifiedASTTranspiler {
 
       // Recursively process nested statements
       if (stmt.statementType === 'If') {
-        const ifStmt = stmt as any;
+        const ifStmt = stmt as VB6IfNode;
 
         // Check for constant true/false conditions
         if (ifStmt.condition?.expressionType === 'Literal') {
@@ -722,31 +910,31 @@ export class VB6UnifiedASTTranspiler {
 
         newStatements.push(stmt);
       } else if (stmt.statementType === 'For') {
-        const forStmt = stmt as any;
+        const forStmt = stmt as VB6ForNode;
         const bodyResult = this.eliminateDeadCodeInStatements(forStmt.body || []);
         removed += bodyResult.removed;
         forStmt.body = bodyResult.statements;
         newStatements.push(stmt);
       } else if (stmt.statementType === 'ForEach') {
-        const forStmt = stmt as any;
+        const forStmt = stmt as VB6ForEachNode;
         const bodyResult = this.eliminateDeadCodeInStatements(forStmt.body || []);
         removed += bodyResult.removed;
         forStmt.body = bodyResult.statements;
         newStatements.push(stmt);
       } else if (stmt.statementType === 'Do') {
-        const doStmt = stmt as any;
+        const doStmt = stmt as VB6DoNode;
         const bodyResult = this.eliminateDeadCodeInStatements(doStmt.body || []);
         removed += bodyResult.removed;
         doStmt.body = bodyResult.statements;
         newStatements.push(stmt);
       } else if (stmt.statementType === 'With') {
-        const withStmt = stmt as any;
+        const withStmt = stmt as VB6WithNode;
         const bodyResult = this.eliminateDeadCodeInStatements(withStmt.body || []);
         removed += bodyResult.removed;
         withStmt.body = bodyResult.statements;
         newStatements.push(stmt);
       } else if (stmt.statementType === 'Select') {
-        const selectStmt = stmt as any;
+        const selectStmt = stmt as VB6SelectNode;
         for (const caseClause of selectStmt.cases || []) {
           const caseResult = this.eliminateDeadCodeInStatements(caseClause.statements || []);
           removed += caseResult.removed;
@@ -786,7 +974,10 @@ export class VB6UnifiedASTTranspiler {
   /**
    * Fold constants in a list of statements
    */
-  private foldConstantsInStatements(statements: VB6StatementNode[]): { statements: VB6StatementNode[]; folded: number } {
+  private foldConstantsInStatements(statements: VB6StatementNode[]): {
+    statements: VB6StatementNode[];
+    folded: number;
+  } {
     let folded = 0;
 
     for (let i = 0; i < statements.length; i++) {
@@ -794,16 +985,17 @@ export class VB6UnifiedASTTranspiler {
 
       // Fold expressions in assignments
       if (stmt.statementType === 'Assignment') {
-        const result = this.foldConstantExpression((stmt as any).value);
+        const assignStmt = stmt as VB6AssignmentNode;
+        const result = this.foldConstantExpression(assignStmt.value);
         if (result.folded) {
-          (stmt as any).value = result.expression;
+          assignStmt.value = result.expression;
           folded++;
         }
       }
 
       // Fold conditions in If statements
       if (stmt.statementType === 'If') {
-        const ifStmt = stmt as any;
+        const ifStmt = stmt as VB6IfNode;
         const condResult = this.foldConstantExpression(ifStmt.condition);
         if (condResult.folded) {
           ifStmt.condition = condResult.expression;
@@ -822,7 +1014,7 @@ export class VB6UnifiedASTTranspiler {
 
       // Fold in For loop bounds
       if (stmt.statementType === 'For') {
-        const forStmt = stmt as any;
+        const forStmt = stmt as VB6ForNode;
         const startResult = this.foldConstantExpression(forStmt.startValue);
         if (startResult.folded) {
           forStmt.startValue = startResult.expression;
@@ -853,12 +1045,15 @@ export class VB6UnifiedASTTranspiler {
   /**
    * Attempt to fold a constant expression
    */
-  private foldConstantExpression(expr: VB6ExpressionNode): { expression: VB6ExpressionNode; folded: boolean } {
+  private foldConstantExpression(expr: VB6ExpressionNode): {
+    expression: VB6ExpressionNode;
+    folded: boolean;
+  } {
     if (!expr) return { expression: expr, folded: false };
 
     // Only fold binary operations between literals
     if (expr.expressionType === 'BinaryOp') {
-      const binOp = expr as any;
+      const binOp = expr as VB6BinaryOpNode;
       const left = binOp.left;
       const right = binOp.right;
 
@@ -875,7 +1070,7 @@ export class VB6UnifiedASTTranspiler {
         const op = binOp.operator;
 
         // Compute the result
-        let result: any;
+        let result: string | number | boolean = 0;
         let canFold = true;
 
         switch (op) {
@@ -980,19 +1175,22 @@ export class VB6UnifiedASTTranspiler {
     const newAST = JSON.parse(JSON.stringify(ast)) as VB6ModuleNode;
 
     // Build function info map
-    const functionInfo = new Map<string, {
-      proc: VB6ProcedureNode;
-      callCount: number;
-      canInline: boolean;
-      statementCount: number;
-    }>();
+    const functionInfo = new Map<
+      string,
+      {
+        proc: VB6ProcedureNode;
+        callCount: number;
+        canInline: boolean;
+        statementCount: number;
+      }
+    >();
 
     // Analyze functions for inlining candidates
     for (const proc of newAST.procedures) {
       if (proc.procedureType === 'Function') {
         const statementCount = this.countStatements(proc.body);
-        const hasByRef = proc.parameters.some(p =>
-          p.parameterType === 'ByRef' || (!p.parameterType && p.parameterType !== 'ByVal')
+        const hasByRef = proc.parameters.some(
+          p => p.parameterType === 'ByRef' || (!p.parameterType && p.parameterType !== 'ByVal')
         );
         const hasRecursion = this.hasRecursiveCall(proc.body, proc.name);
 
@@ -1000,7 +1198,7 @@ export class VB6UnifiedASTTranspiler {
           proc,
           callCount: 0,
           canInline: statementCount <= 3 && !hasByRef && !hasRecursion,
-          statementCount
+          statementCount,
         });
       }
     }
@@ -1034,9 +1232,9 @@ export class VB6UnifiedASTTranspiler {
     let count = 0;
     for (const stmt of statements) {
       count++;
-      if ((stmt as any).thenStatements) count += this.countStatements((stmt as any).thenStatements);
-      if ((stmt as any).elseStatements) count += this.countStatements((stmt as any).elseStatements);
-      if ((stmt as any).body) count += this.countStatements((stmt as any).body);
+      if (stmt.thenStatements) count += this.countStatements(stmt.thenStatements);
+      if (stmt.elseStatements) count += this.countStatements(stmt.elseStatements);
+      if (stmt.body) count += this.countStatements(stmt.body);
     }
     return count;
   }
@@ -1047,7 +1245,11 @@ export class VB6UnifiedASTTranspiler {
   private hasRecursiveCall(statements: VB6StatementNode[], funcName: string): boolean {
     for (const stmt of statements) {
       if (this.statementCallsFunction(stmt, funcName)) return true;
-      const nested = [...(stmt as any).thenStatements || [], ...(stmt as any).elseStatements || [], ...(stmt as any).body || []];
+      const nested = [
+        ...(stmt.thenStatements || []),
+        ...(stmt.elseStatements || []),
+        ...(stmt.body || []),
+      ];
       if (nested.length > 0 && this.hasRecursiveCall(nested, funcName)) return true;
     }
     return false;
@@ -1058,10 +1260,10 @@ export class VB6UnifiedASTTranspiler {
    */
   private statementCallsFunction(stmt: VB6StatementNode, funcName: string): boolean {
     if (stmt.statementType === 'FunctionCall' || stmt.statementType === 'Call') {
-      if (((stmt as any).name || (stmt as any).procedureName) === funcName) return true;
+      if ((stmt.name || stmt.procedureName) === funcName) return true;
     }
     if (stmt.statementType === 'Assignment') {
-      return this.expressionCallsFunction((stmt as any).value, funcName);
+      return this.expressionCallsFunction((stmt as VB6AssignmentNode).value, funcName);
     }
     return false;
   }
@@ -1069,7 +1271,10 @@ export class VB6UnifiedASTTranspiler {
   /**
    * Check if expression calls a specific function
    */
-  private expressionCallsFunction(expr: any, funcName: string): boolean {
+  private expressionCallsFunction(
+    expr: VB6ExpressionNode | null | undefined,
+    funcName: string
+  ): boolean {
     if (!expr) return false;
     if (expr.expressionType === 'FunctionCall' && expr.name === funcName) return true;
     if (expr.left && this.expressionCallsFunction(expr.left, funcName)) return true;
@@ -1086,10 +1291,17 @@ export class VB6UnifiedASTTranspiler {
   /**
    * Count function calls in statements
    */
-  private countFunctionCalls(statements: VB6StatementNode[], functionInfo: Map<string, any>): void {
+  private countFunctionCalls(
+    statements: VB6StatementNode[],
+    functionInfo: Map<string, FunctionInlineInfo>
+  ): void {
     for (const stmt of statements) {
       this.countCallsInStatement(stmt, functionInfo);
-      const nested = [...(stmt as any).thenStatements || [], ...(stmt as any).elseStatements || [], ...(stmt as any).body || []];
+      const nested = [
+        ...(stmt.thenStatements || []),
+        ...(stmt.elseStatements || []),
+        ...(stmt.body || []),
+      ];
       if (nested.length > 0) this.countFunctionCalls(nested, functionInfo);
     }
   }
@@ -1097,21 +1309,27 @@ export class VB6UnifiedASTTranspiler {
   /**
    * Count calls in a single statement
    */
-  private countCallsInStatement(stmt: VB6StatementNode, functionInfo: Map<string, any>): void {
+  private countCallsInStatement(
+    stmt: VB6StatementNode,
+    functionInfo: Map<string, FunctionInlineInfo>
+  ): void {
     if (stmt.statementType === 'FunctionCall' || stmt.statementType === 'Call') {
-      const name = (stmt as any).name || (stmt as any).procedureName;
+      const name = stmt.name || stmt.procedureName;
       const info = functionInfo.get(name);
       if (info) info.callCount++;
     }
     if (stmt.statementType === 'Assignment') {
-      this.countCallsInExpression((stmt as any).value, functionInfo);
+      this.countCallsInExpression((stmt as VB6AssignmentNode).value, functionInfo);
     }
   }
 
   /**
    * Count calls in expression
    */
-  private countCallsInExpression(expr: any, functionInfo: Map<string, any>): void {
+  private countCallsInExpression(
+    expr: VB6ExpressionNode | null | undefined,
+    functionInfo: Map<string, FunctionInlineInfo>
+  ): void {
     if (!expr) return;
     if (expr.expressionType === 'FunctionCall') {
       const info = functionInfo.get(expr.name);
@@ -1130,20 +1348,33 @@ export class VB6UnifiedASTTranspiler {
   /**
    * Inline function call in statements
    */
-  private inlineFunctionInStatements(statements: VB6StatementNode[], funcName: string, funcProc: VB6ProcedureNode): boolean {
+  private inlineFunctionInStatements(
+    statements: VB6StatementNode[],
+    funcName: string,
+    funcProc: VB6ProcedureNode
+  ): boolean {
     for (let i = 0; i < statements.length; i++) {
       const stmt = statements[i];
       if (stmt.statementType === 'Assignment') {
-        const value = (stmt as any).value;
+        const assignStmt = stmt as VB6AssignmentNode;
+        const value = assignStmt.value;
         if (value?.expressionType === 'FunctionCall' && value.name === funcName) {
-          const inlinedStmts = this.createInlinedStatements(funcProc, value.arguments || [], (stmt as any).target);
+          const inlinedStmts = this.createInlinedStatements(
+            funcProc,
+            value.arguments || [],
+            assignStmt.target
+          );
           statements.splice(i, 1, ...inlinedStmts);
           return true;
         }
       }
-      for (const key of ['thenStatements', 'elseStatements', 'body']) {
-        const nested = (stmt as any)[key];
-        if (nested && Array.isArray(nested) && this.inlineFunctionInStatements(nested, funcName, funcProc)) {
+      for (const key of ['thenStatements', 'elseStatements', 'body'] as const) {
+        const nested = stmt[key];
+        if (
+          nested &&
+          Array.isArray(nested) &&
+          this.inlineFunctionInStatements(nested, funcName, funcProc)
+        ) {
           return true;
         }
       }
@@ -1154,26 +1385,35 @@ export class VB6UnifiedASTTranspiler {
   /**
    * Create inlined statements from function body
    */
-  private createInlinedStatements(func: VB6ProcedureNode, args: any[], targetVar: any): VB6StatementNode[] {
+  private createInlinedStatements(
+    func: VB6ProcedureNode,
+    args: VB6ExpressionNode[],
+    targetVar: VB6ExpressionNode | string
+  ): VB6StatementNode[] {
     const result: VB6StatementNode[] = [];
     for (let i = 0; i < func.parameters.length; i++) {
       const param = func.parameters[i];
       const arg = args[i];
       result.push({
+        type: 'Statement',
         statementType: 'LocalVariable',
         name: `__inline_${param.name}`,
         dataType: param.dataType,
         initialValue: arg?.value || arg,
         line: 0,
-        column: 0
-      } as any);
+        column: 0,
+      } as VB6StatementNode);
     }
     for (const stmt of func.body) {
       const clonedStmt = JSON.parse(JSON.stringify(stmt));
       for (const param of func.parameters) {
         this.substituteIdentifier(clonedStmt, param.name, `__inline_${param.name}`);
       }
-      this.substituteIdentifier(clonedStmt, func.name, typeof targetVar === 'string' ? targetVar : targetVar.name);
+      this.substituteIdentifier(
+        clonedStmt,
+        func.name,
+        typeof targetVar === 'string' ? targetVar : targetVar.name
+      );
       result.push(clonedStmt);
     }
     return result;
@@ -1182,15 +1422,20 @@ export class VB6UnifiedASTTranspiler {
   /**
    * Substitute identifier in AST node
    */
-  private substituteIdentifier(node: any, oldName: string, newName: string): void {
+  private substituteIdentifier(
+    node: Record<string, unknown> | null,
+    oldName: string,
+    newName: string
+  ): void {
     if (!node || typeof node !== 'object') return;
     if (node.expressionType === 'Identifier' && node.name === oldName) node.name = newName;
     if (node.name === oldName && node.expressionType !== 'FunctionCall') node.name = newName;
     for (const key of Object.keys(node)) {
       if (Array.isArray(node[key])) {
-        for (const item of node[key]) this.substituteIdentifier(item, oldName, newName);
+        for (const item of node[key] as Record<string, unknown>[])
+          this.substituteIdentifier(item, oldName, newName);
       } else if (typeof node[key] === 'object' && node[key] !== null) {
-        this.substituteIdentifier(node[key], oldName, newName);
+        this.substituteIdentifier(node[key] as Record<string, unknown>, oldName, newName);
       }
     }
   }
@@ -1213,12 +1458,15 @@ export class VB6UnifiedASTTranspiler {
   /**
    * Unroll loops in statement list
    */
-  private unrollLoopsInStatements(statements: VB6StatementNode[]): { statements: VB6StatementNode[]; unrolled: number } {
+  private unrollLoopsInStatements(statements: VB6StatementNode[]): {
+    statements: VB6StatementNode[];
+    unrolled: number;
+  } {
     let unrolled = 0;
     const newStatements: VB6StatementNode[] = [];
     for (const stmt of statements) {
       if (stmt.statementType === 'For') {
-        const forStmt = stmt as any;
+        const forStmt = stmt as VB6ForNode;
         if (this.canUnrollLoop(forStmt)) {
           const unrolledStmts = this.unrollForLoop(forStmt);
           if (unrolledStmts) {
@@ -1231,10 +1479,10 @@ export class VB6UnifiedASTTranspiler {
         forStmt.body = bodyResult.statements;
         unrolled += bodyResult.unrolled;
       } else {
-        for (const key of ['thenStatements', 'elseStatements', 'body']) {
-          if ((stmt as any)[key]) {
-            const result = this.unrollLoopsInStatements((stmt as any)[key]);
-            (stmt as any)[key] = result.statements;
+        for (const key of ['thenStatements', 'elseStatements', 'body'] as const) {
+          if (stmt[key]) {
+            const result = this.unrollLoopsInStatements(stmt[key]);
+            stmt[key] = result.statements;
             unrolled += result.unrolled;
           }
         }
@@ -1247,7 +1495,7 @@ export class VB6UnifiedASTTranspiler {
   /**
    * Check if a For loop can be unrolled
    */
-  private canUnrollLoop(forStmt: any): boolean {
+  private canUnrollLoop(forStmt: VB6StatementNode): boolean {
     if (!this.isConstantExpression(forStmt.start)) return false;
     if (!this.isConstantExpression(forStmt.end)) return false;
     if (forStmt.step && !this.isConstantExpression(forStmt.step)) return false;
@@ -1265,11 +1513,15 @@ export class VB6UnifiedASTTranspiler {
   /**
    * Check if expression is a constant
    */
-  private isConstantExpression(expr: any): boolean {
+  private isConstantExpression(expr: VB6ExpressionNode | null | undefined): boolean {
     if (!expr) return false;
     if (expr.expressionType === 'Literal') return true;
-    if (expr.expressionType === 'UnaryOp' && expr.operator === '-') return this.isConstantExpression(expr.operand);
-    if (expr.expressionType === 'BinaryOp' && ['+', '-', '*', '/', '\\', 'Mod'].includes(expr.operator)) {
+    if (expr.expressionType === 'UnaryOp' && expr.operator === '-')
+      return this.isConstantExpression(expr.operand);
+    if (
+      expr.expressionType === 'BinaryOp' &&
+      ['+', '-', '*', '/', '\\', 'Mod'].includes(expr.operator)
+    ) {
       return this.isConstantExpression(expr.left) && this.isConstantExpression(expr.right);
     }
     return false;
@@ -1278,20 +1530,28 @@ export class VB6UnifiedASTTranspiler {
   /**
    * Evaluate constant expression
    */
-  private evaluateConstant(expr: any): number {
+  private evaluateConstant(expr: VB6ExpressionNode): number {
     if (expr.expressionType === 'Literal') return Number(expr.value);
-    if (expr.expressionType === 'UnaryOp' && expr.operator === '-') return -this.evaluateConstant(expr.operand);
+    if (expr.expressionType === 'UnaryOp' && expr.operator === '-')
+      return -this.evaluateConstant(expr.operand);
     if (expr.expressionType === 'BinaryOp') {
       const left = this.evaluateConstant(expr.left);
       const right = this.evaluateConstant(expr.right);
       switch (expr.operator) {
-        case '+': return left + right;
-        case '-': return left - right;
-        case '*': return left * right;
-        case '/': return left / right;
-        case '\\': return Math.floor(left / right);
-        case 'Mod': return left % right;
-        default: return 0;
+        case '+':
+          return left + right;
+        case '-':
+          return left - right;
+        case '*':
+          return left * right;
+        case '/':
+          return left / right;
+        case '\\':
+          return Math.floor(left / right);
+        case 'Mod':
+          return left % right;
+        default:
+          return 0;
       }
     }
     return 0;
@@ -1303,7 +1563,11 @@ export class VB6UnifiedASTTranspiler {
   private hasNestedLoops(statements: VB6StatementNode[]): boolean {
     for (const stmt of statements) {
       if (['For', 'ForEach', 'Do', 'While'].includes(stmt.statementType)) return true;
-      const nested = [...(stmt as any).thenStatements || [], ...(stmt as any).elseStatements || [], ...(stmt as any).body || []];
+      const nested = [
+        ...(stmt.thenStatements || []),
+        ...(stmt.elseStatements || []),
+        ...(stmt.body || []),
+      ];
       if (this.hasNestedLoops(nested)) return true;
     }
     return false;
@@ -1315,7 +1579,7 @@ export class VB6UnifiedASTTranspiler {
   private bodyModifiesVariable(statements: VB6StatementNode[], varName: string): boolean {
     for (const stmt of statements) {
       if (stmt.statementType === 'Assignment') {
-        const target = (stmt as any).target;
+        const target = (stmt as VB6AssignmentNode).target;
         if ((typeof target === 'string' ? target : target?.name) === varName) return true;
       }
     }
@@ -1325,7 +1589,7 @@ export class VB6UnifiedASTTranspiler {
   /**
    * Unroll a For loop
    */
-  private unrollForLoop(forStmt: any): VB6StatementNode[] | null {
+  private unrollForLoop(forStmt: VB6StatementNode): VB6StatementNode[] | null {
     const start = this.evaluateConstant(forStmt.start);
     const end = this.evaluateConstant(forStmt.end);
     const step = forStmt.step ? this.evaluateConstant(forStmt.step) : 1;
@@ -1334,11 +1598,13 @@ export class VB6UnifiedASTTranspiler {
     const unrolledStmts: VB6StatementNode[] = [];
     for (let i = start; step > 0 ? i <= end : i >= end; i += step) {
       unrolledStmts.push({
+        type: 'Statement',
         statementType: 'Assignment',
         target: { expressionType: 'Identifier', name: varName },
         value: { expressionType: 'Literal', literalType: 'Number', value: i },
-        line: 0, column: 0
-      } as any);
+        line: 0,
+        column: 0,
+      } as VB6StatementNode);
       for (const bodyStmt of forStmt.body || []) {
         unrolledStmts.push(JSON.parse(JSON.stringify(bodyStmt)));
       }
@@ -1379,7 +1645,12 @@ export class VB6UnifiedASTTranspiler {
    */
   private isClassModule(ast: VB6ModuleNode): boolean {
     // Check for VB_Creatable or VB_PredeclaredId attributes (class module indicators)
-    const classIndicators = ['VB_Creatable', 'VB_PredeclaredId', 'VB_Exposed', 'VB_GlobalNameSpace'];
+    const classIndicators = [
+      'VB_Creatable',
+      'VB_PredeclaredId',
+      'VB_Exposed',
+      'VB_GlobalNameSpace',
+    ];
     for (const attr of ast.attributes || []) {
       if (classIndicators.includes(attr.name)) {
         return true;
@@ -1387,7 +1658,8 @@ export class VB6UnifiedASTTranspiler {
     }
 
     // Check module type from AST
-    if ((ast as any).moduleType === 'Class' || (ast as any).moduleType === 'cls') {
+    const moduleType = (ast as unknown as { moduleType?: string }).moduleType;
+    if (moduleType === 'Class' || moduleType === 'cls') {
       return true;
     }
 
@@ -1417,8 +1689,10 @@ export class VB6UnifiedASTTranspiler {
     // Collect interface implementations
     const implementedInterfaces: string[] = [];
     for (const decl of ast.declarations) {
-      if (decl.declarationType === 'Implements') {
-        implementedInterfaces.push((decl as any).interfaceName || decl.name);
+      if (decl.declarationType === ('Implements' as string)) {
+        implementedInterfaces.push(
+          (decl as VB6DeclarationNode & { interfaceName?: string }).interfaceName || decl.name
+        );
       }
     }
 
@@ -1460,8 +1734,14 @@ export class VB6UnifiedASTTranspiler {
     }
 
     // Group properties - handle both regular and interface properties
-    const properties = new Map<string, { get?: VB6ProcedureNode; let?: VB6ProcedureNode; set?: VB6ProcedureNode }>();
-    const interfaceProperties = new Map<string, Map<string, { get?: VB6ProcedureNode; let?: VB6ProcedureNode; set?: VB6ProcedureNode }>>();
+    const properties = new Map<
+      string,
+      { get?: VB6ProcedureNode; let?: VB6ProcedureNode; set?: VB6ProcedureNode }
+    >();
+    const interfaceProperties = new Map<
+      string,
+      Map<string, { get?: VB6ProcedureNode; let?: VB6ProcedureNode; set?: VB6ProcedureNode }>
+    >();
 
     // Collect interface methods (InterfaceName_MethodName pattern)
     const interfaceMethods = new Map<string, VB6ProcedureNode[]>();
@@ -1513,9 +1793,10 @@ export class VB6UnifiedASTTranspiler {
 
       if (prop.let || prop.set) {
         const setter = prop.let || prop.set;
-        const valueParam = setter!.parameters.length > 0
-          ? setter!.parameters[setter!.parameters.length - 1].name
-          : 'value';
+        const valueParam =
+          setter!.parameters.length > 0
+            ? setter!.parameters[setter!.parameters.length - 1].name
+            : 'value';
         code += `  set ${propName}(${valueParam}) {\n`;
         this.indentLevel = 2;
         code += this.generateStatements(setter!.body);
@@ -1705,16 +1986,18 @@ export class VB6UnifiedASTTranspiler {
 
     if (hasBounds) {
       // Complex bounds: Use runtime helper
-      const boundsArray = dimensions.map((dim: any) => {
-        if (dim.lowerBound !== undefined && dim.upperBound !== undefined) {
-          const lower = this.generateExpression(dim.lowerBound);
-          const upper = this.generateExpression(dim.upperBound);
-          return `[${lower}, ${upper}]`;
-        } else {
-          const size = this.generateExpression(dim);
-          return `[0, ${size}]`;
-        }
-      }).join(', ');
+      const boundsArray = dimensions
+        .map((dim: any) => {
+          if (dim.lowerBound !== undefined && dim.upperBound !== undefined) {
+            const lower = this.generateExpression(dim.lowerBound);
+            const upper = this.generateExpression(dim.upperBound);
+            return `[${lower}, ${upper}]`;
+          } else {
+            const size = this.generateExpression(dim);
+            return `[0, ${size}]`;
+          }
+        })
+        .join(', ');
 
       return `VB6.createMultiArray([${boundsArray}], () => ${defaultValue})`;
     }
@@ -1747,18 +2030,18 @@ export class VB6UnifiedASTTranspiler {
    */
   private getDefaultValueForType(vb6Type: string): string {
     const primitiveDefaults: Record<string, string> = {
-      'String': '""',
-      'Integer': '0',
-      'Long': '0',
-      'Single': '0.0',
-      'Double': '0.0',
-      'Boolean': 'false',
-      'Date': 'new Date()',
-      'Object': 'null',
-      'Variant': 'undefined',
-      'Byte': '0',
-      'Currency': '0',
-      'Decimal': '0',
+      String: '""',
+      Integer: '0',
+      Long: '0',
+      Single: '0.0',
+      Double: '0.0',
+      Boolean: 'false',
+      Date: 'new Date()',
+      Object: 'null',
+      Variant: 'undefined',
+      Byte: '0',
+      Currency: '0',
+      Decimal: '0',
     };
 
     // Check if it's a primitive type
@@ -1793,7 +2076,12 @@ export class VB6UnifiedASTTranspiler {
     code += `  constructor() {\n`;
 
     // Add properties from UDT definition (if available)
-    const properties = (decl as any).properties || [];
+    const properties: Array<{ name: string; dataType?: { typeName: string } }> =
+      (
+        decl as VB6DeclarationNode & {
+          properties?: Array<{ name: string; dataType?: { typeName: string } }>;
+        }
+      ).properties || [];
     for (const prop of properties) {
       code += `    this.${prop.name} = ${this.getDefaultValue(prop.dataType?.typeName || 'Variant')};\n`;
     }
@@ -1810,7 +2098,12 @@ export class VB6UnifiedASTTranspiler {
   private generateEnum(decl: VB6DeclarationNode): string {
     // Generate Enum as frozen object with numeric values (TypeScript-style)
     const enumName = decl.name;
-    const members = (decl as any).members || [];
+    const members: Array<{ name: string; value?: VB6ExpressionNode | number | null }> =
+      (
+        decl as VB6DeclarationNode & {
+          members?: Array<{ name: string; value?: VB6ExpressionNode | number | null }>;
+        }
+      ).members || [];
     const visibility = decl.visibility || 'Private';
 
     let code = `// Enum ${enumName}\n`;
@@ -1862,12 +2155,11 @@ export class VB6UnifiedASTTranspiler {
    */
   private generateDeclare(decl: VB6DeclarationNode): string {
     const funcName = decl.name || 'ApiFunction';
-    const libName = ((decl as any).library || (decl as any).lib || 'kernel32').toLowerCase().replace('.dll', '');
-    const alias = (decl as any).alias || funcName;
-    const isFunction = (decl as any).declarationType === 'Function' || (decl as any).isFunction;
-    const params = ((decl as any).parameters || [])
-      .map((p: any) => p.name)
-      .join(', ');
+    const declExt = decl as VB6DeclarationNode & { lib?: string; isFunction?: boolean };
+    const libName = (decl.library || declExt.lib || 'kernel32').toLowerCase().replace('.dll', '');
+    const alias = decl.alias || funcName;
+    const isFunction = decl.declarationType === 'Function' || declExt.isFunction;
+    const params = (decl.parameters || []).map(p => p.name).join(', ');
 
     let code = '';
     code += `// Declare ${isFunction ? 'Function' : 'Sub'} ${funcName} Lib "${libName}" Alias "${alias}"\n`;
@@ -1894,36 +2186,36 @@ export class VB6UnifiedASTTranspiler {
    */
   private getApiMapping(lib: string, func: string): string | null {
     const mappings: { [key: string]: { [key: string]: string } } = {
-      'kernel32': {
-        'GetTickCount': 'return performance.now() | 0;',
-        'Sleep': 'return new Promise(resolve => setTimeout(resolve, arguments[0]));',
-        'GetCurrentProcessId': 'return 1;',
-        'GetCurrentThreadId': 'return 1;',
-        'Beep': 'VB6.beep(arguments[0], arguments[1]); return true;',
-        'GetComputerName': 'arguments[0].value = "Browser"; arguments[1].value = 7; return true;',
-        'GetUserName': 'arguments[0].value = "User"; arguments[1].value = 4; return true;',
+      kernel32: {
+        GetTickCount: 'return performance.now() | 0;',
+        Sleep: 'return new Promise(resolve => setTimeout(resolve, arguments[0]));',
+        GetCurrentProcessId: 'return 1;',
+        GetCurrentThreadId: 'return 1;',
+        Beep: 'VB6.beep(arguments[0], arguments[1]); return true;',
+        GetComputerName: 'arguments[0].value = "Browser"; arguments[1].value = 7; return true;',
+        GetUserName: 'arguments[0].value = "User"; arguments[1].value = 4; return true;',
       },
-      'user32': {
-        'MessageBox': 'return VB6.msgBox(arguments[1], arguments[3] || 0, arguments[2] || "");',
-        'MessageBoxA': 'return VB6.msgBox(arguments[1], arguments[3] || 0, arguments[2] || "");',
-        'GetForegroundWindow': 'return 1;',
-        'GetActiveWindow': 'return 1;',
-        'SetWindowText': 'if (arguments[0] === 1) document.title = arguments[1]; return true;',
-        'ShowWindow': 'return true;',
-        'SetFocus': 'return arguments[0];',
-        'GetSystemMetrics': 'return VB6.getSystemMetric(arguments[0]);',
+      user32: {
+        MessageBox: 'return VB6.msgBox(arguments[1], arguments[3] || 0, arguments[2] || "");',
+        MessageBoxA: 'return VB6.msgBox(arguments[1], arguments[3] || 0, arguments[2] || "");',
+        GetForegroundWindow: 'return 1;',
+        GetActiveWindow: 'return 1;',
+        SetWindowText: 'if (arguments[0] === 1) document.title = arguments[1]; return true;',
+        ShowWindow: 'return true;',
+        SetFocus: 'return arguments[0];',
+        GetSystemMetrics: 'return VB6.getSystemMetric(arguments[0]);',
       },
-      'gdi32': {
-        'CreatePen': 'return VB6.createPen(arguments[0], arguments[1], arguments[2]);',
-        'CreateSolidBrush': 'return VB6.createBrush(arguments[0]);',
-        'DeleteObject': 'return true;',
+      gdi32: {
+        CreatePen: 'return VB6.createPen(arguments[0], arguments[1], arguments[2]);',
+        CreateSolidBrush: 'return VB6.createBrush(arguments[0]);',
+        DeleteObject: 'return true;',
       },
-      'shell32': {
-        'ShellExecute': 'VB6.shell(arguments[2]); return 32;',
+      shell32: {
+        ShellExecute: 'VB6.shell(arguments[2]); return 32;',
       },
-      'winmm': {
-        'PlaySound': 'VB6.playSound(arguments[0]); return true;',
-        'timeGetTime': 'return performance.now() | 0;',
+      winmm: {
+        PlaySound: 'VB6.playSound(arguments[0]); return true;',
+        timeGetTime: 'return performance.now() | 0;',
       },
     };
 
@@ -1954,7 +2246,10 @@ export class VB6UnifiedASTTranspiler {
     code += '// Procedures\n';
 
     // Group properties by name for proper getter/setter generation
-    const properties = new Map<string, { get?: VB6ProcedureNode; let?: VB6ProcedureNode; set?: VB6ProcedureNode }>();
+    const properties = new Map<
+      string,
+      { get?: VB6ProcedureNode; let?: VB6ProcedureNode; set?: VB6ProcedureNode }
+    >();
     const regularProcs: VB6ProcedureNode[] = [];
 
     for (const proc of procedures) {
@@ -1993,7 +2288,10 @@ export class VB6UnifiedASTTranspiler {
   /**
    * Generate a property group with getter and setter
    */
-  private generatePropertyGroup(name: string, prop: { get?: VB6ProcedureNode; let?: VB6ProcedureNode; set?: VB6ProcedureNode }): string {
+  private generatePropertyGroup(
+    name: string,
+    prop: { get?: VB6ProcedureNode; let?: VB6ProcedureNode; set?: VB6ProcedureNode }
+  ): string {
     let code = '';
 
     // Generate private backing field
@@ -2012,7 +2310,10 @@ export class VB6UnifiedASTTranspiler {
 
     // Generate Property Let as function that sets value
     if (prop.let) {
-      const valueParam = prop.let.parameters.length > 0 ? prop.let.parameters[prop.let.parameters.length - 1].name : 'value';
+      const valueParam =
+        prop.let.parameters.length > 0
+          ? prop.let.parameters[prop.let.parameters.length - 1].name
+          : 'value';
       code += `function let${name}(${valueParam}) {\n`;
       this.indentLevel++;
       code += this.generateStatements(prop.let.body);
@@ -2022,7 +2323,10 @@ export class VB6UnifiedASTTranspiler {
 
     // Generate Property Set as function (for object assignment)
     if (prop.set) {
-      const valueParam = prop.set.parameters.length > 0 ? prop.set.parameters[prop.set.parameters.length - 1].name : 'value';
+      const valueParam =
+        prop.set.parameters.length > 0
+          ? prop.set.parameters[prop.set.parameters.length - 1].name
+          : 'value';
       code += `function set${name}(${valueParam}) {\n`;
       this.indentLevel++;
       code += this.generateStatements(prop.set.body);
@@ -2057,7 +2361,8 @@ export class VB6UnifiedASTTranspiler {
    */
   private generatePropertyLet(proc: VB6ProcedureNode): string {
     let code = '';
-    const valueParam = proc.parameters.length > 0 ? proc.parameters[proc.parameters.length - 1].name : 'value';
+    const valueParam =
+      proc.parameters.length > 0 ? proc.parameters[proc.parameters.length - 1].name : 'value';
 
     code += `function let${proc.name}(${valueParam}) {\n`;
     this.indentLevel++;
@@ -2073,7 +2378,8 @@ export class VB6UnifiedASTTranspiler {
    */
   private generatePropertySet(proc: VB6ProcedureNode): string {
     let code = '';
-    const valueParam = proc.parameters.length > 0 ? proc.parameters[proc.parameters.length - 1].name : 'value';
+    const valueParam =
+      proc.parameters.length > 0 ? proc.parameters[proc.parameters.length - 1].name : 'value';
 
     code += `function set${proc.name}(${valueParam}) {\n`;
     this.indentLevel++;
@@ -2112,13 +2418,7 @@ export class VB6UnifiedASTTranspiler {
 
     // Add source map entry for procedure start
     if (this.options.generateSourceMaps && proc.line) {
-      this.addSourceMapEntry(
-        this.currentLine,
-        0,
-        proc.line,
-        proc.column || 0,
-        proc.name
-      );
+      this.addSourceMapEntry(this.currentLine, 0, proc.line, proc.column || 0, proc.name);
     }
 
     // Collect ByRef parameters that need wrapping
@@ -2131,34 +2431,39 @@ export class VB6UnifiedASTTranspiler {
     code += `${functionKeyword} ${proc.name}(`;
 
     // Parameters
-    const params = proc.parameters.map((param, index) => {
-      const paramName = param.name;
-      const paramType = param.dataType ? this.mapVB6TypeToJS(param.dataType.typeName) : 'any';
-      const typeAnnotation = this.options.generateTypeScript ? `: ${paramType}` : '';
+    const params = proc.parameters
+      .map((param, index) => {
+        const paramName = param.name;
+        const paramType = param.dataType ? this.mapVB6TypeToJS(param.dataType.typeName) : 'any';
+        const typeAnnotation = this.options.generateTypeScript ? `: ${paramType}` : '';
 
-      // Handle ParamArray (must be last parameter)
-      if (param.parameterType === 'ParamArray') {
-        hasParamArray = true;
-        paramArrayName = paramName;
-        return `...${paramName}${typeAnnotation ? `: ${paramType}[]` : ''}`;
-      }
+        // Handle ParamArray (must be last parameter)
+        if (param.parameterType === 'ParamArray') {
+          hasParamArray = true;
+          paramArrayName = paramName;
+          return `...${paramName}${typeAnnotation ? `: ${paramType}[]` : ''}`;
+        }
 
-      // Track Optional parameters for default value handling
-      if (param.parameterType === 'Optional') {
-        const defaultVal = param.defaultValue
-          ? this.generateExpression(param.defaultValue)
-          : this.getDefaultValueForType(param.dataType?.typeName || 'Variant');
-        optionalParams.push({ name: paramName, defaultValue: defaultVal });
-      }
+        // Track Optional parameters for default value handling
+        if (param.parameterType === 'Optional') {
+          const defaultVal = param.defaultValue
+            ? this.generateExpression(param.defaultValue)
+            : this.getDefaultValueForType(param.dataType?.typeName || 'Variant');
+          optionalParams.push({ name: paramName, defaultValue: defaultVal });
+        }
 
-      // Track ByRef parameters (default in VB6)
-      // ByRef parameters need special handling for primitives
-      if (param.parameterType === 'ByRef' || (!param.parameterType && param.parameterType !== 'ByVal')) {
-        byRefParams.push(paramName);
-      }
+        // Track ByRef parameters (default in VB6)
+        // ByRef parameters need special handling for primitives
+        if (
+          param.parameterType === 'ByRef' ||
+          (!param.parameterType && param.parameterType !== 'ByVal')
+        ) {
+          byRefParams.push(paramName);
+        }
 
-      return `${paramName}${typeAnnotation}`;
-    }).join(', ');
+        return `${paramName}${typeAnnotation}`;
+      })
+      .join(', ');
 
     code += params;
     code += `)${this.options.generateTypeScript ? `: ${returnType}` : ''} {\n`;
@@ -2204,12 +2509,7 @@ export class VB6UnifiedASTTranspiler {
     for (const stmt of statements) {
       // Track source map for each statement
       if (this.options.generateSourceMaps && stmt.line) {
-        this.addSourceMapEntry(
-          this.currentLine,
-          this.indentLevel * 2,
-          stmt.line,
-          stmt.column || 0
-        );
+        this.addSourceMapEntry(this.currentLine, this.indentLevel * 2, stmt.line, stmt.column || 0);
       }
 
       const stmtCode = this.generateStatement(stmt);
@@ -2249,7 +2549,7 @@ export class VB6UnifiedASTTranspiler {
       case 'OnError':
         return this.generateErrorHandling(stmt);
       case 'FunctionCall':
-        return indent + this.generateExpression((stmt as any).expression) + ';\n';
+        return indent + this.generateExpression(stmt.expression) + ';\n';
       case 'Return':
         return indent + 'return;\n';
       case 'Exit':
@@ -2273,7 +2573,7 @@ export class VB6UnifiedASTTranspiler {
       case 'Set':
         return this.generateSet(stmt, indent);
       case 'Expression':
-        return indent + this.generateExpression((stmt as any).expression) + ';\n';
+        return indent + this.generateExpression(stmt.expression) + ';\n';
       case 'LocalVariable':
         return this.generateLocalVariable(stmt, indent);
       case 'Debug':
@@ -2388,12 +2688,15 @@ export class VB6UnifiedASTTranspiler {
         code += indent + `{\n`;
         code += indent + `  const __oldArr = ${varName} || [];\n`;
         code += indent + `  const __newSize = ${size} + 1;\n`;
-        code += indent + `  ${varName} = new Array(__newSize).fill(null).map((_, __i) => __i < __oldArr.length ? __oldArr[__i] : ${this.getDefaultValueForType(typeName)});\n`;
+        code +=
+          indent +
+          `  ${varName} = new Array(__newSize).fill(null).map((_, __i) => __i < __oldArr.length ? __oldArr[__i] : ${this.getDefaultValueForType(typeName)});\n`;
         code += indent + `}\n`;
       } else {
         // ReDim without Preserve - create new array
         const defaultValue = this.getDefaultValueForType(typeName);
-        code += indent + `${varName} = new Array(${size} + 1).fill(null).map(() => ${defaultValue});\n`;
+        code +=
+          indent + `${varName} = new Array(${size} + 1).fill(null).map(() => ${defaultValue});\n`;
       }
     } else {
       // Multi-dimensional array
@@ -2401,7 +2704,9 @@ export class VB6UnifiedASTTranspiler {
         // ReDim Preserve for multi-dim - only last dimension can change in VB6
         // Generate runtime call to handle preservation
         const sizes = dimensions.map((d: any) => this.generateExpression(d)).join(', ');
-        code += indent + `${varName} = VB6.reDimPreserve(${varName}, [${sizes}], () => ${this.getDefaultValueForType(typeName)});\n`;
+        code +=
+          indent +
+          `${varName} = VB6.reDimPreserve(${varName}, [${sizes}], () => ${this.getDefaultValueForType(typeName)});\n`;
       } else {
         // ReDim without Preserve - create new multi-dimensional array
         const arrayInit = this.generateMultiDimensionalArray(dimensions, typeName);
@@ -2417,9 +2722,9 @@ export class VB6UnifiedASTTranspiler {
    */
   private generateCall(stmt: any, indent: string): string {
     const procName = stmt.procedureName || stmt.name || 'unknown';
-    const args = (stmt.arguments || []).map((arg: any) =>
-      this.generateExpression(arg.value || arg)
-    ).join(', ');
+    const args = (stmt.arguments || [])
+      .map((arg: any) => this.generateExpression(arg.value || arg))
+      .join(', ');
 
     return indent + `${procName}(${args});\n`;
   }
@@ -2522,7 +2827,9 @@ export class VB6UnifiedASTTranspiler {
     const step = stmt.stepValue ? this.generateExpression(stmt.stepValue) : '1';
 
     let code = '';
-    code += indent + `for (let ${variable} = ${start}; ${variable} <= ${end}; ${variable} += ${step}) {\n`;
+    code +=
+      indent +
+      `for (let ${variable} = ${start}; ${variable} <= ${end}; ${variable} += ${step}) {\n`;
     this.indentLevel++;
     code += this.generateStatements(stmt.body);
     this.indentLevel--;
@@ -2663,8 +2970,12 @@ export class VB6UnifiedASTTranspiler {
     for (const caseClause of cases) {
       for (const value of caseClause.values || []) {
         // Check for range (To) or comparison (Is)
-        if (value.type === 'CaseRange' || value.type === 'CaseComparison' ||
-            value.rangeEnd || value.operator) {
+        if (
+          value.type === 'CaseRange' ||
+          value.type === 'CaseComparison' ||
+          value.rangeEnd ||
+          value.operator
+        ) {
           return false;
         }
       }
@@ -2790,7 +3101,10 @@ export class VB6UnifiedASTTranspiler {
     const replacement = this.generateExpression(stmt.value || stmt.replacement);
     const length = stmt.length ? this.generateExpression(stmt.length) : `${replacement}.length`;
 
-    return indent + `${targetName} = ${targetName}.substring(0, ${start} - 1) + ${replacement}.substring(0, ${length}) + ${targetName}.substring(${start} - 1 + ${length});\n`;
+    return (
+      indent +
+      `${targetName} = ${targetName}.substring(0, ${start} - 1) + ${replacement}.substring(0, ${length}) + ${targetName}.substring(${start} - 1 + ${length});\n`
+    );
   }
 
   /**
@@ -2819,7 +3133,8 @@ export class VB6UnifiedASTTranspiler {
    */
   private generateLineInput(stmt: any, indent: string): string {
     const fileNumber = this.generateExpression(stmt.fileNumber || 1);
-    const variable = typeof stmt.variable === 'string' ? stmt.variable : this.generateExpression(stmt.variable);
+    const variable =
+      typeof stmt.variable === 'string' ? stmt.variable : this.generateExpression(stmt.variable);
     return indent + `${variable} = VB6.lineInput(${fileNumber});\n`;
   }
 
@@ -2829,8 +3144,9 @@ export class VB6UnifiedASTTranspiler {
    */
   private generateInput(stmt: any, indent: string): string {
     const fileNumber = this.generateExpression(stmt.fileNumber || 1);
-    const variables = (stmt.variables || [])
-      .map((v: any) => typeof v === 'string' ? v : this.generateExpression(v));
+    const variables = (stmt.variables || []).map((v: any) =>
+      typeof v === 'string' ? v : this.generateExpression(v)
+    );
 
     if (variables.length === 0) {
       return indent + `VB6.input(${fileNumber});\n`;
@@ -2905,7 +3221,8 @@ export class VB6UnifiedASTTranspiler {
   private generateGet(stmt: any, indent: string): string {
     const fileNumber = this.generateExpression(stmt.fileNumber || 1);
     const recordNum = stmt.recordNumber ? this.generateExpression(stmt.recordNumber) : 'undefined';
-    const variable = typeof stmt.variable === 'string' ? stmt.variable : this.generateExpression(stmt.variable);
+    const variable =
+      typeof stmt.variable === 'string' ? stmt.variable : this.generateExpression(stmt.variable);
 
     return indent + `${variable} = VB6.get(${fileNumber}, ${recordNum});\n`;
   }
@@ -3025,7 +3342,8 @@ export class VB6UnifiedASTTranspiler {
     code += indent + `if (typeof this.__raiseEvent === 'function') {\n`;
     code += indent + `  this.__raiseEvent('${eventName}'${args ? ', ' + args : ''});\n`;
     code += indent + `} else if (typeof this.dispatchEvent === 'function') {\n`;
-    code += indent + `  this.dispatchEvent(new CustomEvent('${eventName}', { detail: [${args}] }));\n`;
+    code +=
+      indent + `  this.dispatchEvent(new CustomEvent('${eventName}', { detail: [${args}] }));\n`;
     code += indent + `} else if (typeof this.emit === 'function') {\n`;
     code += indent + `  this.emit('${eventName}'${args ? ', ' + args : ''});\n`;
     code += indent + `}\n`;
@@ -3040,9 +3358,7 @@ export class VB6UnifiedASTTranspiler {
    */
   private generateEventDeclaration(decl: any): string {
     const eventName = decl.name || 'Event';
-    const params = (decl.parameters || [])
-      .map((p: any) => p.name)
-      .join(', ');
+    const params = (decl.parameters || []).map((p: any) => p.name).join(', ');
 
     let code = '';
     code += `// Event: ${eventName}(${params})\n`;
@@ -3088,8 +3404,9 @@ export class VB6UnifiedASTTranspiler {
    * JS: arr1 = []; arr2 = [];
    */
   private generateErase(stmt: any, indent: string): string {
-    const arrays = (stmt.arrays || stmt.variables || [])
-      .map((arr: any) => typeof arr === 'string' ? arr : (arr.name || this.generateExpression(arr)));
+    const arrays = (stmt.arrays || stmt.variables || []).map((arr: any) =>
+      typeof arr === 'string' ? arr : arr.name || this.generateExpression(arr)
+    );
 
     return arrays.map((arr: string) => indent + `${arr} = [];\n`).join('');
   }
@@ -3120,8 +3437,7 @@ export class VB6UnifiedASTTranspiler {
 
       case 'resumenext':
         // On Error Resume Next
-        return indent + `VB6.onErrorResumeNext();\n` +
-               indent + `try {\n`;
+        return indent + `VB6.onErrorResumeNext();\n` + indent + `try {\n`;
 
       case 'goto0':
       case 'gotozero':
@@ -3140,7 +3456,7 @@ export class VB6UnifiedASTTranspiler {
   private hasOnErrorResumeNext(statements: VB6StatementNode[]): boolean {
     for (const stmt of statements) {
       if (stmt.statementType === 'OnError') {
-        const action = ((stmt as any).action || '').toLowerCase();
+        const action = (stmt.action || '').toLowerCase();
         if (action === 'resumenext') {
           return true;
         }
@@ -3170,7 +3486,9 @@ export class VB6UnifiedASTTranspiler {
       // Check for On Error GoTo 0 (disables Resume Next)
       if (line.includes('VB6.onErrorGoToZero()')) {
         if (inTryBlock) {
-          wrapped += indent + `} catch (__err) { Err.Number = __err.number || 1; Err.Description = __err.message; }\n`;
+          wrapped +=
+            indent +
+            `} catch (__err) { Err.Number = __err.number || 1; Err.Description = __err.message; }\n`;
           inTryBlock = false;
         }
         wrapped += line + '\n';
@@ -3178,8 +3496,15 @@ export class VB6UnifiedASTTranspiler {
       }
 
       // Wrap each statement in try-catch when in Resume Next mode
-      if (inTryBlock && line.trim() && !line.trim().startsWith('//') && !line.trim().startsWith('/*')) {
-        wrapped += indent + `try { ${line.trim()} } catch (__err) { Err.Number = __err.number || 1; Err.Description = __err.message; }\n`;
+      if (
+        inTryBlock &&
+        line.trim() &&
+        !line.trim().startsWith('//') &&
+        !line.trim().startsWith('/*')
+      ) {
+        wrapped +=
+          indent +
+          `try { ${line.trim()} } catch (__err) { Err.Number = __err.number || 1; Err.Description = __err.message; }\n`;
       } else {
         wrapped += line + '\n';
       }
@@ -3187,7 +3512,9 @@ export class VB6UnifiedASTTranspiler {
 
     // Close any open try block
     if (inTryBlock) {
-      wrapped += indent + `} catch (__err) { Err.Number = __err.number || 1; Err.Description = __err.message; }\n`;
+      wrapped +=
+        indent +
+        `} catch (__err) { Err.Number = __err.number || 1; Err.Description = __err.message; }\n`;
     }
 
     return wrapped;
@@ -3201,7 +3528,7 @@ export class VB6UnifiedASTTranspiler {
       case 'Literal':
         return this.generateLiteral(expr);
       case 'Identifier':
-        return (expr as any).name;
+        return (expr as VB6IdentifierNode).name;
       case 'BinaryOp':
         return this.generateBinaryOp(expr);
       case 'UnaryOp':
@@ -3215,7 +3542,7 @@ export class VB6UnifiedASTTranspiler {
       case 'WithMemberAccess':
         // In With blocks, .PropertyName accesses the current With object
         // We use __with__ as the implicit object reference
-        return `__with__.${(expr as any).member}`;
+        return `__with__.${expr.member}`;
       default:
         return '/* unknown expression */';
     }
@@ -3353,7 +3680,9 @@ export class VB6UnifiedASTTranspiler {
    */
   private generateFunctionCall(expr: any): string {
     const name = expr.name;
-    const args = (expr.arguments || []).map((arg: any) => this.generateExpression(arg.value)).join(', ');
+    const args = (expr.arguments || [])
+      .map((arg: any) => this.generateExpression(arg.value))
+      .join(', ');
 
     // Add await for async VB6 functions
     if (this.isAsyncVB6Function(name)) {
@@ -3368,20 +3697,41 @@ export class VB6UnifiedASTTranspiler {
    */
   private static readonly ASYNC_VB6_FUNCTIONS = new Set([
     // System functions
-    'DoEvents', 'Sleep', 'Wait', 'Pause',
+    'DoEvents',
+    'Sleep',
+    'Wait',
+    'Pause',
     // Dialog functions (may be async in web context)
-    'MsgBox', 'InputBox',
+    'MsgBox',
+    'InputBox',
     // File operations (async in web)
-    'Open', 'Close', 'Input', 'Print', 'Write', 'Get', 'Put',
-    'FileCopy', 'Kill', 'MkDir', 'RmDir',
+    'Open',
+    'Close',
+    'Input',
+    'Print',
+    'Write',
+    'Get',
+    'Put',
+    'FileCopy',
+    'Kill',
+    'MkDir',
+    'RmDir',
     // Network operations
-    'SendData', 'GetData', 'Connect', 'Disconnect',
+    'SendData',
+    'GetData',
+    'Connect',
+    'Disconnect',
     // Timer-related
-    'Timer', 'SetTimer',
+    'Timer',
+    'SetTimer',
     // Clipboard operations (async Clipboard API)
-    'SetClipboardText', 'GetClipboardText', 'SetClipboardData', 'GetClipboardData',
+    'SetClipboardText',
+    'GetClipboardText',
+    'SetClipboardData',
+    'GetClipboardData',
     // Picture operations
-    'LoadPicture', 'SavePicture'
+    'LoadPicture',
+    'SavePicture',
   ]);
 
   /**
@@ -3409,47 +3759,47 @@ export class VB6UnifiedASTTranspiler {
   private statementNeedsAsync(stmt: VB6StatementNode): boolean {
     // Check direct function calls
     if (stmt.statementType === 'FunctionCall' || stmt.statementType === 'Call') {
-      const name = (stmt as any).name || (stmt as any).procedureName;
+      const name = stmt.name || stmt.procedureName;
       if (this.isAsyncVB6Function(name)) return true;
       // Also check the expression if present
-      if ((stmt as any).expression) {
-        if (this.expressionNeedsAsync((stmt as any).expression)) return true;
+      if (stmt.expression) {
+        if (this.expressionNeedsAsync(stmt.expression)) return true;
       }
     }
 
     // Check Expression statements (standalone function calls)
     if (stmt.statementType === 'Expression') {
-      if (this.expressionNeedsAsync((stmt as any).expression)) return true;
+      if (this.expressionNeedsAsync(stmt.expression)) return true;
     }
 
     // Check assignments with function calls
     if (stmt.statementType === 'Assignment') {
-      if (this.expressionNeedsAsync((stmt as any).value)) return true;
+      if (this.expressionNeedsAsync((stmt as VB6AssignmentNode).value)) return true;
     }
 
     // Check conditions
     if (stmt.statementType === 'If') {
-      if (this.expressionNeedsAsync((stmt as any).condition)) return true;
+      if (this.expressionNeedsAsync((stmt as VB6IfNode).condition)) return true;
     }
 
     // Check nested statements
-    for (const key of ['thenStatements', 'elseStatements', 'body', 'statements']) {
-      const nested = (stmt as any)[key];
+    for (const key of ['thenStatements', 'elseStatements', 'body', 'statements'] as const) {
+      const nested = stmt[key];
       if (nested && Array.isArray(nested)) {
         if (this.procedureNeedsAsync(nested)) return true;
       }
     }
 
     // Check ElseIf clauses
-    if ((stmt as any).elseIfClauses) {
-      for (const clause of (stmt as any).elseIfClauses) {
+    if (stmt.elseIfClauses) {
+      for (const clause of stmt.elseIfClauses) {
         if (clause.statements && this.procedureNeedsAsync(clause.statements)) return true;
       }
     }
 
     // Check Case clauses
-    if ((stmt as any).cases) {
-      for (const caseClause of (stmt as any).cases) {
+    if (stmt.cases) {
+      for (const caseClause of stmt.cases) {
         if (caseClause.statements && this.procedureNeedsAsync(caseClause.statements)) return true;
       }
     }
@@ -3460,7 +3810,7 @@ export class VB6UnifiedASTTranspiler {
   /**
    * Check if an expression needs async
    */
-  private expressionNeedsAsync(expr: any): boolean {
+  private expressionNeedsAsync(expr: VB6ExpressionNode | null | undefined): boolean {
     if (!expr) return false;
 
     if (expr.expressionType === 'FunctionCall') {
@@ -3621,10 +3971,10 @@ export class VB6UnifiedASTTranspiler {
     let encoded = '';
 
     // Handle negative numbers with sign bit
-    let vlq = value < 0 ? ((-value) << 1) + 1 : value << 1;
+    let vlq = value < 0 ? (-value << 1) + 1 : value << 1;
 
     do {
-      let digit = vlq & 0x1F; // 5 bits
+      let digit = vlq & 0x1f; // 5 bits
       vlq = vlq >>> 5;
       if (vlq > 0) {
         digit |= 0x20; // Set continuation bit
@@ -3660,13 +4010,13 @@ export class VB6UnifiedASTTranspiler {
    */
   private mapOperator(vb6Op: string): string {
     const operatorMap: Record<string, string> = {
-      'And': '&&',
-      'Or': '||',
-      'Not': '!',
-      'Mod': '%',
+      And: '&&',
+      Or: '||',
+      Not: '!',
+      Mod: '%',
       '=': '===',
       '<>': '!==',
-      '&': '+',  // String concatenation
+      '&': '+', // String concatenation
     };
 
     return operatorMap[vb6Op] || vb6Op;
@@ -3677,18 +4027,18 @@ export class VB6UnifiedASTTranspiler {
    */
   private mapVB6TypeToJS(vb6Type: string): string {
     const typeMap: Record<string, string> = {
-      'String': 'string',
-      'Integer': 'number',
-      'Long': 'number',
-      'Single': 'number',
-      'Double': 'number',
-      'Boolean': 'boolean',
-      'Date': 'Date',
-      'Object': 'any',
-      'Variant': 'any',
-      'Byte': 'number',
-      'Currency': 'number',
-      'Decimal': 'number',
+      String: 'string',
+      Integer: 'number',
+      Long: 'number',
+      Single: 'number',
+      Double: 'number',
+      Boolean: 'boolean',
+      Date: 'Date',
+      Object: 'any',
+      Variant: 'any',
+      Byte: 'number',
+      Currency: 'number',
+      Decimal: 'number',
     };
 
     return typeMap[vb6Type] || 'any';
@@ -3699,18 +4049,18 @@ export class VB6UnifiedASTTranspiler {
    */
   private getDefaultValue(vb6Type: string): string {
     const defaultMap: Record<string, string> = {
-      'String': '""',
-      'Integer': '0',
-      'Long': '0',
-      'Single': '0.0',
-      'Double': '0.0',
-      'Boolean': 'false',
-      'Date': 'new Date()',
-      'Object': 'null',
-      'Variant': 'undefined',
-      'Byte': '0',
-      'Currency': '0',
-      'Decimal': '0',
+      String: '""',
+      Integer: '0',
+      Long: '0',
+      Single: '0.0',
+      Double: '0.0',
+      Boolean: 'false',
+      Date: 'new Date()',
+      Object: 'null',
+      Variant: 'undefined',
+      Byte: '0',
+      Currency: '0',
+      Decimal: '0',
     };
 
     return defaultMap[vb6Type] || 'undefined';
@@ -3720,8 +4070,9 @@ export class VB6UnifiedASTTranspiler {
    * Get current memory usage
    */
   private getMemoryUsage(): number {
-    if (typeof performance !== 'undefined' && (performance as any).memory) {
-      return (performance as any).memory.usedJSHeapSize;
+    const perf = typeof performance !== 'undefined' ? (performance as PerformanceWithMemory) : null;
+    if (perf?.memory) {
+      return perf.memory.usedJSHeapSize;
     }
     return 0;
   }
@@ -3767,12 +4118,17 @@ export class VB6UnifiedASTTranspiler {
     return {
       success: false,
       javascript: '',
-      errors: this.errors.length > 0 ? this.errors : [{
-        message,
-        line: 0,
-        column: 0,
-        code: 'TRANSPILE_ERROR',
-      }],
+      errors:
+        this.errors.length > 0
+          ? this.errors
+          : [
+              {
+                message,
+                line: 0,
+                column: 0,
+                code: 'TRANSPILE_ERROR',
+              },
+            ],
       warnings: this.warnings,
       metrics: this.metrics,
     };

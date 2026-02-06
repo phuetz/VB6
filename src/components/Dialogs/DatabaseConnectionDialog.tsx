@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { X, Database, Play, TestTube, CheckCircle, AlertCircle, Info, Settings } from 'lucide-react';
-import { vb6DatabaseService, ADOConnection, ConnectionState } from '../../services/VB6DatabaseService';
+import {
+  X,
+  Database,
+  Play,
+  TestTube,
+  CheckCircle,
+  AlertCircle,
+  Info,
+  Settings,
+} from 'lucide-react';
+import {
+  vb6DatabaseService,
+  ADOConnection,
+  ConnectionState,
+} from '../../services/VB6DatabaseService';
 
 interface DatabaseConnectionDialogProps {
   visible: boolean;
@@ -28,13 +41,35 @@ const connectionProviders: ConnectionProvider[] = [
   {
     name: 'microsoft.jet.oledb.4.0',
     displayName: 'Microsoft Access (Jet)',
-    template: 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source={dataSource};User Id={userId};Password={password};',
+    template:
+      'Provider=Microsoft.Jet.OLEDB.4.0;Data Source={dataSource};User Id={userId};Password={password};',
     description: 'Connect to Microsoft Access databases (.mdb files)',
     parameters: [
-      { name: 'dataSource', label: 'Database File', type: 'file', required: true, placeholder: 'C:\\path\\to\\database.mdb', description: 'Path to the Access database file' },
-      { name: 'userId', label: 'User ID', type: 'text', required: false, placeholder: 'admin', description: 'Database user name (optional)' },
-      { name: 'password', label: 'Password', type: 'text', required: false, placeholder: '', description: 'Database password (optional)' }
-    ]
+      {
+        name: 'dataSource',
+        label: 'Database File',
+        type: 'file',
+        required: true,
+        placeholder: 'C:\\path\\to\\database.mdb',
+        description: 'Path to the Access database file',
+      },
+      {
+        name: 'userId',
+        label: 'User ID',
+        type: 'text',
+        required: false,
+        placeholder: 'admin',
+        description: 'Database user name (optional)',
+      },
+      {
+        name: 'password',
+        label: 'Password',
+        type: 'text',
+        required: false,
+        placeholder: '',
+        description: 'Database password (optional)',
+      },
+    ],
   },
   {
     name: 'sqloledb',
@@ -42,52 +77,140 @@ const connectionProviders: ConnectionProvider[] = [
     template: 'Provider=SQLOLEDB;Server={server};Database={database};Uid={userId};Pwd={password};',
     description: 'Connect to Microsoft SQL Server databases',
     parameters: [
-      { name: 'server', label: 'Server', type: 'text', required: true, placeholder: 'localhost\\SQLEXPRESS', description: 'SQL Server instance name' },
-      { name: 'database', label: 'Database', type: 'text', required: true, placeholder: 'Northwind', description: 'Database name' },
-      { name: 'userId', label: 'User ID', type: 'text', required: true, placeholder: 'sa', description: 'SQL Server user name' },
-      { name: 'password', label: 'Password', type: 'text', required: true, placeholder: '', description: 'SQL Server password' }
-    ]
+      {
+        name: 'server',
+        label: 'Server',
+        type: 'text',
+        required: true,
+        placeholder: 'localhost\\SQLEXPRESS',
+        description: 'SQL Server instance name',
+      },
+      {
+        name: 'database',
+        label: 'Database',
+        type: 'text',
+        required: true,
+        placeholder: 'Northwind',
+        description: 'Database name',
+      },
+      {
+        name: 'userId',
+        label: 'User ID',
+        type: 'text',
+        required: true,
+        placeholder: 'sa',
+        description: 'SQL Server user name',
+      },
+      {
+        name: 'password',
+        label: 'Password',
+        type: 'text',
+        required: true,
+        placeholder: '',
+        description: 'SQL Server password',
+      },
+    ],
   },
   {
     name: 'microsoft.ace.oledb.12.0',
     displayName: 'Microsoft Access (ACE)',
-    template: 'Provider=Microsoft.ACE.OLEDB.12.0;Data Source={dataSource};User Id={userId};Password={password};',
+    template:
+      'Provider=Microsoft.ACE.OLEDB.12.0;Data Source={dataSource};User Id={userId};Password={password};',
     description: 'Connect to newer Access databases (.accdb files)',
     parameters: [
-      { name: 'dataSource', label: 'Database File', type: 'file', required: true, placeholder: 'C:\\path\\to\\database.accdb', description: 'Path to the Access database file' },
-      { name: 'userId', label: 'User ID', type: 'text', required: false, placeholder: 'admin', description: 'Database user name (optional)' },
-      { name: 'password', label: 'Password', type: 'text', required: false, placeholder: '', description: 'Database password (optional)' }
-    ]
+      {
+        name: 'dataSource',
+        label: 'Database File',
+        type: 'file',
+        required: true,
+        placeholder: 'C:\\path\\to\\database.accdb',
+        description: 'Path to the Access database file',
+      },
+      {
+        name: 'userId',
+        label: 'User ID',
+        type: 'text',
+        required: false,
+        placeholder: 'admin',
+        description: 'Database user name (optional)',
+      },
+      {
+        name: 'password',
+        label: 'Password',
+        type: 'text',
+        required: false,
+        placeholder: '',
+        description: 'Database password (optional)',
+      },
+    ],
   },
   {
     name: 'msdasql',
     displayName: 'ODBC Driver',
-    template: 'Provider=MSDASQL;Driver={driver};Server={server};Database={database};Uid={userId};Pwd={password};',
+    template:
+      'Provider=MSDASQL;Driver={driver};Server={server};Database={database};Uid={userId};Pwd={password};',
     description: 'Connect through ODBC drivers',
     parameters: [
-      { name: 'driver', label: 'ODBC Driver', type: 'text', required: true, placeholder: '{SQL Server}', description: 'ODBC driver name' },
-      { name: 'server', label: 'Server', type: 'text', required: true, placeholder: 'localhost', description: 'Database server' },
-      { name: 'database', label: 'Database', type: 'text', required: true, placeholder: 'database_name', description: 'Database name' },
-      { name: 'userId', label: 'User ID', type: 'text', required: true, placeholder: 'username', description: 'Database user name' },
-      { name: 'password', label: 'Password', type: 'text', required: true, placeholder: '', description: 'Database password' }
-    ]
+      {
+        name: 'driver',
+        label: 'ODBC Driver',
+        type: 'text',
+        required: true,
+        placeholder: '{SQL Server}',
+        description: 'ODBC driver name',
+      },
+      {
+        name: 'server',
+        label: 'Server',
+        type: 'text',
+        required: true,
+        placeholder: 'localhost',
+        description: 'Database server',
+      },
+      {
+        name: 'database',
+        label: 'Database',
+        type: 'text',
+        required: true,
+        placeholder: 'database_name',
+        description: 'Database name',
+      },
+      {
+        name: 'userId',
+        label: 'User ID',
+        type: 'text',
+        required: true,
+        placeholder: 'username',
+        description: 'Database user name',
+      },
+      {
+        name: 'password',
+        label: 'Password',
+        type: 'text',
+        required: true,
+        placeholder: '',
+        description: 'Database password',
+      },
+    ],
   },
   {
     name: 'custom',
     displayName: 'Custom Connection String',
     template: '',
     description: 'Enter a custom connection string',
-    parameters: []
-  }
+    parameters: [],
+  },
 ];
 
 export const DatabaseConnectionDialog: React.FC<DatabaseConnectionDialogProps> = ({
   visible,
   onClose,
   onConnectionCreated,
-  initialConnectionString = ''
+  initialConnectionString = '',
 }) => {
-  const [selectedProvider, setSelectedProvider] = useState<ConnectionProvider>(connectionProviders[0]);
+  const [selectedProvider, setSelectedProvider] = useState<ConnectionProvider>(
+    connectionProviders[0]
+  );
   const [parameters, setParameters] = useState<{ [key: string]: string }>({});
   const [customConnectionString, setCustomConnectionString] = useState(initialConnectionString);
   const [connectionString, setConnectionString] = useState(initialConnectionString);
@@ -102,7 +225,9 @@ export const DatabaseConnectionDialog: React.FC<DatabaseConnectionDialogProps> =
       if (initialConnectionString) {
         setCustomConnectionString(initialConnectionString);
         setConnectionString(initialConnectionString);
-        setSelectedProvider(connectionProviders.find(p => p.name === 'custom') || connectionProviders[0]);
+        setSelectedProvider(
+          connectionProviders.find(p => p.name === 'custom') || connectionProviders[0]
+        );
       } else {
         // Reset to defaults
         setSelectedProvider(connectionProviders[0]);
@@ -139,7 +264,7 @@ export const DatabaseConnectionDialog: React.FC<DatabaseConnectionDialogProps> =
   const handleParameterChange = (paramName: string, value: string) => {
     setParameters(prev => ({
       ...prev,
-      [paramName]: value
+      [paramName]: value,
     }));
   };
 
@@ -156,20 +281,20 @@ export const DatabaseConnectionDialog: React.FC<DatabaseConnectionDialogProps> =
     try {
       const connection = vb6DatabaseService.createConnection(`test_${Date.now()}`);
       await connection.Open(connectionString);
-      
+
       // Get available tables if connection succeeds
       const tables = vb6DatabaseService.getAvailableTables();
       setAvailableTables(tables);
-      
+
       await connection.Close();
-      setTestResult({ 
-        success: true, 
-        message: `Connection successful! Found ${tables.length} tables.` 
+      setTestResult({
+        success: true,
+        message: `Connection successful! Found ${tables.length} tables.`,
       });
     } catch (error: any) {
-      setTestResult({ 
-        success: false, 
-        message: error.message || 'Connection failed' 
+      setTestResult({
+        success: false,
+        message: error.message || 'Connection failed',
       });
     } finally {
       setIsTestingConnection(false);
@@ -185,13 +310,13 @@ export const DatabaseConnectionDialog: React.FC<DatabaseConnectionDialogProps> =
     try {
       const connection = vb6DatabaseService.createConnection(`connection_${Date.now()}`);
       await connection.Open(connectionString);
-      
+
       onConnectionCreated?.(connection, connectionString);
       onClose();
     } catch (error: any) {
-      setTestResult({ 
-        success: false, 
-        message: error.message || 'Failed to create connection' 
+      setTestResult({
+        success: false,
+        message: error.message || 'Failed to create connection',
       });
     }
   };
@@ -207,10 +332,7 @@ export const DatabaseConnectionDialog: React.FC<DatabaseConnectionDialogProps> =
             <Database className="text-blue-500" size={24} />
             <h2 className="text-xl font-semibold text-gray-800">Database Connection</h2>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -255,7 +377,7 @@ export const DatabaseConnectionDialog: React.FC<DatabaseConnectionDialogProps> =
                     <input
                       type={param.type === 'file' ? 'text' : param.type}
                       value={parameters[param.name] || ''}
-                      onChange={(e) => handleParameterChange(param.name, e.target.value)}
+                      onChange={e => handleParameterChange(param.name, e.target.value)}
                       placeholder={param.placeholder}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required={param.required}
@@ -277,7 +399,7 @@ export const DatabaseConnectionDialog: React.FC<DatabaseConnectionDialogProps> =
               </label>
               <textarea
                 value={customConnectionString}
-                onChange={(e) => setCustomConnectionString(e.target.value)}
+                onChange={e => setCustomConnectionString(e.target.value)}
                 placeholder="Enter your custom connection string..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
                 rows={3}
@@ -300,7 +422,9 @@ export const DatabaseConnectionDialog: React.FC<DatabaseConnectionDialogProps> =
               </button>
             </div>
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-              <code className="text-xs text-gray-700 break-all">{connectionString || 'No connection string generated'}</code>
+              <code className="text-xs text-gray-700 break-all">
+                {connectionString || 'No connection string generated'}
+              </code>
             </div>
           </div>
 
@@ -313,10 +437,12 @@ export const DatabaseConnectionDialog: React.FC<DatabaseConnectionDialogProps> =
               </h3>
               <div className="space-y-3 text-xs text-blue-700">
                 <div>
-                  <strong>Connection Timeout:</strong> Time to wait while trying to establish a connection (default: 15 seconds)
+                  <strong>Connection Timeout:</strong> Time to wait while trying to establish a
+                  connection (default: 15 seconds)
                 </div>
                 <div>
-                  <strong>Command Timeout:</strong> Time to wait for a command to execute (default: 30 seconds)
+                  <strong>Command Timeout:</strong> Time to wait for a command to execute (default:
+                  30 seconds)
                 </div>
                 <div>
                   <strong>Provider:</strong> The OLE DB provider to use for the connection
@@ -347,11 +473,13 @@ export const DatabaseConnectionDialog: React.FC<DatabaseConnectionDialogProps> =
 
             {/* Test Result */}
             {testResult && (
-              <div className={`mt-3 p-3 rounded-lg flex items-start gap-2 ${
-                testResult.success 
-                  ? 'bg-green-50 border border-green-200 text-green-700' 
-                  : 'bg-red-50 border border-red-200 text-red-700'
-              }`}>
+              <div
+                className={`mt-3 p-3 rounded-lg flex items-start gap-2 ${
+                  testResult.success
+                    ? 'bg-green-50 border border-green-200 text-green-700'
+                    : 'bg-red-50 border border-red-200 text-red-700'
+                }`}
+              >
                 {testResult.success ? (
                   <CheckCircle size={16} className="mt-0.5 flex-shrink-0" />
                 ) : (
@@ -359,7 +487,7 @@ export const DatabaseConnectionDialog: React.FC<DatabaseConnectionDialogProps> =
                 )}
                 <div className="flex-1">
                   <p className="text-sm">{testResult.message}</p>
-                  
+
                   {/* Available Tables */}
                   {testResult.success && availableTables.length > 0 && (
                     <div className="mt-2">
@@ -382,7 +510,9 @@ export const DatabaseConnectionDialog: React.FC<DatabaseConnectionDialogProps> =
         {/* Footer */}
         <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
           <div className="text-sm text-gray-600">
-            {testResult?.success ? 'Connection verified successfully' : 'Test the connection before proceeding'}
+            {testResult?.success
+              ? 'Connection verified successfully'
+              : 'Test the connection before proceeding'}
           </div>
           <div className="flex gap-3">
             <button

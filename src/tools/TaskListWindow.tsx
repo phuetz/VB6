@@ -12,14 +12,14 @@ export enum TaskType {
   OPTIMIZE = 'OPTIMIZE',
   Error = 'Error',
   Warning = 'Warning',
-  Custom = 'Custom'
+  Custom = 'Custom',
 }
 
 export enum TaskPriority {
   Critical = 'Critical',
   High = 'High',
   Medium = 'Medium',
-  Low = 'Low'
+  Low = 'Low',
 }
 
 export enum TaskStatus {
@@ -27,7 +27,7 @@ export enum TaskStatus {
   InProgress = 'InProgress',
   Completed = 'Completed',
   Cancelled = 'Cancelled',
-  OnHold = 'OnHold'
+  OnHold = 'OnHold',
 }
 
 export enum TaskCategory {
@@ -38,7 +38,7 @@ export enum TaskCategory {
   Performance = 'Performance',
   Security = 'Security',
   UI = 'UI',
-  Database = 'Database'
+  Database = 'Database',
 }
 
 export interface TaskItem {
@@ -110,7 +110,7 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
   onDeleteTask,
   onCreateTask,
   onScanFiles,
-  onExportTasks
+  onExportTasks,
 }) => {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
@@ -135,7 +135,7 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
     showLineNumbers: true,
     showCategories: true,
     showAssignee: true,
-    showDueDates: true
+    showDueDates: true,
   });
   const [isScanning, setIsScanning] = useState(false);
   const [showNewTaskDialog, setShowNewTaskDialog] = useState(false);
@@ -149,10 +149,10 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
     description: '',
     assignedTo: currentUser,
     dueDate: undefined,
-    tags: []
+    tags: [],
   });
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
-  
+
   const eventEmitter = useRef(new EventEmitter());
   const scanTimer = useRef<NodeJS.Timeout>();
 
@@ -183,12 +183,12 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
             id: 'comment1',
             author: currentUser,
             date: new Date(Date.now() - 86400000),
-            comment: 'Need to handle SQL exceptions properly'
-          }
+            comment: 'Need to handle SQL exceptions properly',
+          },
         ],
         canEdit: true,
         canDelete: true,
-        isBookmarked: false
+        isBookmarked: false,
       },
       {
         id: 'task2',
@@ -212,7 +212,7 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
         comments: [],
         canEdit: true,
         canDelete: true,
-        isBookmarked: true
+        isBookmarked: true,
       },
       {
         id: 'task3',
@@ -236,12 +236,12 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
             id: 'comment2',
             author: 'Bob Wilson',
             date: new Date(Date.now() - 2 * 86400000),
-            comment: 'Might be related to focus issues'
-          }
+            comment: 'Might be related to focus issues',
+          },
         ],
         canEdit: true,
         canDelete: true,
-        isBookmarked: false
+        isBookmarked: false,
       },
       {
         id: 'task4',
@@ -266,12 +266,12 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
             id: 'comment3',
             author: currentUser,
             date: new Date(Date.now() - 86400000),
-            comment: 'Completed optimization, performance improved by 60%'
-          }
+            comment: 'Completed optimization, performance improved by 60%',
+          },
         ],
         canEdit: true,
         canDelete: true,
-        isBookmarked: false
+        isBookmarked: false,
       },
       {
         id: 'task5',
@@ -294,8 +294,8 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
         comments: [],
         canEdit: true,
         canDelete: true,
-        isBookmarked: false
-      }
+        isBookmarked: false,
+      },
     ];
 
     setTasks(sampleTasks);
@@ -352,7 +352,7 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
               comments: [],
               canEdit: true,
               canDelete: true,
-              isBookmarked: false
+              isBookmarked: false,
             };
             setTasks(prev => [...prev, newTask]);
           }
@@ -385,10 +385,12 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
       // Apply search filter
       if (searchText) {
         const searchLower = searchText.toLowerCase();
-        return task.title.toLowerCase().includes(searchLower) ||
-               task.description.toLowerCase().includes(searchLower) ||
-               task.fileName.toLowerCase().includes(searchLower) ||
-               task.tags.some(tag => tag.toLowerCase().includes(searchLower));
+        return (
+          task.title.toLowerCase().includes(searchLower) ||
+          task.description.toLowerCase().includes(searchLower) ||
+          task.fileName.toLowerCase().includes(searchLower) ||
+          task.tags.some(tag => tag.toLowerCase().includes(searchLower))
+        );
       }
 
       return true;
@@ -397,7 +399,7 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
     // Sort tasks
     filtered.sort((a, b) => {
       let comparison = 0;
-      
+
       switch (settings.sortBy) {
         case 'priority': {
           const priorityOrder = { Critical: 4, High: 3, Medium: 2, Low: 1 };
@@ -434,14 +436,17 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
     }
 
     const groupKey = settings.groupByFile ? 'fileName' : 'category';
-    return processedTasks.reduce((groups, task) => {
-      const key = task[groupKey];
-      if (!groups[key]) {
-        groups[key] = [];
-      }
-      groups[key].push(task);
-      return groups;
-    }, {} as Record<string, TaskItem[]>);
+    return processedTasks.reduce(
+      (groups, task) => {
+        const key = task[groupKey];
+        if (!groups[key]) {
+          groups[key] = [];
+        }
+        groups[key].push(task);
+        return groups;
+      },
+      {} as Record<string, TaskItem[]>
+    );
   }, [processedTasks, settings.groupByFile, settings.groupByCategory]);
 
   // Create new task
@@ -460,7 +465,7 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
         comments: [],
         canEdit: true,
         canDelete: true,
-        isBookmarked: false
+        isBookmarked: false,
       };
 
       if (onCreateTask) {
@@ -480,7 +485,7 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
         title: '',
         description: '',
         assignedTo: currentUser,
-        tags: []
+        tags: [],
       });
       setShowNewTaskDialog(false);
     } catch (error) {
@@ -489,37 +494,43 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
   }, [newTask, currentUser, onCreateTask]);
 
   // Update task
-  const updateTask = useCallback(async (task: TaskItem) => {
-    try {
-      if (onUpdateTask) {
-        const success = await onUpdateTask(task);
-        if (!success) return;
-      }
+  const updateTask = useCallback(
+    async (task: TaskItem) => {
+      try {
+        if (onUpdateTask) {
+          const success = await onUpdateTask(task);
+          if (!success) return;
+        }
 
-      setTasks(prev => prev.map(t => 
-        t.id === task.id ? { ...task, modifiedDate: new Date() } : t
-      ));
-    } catch (error) {
-      console.error('Failed to update task:', error);
-    }
-  }, [onUpdateTask]);
+        setTasks(prev =>
+          prev.map(t => (t.id === task.id ? { ...task, modifiedDate: new Date() } : t))
+        );
+      } catch (error) {
+        console.error('Failed to update task:', error);
+      }
+    },
+    [onUpdateTask]
+  );
 
   // Delete task
-  const deleteTask = useCallback(async (taskId: string) => {
-    try {
-      if (onDeleteTask) {
-        const success = await onDeleteTask(taskId);
-        if (!success) return;
-      }
+  const deleteTask = useCallback(
+    async (taskId: string) => {
+      try {
+        if (onDeleteTask) {
+          const success = await onDeleteTask(taskId);
+          if (!success) return;
+        }
 
-      setTasks(prev => prev.filter(t => t.id !== taskId));
-      if (selectedTask?.id === taskId) {
-        setSelectedTask(null);
+        setTasks(prev => prev.filter(t => t.id !== taskId));
+        if (selectedTask?.id === taskId) {
+          setSelectedTask(null);
+        }
+      } catch (error) {
+        console.error('Failed to delete task:', error);
       }
-    } catch (error) {
-      console.error('Failed to delete task:', error);
-    }
-  }, [onDeleteTask, selectedTask]);
+    },
+    [onDeleteTask, selectedTask]
+  );
 
   // Get task priority color
   const getPriorityColor = (priority: TaskPriority): string => {
@@ -580,7 +591,8 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
   // Render task row
   const renderTask = (task: TaskItem): React.ReactNode => {
     const isSelected = selectedTask?.id === task.id;
-    const isOverdue = task.dueDate && task.dueDate < new Date() && task.status !== TaskStatus.Completed;
+    const isOverdue =
+      task.dueDate && task.dueDate < new Date() && task.status !== TaskStatus.Completed;
 
     return (
       <div
@@ -596,7 +608,7 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
       >
         {/* Bookmark */}
         <button
-          onClick={(e) => {
+          onClick={e => {
             e.stopPropagation();
             updateTask({ ...task, isBookmarked: !task.isBookmarked });
           }}
@@ -609,35 +621,29 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
         <span className="w-6 text-center">{getTaskTypeIcon(task.type)}</span>
 
         {/* Priority */}
-        <div className={`w-16 text-xs px-1 py-0.5 rounded text-center ${getPriorityColor(task.priority)}`}>
+        <div
+          className={`w-16 text-xs px-1 py-0.5 rounded text-center ${getPriorityColor(task.priority)}`}
+        >
           {task.priority}
         </div>
 
         {/* Title */}
-        <div className="w-64 font-medium text-gray-800 truncate">
-          {task.title}
-        </div>
+        <div className="w-64 font-medium text-gray-800 truncate">{task.title}</div>
 
         {/* File and Line */}
         <div className="w-32 text-sm text-gray-600 truncate">
           {task.fileName}
-          {settings.showLineNumbers && (
-            <span className="text-gray-400">:{task.lineNumber}</span>
-          )}
+          {settings.showLineNumbers && <span className="text-gray-400">:{task.lineNumber}</span>}
         </div>
 
         {/* Category */}
         {settings.showCategories && (
-          <div className="w-24 text-xs text-gray-500 truncate">
-            {task.category}
-          </div>
+          <div className="w-24 text-xs text-gray-500 truncate">{task.category}</div>
         )}
 
         {/* Assignee */}
         {settings.showAssignee && (
-          <div className="w-24 text-sm text-gray-600 truncate">
-            {task.assignedTo}
-          </div>
+          <div className="w-24 text-sm text-gray-600 truncate">{task.assignedTo}</div>
         )}
 
         {/* Status */}
@@ -647,7 +653,9 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
 
         {/* Due Date */}
         {settings.showDueDates && (
-          <div className={`w-20 text-xs ${isOverdue ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
+          <div
+            className={`w-20 text-xs ${isOverdue ? 'text-red-600 font-medium' : 'text-gray-500'}`}
+          >
             {task.dueDate ? task.dueDate.toLocaleDateString() : '-'}
           </div>
         )}
@@ -662,23 +670,26 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
         {/* Actions */}
         <div className="w-16 flex gap-1">
           <button
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               // Toggle status between Open and Completed
-              const newStatus = task.status === TaskStatus.Completed ? TaskStatus.Open : TaskStatus.Completed;
+              const newStatus =
+                task.status === TaskStatus.Completed ? TaskStatus.Open : TaskStatus.Completed;
               updateTask({ ...task, status: newStatus });
             }}
             className={`text-xs px-1 py-0.5 rounded ${
-              task.status === TaskStatus.Completed ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
+              task.status === TaskStatus.Completed
+                ? 'bg-green-500 text-white'
+                : 'bg-gray-200 text-gray-700'
             }`}
             title={task.status === TaskStatus.Completed ? 'Reopen' : 'Complete'}
           >
             ✓
           </button>
-          
+
           {task.canDelete && (
             <button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 deleteTask(task.id);
               }}
@@ -705,9 +716,7 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
       <div className="flex items-center justify-between p-2 bg-gray-100 border-b border-gray-300">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-medium text-gray-800">Task List</h3>
-          {isScanning && (
-            <div className="text-xs text-blue-600 animate-pulse">Scanning...</div>
-          )}
+          {isScanning && <div className="text-xs text-blue-600 animate-pulse">Scanning...</div>}
         </div>
 
         <div className="flex items-center gap-1">
@@ -715,10 +724,10 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
             type="text"
             placeholder="Search tasks..."
             value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+            onChange={e => setSearchText(e.target.value)}
             className="px-2 py-1 text-xs border border-gray-300 rounded w-32"
           />
-          
+
           <button
             onClick={() => setShowNewTaskDialog(true)}
             className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
@@ -726,7 +735,7 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
           >
             ➕
           </button>
-          
+
           <button
             onClick={scanForTasks}
             disabled={isScanning}
@@ -735,7 +744,7 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
           >
             🔍
           </button>
-          
+
           <button
             onClick={() => onExportTasks?.(processedTasks, 'CSV')}
             className="px-2 py-1 text-xs bg-purple-500 text-white rounded hover:bg-purple-600"
@@ -743,7 +752,7 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
           >
             📊
           </button>
-          
+
           <button
             onClick={() => setShowSettings(!showSettings)}
             className="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
@@ -758,45 +767,53 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
       <div className="flex items-center gap-2 p-2 bg-gray-50 border-b border-gray-200 text-xs">
         <select
           value={filterType}
-          onChange={(e) => setFilterType(e.target.value as TaskType | 'All')}
+          onChange={e => setFilterType(e.target.value as TaskType | 'All')}
           className="px-2 py-1 border border-gray-300 rounded"
         >
           <option value="All">All Types</option>
           {Object.values(TaskType).map(type => (
-            <option key={type} value={type}>{type}</option>
+            <option key={type} value={type}>
+              {type}
+            </option>
           ))}
         </select>
 
         <select
           value={filterPriority}
-          onChange={(e) => setFilterPriority(e.target.value as TaskPriority | 'All')}
+          onChange={e => setFilterPriority(e.target.value as TaskPriority | 'All')}
           className="px-2 py-1 border border-gray-300 rounded"
         >
           <option value="All">All Priorities</option>
           {Object.values(TaskPriority).map(priority => (
-            <option key={priority} value={priority}>{priority}</option>
+            <option key={priority} value={priority}>
+              {priority}
+            </option>
           ))}
         </select>
 
         <select
           value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value as TaskStatus | 'All')}
+          onChange={e => setFilterStatus(e.target.value as TaskStatus | 'All')}
           className="px-2 py-1 border border-gray-300 rounded"
         >
           <option value="All">All Status</option>
           {Object.values(TaskStatus).map(status => (
-            <option key={status} value={status}>{status}</option>
+            <option key={status} value={status}>
+              {status}
+            </option>
           ))}
         </select>
 
         <select
           value={filterAssignee}
-          onChange={(e) => setFilterAssignee(e.target.value)}
+          onChange={e => setFilterAssignee(e.target.value)}
           className="px-2 py-1 border border-gray-300 rounded"
         >
           <option value="All">All Assignees</option>
           {uniqueAssignees.map(assignee => (
-            <option key={assignee} value={assignee}>{assignee}</option>
+            <option key={assignee} value={assignee}>
+              {assignee}
+            </option>
           ))}
         </select>
 
@@ -805,16 +822,16 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
             <input
               type="checkbox"
               checked={settings.showCompleted}
-              onChange={(e) => setSettings(prev => ({ ...prev, showCompleted: e.target.checked }))}
+              onChange={e => setSettings(prev => ({ ...prev, showCompleted: e.target.checked }))}
             />
             Completed
           </label>
-          
+
           <label className="flex items-center gap-1">
             <input
               type="checkbox"
               checked={settings.groupByFile}
-              onChange={(e) => setSettings(prev => ({ ...prev, groupByFile: e.target.checked }))}
+              onChange={e => setSettings(prev => ({ ...prev, groupByFile: e.target.checked }))}
             />
             Group by File
           </label>
@@ -822,7 +839,7 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
       </div>
 
       {/* Column Headers */}
-      <div 
+      <div
         className="flex items-center py-2 px-2 bg-gray-200 border-b border-gray-300 text-xs font-medium text-gray-700"
         style={{ fontSize: `${settings.fontSize}px` }}
       >
@@ -873,7 +890,9 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
             <div className="text-center">
               <div className="text-4xl mb-4">📋</div>
               <p className="text-lg">No tasks found</p>
-              <p className="text-sm mt-2">Create a new task or scan project files for TODO comments</p>
+              <p className="text-sm mt-2">
+                Create a new task or scan project files for TODO comments
+              </p>
             </div>
           </div>
         )}
@@ -884,56 +903,66 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96 max-h-96 overflow-y-auto">
             <h3 className="text-lg font-medium mb-4">Create New Task</h3>
-            
+
             <div className="space-y-4">
               <input
                 type="text"
                 placeholder="Task title"
                 value={newTask.title || ''}
-                onChange={(e) => setNewTask(prev => ({ ...prev, title: e.target.value }))}
+                onChange={e => setNewTask(prev => ({ ...prev, title: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded"
               />
-              
+
               <textarea
                 placeholder="Description"
                 value={newTask.description || ''}
-                onChange={(e) => setNewTask(prev => ({ ...prev, description: e.target.value }))}
+                onChange={e => setNewTask(prev => ({ ...prev, description: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded h-20"
               />
-              
+
               <div className="grid grid-cols-2 gap-2">
                 <select
                   value={newTask.type}
-                  onChange={(e) => setNewTask(prev => ({ ...prev, type: e.target.value as TaskType }))}
+                  onChange={e =>
+                    setNewTask(prev => ({ ...prev, type: e.target.value as TaskType }))
+                  }
                   className="px-3 py-2 border border-gray-300 rounded"
                 >
                   {Object.values(TaskType).map(type => (
-                    <option key={type} value={type}>{type}</option>
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
                   ))}
                 </select>
-                
+
                 <select
                   value={newTask.priority}
-                  onChange={(e) => setNewTask(prev => ({ ...prev, priority: e.target.value as TaskPriority }))}
+                  onChange={e =>
+                    setNewTask(prev => ({ ...prev, priority: e.target.value as TaskPriority }))
+                  }
                   className="px-3 py-2 border border-gray-300 rounded"
                 >
                   {Object.values(TaskPriority).map(priority => (
-                    <option key={priority} value={priority}>{priority}</option>
+                    <option key={priority} value={priority}>
+                      {priority}
+                    </option>
                   ))}
                 </select>
               </div>
-              
+
               <input
                 type="date"
                 value={newTask.dueDate ? newTask.dueDate.toISOString().split('T')[0] : ''}
-                onChange={(e) => setNewTask(prev => ({ 
-                  ...prev, 
-                  dueDate: e.target.value ? new Date(e.target.value) : undefined 
-                }))}
+                onChange={e =>
+                  setNewTask(prev => ({
+                    ...prev,
+                    dueDate: e.target.value ? new Date(e.target.value) : undefined,
+                  }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded"
               />
             </div>
-            
+
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => setShowNewTaskDialog(false)}
@@ -956,11 +985,24 @@ export const TaskListWindow: React.FC<TaskListWindowProps> = ({
       {/* Status Bar */}
       <div className="flex items-center justify-between p-1 bg-gray-100 border-t border-gray-300 text-xs text-gray-600">
         <div className="flex items-center gap-4">
-          <span>Tasks: {processedTasks.length}/{tasks.length}</span>
+          <span>
+            Tasks: {processedTasks.length}/{tasks.length}
+          </span>
           <span>Open: {processedTasks.filter(t => t.status === TaskStatus.Open).length}</span>
-          <span>In Progress: {processedTasks.filter(t => t.status === TaskStatus.InProgress).length}</span>
-          <span>Completed: {processedTasks.filter(t => t.status === TaskStatus.Completed).length}</span>
-          <span>Overdue: {processedTasks.filter(t => t.dueDate && t.dueDate < new Date() && t.status !== TaskStatus.Completed).length}</span>
+          <span>
+            In Progress: {processedTasks.filter(t => t.status === TaskStatus.InProgress).length}
+          </span>
+          <span>
+            Completed: {processedTasks.filter(t => t.status === TaskStatus.Completed).length}
+          </span>
+          <span>
+            Overdue:{' '}
+            {
+              processedTasks.filter(
+                t => t.dueDate && t.dueDate < new Date() && t.status !== TaskStatus.Completed
+              ).length
+            }
+          </span>
         </div>
 
         <div className="flex items-center gap-2">

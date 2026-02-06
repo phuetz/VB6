@@ -3,7 +3,12 @@
  * Integrates with VB6 transpiler and runtime for seamless API access
  */
 
-import { VB6API, VB6APIFunction, DeclareFunction, VB6Constants } from '../runtime/VB6APIDeclarations';
+import {
+  VB6API,
+  VB6APIFunction,
+  DeclareFunction,
+  VB6Constants,
+} from '../runtime/VB6APIDeclarations';
 import { createLogger } from './LoggingService';
 
 const logger = createLogger('APIManager');
@@ -36,10 +41,10 @@ export class VB6APIManager {
   parseCodeForAPIs(code: string): APIDeclaration[] {
     const declarations: APIDeclaration[] = [];
     const lines = code.split('\n');
-    
+
     for (let i = 0; i < lines.length; i++) {
       let line = lines[i].trim();
-      
+
       // Handle multi-line declarations
       if (line.includes('Declare') && !line.includes('(')) {
         // Look for continuation on next lines
@@ -49,7 +54,7 @@ export class VB6APIManager {
           j++;
         }
       }
-      
+
       if (this.isDeclareStatement(line)) {
         const declaration = this.parseDeclaration(line);
         if (declaration) {
@@ -58,7 +63,7 @@ export class VB6APIManager {
         }
       }
     }
-    
+
     return declarations;
   }
 
@@ -70,13 +75,14 @@ export class VB6APIManager {
   // Parse individual declaration
   private parseDeclaration(line: string): APIDeclaration | null {
     try {
-      const declareRegex = /(?:Private\s+|Public\s+)?Declare\s+(Function|Sub)\s+(\w+)\s+Lib\s+"([^"]+)"(?:\s+Alias\s+"([^"]+)")?\s*\(([^)]*)\)(?:\s+As\s+(\w+))?/i;
+      const declareRegex =
+        /(?:Private\s+|Public\s+)?Declare\s+(Function|Sub)\s+(\w+)\s+Lib\s+"([^"]+)"(?:\s+Alias\s+"([^"]+)")?\s*\(([^)]*)\)(?:\s+As\s+(\w+))?/i;
       const match = line.match(declareRegex);
-      
+
       if (!match) return null;
-      
+
       const [fullMatch, funcType, funcName, library, alias, paramStr, returnType] = match;
-      
+
       // Parse parameters
       const parameters: string[] = [];
       if (paramStr.trim()) {
@@ -85,7 +91,7 @@ export class VB6APIManager {
           parameters.push(param.trim());
         }
       }
-      
+
       const declaration: APIDeclaration = {
         id: `${library.toLowerCase()}_${(alias || funcName).toLowerCase()}`,
         name: funcName,
@@ -94,11 +100,10 @@ export class VB6APIManager {
         declaration: line,
         parameters,
         returnType: returnType || 'void',
-        isRegistered: false
+        isRegistered: false,
       };
-      
-      return declaration;
 
+      return declaration;
     } catch (error) {
       logger.error('Error parsing API declaration:', error);
       return null;
@@ -109,12 +114,14 @@ export class VB6APIManager {
   private registerDeclaration(declaration: APIDeclaration): void {
     this.declarations.set(declaration.id, declaration);
     this.codeAPIs.set(declaration.name.toLowerCase(), declaration.declaration);
-    
+
     // Register with VB6API system
     const success = DeclareFunction(declaration.declaration);
     declaration.isRegistered = success;
 
-    logger.info(`API Declaration registered: ${declaration.name} from ${declaration.library} - ${success ? 'Success' : 'Failed'}`);
+    logger.info(
+      `API Declaration registered: ${declaration.name} from ${declaration.library} - ${success ? 'Success' : 'Failed'}`
+    );
   }
 
   // Get all registered declarations
@@ -140,13 +147,12 @@ export class VB6APIManager {
         logger.warn(`API function ${functionName} not declared or not registered`);
         return null;
       }
-      
+
       // Validate parameters
       const validatedArgs = this.validateParameters(declaration, args);
-      
+
       // Call through VB6API system
       return VB6API.callAPI(functionName, ...validatedArgs);
-
     } catch (error) {
       logger.error(`Error calling API ${functionName}:`, error);
       return null;
@@ -156,40 +162,40 @@ export class VB6APIManager {
   // Validate and convert parameters
   private validateParameters(declaration: APIDeclaration, args: any[]): any[] {
     const validatedArgs: any[] = [];
-    
+
     for (let i = 0; i < declaration.parameters.length; i++) {
       const param = declaration.parameters[i];
       const arg = args[i];
-      
+
       // Parse parameter info
       const paramMatch = param.match(/(ByVal|ByRef)?\s*(\w+)\s+As\s+(\w+)(?:\s*=\s*(.+))?/i);
       if (!paramMatch) {
         validatedArgs.push(arg);
         continue;
       }
-      
+
       const [, byRefVal, paramName, paramType, defaultVal] = paramMatch;
       const isByRef = byRefVal?.toLowerCase() === 'byref';
       const hasDefault = !!defaultVal;
-      
+
       let validatedArg = arg;
-      
+
       // Handle missing optional parameters
       if (validatedArg === undefined && hasDefault) {
         validatedArg = this.parseDefaultValue(defaultVal, paramType);
       }
-      
+
       // Handle ByRef parameters
       if (isByRef && typeof validatedArg !== 'object') {
         validatedArg = { value: validatedArg };
       }
-      
+
       // Type conversion
       validatedArg = this.convertType(validatedArg, paramType, isByRef);
-      
+
       validatedArgs.push(validatedArg);
     }
-    
+
     return validatedArgs;
   }
 
@@ -198,7 +204,7 @@ export class VB6APIManager {
     if (isByRef) {
       return value; // ByRef parameters are handled as objects
     }
-    
+
     switch (targetType.toLowerCase()) {
       case 'long':
       case 'integer':
@@ -222,7 +228,7 @@ export class VB6APIManager {
   // Parse default parameter value
   private parseDefaultValue(defaultVal: string, paramType: string): any {
     const trimmed = defaultVal.trim();
-    
+
     switch (paramType.toLowerCase()) {
       case 'long':
       case 'integer':
@@ -244,19 +250,19 @@ export class VB6APIManager {
   // Generate code completion suggestions for API functions
   getAPICompletions(): { name: string; signature: string; description: string }[] {
     const completions: { name: string; signature: string; description: string }[] = [];
-    
+
     for (const [, declaration] of this.declarations) {
       const params = declaration.parameters.join(', ');
       const signature = `${declaration.name}(${params})${declaration.returnType !== 'void' ? ` As ${declaration.returnType}` : ''}`;
       const description = `API function from ${declaration.library}.dll`;
-      
+
       completions.push({
         name: declaration.name,
         signature,
-        description
+        description,
       });
     }
-    
+
     return completions;
   }
 
@@ -264,10 +270,10 @@ export class VB6APIManager {
   private initializeGlobalAPIs(): void {
     // Make VB6 constants globally available
     const globalAny = globalThis as any;
-    
+
     // MessageBox constants
     Object.assign(globalAny, VB6Constants);
-    
+
     // Common API declarations that are frequently used
     const commonAPIs = [
       'Declare Function GetTickCount Lib "kernel32" () As Long',
@@ -277,9 +283,9 @@ export class VB6APIManager {
       'Declare Function ShellExecute Lib "shell32" Alias "ShellExecuteA" (ByVal hwnd As Long, ByVal lpOperation As String, ByVal lpFile As String, ByVal lpParameters As String, ByVal lpDirectory As String, ByVal nShowCmd As Long) As Long',
       'Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)',
       'Declare Function GetComputerName Lib "kernel32" Alias "GetComputerNameA" (ByVal lpBuffer As String, nSize As Long) As Long',
-      'Declare Function GetUserName Lib "kernel32" Alias "GetUserNameA" (ByVal lpBuffer As String, nSize As Long) As Long'
+      'Declare Function GetUserName Lib "kernel32" Alias "GetUserNameA" (ByVal lpBuffer As String, nSize As Long) As Long',
     ];
-    
+
     // Register common APIs
     for (const apiDecl of commonAPIs) {
       const declaration = this.parseDeclaration(apiDecl);
@@ -287,10 +293,11 @@ export class VB6APIManager {
         this.registerDeclaration(declaration);
       }
     }
-    
+
     // Make API manager globally available
     globalAny.VB6APIManager = this;
-    globalAny.CallAPI = (functionName: string, ...args: any[]) => this.callAPI(functionName, ...args);
+    globalAny.CallAPI = (functionName: string, ...args: any[]) =>
+      this.callAPI(functionName, ...args);
 
     logger.info('VB6 API Manager initialized with', this.declarations.size, 'API declarations');
   }
@@ -299,61 +306,66 @@ export class VB6APIManager {
   processSourceCode(sourceCode: string): string {
     // Find and process all Declare Function statements
     const declarations = this.parseCodeForAPIs(sourceCode);
-    
+
     let processedCode = sourceCode;
-    
+
     // Replace Declare Function statements with placeholder comments
     for (const declaration of declarations) {
       const escapedDeclaration = declaration.declaration.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const regex = new RegExp(`^\\s*${escapedDeclaration}\\s*$`, 'gm');
-      processedCode = processedCode.replace(regex, `// API Declaration: ${declaration.name} from ${declaration.library}`);
+      processedCode = processedCode.replace(
+        regex,
+        `// API Declaration: ${declaration.name} from ${declaration.library}`
+      );
     }
-    
+
     return processedCode;
   }
 
   // Generate TypeScript definitions for declared APIs
   generateTypeDefinitions(): string {
     let definitions = '// VB6 API Type Definitions\n\n';
-    
+
     for (const [, declaration] of this.declarations) {
-      const params = declaration.parameters.map(param => {
-        const paramMatch = param.match(/(ByVal|ByRef)?\s*(\w+)\s+As\s+(\w+)(?:\s*=\s*(.+))?/i);
-        if (paramMatch) {
-          const [, byRefVal, paramName, paramType, defaultVal] = paramMatch;
-          const isByRef = byRefVal?.toLowerCase() === 'byref';
-          const isOptional = !!defaultVal;
-          const tsType = this.vb6TypeToTS(paramType);
-          const paramDecl = `${paramName}${isOptional ? '?' : ''}: ${isByRef ? `{value: ${tsType}}` : tsType}`;
-          return paramDecl;
-        }
-        return param;
-      }).join(', ');
-      
+      const params = declaration.parameters
+        .map(param => {
+          const paramMatch = param.match(/(ByVal|ByRef)?\s*(\w+)\s+As\s+(\w+)(?:\s*=\s*(.+))?/i);
+          if (paramMatch) {
+            const [, byRefVal, paramName, paramType, defaultVal] = paramMatch;
+            const isByRef = byRefVal?.toLowerCase() === 'byref';
+            const isOptional = !!defaultVal;
+            const tsType = this.vb6TypeToTS(paramType);
+            const paramDecl = `${paramName}${isOptional ? '?' : ''}: ${isByRef ? `{value: ${tsType}}` : tsType}`;
+            return paramDecl;
+          }
+          return param;
+        })
+        .join(', ');
+
       const returnType = this.vb6TypeToTS(declaration.returnType);
       definitions += `declare function ${declaration.name}(${params}): ${returnType};\n`;
     }
-    
+
     return definitions;
   }
 
   // Convert VB6 type to TypeScript type
   private vb6TypeToTS(vb6Type: string): string {
     const typeMap: { [key: string]: string } = {
-      'Long': 'number',
-      'Integer': 'number',
-      'String': 'string',
-      'Boolean': 'boolean',
-      'Byte': 'number',
-      'Double': 'number',
-      'Single': 'number',
-      'Currency': 'number',
-      'Date': 'Date',
-      'Variant': 'any',
-      'Object': 'any',
-      'void': 'void'
+      Long: 'number',
+      Integer: 'number',
+      String: 'string',
+      Boolean: 'boolean',
+      Byte: 'number',
+      Double: 'number',
+      Single: 'number',
+      Currency: 'number',
+      Date: 'Date',
+      Variant: 'any',
+      Object: 'any',
+      void: 'void',
     };
-    
+
     return typeMap[vb6Type] || 'any';
   }
 

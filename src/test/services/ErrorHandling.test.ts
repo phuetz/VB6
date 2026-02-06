@@ -479,8 +479,10 @@ describe('Error Handling - Data Validation Errors', () => {
     ];
 
     conversionErrors.forEach(error => {
-      const conversionError = new Error(`Cannot convert ${error.value} from ${error.from} to ${error.to}`);
-      
+      const conversionError = new Error(
+        `Cannot convert ${error.value} from ${error.from} to ${error.to}`
+      );
+
       const report = errorHandler.handleError(conversionError, {
         component: 'VB6Runtime',
         action: 'typeConversion',
@@ -517,8 +519,8 @@ describe('Error Handling - Recovery Strategies', () => {
     const strategies: RecoveryStrategy[] = [
       {
         name: 'Memory Cleanup',
-        condition: (error) => error.name === 'OutOfMemoryError',
-        action: async (error) => {
+        condition: error => error.name === 'OutOfMemoryError',
+        action: async error => {
           // Simulate memory cleanup
           return true;
         },
@@ -526,8 +528,8 @@ describe('Error Handling - Recovery Strategies', () => {
       },
       {
         name: 'Retry Operation',
-        condition: (error) => error.name === 'NetworkError',
-        action: async (error) => {
+        condition: error => error.name === 'NetworkError',
+        action: async error => {
           // Simulate retry
           return Math.random() > 0.5;
         },
@@ -535,8 +537,8 @@ describe('Error Handling - Recovery Strategies', () => {
       },
       {
         name: 'Fallback UI',
-        condition: (error) => error.name === 'RenderError',
-        action: async (error) => {
+        condition: error => error.name === 'RenderError',
+        action: async error => {
           // Simulate fallback rendering
           return true;
         },
@@ -637,7 +639,7 @@ describe('Error Handling - Recovery Strategies', () => {
     ];
 
     const monacoError = new Error('Monaco editor failed to load');
-    
+
     const degradationPlan = errorHandler.createDegradationPlan(monacoError, degradationStrategies);
 
     expect(degradationPlan).toMatchObject({
@@ -687,7 +689,7 @@ describe('Error Handling - Logging and Reporting', () => {
     ];
 
     errors.forEach(({ error, severity }) => {
-      errorHandler.handleError(error, { 
+      errorHandler.handleError(error, {
         component: 'TestComponent',
         severity: severity as any,
       });
@@ -991,7 +993,7 @@ function createErrorHandler(config: ErrorHandlerConfig) {
           return await operation();
         } catch (error) {
           lastError = error as Error;
-          
+
           if (attempt === maxRetries) {
             break;
           }
@@ -1057,22 +1059,22 @@ function createErrorHandler(config: ErrorHandlerConfig) {
 
           try {
             const result = operation();
-            
+
             // Success - reset failure count
             if (breaker.state === 'HALF_OPEN') {
               breaker.state = 'CLOSED';
             }
             breaker.failureCount = 0;
-            
+
             return { success: true, result };
           } catch (error) {
             breaker.failureCount++;
             breaker.lastFailureTime = Date.now();
-            
+
             if (breaker.failureCount >= breaker.options.failureThreshold) {
               breaker.state = 'OPEN';
             }
-            
+
             return { success: false, error };
           }
         },
@@ -1085,9 +1087,7 @@ function createErrorHandler(config: ErrorHandlerConfig) {
     },
 
     createDegradationPlan: (error: Error, strategies: any[]) => {
-      const applicableStrategies = strategies.filter(strategy => 
-        strategy.condition(error)
-      );
+      const applicableStrategies = strategies.filter(strategy => strategy.condition(error));
 
       return {
         disabledFeatures: applicableStrategies.map(s => s.feature),
@@ -1123,17 +1123,21 @@ function createErrorHandler(config: ErrorHandlerConfig) {
       recentErrors.forEach(error => {
         stats.errorsByType[error.type] = (stats.errorsByType[error.type] || 0) + 1;
         stats.errorsBySeverity[error.severity] = (stats.errorsBySeverity[error.severity] || 0) + 1;
-        
+
         if (error.context.component) {
-          stats.errorsByComponent[error.context.component] = (stats.errorsByComponent[error.context.component] || 0) + 1;
+          stats.errorsByComponent[error.context.component] =
+            (stats.errorsByComponent[error.context.component] || 0) + 1;
         }
       });
 
       // Find common errors
-      const errorMessages = recentErrors.reduce((acc, error) => {
-        acc[error.message] = (acc[error.message] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
+      const errorMessages = recentErrors.reduce(
+        (acc, error) => {
+          acc[error.message] = (acc[error.message] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
 
       stats.commonErrors = Object.entries(errorMessages)
         .filter(([, count]) => count > 1)
@@ -1145,12 +1149,12 @@ function createErrorHandler(config: ErrorHandlerConfig) {
 
     exportErrorLogs: (options: any = {}) => {
       const { format = 'json', includeStackTraces = false, dateRange } = options;
-      
+
       let filteredErrors = errorReports;
-      
+
       if (dateRange) {
-        filteredErrors = errorReports.filter(error => 
-          error.timestamp >= dateRange.start && error.timestamp <= dateRange.end
+        filteredErrors = errorReports.filter(
+          error => error.timestamp >= dateRange.start && error.timestamp <= dateRange.end
         );
       }
 
@@ -1221,9 +1225,7 @@ function createErrorHandler(config: ErrorHandlerConfig) {
   }
 
   function attemptRecovery(error: Error, report: ErrorReport) {
-    const applicableStrategies = recoveryStrategies.filter(strategy => 
-      strategy.condition(error)
-    );
+    const applicableStrategies = recoveryStrategies.filter(strategy => strategy.condition(error));
 
     for (const strategy of applicableStrategies) {
       try {
@@ -1249,7 +1251,7 @@ function createErrorHandler(config: ErrorHandlerConfig) {
 
   function logError(report: ErrorReport) {
     const logMessage = `[${report.type.toUpperCase()}] ${report.message}`;
-    
+
     switch (report.severity) {
       case 'critical':
         logger.error(logMessage, report);
@@ -1267,17 +1269,9 @@ function createErrorHandler(config: ErrorHandlerConfig) {
   }
 
   function isRetryableError(error: Error): boolean {
-    const retryablePatterns = [
-      'timeout',
-      'connection',
-      'network',
-      'temporary',
-      'unavailable',
-    ];
+    const retryablePatterns = ['timeout', 'connection', 'network', 'temporary', 'unavailable'];
 
-    return retryablePatterns.some(pattern => 
-      error.message.toLowerCase().includes(pattern)
-    );
+    return retryablePatterns.some(pattern => error.message.toLowerCase().includes(pattern));
   }
 
   function canRecoverFromComponentError(error: Error): boolean {
@@ -1287,8 +1281,6 @@ function createErrorHandler(config: ErrorHandlerConfig) {
       'Element type is invalid',
     ];
 
-    return recoverableErrors.some(pattern => 
-      error.message.includes(pattern)
-    );
+    return recoverableErrors.some(pattern => error.message.includes(pattern));
   }
 }

@@ -85,7 +85,7 @@ export class GitIntegrationService {
 
     try {
       const response = await fetch(`${this.baseUrl}/init`, {
-        method: 'POST'
+        method: 'POST',
       });
       return response.ok;
     } catch (error) {
@@ -124,7 +124,7 @@ export class GitIntegrationService {
       const response = await fetch(`${this.baseUrl}/stage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paths })
+        body: JSON.stringify({ paths }),
       });
       return response.ok;
     } catch (error) {
@@ -145,7 +145,7 @@ export class GitIntegrationService {
       const response = await fetch(`${this.baseUrl}/unstage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paths })
+        body: JSON.stringify({ paths }),
       });
       return response.ok;
     } catch (error) {
@@ -166,9 +166,9 @@ export class GitIntegrationService {
       const response = await fetch(`${this.baseUrl}/commit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, author, email })
+        body: JSON.stringify({ message, author, email }),
       });
-      
+
       if (!response.ok) throw new Error('Failed to commit');
 
       const result = await response.json();
@@ -227,7 +227,7 @@ export class GitIntegrationService {
       const response = await fetch(`${this.baseUrl}/branches`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, checkout })
+        body: JSON.stringify({ name, checkout }),
       });
       return response.ok;
     } catch (error) {
@@ -248,7 +248,7 @@ export class GitIntegrationService {
       const response = await fetch(`${this.baseUrl}/checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ branch })
+        body: JSON.stringify({ branch }),
       });
       return response.ok;
     } catch (error) {
@@ -269,9 +269,9 @@ export class GitIntegrationService {
       const response = await fetch(`${this.baseUrl}/merge`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ branch })
+        body: JSON.stringify({ branch }),
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
         return { success: false, conflicts: error.conflicts };
@@ -293,7 +293,9 @@ export class GitIntegrationService {
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}/diff?path=${encodeURIComponent(path)}&staged=${staged}`);
+      const response = await fetch(
+        `${this.baseUrl}/diff?path=${encodeURIComponent(path)}&staged=${staged}`
+      );
       if (!response.ok) throw new Error('Failed to get diff');
       return await response.json();
     } catch (error) {
@@ -332,7 +334,7 @@ export class GitIntegrationService {
       const response = await fetch(`${this.baseUrl}/remotes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, url })
+        body: JSON.stringify({ name, url }),
       });
       return response.ok;
     } catch (error) {
@@ -353,7 +355,7 @@ export class GitIntegrationService {
       const response = await fetch(`${this.baseUrl}/push`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ remote, branch })
+        body: JSON.stringify({ remote, branch }),
       });
       return response.ok;
     } catch (error) {
@@ -365,7 +367,10 @@ export class GitIntegrationService {
   /**
    * Pull from remote
    */
-  async pull(remote: string = 'origin', branch?: string): Promise<{ success: boolean; conflicts?: string[] }> {
+  async pull(
+    remote: string = 'origin',
+    branch?: string
+  ): Promise<{ success: boolean; conflicts?: string[] }> {
     if (this.isSimulated) {
       return { success: true };
     }
@@ -374,9 +379,9 @@ export class GitIntegrationService {
       const response = await fetch(`${this.baseUrl}/pull`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ remote, branch })
+        body: JSON.stringify({ remote, branch }),
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
         return { success: false, conflicts: error.conflicts };
@@ -401,7 +406,7 @@ export class GitIntegrationService {
       const response = await fetch(`${this.baseUrl}/clone`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, directory })
+        body: JSON.stringify({ url, directory }),
       });
       return response.ok;
     } catch (error) {
@@ -424,12 +429,10 @@ export class GitIntegrationService {
       behind: 0,
       staged: [
         { path: 'src/Form1.frm', status: 'modified' },
-        { path: 'src/Module1.bas', status: 'added' }
+        { path: 'src/Module1.bas', status: 'added' },
       ],
-      unstaged: [
-        { path: 'src/Form2.frm', status: 'modified' }
-      ],
-      untracked: ['src/Test.frm', 'docs/README.md']
+      unstaged: [{ path: 'src/Form2.frm', status: 'modified' }],
+      untracked: ['src/Test.frm', 'docs/README.md'],
     };
   }
 
@@ -461,7 +464,7 @@ export class GitIntegrationService {
       'Refactor code structure',
       'Add unit tests',
       'Fix memory leak',
-      'Update documentation'
+      'Update documentation',
     ];
 
     for (let i = skip; i < Math.min(skip + limit, 10); i++) {
@@ -470,7 +473,7 @@ export class GitIntegrationService {
         author: 'John Doe',
         email: 'john@example.com',
         date: new Date(Date.now() - i * 24 * 60 * 60 * 1000),
-        message: messages[i % messages.length]
+        message: messages[i % messages.length],
       });
     }
 
@@ -482,7 +485,7 @@ export class GitIntegrationService {
       { name: 'main', current: true },
       { name: 'develop', current: false },
       { name: 'feature/login', current: false },
-      { name: 'bugfix/memory-leak', current: false }
+      { name: 'bugfix/memory-leak', current: false },
     ];
   }
 
@@ -502,7 +505,7 @@ export class GitIntegrationService {
     if (Math.random() > 0.8) {
       return {
         success: false,
-        conflicts: ['src/Form1.frm', 'src/Module1.bas']
+        conflicts: ['src/Form1.frm', 'src/Module1.bas'],
       };
     }
     return { success: true };
@@ -525,17 +528,15 @@ export class GitIntegrationService {
             { type: 'add', content: '    Dim message As String', newLine: 11 },
             { type: 'add', content: '    message = "Hello, World!"', newLine: 12 },
             { type: 'add', content: '    MsgBox message', newLine: 13 },
-            { type: 'context', content: 'End Sub', oldLine: 12, newLine: 14 }
-          ]
-        }
-      ]
+            { type: 'context', content: 'End Sub', oldLine: 12, newLine: 14 },
+          ],
+        },
+      ],
     };
   }
 
   private simulateRemotes(): GitRemote[] {
-    return [
-      { name: 'origin', url: 'https://github.com/user/vb6-project.git', type: 'both' }
-    ];
+    return [{ name: 'origin', url: 'https://github.com/user/vb6-project.git', type: 'both' }];
   }
 
   private getEmptyStatus(): GitStatus {
@@ -545,7 +546,7 @@ export class GitIntegrationService {
       behind: 0,
       staged: [],
       unstaged: [],
-      untracked: []
+      untracked: [],
     };
   }
 }

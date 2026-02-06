@@ -23,13 +23,13 @@ export enum WindowStyle {
   vbMinimizedFocus = 2,
   vbMaximizedFocus = 3,
   vbNormalNoFocus = 4,
-  vbMinimizedNoFocus = 6
+  vbMinimizedNoFocus = 6,
 }
 
 export enum AppActivateMode {
   Activate = 1,
   MinimizeActivate = 2,
-  MaximizeActivate = 3
+  MaximizeActivate = 3,
 }
 
 // ============================================================================
@@ -44,17 +44,14 @@ class VB6ProcessManager {
   /**
    * Execute a command (simulated in browser)
    */
-  shell(
-    command: string,
-    windowStyle: WindowStyle = WindowStyle.vbNormalFocus
-  ): number {
+  shell(command: string, windowStyle: WindowStyle = WindowStyle.vbNormalFocus): number {
     const processId = this.nextProcessId++;
 
     const processInfo: ProcessInfo = {
       id: processId,
       name: command,
       startTime: Date.now(),
-      status: 'running'
+      status: 'running',
     };
 
     this.processes.set(processId, processInfo);
@@ -63,20 +60,11 @@ class VB6ProcessManager {
     if (command.startsWith('http://') || command.startsWith('https://')) {
       // Open URL in new window
       this.openUrl(command, windowStyle, processId);
-    } else if (
-      command.endsWith('.html') ||
-      command.endsWith('.htm') ||
-      command.includes('/')
-    ) {
+    } else if (command.endsWith('.html') || command.endsWith('.htm') || command.includes('/')) {
       // Assume it's a relative URL
       this.openUrl(command, windowStyle, processId);
     } else {
       // Log the command (can't actually execute in browser)
-      console.log(`[VB6 Shell] Command: ${command}`);
-      console.log(`[VB6 Shell] Window Style: ${windowStyle}`);
-      console.log(
-        `[VB6 Shell] Note: Shell commands are simulated in browser environment`
-      );
 
       // Mark as completed since we can't actually run it
       processInfo.status = 'completed';
@@ -90,11 +78,7 @@ class VB6ProcessManager {
   /**
    * Open URL in new window
    */
-  private openUrl(
-    url: string,
-    windowStyle: WindowStyle,
-    processId: number
-  ): void {
+  private openUrl(url: string, windowStyle: WindowStyle, processId: number): void {
     const features = this.getWindowFeatures(windowStyle);
     const newWindow = window.open(url, '_blank', features);
 
@@ -221,18 +205,9 @@ export function ShellExecute(
     command += ` ${parameters}`;
   }
 
-  console.log(`[VB6 ShellExecute] Operation: ${operation}`);
-  console.log(`[VB6 ShellExecute] File: ${file}`);
-  console.log(`[VB6 ShellExecute] Parameters: ${parameters || '(none)'}`);
-  console.log(`[VB6 ShellExecute] Directory: ${directory || '(current)'}`);
-
   // Handle common operations
   if (operation.toLowerCase() === 'open') {
-    if (
-      file.startsWith('http://') ||
-      file.startsWith('https://') ||
-      file.startsWith('mailto:')
-    ) {
+    if (file.startsWith('http://') || file.startsWith('https://') || file.startsWith('mailto:')) {
       window.open(file, '_blank');
       return 1;
     }
@@ -250,14 +225,6 @@ export function ShellExecute(
  * In browser, this is simulated and has limited functionality
  */
 export function AppActivate(title: string, wait?: boolean): boolean {
-  console.log(`[VB6 AppActivate] Attempting to activate: ${title}`);
-  console.log(
-    `[VB6 AppActivate] Wait: ${wait !== undefined ? wait : 'default'}`
-  );
-  console.log(
-    `[VB6 AppActivate] Note: AppActivate has limited functionality in browser`
-  );
-
   // Try to focus our own window
   if (
     title.toLowerCase().includes(document.title.toLowerCase()) ||
@@ -283,18 +250,8 @@ interface SendKeysOptions {
  * SendKeys - Sends keystrokes to the active window
  * In browser, this only works with focused input elements
  */
-export function SendKeys(
-  keys: string,
-  wait?: boolean,
-  options?: SendKeysOptions
-): void {
-  console.log(`[VB6 SendKeys] Keys: ${keys}`);
-  console.log(`[VB6 SendKeys] Wait: ${wait !== undefined ? wait : 'default'}`);
-
-  const target =
-    options?.targetElement ||
-    (document.activeElement as HTMLElement) ||
-    document.body;
+export function SendKeys(keys: string, wait?: boolean, options?: SendKeysOptions): void {
+  const target = options?.targetElement || (document.activeElement as HTMLElement) || document.body;
 
   // Parse VB6 SendKeys format
   const parsedKeys = parseSendKeys(keys);
@@ -310,7 +267,7 @@ export function SendKeys(
       ctrlKey: keyInfo.ctrl,
       altKey: keyInfo.alt,
       bubbles: true,
-      cancelable: true
+      cancelable: true,
     });
 
     const keypressEvent = new KeyboardEvent('keypress', {
@@ -322,7 +279,7 @@ export function SendKeys(
       ctrlKey: keyInfo.ctrl,
       altKey: keyInfo.alt,
       bubbles: true,
-      cancelable: true
+      cancelable: true,
     });
 
     const keyupEvent = new KeyboardEvent('keyup', {
@@ -334,7 +291,7 @@ export function SendKeys(
       ctrlKey: keyInfo.ctrl,
       altKey: keyInfo.alt,
       bubbles: true,
-      cancelable: true
+      cancelable: true,
     });
 
     target.dispatchEvent(keydownEvent);
@@ -342,10 +299,7 @@ export function SendKeys(
     target.dispatchEvent(keyupEvent);
 
     // If it's an input element, update the value
-    if (
-      target instanceof HTMLInputElement ||
-      target instanceof HTMLTextAreaElement
-    ) {
+    if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
       if (keyInfo.key.length === 1 && !keyInfo.ctrl && !keyInfo.alt) {
         target.value += keyInfo.key;
         target.dispatchEvent(new Event('input', { bubbles: true }));
@@ -431,10 +385,7 @@ function getSpecialKeyInfo(
   ctrl: boolean,
   alt: boolean
 ): KeyInfo | null {
-  const specialKeys: Record<
-    string,
-    { key: string; code: string; keyCode: number }
-  > = {
+  const specialKeys: Record<string, { key: string; code: string; keyCode: number }> = {
     ENTER: { key: 'Enter', code: 'Enter', keyCode: 13 },
     TAB: { key: 'Tab', code: 'Tab', keyCode: 9 },
     ESC: { key: 'Escape', code: 'Escape', keyCode: 27 },
@@ -465,7 +416,7 @@ function getSpecialKeyInfo(
     F10: { key: 'F10', code: 'F10', keyCode: 121 },
     F11: { key: 'F11', code: 'F11', keyCode: 122 },
     F12: { key: 'F12', code: 'F12', keyCode: 123 },
-    SPACE: { key: ' ', code: 'Space', keyCode: 32 }
+    SPACE: { key: ' ', code: 'Space', keyCode: 32 },
   };
 
   const upper = keyName.toUpperCase();
@@ -476,7 +427,6 @@ function getSpecialKeyInfo(
     const count = parseInt(parts[1], 10);
     if (!isNaN(count)) {
       // Return null here, handling repetition would require returning multiple keys
-      console.log(`[SendKeys] Repetition not fully supported: ${keyName}`);
     }
   }
 
@@ -489,7 +439,7 @@ function getSpecialKeyInfo(
       charCode: special.key.length === 1 ? special.key.charCodeAt(0) : 0,
       shift,
       ctrl,
-      alt
+      alt,
     };
   }
 
@@ -504,12 +454,7 @@ function getSpecialKeyInfo(
 /**
  * Get key info for character
  */
-function getCharKeyInfo(
-  char: string,
-  shift: boolean,
-  ctrl: boolean,
-  alt: boolean
-): KeyInfo {
+function getCharKeyInfo(char: string, shift: boolean, ctrl: boolean, alt: boolean): KeyInfo {
   const code = `Key${char.toUpperCase()}`;
   return {
     key: char,
@@ -518,7 +463,7 @@ function getCharKeyInfo(
     charCode: char.charCodeAt(0),
     shift,
     ctrl,
-    alt
+    alt,
   };
 }
 
@@ -532,11 +477,7 @@ let timerIdCounter = 1;
 /**
  * SetTimer - Create a timer (Windows API simulation)
  */
-export function SetTimer(
-  callback: () => void,
-  interval: number,
-  _hwnd?: number
-): number {
+export function SetTimer(callback: () => void, interval: number, _hwnd?: number): number {
   const timerId = timerIdCounter++;
   const handle = setInterval(callback, interval);
   timers.set(timerId, handle);
@@ -577,7 +518,7 @@ export function GetEnvironmentVariable(name: string): string {
     HOMEDRIVE: '/',
     HOMEPATH: '/',
     APPDATA: '/appdata',
-    PROGRAMFILES: '/programs'
+    PROGRAMFILES: '/programs',
   };
 
   return browserEnv[name.toUpperCase()] || '';
@@ -668,8 +609,7 @@ export async function ClipboardGetText(): Promise<string> {
 export function Beep(): void {
   // Try to play a beep using Web Audio API
   try {
-    const audioContext = new (window.AudioContext ||
-      (window as any).webkitAudioContext)();
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
@@ -680,25 +620,19 @@ export function Beep(): void {
     oscillator.type = 'sine';
 
     gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(
-      0.01,
-      audioContext.currentTime + 0.1
-    );
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
 
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.1);
   } catch (e) {
-    console.log('[VB6 Beep] Audio not available');
+    // Audio API may not be available in all environments
   }
 }
 
 /**
  * PlaySound - Play a sound file (simulated)
  */
-export function PlaySound(
-  soundFile: string,
-  flags?: number
-): boolean {
+export function PlaySound(soundFile: string, flags?: number): boolean {
   try {
     const audio = new Audio(soundFile);
     audio.play().catch(() => {
@@ -746,7 +680,7 @@ export const VB6ShellProcess = {
 
   // Enums
   WindowStyle,
-  AppActivateMode
+  AppActivateMode,
 };
 
 export default VB6ShellProcess;

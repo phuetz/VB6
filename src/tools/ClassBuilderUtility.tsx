@@ -15,21 +15,21 @@ export enum VB6DataType {
   Variant = 'Variant',
   Object = 'Object',
   Collection = 'Collection',
-  Custom = 'Custom'
+  Custom = 'Custom',
 }
 
 // Access Modifiers
 export enum AccessModifier {
   Public = 'Public',
   Private = 'Private',
-  Friend = 'Friend'
+  Friend = 'Friend',
 }
 
 // Parameter Passing
 export enum ParameterPassing {
   ByVal = 'ByVal',
   ByRef = 'ByRef',
-  Optional = 'Optional'
+  Optional = 'Optional',
 }
 
 // Class Member Types
@@ -37,7 +37,7 @@ export enum MemberType {
   Property = 'Property',
   Method = 'Method',
   Event = 'Event',
-  Field = 'Field'
+  Field = 'Field',
 }
 
 // COM Threading Models
@@ -45,7 +45,7 @@ export enum ThreadingModel {
   Apartment = 'Apartment',
   Free = 'Free',
   Both = 'Both',
-  Neutral = 'Neutral'
+  Neutral = 'Neutral',
 }
 
 // Class Parameter
@@ -154,18 +154,20 @@ interface ClassBuilderUtilityProps {
 export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
   projectPath,
   onClassGenerated,
-  onClose
+  onClose,
 }) => {
   const [classes, setClasses] = useState<ClassDefinition[]>([]);
   const [selectedClass, setSelectedClass] = useState<ClassDefinition | null>(null);
-  const [activeTab, setActiveTab] = useState<'properties' | 'methods' | 'events' | 'fields' | 'interfaces' | 'code'>('properties');
+  const [activeTab, setActiveTab] = useState<
+    'properties' | 'methods' | 'events' | 'fields' | 'interfaces' | 'code'
+  >('properties');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [addDialogType, setAddDialogType] = useState<MemberType>(MemberType.Property);
   const [generatedCode, setGeneratedCode] = useState('');
   const [showPreview, setShowPreview] = useState(false);
   const [isModified, setIsModified] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  
+
   const eventEmitter = useRef(new EventEmitter());
 
   // Sample interfaces for demonstration
@@ -180,16 +182,26 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
           accessModifier: AccessModifier.Public,
           returnType: VB6DataType.Long,
           parameters: [
-            { name: 'riid', dataType: VB6DataType.String, passing: ParameterPassing.ByRef, description: 'Interface ID' },
-            { name: 'ppvObj', dataType: VB6DataType.Object, passing: ParameterPassing.ByRef, description: 'Object pointer' }
+            {
+              name: 'riid',
+              dataType: VB6DataType.String,
+              passing: ParameterPassing.ByRef,
+              description: 'Interface ID',
+            },
+            {
+              name: 'ppvObj',
+              dataType: VB6DataType.Object,
+              passing: ParameterPassing.ByRef,
+              description: 'Object pointer',
+            },
           ],
           description: 'Query for interface support',
           isFunction: true,
-          isStatic: false
-        }
+          isStatic: false,
+        },
       ],
       properties: [],
-      events: []
+      events: [],
     },
     {
       name: 'IDispatch',
@@ -201,336 +213,389 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
           accessModifier: AccessModifier.Public,
           returnType: VB6DataType.Long,
           parameters: [
-            { name: 'dispIdMember', dataType: VB6DataType.Long, passing: ParameterPassing.ByVal, description: 'Member ID' },
-            { name: 'riid', dataType: VB6DataType.String, passing: ParameterPassing.ByRef, description: 'Interface ID' }
+            {
+              name: 'dispIdMember',
+              dataType: VB6DataType.Long,
+              passing: ParameterPassing.ByVal,
+              description: 'Member ID',
+            },
+            {
+              name: 'riid',
+              dataType: VB6DataType.String,
+              passing: ParameterPassing.ByRef,
+              description: 'Interface ID',
+            },
           ],
           description: 'Invoke method or property',
           isFunction: true,
-          isStatic: false
-        }
+          isStatic: false,
+        },
       ],
       properties: [],
-      events: []
-    }
+      events: [],
+    },
   ];
 
   // Create new class
-  const createNewClass = useCallback((name: string, classType: ClassDefinition['classType'] = 'Class') => {
-    const newClass: ClassDefinition = {
-      id: `class_${Date.now()}`,
-      name,
-      description: `${name} class`,
-      interfaces: [],
-      threadingModel: ThreadingModel.Apartment,
-      classType,
-      properties: [],
-      methods: [],
-      events: [],
-      fields: [],
-      isCreatable: true,
-      isPublic: true,
-      version: '1.0',
-      author: 'Class Builder',
-      created: new Date(),
-      lastModified: new Date()
-    };
+  const createNewClass = useCallback(
+    (name: string, classType: ClassDefinition['classType'] = 'Class') => {
+      const newClass: ClassDefinition = {
+        id: `class_${Date.now()}`,
+        name,
+        description: `${name} class`,
+        interfaces: [],
+        threadingModel: ThreadingModel.Apartment,
+        classType,
+        properties: [],
+        methods: [],
+        events: [],
+        fields: [],
+        isCreatable: true,
+        isPublic: true,
+        version: '1.0',
+        author: 'Class Builder',
+        created: new Date(),
+        lastModified: new Date(),
+      };
 
-    setClasses(prev => [...prev, newClass]);
-    setSelectedClass(newClass);
-    setIsModified(true);
-    eventEmitter.current.emit('classCreated', newClass);
-  }, []);
+      setClasses(prev => [...prev, newClass]);
+      setSelectedClass(newClass);
+      setIsModified(true);
+      eventEmitter.current.emit('classCreated', newClass);
+    },
+    []
+  );
 
   // Add property to class
-  const addProperty = useCallback((property: Omit<ClassProperty, 'id'>) => {
-    if (!selectedClass) return;
+  const addProperty = useCallback(
+    (property: Omit<ClassProperty, 'id'>) => {
+      if (!selectedClass) return;
 
-    const newProperty: ClassProperty = {
-      ...property,
-      id: `prop_${Date.now()}`
-    };
+      const newProperty: ClassProperty = {
+        ...property,
+        id: `prop_${Date.now()}`,
+      };
 
-    const updatedClass = {
-      ...selectedClass,
-      properties: [...selectedClass.properties, newProperty],
-      lastModified: new Date()
-    };
+      const updatedClass = {
+        ...selectedClass,
+        properties: [...selectedClass.properties, newProperty],
+        lastModified: new Date(),
+      };
 
-    setSelectedClass(updatedClass);
-    setClasses(prev => prev.map(c => c.id === selectedClass.id ? updatedClass : c));
-    setIsModified(true);
-    eventEmitter.current.emit('propertyAdded', { class: updatedClass, property: newProperty });
-  }, [selectedClass]);
+      setSelectedClass(updatedClass);
+      setClasses(prev => prev.map(c => (c.id === selectedClass.id ? updatedClass : c)));
+      setIsModified(true);
+      eventEmitter.current.emit('propertyAdded', { class: updatedClass, property: newProperty });
+    },
+    [selectedClass]
+  );
 
   // Add method to class
-  const addMethod = useCallback((method: Omit<ClassMethod, 'id'>) => {
-    if (!selectedClass) return;
+  const addMethod = useCallback(
+    (method: Omit<ClassMethod, 'id'>) => {
+      if (!selectedClass) return;
 
-    const newMethod: ClassMethod = {
-      ...method,
-      id: `method_${Date.now()}`
-    };
+      const newMethod: ClassMethod = {
+        ...method,
+        id: `method_${Date.now()}`,
+      };
 
-    const updatedClass = {
-      ...selectedClass,
-      methods: [...selectedClass.methods, newMethod],
-      lastModified: new Date()
-    };
+      const updatedClass = {
+        ...selectedClass,
+        methods: [...selectedClass.methods, newMethod],
+        lastModified: new Date(),
+      };
 
-    setSelectedClass(updatedClass);
-    setClasses(prev => prev.map(c => c.id === selectedClass.id ? updatedClass : c));
-    setIsModified(true);
-    eventEmitter.current.emit('methodAdded', { class: updatedClass, method: newMethod });
-  }, [selectedClass]);
+      setSelectedClass(updatedClass);
+      setClasses(prev => prev.map(c => (c.id === selectedClass.id ? updatedClass : c)));
+      setIsModified(true);
+      eventEmitter.current.emit('methodAdded', { class: updatedClass, method: newMethod });
+    },
+    [selectedClass]
+  );
 
   // Add event to class
-  const addEvent = useCallback((event: Omit<ClassEvent, 'id'>) => {
-    if (!selectedClass) return;
+  const addEvent = useCallback(
+    (event: Omit<ClassEvent, 'id'>) => {
+      if (!selectedClass) return;
 
-    const newEvent: ClassEvent = {
-      ...event,
-      id: `event_${Date.now()}`
-    };
+      const newEvent: ClassEvent = {
+        ...event,
+        id: `event_${Date.now()}`,
+      };
 
-    const updatedClass = {
-      ...selectedClass,
-      events: [...selectedClass.events, newEvent],
-      lastModified: new Date()
-    };
+      const updatedClass = {
+        ...selectedClass,
+        events: [...selectedClass.events, newEvent],
+        lastModified: new Date(),
+      };
 
-    setSelectedClass(updatedClass);
-    setClasses(prev => prev.map(c => c.id === selectedClass.id ? updatedClass : c));
-    setIsModified(true);
-    eventEmitter.current.emit('eventAdded', { class: updatedClass, event: newEvent });
-  }, [selectedClass]);
+      setSelectedClass(updatedClass);
+      setClasses(prev => prev.map(c => (c.id === selectedClass.id ? updatedClass : c)));
+      setIsModified(true);
+      eventEmitter.current.emit('eventAdded', { class: updatedClass, event: newEvent });
+    },
+    [selectedClass]
+  );
 
   // Add field to class
-  const addField = useCallback((field: Omit<ClassField, 'id'>) => {
-    if (!selectedClass) return;
+  const addField = useCallback(
+    (field: Omit<ClassField, 'id'>) => {
+      if (!selectedClass) return;
 
-    const newField: ClassField = {
-      ...field,
-      id: `field_${Date.now()}`
-    };
+      const newField: ClassField = {
+        ...field,
+        id: `field_${Date.now()}`,
+      };
 
-    const updatedClass = {
-      ...selectedClass,
-      fields: [...selectedClass.fields, newField],
-      lastModified: new Date()
-    };
+      const updatedClass = {
+        ...selectedClass,
+        fields: [...selectedClass.fields, newField],
+        lastModified: new Date(),
+      };
 
-    setSelectedClass(updatedClass);
-    setClasses(prev => prev.map(c => c.id === selectedClass.id ? updatedClass : c));
-    setIsModified(true);
-    eventEmitter.current.emit('fieldAdded', { class: updatedClass, field: newField });
-  }, [selectedClass]);
+      setSelectedClass(updatedClass);
+      setClasses(prev => prev.map(c => (c.id === selectedClass.id ? updatedClass : c)));
+      setIsModified(true);
+      eventEmitter.current.emit('fieldAdded', { class: updatedClass, field: newField });
+    },
+    [selectedClass]
+  );
 
   // Generate VB6 class code
-  const generateClassCode = useCallback((classDefinition: ClassDefinition): string => {
-    let code = '';
-    
-    // Class header comments
-    code += `'===============================================================================\n`;
-    code += `' Class: ${classDefinition.name}\n`;
-    code += `' Description: ${classDefinition.description}\n`;
-    code += `' Author: ${classDefinition.author}\n`;
-    code += `' Version: ${classDefinition.version}\n`;
-    code += `' Created: ${classDefinition.created.toLocaleDateString()}\n`;
-    code += `' Modified: ${classDefinition.lastModified.toLocaleDateString()}\n`;
-    code += `'===============================================================================\n\n`;
+  const generateClassCode = useCallback(
+    (classDefinition: ClassDefinition): string => {
+      let code = '';
 
-    // Class options
-    code += `Option Explicit\n\n`;
+      // Class header comments
+      code += `'===============================================================================\n`;
+      code += `' Class: ${classDefinition.name}\n`;
+      code += `' Description: ${classDefinition.description}\n`;
+      code += `' Author: ${classDefinition.author}\n`;
+      code += `' Version: ${classDefinition.version}\n`;
+      code += `' Created: ${classDefinition.created.toLocaleDateString()}\n`;
+      code += `' Modified: ${classDefinition.lastModified.toLocaleDateString()}\n`;
+      code += `'===============================================================================\n\n`;
 
-    if (classDefinition.classType === 'ActiveX Control' || classDefinition.classType === 'ActiveX DLL') {
-      code += `Option Base 0\n`;
-      code += `Option Compare Binary\n\n`;
-    }
+      // Class options
+      code += `Option Explicit\n\n`;
 
-    // Implements statements
-    if (classDefinition.interfaces.length > 0) {
-      classDefinition.interfaces.forEach(interfaceName => {
-        code += `Implements ${interfaceName}\n`;
-      });
-      code += '\n';
-    }
-
-    // Private fields
-    if (classDefinition.fields.length > 0) {
-      code += `'--- Private Fields ---\n`;
-      classDefinition.fields.forEach(field => {
-        if (field.accessModifier === AccessModifier.Private) {
-          code += `${field.accessModifier} `;
-          if (field.isConstant) code += 'Const ';
-          code += `${field.name} As ${field.dataType === VB6DataType.Custom ? field.customType : field.dataType}`;
-          if (field.defaultValue) {
-            code += ` = ${field.defaultValue}`;
-          }
-          code += `  ' ${field.description}\n`;
-        }
-      });
-      code += '\n';
-    }
-
-    // Property backing fields
-    classDefinition.properties.forEach(prop => {
-      if (prop.hasGet || prop.hasSet || prop.hasLet) {
-        const fieldName = `m_${prop.name}`;
-        code += `Private ${fieldName} As ${prop.dataType === VB6DataType.Custom ? prop.customType : prop.dataType}`;
-        if (prop.defaultValue) {
-          code += ` = ${prop.defaultValue}`;
-        }
-        code += `  ' Backing field for ${prop.name}\n`;
+      if (
+        classDefinition.classType === 'ActiveX Control' ||
+        classDefinition.classType === 'ActiveX DLL'
+      ) {
+        code += `Option Base 0\n`;
+        code += `Option Compare Binary\n\n`;
       }
-    });
-    
-    if (classDefinition.properties.length > 0) code += '\n';
 
-    // Events
-    if (classDefinition.events.length > 0) {
-      code += `'--- Events ---\n`;
-      classDefinition.events.forEach(event => {
-        code += `Public Event ${event.name}(`;
-        code += event.parameters.map(p => 
-          `${p.passing} ${p.name} As ${p.dataType === VB6DataType.Custom ? p.customType : p.dataType}`
-        ).join(', ');
-        code += `)  ' ${event.description}\n`;
-      });
-      code += '\n';
-    }
+      // Implements statements
+      if (classDefinition.interfaces.length > 0) {
+        classDefinition.interfaces.forEach(interfaceName => {
+          code += `Implements ${interfaceName}\n`;
+        });
+        code += '\n';
+      }
 
-    // Constructor (Class_Initialize)
-    code += `'--- Constructor ---\n`;
-    code += `Private Sub Class_Initialize()\n`;
-    if (classDefinition.constructorCode) {
-      code += `    ${classDefinition.constructorCode.replace(/\n/g, '\n    ')}\n`;
-    } else {
-      code += `    ' Initialize class members\n`;
-    }
-    code += `End Sub\n\n`;
+      // Private fields
+      if (classDefinition.fields.length > 0) {
+        code += `'--- Private Fields ---\n`;
+        classDefinition.fields.forEach(field => {
+          if (field.accessModifier === AccessModifier.Private) {
+            code += `${field.accessModifier} `;
+            if (field.isConstant) code += 'Const ';
+            code += `${field.name} As ${field.dataType === VB6DataType.Custom ? field.customType : field.dataType}`;
+            if (field.defaultValue) {
+              code += ` = ${field.defaultValue}`;
+            }
+            code += `  ' ${field.description}\n`;
+          }
+        });
+        code += '\n';
+      }
 
-    // Destructor (Class_Terminate)
-    code += `'--- Destructor ---\n`;
-    code += `Private Sub Class_Terminate()\n`;
-    if (classDefinition.destructorCode) {
-      code += `    ${classDefinition.destructorCode.replace(/\n/g, '\n    ')}\n`;
-    } else {
-      code += `    ' Clean up class members\n`;
-    }
-    code += `End Sub\n\n`;
-
-    // Properties
-    if (classDefinition.properties.length > 0) {
-      code += `'--- Properties ---\n`;
+      // Property backing fields
       classDefinition.properties.forEach(prop => {
-        const dataTypeStr = prop.dataType === VB6DataType.Custom ? prop.customType : prop.dataType;
-        const fieldName = `m_${prop.name}`;
-
-        // Property Get
-        if (prop.hasGet) {
-          code += `${prop.accessModifier} Property Get ${prop.name}() As ${dataTypeStr}\n`;
-          if (prop.validation) {
-            code += `    ' Validation: ${prop.validation}\n`;
+        if (prop.hasGet || prop.hasSet || prop.hasLet) {
+          const fieldName = `m_${prop.name}`;
+          code += `Private ${fieldName} As ${prop.dataType === VB6DataType.Custom ? prop.customType : prop.dataType}`;
+          if (prop.defaultValue) {
+            code += ` = ${prop.defaultValue}`;
           }
-          if (prop.dataType === VB6DataType.Object) {
-            code += `    Set ${prop.name} = ${fieldName}\n`;
-          } else {
-            code += `    ${prop.name} = ${fieldName}\n`;
-          }
-          code += `End Property\n\n`;
-        }
-
-        // Property Let
-        if (prop.hasLet && prop.dataType !== VB6DataType.Object) {
-          code += `${prop.accessModifier} Property Let ${prop.name}(ByVal vNewValue As ${dataTypeStr})\n`;
-          if (prop.validation) {
-            code += `    ' Validation: ${prop.validation}\n`;
-            code += `    ' Add validation code here\n`;
-          }
-          code += `    ${fieldName} = vNewValue\n`;
-          code += `End Property\n\n`;
-        }
-
-        // Property Set
-        if (prop.hasSet && prop.dataType === VB6DataType.Object) {
-          code += `${prop.accessModifier} Property Set ${prop.name}(ByVal vNewValue As ${dataTypeStr})\n`;
-          if (prop.validation) {
-            code += `    ' Validation: ${prop.validation}\n`;
-            code += `    ' Add validation code here\n`;
-          }
-          code += `    Set ${fieldName} = vNewValue\n`;
-          code += `End Property\n\n`;
+          code += `  ' Backing field for ${prop.name}\n`;
         }
       });
-    }
 
-    // Methods
-    if (classDefinition.methods.length > 0) {
-      code += `'--- Methods ---\n`;
-      classDefinition.methods.forEach(method => {
-        const methodType = method.isFunction ? 'Function' : 'Sub';
-        const returnTypeStr = method.isFunction && method.returnType 
-          ? ` As ${method.returnType === VB6DataType.Custom ? method.customReturnType : method.returnType}`
-          : '';
+      if (classDefinition.properties.length > 0) code += '\n';
 
-        code += `${method.accessModifier} ${methodType} ${method.name}(`;
-        code += method.parameters.map(p =>
-          `${p.passing} ${p.name} As ${p.dataType === VB6DataType.Custom ? p.customType : p.dataType}${p.defaultValue ? ` = ${p.defaultValue}` : ''}`
-        ).join(', ');
-        code += `)${returnTypeStr}\n`;
-        
-        code += `    ' ${method.description}\n`;
-        
-        if (method.implementation) {
-          code += `    ${method.implementation.replace(/\n/g, '\n    ')}\n`;
-        } else {
-          code += `    ' TODO: Implement ${method.name}\n`;
-          if (method.isFunction) {
-            const defaultReturn = method.returnType === VB6DataType.String ? '""' : 
-                                method.returnType === VB6DataType.Boolean ? 'False' :
-                                method.returnType === VB6DataType.Object ? 'Nothing' : '0';
-            code += `    ${method.name} = ${defaultReturn}\n`;
+      // Events
+      if (classDefinition.events.length > 0) {
+        code += `'--- Events ---\n`;
+        classDefinition.events.forEach(event => {
+          code += `Public Event ${event.name}(`;
+          code += event.parameters
+            .map(
+              p =>
+                `${p.passing} ${p.name} As ${p.dataType === VB6DataType.Custom ? p.customType : p.dataType}`
+            )
+            .join(', ');
+          code += `)  ' ${event.description}\n`;
+        });
+        code += '\n';
+      }
+
+      // Constructor (Class_Initialize)
+      code += `'--- Constructor ---\n`;
+      code += `Private Sub Class_Initialize()\n`;
+      if (classDefinition.constructorCode) {
+        code += `    ${classDefinition.constructorCode.replace(/\n/g, '\n    ')}\n`;
+      } else {
+        code += `    ' Initialize class members\n`;
+      }
+      code += `End Sub\n\n`;
+
+      // Destructor (Class_Terminate)
+      code += `'--- Destructor ---\n`;
+      code += `Private Sub Class_Terminate()\n`;
+      if (classDefinition.destructorCode) {
+        code += `    ${classDefinition.destructorCode.replace(/\n/g, '\n    ')}\n`;
+      } else {
+        code += `    ' Clean up class members\n`;
+      }
+      code += `End Sub\n\n`;
+
+      // Properties
+      if (classDefinition.properties.length > 0) {
+        code += `'--- Properties ---\n`;
+        classDefinition.properties.forEach(prop => {
+          const dataTypeStr =
+            prop.dataType === VB6DataType.Custom ? prop.customType : prop.dataType;
+          const fieldName = `m_${prop.name}`;
+
+          // Property Get
+          if (prop.hasGet) {
+            code += `${prop.accessModifier} Property Get ${prop.name}() As ${dataTypeStr}\n`;
+            if (prop.validation) {
+              code += `    ' Validation: ${prop.validation}\n`;
+            }
+            if (prop.dataType === VB6DataType.Object) {
+              code += `    Set ${prop.name} = ${fieldName}\n`;
+            } else {
+              code += `    ${prop.name} = ${fieldName}\n`;
+            }
+            code += `End Property\n\n`;
           }
-        }
-        
-        code += `End ${methodType}\n\n`;
-      });
-    }
 
-    // Interface implementations
-    classDefinition.interfaces.forEach(interfaceName => {
-      const interfaceImpl = availableInterfaces.find(i => i.name === interfaceName);
-      if (interfaceImpl) {
-        code += `'--- ${interfaceName} Implementation ---\n`;
-        interfaceImpl.methods.forEach(method => {
+          // Property Let
+          if (prop.hasLet && prop.dataType !== VB6DataType.Object) {
+            code += `${prop.accessModifier} Property Let ${prop.name}(ByVal vNewValue As ${dataTypeStr})\n`;
+            if (prop.validation) {
+              code += `    ' Validation: ${prop.validation}\n`;
+              code += `    ' Add validation code here\n`;
+            }
+            code += `    ${fieldName} = vNewValue\n`;
+            code += `End Property\n\n`;
+          }
+
+          // Property Set
+          if (prop.hasSet && prop.dataType === VB6DataType.Object) {
+            code += `${prop.accessModifier} Property Set ${prop.name}(ByVal vNewValue As ${dataTypeStr})\n`;
+            if (prop.validation) {
+              code += `    ' Validation: ${prop.validation}\n`;
+              code += `    ' Add validation code here\n`;
+            }
+            code += `    Set ${fieldName} = vNewValue\n`;
+            code += `End Property\n\n`;
+          }
+        });
+      }
+
+      // Methods
+      if (classDefinition.methods.length > 0) {
+        code += `'--- Methods ---\n`;
+        classDefinition.methods.forEach(method => {
           const methodType = method.isFunction ? 'Function' : 'Sub';
-          const returnTypeStr = method.isFunction && method.returnType 
-            ? ` As ${method.returnType === VB6DataType.Custom ? method.customReturnType : method.returnType}`
-            : '';
+          const returnTypeStr =
+            method.isFunction && method.returnType
+              ? ` As ${method.returnType === VB6DataType.Custom ? method.customReturnType : method.returnType}`
+              : '';
 
-          code += `Private ${methodType} ${interfaceName}_${method.name}(`;
-          code += method.parameters.map(p =>
-            `${p.passing} ${p.name} As ${p.dataType === VB6DataType.Custom ? p.customType : p.dataType}`
-          ).join(', ');
+          code += `${method.accessModifier} ${methodType} ${method.name}(`;
+          code += method.parameters
+            .map(
+              p =>
+                `${p.passing} ${p.name} As ${p.dataType === VB6DataType.Custom ? p.customType : p.dataType}${p.defaultValue ? ` = ${p.defaultValue}` : ''}`
+            )
+            .join(', ');
           code += `)${returnTypeStr}\n`;
-          
+
           code += `    ' ${method.description}\n`;
-          code += `    ' TODO: Implement ${interfaceName}.${method.name}\n`;
-          
-          if (method.isFunction) {
-            const defaultReturn = method.returnType === VB6DataType.String ? '""' : 
-                                method.returnType === VB6DataType.Boolean ? 'False' :
-                                method.returnType === VB6DataType.Object ? 'Nothing' : '0';
-            code += `    ${interfaceName}_${method.name} = ${defaultReturn}\n`;
+
+          if (method.implementation) {
+            code += `    ${method.implementation.replace(/\n/g, '\n    ')}\n`;
+          } else {
+            code += `    ' TODO: Implement ${method.name}\n`;
+            if (method.isFunction) {
+              const defaultReturn =
+                method.returnType === VB6DataType.String
+                  ? '""'
+                  : method.returnType === VB6DataType.Boolean
+                    ? 'False'
+                    : method.returnType === VB6DataType.Object
+                      ? 'Nothing'
+                      : '0';
+              code += `    ${method.name} = ${defaultReturn}\n`;
+            }
           }
-          
+
           code += `End ${methodType}\n\n`;
         });
       }
-    });
 
-    return code;
-  }, [availableInterfaces]);
+      // Interface implementations
+      classDefinition.interfaces.forEach(interfaceName => {
+        const interfaceImpl = availableInterfaces.find(i => i.name === interfaceName);
+        if (interfaceImpl) {
+          code += `'--- ${interfaceName} Implementation ---\n`;
+          interfaceImpl.methods.forEach(method => {
+            const methodType = method.isFunction ? 'Function' : 'Sub';
+            const returnTypeStr =
+              method.isFunction && method.returnType
+                ? ` As ${method.returnType === VB6DataType.Custom ? method.customReturnType : method.returnType}`
+                : '';
+
+            code += `Private ${methodType} ${interfaceName}_${method.name}(`;
+            code += method.parameters
+              .map(
+                p =>
+                  `${p.passing} ${p.name} As ${p.dataType === VB6DataType.Custom ? p.customType : p.dataType}`
+              )
+              .join(', ');
+            code += `)${returnTypeStr}\n`;
+
+            code += `    ' ${method.description}\n`;
+            code += `    ' TODO: Implement ${interfaceName}.${method.name}\n`;
+
+            if (method.isFunction) {
+              const defaultReturn =
+                method.returnType === VB6DataType.String
+                  ? '""'
+                  : method.returnType === VB6DataType.Boolean
+                    ? 'False'
+                    : method.returnType === VB6DataType.Object
+                      ? 'Nothing'
+                      : '0';
+              code += `    ${interfaceName}_${method.name} = ${defaultReturn}\n`;
+            }
+
+            code += `End ${methodType}\n\n`;
+          });
+        }
+      });
+
+      return code;
+    },
+    [availableInterfaces]
+  );
 
   // Validate class definition
   const validateClass = useCallback((classDefinition: ClassDefinition): string[] => {
@@ -540,7 +605,9 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
     if (!classDefinition.name || classDefinition.name.trim() === '') {
       errors.push('Class name is required');
     } else if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(classDefinition.name)) {
-      errors.push('Class name must start with a letter and contain only letters, numbers, and underscores');
+      errors.push(
+        'Class name must start with a letter and contain only letters, numbers, and underscores'
+      );
     }
 
     // Check for duplicate property names
@@ -562,7 +629,17 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
     });
 
     // Check for invalid property/method names
-    const reservedWords = ['Class', 'Sub', 'Function', 'Property', 'Event', 'End', 'If', 'Then', 'Else'];
+    const reservedWords = [
+      'Class',
+      'Sub',
+      'Function',
+      'Property',
+      'Event',
+      'End',
+      'If',
+      'Then',
+      'Else',
+    ];
     [...classDefinition.properties, ...classDefinition.methods].forEach(member => {
       if (reservedWords.includes(member.name)) {
         errors.push(`'${member.name}' is a reserved word and cannot be used as a member name`);
@@ -592,7 +669,7 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
 
     const code = generateClassCode(selectedClass);
     onClassGenerated?.(selectedClass, code);
-    
+
     // Also create downloadable file
     const blob = new Blob([code], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -606,31 +683,34 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
   }, [selectedClass, generateClassCode, onClassGenerated]);
 
   // Remove member from class
-  const removeMember = useCallback((type: MemberType, id: string) => {
-    if (!selectedClass) return;
+  const removeMember = useCallback(
+    (type: MemberType, id: string) => {
+      if (!selectedClass) return;
 
-    const updatedClass = { ...selectedClass };
+      const updatedClass = { ...selectedClass };
 
-    switch (type) {
-      case MemberType.Property:
-        updatedClass.properties = updatedClass.properties.filter(p => p.id !== id);
-        break;
-      case MemberType.Method:
-        updatedClass.methods = updatedClass.methods.filter(m => m.id !== id);
-        break;
-      case MemberType.Event:
-        updatedClass.events = updatedClass.events.filter(e => e.id !== id);
-        break;
-      case MemberType.Field:
-        updatedClass.fields = updatedClass.fields.filter(f => f.id !== id);
-        break;
-    }
+      switch (type) {
+        case MemberType.Property:
+          updatedClass.properties = updatedClass.properties.filter(p => p.id !== id);
+          break;
+        case MemberType.Method:
+          updatedClass.methods = updatedClass.methods.filter(m => m.id !== id);
+          break;
+        case MemberType.Event:
+          updatedClass.events = updatedClass.events.filter(e => e.id !== id);
+          break;
+        case MemberType.Field:
+          updatedClass.fields = updatedClass.fields.filter(f => f.id !== id);
+          break;
+      }
 
-    updatedClass.lastModified = new Date();
-    setSelectedClass(updatedClass);
-    setClasses(prev => prev.map(c => c.id === selectedClass.id ? updatedClass : c));
-    setIsModified(true);
-  }, [selectedClass]);
+      updatedClass.lastModified = new Date();
+      setSelectedClass(updatedClass);
+      setClasses(prev => prev.map(c => (c.id === selectedClass.id ? updatedClass : c)));
+      setIsModified(true);
+    },
+    [selectedClass]
+  );
 
   // Initialize with sample class
   useEffect(() => {
@@ -653,7 +733,7 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
           New Class
         </button>
       </div>
-      
+
       <div className="space-y-2">
         {classes.map(cls => (
           <div
@@ -683,40 +763,40 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg p-6 w-[600px] max-h-[80vh] overflow-y-auto">
           <h2 className="text-lg font-bold mb-4">Add {addDialogType}</h2>
-          
+
           {addDialogType === MemberType.Property && (
-            <PropertyForm 
-              onAdd={(property) => {
+            <PropertyForm
+              onAdd={property => {
                 addProperty(property);
                 setShowAddDialog(false);
               }}
               onCancel={() => setShowAddDialog(false)}
             />
           )}
-          
+
           {addDialogType === MemberType.Method && (
-            <MethodForm 
-              onAdd={(method) => {
+            <MethodForm
+              onAdd={method => {
                 addMethod(method);
                 setShowAddDialog(false);
               }}
               onCancel={() => setShowAddDialog(false)}
             />
           )}
-          
+
           {addDialogType === MemberType.Event && (
-            <EventForm 
-              onAdd={(event) => {
+            <EventForm
+              onAdd={event => {
                 addEvent(event);
                 setShowAddDialog(false);
               }}
               onCancel={() => setShowAddDialog(false)}
             />
           )}
-          
+
           {addDialogType === MemberType.Field && (
-            <FieldForm 
-              onAdd={(field) => {
+            <FieldForm
+              onAdd={field => {
                 addField(field);
                 setShowAddDialog(false);
               }}
@@ -731,10 +811,16 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
   const renderMemberList = (type: MemberType) => {
     if (!selectedClass) return null;
 
-    const members = type === MemberType.Property ? selectedClass.properties :
-                   type === MemberType.Method ? selectedClass.methods :
-                   type === MemberType.Event ? selectedClass.events :
-                   type === MemberType.Field ? selectedClass.fields : [];
+    const members =
+      type === MemberType.Property
+        ? selectedClass.properties
+        : type === MemberType.Method
+          ? selectedClass.methods
+          : type === MemberType.Event
+            ? selectedClass.events
+            : type === MemberType.Field
+              ? selectedClass.fields
+              : [];
 
     return (
       <div className="p-4">
@@ -750,7 +836,7 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
             Add {type}
           </button>
         </div>
-        
+
         <div className="space-y-2">
           {members.map((member: any) => (
             <div key={member.id} className="p-3 border border-gray-200 rounded hover:bg-gray-50">
@@ -765,12 +851,17 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
                     )}
                     {'dataType' in member && (
                       <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
-                        {member.dataType === VB6DataType.Custom ? member.customType : member.dataType}
+                        {member.dataType === VB6DataType.Custom
+                          ? member.customType
+                          : member.dataType}
                       </span>
                     )}
                     {'returnType' in member && member.returnType && (
                       <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
-                        → {member.returnType === VB6DataType.Custom ? member.customReturnType : member.returnType}
+                        →{' '}
+                        {member.returnType === VB6DataType.Custom
+                          ? member.customReturnType
+                          : member.returnType}
                       </span>
                     )}
                   </div>
@@ -790,7 +881,7 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
               </div>
             </div>
           ))}
-          
+
           {members.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               <p className="text-sm">No {type.toLowerCase()}s defined</p>
@@ -808,9 +899,7 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
         <div className="p-4 border-b border-gray-200">
           <h1 className="text-xl font-bold text-gray-900">Class Builder Utility</h1>
         </div>
-        <div className="flex-1">
-          {renderClassList()}
-        </div>
+        <div className="flex-1">{renderClassList()}</div>
       </div>
     );
   }
@@ -843,10 +932,7 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
             >
               Export Class
             </button>
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
-            >
+            <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:text-gray-800">
               Close
             </button>
           </div>
@@ -878,39 +964,57 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
                 <input
                   type="text"
                   value={selectedClass.name}
-                  onChange={(e) => {
-                    const updatedClass = { ...selectedClass, name: e.target.value, lastModified: new Date() };
+                  onChange={e => {
+                    const updatedClass = {
+                      ...selectedClass,
+                      name: e.target.value,
+                      lastModified: new Date(),
+                    };
                     setSelectedClass(updatedClass);
-                    setClasses(prev => prev.map(c => c.id === selectedClass.id ? updatedClass : c));
+                    setClasses(prev =>
+                      prev.map(c => (c.id === selectedClass.id ? updatedClass : c))
+                    );
                     setIsModified(true);
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
                   value={selectedClass.description}
-                  onChange={(e) => {
-                    const updatedClass = { ...selectedClass, description: e.target.value, lastModified: new Date() };
+                  onChange={e => {
+                    const updatedClass = {
+                      ...selectedClass,
+                      description: e.target.value,
+                      lastModified: new Date(),
+                    };
                     setSelectedClass(updatedClass);
-                    setClasses(prev => prev.map(c => c.id === selectedClass.id ? updatedClass : c));
+                    setClasses(prev =>
+                      prev.map(c => (c.id === selectedClass.id ? updatedClass : c))
+                    );
                     setIsModified(true);
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   rows={3}
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Class Type</label>
                 <select
                   value={selectedClass.classType}
-                  onChange={(e) => {
-                    const updatedClass = { ...selectedClass, classType: e.target.value as ClassDefinition['classType'], lastModified: new Date() };
+                  onChange={e => {
+                    const updatedClass = {
+                      ...selectedClass,
+                      classType: e.target.value as ClassDefinition['classType'],
+                      lastModified: new Date(),
+                    };
                     setSelectedClass(updatedClass);
-                    setClasses(prev => prev.map(c => c.id === selectedClass.id ? updatedClass : c));
+                    setClasses(prev =>
+                      prev.map(c => (c.id === selectedClass.id ? updatedClass : c))
+                    );
                     setIsModified(true);
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
@@ -921,48 +1025,70 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
                   <option value="ActiveX EXE">ActiveX EXE</option>
                 </select>
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Threading Model</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Threading Model
+                </label>
                 <select
                   value={selectedClass.threadingModel}
-                  onChange={(e) => {
-                    const updatedClass = { ...selectedClass, threadingModel: e.target.value as ThreadingModel, lastModified: new Date() };
+                  onChange={e => {
+                    const updatedClass = {
+                      ...selectedClass,
+                      threadingModel: e.target.value as ThreadingModel,
+                      lastModified: new Date(),
+                    };
                     setSelectedClass(updatedClass);
-                    setClasses(prev => prev.map(c => c.id === selectedClass.id ? updatedClass : c));
+                    setClasses(prev =>
+                      prev.map(c => (c.id === selectedClass.id ? updatedClass : c))
+                    );
                     setIsModified(true);
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 >
                   {Object.values(ThreadingModel).map(model => (
-                    <option key={model} value={model}>{model}</option>
+                    <option key={model} value={model}>
+                      {model}
+                    </option>
                   ))}
                 </select>
               </div>
-              
+
               <div className="flex gap-4">
                 <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={selectedClass.isCreatable}
-                    onChange={(e) => {
-                      const updatedClass = { ...selectedClass, isCreatable: e.target.checked, lastModified: new Date() };
+                    onChange={e => {
+                      const updatedClass = {
+                        ...selectedClass,
+                        isCreatable: e.target.checked,
+                        lastModified: new Date(),
+                      };
                       setSelectedClass(updatedClass);
-                      setClasses(prev => prev.map(c => c.id === selectedClass.id ? updatedClass : c));
+                      setClasses(prev =>
+                        prev.map(c => (c.id === selectedClass.id ? updatedClass : c))
+                      );
                       setIsModified(true);
                     }}
                   />
                   <span className="text-sm">Creatable</span>
                 </label>
-                
+
                 <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={selectedClass.isPublic}
-                    onChange={(e) => {
-                      const updatedClass = { ...selectedClass, isPublic: e.target.checked, lastModified: new Date() };
+                    onChange={e => {
+                      const updatedClass = {
+                        ...selectedClass,
+                        isPublic: e.target.checked,
+                        lastModified: new Date(),
+                      };
                       setSelectedClass(updatedClass);
-                      setClasses(prev => prev.map(c => c.id === selectedClass.id ? updatedClass : c));
+                      setClasses(prev =>
+                        prev.map(c => (c.id === selectedClass.id ? updatedClass : c))
+                      );
                       setIsModified(true);
                     }}
                   />
@@ -975,10 +1101,16 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
                 <input
                   type="text"
                   value={selectedClass.version}
-                  onChange={(e) => {
-                    const updatedClass = { ...selectedClass, version: e.target.value, lastModified: new Date() };
+                  onChange={e => {
+                    const updatedClass = {
+                      ...selectedClass,
+                      version: e.target.value,
+                      lastModified: new Date(),
+                    };
                     setSelectedClass(updatedClass);
-                    setClasses(prev => prev.map(c => c.id === selectedClass.id ? updatedClass : c));
+                    setClasses(prev =>
+                      prev.map(c => (c.id === selectedClass.id ? updatedClass : c))
+                    );
                     setIsModified(true);
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
@@ -1013,7 +1145,7 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
             {activeTab === 'methods' && renderMemberList(MemberType.Method)}
             {activeTab === 'events' && renderMemberList(MemberType.Event)}
             {activeTab === 'fields' && renderMemberList(MemberType.Field)}
-            
+
             {activeTab === 'interfaces' && (
               <div className="p-4">
                 <div className="flex items-center justify-between mb-4">
@@ -1021,17 +1153,26 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
                 </div>
                 <div className="space-y-2">
                   {availableInterfaces.map(intf => (
-                    <label key={intf.name} className="flex items-center gap-2 p-2 border border-gray-200 rounded">
+                    <label
+                      key={intf.name}
+                      className="flex items-center gap-2 p-2 border border-gray-200 rounded"
+                    >
                       <input
                         type="checkbox"
                         checked={selectedClass.interfaces.includes(intf.name)}
-                        onChange={(e) => {
+                        onChange={e => {
                           const interfaces = e.target.checked
                             ? [...selectedClass.interfaces, intf.name]
                             : selectedClass.interfaces.filter(i => i !== intf.name);
-                          const updatedClass = { ...selectedClass, interfaces, lastModified: new Date() };
+                          const updatedClass = {
+                            ...selectedClass,
+                            interfaces,
+                            lastModified: new Date(),
+                          };
                           setSelectedClass(updatedClass);
-                          setClasses(prev => prev.map(c => c.id === selectedClass.id ? updatedClass : c));
+                          setClasses(prev =>
+                            prev.map(c => (c.id === selectedClass.id ? updatedClass : c))
+                          );
                           setIsModified(true);
                         }}
                       />
@@ -1044,7 +1185,7 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
                 </div>
               </div>
             )}
-            
+
             {activeTab === 'code' && (
               <div className="p-4">
                 <div className="mb-4">
@@ -1056,7 +1197,7 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
                     Generate Code
                   </button>
                 </div>
-                
+
                 {generatedCode && (
                   <pre className="bg-gray-50 border border-gray-300 rounded p-4 text-xs font-mono overflow-auto h-96">
                     {generatedCode}
@@ -1070,7 +1211,7 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
 
       {/* Dialogs */}
       {renderAddMemberDialog()}
-      
+
       {/* Code Preview Modal */}
       {showPreview && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -1094,11 +1235,9 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
                 </button>
               </div>
             </div>
-            
+
             <div className="flex-1 overflow-auto border border-gray-300 rounded">
-              <pre className="p-4 text-sm font-mono bg-gray-50 h-full">
-                {generatedCode}
-              </pre>
+              <pre className="p-4 text-sm font-mono bg-gray-50 h-full">{generatedCode}</pre>
             </div>
           </div>
         </div>
@@ -1108,8 +1247,9 @@ export const ClassBuilderUtility: React.FC<ClassBuilderUtilityProps> = ({
       <div className="p-2 border-t border-gray-200 bg-gray-50 text-xs text-gray-600">
         <div className="flex justify-between">
           <span>
-            Class: {selectedClass.name} • Type: {selectedClass.classType} • 
-            {selectedClass.properties.length} properties, {selectedClass.methods.length} methods, {selectedClass.events.length} events
+            Class: {selectedClass.name} • Type: {selectedClass.classType} •
+            {selectedClass.properties.length} properties, {selectedClass.methods.length} methods,{' '}
+            {selectedClass.events.length} events
           </span>
           <span>{isModified ? 'Modified' : 'Saved'}</span>
         </div>
@@ -1133,7 +1273,7 @@ const PropertyForm: React.FC<{
     description: '',
     readOnly: false,
     withEvents: false,
-    array: false
+    array: false,
   });
 
   return (
@@ -1144,69 +1284,68 @@ const PropertyForm: React.FC<{
           <input
             type="text"
             value={property.name}
-            onChange={(e) => setProperty({ ...property, name: e.target.value })}
+            onChange={e => setProperty({ ...property, name: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded"
           />
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Data Type</label>
           <select
             value={property.dataType}
-            onChange={(e) => setProperty({ ...property, dataType: e.target.value as VB6DataType })}
+            onChange={e => setProperty({ ...property, dataType: e.target.value as VB6DataType })}
             className="w-full px-3 py-2 border border-gray-300 rounded"
           >
             {Object.values(VB6DataType).map(type => (
-              <option key={type} value={type}>{type}</option>
+              <option key={type} value={type}>
+                {type}
+              </option>
             ))}
           </select>
         </div>
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
         <textarea
           value={property.description}
-          onChange={(e) => setProperty({ ...property, description: e.target.value })}
+          onChange={e => setProperty({ ...property, description: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded"
           rows={2}
         />
       </div>
-      
+
       <div className="grid grid-cols-3 gap-4">
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={property.hasGet}
-            onChange={(e) => setProperty({ ...property, hasGet: e.target.checked })}
+            onChange={e => setProperty({ ...property, hasGet: e.target.checked })}
           />
           <span className="text-sm">Property Get</span>
         </label>
-        
+
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={property.hasLet}
-            onChange={(e) => setProperty({ ...property, hasLet: e.target.checked })}
+            onChange={e => setProperty({ ...property, hasLet: e.target.checked })}
           />
           <span className="text-sm">Property Let</span>
         </label>
-        
+
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={property.hasSet}
-            onChange={(e) => setProperty({ ...property, hasSet: e.target.checked })}
+            onChange={e => setProperty({ ...property, hasSet: e.target.checked })}
           />
           <span className="text-sm">Property Set</span>
         </label>
       </div>
-      
+
       <div className="flex justify-end gap-2">
-        <button
-          onClick={onCancel}
-          className="px-4 py-2 text-gray-600 hover:text-gray-800"
-        >
+        <button onClick={onCancel} className="px-4 py-2 text-gray-600 hover:text-gray-800">
           Cancel
         </button>
         <button
@@ -1232,18 +1371,21 @@ const MethodForm: React.FC<{
     parameters: [],
     description: '',
     isFunction: false,
-    isStatic: false
+    isStatic: false,
   });
 
   const addParameter = () => {
     setMethod({
       ...method,
-      parameters: [...method.parameters, {
-        name: '',
-        dataType: VB6DataType.String,
-        passing: ParameterPassing.ByVal,
-        description: ''
-      }]
+      parameters: [
+        ...method.parameters,
+        {
+          name: '',
+          dataType: VB6DataType.String,
+          passing: ParameterPassing.ByVal,
+          description: '',
+        },
+      ],
     });
   };
 
@@ -1255,70 +1397,76 @@ const MethodForm: React.FC<{
           <input
             type="text"
             value={method.name}
-            onChange={(e) => setMethod({ ...method, name: e.target.value })}
+            onChange={e => setMethod({ ...method, name: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded"
           />
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Access</label>
           <select
             value={method.accessModifier}
-            onChange={(e) => setMethod({ ...method, accessModifier: e.target.value as AccessModifier })}
+            onChange={e =>
+              setMethod({ ...method, accessModifier: e.target.value as AccessModifier })
+            }
             className="w-full px-3 py-2 border border-gray-300 rounded"
           >
             {Object.values(AccessModifier).map(access => (
-              <option key={access} value={access}>{access}</option>
+              <option key={access} value={access}>
+                {access}
+              </option>
             ))}
           </select>
         </div>
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
         <textarea
           value={method.description}
-          onChange={(e) => setMethod({ ...method, description: e.target.value })}
+          onChange={e => setMethod({ ...method, description: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded"
           rows={2}
         />
       </div>
-      
+
       <div className="flex gap-4">
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={method.isFunction}
-            onChange={(e) => setMethod({ ...method, isFunction: e.target.checked })}
+            onChange={e => setMethod({ ...method, isFunction: e.target.checked })}
           />
           <span className="text-sm">Function (returns value)</span>
         </label>
-        
+
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={method.isStatic}
-            onChange={(e) => setMethod({ ...method, isStatic: e.target.checked })}
+            onChange={e => setMethod({ ...method, isStatic: e.target.checked })}
           />
           <span className="text-sm">Static</span>
         </label>
       </div>
-      
+
       {method.isFunction && (
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Return Type</label>
           <select
             value={method.returnType || VB6DataType.String}
-            onChange={(e) => setMethod({ ...method, returnType: e.target.value as VB6DataType })}
+            onChange={e => setMethod({ ...method, returnType: e.target.value as VB6DataType })}
             className="w-full px-3 py-2 border border-gray-300 rounded"
           >
             {Object.values(VB6DataType).map(type => (
-              <option key={type} value={type}>{type}</option>
+              <option key={type} value={type}>
+                {type}
+              </option>
             ))}
           </select>
         </div>
       )}
-      
+
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="block text-sm font-medium text-gray-700">Parameters</label>
@@ -1329,7 +1477,7 @@ const MethodForm: React.FC<{
             Add Parameter
           </button>
         </div>
-        
+
         <div className="space-y-2 max-h-32 overflow-y-auto">
           {method.parameters.map((param, index) => (
             <div key={index} className="grid grid-cols-4 gap-2">
@@ -1337,17 +1485,17 @@ const MethodForm: React.FC<{
                 type="text"
                 placeholder="Name"
                 value={param.name}
-                onChange={(e) => {
+                onChange={e => {
                   const newParams = [...method.parameters];
                   newParams[index].name = e.target.value;
                   setMethod({ ...method, parameters: newParams });
                 }}
                 className="px-2 py-1 border border-gray-300 rounded text-sm"
               />
-              
+
               <select
                 value={param.dataType}
-                onChange={(e) => {
+                onChange={e => {
                   const newParams = [...method.parameters];
                   newParams[index].dataType = e.target.value as VB6DataType;
                   setMethod({ ...method, parameters: newParams });
@@ -1355,13 +1503,15 @@ const MethodForm: React.FC<{
                 className="px-2 py-1 border border-gray-300 rounded text-sm"
               >
                 {Object.values(VB6DataType).map(type => (
-                  <option key={type} value={type}>{type}</option>
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
                 ))}
               </select>
-              
+
               <select
                 value={param.passing}
-                onChange={(e) => {
+                onChange={e => {
                   const newParams = [...method.parameters];
                   newParams[index].passing = e.target.value as ParameterPassing;
                   setMethod({ ...method, parameters: newParams });
@@ -1369,10 +1519,12 @@ const MethodForm: React.FC<{
                 className="px-2 py-1 border border-gray-300 rounded text-sm"
               >
                 {Object.values(ParameterPassing).map(passing => (
-                  <option key={passing} value={passing}>{passing}</option>
+                  <option key={passing} value={passing}>
+                    {passing}
+                  </option>
                 ))}
               </select>
-              
+
               <button
                 onClick={() => {
                   const newParams = method.parameters.filter((_, i) => i !== index);
@@ -1386,12 +1538,9 @@ const MethodForm: React.FC<{
           ))}
         </div>
       </div>
-      
+
       <div className="flex justify-end gap-2">
-        <button
-          onClick={onCancel}
-          className="px-4 py-2 text-gray-600 hover:text-gray-800"
-        >
+        <button onClick={onCancel} className="px-4 py-2 text-gray-600 hover:text-gray-800">
           Cancel
         </button>
         <button
@@ -1414,7 +1563,7 @@ const EventForm: React.FC<{
   const [event, setEvent] = useState<Omit<ClassEvent, 'id'>>({
     name: '',
     parameters: [],
-    description: ''
+    description: '',
   });
 
   return (
@@ -1424,26 +1573,23 @@ const EventForm: React.FC<{
         <input
           type="text"
           value={event.name}
-          onChange={(e) => setEvent({ ...event, name: e.target.value })}
+          onChange={e => setEvent({ ...event, name: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded"
         />
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
         <textarea
           value={event.description}
-          onChange={(e) => setEvent({ ...event, description: e.target.value })}
+          onChange={e => setEvent({ ...event, description: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded"
           rows={2}
         />
       </div>
-      
+
       <div className="flex justify-end gap-2">
-        <button
-          onClick={onCancel}
-          className="px-4 py-2 text-gray-600 hover:text-gray-800"
-        >
+        <button onClick={onCancel} className="px-4 py-2 text-gray-600 hover:text-gray-800">
           Cancel
         </button>
         <button
@@ -1469,7 +1615,7 @@ const FieldForm: React.FC<{
     accessModifier: AccessModifier.Private,
     description: '',
     isConstant: false,
-    withEvents: false
+    withEvents: false,
   });
 
   return (
@@ -1480,60 +1626,59 @@ const FieldForm: React.FC<{
           <input
             type="text"
             value={field.name}
-            onChange={(e) => setField({ ...field, name: e.target.value })}
+            onChange={e => setField({ ...field, name: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded"
           />
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Data Type</label>
           <select
             value={field.dataType}
-            onChange={(e) => setField({ ...field, dataType: e.target.value as VB6DataType })}
+            onChange={e => setField({ ...field, dataType: e.target.value as VB6DataType })}
             className="w-full px-3 py-2 border border-gray-300 rounded"
           >
             {Object.values(VB6DataType).map(type => (
-              <option key={type} value={type}>{type}</option>
+              <option key={type} value={type}>
+                {type}
+              </option>
             ))}
           </select>
         </div>
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
         <textarea
           value={field.description}
-          onChange={(e) => setField({ ...field, description: e.target.value })}
+          onChange={e => setField({ ...field, description: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded"
           rows={2}
         />
       </div>
-      
+
       <div className="flex gap-4">
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={field.isConstant}
-            onChange={(e) => setField({ ...field, isConstant: e.target.checked })}
+            onChange={e => setField({ ...field, isConstant: e.target.checked })}
           />
           <span className="text-sm">Constant</span>
         </label>
-        
+
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={field.withEvents}
-            onChange={(e) => setField({ ...field, withEvents: e.target.checked })}
+            onChange={e => setField({ ...field, withEvents: e.target.checked })}
           />
           <span className="text-sm">WithEvents</span>
         </label>
       </div>
-      
+
       <div className="flex justify-end gap-2">
-        <button
-          onClick={onCancel}
-          className="px-4 py-2 text-gray-600 hover:text-gray-800"
-        >
+        <button onClick={onCancel} className="px-4 py-2 text-gray-600 hover:text-gray-800">
           Cancel
         </button>
         <button

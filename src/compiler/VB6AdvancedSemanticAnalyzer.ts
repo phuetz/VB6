@@ -4,25 +4,27 @@
  */
 
 import { VB6TypeSystem, TypeCheckResult, VB6TypeInfo } from './VB6TypeSystem';
-import { 
-  VB6ModuleNode, 
-  VB6ProcedureNode, 
-  VB6StatementNode, 
+import {
+  VB6ModuleNode,
+  VB6ProcedureNode,
+  VB6StatementNode,
   VB6ExpressionNode,
   VB6DeclarationNode,
   VB6ASTNode,
   VB6AssignmentNode,
   VB6IfNode,
   VB6ForNode,
-  VB6WhileNode,
-  VB6CallNode
+  VB6DoNode,
+  VB6FunctionCallNode,
+  VB6IdentifierNode,
+  VB6LiteralNode,
 } from './VB6RecursiveDescentParser';
 
 export enum SemanticErrorSeverity {
   Error = 'error',
   Warning = 'warning',
   Info = 'info',
-  Hint = 'hint'
+  Hint = 'hint',
 }
 
 export interface SemanticError {
@@ -124,27 +126,21 @@ export class VB6AdvancedSemanticAnalyzer {
     this.reset();
 
     // Phase 1: Construction de la table des symboles
-    console.log('Phase 1: Building symbol table...');
     this.buildSymbolTable(ast);
 
     // Phase 2: Résolution des types
-    console.log('Phase 2: Resolving types...');
     this.resolveTypes(ast);
 
     // Phase 3: Vérification des types
-    console.log('Phase 3: Type checking...');
     this.checkTypes(ast);
 
     // Phase 4: Analyse de flux de contrôle
-    console.log('Phase 4: Control flow analysis...');
     this.analyzeControlFlow(ast);
 
     // Phase 5: Détection du code mort
-    console.log('Phase 5: Dead code detection...');
     this.detectDeadCode(ast);
 
     // Phase 6: Validation des interfaces et événements
-    console.log('Phase 6: Interface validation...');
     this.validateInterfaces(ast);
 
     // Calculer les métriques
@@ -158,7 +154,7 @@ export class VB6AdvancedSemanticAnalyzer {
       controlFlow: this.controlFlowGraphs,
       errors: this.errors,
       warnings: this.warnings,
-      metrics
+      metrics,
     };
   }
 
@@ -210,7 +206,7 @@ export class VB6AdvancedSemanticAnalyzer {
       isStatic: decl.isStatic,
       isWithEvents: decl.isWithEvents,
       initialized: decl.initialValue !== undefined,
-      references: 0
+      references: 0,
     };
 
     // Vérifier les doublons
@@ -244,7 +240,7 @@ export class VB6AdvancedSemanticAnalyzer {
       line: proc.line,
       column: proc.column,
       isStatic: proc.isStatic,
-      references: 0
+      references: 0,
     };
     previousScope.symbols.set(proc.name, procSymbol);
 
@@ -257,7 +253,7 @@ export class VB6AdvancedSemanticAnalyzer {
         line: param.line,
         column: param.column,
         initialized: true,
-        references: 0
+        references: 0,
       };
       procScope.symbols.set(param.name, paramSymbol);
     }
@@ -276,11 +272,11 @@ export class VB6AdvancedSemanticAnalyzer {
    */
   private resolveTypes(node: VB6ASTNode): void {
     // Parcourir l'AST et résoudre tous les types
-    this.traverseNode(node, (child) => {
+    this.traverseNode(node, child => {
       if (child.type === 'Declaration') {
         const decl = child as VB6DeclarationNode;
         const symbol = this.findSymbol(decl.name);
-        
+
         if (symbol && typeof symbol.type === 'string') {
           const typeInfo = this.typeSystem.getType(symbol.type);
           if (!typeInfo) {
@@ -309,7 +305,10 @@ export class VB6AdvancedSemanticAnalyzer {
         if (stmt.statementType === 'Assignment') {
           this.checkAssignment(stmt as VB6AssignmentNode);
         } else if (stmt.statementType === 'Call') {
-          this.checkFunctionCall(stmt as VB6CallNode);
+          const expr = (stmt as VB6StatementNode & { expression?: VB6ExpressionNode }).expression;
+          if (expr && expr.expressionType === 'FunctionCall') {
+            this.checkFunctionCall(expr as VB6FunctionCallNode);
+          }
         }
         break;
       }
@@ -328,7 +327,7 @@ export class VB6AdvancedSemanticAnalyzer {
 
     if (targetType && valueType) {
       const compatibility = this.typeSystem.checkTypeCompatibility(valueType, targetType);
-      
+
       if (!compatibility.valid) {
         this.addError(
           assignment.line,
@@ -337,12 +336,7 @@ export class VB6AdvancedSemanticAnalyzer {
           'TYPE_MISMATCH'
         );
       } else if (compatibility.warning) {
-        this.addWarning(
-          assignment.line,
-          assignment.column,
-          compatibility.warning,
-          'TYPE_WARNING'
-        );
+        this.addWarning(assignment.line, assignment.column, compatibility.warning, 'TYPE_WARNING');
       }
     }
   }
@@ -350,16 +344,28 @@ export class VB6AdvancedSemanticAnalyzer {
   /**
    * Vérifier un appel de fonction
    */
-  private checkFunctionCall(call: VB6CallNode): void {
+  private checkFunctionCall(call: VB6FunctionCallNode): void {
     const func = this.findSymbol(call.name);
-    
+
     if (!func) {
       // Vérifier si c'est une fonction built-in
       const builtins = new Set([
-        'MsgBox', 'InputBox', 'Print', 'Len', 'Left', 'Right', 'Mid',
-        'UCase', 'LCase', 'Trim', 'Val', 'Str', 'Now', 'Timer'
+        'MsgBox',
+        'InputBox',
+        'Print',
+        'Len',
+        'Left',
+        'Right',
+        'Mid',
+        'UCase',
+        'LCase',
+        'Trim',
+        'Val',
+        'Str',
+        'Now',
+        'Timer',
       ]);
-      
+
       if (!builtins.has(call.name)) {
         this.addError(
           call.line,
@@ -381,13 +387,13 @@ export class VB6AdvancedSemanticAnalyzer {
       const proc = node as VB6ProcedureNode;
       const cfg = this.buildControlFlowGraph(proc);
       this.controlFlowGraphs.set(proc.name, cfg);
-      
+
       // Vérifier les chemins de retour
       if (proc.procedureType === 'Function') {
         this.checkReturnPaths(proc, cfg);
       }
     }
-    
+
     this.traverseNode(node, child => this.analyzeControlFlow(child));
   }
 
@@ -400,7 +406,7 @@ export class VB6AdvancedSemanticAnalyzer {
       type: 'entry',
       predecessors: new Set(),
       successors: new Set(),
-      reachable: true
+      reachable: true,
     };
 
     const exit: ControlFlowNode = {
@@ -408,7 +414,7 @@ export class VB6AdvancedSemanticAnalyzer {
       type: 'exit',
       predecessors: new Set(),
       successors: new Set(),
-      reachable: false
+      reachable: false,
     };
 
     const nodes = new Map<string, ControlFlowNode>();
@@ -448,7 +454,7 @@ export class VB6AdvancedSemanticAnalyzer {
       predecessors: new Set(),
       successors: new Set(),
       statement: stmt,
-      reachable: false
+      reachable: false,
     };
     nodes.set(node.id, node);
 
@@ -520,15 +526,15 @@ export class VB6AdvancedSemanticAnalyzer {
   private detectInfiniteLoops(node: VB6ASTNode): void {
     if (node.type === 'Statement') {
       const stmt = node as VB6StatementNode;
-      
+
       if (stmt.statementType === 'While' || stmt.statementType === 'Do') {
-        const loop = stmt as VB6WhileNode;
-        
+        const loop = stmt as VB6DoNode;
+
         // Vérifier si la condition est une constante true
         if (this.isConstantTrue(loop.condition)) {
           // Vérifier s'il y a un Exit dans le corps
           const hasExit = this.containsExit(loop.body);
-          
+
           if (!hasExit) {
             this.addWarning(
               loop.line,
@@ -540,7 +546,7 @@ export class VB6AdvancedSemanticAnalyzer {
         }
       }
     }
-    
+
     this.traverseNode(node, child => this.detectInfiniteLoops(child));
   }
 
@@ -551,29 +557,30 @@ export class VB6AdvancedSemanticAnalyzer {
     // Vérifier les implémentations d'interface
     // Vérifier les WithEvents et RaiseEvent
     // Vérifier les propriétés Get/Let/Set cohérentes
-    
+
     if (node.type === 'Module') {
       const module = node as VB6ModuleNode;
-      
+
       // Vérifier les propriétés
       const properties = new Map<string, Set<string>>();
-      
+
       for (const proc of module.procedures || []) {
         if (proc.procedureType.startsWith('Property')) {
           const propType = proc.procedureType.substring(8); // Remove 'Property'
-          
+
           if (!properties.has(proc.name)) {
             properties.set(proc.name, new Set());
           }
           properties.get(proc.name)!.add(propType);
         }
       }
-      
+
       // Vérifier la cohérence des propriétés
       for (const [propName, types] of properties) {
         if (types.has('Let') && types.has('Set')) {
           this.addWarning(
-            0, 0,
+            0,
+            0,
             `Property '${propName}' has both Let and Set accessors`,
             'PROPERTY_AMBIGUOUS'
           );
@@ -589,27 +596,27 @@ export class VB6AdvancedSemanticAnalyzer {
       name,
       parent,
       symbols: new Map(),
-      children: []
+      children: [],
     };
-    
+
     if (parent) {
       parent.children.push(scope);
     }
-    
+
     return scope;
   }
 
   private findSymbol(name: string): Symbol | undefined {
     // Chercher dans le scope actuel et remonter
     let scope: Scope | undefined = this.currentScope;
-    
+
     while (scope) {
       if (scope.symbols.has(name)) {
         return scope.symbols.get(name);
       }
       scope = scope.parent;
     }
-    
+
     // Chercher dans la table globale
     return this.symbolTable.get(name);
   }
@@ -624,12 +631,13 @@ export class VB6AdvancedSemanticAnalyzer {
   private getExpressionType(expr: VB6ExpressionNode): VB6TypeInfo | undefined {
     // Simplification - devrait analyser l'expression complète
     if (expr.expressionType === 'Identifier') {
-      const symbol = this.findSymbol((expr as any).name);
+      const identExpr = expr as VB6IdentifierNode;
+      const symbol = this.findSymbol(identExpr.name);
       return symbol ? (symbol.type as VB6TypeInfo) : undefined;
     }
-    
+
     if (expr.expressionType === 'Literal') {
-      const literal = expr as any;
+      const literal = expr as VB6LiteralNode;
       if (typeof literal.value === 'number') {
         return this.typeSystem.getType('Double');
       }
@@ -640,25 +648,26 @@ export class VB6AdvancedSemanticAnalyzer {
         return this.typeSystem.getType('Boolean');
       }
     }
-    
+
     return this.typeSystem.getType('Variant');
   }
 
   private traverseNode(node: VB6ASTNode, visitor: (node: VB6ASTNode) => void): void {
     if (!node) return;
-    
+
     // Parcourir tous les champs qui pourraient contenir des nœuds
-    for (const key in node) {
-      const value = (node as any)[key];
-      
+    const record = node as Record<string, unknown>;
+    for (const key in record) {
+      const value = record[key];
+
       if (Array.isArray(value)) {
         for (const item of value) {
           if (item && typeof item === 'object' && 'type' in item) {
-            visitor(item);
+            visitor(item as VB6ASTNode);
           }
         }
       } else if (value && typeof value === 'object' && 'type' in value) {
-        visitor(value);
+        visitor(value as VB6ASTNode);
       }
     }
   }
@@ -667,21 +676,18 @@ export class VB6AdvancedSemanticAnalyzer {
     return `node_${this.nodeIdCounter++}`;
   }
 
-  private markReachableNodes(
-    start: ControlFlowNode,
-    nodes: Map<string, ControlFlowNode>
-  ): void {
+  private markReachableNodes(start: ControlFlowNode, nodes: Map<string, ControlFlowNode>): void {
     const visited = new Set<string>();
     const queue = [start];
-    
+
     while (queue.length > 0) {
       const node = queue.shift()!;
-      
+
       if (visited.has(node.id)) continue;
-      
+
       visited.add(node.id);
       node.reachable = true;
-      
+
       for (const successorId of node.successors) {
         const successor = nodes.get(successorId);
         if (successor && !visited.has(successorId)) {
@@ -694,7 +700,7 @@ export class VB6AdvancedSemanticAnalyzer {
   private checkReturnPaths(proc: VB6ProcedureNode, cfg: ControlFlowGraph): void {
     // Vérifier que tous les chemins mènent à un return pour les fonctions
     const hasReturn = this.allPathsReturn(cfg.entry, cfg.exit, cfg.nodes, new Set());
-    
+
     if (!hasReturn) {
       this.addWarning(
         proc.line,
@@ -713,34 +719,34 @@ export class VB6AdvancedSemanticAnalyzer {
   ): boolean {
     if (visited.has(node.id)) return true;
     visited.add(node.id);
-    
+
     if (node.id === exit.id) return true;
-    
+
     if (node.statement && node.statement.statementType === 'Return') {
       return true;
     }
-    
+
     if (node.successors.size === 0) return false;
-    
+
     for (const successorId of node.successors) {
       const successor = nodes.get(successorId);
       if (successor && !this.allPathsReturn(successor, exit, nodes, visited)) {
         return false;
       }
     }
-    
+
     return true;
   }
 
   private isConstantTrue(expr: VB6ExpressionNode): boolean {
     // Simplification - vérifier si c'est littéralement True
-    return expr.expressionType === 'Literal' && (expr as any).value === true;
+    return expr.expressionType === 'Literal' && (expr as VB6LiteralNode).value === true;
   }
 
   private containsExit(statements: VB6StatementNode[]): boolean {
     for (const stmt of statements) {
       if (stmt.statementType === 'Exit') return true;
-      
+
       // Vérifier récursivement dans les sous-statements
       if (stmt.statementType === 'If') {
         const ifStmt = stmt as VB6IfNode;
@@ -759,7 +765,7 @@ export class VB6AdvancedSemanticAnalyzer {
     let unusedVariables = 0;
 
     // Calculer la complexité cyclomatique
-    this.traverseNode(ast, (node) => {
+    this.traverseNode(ast, node => {
       if (node.type === 'Statement') {
         const stmt = node as VB6StatementNode;
         if (['If', 'For', 'While', 'Do', 'Case'].includes(stmt.statementType)) {
@@ -790,7 +796,7 @@ export class VB6AdvancedSemanticAnalyzer {
       unreachableCode,
       typeErrors: this.errors.filter(e => e.code?.includes('TYPE')).length,
       uninitializedVariables,
-      unusedVariables
+      unusedVariables,
     };
   }
 
@@ -804,7 +810,7 @@ export class VB6AdvancedSemanticAnalyzer {
       column,
       message,
       severity: SemanticErrorSeverity.Error,
-      code
+      code,
     });
   }
 
@@ -814,7 +820,7 @@ export class VB6AdvancedSemanticAnalyzer {
       column,
       message,
       severity: SemanticErrorSeverity.Warning,
-      code
+      code,
     });
   }
 

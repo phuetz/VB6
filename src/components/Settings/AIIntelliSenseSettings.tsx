@@ -17,7 +17,7 @@ import {
   Eye,
   EyeOff,
   Sliders,
-  BarChart3
+  BarChart3,
 } from 'lucide-react';
 import { aiIntelliSenseEngine } from '../../services/AIIntelliSenseEngine';
 
@@ -53,15 +53,17 @@ const DEFAULT_SETTINGS: AISettings = {
   enableProjectTypeDetection: true,
   enableTimeBasedSuggestions: false,
   showAIIndicators: true,
-  autoTriggerDelay: 300
+  autoTriggerDelay: 300,
 };
 
 export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
   visible,
-  onClose
+  onClose,
 }) => {
   const [settings, setSettings] = useState<AISettings>(DEFAULT_SETTINGS);
-  const [activeTab, setActiveTab] = useState<'general' | 'performance' | 'learning' | 'advanced'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'performance' | 'learning' | 'advanced'>(
+    'general'
+  );
   const [isExporting, setIsExporting] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
 
@@ -83,7 +85,7 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
     const newSettings = { ...settings, ...updates };
     setSettings(newSettings);
     localStorage.setItem('ai-intellisense-settings', JSON.stringify(newSettings));
-    
+
     // Update the AI engine configuration
     aiIntelliSenseEngine.updateConfig({
       enableAI: newSettings.enableAI,
@@ -91,7 +93,7 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
       contextWindow: newSettings.contextWindow,
       maxSuggestions: newSettings.maxSuggestions,
       confidenceThreshold: newSettings.confidenceThreshold,
-      learningRate: newSettings.learningRate
+      learningRate: newSettings.learningRate,
     });
   };
 
@@ -105,18 +107,18 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
   // Export settings
   const exportSettings = async () => {
     setIsExporting(true);
-    
+
     try {
       const exportData = {
         settings,
         timestamp: new Date().toISOString(),
-        version: '1.0'
+        version: '1.0',
       };
-      
+
       const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-        type: 'application/json'
+        type: 'application/json',
       });
-      
+
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -135,7 +137,7 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
   // Import settings
   const importSettings = (file: File) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       try {
         const data = JSON.parse(e.target?.result as string);
         if (data.settings) {
@@ -152,18 +154,16 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
 
   if (!visible) return null;
 
-  const TabButton: React.FC<{ id: string; icon: React.ReactNode; label: string; active: boolean }> = ({
-    id,
-    icon,
-    label,
-    active
-  }) => (
+  const TabButton: React.FC<{
+    id: string;
+    icon: React.ReactNode;
+    label: string;
+    active: boolean;
+  }> = ({ id, icon, label, active }) => (
     <button
       onClick={() => setActiveTab(id as any)}
       className={`flex items-center gap-2 px-4 py-2 text-sm rounded-lg transition-colors ${
-        active
-          ? 'bg-purple-600 text-white'
-          : 'text-gray-600 hover:bg-gray-100'
+        active ? 'bg-purple-600 text-white' : 'text-gray-600 hover:bg-gray-100'
       }`}
     >
       {icon}
@@ -191,13 +191,13 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
 
   const Toggle: React.FC<{ checked: boolean; onChange: (checked: boolean) => void }> = ({
     checked,
-    onChange
+    onChange,
   }) => (
     <label className="relative inline-flex items-center cursor-pointer">
       <input
         type="checkbox"
         checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
+        onChange={e => onChange(e.target.checked)}
         className="sr-only peer"
       />
       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
@@ -219,11 +219,12 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
         max={max}
         step={step}
         value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
+        onChange={e => onChange(parseFloat(e.target.value))}
         className="w-32 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
       />
       <span className="text-sm text-gray-600 font-mono w-16">
-        {value}{unit}
+        {value}
+        {unit}
       </span>
     </div>
   );
@@ -235,17 +236,12 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Brain className="text-purple-600" size={24} />
-            <h2 className="text-xl font-semibold text-gray-800">
-              AI IntelliSense Settings
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-800">AI IntelliSense Settings</h2>
             <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-sm">
               Ultra-Think
             </span>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
             ×
           </button>
         </div>
@@ -289,7 +285,7 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
               >
                 <Toggle
                   checked={settings.enableAI}
-                  onChange={(checked) => updateSettings({ enableAI: checked })}
+                  onChange={checked => updateSettings({ enableAI: checked })}
                 />
               </SettingRow>
 
@@ -300,7 +296,7 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
               >
                 <Toggle
                   checked={settings.showAIIndicators}
-                  onChange={(checked) => updateSettings({ showAIIndicators: checked })}
+                  onChange={checked => updateSettings({ showAIIndicators: checked })}
                 />
               </SettingRow>
 
@@ -311,7 +307,7 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
               >
                 <Toggle
                   checked={settings.enableSnippets}
-                  onChange={(checked) => updateSettings({ enableSnippets: checked })}
+                  onChange={checked => updateSettings({ enableSnippets: checked })}
                 />
               </SettingRow>
 
@@ -322,7 +318,7 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
               >
                 <Toggle
                   checked={settings.enableProjectTypeDetection}
-                  onChange={(checked) => updateSettings({ enableProjectTypeDetection: checked })}
+                  onChange={checked => updateSettings({ enableProjectTypeDetection: checked })}
                 />
               </SettingRow>
 
@@ -336,7 +332,7 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
                   min={0}
                   max={1000}
                   step={50}
-                  onChange={(value) => updateSettings({ autoTriggerDelay: value })}
+                  onChange={value => updateSettings({ autoTriggerDelay: value })}
                   unit="ms"
                 />
               </SettingRow>
@@ -355,7 +351,7 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
                   min={10}
                   max={200}
                   step={10}
-                  onChange={(value) => updateSettings({ maxSuggestions: value })}
+                  onChange={value => updateSettings({ maxSuggestions: value })}
                 />
               </SettingRow>
 
@@ -369,7 +365,7 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
                   min={0}
                   max={1}
                   step={0.05}
-                  onChange={(value) => updateSettings({ confidenceThreshold: value })}
+                  onChange={value => updateSettings({ confidenceThreshold: value })}
                 />
               </SettingRow>
 
@@ -383,7 +379,7 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
                   min={100}
                   max={5000}
                   step={100}
-                  onChange={(value) => updateSettings({ contextWindow: value })}
+                  onChange={value => updateSettings({ contextWindow: value })}
                 />
               </SettingRow>
 
@@ -412,7 +408,7 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
               >
                 <Toggle
                   checked={settings.personalizedSuggestions}
-                  onChange={(checked) => updateSettings({ personalizedSuggestions: checked })}
+                  onChange={checked => updateSettings({ personalizedSuggestions: checked })}
                 />
               </SettingRow>
 
@@ -423,7 +419,7 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
               >
                 <Toggle
                   checked={settings.enablePatternLearning}
-                  onChange={(checked) => updateSettings({ enablePatternLearning: checked })}
+                  onChange={checked => updateSettings({ enablePatternLearning: checked })}
                 />
               </SettingRow>
 
@@ -434,7 +430,7 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
               >
                 <Toggle
                   checked={settings.enableTimeBasedSuggestions}
-                  onChange={(checked) => updateSettings({ enableTimeBasedSuggestions: checked })}
+                  onChange={checked => updateSettings({ enableTimeBasedSuggestions: checked })}
                 />
               </SettingRow>
 
@@ -448,7 +444,7 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
                   min={0.01}
                   max={0.5}
                   step={0.01}
-                  onChange={(value) => updateSettings({ learningRate: value })}
+                  onChange={value => updateSettings({ learningRate: value })}
                 />
               </SettingRow>
 
@@ -458,7 +454,8 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
                   <div>
                     <h4 className="font-medium text-blue-800">Learning Status</h4>
                     <p className="text-sm text-blue-700 mt-1">
-                      The AI has learned from your coding patterns and will continue to improve suggestions over time.
+                      The AI has learned from your coding patterns and will continue to improve
+                      suggestions over time.
                     </p>
                     <button
                       onClick={() => {
@@ -517,7 +514,7 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
                     <Download size={14} />
                     {isExporting ? 'Exporting...' : 'Export Settings'}
                   </button>
-                  
+
                   <label className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm cursor-pointer">
                     <Upload size={14} />
                     Import Settings
@@ -525,7 +522,7 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
                       type="file"
                       accept=".json"
                       className="hidden"
-                      onChange={(e) => {
+                      onChange={e => {
                         const file = e.target.files?.[0];
                         if (file) {
                           importSettings(file);
@@ -542,7 +539,9 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
                 <h4 className="font-medium text-gray-800">Debug Information</h4>
                 <div className="bg-gray-100 rounded p-3 font-mono text-sm">
                   <div>AI Engine: Active</div>
-                  <div>Learning Mode: {settings.personalizedSuggestions ? 'Enabled' : 'Disabled'}</div>
+                  <div>
+                    Learning Mode: {settings.personalizedSuggestions ? 'Enabled' : 'Disabled'}
+                  </div>
                   <div>Cache Size: Dynamic</div>
                   <div>Version: 1.0.0-ultra</div>
                 </div>
@@ -560,7 +559,7 @@ export const AIIntelliSenseSettings: React.FC<AIIntelliSenseSettingsProps> = ({
             <RotateCcw size={14} />
             Reset to Defaults
           </button>
-          
+
           <div className="flex gap-3">
             <button
               onClick={onClose}

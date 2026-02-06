@@ -10,28 +10,28 @@ export enum ConnectionType {
   SQLSERVER = 'SQL Server',
   ORACLE = 'Oracle',
   ACCESS = 'Microsoft Access',
-  EXCEL = 'Microsoft Excel'
+  EXCEL = 'Microsoft Excel',
 }
 
 export enum CommandType {
   Table = 'adCmdTable',
   Text = 'adCmdText',
   StoredProcedure = 'adCmdStoredProc',
-  Unknown = 'adCmdUnknown'
+  Unknown = 'adCmdUnknown',
 }
 
 export enum CursorType {
   OpenForwardOnly = 'adOpenForwardOnly',
   OpenKeyset = 'adOpenKeyset',
   OpenDynamic = 'adOpenDynamic',
-  OpenStatic = 'adOpenStatic'
+  OpenStatic = 'adOpenStatic',
 }
 
 export enum LockType {
   ReadOnly = 'adLockReadOnly',
   PessimisticLock = 'adLockPessimistic',
   OptimisticLock = 'adLockOptimistic',
-  BatchOptimistic = 'adLockBatchOptimistic'
+  BatchOptimistic = 'adLockBatchOptimistic',
 }
 
 // Database Connection
@@ -155,7 +155,7 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
   environment: initialEnvironment,
   onEnvironmentChange,
   onGenerateCode,
-  onTestConnection
+  onTestConnection,
 }) => {
   const [environment, setEnvironment] = useState<DataEnvironment>(
     initialEnvironment || {
@@ -166,11 +166,13 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
       commands: [],
       reports: [],
       created: new Date(),
-      modified: new Date()
+      modified: new Date(),
     }
   );
 
-  const [selectedTab, setSelectedTab] = useState<'connections' | 'commands' | 'schema' | 'reports'>('connections');
+  const [selectedTab, setSelectedTab] = useState<'connections' | 'commands' | 'schema' | 'reports'>(
+    'connections'
+  );
   const [selectedConnection, setSelectedConnection] = useState<DatabaseConnection | null>(null);
   const [selectedCommand, setSelectedCommand] = useState<DatabaseCommand | null>(null);
   const [showConnectionDialog, setShowConnectionDialog] = useState(false);
@@ -179,7 +181,7 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
     type: ConnectionType.SQLSERVER,
     integratedSecurity: true,
     timeout: 30,
-    properties: {}
+    properties: {},
   });
   const [commandDialog, setCommandDialog] = useState<Partial<DatabaseCommand>>({
     commandType: CommandType.Text,
@@ -188,7 +190,7 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
     timeout: 30,
     cacheSize: 1,
     maxRecords: 0,
-    parameters: []
+    parameters: [],
   });
   const [schema, setSchema] = useState<DatabaseSchema | null>(null);
   const [queryBuilder, setQueryBuilder] = useState<{
@@ -202,7 +204,7 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
     tables: [],
     fields: [],
     conditions: [],
-    orderBy: []
+    orderBy: [],
   });
   const [isDirty, setIsDirty] = useState(false);
 
@@ -229,20 +231,20 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
       integratedSecurity: connectionDialog.integratedSecurity || false,
       timeout: connectionDialog.timeout || 30,
       isConnected: false,
-      properties: connectionDialog.properties || {}
+      properties: connectionDialog.properties || {},
     };
 
     setEnvironment(prev => ({
       ...prev,
       connections: [...prev.connections, newConnection],
-      modified: new Date()
+      modified: new Date(),
     }));
 
     setConnectionDialog({
       type: ConnectionType.SQLSERVER,
       integratedSecurity: true,
       timeout: 30,
-      properties: {}
+      properties: {},
     });
     setShowConnectionDialog(false);
     setIsDirty(true);
@@ -264,13 +266,13 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
       cursorType: commandDialog.cursorType || CursorType.OpenForwardOnly,
       lockType: commandDialog.lockType || LockType.ReadOnly,
       cacheSize: commandDialog.cacheSize || 1,
-      maxRecords: commandDialog.maxRecords || 0
+      maxRecords: commandDialog.maxRecords || 0,
     };
 
     setEnvironment(prev => ({
       ...prev,
       commands: [...prev.commands, newCommand],
-      modified: new Date()
+      modified: new Date(),
     }));
 
     setCommandDialog({
@@ -280,49 +282,54 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
       timeout: 30,
       cacheSize: 1,
       maxRecords: 0,
-      parameters: []
+      parameters: [],
     });
     setShowCommandDialog(false);
     setIsDirty(true);
   }, [commandDialog, generateId]);
 
   // Test connection
-  const testConnection = useCallback(async (connection: DatabaseConnection) => {
-    try {
-      const result = await onTestConnection?.(connection);
-      if (result) {
+  const testConnection = useCallback(
+    async (connection: DatabaseConnection) => {
+      try {
+        const result = await onTestConnection?.(connection);
+        if (result) {
+          setEnvironment(prev => ({
+            ...prev,
+            connections: prev.connections.map(c =>
+              c.id === connection.id ? { ...c, isConnected: true, lastError: undefined } : c
+            ),
+          }));
+          return true;
+        } else {
+          setEnvironment(prev => ({
+            ...prev,
+            connections: prev.connections.map(c =>
+              c.id === connection.id
+                ? { ...c, isConnected: false, lastError: 'Connection failed' }
+                : c
+            ),
+          }));
+          return false;
+        }
+      } catch (error) {
         setEnvironment(prev => ({
           ...prev,
           connections: prev.connections.map(c =>
             c.id === connection.id
-              ? { ...c, isConnected: true, lastError: undefined }
+              ? {
+                  ...c,
+                  isConnected: false,
+                  lastError: error instanceof Error ? error.message : 'Connection failed',
+                }
               : c
-          )
-        }));
-        return true;
-      } else {
-        setEnvironment(prev => ({
-          ...prev,
-          connections: prev.connections.map(c =>
-            c.id === connection.id
-              ? { ...c, isConnected: false, lastError: 'Connection failed' }
-              : c
-          )
+          ),
         }));
         return false;
       }
-    } catch (error) {
-      setEnvironment(prev => ({
-        ...prev,
-        connections: prev.connections.map(c =>
-          c.id === connection.id
-            ? { ...c, isConnected: false, lastError: error instanceof Error ? error.message : 'Connection failed' }
-            : c
-        )
-      }));
-      return false;
-    }
-  }, [onTestConnection]);
+    },
+    [onTestConnection]
+  );
 
   // Generate connection string
   const generateConnectionString = useCallback((conn: Partial<DatabaseConnection>): string => {
@@ -361,47 +368,133 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
           name: 'Customers',
           type: 'TABLE',
           fields: [
-            { name: 'CustomerID', type: 'int', size: 4, precision: 10, scale: 0, isNullable: false, isKey: true, isAutoIncrement: true },
-            { name: 'CompanyName', type: 'nvarchar', size: 40, precision: 0, scale: 0, isNullable: false, isKey: false, isAutoIncrement: false },
-            { name: 'ContactName', type: 'nvarchar', size: 30, precision: 0, scale: 0, isNullable: true, isKey: false, isAutoIncrement: false },
-            { name: 'Country', type: 'nvarchar', size: 15, precision: 0, scale: 0, isNullable: true, isKey: false, isAutoIncrement: false }
+            {
+              name: 'CustomerID',
+              type: 'int',
+              size: 4,
+              precision: 10,
+              scale: 0,
+              isNullable: false,
+              isKey: true,
+              isAutoIncrement: true,
+            },
+            {
+              name: 'CompanyName',
+              type: 'nvarchar',
+              size: 40,
+              precision: 0,
+              scale: 0,
+              isNullable: false,
+              isKey: false,
+              isAutoIncrement: false,
+            },
+            {
+              name: 'ContactName',
+              type: 'nvarchar',
+              size: 30,
+              precision: 0,
+              scale: 0,
+              isNullable: true,
+              isKey: false,
+              isAutoIncrement: false,
+            },
+            {
+              name: 'Country',
+              type: 'nvarchar',
+              size: 15,
+              precision: 0,
+              scale: 0,
+              isNullable: true,
+              isKey: false,
+              isAutoIncrement: false,
+            },
           ],
           indexes: [
             { name: 'PK_Customers', fields: ['CustomerID'], isUnique: true, isPrimary: true },
-            { name: 'IX_CompanyName', fields: ['CompanyName'], isUnique: false, isPrimary: false }
-          ]
+            { name: 'IX_CompanyName', fields: ['CompanyName'], isUnique: false, isPrimary: false },
+          ],
         },
         {
           name: 'Orders',
           type: 'TABLE',
           fields: [
-            { name: 'OrderID', type: 'int', size: 4, precision: 10, scale: 0, isNullable: false, isKey: true, isAutoIncrement: true },
-            { name: 'CustomerID', type: 'int', size: 4, precision: 10, scale: 0, isNullable: true, isKey: false, isAutoIncrement: false },
-            { name: 'OrderDate', type: 'datetime', size: 8, precision: 23, scale: 3, isNullable: true, isKey: false, isAutoIncrement: false },
-            { name: 'TotalAmount', type: 'money', size: 8, precision: 19, scale: 4, isNullable: true, isKey: false, isAutoIncrement: false }
+            {
+              name: 'OrderID',
+              type: 'int',
+              size: 4,
+              precision: 10,
+              scale: 0,
+              isNullable: false,
+              isKey: true,
+              isAutoIncrement: true,
+            },
+            {
+              name: 'CustomerID',
+              type: 'int',
+              size: 4,
+              precision: 10,
+              scale: 0,
+              isNullable: true,
+              isKey: false,
+              isAutoIncrement: false,
+            },
+            {
+              name: 'OrderDate',
+              type: 'datetime',
+              size: 8,
+              precision: 23,
+              scale: 3,
+              isNullable: true,
+              isKey: false,
+              isAutoIncrement: false,
+            },
+            {
+              name: 'TotalAmount',
+              type: 'money',
+              size: 8,
+              precision: 19,
+              scale: 4,
+              isNullable: true,
+              isKey: false,
+              isAutoIncrement: false,
+            },
           ],
           indexes: [
             { name: 'PK_Orders', fields: ['OrderID'], isUnique: true, isPrimary: true },
-            { name: 'FK_Orders_Customers', fields: ['CustomerID'], isUnique: false, isPrimary: false }
-          ]
-        }
+            {
+              name: 'FK_Orders_Customers',
+              fields: ['CustomerID'],
+              isUnique: false,
+              isPrimary: false,
+            },
+          ],
+        },
       ],
       procedures: [
         {
           name: 'GetCustomerOrders',
           parameters: [
-            { id: 'p1', name: '@CustomerID', type: 'int', direction: 'Input', size: 4, precision: 10, scale: 0, isNullable: false }
+            {
+              id: 'p1',
+              name: '@CustomerID',
+              type: 'int',
+              direction: 'Input',
+              size: 4,
+              precision: 10,
+              scale: 0,
+              isNullable: false,
+            },
           ],
-          returnType: 'recordset'
-        }
+          returnType: 'recordset',
+        },
       ],
       functions: [
         {
           name: 'GetCustomerCount',
           parameters: [],
-          returnType: 'int'
-        }
-      ]
+          returnType: 'int',
+        },
+      ],
     };
 
     setSchema(mockSchema);
@@ -416,7 +509,7 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
     environment.connections.forEach(conn => {
       code += `' Connection: ${conn.name}\n`;
       code += `Private ${conn.name} As ADODB.Connection\n\n`;
-      
+
       code += `Private Sub Initialize${conn.name}()\n`;
       code += `    Set ${conn.name} = New ADODB.Connection\n`;
       code += `    ${conn.name}.ConnectionString = "${conn.connectionString}"\n`;
@@ -432,20 +525,20 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
 
       code += `' Command: ${cmd.name}\n`;
       code += `Private ${cmd.name} As ADODB.Recordset\n\n`;
-      
+
       code += `Private Sub Initialize${cmd.name}()\n`;
       code += `    Set ${cmd.name} = New ADODB.Recordset\n`;
       code += `    ${cmd.name}.CursorType = ${cmd.cursorType}\n`;
       code += `    ${cmd.name}.LockType = ${cmd.lockType}\n`;
       if (cmd.cacheSize > 1) code += `    ${cmd.name}.CacheSize = ${cmd.cacheSize}\n`;
       if (cmd.maxRecords > 0) code += `    ${cmd.name}.MaxRecords = ${cmd.maxRecords}\n`;
-      
+
       if (cmd.commandType === CommandType.Text) {
         code += `    ${cmd.name}.Open "${cmd.commandText}", ${conn.name}\n`;
       } else if (cmd.commandType === CommandType.Table) {
         code += `    ${cmd.name}.Open "${cmd.source}", ${conn.name}, ${cmd.cursorType}, ${cmd.lockType}\n`;
       }
-      
+
       code += `End Sub\n\n`;
     });
 
@@ -474,10 +567,18 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
     if (connectionDialog.type || connectionDialog.dataSource || connectionDialog.initialCatalog) {
       setConnectionDialog(prev => ({
         ...prev,
-        connectionString: generateConnectionString(prev)
+        connectionString: generateConnectionString(prev),
       }));
     }
-  }, [connectionDialog.type, connectionDialog.dataSource, connectionDialog.initialCatalog, connectionDialog.integratedSecurity, connectionDialog.userId, connectionDialog.password, generateConnectionString]);
+  }, [
+    connectionDialog.type,
+    connectionDialog.dataSource,
+    connectionDialog.initialCatalog,
+    connectionDialog.integratedSecurity,
+    connectionDialog.userId,
+    connectionDialog.password,
+    generateConnectionString,
+  ]);
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -520,7 +621,7 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
             { key: 'connections', label: 'Connections', count: environment.connections.length },
             { key: 'commands', label: 'Commands', count: environment.commands.length },
             { key: 'schema', label: 'Schema', count: schema?.tables.length || 0 },
-            { key: 'reports', label: 'Reports', count: environment.reports.length }
+            { key: 'reports', label: 'Reports', count: environment.reports.length },
           ].map(tab => (
             <button
               key={tab.key}
@@ -547,9 +648,13 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
                       <h3 className="text-lg font-medium">{conn.name}</h3>
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        conn.isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 rounded text-xs ${
+                          conn.isConnected
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}
+                      >
                         {conn.isConnected ? 'Connected' : 'Disconnected'}
                       </span>
                       <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
@@ -571,24 +676,24 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
                       </button>
                     </div>
                   </div>
-                  
+
                   <div className="text-sm text-gray-600 mb-2">
                     <strong>Data Source:</strong> {conn.dataSource}
                   </div>
-                  
+
                   {conn.initialCatalog && (
                     <div className="text-sm text-gray-600 mb-2">
                       <strong>Database:</strong> {conn.initialCatalog}
                     </div>
                   )}
-                  
+
                   <div className="text-sm text-gray-600 mb-2">
                     <strong>Connection String:</strong>
                     <div className="mt-1 p-2 bg-gray-100 rounded font-mono text-xs break-all">
                       {conn.connectionString}
                     </div>
                   </div>
-                  
+
                   {conn.lastError && (
                     <div className="text-sm text-red-600">
                       <strong>Error:</strong> {conn.lastError}
@@ -596,12 +701,14 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
                   )}
                 </div>
               ))}
-              
+
               {environment.connections.length === 0 && (
                 <div className="text-center py-12 text-gray-500">
                   <div className="text-4xl mb-4">🔌</div>
                   <p className="text-lg">No connections defined</p>
-                  <p className="text-sm mt-2">Click "Add Connection" to create your first database connection</p>
+                  <p className="text-sm mt-2">
+                    Click "Add Connection" to create your first database connection
+                  </p>
                 </div>
               )}
             </div>
@@ -631,33 +738,43 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
                         </button>
                       </div>
                     </div>
-                    
+
                     <div className="text-sm text-gray-600 mb-2">
                       <strong>Connection:</strong> {conn?.name || 'Unknown'}
                     </div>
-                    
+
                     <div className="text-sm text-gray-600 mb-2">
                       <strong>Command Text:</strong>
                       <div className="mt-1 p-2 bg-gray-100 rounded font-mono text-xs">
                         {cmd.commandText || '(empty)'}
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                      <div><strong>Cursor Type:</strong> {cmd.cursorType}</div>
-                      <div><strong>Lock Type:</strong> {cmd.lockType}</div>
-                      <div><strong>Cache Size:</strong> {cmd.cacheSize}</div>
-                      <div><strong>Max Records:</strong> {cmd.maxRecords || 'All'}</div>
+                      <div>
+                        <strong>Cursor Type:</strong> {cmd.cursorType}
+                      </div>
+                      <div>
+                        <strong>Lock Type:</strong> {cmd.lockType}
+                      </div>
+                      <div>
+                        <strong>Cache Size:</strong> {cmd.cacheSize}
+                      </div>
+                      <div>
+                        <strong>Max Records:</strong> {cmd.maxRecords || 'All'}
+                      </div>
                     </div>
                   </div>
                 );
               })}
-              
+
               {environment.commands.length === 0 && (
                 <div className="text-center py-12 text-gray-500">
                   <div className="text-4xl mb-4">📊</div>
                   <p className="text-lg">No commands defined</p>
-                  <p className="text-sm mt-2">Click "Add Command" to create your first database command</p>
+                  <p className="text-sm mt-2">
+                    Click "Add Command" to create your first database command
+                  </p>
                 </div>
               )}
             </div>
@@ -680,7 +797,7 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
                             {table.type}
                           </span>
                         </div>
-                        
+
                         <div className="overflow-x-auto">
                           <table className="w-full text-sm">
                             <thead>
@@ -699,9 +816,21 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
                                   <td className="py-2">{field.size}</td>
                                   <td className="py-2">
                                     <div className="flex gap-1">
-                                      {field.isKey && <span className="bg-yellow-100 text-yellow-800 px-1 rounded text-xs">PK</span>}
-                                      {field.isAutoIncrement && <span className="bg-blue-100 text-blue-800 px-1 rounded text-xs">AI</span>}
-                                      {!field.isNullable && <span className="bg-red-100 text-red-800 px-1 rounded text-xs">NN</span>}
+                                      {field.isKey && (
+                                        <span className="bg-yellow-100 text-yellow-800 px-1 rounded text-xs">
+                                          PK
+                                        </span>
+                                      )}
+                                      {field.isAutoIncrement && (
+                                        <span className="bg-blue-100 text-blue-800 px-1 rounded text-xs">
+                                          AI
+                                        </span>
+                                      )}
+                                      {!field.isNullable && (
+                                        <span className="bg-red-100 text-red-800 px-1 rounded text-xs">
+                                          NN
+                                        </span>
+                                      )}
                                     </div>
                                   </td>
                                 </tr>
@@ -717,7 +846,9 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
                 {/* Stored Procedures */}
                 {schema.procedures.length > 0 && (
                   <div>
-                    <h3 className="text-lg font-medium mb-4">Stored Procedures ({schema.procedures.length})</h3>
+                    <h3 className="text-lg font-medium mb-4">
+                      Stored Procedures ({schema.procedures.length})
+                    </h3>
                     <div className="grid gap-4">
                       {schema.procedures.map(proc => (
                         <div key={proc.name} className="border border-gray-300 rounded-lg p-4">
@@ -744,7 +875,9 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
               <div className="text-center py-12 text-gray-500">
                 <div className="text-4xl mb-4">🗂️</div>
                 <p className="text-lg">No schema loaded</p>
-                <p className="text-sm mt-2">Connect to a database and click "Load Schema" to view the database structure</p>
+                <p className="text-sm mt-2">
+                  Connect to a database and click "Load Schema" to view the database structure
+                </p>
               </div>
             )}
           </div>
@@ -766,43 +899,56 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[600px] max-h-[80vh] overflow-y-auto">
             <h3 className="text-lg font-medium mb-4">Add Database Connection</h3>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Connection Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Connection Name
+                </label>
                 <input
                   type="text"
                   value={connectionDialog.name || ''}
-                  onChange={(e) => setConnectionDialog(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => setConnectionDialog(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="e.g., NorthwindConnection"
                 />
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Connection Type</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Connection Type
+                </label>
                 <select
                   value={connectionDialog.type}
-                  onChange={(e) => setConnectionDialog(prev => ({ ...prev, type: e.target.value as ConnectionType }))}
+                  onChange={e =>
+                    setConnectionDialog(prev => ({
+                      ...prev,
+                      type: e.target.value as ConnectionType,
+                    }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 >
                   {Object.values(ConnectionType).map(type => (
-                    <option key={type} value={type}>{type}</option>
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Data Source</label>
                 <input
                   type="text"
                   value={connectionDialog.dataSource || ''}
-                  onChange={(e) => setConnectionDialog(prev => ({ ...prev, dataSource: e.target.value }))}
+                  onChange={e =>
+                    setConnectionDialog(prev => ({ ...prev, dataSource: e.target.value }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="Server name or file path"
                 />
               </div>
-              
+
               {connectionDialog.type === ConnectionType.SQLSERVER && (
                 <>
                   <div>
@@ -810,40 +956,55 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
                     <input
                       type="text"
                       value={connectionDialog.initialCatalog || ''}
-                      onChange={(e) => setConnectionDialog(prev => ({ ...prev, initialCatalog: e.target.value }))}
+                      onChange={e =>
+                        setConnectionDialog(prev => ({ ...prev, initialCatalog: e.target.value }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                       placeholder="Database name"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="flex items-center gap-2">
                       <input
                         type="checkbox"
                         checked={connectionDialog.integratedSecurity || false}
-                        onChange={(e) => setConnectionDialog(prev => ({ ...prev, integratedSecurity: e.target.checked }))}
+                        onChange={e =>
+                          setConnectionDialog(prev => ({
+                            ...prev,
+                            integratedSecurity: e.target.checked,
+                          }))
+                        }
                       />
                       <span className="text-sm">Use Windows Authentication</span>
                     </label>
                   </div>
-                  
+
                   {!connectionDialog.integratedSecurity && (
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">User ID</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          User ID
+                        </label>
                         <input
                           type="text"
                           value={connectionDialog.userId || ''}
-                          onChange={(e) => setConnectionDialog(prev => ({ ...prev, userId: e.target.value }))}
+                          onChange={e =>
+                            setConnectionDialog(prev => ({ ...prev, userId: e.target.value }))
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Password
+                        </label>
                         <input
                           type="password"
                           value={connectionDialog.password || ''}
-                          onChange={(e) => setConnectionDialog(prev => ({ ...prev, password: e.target.value }))}
+                          onChange={e =>
+                            setConnectionDialog(prev => ({ ...prev, password: e.target.value }))
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded"
                         />
                       </div>
@@ -851,18 +1012,22 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
                   )}
                 </>
               )}
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Connection String</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Connection String
+                </label>
                 <textarea
                   value={connectionDialog.connectionString || ''}
-                  onChange={(e) => setConnectionDialog(prev => ({ ...prev, connectionString: e.target.value }))}
+                  onChange={e =>
+                    setConnectionDialog(prev => ({ ...prev, connectionString: e.target.value }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded font-mono text-sm"
                   rows={3}
                 />
               </div>
             </div>
-            
+
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => {
@@ -871,7 +1036,7 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
                     type: ConnectionType.SQLSERVER,
                     integratedSecurity: true,
                     timeout: 30,
-                    properties: {}
+                    properties: {},
                   });
                 }}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800"
@@ -895,86 +1060,114 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[600px] max-h-[80vh] overflow-y-auto">
             <h3 className="text-lg font-medium mb-4">Add Database Command</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Command Name</label>
                 <input
                   type="text"
                   value={commandDialog.name || ''}
-                  onChange={(e) => setCommandDialog(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => setCommandDialog(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="e.g., CustomersCommand"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Connection</label>
                 <select
                   value={commandDialog.connectionId || ''}
-                  onChange={(e) => setCommandDialog(prev => ({ ...prev, connectionId: e.target.value }))}
+                  onChange={e =>
+                    setCommandDialog(prev => ({ ...prev, connectionId: e.target.value }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 >
                   <option value="">Select connection...</option>
                   {environment.connections.map(conn => (
-                    <option key={conn.id} value={conn.id}>{conn.name}</option>
+                    <option key={conn.id} value={conn.id}>
+                      {conn.name}
+                    </option>
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Command Type</label>
                 <select
                   value={commandDialog.commandType}
-                  onChange={(e) => setCommandDialog(prev => ({ ...prev, commandType: e.target.value as CommandType }))}
+                  onChange={e =>
+                    setCommandDialog(prev => ({
+                      ...prev,
+                      commandType: e.target.value as CommandType,
+                    }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 >
                   {Object.values(CommandType).map(type => (
-                    <option key={type} value={type}>{type}</option>
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
                   ))}
                 </select>
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Command Text / Source</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Command Text / Source
+                </label>
                 <textarea
                   value={commandDialog.commandText || ''}
-                  onChange={(e) => setCommandDialog(prev => ({ ...prev, commandText: e.target.value }))}
+                  onChange={e =>
+                    setCommandDialog(prev => ({ ...prev, commandText: e.target.value }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded font-mono text-sm"
                   rows={4}
                   placeholder="SQL query, table name, or stored procedure name"
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Cursor Type</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Cursor Type
+                  </label>
                   <select
                     value={commandDialog.cursorType}
-                    onChange={(e) => setCommandDialog(prev => ({ ...prev, cursorType: e.target.value as CursorType }))}
+                    onChange={e =>
+                      setCommandDialog(prev => ({
+                        ...prev,
+                        cursorType: e.target.value as CursorType,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   >
                     {Object.values(CursorType).map(type => (
-                      <option key={type} value={type}>{type}</option>
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
                     ))}
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Lock Type</label>
                   <select
                     value={commandDialog.lockType}
-                    onChange={(e) => setCommandDialog(prev => ({ ...prev, lockType: e.target.value as LockType }))}
+                    onChange={e =>
+                      setCommandDialog(prev => ({ ...prev, lockType: e.target.value as LockType }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   >
                     {Object.values(LockType).map(type => (
-                      <option key={type} value={type}>{type}</option>
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
             </div>
-            
+
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => {
@@ -986,7 +1179,7 @@ export const DataEnvironmentDesigner: React.FC<DataEnvironmentDesignerProps> = (
                     timeout: 30,
                     cacheSize: 1,
                     maxRecords: 0,
-                    parameters: []
+                    parameters: [],
                   });
                 }}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800"

@@ -1,15 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import MonacoEditor from '@monaco-editor/react';
 import { vb6TestFramework, TestCase } from '../../services/VB6TestFramework';
-import { 
-  Save, 
-  X, 
-  FileText, 
-  Code, 
-  Settings,
-  PlayCircle,
-  AlertCircle
-} from 'lucide-react';
+import { Save, X, FileText, Code, Settings, PlayCircle, AlertCircle } from 'lucide-react';
 
 interface TestCaseEditorProps {
   testCase?: TestCase;
@@ -18,12 +10,7 @@ interface TestCaseEditorProps {
   onCancel: () => void;
 }
 
-const TestCaseEditor: React.FC<TestCaseEditorProps> = ({
-  testCase,
-  suiteId,
-  onSave,
-  onCancel
-}) => {
+const TestCaseEditor: React.FC<TestCaseEditorProps> = ({ testCase, suiteId, onSave, onCancel }) => {
   const [name, setName] = useState(testCase?.name || '');
   const [description, setDescription] = useState(testCase?.description || '');
   const [category, setCategory] = useState(testCase?.category || 'General');
@@ -69,7 +56,7 @@ const TestCaseEditor: React.FC<TestCaseEditorProps> = ({
       setup: setup.trim() || undefined,
       teardown: teardown.trim() || undefined,
       expectedResult: expectedResult.trim() || undefined,
-      status: testCase?.status || 'pending'
+      status: testCase?.status || 'pending',
     };
 
     if (!testCase) {
@@ -80,7 +67,20 @@ const TestCaseEditor: React.FC<TestCaseEditorProps> = ({
       // Updating existing test
       onSave(newTestCase);
     }
-  }, [testCase, suiteId, name, description, category, type, code, setup, teardown, expectedResult, validateTest, onSave]);
+  }, [
+    testCase,
+    suiteId,
+    name,
+    description,
+    category,
+    type,
+    code,
+    setup,
+    teardown,
+    expectedResult,
+    validateTest,
+    onSave,
+  ]);
 
   const getCodeTemplate = () => {
     return `' Test: ${name || 'New Test'}
@@ -126,10 +126,7 @@ Set testData = Nothing
             <FileText size={20} />
             {testCase ? 'Edit Test Case' : 'New Test Case'}
           </h2>
-          <button
-            onClick={onCancel}
-            className="hover:bg-blue-700 p-1 rounded"
-          >
+          <button onClick={onCancel} className="hover:bg-blue-700 p-1 rounded">
             <X size={20} />
           </button>
         </div>
@@ -162,7 +159,7 @@ Set testData = Nothing
                 <input
                   type="text"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={e => setName(e.target.value)}
                   className="w-full px-2 py-1 border rounded text-sm"
                   placeholder="Test name"
                 />
@@ -172,7 +169,7 @@ Set testData = Nothing
                 <label className="block text-sm font-medium mb-1">Description</label>
                 <textarea
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={e => setDescription(e.target.value)}
                   className="w-full px-2 py-1 border rounded text-sm"
                   rows={3}
                   placeholder="Test description"
@@ -184,7 +181,7 @@ Set testData = Nothing
                 <input
                   type="text"
                   value={category}
-                  onChange={(e) => setCategory(e.target.value)}
+                  onChange={e => setCategory(e.target.value)}
                   className="w-full px-2 py-1 border rounded text-sm"
                   placeholder="e.g., Controls, Functions, Events"
                 />
@@ -194,7 +191,7 @@ Set testData = Nothing
                 <label className="block text-sm font-medium mb-1">Test Type</label>
                 <select
                   value={type}
-                  onChange={(e) => setType(e.target.value as TestCase['type'])}
+                  onChange={e => setType(e.target.value as TestCase['type'])}
                   className="w-full px-2 py-1 border rounded text-sm"
                 >
                   <option value="unit">Unit Test</option>
@@ -208,7 +205,7 @@ Set testData = Nothing
                 <label className="block text-sm font-medium mb-1">Expected Result</label>
                 <textarea
                   value={expectedResult}
-                  onChange={(e) => setExpectedResult(e.target.value)}
+                  onChange={e => setExpectedResult(e.target.value)}
                   className="w-full px-2 py-1 border rounded text-sm"
                   rows={2}
                   placeholder="Expected test outcome (optional)"
@@ -274,14 +271,14 @@ Set testData = Nothing
                 <MonacoEditor
                   language="vb"
                   value={code || getCodeTemplate()}
-                  onChange={(value) => setCode(value || '')}
+                  onChange={value => setCode(value || '')}
                   options={{
                     minimap: { enabled: false },
                     fontSize: 12,
                     lineNumbers: 'on',
                     scrollBeyondLastLine: false,
                     automaticLayout: true,
-                    tabSize: 2
+                    tabSize: 2,
                   }}
                 />
               )}
@@ -289,14 +286,14 @@ Set testData = Nothing
                 <MonacoEditor
                   language="vb"
                   value={setup || getSetupTemplate()}
-                  onChange={(value) => setSetup(value || '')}
+                  onChange={value => setSetup(value || '')}
                   options={{
                     minimap: { enabled: false },
                     fontSize: 12,
                     lineNumbers: 'on',
                     scrollBeyondLastLine: false,
                     automaticLayout: true,
-                    tabSize: 2
+                    tabSize: 2,
                   }}
                 />
               )}
@@ -304,14 +301,14 @@ Set testData = Nothing
                 <MonacoEditor
                   language="vb"
                   value={teardown || getTeardownTemplate()}
-                  onChange={(value) => setTeardown(value || '')}
+                  onChange={value => setTeardown(value || '')}
                   options={{
                     minimap: { enabled: false },
                     fontSize: 12,
                     lineNumbers: 'on',
                     scrollBeyondLastLine: false,
                     automaticLayout: true,
-                    tabSize: 2
+                    tabSize: 2,
                   }}
                 />
               )}
@@ -322,10 +319,13 @@ Set testData = Nothing
         {/* Footer */}
         <div className="border-t border-gray-300 px-4 py-3 flex justify-between">
           <div className="text-sm text-gray-600">
-            {type === 'unit' && "Unit tests should test individual functions or methods in isolation"}
-            {type === 'integration' && "Integration tests verify that components work together correctly"}
-            {type === 'visual' && "Visual tests capture and compare UI screenshots"}
-            {type === 'performance' && "Performance tests measure execution time and resource usage"}
+            {type === 'unit' &&
+              'Unit tests should test individual functions or methods in isolation'}
+            {type === 'integration' &&
+              'Integration tests verify that components work together correctly'}
+            {type === 'visual' && 'Visual tests capture and compare UI screenshots'}
+            {type === 'performance' &&
+              'Performance tests measure execution time and resource usage'}
           </div>
           <div className="flex gap-2">
             <button

@@ -4,14 +4,14 @@
  * Compatible with VB6 resource compilation workflow
  */
 
-import { 
+import {
   VB6ResourceManagerInstance,
   VB6ResourceType,
   VB6LanguageID,
   VB6MenuItem,
   VB6DialogResource,
   VB6DialogControl,
-  VB6VersionResource
+  VB6VersionResource,
 } from './VB6ResourceManager';
 
 // Resource Compiler Constants
@@ -26,7 +26,7 @@ export const RC_CONSTANTS = {
   WS_CLIPSIBLINGS: 0x04000000,
   WS_CLIPCHILDREN: 0x02000000,
   WS_MAXIMIZE: 0x01000000,
-  WS_CAPTION: 0x00C00000,
+  WS_CAPTION: 0x00c00000,
   WS_BORDER: 0x00800000,
   WS_DLGFRAME: 0x00400000,
   WS_VSCROLL: 0x00200000,
@@ -73,7 +73,7 @@ export const RC_CONSTANTS = {
   WS_EX_RIGHTSCROLLBAR: 0x00000000,
   WS_EX_CONTROLPARENT: 0x00010000,
   WS_EX_STATICEDGE: 0x00020000,
-  WS_EX_APPWINDOW: 0x00040000
+  WS_EX_APPWINDOW: 0x00040000,
 };
 
 // Resource Compilation Context
@@ -114,7 +114,7 @@ enum TokenType {
   NEWLINE = 'NEWLINE',
   EOF = 'EOF',
   COMMENT = 'COMMENT',
-  KEYWORD = 'KEYWORD'
+  KEYWORD = 'KEYWORD',
 }
 
 interface Token {
@@ -135,7 +135,7 @@ export class VB6ResourceCompiler {
       currentFile: '',
       lineNumber: 1,
       errors: [],
-      warnings: []
+      warnings: [],
     };
 
     // Add standard defines
@@ -152,7 +152,10 @@ export class VB6ResourceCompiler {
   }
 
   // Main compilation entry point
-  async compileResourceScript(rcContent: string, filename: string = 'resources.rc'): Promise<{ success: boolean; errors: CompilationError[]; data?: ArrayBuffer }> {
+  async compileResourceScript(
+    rcContent: string,
+    filename: string = 'resources.rc'
+  ): Promise<{ success: boolean; errors: CompilationError[]; data?: ArrayBuffer }> {
     this.context.currentFile = filename;
     this.context.lineNumber = 1;
     this.context.errors = [];
@@ -164,7 +167,7 @@ export class VB6ResourceCompiler {
 
       // Tokenize the input
       const tokens = this.tokenize(rcContent);
-      
+
       // Parse tokens into resource definitions
       await this.parseTokens(tokens);
 
@@ -174,12 +177,12 @@ export class VB6ResourceCompiler {
         return {
           success: true,
           errors: this.context.errors,
-          data
+          data,
         };
       } else {
         return {
           success: false,
-          errors: this.context.errors
+          errors: this.context.errors,
         };
       }
     } catch (error) {
@@ -188,12 +191,12 @@ export class VB6ResourceCompiler {
         line: this.context.lineNumber,
         column: 0,
         message: `Compilation failed: ${error}`,
-        severity: 'error'
+        severity: 'error',
       });
 
       return {
         success: false,
-        errors: this.context.errors
+        errors: this.context.errors,
       };
     }
   }
@@ -206,16 +209,66 @@ export class VB6ResourceCompiler {
     let i = 0;
 
     const keywords = new Set([
-      'STRINGTABLE', 'MENU', 'DIALOG', 'DIALOGEX', 'ICON', 'CURSOR', 'BITMAP',
-      'ACCELERATORS', 'RCDATA', 'VERSIONINFO', 'POPUP', 'MENUITEM', 'SEPARATOR',
-      'CONTROL', 'DEFPUSHBUTTON', 'PUSHBUTTON', 'LTEXT', 'RTEXT', 'CTEXT',
-      'EDITTEXT', 'LISTBOX', 'COMBOBOX', 'SCROLLBAR', 'GROUPBOX', 'CHECKBOX',
-      'RADIOBUTTON', 'LANGUAGE', 'SUBLANGUAGE', 'BEGIN', 'END', 'FILEVERSION',
-      'PRODUCTVERSION', 'FILEFLAGSMASK', 'FILEFLAGS', 'FILEOS', 'FILETYPE',
-      'FILESUBTYPE', 'BLOCK', 'VALUE', 'STYLE', 'EXSTYLE', 'CAPTION', 'FONT',
-      'CLASS', 'PRELOAD', 'LOADONCALL', 'FIXED', 'MOVEABLE', 'DISCARDABLE',
-      'PURE', 'IMPURE', 'SHARED', 'NONSHARED', 'AUTO3DFACE', 'INACTIVE',
-      'GRAYED', 'CHECKED', 'MENUBARBREAK', 'MENUBREAK', 'HELP'
+      'STRINGTABLE',
+      'MENU',
+      'DIALOG',
+      'DIALOGEX',
+      'ICON',
+      'CURSOR',
+      'BITMAP',
+      'ACCELERATORS',
+      'RCDATA',
+      'VERSIONINFO',
+      'POPUP',
+      'MENUITEM',
+      'SEPARATOR',
+      'CONTROL',
+      'DEFPUSHBUTTON',
+      'PUSHBUTTON',
+      'LTEXT',
+      'RTEXT',
+      'CTEXT',
+      'EDITTEXT',
+      'LISTBOX',
+      'COMBOBOX',
+      'SCROLLBAR',
+      'GROUPBOX',
+      'CHECKBOX',
+      'RADIOBUTTON',
+      'LANGUAGE',
+      'SUBLANGUAGE',
+      'BEGIN',
+      'END',
+      'FILEVERSION',
+      'PRODUCTVERSION',
+      'FILEFLAGSMASK',
+      'FILEFLAGS',
+      'FILEOS',
+      'FILETYPE',
+      'FILESUBTYPE',
+      'BLOCK',
+      'VALUE',
+      'STYLE',
+      'EXSTYLE',
+      'CAPTION',
+      'FONT',
+      'CLASS',
+      'PRELOAD',
+      'LOADONCALL',
+      'FIXED',
+      'MOVEABLE',
+      'DISCARDABLE',
+      'PURE',
+      'IMPURE',
+      'SHARED',
+      'NONSHARED',
+      'AUTO3DFACE',
+      'INACTIVE',
+      'GRAYED',
+      'CHECKED',
+      'MENUBARBREAK',
+      'MENUBREAK',
+      'HELP',
     ]);
 
     while (i < content.length) {
@@ -297,12 +350,24 @@ export class VB6ResourceCompiler {
             i++;
             const escaped = content[i];
             switch (escaped) {
-              case 'n': str += '\n'; break;
-              case 'r': str += '\r'; break;
-              case 't': str += '\t'; break;
-              case '\\': str += '\\'; break;
-              case '"': str += '"'; break;
-              default: str += escaped; break;
+              case 'n':
+                str += '\n';
+                break;
+              case 'r':
+                str += '\r';
+                break;
+              case 't':
+                str += '\t';
+                break;
+              case '\\':
+                str += '\\';
+                break;
+              case '"':
+                str += '"';
+                break;
+              default:
+                str += escaped;
+                break;
             }
           } else {
             str += content[i];
@@ -322,9 +387,13 @@ export class VB6ResourceCompiler {
       if (char >= '0' && char <= '9') {
         let num = '';
         const startColumn = column;
-        
+
         // Handle hex numbers
-        if (char === '0' && i + 1 < content.length && (content[i + 1] === 'x' || content[i + 1] === 'X')) {
+        if (
+          char === '0' &&
+          i + 1 < content.length &&
+          (content[i + 1] === 'x' || content[i + 1] === 'X')
+        ) {
           num += content[i] + content[i + 1];
           i += 2;
           column += 2;
@@ -341,7 +410,7 @@ export class VB6ResourceCompiler {
             column++;
           }
         }
-        
+
         tokens.push({ type: TokenType.NUMBER, value: num, line, column: startColumn });
         continue;
       }
@@ -350,13 +419,15 @@ export class VB6ResourceCompiler {
       if ((char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') || char === '_') {
         let identifier = '';
         const startColumn = column;
-        while (i < content.length && (/[a-zA-Z0-9_]/.test(content[i]))) {
+        while (i < content.length && /[a-zA-Z0-9_]/.test(content[i])) {
           identifier += content[i];
           i++;
           column++;
         }
-        
-        const tokenType = keywords.has(identifier.toUpperCase()) ? TokenType.KEYWORD : TokenType.IDENTIFIER;
+
+        const tokenType = keywords.has(identifier.toUpperCase())
+          ? TokenType.KEYWORD
+          : TokenType.IDENTIFIER;
         tokens.push({ type: tokenType, value: identifier, line, column: startColumn });
         continue;
       }
@@ -364,14 +435,30 @@ export class VB6ResourceCompiler {
       // Handle single-character tokens
       let tokenType: TokenType | null = null;
       switch (char) {
-        case '{': tokenType = TokenType.LBRACE; break;
-        case '}': tokenType = TokenType.RBRACE; break;
-        case '(': tokenType = TokenType.LPAREN; break;
-        case ')': tokenType = TokenType.RPAREN; break;
-        case ',': tokenType = TokenType.COMMA; break;
-        case ';': tokenType = TokenType.SEMICOLON; break;
-        case '=': tokenType = TokenType.EQUALS; break;
-        case '|': tokenType = TokenType.PIPE; break;
+        case '{':
+          tokenType = TokenType.LBRACE;
+          break;
+        case '}':
+          tokenType = TokenType.RBRACE;
+          break;
+        case '(':
+          tokenType = TokenType.LPAREN;
+          break;
+        case ')':
+          tokenType = TokenType.RPAREN;
+          break;
+        case ',':
+          tokenType = TokenType.COMMA;
+          break;
+        case ';':
+          tokenType = TokenType.SEMICOLON;
+          break;
+        case '=':
+          tokenType = TokenType.EQUALS;
+          break;
+        case '|':
+          tokenType = TokenType.PIPE;
+          break;
       }
 
       if (tokenType) {
@@ -387,7 +474,7 @@ export class VB6ResourceCompiler {
         line,
         column,
         message: `Unknown character: '${char}'`,
-        severity: 'warning'
+        severity: 'warning',
       });
       i++;
       column++;
@@ -423,7 +510,7 @@ export class VB6ResourceCompiler {
 
     while (i < tokens.length && peek().type !== TokenType.EOF) {
       skipNewlines();
-      
+
       const token = peek();
       if (token.type === TokenType.EOF) break;
 
@@ -431,7 +518,7 @@ export class VB6ResourceCompiler {
       if (token.type === TokenType.IDENTIFIER || token.type === TokenType.NUMBER) {
         const resourceId = consume();
         skipNewlines();
-        
+
         const resourceType = consume(TokenType.KEYWORD);
         skipNewlines();
 
@@ -459,9 +546,17 @@ export class VB6ResourceCompiler {
             await this.parseRCData(resourceId, tokens, i, peek, consume, skipNewlines);
             break;
           default:
-            this.addError(`Unknown resource type: ${resourceType.value}`, resourceType.line, resourceType.column);
+            this.addError(
+              `Unknown resource type: ${resourceType.value}`,
+              resourceType.line,
+              resourceType.column
+            );
             // Skip to next resource
-            while (peek().type !== TokenType.EOF && peek().type !== TokenType.IDENTIFIER && peek().type !== TokenType.NUMBER) {
+            while (
+              peek().type !== TokenType.EOF &&
+              peek().type !== TokenType.IDENTIFIER &&
+              peek().type !== TokenType.NUMBER
+            ) {
               i++;
             }
             break;
@@ -474,9 +569,15 @@ export class VB6ResourceCompiler {
   }
 
   // Parse string table
-  private async parseStringTable(tokens: Token[], currentIndex: number, peek: () => Token, consume: (type?: TokenType) => Token, skipNewlines: () => void): Promise<void> {
+  private async parseStringTable(
+    tokens: Token[],
+    currentIndex: number,
+    peek: () => Token,
+    consume: (type?: TokenType) => Token,
+    skipNewlines: () => void
+  ): Promise<void> {
     skipNewlines();
-    
+
     // Optional LANGUAGE clause
     if (peek().value.toUpperCase() === 'LANGUAGE') {
       consume();
@@ -491,10 +592,10 @@ export class VB6ResourceCompiler {
     while (peek().type !== TokenType.RBRACE && peek().type !== TokenType.EOF) {
       const stringId = consume(TokenType.NUMBER);
       skipNewlines();
-      
+
       consume(TokenType.COMMA);
       skipNewlines();
-      
+
       const stringValue = consume(TokenType.STRING);
       skipNewlines();
 
@@ -511,9 +612,16 @@ export class VB6ResourceCompiler {
   }
 
   // Parse menu
-  private async parseMenu(resourceId: Token, tokens: Token[], currentIndex: number, peek: () => Token, consume: (type?: TokenType) => Token, skipNewlines: () => void): Promise<void> {
+  private async parseMenu(
+    resourceId: Token,
+    tokens: Token[],
+    currentIndex: number,
+    peek: () => Token,
+    consume: (type?: TokenType) => Token,
+    skipNewlines: () => void
+  ): Promise<void> {
     const menuItems: VB6MenuItem[] = [];
-    
+
     skipNewlines();
     consume(TokenType.LBRACE);
     skipNewlines();
@@ -529,24 +637,32 @@ export class VB6ResourceCompiler {
 
     // Add menu resource
     VB6ResourceManagerInstance.addMenuResource(
-      typeof resourceId.value === 'string' ? parseInt(resourceId.value) : parseInt(resourceId.value),
+      typeof resourceId.value === 'string'
+        ? parseInt(resourceId.value)
+        : parseInt(resourceId.value),
       menuItems,
       VB6LanguageID.LANG_NEUTRAL
     );
   }
 
   // Parse menu item
-  private async parseMenuItem(tokens: Token[], currentIndex: number, peek: () => Token, consume: (type?: TokenType) => Token, skipNewlines: () => void): Promise<VB6MenuItem | null> {
+  private async parseMenuItem(
+    tokens: Token[],
+    currentIndex: number,
+    peek: () => Token,
+    consume: (type?: TokenType) => Token,
+    skipNewlines: () => void
+  ): Promise<VB6MenuItem | null> {
     const token = peek();
-    
+
     if (token.value.toUpperCase() === 'POPUP') {
       consume();
       const text = consume(TokenType.STRING);
       skipNewlines();
-      
+
       consume(TokenType.LBRACE);
       skipNewlines();
-      
+
       const children: VB6MenuItem[] = [];
       while (peek().type !== TokenType.RBRACE && peek().type !== TokenType.EOF) {
         const child = await this.parseMenuItem(tokens, currentIndex, peek, consume, skipNewlines);
@@ -554,9 +670,9 @@ export class VB6ResourceCompiler {
           children.push(child);
         }
       }
-      
+
       consume(TokenType.RBRACE);
-      
+
       return {
         id: 0,
         text: text.value,
@@ -564,11 +680,11 @@ export class VB6ResourceCompiler {
         checked: false,
         separator: false,
         popup: true,
-        children
+        children,
       };
     } else if (token.value.toUpperCase() === 'MENUITEM') {
       consume();
-      
+
       if (peek().value.toUpperCase() === 'SEPARATOR') {
         consume();
         return {
@@ -577,34 +693,41 @@ export class VB6ResourceCompiler {
           enabled: false,
           checked: false,
           separator: true,
-          popup: false
+          popup: false,
         };
       } else {
         const text = consume(TokenType.STRING);
         skipNewlines();
-        
+
         consume(TokenType.COMMA);
         skipNewlines();
-        
+
         const id = consume(TokenType.NUMBER);
         skipNewlines();
-        
+
         return {
           id: parseInt(id.value),
           text: text.value,
           enabled: true,
           checked: false,
           separator: false,
-          popup: false
+          popup: false,
         };
       }
     }
-    
+
     return null;
   }
 
   // Parse dialog
-  private async parseDialog(resourceId: Token, tokens: Token[], currentIndex: number, peek: () => Token, consume: (type?: TokenType) => Token, skipNewlines: () => void): Promise<void> {
+  private async parseDialog(
+    resourceId: Token,
+    tokens: Token[],
+    currentIndex: number,
+    peek: () => Token,
+    consume: (type?: TokenType) => Token,
+    skipNewlines: () => void
+  ): Promise<void> {
     // Parse dialog coordinates
     const x = consume(TokenType.NUMBER);
     consume(TokenType.COMMA);
@@ -625,13 +748,13 @@ export class VB6ResourceCompiler {
       style: RC_CONSTANTS.WS_POPUP | RC_CONSTANTS.WS_CAPTION | RC_CONSTANTS.WS_SYSMENU,
       exStyle: 0,
       controls: [],
-      languageId: VB6LanguageID.LANG_NEUTRAL
+      languageId: VB6LanguageID.LANG_NEUTRAL,
     };
 
     // Parse optional clauses
     while (peek().type === TokenType.KEYWORD) {
       const keyword = consume().value.toUpperCase();
-      
+
       switch (keyword) {
         case 'STYLE': {
           // Parse style value
@@ -658,7 +781,7 @@ export class VB6ResourceCompiler {
             size: parseInt(fontSize.value),
             weight: 400,
             italic: false,
-            charset: 0
+            charset: 0,
           };
           break;
         }
@@ -671,7 +794,13 @@ export class VB6ResourceCompiler {
 
     // Parse controls
     while (peek().type !== TokenType.RBRACE && peek().type !== TokenType.EOF) {
-      const control = await this.parseDialogControl(tokens, currentIndex, peek, consume, skipNewlines);
+      const control = await this.parseDialogControl(
+        tokens,
+        currentIndex,
+        peek,
+        consume,
+        skipNewlines
+      );
       if (control) {
         dialog.controls.push(control);
       }
@@ -683,16 +812,25 @@ export class VB6ResourceCompiler {
   }
 
   // Parse dialog control
-  private async parseDialogControl(tokens: Token[], currentIndex: number, peek: () => Token, consume: (type?: TokenType) => Token, skipNewlines: () => void): Promise<VB6DialogControl | null> {
+  private async parseDialogControl(
+    tokens: Token[],
+    currentIndex: number,
+    peek: () => Token,
+    consume: (type?: TokenType) => Token,
+    skipNewlines: () => void
+  ): Promise<VB6DialogControl | null> {
     const controlType = consume(TokenType.KEYWORD).value.toUpperCase();
-    
+
     const text = consume(TokenType.STRING);
     consume(TokenType.COMMA);
     const id = consume(TokenType.NUMBER);
     consume(TokenType.COMMA);
-    
+
     let className = '';
-    let x = 0, y = 0, width = 0, height = 0;
+    let x = 0,
+      y = 0,
+      width = 0,
+      height = 0;
     let style = 0;
     const exStyle = 0;
 
@@ -713,7 +851,7 @@ export class VB6ResourceCompiler {
       // Specific control type
       className = this.getControlClassName(controlType);
       style = this.getDefaultControlStyle(controlType);
-      
+
       // Parse coordinates
       x = parseInt(consume(TokenType.NUMBER).value);
       consume(TokenType.COMMA);
@@ -735,43 +873,71 @@ export class VB6ResourceCompiler {
       width,
       height,
       style,
-      exStyle
+      exStyle,
     };
   }
 
   // Parse icon resource
-  private async parseIcon(resourceId: Token, tokens: Token[], currentIndex: number, peek: () => Token, consume: (type?: TokenType) => Token, skipNewlines: () => void): Promise<void> {
+  private async parseIcon(
+    resourceId: Token,
+    tokens: Token[],
+    currentIndex: number,
+    peek: () => Token,
+    consume: (type?: TokenType) => Token,
+    skipNewlines: () => void
+  ): Promise<void> {
     const filename = consume(TokenType.STRING);
-    
+
     // In a real implementation, would load the icon file
     // For now, create a placeholder
     const iconData = new ArrayBuffer(1024); // Placeholder
-    
+
     VB6ResourceManagerInstance.addIconResource(
       parseInt(resourceId.value),
       iconData,
-      32, 32, 32, false
+      32,
+      32,
+      32,
+      false
     );
   }
 
   // Parse cursor resource
-  private async parseCursor(resourceId: Token, tokens: Token[], currentIndex: number, peek: () => Token, consume: (type?: TokenType) => Token, skipNewlines: () => void): Promise<void> {
+  private async parseCursor(
+    resourceId: Token,
+    tokens: Token[],
+    currentIndex: number,
+    peek: () => Token,
+    consume: (type?: TokenType) => Token,
+    skipNewlines: () => void
+  ): Promise<void> {
     const filename = consume(TokenType.STRING);
-    
+
     // In a real implementation, would load the cursor file
     const cursorData = new ArrayBuffer(1024); // Placeholder
-    
+
     VB6ResourceManagerInstance.addIconResource(
       parseInt(resourceId.value),
       cursorData,
-      32, 32, 32, true, 16, 16
+      32,
+      32,
+      32,
+      true,
+      16,
+      16
     );
   }
 
   // Parse version info
-  private async parseVersionInfo(tokens: Token[], currentIndex: number, peek: () => Token, consume: (type?: TokenType) => Token, skipNewlines: () => void): Promise<void> {
+  private async parseVersionInfo(
+    tokens: Token[],
+    currentIndex: number,
+    peek: () => Token,
+    consume: (type?: TokenType) => Token,
+    skipNewlines: () => void
+  ): Promise<void> {
     skipNewlines();
-    
+
     const version: VB6VersionResource = {
       fileVersion: { major: 1, minor: 0, build: 0, revision: 0 },
       productVersion: { major: 1, minor: 0, build: 0, revision: 0 },
@@ -780,7 +946,7 @@ export class VB6ResourceCompiler {
       fileOS: 0x40004,
       fileType: 0x1,
       fileSubtype: 0,
-      stringInfo: {}
+      stringInfo: {},
     };
 
     consume(TokenType.LBRACE);
@@ -788,7 +954,7 @@ export class VB6ResourceCompiler {
 
     while (peek().type !== TokenType.RBRACE && peek().type !== TokenType.EOF) {
       const keyword = consume(TokenType.KEYWORD).value.toUpperCase();
-      
+
       switch (keyword) {
         case 'FILEVERSION': {
           const fv1 = consume(TokenType.NUMBER);
@@ -798,16 +964,16 @@ export class VB6ResourceCompiler {
           const fv3 = consume(TokenType.NUMBER);
           consume(TokenType.COMMA);
           const fv4 = consume(TokenType.NUMBER);
-          
+
           version.fileVersion = {
             major: parseInt(fv1.value),
             minor: parseInt(fv2.value),
             build: parseInt(fv3.value),
-            revision: parseInt(fv4.value)
+            revision: parseInt(fv4.value),
           };
           break;
         }
-          
+
         case 'PRODUCTVERSION': {
           const pv1 = consume(TokenType.NUMBER);
           consume(TokenType.COMMA);
@@ -816,22 +982,22 @@ export class VB6ResourceCompiler {
           const pv3 = consume(TokenType.NUMBER);
           consume(TokenType.COMMA);
           const pv4 = consume(TokenType.NUMBER);
-          
+
           version.productVersion = {
             major: parseInt(pv1.value),
             minor: parseInt(pv2.value),
             build: parseInt(pv3.value),
-            revision: parseInt(pv4.value)
+            revision: parseInt(pv4.value),
           };
           break;
         }
-          
+
         case 'BLOCK': {
           const blockName = consume(TokenType.STRING);
           skipNewlines();
           consume(TokenType.LBRACE);
           skipNewlines();
-          
+
           while (peek().type !== TokenType.RBRACE && peek().type !== TokenType.EOF) {
             if (peek().value.toUpperCase() === 'VALUE') {
               consume();
@@ -844,36 +1010,43 @@ export class VB6ResourceCompiler {
             }
             skipNewlines();
           }
-          
+
           consume(TokenType.RBRACE);
           break;
         }
-          
+
         default:
           // Skip unknown version info elements
           while (peek().type !== TokenType.NEWLINE && peek().type !== TokenType.EOF) {
             i++;
           }
       }
-      
+
       skipNewlines();
     }
 
     consume(TokenType.RBRACE);
-    
+
     VB6ResourceManagerInstance.setVersionResource(version);
   }
 
   // Parse RCDATA
-  private async parseRCData(resourceId: Token, tokens: Token[], currentIndex: number, peek: () => Token, consume: (type?: TokenType) => Token, skipNewlines: () => void): Promise<void> {
+  private async parseRCData(
+    resourceId: Token,
+    tokens: Token[],
+    currentIndex: number,
+    peek: () => Token,
+    consume: (type?: TokenType) => Token,
+    skipNewlines: () => void
+  ): Promise<void> {
     skipNewlines();
-    
+
     // Simple RCDATA parsing - collect data until end
     const data: number[] = [];
-    
+
     consume(TokenType.LBRACE);
     skipNewlines();
-    
+
     while (peek().type !== TokenType.RBRACE && peek().type !== TokenType.EOF) {
       const token = consume();
       if (token.type === TokenType.NUMBER) {
@@ -884,22 +1057,22 @@ export class VB6ResourceCompiler {
           data.push(token.value.charCodeAt(i));
         }
       }
-      
+
       if (peek().type === TokenType.COMMA) {
         consume(TokenType.COMMA);
       }
       skipNewlines();
     }
-    
+
     consume(TokenType.RBRACE);
-    
+
     // Create ArrayBuffer from data
     const buffer = new ArrayBuffer(data.length);
     const view = new Uint8Array(buffer);
     for (let i = 0; i < data.length; i++) {
       view[i] = data[i];
     }
-    
+
     VB6ResourceManagerInstance.addCustomResource(
       parseInt(resourceId.value),
       `RCDATA ${resourceId.value}`,
@@ -911,9 +1084,9 @@ export class VB6ResourceCompiler {
   // Helper methods
   private handlePreprocessorDirective(directive: string, line: number): void {
     const trimmed = directive.trim();
-    
+
     if (trimmed.startsWith('#include')) {
-      const match = trimmed.match(/#include\s*[<"]([^>"]+)[>"]/) ;
+      const match = trimmed.match(/#include\s*[<"]([^>"]+)[>"]/);
       if (match) {
         this.context.includes.push(match[1]);
       }
@@ -930,25 +1103,26 @@ export class VB6ResourceCompiler {
     if (value.startsWith('0x') || value.startsWith('0X')) {
       return parseInt(value, 16);
     }
-    
+
     // Handle decimal values
     if (/^\d+$/.test(value)) {
       return parseInt(value, 10);
     }
-    
+
     // Handle symbolic constants
     const constantValue = (RC_CONSTANTS as any)[value];
     if (constantValue !== undefined) {
       return constantValue;
     }
-    
+
     // Handle OR'd constants
     if (value.includes('|')) {
-      return value.split('|')
+      return value
+        .split('|')
         .map(part => this.parseStyleValue(part.trim()))
         .reduce((acc, val) => acc | val, 0);
     }
-    
+
     return 0;
   }
 
@@ -990,15 +1164,32 @@ export class VB6ResourceCompiler {
       case 'RADIOBUTTON':
         return RC_CONSTANTS.WS_CHILD | RC_CONSTANTS.WS_VISIBLE | RC_CONSTANTS.WS_TABSTOP;
       case 'EDITTEXT':
-        return RC_CONSTANTS.WS_CHILD | RC_CONSTANTS.WS_VISIBLE | RC_CONSTANTS.WS_BORDER | RC_CONSTANTS.WS_TABSTOP;
+        return (
+          RC_CONSTANTS.WS_CHILD |
+          RC_CONSTANTS.WS_VISIBLE |
+          RC_CONSTANTS.WS_BORDER |
+          RC_CONSTANTS.WS_TABSTOP
+        );
       case 'LTEXT':
       case 'RTEXT':
       case 'CTEXT':
         return RC_CONSTANTS.WS_CHILD | RC_CONSTANTS.WS_VISIBLE;
       case 'LISTBOX':
-        return RC_CONSTANTS.WS_CHILD | RC_CONSTANTS.WS_VISIBLE | RC_CONSTANTS.WS_BORDER | RC_CONSTANTS.WS_VSCROLL | RC_CONSTANTS.WS_TABSTOP;
+        return (
+          RC_CONSTANTS.WS_CHILD |
+          RC_CONSTANTS.WS_VISIBLE |
+          RC_CONSTANTS.WS_BORDER |
+          RC_CONSTANTS.WS_VSCROLL |
+          RC_CONSTANTS.WS_TABSTOP
+        );
       case 'COMBOBOX':
-        return RC_CONSTANTS.WS_CHILD | RC_CONSTANTS.WS_VISIBLE | RC_CONSTANTS.WS_BORDER | RC_CONSTANTS.WS_VSCROLL | RC_CONSTANTS.WS_TABSTOP;
+        return (
+          RC_CONSTANTS.WS_CHILD |
+          RC_CONSTANTS.WS_VISIBLE |
+          RC_CONSTANTS.WS_BORDER |
+          RC_CONSTANTS.WS_VSCROLL |
+          RC_CONSTANTS.WS_TABSTOP
+        );
       case 'GROUPBOX':
         return RC_CONSTANTS.WS_CHILD | RC_CONSTANTS.WS_VISIBLE;
       default:
@@ -1012,7 +1203,7 @@ export class VB6ResourceCompiler {
       line,
       column,
       message,
-      severity: 'error'
+      severity: 'error',
     });
   }
 
@@ -1020,18 +1211,18 @@ export class VB6ResourceCompiler {
   exportToVB6Project(): string {
     const resources = VB6ResourceManagerInstance.getAllResources();
     let output = '';
-    
+
     // Generate resource references for VB6 project file
     if (resources.length > 0) {
       output += 'ResFile32="resources.res"\n';
     }
-    
+
     // Add icon reference if exists
     const iconResource = resources.find(r => r.type === VB6ResourceType.RT_ICON);
     if (iconResource) {
       output += `IconForm="ICON:${iconResource.id}:0"\n`;
     }
-    
+
     return output;
   }
 }

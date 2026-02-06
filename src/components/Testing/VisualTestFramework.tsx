@@ -37,7 +37,7 @@ import {
   TrendingUp,
   Database,
   Monitor,
-  Cpu
+  Cpu,
 } from 'lucide-react';
 
 // Types pour le framework de test
@@ -140,19 +140,18 @@ class VB6TestRunner {
   private static instance: VB6TestRunner;
   private isRunning = false;
   private currentSession: TestSession | null = null;
-  
+
   static getInstance(): VB6TestRunner {
     if (!VB6TestRunner.instance) {
       VB6TestRunner.instance = new VB6TestRunner();
     }
     return VB6TestRunner.instance;
   }
-  
+
   async runTest(test: TestCase, mockData?: MockDataConfig): Promise<TestResult> {
-    
     const startTime = performance.now();
     const startMemory = (performance as any).memory?.usedJSHeapSize || 0;
-    
+
     const result: TestResult = {
       testId: test.id,
       status: 'passed',
@@ -160,18 +159,18 @@ class VB6TestRunner {
       assertions: { passed: 0, failed: 0, total: test.assertions.length },
       coverage: { lines: 0, functions: 0, branches: 0 },
       memory: { start: startMemory, end: 0, peak: 0 },
-      logs: []
+      logs: [],
     };
-    
+
     try {
       // Setup mock data
       if (mockData) {
         this.setupMockEnvironment(mockData);
       }
-      
+
       // Execute test code
       const testResult = await this.executeVB6Code(test.code);
-      
+
       // Run assertions
       for (const assertion of test.assertions) {
         const assertionResult = await this.runAssertion(assertion, testResult);
@@ -181,30 +180,33 @@ class VB6TestRunner {
           result.assertions.failed++;
           result.status = 'failed';
         }
-        result.logs.push(`Assertion: ${assertion.description} - ${assertionResult.passed ? 'PASS' : 'FAIL'}`);
+        result.logs.push(
+          `Assertion: ${assertion.description} - ${assertionResult.passed ? 'PASS' : 'FAIL'}`
+        );
       }
-      
+
       // Calculate coverage (simulated)
       result.coverage = this.calculateCodeCoverage(test.code);
-      
     } catch (error: any) {
       result.status = 'failed';
       result.error = error.message;
       result.logs.push(`Error: ${error.message}`);
     }
-    
+
     const endTime = performance.now();
     const endMemory = (performance as any).memory?.usedJSHeapSize || 0;
-    
+
     result.executionTime = endTime - startTime;
     result.memory.end = endMemory;
     result.memory.peak = Math.max(startMemory, endMemory);
-    
+
     return result;
   }
-  
-  async runTestSuite(suite: TestSuite, onProgress?: (progress: number) => void): Promise<TestSession> {
-    
+
+  async runTestSuite(
+    suite: TestSuite,
+    onProgress?: (progress: number) => void
+  ): Promise<TestSession> {
     this.isRunning = true;
     const session: TestSession = {
       id: `session_${Date.now()}`,
@@ -217,45 +219,44 @@ class VB6TestRunner {
         failed: 0,
         skipped: 0,
         duration: 0,
-        coverage: { overall: 0, lines: 0, functions: 0, branches: 0 }
-      }
+        coverage: { overall: 0, lines: 0, functions: 0, branches: 0 },
+      },
     };
-    
+
     this.currentSession = session;
-    
+
     try {
       // Setup suite
       if (suite.setup) {
         await this.executeVB6Code(suite.setup);
       }
-      
+
       const startTime = performance.now();
-      
+
       // Run tests
       for (let i = 0; i < suite.tests.length; i++) {
         if (!this.isRunning) break; // Allow stopping
-        
+
         const test = suite.tests[i];
-        
+
         try {
           // Before each
           if (suite.beforeEach) {
             await this.executeVB6Code(suite.beforeEach);
           }
-          
+
           const result = await this.runTest(test);
           session.results.push(result);
-          
+
           // Update summary
           if (result.status === 'passed') session.summary.passed++;
           else if (result.status === 'failed') session.summary.failed++;
           else session.summary.skipped++;
-          
+
           // After each
           if (suite.afterEach) {
             await this.executeVB6Code(suite.afterEach);
           }
-          
         } catch (error: any) {
           session.results.push({
             testId: test.id,
@@ -265,70 +266,80 @@ class VB6TestRunner {
             coverage: { lines: 0, functions: 0, branches: 0 },
             memory: { start: 0, end: 0, peak: 0 },
             error: error.message,
-            logs: [`Suite error: ${error.message}`]
+            logs: [`Suite error: ${error.message}`],
           });
           session.summary.failed++;
         }
-        
+
         onProgress?.(((i + 1) / suite.tests.length) * 100);
       }
-      
+
       // Teardown suite
       if (suite.teardown) {
         await this.executeVB6Code(suite.teardown);
       }
-      
+
       const endTime = performance.now();
       session.ended = new Date();
       session.summary.duration = endTime - startTime;
-      
+
       // Calculate overall coverage
-      const totalCoverage = session.results.reduce((acc, result) => ({
-        lines: acc.lines + result.coverage.lines,
-        functions: acc.functions + result.coverage.functions,
-        branches: acc.branches + result.coverage.branches
-      }), { lines: 0, functions: 0, branches: 0 });
-      
+      const totalCoverage = session.results.reduce(
+        (acc, result) => ({
+          lines: acc.lines + result.coverage.lines,
+          functions: acc.functions + result.coverage.functions,
+          branches: acc.branches + result.coverage.branches,
+        }),
+        { lines: 0, functions: 0, branches: 0 }
+      );
+
       session.summary.coverage = {
-        overall: Math.round((totalCoverage.lines + totalCoverage.functions + totalCoverage.branches) / 3),
+        overall: Math.round(
+          (totalCoverage.lines + totalCoverage.functions + totalCoverage.branches) / 3
+        ),
         lines: Math.round(totalCoverage.lines / session.results.length),
         functions: Math.round(totalCoverage.functions / session.results.length),
-        branches: Math.round(totalCoverage.branches / session.results.length)
+        branches: Math.round(totalCoverage.branches / session.results.length),
       };
-      
     } catch (error: any) {
       console.error('❌ Test suite failed:', error);
     }
-    
+
     this.isRunning = false;
     this.currentSession = null;
-    
+
     return session;
   }
-  
+
   stopExecution() {
     this.isRunning = false;
   }
-  
+
   private async executeVB6Code(code: string): Promise<any> {
     // Simulate VB6 code execution
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Mock execution result
-        resolve({
-          success: true,
-          output: `Executed: ${code.substring(0, 50)}...`,
-          variables: {},
-          controls: {}
-        });
-      }, Math.random() * 100 + 50);
+    return new Promise(resolve => {
+      setTimeout(
+        () => {
+          // Mock execution result
+          resolve({
+            success: true,
+            output: `Executed: ${code.substring(0, 50)}...`,
+            variables: {},
+            controls: {},
+          });
+        },
+        Math.random() * 100 + 50
+      );
     });
   }
-  
-  private async runAssertion(assertion: TestAssertion, testResult: any): Promise<{ passed: boolean; message: string }> {
+
+  private async runAssertion(
+    assertion: TestAssertion,
+    testResult: any
+  ): Promise<{ passed: boolean; message: string }> {
     try {
       let passed = false;
-      
+
       switch (assertion.type) {
         case 'equals':
           passed = testResult.output === assertion.expected;
@@ -346,29 +357,35 @@ class VB6TestRunner {
           // Custom assertion - evaluate expression
           passed = Math.random() > 0.3; // Simulate success rate
       }
-      
+
       return {
         passed,
-        message: passed ? 'Assertion passed' : `Expected ${assertion.expected}, got ${testResult.output}`
+        message: passed
+          ? 'Assertion passed'
+          : `Expected ${assertion.expected}, got ${testResult.output}`,
       };
     } catch (error: any) {
       return { passed: false, message: error.message };
     }
   }
-  
-  private calculateCodeCoverage(code: string): { lines: number; functions: number; branches: number } {
+
+  private calculateCodeCoverage(code: string): {
+    lines: number;
+    functions: number;
+    branches: number;
+  } {
     // Simulate code coverage analysis
     const lines = code.split('\n').length;
     const functions = (code.match(/function|sub/gi) || []).length;
     const branches = (code.match(/if|select|while|for/gi) || []).length;
-    
+
     return {
       lines: Math.round(60 + Math.random() * 35), // 60-95% coverage
       functions: Math.round(50 + Math.random() * 40), // 50-90% coverage
-      branches: Math.round(40 + Math.random() * 50) // 40-90% coverage
+      branches: Math.round(40 + Math.random() * 50), // 40-90% coverage
     };
   }
-  
+
   private setupMockEnvironment(mockData: MockDataConfig) {
     // Setup mock controls, database, files, etc.
   }
@@ -378,12 +395,12 @@ class VB6TestRunner {
 class VB6TestGenerator {
   generateTestsForFunction(functionCode: string): TestCase[] {
     const tests: TestCase[] = [];
-    
+
     // Analyse du code pour générer des tests
     const functionName = this.extractFunctionName(functionCode);
     const parameters = this.extractParameters(functionCode);
     const returnType = this.extractReturnType(functionCode);
-    
+
     // Test de base
     tests.push({
       id: `test_${functionName}_basic`,
@@ -396,9 +413,9 @@ class VB6TestGenerator {
       assertions: this.generateBasicAssertions(functionName, returnType),
       tags: ['auto-generated', 'basic'],
       priority: 'medium',
-      created: new Date()
+      created: new Date(),
     });
-    
+
     // Test des cas limites
     if (parameters.length > 0) {
       tests.push({
@@ -412,10 +429,10 @@ class VB6TestGenerator {
         assertions: this.generateEdgeCaseAssertions(functionName, parameters),
         tags: ['auto-generated', 'edge-cases'],
         priority: 'high',
-        created: new Date()
+        created: new Date(),
       });
     }
-    
+
     // Test d'erreurs
     tests.push({
       id: `test_${functionName}_error_handling`,
@@ -428,29 +445,32 @@ class VB6TestGenerator {
       assertions: this.generateErrorAssertions(functionName),
       tags: ['auto-generated', 'error-handling'],
       priority: 'medium',
-      created: new Date()
+      created: new Date(),
     });
-    
+
     return tests;
   }
-  
+
   private extractFunctionName(code: string): string {
     const match = code.match(/(?:function|sub)\s+([a-z_]\w*)/i);
     return match ? match[1] : 'UnknownFunction';
   }
-  
+
   private extractParameters(code: string): string[] {
     const match = code.match(/\(([^)]*)\)/);
     if (!match || !match[1]) return [];
-    
-    return match[1].split(',').map(p => p.trim()).filter(p => p.length > 0);
+
+    return match[1]
+      .split(',')
+      .map(p => p.trim())
+      .filter(p => p.length > 0);
   }
-  
+
   private extractReturnType(code: string): string {
     const match = code.match(/as\s+([a-z_]\w*)/i);
     return match ? match[1] : 'Variant';
   }
-  
+
   private generateBasicTest(functionName: string, parameters: string[]): string {
     const paramValues = parameters.map((_, i) => `param${i + 1}`).join(', ');
     return `
@@ -459,7 +479,7 @@ result = ${functionName}(${paramValues})
 ' Basic test implementation
     `.trim();
   }
-  
+
   private generateBasicAssertions(functionName: string, returnType: string): TestAssertion[] {
     return [
       {
@@ -467,18 +487,18 @@ result = ${functionName}(${paramValues})
         type: 'exists',
         description: `${functionName} should return a value`,
         expected: 'result',
-        expression: 'result !== undefined'
+        expression: 'result !== undefined',
       },
       {
         id: `assert_${functionName}_type`,
         type: 'type',
         description: `${functionName} should return correct type`,
         expected: returnType.toLowerCase(),
-        expression: `typeof result === '${returnType.toLowerCase()}'`
-      }
+        expression: `typeof result === '${returnType.toLowerCase()}'`,
+      },
     ];
   }
-  
+
   private generateEdgeCaseTest(functionName: string, parameters: string[]): string {
     return `
 ' Test with boundary values
@@ -487,7 +507,7 @@ result1 = ${functionName}(${parameters.map(() => '0').join(', ')})
 result2 = ${functionName}(${parameters.map(() => 'Empty').join(', ')})
     `.trim();
   }
-  
+
   private generateEdgeCaseAssertions(functionName: string, parameters: string[]): TestAssertion[] {
     return [
       {
@@ -495,11 +515,11 @@ result2 = ${functionName}(${parameters.map(() => 'Empty').join(', ')})
         type: 'custom',
         description: `${functionName} should handle empty parameters`,
         expected: true,
-        expression: 'result1 !== null && result2 !== null'
-      }
+        expression: 'result1 !== null && result2 !== null',
+      },
     ];
   }
-  
+
   private generateErrorTest(functionName: string, parameters: string[]): string {
     return `
 ' Test error conditions
@@ -509,7 +529,7 @@ result = ${functionName}(${parameters.map(() => 'Nothing').join(', ')})
 ' Check for expected errors
     `.trim();
   }
-  
+
   private generateErrorAssertions(functionName: string): TestAssertion[] {
     return [
       {
@@ -517,8 +537,8 @@ result = ${functionName}(${parameters.map(() => 'Nothing').join(', ')})
         type: 'custom',
         description: `${functionName} should handle errors gracefully`,
         expected: true,
-        expression: 'Err.Number <> 0 Or result Is Not Nothing'
-      }
+        expression: 'Err.Number <> 0 Or result Is Not Nothing',
+      },
     ];
   }
 }
@@ -529,11 +549,10 @@ interface VisualTestFrameworkProps {
   onClose: () => void;
 }
 
-export const VisualTestFramework: React.FC<VisualTestFrameworkProps> = ({
-  visible,
-  onClose
-}) => {
-  const [activeTab, setActiveTab] = useState<'tests' | 'results' | 'coverage' | 'settings'>('tests');
+export const VisualTestFramework: React.FC<VisualTestFrameworkProps> = ({ visible, onClose }) => {
+  const [activeTab, setActiveTab] = useState<'tests' | 'results' | 'coverage' | 'settings'>(
+    'tests'
+  );
   const [testSuites, setTestSuites] = useState<TestSuite[]>([]);
   const [selectedSuite, setSelectedSuite] = useState<TestSuite | null>(null);
   const [selectedTest, setSelectedTest] = useState<TestCase | null>(null);
@@ -541,10 +560,10 @@ export const VisualTestFramework: React.FC<VisualTestFrameworkProps> = ({
   const [progress, setProgress] = useState(0);
   const [currentSession, setCurrentSession] = useState<TestSession | null>(null);
   const [testHistory, setTestHistory] = useState<TestSession[]>([]);
-  
+
   const testRunner = VB6TestRunner.getInstance();
   const testGenerator = new VB6TestGenerator();
-  
+
   // Exemple de suite de tests
   useEffect(() => {
     if (testSuites.length === 0) {
@@ -565,19 +584,19 @@ Set txt = New TextBox
 txt.Text = "Hello World"
 Assert txt.Text = "Hello World"
             `.trim(),
-            expectedResult: "Hello World",
+            expectedResult: 'Hello World',
             assertions: [
               {
                 id: 'assert_textbox_text',
                 type: 'equals',
                 description: 'TextBox should contain entered text',
                 expected: 'Hello World',
-                expression: 'txt.Text = "Hello World"'
-              }
+                expression: 'txt.Text = "Hello World"',
+              },
             ],
             tags: ['ui', 'textbox', 'validation'],
             priority: 'high',
-            created: new Date()
+            created: new Date(),
           },
           {
             id: 'test_button_click',
@@ -598,12 +617,12 @@ btn_Click
                 type: 'custom',
                 description: 'Button click should trigger event',
                 expected: true,
-                expression: 'clickEventFired = True'
-              }
+                expression: 'clickEventFired = True',
+              },
             ],
             tags: ['ui', 'button', 'events'],
             priority: 'medium',
-            created: new Date()
+            created: new Date(),
           },
           {
             id: 'test_performance_loop',
@@ -627,29 +646,29 @@ endTime = Timer
                 type: 'less',
                 description: 'Loop should complete within reasonable time',
                 expected: 1000,
-                expression: '(endTime - startTime) * 1000 < 1000'
-              }
+                expression: '(endTime - startTime) * 1000 < 1000',
+              },
             ],
             tags: ['performance', 'loops'],
             priority: 'low',
-            created: new Date()
-          }
+            created: new Date(),
+          },
         ],
         parallel: false,
-        timeout: 30000
+        timeout: 30000,
       };
-      
+
       setTestSuites([sampleSuite]);
       setSelectedSuite(sampleSuite);
     }
   }, [testSuites.length]);
-  
+
   const runTestSuite = async (suite: TestSuite) => {
     if (isRunning) return;
-    
+
     setIsRunning(true);
     setProgress(0);
-    
+
     try {
       const session = await testRunner.runTestSuite(suite, setProgress);
       setCurrentSession(session);
@@ -661,16 +680,16 @@ endTime = Timer
       setProgress(0);
     }
   };
-  
+
   const stopTestSuite = () => {
     testRunner.stopExecution();
     setIsRunning(false);
     setProgress(0);
   };
-  
+
   const generateTests = () => {
     if (!selectedSuite) return;
-    
+
     // Generate tests for sample VB6 function
     const sampleFunction = `
 Function CalculateTotal(price As Double, tax As Double) As Double
@@ -680,25 +699,25 @@ Function CalculateTotal(price As Double, tax As Double) As Double
     CalculateTotal = price * (1 + tax)
 End Function
     `.trim();
-    
+
     const generatedTests = testGenerator.generateTestsForFunction(sampleFunction);
-    
+
     setSelectedSuite({
       ...selectedSuite,
-      tests: [...selectedSuite.tests, ...generatedTests]
+      tests: [...selectedSuite.tests, ...generatedTests],
     });
-    
-    setTestSuites(prev => 
-      prev.map(suite => 
-        suite.id === selectedSuite.id 
+
+    setTestSuites(prev =>
+      prev.map(suite =>
+        suite.id === selectedSuite.id
           ? { ...suite, tests: [...suite.tests, ...generatedTests] }
           : suite
       )
     );
   };
-  
+
   if (!visible) return null;
-  
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl w-full max-w-7xl h-5/6 flex flex-col">
@@ -711,11 +730,13 @@ End Function
             </h2>
             {currentSession && (
               <div className="flex items-center space-x-2 text-sm">
-                <div className={`px-2 py-1 rounded font-medium ${
-                  currentSession.summary.failed === 0 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-red-100 text-red-800'
-                }`}>
+                <div
+                  className={`px-2 py-1 rounded font-medium ${
+                    currentSession.summary.failed === 0
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}
+                >
                   {currentSession.summary.passed}/{currentSession.summary.total} passed
                 </div>
                 <div className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
@@ -724,7 +745,7 @@ End Function
               </div>
             )}
           </div>
-          
+
           <div className="flex items-center space-x-2">
             {selectedSuite && (
               <>
@@ -771,7 +792,7 @@ End Function
             </button>
           </div>
         </div>
-        
+
         {/* Progress Bar */}
         {isRunning && (
           <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800">
@@ -787,14 +808,14 @@ End Function
             </div>
           </div>
         )}
-        
+
         {/* Tabs */}
         <div className="flex border-b dark:border-gray-700">
           {[
             { id: 'tests', label: 'Test Suites', icon: TestTube },
             { id: 'results', label: 'Results', icon: BarChart3 },
             { id: 'coverage', label: 'Coverage', icon: PieChart },
-            { id: 'settings', label: 'Settings', icon: Settings }
+            { id: 'settings', label: 'Settings', icon: Settings },
           ].map(tab => (
             <button
               key={tab.id}
@@ -810,7 +831,7 @@ End Function
             </button>
           ))}
         </div>
-        
+
         {/* Content */}
         <div className="flex-1 overflow-hidden">
           {activeTab === 'tests' && (
@@ -825,7 +846,9 @@ End Function
                         key={suite.id}
                         onClick={() => setSelectedSuite(suite)}
                         className={`p-3 border rounded cursor-pointer hover:bg-gray-50 transition-colors ${
-                          selectedSuite?.id === suite.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                          selectedSuite?.id === suite.id
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200'
                         }`}
                       >
                         <h4 className="font-medium">{suite.name}</h4>
@@ -839,7 +862,7 @@ End Function
                   </div>
                 </div>
               </div>
-              
+
               {/* Test Cases */}
               <div className="w-1/3 border-r dark:border-gray-700 overflow-auto">
                 <div className="p-4">
@@ -853,7 +876,9 @@ End Function
                           key={test.id}
                           onClick={() => setSelectedTest(test)}
                           className={`p-3 border rounded cursor-pointer hover:bg-gray-50 transition-colors ${
-                            selectedTest?.id === test.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                            selectedTest?.id === test.id
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200'
                           }`}
                         >
                           <div className="flex items-start justify-between">
@@ -861,23 +886,33 @@ End Function
                               <h4 className="font-medium text-sm">{test.name}</h4>
                               <p className="text-xs text-gray-600 mt-1">{test.description}</p>
                               <div className="flex items-center mt-2 text-xs">
-                                <span className={`px-2 py-1 rounded ${
-                                  test.status === 'passed' ? 'bg-green-100 text-green-800' :
-                                  test.status === 'failed' ? 'bg-red-100 text-red-800' :
-                                  test.status === 'running' ? 'bg-blue-100 text-blue-800' :
-                                  'bg-gray-100 text-gray-800'
-                                }`}>
+                                <span
+                                  className={`px-2 py-1 rounded ${
+                                    test.status === 'passed'
+                                      ? 'bg-green-100 text-green-800'
+                                      : test.status === 'failed'
+                                        ? 'bg-red-100 text-red-800'
+                                        : test.status === 'running'
+                                          ? 'bg-blue-100 text-blue-800'
+                                          : 'bg-gray-100 text-gray-800'
+                                  }`}
+                                >
                                   {test.status}
                                 </span>
                                 <span className="ml-2 text-gray-500">{test.category}</span>
                               </div>
                             </div>
-                            <div className={`p-1 rounded ${
-                              test.priority === 'critical' ? 'bg-red-100 text-red-600' :
-                              test.priority === 'high' ? 'bg-orange-100 text-orange-600' :
-                              test.priority === 'medium' ? 'bg-yellow-100 text-yellow-600' :
-                              'bg-gray-100 text-gray-600'
-                            }`}>
+                            <div
+                              className={`p-1 rounded ${
+                                test.priority === 'critical'
+                                  ? 'bg-red-100 text-red-600'
+                                  : test.priority === 'high'
+                                    ? 'bg-orange-100 text-orange-600'
+                                    : test.priority === 'medium'
+                                      ? 'bg-yellow-100 text-yellow-600'
+                                      : 'bg-gray-100 text-gray-600'
+                              }`}
+                            >
                               {test.priority}
                             </div>
                           </div>
@@ -887,7 +922,7 @@ End Function
                   )}
                 </div>
               </div>
-              
+
               {/* Test Details */}
               <div className="w-1/3 overflow-auto">
                 <div className="p-4">
@@ -897,31 +932,38 @@ End Function
                         <h3 className="font-semibold text-lg">{selectedTest.name}</h3>
                         <p className="text-gray-600 mt-1">{selectedTest.description}</p>
                       </div>
-                      
+
                       <div>
                         <h4 className="font-medium mb-2">Test Code</h4>
                         <pre className="bg-gray-50 p-3 rounded text-sm border overflow-x-auto">
                           <code>{selectedTest.code}</code>
                         </pre>
                       </div>
-                      
+
                       <div>
-                        <h4 className="font-medium mb-2">Assertions ({selectedTest.assertions.length})</h4>
+                        <h4 className="font-medium mb-2">
+                          Assertions ({selectedTest.assertions.length})
+                        </h4>
                         <div className="space-y-2">
                           {selectedTest.assertions.map(assertion => (
                             <div key={assertion.id} className="bg-gray-50 p-2 rounded text-sm">
                               <div className="font-medium">{assertion.description}</div>
-                              <div className="text-gray-600 text-xs mt-1">{assertion.expression}</div>
+                              <div className="text-gray-600 text-xs mt-1">
+                                {assertion.expression}
+                              </div>
                             </div>
                           ))}
                         </div>
                       </div>
-                      
+
                       <div>
                         <h4 className="font-medium mb-2">Tags</h4>
                         <div className="flex flex-wrap gap-1">
                           {selectedTest.tags.map(tag => (
-                            <span key={tag} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                            <span
+                              key={tag}
+                              className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs"
+                            >
                               {tag}
                             </span>
                           ))}
@@ -938,35 +980,45 @@ End Function
               </div>
             </div>
           )}
-          
+
           {activeTab === 'results' && (
             <div className="p-4 overflow-auto">
               {currentSession ? (
                 <div className="space-y-6">
                   {/* Session Summary */}
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-4">Test Session: {currentSession.name}</h3>
-                    
+                    <h3 className="font-semibold text-lg mb-4">
+                      Test Session: {currentSession.name}
+                    </h3>
+
                     <div className="grid grid-cols-4 gap-4 mb-4">
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{currentSession.summary.passed}</div>
+                        <div className="text-2xl font-bold text-green-600">
+                          {currentSession.summary.passed}
+                        </div>
                         <div className="text-sm text-gray-600">Passed</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-red-600">{currentSession.summary.failed}</div>
+                        <div className="text-2xl font-bold text-red-600">
+                          {currentSession.summary.failed}
+                        </div>
                         <div className="text-sm text-gray-600">Failed</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-yellow-600">{currentSession.summary.skipped}</div>
+                        <div className="text-2xl font-bold text-yellow-600">
+                          {currentSession.summary.skipped}
+                        </div>
                         <div className="text-sm text-gray-600">Skipped</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">{Math.round(currentSession.summary.duration)}ms</div>
+                        <div className="text-2xl font-bold text-blue-600">
+                          {Math.round(currentSession.summary.duration)}ms
+                        </div>
                         <div className="text-sm text-gray-600">Duration</div>
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Test Results */}
                   <div>
                     <h4 className="font-medium mb-3">Individual Results</h4>
@@ -975,19 +1027,28 @@ End Function
                         <div key={index} className="bg-white border rounded p-3">
                           <div className="flex items-start justify-between">
                             <div className="flex items-start space-x-3">
-                              <div className={`p-1 rounded ${
-                                result.status === 'passed' ? 'bg-green-100 text-green-600' :
-                                result.status === 'failed' ? 'bg-red-100 text-red-600' :
-                                'bg-yellow-100 text-yellow-600'
-                              }`}>
-                                {result.status === 'passed' ? <CheckCircle size={16} /> :
-                                 result.status === 'failed' ? <XCircle size={16} /> :
-                                 <AlertTriangle size={16} />}
+                              <div
+                                className={`p-1 rounded ${
+                                  result.status === 'passed'
+                                    ? 'bg-green-100 text-green-600'
+                                    : result.status === 'failed'
+                                      ? 'bg-red-100 text-red-600'
+                                      : 'bg-yellow-100 text-yellow-600'
+                                }`}
+                              >
+                                {result.status === 'passed' ? (
+                                  <CheckCircle size={16} />
+                                ) : result.status === 'failed' ? (
+                                  <XCircle size={16} />
+                                ) : (
+                                  <AlertTriangle size={16} />
+                                )}
                               </div>
                               <div>
                                 <h5 className="font-medium">Test {index + 1}</h5>
                                 <div className="text-sm text-gray-600">
-                                  {result.assertions.passed}/{result.assertions.total} assertions passed
+                                  {result.assertions.passed}/{result.assertions.total} assertions
+                                  passed
                                 </div>
                                 {result.error && (
                                   <div className="text-sm text-red-600 mt-1">
@@ -1015,13 +1076,13 @@ End Function
               )}
             </div>
           )}
-          
+
           {activeTab === 'coverage' && (
             <div className="p-4">
               {currentSession ? (
                 <div className="space-y-6">
                   <h3 className="font-semibold text-lg">Code Coverage Analysis</h3>
-                  
+
                   <div className="grid grid-cols-3 gap-4">
                     <div className="bg-gray-50 p-4 rounded text-center">
                       <div className="text-3xl font-bold text-blue-600 mb-2">
@@ -1035,7 +1096,7 @@ End Function
                         />
                       </div>
                     </div>
-                    
+
                     <div className="bg-gray-50 p-4 rounded text-center">
                       <div className="text-3xl font-bold text-green-600 mb-2">
                         {currentSession.summary.coverage.functions}%
@@ -1048,7 +1109,7 @@ End Function
                         />
                       </div>
                     </div>
-                    
+
                     <div className="bg-gray-50 p-4 rounded text-center">
                       <div className="text-3xl font-bold text-orange-600 mb-2">
                         {currentSession.summary.coverage.branches}%
@@ -1062,7 +1123,7 @@ End Function
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-gray-50 p-4 rounded">
                     <h4 className="font-medium mb-3">Coverage Recommendations</h4>
                     <div className="space-y-2 text-sm">
@@ -1090,11 +1151,11 @@ End Function
               )}
             </div>
           )}
-          
+
           {activeTab === 'settings' && (
             <div className="p-4">
               <h3 className="font-semibold text-lg mb-4">Test Framework Settings</h3>
-              
+
               <div className="space-y-6">
                 <div>
                   <h4 className="font-medium mb-3">Execution Settings</h4>
@@ -1113,7 +1174,7 @@ End Function
                     </label>
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="font-medium mb-3">Test Generation</h4>
                   <div className="space-y-3">
@@ -1131,22 +1192,22 @@ End Function
                     </label>
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="font-medium mb-3">Timeouts & Limits</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-1">Test Timeout (ms)</label>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         defaultValue={30000}
                         className="w-full px-3 py-2 border rounded text-sm"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">Suite Timeout (ms)</label>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         defaultValue={300000}
                         className="w-full px-3 py-2 border rounded text-sm"
                       />

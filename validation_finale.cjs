@@ -13,37 +13,36 @@ try {
   const lexerResult = execSync('npm test -- --reporter=dot src/test/vb6Lexer.test.ts', {
     cwd: '/home/patrice/claude/vb6',
     encoding: 'utf8',
-    timeout: 30000
+    timeout: 30000,
   });
   console.log('✅ Lexer test: PASSÉ');
-  
-  // Test du parser  
+
+  // Test du parser
   console.log('📝 Test du Parser VB6...');
   const parserResult = execSync('npm test -- --reporter=dot src/test/vb6Parser.test.ts', {
-    cwd: '/home/patrice/claude/vb6', 
+    cwd: '/home/patrice/claude/vb6',
     encoding: 'utf8',
-    timeout: 30000
+    timeout: 30000,
   });
   console.log('✅ Parser test: PASSÉ');
-  
+
   // Test de l'analyseur sémantique
-  console.log('📝 Test de l\'Analyseur Sémantique...');
+  console.log("📝 Test de l'Analyseur Sémantique...");
   const semanticResult = execSync('npm test -- --reporter=dot src/test/vb6Semantic.test.ts', {
     cwd: '/home/patrice/claude/vb6',
-    encoding: 'utf8', 
-    timeout: 30000
+    encoding: 'utf8',
+    timeout: 30000,
   });
   console.log('✅ Analyseur Sémantique test: PASSÉ');
-  
+
   // Test de l'analyseur de code
-  console.log('📝 Test de l\'Analyseur de Code...');
+  console.log("📝 Test de l'Analyseur de Code...");
   const codeAnalyzerResult = execSync('npm test -- --reporter=dot src/test/codeAnalyzer.test.ts', {
     cwd: '/home/patrice/claude/vb6',
     encoding: 'utf8',
-    timeout: 30000
+    timeout: 30000,
   });
   console.log('✅ Analyseur de Code test: PASSÉ');
-  
 } catch (error) {
   console.log(`❌ Erreur lors des tests: ${error.message}`);
 }
@@ -55,43 +54,43 @@ const componentCapabilities = {
   'Lexer VB6': {
     'Score Global': '9/10',
     'Tokenisation VB6': '✅ 99% précision',
-    'Mots-clés': '✅ 87 keywords complets', 
-    'Opérateurs': '✅ Tous supportés',
-    'Littéraux': '✅ String/Number/Date/Hex/Octal',
-    'Performance': '✅ ~1ms/1000 lignes',
-    'Sécurité': '✅ Protection DoS',
-    'Limitations': 'Aucune majeure'
+    'Mots-clés': '✅ 87 keywords complets',
+    Opérateurs: '✅ Tous supportés',
+    Littéraux: '✅ String/Number/Date/Hex/Octal',
+    Performance: '✅ ~1ms/1000 lignes',
+    Sécurité: '✅ Protection DoS',
+    Limitations: 'Aucune majeure',
   },
-  
+
   'Parser VB6': {
     'Score Global': '7/10',
-    'Variables': '✅ Dim/Public/Private',
-    'Procédures': '✅ Sub/Function/Property',
-    'Événements': '✅ Event declarations', 
-    'Modules': '✅ Parsing basique',
-    'Performance': '✅ ~5ms/1000 lignes',
-    'Limitations': 'Classes partielles, pas de structures de contrôle complexes'
+    Variables: '✅ Dim/Public/Private',
+    Procédures: '✅ Sub/Function/Property',
+    Événements: '✅ Event declarations',
+    Modules: '✅ Parsing basique',
+    Performance: '✅ ~5ms/1000 lignes',
+    Limitations: 'Classes partielles, pas de structures de contrôle complexes',
   },
-  
+
   'Analyseur Sémantique': {
     'Score Global': '3/10',
     'Variables non déclarées': '✅ Détection basique',
-    'Portée': '⚠️ Très limitée',  
-    'Types': '❌ Aucune validation',
-    'Objets': '❌ Pas de gestion',
-    'Flux': '❌ Pas d\'analyse',
-    'Performance': '⚠️ ~50ms/1000 lignes',
-    'Limitations': 'Couverture 15% seulement'
+    Portée: '⚠️ Très limitée',
+    Types: '❌ Aucune validation',
+    Objets: '❌ Pas de gestion',
+    Flux: "❌ Pas d'analyse",
+    Performance: '⚠️ ~50ms/1000 lignes',
+    Limitations: 'Couverture 15% seulement',
   },
-  
+
   'Validation Propriétés': {
     'Score Global': '9/10',
     'Types VB6': '✅ Support complet',
-    'Couleurs': '✅ VB6 + HTML formats',
-    'Validation': '✅ Messages contextuels',
-    'Performance': '✅ ~0.1ms/propriété',
-    'Limitations': 'Aucune majeure'
-  }
+    Couleurs: '✅ VB6 + HTML formats',
+    Validation: '✅ Messages contextuels',
+    Performance: '✅ ~0.1ms/propriété',
+    Limitations: 'Aucune majeure',
+  },
 };
 
 Object.entries(componentCapabilities).forEach(([component, capabilities]) => {
@@ -102,7 +101,7 @@ Object.entries(componentCapabilities).forEach(([component, capabilities]) => {
   console.log('');
 });
 
-console.log('3. TESTS DE VALIDATION AVEC CODES D\'ERREURS RÉELS\n');
+console.log("3. TESTS DE VALIDATION AVEC CODES D'ERREURS RÉELS\n");
 
 // Codes de test basés sur les erreurs VB6 courantes
 const validationTests = [
@@ -115,9 +114,9 @@ Sub Test()
   y = undeclaredVar
 End Sub`,
     expectedErrors: ['Variable "x" non déclarée', 'Variable "undeclaredVar" non déclarée'],
-    currentDetection: '✅ OUI (2/2)'
+    currentDetection: '✅ OUI (2/2)',
   },
-  
+
   {
     name: 'Test Erreurs de Types',
     expected: 'AUCUNE DÉTECTION',
@@ -129,11 +128,11 @@ Sub Test()
   strVar = 123
 End Sub`,
     expectedErrors: ['Type mismatch: String -> Integer', 'Type mismatch: Integer -> String'],
-    currentDetection: '❌ NON (0/2)'
+    currentDetection: '❌ NON (0/2)',
   },
-  
+
   {
-    name: 'Test Objets Non Initialisés', 
+    name: 'Test Objets Non Initialisés',
     expected: 'AUCUNE DÉTECTION',
     vbCode: `
 Sub Test()
@@ -143,9 +142,9 @@ Sub Test()
   obj.Property = "test"
 End Sub`,
     expectedErrors: ['Objet non initialisé', 'Utilisation après Set Nothing'],
-    currentDetection: '❌ NON (0/2)'
+    currentDetection: '❌ NON (0/2)',
   },
-  
+
   {
     name: 'Test Portée Variables',
     expected: 'AUCUNE DÉTECTION',
@@ -157,12 +156,12 @@ Sub Proc2()
   localVar = "error"
 End Sub`,
     expectedErrors: ['Variable hors de portée'],
-    currentDetection: '❌ NON (0/1)'
+    currentDetection: '❌ NON (0/1)',
   },
-  
+
   {
     name: 'Test Structures Incomplètes',
-    expected: 'AUCUNE DÉTECTION',  
+    expected: 'AUCUNE DÉTECTION',
     vbCode: `
 Sub Test()
   For i = 1 To 10
@@ -171,8 +170,8 @@ Sub Test()
     ' Pas de End If
 End Sub`,
     expectedErrors: ['Next manquant', 'End If manquant'],
-    currentDetection: '❌ NON (0/2)'
-  }
+    currentDetection: '❌ NON (0/2)',
+  },
 ];
 
 validationTests.forEach((test, index) => {
@@ -188,13 +187,13 @@ console.log('\n4. CALCUL DU SCORE DE COUVERTURE GLOBAL\n');
 
 const coverageCalculation = {
   'Tests Passants': 5,
-  'Tests Échoués': 8, 
-  'Types d\'Erreurs Détectées': 2,
-  'Types d\'Erreurs VB6 Standard': 50,
+  'Tests Échoués': 8,
+  "Types d'Erreurs Détectées": 2,
+  "Types d'Erreurs VB6 Standard": 50,
   'Score de Précision': '100% (pour les erreurs détectées)',
-  'Score de Rappel': '4% (2/50 types d\'erreurs)',
+  'Score de Rappel': "4% (2/50 types d'erreurs)",
   'Score F1': '8% (moyenne harmonique)',
-  'Couverture Globale Estimée': '15%'
+  'Couverture Globale Estimée': '15%',
 };
 
 Object.entries(coverageCalculation).forEach(([metric, value]) => {
@@ -208,28 +207,28 @@ const finalRecommendations = {
     '🔥 Implémenter système de types VB6 complet',
     '🔥 Refactorer analyseur sémantique avec AST enrichi',
     '🔥 Ajouter gestion de portée inter-procédures',
-    '🔥 Tests unitaires pour chaque type d\'erreur VB6'
+    "🔥 Tests unitaires pour chaque type d'erreur VB6",
   ],
-  
+
   'ACTIONS IMPORTANTES (Semaine 3-4)': [
     '⚡ Validation appels de procédures et paramètres',
     '⚡ Détection objets non initialisés',
-    '⚡ Analyse structures de contrôle imbriquées', 
-    '⚡ Gestion des labels et GoTo'
+    '⚡ Analyse structures de contrôle imbriquées',
+    '⚡ Gestion des labels et GoTo',
   ],
-  
+
   'OPTIMISATIONS (Semaine 5-6)': [
     '🚀 Cache et analyse incrémentale',
     '🚀 Métriques qualité avancées',
     '🚀 Interface configuration règles',
-    '🚀 Performance sur gros projets'
+    '🚀 Performance sur gros projets',
   ],
-  
+
   'ROI PAR PHASE': [
     'Phase 1-2: 300% ROI (15% → 60% couverture)',
     'Phase 3-4: 150% ROI (60% → 80% couverture)',
-    'Phase 5-6: 100% ROI (optimisations + UX)'
-  ]
+    'Phase 5-6: 100% ROI (optimisations + UX)',
+  ],
 };
 
 Object.entries(finalRecommendations).forEach(([category, actions]) => {
@@ -238,7 +237,7 @@ Object.entries(finalRecommendations).forEach(([category, actions]) => {
   console.log('');
 });
 
-console.log('6. CONCLUSION DE L\'INVESTIGATION\n');
+console.log("6. CONCLUSION DE L'INVESTIGATION\n");
 
 console.log(`
 🎯 ÉTAT ACTUEL DU PROJET:
@@ -265,7 +264,7 @@ console.log(`
    Architecture excellente, fondations solides.
 `);
 
-console.log('=== FIN DE L\'INVESTIGATION ULTRA-DÉTAILLÉE ===');
+console.log("=== FIN DE L'INVESTIGATION ULTRA-DÉTAILLÉE ===");
 
 // Génère un fichier de synthèse
 const summary = `

@@ -10,7 +10,7 @@ import {
   VB6DrawMode,
   VB6DrawStyle,
   VB6FillStyle,
-  VB6ScaleMode
+  VB6ScaleMode,
 } from '../../runtime/VB6FormGraphics';
 import { VB6ColorConstants } from '../../runtime/VB6Constants';
 
@@ -193,10 +193,10 @@ describe('VB6 Graphics Methods', () => {
         VB6FillStyle.vbUpwardDiagonal,
         VB6FillStyle.vbDownwardDiagonal,
         VB6FillStyle.vbCross,
-        VB6FillStyle.vbDiagonalCross
+        VB6FillStyle.vbDiagonalCross,
       ];
 
-      patterns.forEach((pattern) => {
+      patterns.forEach(pattern => {
         ctx.FillStyle = pattern;
         ctx.Circle(320, 240, 50);
         expect(ctx.FillStyle).toBe(pattern);
@@ -240,10 +240,10 @@ describe('VB6 Graphics Methods', () => {
           VB6FillStyle.vbUpwardDiagonal,
           VB6FillStyle.vbDownwardDiagonal,
           VB6FillStyle.vbCross,
-          VB6FillStyle.vbDiagonalCross
+          VB6FillStyle.vbDiagonalCross,
         ];
 
-        patterns.forEach((pattern) => {
+        patterns.forEach(pattern => {
           ctx.FillStyle = pattern;
           expect(ctx.FillStyle).toBe(pattern);
         });
@@ -354,10 +354,10 @@ describe('VB6 Graphics Methods', () => {
   describe('VB6 Color Constants', () => {
     it('should have correct color values', () => {
       expect(VB6ColorConstants.vbBlack).toBe(0x000000);
-      expect(VB6ColorConstants.vbRed).toBe(0x0000FF);
-      expect(VB6ColorConstants.vbGreen).toBe(0x00FF00);
-      expect(VB6ColorConstants.vbBlue).toBe(0xFF0000);
-      expect(VB6ColorConstants.vbWhite).toBe(0xFFFFFF);
+      expect(VB6ColorConstants.vbRed).toBe(0x0000ff);
+      expect(VB6ColorConstants.vbGreen).toBe(0x00ff00);
+      expect(VB6ColorConstants.vbBlue).toBe(0xff0000);
+      expect(VB6ColorConstants.vbWhite).toBe(0xffffff);
     });
 
     it('should support all basic colors', () => {
@@ -369,10 +369,10 @@ describe('VB6 Graphics Methods', () => {
         VB6ColorConstants.vbBlue,
         VB6ColorConstants.vbMagenta,
         VB6ColorConstants.vbCyan,
-        VB6ColorConstants.vbWhite
+        VB6ColorConstants.vbWhite,
       ];
 
-      colors.forEach((color) => {
+      colors.forEach(color => {
         expect(typeof color).toBe('number');
         expect(color).toBeGreaterThanOrEqual(0);
       });

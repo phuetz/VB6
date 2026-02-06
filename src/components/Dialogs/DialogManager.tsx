@@ -1,5 +1,6 @@
 import React from 'react';
-import { useVB6 } from '../../context/VB6Context';
+import { useWindowStore } from '../../stores/windowStore';
+import { shallow } from 'zustand/shallow';
 import NewProjectDialog from './NewProjectDialog';
 import ReferencesDialog from './ReferencesDialog';
 import ComponentsDialog from './ComponentsDialog';
@@ -10,62 +11,61 @@ import { UserControlDesigner } from '../UserControls/UserControlDesigner';
 import OptionsDialog from './OptionsDialog';
 
 const DialogManager: React.FC = () => {
-  const { state, dispatch } = useVB6();
+  const {
+    showNewProjectDialog,
+    showReferences,
+    showComponents,
+    showMenuEditor,
+    showObjectBrowser,
+    showFormLayout,
+    showUserControlDesigner,
+    showOptionsDialog,
+  } = useWindowStore(
+    state => ({
+      showNewProjectDialog: state.showNewProjectDialog,
+      showReferences: state.showReferences,
+      showComponents: state.showComponents,
+      showMenuEditor: state.showMenuEditor,
+      showObjectBrowser: state.showObjectBrowser,
+      showFormLayout: state.showFormLayout,
+      showUserControlDesigner: state.showUserControlDesigner,
+      showOptionsDialog: state.showOptionsDialog,
+    }),
+    shallow
+  );
+  const windowShowDialog = useWindowStore(state => state.showDialog);
 
   return (
     <>
-      {state.showNewProjectDialog && <NewProjectDialog />}
-      {state.showReferences && <ReferencesDialog />}
-      {state.showComponents && <ComponentsDialog />}
-      {state.showMenuEditor && (
+      {showNewProjectDialog && <NewProjectDialog />}
+      {showReferences && <ReferencesDialog />}
+      {showComponents && <ComponentsDialog />}
+      {showMenuEditor && (
         <MenuEditor
-          visible={state.showMenuEditor}
-          onClose={() =>
-            dispatch({
-              type: 'SHOW_DIALOG',
-              payload: { dialogName: 'showMenuEditor', show: false },
-            })
-          }
-          onSave={menus => {
-            // Save menus to form
-            console.log('Saving menus:', menus);
-          }}
+          visible={showMenuEditor}
+          onClose={() => windowShowDialog('showMenuEditor', false)}
+          onSave={menus => {}}
         />
       )}
-      {state.showObjectBrowser && (
+      {showObjectBrowser && (
         <ObjectBrowser
-          visible={state.showObjectBrowser}
-          onClose={() =>
-            dispatch({
-              type: 'SHOW_DIALOG',
-              payload: { dialogName: 'showObjectBrowser', show: false },
-            })
-          }
+          visible={showObjectBrowser}
+          onClose={() => windowShowDialog('showObjectBrowser', false)}
         />
       )}
-      {state.showFormLayout && (
+      {showFormLayout && (
         <FormLayout
-          visible={state.showFormLayout}
-          onClose={() =>
-            dispatch({
-              type: 'SHOW_DIALOG',
-              payload: { dialogName: 'showFormLayout', show: false },
-            })
-          }
+          visible={showFormLayout}
+          onClose={() => windowShowDialog('showFormLayout', false)}
         />
       )}
-      {state.showUserControlDesigner && (
+      {showUserControlDesigner && (
         <UserControlDesigner
-          visible={state.showUserControlDesigner}
-          onClose={() =>
-            dispatch({
-              type: 'SHOW_DIALOG',
-              payload: { dialogName: 'showUserControlDesigner', show: false },
-            })
-          }
+          visible={showUserControlDesigner}
+          onClose={() => windowShowDialog('showUserControlDesigner', false)}
         />
       )}
-      {state.showOptionsDialog && <OptionsDialog />}
+      {showOptionsDialog && <OptionsDialog />}
     </>
   );
 };

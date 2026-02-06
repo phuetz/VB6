@@ -78,7 +78,7 @@ interface VB6Control {
 
 describe('Drag & Drop System - Toolbox Integration (@dnd-kit)', () => {
   let mockStore: any;
-  
+
   beforeEach(() => {
     mockStore = {
       controls: [],
@@ -127,7 +127,7 @@ describe('Drag & Drop System - Toolbox Integration (@dnd-kit)', () => {
       mockStore.setDraggedControl({
         type: event.active.id,
         source: 'toolbox',
-        data: { type: event.active.id }
+        data: { type: event.active.id },
       });
     };
 
@@ -142,7 +142,7 @@ describe('Drag & Drop System - Toolbox Integration (@dnd-kit)', () => {
     expect(mockStore.setDraggedControl).toHaveBeenCalledWith({
       type: 'TextBox',
       source: 'toolbox',
-      data: { type: 'TextBox' }
+      data: { type: 'TextBox' },
     });
   });
 
@@ -169,12 +169,8 @@ describe('Drag & Drop System - Toolbox Integration (@dnd-kit)', () => {
 
   it('should show drag overlay during toolbox drag', () => {
     const dragOverlayContent = <div data-testid="dragging-textbox">TextBox</div>;
-    
-    render(
-      <div data-testid="drag-overlay">
-        {dragOverlayContent}
-      </div>
-    );
+
+    render(<div data-testid="drag-overlay">{dragOverlayContent}</div>);
 
     expect(screen.getByTestId('drag-overlay')).toBeInTheDocument();
     expect(screen.getByTestId('dragging-textbox')).toBeInTheDocument();
@@ -207,8 +203,26 @@ describe('Drag & Drop System - Canvas Manipulation (Native)', () => {
 
   beforeEach(() => {
     controls = [
-      { id: 'ctrl1', type: 'TextBox', name: 'Text1', left: 100, top: 50, width: 120, height: 25, zIndex: 1 },
-      { id: 'ctrl2', type: 'CommandButton', name: 'Command1', left: 200, top: 100, width: 95, height: 25, zIndex: 2 },
+      {
+        id: 'ctrl1',
+        type: 'TextBox',
+        name: 'Text1',
+        left: 100,
+        top: 50,
+        width: 120,
+        height: 25,
+        zIndex: 1,
+      },
+      {
+        id: 'ctrl2',
+        type: 'CommandButton',
+        name: 'Command1',
+        left: 200,
+        top: 100,
+        width: 95,
+        height: 25,
+        zIndex: 2,
+      },
     ];
 
     document.body.innerHTML = `
@@ -217,7 +231,7 @@ describe('Drag & Drop System - Canvas Manipulation (Native)', () => {
         <div data-testid="control-ctrl2" data-control-id="ctrl2" style="position: absolute; left: 200px; top: 100px; width: 95px; height: 25px;">Command1</div>
       </div>
     `;
-    
+
     canvas = screen.getByTestId('designer-canvas');
   });
 
@@ -249,7 +263,7 @@ describe('Drag & Drop System - Canvas Manipulation (Native)', () => {
 
     const moveEvent = new MouseEvent('mousemove', {
       clientX: 167, // Should snap to 168 (21 * 8)
-      clientY: 71,  // Should snap to 72 (9 * 8)
+      clientY: 71, // Should snap to 72 (9 * 8)
       bubbles: true,
     });
 
@@ -257,7 +271,7 @@ describe('Drag & Drop System - Canvas Manipulation (Native)', () => {
 
     if (snapToGrid) {
       const snappedX = Math.round(167 / gridSize) * gridSize; // 168
-      const snappedY = Math.round(71 / gridSize) * gridSize;  // 72
+      const snappedY = Math.round(71 / gridSize) * gridSize; // 72
 
       expect(snappedX).toBe(168);
       expect(snappedY).toBe(72);
@@ -286,20 +300,24 @@ describe('Drag & Drop System - Canvas Manipulation (Native)', () => {
     const selectedControls = ['ctrl1', 'ctrl2'];
     const dragOffset = { x: 50, y: 30 };
 
-    const updatedPositions = selectedControls.map(id => {
-      const control = controls.find(c => c.id === id);
-      return control ? {
-        ...control,
-        left: control.left + dragOffset.x,
-        top: control.top + dragOffset.y,
-      } : null;
-    }).filter(Boolean);
+    const updatedPositions = selectedControls
+      .map(id => {
+        const control = controls.find(c => c.id === id);
+        return control
+          ? {
+              ...control,
+              left: control.left + dragOffset.x,
+              top: control.top + dragOffset.y,
+            }
+          : null;
+      })
+      .filter(Boolean);
 
     expect(updatedPositions).toHaveLength(2);
     expect(updatedPositions[0]?.left).toBe(150); // 100 + 50
-    expect(updatedPositions[0]?.top).toBe(80);   // 50 + 30
+    expect(updatedPositions[0]?.top).toBe(80); // 50 + 30
     expect(updatedPositions[1]?.left).toBe(250); // 200 + 50
-    expect(updatedPositions[1]?.top).toBe(130);  // 100 + 30
+    expect(updatedPositions[1]?.top).toBe(130); // 100 + 30
   });
 
   it('should respect canvas boundaries during drag', () => {
@@ -364,7 +382,7 @@ describe('Drag & Drop System - Resize Handles', () => {
 
   it('should render all 8 resize handles', () => {
     const directions = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
-    
+
     directions.forEach(direction => {
       const handle = screen.getByTestId(`resize-handle-${direction}`);
       expect(handle).toBeInTheDocument();
@@ -379,14 +397,14 @@ describe('Drag & Drop System - Resize Handles', () => {
 
     const resizeEvent = new MouseEvent('mousedown', {
       clientX: 223, // Right edge + 3px handle
-      clientY: 78,  // Bottom edge + 3px handle
+      clientY: 78, // Bottom edge + 3px handle
       bubbles: true,
     });
 
     fireEvent(seHandle, resizeEvent);
 
     const newSize = calculateResize('se', startSize, dragDelta);
-    
+
     expect(newSize.width).toBe(140); // 120 + 20
     expect(newSize.height).toBe(35); // 25 + 10
   });
@@ -399,10 +417,10 @@ describe('Drag & Drop System - Resize Handles', () => {
 
     const newGeometry = calculateResize('nw', startSize, dragDelta, startPos);
 
-    expect(newGeometry.width).toBe(130);  // 120 + 10 (opposite direction)
-    expect(newGeometry.height).toBe(30);  // 25 + 5 (opposite direction)
-    expect(newGeometry.left).toBe(90);    // 100 - 10 (position moves)
-    expect(newGeometry.top).toBe(45);     // 50 - 5 (position moves)
+    expect(newGeometry.width).toBe(130); // 120 + 10 (opposite direction)
+    expect(newGeometry.height).toBe(30); // 25 + 5 (opposite direction)
+    expect(newGeometry.left).toBe(90); // 100 - 10 (position moves)
+    expect(newGeometry.top).toBe(45); // 50 - 5 (position moves)
   });
 
   it('should enforce minimum size constraints during resize', () => {
@@ -418,14 +436,14 @@ describe('Drag & Drop System - Resize Handles', () => {
 
   it('should show appropriate resize cursors', () => {
     const cursorMap = {
-      'nw': 'nw-resize',
-      'n': 'n-resize',
-      'ne': 'ne-resize',
-      'e': 'e-resize',
-      'se': 'se-resize',
-      's': 's-resize',
-      'sw': 'sw-resize',
-      'w': 'w-resize',
+      nw: 'nw-resize',
+      n: 'n-resize',
+      ne: 'ne-resize',
+      e: 'e-resize',
+      se: 'se-resize',
+      s: 's-resize',
+      sw: 'sw-resize',
+      w: 'w-resize',
     };
 
     Object.entries(cursorMap).forEach(([direction, cursor]) => {
@@ -448,7 +466,7 @@ describe('Drag & Drop System - Resize Handles', () => {
     const newSize = calculateResize('se', startSize, scaledDelta);
 
     expect(newSize.width).toBe(140); // 120 + 20
-    expect(newSize.height).toBe(35);  // 25 + 10
+    expect(newSize.height).toBe(35); // 25 + 10
   });
 });
 
@@ -457,16 +475,43 @@ describe('Drag & Drop System - Alignment Guides', () => {
 
   beforeEach(() => {
     controls = [
-      { id: 'ctrl1', type: 'TextBox', name: 'Text1', left: 100, top: 50, width: 120, height: 25, zIndex: 1 },
-      { id: 'ctrl2', type: 'CommandButton', name: 'Command1', left: 200, top: 100, width: 95, height: 25, zIndex: 2 },
-      { id: 'ctrl3', type: 'Label', name: 'Label1', left: 50, top: 150, width: 65, height: 17, zIndex: 3 },
+      {
+        id: 'ctrl1',
+        type: 'TextBox',
+        name: 'Text1',
+        left: 100,
+        top: 50,
+        width: 120,
+        height: 25,
+        zIndex: 1,
+      },
+      {
+        id: 'ctrl2',
+        type: 'CommandButton',
+        name: 'Command1',
+        left: 200,
+        top: 100,
+        width: 95,
+        height: 25,
+        zIndex: 2,
+      },
+      {
+        id: 'ctrl3',
+        type: 'Label',
+        name: 'Label1',
+        left: 50,
+        top: 150,
+        width: 65,
+        height: 17,
+        zIndex: 3,
+      },
     ];
   });
 
   it('should calculate horizontal alignment guides', () => {
     const draggingControl = controls[0];
     const otherControls = controls.slice(1);
-    
+
     const horizontalGuides = calculateAlignmentGuides(draggingControl, otherControls, 'horizontal');
 
     expect(horizontalGuides).toContainEqual(
@@ -489,7 +534,7 @@ describe('Drag & Drop System - Alignment Guides', () => {
   it('should calculate vertical alignment guides', () => {
     const draggingControl = controls[0];
     const otherControls = controls.slice(1);
-    
+
     const verticalGuides = calculateAlignmentGuides(draggingControl, otherControls, 'vertical');
 
     expect(verticalGuides).toContainEqual(
@@ -512,7 +557,7 @@ describe('Drag & Drop System - Alignment Guides', () => {
     const snappedPosition = snapToAlignmentGuides(draggingPosition, guides, snapTolerance);
 
     expect(snappedPosition.left).toBe(100); // Snapped to guide
-    expect(snappedPosition.top).toBe(50);   // Snapped to guide
+    expect(snappedPosition.top).toBe(50); // Snapped to guide
   });
 
   it('should not snap if outside tolerance', () => {
@@ -526,7 +571,7 @@ describe('Drag & Drop System - Alignment Guides', () => {
     const snappedPosition = snapToAlignmentGuides(draggingPosition, guides, snapTolerance);
 
     expect(snappedPosition.left).toBe(90); // Not snapped
-    expect(snappedPosition.top).toBe(40);  // Not snapped
+    expect(snappedPosition.top).toBe(40); // Not snapped
   });
 
   it('should render visual alignment guides', () => {
@@ -570,12 +615,30 @@ describe('Drag & Drop System - Performance & Edge Cases', () => {
 
   it('should handle overlapping controls', () => {
     const overlappingControls = [
-      { id: 'ctrl1', type: 'TextBox', name: 'Text1', left: 100, top: 50, width: 120, height: 25, zIndex: 1 },
-      { id: 'ctrl2', type: 'Label', name: 'Label1', left: 110, top: 60, width: 65, height: 17, zIndex: 2 },
+      {
+        id: 'ctrl1',
+        type: 'TextBox',
+        name: 'Text1',
+        left: 100,
+        top: 50,
+        width: 120,
+        height: 25,
+        zIndex: 1,
+      },
+      {
+        id: 'ctrl2',
+        type: 'Label',
+        name: 'Label1',
+        left: 110,
+        top: 60,
+        width: 65,
+        height: 17,
+        zIndex: 2,
+      },
     ];
 
     const overlap = calculateOverlap(overlappingControls[0], overlappingControls[1]);
-    
+
     expect(overlap.hasOverlap).toBe(true);
     expect(overlap.area).toBeGreaterThan(0);
   });
@@ -588,8 +651,8 @@ describe('Drag & Drop System - Performance & Edge Cases', () => {
       timeStamp: i * 16, // 60fps
     }));
 
-    const processedEvents = rapidEvents.filter((event, index) => 
-      index === 0 || event.timeStamp - rapidEvents[index - 1].timeStamp >= 16
+    const processedEvents = rapidEvents.filter(
+      (event, index) => index === 0 || event.timeStamp - rapidEvents[index - 1].timeStamp >= 16
     );
 
     expect(processedEvents.length).toBeLessThanOrEqual(rapidEvents.length);
@@ -626,7 +689,7 @@ describe('Drag & Drop System - Performance & Edge Cases', () => {
           target: document.createElement('div'),
           clientX: 100,
           clientY: 50,
-        })
+        }),
       ],
       bubbles: true,
     });
@@ -693,17 +756,21 @@ function getDefaultHeight(controlType: string): number {
 }
 
 function detectCollision(rect1: any, rect2: any): boolean {
-  return rect1.left < rect2.right &&
-         rect1.right > rect2.left &&
-         rect1.top < rect2.bottom &&
-         rect1.bottom > rect2.top;
+  return (
+    rect1.left < rect2.right &&
+    rect1.right > rect2.left &&
+    rect1.top < rect2.bottom &&
+    rect1.bottom > rect2.top
+  );
 }
 
 function isWithinBounds(rect: any, bounds: any): boolean {
-  return rect.left >= bounds.left &&
-         rect.top >= bounds.top &&
-         rect.right <= bounds.right &&
-         rect.bottom <= bounds.bottom;
+  return (
+    rect.left >= bounds.left &&
+    rect.top >= bounds.top &&
+    rect.right <= bounds.right &&
+    rect.bottom <= bounds.bottom
+  );
 }
 
 function constrainToCanvas(

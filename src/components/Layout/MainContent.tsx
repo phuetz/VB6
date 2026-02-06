@@ -1,52 +1,111 @@
 import React from 'react';
 import { useVB6Store } from '../../stores/vb6Store';
+import { useWindowStore } from '../../stores/windowStore';
 import { shallow } from 'zustand/shallow';
-import AdvancedToolbox from '../Panels/Toolbox/AdvancedToolbox';
+import Toolbox from '../Panels/Toolbox/Toolbox';
 import FormDesigner from '../Designer/FormDesigner';
-import AdvancedCodeEditor from '../Editor/AdvancedCodeEditor';
+import LazyMonacoEditor from '../Editor/LazyMonacoEditor';
+import ImmediateWindow from '../Panels/ImmediateWindow/ImmediateWindow';
+import { DebugToolbar } from '../Debug/DebugWindows';
+import AdvancedDebugPanel from '../Debug/AdvancedDebugPanel';
 import ProjectExplorer from '../Panels/ProjectExplorer/ProjectExplorer';
 import PropertiesWindow from '../Panels/PropertiesWindow/PropertiesWindow';
 import ControlTree from '../Panels/ControlTree/ControlTree';
-import ImmediateWindow from '../Panels/ImmediateWindow/ImmediateWindow';
-import { WatchWindow, LocalsWindow, CallStackWindow, DebugToolbar } from '../Debug/DebugWindows';
-import AdvancedDebugPanel from '../Debug/AdvancedDebugPanel';
+import { WatchWindow, LocalsWindow, CallStackWindow } from '../Debug/DebugWindows';
 import GitPanel from '../Panels/GitPanel';
 import MemoryProfiler from '../Debug/MemoryProfiler';
 import TestRunner from '../Testing/TestRunner';
+import {
+  ToolboxErrorBoundary,
+  EditorErrorBoundary,
+  DesignerErrorBoundary,
+  DebugErrorBoundary,
+} from '../ErrorBoundary';
+import WindowManager from './WindowManager';
+import type { PanelConfig } from './windowTypes';
+
+const rightPanels: PanelConfig[] = [
+  {
+    id: 'projectExplorer',
+    storeKey: 'showProjectExplorer',
+    component: ProjectExplorer,
+    boundaryType: 'panel',
+    panelName: 'Project Explorer',
+  },
+  {
+    id: 'controlTree',
+    storeKey: 'showControlTree',
+    component: ControlTree,
+    boundaryType: 'panel',
+    panelName: 'Control Tree',
+  },
+  {
+    id: 'propertiesWindow',
+    storeKey: 'showPropertiesWindow',
+    component: PropertiesWindow,
+    boundaryType: 'panel',
+    panelName: 'Properties Window',
+  },
+  {
+    id: 'watchWindow',
+    storeKey: 'showWatchWindow',
+    component: WatchWindow,
+    boundaryType: 'debug',
+    visibilityControlled: true,
+  },
+  {
+    id: 'localsWindow',
+    storeKey: 'showLocalsWindow',
+    component: LocalsWindow,
+    boundaryType: 'debug',
+    visibilityControlled: true,
+  },
+  {
+    id: 'callStack',
+    storeKey: 'showCallStack',
+    component: CallStackWindow,
+    boundaryType: 'debug',
+    visibilityControlled: true,
+  },
+  {
+    id: 'gitPanel',
+    storeKey: 'showGitPanel',
+    component: GitPanel,
+    boundaryType: 'panel',
+    panelName: 'Git Panel',
+    className: 'h-96 border-t border-gray-400',
+  },
+  {
+    id: 'memoryProfiler',
+    storeKey: 'showMemoryProfiler',
+    component: MemoryProfiler,
+    boundaryType: 'panel',
+    panelName: 'Memory Profiler',
+    className: 'w-80 h-96 absolute bottom-4 right-4 shadow-lg',
+  },
+  {
+    id: 'testRunner',
+    storeKey: 'showTestRunner',
+    component: TestRunner,
+    boundaryType: 'panel',
+    panelName: 'Test Runner',
+    className: 'h-96 border-t border-gray-400',
+  },
+];
 
 const MainContent: React.FC = () => {
-  // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
-  const {
-    showToolbox,
-    showCodeEditor,
-    showProjectExplorer,
-    showPropertiesWindow,
-    showControlTree,
-    showImmediateWindow,
-    showWatchWindow,
-    showLocalsWindow,
-    showCallStack,
-    executionMode,
-    toggleWindow,
-    showGitPanel,
-    showMemoryProfiler,
-    showTestRunner,
-  } = useVB6Store(
-    (state) => ({
+  const { showToolbox, showCodeEditor, showImmediateWindow } = useWindowStore(
+    state => ({
       showToolbox: state.showToolbox,
       showCodeEditor: state.showCodeEditor,
-      showProjectExplorer: state.showProjectExplorer,
-      showPropertiesWindow: state.showPropertiesWindow,
-      showControlTree: state.showControlTree,
       showImmediateWindow: state.showImmediateWindow,
-      showWatchWindow: state.showWatchWindow,
-      showLocalsWindow: state.showLocalsWindow,
-      showCallStack: state.showCallStack,
+    }),
+    shallow
+  );
+
+  const { executionMode } = useVB6Store(
+    state => ({
       executionMode: state.executionMode,
-      toggleWindow: state.toggleWindow,
-      showGitPanel: state.showGitPanel,
-      showMemoryProfiler: state.showMemoryProfiler,
-      showTestRunner: state.showTestRunner,
     }),
     shallow
   );
@@ -54,58 +113,44 @@ const MainContent: React.FC = () => {
   return (
     <div className="flex-1 flex overflow-hidden">
       {/* Left Panel - Toolbox */}
-      {showToolbox && <AdvancedToolbox />}
+      {showToolbox && (
+        <ToolboxErrorBoundary>
+          <Toolbox />
+        </ToolboxErrorBoundary>
+      )}
 
       {/* Center Panel - Form Designer or Code Editor */}
       <div className="flex-1 flex flex-col bg-gray-300 overflow-hidden">
-        {/* Debug Toolbar */}
         {(executionMode === 'break' || executionMode === 'run') && <DebugToolbar />}
 
-        {showCodeEditor ? <AdvancedCodeEditor /> : <FormDesigner />}
+        {showCodeEditor ? (
+          <EditorErrorBoundary>
+            <LazyMonacoEditor />
+          </EditorErrorBoundary>
+        ) : (
+          <DesignerErrorBoundary>
+            <FormDesigner />
+          </DesignerErrorBoundary>
+        )}
 
-        {/* Bottom Panel - Immediate Window and Advanced Debug Panel */}
+        {/* Bottom Panel */}
         <div className="flex flex-col">
-          {showImmediateWindow && <ImmediateWindow />}
+          {showImmediateWindow && (
+            <DebugErrorBoundary>
+              <ImmediateWindow />
+            </DebugErrorBoundary>
+          )}
           {(executionMode === 'break' || executionMode === 'run' || executionMode === 'design') && (
-            <AdvancedDebugPanel className="h-80 border-t border-gray-400" />
+            <DebugErrorBoundary>
+              <AdvancedDebugPanel className="h-80 border-t border-gray-400" />
+            </DebugErrorBoundary>
           )}
         </div>
       </div>
 
-      {/* Right Panel - Project Explorer and Properties */}
+      {/* Right Panel - data-driven via WindowManager */}
       <div className="w-80 bg-gray-100 border-l border-gray-400 flex flex-col">
-        {showProjectExplorer && <ProjectExplorer />}
-        {showControlTree && <ControlTree />}
-        {showPropertiesWindow && <PropertiesWindow />}
-
-        {/* Debug Windows */}
-        {showWatchWindow && (
-          <WatchWindow visible={showWatchWindow} onClose={() => toggleWindow('showWatchWindow')} />
-        )}
-        {showLocalsWindow && (
-          <LocalsWindow
-            visible={showLocalsWindow}
-            onClose={() => toggleWindow('showLocalsWindow')}
-          />
-        )}
-        {showCallStack && (
-          <CallStackWindow visible={showCallStack} onClose={() => toggleWindow('showCallStack')} />
-        )}
-        
-        {/* Git Panel */}
-        {showGitPanel && (
-          <GitPanel className="h-96 border-t border-gray-400" />
-        )}
-        
-        {/* Memory Profiler */}
-        {showMemoryProfiler && (
-          <MemoryProfiler className="w-80 h-96 absolute bottom-4 right-4 shadow-lg" />
-        )}
-        
-        {/* Test Runner */}
-        {showTestRunner && (
-          <TestRunner className="h-96 border-t border-gray-400" />
-        )}
+        <WindowManager panels={rightPanels} />
       </div>
     </div>
   );

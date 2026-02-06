@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import * as monaco from 'monaco-editor';
 import { useVB6Store } from '../../stores/vb6Store';
 import { shallow } from 'zustand/shallow';
@@ -9,6 +9,26 @@ import { BreakpointGutter } from '../Debug/BreakpointGutter';
 import { AIIntelliSenseProvider } from './AIIntelliSenseProvider';
 import { AIIntelliSenseSettings } from '../Settings/AIIntelliSenseSettings';
 import { CompletionItem } from '../../services/AIIntelliSenseEngine';
+import { VB6Compiler, CompilerDiagnostic } from '../../services/VB6Compiler';
+
+const DIAGNOSTIC_SEVERITY_MAP: Record<string, monaco.MarkerSeverity> = {
+  error: monaco.MarkerSeverity.Error,
+  warning: monaco.MarkerSeverity.Warning,
+  info: monaco.MarkerSeverity.Info,
+};
+
+function diagnosticsToMarkers(diagnostics: CompilerDiagnostic[]): monaco.editor.IMarkerData[] {
+  return diagnostics.map(d => ({
+    severity: DIAGNOSTIC_SEVERITY_MAP[d.severity] ?? monaco.MarkerSeverity.Info,
+    message: d.message,
+    startLineNumber: d.line,
+    startColumn: d.column,
+    endLineNumber: d.endLine ?? d.line,
+    endColumn: d.endColumn ?? d.column + 1,
+    code: d.code,
+    source: `vb6-${d.source}`,
+  }));
+}
 
 // VB6 Language Configuration
 const VB6_LANGUAGE_CONFIG: monaco.languages.ILanguageConfiguration = {
@@ -45,61 +65,273 @@ const VB6_LANGUAGE_TOKENS: monaco.languages.IMonarchLanguage = {
 
   keywords: [
     // Control flow
-    'If', 'Then', 'Else', 'ElseIf', 'End', 'Select', 'Case', 'For', 'Next', 'To', 'Step',
-    'While', 'Wend', 'Do', 'Loop', 'Until', 'Each', 'In', 'Exit', 'GoTo', 'GoSub', 'Return',
-    'On', 'Error', 'Resume', 'With',
+    'If',
+    'Then',
+    'Else',
+    'ElseIf',
+    'End',
+    'Select',
+    'Case',
+    'For',
+    'Next',
+    'To',
+    'Step',
+    'While',
+    'Wend',
+    'Do',
+    'Loop',
+    'Until',
+    'Each',
+    'In',
+    'Exit',
+    'GoTo',
+    'GoSub',
+    'Return',
+    'On',
+    'Error',
+    'Resume',
+    'With',
     // Declarations
-    'Dim', 'ReDim', 'Preserve', 'As', 'Private', 'Public', 'Friend', 'Static', 'Global',
-    'Const', 'Type', 'Enum', 'Declare', 'Lib', 'Alias', 'Sub', 'Function', 'Property',
-    'Get', 'Let', 'Set', 'Class', 'Module', 'Event', 'RaiseEvent', 'Implements',
+    'Dim',
+    'ReDim',
+    'Preserve',
+    'As',
+    'Private',
+    'Public',
+    'Friend',
+    'Static',
+    'Global',
+    'Const',
+    'Type',
+    'Enum',
+    'Declare',
+    'Lib',
+    'Alias',
+    'Sub',
+    'Function',
+    'Property',
+    'Get',
+    'Let',
+    'Set',
+    'Class',
+    'Module',
+    'Event',
+    'RaiseEvent',
+    'Implements',
     // Parameters
-    'ByVal', 'ByRef', 'Optional', 'ParamArray',
+    'ByVal',
+    'ByRef',
+    'Optional',
+    'ParamArray',
     // Types
-    'Boolean', 'Byte', 'Integer', 'Long', 'Single', 'Double', 'Currency', 'Decimal',
-    'Date', 'String', 'Object', 'Variant', 'Any',
+    'Boolean',
+    'Byte',
+    'Integer',
+    'Long',
+    'Single',
+    'Double',
+    'Currency',
+    'Decimal',
+    'Date',
+    'String',
+    'Object',
+    'Variant',
+    'Any',
     // Operators
-    'And', 'Or', 'Not', 'Xor', 'Eqv', 'Imp', 'Mod', 'Like', 'Is', 'TypeOf',
+    'And',
+    'Or',
+    'Not',
+    'Xor',
+    'Eqv',
+    'Imp',
+    'Mod',
+    'Like',
+    'Is',
+    'TypeOf',
     // Literals
-    'True', 'False', 'Nothing', 'Null', 'Empty', 'Me',
+    'True',
+    'False',
+    'Nothing',
+    'Null',
+    'Empty',
+    'Me',
     // Object
-    'New', 'Call', 'WithEvents',
+    'New',
+    'Call',
+    'WithEvents',
     // Misc
-    'Option', 'Explicit', 'Compare', 'Base', 'Binary', 'Text', 'Database',
-    'Attribute', 'VB_Name', 'VB_GlobalNameSpace', 'VB_Creatable', 'VB_PredeclaredId',
-    'DefBool', 'DefByte', 'DefInt', 'DefLng', 'DefCur', 'DefSng', 'DefDbl',
-    'DefDec', 'DefDate', 'DefStr', 'DefObj', 'DefVar',
-    'Debug', 'Print', 'Assert', 'DoEvents', 'Stop', 'Beep',
+    'Option',
+    'Explicit',
+    'Compare',
+    'Base',
+    'Binary',
+    'Text',
+    'Database',
+    'Attribute',
+    'VB_Name',
+    'VB_GlobalNameSpace',
+    'VB_Creatable',
+    'VB_PredeclaredId',
+    'DefBool',
+    'DefByte',
+    'DefInt',
+    'DefLng',
+    'DefCur',
+    'DefSng',
+    'DefDbl',
+    'DefDec',
+    'DefDate',
+    'DefStr',
+    'DefObj',
+    'DefVar',
+    'Debug',
+    'Print',
+    'Assert',
+    'DoEvents',
+    'Stop',
+    'Beep',
   ],
 
   builtinFunctions: [
     // String functions
-    'Len', 'Left', 'Right', 'Mid', 'Trim', 'LTrim', 'RTrim', 'UCase', 'LCase',
-    'InStr', 'InStrRev', 'Replace', 'Split', 'Join', 'StrComp', 'String', 'Space',
-    'Asc', 'Chr', 'Format', 'CStr', 'StrReverse', 'StrConv',
+    'Len',
+    'Left',
+    'Right',
+    'Mid',
+    'Trim',
+    'LTrim',
+    'RTrim',
+    'UCase',
+    'LCase',
+    'InStr',
+    'InStrRev',
+    'Replace',
+    'Split',
+    'Join',
+    'StrComp',
+    'String',
+    'Space',
+    'Asc',
+    'Chr',
+    'Format',
+    'CStr',
+    'StrReverse',
+    'StrConv',
     // Numeric functions
-    'Abs', 'Int', 'Fix', 'Sgn', 'Sqr', 'Exp', 'Log', 'Sin', 'Cos', 'Tan', 'Atn',
-    'Rnd', 'Randomize', 'Round', 'Hex', 'Oct', 'Val',
+    'Abs',
+    'Int',
+    'Fix',
+    'Sgn',
+    'Sqr',
+    'Exp',
+    'Log',
+    'Sin',
+    'Cos',
+    'Tan',
+    'Atn',
+    'Rnd',
+    'Randomize',
+    'Round',
+    'Hex',
+    'Oct',
+    'Val',
     // Conversion functions
-    'CBool', 'CByte', 'CCur', 'CDate', 'CDbl', 'CDec', 'CInt', 'CLng', 'CSng', 'CVar',
+    'CBool',
+    'CByte',
+    'CCur',
+    'CDate',
+    'CDbl',
+    'CDec',
+    'CInt',
+    'CLng',
+    'CSng',
+    'CVar',
     // Date/Time functions
-    'Now', 'Date', 'Time', 'Timer', 'Year', 'Month', 'Day', 'Hour', 'Minute', 'Second',
-    'Weekday', 'DateAdd', 'DateDiff', 'DatePart', 'DateSerial', 'DateValue',
-    'TimeSerial', 'TimeValue', 'MonthName', 'WeekdayName', 'IsDate',
+    'Now',
+    'Date',
+    'Time',
+    'Timer',
+    'Year',
+    'Month',
+    'Day',
+    'Hour',
+    'Minute',
+    'Second',
+    'Weekday',
+    'DateAdd',
+    'DateDiff',
+    'DatePart',
+    'DateSerial',
+    'DateValue',
+    'TimeSerial',
+    'TimeValue',
+    'MonthName',
+    'WeekdayName',
+    'IsDate',
     // Array functions
-    'Array', 'UBound', 'LBound', 'Erase',
+    'Array',
+    'UBound',
+    'LBound',
+    'Erase',
     // Type functions
-    'IsArray', 'IsDate', 'IsEmpty', 'IsError', 'IsMissing', 'IsNull', 'IsNumeric', 'IsObject',
-    'TypeName', 'VarType',
+    'IsArray',
+    'IsDate',
+    'IsEmpty',
+    'IsError',
+    'IsMissing',
+    'IsNull',
+    'IsNumeric',
+    'IsObject',
+    'TypeName',
+    'VarType',
     // File functions
-    'Dir', 'EOF', 'FileLen', 'FreeFile', 'Loc', 'LOF', 'Seek', 'FileAttr', 'GetAttr', 'SetAttr',
-    'FileCopy', 'Kill', 'Name', 'MkDir', 'RmDir', 'ChDir', 'ChDrive', 'CurDir',
+    'Dir',
+    'EOF',
+    'FileLen',
+    'FreeFile',
+    'Loc',
+    'LOF',
+    'Seek',
+    'FileAttr',
+    'GetAttr',
+    'SetAttr',
+    'FileCopy',
+    'Kill',
+    'Name',
+    'MkDir',
+    'RmDir',
+    'ChDir',
+    'ChDrive',
+    'CurDir',
     // I/O functions
-    'Open', 'Close', 'Input', 'Line', 'Print', 'Write', 'Get', 'Put', 'Seek',
+    'Open',
+    'Close',
+    'Input',
+    'Line',
+    'Print',
+    'Write',
+    'Get',
+    'Put',
+    'Seek',
     // Dialog functions
-    'MsgBox', 'InputBox', 'Shell',
+    'MsgBox',
+    'InputBox',
+    'Shell',
     // Misc functions
-    'IIf', 'Choose', 'Switch', 'CreateObject', 'GetObject', 'Environ', 'Command', 'DoEvents',
-    'QBColor', 'RGB', 'LoadPicture', 'SavePicture', 'LoadResString', 'LoadResPicture',
+    'IIf',
+    'Choose',
+    'Switch',
+    'CreateObject',
+    'GetObject',
+    'Environ',
+    'Command',
+    'DoEvents',
+    'QBColor',
+    'RGB',
+    'LoadPicture',
+    'SavePicture',
+    'LoadResString',
+    'LoadResPicture',
   ],
 
   operators: ['=', '>', '<', '<=', '>=', '<>', '+', '-', '*', '/', '\\', '^', '&', ':='],
@@ -294,7 +526,15 @@ const VB6_COMPLETION_PROVIDER: monaco.languages.CompletionItemProvider = {
       {
         label: 'If Then ElseIf Else',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: ['If ${1:condition1} Then', '    ${2}', 'ElseIf ${3:condition2} Then', '    ${4}', 'Else', '    ${5}', 'End If'].join('\n'),
+        insertText: [
+          'If ${1:condition1} Then',
+          '    ${2}',
+          'ElseIf ${3:condition2} Then',
+          '    ${4}',
+          'Else',
+          '    ${5}',
+          'End If',
+        ].join('\n'),
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'If-ElseIf-Else block',
       },
@@ -310,14 +550,18 @@ const VB6_COMPLETION_PROVIDER: monaco.languages.CompletionItemProvider = {
       {
         label: 'For Step Next',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: ['For ${1:i} = ${2:1} To ${3:10} Step ${4:2}', '    ${5}', 'Next ${1:i}'].join('\n'),
+        insertText: ['For ${1:i} = ${2:1} To ${3:10} Step ${4:2}', '    ${5}', 'Next ${1:i}'].join(
+          '\n'
+        ),
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'For-Step-Next loop',
       },
       {
         label: 'For Each Next',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: ['For Each ${1:item} In ${2:collection}', '    ${3}', 'Next ${1:item}'].join('\n'),
+        insertText: ['For Each ${1:item} In ${2:collection}', '    ${3}', 'Next ${1:item}'].join(
+          '\n'
+        ),
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'For Each-Next loop',
       },
@@ -354,7 +598,16 @@ const VB6_COMPLETION_PROVIDER: monaco.languages.CompletionItemProvider = {
       {
         label: 'Select Case',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: ['Select Case ${1:expression}', '    Case ${2:value1}', '        ${3}', '    Case ${4:value2}', '        ${5}', '    Case Else', '        ${6}', 'End Select'].join('\n'),
+        insertText: [
+          'Select Case ${1:expression}',
+          '    Case ${2:value1}',
+          '        ${3}',
+          '    Case ${4:value2}',
+          '        ${5}',
+          '    Case Else',
+          '        ${6}',
+          'End Select',
+        ].join('\n'),
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'Select Case block',
       },
@@ -386,14 +639,24 @@ const VB6_COMPLETION_PROVIDER: monaco.languages.CompletionItemProvider = {
       {
         label: 'Private Function',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: ['Private Function ${1:FunctionName}(${2:parameters}) As ${3:Variant}', '    ${4}', '    ${1:FunctionName} = ${5:result}', 'End Function'].join('\n'),
+        insertText: [
+          'Private Function ${1:FunctionName}(${2:parameters}) As ${3:Variant}',
+          '    ${4}',
+          '    ${1:FunctionName} = ${5:result}',
+          'End Function',
+        ].join('\n'),
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'Private Function',
       },
       {
         label: 'Public Function',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: ['Public Function ${1:FunctionName}(${2:parameters}) As ${3:Variant}', '    ${4}', '    ${1:FunctionName} = ${5:result}', 'End Function'].join('\n'),
+        insertText: [
+          'Public Function ${1:FunctionName}(${2:parameters}) As ${3:Variant}',
+          '    ${4}',
+          '    ${1:FunctionName} = ${5:result}',
+          'End Function',
+        ].join('\n'),
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'Public Function',
       },
@@ -402,21 +665,33 @@ const VB6_COMPLETION_PROVIDER: monaco.languages.CompletionItemProvider = {
       {
         label: 'Property Get',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: ['Public Property Get ${1:PropertyName}() As ${2:Variant}', '    ${1:PropertyName} = m${1:PropertyName}', 'End Property'].join('\n'),
+        insertText: [
+          'Public Property Get ${1:PropertyName}() As ${2:Variant}',
+          '    ${1:PropertyName} = m${1:PropertyName}',
+          'End Property',
+        ].join('\n'),
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'Property Get procedure',
       },
       {
         label: 'Property Let',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: ['Public Property Let ${1:PropertyName}(ByVal value As ${2:Variant})', '    m${1:PropertyName} = value', 'End Property'].join('\n'),
+        insertText: [
+          'Public Property Let ${1:PropertyName}(ByVal value As ${2:Variant})',
+          '    m${1:PropertyName} = value',
+          'End Property',
+        ].join('\n'),
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'Property Let procedure',
       },
       {
         label: 'Property Set',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: ['Public Property Set ${1:PropertyName}(ByVal value As ${2:Object})', '    Set m${1:PropertyName} = value', 'End Property'].join('\n'),
+        insertText: [
+          'Public Property Set ${1:PropertyName}(ByVal value As ${2:Object})',
+          '    Set m${1:PropertyName} = value',
+          'End Property',
+        ].join('\n'),
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'Property Set procedure',
       },
@@ -425,7 +700,15 @@ const VB6_COMPLETION_PROVIDER: monaco.languages.CompletionItemProvider = {
       {
         label: 'On Error GoTo',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: ['On Error GoTo ${1:ErrorHandler}', '    ${2}', '    Exit Sub', '', '${1:ErrorHandler}:', '    MsgBox "Error " & Err.Number & ": " & Err.Description', '    Resume Next'].join('\n'),
+        insertText: [
+          'On Error GoTo ${1:ErrorHandler}',
+          '    ${2}',
+          '    Exit Sub',
+          '',
+          '${1:ErrorHandler}:',
+          '    MsgBox "Error " & Err.Number & ": " & Err.Description',
+          '    Resume Next',
+        ].join('\n'),
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'Error handling with label',
       },
@@ -440,14 +723,24 @@ const VB6_COMPLETION_PROVIDER: monaco.languages.CompletionItemProvider = {
       {
         label: 'Type End Type',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: ['Private Type ${1:TypeName}', '    ${2:Field1} As ${3:String}', '    ${4:Field2} As ${5:Long}', 'End Type'].join('\n'),
+        insertText: [
+          'Private Type ${1:TypeName}',
+          '    ${2:Field1} As ${3:String}',
+          '    ${4:Field2} As ${5:Long}',
+          'End Type',
+        ].join('\n'),
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'User-Defined Type',
       },
       {
         label: 'Enum End Enum',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: ['Public Enum ${1:EnumName}', '    ${2:Value1} = ${3:0}', '    ${4:Value2} = ${5:1}', 'End Enum'].join('\n'),
+        insertText: [
+          'Public Enum ${1:EnumName}',
+          '    ${2:Value1} = ${3:0}',
+          '    ${4:Value2} = ${5:1}',
+          'End Enum',
+        ].join('\n'),
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         detail: 'Enumeration',
       },
@@ -486,15 +779,27 @@ const MonacoCodeEditor: React.FC = () => {
   const [aiEnabled, setAIEnabled] = useState(true);
   const refactoringService = useRef(new VB6RefactoringService());
   const vb6IntelliSense = useRef(new VB6IntelliSenseService());
+  const diagnosticCompiler = useRef(new VB6Compiler());
+  const diagnosticTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const updateDiagnostics = useCallback((code: string) => {
+    if (diagnosticTimerRef.current) clearTimeout(diagnosticTimerRef.current);
+    diagnosticTimerRef.current = setTimeout(() => {
+      const model = editorRef.current?.getModel();
+      if (!model) return;
+      try {
+        const diagnostics = diagnosticCompiler.current.getDiagnostics(code);
+        const markers = diagnosticsToMarkers(diagnostics);
+        monaco.editor.setModelMarkers(model, 'vb6-compiler', markers);
+      } catch {
+        monaco.editor.setModelMarkers(model, 'vb6-compiler', []);
+      }
+    }, 500);
+  }, []);
 
   // PERFORMANCE FIX: Use shallow selector to prevent unnecessary re-renders
-  const {
-    selectedControls,
-    selectedEvent,
-    eventCode,
-    controls,
-  } = useVB6Store(
-    (state) => ({
+  const { selectedControls, selectedEvent, eventCode, controls } = useVB6Store(
+    state => ({
       selectedControls: state.selectedControls,
       selectedEvent: state.selectedEvent,
       eventCode: state.eventCode,
@@ -504,9 +809,9 @@ const MonacoCodeEditor: React.FC = () => {
   );
 
   // Actions don't need shallow comparison
-  const updateEventCode = useVB6Store((state) => state.updateEventCode);
-  const setSelectedEvent = useVB6Store((state) => state.setSelectedEvent);
-  const selectControls = useVB6Store((state) => state.selectControls);
+  const updateEventCode = useVB6Store(state => state.updateEventCode);
+  const setSelectedEvent = useVB6Store(state => state.setSelectedEvent);
+  const selectControls = useVB6Store(state => state.selectControls);
 
   // Initialize Monaco Editor
   useEffect(() => {
@@ -520,7 +825,7 @@ const MonacoCodeEditor: React.FC = () => {
     // Register VB6 themes
     monaco.editor.defineTheme('vb6-classic', VB6_CLASSIC_THEME);
     monaco.editor.defineTheme('vb6-dark', VB6_DARK_THEME);
-    
+
     // Register advanced IntelliSense providers
     // Completion provider
     monaco.languages.registerCompletionItemProvider('vb6', {
@@ -528,14 +833,14 @@ const MonacoCodeEditor: React.FC = () => {
         const items = vb6IntelliSense.current.getCompletionItems(model, position);
         return { suggestions: items };
       },
-      triggerCharacters: ['.', ' ', '(', ',', '=', 'As']
+      triggerCharacters: ['.', ' ', '(', ',', '=', 'As'],
     });
 
     // Hover provider
     monaco.languages.registerHoverProvider('vb6', {
       provideHover: (model, position) => {
         return vb6IntelliSense.current.getHoverInfo(model, position);
-      }
+      },
     });
 
     // Signature help provider
@@ -545,7 +850,7 @@ const MonacoCodeEditor: React.FC = () => {
       provideSignatureHelp: (model, position) => {
         const result = vb6IntelliSense.current.getSignatureHelp(model, position);
         return result ? result.value : null;
-      }
+      },
     });
 
     // Note: Parameter hints are provided through signature help
@@ -586,60 +891,41 @@ const MonacoCodeEditor: React.FC = () => {
 
     // Add keyboard shortcuts
     // Format code
-    editor.addCommand(
-      monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.KeyF,
-      () => {
-        // Format code using the internal formatter
-        useVB6Store.getState().formatCode();
-      }
-    );
-    
+    editor.addCommand(monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.KeyF, () => {
+      // Format code using the internal formatter
+      useVB6Store.getState().formatCode();
+    });
+
     // Refactor shortcut
-    editor.addCommand(
-      monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyR,
-      () => {
-        setShowRefactoringPanel(true);
-      }
-    );
-    
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyR, () => {
+      setShowRefactoringPanel(true);
+    });
+
     // Trigger suggestions manually
-    editor.addCommand(
-      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space,
-      () => {
-        editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
-      }
-    );
-    
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, () => {
+      editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+    });
+
     // AI IntelliSense settings shortcut
-    editor.addCommand(
-      monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyI,
-      () => {
-        setShowAISettings(true);
-      }
-    );
-    
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyI, () => {
+      setShowAISettings(true);
+    });
+
     // Toggle AI IntelliSense
-    editor.addCommand(
-      monaco.KeyMod.CtrlCmd | monaco.KeyMod.Alt | monaco.KeyCode.KeyA,
-      () => {
-        setAIEnabled(prev => !prev);
-      }
-    );
-    
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Alt | monaco.KeyCode.KeyA, () => {
+      setAIEnabled(prev => !prev);
+    });
+
     // Go to definition (simulated)
-    editor.addCommand(
-      monaco.KeyCode.F12,
-      () => {
-        const position = editor.getPosition();
-        if (position) {
-          const word = editor.getModel()?.getWordAtPosition(position);
-          if (word) {
-            // TODO: Implement go to definition
-            console.log('Go to definition:', word.word);
-          }
+    editor.addCommand(monaco.KeyCode.F12, () => {
+      const position = editor.getPosition();
+      if (position) {
+        const word = editor.getModel()?.getWordAtPosition(position);
+        if (word) {
+          // TODO: Implement go to definition
         }
       }
-    );
+    });
 
     editorRef.current = editor;
     setIsReady(true);
@@ -647,10 +933,13 @@ const MonacoCodeEditor: React.FC = () => {
     // Add content change listener
     editor.onDidChangeModelContent(() => {
       const value = editor.getValue();
-      
+
       // Update IntelliSense with current code
       vb6IntelliSense.current.parseCode(value);
-      
+
+      // Run compiler diagnostics (debounced)
+      updateDiagnostics(value);
+
       if (selectedControls.length === 1 && selectedEvent) {
         // Extract the actual code from the editor (which contains procedure wrappers)
         const procedureStart = `Private Sub ${selectedControls[0].name}_${selectedEvent}()\n`;
@@ -668,19 +957,20 @@ const MonacoCodeEditor: React.FC = () => {
         updateEventCode(eventKey, codeContent);
       }
     });
-    
+
     // Update IntelliSense with controls
     vb6IntelliSense.current.updateControls(controls);
 
     return () => {
+      if (diagnosticTimerRef.current) clearTimeout(diagnosticTimerRef.current);
       editor.dispose();
     };
-  }, [controls]);
+  }, [controls, updateDiagnostics]);
 
   // Update editor content when selection changes
   useEffect(() => {
     if (!isReady || !editorRef.current) return;
-    
+
     // Update IntelliSense with latest controls
     vb6IntelliSense.current.updateControls(controls);
 
@@ -771,7 +1061,11 @@ const MonacoCodeEditor: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 bg-white overflow-hidden flex flex-col">
+    <div
+      role="region"
+      aria-label="Code Editor"
+      className="flex-1 bg-white overflow-hidden flex flex-col"
+    >
       {/* Header */}
       <div className="bg-gray-200 px-2 py-1 border-b border-gray-400 flex items-center gap-2 text-xs">
         <select
@@ -815,14 +1109,17 @@ const MonacoCodeEditor: React.FC = () => {
         </select>
 
         <div className="flex items-center gap-2 ml-auto">
-          <div className="text-gray-600 text-xs">Monaco Editor • VB6 IntelliSense • Press Ctrl+Space for suggestions • Ctrl+Shift+R for refactoring</div>
-          
+          <div className="text-gray-600 text-xs">
+            Monaco Editor • VB6 IntelliSense • Press Ctrl+Space for suggestions • Ctrl+Shift+R for
+            refactoring
+          </div>
+
           {/* AI IntelliSense Toggle */}
           <button
             onClick={() => setAIEnabled(!aiEnabled)}
             className={`px-2 py-1 text-xs rounded transition-colors flex items-center gap-1 ${
-              aiEnabled 
-                ? 'bg-purple-600 text-white hover:bg-purple-700' 
+              aiEnabled
+                ? 'bg-purple-600 text-white hover:bg-purple-700'
                 : 'bg-gray-300 text-gray-600 hover:bg-gray-400'
             }`}
             title="Toggle AI IntelliSense"
@@ -830,7 +1127,7 @@ const MonacoCodeEditor: React.FC = () => {
             <span className="text-xs">🧠</span>
             AI
           </button>
-          
+
           {/* AI Settings Button */}
           <button
             onClick={() => setShowAISettings(true)}
@@ -843,11 +1140,17 @@ const MonacoCodeEditor: React.FC = () => {
       </div>
 
       {/* Editor */}
-      <div ref={containerRef} className="flex-1" style={{ minHeight: 0 }} />
-      
+      <div
+        ref={containerRef}
+        role="application"
+        aria-label="VB6 Code Editor"
+        className="flex-1"
+        style={{ minHeight: 0 }}
+      />
+
       {/* Refactoring Panel */}
       {showRefactoringPanel && (
-        <RefactoringPanel 
+        <RefactoringPanel
           editor={editorRef.current || undefined}
           onClose={() => setShowRefactoringPanel(false)}
         />
@@ -858,8 +1161,7 @@ const MonacoCodeEditor: React.FC = () => {
         <AIIntelliSenseProvider
           editor={editorRef.current}
           controls={controls}
-          onCompletionAccepted={(item) => {
-            console.log('AI completion accepted:', item.label, 'source:', item.source);
+          onCompletionAccepted={item => {
             // Track AI usage for learning
             if (item.source === 'ai') {
               // Could send analytics or update user preferences here
@@ -869,19 +1171,14 @@ const MonacoCodeEditor: React.FC = () => {
       )}
 
       {/* AI Settings Panel */}
-      <AIIntelliSenseSettings
-        visible={showAISettings}
-        onClose={() => setShowAISettings(false)}
-      />
+      <AIIntelliSenseSettings visible={showAISettings} onClose={() => setShowAISettings(false)} />
 
       {/* Breakpoint Gutter Integration */}
       {isReady && editorRef.current && (
         <BreakpointGutter
           editor={editorRef.current}
           file="current.vb"
-          onBreakpointToggle={(line) => {
-            console.log('Breakpoint toggled at line:', line);
-          }}
+          onBreakpointToggle={line => {}}
         />
       )}
     </div>

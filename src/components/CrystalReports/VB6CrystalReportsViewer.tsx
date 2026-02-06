@@ -1,9 +1,9 @@
 /**
  * VB6 Crystal Reports Viewer Control - Complete Implementation
- * 
+ *
  * Contrôle CRITIQUE pour affichage Crystal Reports VB6
  * Complète le CrystalReports Engine avec interface utilisateur
- * 
+ *
  * Implémente l'API complète CrystalReports Viewer VB6:
  * - Report display et navigation
  * - Zoom et print preview
@@ -16,12 +16,12 @@
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { VB6ControlProps } from '../Controls/VB6Controls';
-import { 
-  VB6CrystalReportsEngine, 
-  CRGeneratedReport, 
+import {
+  VB6CrystalReportsEngine,
+  CRGeneratedReport,
   CRExportFormatType,
   CRParameterField,
-  CRParameterFieldType 
+  CRParameterFieldType,
 } from './VB6CrystalReportsEngine';
 
 // ============================================================================
@@ -31,7 +31,7 @@ import {
 export enum CRViewerDisplayMode {
   crDisplayModeNormal = 0,
   crDisplayModeMaximized = 1,
-  crDisplayModeEmbedded = 2
+  crDisplayModeEmbedded = 2,
 }
 
 export interface CRViewerProps extends VB6ControlProps {
@@ -95,7 +95,7 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
 }) => {
   const viewerRef = useRef<HTMLDivElement>(null);
   const reportContentRef = useRef<HTMLDivElement>(null);
-  
+
   const [report, setReport] = useState<CRGeneratedReport | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(currentPageNumber);
   const [zoom, setZoom] = useState<number>(zoomLevel);
@@ -117,30 +117,42 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
    */
   const crystalViewerAPI = {
     // Properties
-    get ReportSource() { return reportSource; },
+    get ReportSource() {
+      return reportSource;
+    },
     set ReportSource(value: string) {
       if (value !== reportSource && reportEngine) {
         loadReport(value);
       }
     },
 
-    get CurrentPageNumber() { return currentPage; },
+    get CurrentPageNumber() {
+      return currentPage;
+    },
     set CurrentPageNumber(value: number) {
       if (report && value >= 1 && value <= report.pageCount) {
         setCurrentPage(value);
       }
     },
 
-    get ZoomLevel() { return zoom; },
+    get ZoomLevel() {
+      return zoom;
+    },
     set ZoomLevel(value: number) {
       if (value >= 25 && value <= 400) {
         setZoom(value);
       }
     },
 
-    get EnableRefresh() { return enableRefresh; },
-    get EnableExport() { return enableExport; },
-    get EnablePrint() { return enablePrint; },
+    get EnableRefresh() {
+      return enableRefresh;
+    },
+    get EnableExport() {
+      return enableExport;
+    },
+    get EnablePrint() {
+      return enablePrint;
+    },
 
     // Methods
     ViewReport: () => {
@@ -202,46 +214,46 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
 
     Zoom: (zoomFactor: number) => {
       crystalViewerAPI.ZoomLevel = zoomFactor;
-    }
+    },
   };
 
   /**
    * Charger rapport
    */
-  const loadReport = useCallback(async (reportPath: string) => {
-    if (!reportEngine) return;
+  const loadReport = useCallback(
+    async (reportPath: string) => {
+      if (!reportEngine) return;
 
-    setIsLoading(true);
-    
-    try {
-      // Ouvrir rapport
-      const success = reportEngine.openReport(reportPath);
-      if (!success) {
-        throw new Error(`Failed to load report: ${reportPath}`);
-      }
+      setIsLoading(true);
 
-      // Vérifier si paramètres requis
-      const reportParameters = Array.from((reportEngine as any).parameters.values());
-      if (reportParameters.length > 0 && !autoSetParameterValues) {
-        setParameters(reportParameters);
-        setShowParameterDialog(true);
+      try {
+        // Ouvrir rapport
+        const success = reportEngine.openReport(reportPath);
+        if (!success) {
+          throw new Error(`Failed to load report: ${reportPath}`);
+        }
+
+        // Vérifier si paramètres requis
+        const reportParameters = Array.from((reportEngine as any).parameters.values());
+        if (reportParameters.length > 0 && !autoSetParameterValues) {
+          setParameters(reportParameters);
+          setShowParameterDialog(true);
+          setIsLoading(false);
+          return;
+        }
+
+        // Générer rapport
+        const generatedReport = await reportEngine.generateReport();
+        setReport(generatedReport);
+        setCurrentPage(1);
+      } catch (error) {
+        console.error(`❌ Failed to load report: ${error}`);
+      } finally {
         setIsLoading(false);
-        return;
       }
-
-      // Générer rapport
-      const generatedReport = await reportEngine.generateReport();
-      setReport(generatedReport);
-      setCurrentPage(1);
-      
-      console.log(`✅ Report loaded and displayed: ${reportPath}`);
-
-    } catch (error) {
-      console.error(`❌ Failed to load report: ${error}`);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [reportEngine, autoSetParameterValues]);
+    },
+    [reportEngine, autoSetParameterValues]
+  );
 
   /**
    * Rafraîchir rapport
@@ -250,21 +262,18 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
     if (!reportEngine || !reportSource) return;
 
     setIsLoading(true);
-    
+
     try {
       // Rafraîchir données
       reportEngine.refreshData();
-      
+
       // Régénérer rapport
       const generatedReport = await reportEngine.generateReport();
       setReport(generatedReport);
-      
+
       if (onReportRefresh) {
         onReportRefresh();
       }
-
-      console.log('🔄 Report refreshed');
-
     } catch (error) {
       console.error(`❌ Failed to refresh report: ${error}`);
     } finally {
@@ -286,7 +295,7 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
     const printHTML = generatePrintHTML(report);
     printWindow.document.write(printHTML);
     printWindow.document.close();
-    
+
     // Déclencher impression
     printWindow.onload = () => {
       printWindow.print();
@@ -296,58 +305,59 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
     if (onPrintReport) {
       onPrintReport();
     }
-
-    console.log('🖨️ Print dialog opened');
   }, [report, onPrintReport]);
 
   /**
    * Exporter rapport
    */
-  const exportReport = useCallback(async (format: CRExportFormatType) => {
-    if (!report || !reportEngine) return;
+  const exportReport = useCallback(
+    async (format: CRExportFormatType) => {
+      if (!report || !reportEngine) return;
 
-    try {
-      await reportEngine.exportReport(report, format);
-      
-      if (onExportReport) {
-        onExportReport(format);
+      try {
+        await reportEngine.exportReport(report, format);
+
+        if (onExportReport) {
+          onExportReport(format);
+        }
+      } catch (error) {
+        console.error(`❌ Export failed: ${error}`);
       }
-
-      console.log(`📤 Report exported as ${CRExportFormatType[format]}`);
-
-    } catch (error) {
-      console.error(`❌ Export failed: ${error}`);
-    }
-  }, [report, reportEngine, onExportReport]);
+    },
+    [report, reportEngine, onExportReport]
+  );
 
   /**
    * Recherche dans rapport
    */
-  const performSearch = useCallback((searchText: string, fromBeginning: boolean): boolean => {
-    if (!report || !searchText) return false;
+  const performSearch = useCallback(
+    (searchText: string, fromBeginning: boolean): boolean => {
+      if (!report || !searchText) return false;
 
-    const results: number[] = [];
-    
-    // Chercher dans toutes les pages
-    report.pages.forEach((page, pageIndex) => {
-      page.elements.forEach(element => {
-        if (element.content.toLowerCase().includes(searchText.toLowerCase())) {
-          results.push(pageIndex + 1);
-        }
+      const results: number[] = [];
+
+      // Chercher dans toutes les pages
+      report.pages.forEach((page, pageIndex) => {
+        page.elements.forEach(element => {
+          if (element.content.toLowerCase().includes(searchText.toLowerCase())) {
+            results.push(pageIndex + 1);
+          }
+        });
       });
-    });
 
-    setSearchResults([...new Set(results)]); // Remove duplicates
-    setSearchTerm(searchText);
-    setCurrentSearchResult(0);
+      setSearchResults([...new Set(results)]); // Remove duplicates
+      setSearchTerm(searchText);
+      setCurrentSearchResult(0);
 
-    if (results.length > 0) {
-      setCurrentPage(results[0]);
-      return true;
-    }
+      if (results.length > 0) {
+        setCurrentPage(results[0]);
+        return true;
+      }
 
-    return false;
-  }, [report]);
+      return false;
+    },
+    [report]
+  );
 
   /**
    * Générer HTML pour impression
@@ -371,9 +381,13 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
     </style>
 </head>
 <body>
-    ${report.pages.map(page => `
+    ${report.pages
+      .map(
+        page => `
         <div class="page" style="width: ${page.width * 0.1}px; height: ${page.height * 0.1}px;">
-            ${page.elements.map(element => `
+            ${page.elements
+              .map(
+                element => `
                 <div class="element" style="
                     left: ${element.x * 0.1}px;
                     top: ${element.y * 0.1}px;
@@ -388,9 +402,13 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
                 ">
                     ${element.content}
                 </div>
-            `).join('')}
+            `
+              )
+              .join('')}
         </div>
-    `).join('')}
+    `
+      )
+      .join('')}
 </body>
 </html>`;
   };
@@ -428,7 +446,7 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
     if (name) {
       (window as any)[name] = crystalViewerAPI;
     }
-    
+
     return () => {
       if (name && (window as any)[name] === crystalViewerAPI) {
         delete (window as any)[name];
@@ -455,7 +473,7 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
     fontFamily: 'MS Sans Serif',
     fontSize: '8pt',
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
   };
 
   return (
@@ -468,29 +486,35 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
     >
       {/* Toolbar */}
       {displayToolbar && (
-        <div style={{
-          height: '32px',
-          backgroundColor: '#E0E0E0',
-          border: '1px solid #C0C0C0',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '2px 4px',
-          gap: '2px'
-        }}>
+        <div
+          style={{
+            height: '32px',
+            backgroundColor: '#E0E0E0',
+            border: '1px solid #C0C0C0',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '2px 4px',
+            gap: '2px',
+          }}
+        >
           {/* Navigation buttons */}
           <button
             onClick={() => crystalViewerAPI.GetFirstPage()}
             disabled={!report || currentPage === 1}
             style={{ width: '24px', height: '24px', fontSize: '12px' }}
             title="First Page"
-          >⏮</button>
-          
+          >
+            ⏮
+          </button>
+
           <button
             onClick={() => crystalViewerAPI.GetPreviousPage()}
             disabled={!report || currentPage === 1}
             style={{ width: '24px', height: '24px', fontSize: '12px' }}
             title="Previous Page"
-          >◀</button>
+          >
+            ◀
+          </button>
 
           <span style={{ margin: '0 8px', fontSize: '11px' }}>
             Page {currentPage} of {report?.pageCount || 0}
@@ -501,23 +525,29 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
             disabled={!report || currentPage === report?.pageCount}
             style={{ width: '24px', height: '24px', fontSize: '12px' }}
             title="Next Page"
-          >▶</button>
-          
+          >
+            ▶
+          </button>
+
           <button
             onClick={() => crystalViewerAPI.GetLastPage()}
             disabled={!report || currentPage === report?.pageCount}
             style={{ width: '24px', height: '24px', fontSize: '12px' }}
             title="Last Page"
-          >⏭</button>
+          >
+            ⏭
+          </button>
 
-          <div style={{ width: '1px', height: '20px', backgroundColor: '#C0C0C0', margin: '0 4px' }} />
+          <div
+            style={{ width: '1px', height: '20px', backgroundColor: '#C0C0C0', margin: '0 4px' }}
+          />
 
           {/* Zoom controls */}
           {enableZoom && (
             <>
               <select
                 value={zoom}
-                onChange={(e) => setZoom(Number(e.target.value))}
+                onChange={e => setZoom(Number(e.target.value))}
                 style={{ fontSize: '11px', height: '20px' }}
               >
                 <option value={25}>25%</option>
@@ -528,7 +558,14 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
                 <option value={150}>150%</option>
                 <option value={200}>200%</option>
               </select>
-              <div style={{ width: '1px', height: '20px', backgroundColor: '#C0C0C0', margin: '0 4px' }} />
+              <div
+                style={{
+                  width: '1px',
+                  height: '20px',
+                  backgroundColor: '#C0C0C0',
+                  margin: '0 4px',
+                }}
+              />
             </>
           )}
 
@@ -539,7 +576,9 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
               disabled={isLoading}
               style={{ width: '24px', height: '24px', fontSize: '12px' }}
               title="Refresh Report"
-            >🔄</button>
+            >
+              🔄
+            </button>
           )}
 
           {enablePrint && (
@@ -548,12 +587,14 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
               disabled={!report}
               style={{ width: '24px', height: '24px', fontSize: '12px' }}
               title="Print Report"
-            >🖨</button>
+            >
+              🖨
+            </button>
           )}
 
           {enableExport && (
             <select
-              onChange={(e) => {
+              onChange={e => {
                 if (e.target.value && report) {
                   exportReport(Number(e.target.value) as CRExportFormatType);
                   e.target.value = '';
@@ -562,7 +603,9 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
               style={{ fontSize: '11px', height: '20px' }}
               defaultValue=""
             >
-              <option value="" disabled>Export...</option>
+              <option value="" disabled>
+                Export...
+              </option>
               <option value={CRExportFormatType.crEFTPortableDocFormat}>PDF</option>
               <option value={CRExportFormatType.crEFTMSExcel}>Excel</option>
               <option value={CRExportFormatType.crEFTHTML}>HTML</option>
@@ -573,13 +616,20 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
           {/* Search */}
           {enableSearch && (
             <>
-              <div style={{ width: '1px', height: '20px', backgroundColor: '#C0C0C0', margin: '0 4px' }} />
+              <div
+                style={{
+                  width: '1px',
+                  height: '20px',
+                  backgroundColor: '#C0C0C0',
+                  margin: '0 4px',
+                }}
+              />
               <input
                 type="text"
                 placeholder="Search..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyPress={(e) => {
+                onChange={e => setSearchTerm(e.target.value)}
+                onKeyPress={e => {
                   if (e.key === 'Enter') {
                     performSearch(searchTerm, true);
                   }
@@ -591,7 +641,9 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
                 disabled={!searchTerm || !report}
                 style={{ width: '24px', height: '24px', fontSize: '12px' }}
                 title="Search"
-              >🔍</button>
+              >
+                🔍
+              </button>
             </>
           )}
         </div>
@@ -601,15 +653,15 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* Group Tree */}
         {displayGroupTree && enableGroupTree && (
-          <div style={{
-            width: '200px',
-            backgroundColor: '#FFFFFF',
-            border: '1px solid #C0C0C0',
-            overflowY: 'auto'
-          }}>
-            <div style={{ padding: '8px', fontSize: '11px', fontWeight: 'bold' }}>
-              Group Tree
-            </div>
+          <div
+            style={{
+              width: '200px',
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #C0C0C0',
+              overflowY: 'auto',
+            }}
+          >
+            <div style={{ padding: '8px', fontSize: '11px', fontWeight: 'bold' }}>Group Tree</div>
             {/* Group tree implementation would go here */}
           </div>
         )}
@@ -622,43 +674,49 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
             backgroundColor: '#FFFFFF',
             border: '1px solid #C0C0C0',
             overflow: 'auto',
-            position: 'relative'
+            position: 'relative',
           }}
         >
           {isLoading && (
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              fontSize: '14px',
-              color: '#666'
-            }}>
+            <div
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                fontSize: '14px',
+                color: '#666',
+              }}
+            >
               Loading Report...
             </div>
           )}
 
           {!isLoading && !report && (
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              fontSize: '14px',
-              color: '#666',
-              textAlign: 'center'
-            }}>
+            <div
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                fontSize: '14px',
+                color: '#666',
+                textAlign: 'center',
+              }}
+            >
               <h3>Crystal Reports Viewer</h3>
               <p>No report loaded</p>
             </div>
           )}
 
           {!isLoading && report && (
-            <div style={{
-              padding: '20px',
-              transform: `scale(${zoom / 100})`,
-              transformOrigin: 'top left'
-            }}>
+            <div
+              style={{
+                padding: '20px',
+                transform: `scale(${zoom / 100})`,
+                transformOrigin: 'top left',
+              }}
+            >
               {/* Render current page */}
               {report.pages[currentPage - 1] && (
                 <div
@@ -668,7 +726,7 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
                     backgroundColor: '#FFFFFF',
                     border: '1px solid #C0C0C0',
                     position: 'relative',
-                    boxShadow: '2px 2px 5px rgba(0,0,0,0.1)'
+                    boxShadow: '2px 2px 5px rgba(0,0,0,0.1)',
                   }}
                 >
                   {report.pages[currentPage - 1].elements.map((element, index) => (
@@ -685,10 +743,13 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
                         fontWeight: element.format.fontBold ? 'bold' : 'normal',
                         fontStyle: element.format.fontItalic ? 'italic' : 'normal',
                         color: element.format.fontColor,
-                        backgroundColor: element.format.backgroundColor !== 'transparent' ? element.format.backgroundColor : undefined,
+                        backgroundColor:
+                          element.format.backgroundColor !== 'transparent'
+                            ? element.format.backgroundColor
+                            : undefined,
                         textAlign: element.format.alignment.toLowerCase() as any,
                         overflow: 'hidden',
-                        lineHeight: 1.2
+                        lineHeight: 1.2,
                       }}
                     >
                       {element.content}
@@ -703,44 +764,54 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
 
       {/* Parameter Dialog */}
       {showParameterDialog && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: '#F0F0F0',
-            border: '2px outset #C0C0C0',
-            padding: '16px',
-            minWidth: '400px',
-            fontFamily: 'MS Sans Serif',
-            fontSize: '8pt'
-          }}>
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: '#F0F0F0',
+              border: '2px outset #C0C0C0',
+              padding: '16px',
+              minWidth: '400px',
+              fontFamily: 'MS Sans Serif',
+              fontSize: '8pt',
+            }}
+          >
             <h3>Enter Parameters</h3>
-            
+
             {parameters.map((param, index) => (
               <div key={param.name} style={{ marginBottom: '12px' }}>
                 <label style={{ display: 'block', marginBottom: '4px' }}>
                   {param.prompt || param.name}:
                 </label>
                 <input
-                  type={param.type === CRParameterFieldType.crNumberField ? 'number' :
-                        param.type === CRParameterFieldType.crDateField ? 'date' :
-                        param.type === CRParameterFieldType.crBooleanField ? 'checkbox' : 'text'}
+                  type={
+                    param.type === CRParameterFieldType.crNumberField
+                      ? 'number'
+                      : param.type === CRParameterFieldType.crDateField
+                        ? 'date'
+                        : param.type === CRParameterFieldType.crBooleanField
+                          ? 'checkbox'
+                          : 'text'
+                  }
                   value={param.value || ''}
-                  onChange={(e) => {
+                  onChange={e => {
                     const newParams = [...parameters];
                     newParams[index] = {
                       ...param,
                       value: e.target.type === 'checkbox' ? e.target.checked : e.target.value,
-                      hasCurrentValue: true
+                      hasCurrentValue: true,
                     };
                     setParameters(newParams);
                   }}
@@ -748,12 +819,12 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
                     width: '100%',
                     height: '20px',
                     border: '1px inset #C0C0C0',
-                    fontSize: '11px'
+                    fontSize: '11px',
                   }}
                 />
               </div>
             ))}
-            
+
             <div style={{ textAlign: 'right', marginTop: '16px' }}>
               <button
                 onClick={handleParameterSubmit}
@@ -761,7 +832,7 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
                   marginRight: '8px',
                   padding: '4px 16px',
                   border: '1px outset #C0C0C0',
-                  backgroundColor: '#F0F0F0'
+                  backgroundColor: '#F0F0F0',
                 }}
               >
                 OK
@@ -771,7 +842,7 @@ export const VB6CrystalReportsViewer: React.FC<CRViewerProps> = ({
                 style={{
                   padding: '4px 16px',
                   border: '1px outset #C0C0C0',
-                  backgroundColor: '#F0F0F0'
+                  backgroundColor: '#F0F0F0',
                 }}
               >
                 Cancel

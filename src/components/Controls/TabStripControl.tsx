@@ -10,13 +10,13 @@ import { useVB6Store } from '../../stores/vb6Store';
 // TabStrip Constants
 export enum TabStripStyle {
   tabTabs = 0,
-  tabButtons = 1
+  tabButtons = 1,
 }
 
 export enum TabStripTabWidthStyle {
   tabJustified = 0,
   tabNonJustified = 1,
-  tabFixed = 2
+  tabFixed = 2,
 }
 
 export interface Tab {
@@ -33,7 +33,7 @@ export interface Tab {
 export interface TabStripProps extends VB6ControlPropsEnhanced {
   // Tabs collection
   tabs?: Tab[];
-  
+
   // Appearance
   style?: TabStripStyle;
   tabWidthStyle?: TabStripTabWidthStyle;
@@ -42,17 +42,17 @@ export interface TabStripProps extends VB6ControlPropsEnhanced {
   tabMinWidth?: number;
   separators?: boolean;
   hotTracking?: boolean;
-  
+
   // Images
   imageList?: string; // ImageList control name
-  
+
   // Current selection
   selectedItem?: number;
-  
+
   // Behavior
   multiRow?: boolean;
   showTips?: boolean;
-  
+
   // Events
   onClick?: (tab: Tab) => void;
   onBeforeClick?: (tab: Tab, cancel: boolean) => void;
@@ -89,7 +89,7 @@ export const TabStripControl = forwardRef<HTMLDivElement, TabStripProps>((props,
   const [selectedIndex, setSelectedIndex] = useState(selectedItem);
   const [hoveredIndex, setHoveredIndex] = useState(-1);
   const [draggedTab, setDraggedTab] = useState<number | null>(null);
-  
+
   const tabStripRef = useRef<HTMLDivElement>(null);
   const { fireEvent, updateControl } = useVB6Store();
 
@@ -106,9 +106,9 @@ export const TabStripControl = forwardRef<HTMLDivElement, TabStripProps>((props,
         image: image || -1,
         toolTipText: '',
         visible: true,
-        selected: false
+        selected: false,
       };
-      
+
       const newTabs = [...tabs];
       if (index !== undefined && index <= tabs.length) {
         newTabs.splice(index - 1, 0, newTab);
@@ -119,7 +119,7 @@ export const TabStripControl = forwardRef<HTMLDivElement, TabStripProps>((props,
       } else {
         newTabs.push(newTab);
       }
-      
+
       setTabs(newTabs);
       fireEvent(name, 'TabAdded', { tab: newTab });
       return newTab;
@@ -127,22 +127,22 @@ export const TabStripControl = forwardRef<HTMLDivElement, TabStripProps>((props,
 
     Remove: (index: number) => {
       if (index < 1 || index > tabs.length) return false;
-      
+
       const removedTab = tabs[index - 1];
       const newTabs = tabs.filter((_, i) => i !== index - 1);
-      
+
       // Reindex remaining tabs
       newTabs.forEach((tab, i) => {
         tab.index = i + 1;
       });
-      
+
       setTabs(newTabs);
-      
+
       // Adjust selected index if necessary
       if (selectedIndex >= index) {
         setSelectedIndex(Math.max(1, selectedIndex - 1));
       }
-      
+
       fireEvent(name, 'TabRemoved', { tab: removedTab });
       return true;
     },
@@ -156,117 +156,139 @@ export const TabStripControl = forwardRef<HTMLDivElement, TabStripProps>((props,
     // Selection methods
     SelectTab: (index: number) => {
       if (index < 1 || index > tabs.length) return false;
-      
+
       const tab = tabs[index - 1];
       if (!tab.visible) return false;
-      
+
       const cancel = false;
       onBeforeClick?.(tab, cancel);
       fireEvent(name, 'BeforeClick', { tab, cancel });
-      
+
       if (cancel) return false;
-      
+
       setSelectedIndex(index);
-      
+
       // Update selected state
       const newTabs = tabs.map((t, i) => ({
         ...t,
-        selected: i === index - 1
+        selected: i === index - 1,
       }));
       setTabs(newTabs);
-      
+
       onClick?.(tab);
       fireEvent(name, 'Click', { tab });
       return true;
     },
 
     // Properties
-    get Count() { return tabs.length; },
-    get SelectedItem() { return selectedIndex > 0 ? tabs[selectedIndex - 1] : null; },
-    
+    get Count() {
+      return tabs.length;
+    },
+    get SelectedItem() {
+      return selectedIndex > 0 ? tabs[selectedIndex - 1] : null;
+    },
+
     // Item access
     Item: (index: number) => {
       if (index < 1 || index > tabs.length) return null;
       return tabs[index - 1];
-    }
+    },
   };
 
-  const handleTabClick = useCallback((tabIndex: number, e: React.MouseEvent) => {
-    if (!enabled) return;
-    
-    e.preventDefault();
-    vb6Methods.SelectTab(tabIndex + 1);
-  }, [enabled, vb6Methods]);
+  const handleTabClick = useCallback(
+    (tabIndex: number, e: React.MouseEvent) => {
+      if (!enabled) return;
 
-  const handleTabMouseEnter = useCallback((tabIndex: number) => {
-    if (hotTracking) {
-      setHoveredIndex(tabIndex);
-    }
-  }, [hotTracking]);
+      e.preventDefault();
+      vb6Methods.SelectTab(tabIndex + 1);
+    },
+    [enabled, vb6Methods]
+  );
+
+  const handleTabMouseEnter = useCallback(
+    (tabIndex: number) => {
+      if (hotTracking) {
+        setHoveredIndex(tabIndex);
+      }
+    },
+    [hotTracking]
+  );
 
   const handleTabMouseLeave = useCallback(() => {
     setHoveredIndex(-1);
   }, []);
 
-  const handleTabDragStart = useCallback((tabIndex: number, e: React.DragEvent) => {
-    if (!enabled) return;
-    
-    setDraggedTab(tabIndex);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', tabIndex.toString());
-  }, [enabled]);
+  const handleTabDragStart = useCallback(
+    (tabIndex: number, e: React.DragEvent) => {
+      if (!enabled) return;
 
-  const handleTabDragOver = useCallback((e: React.DragEvent) => {
-    if (draggedTab !== null) {
+      setDraggedTab(tabIndex);
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', tabIndex.toString());
+    },
+    [enabled]
+  );
+
+  const handleTabDragOver = useCallback(
+    (e: React.DragEvent) => {
+      if (draggedTab !== null) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+      }
+    },
+    [draggedTab]
+  );
+
+  const handleTabDrop = useCallback(
+    (targetIndex: number, e: React.DragEvent) => {
+      if (draggedTab === null || !enabled) return;
+
       e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-    }
-  }, [draggedTab]);
 
-  const handleTabDrop = useCallback((targetIndex: number, e: React.DragEvent) => {
-    if (draggedTab === null || !enabled) return;
-    
-    e.preventDefault();
-    
-    if (draggedTab !== targetIndex) {
-      const newTabs = [...tabs];
-      const draggedTabObj = newTabs[draggedTab];
-      
-      // Remove dragged tab
-      newTabs.splice(draggedTab, 1);
-      
-      // Insert at new position
-      const insertIndex = targetIndex > draggedTab ? targetIndex - 1 : targetIndex;
-      newTabs.splice(insertIndex, 0, draggedTabObj);
-      
-      // Reindex all tabs
-      newTabs.forEach((tab, i) => {
-        tab.index = i + 1;
-      });
-      
-      setTabs(newTabs);
-      fireEvent(name, 'TabMoved', { from: draggedTab + 1, to: targetIndex + 1 });
-    }
-    
-    setDraggedTab(null);
-  }, [draggedTab, enabled, tabs, name, fireEvent]);
+      if (draggedTab !== targetIndex) {
+        const newTabs = [...tabs];
+        const draggedTabObj = newTabs[draggedTab];
+
+        // Remove dragged tab
+        newTabs.splice(draggedTab, 1);
+
+        // Insert at new position
+        const insertIndex = targetIndex > draggedTab ? targetIndex - 1 : targetIndex;
+        newTabs.splice(insertIndex, 0, draggedTabObj);
+
+        // Reindex all tabs
+        newTabs.forEach((tab, i) => {
+          tab.index = i + 1;
+        });
+
+        setTabs(newTabs);
+        fireEvent(name, 'TabMoved', { from: draggedTab + 1, to: targetIndex + 1 });
+      }
+
+      setDraggedTab(null);
+    },
+    [draggedTab, enabled, tabs, name, fireEvent]
+  );
 
   // Calculate tab dimensions
-  const getTabWidth = useCallback((tab: Tab, index: number) => {
-    if (tabWidthStyle === TabStripTabWidthStyle.tabFixed && tabFixedWidth > 0) {
-      return tabFixedWidth;
-    }
-    
-    if (tabWidthStyle === TabStripTabWidthStyle.tabJustified) {
-      return Math.floor(width / Math.max(1, tabs.length));
-    }
-    
-    // Auto-size based on content
-    const minWidth = tabMinWidth || 50;
-    const textWidth = tab.caption.length * 8 + 20; // Approximate
-    const imageWidth = tab.image >= 0 ? 20 : 0;
-    return Math.max(minWidth, textWidth + imageWidth);
-  }, [tabWidthStyle, tabFixedWidth, width, tabs.length, tabMinWidth]);
+  const getTabWidth = useCallback(
+    (tab: Tab, index: number) => {
+      if (tabWidthStyle === TabStripTabWidthStyle.tabFixed && tabFixedWidth > 0) {
+        return tabFixedWidth;
+      }
+
+      if (tabWidthStyle === TabStripTabWidthStyle.tabJustified) {
+        return Math.floor(width / Math.max(1, tabs.length));
+      }
+
+      // Auto-size based on content
+      const minWidth = tabMinWidth || 50;
+      const textWidth = tab.caption.length * 8 + 20; // Approximate
+      const imageWidth = tab.image >= 0 ? 20 : 0;
+      return Math.max(minWidth, textWidth + imageWidth);
+    },
+    [tabWidthStyle, tabFixedWidth, width, tabs.length, tabMinWidth]
+  );
 
   const getTabHeight = () => {
     return tabFixedHeight > 0 ? tabFixedHeight : 24;
@@ -295,8 +317,12 @@ export const TabStripControl = forwardRef<HTMLDivElement, TabStripProps>((props,
         Clear: vb6Methods.Clear,
         SelectTab: vb6Methods.SelectTab,
         Item: vb6Methods.Item,
-        get Count() { return vb6Methods.Count; },
-        get SelectedItem() { return vb6Methods.SelectedItem; }
+        get Count() {
+          return vb6Methods.Count;
+        },
+        get SelectedItem() {
+          return vb6Methods.SelectedItem;
+        },
       };
     }
   }, [name, vb6Methods]);
@@ -305,7 +331,7 @@ export const TabStripControl = forwardRef<HTMLDivElement, TabStripProps>((props,
 
   const tabHeight = getTabHeight();
   const isButtonStyle = style === TabStripStyle.tabButtons;
-  
+
   return (
     <div
       ref={ref}
@@ -320,7 +346,7 @@ export const TabStripControl = forwardRef<HTMLDivElement, TabStripProps>((props,
         fontFamily: 'MS Sans Serif',
         fontSize: '8pt',
         opacity: enabled ? 1 : 0.5,
-        overflow: 'hidden'
+        overflow: 'hidden',
       }}
       {...rest}
     >
@@ -334,16 +360,16 @@ export const TabStripControl = forwardRef<HTMLDivElement, TabStripProps>((props,
           height: isButtonStyle ? tabHeight : tabHeight + 2,
           backgroundColor: '#f0f0f0',
           borderBottom: isButtonStyle ? 'none' : '1px solid #808080',
-          overflow: 'hidden'
+          overflow: 'hidden',
         }}
       >
         {tabs.map((tab, index) => {
           if (!tab.visible) return null;
-          
+
           const isSelected = selectedIndex === index + 1;
           const isHovered = hoveredIndex === index;
           const tabWidth = getTabWidth(tab, index);
-          
+
           let tabStyle: React.CSSProperties = {
             display: 'flex',
             alignItems: 'center',
@@ -356,18 +382,18 @@ export const TabStripControl = forwardRef<HTMLDivElement, TabStripProps>((props,
             position: 'relative',
             overflow: 'hidden',
             whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis'
+            textOverflow: 'ellipsis',
           };
-          
+
           if (isButtonStyle) {
             // Button style tabs
             tabStyle = {
               ...tabStyle,
               border: '1px outset #c0c0c0',
               backgroundColor: isSelected ? '#e0e0e0' : isHovered ? '#f8f8f8' : '#f0f0f0',
-              marginRight: '1px'
+              marginRight: '1px',
             };
-            
+
             if (isSelected) {
               tabStyle.border = '1px inset #c0c0c0';
             }
@@ -381,24 +407,24 @@ export const TabStripControl = forwardRef<HTMLDivElement, TabStripProps>((props,
               borderTopLeftRadius: '4px',
               borderTopRightRadius: '4px',
               marginBottom: isSelected ? '0' : '2px',
-              zIndex: isSelected ? 10 : 1
+              zIndex: isSelected ? 10 : 1,
             };
-            
+
             if (isHovered && !isSelected) {
               tabStyle.backgroundColor = '#e8e8e8';
             }
           }
-          
+
           return (
             <div
               key={tab.key}
               style={tabStyle}
-              onClick={(e) => handleTabClick(index, e)}
+              onClick={e => handleTabClick(index, e)}
               onMouseEnter={() => handleTabMouseEnter(index)}
               onMouseLeave={handleTabMouseLeave}
-              onDragStart={(e) => handleTabDragStart(index, e)}
+              onDragStart={e => handleTabDragStart(index, e)}
               onDragOver={handleTabDragOver}
-              onDrop={(e) => handleTabDrop(index, e)}
+              onDrop={e => handleTabDrop(index, e)}
               draggable={enabled}
               title={showTips ? tab.toolTipText || tab.caption : undefined}
             >
@@ -411,20 +437,22 @@ export const TabStripControl = forwardRef<HTMLDivElement, TabStripProps>((props,
                     backgroundImage: `url(images/${imageList})`,
                     backgroundPosition: `-${tab.image * 16}px 0`,
                     backgroundRepeat: 'no-repeat',
-                    marginRight: '4px'
+                    marginRight: '4px',
                   }}
                 />
               )}
-              
+
               {/* Tab caption */}
-              <span style={{ 
-                fontSize: '8pt',
-                fontWeight: isSelected ? 'bold' : 'normal',
-                color: enabled ? '#000000' : '#808080'
-              }}>
+              <span
+                style={{
+                  fontSize: '8pt',
+                  fontWeight: isSelected ? 'bold' : 'normal',
+                  color: enabled ? '#000000' : '#808080',
+                }}
+              >
                 {tab.caption}
               </span>
-              
+
               {/* Separator */}
               {separators && index < tabs.length - 1 && (
                 <div
@@ -434,7 +462,7 @@ export const TabStripControl = forwardRef<HTMLDivElement, TabStripProps>((props,
                     top: '20%',
                     bottom: '20%',
                     width: '1px',
-                    backgroundColor: '#808080'
+                    backgroundColor: '#808080',
                   }}
                 />
               )}
@@ -442,7 +470,7 @@ export const TabStripControl = forwardRef<HTMLDivElement, TabStripProps>((props,
           );
         })}
       </div>
-      
+
       {/* Tab content area */}
       <div
         style={{
@@ -452,7 +480,7 @@ export const TabStripControl = forwardRef<HTMLDivElement, TabStripProps>((props,
           margin: isButtonStyle ? '2px' : '0',
           height: height - tabHeight - (isButtonStyle ? 6 : 2),
           overflow: 'hidden',
-          position: 'relative'
+          position: 'relative',
         }}
       >
         {/* Content placeholder - actual content would be rendered by parent */}
@@ -465,13 +493,12 @@ export const TabStripControl = forwardRef<HTMLDivElement, TabStripProps>((props,
             justifyContent: 'center',
             color: '#666666',
             fontSize: '10pt',
-            fontStyle: 'italic'
+            fontStyle: 'italic',
           }}
         >
-          {tabs.length > 0 && selectedIndex > 0 ? 
-            `Tab Content: ${tabs[selectedIndex - 1]?.caption}` : 
-            'No tabs available'
-          }
+          {tabs.length > 0 && selectedIndex > 0
+            ? `Tab Content: ${tabs[selectedIndex - 1]?.caption}`
+            : 'No tabs available'}
         </div>
       </div>
     </div>

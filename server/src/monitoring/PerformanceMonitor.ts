@@ -106,10 +106,10 @@ export class PerformanceMonitor {
     // HARDWARE CACHE TIMING BUG FIX: Add timing jitter and reduce precision
     const jitteredDuration = this.addTimingJitter(duration);
     const quantizedDuration = Math.floor(jitteredDuration / 10) * 10; // 10ms quantization
-    
+
     // Randomize memory access patterns
     this.randomizeMemoryAccess();
-    
+
     const metric: RequestMetric = {
       method,
       path,
@@ -138,9 +138,12 @@ export class PerformanceMonitor {
 
     // Logging des erreurs
     if (statusCode >= 500) {
-      this.recordError(`HTTP ${statusCode}`, `${method} ${path}`, { duration: quantizedDuration, statusCode });
+      this.recordError(`HTTP ${statusCode}`, `${method} ${path}`, {
+        duration: quantizedDuration,
+        statusCode,
+      });
     }
-    
+
     // Add cache-timing resistant delay
     this.microJitter();
   }
@@ -152,10 +155,10 @@ export class PerformanceMonitor {
     // HARDWARE CACHE TIMING BUG FIX: Add timing jitter and reduce precision
     const jitteredDuration = this.addTimingJitter(duration);
     const quantizedDuration = Math.floor(jitteredDuration / 50) * 50; // 50ms quantization for DB queries
-    
+
     // Randomize memory access patterns
     this.randomizeMemoryAccess();
-    
+
     const queryMetric = {
       connectionId,
       sql: sql.substring(0, 200),
@@ -188,7 +191,7 @@ export class PerformanceMonitor {
         duration: quantizedDuration,
       });
     }
-    
+
     // Add cache-timing resistant delay
     this.microJitter();
   }
@@ -324,12 +327,12 @@ export class PerformanceMonitor {
   private collectSystemMetrics(): void {
     // Randomize memory access patterns before collecting metrics
     this.randomizeMemoryAccess();
-    
+
     const memoryUsage = this.sanitizeMemoryUsage(process.memoryUsage());
     const cpuUsage = process.cpuUsage();
 
     // HARDWARE CACHE TIMING BUG FIX: Quantize memory measurements
-    const memoryUsedMB = Math.floor((memoryUsage.heapUsed / 1024 / 1024) / 5) * 5; // 5MB quantization
+    const memoryUsedMB = Math.floor(memoryUsage.heapUsed / 1024 / 1024 / 5) * 5; // 5MB quantization
     this.checkAlerts('memory_usage', memoryUsedMB);
 
     // HARDWARE CACHE TIMING BUG FIX: Quantize CPU measurements
@@ -341,7 +344,7 @@ export class PerformanceMonitor {
       memory: `${Math.round(memoryUsedMB)}MB`,
       cpu: `${Math.round(quantizedCpuPercent * 100)}%`,
     });
-    
+
     // Add cache-timing resistant delay
     this.microJitter();
   }
@@ -628,10 +631,10 @@ export class PerformanceMonitor {
   exportMetrics(): string {
     // Randomize memory access patterns
     this.randomizeMemoryAccess();
-    
+
     // Add timing jitter to prevent timing analysis
     this.microJitter();
-    
+
     return JSON.stringify(
       {
         requests: this.metrics,
@@ -659,7 +662,7 @@ export class PerformanceMonitor {
   private sanitizeMemoryUsage(memUsage: NodeJS.MemoryUsage): NodeJS.MemoryUsage {
     // Quantize memory measurements to prevent cache state inference
     const quantize = (value: number, quantum: number) => Math.floor(value / quantum) * quantum;
-    
+
     return {
       rss: quantize(memUsage.rss, 1024 * 1024), // 1MB quantization
       heapTotal: quantize(memUsage.heapTotal, 512 * 1024), // 512KB quantization
@@ -677,7 +680,7 @@ export class PerformanceMonitor {
     const sizes = [64, 128, 256, 512];
     const size = sizes[Math.floor(Math.random() * sizes.length)];
     const dummy = new Array(size);
-    
+
     // Random access pattern
     for (let i = 0; i < Math.min(size / 8, 32); i++) {
       const randomIndex = Math.floor(Math.random() * size);

@@ -109,13 +109,13 @@ class VB6FastifyServer {
     try {
       // Enregistrer les plugins
       await this.registerPlugins();
-      
+
       // Configurer les routes
       await this.registerRoutes();
-      
+
       // Configurer WebSocket
       await this.registerWebSocket();
-      
+
       // Initialiser les services
       await this.dbService.initialize();
       await this.reportsService.initialize();
@@ -135,7 +135,7 @@ class VB6FastifyServer {
           defaultSrc: ["'self'"],
           styleSrc: ["'self'", "'nonce-' + (process.env.CSP_NONCE || 'development-only-nonce')"],
           scriptSrc: ["'self'", "'nonce-' + (process.env.CSP_NONCE || 'development-only-nonce')"],
-          imgSrc: ["'self'", "data:", "https:"],
+          imgSrc: ["'self'", 'data:', 'https:'],
           connectSrc: ["'self'"],
           fontSrc: ["'self'"],
           objectSrc: ["'none'"],
@@ -279,20 +279,24 @@ class VB6FastifyServer {
     });
 
     // CSRF VULNERABILITY BUG FIX: Provide CSRF token to authenticated clients
-    this.fastify.get('/csrf-token', {
-      preHandler: this.fastify.auth([this.fastify.verifyJWT]),
-    }, async (request, reply) => {
-      const token = await reply.generateCsrf();
-      reply.send({ csrfToken: token });
-    });
+    this.fastify.get(
+      '/csrf-token',
+      {
+        preHandler: this.fastify.auth([this.fastify.verifyJWT]),
+      },
+      async (request, reply) => {
+        const token = await reply.generateCsrf();
+        reply.send({ csrfToken: token });
+      }
+    );
 
     // Authentification
-    this.fastify.register(async (fastify) => {
+    this.fastify.register(async fastify => {
       await fastify.register(this.authRoutes.bind(this));
     });
 
     // Routes de base de données
-    this.fastify.register(async (fastify) => {
+    this.fastify.register(async fastify => {
       await fastify.addHook('preHandler', fastify.auth([fastify.verifyJWT]));
       // CSRF VULNERABILITY BUG FIX: Add CSRF validation to all state-changing routes
       await fastify.addHook('preHandler', async (request, reply) => {
@@ -304,7 +308,7 @@ class VB6FastifyServer {
     });
 
     // Routes de rapports
-    this.fastify.register(async (fastify) => {
+    this.fastify.register(async fastify => {
       await fastify.addHook('preHandler', fastify.auth([fastify.verifyJWT]));
       // CSRF VULNERABILITY BUG FIX: Add CSRF validation to all state-changing routes
       await fastify.addHook('preHandler', async (request, reply) => {
@@ -316,7 +320,7 @@ class VB6FastifyServer {
     });
 
     // Routes d'administration
-    this.fastify.register(async (fastify) => {
+    this.fastify.register(async fastify => {
       await fastify.addHook('preHandler', fastify.auth([fastify.verifyJWT]));
       // CSRF VULNERABILITY BUG FIX: Add CSRF validation to all state-changing routes
       await fastify.addHook('preHandler', async (request, reply) => {
@@ -367,94 +371,121 @@ class VB6FastifyServer {
 
   private async databaseRoutes(fastify: FastifyInstance): Promise<void> {
     // Ajouter une connexion
-    fastify.post('/db/connections', {
-      schema: {
-        tags: ['database'],
-        body: schemas.connectionSchema,
+    fastify.post(
+      '/db/connections',
+      {
+        schema: {
+          tags: ['database'],
+          body: schemas.connectionSchema,
+        },
       },
-    }, async (request: FastifyRequest, reply: FastifyReply) => {
-      const config = request.body as any;
-      const connectionId = `conn_${Date.now()}`;
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        const config = request.body as any;
+        const connectionId = `conn_${Date.now()}`;
 
-      try {
-        await this.dbService.addConnection(connectionId, config);
-        this.connectionStates.set(connectionId, {
-          id: connectionId,
-          config: { ...config, password: '***' },
-          createdAt: new Date(),
-          lastUsed: new Date(),
-          queryCount: 0,
-        });
+        try {
+          await this.dbService.addConnection(connectionId, config);
+          this.connectionStates.set(connectionId, {
+            id: connectionId,
+            config: { ...config, password: '***' },
+            createdAt: new Date(),
+            lastUsed: new Date(),
+            queryCount: 0,
+          });
 
-        reply.send({ connectionId, message: 'Connexion créée avec succès' });
-      } catch (error) {
-        reply.code(500).send({ error: 'Erreur création connexion' });
+          reply.send({ connectionId, message: 'Connexion créée avec succès' });
+        } catch (error) {
+          reply.code(500).send({ error: 'Erreur création connexion' });
+        }
       }
-    });
+    );
 
     // Exécuter une requête
-    fastify.post('/db/query', {
-      schema: {
-        tags: ['database'],
-        body: schemas.querySchema,
+    fastify.post(
+      '/db/query',
+      {
+        schema: {
+          tags: ['database'],
+          body: schemas.querySchema,
+        },
       },
-    }, async (request: FastifyRequest, reply: FastifyReply) => {
-      const { connectionId, sql, parameters = [], useCache = true, timeout = 30000 } = request.body as any;
-      const queryId = `query_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-      try {
-        // Enregistrer la requête active
-        this.activeQueries.set(queryId, {
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        const {
           connectionId,
-          sql: sql.substring(0, 100) + '...',
-          startTime: Date.now(),
-          status: 'executing',
-        });
+          sql,
+          parameters = [],
+          useCache = true,
+          timeout = 30000,
+        } = request.body as any;
+        const queryId = `query_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-        const startTime = Date.now();
-        const result = await this.dbService.executeQuery(connectionId, sql, parameters, useCache, 300);
-        const executionTime = Date.now() - startTime;
+        try {
+          // Enregistrer la requête active
+          this.activeQueries.set(queryId, {
+            connectionId,
+            sql: sql.substring(0, 100) + '...',
+            startTime: Date.now(),
+            status: 'executing',
+          });
 
-        // Mettre à jour les statistiques
-        const connState = this.connectionStates.get(connectionId);
-        if (connState) {
-          connState.lastUsed = new Date();
-          connState.queryCount++;
+          const startTime = Date.now();
+          const result = await this.dbService.executeQuery(
+            connectionId,
+            sql,
+            parameters,
+            useCache,
+            300
+          );
+          const executionTime = Date.now() - startTime;
+
+          // Mettre à jour les statistiques
+          const connState = this.connectionStates.get(connectionId);
+          if (connState) {
+            connState.lastUsed = new Date();
+            connState.queryCount++;
+          }
+
+          // Supprimer la requête active
+          this.activeQueries.delete(queryId);
+
+          // Enregistrer les métriques
+          this.recordPerformanceMetric('query_execution', executionTime);
+
+          reply.send({
+            queryId,
+            data: result.data,
+            fields: result.fields,
+            rowsAffected: result.rowsAffected,
+            executionTime,
+            fromCache: result.fromCache,
+          });
+        } catch (error) {
+          this.activeQueries.delete(queryId);
+          this.logger.error(`Erreur requête ${queryId}:`, error);
+          reply.code(500).send({ error: 'Erreur exécution requête' });
         }
-
-        // Supprimer la requête active
-        this.activeQueries.delete(queryId);
-
-        // Enregistrer les métriques
-        this.recordPerformanceMetric('query_execution', executionTime);
-
-        reply.send({
-          queryId,
-          data: result.data,
-          fields: result.fields,
-          rowsAffected: result.rowsAffected,
-          executionTime,
-          fromCache: result.fromCache,
-        });
-      } catch (error) {
-        this.activeQueries.delete(queryId);
-        this.logger.error(`Erreur requête ${queryId}:`, error);
-        reply.code(500).send({ error: 'Erreur exécution requête' });
       }
-    });
+    );
 
     // Exécuter une requête préparée
-    fastify.post('/db/prepared/:statementId', async (request: FastifyRequest, reply: FastifyReply) => {
-      const { statementId } = request.params as any;
-      const { connectionId, parameters = [] } = request.body as any;
+    fastify.post(
+      '/db/prepared/:statementId',
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        const { statementId } = request.params as any;
+        const { connectionId, parameters = [] } = request.body as any;
 
-      try {
-        const result = await this.dbService.executePreparedStatement(connectionId, statementId, parameters);
-        reply.send(result);
-      } catch (error) {
-        reply.code(500).send({ error: 'Erreur exécution statement préparé' });
+        try {
+          const result = await this.dbService.executePreparedStatement(
+            connectionId,
+            statementId,
+            parameters
+          );
+          reply.send(result);
+        } catch (error) {
+          reply.code(500).send({ error: 'Erreur exécution statement préparé' });
+        }
       }
-    });
+    );
 
     // Transactions
     fastify.post('/db/transaction/begin', async (request: FastifyRequest, reply: FastifyReply) => {
@@ -479,16 +510,19 @@ class VB6FastifyServer {
       }
     });
 
-    fastify.post('/db/transaction/rollback', async (request: FastifyRequest, reply: FastifyReply) => {
-      const { transactionId } = request.body as any;
+    fastify.post(
+      '/db/transaction/rollback',
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        const { transactionId } = request.body as any;
 
-      try {
-        await this.dbService.rollbackTransaction(transactionId);
-        reply.send({ message: 'Transaction annulée' });
-      } catch (error) {
-        reply.code(500).send({ error: 'Erreur annulation transaction' });
+        try {
+          await this.dbService.rollbackTransaction(transactionId);
+          reply.send({ message: 'Transaction annulée' });
+        } catch (error) {
+          reply.code(500).send({ error: 'Erreur annulation transaction' });
+        }
       }
-    });
+    );
 
     // Import en masse
     fastify.post('/db/bulk-import', async (request: FastifyRequest, reply: FastifyReply) => {
@@ -518,76 +552,92 @@ class VB6FastifyServer {
 
   private async reportsRoutes(fastify: FastifyInstance): Promise<void> {
     // Créer un rapport
-    fastify.post('/reports', {
-      schema: {
-        tags: ['reports'],
-        body: {
-          type: 'object',
-          properties: {
-            name: { type: 'string' },
-            title: { type: 'string' },
-            dataSources: { type: 'array' },
-            sections: { type: 'array' },
-            parameters: { type: 'array' },
+    fastify.post(
+      '/reports',
+      {
+        schema: {
+          tags: ['reports'],
+          body: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              title: { type: 'string' },
+              dataSources: { type: 'array' },
+              sections: { type: 'array' },
+              parameters: { type: 'array' },
+            },
+            required: ['name', 'title'],
           },
-          required: ['name', 'title'],
         },
       },
-    }, async (request: FastifyRequest, reply: FastifyReply) => {
-      const reportConfig = request.body as any;
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        const reportConfig = request.body as any;
 
-      try {
-        const reportId = await this.reportsService.createReport(reportConfig);
-        reply.send({ reportId, message: 'Rapport créé avec succès' });
-      } catch (error) {
-        reply.code(500).send({ error: 'Erreur création rapport' });
+        try {
+          const reportId = await this.reportsService.createReport(reportConfig);
+          reply.send({ reportId, message: 'Rapport créé avec succès' });
+        } catch (error) {
+          reply.code(500).send({ error: 'Erreur création rapport' });
+        }
       }
-    });
+    );
 
     // Générer un rapport
-    fastify.post('/reports/:reportId/generate', {
-      schema: {
-        tags: ['reports'],
-        params: {
-          type: 'object',
-          properties: {
-            reportId: { type: 'string' },
+    fastify.post(
+      '/reports/:reportId/generate',
+      {
+        schema: {
+          tags: ['reports'],
+          params: {
+            type: 'object',
+            properties: {
+              reportId: { type: 'string' },
+            },
           },
+          body: schemas.reportSchema,
         },
-        body: schemas.reportSchema,
       },
-    }, async (request: FastifyRequest, reply: FastifyReply) => {
-      const { reportId } = request.params as any;
-      const { parameters = {}, format = 'pdf' } = request.body as any;
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        const { reportId } = request.params as any;
+        const { parameters = {}, format = 'pdf' } = request.body as any;
 
-      try {
-        const startTime = Date.now();
-        const result = await this.reportsService.generateReport(reportId, parameters, { format });
-        const generationTime = Date.now() - startTime;
+        try {
+          const startTime = Date.now();
+          const result = await this.reportsService.generateReport(reportId, parameters, { format });
+          const generationTime = Date.now() - startTime;
 
-        this.recordPerformanceMetric('report_generation', generationTime);
+          this.recordPerformanceMetric('report_generation', generationTime);
 
-        reply
-          .type(this.getMimeType(format))
-          .header('Content-Disposition', `attachment; filename="${reportId}.${format}"`)
-          .send(result.buffer);
-      } catch (error) {
-        reply.code(500).send({ error: 'Erreur génération rapport' });
+          reply
+            .type(this.getMimeType(format))
+            .header('Content-Disposition', `attachment; filename="${reportId}.${format}"`)
+            .send(result.buffer);
+        } catch (error) {
+          reply.code(500).send({ error: 'Erreur génération rapport' });
+        }
       }
-    });
+    );
 
     // Aperçu de rapport
-    fastify.get('/reports/:reportId/preview', async (request: FastifyRequest, reply: FastifyReply) => {
-      const { reportId } = request.params as any;
-      const { page = 1, pageSize = 50, parameters = {} } = request.query as any;
+    fastify.get(
+      '/reports/:reportId/preview',
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        const { reportId } = request.params as any;
+        const { page = 1, pageSize = 50, parameters = {} } = request.query as any;
 
-      try {
-        const preview = await this.reportsService.previewReport(reportId, parameters, page, pageSize);
-        reply.send(preview);
-      } catch (error) {
-        reply.code(500).send({ error: 'Erreur aperçu rapport' });
+        try {
+          const preview = await this.reportsService.previewReport(
+            reportId,
+            parameters,
+            page,
+            pageSize
+          );
+          reply.send(preview);
+        } catch (error) {
+          reply.code(500).send({ error: 'Erreur aperçu rapport' });
+        }
       }
-    });
+    );
 
     // Lister les rapports
     fastify.get('/reports', async (request: FastifyRequest, reply: FastifyReply) => {
@@ -655,7 +705,7 @@ class VB6FastifyServer {
     // Redémarrer le serveur
     fastify.post('/admin/restart', async (request: FastifyRequest, reply: FastifyReply) => {
       reply.send({ message: 'Redémarrage en cours...' });
-      
+
       setTimeout(() => {
         process.exit(0);
       }, 1000);
@@ -663,14 +713,14 @@ class VB6FastifyServer {
   }
 
   private async registerWebSocket(): Promise<void> {
-    this.fastify.register(async (fastify) => {
+    this.fastify.register(async fastify => {
       fastify.get('/ws', { websocket: true }, async (connection, req) => {
         const clientId = `client_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
-        connection.socket.on('message', async (message) => {
+
+        connection.socket.on('message', async message => {
           try {
             const data = JSON.parse(message.toString());
-            
+
             switch (data.type) {
               case 'query':
                 await this.handleWebSocketQuery(connection, data);
@@ -683,10 +733,12 @@ class VB6FastifyServer {
                 break;
             }
           } catch (error) {
-            connection.socket.send(JSON.stringify({ 
-              type: 'error', 
-              message: 'Erreur traitement message' 
-            }));
+            connection.socket.send(
+              JSON.stringify({
+                type: 'error',
+                message: 'Erreur traitement message',
+              })
+            );
           }
         });
 
@@ -694,11 +746,13 @@ class VB6FastifyServer {
           this.logger.info(`Client WebSocket déconnecté: ${clientId}`);
         });
 
-        connection.socket.send(JSON.stringify({
-          type: 'connected',
-          clientId,
-          timestamp: Date.now(),
-        }));
+        connection.socket.send(
+          JSON.stringify({
+            type: 'connected',
+            clientId,
+            timestamp: Date.now(),
+          })
+        );
       });
     });
   }
@@ -712,30 +766,36 @@ class VB6FastifyServer {
         data.useCache !== false
       );
 
-      connection.socket.send(JSON.stringify({
-        type: 'query_result',
-        queryId: data.queryId,
-        data: result.data,
-        fields: result.fields,
-        executionTime: result.executionTime,
-        fromCache: result.fromCache,
-      }));
+      connection.socket.send(
+        JSON.stringify({
+          type: 'query_result',
+          queryId: data.queryId,
+          data: result.data,
+          fields: result.fields,
+          executionTime: result.executionTime,
+          fromCache: result.fromCache,
+        })
+      );
     } catch (error) {
-      connection.socket.send(JSON.stringify({
-        type: 'query_error',
-        queryId: data.queryId,
-        error: 'Erreur exécution requête',
-      }));
+      connection.socket.send(
+        JSON.stringify({
+          type: 'query_error',
+          queryId: data.queryId,
+          error: 'Erreur exécution requête',
+        })
+      );
     }
   }
 
   private async handleWebSocketSubscription(connection: any, data: any): Promise<void> {
     // Implémentation des souscriptions temps réel
-    connection.socket.send(JSON.stringify({
-      type: 'subscribed',
-      subscription: data.subscription,
-      timestamp: Date.now(),
-    }));
+    connection.socket.send(
+      JSON.stringify({
+        type: 'subscribed',
+        subscription: data.subscription,
+        timestamp: Date.now(),
+      })
+    );
   }
 
   private getMimeType(format: string): string {
@@ -771,13 +831,15 @@ class VB6FastifyServer {
 
   async start(): Promise<void> {
     try {
-      await this.fastify.listen({ 
-        port: SERVER_CONFIG.port, 
-        host: SERVER_CONFIG.host 
+      await this.fastify.listen({
+        port: SERVER_CONFIG.port,
+        host: SERVER_CONFIG.host,
       });
-      
+
       this.logger.info(`Serveur Fastify démarré sur ${SERVER_CONFIG.host}:${SERVER_CONFIG.port}`);
-      this.logger.info(`Documentation API disponible sur: http://${SERVER_CONFIG.host}:${SERVER_CONFIG.port}/docs`);
+      this.logger.info(
+        `Documentation API disponible sur: http://${SERVER_CONFIG.host}:${SERVER_CONFIG.port}/docs`
+      );
     } catch (error) {
       this.logger.error('Erreur démarrage serveur:', error);
       process.exit(1);
@@ -809,13 +871,16 @@ if (cluster.isMaster && process.env.NODE_ENV === 'production') {
   });
 } else {
   const server = new VB6FastifyServer();
-  
-  server.initialize().then(() => {
-    server.start();
-  }).catch(error => {
-    console.error('Erreur initialisation serveur:', error);
-    process.exit(1);
-  });
+
+  server
+    .initialize()
+    .then(() => {
+      server.start();
+    })
+    .catch(error => {
+      console.error('Erreur initialisation serveur:', error);
+      process.exit(1);
+    });
 
   // Gestion des signaux
   process.on('SIGINT', async () => {

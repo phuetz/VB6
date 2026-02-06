@@ -39,7 +39,7 @@ export class LayoutToolsService {
     const bounds = this.getSelectionBounds(controls);
 
     let referenceValue: number;
-    
+
     switch (options.type) {
       case 'left':
         referenceValue = options.reference === 'form' ? 0 : bounds.left;
@@ -49,18 +49,20 @@ export class LayoutToolsService {
         break;
 
       case 'center':
-        referenceValue = options.reference === 'form' 
-          ? 400 // Assuming form width ~800
-          : bounds.left + bounds.width / 2;
+        referenceValue =
+          options.reference === 'form'
+            ? 400 // Assuming form width ~800
+            : bounds.left + bounds.width / 2;
         updatedControls.forEach(control => {
           control.Left = referenceValue - (control.Width || 0) / 2;
         });
         break;
 
       case 'right':
-        referenceValue = options.reference === 'form' 
-          ? 800 // Assuming form width
-          : bounds.right;
+        referenceValue =
+          options.reference === 'form'
+            ? 800 // Assuming form width
+            : bounds.right;
         updatedControls.forEach(control => {
           control.Left = referenceValue - (control.Width || 0);
         });
@@ -74,18 +76,20 @@ export class LayoutToolsService {
         break;
 
       case 'middle':
-        referenceValue = options.reference === 'form'
-          ? 300 // Assuming form height ~600
-          : bounds.top + bounds.height / 2;
+        referenceValue =
+          options.reference === 'form'
+            ? 300 // Assuming form height ~600
+            : bounds.top + bounds.height / 2;
         updatedControls.forEach(control => {
           control.Top = referenceValue - (control.Height || 0) / 2;
         });
         break;
 
       case 'bottom':
-        referenceValue = options.reference === 'form'
-          ? 600 // Assuming form height
-          : bounds.bottom;
+        referenceValue =
+          options.reference === 'form'
+            ? 600 // Assuming form height
+            : bounds.bottom;
         updatedControls.forEach(control => {
           control.Top = referenceValue - (control.Height || 0);
         });
@@ -110,63 +114,60 @@ export class LayoutToolsService {
         // Distribution par espacement uniforme
         const totalWidth = updatedControls.reduce((sum, control) => sum + (control.Width || 0), 0);
         const availableSpace = bounds.width - totalWidth;
-        const spacing = options.spacing !== undefined 
-          ? options.spacing 
-          : availableSpace / (controls.length - 1);
+        const spacing =
+          options.spacing !== undefined ? options.spacing : availableSpace / (controls.length - 1);
 
         let currentX = bounds.left;
         updatedControls.forEach(control => {
           control.Left = currentX;
           currentX += (control.Width || 0) + spacing;
         });
-
       } else if (options.type === 'centers') {
         // Distribution par centres
         const spacing = bounds.width / (controls.length - 1);
         updatedControls.forEach((control, index) => {
-          const centerX = bounds.left + (index * spacing);
+          const centerX = bounds.left + index * spacing;
           control.Left = centerX - (control.Width || 0) / 2;
         });
-
       } else if (options.type === 'edges') {
         // Distribution par bords
         const spacing = bounds.width / (controls.length - 1);
         updatedControls.forEach((control, index) => {
-          control.Left = bounds.left + (index * spacing);
+          control.Left = bounds.left + index * spacing;
         });
       }
-
-    } else { // vertical
+    } else {
+      // vertical
       // Trier par position verticale
       updatedControls.sort((a, b) => (a.Top || 0) - (b.Top || 0));
 
       if (options.type === 'space') {
         // Distribution par espacement uniforme
-        const totalHeight = updatedControls.reduce((sum, control) => sum + (control.Height || 0), 0);
+        const totalHeight = updatedControls.reduce(
+          (sum, control) => sum + (control.Height || 0),
+          0
+        );
         const availableSpace = bounds.height - totalHeight;
-        const spacing = options.spacing !== undefined 
-          ? options.spacing 
-          : availableSpace / (controls.length - 1);
+        const spacing =
+          options.spacing !== undefined ? options.spacing : availableSpace / (controls.length - 1);
 
         let currentY = bounds.top;
         updatedControls.forEach(control => {
           control.Top = currentY;
           currentY += (control.Height || 0) + spacing;
         });
-
       } else if (options.type === 'centers') {
         // Distribution par centres
         const spacing = bounds.height / (controls.length - 1);
         updatedControls.forEach((control, index) => {
-          const centerY = bounds.top + (index * spacing);
+          const centerY = bounds.top + index * spacing;
           control.Top = centerY - (control.Height || 0) / 2;
         });
-
       } else if (options.type === 'edges') {
         // Distribution par bords
         const spacing = bounds.height / (controls.length - 1);
         updatedControls.forEach((control, index) => {
-          control.Top = bounds.top + (index * spacing);
+          control.Top = bounds.top + index * spacing;
         });
       }
     }
@@ -179,11 +180,11 @@ export class LayoutToolsService {
     if (controls.length < 2) return controls;
 
     const updatedControls = [...controls];
-    
+
     if (options.horizontal !== undefined) {
       // Trier par position horizontale
       updatedControls.sort((a, b) => (a.Left || 0) - (b.Left || 0));
-      
+
       let currentX = updatedControls[0].Left || 0;
       for (let i = 1; i < updatedControls.length; i++) {
         currentX += (updatedControls[i - 1].Width || 0) + options.horizontal;
@@ -194,7 +195,7 @@ export class LayoutToolsService {
     if (options.vertical !== undefined) {
       // Trier par position verticale
       updatedControls.sort((a, b) => (a.Top || 0) - (b.Top || 0));
-      
+
       let currentY = updatedControls[0].Top || 0;
       for (let i = 1; i < updatedControls.length; i++) {
         currentY += (updatedControls[i - 1].Height || 0) + options.vertical;
@@ -206,22 +207,26 @@ export class LayoutToolsService {
   }
 
   // Créer une grille de contrôles
-  arrangeInGrid(controls: VB6Control[], columns: number, spacing: { x: number; y: number }): VB6Control[] {
+  arrangeInGrid(
+    controls: VB6Control[],
+    columns: number,
+    spacing: { x: number; y: number }
+  ): VB6Control[] {
     if (controls.length === 0) return controls;
 
     const updatedControls = [...controls];
     const bounds = this.getSelectionBounds(controls);
-    
+
     let row = 0;
     let col = 0;
 
     updatedControls.forEach((control, index) => {
-      const x = bounds.left + (col * spacing.x);
-      const y = bounds.top + (row * spacing.y);
-      
+      const x = bounds.left + col * spacing.x;
+      const y = bounds.top + row * spacing.y;
+
       control.Left = x;
       control.Top = y;
-      
+
       col++;
       if (col >= columns) {
         col = 0;
@@ -233,17 +238,20 @@ export class LayoutToolsService {
   }
 
   // Adapter la taille des contrôles
-  resizeControls(controls: VB6Control[], options: {
-    width?: number | 'max' | 'min' | 'average';
-    height?: number | 'max' | 'min' | 'average';
-  }): VB6Control[] {
+  resizeControls(
+    controls: VB6Control[],
+    options: {
+      width?: number | 'max' | 'min' | 'average';
+      height?: number | 'max' | 'min' | 'average';
+    }
+  ): VB6Control[] {
     if (controls.length === 0) return controls;
 
     const updatedControls = [...controls];
-    
+
     if (options.width !== undefined) {
       let targetWidth: number;
-      
+
       if (typeof options.width === 'number') {
         targetWidth = options.width;
       } else {
@@ -262,7 +270,7 @@ export class LayoutToolsService {
             targetWidth = 100;
         }
       }
-      
+
       updatedControls.forEach(control => {
         control.Width = targetWidth;
       });
@@ -270,7 +278,7 @@ export class LayoutToolsService {
 
     if (options.height !== undefined) {
       let targetHeight: number;
-      
+
       if (typeof options.height === 'number') {
         targetHeight = options.height;
       } else {
@@ -289,7 +297,7 @@ export class LayoutToolsService {
             targetHeight = 25;
         }
       }
-      
+
       updatedControls.forEach(control => {
         control.Height = targetHeight;
       });
@@ -322,7 +330,7 @@ export class LayoutToolsService {
       right,
       bottom,
       width: right - left,
-      height: bottom - top
+      height: bottom - top,
     };
   }
 
@@ -344,23 +352,25 @@ export class LayoutToolsService {
       for (let j = i + 1; j < controls.length; j++) {
         const control1 = controls[i];
         const control2 = controls[j];
-        
+
         const hSpacing = Math.abs((control1.Left || 0) - (control2.Left || 0));
         const vSpacing = Math.abs((control1.Top || 0) - (control2.Top || 0));
-        
+
         if (hSpacing > 0) horizontalSpacings.push(hSpacing);
         if (vSpacing > 0) verticalSpacings.push(vSpacing);
       }
     }
 
     // Calculer les espacements moyens ou utiliser des valeurs par défaut
-    const avgHorizontal = horizontalSpacings.length > 0 
-      ? horizontalSpacings.reduce((sum, s) => sum + s, 0) / horizontalSpacings.length 
-      : 8;
-    
-    const avgVertical = verticalSpacings.length > 0 
-      ? verticalSpacings.reduce((sum, s) => sum + s, 0) / verticalSpacings.length 
-      : 8;
+    const avgHorizontal =
+      horizontalSpacings.length > 0
+        ? horizontalSpacings.reduce((sum, s) => sum + s, 0) / horizontalSpacings.length
+        : 8;
+
+    const avgVertical =
+      verticalSpacings.length > 0
+        ? verticalSpacings.reduce((sum, s) => sum + s, 0) / verticalSpacings.length
+        : 8;
 
     // Calculer l'espacement de grille suggéré
     const maxWidth = Math.max(...controls.map(c => c.Width || 0));
@@ -371,8 +381,8 @@ export class LayoutToolsService {
       vertical: Math.max(8, Math.round(avgVertical)),
       gridSpacing: {
         x: Math.max(maxWidth + 16, 120),
-        y: Math.max(maxHeight + 16, 40)
-      }
+        y: Math.max(maxHeight + 16, 40),
+      },
     };
   }
 }

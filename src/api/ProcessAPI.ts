@@ -26,7 +26,7 @@ export enum PROCESS_CREATION_FLAGS {
   CREATE_PROTECTED_PROCESS = 0x00040000,
   EXTENDED_STARTUPINFO_PRESENT = 0x00080000,
   PROCESS_MODE_BACKGROUND_BEGIN = 0x00100000,
-  PROCESS_MODE_BACKGROUND_END = 0x00200000
+  PROCESS_MODE_BACKGROUND_END = 0x00200000,
 }
 
 export enum THREAD_PRIORITY {
@@ -36,7 +36,7 @@ export enum THREAD_PRIORITY {
   THREAD_PRIORITY_NORMAL = 0,
   THREAD_PRIORITY_ABOVE_NORMAL = 1,
   THREAD_PRIORITY_HIGHEST = 2,
-  THREAD_PRIORITY_TIME_CRITICAL = 15
+  THREAD_PRIORITY_TIME_CRITICAL = 15,
 }
 
 export enum PROCESS_ACCESS_RIGHTS {
@@ -53,16 +53,16 @@ export enum PROCESS_ACCESS_RIGHTS {
   PROCESS_QUERY_INFORMATION = 0x0400,
   PROCESS_SUSPEND_RESUME = 0x0800,
   PROCESS_QUERY_LIMITED_INFORMATION = 0x1000,
-  PROCESS_ALL_ACCESS = 0x1F0FFF,
-  SYNCHRONIZE = 0x00100000
+  PROCESS_ALL_ACCESS = 0x1f0fff,
+  SYNCHRONIZE = 0x00100000,
 }
 
 export enum WAIT_RESULT {
   WAIT_ABANDONED = 0x00000080,
   WAIT_OBJECT_0 = 0x00000000,
   WAIT_TIMEOUT = 0x00000102,
-  WAIT_FAILED = 0xFFFFFFFF,
-  INFINITE = 0xFFFFFFFE
+  WAIT_FAILED = 0xffffffff,
+  INFINITE = 0xfffffffe,
 }
 
 export interface PROCESS_INFORMATION {
@@ -132,7 +132,7 @@ class ProcessAPI {
 
   // MEMORY LEAK FIX: Periodic cleanup of terminated processes/threads
   private static cleanupInterval: NodeJS.Timeout | null = null;
-  
+
   private static initialize(): void {
     // Add current process
     ProcessAPI.processes.set(ProcessAPI.getCurrentProcessId(), {
@@ -144,7 +144,7 @@ class ProcessAPI {
       workingSet: 1024 * 1024 * 50, // 50MB simulated
       handles: 100,
       threads: 1,
-      isRunning: true
+      isRunning: true,
     });
 
     // MEMORY LEAK FIX: Start periodic cleanup
@@ -197,13 +197,13 @@ class ProcessAPI {
     }
 
     // Clear all wait intervals
-    ProcessAPI.waitIntervals.forEach((interval) => {
+    ProcessAPI.waitIntervals.forEach(interval => {
       clearInterval(interval);
     });
     ProcessAPI.waitIntervals.clear();
 
     // Terminate all workers
-    ProcessAPI.workers.forEach((worker) => {
+    ProcessAPI.workers.forEach(worker => {
       worker.terminate();
     });
     ProcessAPI.workers.clear();
@@ -212,7 +212,7 @@ class ProcessAPI {
     ProcessAPI.processes.clear();
     ProcessAPI.threads.clear();
   }
-  
+
   // Process Management Functions
   static CreateProcess(
     applicationName: string | null,
@@ -225,16 +225,15 @@ class ProcessAPI {
     currentDirectory: string | null = null,
     startupInfo: STARTUPINFO | null = null
   ): { success: boolean; processInfo: PROCESS_INFORMATION | null } {
-    
     try {
       // In browser environment, we can only simulate process creation
       // Real process creation would require native capabilities
-      
+
       const processId = ++ProcessAPI.processCounter;
       const threadId = ++ProcessAPI.threadCounter;
       const processHandle = processId;
       const threadHandle = threadId;
-      
+
       // Create simulated process
       const commandParts = commandLine.split(' ');
       const processInfo: ProcessInfo = {
@@ -246,11 +245,11 @@ class ProcessAPI {
         workingSet: 1024 * 1024 * 10, // 10MB default
         handles: 10,
         threads: 1,
-        isRunning: !(creationFlags & PROCESS_CREATION_FLAGS.CREATE_SUSPENDED)
+        isRunning: !(creationFlags & PROCESS_CREATION_FLAGS.CREATE_SUSPENDED),
       };
-      
+
       ProcessAPI.processes.set(processId, processInfo);
-      
+
       // Create main thread
       const threadInfo: ThreadInfo = {
         id: threadId,
@@ -258,56 +257,59 @@ class ProcessAPI {
         priority: THREAD_PRIORITY.THREAD_PRIORITY_NORMAL,
         created: new Date(),
         isRunning: processInfo.isRunning,
-        isSuspended: !processInfo.isRunning
+        isSuspended: !processInfo.isRunning,
       };
-      
+
       ProcessAPI.threads.set(threadId, threadInfo);
-      
+
       // For web applications, try to open in new window/tab
       if (commandLine.startsWith('http') || commandLine.startsWith('file:')) {
         window.open(commandLine, '_blank');
       }
-      
+
       const result: PROCESS_INFORMATION = {
         hProcess: processHandle,
         hThread: threadHandle,
         dwProcessId: processId,
-        dwThreadId: threadId
+        dwThreadId: threadId,
       };
-      
+
       return { success: true, processInfo: result };
-      
     } catch (error) {
       console.error('CreateProcess failed:', error);
       return { success: false, processInfo: null };
     }
   }
-  
-  static OpenProcess(desiredAccess: PROCESS_ACCESS_RIGHTS, inheritHandle: boolean, processId: number): number {
+
+  static OpenProcess(
+    desiredAccess: PROCESS_ACCESS_RIGHTS,
+    inheritHandle: boolean,
+    processId: number
+  ): number {
     const process = ProcessAPI.processes.get(processId);
     if (!process) {
       return 0; // Invalid handle
     }
-    
+
     // Return the process ID as handle (simplified)
     return processId;
   }
-  
+
   static TerminateProcess(processHandle: number, exitCode: number): boolean {
     try {
       const process = ProcessAPI.processes.get(processHandle);
       if (!process) {
         return false;
       }
-      
+
       process.isRunning = false;
       process.exitCode = exitCode;
-      
+
       // Terminate associated threads
       ProcessAPI.threads.forEach((thread, threadId) => {
         if (thread.processId === processHandle) {
           thread.isRunning = false;
-          
+
           // Terminate web worker if exists
           const worker = ProcessAPI.workers.get(threadId);
           if (worker) {
@@ -316,30 +318,30 @@ class ProcessAPI {
           }
         }
       });
-      
+
       return true;
     } catch {
       return false;
     }
   }
-  
+
   static GetExitCodeProcess(processHandle: number): { success: boolean; exitCode: number } {
     const process = ProcessAPI.processes.get(processHandle);
     if (!process) {
       return { success: false, exitCode: 0 };
     }
-    
+
     if (process.isRunning) {
       return { success: true, exitCode: 259 }; // STILL_ACTIVE
     }
-    
+
     return { success: true, exitCode: process.exitCode || 0 };
   }
-  
+
   static GetCurrentProcess(): number {
     return ProcessAPI.getCurrentProcessId();
   }
-  
+
   static GetCurrentProcessId(): number {
     // Return a consistent process ID for the current browser tab
     let processId = parseInt(sessionStorage.getItem('VB6_PROCESS_ID') || '0', 10);
@@ -350,13 +352,13 @@ class ProcessAPI {
     }
     return processId;
   }
-  
+
   static GetProcessMemoryInfo(processHandle: number): PROCESS_MEMORY_COUNTERS | null {
     const process = ProcessAPI.processes.get(processHandle);
     if (!process) {
       return null;
     }
-    
+
     // Return simulated memory information
     return {
       cb: 40, // Size of structure
@@ -368,10 +370,10 @@ class ProcessAPI {
       QuotaPeakNonPagedPoolUsage: process.workingSet * 0.1,
       QuotaNonPagedPoolUsage: process.workingSet * 0.05,
       PagefileUsage: process.workingSet * 0.8,
-      PeakPagefileUsage: process.workingSet * 1.1
+      PeakPagefileUsage: process.workingSet * 1.1,
     };
   }
-  
+
   // Thread Management Functions
   static CreateThread(
     threadAttributes: any = null,
@@ -381,32 +383,36 @@ class ProcessAPI {
     creationFlags: number = 0,
     threadId: { value: number } = { value: 0 }
   ): number {
-    
     try {
       const newThreadId = ++ProcessAPI.threadCounter;
       const processId = ProcessAPI.getCurrentProcessId();
-      
+
       const threadInfo: ThreadInfo = {
         id: newThreadId,
         processId: processId,
         priority: THREAD_PRIORITY.THREAD_PRIORITY_NORMAL,
         created: new Date(),
         isRunning: !(creationFlags & PROCESS_CREATION_FLAGS.CREATE_SUSPENDED),
-        isSuspended: !!(creationFlags & PROCESS_CREATION_FLAGS.CREATE_SUSPENDED)
+        isSuspended: !!(creationFlags & PROCESS_CREATION_FLAGS.CREATE_SUSPENDED),
       };
-      
+
       ProcessAPI.threads.set(newThreadId, threadInfo);
       threadId.value = newThreadId;
-      
+
       // BROWSER COMPATIBILITY FIX: Create Web Worker for thread simulation with feature detection
-      if (typeof Worker !== 'undefined' && typeof Blob !== 'undefined' && typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') {
+      if (
+        typeof Worker !== 'undefined' &&
+        typeof Blob !== 'undefined' &&
+        typeof URL !== 'undefined' &&
+        typeof URL.createObjectURL === 'function'
+      ) {
         try {
           const workerCode = `
             // Safe function whitelist - no eval() usage
             const allowedFunctions = {
               'Math.random': () => Math.random(),
               'Date.now': () => Date.now(),
-              'console.log': (msg) => console.log('[Worker]:', msg),
+              'console.log': (msg) => {},
               'setTimeout': (fn, delay) => setTimeout(fn, delay),
               'setInterval': (fn, delay) => setInterval(fn, delay)
             };
@@ -427,39 +433,38 @@ class ProcessAPI {
               }
             };
           `;
-          
+
           const blob = new Blob([workerCode], { type: 'application/javascript' });
           const workerUrl = URL.createObjectURL(blob);
           const worker = new Worker(workerUrl);
-          
+
           // WEBWORKER DEADLOCK FIX: Revoke blob URL after worker creation to prevent memory leak
           URL.revokeObjectURL(workerUrl);
-          
-          worker.onmessage = (e) => {
+
+          worker.onmessage = e => {
             const { success, result, error } = e.data;
             if (!success) {
               console.error('Thread execution error:', error);
             }
           };
-          
-          worker.onerror = (error) => {
+
+          worker.onerror = error => {
             console.error('Worker error:', error);
             threadInfo.isRunning = false;
           };
-          
+
           ProcessAPI.workers.set(newThreadId, worker);
-          
+
           // Start thread if not suspended
           if (threadInfo.isRunning) {
             worker.postMessage({
               funcName: 'console.log', // Safe default function
-              params: [`Thread ${newThreadId} started`]
+              params: [`Thread ${newThreadId} started`],
             });
           }
-          
         } catch (error) {
           console.warn('Web Worker creation failed, using setTimeout simulation:', error);
-          
+
           // Fallback to setTimeout for thread simulation
           if (threadInfo.isRunning) {
             setTimeout(() => {
@@ -474,7 +479,7 @@ class ProcessAPI {
         }
       } else {
         console.warn('Web Worker not supported, using setTimeout simulation');
-        
+
         // Fallback to setTimeout for thread simulation
         if (threadInfo.isRunning) {
           setTimeout(() => {
@@ -487,121 +492,120 @@ class ProcessAPI {
           }, 0);
         }
       }
-      
+
       return newThreadId;
-      
     } catch (error) {
       console.error('CreateThread failed:', error);
       return 0;
     }
   }
-  
+
   static GetCurrentThread(): number {
     return ProcessAPI.getCurrentThreadId();
   }
-  
+
   static GetCurrentThreadId(): number {
     // Return main thread ID
     return 1;
   }
-  
+
   static SuspendThread(threadHandle: number): number {
     const thread = ProcessAPI.threads.get(threadHandle);
     if (!thread) {
-      return 0xFFFFFFFF; // Error
+      return 0xffffffff; // Error
     }
-    
+
     const previousSuspendCount = thread.isSuspended ? 1 : 0;
     thread.isSuspended = true;
     thread.isRunning = false;
-    
+
     // Suspend web worker
     const worker = ProcessAPI.workers.get(threadHandle);
     if (worker) {
       worker.terminate();
       ProcessAPI.workers.delete(threadHandle);
     }
-    
+
     return previousSuspendCount;
   }
-  
+
   static ResumeThread(threadHandle: number): number {
     const thread = ProcessAPI.threads.get(threadHandle);
     if (!thread) {
-      return 0xFFFFFFFF; // Error
+      return 0xffffffff; // Error
     }
-    
+
     const previousSuspendCount = thread.isSuspended ? 1 : 0;
     thread.isSuspended = false;
     thread.isRunning = true;
-    
+
     return previousSuspendCount;
   }
-  
+
   static TerminateThread(threadHandle: number, exitCode: number): boolean {
     try {
       const thread = ProcessAPI.threads.get(threadHandle);
       if (!thread) {
         return false;
       }
-      
+
       thread.isRunning = false;
       thread.exitCode = exitCode;
-      
+
       // Terminate web worker
       const worker = ProcessAPI.workers.get(threadHandle);
       if (worker) {
         worker.terminate();
         ProcessAPI.workers.delete(threadHandle);
       }
-      
+
       return true;
     } catch {
       return false;
     }
   }
-  
+
   static GetThreadPriority(threadHandle: number): number {
     const thread = ProcessAPI.threads.get(threadHandle);
     return thread ? thread.priority : THREAD_PRIORITY.THREAD_PRIORITY_NORMAL;
   }
-  
+
   static SetThreadPriority(threadHandle: number, priority: THREAD_PRIORITY): boolean {
     const thread = ProcessAPI.threads.get(threadHandle);
     if (!thread) {
       return false;
     }
-    
+
     thread.priority = priority;
     return true;
   }
-  
+
   // Synchronization Functions
   static WaitForSingleObject(handle: number, milliseconds: number): Promise<WAIT_RESULT> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const process = ProcessAPI.processes.get(handle);
       const thread = ProcessAPI.threads.get(handle);
-      
+
       if (!process && !thread) {
         resolve(WAIT_RESULT.WAIT_FAILED);
         return;
       }
-      
+
       const target = process || thread;
-      
+
       if (!target!.isRunning) {
         resolve(WAIT_RESULT.WAIT_OBJECT_0);
         return;
       }
-      
+
       if (milliseconds === 0) {
         resolve(WAIT_RESULT.WAIT_TIMEOUT);
         return;
       }
-      
+
       const startTime = Date.now();
       const intervalId = ProcessAPI.intervalCounter++;
-      
+
       const checkInterval = setInterval(() => {
         if (!target!.isRunning) {
           clearInterval(checkInterval);
@@ -609,7 +613,7 @@ class ProcessAPI {
           resolve(WAIT_RESULT.WAIT_OBJECT_0);
           return;
         }
-        
+
         if (milliseconds !== WAIT_RESULT.INFINITE && Date.now() - startTime >= milliseconds) {
           clearInterval(checkInterval);
           ProcessAPI.waitIntervals.delete(intervalId);
@@ -617,36 +621,36 @@ class ProcessAPI {
           return;
         }
       }, 10);
-      
+
       // MEMORY LEAK FIX: Track interval for cleanup
       ProcessAPI.waitIntervals.set(intervalId, checkInterval);
     });
   }
-  
+
   static WaitForMultipleObjects(
     handles: number[],
     waitAll: boolean,
     milliseconds: number
   ): Promise<WAIT_RESULT> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (handles.length === 0) {
         resolve(WAIT_RESULT.WAIT_FAILED);
         return;
       }
-      
+
       const startTime = Date.now();
       let completedCount = 0;
       const intervalId = ProcessAPI.intervalCounter++;
-      
+
       const checkCompletion = () => {
         completedCount = 0;
-        
+
         for (let i = 0; i < handles.length; i++) {
           const handle = handles[i];
           const process = ProcessAPI.processes.get(handle);
           const thread = ProcessAPI.threads.get(handle);
           const target = process || thread;
-          
+
           if (target && !target.isRunning) {
             completedCount++;
             if (!waitAll) {
@@ -654,14 +658,14 @@ class ProcessAPI {
             }
           }
         }
-        
+
         if (waitAll && completedCount === handles.length) {
           return WAIT_RESULT.WAIT_OBJECT_0;
         }
-        
+
         return null;
       };
-      
+
       const checkInterval = setInterval(() => {
         const result = checkCompletion();
         if (result !== null) {
@@ -670,7 +674,7 @@ class ProcessAPI {
           resolve(result);
           return;
         }
-        
+
         if (milliseconds !== WAIT_RESULT.INFINITE && Date.now() - startTime >= milliseconds) {
           clearInterval(checkInterval);
           ProcessAPI.waitIntervals.delete(intervalId);
@@ -678,12 +682,12 @@ class ProcessAPI {
           return;
         }
       }, 10);
-      
+
       // MEMORY LEAK FIX: Track interval for cleanup
       ProcessAPI.waitIntervals.set(intervalId, checkInterval);
     });
   }
-  
+
   // System Information Functions
   static GetSystemInfo(): SYSTEM_INFO {
     return {
@@ -691,16 +695,16 @@ class ProcessAPI {
       wReserved: 0,
       dwPageSize: 4096,
       lpMinimumApplicationAddress: 0x00010000,
-      lpMaximumApplicationAddress: 0x7FFEFFFF,
+      lpMaximumApplicationAddress: 0x7ffeffff,
       dwActiveProcessorMask: (1 << navigator.hardwareConcurrency) - 1,
       dwNumberOfProcessors: navigator.hardwareConcurrency || 1,
       dwProcessorType: 586, // PROCESSOR_INTEL_PENTIUM
       dwAllocationGranularity: 65536,
       wProcessorLevel: 6,
-      wProcessorRevision: 0x3A09
+      wProcessorRevision: 0x3a09,
     };
   }
-  
+
   static GetProcessTimes(processHandle: number): {
     creationTime: Date;
     exitTime: Date;
@@ -711,35 +715,35 @@ class ProcessAPI {
     if (!process) {
       return null;
     }
-    
+
     const now = new Date();
     const runTime = now.getTime() - process.created.getTime();
-    
+
     return {
       creationTime: process.created,
       exitTime: process.isRunning ? new Date(0) : now,
       kernelTime: Math.floor(runTime * 0.1), // 10% kernel time (simulated)
-      userTime: Math.floor(runTime * 0.9)   // 90% user time (simulated)
+      userTime: Math.floor(runTime * 0.9), // 90% user time (simulated)
     };
   }
-  
+
   // Process Enumeration
   static EnumProcesses(): number[] {
     return Array.from(ProcessAPI.processes.keys());
   }
-  
+
   static GetProcessImageFileName(processHandle: number): string {
     const process = ProcessAPI.processes.get(processHandle);
     return process ? process.name : '';
   }
-  
+
   // VB6-compatible helper functions
   static Shell(pathname: string, windowStyle: number = 1): number {
     // VB6 Shell function equivalent
     const result = ProcessAPI.CreateProcess(null, pathname);
     return result.success && result.processInfo ? result.processInfo.dwProcessId : 0;
   }
-  
+
   static CloseHandle(handle: number): boolean {
     // Close process or thread handle
     return true; // Simplified - no actual cleanup needed in simulation

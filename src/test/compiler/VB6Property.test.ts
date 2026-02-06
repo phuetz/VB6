@@ -5,10 +5,13 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { VB6PropertyProcessor, VB6PropertyDeclaration, VB6PropertyGroup } from '../../compiler/VB6PropertySupport';
+import {
+  VB6PropertyProcessor,
+  VB6PropertyDeclaration,
+  VB6PropertyGroup,
+} from '../../compiler/VB6PropertySupport';
 
 describe('VB6 Property Support', () => {
-
   describe('Property Processor - Parsing', () => {
     let processor: VB6PropertyProcessor;
 
@@ -157,7 +160,10 @@ describe('VB6 Property Support', () => {
 
     it('should register Property Get and Let together', () => {
       const getter = processor.parsePropertyDeclaration('Property Get Value() As Long', 1);
-      const letter = processor.parsePropertyDeclaration('Property Let Value(ByVal vNewValue As Long)', 2);
+      const letter = processor.parsePropertyDeclaration(
+        'Property Let Value(ByVal vNewValue As Long)',
+        2
+      );
 
       processor.registerProperty(getter!);
       processor.registerProperty(letter!);
@@ -181,7 +187,10 @@ describe('VB6 Property Support', () => {
     });
 
     it('should identify write-only property', () => {
-      const letter = processor.parsePropertyDeclaration('Property Let Password(ByVal vNewPassword As String)', 1);
+      const letter = processor.parsePropertyDeclaration(
+        'Property Let Password(ByVal vNewPassword As String)',
+        1
+      );
       processor.registerProperty(letter!);
 
       const retrieved = processor.getProperty('Password');
@@ -192,7 +201,10 @@ describe('VB6 Property Support', () => {
 
     it('should register Property Set for objects', () => {
       const getter = processor.parsePropertyDeclaration('Property Get Font() As Object', 1);
-      const setter = processor.parsePropertyDeclaration('Property Set Font(ByVal vNewFont As Object)', 2);
+      const setter = processor.parsePropertyDeclaration(
+        'Property Set Font(ByVal vNewFont As Object)',
+        2
+      );
 
       processor.registerProperty(getter!);
       processor.registerProperty(setter!);
@@ -205,8 +217,12 @@ describe('VB6 Property Support', () => {
     });
 
     it('should get module properties', () => {
-      processor.registerProperty(processor.parsePropertyDeclaration('Property Get Value1() As Long', 1)!);
-      processor.registerProperty(processor.parsePropertyDeclaration('Property Get Value2() As Long', 2)!);
+      processor.registerProperty(
+        processor.parsePropertyDeclaration('Property Get Value1() As Long', 1)!
+      );
+      processor.registerProperty(
+        processor.parsePropertyDeclaration('Property Get Value2() As Long', 2)!
+      );
 
       const moduleProps = processor.getModuleProperties();
       expect(moduleProps).toHaveLength(2);
@@ -223,7 +239,10 @@ describe('VB6 Property Support', () => {
 
     it('should generate JavaScript for simple property', () => {
       const getter = processor.parsePropertyDeclaration('Property Get Value() As Long', 1);
-      const letter = processor.parsePropertyDeclaration('Property Let Value(ByVal vNewValue As Long)', 2);
+      const letter = processor.parsePropertyDeclaration(
+        'Property Let Value(ByVal vNewValue As Long)',
+        2
+      );
 
       processor.registerProperty(getter!);
       processor.registerProperty(letter!);
@@ -249,7 +268,10 @@ describe('VB6 Property Support', () => {
 
     it('should generate JavaScript for object property', () => {
       const getter = processor.parsePropertyDeclaration('Property Get Font() As Object', 1);
-      const setter = processor.parsePropertyDeclaration('Property Set Font(ByVal vNewFont As Object)', 2);
+      const setter = processor.parsePropertyDeclaration(
+        'Property Set Font(ByVal vNewFont As Object)',
+        2
+      );
 
       processor.registerProperty(getter!);
       processor.registerProperty(setter!);
@@ -258,13 +280,16 @@ describe('VB6 Property Support', () => {
       const jsCode = processor.generateJavaScript(propertyGroup!);
 
       expect(jsCode).toContain('set Font(value)');
-      expect(jsCode).toContain('typeof value !== \'object\'');
+      expect(jsCode).toContain("typeof value !== 'object'");
       expect(jsCode).toContain('Property Set can only be used with object values');
     });
 
     it('should generate TypeScript interface', () => {
       const getter = processor.parsePropertyDeclaration('Property Get Value() As Long', 1);
-      const letter = processor.parsePropertyDeclaration('Property Let Value(ByVal vNewValue As Long)', 2);
+      const letter = processor.parsePropertyDeclaration(
+        'Property Let Value(ByVal vNewValue As Long)',
+        2
+      );
 
       processor.registerProperty(getter!);
       processor.registerProperty(letter!);
@@ -288,7 +313,10 @@ describe('VB6 Property Support', () => {
     });
 
     it('should generate write-only TypeScript property', () => {
-      const letter = processor.parsePropertyDeclaration('Property Let Password(ByVal vNewPassword As String)', 1);
+      const letter = processor.parsePropertyDeclaration(
+        'Property Let Password(ByVal vNewPassword As String)',
+        1
+      );
       processor.registerProperty(letter!);
 
       const propertyGroup = processor.getProperty('Password');
@@ -306,7 +334,7 @@ describe('VB6 Property Support', () => {
         { vb6: 'Boolean', ts: 'boolean' },
         { vb6: 'Date', ts: 'Date' },
         { vb6: 'Variant', ts: 'any' },
-        { vb6: 'Object', ts: 'object' }
+        { vb6: 'Object', ts: 'object' },
       ];
 
       for (const type of types) {
@@ -332,7 +360,10 @@ describe('VB6 Property Support', () => {
 
     it('should validate type consistency between Get and Let', () => {
       const getter = processor.parsePropertyDeclaration('Property Get Value() As Long', 1);
-      const letter = processor.parsePropertyDeclaration('Property Let Value(ByVal vNewValue As Long)', 2);
+      const letter = processor.parsePropertyDeclaration(
+        'Property Let Value(ByVal vNewValue As Long)',
+        2
+      );
 
       processor.registerProperty(getter!);
       processor.registerProperty(letter!);
@@ -345,7 +376,10 @@ describe('VB6 Property Support', () => {
 
     it('should detect type mismatch between Get and Let', () => {
       const getter = processor.parsePropertyDeclaration('Property Get Value() As Long', 1);
-      const letter = processor.parsePropertyDeclaration('Property Let Value(ByVal vNewValue As String)', 2);
+      const letter = processor.parsePropertyDeclaration(
+        'Property Let Value(ByVal vNewValue As String)',
+        2
+      );
 
       processor.registerProperty(getter!);
       processor.registerProperty(letter!);
@@ -360,7 +394,10 @@ describe('VB6 Property Support', () => {
 
     it('should allow Variant type compatibility', () => {
       const getter = processor.parsePropertyDeclaration('Property Get Value() As Variant', 1);
-      const letter = processor.parsePropertyDeclaration('Property Let Value(ByVal vNewValue As Long)', 2);
+      const letter = processor.parsePropertyDeclaration(
+        'Property Let Value(ByVal vNewValue As Long)',
+        2
+      );
 
       processor.registerProperty(getter!);
       processor.registerProperty(letter!);
@@ -372,7 +409,10 @@ describe('VB6 Property Support', () => {
     });
 
     it('should validate Set is used with object types', () => {
-      const setter = processor.parsePropertyDeclaration('Property Set Value(ByVal vNewValue As Long)', 1);
+      const setter = processor.parsePropertyDeclaration(
+        'Property Set Value(ByVal vNewValue As Long)',
+        1
+      );
       processor.registerProperty(setter!);
 
       const propertyGroup = processor.getProperty('Value');
@@ -383,7 +423,10 @@ describe('VB6 Property Support', () => {
     });
 
     it('should warn if Let is used with Object types', () => {
-      const letter = processor.parsePropertyDeclaration('Property Let Value(ByVal vNewValue As Object)', 1);
+      const letter = processor.parsePropertyDeclaration(
+        'Property Let Value(ByVal vNewValue As Object)',
+        1
+      );
       processor.registerProperty(letter!);
 
       const propertyGroup = processor.getProperty('Value');
@@ -404,7 +447,10 @@ describe('VB6 Property Support', () => {
 
     it('should export and import property data', () => {
       const getter = processor.parsePropertyDeclaration('Property Get Value() As Long', 1);
-      const letter = processor.parsePropertyDeclaration('Property Let Value(ByVal vNewValue As Long)', 2);
+      const letter = processor.parsePropertyDeclaration(
+        'Property Let Value(ByVal vNewValue As Long)',
+        2
+      );
 
       processor.registerProperty(getter!);
       processor.registerProperty(letter!);
@@ -423,14 +469,15 @@ describe('VB6 Property Support', () => {
     });
 
     it('should clear all properties', () => {
-      processor.registerProperty(processor.parsePropertyDeclaration('Property Get Value() As Long', 1)!);
+      processor.registerProperty(
+        processor.parsePropertyDeclaration('Property Get Value() As Long', 1)!
+      );
       expect(processor.getProperty('Value')).toBeDefined();
 
       processor.clear();
       expect(processor.getProperty('Value')).toBeUndefined();
     });
   });
-
 
   describe('Real-World VB6 Property Scenarios', () => {
     let processor: VB6PropertyProcessor;
@@ -442,7 +489,10 @@ describe('VB6 Property Support', () => {
 
     it('should handle simple value property', () => {
       const getter = processor.parsePropertyDeclaration('Property Get Name() As String', 1);
-      const letter = processor.parsePropertyDeclaration('Property Let Name(ByVal vNewName As String)', 2);
+      const letter = processor.parsePropertyDeclaration(
+        'Property Let Name(ByVal vNewName As String)',
+        2
+      );
 
       expect(getter).not.toBeNull();
       expect(letter).not.toBeNull();
@@ -457,14 +507,17 @@ describe('VB6 Property Support', () => {
 
     it('should handle validated property', () => {
       const getter = processor.parsePropertyDeclaration('Property Get Age() As Integer', 1);
-      const letter = processor.parsePropertyDeclaration('Property Let Age(ByVal vNewAge As Integer)', 2);
+      const letter = processor.parsePropertyDeclaration(
+        'Property Let Age(ByVal vNewAge As Integer)',
+        2
+      );
 
       getter!.body = ['Age = m_age'];
       letter!.body = [
         'If vNewAge < 0 Or vNewAge > 150 Then',
         '    Err.Raise 5, , "Invalid age value"',
         'End If',
-        'm_age = vNewAge'
+        'm_age = vNewAge',
       ];
 
       processor.registerProperty(getter!);
@@ -478,8 +531,14 @@ describe('VB6 Property Support', () => {
     });
 
     it('should handle indexed property', () => {
-      const getter = processor.parsePropertyDeclaration('Property Get Item(ByVal Index As Long) As Variant', 1);
-      const letter = processor.parsePropertyDeclaration('Property Let Item(ByVal Index As Long, ByVal vNewItem As Variant)', 2);
+      const getter = processor.parsePropertyDeclaration(
+        'Property Get Item(ByVal Index As Long) As Variant',
+        1
+      );
+      const letter = processor.parsePropertyDeclaration(
+        'Property Let Item(ByVal Index As Long, ByVal vNewItem As Variant)',
+        2
+      );
 
       expect(getter!.parameters).toHaveLength(1);
       expect(letter!.parameters).toHaveLength(2);
@@ -492,8 +551,14 @@ describe('VB6 Property Support', () => {
     });
 
     it('should handle default property (Item)', () => {
-      const getter = processor.parsePropertyDeclaration('Property Get Item(ByVal Index As Variant) As Variant', 1);
-      const letter = processor.parsePropertyDeclaration('Property Let Item(ByVal Index As Variant, ByVal vNewItem As Variant)', 2);
+      const getter = processor.parsePropertyDeclaration(
+        'Property Get Item(ByVal Index As Variant) As Variant',
+        1
+      );
+      const letter = processor.parsePropertyDeclaration(
+        'Property Let Item(ByVal Index As Variant, ByVal vNewItem As Variant)',
+        2
+      );
 
       processor.registerProperty(getter!);
       processor.registerProperty(letter!);
@@ -506,7 +571,10 @@ describe('VB6 Property Support', () => {
 
     it('should handle object property with Font example', () => {
       const getter = processor.parsePropertyDeclaration('Property Get Font() As Object', 1);
-      const setter = processor.parsePropertyDeclaration('Property Set Font(ByVal vNewFont As Object)', 2);
+      const setter = processor.parsePropertyDeclaration(
+        'Property Set Font(ByVal vNewFont As Object)',
+        2
+      );
 
       processor.registerProperty(getter!);
       processor.registerProperty(setter!);
@@ -514,7 +582,7 @@ describe('VB6 Property Support', () => {
       const propertyGroup = processor.getProperty('Font');
       const jsCode = processor.generateJavaScript(propertyGroup!);
 
-      expect(jsCode).toContain('typeof value !== \'object\'');
+      expect(jsCode).toContain("typeof value !== 'object'");
     });
 
     it('should handle read-only Count property', () => {
@@ -575,10 +643,14 @@ describe('VB6 Property Support', () => {
 
     it('should handle module context switching', () => {
       processor.setCurrentModule('Module1');
-      processor.registerProperty(processor.parsePropertyDeclaration('Private Property Get Value1() As Long', 1)!);
+      processor.registerProperty(
+        processor.parsePropertyDeclaration('Private Property Get Value1() As Long', 1)!
+      );
 
       processor.setCurrentModule('Module2');
-      processor.registerProperty(processor.parsePropertyDeclaration('Private Property Get Value2() As Long', 1)!);
+      processor.registerProperty(
+        processor.parsePropertyDeclaration('Private Property Get Value2() As Long', 1)!
+      );
 
       processor.setCurrentModule('Module1');
       const moduleProps = processor.getModuleProperties();
@@ -586,8 +658,12 @@ describe('VB6 Property Support', () => {
     });
 
     it('should generate property accessors for class', () => {
-      processor.registerProperty(processor.parsePropertyDeclaration('Property Get Value() As Long', 1)!);
-      processor.registerProperty(processor.parsePropertyDeclaration('Property Let Value(ByVal vNewValue As Long)', 2)!);
+      processor.registerProperty(
+        processor.parsePropertyDeclaration('Property Get Value() As Long', 1)!
+      );
+      processor.registerProperty(
+        processor.parsePropertyDeclaration('Property Let Value(ByVal vNewValue As Long)', 2)!
+      );
 
       const jsCode = processor.generatePropertyAccessors('MyClass');
       expect(jsCode).toContain('MyClass');

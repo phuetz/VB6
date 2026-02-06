@@ -5,11 +5,14 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { VB6DeclareProcessor, VB6DeclareFunction, VB6DeclareParameter } from '../../compiler/VB6DeclareSupport';
+import {
+  VB6DeclareProcessor,
+  VB6DeclareFunction,
+  VB6DeclareParameter,
+} from '../../compiler/VB6DeclareSupport';
 import { VB6DeclareRegistry } from '../../runtime/VB6DeclareSupport';
 
 describe('VB6 Declare Support', () => {
-
   describe('Declare Processor - Parsing', () => {
     let processor: VB6DeclareProcessor;
 
@@ -47,7 +50,8 @@ describe('VB6 Declare Support', () => {
     });
 
     it('should parse Declare with Alias', () => {
-      const code = 'Declare Function GetWindowsDirectory Lib "kernel32" Alias "GetWindowsDirectoryA" (ByVal lpBuffer As String, ByVal nSize As Long) As Long';
+      const code =
+        'Declare Function GetWindowsDirectory Lib "kernel32" Alias "GetWindowsDirectoryA" (ByVal lpBuffer As String, ByVal nSize As Long) As Long';
       const result = processor.parseDeclareStatement(code, 1);
 
       expect(result).not.toBeNull();
@@ -58,7 +62,8 @@ describe('VB6 Declare Support', () => {
     });
 
     it('should parse Public Declare', () => {
-      const code = 'Public Declare Function MessageBox Lib "user32" Alias "MessageBoxA" (ByVal hWnd As Long, ByVal lpText As String, ByVal lpCaption As String, ByVal wType As Long) As Long';
+      const code =
+        'Public Declare Function MessageBox Lib "user32" Alias "MessageBoxA" (ByVal hWnd As Long, ByVal lpText As String, ByVal lpCaption As String, ByVal wType As Long) As Long';
       const result = processor.parseDeclareStatement(code, 1);
 
       expect(result).not.toBeNull();
@@ -68,7 +73,8 @@ describe('VB6 Declare Support', () => {
     });
 
     it('should parse Private Declare', () => {
-      const code = 'Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long';
+      const code =
+        'Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long';
       const result = processor.parseDeclareStatement(code, 1);
 
       expect(result).not.toBeNull();
@@ -108,7 +114,8 @@ describe('VB6 Declare Support', () => {
     });
 
     it('should parse multiple parameters', () => {
-      const code = 'Declare Function GetPrivateProfileString Lib "kernel32" Alias "GetPrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As String, ByVal lpDefault As String, ByVal lpReturnedString As String, ByVal nSize As Long, ByVal lpFileName As String) As Long';
+      const code =
+        'Declare Function GetPrivateProfileString Lib "kernel32" Alias "GetPrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As String, ByVal lpDefault As String, ByVal lpReturnedString As String, ByVal nSize As Long, ByVal lpFileName As String) As Long';
       const result = processor.parseDeclareStatement(code, 1);
 
       expect(result).not.toBeNull();
@@ -197,7 +204,8 @@ describe('VB6 Declare Support', () => {
     });
 
     it('should generate parameter validation in shim', () => {
-      const code = 'Declare Function Test Lib "test.dll" (ByVal x As Long, ByVal y As Long) As Long';
+      const code =
+        'Declare Function Test Lib "test.dll" (ByVal x As Long, ByVal y As Long) As Long';
       const declareFunc = processor.parseDeclareStatement(code, 1);
 
       processor.registerDeclareFunction(declareFunc!);
@@ -219,7 +227,8 @@ describe('VB6 Declare Support', () => {
     });
 
     it('should generate TypeScript with optional parameters', () => {
-      const code = 'Declare Function Test Lib "test.dll" (ByVal x As Long, Optional ByVal y As Long) As Long';
+      const code =
+        'Declare Function Test Lib "test.dll" (ByVal x As Long, Optional ByVal y As Long) As Long';
       const declareFunc = processor.parseDeclareStatement(code, 1);
 
       processor.registerDeclareFunction(declareFunc!);
@@ -263,7 +272,8 @@ describe('VB6 Declare Support', () => {
     });
 
     it('should generate User32 MessageBox implementation', () => {
-      const code = 'Declare Function MessageBox Lib "user32" Alias "MessageBoxA" (ByVal hWnd As Long, ByVal lpText As String, ByVal lpCaption As String, ByVal wType As Long) As Long';
+      const code =
+        'Declare Function MessageBox Lib "user32" Alias "MessageBoxA" (ByVal hWnd As Long, ByVal lpText As String, ByVal lpCaption As String, ByVal wType As Long) As Long';
       const declareFunc = processor.parseDeclareStatement(code, 1);
 
       processor.registerDeclareFunction(declareFunc!);
@@ -275,7 +285,8 @@ describe('VB6 Declare Support', () => {
     });
 
     it('should generate Shell32 ShellExecute implementation', () => {
-      const code = 'Declare Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" (ByVal hWnd As Long, ByVal lpOperation As String, ByVal lpFile As String, ByVal lpParameters As String, ByVal lpDirectory As String, ByVal nShowCmd As Long) As Long';
+      const code =
+        'Declare Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" (ByVal hWnd As Long, ByVal lpOperation As String, ByVal lpFile As String, ByVal lpParameters As String, ByVal lpDirectory As String, ByVal nShowCmd As Long) As Long';
       const declareFunc = processor.parseDeclareStatement(code, 1);
 
       processor.registerDeclareFunction(declareFunc!);
@@ -321,7 +332,8 @@ describe('VB6 Declare Support', () => {
     });
 
     it('should validate too few arguments', () => {
-      const code = 'Declare Function Test Lib "test.dll" (ByVal x As Long, ByVal y As Long) As Long';
+      const code =
+        'Declare Function Test Lib "test.dll" (ByVal x As Long, ByVal y As Long) As Long';
       const declareFunc = processor.parseDeclareStatement(code, 1);
 
       processor.registerDeclareFunction(declareFunc!);
@@ -351,7 +363,8 @@ describe('VB6 Declare Support', () => {
     });
 
     it('should allow optional parameters to be omitted', () => {
-      const code = 'Declare Function Test Lib "test.dll" (ByVal x As Long, Optional ByVal y As Long) As Long';
+      const code =
+        'Declare Function Test Lib "test.dll" (ByVal x As Long, Optional ByVal y As Long) As Long';
       const declareFunc = processor.parseDeclareStatement(code, 1);
 
       processor.registerDeclareFunction(declareFunc!);
@@ -400,7 +413,6 @@ describe('VB6 Declare Support', () => {
   });
 
   describe('Runtime Declare Registry', () => {
-
     it('should parse Declare statement', () => {
       const code = 'Declare Function GetTickCount Lib "kernel32" () As Long';
       const result = VB6DeclareRegistry.parseDeclareStatement(code);
@@ -412,7 +424,8 @@ describe('VB6 Declare Support', () => {
     });
 
     it('should parse Declare with alias', () => {
-      const code = 'Declare Function MessageBox Lib "user32" Alias "MessageBoxA" (ByVal hWnd As Long, ByVal lpText As String, ByVal lpCaption As String, ByVal wType As Long) As Long';
+      const code =
+        'Declare Function MessageBox Lib "user32" Alias "MessageBoxA" (ByVal hWnd As Long, ByVal lpText As String, ByVal lpCaption As String, ByVal wType As Long) As Long';
       const result = VB6DeclareRegistry.parseDeclareStatement(code);
 
       expect(result).not.toBeNull();
@@ -465,7 +478,8 @@ describe('VB6 Declare Support', () => {
     });
 
     it('should handle Windows GetWindowsDirectory API', () => {
-      const code = 'Declare Function GetWindowsDirectory Lib "kernel32" Alias "GetWindowsDirectoryA" (ByVal lpBuffer As String, ByVal nSize As Long) As Long';
+      const code =
+        'Declare Function GetWindowsDirectory Lib "kernel32" Alias "GetWindowsDirectoryA" (ByVal lpBuffer As String, ByVal nSize As Long) As Long';
       const result = processor.parseDeclareStatement(code, 1);
 
       expect(result).not.toBeNull();
@@ -479,7 +493,8 @@ describe('VB6 Declare Support', () => {
     });
 
     it('should handle complex GetPrivateProfileString API', () => {
-      const code = 'Declare Function GetPrivateProfileString Lib "kernel32" Alias "GetPrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As String, ByVal lpDefault As String, ByVal lpReturnedString As String, ByVal nSize As Long, ByVal lpFileName As String) As Long';
+      const code =
+        'Declare Function GetPrivateProfileString Lib "kernel32" Alias "GetPrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As String, ByVal lpDefault As String, ByVal lpReturnedString As String, ByVal nSize As Long, ByVal lpFileName As String) As Long';
       const result = processor.parseDeclareStatement(code, 1);
 
       expect(result).not.toBeNull();
@@ -488,13 +503,20 @@ describe('VB6 Declare Support', () => {
       expect(result!.parameters[0].asString).toBe(true);
 
       processor.registerDeclareFunction(result!);
-      const validation = processor.validateDeclareCall('GetPrivateProfileString',
-        ['Section', 'Key', 'Default', '', 256, 'config.ini']);
+      const validation = processor.validateDeclareCall('GetPrivateProfileString', [
+        'Section',
+        'Key',
+        'Default',
+        '',
+        256,
+        'config.ini',
+      ]);
       expect(validation.valid).toBe(true);
     });
 
     it('should handle FindWindow API', () => {
-      const code = 'Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long';
+      const code =
+        'Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long';
       const result = processor.parseDeclareStatement(code, 1);
 
       expect(result).not.toBeNull();
@@ -507,7 +529,8 @@ describe('VB6 Declare Support', () => {
     });
 
     it('should handle SendMessage API with variant types', () => {
-      const code = 'Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long';
+      const code =
+        'Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long';
       const result = processor.parseDeclareStatement(code, 1);
 
       expect(result).not.toBeNull();
@@ -517,7 +540,8 @@ describe('VB6 Declare Support', () => {
     });
 
     it('should handle multimedia PlaySound API', () => {
-      const code = 'Declare Function PlaySound Lib "winmm.dll" Alias "PlaySoundA" (ByVal lpszName As String, ByVal hModule As Long, ByVal dwFlags As Long) As Long';
+      const code =
+        'Declare Function PlaySound Lib "winmm.dll" Alias "PlaySoundA" (ByVal lpszName As String, ByVal hModule As Long, ByVal dwFlags As Long) As Long';
       const result = processor.parseDeclareStatement(code, 1);
 
       expect(result).not.toBeNull();
@@ -546,7 +570,8 @@ describe('VB6 Declare Support', () => {
     });
 
     it('should handle Declare with many parameters', () => {
-      const code = 'Declare Function Test Lib "test.dll" (p1 As Long, p2 As Long, p3 As Long, p4 As Long, p5 As Long, p6 As Long, p7 As Long, p8 As Long) As Long';
+      const code =
+        'Declare Function Test Lib "test.dll" (p1 As Long, p2 As Long, p3 As Long, p4 As Long, p5 As Long, p6 As Long, p7 As Long, p8 As Long) As Long';
       const result = processor.parseDeclareStatement(code, 1);
 
       expect(result).not.toBeNull();
@@ -575,7 +600,7 @@ describe('VB6 Declare Support', () => {
         'Declare Function TestString Lib "test.dll" () As String',
         'Declare Function TestBoolean Lib "test.dll" () As Boolean',
         'Declare Function TestDouble Lib "test.dll" () As Double',
-        'Declare Function TestVariant Lib "test.dll" () As Variant'
+        'Declare Function TestVariant Lib "test.dll" () As Variant',
       ];
 
       for (const funcCode of functions) {

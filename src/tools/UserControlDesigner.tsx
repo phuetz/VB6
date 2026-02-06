@@ -16,19 +16,19 @@ export enum ControlType {
   Timer = 'Timer',
   ScrollBar = 'ScrollBar',
   Shape = 'Shape',
-  Line = 'Line'
+  Line = 'Line',
 }
 
 export enum ResizeMode {
   None = 'None',
   UserSized = 'UserSized',
-  AutoSize = 'AutoSize'
+  AutoSize = 'AutoSize',
 }
 
 export enum PropertyScope {
   Public = 'Public',
   Private = 'Private',
-  Friend = 'Friend'
+  Friend = 'Friend',
 }
 
 export enum PropertyType {
@@ -40,7 +40,7 @@ export enum PropertyType {
   Boolean = 'Boolean',
   Variant = 'Variant',
   Object = 'Object',
-  Enum = 'Enum'
+  Enum = 'Enum',
 }
 
 export interface ConstituentControl {
@@ -114,7 +114,12 @@ export interface UserControlSettings {
   publicCreatable: boolean;
   dataBindingBehavior: 'None' | 'SimpleBound' | 'ComplexBound';
   dataSourceBehavior: 'None' | 'DataSource';
-  mtsTransactionMode: 'NotAnMTSObject' | 'NoTransactions' | 'RequiresTransaction' | 'UsesTransaction' | 'RequiresNewTransaction';
+  mtsTransactionMode:
+    | 'NotAnMTSObject'
+    | 'NoTransactions'
+    | 'RequiresTransaction'
+    | 'UsesTransaction'
+    | 'RequiresNewTransaction';
   helpContextId: number;
   helpFile: string;
 }
@@ -128,7 +133,14 @@ export interface UserControlProject {
   constituentControls: ConstituentControl[];
   userControlSize: { width: number; height: number };
   resizeMode: ResizeMode;
-  scaleMode: 'Twips' | 'Points' | 'Pixels' | 'Characters' | 'Inches' | 'Millimeters' | 'Centimeters';
+  scaleMode:
+    | 'Twips'
+    | 'Points'
+    | 'Pixels'
+    | 'Characters'
+    | 'Inches'
+    | 'Millimeters'
+    | 'Centimeters';
   backColor: string;
   foreColor: string;
   font: {
@@ -164,7 +176,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
   onProjectChange,
   onGenerateCode,
   onTestControl,
-  onSaveProject
+  onSaveProject,
 }) => {
   const [project, setProject] = useState<UserControlProject>({
     id: 'usercontrol1',
@@ -183,7 +195,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
       dataSourceBehavior: 'None',
       mtsTransactionMode: 'NotAnMTSObject',
       helpContextId: 0,
-      helpFile: ''
+      helpFile: '',
     },
     properties: [],
     methods: [],
@@ -200,9 +212,9 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
       bold: false,
       italic: false,
       underline: false,
-      strikethrough: false
+      strikethrough: false,
     },
-    lastModified: new Date()
+    lastModified: new Date(),
   });
 
   const [selectedControl, setSelectedControl] = useState<ConstituentControl | null>(null);
@@ -215,7 +227,9 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
   const [showProperties, setShowProperties] = useState(true);
   const [showToolbox, setShowToolbox] = useState(true);
   const [showCode, setShowCode] = useState(false);
-  const [activeTab, setActiveTab] = useState<'design' | 'properties' | 'methods' | 'events'>('design');
+  const [activeTab, setActiveTab] = useState<'design' | 'properties' | 'methods' | 'events'>(
+    'design'
+  );
   const [testMode, setTestMode] = useState(false);
   const [zoom, setZoom] = useState(100);
   const [showGrid, setShowGrid] = useState(true);
@@ -234,7 +248,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
       defaultProperties: { Caption: 'Label1', Alignment: 0, BackStyle: 0 },
       defaultSize: { width: 60, height: 20 },
       icon: '📝',
-      category: 'Standard'
+      category: 'Standard',
     },
     {
       type: ControlType.TextBox,
@@ -242,7 +256,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
       defaultProperties: { Text: '', MultiLine: false, ScrollBars: 0 },
       defaultSize: { width: 100, height: 20 },
       icon: '📄',
-      category: 'Standard'
+      category: 'Standard',
     },
     {
       type: ControlType.CommandButton,
@@ -250,7 +264,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
       defaultProperties: { Caption: 'Command1', Default: false, Cancel: false },
       defaultSize: { width: 75, height: 25 },
       icon: '🔘',
-      category: 'Standard'
+      category: 'Standard',
     },
     {
       type: ControlType.CheckBox,
@@ -258,7 +272,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
       defaultProperties: { Caption: 'Check1', Value: 0 },
       defaultSize: { width: 80, height: 20 },
       icon: '☑️',
-      category: 'Standard'
+      category: 'Standard',
     },
     {
       type: ControlType.OptionButton,
@@ -266,7 +280,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
       defaultProperties: { Caption: 'Option1', Value: false },
       defaultSize: { width: 80, height: 20 },
       icon: '🔘',
-      category: 'Standard'
+      category: 'Standard',
     },
     {
       type: ControlType.ListBox,
@@ -274,7 +288,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
       defaultProperties: { List: [], ListIndex: -1, MultiSelect: 0 },
       defaultSize: { width: 120, height: 80 },
       icon: '📋',
-      category: 'Standard'
+      category: 'Standard',
     },
     {
       type: ControlType.ComboBox,
@@ -282,7 +296,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
       defaultProperties: { Text: '', Style: 0, List: [] },
       defaultSize: { width: 120, height: 20 },
       icon: '🔽',
-      category: 'Standard'
+      category: 'Standard',
     },
     {
       type: ControlType.PictureBox,
@@ -290,7 +304,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
       defaultProperties: { Picture: '', AutoSize: false, BorderStyle: 1 },
       defaultSize: { width: 100, height: 100 },
       icon: '🖼️',
-      category: 'Standard'
+      category: 'Standard',
     },
     {
       type: ControlType.Image,
@@ -298,7 +312,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
       defaultProperties: { Picture: '', Stretch: false },
       defaultSize: { width: 60, height: 60 },
       icon: '🖼️',
-      category: 'Standard'
+      category: 'Standard',
     },
     {
       type: ControlType.Frame,
@@ -306,7 +320,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
       defaultProperties: { Caption: 'Frame1', BorderStyle: 1 },
       defaultSize: { width: 120, height: 80 },
       icon: '🔲',
-      category: 'Standard'
+      category: 'Standard',
     },
     {
       type: ControlType.Timer,
@@ -314,8 +328,8 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
       defaultProperties: { Interval: 0, Enabled: false },
       defaultSize: { width: 20, height: 20 },
       icon: '⏱️',
-      category: 'Standard'
-    }
+      category: 'Standard',
+    },
   ];
 
   // Initialize project
@@ -336,7 +350,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
           browsable: true,
           readOnly: false,
           designTimeOnly: false,
-          runtimeOnly: false
+          runtimeOnly: false,
         },
         {
           id: 'prop2',
@@ -349,7 +363,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
           browsable: true,
           readOnly: false,
           designTimeOnly: false,
-          runtimeOnly: false
+          runtimeOnly: false,
         },
         {
           id: 'prop3',
@@ -362,8 +376,8 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
           browsable: true,
           readOnly: false,
           designTimeOnly: false,
-          runtimeOnly: false
-        }
+          runtimeOnly: false,
+        },
       ];
 
       const defaultMethods: UserControlMethod[] = [
@@ -373,8 +387,8 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
           scope: PropertyScope.Public,
           returnType: PropertyType.String,
           parameters: [],
-          description: 'Repaints the user control'
-        }
+          description: 'Repaints the user control',
+        },
       ];
 
       const defaultEvents: UserControlEvent[] = [
@@ -383,29 +397,29 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
           name: 'Click',
           description: 'Occurs when the user clicks the user control',
           parameters: [],
-          cancellable: false
+          cancellable: false,
         },
         {
           id: 'event2',
           name: 'Initialize',
           description: 'Occurs when the user control is first created',
           parameters: [],
-          cancellable: false
+          cancellable: false,
         },
         {
           id: 'event3',
           name: 'Resize',
           description: 'Occurs when the user control is resized',
           parameters: [],
-          cancellable: false
-        }
+          cancellable: false,
+        },
       ];
 
       setProject(prev => ({
         ...prev,
         properties: defaultProperties,
         methods: defaultMethods,
-        events: defaultEvents
+        events: defaultEvents,
       }));
     }
   }, [initialProject]);
@@ -416,66 +430,75 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
   }, [project, onProjectChange]);
 
   // Add constituent control
-  const addConstituentControl = useCallback((type: ControlType, x: number, y: number) => {
-    const template = controlTemplates.find(t => t.type === type);
-    if (!template) return;
+  const addConstituentControl = useCallback(
+    (type: ControlType, x: number, y: number) => {
+      const template = controlTemplates.find(t => t.type === type);
+      if (!template) return;
 
-    // Snap to grid if enabled
-    if (snapToGrid) {
-      x = Math.round(x / gridSize) * gridSize;
-      y = Math.round(y / gridSize) * gridSize;
-    }
+      // Snap to grid if enabled
+      if (snapToGrid) {
+        x = Math.round(x / gridSize) * gridSize;
+        y = Math.round(y / gridSize) * gridSize;
+      }
 
-    const controlCount = project.constituentControls.filter(c => c.type === type).length;
-    const newControl: ConstituentControl = {
-      id: `control_${Date.now()}`,
-      name: `${template.name}${controlCount + 1}`,
-      type,
-      left: x,
-      top: y,
-      width: template.defaultSize.width,
-      height: template.defaultSize.height,
-      visible: true,
-      enabled: true,
-      tabIndex: project.constituentControls.length,
-      tabStop: type !== ControlType.Label && type !== ControlType.Image,
-      properties: { ...template.defaultProperties },
-      events: ['Click', 'DblClick', 'MouseDown', 'MouseMove', 'MouseUp'],
-      zIndex: project.constituentControls.length
-    };
+      const controlCount = project.constituentControls.filter(c => c.type === type).length;
+      const newControl: ConstituentControl = {
+        id: `control_${Date.now()}`,
+        name: `${template.name}${controlCount + 1}`,
+        type,
+        left: x,
+        top: y,
+        width: template.defaultSize.width,
+        height: template.defaultSize.height,
+        visible: true,
+        enabled: true,
+        tabIndex: project.constituentControls.length,
+        tabStop: type !== ControlType.Label && type !== ControlType.Image,
+        properties: { ...template.defaultProperties },
+        events: ['Click', 'DblClick', 'MouseDown', 'MouseMove', 'MouseUp'],
+        zIndex: project.constituentControls.length,
+      };
 
-    setProject(prev => ({
-      ...prev,
-      constituentControls: [...prev.constituentControls, newControl],
-      lastModified: new Date()
-    }));
+      setProject(prev => ({
+        ...prev,
+        constituentControls: [...prev.constituentControls, newControl],
+        lastModified: new Date(),
+      }));
 
-    setSelectedControl(newControl);
-  }, [project.constituentControls, snapToGrid, gridSize, controlTemplates]);
+      setSelectedControl(newControl);
+    },
+    [project.constituentControls, snapToGrid, gridSize, controlTemplates]
+  );
 
   // Update constituent control
-  const updateConstituentControl = useCallback((controlId: string, updates: Partial<ConstituentControl>) => {
-    setProject(prev => ({
-      ...prev,
-      constituentControls: prev.constituentControls.map(control =>
-        control.id === controlId ? { ...control, ...updates } : control
-      ),
-      lastModified: new Date()
-    }));
-  }, []);
+  const updateConstituentControl = useCallback(
+    (controlId: string, updates: Partial<ConstituentControl>) => {
+      setProject(prev => ({
+        ...prev,
+        constituentControls: prev.constituentControls.map(control =>
+          control.id === controlId ? { ...control, ...updates } : control
+        ),
+        lastModified: new Date(),
+      }));
+    },
+    []
+  );
 
   // Delete constituent control
-  const deleteConstituentControl = useCallback((controlId: string) => {
-    setProject(prev => ({
-      ...prev,
-      constituentControls: prev.constituentControls.filter(control => control.id !== controlId),
-      lastModified: new Date()
-    }));
+  const deleteConstituentControl = useCallback(
+    (controlId: string) => {
+      setProject(prev => ({
+        ...prev,
+        constituentControls: prev.constituentControls.filter(control => control.id !== controlId),
+        lastModified: new Date(),
+      }));
 
-    if (selectedControl?.id === controlId) {
-      setSelectedControl(null);
-    }
-  }, [selectedControl]);
+      if (selectedControl?.id === controlId) {
+        setSelectedControl(null);
+      }
+    },
+    [selectedControl]
+  );
 
   // Add user control property
   const addUserControlProperty = useCallback(() => {
@@ -490,95 +513,119 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
       browsable: true,
       readOnly: false,
       designTimeOnly: false,
-      runtimeOnly: false
+      runtimeOnly: false,
     };
 
     setProject(prev => ({
       ...prev,
       properties: [...prev.properties, newProperty],
-      lastModified: new Date()
+      lastModified: new Date(),
     }));
 
     setSelectedProperty(newProperty);
   }, []);
 
   // Update user control property
-  const updateUserControlProperty = useCallback((propertyId: string, updates: Partial<UserControlProperty>) => {
-    setProject(prev => ({
-      ...prev,
-      properties: prev.properties.map(prop =>
-        prop.id === propertyId ? { ...prop, ...updates } : prop
-      ),
-      lastModified: new Date()
-    }));
-  }, []);
+  const updateUserControlProperty = useCallback(
+    (propertyId: string, updates: Partial<UserControlProperty>) => {
+      setProject(prev => ({
+        ...prev,
+        properties: prev.properties.map(prop =>
+          prop.id === propertyId ? { ...prop, ...updates } : prop
+        ),
+        lastModified: new Date(),
+      }));
+    },
+    []
+  );
 
   // Delete user control property
-  const deleteUserControlProperty = useCallback((propertyId: string) => {
-    setProject(prev => ({
-      ...prev,
-      properties: prev.properties.filter(prop => prop.id !== propertyId),
-      lastModified: new Date()
-    }));
+  const deleteUserControlProperty = useCallback(
+    (propertyId: string) => {
+      setProject(prev => ({
+        ...prev,
+        properties: prev.properties.filter(prop => prop.id !== propertyId),
+        lastModified: new Date(),
+      }));
 
-    if (selectedProperty?.id === propertyId) {
-      setSelectedProperty(null);
-    }
-  }, [selectedProperty]);
+      if (selectedProperty?.id === propertyId) {
+        setSelectedProperty(null);
+      }
+    },
+    [selectedProperty]
+  );
 
   // Handle canvas drop
-  const handleCanvasDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    if (!draggedControlType || !userControlRef.current) return;
+  const handleCanvasDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      if (!draggedControlType || !userControlRef.current) return;
 
-    const rect = userControlRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (100 / zoom);
-    const y = (e.clientY - rect.top) * (100 / zoom);
+      const rect = userControlRef.current.getBoundingClientRect();
+      const x = (e.clientX - rect.left) * (100 / zoom);
+      const y = (e.clientY - rect.top) * (100 / zoom);
 
-    addConstituentControl(draggedControlType, x, y);
-    setDraggedControlType(null);
-  }, [draggedControlType, zoom, addConstituentControl]);
+      addConstituentControl(draggedControlType, x, y);
+      setDraggedControlType(null);
+    },
+    [draggedControlType, zoom, addConstituentControl]
+  );
 
   // Handle control mouse down
-  const handleControlMouseDown = useCallback((e: React.MouseEvent, control: ConstituentControl) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!userControlRef.current) return;
+  const handleControlMouseDown = useCallback(
+    (e: React.MouseEvent, control: ConstituentControl) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-    setSelectedControl(control);
-    setIsDragging(true);
+      if (!userControlRef.current) return;
 
-    const rect = userControlRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (100 / zoom);
-    const y = (e.clientY - rect.top) * (100 / zoom);
+      setSelectedControl(control);
+      setIsDragging(true);
 
-    setDragOffset({
-      x: x - control.left,
-      y: y - control.top
-    });
-  }, [zoom]);
+      const rect = userControlRef.current.getBoundingClientRect();
+      const x = (e.clientX - rect.left) * (100 / zoom);
+      const y = (e.clientY - rect.top) * (100 / zoom);
+
+      setDragOffset({
+        x: x - control.left,
+        y: y - control.top,
+      });
+    },
+    [zoom]
+  );
 
   // Handle mouse move
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isDragging || !selectedControl || !userControlRef.current) return;
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!isDragging || !selectedControl || !userControlRef.current) return;
 
-    const rect = userControlRef.current.getBoundingClientRect();
-    let x = (e.clientX - rect.left) * (100 / zoom) - dragOffset.x;
-    let y = (e.clientY - rect.top) * (100 / zoom) - dragOffset.y;
+      const rect = userControlRef.current.getBoundingClientRect();
+      let x = (e.clientX - rect.left) * (100 / zoom) - dragOffset.x;
+      let y = (e.clientY - rect.top) * (100 / zoom) - dragOffset.y;
 
-    // Snap to grid if enabled
-    if (snapToGrid) {
-      x = Math.round(x / gridSize) * gridSize;
-      y = Math.round(y / gridSize) * gridSize;
-    }
+      // Snap to grid if enabled
+      if (snapToGrid) {
+        x = Math.round(x / gridSize) * gridSize;
+        y = Math.round(y / gridSize) * gridSize;
+      }
 
-    // Keep within bounds
-    x = Math.max(0, Math.min(x, project.userControlSize.width - selectedControl.width));
-    y = Math.max(0, Math.min(y, project.userControlSize.height - selectedControl.height));
+      // Keep within bounds
+      x = Math.max(0, Math.min(x, project.userControlSize.width - selectedControl.width));
+      y = Math.max(0, Math.min(y, project.userControlSize.height - selectedControl.height));
 
-    updateConstituentControl(selectedControl.id, { left: x, top: y });
-  }, [isDragging, selectedControl, dragOffset, zoom, snapToGrid, gridSize, project.userControlSize, updateConstituentControl]);
+      updateConstituentControl(selectedControl.id, { left: x, top: y });
+    },
+    [
+      isDragging,
+      selectedControl,
+      dragOffset,
+      zoom,
+      snapToGrid,
+      gridSize,
+      project.userControlSize,
+      updateConstituentControl,
+    ]
+  );
 
   // Handle mouse up
   const handleMouseUp = useCallback(() => {
@@ -609,9 +656,9 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
           width: control.width * (zoom / 100),
           height: control.height * (zoom / 100),
           zIndex: control.zIndex,
-          backgroundColor: control.type === ControlType.Label ? 'transparent' : '#F0F0F0'
+          backgroundColor: control.type === ControlType.Label ? 'transparent' : '#F0F0F0',
         }}
-        onMouseDown={(e) => handleControlMouseDown(e, control)}
+        onMouseDown={e => handleControlMouseDown(e, control)}
         onDoubleClick={() => {
           // Open property editor or code editor
         }}
@@ -650,30 +697,14 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
     // Vertical lines
     for (let x = 0; x <= width; x += scaledGridSize) {
       gridLines.push(
-        <line
-          key={`v${x}`}
-          x1={x}
-          y1={0}
-          x2={x}
-          y2={height}
-          stroke="#E0E0E0"
-          strokeWidth="0.5"
-        />
+        <line key={`v${x}`} x1={x} y1={0} x2={x} y2={height} stroke="#E0E0E0" strokeWidth="0.5" />
       );
     }
 
     // Horizontal lines
     for (let y = 0; y <= height; y += scaledGridSize) {
       gridLines.push(
-        <line
-          key={`h${y}`}
-          x1={0}
-          y1={y}
-          x2={width}
-          y2={y}
-          stroke="#E0E0E0"
-          strokeWidth="0.5"
-        />
+        <line key={`h${y}`} x1={0} y1={y} x2={width} y2={y} stroke="#E0E0E0" strokeWidth="0.5" />
       );
     }
 
@@ -706,7 +737,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
           >
             🧪
           </button>
-          
+
           <button
             onClick={() => setShowCode(!showCode)}
             className={`px-2 py-1 text-xs rounded ${
@@ -716,7 +747,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
           >
             💻
           </button>
-          
+
           <button
             onClick={() => onSaveProject?.(project)}
             className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
@@ -724,10 +755,10 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
           >
             💾
           </button>
-          
+
           <select
             value={zoom}
-            onChange={(e) => setZoom(parseInt(e.target.value))}
+            onChange={e => setZoom(parseInt(e.target.value))}
             className="px-2 py-1 text-xs border border-gray-300 rounded"
           >
             <option value={25}>25%</option>
@@ -746,7 +777,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
           { key: 'design', label: 'Design', icon: '🎨' },
           { key: 'properties', label: 'Properties', icon: '🏷️' },
           { key: 'methods', label: 'Methods', icon: '🔧' },
-          { key: 'events', label: 'Events', icon: '⚡' }
+          { key: 'events', label: 'Events', icon: '⚡' },
         ].map(tab => (
           <button
             key={tab.key}
@@ -771,7 +802,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
             <div className="p-2 bg-gray-50 border-b border-gray-200">
               <h4 className="font-medium text-gray-700">Toolbox</h4>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-2">
               <div className="grid grid-cols-3 gap-1">
                 {controlTemplates.map(template => (
@@ -779,7 +810,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
                     key={template.type}
                     className="flex flex-col items-center p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-100"
                     draggable
-                    onDragStart={(e) => {
+                    onDragStart={e => {
                       setDraggedControlType(template.type);
                       e.dataTransfer.effectAllowed = 'copy';
                     }}
@@ -804,7 +835,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
                   <input
                     type="checkbox"
                     checked={showGrid}
-                    onChange={(e) => setShowGrid(e.target.checked)}
+                    onChange={e => setShowGrid(e.target.checked)}
                   />
                   Show Grid
                 </label>
@@ -812,13 +843,13 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
                   <input
                     type="checkbox"
                     checked={snapToGrid}
-                    onChange={(e) => setSnapToGrid(e.target.checked)}
+                    onChange={e => setSnapToGrid(e.target.checked)}
                   />
                   Snap to Grid
                 </label>
                 <select
                   value={gridSize}
-                  onChange={(e) => setGridSize(parseInt(e.target.value))}
+                  onChange={e => setGridSize(parseInt(e.target.value))}
                   className="px-2 py-1 text-xs border border-gray-300 rounded"
                 >
                   <option value={4}>4px</option>
@@ -834,18 +865,15 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
                 style={{
                   width: project.userControlSize.width * (zoom / 100),
                   height: project.userControlSize.height * (zoom / 100),
-                  backgroundColor: project.backColor
+                  backgroundColor: project.backColor,
                 }}
                 onDrop={handleCanvasDrop}
-                onDragOver={(e) => e.preventDefault()}
+                onDragOver={e => e.preventDefault()}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
               >
-                <div
-                  ref={userControlRef}
-                  className="relative w-full h-full"
-                >
+                <div ref={userControlRef} className="relative w-full h-full">
                   {renderGrid()}
                   {project.constituentControls.map(renderConstituentControl)}
                 </div>
@@ -873,17 +901,21 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
                   <div
                     key={property.id}
                     className={`p-2 border rounded cursor-pointer ${
-                      selectedProperty?.id === property.id ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+                      selectedProperty?.id === property.id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-300'
                     }`}
                     onClick={() => setSelectedProperty(property)}
                   >
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="font-medium">{property.name}</div>
-                        <div className="text-xs text-gray-600">{property.type} - {property.scope}</div>
+                        <div className="text-xs text-gray-600">
+                          {property.type} - {property.scope}
+                        </div>
                       </div>
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           deleteUserControlProperty(property.id);
                         }}
@@ -915,7 +947,9 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
                 {project.methods.map(method => (
                   <div key={method.id} className="p-2 border border-gray-300 rounded">
                     <div className="font-medium">{method.name}</div>
-                    <div className="text-xs text-gray-600">{method.returnType} - {method.scope}</div>
+                    <div className="text-xs text-gray-600">
+                      {method.returnType} - {method.scope}
+                    </div>
                     <div className="text-xs text-gray-500 mt-1">{method.description}</div>
                   </div>
                 ))}
@@ -940,9 +974,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
                   <div key={event.id} className="p-2 border border-gray-300 rounded">
                     <div className="font-medium">{event.name}</div>
                     <div className="text-xs text-gray-500 mt-1">{event.description}</div>
-                    {event.cancellable && (
-                      <div className="text-xs text-blue-600">Cancellable</div>
-                    )}
+                    {event.cancellable && <div className="text-xs text-blue-600">Cancellable</div>}
                   </div>
                 ))}
               </div>
@@ -958,7 +990,7 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
                 {selectedControl ? 'Control Properties' : 'Property Details'}
               </h4>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-2">
               {selectedControl && (
                 <div className="space-y-3">
@@ -967,18 +999,24 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
                     <input
                       type="text"
                       value={selectedControl.name}
-                      onChange={(e) => updateConstituentControl(selectedControl.id, { name: e.target.value })}
+                      onChange={e =>
+                        updateConstituentControl(selectedControl.id, { name: e.target.value })
+                      }
                       className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">Left</label>
                       <input
                         type="number"
                         value={selectedControl.left}
-                        onChange={(e) => updateConstituentControl(selectedControl.id, { left: parseInt(e.target.value) })}
+                        onChange={e =>
+                          updateConstituentControl(selectedControl.id, {
+                            left: parseInt(e.target.value),
+                          })
+                        }
                         className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                       />
                     </div>
@@ -987,19 +1025,27 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
                       <input
                         type="number"
                         value={selectedControl.top}
-                        onChange={(e) => updateConstituentControl(selectedControl.id, { top: parseInt(e.target.value) })}
+                        onChange={e =>
+                          updateConstituentControl(selectedControl.id, {
+                            top: parseInt(e.target.value),
+                          })
+                        }
                         className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                       />
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">Width</label>
                       <input
                         type="number"
                         value={selectedControl.width}
-                        onChange={(e) => updateConstituentControl(selectedControl.id, { width: parseInt(e.target.value) })}
+                        onChange={e =>
+                          updateConstituentControl(selectedControl.id, {
+                            width: parseInt(e.target.value),
+                          })
+                        }
                         className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                       />
                     </div>
@@ -1008,36 +1054,52 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
                       <input
                         type="number"
                         value={selectedControl.height}
-                        onChange={(e) => updateConstituentControl(selectedControl.id, { height: parseInt(e.target.value) })}
+                        onChange={e =>
+                          updateConstituentControl(selectedControl.id, {
+                            height: parseInt(e.target.value),
+                          })
+                        }
                         className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                       />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="flex items-center gap-2 text-xs">
                       <input
                         type="checkbox"
                         checked={selectedControl.visible}
-                        onChange={(e) => updateConstituentControl(selectedControl.id, { visible: e.target.checked })}
+                        onChange={e =>
+                          updateConstituentControl(selectedControl.id, {
+                            visible: e.target.checked,
+                          })
+                        }
                       />
                       Visible
                     </label>
-                    
+
                     <label className="flex items-center gap-2 text-xs">
                       <input
                         type="checkbox"
                         checked={selectedControl.enabled}
-                        onChange={(e) => updateConstituentControl(selectedControl.id, { enabled: e.target.checked })}
+                        onChange={e =>
+                          updateConstituentControl(selectedControl.id, {
+                            enabled: e.target.checked,
+                          })
+                        }
                       />
                       Enabled
                     </label>
-                    
+
                     <label className="flex items-center gap-2 text-xs">
                       <input
                         type="checkbox"
                         checked={selectedControl.tabStop}
-                        onChange={(e) => updateConstituentControl(selectedControl.id, { tabStop: e.target.checked })}
+                        onChange={e =>
+                          updateConstituentControl(selectedControl.id, {
+                            tabStop: e.target.checked,
+                          })
+                        }
                       />
                       Tab Stop
                     </label>
@@ -1052,61 +1114,89 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
                     <input
                       type="text"
                       value={selectedProperty.name}
-                      onChange={(e) => updateUserControlProperty(selectedProperty.id, { name: e.target.value })}
+                      onChange={e =>
+                        updateUserControlProperty(selectedProperty.id, { name: e.target.value })
+                      }
                       className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
                     <select
                       value={selectedProperty.type}
-                      onChange={(e) => updateUserControlProperty(selectedProperty.id, { type: e.target.value as PropertyType })}
+                      onChange={e =>
+                        updateUserControlProperty(selectedProperty.id, {
+                          type: e.target.value as PropertyType,
+                        })
+                      }
                       className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                     >
                       {Object.values(PropertyType).map(type => (
-                        <option key={type} value={type}>{type}</option>
+                        <option key={type} value={type}>
+                          {type}
+                        </option>
                       ))}
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Scope</label>
                     <select
                       value={selectedProperty.scope}
-                      onChange={(e) => updateUserControlProperty(selectedProperty.id, { scope: e.target.value as PropertyScope })}
+                      onChange={e =>
+                        updateUserControlProperty(selectedProperty.id, {
+                          scope: e.target.value as PropertyScope,
+                        })
+                      }
                       className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                     >
                       {Object.values(PropertyScope).map(scope => (
-                        <option key={scope} value={scope}>{scope}</option>
+                        <option key={scope} value={scope}>
+                          {scope}
+                        </option>
                       ))}
                     </select>
                   </div>
-                  
+
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Description
+                    </label>
                     <textarea
                       value={selectedProperty.description}
-                      onChange={(e) => updateUserControlProperty(selectedProperty.id, { description: e.target.value })}
+                      onChange={e =>
+                        updateUserControlProperty(selectedProperty.id, {
+                          description: e.target.value,
+                        })
+                      }
                       className="w-full px-2 py-1 text-xs border border-gray-300 rounded h-16"
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="flex items-center gap-2 text-xs">
                       <input
                         type="checkbox"
                         checked={selectedProperty.browsable}
-                        onChange={(e) => updateUserControlProperty(selectedProperty.id, { browsable: e.target.checked })}
+                        onChange={e =>
+                          updateUserControlProperty(selectedProperty.id, {
+                            browsable: e.target.checked,
+                          })
+                        }
                       />
                       Browsable
                     </label>
-                    
+
                     <label className="flex items-center gap-2 text-xs">
                       <input
                         type="checkbox"
                         checked={selectedProperty.readOnly}
-                        onChange={(e) => updateUserControlProperty(selectedProperty.id, { readOnly: e.target.checked })}
+                        onChange={e =>
+                          updateUserControlProperty(selectedProperty.id, {
+                            readOnly: e.target.checked,
+                          })
+                        }
                       />
                       Read Only
                     </label>
@@ -1135,7 +1225,9 @@ export const UserControlDesigner: React.FC<UserControlDesignerProps> = ({
         <div className="flex items-center gap-2">
           <span>Zoom: {zoom}%</span>
           <span>Grid: {gridSize}px</span>
-          <span>Size: {project.userControlSize.width}×{project.userControlSize.height}</span>
+          <span>
+            Size: {project.userControlSize.width}×{project.userControlSize.height}
+          </span>
         </div>
       </div>
     </div>

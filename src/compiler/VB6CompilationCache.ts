@@ -1,6 +1,6 @@
 /**
  * VB6 Compilation Cache - Ultra-Complete Implementation
- * 
+ *
  * Features:
  * - LRU (Least Recently Used) cache with configurable size
  * - SHA256 fingerprinting for content validation
@@ -27,12 +27,12 @@ const createHash = (algorithm: string) => {
       let hash = 0;
       for (let i = 0; i < data.length; i++) {
         const char = data.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
+        hash = (hash << 5) - hash + char;
         hash = hash & hash; // Convert to 32bit integer
       }
       // Convert to hex string
       return Math.abs(hash).toString(16).padStart(8, '0');
-    }
+    },
   };
 
   return hashObject;
@@ -89,11 +89,11 @@ export class VB6CompilationCache<T = any> {
   private dependencies = new Map<string, DependencyInfo>();
   private metrics: CacheMetrics;
   private options: Required<CacheOptions>;
-  
+
   // Performance optimization
   private fingerprintCache = new Map<string, string>();
   private compressionCache = new Map<string, { compressed: string; original: string }>();
-  
+
   constructor(options: CacheOptions = {}) {
     this.options = {
       maxSize: options.maxSize ?? 100 * 1024 * 1024, // 100MB default
@@ -104,7 +104,7 @@ export class VB6CompilationCache<T = any> {
       enablePersistence: options.enablePersistence ?? false,
       persistenceKey: options.persistenceKey ?? 'vb6_compilation_cache',
       memoryPressureThreshold: options.memoryPressureThreshold ?? 0.8,
-      enableMetrics: options.enableMetrics ?? true
+      enableMetrics: options.enableMetrics ?? true,
     };
 
     this.metrics = {
@@ -117,7 +117,7 @@ export class VB6CompilationCache<T = any> {
       invalidations: 0,
       compressionRatio: 0,
       averageAccessTime: 0,
-      memoryPressure: 0
+      memoryPressure: 0,
     };
 
     // Load from persistence if enabled
@@ -134,9 +134,9 @@ export class VB6CompilationCache<T = any> {
    */
   public get(key: string, dependencies?: string[]): T | undefined {
     const startTime = performance.now();
-    
+
     const item = this.cache.get(key);
-    
+
     if (!item) {
       this.recordMiss();
       return undefined;
@@ -172,16 +172,20 @@ export class VB6CompilationCache<T = any> {
   /**
    * Set item in cache
    */
-  public set(key: string, value: T, options?: {
-    ttl?: number;
-    dependencies?: string[];
-    forceUpdate?: boolean;
-  }): void {
+  public set(
+    key: string,
+    value: T,
+    options?: {
+      ttl?: number;
+      dependencies?: string[];
+      forceUpdate?: boolean;
+    }
+  ): void {
     const { ttl, dependencies = [], forceUpdate = false } = options || {};
 
     // Calculate fingerprint
     const fingerprint = this.calculateFingerprint(value, dependencies);
-    
+
     // Check if item already exists and hasn't changed
     const existingItem = this.cache.get(key);
     if (existingItem && !forceUpdate && existingItem.fingerprint === fingerprint) {
@@ -219,7 +223,7 @@ export class VB6CompilationCache<T = any> {
       size: itemSize,
       ttl: ttl || this.options.defaultTTL,
       dependencies: new Set(dependencies),
-      compressed
+      compressed,
     };
 
     // Store dependencies
@@ -243,7 +247,7 @@ export class VB6CompilationCache<T = any> {
    */
   public has(key: string): boolean {
     const item = this.cache.get(key);
-    
+
     if (!item) {
       return false;
     }
@@ -341,17 +345,16 @@ export class VB6CompilationCache<T = any> {
     maxSize: number;
     utilizationRatio: number;
   } {
-    const totalSize = Array.from(this.cache.values())
-      .reduce((sum, item) => sum + item.size, 0);
-    
+    const totalSize = Array.from(this.cache.values()).reduce((sum, item) => sum + item.size, 0);
+
     const itemCount = this.cache.size;
-    
+
     return {
       itemCount,
       totalSize,
       averageSize: itemCount > 0 ? totalSize / itemCount : 0,
       maxSize: this.options.maxSize,
-      utilizationRatio: totalSize / this.options.maxSize
+      utilizationRatio: totalSize / this.options.maxSize,
     };
   }
 
@@ -369,7 +372,7 @@ export class VB6CompilationCache<T = any> {
         key,
         accessCount: item.accessCount,
         size: item.size,
-        age: Date.now() - item.timestamp
+        age: Date.now() - item.timestamp,
       }))
       .sort((a, b) => b.accessCount - a.accessCount)
       .slice(0, limit);
@@ -381,7 +384,7 @@ export class VB6CompilationCache<T = any> {
   private calculateFingerprint(value: T, dependencies: string[]): string {
     const content = JSON.stringify(value);
     const cacheKey = content + dependencies.join(',');
-    
+
     // Use cached fingerprint if available
     if (this.fingerprintCache.has(cacheKey)) {
       return this.fingerprintCache.get(cacheKey)!;
@@ -390,7 +393,7 @@ export class VB6CompilationCache<T = any> {
     // Calculate SHA256 hash
     const hash = createHash('sha256');
     hash.update(content);
-    
+
     // Include dependency fingerprints
     for (const dep of dependencies.sort()) {
       const depInfo = this.dependencies.get(dep);
@@ -402,10 +405,10 @@ export class VB6CompilationCache<T = any> {
     }
 
     const fingerprint = hash.digest('hex');
-    
+
     // Cache the fingerprint
     this.fingerprintCache.set(cacheKey, fingerprint);
-    
+
     // Limit fingerprint cache size
     if (this.fingerprintCache.size > 10000) {
       const oldestKeys = Array.from(this.fingerprintCache.keys()).slice(0, 1000);
@@ -428,7 +431,7 @@ export class VB6CompilationCache<T = any> {
     // Check if dependency set has changed
     const itemDeps = new Set(item.dependencies);
     const currentDeps = new Set(currentDependencies);
-    
+
     if (itemDeps.size !== currentDeps.size) {
       return false;
     }
@@ -462,9 +465,9 @@ export class VB6CompilationCache<T = any> {
           file: dep,
           lastModified: Date.now(),
           size: 0,
-          fingerprint: this.calculateFileFingerprint(dep)
+          fingerprint: this.calculateFileFingerprint(dep),
         };
-        
+
         this.dependencies.set(dep, depInfo);
       }
     }
@@ -475,7 +478,9 @@ export class VB6CompilationCache<T = any> {
    */
   private calculateFileFingerprint(file: string): string {
     // In a real implementation, you would read file content and hash it
-    return createHash('sha256').update(file + Date.now()).digest('hex');
+    return createHash('sha256')
+      .update(file + Date.now())
+      .digest('hex');
   }
 
   /**
@@ -514,13 +519,12 @@ export class VB6CompilationCache<T = any> {
    * Ensure sufficient space in cache
    */
   private ensureSpace(requiredSize: number): void {
-    const currentSize = Array.from(this.cache.values())
-      .reduce((sum, item) => sum + item.size, 0);
+    const currentSize = Array.from(this.cache.values()).reduce((sum, item) => sum + item.size, 0);
 
     // Check size constraints
     while (
-      (currentSize + requiredSize > this.options.maxSize) ||
-      (this.cache.size >= this.options.maxItems)
+      currentSize + requiredSize > this.options.maxSize ||
+      this.cache.size >= this.options.maxItems
     ) {
       if (this.accessOrder.length === 0) {
         break; // Nothing to evict
@@ -579,7 +583,7 @@ export class VB6CompilationCache<T = any> {
 
     // Cache compression result
     this.compressionCache.set(data, { compressed, original: data });
-    
+
     // Limit compression cache size
     if (this.compressionCache.size > 1000) {
       const oldestKeys = Array.from(this.compressionCache.keys()).slice(0, 100);
@@ -650,7 +654,7 @@ export class VB6CompilationCache<T = any> {
     if (totalAccesses === 1) {
       this.metrics.averageAccessTime = accessTime;
     } else {
-      this.metrics.averageAccessTime = 
+      this.metrics.averageAccessTime =
         (this.metrics.averageAccessTime * (totalAccesses - 1) + accessTime) / totalAccesses;
     }
   }
@@ -660,21 +664,21 @@ export class VB6CompilationCache<T = any> {
    */
   private updateMetrics(): void {
     this.metrics.totalItems = this.cache.size;
-    this.metrics.totalSize = Array.from(this.cache.values())
-      .reduce((sum, item) => sum + item.size, 0);
-    
+    this.metrics.totalSize = Array.from(this.cache.values()).reduce(
+      (sum, item) => sum + item.size,
+      0
+    );
+
     // Calculate compression ratio
-    const totalOriginalSize = Array.from(this.cache.values())
-      .reduce((sum, item) => {
-        if (item.compressed) {
-          return sum + (item.size * 2); // Estimate original size
-        }
-        return sum + item.size;
-      }, 0);
-    
-    this.metrics.compressionRatio = totalOriginalSize > 0 
-      ? this.metrics.totalSize / totalOriginalSize 
-      : 1;
+    const totalOriginalSize = Array.from(this.cache.values()).reduce((sum, item) => {
+      if (item.compressed) {
+        return sum + item.size * 2; // Estimate original size
+      }
+      return sum + item.size;
+    }, 0);
+
+    this.metrics.compressionRatio =
+      totalOriginalSize > 0 ? this.metrics.totalSize / totalOriginalSize : 1;
 
     // Calculate memory pressure
     this.metrics.memoryPressure = this.metrics.totalSize / this.options.maxSize;
@@ -694,7 +698,7 @@ export class VB6CompilationCache<T = any> {
       invalidations: 0,
       compressionRatio: 0,
       averageAccessTime: 0,
-      memoryPressure: 0
+      memoryPressure: 0,
     };
   }
 
@@ -703,14 +707,20 @@ export class VB6CompilationCache<T = any> {
    */
   private startMaintenanceTasks(): void {
     // Cleanup expired items every 5 minutes
-    setInterval(() => {
-      this.cleanupExpiredItems();
-    }, 5 * 60 * 1000);
+    setInterval(
+      () => {
+        this.cleanupExpiredItems();
+      },
+      5 * 60 * 1000
+    );
 
     // Optimize cache every 30 minutes
-    setInterval(() => {
-      this.optimizeCache();
-    }, 30 * 60 * 1000);
+    setInterval(
+      () => {
+        this.optimizeCache();
+      },
+      30 * 60 * 1000
+    );
 
     // Check memory pressure every minute
     setInterval(() => {
@@ -742,8 +752,9 @@ export class VB6CompilationCache<T = any> {
   private optimizeCache(): void {
     // Remove least accessed items if cache is getting full
     if (this.metrics.memoryPressure > 0.9) {
-      const items = Array.from(this.cache.entries())
-        .sort(([, a], [, b]) => a.accessCount - b.accessCount);
+      const items = Array.from(this.cache.entries()).sort(
+        ([, a], [, b]) => a.accessCount - b.accessCount
+      );
 
       const itemsToRemove = Math.floor(items.length * 0.1);
       for (let i = 0; i < itemsToRemove; i++) {
@@ -770,7 +781,7 @@ export class VB6CompilationCache<T = any> {
     if (this.metrics.memoryPressure > this.options.memoryPressureThreshold) {
       // Aggressive cleanup
       const targetSize = this.options.maxSize * (this.options.memoryPressureThreshold - 0.1);
-      
+
       while (this.metrics.totalSize > targetSize && this.accessOrder.length > 0) {
         const lruKey = this.accessOrder[0];
         this.delete(lruKey);
@@ -794,7 +805,7 @@ export class VB6CompilationCache<T = any> {
         accessOrder: this.accessOrder,
         dependencies: Array.from(this.dependencies.entries()),
         metrics: this.metrics,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       localStorage.setItem(this.options.persistenceKey, JSON.stringify(cacheData));
@@ -818,7 +829,7 @@ export class VB6CompilationCache<T = any> {
       }
 
       const cacheData = JSON.parse(data);
-      
+
       // Check if cache data is recent (within 24 hours)
       if (Date.now() - cacheData.timestamp > 24 * 60 * 60 * 1000) {
         this.clearPersistence();
@@ -829,7 +840,7 @@ export class VB6CompilationCache<T = any> {
       for (const [key, item] of cacheData.items) {
         this.cache.set(key, {
           ...item,
-          dependencies: new Set(item.dependencies)
+          dependencies: new Set(item.dependencies),
         });
       }
 
@@ -843,7 +854,6 @@ export class VB6CompilationCache<T = any> {
 
       // Restore metrics
       this.metrics = { ...this.metrics, ...cacheData.metrics };
-
     } catch (error) {
       console.warn('Failed to load cache from persistence:', error);
       this.clearPersistence();
@@ -868,7 +878,7 @@ export const compilationCache = new VB6CompilationCache({
   maxItems: 5000,
   enableCompression: true,
   enablePersistence: true,
-  persistenceKey: 'vb6_compilation_cache_v2'
+  persistenceKey: 'vb6_compilation_cache_v2',
 });
 
 // Export types

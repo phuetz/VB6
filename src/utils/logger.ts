@@ -48,7 +48,7 @@ class Logger {
    */
   public debug(message: string, ...args: unknown[]): void {
     if (this.logLevel <= LogLevel.DEBUG) {
-      console.log(`[DEBUG] ${message}`, ...args);
+      // noop
     }
   }
 

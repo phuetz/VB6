@@ -12,13 +12,13 @@ import { useVB6Store } from '../../stores/vb6Store';
 export enum DataComboStyle {
   dbcDropdownCombo = 0,
   dbcSimpleCombo = 1,
-  dbcDropdownList = 2
+  dbcDropdownList = 2,
 }
 
 export enum DataComboMatchEntry {
   dbcNoMatch = 0,
   dbcBasicMatching = 1,
-  dbcExtendedMatching = 2
+  dbcExtendedMatching = 2,
 }
 
 export interface DataRecord {
@@ -32,23 +32,23 @@ export interface DataComboProps extends VB6ControlPropsEnhanced {
   listField?: string; // Field to display in list
   boundColumn?: string; // Column to return as value
   rowSource?: DataRecord[]; // Static data source
-  
+
   // Display properties
   style?: DataComboStyle;
   matchEntry?: DataComboMatchEntry;
   maxLength?: number;
-  
+
   // List properties
   listRows?: number; // Number of visible rows in dropdown
   sorted?: boolean;
   integralHeight?: boolean;
-  
+
   // Visual properties
   backColor?: string;
   foreColor?: string;
   font?: any;
   locked?: boolean;
-  
+
   // Events
   onSelectionChange?: (selectedValue: any, selectedText: string) => void;
   onDataChange?: (value: any) => void;
@@ -101,7 +101,7 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
   const [allData, setAllData] = useState<DataRecord[]>([]);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [searchText, setSearchText] = useState<string>('');
-  
+
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { fireEvent, updateControl } = useVB6Store();
@@ -115,15 +115,15 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
         const record = allData[0];
         const value = boundColumn ? record[boundColumn] : record[Object.keys(record)[0]];
         const text = listField ? record[listField] : String(value);
-        
+
         setCurrentValue(value);
         setDisplayText(text);
-        
+
         updateControl(id, 'Value', value);
         updateControl(id, 'Text', text);
         onSelectionChange?.(value, text);
         fireEvent(name, 'Change', { value, text });
-        
+
         return true;
       }
       return false;
@@ -136,15 +136,15 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
         const record = allData[newIndex];
         const value = boundColumn ? record[boundColumn] : record[Object.keys(record)[0]];
         const text = listField ? record[listField] : String(value);
-        
+
         setCurrentValue(value);
         setDisplayText(text);
-        
+
         updateControl(id, 'Value', value);
         updateControl(id, 'Text', text);
         onSelectionChange?.(value, text);
         fireEvent(name, 'Change', { value, text });
-        
+
         return true;
       }
       return false;
@@ -157,15 +157,15 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
         const record = allData[newIndex];
         const value = boundColumn ? record[boundColumn] : record[Object.keys(record)[0]];
         const text = listField ? record[listField] : String(value);
-        
+
         setCurrentValue(value);
         setDisplayText(text);
-        
+
         updateControl(id, 'Value', value);
         updateControl(id, 'Text', text);
         onSelectionChange?.(value, text);
         fireEvent(name, 'Change', { value, text });
-        
+
         return true;
       }
       return false;
@@ -178,15 +178,15 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
         const record = allData[lastIndex];
         const value = boundColumn ? record[boundColumn] : record[Object.keys(record)[0]];
         const text = listField ? record[listField] : String(value);
-        
+
         setCurrentValue(value);
         setDisplayText(text);
-        
+
         updateControl(id, 'Value', value);
         updateControl(id, 'Text', text);
         onSelectionChange?.(value, text);
         fireEvent(name, 'Change', { value, text });
-        
+
         return true;
       }
       return false;
@@ -197,17 +197,17 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
       const newRecord: DataRecord = {};
       const displayField = listField || 'text';
       const valueField = boundColumn || 'value';
-      
+
       newRecord[displayField] = item;
       newRecord[valueField] = item;
-      
+
       const newData = [...allData];
       if (index !== undefined && index >= 0 && index <= newData.length) {
         newData.splice(index, 0, newRecord);
       } else {
         newData.push(newRecord);
       }
-      
+
       setAllData(newData);
       updateFilteredData(newData, searchText);
     },
@@ -218,7 +218,7 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
         newData.splice(index, 1);
         setAllData(newData);
         updateFilteredData(newData, searchText);
-        
+
         // Adjust selected index if necessary
         if (selectedIndex >= newData.length) {
           setSelectedIndex(newData.length - 1);
@@ -238,7 +238,7 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
     // Search methods
     FindItem: (searchStr: string, startIndex: number = 0): number => {
       const displayField = listField || Object.keys(allData[0] || {})[0];
-      
+
       for (let i = startIndex; i < allData.length; i++) {
         const itemText = String(allData[i][displayField] || '').toLowerCase();
         if (itemText.includes(searchStr.toLowerCase())) {
@@ -259,10 +259,10 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
         const record = allData[index];
         const value = boundColumn ? record[boundColumn] : record[Object.keys(record)[0]];
         const text = listField ? record[listField] : String(value);
-        
+
         setCurrentValue(value);
         setDisplayText(text);
-        
+
         updateControl(id, 'Value', value);
         updateControl(id, 'Text', text);
         onSelectionChange?.(value, text);
@@ -289,14 +289,16 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
     },
 
     // Properties
-    get Value() { return currentValue; },
+    get Value() {
+      return currentValue;
+    },
     set Value(value: any) {
       setCurrentValue(value);
-      
+
       // Find matching record
       const valueField = boundColumn || Object.keys(allData[0] || {})[0];
       const matchIndex = allData.findIndex(record => record[valueField] === value);
-      
+
       if (matchIndex >= 0) {
         setSelectedIndex(matchIndex);
         const record = allData[matchIndex];
@@ -305,15 +307,17 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
       } else {
         setDisplayText(String(value));
       }
-      
+
       updateControl(id, 'Value', value);
       onDataChange?.(value);
     },
 
-    get Text() { return displayText; },
+    get Text() {
+      return displayText;
+    },
     set Text(text: string) {
       setDisplayText(text);
-      
+
       // In editable combo, update the value as well
       if (style === DataComboStyle.dbcDropdownCombo || style === DataComboStyle.dbcSimpleCombo) {
         setCurrentValue(text);
@@ -322,7 +326,9 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
       }
     },
 
-    get ListIndex() { return selectedIndex; },
+    get ListIndex() {
+      return selectedIndex;
+    },
     set ListIndex(index: number) {
       if (index >= -1 && index < allData.length) {
         setSelectedIndex(index);
@@ -330,18 +336,20 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
           const record = allData[index];
           const value = boundColumn ? record[boundColumn] : record[Object.keys(record)[0]];
           const text = listField ? record[listField] : String(value);
-          
+
           setCurrentValue(value);
           setDisplayText(text);
-          
+
           updateControl(id, 'Value', value);
           updateControl(id, 'Text', text);
         }
       }
     },
 
-    get ListCount() { return allData.length; },
-    
+    get ListCount() {
+      return allData.length;
+    },
+
     get BoundText() {
       if (selectedIndex >= 0 && boundColumn) {
         return String(allData[selectedIndex][boundColumn] || '');
@@ -366,13 +374,13 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
         return record[valueField];
       }
       return null;
-    }
+    },
   };
 
   // Load data from various sources
   const loadDataFromSource = useCallback(() => {
     let data: DataRecord[] = [];
-    
+
     if (rowSource && Array.isArray(rowSource)) {
       data = [...rowSource];
     } else if (dataSource) {
@@ -385,7 +393,7 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
         data = dataSource.getData();
       }
     }
-    
+
     // Sort if required
     if (sorted && data.length > 0) {
       const displayField = listField || Object.keys(data[0])[0];
@@ -395,127 +403,136 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
         return aVal.localeCompare(bVal);
       });
     }
-    
+
     setAllData(data);
     setFilteredData(data);
-    
   }, [dataSource, rowSource, listField, sorted]);
 
   // Update filtered data based on search
-  const updateFilteredData = useCallback((data: DataRecord[], search: string) => {
-    if (!search) {
-      setFilteredData(data);
-      return;
-    }
-    
-    const displayField = listField || Object.keys(data[0] || {})[0];
-    const filtered = data.filter(record => {
-      const text = String(record[displayField] || '').toLowerCase();
-      if (matchEntry === DataComboMatchEntry.dbcExtendedMatching) {
-        return text.includes(search.toLowerCase());
-      } else {
-        return text.startsWith(search.toLowerCase());
+  const updateFilteredData = useCallback(
+    (data: DataRecord[], search: string) => {
+      if (!search) {
+        setFilteredData(data);
+        return;
       }
-    });
-    
-    setFilteredData(filtered);
-  }, [listField, matchEntry]);
+
+      const displayField = listField || Object.keys(data[0] || {})[0];
+      const filtered = data.filter(record => {
+        const text = String(record[displayField] || '').toLowerCase();
+        if (matchEntry === DataComboMatchEntry.dbcExtendedMatching) {
+          return text.includes(search.toLowerCase());
+        } else {
+          return text.startsWith(search.toLowerCase());
+        }
+      });
+
+      setFilteredData(filtered);
+    },
+    [listField, matchEntry]
+  );
 
   // Handle input changes
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    
-    if (maxLength > 0 && value.length > maxLength) {
-      return;
-    }
-    
-    setDisplayText(value);
-    setSearchText(value);
-    setIsEditing(true);
-    
-    if (style !== DataComboStyle.dbcDropdownList) {
-      setCurrentValue(value);
-      updateControl(id, 'Value', value);
-      onDataChange?.(value);
-    }
-    
-    // Filter data based on input
-    updateFilteredData(allData, value);
-    
-    // Auto-open dropdown if typing and matching enabled
-    if (matchEntry !== DataComboMatchEntry.dbcNoMatch && value.length > 0) {
-      setIsOpen(true);
-    }
-    
-  }, [maxLength, style, id, updateControl, onDataChange, allData, matchEntry, updateFilteredData]);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+
+      if (maxLength > 0 && value.length > maxLength) {
+        return;
+      }
+
+      setDisplayText(value);
+      setSearchText(value);
+      setIsEditing(true);
+
+      if (style !== DataComboStyle.dbcDropdownList) {
+        setCurrentValue(value);
+        updateControl(id, 'Value', value);
+        onDataChange?.(value);
+      }
+
+      // Filter data based on input
+      updateFilteredData(allData, value);
+
+      // Auto-open dropdown if typing and matching enabled
+      if (matchEntry !== DataComboMatchEntry.dbcNoMatch && value.length > 0) {
+        setIsOpen(true);
+      }
+    },
+    [maxLength, style, id, updateControl, onDataChange, allData, matchEntry, updateFilteredData]
+  );
 
   // Handle selection from dropdown
-  const handleSelection = useCallback((record: DataRecord, index: number) => {
-    const value = boundColumn ? record[boundColumn] : record[Object.keys(record)[0]];
-    const text = listField ? record[listField] : String(value);
-    
-    setCurrentValue(value);
-    setDisplayText(text);
-    setSelectedIndex(allData.indexOf(record));
-    setIsOpen(false);
-    setIsEditing(false);
-    setSearchText('');
-    
-    updateControl(id, 'Value', value);
-    updateControl(id, 'Text', text);
-    updateControl(id, 'ListIndex', allData.indexOf(record));
-    
-    onSelectionChange?.(value, text);
-    fireEvent(name, 'Change', { value, text });
-    
-  }, [boundColumn, listField, allData, id, updateControl, onSelectionChange, fireEvent, name]);
+  const handleSelection = useCallback(
+    (record: DataRecord, index: number) => {
+      const value = boundColumn ? record[boundColumn] : record[Object.keys(record)[0]];
+      const text = listField ? record[listField] : String(value);
+
+      setCurrentValue(value);
+      setDisplayText(text);
+      setSelectedIndex(allData.indexOf(record));
+      setIsOpen(false);
+      setIsEditing(false);
+      setSearchText('');
+
+      updateControl(id, 'Value', value);
+      updateControl(id, 'Text', text);
+      updateControl(id, 'ListIndex', allData.indexOf(record));
+
+      onSelectionChange?.(value, text);
+      fireEvent(name, 'Change', { value, text });
+    },
+    [boundColumn, listField, allData, id, updateControl, onSelectionChange, fireEvent, name]
+  );
 
   // Handle keyboard navigation
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (!enabled) return;
-    
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        if (!isOpen) {
-          setIsOpen(true);
-        } else if (selectedIndex < filteredData.length - 1) {
-          const newIndex = selectedIndex + 1;
-          const record = filteredData[newIndex];
-          handleSelection(record, newIndex);
-        }
-        break;
-        
-      case 'ArrowUp':
-        e.preventDefault();
-        if (isOpen && selectedIndex > 0) {
-          const newIndex = selectedIndex - 1;
-          const record = filteredData[newIndex];
-          handleSelection(record, newIndex);
-        }
-        break;
-        
-      case 'Enter':
-        e.preventDefault();
-        if (isOpen && selectedIndex >= 0) {
-          const record = filteredData[selectedIndex];
-          handleSelection(record, selectedIndex);
-        }
-        setIsOpen(false);
-        break;
-        
-      case 'Escape':
-        e.preventDefault();
-        setIsOpen(false);
-        setIsEditing(false);
-        // Restore original text
-        break;
-        
-      case 'Tab':
-        setIsOpen(false);
-        break;
-    }
-  }, [enabled, isOpen, selectedIndex, filteredData, handleSelection]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!enabled) return;
+
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          if (!isOpen) {
+            setIsOpen(true);
+          } else if (selectedIndex < filteredData.length - 1) {
+            const newIndex = selectedIndex + 1;
+            const record = filteredData[newIndex];
+            handleSelection(record, newIndex);
+          }
+          break;
+
+        case 'ArrowUp':
+          e.preventDefault();
+          if (isOpen && selectedIndex > 0) {
+            const newIndex = selectedIndex - 1;
+            const record = filteredData[newIndex];
+            handleSelection(record, newIndex);
+          }
+          break;
+
+        case 'Enter':
+          e.preventDefault();
+          if (isOpen && selectedIndex >= 0) {
+            const record = filteredData[selectedIndex];
+            handleSelection(record, selectedIndex);
+          }
+          setIsOpen(false);
+          break;
+
+        case 'Escape':
+          e.preventDefault();
+          setIsOpen(false);
+          setIsEditing(false);
+          // Restore original text
+          break;
+
+        case 'Tab':
+          setIsOpen(false);
+          break;
+      }
+    },
+    [enabled, isOpen, selectedIndex, filteredData, handleSelection]
+  );
 
   // Load data on mount and when dependencies change
   useEffect(() => {
@@ -566,7 +583,7 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
     height: style === DataComboStyle.dbcSimpleCombo ? Math.max(height, 100) : height,
     fontFamily: font.name,
     fontSize: `${font.size}pt`,
-    opacity: enabled ? 1 : 0.5
+    opacity: enabled ? 1 : 0.5,
   };
 
   const inputStyle: React.CSSProperties = {
@@ -579,7 +596,7 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
     fontSize: 'inherit',
     fontFamily: 'inherit',
     outline: 'none',
-    cursor: enabled ? 'text' : 'default'
+    cursor: enabled ? 'text' : 'default',
   };
 
   const dropdownButtonStyle: React.CSSProperties = {
@@ -594,7 +611,7 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '8px'
+    fontSize: '8px',
   };
 
   const dropdownStyle: React.CSSProperties = {
@@ -607,7 +624,7 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
     border: '1px solid #808080',
     boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
     zIndex: 1000,
-    overflow: 'auto'
+    overflow: 'auto',
   };
 
   const listItemStyle = (isSelected: boolean): React.CSSProperties => ({
@@ -616,7 +633,7 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
     backgroundColor: isSelected ? '#316AC5' : 'transparent',
     color: isSelected ? '#FFFFFF' : foreColor,
     fontSize: 'inherit',
-    fontFamily: 'inherit'
+    fontFamily: 'inherit',
   });
 
   return (
@@ -633,7 +650,13 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
       }}
       {...rest}
     >
-      <div style={{ position: 'relative', width: '100%', height: style === DataComboStyle.dbcSimpleCombo ? 21 : '100%' }}>
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: style === DataComboStyle.dbcSimpleCombo ? 21 : '100%',
+        }}
+      >
         <input
           ref={inputRef}
           type="text"
@@ -653,7 +676,7 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
           style={inputStyle}
           maxLength={maxLength > 0 ? maxLength : undefined}
         />
-        
+
         {style !== DataComboStyle.dbcSimpleCombo && (
           <button
             style={dropdownButtonStyle}
@@ -664,24 +687,26 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
             ▼
           </button>
         )}
-        
+
         {isOpen && (
           <div ref={dropdownRef} style={dropdownStyle}>
             {filteredData.map((record, index) => {
-              const displayValue = listField ? record[listField] : String(record[Object.keys(record)[0]] || '');
+              const displayValue = listField
+                ? record[listField]
+                : String(record[Object.keys(record)[0]] || '');
               const isItemSelected = allData.indexOf(record) === selectedIndex;
-              
+
               return (
                 <div
                   key={index}
                   style={listItemStyle(isItemSelected)}
                   onClick={() => handleSelection(record, index)}
-                  onMouseEnter={(e) => {
+                  onMouseEnter={e => {
                     if (!isItemSelected) {
                       e.currentTarget.style.backgroundColor = '#E0E0E0';
                     }
                   }}
-                  onMouseLeave={(e) => {
+                  onMouseLeave={e => {
                     if (!isItemSelected) {
                       e.currentTarget.style.backgroundColor = 'transparent';
                     }
@@ -691,7 +716,7 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
                 </div>
               );
             })}
-            
+
             {filteredData.length === 0 && searchText && (
               <div style={{ padding: '4px', color: '#808080', fontStyle: 'italic' }}>
                 No matches found
@@ -700,23 +725,27 @@ export const DataComboControl = forwardRef<HTMLDivElement, DataComboProps>((prop
           </div>
         )}
       </div>
-      
+
       {/* Simple combo list area */}
       {style === DataComboStyle.dbcSimpleCombo && (
-        <div style={{
-          position: 'absolute',
-          top: 21,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: backColor,
-          border: '2px inset #C0C0C0',
-          overflow: 'auto'
-        }}>
+        <div
+          style={{
+            position: 'absolute',
+            top: 21,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: backColor,
+            border: '2px inset #C0C0C0',
+            overflow: 'auto',
+          }}
+        >
           {filteredData.map((record, index) => {
-            const displayValue = listField ? record[listField] : String(record[Object.keys(record)[0]] || '');
+            const displayValue = listField
+              ? record[listField]
+              : String(record[Object.keys(record)[0]] || '');
             const isItemSelected = allData.indexOf(record) === selectedIndex;
-            
+
             return (
               <div
                 key={index}
@@ -761,7 +790,7 @@ export const getDataComboControlDefaults = (id: number) => ({
   locked: false,
   visible: true,
   enabled: true,
-  tabIndex: id
+  tabIndex: id,
 });
 
 export default DataComboControl;

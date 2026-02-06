@@ -22,17 +22,19 @@ class ControlArrayManager {
     this.performMemoryLayoutJitter();
 
     const existingArray = this.controlArrays.get(arrayName);
-    
+
     if (existingArray) {
       // Vérifier si on dépasse la limite VB6
       if (existingArray.members.length >= this.maxArraySize) {
-        throw new Error(`Control array '${arrayName}' has reached maximum size (${this.maxArraySize})`);
+        throw new Error(
+          `Control array '${arrayName}' has reached maximum size (${this.maxArraySize})`
+        );
       }
-      
+
       // Trouver le prochain index disponible
       const usedIndices = existingArray.members.map(m => m.index || 0);
       const nextIndex = this.findNextAvailableIndex(usedIndices);
-      
+
       const newControl: Control = {
         ...baseControl,
         id: Date.now(),
@@ -43,9 +45,9 @@ class ControlArrayManager {
         // Hériter des propriétés communes du tableau
         ...this.getCommonProperties(existingArray.members),
       };
-      
+
       existingArray.members.push(newControl);
-      
+
       return [...controls, newControl];
     } else {
       // Créer un nouveau tableau
@@ -57,13 +59,13 @@ class ControlArrayManager {
         index: 0,
         isArray: true,
       };
-      
+
       this.controlArrays.set(arrayName, {
         name: arrayName,
         members: [newControl],
         baseProperties: this.extractBaseProperties(baseControl),
       });
-      
+
       return [...controls, newControl];
     }
   }
@@ -73,13 +75,13 @@ class ControlArrayManager {
    */
   private static findNextAvailableIndex(usedIndices: number[]): number {
     const sortedIndices = usedIndices.sort((a, b) => a - b);
-    
+
     for (let i = 0; i < sortedIndices.length; i++) {
       if (sortedIndices[i] !== i) {
         return i;
       }
     }
-    
+
     return sortedIndices.length;
   }
 
@@ -96,29 +98,36 @@ class ControlArrayManager {
    */
   private static getCommonProperties(members: Control[]): Record<string, any> {
     if (members.length === 0) return {};
-    
+
     const commonProps: Record<string, any> = {};
     const firstMember = members[0];
-    
+
     // Propriétés qui doivent être communes à tous les membres d'un tableau
     const sharedProperties = [
-      'type', 'width', 'height', 'visible', 'enabled', 
-      'fontSize', 'fontFamily', 'color', 'backgroundColor'
+      'type',
+      'width',
+      'height',
+      'visible',
+      'enabled',
+      'fontSize',
+      'fontFamily',
+      'color',
+      'backgroundColor',
     ];
-    
+
     sharedProperties.forEach(prop => {
       if (prop in firstMember) {
         // Vérifier si la propriété est commune à tous les membres
-        const isCommon = members.every(member => 
-          member[prop as keyof Control] === firstMember[prop as keyof Control]
+        const isCommon = members.every(
+          member => member[prop as keyof Control] === firstMember[prop as keyof Control]
         );
-        
+
         if (isCommon) {
           commonProps[prop] = firstMember[prop as keyof Control];
         }
       }
     });
-    
+
     return commonProps;
   }
 
@@ -129,20 +138,20 @@ class ControlArrayManager {
     if (!control.isArray || !control.arrayName) {
       throw new Error('Control is not part of an array');
     }
-    
+
     const arrayInfo = this.controlArrays.get(control.arrayName);
     if (!arrayInfo) {
       throw new Error(`Array '${control.arrayName}' not found`);
     }
-    
+
     // Retirer le contrôle de l'info du tableau
     arrayInfo.members = arrayInfo.members.filter(m => m.id !== control.id);
-    
+
     // Si le tableau est vide, le supprimer complètement
     if (arrayInfo.members.length === 0) {
       this.controlArrays.delete(control.arrayName);
     }
-    
+
     return controls.filter(c => c.id !== control.id);
   }
 
@@ -159,7 +168,7 @@ class ControlArrayManager {
     if (!arrayInfo) {
       throw new Error(`Array '${arrayName}' not found`);
     }
-    
+
     return controls.map(control => {
       if (control.arrayName === arrayName && control.isArray) {
         return { ...control, [property]: value };
@@ -190,7 +199,7 @@ class ControlArrayManager {
     // Vérifier que le nom n'est pas déjà utilisé par un contrôle non-tableau
     const nonArrayControl = existingControls.find(c => c.name === name && !c.isArray);
     if (nonArrayControl) return false;
-    
+
     // Vérifier la syntaxe du nom (VB6 naming rules)
     const validNameRegex = /^[a-zA-Z][a-zA-Z0-9_]*$/;
     return validNameRegex.test(name);
@@ -204,48 +213,41 @@ class ControlArrayManager {
     if (!arrayInfo) {
       throw new Error(`Array '${arrayName}' not found`);
     }
-    
+
     // Trier les membres par index actuel
     const sortedMembers = arrayInfo.members.sort((a, b) => (a.index || 0) - (b.index || 0));
-    
+
     // Réassigner les indices de manière continue
     const updatedControls = controls.map(control => {
       if (control.arrayName === arrayName && control.isArray) {
         const memberIndex = sortedMembers.findIndex(m => m.id === control.id);
         const newIndex = memberIndex;
         const newName = `${arrayName}(${newIndex})`;
-        
+
         return { ...control, index: newIndex, name: newName };
       }
       return control;
     });
-    
+
     // Mettre à jour l'info du tableau
     arrayInfo.members = sortedMembers.map((member, index) => ({
       ...member,
       index,
       name: `${arrayName}(${index})`,
     }));
-    
+
     return updatedControls;
   }
 
   /**
    * Clone un membre de tableau existant
    */
-  static cloneArrayMember(
-    sourceControl: Control,
-    controls: Control[]
-  ): Control[] {
+  static cloneArrayMember(sourceControl: Control, controls: Control[]): Control[] {
     if (!sourceControl.isArray || !sourceControl.arrayName) {
       throw new Error('Source control is not part of an array');
     }
-    
-    return this.createOrAddToArray(
-      sourceControl,
-      sourceControl.arrayName,
-      controls
-    );
+
+    return this.createOrAddToArray(sourceControl, sourceControl.arrayName, controls);
   }
 
   /**
@@ -255,7 +257,7 @@ class ControlArrayManager {
     if (control.isArray) {
       throw new Error('Control is already part of an array');
     }
-    
+
     return {
       ...control,
       name: `${arrayName}(0)`,
@@ -289,11 +291,11 @@ class ControlArrayManager {
     // Create temporary allocations to randomize heap state
     const allocCount = Math.floor(Math.random() * 8) + 3; // 3-11 allocations
     const tempAllocs: any[] = [];
-    
+
     for (let i = 0; i < allocCount; i++) {
       const allocSize = Math.floor(Math.random() * 30) + 5; // 5-35 elements
       const allocation = new Array(allocSize);
-      
+
       // Fill with control-like data to match typical usage patterns
       for (let j = 0; j < allocSize; j++) {
         allocation[j] = {
@@ -306,9 +308,9 @@ class ControlArrayManager {
           height: Math.random() * 100 + 20,
         };
       }
-      
+
       tempAllocs.push(allocation);
-      
+
       // Random delay for each allocation (0-3ms)
       const delay = Math.random() * 3;
       setTimeout(() => {
@@ -320,7 +322,7 @@ class ControlArrayManager {
         }
       }, delay);
     }
-    
+
     // Schedule cleanup after 10-20ms to allow heap state changes
     const cleanupDelay = Math.random() * 10 + 10;
     setTimeout(() => {

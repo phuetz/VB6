@@ -1,7 +1,7 @@
 /**
  * VB6 JavaScript Generator - Ultra-Complete Implementation
  * Generates optimized JavaScript code from VB6 AST
- * 
+ *
  * Features:
  * - Direct AST to JavaScript generation
  * - Modern JavaScript optimizations
@@ -13,7 +13,13 @@
  * - Memory optimization
  */
 
-import { VB6ModuleAST, VB6Procedure, VB6Variable, VB6Parameter, VB6Property } from '../utils/vb6Parser';
+import {
+  VB6ModuleAST,
+  VB6Procedure,
+  VB6Variable,
+  VB6Parameter,
+  VB6Property,
+} from '../utils/vb6Parser';
 
 export interface JSGenerationOptions {
   useES6Classes?: boolean;
@@ -54,7 +60,7 @@ export class VB6JSGenerator {
       enableOptimizations: options.enableOptimizations ?? true,
       targetRuntime: options.targetRuntime ?? 'browser',
       strictMode: options.strictMode ?? true,
-      generateTypeScript: options.generateTypeScript ?? false
+      generateTypeScript: options.generateTypeScript ?? false,
     };
 
     this.metrics = {
@@ -63,7 +69,7 @@ export class VB6JSGenerator {
       classesGenerated: 0,
       optimizationsApplied: 0,
       compilationTime: 0,
-      memoryUsed: 0
+      memoryUsed: 0,
     };
 
     this.typeMap = new Map([
@@ -78,7 +84,7 @@ export class VB6JSGenerator {
       ['Variant', 'any'],
       ['Byte', 'number'],
       ['Currency', 'number'],
-      ['Decimal', 'number']
+      ['Decimal', 'number'],
     ]);
   }
 
@@ -119,7 +125,9 @@ export class VB6JSGenerator {
       return output;
     } catch (error) {
       console.error('JavaScript generation failed:', error);
-      throw new Error(`JS generation error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `JS generation error: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -184,7 +192,7 @@ export class VB6JSGenerator {
 
     if (this.options.useES6Classes) {
       output += `class ${udt.name} {\n`;
-      
+
       // Constructor
       output += '  constructor() {\n';
       for (const field of udt.fields) {
@@ -231,7 +239,7 @@ export class VB6JSGenerator {
     let output = '';
 
     const className = ast.name || 'Module1';
-    
+
     if (this.options.useES6Classes) {
       output += `class ${className} {\n`;
       this.indentLevel++;
@@ -297,7 +305,7 @@ export class VB6JSGenerator {
     if (variables.length === 0) return '';
 
     let output = this.indent('// Module Variables\n');
-    
+
     for (const variable of variables) {
       if (this.options.generateTypeScript) {
         const jsType = this.mapVB6TypeToJS(variable.varType);
@@ -368,10 +376,10 @@ export class VB6JSGenerator {
    */
   private generateProcedureBody(proc: VB6Procedure): string {
     let output = '';
-    
+
     // Parse and translate VB6 statements
     const lines = proc.body.split('\n');
-    
+
     for (let line of lines) {
       line = line.trim();
       if (line === '' || line.startsWith("'")) continue;
@@ -400,7 +408,13 @@ export class VB6JSGenerator {
     }
 
     // Assignment statements
-    if (statement.includes('=') && !statement.includes('==') && !statement.includes('<=') && !statement.includes('>=') && !statement.includes('<>')) {
+    if (
+      statement.includes('=') &&
+      !statement.includes('==') &&
+      !statement.includes('<=') &&
+      !statement.includes('>=') &&
+      !statement.includes('<>')
+    ) {
       return this.translateAssignmentStatement(statement);
     }
 
@@ -425,7 +439,10 @@ export class VB6JSGenerator {
     }
 
     // Return statements (function name assignment)
-    if (context.type === 'function' && statement.toLowerCase().startsWith(context.name.toLowerCase() + ' =')) {
+    if (
+      context.type === 'function' &&
+      statement.toLowerCase().startsWith(context.name.toLowerCase() + ' =')
+    ) {
       const value = statement.substring(context.name.length + 3).trim();
       return `this.${context.name}_result = ${this.translateExpression(value)};`;
     }
@@ -462,7 +479,10 @@ export class VB6JSGenerator {
     }
 
     // Print/Debug.Print
-    if (statement.toLowerCase().startsWith('debug.print ') || statement.toLowerCase().startsWith('print ')) {
+    if (
+      statement.toLowerCase().startsWith('debug.print ') ||
+      statement.toLowerCase().startsWith('print ')
+    ) {
       return this.translatePrintStatement(statement);
     }
 
@@ -607,7 +627,10 @@ export class VB6JSGenerator {
 
     // Handle range: Case 1 To 10
     if (lower.includes(' to ')) {
-      const [start, end] = value.toLowerCase().split(' to ').map(v => this.translateExpression(v.trim()));
+      const [start, end] = value
+        .toLowerCase()
+        .split(' to ')
+        .map(v => this.translateExpression(v.trim()));
       return `// Case ${start} To ${end} (range handling requires loop)\ncase ${start}: // Start of range`;
     }
 
@@ -658,7 +681,10 @@ export class VB6JSGenerator {
     }
 
     // Handle multiple arguments separated by ; or ,
-    const args = content.split(/[;,]/).map(a => this.translateExpression(a.trim())).filter(a => a);
+    const args = content
+      .split(/[;,]/)
+      .map(a => this.translateExpression(a.trim()))
+      .filter(a => a);
     return `console.log(${args.join(', ')});`;
   }
 
@@ -671,7 +697,7 @@ export class VB6JSGenerator {
       const varName = match[1];
       const varType = match[2];
       const defaultValue = this.getDefaultValue(varType);
-      
+
       if (this.options.generateTypeScript) {
         const jsType = this.mapVB6TypeToJS(varType);
         return `let ${varName}: ${jsType} = ${defaultValue};`;
@@ -690,7 +716,7 @@ export class VB6JSGenerator {
     if (parts.length === 2) {
       const left = parts[0].trim();
       const right = parts[1].trim();
-      
+
       // Handle object property assignment
       if (left.includes('.')) {
         return `${left} = ${this.translateExpression(right)};`;
@@ -723,7 +749,7 @@ export class VB6JSGenerator {
       const start = this.translateExpression(match[2]);
       const end = this.translateExpression(match[3]);
       const step = match[4] ? this.translateExpression(match[4]) : '1';
-      
+
       return `for (let ${variable} = ${start}; ${variable} <= ${end}; ${variable} += ${step}) {`;
     }
     return `// Invalid For statement: ${statement}`;
@@ -747,7 +773,7 @@ export class VB6JSGenerator {
   private translateFunctionCall(statement: string): string {
     // Handle VB6 built-in functions
     const builtins = ['MsgBox', 'InputBox', 'Chr', 'Asc', 'Left', 'Right', 'Mid', 'Len', 'InStr'];
-    
+
     for (const builtin of builtins) {
       if (statement.toLowerCase().includes(builtin.toLowerCase())) {
         return `VB6.${builtin}${statement.substring(statement.indexOf('('))};`;
@@ -857,14 +883,16 @@ export class VB6JSGenerator {
    * Generate parameter list for function signature
    */
   private generateParameterList(params: VB6Parameter[], includeTypes: boolean): string {
-    return params.map(param => {
-      const cleanName = param.name.replace(/^ByRef |^ByVal /, '');
-      if (includeTypes && this.options.generateTypeScript) {
-        const jsType = this.mapVB6TypeToJS(param.type);
-        return `${cleanName}: ${jsType}`;
-      }
-      return cleanName;
-    }).join(', ');
+    return params
+      .map(param => {
+        const cleanName = param.name.replace(/^ByRef |^ByVal /, '');
+        if (includeTypes && this.options.generateTypeScript) {
+          const jsType = this.mapVB6TypeToJS(param.type);
+          return `${cleanName}: ${jsType}`;
+        }
+        return cleanName;
+      })
+      .join(', ');
   }
 
   /**
@@ -906,7 +934,7 @@ export class VB6JSGenerator {
       // Remove empty lines and single-line comments
       return trimmed !== '' && !trimmed.startsWith('//');
     });
-    
+
     return filteredLines.join('\n');
   }
 
@@ -918,7 +946,7 @@ export class VB6JSGenerator {
     code = code.replace(/(\d+)\s*\+\s*(\d+)/g, (match, a, b) => String(Number(a) + Number(b)));
     code = code.replace(/(\d+)\s*-\s*(\d+)/g, (match, a, b) => String(Number(a) - Number(b)));
     code = code.replace(/(\d+)\s*\*\s*(\d+)/g, (match, a, b) => String(Number(a) * Number(b)));
-    
+
     return code;
   }
 
@@ -948,7 +976,7 @@ export class VB6JSGenerator {
 
     // Export statements
     output += '// Module exports\n';
-    
+
     if (this.options.generateSourceMaps) {
       output += '\n// Source map\n';
       output += `//# sourceMappingURL=data:application/json;base64,${btoa(JSON.stringify(this.sourceMap))}\n`;
@@ -971,9 +999,10 @@ export class VB6JSGenerator {
 
   private getDefaultValue(type: string | null): string {
     if (!type) return 'null';
-    
+
     switch (type.toLowerCase()) {
-      case 'string': return '""';
+      case 'string':
+        return '""';
       case 'integer':
       case 'long':
       case 'single':
@@ -982,8 +1011,10 @@ export class VB6JSGenerator {
       case 'currency':
       case 'decimal':
         return '0';
-      case 'boolean': return 'false';
-      case 'date': return 'new Date()';
+      case 'boolean':
+        return 'false';
+      case 'date':
+        return 'new Date()';
       case 'object':
       case 'variant':
       default:

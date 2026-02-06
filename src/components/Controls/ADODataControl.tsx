@@ -12,10 +12,10 @@ interface ADORecord {
   [key: string]: any;
 }
 
-export const ADODataControl: React.FC<ADODataControlProps> = ({ 
-  control, 
+export const ADODataControl: React.FC<ADODataControlProps> = ({
+  control,
   isDesignMode = false,
-  onPropertyChange 
+  onPropertyChange,
 }) => {
   // VB6 ADO Data control properties
   const {
@@ -45,10 +45,30 @@ export const ADODataControl: React.FC<ADODataControlProps> = ({
 
   // ADO Recordset state
   const [records, setRecords] = useState<ADORecord[]>([
-    { CustomerID: 'ALFKI', CompanyName: 'Alfreds Futterkiste', ContactName: 'Maria Anders', Country: 'Germany' },
-    { CustomerID: 'ANATR', CompanyName: 'Ana Trujillo Emparedados', ContactName: 'Ana Trujillo', Country: 'Mexico' },
-    { CustomerID: 'ANTON', CompanyName: 'Antonio Moreno Taquería', ContactName: 'Antonio Moreno', Country: 'Mexico' },
-    { CustomerID: 'AROUT', CompanyName: 'Around the Horn', ContactName: 'Thomas Hardy', Country: 'UK' },
+    {
+      CustomerID: 'ALFKI',
+      CompanyName: 'Alfreds Futterkiste',
+      ContactName: 'Maria Anders',
+      Country: 'Germany',
+    },
+    {
+      CustomerID: 'ANATR',
+      CompanyName: 'Ana Trujillo Emparedados',
+      ContactName: 'Ana Trujillo',
+      Country: 'Mexico',
+    },
+    {
+      CustomerID: 'ANTON',
+      CompanyName: 'Antonio Moreno Taquería',
+      ContactName: 'Antonio Moreno',
+      Country: 'Mexico',
+    },
+    {
+      CustomerID: 'AROUT',
+      CompanyName: 'Around the Horn',
+      ContactName: 'Thomas Hardy',
+      Country: 'UK',
+    },
   ]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isEOF, setIsEOF] = useState(false);
@@ -64,14 +84,13 @@ export const ADODataControl: React.FC<ADODataControlProps> = ({
   // ADO Connection simulation
   useEffect(() => {
     if (!isDesignMode && connectionString) {
-      console.log(`ADO: Opening connection with: ${connectionString}`);
       setIsConnected(true);
-      
+
       // Fire ADO events
       if (window.VB6Runtime?.fireEvent) {
         window.VB6Runtime.fireEvent(control.name, 'WillConnect');
         window.VB6Runtime.fireEvent(control.name, 'ConnectComplete');
-        
+
         if (recordSource) {
           window.VB6Runtime.fireEvent(control.name, 'WillExecute');
           window.VB6Runtime.fireEvent(control.name, 'ExecuteComplete');
@@ -86,7 +105,7 @@ export const ADODataControl: React.FC<ADODataControlProps> = ({
       const oldPosition = currentIndex;
       setCurrentIndex(0);
       onPropertyChange?.('absolutePosition', 1);
-      
+
       if (window.VB6Runtime?.fireEvent) {
         window.VB6Runtime.fireEvent(control.name, 'WillMove');
         window.VB6Runtime.fireEvent(control.name, 'MoveComplete');
@@ -99,7 +118,7 @@ export const ADODataControl: React.FC<ADODataControlProps> = ({
       const newIndex = currentIndex - 1;
       setCurrentIndex(newIndex);
       onPropertyChange?.('absolutePosition', newIndex + 1);
-      
+
       if (window.VB6Runtime?.fireEvent) {
         window.VB6Runtime.fireEvent(control.name, 'WillMove');
         window.VB6Runtime.fireEvent(control.name, 'MoveComplete');
@@ -114,7 +133,7 @@ export const ADODataControl: React.FC<ADODataControlProps> = ({
       const newIndex = currentIndex + 1;
       setCurrentIndex(newIndex);
       onPropertyChange?.('absolutePosition', newIndex + 1);
-      
+
       if (window.VB6Runtime?.fireEvent) {
         window.VB6Runtime.fireEvent(control.name, 'WillMove');
         window.VB6Runtime.fireEvent(control.name, 'MoveComplete');
@@ -124,15 +143,15 @@ export const ADODataControl: React.FC<ADODataControlProps> = ({
       setCurrentIndex(records.length - 1);
     } else if (eofAction === 2) {
       // AddNew
-      const newRecord: ADORecord = { 
-        CustomerID: `NEW${records.length + 1}`, 
-        CompanyName: 'New Company', 
+      const newRecord: ADORecord = {
+        CustomerID: `NEW${records.length + 1}`,
+        CompanyName: 'New Company',
         ContactName: 'New Contact',
-        Country: 'Unknown'
+        Country: 'Unknown',
       };
       setRecords([...records, newRecord]);
       setCurrentIndex(records.length);
-      
+
       if (window.VB6Runtime?.fireEvent) {
         window.VB6Runtime.fireEvent(control.name, 'WillChangeRecord');
         window.VB6Runtime.fireEvent(control.name, 'RecordChangeComplete');
@@ -145,7 +164,7 @@ export const ADODataControl: React.FC<ADODataControlProps> = ({
       const lastIndex = records.length - 1;
       setCurrentIndex(lastIndex);
       onPropertyChange?.('absolutePosition', lastIndex + 1);
-      
+
       if (window.VB6Runtime?.fireEvent) {
         window.VB6Runtime.fireEvent(control.name, 'WillMove');
         window.VB6Runtime.fireEvent(control.name, 'MoveComplete');
@@ -200,9 +219,10 @@ export const ADODataControl: React.FC<ADODataControlProps> = ({
   };
 
   const statusDot = isConnected ? '🟢' : '🔴';
-  const recordInfo = isConnected && records.length > 0 && currentIndex < records.length
-    ? `${statusDot} ${caption} [${currentIndex + 1}/${records.length}]`
-    : `${statusDot} ${caption}`;
+  const recordInfo =
+    isConnected && records.length > 0 && currentIndex < records.length
+      ? `${statusDot} ${caption} [${currentIndex + 1}/${records.length}]`
+      : `${statusDot} ${caption}`;
 
   return (
     <>
@@ -222,7 +242,7 @@ export const ADODataControl: React.FC<ADODataControlProps> = ({
         >
           |◀
         </button>
-        
+
         {/* Move Previous Button */}
         <button
           style={buttonStyle}
@@ -232,12 +252,10 @@ export const ADODataControl: React.FC<ADODataControlProps> = ({
         >
           ◀
         </button>
-        
+
         {/* Caption/Record Info */}
-        <div style={captionStyle}>
-          {recordInfo}
-        </div>
-        
+        <div style={captionStyle}>{recordInfo}</div>
+
         {/* Move Next Button */}
         <button
           style={buttonStyle}
@@ -247,7 +265,7 @@ export const ADODataControl: React.FC<ADODataControlProps> = ({
         >
           ▶
         </button>
-        
+
         {/* Move Last Button */}
         <button
           style={buttonStyle}
@@ -258,7 +276,7 @@ export const ADODataControl: React.FC<ADODataControlProps> = ({
           ▶|
         </button>
       </div>
-      
+
       {/* Design mode indicator */}
       {isDesignMode && (
         <div
@@ -283,11 +301,11 @@ export const ADODataControlEvents = {
   WillConnect: 'WillConnect',
   ConnectComplete: 'ConnectComplete',
   Disconnect: 'Disconnect',
-  
+
   // Command Events
   WillExecute: 'WillExecute',
   ExecuteComplete: 'ExecuteComplete',
-  
+
   // Recordset Events
   WillChangeField: 'WillChangeField',
   FieldChangeComplete: 'FieldChangeComplete',
@@ -300,7 +318,7 @@ export const ADODataControlEvents = {
   RecordChangeComplete: 'RecordChangeComplete',
   WillChangeRecordset: 'WillChangeRecordset',
   RecordsetChangeComplete: 'RecordsetChangeComplete',
-  
+
   // Error Event
   InfoMessage: 'InfoMessage',
   Error: 'Error',

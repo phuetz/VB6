@@ -287,7 +287,7 @@ export class WebSocketManager {
     }
 
     const clientActiveQueries = this.activeQueries.get(client.id)!;
-    
+
     if (clientActiveQueries.size >= this.MAX_CONCURRENT_QUERIES_PER_CLIENT) {
       client.socket.emit('query_error', {
         queryId,
@@ -331,7 +331,7 @@ export class WebSocketManager {
     } finally {
       // RACE CONDITION BUG FIX: Always remove query from active set
       clientActiveQueries.delete(queryId);
-      
+
       // Clean up empty sets to prevent memory leaks
       if (clientActiveQueries.size === 0) {
         this.activeQueries.delete(client.id);
@@ -649,7 +649,7 @@ export class WebSocketManager {
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval);
     }
-    
+
     // Nettoyage toutes les 30 minutes
     this.cleanupInterval = setInterval(
       () => {

@@ -7,7 +7,7 @@ export enum SearchScope {
   AllOpenDocuments = 'open',
   EntireProject = 'project',
   ProjectGroup = 'group',
-  SelectedText = 'selection'
+  SelectedText = 'selection',
 }
 
 // Search Options
@@ -19,7 +19,7 @@ export enum SearchOptions {
   WrapAround = 0x10,
   SearchInComments = 0x20,
   SearchInStrings = 0x40,
-  PreserveCase = 0x80
+  PreserveCase = 0x80,
 }
 
 // File Type Filters
@@ -29,7 +29,7 @@ export enum FileTypeFilter {
   Forms = 'forms',
   Modules = 'modules',
   Classes = 'classes',
-  Resources = 'resources'
+  Resources = 'resources',
 }
 
 // Search Result
@@ -72,7 +72,7 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
   onNavigateToResult,
   onGetFileContent,
   onSetFileContent,
-  onGetProjectFiles
+  onGetProjectFiles,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<'find' | 'replace'>('find');
@@ -87,8 +87,12 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
   const [currentResultIndex, setCurrentResultIndex] = useState(-1);
   const [searchHistory, setSearchHistory] = useState<SearchHistoryEntry[]>([]);
   const [showHistory, setShowHistory] = useState(false);
-  const [searchStats, setSearchStats] = useState<{ files: number; matches: number; time: number }>({ files: 0, matches: 0, time: 0 });
-  
+  const [searchStats, setSearchStats] = useState<{ files: number; matches: number; time: number }>({
+    files: 0,
+    matches: 0,
+    time: 0,
+  });
+
   const searchInputRef = useRef<HTMLInputElement>(null);
   const eventEmitter = useRef(new EventEmitter());
 
@@ -110,20 +114,29 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
   }, []);
 
   // Save search history to localStorage
-  const saveToHistory = useCallback((entry: Omit<SearchHistoryEntry, 'timestamp'>) => {
-    const newEntry: SearchHistoryEntry = { ...entry, timestamp: new Date() };
-    const newHistory = [newEntry, ...searchHistory.filter(h => h.searchText !== entry.searchText).slice(0, 49)];
-    setSearchHistory(newHistory);
-    localStorage.setItem('vb6_search_history', JSON.stringify(newHistory));
-  }, [searchHistory]);
+  const saveToHistory = useCallback(
+    (entry: Omit<SearchHistoryEntry, 'timestamp'>) => {
+      const newEntry: SearchHistoryEntry = { ...entry, timestamp: new Date() };
+      const newHistory = [
+        newEntry,
+        ...searchHistory.filter(h => h.searchText !== entry.searchText).slice(0, 49),
+      ];
+      setSearchHistory(newHistory);
+      localStorage.setItem('vb6_search_history', JSON.stringify(newHistory));
+    },
+    [searchHistory]
+  );
 
   const toggleOption = useCallback((option: SearchOptions) => {
     setSearchOptions(prev => prev ^ option);
   }, []);
 
-  const hasOption = useCallback((option: SearchOptions): boolean => {
-    return (searchOptions & option) !== 0;
-  }, [searchOptions]);
+  const hasOption = useCallback(
+    (option: SearchOptions): boolean => {
+      return (searchOptions & option) !== 0;
+    },
+    [searchOptions]
+  );
 
   const escapeRegex = (str: string): string => {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -144,146 +157,164 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
       /\(.*\|.*\).*\+/, // Alternation with quantifiers
       /\(.*\|.*\).*\*/, // Alternation with quantifiers
     ];
-    
+
     return vulnerablePatterns.some(vuln => vuln.test(pattern));
   };
 
-  const buildSearchPattern = useCallback((text: string): RegExp => {
-    let pattern = text;
-    
-    if (!hasOption(SearchOptions.UseRegex)) {
-      pattern = escapeRegex(text);
-    } else {
-      // REDOS VULNERABILITY BUG FIX: Validate user-provided regex patterns
-      if (isVulnerablePattern(text)) {
-        throw new Error('Potentially dangerous regex pattern detected. Please simplify your pattern to avoid performance issues.');
+  const buildSearchPattern = useCallback(
+    (text: string): RegExp => {
+      let pattern = text;
+
+      if (!hasOption(SearchOptions.UseRegex)) {
+        pattern = escapeRegex(text);
+      } else {
+        // REDOS VULNERABILITY BUG FIX: Validate user-provided regex patterns
+        if (isVulnerablePattern(text)) {
+          throw new Error(
+            'Potentially dangerous regex pattern detected. Please simplify your pattern to avoid performance issues.'
+          );
+        }
+
+        // Additional length limit for regex patterns
+        if (text.length > 1000) {
+          throw new Error('Regex pattern too long (max 1000 characters)');
+        }
+
+        // Test regex compilation with timeout
+        try {
+          new RegExp(text);
+        } catch (error) {
+          throw new Error('Invalid regex pattern: ' + (error as Error).message);
+        }
       }
-      
-      // Additional length limit for regex patterns
-      if (text.length > 1000) {
-        throw new Error('Regex pattern too long (max 1000 characters)');
+
+      if (hasOption(SearchOptions.WholeWord)) {
+        pattern = `\\b${pattern}\\b`;
       }
-      
-      // Test regex compilation with timeout
-      try {
-        new RegExp(text);
-      } catch (error) {
-        throw new Error('Invalid regex pattern: ' + (error as Error).message);
-      }
-    }
-    
-    if (hasOption(SearchOptions.WholeWord)) {
-      pattern = `\\b${pattern}\\b`;
-    }
-    
-    const flags = hasOption(SearchOptions.CaseSensitive) ? 'g' : 'gi';
-    return new RegExp(pattern, flags);
-  }, [hasOption]);
+
+      const flags = hasOption(SearchOptions.CaseSensitive) ? 'g' : 'gi';
+      return new RegExp(pattern, flags);
+    },
+    [hasOption]
+  );
 
   // REDOS VULNERABILITY BUG FIX: Timeout mechanism for regex execution
-  const executeRegexWithTimeout = (regex: RegExp, text: string, timeoutMs: number = 100): RegExpExecArray | null => {
+  const executeRegexWithTimeout = (
+    regex: RegExp,
+    text: string,
+    timeoutMs: number = 100
+  ): RegExpExecArray | null => {
     const startTime = Date.now();
     let match: RegExpExecArray | null = null;
-    
+
     // Reset regex state
     regex.lastIndex = 0;
     match = regex.exec(text);
-    
+
     // Check if operation took too long
     if (Date.now() - startTime > timeoutMs) {
       throw new Error('Regex execution timeout - pattern may be too complex');
     }
-    
+
     return match;
   };
 
-  const searchInFile = useCallback(async (filename: string, content: string, pattern: RegExp): Promise<SearchResult[]> => {
-    const results: SearchResult[] = [];
-    const lines = content.split('\n');
-    
-    lines.forEach((line, lineIndex) => {
-      try {
-        let match;
-        const regex = new RegExp(pattern.source, pattern.flags);
-        const maxMatches = 1000; // Limit matches per line to prevent DoS
-        let matchCount = 0;
-        
-        // REDOS VULNERABILITY BUG FIX: Use timeout mechanism and limit matches
-        while ((match = executeRegexWithTimeout(regex, line, 50)) !== null && matchCount < maxMatches) {
-          matchCount++;
-          
-          // Skip matches in comments if option is set
-          if (!hasOption(SearchOptions.SearchInComments)) {
-            const beforeMatch = line.substring(0, match.index);
-            if (beforeMatch.includes("'") || beforeMatch.includes("REM ")) {
-              continue;
+  const searchInFile = useCallback(
+    async (filename: string, content: string, pattern: RegExp): Promise<SearchResult[]> => {
+      const results: SearchResult[] = [];
+      const lines = content.split('\n');
+
+      lines.forEach((line, lineIndex) => {
+        try {
+          let match;
+          const regex = new RegExp(pattern.source, pattern.flags);
+          const maxMatches = 1000; // Limit matches per line to prevent DoS
+          let matchCount = 0;
+
+          // REDOS VULNERABILITY BUG FIX: Use timeout mechanism and limit matches
+          while (
+            (match = executeRegexWithTimeout(regex, line, 50)) !== null &&
+            matchCount < maxMatches
+          ) {
+            matchCount++;
+
+            // Skip matches in comments if option is set
+            if (!hasOption(SearchOptions.SearchInComments)) {
+              const beforeMatch = line.substring(0, match.index);
+              if (beforeMatch.includes("'") || beforeMatch.includes('REM ')) {
+                continue;
+              }
+            }
+
+            // Skip matches in strings if option is set
+            if (!hasOption(SearchOptions.SearchInStrings)) {
+              const beforeMatch = line.substring(0, match.index);
+              const quoteCount = (beforeMatch.match(/"/g) || []).length;
+              if (quoteCount % 2 !== 0) {
+                continue;
+              }
+            }
+
+            results.push({
+              id: `${filename}_${lineIndex}_${match.index}`,
+              filename: filename.split('/').pop() || filename,
+              filepath: filename,
+              line: lineIndex + 1,
+              column: match.index + 1,
+              matchText: match[0],
+              lineText: line.trim(),
+              beforeText: line.substring(Math.max(0, match.index - 20), match.index),
+              afterText: line.substring(
+                match.index + match[0].length,
+                Math.min(line.length, match.index + match[0].length + 20)
+              ),
+            });
+
+            // Prevent infinite loops in global regex
+            if (regex.global && match.index === regex.lastIndex) {
+              regex.lastIndex++;
             }
           }
-        
-        // Skip matches in strings if option is set
-        if (!hasOption(SearchOptions.SearchInStrings)) {
-          const beforeMatch = line.substring(0, match.index);
-          const quoteCount = (beforeMatch.match(/"/g) || []).length;
-          if (quoteCount % 2 !== 0) {
-            continue;
-          }
+        } catch (error) {
+          // REDOS VULNERABILITY BUG FIX: Handle regex timeout and other errors gracefully
+          console.warn(`Regex error on line ${lineIndex + 1} in ${filename}:`, error);
+          // Continue with other lines instead of failing completely
         }
-        
-        results.push({
-          id: `${filename}_${lineIndex}_${match.index}`,
-          filename: filename.split('/').pop() || filename,
-          filepath: filename,
-          line: lineIndex + 1,
-          column: match.index + 1,
-          matchText: match[0],
-          lineText: line.trim(),
-          beforeText: line.substring(Math.max(0, match.index - 20), match.index),
-          afterText: line.substring(match.index + match[0].length, Math.min(line.length, match.index + match[0].length + 20))
-        });
-        
-        // Prevent infinite loops in global regex
-        if (regex.global && match.index === regex.lastIndex) {
-          regex.lastIndex++;
-        }
-      }
-    } catch (error) {
-      // REDOS VULNERABILITY BUG FIX: Handle regex timeout and other errors gracefully
-      console.warn(`Regex error on line ${lineIndex + 1} in ${filename}:`, error);
-      // Continue with other lines instead of failing completely
-    }
-    });
-    
-    return results;
-  }, [hasOption]);
+      });
+
+      return results;
+    },
+    [hasOption]
+  );
 
   const performSearch = useCallback(async () => {
     if (!searchText) return;
-    
+
     setIsSearching(true);
     setSearchResults([]);
     setSelectedResults(new Set());
     setCurrentResultIndex(-1);
-    
+
     const startTime = Date.now();
     const pattern = buildSearchPattern(searchText);
     const results: SearchResult[] = [];
     let filesSearched = 0;
-    
+
     try {
       let filesToSearch: string[] = [];
-      
+
       // Determine files to search based on scope
       switch (searchScope) {
         case SearchScope.CurrentDocument:
           // TODO: Get current document filename
           filesToSearch = ['current.vb'];
           break;
-          
+
         case SearchScope.AllOpenDocuments:
           // TODO: Get all open document filenames
           filesToSearch = ['file1.vb', 'file2.vb'];
           break;
-          
+
         case SearchScope.EntireProject:
         case SearchScope.ProjectGroup:
           if (onGetProjectFiles) {
@@ -291,7 +322,7 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
           }
           break;
       }
-      
+
       // Filter by file type
       if (fileTypeFilter !== FileTypeFilter.All) {
         filesToSearch = filesToSearch.filter(file => {
@@ -312,7 +343,7 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
           }
         });
       }
-      
+
       // Search in each file
       for (const file of filesToSearch) {
         if (onGetFileContent) {
@@ -326,124 +357,145 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
           }
         }
       }
-      
+
       setSearchResults(results);
       setSearchStats({
         files: filesSearched,
         matches: results.length,
-        time: Date.now() - startTime
+        time: Date.now() - startTime,
       });
-      
+
       // Save to history
       saveToHistory({
         searchText,
         scope: searchScope,
-        options: searchOptions
+        options: searchOptions,
       });
-      
+
       // Emit search completed event
       eventEmitter.current.emit('searchCompleted', results);
-      
     } catch (error) {
       console.error('Search error:', error);
     } finally {
       setIsSearching(false);
     }
-  }, [searchText, searchScope, searchOptions, fileTypeFilter, buildSearchPattern, searchInFile, onGetFileContent, onGetProjectFiles, saveToHistory]);
+  }, [
+    searchText,
+    searchScope,
+    searchOptions,
+    fileTypeFilter,
+    buildSearchPattern,
+    searchInFile,
+    onGetFileContent,
+    onGetProjectFiles,
+    saveToHistory,
+  ]);
 
-  const performReplace = useCallback(async (results: SearchResult[]) => {
-    if (replaceText === undefined || results.length === 0) return;
-    
-    const fileChanges = new Map<string, Array<{ result: SearchResult; newText: string }>>();
-    
-    // Group changes by file
-    results.forEach(result => {
-      let newText = replaceText;
-      
-      // Preserve case if option is set
-      if (hasOption(SearchOptions.PreserveCase)) {
-        const match = result.matchText;
-        if (match === match.toUpperCase()) {
-          newText = replaceText.toUpperCase();
-        } else if (match === match.toLowerCase()) {
-          newText = replaceText.toLowerCase();
-        } else if (match[0] === match[0].toUpperCase()) {
-          newText = replaceText[0].toUpperCase() + replaceText.slice(1).toLowerCase();
+  const performReplace = useCallback(
+    async (results: SearchResult[]) => {
+      if (replaceText === undefined || results.length === 0) return;
+
+      const fileChanges = new Map<string, Array<{ result: SearchResult; newText: string }>>();
+
+      // Group changes by file
+      results.forEach(result => {
+        let newText = replaceText;
+
+        // Preserve case if option is set
+        if (hasOption(SearchOptions.PreserveCase)) {
+          const match = result.matchText;
+          if (match === match.toUpperCase()) {
+            newText = replaceText.toUpperCase();
+          } else if (match === match.toLowerCase()) {
+            newText = replaceText.toLowerCase();
+          } else if (match[0] === match[0].toUpperCase()) {
+            newText = replaceText[0].toUpperCase() + replaceText.slice(1).toLowerCase();
+          }
         }
-      }
-      
-      if (!fileChanges.has(result.filepath)) {
-        fileChanges.set(result.filepath, []);
-      }
-      fileChanges.get(result.filepath)!.push({ result, newText });
-    });
-    
-    // Apply changes to each file
-    const replaceResults: ReplaceResult[] = [];
-    
-    for (const [filepath, changes] of fileChanges) {
-      try {
-        if (onGetFileContent && onSetFileContent) {
-          const content = await onGetFileContent(filepath);
-          let replacements = 0;
-          
-          // Sort changes by position (reverse order to avoid position shifts)
-          changes.sort((a, b) => {
-            if (a.result.line !== b.result.line) {
-              return b.result.line - a.result.line;
-            }
-            return b.result.column - a.result.column;
-          });
-          
-          // Apply replacements
-          const lines = content.split('\n');
-          changes.forEach(({ result, newText }) => {
-            const lineIndex = result.line - 1;
-            if (lineIndex >= 0 && lineIndex < lines.length) {
-              const line = lines[lineIndex];
-              const before = line.substring(0, result.column - 1);
-              const after = line.substring(result.column - 1 + result.matchText.length);
-              lines[lineIndex] = before + newText + after;
-              replacements++;
-            }
-          });
-          
-          // Save the modified content
-          await onSetFileContent(filepath, lines.join('\n'));
-          
+
+        if (!fileChanges.has(result.filepath)) {
+          fileChanges.set(result.filepath, []);
+        }
+        fileChanges.get(result.filepath)!.push({ result, newText });
+      });
+
+      // Apply changes to each file
+      const replaceResults: ReplaceResult[] = [];
+
+      for (const [filepath, changes] of fileChanges) {
+        try {
+          if (onGetFileContent && onSetFileContent) {
+            const content = await onGetFileContent(filepath);
+            let replacements = 0;
+
+            // Sort changes by position (reverse order to avoid position shifts)
+            changes.sort((a, b) => {
+              if (a.result.line !== b.result.line) {
+                return b.result.line - a.result.line;
+              }
+              return b.result.column - a.result.column;
+            });
+
+            // Apply replacements
+            const lines = content.split('\n');
+            changes.forEach(({ result, newText }) => {
+              const lineIndex = result.line - 1;
+              if (lineIndex >= 0 && lineIndex < lines.length) {
+                const line = lines[lineIndex];
+                const before = line.substring(0, result.column - 1);
+                const after = line.substring(result.column - 1 + result.matchText.length);
+                lines[lineIndex] = before + newText + after;
+                replacements++;
+              }
+            });
+
+            // Save the modified content
+            await onSetFileContent(filepath, lines.join('\n'));
+
+            replaceResults.push({
+              filename: filepath,
+              replacements,
+              errors: [],
+            });
+          }
+        } catch (error) {
           replaceResults.push({
             filename: filepath,
-            replacements,
-            errors: []
+            replacements: 0,
+            errors: [String(error)],
           });
         }
-      } catch (error) {
-        replaceResults.push({
-          filename: filepath,
-          replacements: 0,
-          errors: [String(error)]
-        });
       }
-    }
-    
-    // Update search results to reflect replacements
-    const remainingResults = searchResults.filter(r => !results.includes(r));
-    setSearchResults(remainingResults);
-    setSelectedResults(new Set());
-    
-    // Save to history
-    saveToHistory({
-      searchText,
+
+      // Update search results to reflect replacements
+      const remainingResults = searchResults.filter(r => !results.includes(r));
+      setSearchResults(remainingResults);
+      setSelectedResults(new Set());
+
+      // Save to history
+      saveToHistory({
+        searchText,
+        replaceText,
+        scope: searchScope,
+        options: searchOptions,
+      });
+
+      // Emit replace completed event
+      eventEmitter.current.emit('replaceCompleted', replaceResults);
+
+      return replaceResults;
+    },
+    [
       replaceText,
-      scope: searchScope,
-      options: searchOptions
-    });
-    
-    // Emit replace completed event
-    eventEmitter.current.emit('replaceCompleted', replaceResults);
-    
-    return replaceResults;
-  }, [replaceText, searchResults, hasOption, onGetFileContent, onSetFileContent, searchScope, searchOptions, saveToHistory]);
+      searchResults,
+      hasOption,
+      onGetFileContent,
+      onSetFileContent,
+      searchScope,
+      searchOptions,
+      saveToHistory,
+    ]
+  );
 
   const handleReplaceAll = useCallback(async () => {
     await performReplace(searchResults);
@@ -454,34 +506,37 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
     await performReplace(selected);
   }, [performReplace, searchResults, selectedResults]);
 
-  const navigateToResult = useCallback((result: SearchResult) => {
-    onNavigateToResult?.(result.filepath, result.line, result.column);
-    
-    // Update current result index
-    const index = searchResults.findIndex(r => r.id === result.id);
-    setCurrentResultIndex(index);
-  }, [searchResults, onNavigateToResult]);
+  const navigateToResult = useCallback(
+    (result: SearchResult) => {
+      onNavigateToResult?.(result.filepath, result.line, result.column);
+
+      // Update current result index
+      const index = searchResults.findIndex(r => r.id === result.id);
+      setCurrentResultIndex(index);
+    },
+    [searchResults, onNavigateToResult]
+  );
 
   const navigateToNext = useCallback(() => {
     if (searchResults.length === 0) return;
-    
+
     let nextIndex = currentResultIndex + 1;
     if (nextIndex >= searchResults.length) {
       nextIndex = hasOption(SearchOptions.WrapAround) ? 0 : searchResults.length - 1;
     }
-    
+
     setCurrentResultIndex(nextIndex);
     navigateToResult(searchResults[nextIndex]);
   }, [currentResultIndex, searchResults, hasOption, navigateToResult]);
 
   const navigateToPrevious = useCallback(() => {
     if (searchResults.length === 0) return;
-    
+
     let prevIndex = currentResultIndex - 1;
     if (prevIndex < 0) {
       prevIndex = hasOption(SearchOptions.WrapAround) ? searchResults.length - 1 : 0;
     }
-    
+
     setCurrentResultIndex(prevIndex);
     navigateToResult(searchResults[prevIndex]);
   }, [currentResultIndex, searchResults, hasOption, navigateToResult]);
@@ -520,7 +575,7 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isVisible) return;
-      
+
       if (e.key === 'Escape') {
         setIsVisible(false);
       } else if (e.key === 'Enter' && e.ctrlKey) {
@@ -534,7 +589,7 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
         }
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isVisible, performSearch, navigateToNext, navigateToPrevious]);
@@ -558,12 +613,12 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
         setActiveTab('replace');
       }
     };
-    
+
     eventEmitter.current.on('show', show);
-    
+
     // Expose the event emitter for external control
     (window as any).vb6FindReplace = eventEmitter.current;
-    
+
     return () => {
       eventEmitter.current.off('show', show);
       delete (window as any).vb6FindReplace;
@@ -602,10 +657,7 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
               </button>
             </div>
           </div>
-          <button
-            onClick={() => setIsVisible(false)}
-            className="p-1 hover:bg-gray-100 rounded"
-          >
+          <button onClick={() => setIsVisible(false)} className="p-1 hover:bg-gray-100 rounded">
             ✕
           </button>
         </div>
@@ -620,8 +672,8 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
                   ref={searchInputRef}
                   type="text"
                   value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                  onKeyDown={(e) => {
+                  onChange={e => setSearchText(e.target.value)}
+                  onKeyDown={e => {
                     if (e.key === 'Enter' && !e.ctrlKey) {
                       performSearch();
                     }
@@ -643,11 +695,13 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
           {activeTab === 'replace' && (
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Replace with:</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Replace with:
+                </label>
                 <input
                   type="text"
                   value={replaceText}
-                  onChange={(e) => setReplaceText(e.target.value)}
+                  onChange={e => setReplaceText(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                   placeholder="Enter replacement text..."
                 />
@@ -668,9 +722,7 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
                   {entry.replaceText && (
                     <div className="text-xs text-gray-500">→ {entry.replaceText}</div>
                   )}
-                  <div className="text-xs text-gray-400">
-                    {entry.timestamp.toLocaleString()}
-                  </div>
+                  <div className="text-xs text-gray-400">{entry.timestamp.toLocaleString()}</div>
                 </div>
               ))}
             </div>
@@ -682,7 +734,7 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">Search in:</label>
               <select
                 value={searchScope}
-                onChange={(e) => setSearchScope(e.target.value as SearchScope)}
+                onChange={e => setSearchScope(e.target.value as SearchScope)}
                 className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
               >
                 <option value={SearchScope.CurrentDocument}>Current Document</option>
@@ -697,7 +749,7 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">File types:</label>
               <select
                 value={fileTypeFilter}
-                onChange={(e) => setFileTypeFilter(e.target.value as FileTypeFilter)}
+                onChange={e => setFileTypeFilter(e.target.value as FileTypeFilter)}
                 className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
               >
                 <option value={FileTypeFilter.All}>All Files</option>
@@ -824,7 +876,8 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
               {/* Results Header */}
               <div className="p-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
                 <div className="text-sm text-gray-600">
-                  Found {searchStats.matches} matches in {searchStats.files} files ({searchStats.time}ms)
+                  Found {searchStats.matches} matches in {searchStats.files} files (
+                  {searchStats.time}ms)
                 </div>
                 {activeTab === 'replace' && (
                   <div className="flex gap-2">
@@ -859,7 +912,7 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
                         <input
                           type="checkbox"
                           checked={selectedResults.has(result.id)}
-                          onChange={(e) => {
+                          onChange={e => {
                             e.stopPropagation();
                             toggleResultSelection(result.id);
                           }}
@@ -869,7 +922,9 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
                       <div className="flex-1">
                         <div className="flex items-center gap-2 text-sm">
                           <span className="font-medium text-blue-600">{result.filename}</span>
-                          <span className="text-gray-500">Line {result.line}, Column {result.column}</span>
+                          <span className="text-gray-500">
+                            Line {result.line}, Column {result.column}
+                          </span>
                         </div>
                         <div className="mt-1 font-mono text-xs text-gray-700">
                           <span className="text-gray-500">{result.beforeText}</span>
@@ -899,7 +954,9 @@ export const FindReplaceManager: React.FC<FindReplaceManagerProps> = ({
         <div className="p-3 border-t border-gray-200 bg-gray-50 flex items-center justify-between text-sm text-gray-600">
           <div>
             {currentResultIndex >= 0 && searchResults.length > 0 && (
-              <span>Result {currentResultIndex + 1} of {searchResults.length}</span>
+              <span>
+                Result {currentResultIndex + 1} of {searchResults.length}
+              </span>
             )}
           </div>
           <div className="flex gap-4">

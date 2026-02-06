@@ -35,7 +35,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ visible, onClose
         id: 'new-project',
         title: 'New Project',
         category: 'File',
-        action: () => console.log('New Project'),
+        action: () => {},
         shortcut: 'Ctrl+N',
         icon: <FileText size={16} />,
         tags: ['create', 'project', 'new', 'file'],
@@ -45,7 +45,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ visible, onClose
         id: 'open-project',
         title: 'Open Project',
         category: 'File',
-        action: () => console.log('Open Project'),
+        action: () => {},
         shortcut: 'Ctrl+O',
         icon: <FileText size={16} />,
         tags: ['open', 'project', 'file'],
@@ -55,7 +55,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ visible, onClose
         id: 'save-project',
         title: 'Save Project',
         category: 'File',
-        action: () => console.log('Save Project'),
+        action: () => {},
         shortcut: 'Ctrl+S',
         icon: <FileText size={16} />,
         favorite: true,
@@ -66,7 +66,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ visible, onClose
         id: 'run-project',
         title: 'Run Project',
         category: 'Debug',
-        action: () => console.log('Run Project'),
+        action: () => {},
         shortcut: 'F5',
         icon: <Play size={16} />,
         favorite: true,
@@ -77,7 +77,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ visible, onClose
         id: 'settings',
         title: 'Open Settings',
         category: 'Tools',
-        action: () => console.log('Open Settings'),
+        action: () => {},
         icon: <Settings size={16} />,
         tags: ['settings', 'options', 'preferences'],
         description: 'Open the IDE settings',
@@ -86,7 +86,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ visible, onClose
         id: 'code-analyzer',
         title: 'Analyze Code',
         category: 'Tools',
-        action: () => console.log('Analyze Code'),
+        action: () => {},
         icon: <ArrowRight size={16} />,
         tags: ['analyze', 'lint', 'check'],
         description: 'Run code analysis on the current project',
@@ -95,7 +95,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ visible, onClose
         id: 'format-code',
         title: 'Format Code',
         category: 'Edit',
-        action: () => console.log('Format Code'),
+        action: () => {},
         shortcut: 'Shift+Alt+F',
         tags: ['format', 'beautify', 'indent'],
         description: 'Format the current document',
@@ -104,7 +104,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ visible, onClose
         id: 'toggle-breakpoint',
         title: 'Toggle Breakpoint',
         category: 'Debug',
-        action: () => console.log('Toggle Breakpoint'),
+        action: () => {},
         shortcut: 'F9',
         tags: ['debug', 'breakpoint'],
         description: 'Toggle a breakpoint on the current line',
@@ -127,17 +127,20 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ visible, onClose
   }, [searchTerm, activeView]);
 
   // Define executeCommand before using it in useEffect
-  const executeCommand = useCallback((command: CommandItem) => {
-    command.action();
+  const executeCommand = useCallback(
+    (command: CommandItem) => {
+      command.action();
 
-    // Add to recent commands
-    setRecentCommands(prev => {
-      const newRecent = prev.filter(id => id !== command.id);
-      return [command.id, ...newRecent].slice(0, 5);
-    });
+      // Add to recent commands
+      setRecentCommands(prev => {
+        const newRecent = prev.filter(id => id !== command.id);
+        return [command.id, ...newRecent].slice(0, 5);
+      });
 
-    onClose();
-  }, [onClose]);
+      onClose();
+    },
+    [onClose]
+  );
 
   // Filter commands based on search and active view
   const filteredCommands = commands.filter(cmd => {

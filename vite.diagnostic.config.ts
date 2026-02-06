@@ -21,13 +21,13 @@ export default defineConfig({
   // Pas d'optimisation complexe pour le diagnostic
   optimizeDeps: {
     exclude: [],
-    include: ['react', 'react-dom']
+    include: ['react', 'react-dom'],
   },
   build: {
     target: 'es2015',
-    outDir: 'dist'
+    outDir: 'dist',
   },
   // Logs détaillés
   logLevel: 'info',
-  clearScreen: false
+  clearScreen: false,
 });

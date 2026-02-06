@@ -37,21 +37,21 @@ export const DiagnosticDashboard: React.FC = () => {
   useEffect(() => {
     const measureFPS = (timestamp: number) => {
       frameCountRef.current++;
-      
+
       if (timestamp - lastTimeRef.current >= 1000) {
         setMetrics(prev => ({
           ...prev,
-          fps: Math.round(frameCountRef.current * 1000 / (timestamp - lastTimeRef.current))
+          fps: Math.round((frameCountRef.current * 1000) / (timestamp - lastTimeRef.current)),
         }));
         frameCountRef.current = 0;
         lastTimeRef.current = timestamp;
       }
-      
+
       animationFrameRef.current = requestAnimationFrame(measureFPS);
     };
-    
+
     animationFrameRef.current = requestAnimationFrame(measureFPS);
-    
+
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
@@ -66,7 +66,7 @@ export const DiagnosticDashboard: React.FC = () => {
         const memInfo = (performance as any).memory;
         setMetrics(prev => ({
           ...prev,
-          memory: Math.round(memInfo.usedJSHeapSize / 1048576) // Convert to MB
+          memory: Math.round(memInfo.usedJSHeapSize / 1048576), // Convert to MB
         }));
       }
     }, 1000);
@@ -136,9 +136,12 @@ export const DiagnosticDashboard: React.FC = () => {
 
   const getStatusColor = (status: 'healthy' | 'warning' | 'error') => {
     switch (status) {
-      case 'healthy': return '#4CAF50';
-      case 'warning': return '#FF9800';
-      case 'error': return '#F44336';
+      case 'healthy':
+        return '#4CAF50';
+      case 'warning':
+        return '#FF9800';
+      case 'error':
+        return '#F44336';
     }
   };
 
@@ -199,9 +202,7 @@ export const DiagnosticDashboard: React.FC = () => {
           alignItems: 'center',
         }}
       >
-        <span style={{ fontWeight: 'bold', fontSize: '14px' }}>
-          📊 Diagnostic Dashboard
-        </span>
+        <span style={{ fontWeight: 'bold', fontSize: '14px' }}>📊 Diagnostic Dashboard</span>
         <button
           onClick={() => setIsMinimized(true)}
           style={{
@@ -220,25 +221,37 @@ export const DiagnosticDashboard: React.FC = () => {
       <div style={{ padding: '15px' }}>
         <h3 style={{ margin: '0 0 10px 0', fontSize: '14px' }}>System Metrics</h3>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-          <div style={{ background: 'rgba(255, 255, 255, 0.1)', padding: '8px', borderRadius: '5px' }}>
+          <div
+            style={{ background: 'rgba(255, 255, 255, 0.1)', padding: '8px', borderRadius: '5px' }}
+          >
             <div style={{ opacity: 0.7 }}>FPS</div>
-            <div style={{ fontSize: '18px', color: getFPSColor(metrics.fps) }}>
-              {metrics.fps}
-            </div>
+            <div style={{ fontSize: '18px', color: getFPSColor(metrics.fps) }}>{metrics.fps}</div>
           </div>
           {metrics.memory && (
-            <div style={{ background: 'rgba(255, 255, 255, 0.1)', padding: '8px', borderRadius: '5px' }}>
+            <div
+              style={{
+                background: 'rgba(255, 255, 255, 0.1)',
+                padding: '8px',
+                borderRadius: '5px',
+              }}
+            >
               <div style={{ opacity: 0.7 }}>Memory</div>
               <div style={{ fontSize: '18px' }}>{metrics.memory} MB</div>
             </div>
           )}
-          <div style={{ background: 'rgba(255, 255, 255, 0.1)', padding: '8px', borderRadius: '5px' }}>
+          <div
+            style={{ background: 'rgba(255, 255, 255, 0.1)', padding: '8px', borderRadius: '5px' }}
+          >
             <div style={{ opacity: 0.7 }}>Errors</div>
-            <div style={{ fontSize: '18px', color: metrics.errorCount > 0 ? '#F44336' : '#4CAF50' }}>
+            <div
+              style={{ fontSize: '18px', color: metrics.errorCount > 0 ? '#F44336' : '#4CAF50' }}
+            >
               {metrics.errorCount}
             </div>
           </div>
-          <div style={{ background: 'rgba(255, 255, 255, 0.1)', padding: '8px', borderRadius: '5px' }}>
+          <div
+            style={{ background: 'rgba(255, 255, 255, 0.1)', padding: '8px', borderRadius: '5px' }}
+          >
             <div style={{ opacity: 0.7 }}>Components</div>
             <div style={{ fontSize: '18px' }}>{componentHealth.length}</div>
           </div>

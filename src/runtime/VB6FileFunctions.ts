@@ -1,6 +1,6 @@
 /**
  * VB6 File Functions Implementation
- * 
+ *
  * Web-compatible implementation of VB6 file I/O functions
  * Note: Many functions are simulated due to browser security restrictions
  */
@@ -13,14 +13,14 @@ export enum VB6FileMode {
   Output = 2,
   Random = 3,
   Append = 4,
-  Binary = 5
+  Binary = 5,
 }
 
 // File access types
 export enum VB6FileAccess {
   Read = 1,
   Write = 2,
-  ReadWrite = 3
+  ReadWrite = 3,
 }
 
 // File share modes
@@ -29,7 +29,7 @@ export enum VB6FileShare {
   LockReadWrite = 1,
   LockWrite = 2,
   LockRead = 3,
-  Shared = 4
+  Shared = 4,
 }
 
 interface VB6FileHandle {
@@ -59,9 +59,15 @@ class VB6FileSystem {
 
   constructor() {
     // Initialize with some virtual files for demonstration
-    this.virtualFileSystem.set('C:\\AUTOEXEC.BAT', '@echo off\npath=C:\\WINDOWS;C:\\WINDOWS\\SYSTEM');
+    this.virtualFileSystem.set(
+      'C:\\AUTOEXEC.BAT',
+      '@echo off\npath=C:\\WINDOWS;C:\\WINDOWS\\SYSTEM'
+    );
     this.virtualFileSystem.set('C:\\CONFIG.SYS', 'FILES=30\nBUFFERS=15');
-    this.virtualFileSystem.set('C:\\WINDOWS\\WIN.INI', '[Desktop]\nWallpaper=C:\\WINDOWS\\SETUP.BMP');
+    this.virtualFileSystem.set(
+      'C:\\WINDOWS\\WIN.INI',
+      '[Desktop]\nWallpaper=C:\\WINDOWS\\SETUP.BMP'
+    );
   }
 
   /**
@@ -75,7 +81,7 @@ class VB6FileSystem {
     recordLength: number = 128
   ): number {
     const fileNumber = this.nextFileNumber++;
-    
+
     // Check if file exists for input mode
     if (mode === VB6FileMode.Input && !this.virtualFileSystem.has(fileName)) {
       errorHandler.raiseError(53, 'File not found', 'VB6FileSystem');
@@ -97,7 +103,7 @@ class VB6FileSystem {
       recordLength,
       isOpen: true,
       access,
-      share
+      share,
     };
 
     this.openFiles.set(fileNumber, fileHandle);
@@ -115,9 +121,11 @@ class VB6FileSystem {
     }
 
     // Save content to virtual file system if it was modified
-    if (fileHandle.mode === VB6FileMode.Output || 
-        fileHandle.mode === VB6FileMode.Append || 
-        fileHandle.mode === VB6FileMode.Random) {
+    if (
+      fileHandle.mode === VB6FileMode.Output ||
+      fileHandle.mode === VB6FileMode.Append ||
+      fileHandle.mode === VB6FileMode.Random
+    ) {
       this.virtualFileSystem.set(fileHandle.fileName, fileHandle.content);
     }
 
@@ -202,7 +210,7 @@ class VB6FileSystem {
     const startPos = fileHandle.position;
     const content = fileHandle.content;
     let endPos = content.indexOf('\n', startPos);
-    
+
     if (endPos === -1) {
       endPos = content.length;
     }
@@ -226,7 +234,7 @@ class VB6FileSystem {
     const startPos = fileHandle.position;
     const endPos = Math.min(startPos + length, fileHandle.content.length);
     const data = fileHandle.content.substring(startPos, endPos);
-    
+
     fileHandle.position = endPos;
     return data;
   }
@@ -277,20 +285,20 @@ class VB6FileSystem {
    */
   getDirectoryListing(path: string, pattern: string = '*.*'): string[] {
     const files: string[] = [];
-    
+
     // Simulate some common files
     if (path.toUpperCase().includes('C:\\WINDOWS')) {
       files.push('WIN.INI', 'SYSTEM.INI', 'NOTEPAD.EXE', 'CALC.EXE');
     } else if (path.toUpperCase().includes('C:\\')) {
       files.push('AUTOEXEC.BAT', 'CONFIG.SYS', 'WINDOWS', 'TEMP');
     }
-    
+
     // Filter by pattern (simplified)
     if (pattern !== '*.*') {
       const regex = new RegExp(pattern.replace(/\*/g, '.*').replace(/\?/g, '.'), 'i');
       return files.filter(file => regex.test(file));
     }
-    
+
     return files;
   }
 
@@ -299,7 +307,6 @@ class VB6FileSystem {
    */
   createDirectory(path: string): void {
     // Simulate directory creation
-    console.log(`Virtual directory created: ${path}`);
   }
 
   /**
@@ -307,7 +314,6 @@ class VB6FileSystem {
    */
   removeDirectory(path: string): void {
     // Simulate directory removal
-    console.log(`Virtual directory removed: ${path}`);
   }
 
   /**
@@ -330,7 +336,7 @@ class VB6FileSystem {
       errorHandler.raiseError(53, 'File not found', 'VB6FileSystem');
       return;
     }
-    
+
     this.virtualFileSystem.set(destination, content);
   }
 
@@ -341,7 +347,7 @@ class VB6FileSystem {
     if (this.virtualFileSystem.has(fileName)) {
       return 0; // Normal file
     }
-    
+
     errorHandler.raiseError(53, 'File not found', 'VB6FileSystem');
     return 0;
   }
@@ -380,7 +386,7 @@ export function Open(
     share || VB6FileShare.Default,
     recordLength || 128
   );
-  
+
   if (actualFileNum !== fileNumber) {
     // In real VB6, you specify the file number
     // Here we just ensure it's opened
@@ -460,12 +466,14 @@ export function Print(fileNumber: number, ...data: any[]): void {
  * Write to file (Write #)
  */
 export function Write(fileNumber: number, ...data: any[]): void {
-  const output = data.map(item => {
-    if (typeof item === 'string') {
-      return `"${item}"`;
-    }
-    return String(item);
-  }).join(',');
+  const output = data
+    .map(item => {
+      if (typeof item === 'string') {
+        return `"${item}"`;
+      }
+      return String(item);
+    })
+    .join(',');
   fileSystem.writeLine(fileNumber, output);
 }
 
@@ -478,7 +486,7 @@ export function Get(fileNumber: number, recordNumber?: number, variable?: any): 
   if (position !== undefined) {
     fileSystem.seekFile(fileNumber, position);
   }
-  
+
   return fileSystem.readChars(fileNumber, 128);
 }
 
@@ -491,7 +499,7 @@ export function Put(fileNumber: number, recordNumber?: number, data?: any): void
   if (position !== undefined) {
     fileSystem.seekFile(fileNumber, position);
   }
-  
+
   fileSystem.writeToFile(fileNumber, String(data));
 }
 
@@ -522,7 +530,6 @@ export function RmDir(path: string): void {
  */
 export function ChDir(path: string): void {
   // Simulate directory change
-  console.log(`Changed directory to: ${path}`);
 }
 
 /**
@@ -530,7 +537,6 @@ export function ChDir(path: string): void {
  */
 export function ChDrive(drive: string): void {
   // Simulate drive change
-  console.log(`Changed drive to: ${drive}`);
 }
 
 /**
@@ -556,7 +562,7 @@ export function Name(oldName: string, newName: string): void {
     errorHandler.raiseError(53, 'File not found', 'VB6FileSystem');
     return;
   }
-  
+
   fileSystem['virtualFileSystem'].set(newName, content);
   fileSystem['virtualFileSystem'].delete(oldName);
 }
@@ -590,7 +596,7 @@ export function FileDateTime(fileName: string): Date {
     errorHandler.raiseError(53, 'File not found', 'VB6FileSystem');
     return new Date();
   }
-  
+
   return new Date(); // Return current date as simulation
 }
 
@@ -603,7 +609,7 @@ export function FileLen(fileName: string): number {
     errorHandler.raiseError(53, 'File not found', 'VB6FileSystem');
     return 0;
   }
-  
+
   return content.length;
 }
 
@@ -616,7 +622,7 @@ export const VB6FileAttributes = {
   vbVolume: 8,
   vbDirectory: 16,
   vbArchive: 32,
-  vbAlias: 64
+  vbAlias: 64,
 };
 
 export const VB6FileFunctions = {
@@ -648,5 +654,5 @@ export const VB6FileFunctions = {
   GetAttr,
   SetAttr,
   FileDateTime,
-  FileLen
+  FileLen,
 };

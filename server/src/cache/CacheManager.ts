@@ -22,30 +22,32 @@ class CachePersistenceProtection {
     /constructor/i,
     /eval/i,
     /function/i,
-    /script/i
+    /script/i,
   ];
-  
+
   private sessionId: string;
   private sessionStartTime: number;
   private suspiciousActivity: Map<string, number> = new Map();
-  
+
   constructor() {
     this.sessionId = this.generateSessionId();
     this.sessionStartTime = Date.now();
   }
-  
+
   /**
    * SERVICE WORKER PERSISTENCE BUG FIX: Generate secure session ID
    */
   private generateSessionId(): string {
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substring(2);
-    const userAgent = typeof navigator !== 'undefined' ? 
-      navigator.userAgent.slice(-10).replace(/[^a-zA-Z0-9]/g, '') : 'server';
-    
+    const userAgent =
+      typeof navigator !== 'undefined'
+        ? navigator.userAgent.slice(-10).replace(/[^a-zA-Z0-9]/g, '')
+        : 'server';
+
     return `vb6_session_${timestamp}_${random}_${userAgent}`;
   }
-  
+
   /**
    * SERVICE WORKER PERSISTENCE BUG FIX: Validate cache key for security
    */
@@ -54,13 +56,13 @@ class CachePersistenceProtection {
       console.warn('Cache key must be string');
       return false;
     }
-    
+
     // Check key length
     if (key.length > 500) {
       console.warn(`Cache key too long: ${key.length}`);
       return false;
     }
-    
+
     // Check for suspicious patterns
     for (const pattern of CachePersistenceProtection.SUSPICIOUS_KEY_PATTERNS) {
       if (pattern.test(key)) {
@@ -69,18 +71,18 @@ class CachePersistenceProtection {
         return false;
       }
     }
-    
+
     // Prefix with session ID to prevent cross-session pollution
     return true;
   }
-  
+
   /**
    * SERVICE WORKER PERSISTENCE BUG FIX: Create session-isolated cache key
    */
   createSessionKey(key: string): string {
     return `${this.sessionId}:${key}`;
   }
-  
+
   /**
    * SERVICE WORKER PERSISTENCE BUG FIX: Validate cache value
    */
@@ -89,12 +91,13 @@ class CachePersistenceProtection {
       // Check serialized size
       const serialized = JSON.stringify(value);
       const sizeBytes = new Blob([serialized]).size;
-      
-      if (sizeBytes > 10 * 1024 * 1024) { // 10MB per value
+
+      if (sizeBytes > 10 * 1024 * 1024) {
+        // 10MB per value
         console.warn(`Cache value too large: ${sizeBytes} bytes`);
         return false;
       }
-      
+
       // Check for dangerous patterns in serialized data
       const dangerousPatterns = [
         /service.*worker/gi,
@@ -105,36 +108,36 @@ class CachePersistenceProtection {
         /javascript:/gi,
         /data:text\/html/gi,
         /__proto__/gi,
-        /constructor/gi
+        /constructor/gi,
       ];
-      
+
       for (const pattern of dangerousPatterns) {
         if (pattern.test(serialized)) {
           console.warn('Dangerous pattern detected in cache value');
           return false;
         }
       }
-      
+
       return true;
     } catch (error) {
       console.warn('Cache value validation failed:', error);
       return false;
     }
   }
-  
+
   /**
    * SERVICE WORKER PERSISTENCE BUG FIX: Record suspicious activity
    */
   private recordSuspiciousActivity(key: string): void {
     const count = this.suspiciousActivity.get(key) || 0;
     this.suspiciousActivity.set(key, count + 1);
-    
+
     if (count >= 5) {
       console.error(`Multiple suspicious cache attempts for key: ${key}`);
       // In production, this could trigger additional security measures
     }
   }
-  
+
   /**
    * SERVICE WORKER PERSISTENCE BUG FIX: Check session validity
    */
@@ -142,7 +145,7 @@ class CachePersistenceProtection {
     const sessionAge = Date.now() - this.sessionStartTime;
     return sessionAge < CachePersistenceProtection.SESSION_TIMEOUT_MS;
   }
-  
+
   /**
    * SERVICE WORKER PERSISTENCE BUG FIX: Get current session info
    */
@@ -151,10 +154,10 @@ class CachePersistenceProtection {
     return {
       id: this.sessionId,
       age,
-      valid: this.isSessionValid()
+      valid: this.isSessionValid(),
     };
   }
-  
+
   /**
    * SERVICE WORKER PERSISTENCE BUG FIX: Clean up session data
    */
@@ -211,7 +214,7 @@ export class CacheManager {
       clears: 0,
       startTime: Date.now(),
     };
-    
+
     // SERVICE WORKER PERSISTENCE BUG FIX: Initialize protection
     this.persistenceProtection = new CachePersistenceProtection();
   }
@@ -306,24 +309,27 @@ export class CacheManager {
   async get(key: string): Promise<any> {
     try {
       // SERVICE WORKER PERSISTENCE BUG FIX: Validate key and session
-      if (!this.persistenceProtection.validateCacheKey(key) || !this.persistenceProtection.isSessionValid()) {
+      if (
+        !this.persistenceProtection.validateCacheKey(key) ||
+        !this.persistenceProtection.isSessionValid()
+      ) {
         this.stats.misses++;
         return null;
       }
-      
+
       // SERVICE WORKER PERSISTENCE BUG FIX: Use session-isolated key
       const sessionKey = this.persistenceProtection.createSessionKey(key);
-      
+
       // Add timing jitter to prevent cache timing attacks
       await this.addCacheTimingJitter();
       this.randomizeMemoryAccess();
-      
+
       // Tentative Redis en premier
       if (this.isRedisConnected) {
         const redisValue = await this.redisClient.get(sessionKey);
         if (redisValue) {
           const parsedValue = JSON.parse(redisValue);
-          
+
           // SERVICE WORKER PERSISTENCE BUG FIX: Validate retrieved value
           if (this.persistenceProtection.validateCacheValue(parsedValue)) {
             this.stats.hits++;
@@ -347,7 +353,7 @@ export class CacheManager {
             entry.lastAccessed = Date.now();
             this.stats.hits++;
             this.logger.debug(`Cache hit mémoire: ${key}`);
-            
+
             this.microJitter();
             return entry.value;
           } else {
@@ -376,26 +382,28 @@ export class CacheManager {
   async set(key: string, value: any, ttl: number = 300): Promise<void> {
     try {
       // SERVICE WORKER PERSISTENCE BUG FIX: Validate key, value, and session
-      if (!this.persistenceProtection.validateCacheKey(key) || 
-          !this.persistenceProtection.validateCacheValue(value) ||
-          !this.persistenceProtection.isSessionValid()) {
+      if (
+        !this.persistenceProtection.validateCacheKey(key) ||
+        !this.persistenceProtection.validateCacheValue(value) ||
+        !this.persistenceProtection.isSessionValid()
+      ) {
         this.logger.warn(`Cache set blocked for security: ${key}`);
         return;
       }
-      
+
       // SERVICE WORKER PERSISTENCE BUG FIX: Check cache size limits
       if (this.memoryCache.size >= CachePersistenceProtection['MAX_CACHE_ENTRIES']) {
         this.logger.warn('Cache size limit reached, cleaning up');
         await this.cleanupBySize();
       }
-      
+
       // SERVICE WORKER PERSISTENCE BUG FIX: Use session-isolated key
       const sessionKey = this.persistenceProtection.createSessionKey(key);
-      
+
       // Add timing jitter
       await this.addCacheTimingJitter();
       this.randomizeMemoryAccess();
-      
+
       const serializedValue = JSON.stringify(value);
 
       // Sauvegarde Redis
@@ -420,7 +428,7 @@ export class CacheManager {
       this.memoryCache.set(sessionKey, entry);
       this.stats.sets++;
       this.logger.debug(`Cache set mémoire: ${key} (TTL: ${ttl}s)`);
-      
+
       this.microJitter();
     } catch (error) {
       this.logger.error(`Erreur sauvegarde cache ${key}:`, error);
@@ -554,7 +562,7 @@ export class CacheManager {
       const uptime = Date.now() - this.stats.startTime;
       const totalRequests = this.stats.hits + this.stats.misses;
       const hitRate = totalRequests > 0 ? (this.stats.hits / totalRequests) * 100 : 0;
-      
+
       // SERVICE WORKER PERSISTENCE BUG FIX: Include session info
       const sessionInfo = this.persistenceProtection.getSessionInfo();
 
@@ -569,7 +577,7 @@ export class CacheManager {
         totalClears: this.stats.clears,
         uptime,
         redisConnected: this.isRedisConnected,
-        sessionInfo // SERVICE WORKER PERSISTENCE BUG FIX: Session tracking
+        sessionInfo, // SERVICE WORKER PERSISTENCE BUG FIX: Session tracking
       };
     } catch (error) {
       this.logger.error('Erreur récupération statistiques:', error);
@@ -607,7 +615,7 @@ export class CacheManager {
 
       // SERVICE WORKER PERSISTENCE BUG FIX: Clean session data
       this.persistenceProtection.cleanupSession();
-      
+
       // Vidage mémoire
       this.memoryCache.clear();
 
@@ -798,7 +806,7 @@ export class CacheManager {
   private async addCacheTimingJitter(): Promise<void> {
     // Generate random delay between 0-2ms to prevent cache timing attacks
     const jitterMs = Math.random() * 2;
-    
+
     // Use multiple delay mechanisms
     const promises = [
       new Promise(resolve => setTimeout(resolve, jitterMs * 0.6)),
@@ -809,9 +817,9 @@ export class CacheManager {
           Math.random();
         }
         resolve(undefined);
-      })
+      }),
     ];
-    
+
     await Promise.all(promises);
   }
 
@@ -823,7 +831,7 @@ export class CacheManager {
     const sizes = [32, 64, 128, 256];
     const size = sizes[Math.floor(Math.random() * sizes.length)];
     const dummy = new Array(size);
-    
+
     // Random access pattern
     for (let i = 0; i < Math.min(size / 8, 32); i++) {
       const randomIndex = Math.floor(Math.random() * size);

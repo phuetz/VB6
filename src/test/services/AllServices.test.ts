@@ -18,9 +18,9 @@ const mockFs = {
 
 const mockPath = {
   join: vi.fn((...paths) => paths.join('/')),
-  dirname: vi.fn((path) => path.split('/').slice(0, -1).join('/')),
-  basename: vi.fn((path) => path.split('/').pop()),
-  extname: vi.fn((path) => {
+  dirname: vi.fn(path => path.split('/').slice(0, -1).join('/')),
+  basename: vi.fn(path => path.split('/').pop()),
+  extname: vi.fn(path => {
     const parts = path.split('.');
     return parts.length > 1 ? '.' + parts.pop() : '';
   }),
@@ -121,9 +121,7 @@ MaxNumberOfThreads=1
       forms: ['Form1.frm'],
       modules: ['Module1.bas'],
       startupObject: 'Form1',
-      references: expect.arrayContaining([
-        expect.stringContaining('stdole2.tlb'),
-      ]),
+      references: expect.arrayContaining([expect.stringContaining('stdole2.tlb')]),
     });
 
     expect(mockFs.readFile).toHaveBeenCalledWith('/projects/test.vbp', 'utf-8');
@@ -150,7 +148,7 @@ MaxNumberOfThreads=1
 
     expect(mockFs.writeFile).toHaveBeenCalled();
     const [filePath, content] = mockFs.writeFile.mock.calls[0];
-    
+
     expect(filePath).toBe('/projects/test.vbp');
     expect(content).toContain('Name="TestProject"');
     expect(content).toContain('Form=Form1.frm');
@@ -226,14 +224,19 @@ End Sub
   it('should handle file not found errors', async () => {
     mockFs.exists.mockResolvedValue(false);
 
-    await expect(fileManager.loadProject('/nonexistent/project.vbp'))
-      .rejects.toThrow('Project file not found');
+    await expect(fileManager.loadProject('/nonexistent/project.vbp')).rejects.toThrow(
+      'Project file not found'
+    );
   });
 
   it('should validate file extensions', () => {
-    expect(() => fileManager.validateProjectFile('test.txt')).toThrow('Invalid project file extension');
+    expect(() => fileManager.validateProjectFile('test.txt')).toThrow(
+      'Invalid project file extension'
+    );
     expect(() => fileManager.validateFormFile('test.txt')).toThrow('Invalid form file extension');
-    expect(() => fileManager.validateModuleFile('test.txt')).toThrow('Invalid module file extension');
+    expect(() => fileManager.validateModuleFile('test.txt')).toThrow(
+      'Invalid module file extension'
+    );
 
     expect(() => fileManager.validateProjectFile('test.vbp')).not.toThrow();
     expect(() => fileManager.validateFormFile('test.frm')).not.toThrow();
@@ -254,7 +257,7 @@ End Sub
     };
 
     mockFs.exists.mockResolvedValue(true);
-    
+
     await fileManager.saveProject(project, { createBackup: true });
 
     expect(mockFs.writeFile).toHaveBeenCalledTimes(2); // Original + backup
@@ -277,9 +280,7 @@ End Sub
       lastModified: Date.now(),
     }));
 
-    const savePromises = projects.map(project => 
-      fileManager.saveProject(project)
-    );
+    const savePromises = projects.map(project => fileManager.saveProject(project));
 
     await Promise.all(savePromises);
 
@@ -325,9 +326,7 @@ End Sub
     const result = await compiler.compile(invalidCode);
 
     expect(result.success).toBe(false);
-    expect(result.errors).toContainEqual(
-      expect.stringContaining('Unterminated string')
-    );
+    expect(result.errors).toContainEqual(expect.stringContaining('Unterminated string'));
   });
 
   it('should handle complex control structures', async () => {
@@ -376,8 +375,8 @@ Private Sub TestOptimization()
 End Sub
     `;
 
-    const result = await compiler.compile(unoptimizedCode, { 
-      optimize: true 
+    const result = await compiler.compile(unoptimizedCode, {
+      optimize: true,
     });
 
     expect(result.success).toBe(true);
@@ -396,13 +395,11 @@ End Sub
     `;
 
     const result = await compiler.compile(infiniteLoopCode, {
-      timeout: 100
+      timeout: 100,
     });
 
     expect(result.success).toBe(false);
-    expect(result.errors).toContainEqual(
-      expect.stringContaining('Compilation timeout')
-    );
+    expect(result.errors).toContainEqual(expect.stringContaining('Compilation timeout'));
   });
 
   it('should generate source maps', async () => {
@@ -415,7 +412,7 @@ End Sub
     `;
 
     const result = await compiler.compile(vb6Code, {
-      generateSourceMap: true
+      generateSourceMap: true,
     });
 
     expect(result.success).toBe(true);
@@ -459,10 +456,10 @@ describe('ThemeManager Service', () => {
 
   it('should apply theme to document', () => {
     const lightTheme = themeManager.getTheme('light');
-    
+
     // The applyTheme method should not throw errors
     expect(() => themeManager.applyTheme(lightTheme)).not.toThrow();
-    
+
     // Verify theme is applied by checking current theme name
     expect(themeManager.getCurrentTheme()).toBe('light');
   });
@@ -505,22 +502,18 @@ describe('ThemeManager Service', () => {
       colors: {}, // Missing required colors
     };
 
-    expect(() => themeManager.addTheme(invalidTheme))
-      .toThrow('Invalid theme configuration');
+    expect(() => themeManager.addTheme(invalidTheme)).toThrow('Invalid theme configuration');
   });
 
   it('should persist theme selection', () => {
     themeManager.setCurrentTheme('dark');
 
-    expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
-      'vb6-current-theme',
-      'dark'
-    );
+    expect(mockLocalStorage.setItem).toHaveBeenCalledWith('vb6-current-theme', 'dark');
   });
 
   it('should handle theme change events', () => {
     const mockCallback = vi.fn();
-    
+
     themeManager.onThemeChange(mockCallback);
     themeManager.setCurrentTheme('dark');
 
@@ -606,10 +599,11 @@ describe('AuthService', () => {
 
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({ 
-        user: { ...newUser, id: 'user2' },
-        message: 'Registration successful' 
-      }),
+      json: () =>
+        Promise.resolve({
+          user: { ...newUser, id: 'user2' },
+          message: 'Registration successful',
+        }),
     });
 
     const result = await authService.register(newUser);
@@ -619,10 +613,11 @@ describe('AuthService', () => {
   });
 
   it('should validate token expiration', () => {
-    const expiredToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyMzkwMjJ9.invalid';
-    
+    const expiredToken =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyMzkwMjJ9.invalid';
+
     const isValid = authService.isTokenValid(expiredToken);
-    
+
     expect(isValid).toBe(false);
   });
 
@@ -693,8 +688,9 @@ describe('PluginSystem Service', () => {
     };
 
     // Should fail without dependency
-    await expect(pluginSystem.registerPlugin(dependentPlugin))
-      .rejects.toThrow('Missing dependency: TestPlugin');
+    await expect(pluginSystem.registerPlugin(dependentPlugin)).rejects.toThrow(
+      'Missing dependency: TestPlugin'
+    );
 
     // Should succeed with dependency
     await pluginSystem.registerPlugin(basePlugin);
@@ -705,7 +701,7 @@ describe('PluginSystem Service', () => {
 
   it('should execute plugin commands', async () => {
     const mockCommand = vi.fn().mockResolvedValue('Command executed');
-    
+
     const plugin = {
       name: 'CommandPlugin',
       version: '1.0.0',
@@ -736,8 +732,9 @@ describe('PluginSystem Service', () => {
       }),
     };
 
-    await expect(pluginSystem.registerPlugin(faultyPlugin))
-      .rejects.toThrow('Plugin activation failed');
+    await expect(pluginSystem.registerPlugin(faultyPlugin)).rejects.toThrow(
+      'Plugin activation failed'
+    );
 
     expect(pluginSystem.getPlugin('FaultyPlugin')).toBeUndefined();
   });
@@ -761,7 +758,7 @@ describe('PluginSystem Service', () => {
     const plugin = {
       name: 'APIPlugin',
       version: '1.0.0',
-      activate: vi.fn().mockImplementation((api) => {
+      activate: vi.fn().mockImplementation(api => {
         // Plugin can access API
         expect(api.vscode).toBeDefined();
         expect(api.fs).toBeDefined();
@@ -783,7 +780,7 @@ describe('DatabaseService', () => {
 
   it('should establish database connection', async () => {
     const connectionString = 'sqlite://memory';
-    
+
     await dbService.connect(connectionString);
 
     expect(dbService.isConnected()).toBe(true);
@@ -791,7 +788,7 @@ describe('DatabaseService', () => {
 
   it('should execute SQL queries', async () => {
     await dbService.connect('sqlite://memory');
-    
+
     const result = await dbService.query('SELECT 1 as test');
 
     expect(result).toEqual([{ test: 1 }]);
@@ -799,17 +796,11 @@ describe('DatabaseService', () => {
 
   it('should handle parameterized queries', async () => {
     await dbService.connect('sqlite://memory');
-    
-    await dbService.query('CREATE TABLE users (id INTEGER, name TEXT)');
-    await dbService.query(
-      'INSERT INTO users (id, name) VALUES (?, ?)', 
-      [1, 'John Doe']
-    );
 
-    const result = await dbService.query(
-      'SELECT * FROM users WHERE id = ?', 
-      [1]
-    );
+    await dbService.query('CREATE TABLE users (id INTEGER, name TEXT)');
+    await dbService.query('INSERT INTO users (id, name) VALUES (?, ?)', [1, 'John Doe']);
+
+    const result = await dbService.query('SELECT * FROM users WHERE id = ?', [1]);
 
     expect(result[0]).toMatchObject({ id: 1, name: 'John Doe' });
   });
@@ -818,7 +809,7 @@ describe('DatabaseService', () => {
     await dbService.connect('sqlite://memory');
     await dbService.query('CREATE TABLE test (id INTEGER, value TEXT)');
 
-    await dbService.transaction(async (tx) => {
+    await dbService.transaction(async tx => {
       await tx.query('INSERT INTO test (id, value) VALUES (1, "first")');
       await tx.query('INSERT INTO test (id, value) VALUES (2, "second")');
     });
@@ -831,18 +822,19 @@ describe('DatabaseService', () => {
     await dbService.connect('sqlite://memory');
     await dbService.query('CREATE TABLE test (id INTEGER PRIMARY KEY)');
 
-    await expect(dbService.transaction(async (tx) => {
-      await tx.query('INSERT INTO test (id) VALUES (1)');
-      await tx.query('INSERT INTO test (id) VALUES (1)'); // Duplicate key error
-    })).rejects.toThrow();
+    await expect(
+      dbService.transaction(async tx => {
+        await tx.query('INSERT INTO test (id) VALUES (1)');
+        await tx.query('INSERT INTO test (id) VALUES (1)'); // Duplicate key error
+      })
+    ).rejects.toThrow();
 
     const result = await dbService.query('SELECT COUNT(*) as count FROM test');
     expect(result[0].count).toBe(0); // Transaction rolled back
   });
 
   it('should handle connection errors', async () => {
-    await expect(dbService.connect('invalid://connection'))
-      .rejects.toThrow('Connection failed');
+    await expect(dbService.connect('invalid://connection')).rejects.toThrow('Connection failed');
   });
 });
 
@@ -851,7 +843,7 @@ function createFileManager() {
   return {
     async loadProject(path: string): Promise<VB6Project> {
       this.validateProjectFile(path);
-      
+
       const exists = await mockFs.exists(path);
       if (!exists) {
         throw new Error('Project file not found');
@@ -863,18 +855,18 @@ function createFileManager() {
 
     async saveProject(project: VB6Project, options: any = {}): Promise<void> {
       const content = this.serializeProject(project);
-      
+
       if (options.createBackup) {
         const backupPath = project.path + '.bak';
         await mockFs.writeFile(backupPath, content);
       }
-      
+
       await mockFs.writeFile(project.path, content);
     },
 
     async loadForm(path: string): Promise<VB6Form> {
       this.validateFormFile(path);
-      
+
       const exists = await mockFs.exists(path);
       if (!exists) {
         throw new Error('Form file not found');
@@ -918,7 +910,7 @@ function createFileManager() {
 
       lines.forEach(line => {
         const trimmed = line.trim();
-        
+
         if (trimmed.startsWith('Name=')) {
           project.name = trimmed.split('=')[1].replace(/"/g, '');
         } else if (trimmed.startsWith('Form=')) {
@@ -1007,7 +999,7 @@ function createFileManager() {
     extractPropertyValue(line: string): string {
       const equalIndex = line.indexOf('=');
       if (equalIndex === -1) return '';
-      
+
       let value = line.substring(equalIndex + 1).trim();
       value = value.replace(/^"/, '').replace(/"$/, ''); // Remove quotes
       return value;
@@ -1015,24 +1007,24 @@ function createFileManager() {
 
     serializeProject(project: VB6Project): string {
       let content = 'Type=Exe\n';
-      
+
       project.forms.forEach(form => {
         content += `Form=${form}\n`;
       });
-      
+
       project.references.forEach(ref => {
         content += `Reference=${ref}\n`;
       });
-      
+
       project.modules.forEach((module, index) => {
         content += `Module=Module${index + 1}; ${module}\n`;
       });
-      
+
       content += `Startup="${project.startupObject}"\n`;
       content += `Name="${project.name}"\n`;
       content += 'MajorVer=1\n';
       content += 'MinorVer=0\n';
-      
+
       return content;
     },
   };
@@ -1051,7 +1043,7 @@ function createVB6Compiler() {
         }
 
         const result = this.performCompilation(code, options);
-        
+
         return {
           success: !result.errors.length,
           output: result.output,
@@ -1221,23 +1213,23 @@ function createThemeManager() {
 
     generateCSSVariables(theme: ThemeConfig): string {
       let css = '';
-      
+
       Object.entries(theme.colors).forEach(([key, value]) => {
         css += `--color-${key}: ${value};\n`;
       });
-      
+
       Object.entries(theme.fonts).forEach(([key, value]) => {
         css += `--font-${key}: ${value};\n`;
       });
-      
+
       Object.entries(theme.spacing).forEach(([key, value]) => {
         css += `--spacing-${key}: ${value}px;\n`;
       });
-      
+
       Object.entries(theme.borderRadius).forEach(([key, value]) => {
         css += `--border-radius-${key}: ${value}px;\n`;
       });
-      
+
       return css;
     },
 
@@ -1319,7 +1311,7 @@ function createAuthService() {
 
     hasPermission(permission: string): boolean {
       if (!currentUser) return false;
-      
+
       const requiredRoles = permissions[permission] || [];
       return currentUser.roles.some((role: string) => requiredRoles.includes(role));
     },
@@ -1456,7 +1448,7 @@ function createDatabaseService() {
       if (normalizedSql.startsWith('insert into')) {
         const tableName = this.extractTableName(sql);
         const table = tables.get(tableName) || [];
-        
+
         // Simple insert mock
         if (tableName === 'users' && params.length >= 2) {
           table.push({ id: params[0], name: params[1] });

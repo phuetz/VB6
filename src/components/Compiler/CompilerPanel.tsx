@@ -1,10 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import { useVB6Store } from '../../stores/vb6Store';
-import { 
-  createVB6NativeCompiler, 
-  CompilationTarget, 
+import {
+  createVB6NativeCompiler,
+  CompilationTarget,
   CompilerOptions,
-  CompilationResult 
+  CompilationResult,
 } from '../../compiler/VB6NativeCompiler';
 import { Platform } from '../../compiler/VB6Linker';
 
@@ -18,41 +18,41 @@ export const CompilerPanel: React.FC = () => {
   const [includeDebugInfo, setIncludeDebugInfo] = useState(false);
   const [embedRuntime, setEmbedRuntime] = useState(true);
   const [entryPoint, setEntryPoint] = useState('Main');
-  
+
   const addOutput = useCallback((message: string) => {
     setOutput(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`]);
   }, []);
-  
+
   const handleCompile = useCallback(async () => {
     setIsCompiling(true);
     setOutput([]);
     addOutput('Starting compilation...');
-    
+
     try {
       // Collect source files
       const sourceFiles: { [filename: string]: string } = {};
-      
+
       // Add forms
       forms.forEach(form => {
         const filename = `${form.name}.frm`;
         sourceFiles[filename] = generateFormCode(form);
         addOutput(`Processing form: ${filename}`);
       });
-      
+
       // Add modules
       modules.forEach(module => {
         const filename = `${module.name}.bas`;
         sourceFiles[filename] = module.code;
         addOutput(`Processing module: ${filename}`);
       });
-      
+
       if (Object.keys(sourceFiles).length === 0) {
         throw new Error('No source files to compile');
       }
-      
+
       // Create compiler instance
       const compiler = createVB6NativeCompiler();
-      
+
       // Set compiler options
       const options: CompilerOptions = {
         target: selectedTarget,
@@ -62,20 +62,20 @@ export const CompilerPanel: React.FC = () => {
         linkLibraries: ['vb6runtime', 'user32', 'kernel32'],
         entryPoint,
       };
-      
+
       addOutput(`Target: ${selectedTarget}, Platform: ${selectedPlatform}`);
       addOutput(`Optimization level: ${optimizationLevel}`);
       addOutput('');
-      
+
       // Compile
       const result: CompilationResult = await compiler.compile(sourceFiles, options);
-      
+
       if (result.success && result.executable) {
         addOutput('✅ Compilation successful!');
         addOutput(`Output format: ${result.executable.format}`);
         addOutput(`Entry point: ${result.executable.entryPoint}`);
         addOutput(`Size: ${formatBytes(result.executable.data.length)}`);
-        
+
         // Download executable
         downloadExecutable(result.executable.data, getOutputFilename());
       } else {
@@ -95,8 +95,18 @@ export const CompilerPanel: React.FC = () => {
       addOutput('');
       addOutput('Compilation complete.');
     }
-  }, [forms, modules, selectedTarget, selectedPlatform, optimizationLevel, includeDebugInfo, entryPoint, addOutput, getOutputFilename]);
-  
+  }, [
+    forms,
+    modules,
+    selectedTarget,
+    selectedPlatform,
+    optimizationLevel,
+    includeDebugInfo,
+    entryPoint,
+    addOutput,
+    getOutputFilename,
+  ]);
+
   const generateFormCode = (form: any): string => {
     // Generate VB6 form code
     let code = `VERSION 5.00\n`;
@@ -105,7 +115,7 @@ export const CompilerPanel: React.FC = () => {
     code += `   ClientHeight = ${form.height}\n`;
     code += `   ClientWidth = ${form.width}\n`;
     code += `   StartUpPosition = ${form.startUpPosition || 3}\n`;
-    
+
     // Add controls
     form.controls?.forEach((control: any) => {
       code += `   Begin VB.${control.type} ${control.name}\n`;
@@ -116,23 +126,23 @@ export const CompilerPanel: React.FC = () => {
       if (control.caption) code += `      Caption = "${control.caption}"\n`;
       code += `   End\n`;
     });
-    
+
     code += `End\n\n`;
-    
+
     // Add code behind
     if (form.code) {
       code += form.code;
     }
-    
+
     return code;
   };
-  
+
   const formatBytes = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
-  
+
   const getOutputFilename = useCallback((): string => {
     const extensions: { [key: string]: string } = {
       [CompilationTarget.X86_32]: '.exe',
@@ -140,11 +150,11 @@ export const CompilerPanel: React.FC = () => {
       [CompilationTarget.WASM]: '.wasm',
       [CompilationTarget.LLVM_IR]: '.ll',
     };
-    
+
     const projectName = forms[0]?.name || 'output';
     return `${projectName}${extensions[selectedTarget] || '.bin'}`;
   }, [forms, selectedTarget]);
-  
+
   const downloadExecutable = (data: Uint8Array, filename: string) => {
     const blob = new Blob([data], { type: 'application/octet-stream' });
     const url = URL.createObjectURL(blob);
@@ -154,14 +164,14 @@ export const CompilerPanel: React.FC = () => {
     a.click();
     URL.revokeObjectURL(url);
   };
-  
+
   return (
     <div className="flex flex-col h-full bg-gray-900 text-gray-100">
       {/* Header */}
       <div className="bg-gray-800 px-4 py-2 border-b border-gray-700">
         <h2 className="text-lg font-semibold">VB6 Native Compiler</h2>
       </div>
-      
+
       {/* Options */}
       <div className="p-4 space-y-4 border-b border-gray-700">
         <div className="grid grid-cols-2 gap-4">
@@ -170,7 +180,7 @@ export const CompilerPanel: React.FC = () => {
             <label className="block text-sm font-medium mb-1">Compilation Target</label>
             <select
               value={selectedTarget}
-              onChange={(e) => setSelectedTarget(e.target.value as CompilationTarget)}
+              onChange={e => setSelectedTarget(e.target.value as CompilationTarget)}
               className="w-full px-3 py-1 bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-blue-500"
               disabled={isCompiling}
             >
@@ -180,13 +190,13 @@ export const CompilerPanel: React.FC = () => {
               <option value={CompilationTarget.LLVM_IR}>LLVM IR</option>
             </select>
           </div>
-          
+
           {/* Platform */}
           <div>
             <label className="block text-sm font-medium mb-1">Target Platform</label>
             <select
               value={selectedPlatform}
-              onChange={(e) => setSelectedPlatform(e.target.value as Platform)}
+              onChange={e => setSelectedPlatform(e.target.value as Platform)}
               className="w-full px-3 py-1 bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-blue-500"
               disabled={isCompiling || selectedTarget === CompilationTarget.WASM}
             >
@@ -198,13 +208,13 @@ export const CompilerPanel: React.FC = () => {
               <option value={Platform.MACOS_ARM}>macOS ARM</option>
             </select>
           </div>
-          
+
           {/* Optimization */}
           <div>
             <label className="block text-sm font-medium mb-1">Optimization Level</label>
             <select
               value={optimizationLevel}
-              onChange={(e) => setOptimizationLevel(Number(e.target.value))}
+              onChange={e => setOptimizationLevel(Number(e.target.value))}
               className="w-full px-3 py-1 bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-blue-500"
               disabled={isCompiling}
             >
@@ -214,46 +224,46 @@ export const CompilerPanel: React.FC = () => {
               <option value={3}>Aggressive (-O3)</option>
             </select>
           </div>
-          
+
           {/* Entry Point */}
           <div>
             <label className="block text-sm font-medium mb-1">Entry Point</label>
             <input
               type="text"
               value={entryPoint}
-              onChange={(e) => setEntryPoint(e.target.value)}
+              onChange={e => setEntryPoint(e.target.value)}
               className="w-full px-3 py-1 bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-blue-500"
               placeholder="Main"
               disabled={isCompiling}
             />
           </div>
         </div>
-        
+
         {/* Checkboxes */}
         <div className="flex gap-6">
           <label className="flex items-center">
             <input
               type="checkbox"
               checked={includeDebugInfo}
-              onChange={(e) => setIncludeDebugInfo(e.target.checked)}
+              onChange={e => setIncludeDebugInfo(e.target.checked)}
               className="mr-2"
               disabled={isCompiling}
             />
             <span className="text-sm">Include Debug Info</span>
           </label>
-          
+
           <label className="flex items-center">
             <input
               type="checkbox"
               checked={embedRuntime}
-              onChange={(e) => setEmbedRuntime(e.target.checked)}
+              onChange={e => setEmbedRuntime(e.target.checked)}
               className="mr-2"
               disabled={isCompiling}
             />
             <span className="text-sm">Embed Runtime</span>
           </label>
         </div>
-        
+
         {/* Compile Button */}
         <button
           onClick={handleCompile}
@@ -267,7 +277,7 @@ export const CompilerPanel: React.FC = () => {
           {isCompiling ? 'Compiling...' : 'Compile to Native Code'}
         </button>
       </div>
-      
+
       {/* Output */}
       <div className="flex-1 overflow-auto p-4">
         <div className="bg-gray-800 rounded p-3 h-full">
@@ -276,14 +286,18 @@ export const CompilerPanel: React.FC = () => {
               <div className="text-gray-500">Compiler output will appear here...</div>
             ) : (
               output.map((line, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className={
-                    line.includes('✅') ? 'text-green-400' :
-                    line.includes('❌') ? 'text-red-400' :
-                    line.includes('⚠️') ? 'text-yellow-400' :
-                    line.includes('[') ? 'text-gray-400' :
-                    'text-gray-200'
+                    line.includes('✅')
+                      ? 'text-green-400'
+                      : line.includes('❌')
+                        ? 'text-red-400'
+                        : line.includes('⚠️')
+                          ? 'text-yellow-400'
+                          : line.includes('[')
+                            ? 'text-gray-400'
+                            : 'text-gray-200'
                   }
                 >
                   {line}

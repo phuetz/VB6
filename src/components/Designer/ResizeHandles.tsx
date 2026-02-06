@@ -11,10 +11,13 @@ const ResizeHandles: React.FC<ResizeHandlesProps> = ({ control, onStartResize })
   const { state } = useVB6();
 
   // EDGE CASE FIX: Only show resize handles for single selection
-  if (state.executionMode === 'run' || 
-      state.selectedControls.length !== 1 || 
-      !onStartResize ||
-      control.locked === true) return null;
+  if (
+    state.executionMode === 'run' ||
+    state.selectedControls.length !== 1 ||
+    !onStartResize ||
+    control.locked === true
+  )
+    return null;
 
   const handleStyle: React.CSSProperties = {
     position: 'absolute',

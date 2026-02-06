@@ -52,7 +52,6 @@ export class VB6MemoryManager extends EventEmitter {
     module: string,
     procedure?: string
   ): any {
-    
     // DESIGN PATTERN FIX: Validate allocation request
     if (size <= 0) {
       throw new Error('Allocation size must be positive');
@@ -69,7 +68,9 @@ export class VB6MemoryManager extends EventEmitter {
 
     // Check if allocation would exceed memory limit
     if (this.getCurrentUsage() + size > this.maxMemory) {
-      throw new Error(`Out of memory: Cannot allocate ${size} bytes (${this.getCurrentUsage()} already in use)`);
+      throw new Error(
+        `Out of memory: Cannot allocate ${size} bytes (${this.getCurrentUsage()} already in use)`
+      );
     }
 
     // Create allocation record
@@ -80,12 +81,12 @@ export class VB6MemoryManager extends EventEmitter {
       timestamp: Date.now(),
       module,
       procedure,
-      references: 1
+      references: 1,
     };
 
     // Create the actual memory object/pointer
     const ptr = this.createMemoryObject(type, size);
-    
+
     // Track the allocation
     this.allocations.set(allocation.id, allocation);
     this.allocatedMemory.set(ptr, allocation);
@@ -94,7 +95,7 @@ export class VB6MemoryManager extends EventEmitter {
     this.emit('memoryAllocated', {
       allocation,
       currentUsage: this.getCurrentUsage(),
-      availableMemory: this.getAvailableMemory()
+      availableMemory: this.getAvailableMemory(),
     });
 
     return ptr;
@@ -112,7 +113,7 @@ export class VB6MemoryManager extends EventEmitter {
 
     // Decrease reference count
     allocation.references--;
-    
+
     // Only actually deallocate when no more references
     if (allocation.references <= 0) {
       this.allocatedMemory.delete(ptr);
@@ -122,7 +123,7 @@ export class VB6MemoryManager extends EventEmitter {
       this.emit('memoryDeallocated', {
         allocation,
         currentUsage: this.getCurrentUsage(),
-        availableMemory: this.getAvailableMemory()
+        availableMemory: this.getAvailableMemory(),
       });
 
       return true;
@@ -149,7 +150,7 @@ export class VB6MemoryManager extends EventEmitter {
     if (allocation && allocation.references > 0) {
       allocation.references--;
       this.emit('referenceRemoved', allocation);
-      
+
       // Auto-deallocate if no more references
       if (allocation.references === 0) {
         return this.deallocate(ptr);
@@ -165,7 +166,7 @@ export class VB6MemoryManager extends EventEmitter {
   collectGarbage(): number {
     const beforeCount = this.allocations.size;
     const beforeMemory = this.getCurrentUsage();
-    
+
     let collected = 0;
     const toDelete: any[] = [];
 
@@ -191,7 +192,7 @@ export class VB6MemoryManager extends EventEmitter {
       collectedAllocations: collected,
       freedMemory,
       remainingAllocations: this.allocations.size,
-      gcCollections: this.gcCollections
+      gcCollections: this.gcCollections,
     });
 
     return freedMemory;
@@ -203,12 +204,11 @@ export class VB6MemoryManager extends EventEmitter {
   defragment(): void {
     // Simulate memory defragmentation
     // In a real implementation, this would reorganize memory blocks
-    console.log('Memory defragmentation completed');
-    
+
     this.emit('memoryDefragmented', {
       allocationsCount: this.allocations.size,
       currentUsage: this.getCurrentUsage(),
-      fragmentationRatio: this.getFragmentationRatio()
+      fragmentationRatio: this.getFragmentationRatio(),
     });
   }
 
@@ -217,8 +217,11 @@ export class VB6MemoryManager extends EventEmitter {
    */
   getMemoryStats(): MemoryStats {
     const currentUsage = this.getCurrentUsage();
-    const largestAllocation = Math.max(0, ...Array.from(this.allocations.values()).map(a => a.size));
-    
+    const largestAllocation = Math.max(
+      0,
+      ...Array.from(this.allocations.values()).map(a => a.size)
+    );
+
     return {
       totalAllocated: this.totalAllocated,
       totalDeallocated: this.totalDeallocated,
@@ -227,7 +230,7 @@ export class VB6MemoryManager extends EventEmitter {
       allocationsCount: this.allocations.size,
       largestAllocation,
       fragmentationRatio: this.getFragmentationRatio(),
-      gcCollections: this.gcCollections
+      gcCollections: this.gcCollections,
     };
   }
 
@@ -250,12 +253,12 @@ export class VB6MemoryManager extends EventEmitter {
    */
   getUsageByModule(): Map<string, number> {
     const usage = new Map<string, number>();
-    
+
     for (const allocation of this.allocations.values()) {
       const current = usage.get(allocation.module) || 0;
       usage.set(allocation.module, current + allocation.size);
     }
-    
+
     return usage;
   }
 
@@ -265,13 +268,13 @@ export class VB6MemoryManager extends EventEmitter {
   findPotentialLeaks(ageThresholdMs: number = 60000): MemoryAllocation[] {
     const now = Date.now();
     const leaks: MemoryAllocation[] = [];
-    
+
     for (const allocation of this.allocations.values()) {
       if (now - allocation.timestamp > ageThresholdMs) {
         leaks.push(allocation);
       }
     }
-    
+
     return leaks;
   }
 
@@ -281,14 +284,14 @@ export class VB6MemoryManager extends EventEmitter {
   cleanup(): void {
     const allocatedCount = this.allocations.size;
     const allocatedMemory = this.getCurrentUsage();
-    
+
     this.allocations.clear();
     this.allocatedMemory.clear();
     this.totalDeallocated += allocatedMemory;
-    
+
     this.emit('memoryCleanup', {
       deallocatedCount: allocatedCount,
-      deallocatedMemory: allocatedMemory
+      deallocatedMemory: allocatedMemory,
     });
   }
 
@@ -297,9 +300,11 @@ export class VB6MemoryManager extends EventEmitter {
    */
   setMaxMemory(maxMemory: number): void {
     if (maxMemory < this.getCurrentUsage()) {
-      throw new Error(`Cannot set max memory ${maxMemory} below current usage ${this.getCurrentUsage()}`);
+      throw new Error(
+        `Cannot set max memory ${maxMemory} below current usage ${this.getCurrentUsage()}`
+      );
     }
-    
+
     this.maxMemory = maxMemory;
     this.emit('maxMemoryChanged', { maxMemory });
   }
@@ -308,7 +313,7 @@ export class VB6MemoryManager extends EventEmitter {
     if (threshold < 0.1 || threshold > 1.0) {
       throw new Error('GC threshold must be between 0.1 and 1.0');
     }
-    
+
     this.gcThreshold = threshold;
     this.emit('gcThresholdChanged', { threshold });
   }
@@ -339,10 +344,10 @@ export class VB6MemoryManager extends EventEmitter {
     // In reality, this would analyze memory block distribution
     const allocCount = this.allocations.size;
     if (allocCount === 0) return 0;
-    
+
     const avgSize = this.getCurrentUsage() / allocCount;
     const maxSize = Math.max(...Array.from(this.allocations.values()).map(a => a.size));
-    
-    return maxSize > 0 ? 1 - (avgSize / maxSize) : 0;
+
+    return maxSize > 0 ? 1 - avgSize / maxSize : 0;
   }
 }

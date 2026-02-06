@@ -20,14 +20,13 @@ export class VB6VariableManager extends EventEmitter {
    * DESIGN PATTERN FIX: Clear variable scoping rules
    */
   declareVariable(
-    name: string, 
-    type: VB6DataType, 
+    name: string,
+    type: VB6DataType,
     scope: 'global' | 'module' | 'procedure',
     moduleContext?: string,
     procedureContext?: string,
     isStatic: boolean = false
   ): VB6Variable {
-    
     const variable: VB6Variable = {
       name,
       type,
@@ -38,7 +37,7 @@ export class VB6VariableManager extends EventEmitter {
       isStatic,
       isDim: true,
       isConst: false,
-      scope
+      scope,
     };
 
     switch (scope) {
@@ -77,14 +76,13 @@ export class VB6VariableManager extends EventEmitter {
     moduleContext?: string,
     procedureContext?: string
   ): VB6Variable | undefined {
-    
     // First check procedure scope (if in procedure)
     if (procedureContext) {
       const staticKey = `${procedureContext}.${name}`;
       if (this.staticVariables.has(staticKey)) {
         return this.staticVariables.get(staticKey);
       }
-      
+
       const procedureVars = this.procedureVariables.get(procedureContext);
       if (procedureVars?.has(name)) {
         return procedureVars.get(name);
@@ -112,7 +110,6 @@ export class VB6VariableManager extends EventEmitter {
     moduleContext?: string,
     procedureContext?: string
   ): boolean {
-    
     const variable = this.getVariable(name, moduleContext, procedureContext);
     if (!variable) {
       this.emit('error', new Error(`Variable '${name}' not found`));
@@ -126,7 +123,10 @@ export class VB6VariableManager extends EventEmitter {
 
     // DESIGN PATTERN FIX: Type checking before assignment
     if (!this.isTypeCompatible(value, variable.type)) {
-      this.emit('error', new Error(`Type mismatch: Cannot assign ${typeof value} to ${VB6DataType[variable.type]}`));
+      this.emit(
+        'error',
+        new Error(`Type mismatch: Cannot assign ${typeof value} to ${VB6DataType[variable.type]}`)
+      );
       return false;
     }
 
@@ -179,7 +179,7 @@ export class VB6VariableManager extends EventEmitter {
   private isTypeCompatible(value: any, targetType: VB6DataType): boolean {
     // Implement VB6 type compatibility rules
     if (targetType === VB6DataType.vbVariant) return true;
-    
+
     switch (targetType) {
       case VB6DataType.vbInteger:
       case VB6DataType.vbLong:

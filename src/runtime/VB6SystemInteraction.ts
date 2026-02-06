@@ -1,6 +1,6 @@
 /**
  * VB6 System Interaction Functions
- * 
+ *
  * Web-compatible implementation of VB6 system interaction functions
  * Shell, AppActivate, SendKeys, Environ, DoEvents, etc.
  * Note: Many functions are simulated due to browser security restrictions
@@ -15,7 +15,7 @@ export const VB6WindowState = {
   vbMinimizedFocus: 2,
   vbMaximizedFocus: 3,
   vbNormalNoFocus: 4,
-  vbMinimizedNoFocus: 6
+  vbMinimizedNoFocus: 6,
 } as const;
 
 // SendKeys special key constants
@@ -55,7 +55,7 @@ export const VB6SendKeysConstants = {
   RIGHT: '{RIGHT}',
   SCROLLLOCK: '{SCROLLLOCK}',
   TAB: '{TAB}',
-  UP: '{UP}'
+  UP: '{UP}',
 } as const;
 
 // Process information interface
@@ -84,22 +84,25 @@ class ProcessRegistry {
   // Simulate process creation
   createProcess(command: string, windowState: number = VB6WindowState.vbNormalFocus): number {
     const processId = this.nextProcessId++;
-    
+
     // Extract executable name from command
     const parts = command.split(' ');
     const executablePath = parts[0];
-    const executableName = executablePath.split('\\').pop() || executablePath.split('/').pop() || executablePath;
-    
+    const executableName =
+      executablePath.split('\\').pop() || executablePath.split('/').pop() || executablePath;
+
     const processInfo: ProcessInfo = {
       processId,
       processName: executableName,
       windowTitle: this.getDefaultWindowTitle(executableName),
-      isActive: windowState === VB6WindowState.vbNormalFocus || windowState === VB6WindowState.vbMaximizedFocus,
-      created: new Date()
+      isActive:
+        windowState === VB6WindowState.vbNormalFocus ||
+        windowState === VB6WindowState.vbMaximizedFocus,
+      created: new Date(),
     };
 
     this.processes.set(processId, processInfo);
-    
+
     if (processInfo.isActive) {
       this.activeProcess = processId;
     }
@@ -119,8 +122,10 @@ class ProcessRegistry {
     } else {
       // Search by window title or process name
       for (const process of this.processes.values()) {
-        if (process.windowTitle.toLowerCase().includes(identifier.toLowerCase()) ||
-            process.processName.toLowerCase().includes(identifier.toLowerCase())) {
+        if (
+          process.windowTitle.toLowerCase().includes(identifier.toLowerCase()) ||
+          process.processName.toLowerCase().includes(identifier.toLowerCase())
+        ) {
           targetProcess = process;
           break;
         }
@@ -130,14 +135,14 @@ class ProcessRegistry {
     if (targetProcess) {
       this.activeProcess = targetProcess.processId;
       targetProcess.isActive = true;
-      
+
       // Deactivate other processes
       for (const [id, process] of this.processes) {
         if (id !== targetProcess.processId) {
           process.isActive = false;
         }
       }
-      
+
       return true;
     }
 
@@ -159,18 +164,18 @@ class ProcessRegistry {
 
   private getDefaultWindowTitle(executableName: string): string {
     const lowerName = executableName.toLowerCase().replace('.exe', '');
-    
+
     const titleMap: { [key: string]: string } = {
-      'notepad': 'Untitled - Notepad',
-      'calc': 'Calculator',
-      'mspaint': 'Paint',
-      'winword': 'Microsoft Word',
-      'excel': 'Microsoft Excel',
-      'powerpnt': 'Microsoft PowerPoint',
-      'iexplore': 'Internet Explorer',
-      'firefox': 'Mozilla Firefox',
-      'chrome': 'Google Chrome',
-      'explorer': 'Windows Explorer'
+      notepad: 'Untitled - Notepad',
+      calc: 'Calculator',
+      mspaint: 'Paint',
+      winword: 'Microsoft Word',
+      excel: 'Microsoft Excel',
+      powerpnt: 'Microsoft PowerPoint',
+      iexplore: 'Internet Explorer',
+      firefox: 'Mozilla Firefox',
+      chrome: 'Google Chrome',
+      explorer: 'Windows Explorer',
     };
 
     return titleMap[lowerName] || executableName;
@@ -179,17 +184,15 @@ class ProcessRegistry {
   private simulateProcessExecution(command: string, windowState: number): void {
     // In a real implementation, this would launch the actual process
     // In browser environment, we can only simulate or provide alternatives
-    
+
     const lowerCommand = command.toLowerCase();
-    
+
     if (lowerCommand.includes('notepad')) {
       this.openTextEditor();
     } else if (lowerCommand.includes('calc')) {
       this.openCalculator();
     } else if (lowerCommand.includes('http') || lowerCommand.includes('www')) {
       this.openUrl(command);
-    } else {
-      console.log(`Simulated process execution: ${command} (window state: ${windowState})`);
     }
   }
 
@@ -204,7 +207,7 @@ class ProcessRegistry {
       </body>
       </html>
     `;
-    
+
     const blob = new Blob([textEditorHtml], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     window.open(url, '_blank', 'width=600,height=400');
@@ -339,7 +342,7 @@ class ProcessRegistry {
       </body>
       </html>
     `;
-    
+
     const blob = new Blob([calcHtml], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     window.open(url, '_blank', 'width=250,height=350');
@@ -365,7 +368,7 @@ class EnvironmentVariables {
     ['WINDIR', 'C:\\Windows'],
     ['SYSTEMROOT', 'C:\\Windows'],
     ['PROGRAMFILES', 'C:\\Program Files'],
-    ['COMMONPROGRAMFILES', 'C:\\Program Files\\Common Files']
+    ['COMMONPROGRAMFILES', 'C:\\Program Files\\Common Files'],
   ]);
 
   static get(variableName: string): string {
@@ -395,7 +398,7 @@ class SendKeysSimulator {
     while (this.queue.length > 0) {
       const { keys, wait } = this.queue.shift()!;
       await this.simulateKeystrokes(keys);
-      
+
       if (wait) {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
@@ -406,8 +409,11 @@ class SendKeysSimulator {
 
   private static async simulateKeystrokes(keys: string): Promise<void> {
     const activeElement = document.activeElement as HTMLInputElement | HTMLTextAreaElement;
-    
-    if (!activeElement || (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA')) {
+
+    if (
+      !activeElement ||
+      (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA')
+    ) {
       console.warn('SendKeys: No active input element found');
       return;
     }
@@ -415,12 +421,15 @@ class SendKeysSimulator {
     // Parse special keys
     let processedKeys = keys;
     const specialKeys = Object.entries(VB6SendKeysConstants);
-    
+
     for (const [name, code] of specialKeys) {
-      processedKeys = processedKeys.replace(new RegExp(code.replace(/[{}]/g, '\\$&'), 'g'), (match) => {
-        this.simulateSpecialKey(activeElement, name);
-        return '';
-      });
+      processedKeys = processedKeys.replace(
+        new RegExp(code.replace(/[{}]/g, '\\$&'), 'g'),
+        match => {
+          this.simulateSpecialKey(activeElement, name);
+          return '';
+        }
+      );
     }
 
     // Type remaining characters
@@ -430,55 +439,62 @@ class SendKeysSimulator {
           // Modifier keys - simulate in combination with next character
           continue;
         }
-        
+
         this.typeCharacter(activeElement, char);
         await new Promise(resolve => setTimeout(resolve, 10));
       }
     }
   }
 
-  private static simulateSpecialKey(element: HTMLInputElement | HTMLTextAreaElement, keyName: string): void {
+  private static simulateSpecialKey(
+    element: HTMLInputElement | HTMLTextAreaElement,
+    keyName: string
+  ): void {
     const keyMap: { [key: string]: string } = {
-      'ENTER': 'Enter',
-      'TAB': 'Tab',
-      'ESC': 'Escape',
-      'ESCAPE': 'Escape',
-      'BACKSPACE': 'Backspace',
-      'BS': 'Backspace',
-      'DELETE': 'Delete',
-      'DEL': 'Delete',
-      'HOME': 'Home',
-      'END': 'End',
-      'LEFT': 'ArrowLeft',
-      'RIGHT': 'ArrowRight',
-      'UP': 'ArrowUp',
-      'DOWN': 'ArrowDown',
-      'PGUP': 'PageUp',
-      'PGDN': 'PageDown',
-      'INSERT': 'Insert',
-      'INS': 'Insert'
+      ENTER: 'Enter',
+      TAB: 'Tab',
+      ESC: 'Escape',
+      ESCAPE: 'Escape',
+      BACKSPACE: 'Backspace',
+      BS: 'Backspace',
+      DELETE: 'Delete',
+      DEL: 'Delete',
+      HOME: 'Home',
+      END: 'End',
+      LEFT: 'ArrowLeft',
+      RIGHT: 'ArrowRight',
+      UP: 'ArrowUp',
+      DOWN: 'ArrowDown',
+      PGUP: 'PageUp',
+      PGDN: 'PageDown',
+      INSERT: 'Insert',
+      INS: 'Insert',
     };
 
     const eventKey = keyMap[keyName] || keyName;
-    
+
     const keyEvent = new KeyboardEvent('keydown', {
       key: eventKey,
       bubbles: true,
-      cancelable: true
+      cancelable: true,
     });
-    
+
     element.dispatchEvent(keyEvent);
   }
 
-  private static typeCharacter(element: HTMLInputElement | HTMLTextAreaElement, char: string): void {
+  private static typeCharacter(
+    element: HTMLInputElement | HTMLTextAreaElement,
+    char: string
+  ): void {
     const currentValue = element.value;
     const selectionStart = element.selectionStart || 0;
     const selectionEnd = element.selectionEnd || 0;
-    
-    const newValue = currentValue.substring(0, selectionStart) + char + currentValue.substring(selectionEnd);
+
+    const newValue =
+      currentValue.substring(0, selectionStart) + char + currentValue.substring(selectionEnd);
     element.value = newValue;
     element.setSelectionRange(selectionStart + 1, selectionStart + 1);
-    
+
     // Trigger input event
     const inputEvent = new Event('input', { bubbles: true });
     element.dispatchEvent(inputEvent);
@@ -492,7 +508,10 @@ let doEventsCounter = 0;
  * VB6 Shell Function
  * Executes a program and returns the process ID
  */
-export function Shell(pathname: string, windowState: number = VB6WindowState.vbNormalFocus): number {
+export function Shell(
+  pathname: string,
+  windowState: number = VB6WindowState.vbNormalFocus
+): number {
   try {
     const processRegistry = ProcessRegistry.getInstance();
     return processRegistry.createProcess(pathname, windowState);
@@ -510,12 +529,12 @@ export function AppActivate(app: string | number, wait?: boolean): boolean {
   try {
     const processRegistry = ProcessRegistry.getInstance();
     const result = processRegistry.activateProcess(app);
-    
+
     if (wait) {
       // Simulate wait for activation
       setTimeout(() => {}, 100);
     }
-    
+
     return result;
   } catch (error) {
     errorHandler.raiseError(5, 'Invalid procedure call or argument', 'AppActivate');
@@ -562,13 +581,20 @@ export function Environ(envstring: string | number): string {
 export function DoEvents(): number {
   try {
     doEventsCounter++;
-    
-    // Yield to browser's event loop
-    return new Promise<number>((resolve) => {
+
+    // Yield to browser's event loop using requestIdleCallback or setTimeout
+    // Note: VB6 DoEvents is synchronous but in browser we schedule a yield
+    if (typeof requestIdleCallback !== 'undefined') {
+      requestIdleCallback(() => {
+        /* yield to event loop */
+      });
+    } else {
       setTimeout(() => {
-        resolve(doEventsCounter);
+        /* yield to event loop */
       }, 0);
-    }) as any; // Return synchronously for VB6 compatibility
+    }
+
+    return doEventsCounter;
   } catch (error) {
     errorHandler.raiseError(5, 'Invalid procedure call or argument', 'DoEvents');
     return doEventsCounter;
@@ -583,22 +609,25 @@ export function Beep(): void {
   try {
     // Web Audio API beep
     if (typeof window !== 'undefined' && window.AudioContext) {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AudioCtx) return;
+      const audioContext = new AudioCtx();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
-      
+
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
-      
+
       oscillator.frequency.value = 800; // 800 Hz beep
       gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-      
+
       oscillator.start();
       oscillator.stop(audioContext.currentTime + 0.2);
     } else {
       // Fallback to console beep
-      console.log('\x07'); // ASCII bell character
     }
   } catch (error) {
     errorHandler.raiseError(5, 'Invalid procedure call or argument', 'Beep');
@@ -625,26 +654,54 @@ export function Command(): string {
 /**
  * Get system information
  */
-export function GetSystemInfo(): { [key: string]: any } {
-  const info: { [key: string]: any } = {
+/** Chrome-specific performance.memory API */
+interface PerformanceMemory {
+  usedJSHeapSize: number;
+  totalJSHeapSize: number;
+  jsHeapSizeLimit: number;
+}
+
+interface PerformanceWithMemory extends Performance {
+  memory?: PerformanceMemory;
+}
+
+interface SystemInfo {
+  Platform: string;
+  UserAgent: string;
+  Language: string;
+  CookieEnabled: boolean;
+  OnLine: boolean;
+  Screen: { Width: number; Height: number; ColorDepth: number; PixelDepth: number } | null;
+  Memory: { Used: number; Total: number; Limit: number } | null;
+}
+
+export function GetSystemInfo(): SystemInfo {
+  const perfWithMemory = performance as PerformanceWithMemory;
+
+  const info: SystemInfo = {
     Platform: 'Web',
     UserAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
     Language: typeof navigator !== 'undefined' ? navigator.language : 'en-US',
     CookieEnabled: typeof navigator !== 'undefined' ? navigator.cookieEnabled : false,
     OnLine: typeof navigator !== 'undefined' ? navigator.onLine : true,
-    Screen: typeof screen !== 'undefined' ? {
-      Width: screen.width,
-      Height: screen.height,
-      ColorDepth: screen.colorDepth,
-      PixelDepth: screen.pixelDepth
-    } : null,
-    Memory: (performance as any).memory ? {
-      Used: Math.round((performance as any).memory.usedJSHeapSize / 1024 / 1024),
-      Total: Math.round((performance as any).memory.totalJSHeapSize / 1024 / 1024),
-      Limit: Math.round((performance as any).memory.jsHeapSizeLimit / 1024 / 1024)
-    } : null
+    Screen:
+      typeof screen !== 'undefined'
+        ? {
+            Width: screen.width,
+            Height: screen.height,
+            ColorDepth: screen.colorDepth,
+            PixelDepth: screen.pixelDepth,
+          }
+        : null,
+    Memory: perfWithMemory.memory
+      ? {
+          Used: Math.round(perfWithMemory.memory.usedJSHeapSize / 1024 / 1024),
+          Total: Math.round(perfWithMemory.memory.totalJSHeapSize / 1024 / 1024),
+          Limit: Math.round(perfWithMemory.memory.jsHeapSizeLimit / 1024 / 1024),
+        }
+      : null,
   };
-  
+
   return info;
 }
 
@@ -653,7 +710,7 @@ export const VB6SystemInteraction = {
   // Constants
   VB6WindowState,
   VB6SendKeysConstants,
-  
+
   // Functions
   Shell,
   AppActivate,
@@ -663,9 +720,9 @@ export const VB6SystemInteraction = {
   Beep,
   Command,
   GetSystemInfo,
-  
+
   // Utility functions
   SetEnvironmentVariable: EnvironmentVariables.set,
   GetProcessInfo: (processId: number) => ProcessRegistry.getInstance().getProcess(processId),
-  GetActiveProcess: () => ProcessRegistry.getInstance().getActiveProcess()
+  GetActiveProcess: () => ProcessRegistry.getInstance().getActiveProcess(),
 };

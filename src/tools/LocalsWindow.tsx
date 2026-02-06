@@ -17,7 +17,7 @@ export enum VariableType {
   Array = 'Array',
   UserDefined = 'UserDefined',
   Enum = 'Enum',
-  Unknown = 'Unknown'
+  Unknown = 'Unknown',
 }
 
 export enum VariableScope {
@@ -26,14 +26,14 @@ export enum VariableScope {
   Module = 'Module',
   Global = 'Global',
   Static = 'Static',
-  WithBlock = 'With Block'
+  WithBlock = 'With Block',
 }
 
 export enum VariableAccess {
   ReadWrite = 'ReadWrite',
   ReadOnly = 'ReadOnly',
   WriteOnly = 'WriteOnly',
-  Const = 'Const'
+  Const = 'Const',
 }
 
 export interface LocalVariable {
@@ -102,7 +102,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
   onVariableExpand,
   onShowInMemory,
   onAddToWatch,
-  onCopyValue
+  onCopyValue,
 }) => {
   const [variables, setVariables] = useState<LocalVariable[]>([]);
   const [filteredVariables, setFilteredVariables] = useState<LocalVariable[]>([]);
@@ -122,14 +122,14 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
     sortBy: 'name',
     sortOrder: 'asc',
     fontSize: 11,
-    expandNewVariables: false
+    expandNewVariables: false,
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
   const [contextMenuVariable, setContextMenuVariable] = useState<LocalVariable | null>(null);
-  
+
   const eventEmitter = useRef(new EventEmitter());
   const refreshTimer = useRef<NodeJS.Timeout>();
 
@@ -157,7 +157,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
         address: '0x001234F0',
         size: 16,
         isModified: false,
-        isError: false
+        isError: false,
       },
       {
         id: 'var2',
@@ -175,7 +175,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
         size: 2,
         isModified: true,
         isError: false,
-        lastModified: new Date()
+        lastModified: new Date(),
       },
       {
         id: 'var3',
@@ -192,7 +192,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
         address: '0x001234F8',
         objectTypeName: 'User',
         isModified: false,
-        isError: false
+        isError: false,
       },
       {
         id: 'var4',
@@ -208,7 +208,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
         level: 0,
         arrayBounds: [{ lower: 0, upper: 4 }],
         isModified: false,
-        isError: false
+        isError: false,
       },
       {
         id: 'var5',
@@ -223,7 +223,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
         children: [],
         level: 0,
         isModified: false,
-        isError: false
+        isError: false,
       },
       {
         id: 'var6',
@@ -238,7 +238,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
         children: [],
         level: 0,
         isModified: false,
-        isError: false
+        isError: false,
       },
       {
         id: 'var7',
@@ -254,8 +254,8 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
         level: 0,
         isModified: false,
         isError: true,
-        errorMessage: 'Object variable or With block variable not set'
-      }
+        errorMessage: 'Object variable or With block variable not set',
+      },
     ];
 
     setVariables(sampleVariables);
@@ -288,9 +288,11 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
       // Apply search filter
       if (searchText) {
         const searchLower = searchText.toLowerCase();
-        return variable.name.toLowerCase().includes(searchLower) ||
-               variable.displayValue.toLowerCase().includes(searchLower) ||
-               variable.type.toLowerCase().includes(searchLower);
+        return (
+          variable.name.toLowerCase().includes(searchLower) ||
+          variable.displayValue.toLowerCase().includes(searchLower) ||
+          variable.type.toLowerCase().includes(searchLower)
+        );
       }
 
       return true;
@@ -299,7 +301,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
     // Sort variables
     filtered.sort((a, b) => {
       let comparison = 0;
-      
+
       switch (settings.sortBy) {
         case 'name':
           comparison = a.name.localeCompare(b.name);
@@ -332,61 +334,62 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
     try {
       // In a real implementation, this would fetch from the debug engine
       setLastRefresh(new Date());
-      
+
       // Simulate some variable changes
-      setVariables(prev => prev.map(variable => {
-        if (variable.name === 'intCount' && Math.random() < 0.3) {
-          const newValue = Math.floor(Math.random() * 100);
-          return {
-            ...variable,
-            value: newValue,
-            displayValue: settings.showHexValues ? `${newValue} (0x${newValue.toString(16).toUpperCase()})` : String(newValue),
-            isModified: true,
-            lastModified: new Date()
-          };
-        }
-        return variable;
-      }));
+      setVariables(prev =>
+        prev.map(variable => {
+          if (variable.name === 'intCount' && Math.random() < 0.3) {
+            const newValue = Math.floor(Math.random() * 100);
+            return {
+              ...variable,
+              value: newValue,
+              displayValue: settings.showHexValues
+                ? `${newValue} (0x${newValue.toString(16).toUpperCase()})`
+                : String(newValue),
+              isModified: true,
+              lastModified: new Date(),
+            };
+          }
+          return variable;
+        })
+      );
     } finally {
       setIsRefreshing(false);
     }
   }, [debugSession, settings.showHexValues]);
 
   // Toggle variable expansion
-  const toggleExpansion = useCallback(async (variable: LocalVariable) => {
-    if (!variable.hasChildren) return;
+  const toggleExpansion = useCallback(
+    async (variable: LocalVariable) => {
+      if (!variable.hasChildren) return;
 
-    if (!variable.isExpanded && variable.children.length === 0) {
-      // Load children for the first time
-      if (onVariableExpand) {
-        try {
-          const children = await onVariableExpand(variable);
-          setVariables(prev => prev.map(v => 
-            v.id === variable.id 
-              ? { ...v, children, isExpanded: true }
-              : v
-          ));
-        } catch (error) {
-          console.error('Failed to expand variable:', error);
+      if (!variable.isExpanded && variable.children.length === 0) {
+        // Load children for the first time
+        if (onVariableExpand) {
+          try {
+            const children = await onVariableExpand(variable);
+            setVariables(prev =>
+              prev.map(v => (v.id === variable.id ? { ...v, children, isExpanded: true } : v))
+            );
+          } catch (error) {
+            console.error('Failed to expand variable:', error);
+          }
+        } else {
+          // Generate sample children for demo
+          const children = generateSampleChildren(variable);
+          setVariables(prev =>
+            prev.map(v => (v.id === variable.id ? { ...v, children, isExpanded: true } : v))
+          );
         }
       } else {
-        // Generate sample children for demo
-        const children = generateSampleChildren(variable);
-        setVariables(prev => prev.map(v => 
-          v.id === variable.id 
-            ? { ...v, children, isExpanded: true }
-            : v
-        ));
+        // Just toggle expansion
+        setVariables(prev =>
+          prev.map(v => (v.id === variable.id ? { ...v, isExpanded: !v.isExpanded } : v))
+        );
       }
-    } else {
-      // Just toggle expansion
-      setVariables(prev => prev.map(v => 
-        v.id === variable.id 
-          ? { ...v, isExpanded: !v.isExpanded }
-          : v
-      ));
-    }
-  }, [onVariableExpand]);
+    },
+    [onVariableExpand]
+  );
 
   // Generate sample children for objects and arrays
   const generateSampleChildren = (parent: LocalVariable): LocalVariable[] => {
@@ -406,7 +409,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
           parent: parent.id,
           level: parent.level + 1,
           isModified: false,
-          isError: false
+          isError: false,
         },
         {
           id: `${parent.id}_prop2`,
@@ -422,7 +425,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
           parent: parent.id,
           level: parent.level + 1,
           isModified: false,
-          isError: false
+          isError: false,
         },
         {
           id: `${parent.id}_prop3`,
@@ -438,8 +441,8 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
           parent: parent.id,
           level: parent.level + 1,
           isModified: false,
-          isError: false
-        }
+          isError: false,
+        },
       ];
     } else if (parent.type === VariableType.Array) {
       const array = parent.value as any[];
@@ -457,7 +460,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
         parent: parent.id,
         level: parent.level + 1,
         isModified: false,
-        isError: false
+        isError: false,
       }));
     }
 
@@ -480,24 +483,26 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
 
     try {
       const newValue = parseValue(editValue, editingVariable.type);
-      
+
       if (onVariableChange) {
         const success = await onVariableChange(editingVariable, newValue);
         if (!success) return;
       }
 
       // Update local state
-      setVariables(prev => prev.map(v => 
-        v.id === editingVariable.id 
-          ? { 
-              ...v, 
-              value: newValue, 
-              displayValue: formatValue(newValue, v.type, settings.showHexValues),
-              isModified: true,
-              lastModified: new Date()
-            }
-          : v
-      ));
+      setVariables(prev =>
+        prev.map(v =>
+          v.id === editingVariable.id
+            ? {
+                ...v,
+                value: newValue,
+                displayValue: formatValue(newValue, v.type, settings.showHexValues),
+                isModified: true,
+                lastModified: new Date(),
+              }
+            : v
+        )
+      );
 
       setEditingVariable(null);
       setEditValue('');
@@ -598,13 +603,13 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
           className={`flex items-center py-1 px-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 ${
             isSelected ? 'bg-blue-100' : ''
           } ${variable.isError ? 'bg-red-50' : ''} ${variable.isModified ? 'bg-yellow-50' : ''}`}
-          style={{ 
+          style={{
             paddingLeft: `${8 + depth * 16}px`,
-            fontSize: `${settings.fontSize}px`
+            fontSize: `${settings.fontSize}px`,
           }}
           onClick={() => setSelectedVariable(variable)}
           onDoubleClick={() => startEditing(variable)}
-          onContextMenu={(e) => {
+          onContextMenu={e => {
             e.preventDefault();
             setContextMenuVariable(variable);
             setContextMenuPosition({ x: e.clientX, y: e.clientY });
@@ -615,7 +620,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
           <div className="w-4 text-center">
             {variable.hasChildren && (
               <button
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   toggleExpansion(variable);
                 }}
@@ -630,9 +635,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
           <span className="w-6 text-center">{getVariableIcon(variable)}</span>
 
           {/* Name */}
-          <div className="w-32 font-mono font-medium text-gray-800 truncate">
-            {variable.name}
-          </div>
+          <div className="w-32 font-mono font-medium text-gray-800 truncate">{variable.name}</div>
 
           {/* Value */}
           <div className="flex-1 font-mono text-gray-700">
@@ -640,9 +643,9 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
               <input
                 type="text"
                 value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
+                onChange={e => setEditValue(e.target.value)}
                 onBlur={saveEdit}
-                onKeyPress={(e) => {
+                onKeyPress={e => {
                   if (e.key === 'Enter') {
                     saveEdit();
                   } else if (e.key === 'Escape') {
@@ -661,27 +664,19 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
           </div>
 
           {/* Type */}
-          <div className="w-20 text-xs text-gray-500 truncate">
-            {variable.type}
-          </div>
+          <div className="w-20 text-xs text-gray-500 truncate">{variable.type}</div>
 
           {/* Scope */}
-          <div className="w-16 text-xs text-gray-500 truncate">
-            {variable.scope}
-          </div>
+          <div className="w-16 text-xs text-gray-500 truncate">{variable.scope}</div>
 
           {/* Address (if enabled) */}
           {settings.showAddresses && variable.address && (
-            <div className="w-20 text-xs text-gray-400 font-mono">
-              {variable.address}
-            </div>
+            <div className="w-20 text-xs text-gray-400 font-mono">{variable.address}</div>
           )}
         </div>
 
         {/* Render children if expanded */}
-        {variable.isExpanded && variable.children.map(child => 
-          renderVariable(child, depth + 1)
-        )}
+        {variable.isExpanded && variable.children.map(child => renderVariable(child, depth + 1))}
       </React.Fragment>
     );
   };
@@ -691,23 +686,23 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
     {
       label: 'Edit Value',
       enabled: contextMenuVariable?.access === VariableAccess.ReadWrite,
-      action: () => contextMenuVariable && startEditing(contextMenuVariable)
+      action: () => contextMenuVariable && startEditing(contextMenuVariable),
     },
     {
       label: 'Copy Value',
       enabled: true,
-      action: () => contextMenuVariable && onCopyValue?.(contextMenuVariable)
+      action: () => contextMenuVariable && onCopyValue?.(contextMenuVariable),
     },
     {
       label: 'Add to Watch',
       enabled: true,
-      action: () => contextMenuVariable && onAddToWatch?.(contextMenuVariable)
+      action: () => contextMenuVariable && onAddToWatch?.(contextMenuVariable),
     },
     {
       label: 'Show in Memory',
       enabled: contextMenuVariable?.address !== undefined,
-      action: () => contextMenuVariable && onShowInMemory?.(contextMenuVariable)
-    }
+      action: () => contextMenuVariable && onShowInMemory?.(contextMenuVariable),
+    },
   ];
 
   return (
@@ -721,9 +716,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
               {debugSession.currentModule}.{debugSession.currentProcedure}
             </span>
           )}
-          {isRefreshing && (
-            <div className="text-xs text-blue-600 animate-pulse">Refreshing...</div>
-          )}
+          {isRefreshing && <div className="text-xs text-blue-600 animate-pulse">Refreshing...</div>}
         </div>
 
         <div className="flex items-center gap-1">
@@ -731,10 +724,10 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
             type="text"
             placeholder="Search..."
             value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+            onChange={e => setSearchText(e.target.value)}
             className="px-2 py-1 text-xs border border-gray-300 rounded w-20"
           />
-          
+
           <button
             onClick={refreshVariables}
             disabled={!debugSession?.isActive || isRefreshing}
@@ -743,7 +736,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
           >
             🔄
           </button>
-          
+
           <button
             onClick={() => setSettings(prev => ({ ...prev, autoRefresh: !prev.autoRefresh }))}
             className={`px-2 py-1 text-xs rounded ${
@@ -760,7 +753,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
       <div className="flex items-center gap-2 p-2 bg-gray-50 border-b border-gray-200 text-xs">
         <select
           value={settings.sortBy}
-          onChange={(e) => setSettings(prev => ({ ...prev, sortBy: e.target.value as any }))}
+          onChange={e => setSettings(prev => ({ ...prev, sortBy: e.target.value as any }))}
           className="px-1 py-1 border border-gray-300 rounded"
         >
           <option value="name">Sort by Name</option>
@@ -770,7 +763,9 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
         </select>
 
         <button
-          onClick={() => setSettings(prev => ({ ...prev, sortOrder: prev.sortOrder === 'asc' ? 'desc' : 'asc' }))}
+          onClick={() =>
+            setSettings(prev => ({ ...prev, sortOrder: prev.sortOrder === 'asc' ? 'desc' : 'asc' }))
+          }
           className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded"
         >
           {settings.sortOrder === 'asc' ? '↑' : '↓'}
@@ -781,34 +776,36 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
             <input
               type="checkbox"
               checked={settings.showParameters}
-              onChange={(e) => setSettings(prev => ({ ...prev, showParameters: e.target.checked }))}
+              onChange={e => setSettings(prev => ({ ...prev, showParameters: e.target.checked }))}
             />
             Params
           </label>
-          
+
           <label className="flex items-center gap-1">
             <input
               type="checkbox"
               checked={settings.showModuleVariables}
-              onChange={(e) => setSettings(prev => ({ ...prev, showModuleVariables: e.target.checked }))}
+              onChange={e =>
+                setSettings(prev => ({ ...prev, showModuleVariables: e.target.checked }))
+              }
             />
             Module
           </label>
-          
+
           <label className="flex items-center gap-1">
             <input
               type="checkbox"
               checked={settings.showHexValues}
-              onChange={(e) => setSettings(prev => ({ ...prev, showHexValues: e.target.checked }))}
+              onChange={e => setSettings(prev => ({ ...prev, showHexValues: e.target.checked }))}
             />
             Hex
           </label>
-          
+
           <label className="flex items-center gap-1">
             <input
               type="checkbox"
               checked={settings.showAddresses}
-              onChange={(e) => setSettings(prev => ({ ...prev, showAddresses: e.target.checked }))}
+              onChange={e => setSettings(prev => ({ ...prev, showAddresses: e.target.checked }))}
             />
             Addr
           </label>
@@ -816,7 +813,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
       </div>
 
       {/* Column Headers */}
-      <div 
+      <div
         className="flex items-center py-2 px-2 bg-gray-200 border-b border-gray-300 text-xs font-medium text-gray-700"
         style={{ fontSize: `${settings.fontSize}px` }}
       >
@@ -860,7 +857,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
           className="fixed bg-white border border-gray-300 shadow-lg z-50 py-1"
           style={{
             left: contextMenuPosition.x,
-            top: contextMenuPosition.y
+            top: contextMenuPosition.y,
           }}
           onMouseLeave={() => setShowContextMenu(false)}
         >
@@ -894,9 +891,7 @@ export const LocalsWindow: React.FC<LocalsWindowProps> = ({
 
         <div className="flex items-center gap-2">
           <span>Last Update: {lastRefresh.toLocaleTimeString()}</span>
-          {settings.autoRefresh && (
-            <span className="text-green-600">Auto-refresh ON</span>
-          )}
+          {settings.autoRefresh && <span className="text-green-600">Auto-refresh ON</span>}
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 /**
  * VB6 Advanced Language Features Implementation
- * 
+ *
  * Complete implementation of advanced VB6 language features:
  * - GoTo and Labels
  * - Static variables
@@ -85,13 +85,11 @@ export class VB6AdvancedLanguageProcessor {
   goTo(labelName: string): void {
     const key = `${this.currentModule}.${this.currentProcedure}.${labelName}`;
     const label = this.labels.get(key);
-    
+
     if (!label) {
       throw new Error(`Label '${labelName}' not found in procedure '${this.currentProcedure}'`);
     }
-    
-    console.log(`[VB6 GoTo] Jumping to label '${labelName}' at line ${label.line}`);
-    
+
     // In a real implementation, this would modify the execution pointer
     // For JavaScript transpilation, we use structured control flow instead
     this.executionStack.push(`GoTo:${labelName}`);
@@ -102,16 +100,15 @@ export class VB6AdvancedLanguageProcessor {
    */
   registerLabel(labelName: string, line: number): void {
     const key = `${this.currentModule}.${this.currentProcedure}.${labelName}`;
-    
+
     const label: VB6Label = {
       name: labelName,
       line,
       module: this.currentModule,
-      procedure: this.currentProcedure
+      procedure: this.currentProcedure,
     };
-    
+
     this.labels.set(key, label);
-    console.log(`[VB6 Label] Registered label '${labelName}' at line ${line}`);
   }
 
   /**
@@ -120,10 +117,10 @@ export class VB6AdvancedLanguageProcessor {
    */
   declareStaticVariable(name: string, type: string, initialValue?: any): any {
     const key = `${this.currentModule}.${this.currentProcedure}.${name}`;
-    
+
     // Check if already exists
     let staticVar = this.staticVars.get(key);
-    
+
     if (!staticVar) {
       // First time - initialize
       staticVar = {
@@ -131,13 +128,12 @@ export class VB6AdvancedLanguageProcessor {
         type,
         value: initialValue !== undefined ? initialValue : this.getDefaultValue(type),
         module: this.currentModule,
-        procedure: this.currentProcedure
+        procedure: this.currentProcedure,
       };
-      
+
       this.staticVars.set(key, staticVar);
-      console.log(`[VB6 Static] Declared static variable '${name}' with initial value:`, staticVar.value);
     }
-    
+
     return staticVar.value;
   }
 
@@ -147,11 +143,11 @@ export class VB6AdvancedLanguageProcessor {
   getStaticVariable(name: string): any {
     const key = `${this.currentModule}.${this.currentProcedure}.${name}`;
     const staticVar = this.staticVars.get(key);
-    
+
     if (!staticVar) {
       throw new Error(`Static variable '${name}' not found`);
     }
-    
+
     return staticVar.value;
   }
 
@@ -161,13 +157,12 @@ export class VB6AdvancedLanguageProcessor {
   setStaticVariable(name: string, value: any): void {
     const key = `${this.currentModule}.${this.currentProcedure}.${name}`;
     const staticVar = this.staticVars.get(key);
-    
+
     if (!staticVar) {
       throw new Error(`Static variable '${name}' not found`);
     }
-    
+
     staticVar.value = value;
-    console.log(`[VB6 Static] Updated static variable '${name}' to:`, value);
   }
 
   /**
@@ -182,12 +177,12 @@ export class VB6AdvancedLanguageProcessor {
   ): VB6OptionalParameter {
     const isMissing = providedValue === undefined;
     const value = isMissing ? defaultValue : providedValue;
-    
+
     return {
       name: paramName,
       type: paramType,
       defaultValue,
-      isMissing
+      isMissing,
     };
   }
 
@@ -209,7 +204,7 @@ export class VB6AdvancedLanguageProcessor {
   processParamArray(paramName: string, ...args: any[]): VB6ParamArray {
     return {
       name: paramName,
-      values: args
+      values: args,
     };
   }
 
@@ -219,57 +214,46 @@ export class VB6AdvancedLanguageProcessor {
    */
   declareWithEvents(variableName: string, className: string): VB6WithEvents {
     const key = `${this.currentModule}.${variableName}`;
-    
+
     const withEventsVar: VB6WithEvents = {
       variableName,
       className,
       module: this.currentModule,
-      events: new Map()
+      events: new Map(),
     };
-    
+
     this.withEvents.set(key, withEventsVar);
-    console.log(`[VB6 WithEvents] Declared WithEvents variable '${variableName}' of type '${className}'`);
-    
+
     return withEventsVar;
   }
 
   /**
    * Connect WithEvents handler
    */
-  connectWithEventsHandler(
-    variableName: string,
-    eventName: string,
-    handler: EventHandler
-  ): void {
+  connectWithEventsHandler(variableName: string, eventName: string, handler: EventHandler): void {
     const key = `${this.currentModule}.${variableName}`;
     const withEventsVar = this.withEvents.get(key);
-    
+
     if (!withEventsVar) {
       throw new Error(`WithEvents variable '${variableName}' not found`);
     }
-    
+
     withEventsVar.events.set(eventName, handler);
-    console.log(`[VB6 WithEvents] Connected handler for '${variableName}_${eventName}'`);
   }
 
   /**
    * Trigger WithEvents event
    */
-  triggerWithEventsEvent(
-    variableName: string,
-    eventName: string,
-    ...args: any[]
-  ): void {
+  triggerWithEventsEvent(variableName: string, eventName: string, ...args: any[]): void {
     const key = `${this.currentModule}.${variableName}`;
     const withEventsVar = this.withEvents.get(key);
-    
+
     if (!withEventsVar) {
       return; // No WithEvents variable
     }
-    
+
     const handler = withEventsVar.events.get(eventName);
     if (handler) {
-      console.log(`[VB6 WithEvents] Triggering '${variableName}_${eventName}'`);
       handler(...args);
     }
   }
@@ -278,19 +262,14 @@ export class VB6AdvancedLanguageProcessor {
    * Friend scope implementation
    * Methods accessible within the same project but not externally
    */
-  isFriendAccessible(
-    targetModule: string,
-    callingModule: string,
-    memberName: string
-  ): boolean {
+  isFriendAccessible(targetModule: string, callingModule: string, memberName: string): boolean {
     // In VB6, Friend members are accessible within the same project
     // For web implementation, we consider same "project" as modules with same prefix
     const targetProject = targetModule.split('.')[0];
     const callingProject = callingModule.split('.')[0];
-    
+
     const isAccessible = targetProject === callingProject;
-    console.log(`[VB6 Friend] Access check for '${memberName}': ${isAccessible ? 'Allowed' : 'Denied'}`);
-    
+
     return isAccessible;
   }
 
@@ -305,27 +284,32 @@ export class VB6AdvancedLanguageProcessor {
   ): object {
     const property = {
       _value: undefined,
-      
-      get: getProc || function() {
-        return this._value;
-      },
-      
-      let: letProc || function(value: any) {
-        if (typeof value === 'object') {
-          throw new Error('Cannot assign object with Property Let');
-        }
-        this._value = value;
-      },
-      
-      set: setProc || function(value: any) {
-        if (typeof value !== 'object') {
-          throw new Error('Must assign object with Property Set');
-        }
-        this._value = value;
-      }
+
+      get:
+        getProc ||
+        function () {
+          return this._value;
+        },
+
+      let:
+        letProc ||
+        function (value: any) {
+          if (typeof value === 'object') {
+            throw new Error('Cannot assign object with Property Let');
+          }
+          this._value = value;
+        },
+
+      set:
+        setProc ||
+        function (value: any) {
+          if (typeof value !== 'object') {
+            throw new Error('Must assign object with Property Set');
+          }
+          this._value = value;
+        },
     };
-    
-    console.log(`[VB6 Property] Created property '${name}'`);
+
     return property;
   }
 
@@ -362,37 +346,37 @@ export class VB6AdvancedLanguageProcessor {
    */
   generateGoToJavaScript(procedure: string): string {
     let js = '';
-    
+
     // Collect all labels in this procedure
     const procedureLabels: VB6Label[] = [];
-    this.labels.forEach((label) => {
+    this.labels.forEach(label => {
       if (label.procedure === procedure) {
         procedureLabels.push(label);
       }
     });
-    
+
     if (procedureLabels.length === 0) {
       return js; // No labels, no GoTo handling needed
     }
-    
+
     // Generate label handling with switch statement
     js += `let __vb6_goto_label = null;\n`;
     js += `__vb6_goto_loop: while (true) {\n`;
     js += `  switch (__vb6_goto_label) {\n`;
     js += `    case null:\n`;
     js += `      // Normal execution flow\n`;
-    
+
     procedureLabels.forEach(label => {
       js += `    case '${label.name}':\n`;
       js += `      __vb6_goto_label = null; // Reset label\n`;
       js += `      // Code at label ${label.name}\n`;
     });
-    
+
     js += `    default:\n`;
     js += `      break __vb6_goto_loop;\n`;
     js += `  }\n`;
     js += `}\n`;
-    
+
     return js;
   }
 
@@ -401,35 +385,31 @@ export class VB6AdvancedLanguageProcessor {
    */
   generateStaticVariableJS(name: string, type: string, initialValue?: any): string {
     const storageKey = `${this.currentModule}_${this.currentProcedure}_${name}`;
-    
+
     let js = `// Static variable: ${name}\n`;
     js += `if (!window.__vb6_static) window.__vb6_static = {};\n`;
     js += `if (!window.__vb6_static['${storageKey}']) {\n`;
     js += `  window.__vb6_static['${storageKey}'] = ${JSON.stringify(initialValue || this.getDefaultValue(type))};\n`;
     js += `}\n`;
     js += `let ${name} = window.__vb6_static['${storageKey}'];\n`;
-    
+
     // Add getter/setter to track changes
     js += `Object.defineProperty(this, '${name}', {\n`;
     js += `  get: function() { return window.__vb6_static['${storageKey}']; },\n`;
     js += `  set: function(value) { window.__vb6_static['${storageKey}'] = value; }\n`;
     js += `});\n`;
-    
+
     return js;
   }
 
   /**
    * Generate JavaScript for Optional parameters
    */
-  generateOptionalParameterJS(
-    paramName: string,
-    paramType: string,
-    defaultValue: any
-  ): string {
+  generateOptionalParameterJS(paramName: string, paramType: string, defaultValue: any): string {
     let js = `// Optional parameter: ${paramName}\n`;
     js += `${paramName} = ${paramName} !== undefined ? ${paramName} : ${JSON.stringify(defaultValue)};\n`;
     js += `${paramName}.__isMissing = ${paramName} === ${JSON.stringify(defaultValue)};\n`;
-    
+
     return js;
   }
 
@@ -439,7 +419,7 @@ export class VB6AdvancedLanguageProcessor {
   generateParamArrayJS(paramName: string, startIndex: number): string {
     let js = `// ParamArray: ${paramName}\n`;
     js += `const ${paramName} = Array.prototype.slice.call(arguments, ${startIndex});\n`;
-    
+
     return js;
   }
 
@@ -450,7 +430,7 @@ export class VB6AdvancedLanguageProcessor {
     let js = `// WithEvents: ${variableName}\n`;
     js += `let ${variableName} = null;\n`;
     js += `const ${variableName}_events = {};\n\n`;
-    
+
     // Generate setter that connects events
     js += `Object.defineProperty(this, '${variableName}', {\n`;
     js += `  get: function() { return ${variableName}; },\n`;
@@ -464,7 +444,7 @@ export class VB6AdvancedLanguageProcessor {
     js += `    }\n`;
     js += `  }\n`;
     js += `});\n`;
-    
+
     return js;
   }
 
@@ -625,22 +605,22 @@ Public Property Let Age(ByVal value As Integer)
         Err.Raise 5, , "Invalid age"
     End If
 End Property
-`
+`,
 };
 
 // Export all features
 export const VB6AdvancedLanguageFeaturesAPI = {
   // Classes
   VB6AdvancedLanguageProcessor,
-  
+
   // Global instance
   advancedLanguageProcessor,
-  
+
   // Functions
   GoTo,
   IsMissing,
   CreateProperty,
-  
+
   // Examples
-  VB6AdvancedLanguageExamples
+  VB6AdvancedLanguageExamples,
 };

@@ -31,19 +31,19 @@ export enum VB6ResourceType {
   RT_ANIICON = 22,
   RT_HTML = 23,
   RT_MANIFEST = 24,
-  RT_CUSTOM = 256
+  RT_CUSTOM = 256,
 }
 
 // VB6 Language IDs for internationalization
 export enum VB6LanguageID {
   LANG_NEUTRAL = 0x0000,
   LANG_ENGLISH = 0x0009,
-  LANG_FRENCH = 0x000C,
+  LANG_FRENCH = 0x000c,
   LANG_GERMAN = 0x0007,
-  LANG_SPANISH = 0x000A,
+  LANG_SPANISH = 0x000a,
   LANG_ITALIAN = 0x0010,
   LANG_JAPANESE = 0x0011,
-  LANG_CHINESE = 0x0004
+  LANG_CHINESE = 0x0004,
 }
 
 // Resource Entry Structure
@@ -216,7 +216,7 @@ export class VB6ResourceManager {
       dataSize,
       created: new Date(),
       modified: new Date(),
-      checksum: 0
+      checksum: 0,
     });
     offset += headerSize;
 
@@ -235,17 +235,22 @@ export class VB6ResourceManager {
   }
 
   // String Resource Management
-  addStringResource(id: number, value: string, languageId: VB6LanguageID = VB6LanguageID.LANG_NEUTRAL, description?: string): void {
+  addStringResource(
+    id: number,
+    value: string,
+    languageId: VB6LanguageID = VB6LanguageID.LANG_NEUTRAL,
+    description?: string
+  ): void {
     if (!this.stringResources.has(id)) {
       this.stringResources.set(id, new Map());
     }
-    
+
     const langMap = this.stringResources.get(id)!;
     langMap.set(languageId, {
       id,
       value,
       languageId,
-      description
+      description,
     });
 
     // Update main resource entry
@@ -259,13 +264,16 @@ export class VB6ResourceManager {
       size: value.length * 2, // Unicode
       created: new Date(),
       modified: new Date(),
-      description
+      description,
     });
 
     this.isDirty = true;
   }
 
-  getStringResource(id: number, languageId: VB6LanguageID = VB6LanguageID.LANG_NEUTRAL): string | null {
+  getStringResource(
+    id: number,
+    languageId: VB6LanguageID = VB6LanguageID.LANG_NEUTRAL
+  ): string | null {
     const langMap = this.stringResources.get(id);
     if (!langMap) return null;
 
@@ -302,31 +310,40 @@ export class VB6ResourceManager {
       if (langMap.size === 0) {
         this.stringResources.delete(id);
       }
-      
+
       // Remove from main resources
       const resourceId = `STRING_${id}_${languageId}`;
       this.resources.delete(resourceId);
-      
+
       if (removed) this.isDirty = true;
       return removed;
     } else {
       // Remove all language versions
       this.stringResources.delete(id);
-      
+
       // Remove all from main resources
       for (const [key] of this.resources) {
         if (key.startsWith(`STRING_${id}_`)) {
           this.resources.delete(key);
         }
       }
-      
+
       this.isDirty = true;
       return true;
     }
   }
 
   // Icon Resource Management
-  addIconResource(id: number, iconData: ArrayBuffer, width: number, height: number, colorDepth: number, isCursor: boolean = false, hotspotX?: number, hotspotY?: number): void {
+  addIconResource(
+    id: number,
+    iconData: ArrayBuffer,
+    width: number,
+    height: number,
+    colorDepth: number,
+    isCursor: boolean = false,
+    hotspotX?: number,
+    hotspotY?: number
+  ): void {
     const iconResource: VB6IconResource = {
       id,
       width,
@@ -335,7 +352,7 @@ export class VB6ResourceManager {
       data: iconData,
       isCursor,
       hotspotX,
-      hotspotY
+      hotspotY,
     };
 
     this.iconResources.set(id, iconResource);
@@ -351,7 +368,7 @@ export class VB6ResourceManager {
       size: iconData.byteLength,
       created: new Date(),
       modified: new Date(),
-      description: `${width}x${height} ${colorDepth}-bit ${isCursor ? 'cursor' : 'icon'}`
+      description: `${width}x${height} ${colorDepth}-bit ${isCursor ? 'cursor' : 'icon'}`,
     });
 
     this.isDirty = true;
@@ -375,11 +392,15 @@ export class VB6ResourceManager {
   }
 
   // Menu Resource Management
-  addMenuResource(id: number, items: VB6MenuItem[], languageId: VB6LanguageID = VB6LanguageID.LANG_NEUTRAL): void {
+  addMenuResource(
+    id: number,
+    items: VB6MenuItem[],
+    languageId: VB6LanguageID = VB6LanguageID.LANG_NEUTRAL
+  ): void {
     const menuResource: VB6MenuResource = {
       id,
       items,
-      languageId
+      languageId,
     };
 
     this.menuResources.set(id, menuResource);
@@ -395,7 +416,7 @@ export class VB6ResourceManager {
       size: this.calculateMenuSize(items),
       created: new Date(),
       modified: new Date(),
-      description: `Menu with ${this.countMenuItems(items)} items`
+      description: `Menu with ${this.countMenuItems(items)} items`,
     });
 
     this.isDirty = true;
@@ -420,7 +441,7 @@ export class VB6ResourceManager {
       size: this.calculateDialogSize(dialog),
       created: new Date(),
       modified: new Date(),
-      description: `Dialog "${dialog.title}" with ${dialog.controls.length} controls`
+      description: `Dialog "${dialog.title}" with ${dialog.controls.length} controls`,
     });
 
     this.isDirty = true;
@@ -444,7 +465,7 @@ export class VB6ResourceManager {
       size: this.calculateVersionSize(version),
       created: new Date(),
       modified: new Date(),
-      description: `Version ${version.fileVersion.major}.${version.fileVersion.minor}.${version.fileVersion.build}.${version.fileVersion.revision}`
+      description: `Version ${version.fileVersion.major}.${version.fileVersion.minor}.${version.fileVersion.build}.${version.fileVersion.revision}`,
     });
 
     this.isDirty = true;
@@ -455,7 +476,13 @@ export class VB6ResourceManager {
   }
 
   // Custom Resource Management
-  addCustomResource(id: number | string, name: string, data: ArrayBuffer, type: VB6ResourceType = VB6ResourceType.RT_RCDATA, description?: string): void {
+  addCustomResource(
+    id: number | string,
+    name: string,
+    data: ArrayBuffer,
+    type: VB6ResourceType = VB6ResourceType.RT_RCDATA,
+    description?: string
+  ): void {
     const resourceId = `CUSTOM_${id}`;
     this.resources.set(resourceId, {
       id,
@@ -466,7 +493,7 @@ export class VB6ResourceManager {
       size: data.byteLength,
       created: new Date(),
       modified: new Date(),
-      description
+      description,
     });
 
     this.isDirty = true;
@@ -497,7 +524,11 @@ export class VB6ResourceManager {
   }
 
   // Resource Statistics
-  getResourceStats(): { totalSize: number; resourceCount: number; byType: { [key: number]: number } } {
+  getResourceStats(): {
+    totalSize: number;
+    resourceCount: number;
+    byType: { [key: number]: number };
+  } {
     const resources = this.getAllResources();
     const totalSize = resources.reduce((sum, r) => sum + r.size, 0);
     const byType: { [key: number]: number } = {};
@@ -509,7 +540,7 @@ export class VB6ResourceManager {
     return {
       totalSize,
       resourceCount: resources.length,
-      byType
+      byType,
     };
   }
 
@@ -532,10 +563,10 @@ export class VB6ResourceManager {
   async importFromVB6Project(projectData: string): Promise<number> {
     let importCount = 0;
     const lines = projectData.split('\n');
-    
+
     for (const line of lines) {
       const trimmed = line.trim();
-      
+
       // Parse resource references in VB6 project files
       if (trimmed.startsWith('ResFile32=')) {
         const resFile = trimmed.substring(10).replace(/"/g, '');
@@ -547,16 +578,16 @@ export class VB6ResourceManager {
         importCount++;
       }
     }
-    
+
     return importCount;
   }
 
   exportToResourceScript(): string {
     let script = '// VB6 Resource Script\n// Generated by VB6 Resource Manager\n\n';
-    
+
     // Include headers
     script += '#include <windows.h>\n\n';
-    
+
     // Export string resources
     const stringGroups = new Map<VB6LanguageID, VB6StringResource[]>();
     for (const resource of this.getAllStringResources()) {
@@ -565,7 +596,7 @@ export class VB6ResourceManager {
       }
       stringGroups.get(resource.languageId)!.push(resource);
     }
-    
+
     for (const [langId, strings] of stringGroups) {
       script += `STRINGTABLE LANGUAGE ${this.getLanguageName(langId)}\n{\n`;
       for (const str of strings) {
@@ -573,19 +604,19 @@ export class VB6ResourceManager {
       }
       script += '}\n\n';
     }
-    
+
     // Export icon resources
     for (const icon of this.getAllIconResources()) {
       script += `${icon.id} ICON "${icon.id}.ico"\n`;
     }
-    
+
     // Export menu resources
     for (const [id, menu] of this.menuResources) {
       script += `${id} MENU\n{\n`;
       script += this.menuToScript(menu.items, 1);
       script += '}\n\n';
     }
-    
+
     // Export dialog resources
     for (const [id, dialog] of this.dialogResources) {
       script += `${id} DIALOG ${dialog.x}, ${dialog.y}, ${dialog.width}, ${dialog.height}\n`;
@@ -599,7 +630,7 @@ export class VB6ResourceManager {
       }
       script += '}\n\n';
     }
-    
+
     return script;
   }
 
@@ -613,7 +644,7 @@ export class VB6ResourceManager {
       dataSize: view.getUint32(offset + 16, true),
       created: new Date(view.getBigUint64(offset + 20, true).toString()),
       modified: new Date(view.getBigUint64(offset + 28, true).toString()),
-      checksum: view.getUint32(offset + 36, true)
+      checksum: view.getUint32(offset + 36, true),
     };
   }
 
@@ -634,13 +665,13 @@ export class VB6ResourceManager {
     const languageId = view.getUint16(offset + 8, true);
     const size = view.getUint32(offset + 10, true);
     const nameLength = view.getUint16(offset + 14, true);
-    
+
     let nameOffset = offset + 16;
     const name = this.readUnicodeString(view, nameOffset, nameLength);
     nameOffset += nameLength * 2;
-    
+
     const data = view.buffer.slice(nameOffset, nameOffset + size);
-    
+
     return {
       id,
       type,
@@ -649,7 +680,7 @@ export class VB6ResourceManager {
       data,
       size,
       created: new Date(),
-      modified: new Date()
+      modified: new Date(),
     };
   }
 
@@ -659,12 +690,16 @@ export class VB6ResourceManager {
     view.setUint16(offset + 8, entry.languageId, true);
     view.setUint32(offset + 10, entry.size, true);
     view.setUint16(offset + 14, entry.name.length, true);
-    
+
     this.writeUnicodeString(view, offset + 16, entry.name);
-    
+
     if (entry.data instanceof ArrayBuffer) {
       const sourceView = new Uint8Array(entry.data);
-      const targetView = new Uint8Array(view.buffer, offset + 16 + entry.name.length * 2, entry.size);
+      const targetView = new Uint8Array(
+        view.buffer,
+        offset + 16 + entry.name.length * 2,
+        entry.size
+      );
       targetView.set(sourceView);
     }
   }
@@ -725,7 +760,7 @@ export class VB6ResourceManager {
   private menuToScript(items: VB6MenuItem[], indent: number): string {
     let script = '';
     const indentStr = '  '.repeat(indent);
-    
+
     for (const item of items) {
       if (item.separator) {
         script += `${indentStr}MENUITEM SEPARATOR\n`;
@@ -737,7 +772,7 @@ export class VB6ResourceManager {
         script += `${indentStr}MENUITEM "${item.text}", ${item.id}\n`;
       }
     }
-    
+
     return script;
   }
 
@@ -757,14 +792,22 @@ export class VB6ResourceManager {
 
   private getLanguageName(langId: VB6LanguageID): string {
     switch (langId) {
-      case VB6LanguageID.LANG_ENGLISH: return 'LANG_ENGLISH, SUBLANG_DEFAULT';
-      case VB6LanguageID.LANG_FRENCH: return 'LANG_FRENCH, SUBLANG_DEFAULT';
-      case VB6LanguageID.LANG_GERMAN: return 'LANG_GERMAN, SUBLANG_DEFAULT';
-      case VB6LanguageID.LANG_SPANISH: return 'LANG_SPANISH, SUBLANG_DEFAULT';
-      case VB6LanguageID.LANG_ITALIAN: return 'LANG_ITALIAN, SUBLANG_DEFAULT';
-      case VB6LanguageID.LANG_JAPANESE: return 'LANG_JAPANESE, SUBLANG_DEFAULT';
-      case VB6LanguageID.LANG_CHINESE: return 'LANG_CHINESE, SUBLANG_DEFAULT';
-      default: return 'LANG_NEUTRAL, SUBLANG_DEFAULT';
+      case VB6LanguageID.LANG_ENGLISH:
+        return 'LANG_ENGLISH, SUBLANG_DEFAULT';
+      case VB6LanguageID.LANG_FRENCH:
+        return 'LANG_FRENCH, SUBLANG_DEFAULT';
+      case VB6LanguageID.LANG_GERMAN:
+        return 'LANG_GERMAN, SUBLANG_DEFAULT';
+      case VB6LanguageID.LANG_SPANISH:
+        return 'LANG_SPANISH, SUBLANG_DEFAULT';
+      case VB6LanguageID.LANG_ITALIAN:
+        return 'LANG_ITALIAN, SUBLANG_DEFAULT';
+      case VB6LanguageID.LANG_JAPANESE:
+        return 'LANG_JAPANESE, SUBLANG_DEFAULT';
+      case VB6LanguageID.LANG_CHINESE:
+        return 'LANG_CHINESE, SUBLANG_DEFAULT';
+      default:
+        return 'LANG_NEUTRAL, SUBLANG_DEFAULT';
     }
   }
 
@@ -813,12 +856,12 @@ export function LoadResString(id: number): string {
 
 export function LoadResPicture(id: number, type: VB6ResourceType): ArrayBuffer | null {
   const resource = VB6ResourceManagerInstance.findResource(id, type);
-  return resource ? resource.data as ArrayBuffer : null;
+  return resource ? (resource.data as ArrayBuffer) : null;
 }
 
 export function LoadResData(id: number | string, type: VB6ResourceType): ArrayBuffer | null {
   const resource = VB6ResourceManagerInstance.findResource(id, type);
-  return resource ? resource.data as ArrayBuffer : null;
+  return resource ? (resource.data as ArrayBuffer) : null;
 }
 
 logger.info('VB6 Resource Manager initialized with full .res file support');

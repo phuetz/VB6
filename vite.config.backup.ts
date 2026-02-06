@@ -10,14 +10,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['lucide-react'],
-    include: [
-      'buffer', 
-      'process', 
-      'util', 
-      'crypto-browserify', 
-      'stream-browserify',
-      'events'
-    ]
+    include: ['buffer', 'process', 'util', 'crypto-browserify', 'stream-browserify', 'events'],
   },
   define: {
     global: 'globalThis',
@@ -32,7 +25,7 @@ export default defineConfig({
       util: 'util',
       buffer: 'buffer',
       process: 'process/browser',
-    }
+    },
   },
   server: {
     port: 3001,

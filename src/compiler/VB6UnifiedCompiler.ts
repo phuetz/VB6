@@ -1,6 +1,6 @@
 /**
  * VB6 Unified Compiler - Ultra-Complete Integration
- * 
+ *
  * Features:
  * - Complete integration of all compiler components
  * - Pipeline: Lexer → Parser → Analyzer → Generator → Optimizer
@@ -26,7 +26,7 @@ import { VB6SemanticAnalyzer } from '../utils/vb6SemanticAnalyzer';
 export interface CompilerOptions {
   // Lexer options
   lexer?: LexerOptions;
-  
+
   // Parser options
   parser?: {
     strictMode?: boolean;
@@ -34,7 +34,7 @@ export interface CompilerOptions {
     enableLineNumbers?: boolean;
     maxComplexity?: number;
   };
-  
+
   // Semantic analyzer options
   analyzer?: {
     strictTypeChecking?: boolean;
@@ -42,30 +42,30 @@ export interface CompilerOptions {
     warnOnImplicitConversion?: boolean;
     enableFlowAnalysis?: boolean;
   };
-  
+
   // JS Generator options
   generator?: JSGenerationOptions;
-  
+
   // UDT Transpiler options
   udt?: UDTTranspilerOptions;
-  
+
   // WASM Optimizer options
   wasm?: WasmOptimizationOptions;
-  
+
   // Cache options
   cache?: {
     enabled?: boolean;
     maxSize?: number;
     enablePersistence?: boolean;
   };
-  
+
   // Worker options
   workers?: {
     enabled?: boolean;
     maxWorkers?: number;
     chunkSize?: number;
   };
-  
+
   // Output options
   output?: {
     target?: 'es5' | 'es6' | 'es2017' | 'es2020' | 'esnext';
@@ -74,7 +74,7 @@ export interface CompilerOptions {
     minify?: boolean;
     bundleRuntime?: boolean;
   };
-  
+
   // Debug options
   debug?: {
     enableProfiling?: boolean;
@@ -130,7 +130,7 @@ export interface CompilationMetrics {
   wasmOptimizations: number;
   memoryUsage: number;
   workerThreadsUsed: number;
-  
+
   // Individual component metrics
   lexerMetrics?: LexerMetrics;
   generatorMetrics?: GenerationMetrics;
@@ -162,12 +162,12 @@ export class VB6UnifiedCompiler {
   private cache: VB6CompilationCache;
   private wasmOptimizer: VB6WasmOptimizer;
   private analyzer: VB6SemanticAnalyzer;
-  
+
   // Pipeline management
   private pipeline: CompilerPipeline;
   private workers: Worker[] = [];
   private activeCompilations = new Map<string, Promise<CompilationResult>>();
-  
+
   // Metrics tracking
   private globalMetrics: CompilationMetrics;
   private compilationHistory: CompilationResult[] = [];
@@ -193,21 +193,21 @@ export class VB6UnifiedCompiler {
         bufferSize: 64 * 1024,
         enableMetrics: true,
         enableErrorRecovery: true,
-        ...options.lexer
+        ...options.lexer,
       },
       parser: {
         strictMode: false,
         allowImplicitTypes: true,
         enableLineNumbers: true,
         maxComplexity: 1000,
-        ...options.parser
+        ...options.parser,
       },
       analyzer: {
         strictTypeChecking: false,
         allowVariantConversion: true,
         warnOnImplicitConversion: false,
         enableFlowAnalysis: true,
-        ...options.analyzer
+        ...options.analyzer,
       },
       generator: {
         useES6Classes: true,
@@ -216,7 +216,7 @@ export class VB6UnifiedCompiler {
         targetRuntime: 'browser',
         strictMode: false,
         generateTypeScript: false,
-        ...options.generator
+        ...options.generator,
       },
       udt: {
         generateTypeScript: false,
@@ -226,7 +226,7 @@ export class VB6UnifiedCompiler {
         generateComments: true,
         strictTypeChecking: false,
         enableCloning: true,
-        ...options.udt
+        ...options.udt,
       },
       wasm: {
         enableSIMD: true,
@@ -240,19 +240,19 @@ export class VB6UnifiedCompiler {
         complexityThreshold: 10,
         enableProfiler: true,
         enableBinaryen: false,
-        ...options.wasm
+        ...options.wasm,
       },
       cache: {
         enabled: true,
         maxSize: 200 * 1024 * 1024,
         enablePersistence: true,
-        ...options.cache
+        ...options.cache,
       },
       workers: {
         enabled: typeof Worker !== 'undefined',
         maxWorkers: Math.max(1, navigator?.hardwareConcurrency || 4),
         chunkSize: 100000,
-        ...options.workers
+        ...options.workers,
       },
       output: {
         target: 'es2017',
@@ -260,15 +260,15 @@ export class VB6UnifiedCompiler {
         sourceMaps: false,
         minify: false,
         bundleRuntime: true,
-        ...options.output
+        ...options.output,
       },
       debug: {
         enableProfiling: false,
         enableTracing: false,
         logLevel: 'warn',
         enableMetrics: true,
-        ...options.debug
-      }
+        ...options.debug,
+      },
     };
   }
 
@@ -282,11 +282,11 @@ export class VB6UnifiedCompiler {
     this.errorHandler = VB6AdvancedErrorHandler.getInstance();
     this.wasmOptimizer = new VB6WasmOptimizer(this.options.wasm);
     this.analyzer = new VB6SemanticAnalyzer();
-    
+
     if (this.options.cache.enabled) {
       this.cache = new VB6CompilationCache({
         maxSize: this.options.cache.maxSize,
-        enablePersistence: this.options.cache.enablePersistence
+        enablePersistence: this.options.cache.enablePersistence,
       });
     }
   }
@@ -303,29 +303,29 @@ export class VB6UnifiedCompiler {
         {
           name: 'lexical-analysis',
           execute: this.lexicalAnalysis.bind(this),
-          validate: (input: string) => typeof input === 'string' && input.length > 0
+          validate: (input: string) => typeof input === 'string' && input.length > 0,
         },
         {
           name: 'syntactic-analysis',
           execute: this.syntacticAnalysis.bind(this),
-          validate: (tokens: Token[]) => Array.isArray(tokens) && tokens.length > 0
+          validate: (tokens: Token[]) => Array.isArray(tokens) && tokens.length > 0,
         },
         {
           name: 'semantic-analysis',
           execute: this.semanticAnalysis.bind(this),
-          validate: (ast: VB6ModuleAST) => ast && typeof ast === 'object'
+          validate: (ast: VB6ModuleAST) => ast && typeof ast === 'object',
         },
         {
           name: 'code-generation',
           execute: this.codeGeneration.bind(this),
-          validate: (ast: VB6ModuleAST) => ast && typeof ast === 'object'
+          validate: (ast: VB6ModuleAST) => ast && typeof ast === 'object',
         },
         {
           name: 'optimization',
           execute: this.optimization.bind(this),
-          validate: (code: string) => typeof code === 'string' && code.length > 0
-        }
-      ]
+          validate: (code: string) => typeof code === 'string' && code.length > 0,
+        },
+      ],
     };
   }
 
@@ -366,18 +366,18 @@ export class VB6UnifiedCompiler {
   public async compile(source: string, filename?: string): Promise<CompilationResult> {
     const startTime = performance.now();
     const compilationId = `${filename || 'inline'}_${Date.now()}`;
-    
+
     try {
       // Check cache first
       if (this.options.cache.enabled) {
         const cacheKey = this.generateCacheKey(source, filename);
         const cached = this.cache.get(cacheKey);
-        
+
         if (cached) {
           this.globalMetrics.cacheHits++;
           return cached as CompilationResult;
         }
-        
+
         this.globalMetrics.cacheMisses++;
       }
 
@@ -391,7 +391,7 @@ export class VB6UnifiedCompiler {
       this.activeCompilations.set(compilationId, compilationPromise);
 
       const result = await compilationPromise;
-      
+
       // Cache successful compilation
       if (result.success && this.options.cache.enabled) {
         const cacheKey = this.generateCacheKey(source, filename);
@@ -400,25 +400,26 @@ export class VB6UnifiedCompiler {
 
       // Update global metrics
       this.updateGlobalMetrics(result, performance.now() - startTime);
-      
+
       // Clean up
       this.activeCompilations.delete(compilationId);
-      
+
       return result;
-      
     } catch (error) {
       this.activeCompilations.delete(compilationId);
-      
+
       return {
         success: false,
         output: '',
-        errors: [{
-          type: 'fatal' as any,
-          message: `Compilation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          severity: 'fatal'
-        }],
+        errors: [
+          {
+            type: 'fatal' as any,
+            message: `Compilation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            severity: 'fatal',
+          },
+        ],
         warnings: [],
-        metrics: this.createEmptyMetrics()
+        metrics: this.createEmptyMetrics(),
       };
     }
   }
@@ -439,7 +440,7 @@ export class VB6UnifiedCompiler {
       // Execute each pipeline stage
       for (const stage of this.pipeline.stages) {
         const stageStartTime = performance.now();
-        
+
         try {
           // Validate input
           if (stage.validate && !stage.validate(currentInput)) {
@@ -454,29 +455,28 @@ export class VB6UnifiedCompiler {
           // Execute stage
           const stageResult = await stage.execute(currentInput, this.options);
           currentInput = stageResult.output || stageResult;
-          
+
           // Collect stage metrics
           const stageTime = performance.now() - stageStartTime;
           this.updateStageMetrics(metrics, stage.name, stageTime, stageResult);
-          
+
           // Collect errors and warnings
           if (stageResult.errors) {
             errors.push(...stageResult.errors);
           }
-          
+
           if (stageResult.warnings) {
             warnings.push(...stageResult.warnings);
           }
-          
         } catch (stageError) {
           const error: CompilationError = {
             type: this.getErrorTypeFromStage(stage.name),
             message: `${stage.name} failed: ${stageError instanceof Error ? stageError.message : 'Unknown error'}`,
-            severity: 'error'
+            severity: 'error',
           };
-          
+
           errors.push(error);
-          
+
           // Continue with error recovery if possible
           if (this.options.lexer.enableErrorRecovery) {
             currentInput = this.recoverFromError(stage.name, stageError, currentInput);
@@ -487,20 +487,22 @@ export class VB6UnifiedCompiler {
       }
 
       // Calculate total metrics
-      metrics.totalTime = metrics.lexingTime + metrics.parsingTime + 
-                         metrics.analysisTime + metrics.generationTime + 
-                         metrics.optimizationTime;
+      metrics.totalTime =
+        metrics.lexingTime +
+        metrics.parsingTime +
+        metrics.analysisTime +
+        metrics.generationTime +
+        metrics.optimizationTime;
 
       const result: CompilationResult = {
         success: errors.filter(e => e.severity === 'error' || e.severity === 'fatal').length === 0,
         output: typeof currentInput === 'string' ? currentInput : JSON.stringify(currentInput),
         errors,
         warnings,
-        metrics
+        metrics,
       };
 
       return result;
-
     } finally {
       // Exit compilation context
       this.errorHandler.exitContext();
@@ -510,32 +512,37 @@ export class VB6UnifiedCompiler {
   /**
    * Lexical analysis stage
    */
-  private async lexicalAnalysis(source: string): Promise<{ tokens: Token[]; metrics: LexerMetrics }> {
+  private async lexicalAnalysis(
+    source: string
+  ): Promise<{ tokens: Token[]; metrics: LexerMetrics }> {
     const tokens = this.lexer.tokenize(source);
     const metrics = this.lexer.getMetrics();
-    
+
     return { tokens, metrics };
   }
 
   /**
    * Syntactic analysis stage
    */
-  private async syntacticAnalysis(lexResult: { tokens: Token[] }): Promise<{ ast: VB6ModuleAST; errors: CompilationError[] }> {
+  private async syntacticAnalysis(lexResult: {
+    tokens: Token[];
+  }): Promise<{ ast: VB6ModuleAST; errors: CompilationError[] }> {
     try {
       // Extract source code from tokens for parsing
       const sourceCode = this.reconstructSourceFromTokens(lexResult.tokens);
       const ast = parseVB6Module(sourceCode);
-      
+
       return { ast, errors: [] };
-      
     } catch (error) {
       return {
         ast: { name: 'ErrorModule', variables: [], procedures: [], properties: [], events: [] },
-        errors: [{
-          type: 'parser',
-          message: `Parse error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          severity: 'error'
-        }]
+        errors: [
+          {
+            type: 'parser',
+            message: `Parse error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            severity: 'error',
+          },
+        ],
       };
     }
   }
@@ -543,41 +550,44 @@ export class VB6UnifiedCompiler {
   /**
    * Semantic analysis stage
    */
-  private async semanticAnalysis(parseResult: { ast: VB6ModuleAST }): Promise<{ ast: VB6ModuleAST; errors: CompilationError[]; warnings: CompilationWarning[] }> {
+  private async semanticAnalysis(parseResult: {
+    ast: VB6ModuleAST;
+  }): Promise<{ ast: VB6ModuleAST; errors: CompilationError[]; warnings: CompilationWarning[] }> {
     try {
       // Perform semantic analysis
       const analysisResult = this.analyzer.analyze(parseResult.ast);
-      
+
       const errors: CompilationError[] = analysisResult.errors.map(e => ({
         type: 'analyzer' as const,
         message: e.message,
         line: e.line,
         column: e.column,
-        severity: 'error' as const
+        severity: 'error' as const,
       }));
-      
+
       const warnings: CompilationWarning[] = analysisResult.warnings.map(w => ({
         type: 'analyzer' as const,
         message: w.message,
         line: w.line,
-        column: w.column
+        column: w.column,
       }));
 
       return {
         ast: parseResult.ast,
         errors,
-        warnings
+        warnings,
       };
-      
     } catch (error) {
       return {
         ast: parseResult.ast,
-        errors: [{
-          type: 'analyzer',
-          message: `Semantic analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          severity: 'error'
-        }],
-        warnings: []
+        errors: [
+          {
+            type: 'analyzer',
+            message: `Semantic analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            severity: 'error',
+          },
+        ],
+        warnings: [],
       };
     }
   }
@@ -585,21 +595,25 @@ export class VB6UnifiedCompiler {
   /**
    * Code generation stage
    */
-  private async codeGeneration(analysisResult: { ast: VB6ModuleAST }): Promise<{ output: string; metrics: GenerationMetrics }> {
+  private async codeGeneration(analysisResult: {
+    ast: VB6ModuleAST;
+  }): Promise<{ output: string; metrics: GenerationMetrics }> {
     const output = this.generator.generateModule(analysisResult.ast);
     const metrics = this.generator.getMetrics();
-    
+
     return { output, metrics };
   }
 
   /**
    * Optimization stage
    */
-  private async optimization(generationResult: { output: string }): Promise<{ output: string; metrics: any }> {
+  private async optimization(generationResult: {
+    output: string;
+  }): Promise<{ output: string; metrics: any }> {
     let optimizedCode = generationResult.output;
     const metrics = {
       wasmOptimizations: 0,
-      minificationRatio: 1
+      minificationRatio: 1,
     };
 
     // Apply minification if enabled
@@ -626,7 +640,7 @@ export class VB6UnifiedCompiler {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return hash.toString(36);
@@ -638,12 +652,18 @@ export class VB6UnifiedCompiler {
 
   private getErrorTypeFromStage(stageName: string): CompilationError['type'] {
     switch (stageName) {
-      case 'lexical-analysis': return 'lexer';
-      case 'syntactic-analysis': return 'parser';
-      case 'semantic-analysis': return 'analyzer';
-      case 'code-generation': return 'generator';
-      case 'optimization': return 'optimizer';
-      default: return 'generator';
+      case 'lexical-analysis':
+        return 'lexer';
+      case 'syntactic-analysis':
+        return 'parser';
+      case 'semantic-analysis':
+        return 'analyzer';
+      case 'code-generation':
+        return 'generator';
+      case 'optimization':
+        return 'optimizer';
+      default:
+        return 'generator';
     }
   }
 
@@ -662,7 +682,12 @@ export class VB6UnifiedCompiler {
       .trim();
   }
 
-  private updateStageMetrics(metrics: CompilationMetrics, stageName: string, time: number, result: any): void {
+  private updateStageMetrics(
+    metrics: CompilationMetrics,
+    stageName: string,
+    time: number,
+    result: any
+  ): void {
     switch (stageName) {
       case 'lexical-analysis':
         metrics.lexingTime = time;
@@ -699,10 +724,10 @@ export class VB6UnifiedCompiler {
     this.globalMetrics.linesOfCode += result.metrics.linesOfCode;
     this.globalMetrics.tokensGenerated += result.metrics.tokensGenerated;
     this.globalMetrics.functionsCompiled += result.metrics.functionsCompiled;
-    
+
     // Add to compilation history
     this.compilationHistory.push(result);
-    
+
     // Keep only recent compilations
     if (this.compilationHistory.length > 100) {
       this.compilationHistory = this.compilationHistory.slice(-100);
@@ -725,7 +750,7 @@ export class VB6UnifiedCompiler {
       udtsGenerated: 0,
       wasmOptimizations: 0,
       memoryUsage: 0,
-      workerThreadsUsed: 0
+      workerThreadsUsed: 0,
     };
   }
 
@@ -739,10 +764,9 @@ export class VB6UnifiedCompiler {
    */
   private handleWorkerMessage(event: MessageEvent): void {
     const { type, id, result, error } = event.data;
-    
+
     if (type === 'compilation-complete') {
       // Handle worker compilation completion
-      console.log(`Worker compilation ${id} completed`);
     } else if (type === 'compilation-error') {
       console.error(`Worker compilation ${id} failed:`, error);
     }
@@ -755,11 +779,13 @@ export class VB6UnifiedCompiler {
   /**
    * Public API methods
    */
-  
+
   /**
    * Compile multiple files in parallel
    */
-  public async compileFiles(files: { name: string; content: string }[]): Promise<CompilationResult[]> {
+  public async compileFiles(
+    files: { name: string; content: string }[]
+  ): Promise<CompilationResult[]> {
     const promises = files.map(file => this.compile(file.content, file.name));
     return Promise.all(promises);
   }
@@ -810,7 +836,12 @@ export class VB6UnifiedCompiler {
   /**
    * Profile VB6 code for WASM optimization
    */
-  public profileForOptimization(procedureName: string, moduleName: string, executionTime: number, vb6Code: string): void {
+  public profileForOptimization(
+    procedureName: string,
+    moduleName: string,
+    executionTime: number,
+    vb6Code: string
+  ): void {
     this.wasmOptimizer.profileExecution(procedureName, moduleName, executionTime, vb6Code);
   }
 
@@ -845,4 +876,10 @@ export class VB6UnifiedCompiler {
 export const unifiedCompiler = new VB6UnifiedCompiler();
 
 // Export types
-export type { CompilerOptions, CompilationResult, CompilationError, CompilationWarning, CompilationMetrics };
+export type {
+  CompilerOptions,
+  CompilationResult,
+  CompilationError,
+  CompilationWarning,
+  CompilationMetrics,
+};

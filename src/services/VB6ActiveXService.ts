@@ -73,7 +73,7 @@ export enum ActiveXControlType {
   StatusBar = 'StatusBar',
   CoolBar = 'CoolBar',
   ImageList = 'ImageList',
-  CommonDialog = 'CommonDialog'
+  CommonDialog = 'CommonDialog',
 }
 
 // Base ActiveX Control Interface
@@ -168,7 +168,7 @@ export class MSCommControl extends ActiveXControlBase {
       Output: '',
       CommEvent: 0,
       DTREnable: true,
-      RTSEnable: true
+      RTSEnable: true,
     };
   }
 
@@ -178,7 +178,7 @@ export class MSCommControl extends ActiveXControlBase {
       ClosePort: this.closePort.bind(this),
       SendData: this.sendData.bind(this),
       ReadData: this.readData.bind(this),
-      ClearBuffer: this.clearBuffer.bind(this)
+      ClearBuffer: this.clearBuffer.bind(this),
     };
   }
 
@@ -203,16 +203,16 @@ export class MSCommControl extends ActiveXControlBase {
     try {
       // Request port access
       this.port = await (navigator as any).serial.requestPort();
-      
+
       // Parse settings
       const [baudRate] = this.properties.Settings.split(',');
-      
+
       // Open port
       await this.port.open({ baudRate: parseInt(baudRate) });
-      
+
       this.properties.PortOpen = true;
       this.events.emit('OnComm', { CommEvent: 3 }); // Port opened
-      
+
       // Set up reading
       this.startReading();
     } catch (error) {
@@ -259,12 +259,14 @@ export class MSCommControl extends ActiveXControlBase {
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
-        
+
         const text = decoder.decode(value);
         this.properties.Input += text;
-        
-        if (this.properties.RThreshold > 0 && 
-            this.properties.Input.length >= this.properties.RThreshold) {
+
+        if (
+          this.properties.RThreshold > 0 &&
+          this.properties.Input.length >= this.properties.RThreshold
+        ) {
           this.events.emit('OnComm', { CommEvent: 2 }); // Receive event
         }
       }
@@ -298,7 +300,7 @@ export class MSChartControl extends ActiveXControlBase {
       GridLines: true,
       Data: this.createDefaultData(),
       Series: [],
-      AutoRedraw: true
+      AutoRedraw: true,
     };
   }
 
@@ -309,7 +311,7 @@ export class MSChartControl extends ActiveXControlBase {
       GetData: this.getData.bind(this),
       AddSeries: this.addSeries.bind(this),
       RemoveSeries: this.removeSeries.bind(this),
-      ExportChart: this.exportChart.bind(this)
+      ExportChart: this.exportChart.bind(this),
     };
   }
 
@@ -406,8 +408,12 @@ export class MSChartControl extends ActiveXControlBase {
   }
 
   private setData(row: number, col: number, value: number): void {
-    if (row >= 0 && row < this.properties.RowCount &&
-        col >= 0 && col < this.properties.ColumnCount) {
+    if (
+      row >= 0 &&
+      row < this.properties.RowCount &&
+      col >= 0 &&
+      col < this.properties.ColumnCount
+    ) {
       this.properties.Data[row][col] = value;
       if (this.properties.AutoRedraw) {
         this.refresh();
@@ -416,8 +422,12 @@ export class MSChartControl extends ActiveXControlBase {
   }
 
   private getData(row: number, col: number): number {
-    if (row >= 0 && row < this.properties.RowCount &&
-        col >= 0 && col < this.properties.ColumnCount) {
+    if (
+      row >= 0 &&
+      row < this.properties.RowCount &&
+      col >= 0 &&
+      col < this.properties.ColumnCount
+    ) {
       return this.properties.Data[row][col];
     }
     return 0;
@@ -480,7 +490,7 @@ export class WebBrowserControl extends ActiveXControlBase {
       Top: 0,
       Left: 0,
       StatusText: '',
-      Document: null
+      Document: null,
     };
   }
 
@@ -498,7 +508,7 @@ export class WebBrowserControl extends ActiveXControlBase {
       Quit: this.quit.bind(this),
       ExecWB: this.execWB.bind(this),
       GetProperty: this.getBrowserProperty.bind(this),
-      PutProperty: this.putBrowserProperty.bind(this)
+      PutProperty: this.putBrowserProperty.bind(this),
     };
   }
 
@@ -508,11 +518,11 @@ export class WebBrowserControl extends ActiveXControlBase {
     this.iframe.width = String(this.properties.Width);
     this.iframe.height = String(this.properties.Height);
     this.iframe.style.border = '1px solid #ccc';
-    
+
     // Set up event listeners
     this.iframe.addEventListener('load', this.handleLoad.bind(this));
     this.iframe.addEventListener('error', this.handleError.bind(this));
-    
+
     // Set initial URL
     this.iframe.src = this.properties.LocationURL;
   }
@@ -524,17 +534,22 @@ export class WebBrowserControl extends ActiveXControlBase {
     }
   }
 
-  private navigate(url: string, flags?: number, targetFrameName?: string,
-                   postData?: ActiveXPostData, headers?: string): void {
+  private navigate(
+    url: string,
+    flags?: number,
+    targetFrameName?: string,
+    postData?: ActiveXPostData,
+    headers?: string
+  ): void {
     if (!this.iframe) return;
-    
+
     this.properties.Busy = true;
     this.properties.ReadyState = 1;
     this.events.emit('BeforeNavigate2', { URL: url, Cancel: false });
-    
+
     this.iframe.src = url;
     this.properties.LocationURL = url;
-    
+
     // Add to history
     if (this.currentIndex < this.navigationHistory.length - 1) {
       this.navigationHistory = this.navigationHistory.slice(0, this.currentIndex + 1);
@@ -624,7 +639,7 @@ export class WebBrowserControl extends ActiveXControlBase {
     this.events.emit('NavigateError', {
       URL: this.properties.LocationURL,
       StatusCode: 404,
-      Cancel: false
+      Cancel: false,
     });
   }
 
@@ -666,7 +681,7 @@ export class CommonDialogControl extends ActiveXControlBase {
       InitDir: '',
       MaxFileSize: 260,
       PrinterDefault: false,
-      ToPage: 1
+      ToPage: 1,
     };
   }
 
@@ -677,7 +692,7 @@ export class CommonDialogControl extends ActiveXControlBase {
       ShowColor: this.showColor.bind(this),
       ShowFont: this.showFont.bind(this),
       ShowPrinter: this.showPrinter.bind(this),
-      ShowHelp: this.showHelp.bind(this)
+      ShowHelp: this.showHelp.bind(this),
     };
   }
 
@@ -693,9 +708,9 @@ export class CommonDialogControl extends ActiveXControlBase {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = this.parseFilter();
-    
+
     return new Promise((resolve, reject) => {
-      input.addEventListener('change', (event) => {
+      input.addEventListener('change', event => {
         const file = (event.target as HTMLInputElement).files?.[0];
         if (file) {
           this.properties.FileName = file.name;
@@ -708,7 +723,7 @@ export class CommonDialogControl extends ActiveXControlBase {
           resolve();
         }
       });
-      
+
       input.click();
     });
   }
@@ -729,15 +744,15 @@ export class CommonDialogControl extends ActiveXControlBase {
     const input = document.createElement('input');
     input.type = 'color';
     input.value = this.rgbToHex(this.properties.Color);
-    
+
     return new Promise((resolve, reject) => {
-      input.addEventListener('change', (event) => {
+      input.addEventListener('change', event => {
         const hex = (event.target as HTMLInputElement).value;
         this.properties.Color = this.hexToRgb(hex);
         this.events.emit('ColorOk');
         resolve();
       });
-      
+
       input.click();
     });
   }
@@ -770,21 +785,21 @@ export class CommonDialogControl extends ActiveXControlBase {
     // Convert VB6 filter format to HTML accept attribute
     const filters = this.properties.Filter.split('|');
     const extensions: string[] = [];
-    
+
     for (let i = 1; i < filters.length; i += 2) {
       const ext = filters[i].replace('*', '');
       if (ext !== '.*') {
         extensions.push(ext);
       }
     }
-    
+
     return extensions.join(',');
   }
 
   private rgbToHex(rgb: number): string {
-    const r = (rgb >> 16) & 0xFF;
-    const g = (rgb >> 8) & 0xFF;
-    const b = rgb & 0xFF;
+    const r = (rgb >> 16) & 0xff;
+    const g = (rgb >> 8) & 0xff;
+    const b = rgb & 0xff;
     return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
   }
 
@@ -834,7 +849,7 @@ export class VB6ActiveXService {
     const control = new ControlClass(controlId);
     await control.initialize();
     this.controls.set(controlId, control);
-    
+
     return control;
   }
 

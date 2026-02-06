@@ -201,7 +201,7 @@ describe('VB6 Runtime - Date/Time Functions', () => {
     const baseDate = new Date('2024-01-15');
     const futureDate = DateAdd('d', 5, baseDate);
     expect(futureDate.getDate()).toBe(20);
-    
+
     const pastDate = DateAdd('m', -1, baseDate);
     expect(pastDate.getMonth()).toBe(11); // December of previous year
   });
@@ -210,7 +210,7 @@ describe('VB6 Runtime - Date/Time Functions', () => {
     const date1 = new Date('2024-01-15');
     const date2 = new Date('2024-01-20');
     expect(DateDiff('d', date1, date2)).toBe(5);
-    
+
     const date3 = new Date('2024-02-15');
     expect(DateDiff('m', date1, date3)).toBe(1);
   });
@@ -286,7 +286,7 @@ describe('VB6 Runtime - Array Functions', () => {
     const arr = [1, 2, 3, 4, 5];
     expect(UBound(arr)).toBe(4); // VB6 arrays are 0-based in JS
     expect(LBound(arr)).toBe(0);
-    
+
     const emptyArr: any[] = [];
     expect(UBound(emptyArr)).toBe(-1);
     expect(LBound(emptyArr)).toBe(0);
@@ -302,7 +302,7 @@ describe('VB6 Runtime - Array Functions', () => {
   it('should handle Array function correctly', () => {
     const arr = ArrayFunc(1, 2, 3, 'hello');
     expect(arr).toEqual([1, 2, 3, 'hello']);
-    
+
     const emptyArr = ArrayFunc();
     expect(emptyArr).toEqual([]);
   });
@@ -312,7 +312,7 @@ describe('VB6 Runtime - Array Functions', () => {
     expect(Join(arr, ' ')).toBe('Hello World VB6');
     expect(Join(arr, ',')).toBe('Hello,World,VB6');
     expect(Join(arr)).toBe('Hello World VB6'); // Default separator
-    
+
     const str = 'Hello,World,VB6';
     expect(Split(str, ',')).toEqual(['Hello', 'World', 'VB6']);
     expect(Split(str)).toEqual(['Hello,World,VB6']); // No separator
@@ -322,7 +322,7 @@ describe('VB6 Runtime - Array Functions', () => {
     const arr = ['Hello', 'World', 'Help', 'Test'];
     const filtered = Filter(arr, 'He');
     expect(filtered).toEqual(['Hello', 'Help']);
-    
+
     const filteredExclude = Filter(arr, 'He', false);
     expect(filteredExclude).toEqual(['World', 'Test']);
   });
@@ -334,9 +334,9 @@ describe('VB6 Runtime - File System Functions', () => {
     global.mockFileSystem = {
       '/test/file1.txt': 'content1',
       '/test/file2.txt': 'content2',
-      '/test/subdir/file3.txt': 'content3'
+      '/test/subdir/file3.txt': 'content3',
     };
-    
+
     // Test would need actual file system mocking
     expect(typeof Dir).toBe('function');
   });
@@ -374,8 +374,10 @@ function Len(str: any): number {
 }
 
 function InStr(startOrStr: number | string, strOrSubstr: string, substr?: string): number {
-  let searchStr: string, searchSubstr: string, startPos: number = 1;
-  
+  let searchStr: string,
+    searchSubstr: string,
+    startPos: number = 1;
+
   if (typeof startOrStr === 'number' && substr !== undefined) {
     startPos = startOrStr;
     searchStr = strOrSubstr;
@@ -384,7 +386,7 @@ function InStr(startOrStr: number | string, strOrSubstr: string, substr?: string
     searchStr = String(startOrStr);
     searchSubstr = strOrSubstr;
   }
-  
+
   const index = searchStr.indexOf(searchSubstr, startPos - 1);
   return index === -1 ? 0 : index + 1;
 }
@@ -552,8 +554,9 @@ function DateDiff(interval: string, date1: Date, date2: Date): number {
     case 'd':
       return Math.floor(diffMs / (24 * 60 * 60 * 1000));
     case 'm':
-      return (date2.getFullYear() - date1.getFullYear()) * 12 + 
-             (date2.getMonth() - date1.getMonth());
+      return (
+        (date2.getFullYear() - date1.getFullYear()) * 12 + (date2.getMonth() - date1.getMonth())
+      );
     case 'y':
       return date2.getFullYear() - date1.getFullYear();
     default:
@@ -649,9 +652,7 @@ function Split(str: string, separator?: string): string[] {
 }
 
 function Filter(arr: string[], match: string, include: boolean = true): string[] {
-  return arr.filter(item => 
-    include ? item.includes(match) : !item.includes(match)
-  );
+  return arr.filter(item => (include ? item.includes(match) : !item.includes(match)));
 }
 
 function Dir(path?: string): string {

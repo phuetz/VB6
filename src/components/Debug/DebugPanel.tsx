@@ -1,18 +1,38 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Play, Pause, Square, SkipForward, ArrowDown, ArrowRight, 
-  Bug, Eye, EyeOff, Trash2, Plus, Settings, Info, 
-  ChevronRight, ChevronDown, Circle, AlertTriangle,
-  Clock, Zap, Target, List, Code, Terminal, X
+import {
+  Play,
+  Pause,
+  Square,
+  SkipForward,
+  ArrowDown,
+  ArrowRight,
+  Bug,
+  Eye,
+  EyeOff,
+  Trash2,
+  Plus,
+  Settings,
+  Info,
+  ChevronRight,
+  ChevronDown,
+  Circle,
+  AlertTriangle,
+  Clock,
+  Zap,
+  Target,
+  List,
+  Code,
+  Terminal,
+  X,
 } from 'lucide-react';
-import { 
-  vb6Debugger, 
-  Breakpoint, 
-  WatchExpression, 
-  CallStackFrame, 
+import {
+  vb6Debugger,
+  Breakpoint,
+  WatchExpression,
+  CallStackFrame,
   Variable,
   VariableScope,
-  StepType 
+  StepType,
 } from '../../services/VB6DebuggerService';
 
 interface DebugPanelProps {
@@ -26,14 +46,20 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
   visible,
   onClose,
   currentFile,
-  onNavigateToLine
+  onNavigateToLine,
 }) => {
-  const [activeTab, setActiveTab] = useState<'breakpoints' | 'watch' | 'callstack' | 'variables' | 'output'>('breakpoints');
+  const [activeTab, setActiveTab] = useState<
+    'breakpoints' | 'watch' | 'callstack' | 'variables' | 'output'
+  >('breakpoints');
   const [debuggerState, setDebuggerState] = useState(vb6Debugger.getState());
   const [breakpoints, setBreakpoints] = useState<Breakpoint[]>([]);
   const [watchExpressions, setWatchExpressions] = useState<WatchExpression[]>([]);
   const [callStack, setCallStack] = useState<CallStackFrame[]>([]);
-  const [variables, setVariables] = useState<VariableScope>({ locals: [], globals: [], module: [] });
+  const [variables, setVariables] = useState<VariableScope>({
+    locals: [],
+    globals: [],
+    module: [],
+  });
   const [outputLines, setOutputLines] = useState<any[]>([]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [newWatchExpression, setNewWatchExpression] = useState('');
@@ -122,9 +148,12 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
     vb6Debugger.removeBreakpoint(id);
   }, []);
 
-  const handleNavigateToBreakpoint = useCallback((breakpoint: Breakpoint) => {
-    onNavigateToLine?.(breakpoint.file, breakpoint.line);
-  }, [onNavigateToLine]);
+  const handleNavigateToBreakpoint = useCallback(
+    (breakpoint: Breakpoint) => {
+      onNavigateToLine?.(breakpoint.file, breakpoint.line);
+    },
+    [onNavigateToLine]
+  );
 
   // Watch expression management
   const handleAddWatch = useCallback(() => {
@@ -139,28 +168,38 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
   }, []);
 
   // Call stack navigation
-  const handleSelectFrame = useCallback((frameId: string) => {
-    vb6Debugger.selectStackFrame(frameId);
-    const frame = callStack.find(f => f.id === frameId);
-    if (frame) {
-      onNavigateToLine?.(frame.file, frame.line);
-    }
-  }, [callStack, onNavigateToLine]);
+  const handleSelectFrame = useCallback(
+    (frameId: string) => {
+      vb6Debugger.selectStackFrame(frameId);
+      const frame = callStack.find(f => f.id === frameId);
+      if (frame) {
+        onNavigateToLine?.(frame.file, frame.line);
+      }
+    },
+    [callStack, onNavigateToLine]
+  );
 
   // Variable expansion
-  const toggleExpanded = useCallback((id: string) => {
-    const newExpanded = new Set(expandedItems);
-    if (newExpanded.has(id)) {
-      newExpanded.delete(id);
-    } else {
-      newExpanded.add(id);
-    }
-    setExpandedItems(newExpanded);
-  }, [expandedItems]);
+  const toggleExpanded = useCallback(
+    (id: string) => {
+      const newExpanded = new Set(expandedItems);
+      if (newExpanded.has(id)) {
+        newExpanded.delete(id);
+      } else {
+        newExpanded.add(id);
+      }
+      setExpandedItems(newExpanded);
+    },
+    [expandedItems]
+  );
 
   // Render components
   const renderDebugControls = () => (
-    <div className="flex items-center gap-2 p-3 border-b border-gray-200 bg-gray-50">
+    <div
+      role="toolbar"
+      aria-label="Debug Controls"
+      className="flex items-center gap-2 p-3 border-b border-gray-200 bg-gray-50"
+    >
       <div className="flex items-center gap-1">
         {debuggerState.status === 'idle' && (
           <button
@@ -172,7 +211,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
             Start
           </button>
         )}
-        
+
         {debuggerState.status === 'running' && (
           <button
             onClick={handlePause}
@@ -183,7 +222,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
             Pause
           </button>
         )}
-        
+
         {debuggerState.status === 'paused' && (
           <button
             onClick={handleResume}
@@ -194,7 +233,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
             Continue
           </button>
         )}
-        
+
         <button
           onClick={handleStop}
           disabled={debuggerState.status === 'idle'}
@@ -239,21 +278,25 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
 
       <div className="flex items-center gap-2 text-sm text-gray-600">
         <div className="flex items-center gap-1">
-          <div className={`w-2 h-2 rounded-full ${
-            debuggerState.status === 'running' ? 'bg-green-500' : 
-            debuggerState.status === 'paused' ? 'bg-orange-500' : 
-            'bg-gray-400'
-          }`} />
+          <div
+            className={`w-2 h-2 rounded-full ${
+              debuggerState.status === 'running'
+                ? 'bg-green-500'
+                : debuggerState.status === 'paused'
+                  ? 'bg-orange-500'
+                  : 'bg-gray-400'
+            }`}
+          />
           <span className="capitalize">{debuggerState.status}</span>
         </div>
-        
+
         {executionStats.elapsedTime > 0 && (
           <div className="flex items-center gap-1">
             <Clock size={12} />
             <span>{(executionStats.elapsedTime / 1000).toFixed(1)}s</span>
           </div>
         )}
-        
+
         {executionStats.statementCount > 0 && (
           <div className="flex items-center gap-1">
             <Zap size={12} />
@@ -275,7 +318,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
           Add Breakpoint
         </button>
       </div>
-      
+
       <div className="space-y-1 p-2">
         {breakpoints.map(bp => (
           <div
@@ -286,7 +329,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
             onClick={() => handleNavigateToBreakpoint(bp)}
           >
             <button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 handleToggleBreakpoint(bp.id);
               }}
@@ -297,15 +340,13 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
                 className={`${bp.enabled ? 'text-red-500 fill-current' : 'text-gray-400'}`}
               />
             </button>
-            
+
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium truncate">
                 {bp.file}:{bp.line}
               </div>
               {bp.condition && (
-                <div className="text-xs text-gray-500 truncate">
-                  Condition: {bp.condition}
-                </div>
+                <div className="text-xs text-gray-500 truncate">Condition: {bp.condition}</div>
               )}
               {bp.hitCount !== undefined && bp.hitCount > 0 && (
                 <div className="text-xs text-blue-600">
@@ -313,9 +354,9 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
                 </div>
               )}
             </div>
-            
+
             <button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 handleRemoveBreakpoint(bp.id);
               }}
@@ -325,7 +366,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
             </button>
           </div>
         ))}
-        
+
         {breakpoints.length === 0 && (
           <div className="text-center text-gray-500 py-8">
             <Target size={24} className="mx-auto mb-2 opacity-50" />
@@ -347,8 +388,8 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
             type="text"
             placeholder="Expression to watch..."
             value={newWatchExpression}
-            onChange={(e) => setNewWatchExpression(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleAddWatch()}
+            onChange={e => setNewWatchExpression(e.target.value)}
+            onKeyPress={e => e.key === 'Enter' && handleAddWatch()}
             className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
@@ -361,7 +402,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
           </button>
         </div>
       </div>
-      
+
       <div className="space-y-1 p-2">
         {watchExpressions.map(watch => (
           <div key={watch.id} className="flex items-start gap-2 p-2 rounded hover:bg-gray-50">
@@ -378,7 +419,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
                 </div>
               )}
             </div>
-            
+
             <button
               onClick={() => handleRemoveWatch(watch.id)}
               className="p-1 hover:bg-gray-200 rounded text-gray-500"
@@ -387,7 +428,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
             </button>
           </div>
         ))}
-        
+
         {watchExpressions.length === 0 && (
           <div className="text-center text-gray-500 py-8">
             <Eye size={24} className="mx-auto mb-2 opacity-50" />
@@ -412,19 +453,15 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
             }`}
             onClick={() => handleSelectFrame(frame.id)}
           >
-            <div className="flex-shrink-0 text-xs text-gray-500 w-6 text-center">
-              {index}
-            </div>
-            
+            <div className="flex-shrink-0 text-xs text-gray-500 w-6 text-center">{index}</div>
+
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium truncate">
-                {frame.name}
-              </div>
+              <div className="text-sm font-medium truncate">{frame.name}</div>
               <div className="text-xs text-gray-500 truncate">
                 {frame.file}:{frame.line}
               </div>
             </div>
-            
+
             {!frame.isUserCode && (
               <div className="text-xs text-orange-600 bg-orange-100 px-2 py-0.5 rounded">
                 System
@@ -432,14 +469,12 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
             )}
           </div>
         ))}
-        
+
         {callStack.length === 0 && (
           <div className="text-center text-gray-500 py-8">
             <List size={24} className="mx-auto mb-2 opacity-50" />
             <div className="text-sm">No call stack</div>
-            <div className="text-xs text-gray-400 mt-1">
-              Call stack appears when debugging
-            </div>
+            <div className="text-xs text-gray-400 mt-1">Call stack appears when debugging</div>
           </div>
         )}
       </div>
@@ -449,7 +484,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
   const renderVariable = (variable: Variable, depth: number = 0) => {
     const hasChildren = variable.expandable && variable.children;
     const isExpanded = expandedItems.has(variable.name);
-    
+
     return (
       <div key={variable.name} style={{ marginLeft: `${depth * 16}px` }}>
         <div className="flex items-center gap-1 p-1 hover:bg-gray-50 rounded text-sm">
@@ -463,20 +498,16 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
           ) : (
             <div className="w-5" />
           )}
-          
+
           <span className="font-medium text-blue-700">{variable.name}</span>
           <span className="text-gray-500 text-xs">({variable.type})</span>
           <span className="text-gray-700 flex-1 truncate ml-2">{variable.value}</span>
-          
-          {!variable.writable && (
-            <EyeOff size={12} className="text-gray-400" title="Read-only" />
-          )}
+
+          {!variable.writable && <EyeOff size={12} className="text-gray-400" title="Read-only" />}
         </div>
-        
+
         {hasChildren && isExpanded && variable.children && (
-          <div>
-            {variable.children.map(child => renderVariable(child, depth + 1))}
-          </div>
+          <div>{variable.children.map(child => renderVariable(child, depth + 1))}</div>
         )}
       </div>
     );
@@ -484,19 +515,15 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
 
   const renderVariables = () => (
     <div className="flex-1 overflow-y-auto">
-      <div className="text-xs font-semibold text-gray-700 p-2 bg-gray-50 border-b">
-        LOCALS
-      </div>
+      <div className="text-xs font-semibold text-gray-700 p-2 bg-gray-50 border-b">LOCALS</div>
       <div className="p-2">
         {variables.locals.map(variable => renderVariable(variable))}
         {variables.locals.length === 0 && (
           <div className="text-xs text-gray-500 py-2">No local variables</div>
         )}
       </div>
-      
-      <div className="text-xs font-semibold text-gray-700 p-2 bg-gray-50 border-b">
-        GLOBALS
-      </div>
+
+      <div className="text-xs font-semibold text-gray-700 p-2 bg-gray-50 border-b">GLOBALS</div>
       <div className="p-2">
         {variables.globals.map(variable => renderVariable(variable))}
         {variables.globals.length === 0 && (
@@ -511,32 +538,31 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
       <div className="p-2 space-y-1">
         {outputLines.map((line, index) => (
           <div key={index} className="text-sm font-mono">
-            <span className="text-gray-500 text-xs">
-              [{line.timestamp?.toLocaleTimeString()}]
-            </span>
-            <span className={`ml-2 ${
-              line.type === 'error' ? 'text-red-600' :
-              line.type === 'warning' ? 'text-orange-600' :
-              line.type === 'logpoint' ? 'text-blue-600' :
-              'text-gray-800'
-            }`}>
+            <span className="text-gray-500 text-xs">[{line.timestamp?.toLocaleTimeString()}]</span>
+            <span
+              className={`ml-2 ${
+                line.type === 'error'
+                  ? 'text-red-600'
+                  : line.type === 'warning'
+                    ? 'text-orange-600'
+                    : line.type === 'logpoint'
+                      ? 'text-blue-600'
+                      : 'text-gray-800'
+              }`}
+            >
               {line.message}
             </span>
             {line.location && (
-              <span className="text-gray-400 text-xs ml-2">
-                at {line.location}
-              </span>
+              <span className="text-gray-400 text-xs ml-2">at {line.location}</span>
             )}
           </div>
         ))}
-        
+
         {outputLines.length === 0 && (
           <div className="text-center text-gray-500 py-8">
             <Terminal size={24} className="mx-auto mb-2 opacity-50" />
             <div className="text-sm">No output</div>
-            <div className="text-xs text-gray-400 mt-1">
-              Debug output will appear here
-            </div>
+            <div className="text-xs text-gray-400 mt-1">Debug output will appear here</div>
           </div>
         )}
       </div>
@@ -547,19 +573,21 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
-      <div className="bg-white rounded-lg shadow-2xl w-[1000px] h-[700px] flex flex-col">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="debug-panel-title"
+        className="bg-white rounded-lg shadow-2xl w-[1000px] h-[700px] flex flex-col"
+      >
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Bug className="text-green-500" size={24} />
-            <h2 className="text-xl font-semibold text-gray-800">
+            <h2 id="debug-panel-title" className="text-xl font-semibold text-gray-800">
               VB6 Debugger
             </h2>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -568,18 +596,21 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
         {renderDebugControls()}
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-gray-200">
+        <div role="tablist" aria-label="Debug Panels" className="flex border-b border-gray-200">
           {[
             { id: 'breakpoints', label: 'Breakpoints', icon: Target },
             { id: 'watch', label: 'Watch', icon: Eye },
             { id: 'callstack', label: 'Call Stack', icon: List },
             { id: 'variables', label: 'Variables', icon: Code },
-            { id: 'output', label: 'Output', icon: Terminal }
+            { id: 'output', label: 'Output', icon: Terminal },
           ].map(tab => {
             const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                aria-controls={`debug-tabpanel-${tab.id}`}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 px-4 py-2 text-sm border-b-2 transition-colors ${
                   activeTab === tab.id
@@ -595,7 +626,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
         </div>
 
         {/* Tab Content */}
-        <div className="flex-1 overflow-hidden">
+        <div role="tabpanel" aria-label={activeTab} className="flex-1 overflow-hidden">
           {activeTab === 'breakpoints' && renderBreakpoints()}
           {activeTab === 'watch' && renderWatchExpressions()}
           {activeTab === 'callstack' && renderCallStack()}

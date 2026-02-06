@@ -1,6 +1,6 @@
 /**
  * VB6 Toolbar Control Implementation
- * 
+ *
  * Toolbar with buttons and full VB6 compatibility
  */
 
@@ -31,33 +31,33 @@ export interface ToolbarControl {
   top: number;
   width: number;
   height: number;
-  
+
   // Button management
   buttons: ToolbarButton[];
-  
+
   // Appearance
   allowCustomize: boolean;
   showTips: boolean;
   style: number; // 0=Standard, 1=Flat
   appearance: number; // 0=Flat, 1=3D
   borderStyle: number; // 0=None, 1=Fixed Single
-  
+
   // Button appearance
   buttonHeight: number;
   buttonWidth: number;
   wrappable: boolean;
-  
+
   // ImageList associations
   imageList: string; // ImageList control name
   disabledImageList: string;
   hotImageList: string;
-  
+
   // Behavior
   enabled: boolean;
   visible: boolean;
   mousePointer: number;
   tag: string;
-  
+
   // Events
   onButtonClick?: string;
   onButtonMenuClick?: string;
@@ -75,7 +75,7 @@ export const ToolbarControl: React.FC<ToolbarControlProps> = ({
   control,
   isDesignMode = false,
   onPropertyChange,
-  onEvent
+  onEvent,
 }) => {
   const {
     name,
@@ -98,31 +98,36 @@ export const ToolbarControl: React.FC<ToolbarControlProps> = ({
     enabled = true,
     visible = true,
     mousePointer = 0,
-    tag = ''
+    tag = '',
   } = control;
 
   const [hoveredButton, setHoveredButton] = useState<number>(-1);
   const [pressedButton, setPressedButton] = useState<number>(-1);
 
-  const handleButtonClick = useCallback((button: ToolbarButton, event: React.MouseEvent) => {
-    if (!enabled || !button.enabled) return;
-    
-    event.preventDefault();
-    
-    // Handle different button styles
-    if (button.style === 1) { // Check button
-      const newValue = button.value === 0 ? 1 : 0;
-      onPropertyChange?.(`buttons[${button.index}].value`, newValue);
-      onEvent?.('Change', { button: button.index });
-    } else if (button.style === 2) { // Group button
-      // Uncheck other buttons in the same group (simplified)
-      const newValue = 1;
-      onPropertyChange?.(`buttons[${button.index}].value`, newValue);
-      onEvent?.('Change', { button: button.index });
-    }
-    
-    onEvent?.('ButtonClick', { button: button.index, key: button.key });
-  }, [enabled, onPropertyChange, onEvent]);
+  const handleButtonClick = useCallback(
+    (button: ToolbarButton, event: React.MouseEvent) => {
+      if (!enabled || !button.enabled) return;
+
+      event.preventDefault();
+
+      // Handle different button styles
+      if (button.style === 1) {
+        // Check button
+        const newValue = button.value === 0 ? 1 : 0;
+        onPropertyChange?.(`buttons[${button.index}].value`, newValue);
+        onEvent?.('Change', { button: button.index });
+      } else if (button.style === 2) {
+        // Group button
+        // Uncheck other buttons in the same group (simplified)
+        const newValue = 1;
+        onPropertyChange?.(`buttons[${button.index}].value`, newValue);
+        onEvent?.('Change', { button: button.index });
+      }
+
+      onEvent?.('ButtonClick', { button: button.index, key: button.key });
+    },
+    [enabled, onPropertyChange, onEvent]
+  );
 
   const handleButtonMouseDown = useCallback((buttonIndex: number) => {
     setPressedButton(buttonIndex);
@@ -152,9 +157,21 @@ export const ToolbarControl: React.FC<ToolbarControlProps> = ({
 
   const getCursorStyle = () => {
     const cursors = [
-      'default', 'auto', 'crosshair', 'text', 'wait', 'help',
-      'pointer', 'not-allowed', 'move', 'col-resize', 'row-resize',
-      'n-resize', 's-resize', 'e-resize', 'w-resize'
+      'default',
+      'auto',
+      'crosshair',
+      'text',
+      'wait',
+      'help',
+      'pointer',
+      'not-allowed',
+      'move',
+      'col-resize',
+      'row-resize',
+      'n-resize',
+      's-resize',
+      'e-resize',
+      'w-resize',
     ];
     return cursors[mousePointer] || 'default';
   };
@@ -165,29 +182,31 @@ export const ToolbarControl: React.FC<ToolbarControlProps> = ({
     const isPressed = pressedButton === index;
     const isChecked = button.style === 1 && button.value === 1; // Check button
     const isGroupSelected = button.style === 2 && button.value === 1; // Group button
-    
+
     let border = 'none';
     let background = 'transparent';
-    
-    if (button.style === 3) { // Separator
+
+    if (button.style === 3) {
+      // Separator
       return {
         width: '8px',
         height: `${buttonHeight}px`,
         borderRight: '1px solid #c0c0c0',
         margin: '0 2px',
-        cursor: 'default'
+        cursor: 'default',
       };
     }
-    
-    if (button.style === 4) { // Placeholder
+
+    if (button.style === 4) {
+      // Placeholder
       return {
         width: `${button.width || buttonWidth}px`,
         height: `${buttonHeight}px`,
         background: 'transparent',
-        cursor: 'default'
+        cursor: 'default',
       };
     }
-    
+
     if (isFlat) {
       if (isPressed || isChecked || isGroupSelected) {
         border = '1px inset #c0c0c0';
@@ -207,7 +226,7 @@ export const ToolbarControl: React.FC<ToolbarControlProps> = ({
         border = '2px outset #d0d0d0';
       }
     }
-    
+
     return {
       width: `${button.width || buttonWidth}px`,
       height: `${buttonHeight}px`,
@@ -223,7 +242,7 @@ export const ToolbarControl: React.FC<ToolbarControlProps> = ({
       opacity: button.enabled && enabled ? 1 : 0.5,
       userSelect: 'none' as const,
       fontSize: '11px',
-      color: '#000'
+      color: '#000',
     };
   };
 
@@ -242,7 +261,7 @@ export const ToolbarControl: React.FC<ToolbarControlProps> = ({
     alignItems: 'center',
     padding: '2px',
     overflow: wrappable ? 'wrap' : 'hidden',
-    flexWrap: wrappable ? 'wrap' : 'nowrap' as const
+    flexWrap: wrappable ? 'wrap' : ('nowrap' as const),
   };
 
   return (
@@ -255,12 +274,12 @@ export const ToolbarControl: React.FC<ToolbarControlProps> = ({
     >
       {buttons.map((button, index) => {
         if (!button.visible) return null;
-        
+
         return (
           <div
             key={button.key || index}
             style={getButtonStyle(button, index)}
-            onClick={(e) => handleButtonClick(button, e)}
+            onClick={e => handleButtonClick(button, e)}
             onMouseDown={() => handleButtonMouseDown(index)}
             onMouseUp={handleButtonMouseUp}
             onMouseEnter={() => handleButtonMouseEnter(index)}
@@ -273,11 +292,11 @@ export const ToolbarControl: React.FC<ToolbarControlProps> = ({
                   width: '16px',
                   height: '16px',
                   background: `url(images/${imageList}) -${button.image * 16}px 0`,
-                  marginBottom: button.caption ? '2px' : '0'
+                  marginBottom: button.caption ? '2px' : '0',
                 }}
               />
             )}
-            
+
             {/* Button Caption */}
             {button.caption && (
               <span
@@ -287,13 +306,13 @@ export const ToolbarControl: React.FC<ToolbarControlProps> = ({
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  maxWidth: '100%'
+                  maxWidth: '100%',
                 }}
               >
                 {button.caption}
               </span>
             )}
-            
+
             {/* Dropdown Arrow */}
             {button.style === 5 && (
               <div
@@ -303,7 +322,7 @@ export const ToolbarControl: React.FC<ToolbarControlProps> = ({
                   bottom: '2px',
                   width: '8px',
                   height: '4px',
-                  fontSize: '6px'
+                  fontSize: '6px',
                 }}
               >
                 ▼
@@ -326,7 +345,7 @@ export const ToolbarControl: React.FC<ToolbarControlProps> = ({
             padding: '2px',
             border: '1px solid #ccc',
             whiteSpace: 'nowrap',
-            zIndex: 1000
+            zIndex: 1000,
           }}
         >
           {name} ({buttons.length} buttons)
@@ -356,7 +375,7 @@ export const ToolbarHelpers = {
     tag: '',
     toolTipText: '',
     width: 0, // Auto
-    mixedState: false
+    mixedState: false,
   }),
 
   /**
@@ -364,13 +383,17 @@ export const ToolbarHelpers = {
    */
   createSeparator: (index: number): ToolbarButton => ({
     ...ToolbarHelpers.createButton(index, `sep${index}`, ''),
-    style: 3 // Separator
+    style: 3, // Separator
   }),
 
   /**
    * Add button to toolbar
    */
-  addButton: (buttons: ToolbarButton[], caption: string = '', style: number = 0): ToolbarButton[] => {
+  addButton: (
+    buttons: ToolbarButton[],
+    caption: string = '',
+    style: number = 0
+  ): ToolbarButton[] => {
     const newButton = ToolbarHelpers.createButton(buttons.length, '', caption);
     newButton.style = style;
     return [...buttons, newButton];
@@ -388,35 +411,41 @@ export const ToolbarHelpers = {
    * Remove button from toolbar
    */
   removeButton: (buttons: ToolbarButton[], index: number): ToolbarButton[] => {
-    return buttons.filter((_, i) => i !== index).map((button, i) => ({
-      ...button,
-      index: i
-    }));
+    return buttons
+      .filter((_, i) => i !== index)
+      .map((button, i) => ({
+        ...button,
+        index: i,
+      }));
   },
 
   /**
    * Update button caption
    */
-  updateButtonCaption: (buttons: ToolbarButton[], index: number, caption: string): ToolbarButton[] => {
-    return buttons.map((button, i) => 
-      i === index ? { ...button, caption } : button
-    );
+  updateButtonCaption: (
+    buttons: ToolbarButton[],
+    index: number,
+    caption: string
+  ): ToolbarButton[] => {
+    return buttons.map((button, i) => (i === index ? { ...button, caption } : button));
   },
 
   /**
    * Update button style
    */
   updateButtonStyle: (buttons: ToolbarButton[], index: number, style: number): ToolbarButton[] => {
-    return buttons.map((button, i) => 
-      i === index ? { ...button, style } : button
-    );
+    return buttons.map((button, i) => (i === index ? { ...button, style } : button));
   },
 
   /**
    * Set button checked state
    */
-  setButtonChecked: (buttons: ToolbarButton[], index: number, checked: boolean): ToolbarButton[] => {
-    return buttons.map((button, i) => 
+  setButtonChecked: (
+    buttons: ToolbarButton[],
+    index: number,
+    checked: boolean
+  ): ToolbarButton[] => {
+    return buttons.map((button, i) =>
       i === index ? { ...button, value: checked ? 1 : 0 } : button
     );
   },
@@ -424,11 +453,13 @@ export const ToolbarHelpers = {
   /**
    * Set button enabled state
    */
-  setButtonEnabled: (buttons: ToolbarButton[], index: number, enabled: boolean): ToolbarButton[] => {
-    return buttons.map((button, i) => 
-      i === index ? { ...button, enabled } : button
-    );
-  }
+  setButtonEnabled: (
+    buttons: ToolbarButton[],
+    index: number,
+    enabled: boolean
+  ): ToolbarButton[] => {
+    return buttons.map((button, i) => (i === index ? { ...button, enabled } : button));
+  },
 };
 
 export default ToolbarControl;

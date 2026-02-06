@@ -11,7 +11,7 @@ export enum rdoCursorType {
   rdOpenForwardOnly = 0,
   rdOpenStatic = 1,
   rdOpenKeyset = 2,
-  rdOpenDynamic = 3
+  rdOpenDynamic = 3,
 }
 
 export enum rdoLockType {
@@ -19,13 +19,13 @@ export enum rdoLockType {
   rdConcurLock = 2,
   rdConcurRowver = 3,
   rdConcurValues = 4,
-  rdConcurBatch = 5
+  rdConcurBatch = 5,
 }
 
 export enum rdoQueryState {
   rdRowsetEmpty = 0,
   rdRowsetPopulated = 1,
-  rdRowsetComplete = 2
+  rdRowsetComplete = 2,
 }
 
 export enum rdoColumnStatus {
@@ -41,7 +41,7 @@ export enum rdoColumnStatus {
   rdColStatIntegrityViolation = 9,
   rdColStatSchemaViolation = 10,
   rdColStatBadStatus = 11,
-  rdColStatDefault = 12
+  rdColStatDefault = 12,
 }
 
 export enum rdoResultsetType {
@@ -50,7 +50,7 @@ export enum rdoResultsetType {
   rdResultsetForwardOnly = 4,
   rdResultsetStatic = 8,
   rdResultsetKeyset = 16,
-  rdResultsetDynamic = 32
+  rdResultsetDynamic = 32,
 }
 
 export enum rdoDataType {
@@ -77,7 +77,7 @@ export enum rdoDataType {
   rdTypeWChar = -8,
   rdTypeWVarChar = -9,
   rdTypeWLongVarChar = -10,
-  rdTypeGuid = -11
+  rdTypeGuid = -11,
 }
 
 export enum rdoActionType {
@@ -88,7 +88,7 @@ export enum rdoActionType {
   rdActionDisconnect = 5,
   rdActionOpen = 6,
   rdActionClose = 7,
-  rdActionCancel = 8
+  rdActionCancel = 8,
 }
 
 // RDO Interfaces
@@ -174,45 +174,89 @@ export class RDOColumnObject extends COMObject implements RDOColumn {
   }
 
   // Properties
-  get Name(): string { return this._name; }
-  set Name(value: string) { this._name = value; }
+  get Name(): string {
+    return this._name;
+  }
+  set Name(value: string) {
+    this._name = value;
+  }
 
-  get Type(): rdoDataType { return this._type; }
-  set Type(value: rdoDataType) { this._type = value; }
+  get Type(): rdoDataType {
+    return this._type;
+  }
+  set Type(value: rdoDataType) {
+    this._type = value;
+  }
 
-  get Size(): number { return this._size; }
-  set Size(value: number) { this._size = value; }
+  get Size(): number {
+    return this._size;
+  }
+  set Size(value: number) {
+    this._size = value;
+  }
 
-  get Value(): any { return this._value; }
-  set Value(value: any) { 
+  get Value(): any {
+    return this._value;
+  }
+  set Value(value: any) {
     this._originalValue = this._value;
     this._value = value;
   }
 
-  get ChunkRequired(): boolean { return this._chunkRequired; }
+  get ChunkRequired(): boolean {
+    return this._chunkRequired;
+  }
 
-  get KeyColumn(): boolean { return this._keyColumn; }
-  set KeyColumn(value: boolean) { this._keyColumn = value; }
+  get KeyColumn(): boolean {
+    return this._keyColumn;
+  }
+  set KeyColumn(value: boolean) {
+    this._keyColumn = value;
+  }
 
-  get AllowZeroLength(): boolean { return this._allowZeroLength; }
-  set AllowZeroLength(value: boolean) { this._allowZeroLength = value; }
+  get AllowZeroLength(): boolean {
+    return this._allowZeroLength;
+  }
+  set AllowZeroLength(value: boolean) {
+    this._allowZeroLength = value;
+  }
 
-  get Required(): boolean { return this._required; }
-  set Required(value: boolean) { this._required = value; }
+  get Required(): boolean {
+    return this._required;
+  }
+  set Required(value: boolean) {
+    this._required = value;
+  }
 
-  get Updatable(): boolean { return this._updatable; }
+  get Updatable(): boolean {
+    return this._updatable;
+  }
 
-  get Status(): rdoColumnStatus { return this._status; }
+  get Status(): rdoColumnStatus {
+    return this._status;
+  }
 
-  get BatchConflictValue(): any { return this._batchConflictValue; }
+  get BatchConflictValue(): any {
+    return this._batchConflictValue;
+  }
 
-  get OriginalValue(): any { return this._originalValue; }
+  get OriginalValue(): any {
+    return this._originalValue;
+  }
 
-  get SourceColumn(): string { return this._sourceColumn; }
-  set SourceColumn(value: string) { this._sourceColumn = value; }
+  get SourceColumn(): string {
+    return this._sourceColumn;
+  }
+  set SourceColumn(value: string) {
+    this._sourceColumn = value;
+  }
 
-  get SourceTable(): string { return this._sourceTable; }
-  set SourceTable(value: string) { this._sourceTable = value; }
+  get SourceTable(): string {
+    return this._sourceTable;
+  }
+  set SourceTable(value: string) {
+    this._sourceTable = value;
+  }
 }
 
 // RDO Parameter Implementation
@@ -245,20 +289,40 @@ export class RDOParameterObject extends COMObject implements RDOParameter {
   }
 
   // Properties
-  get Name(): string { return this._name; }
-  set Name(value: string) { this._name = value; }
+  get Name(): string {
+    return this._name;
+  }
+  set Name(value: string) {
+    this._name = value;
+  }
 
-  get Type(): rdoDataType { return this._type; }
-  set Type(value: rdoDataType) { this._type = value; }
+  get Type(): rdoDataType {
+    return this._type;
+  }
+  set Type(value: rdoDataType) {
+    this._type = value;
+  }
 
-  get Direction(): number { return this._direction; }
-  set Direction(value: number) { this._direction = value; }
+  get Direction(): number {
+    return this._direction;
+  }
+  set Direction(value: number) {
+    this._direction = value;
+  }
 
-  get Value(): any { return this._value; }
-  set Value(value: any) { this._value = value; }
+  get Value(): any {
+    return this._value;
+  }
+  set Value(value: any) {
+    this._value = value;
+  }
 
-  get Size(): number { return this._size; }
-  set Size(value: number) { this._size = value; }
+  get Size(): number {
+    return this._size;
+  }
+  set Size(value: number) {
+    this._size = value;
+  }
 }
 
 // RDO Resultset Implementation
@@ -288,7 +352,12 @@ export class RDOResultset extends COMObject {
   private _lastModified: any = null;
   private _connection: RDOConnection | null = null;
 
-  constructor(sql?: string, connection?: RDOConnection, cursorType?: rdoCursorType, lockType?: rdoLockType) {
+  constructor(
+    sql?: string,
+    connection?: RDOConnection,
+    cursorType?: rdoCursorType,
+    lockType?: rdoLockType
+  ) {
     super('{RDO-RESULTSET-CLSID}', 'RDO.rdoResultset');
     if (sql) this._sql = sql;
     if (connection) this._connection = connection;
@@ -453,21 +522,34 @@ export class RDOResultset extends COMObject {
       this.fireEvent('Close', {});
     });
 
-    this.addMethod('GetClipString', (numRows?: number, columnDelimiter?: string, rowDelimiter?: string, nullExpr?: string, clipNulls?: boolean) => {
-      const colDelim = columnDelimiter || '\t';
-      const rowDelim = rowDelimiter || '\r\n';
-      const nullText = nullExpr || '';
-      const startRow = Math.max(0, this._currentRow);
-      const endRow = numRows ? Math.min(startRow + numRows, this._rows.length) : this._rows.length;
-      
-      let result = '';
-      for (let i = startRow; i < endRow; i++) {
-        const row = this._rows[i];
-        const rowText = row.map(cell => cell === null || cell === undefined ? nullText : String(cell)).join(colDelim);
-        result += rowText + rowDelim;
+    this.addMethod(
+      'GetClipString',
+      (
+        numRows?: number,
+        columnDelimiter?: string,
+        rowDelimiter?: string,
+        nullExpr?: string,
+        clipNulls?: boolean
+      ) => {
+        const colDelim = columnDelimiter || '\t';
+        const rowDelim = rowDelimiter || '\r\n';
+        const nullText = nullExpr || '';
+        const startRow = Math.max(0, this._currentRow);
+        const endRow = numRows
+          ? Math.min(startRow + numRows, this._rows.length)
+          : this._rows.length;
+
+        let result = '';
+        for (let i = startRow; i < endRow; i++) {
+          const row = this._rows[i];
+          const rowText = row
+            .map(cell => (cell === null || cell === undefined ? nullText : String(cell)))
+            .join(colDelim);
+          result += rowText + rowDelim;
+        }
+        return result;
       }
-      return result;
-    });
+    );
 
     this.addMethod('GetRows', (numRows?: number) => {
       const startPos = Math.max(0, this._currentRow);
@@ -516,13 +598,14 @@ export class RDOResultset extends COMObject {
 
   private updateAbsolutePosition(): void {
     this._absolutePosition = this._currentRow + 1;
-    this._percentPosition = this._rowCount > 0 ? Math.round((this._currentRow / this._rowCount) * 100) : 0;
+    this._percentPosition =
+      this._rowCount > 0 ? Math.round((this._currentRow / this._rowCount) * 100) : 0;
   }
 
   private executeQuery(sql: string): void {
     this._stillExecuting = true;
     this._state = rdoQueryState.rdRowsetEmpty;
-    
+
     // Simulate query execution
     setTimeout(() => {
       // Create sample columns and data
@@ -530,12 +613,12 @@ export class RDOResultset extends COMObject {
       this.addColumn(new RDOColumnObject('Name', rdoDataType.rdTypeVarChar, 50));
       this.addColumn(new RDOColumnObject('Email', rdoDataType.rdTypeVarChar, 100));
       this.addColumn(new RDOColumnObject('CreateDate', rdoDataType.rdTypeTimestamp, 19));
-      
+
       // Add sample data
       this.addRow([1, 'John Doe', 'john@example.com', new Date()]);
       this.addRow([2, 'Jane Smith', 'jane@example.com', new Date()]);
       this.addRow([3, 'Bob Johnson', 'bob@example.com', new Date()]);
-      
+
       this._stillExecuting = false;
       this._state = rdoQueryState.rdRowsetComplete;
       this.fireEvent('QueryComplete', { query: this, success: true });
@@ -558,32 +641,84 @@ export class RDOResultset extends COMObject {
   }
 
   // Properties
-  get BOF(): boolean { return this._bof; }
-  get EOF(): boolean { return this._eof; }
-  get RowCount(): number { return this._rowCount; }
-  get AbsolutePosition(): number { return this._absolutePosition; }
-  get PercentPosition(): number { return this._percentPosition; }
-  get CursorType(): rdoCursorType { return this._cursorType; }
-  get LockType(): rdoLockType { return this._lockType; }
-  get Updatable(): boolean { return this._updatable; }
-  get Bookmarkable(): boolean { return this._bookmarkable; }
-  get Name(): string { return this._name; }
-  set Name(value: string) { this._name = value; }
-  get SQL(): string { return this._sql; }
-  get State(): rdoQueryState { return this._state; }
-  get Type(): rdoResultsetType { return this._type; }
-  get RowsAffected(): number { return this._rowsAffected; }
-  get StillExecuting(): boolean { return this._stillExecuting; }
-  get CacheSize(): number { return this._cacheSize; }
-  set CacheSize(value: number) { this._cacheSize = value; }
-  get MaxRows(): number { return this._maxRows; }
-  set MaxRows(value: number) { this._maxRows = value; }
-  get BatchSize(): number { return this._batchSize; }
-  set BatchSize(value: number) { this._batchSize = value; }
-  get EditMode(): number { return this._editMode; }
-  get LastModified(): any { return this._lastModified; }
-  get Columns(): Map<string, RDOColumnObject> { return this._columns; }
-  get Connection(): RDOConnection | null { return this._connection; }
+  get BOF(): boolean {
+    return this._bof;
+  }
+  get EOF(): boolean {
+    return this._eof;
+  }
+  get RowCount(): number {
+    return this._rowCount;
+  }
+  get AbsolutePosition(): number {
+    return this._absolutePosition;
+  }
+  get PercentPosition(): number {
+    return this._percentPosition;
+  }
+  get CursorType(): rdoCursorType {
+    return this._cursorType;
+  }
+  get LockType(): rdoLockType {
+    return this._lockType;
+  }
+  get Updatable(): boolean {
+    return this._updatable;
+  }
+  get Bookmarkable(): boolean {
+    return this._bookmarkable;
+  }
+  get Name(): string {
+    return this._name;
+  }
+  set Name(value: string) {
+    this._name = value;
+  }
+  get SQL(): string {
+    return this._sql;
+  }
+  get State(): rdoQueryState {
+    return this._state;
+  }
+  get Type(): rdoResultsetType {
+    return this._type;
+  }
+  get RowsAffected(): number {
+    return this._rowsAffected;
+  }
+  get StillExecuting(): boolean {
+    return this._stillExecuting;
+  }
+  get CacheSize(): number {
+    return this._cacheSize;
+  }
+  set CacheSize(value: number) {
+    this._cacheSize = value;
+  }
+  get MaxRows(): number {
+    return this._maxRows;
+  }
+  set MaxRows(value: number) {
+    this._maxRows = value;
+  }
+  get BatchSize(): number {
+    return this._batchSize;
+  }
+  set BatchSize(value: number) {
+    this._batchSize = value;
+  }
+  get EditMode(): number {
+    return this._editMode;
+  }
+  get LastModified(): any {
+    return this._lastModified;
+  }
+  get Columns(): Map<string, RDOColumnObject> {
+    return this._columns;
+  }
+  get Connection(): RDOConnection | null {
+    return this._connection;
+  }
 }
 
 // RDO Query Implementation
@@ -618,7 +753,7 @@ export class RDOQuery extends COMObject {
     this.addMethod('Execute', () => {
       this._stillExecuting = true;
       this._rowsAffected = 0;
-      
+
       // Simulate query execution
       setTimeout(() => {
         this._stillExecuting = false;
@@ -627,11 +762,19 @@ export class RDOQuery extends COMObject {
       }, 100);
     });
 
-    this.addMethod('OpenResultset', (cursorType?: rdoCursorType, lockType?: rdoLockType, options?: number) => {
-      const rs = new RDOResultset(this._sql, this._connection, cursorType || this._cursorType, lockType || this._lockType);
-      rs.executeQuery(this._sql);
-      return rs;
-    });
+    this.addMethod(
+      'OpenResultset',
+      (cursorType?: rdoCursorType, lockType?: rdoLockType, options?: number) => {
+        const rs = new RDOResultset(
+          this._sql,
+          this._connection,
+          cursorType || this._cursorType,
+          lockType || this._lockType
+        );
+        rs.executeQuery(this._sql);
+        return rs;
+      }
+    );
 
     this.addMethod('Cancel', () => {
       this._stillExecuting = false;
@@ -647,16 +790,23 @@ export class RDOQuery extends COMObject {
       this._prepared = false;
     });
 
-    this.addMethod('CreateParameter', (name?: string, type?: rdoDataType, direction?: number, size?: number, value?: any) => {
-      const param = new RDOParameterObject(name || '', type || rdoDataType.rdTypeVarChar, direction || 1);
-      if (size !== undefined) param.Size = size;
-      if (value !== undefined) param.Value = value;
-      
-      if (name) {
-        this._parameters.set(name, param);
+    this.addMethod(
+      'CreateParameter',
+      (name?: string, type?: rdoDataType, direction?: number, size?: number, value?: any) => {
+        const param = new RDOParameterObject(
+          name || '',
+          type || rdoDataType.rdTypeVarChar,
+          direction || 1
+        );
+        if (size !== undefined) param.Size = size;
+        if (value !== undefined) param.Value = value;
+
+        if (name) {
+          this._parameters.set(name, param);
+        }
+        return param;
       }
-      return param;
-    });
+    );
 
     this.addMethod('Close', () => {
       this._parameters.clear();
@@ -665,50 +815,106 @@ export class RDOQuery extends COMObject {
   }
 
   // Properties
-  get Name(): string { return this._name; }
-  set Name(value: string) { this._name = value; }
+  get Name(): string {
+    return this._name;
+  }
+  set Name(value: string) {
+    this._name = value;
+  }
 
-  get SQL(): string { return this._sql; }
-  set SQL(value: string) { this._sql = value; }
+  get SQL(): string {
+    return this._sql;
+  }
+  set SQL(value: string) {
+    this._sql = value;
+  }
 
-  get Connect(): string { return this._connect; }
-  set Connect(value: string) { this._connect = value; }
+  get Connect(): string {
+    return this._connect;
+  }
+  set Connect(value: string) {
+    this._connect = value;
+  }
 
-  get CursorType(): rdoCursorType { return this._cursorType; }
-  set CursorType(value: rdoCursorType) { this._cursorType = value; }
+  get CursorType(): rdoCursorType {
+    return this._cursorType;
+  }
+  set CursorType(value: rdoCursorType) {
+    this._cursorType = value;
+  }
 
-  get LockType(): rdoLockType { return this._lockType; }
-  set LockType(value: rdoLockType) { this._lockType = value; }
+  get LockType(): rdoLockType {
+    return this._lockType;
+  }
+  set LockType(value: rdoLockType) {
+    this._lockType = value;
+  }
 
-  get RowsAffected(): number { return this._rowsAffected; }
+  get RowsAffected(): number {
+    return this._rowsAffected;
+  }
 
-  get StillExecuting(): boolean { return this._stillExecuting; }
+  get StillExecuting(): boolean {
+    return this._stillExecuting;
+  }
 
-  get Prepared(): boolean { return this._prepared; }
+  get Prepared(): boolean {
+    return this._prepared;
+  }
 
-  get MaxRows(): number { return this._maxRows; }
-  set MaxRows(value: number) { this._maxRows = value; }
+  get MaxRows(): number {
+    return this._maxRows;
+  }
+  set MaxRows(value: number) {
+    this._maxRows = value;
+  }
 
-  get QueryTimeout(): number { return this._queryTimeout; }
-  set QueryTimeout(value: number) { this._queryTimeout = value; }
+  get QueryTimeout(): number {
+    return this._queryTimeout;
+  }
+  set QueryTimeout(value: number) {
+    this._queryTimeout = value;
+  }
 
-  get BatchCollisionCount(): number { return this._batchCollisionCount; }
+  get BatchCollisionCount(): number {
+    return this._batchCollisionCount;
+  }
 
-  get BatchCollisionRows(): any[] { return this._batchCollisionRows; }
+  get BatchCollisionRows(): any[] {
+    return this._batchCollisionRows;
+  }
 
-  get BatchSize(): number { return this._batchSize; }
-  set BatchSize(value: number) { this._batchSize = value; }
+  get BatchSize(): number {
+    return this._batchSize;
+  }
+  set BatchSize(value: number) {
+    this._batchSize = value;
+  }
 
-  get Bindings(): boolean { return this._bindings; }
-  set Bindings(value: boolean) { this._bindings = value; }
+  get Bindings(): boolean {
+    return this._bindings;
+  }
+  set Bindings(value: boolean) {
+    this._bindings = value;
+  }
 
-  get KeysetSize(): number { return this._keysetSize; }
-  set KeysetSize(value: number) { this._keysetSize = value; }
+  get KeysetSize(): number {
+    return this._keysetSize;
+  }
+  set KeysetSize(value: number) {
+    this._keysetSize = value;
+  }
 
-  get Parameters(): Map<string, RDOParameterObject> { return this._parameters; }
+  get Parameters(): Map<string, RDOParameterObject> {
+    return this._parameters;
+  }
 
-  get Connection(): RDOConnection | null { return this._connection; }
-  set Connection(value: RDOConnection | null) { this._connection = value; }
+  get Connection(): RDOConnection | null {
+    return this._connection;
+  }
+  set Connection(value: RDOConnection | null) {
+    this._connection = value;
+  }
 }
 
 // RDO Connection Implementation
@@ -737,17 +943,20 @@ export class RDOConnection extends COMObject {
   }
 
   private setupConnectionMethods(): void {
-    this.addMethod('EstablishConnection', (prompt?: boolean, readOnly?: boolean, options?: number) => {
-      this._stillConnecting = true;
-      
-      // Simulate connection
-      setTimeout(() => {
-        this._stillConnecting = false;
-        this._version = 'RDO 2.0 Simulation';
-        this.loadTableInfo();
-        this.fireEvent('Connect', { connection: this });
-      }, 500);
-    });
+    this.addMethod(
+      'EstablishConnection',
+      (prompt?: boolean, readOnly?: boolean, options?: number) => {
+        this._stillConnecting = true;
+
+        // Simulate connection
+        setTimeout(() => {
+          this._stillConnecting = false;
+          this._version = 'RDO 2.0 Simulation';
+          this.loadTableInfo();
+          this.fireEvent('Connect', { connection: this });
+        }, 500);
+      }
+    );
 
     this.addMethod('Close', () => {
       this._queries.clear();
@@ -758,16 +967,19 @@ export class RDOConnection extends COMObject {
       this.fireEvent('Disconnect', { connection: this });
     });
 
-    this.addMethod('OpenResultset', (query: string, cursorType?: rdoCursorType, lockType?: rdoLockType, options?: number) => {
-      const rs = new RDOResultset(query, this, cursorType, lockType);
-      this._lastQueryResults = rs;
-      rs.executeQuery(query);
-      return rs;
-    });
+    this.addMethod(
+      'OpenResultset',
+      (query: string, cursorType?: rdoCursorType, lockType?: rdoLockType, options?: number) => {
+        const rs = new RDOResultset(query, this, cursorType, lockType);
+        this._lastQueryResults = rs;
+        rs.executeQuery(query);
+        return rs;
+      }
+    );
 
     this.addMethod('Execute', (query: string, options?: number) => {
       this._stillExecuting = true;
-      
+
       // Simulate execution
       setTimeout(() => {
         this._stillExecuting = false;
@@ -821,62 +1033,106 @@ export class RDOConnection extends COMObject {
       Name: 'Customers',
       Type: 'TABLE',
       Schema: 'dbo',
-      Catalog: 'TestDB'
+      Catalog: 'TestDB',
     });
 
     this._tables.set('Orders', {
-      Name: 'Orders', 
+      Name: 'Orders',
       Type: 'TABLE',
       Schema: 'dbo',
-      Catalog: 'TestDB'
+      Catalog: 'TestDB',
     });
 
     this._tables.set('Products', {
       Name: 'Products',
-      Type: 'TABLE', 
+      Type: 'TABLE',
       Schema: 'dbo',
-      Catalog: 'TestDB'
+      Catalog: 'TestDB',
     });
   }
 
   // Properties
-  get Name(): string { return this._name; }
-  set Name(value: string) { this._name = value; }
+  get Name(): string {
+    return this._name;
+  }
+  set Name(value: string) {
+    this._name = value;
+  }
 
-  get Connect(): string { return this._connect; }
-  set Connect(value: string) { this._connect = value; }
+  get Connect(): string {
+    return this._connect;
+  }
+  set Connect(value: string) {
+    this._connect = value;
+  }
 
-  get LoginTimeout(): number { return this._loginTimeout; }
-  set LoginTimeout(value: number) { this._loginTimeout = value; }
+  get LoginTimeout(): number {
+    return this._loginTimeout;
+  }
+  set LoginTimeout(value: number) {
+    this._loginTimeout = value;
+  }
 
-  get QueryTimeout(): number { return this._queryTimeout; }
-  set QueryTimeout(value: number) { this._queryTimeout = value; }
+  get QueryTimeout(): number {
+    return this._queryTimeout;
+  }
+  set QueryTimeout(value: number) {
+    this._queryTimeout = value;
+  }
 
-  get AsyncCheckInterval(): number { return this._asyncCheckInterval; }
-  set AsyncCheckInterval(value: number) { this._asyncCheckInterval = value; }
+  get AsyncCheckInterval(): number {
+    return this._asyncCheckInterval;
+  }
+  set AsyncCheckInterval(value: number) {
+    this._asyncCheckInterval = value;
+  }
 
-  get CursorDriver(): number { return this._cursorDriver; }
-  set CursorDriver(value: number) { this._cursorDriver = value; }
+  get CursorDriver(): number {
+    return this._cursorDriver;
+  }
+  set CursorDriver(value: number) {
+    this._cursorDriver = value;
+  }
 
-  get Environment(): RDOEnvironment | null { return this._environment; }
+  get Environment(): RDOEnvironment | null {
+    return this._environment;
+  }
 
-  get hDbc(): number { return this._hDbc; }
+  get hDbc(): number {
+    return this._hDbc;
+  }
 
-  get LastQueryResults(): RDOResultset | null { return this._lastQueryResults; }
+  get LastQueryResults(): RDOResultset | null {
+    return this._lastQueryResults;
+  }
 
-  get StillConnecting(): boolean { return this._stillConnecting; }
+  get StillConnecting(): boolean {
+    return this._stillConnecting;
+  }
 
-  get StillExecuting(): boolean { return this._stillExecuting; }
+  get StillExecuting(): boolean {
+    return this._stillExecuting;
+  }
 
-  get Transactions(): boolean { return this._transactions; }
+  get Transactions(): boolean {
+    return this._transactions;
+  }
 
-  get Updatable(): boolean { return this._updatable; }
+  get Updatable(): boolean {
+    return this._updatable;
+  }
 
-  get Version(): string { return this._version; }
+  get Version(): string {
+    return this._version;
+  }
 
-  get Queries(): Map<string, RDOQuery> { return this._queries; }
+  get Queries(): Map<string, RDOQuery> {
+    return this._queries;
+  }
 
-  get Tables(): Map<string, RDOTable> { return this._tables; }
+  get Tables(): Map<string, RDOTable> {
+    return this._tables;
+  }
 }
 
 // RDO Environment Implementation
@@ -895,21 +1151,24 @@ export class RDOEnvironment extends COMObject {
   }
 
   private setupEnvironmentMethods(): void {
-    this.addMethod('OpenConnection', (name?: string, prompt?: boolean, readOnly?: boolean, connect?: string, options?: number) => {
-      const conn = new RDOConnection(connect, prompt);
-      conn['_environment'] = this;
-      conn.Name = name || '';
-      conn.LoginTimeout = this._loginTimeout;
-      conn.QueryTimeout = this._queryTimeout;
-      conn.CursorDriver = this._cursorDriver;
-      
-      if (name) {
-        this._connections.set(name, conn);
+    this.addMethod(
+      'OpenConnection',
+      (name?: string, prompt?: boolean, readOnly?: boolean, connect?: string, options?: number) => {
+        const conn = new RDOConnection(connect, prompt);
+        conn['_environment'] = this;
+        conn.Name = name || '';
+        conn.LoginTimeout = this._loginTimeout;
+        conn.QueryTimeout = this._queryTimeout;
+        conn.CursorDriver = this._cursorDriver;
+
+        if (name) {
+          this._connections.set(name, conn);
+        }
+
+        conn.getMethod('EstablishConnection')(prompt, readOnly, options);
+        return conn;
       }
-      
-      conn.getMethod('EstablishConnection')(prompt, readOnly, options);
-      return conn;
-    });
+    );
 
     this.addMethod('BeginTrans', () => {
       // Begin transaction for all connections
@@ -942,21 +1201,41 @@ export class RDOEnvironment extends COMObject {
   }
 
   // Properties
-  get Name(): string { return this._name; }
-  set Name(value: string) { this._name = value; }
+  get Name(): string {
+    return this._name;
+  }
+  set Name(value: string) {
+    this._name = value;
+  }
 
-  get LoginTimeout(): number { return this._loginTimeout; }
-  set LoginTimeout(value: number) { this._loginTimeout = value; }
+  get LoginTimeout(): number {
+    return this._loginTimeout;
+  }
+  set LoginTimeout(value: number) {
+    this._loginTimeout = value;
+  }
 
-  get QueryTimeout(): number { return this._queryTimeout; }
-  set QueryTimeout(value: number) { this._queryTimeout = value; }
+  get QueryTimeout(): number {
+    return this._queryTimeout;
+  }
+  set QueryTimeout(value: number) {
+    this._queryTimeout = value;
+  }
 
-  get CursorDriver(): number { return this._cursorDriver; }
-  set CursorDriver(value: number) { this._cursorDriver = value; }
+  get CursorDriver(): number {
+    return this._cursorDriver;
+  }
+  set CursorDriver(value: number) {
+    this._cursorDriver = value;
+  }
 
-  get hEnv(): number { return this._hEnv; }
+  get hEnv(): number {
+    return this._hEnv;
+  }
 
-  get Connections(): Map<string, RDOConnection> { return this._connections; }
+  get Connections(): Map<string, RDOConnection> {
+    return this._connections;
+  }
 }
 
 // RDO Engine Implementation
@@ -974,20 +1253,26 @@ export class RDOEngine extends COMObject {
   }
 
   private setupEngineeMethods(): void {
-    this.addMethod('rdoCreateEnvironment', (name: string, user?: string, password?: string, options?: number) => {
-      const env = new RDOEnvironment(name);
-      env.LoginTimeout = this._rdoDefaultLoginTimeout;
-      env.QueryTimeout = this._rdoDefaultQueryTimeout;
-      env.CursorDriver = this._rdoDefaultCursorDriver;
-      
-      this._rdoEnvironments.set(name, env);
-      return env;
-    });
+    this.addMethod(
+      'rdoCreateEnvironment',
+      (name: string, user?: string, password?: string, options?: number) => {
+        const env = new RDOEnvironment(name);
+        env.LoginTimeout = this._rdoDefaultLoginTimeout;
+        env.QueryTimeout = this._rdoDefaultQueryTimeout;
+        env.CursorDriver = this._rdoDefaultCursorDriver;
 
-    this.addMethod('rdoRegisterDataSource', (name: string, driver: string, silent: boolean, attributes: string) => {
-      // Register ODBC data source (simplified)
-      return true;
-    });
+        this._rdoEnvironments.set(name, env);
+        return env;
+      }
+    );
+
+    this.addMethod(
+      'rdoRegisterDataSource',
+      (name: string, driver: string, silent: boolean, attributes: string) => {
+        // Register ODBC data source (simplified)
+        return true;
+      }
+    );
   }
 
   private initializeDefaultEnvironment(): void {
@@ -996,18 +1281,34 @@ export class RDOEngine extends COMObject {
   }
 
   // Properties
-  get rdoDefaultCursorDriver(): number { return this._rdoDefaultCursorDriver; }
-  set rdoDefaultCursorDriver(value: number) { this._rdoDefaultCursorDriver = value; }
+  get rdoDefaultCursorDriver(): number {
+    return this._rdoDefaultCursorDriver;
+  }
+  set rdoDefaultCursorDriver(value: number) {
+    this._rdoDefaultCursorDriver = value;
+  }
 
-  get rdoDefaultLoginTimeout(): number { return this._rdoDefaultLoginTimeout; }
-  set rdoDefaultLoginTimeout(value: number) { this._rdoDefaultLoginTimeout = value; }
+  get rdoDefaultLoginTimeout(): number {
+    return this._rdoDefaultLoginTimeout;
+  }
+  set rdoDefaultLoginTimeout(value: number) {
+    this._rdoDefaultLoginTimeout = value;
+  }
 
-  get rdoDefaultQueryTimeout(): number { return this._rdoDefaultQueryTimeout; }
-  set rdoDefaultQueryTimeout(value: number) { this._rdoDefaultQueryTimeout = value; }
+  get rdoDefaultQueryTimeout(): number {
+    return this._rdoDefaultQueryTimeout;
+  }
+  set rdoDefaultQueryTimeout(value: number) {
+    this._rdoDefaultQueryTimeout = value;
+  }
 
-  get rdoEnvironments(): Map<string, RDOEnvironment> { return this._rdoEnvironments; }
+  get rdoEnvironments(): Map<string, RDOEnvironment> {
+    return this._rdoEnvironments;
+  }
 
-  get rdoVersion(): string { return this._rdoVersion; }
+  get rdoVersion(): string {
+    return this._rdoVersion;
+  }
 }
 
 // Register RDO classes with COM registry
@@ -1024,7 +1325,7 @@ registry.registerClass(
   }
 );
 
-// Register RDO Environment  
+// Register RDO Environment
 registry.registerClass(
   '{9F6AA701-D188-11CD-AD48-00AA003C9CB6}',
   'RDO.rdoEnvironment',
@@ -1070,5 +1371,12 @@ registry.registerClass(
 
 // Export main RDO objects
 export const rdoEngine = new RDOEngine();
-export { RDOEnvironment, RDOConnection, RDOQuery, RDOResultset, RDOColumnObject, RDOParameterObject };
+export {
+  RDOEnvironment,
+  RDOConnection,
+  RDOQuery,
+  RDOResultset,
+  RDOColumnObject,
+  RDOParameterObject,
+};
 export default RDOEngine;

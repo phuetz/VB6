@@ -11,7 +11,7 @@ export enum VB6MessageType {
   MouseMove = 'mousemove',
   Resize = 'resize',
   Timer = 'timer',
-  Custom = 'custom'
+  Custom = 'custom',
 }
 
 // Message structure
@@ -51,50 +51,50 @@ export class VB6DoEventsManager {
     timeoutMs: 16, // ~60fps
     yieldToUI: true,
     processTimers: true,
-    processPaint: true
+    processPaint: true,
   };
-  
+
   private constructor() {
     this.setupEventCapture();
   }
-  
+
   static getInstance(): VB6DoEventsManager {
     if (!VB6DoEventsManager.instance) {
       VB6DoEventsManager.instance = new VB6DoEventsManager();
     }
     return VB6DoEventsManager.instance;
   }
-  
+
   /**
    * Main DoEvents function - processes pending messages
    */
   doEvents(): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (this.isProcessing || this.isPaused) {
         resolve();
         return;
       }
-      
+
       this.isProcessing = true;
       this.processCount++;
-      
+
       // Process messages in chunks
       const startTime = performance.now();
       let messagesProcessed = 0;
-      
+
       while (
-        this.messageQueue.length > 0 && 
+        this.messageQueue.length > 0 &&
         messagesProcessed < this.config.maxMessagesPerCycle! &&
-        (performance.now() - startTime) < this.config.timeoutMs!
+        performance.now() - startTime < this.config.timeoutMs!
       ) {
         const message = this.messageQueue.shift()!;
         this.processMessage(message);
         messagesProcessed++;
       }
-      
+
       // Update last process time
       this.lastProcessTime = performance.now();
-      
+
       // Yield to browser if configured
       if (this.config.yieldToUI && typeof window !== 'undefined') {
         // Use requestAnimationFrame for smooth UI updates
@@ -118,7 +118,7 @@ export class VB6DoEventsManager {
       }
     });
   }
-  
+
   /**
    * Synchronous DoEvents (blocking version)
    */
@@ -126,46 +126,43 @@ export class VB6DoEventsManager {
     if (this.isProcessing || this.isPaused) {
       return;
     }
-    
+
     this.isProcessing = true;
     this.processCount++;
-    
+
     const startTime = performance.now();
     let messagesProcessed = 0;
-    
-    while (
-      this.messageQueue.length > 0 && 
-      messagesProcessed < this.config.maxMessagesPerCycle!
-    ) {
+
+    while (this.messageQueue.length > 0 && messagesProcessed < this.config.maxMessagesPerCycle!) {
       const message = this.messageQueue.shift()!;
       this.processMessage(message);
       messagesProcessed++;
-      
+
       // Prevent infinite loops
-      if ((performance.now() - startTime) > this.config.timeoutMs! * 10) {
+      if (performance.now() - startTime > this.config.timeoutMs! * 10) {
         console.warn('[VB6 DoEvents] Breaking out of sync processing - timeout');
         break;
       }
     }
-    
+
     this.lastProcessTime = performance.now();
     this.isProcessing = false;
   }
-  
+
   /**
    * DoEvents with custom configuration
    */
   async doEventsWithConfig(config: Partial<DoEventsConfig>): Promise<void> {
     const oldConfig = { ...this.config };
     Object.assign(this.config, config);
-    
+
     try {
       await this.doEvents();
     } finally {
       this.config = oldConfig;
     }
   }
-  
+
   /**
    * Add message to queue
    */
@@ -175,9 +172,9 @@ export class VB6DoEventsManager {
       target,
       data,
       timestamp: performance.now(),
-      priority
+      priority,
     };
-    
+
     // Insert based on priority (higher priority first)
     const insertIndex = this.messageQueue.findIndex(m => m.priority < priority);
     if (insertIndex === -1) {
@@ -186,7 +183,7 @@ export class VB6DoEventsManager {
       this.messageQueue.splice(insertIndex, 0, message);
     }
   }
-  
+
   /**
    * Clear message queue
    */
@@ -197,21 +194,21 @@ export class VB6DoEventsManager {
       this.messageQueue = [];
     }
   }
-  
+
   /**
    * Pause message processing
    */
   pause(): void {
     this.isPaused = true;
   }
-  
+
   /**
    * Resume message processing
    */
   resume(): void {
     this.isPaused = false;
   }
-  
+
   /**
    * Get queue statistics
    */
@@ -229,16 +226,16 @@ export class VB6DoEventsManager {
       isProcessing: this.isProcessing,
       isPaused: this.isPaused,
       lastProcessTime: this.lastProcessTime,
-      averageProcessTime: this.lastProcessTime / Math.max(this.processCount, 1)
+      averageProcessTime: this.lastProcessTime / Math.max(this.processCount, 1),
     };
   }
-  
+
   /**
    * Create a VB6-style timer
    */
   setTimer(callback: () => void, interval: number): number {
     const timerId = this.nextTimerId++;
-    
+
     if (typeof window !== 'undefined') {
       const id = window.setInterval(() => {
         if (this.config.processTimers) {
@@ -258,10 +255,10 @@ export class VB6DoEventsManager {
       }, interval);
       this.timers.set(timerId, id);
     }
-    
+
     return timerId;
   }
-  
+
   /**
    * Clear a timer
    */
@@ -276,7 +273,7 @@ export class VB6DoEventsManager {
       this.timers.delete(timerId);
     }
   }
-  
+
   /**
    * Force paint/refresh
    */
@@ -284,7 +281,7 @@ export class VB6DoEventsManager {
     if (this.config.processPaint) {
       this.postMessage(VB6MessageType.Paint, null, null, 9);
     }
-    
+
     if (typeof window !== 'undefined' && window.document) {
       // Force browser repaint
       const body = window.document.body;
@@ -294,21 +291,21 @@ export class VB6DoEventsManager {
       body.style.display = '';
     }
   }
-  
+
   /**
    * Sleep function using DoEvents
    */
   async sleep(milliseconds: number): Promise<void> {
     const endTime = performance.now() + milliseconds;
-    
+
     while (performance.now() < endTime) {
       await this.doEvents();
-      
+
       // Small delay to prevent CPU spinning
       await new Promise(resolve => setTimeout(resolve, Math.min(10, milliseconds / 10)));
     }
   }
-  
+
   /**
    * Process long operation with DoEvents
    */
@@ -319,22 +316,22 @@ export class VB6DoEventsManager {
     const generator = operation();
     let index = 0;
     let result = generator.next();
-    
+
     while (!result.done) {
       if (onProgress) {
         onProgress(result.value, index);
       }
-      
+
       // Process messages periodically
       if (index % 10 === 0) {
         await this.doEvents();
       }
-      
+
       result = generator.next();
       index++;
     }
   }
-  
+
   private processMessage(message: VB6Message): void {
     try {
       switch (message.type) {
@@ -343,18 +340,18 @@ export class VB6DoEventsManager {
             message.data.callback();
           }
           break;
-          
+
         case VB6MessageType.Paint:
           this.handlePaintMessage(message);
           break;
-          
+
         case VB6MessageType.Click:
         case VB6MessageType.KeyPress:
         case VB6MessageType.MouseMove:
         case VB6MessageType.Resize:
           this.handleUIMessage(message);
           break;
-          
+
         case VB6MessageType.Custom:
           if (message.data?.handler) {
             message.data.handler(message);
@@ -365,13 +362,13 @@ export class VB6DoEventsManager {
       console.error('[VB6 DoEvents] Error processing message:', error);
     }
   }
-  
+
   private handlePaintMessage(message: VB6Message): void {
     if (message.target && typeof message.target.repaint === 'function') {
       message.target.repaint();
     }
   }
-  
+
   private handleUIMessage(message: VB6Message): void {
     if (message.target && message.data?.event) {
       // Dispatch event to target
@@ -382,40 +379,44 @@ export class VB6DoEventsManager {
       }
     }
   }
-  
+
   private setupEventCapture(): void {
     if (typeof window === 'undefined') {
       return;
     }
-    
+
     // Capture high-priority events
     const captureEvents = ['click', 'keypress', 'keydown', 'keyup'];
-    
+
     captureEvents.forEach(eventType => {
-      window.addEventListener(eventType, (event) => {
-        if (this.isPaused) return;
-        
-        const messageType = this.mapEventToMessageType(eventType);
-        if (messageType) {
-          this.postMessage(messageType, event.target, { event }, 7);
-        }
-      }, true); // Use capture phase
+      window.addEventListener(
+        eventType,
+        event => {
+          if (this.isPaused) return;
+
+          const messageType = this.mapEventToMessageType(eventType);
+          if (messageType) {
+            this.postMessage(messageType, event.target, { event }, 7);
+          }
+        },
+        true
+      ); // Use capture phase
     });
   }
-  
+
   private mapEventToMessageType(eventType: string): VB6MessageType | null {
     const mapping: { [key: string]: VB6MessageType } = {
-      'click': VB6MessageType.Click,
-      'keypress': VB6MessageType.KeyPress,
-      'keydown': VB6MessageType.KeyPress,
-      'keyup': VB6MessageType.KeyPress,
-      'mousemove': VB6MessageType.MouseMove,
-      'resize': VB6MessageType.Resize
+      click: VB6MessageType.Click,
+      keypress: VB6MessageType.KeyPress,
+      keydown: VB6MessageType.KeyPress,
+      keyup: VB6MessageType.KeyPress,
+      mousemove: VB6MessageType.MouseMove,
+      resize: VB6MessageType.Resize,
     };
-    
+
     return mapping[eventType] || null;
   }
-  
+
   /**
    * Clean up resources
    */
@@ -425,16 +426,16 @@ export class VB6DoEventsManager {
       this.clearTimer(timerId);
     });
     this.timers.clear();
-    
+
     // Clear message queue
     this.messageQueue = [];
-    
+
     // Cancel animation frame
     if (this.animationFrameId !== null && typeof window !== 'undefined') {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
     }
-    
+
     // Reset state
     this.isProcessing = false;
     this.isPaused = false;
@@ -482,7 +483,7 @@ export class VB6Timer {
   private _enabled: boolean = false;
   private _interval: number = 1000;
   private _onTimer?: () => void;
-  
+
   constructor(interval?: number, onTimer?: () => void) {
     if (interval !== undefined) {
       this._interval = interval;
@@ -491,15 +492,15 @@ export class VB6Timer {
       this._onTimer = onTimer;
     }
   }
-  
+
   get Enabled(): boolean {
     return this._enabled;
   }
-  
+
   set Enabled(value: boolean) {
     if (value !== this._enabled) {
       this._enabled = value;
-      
+
       if (value) {
         this.start();
       } else {
@@ -507,27 +508,27 @@ export class VB6Timer {
       }
     }
   }
-  
+
   get Interval(): number {
     return this._interval;
   }
-  
+
   set Interval(value: number) {
     this._interval = Math.max(1, value);
-    
+
     if (this._enabled) {
       this.stop();
       this.start();
     }
   }
-  
+
   start(): void {
     if (this.timerId === null && this._onTimer) {
       this.timerId = DoEventsManager.setTimer(this._onTimer, this._interval);
       this._enabled = true;
     }
   }
-  
+
   stop(): void {
     if (this.timerId !== null) {
       DoEventsManager.clearTimer(this.timerId);
@@ -535,7 +536,7 @@ export class VB6Timer {
       this._enabled = false;
     }
   }
-  
+
   dispose(): void {
     this.stop();
     this._onTimer = undefined;
@@ -547,52 +548,52 @@ export class VB6Timer {
  */
 export class VB6LongOperation {
   private cancelled: boolean = false;
-  
+
   /**
    * Example: Process large array with DoEvents
    */
   async processLargeArray(array: any[], processor: (item: any) => void): Promise<void> {
     const chunkSize = 100;
-    
+
     for (let i = 0; i < array.length; i += chunkSize) {
       if (this.cancelled) {
         break;
       }
-      
+
       // Process chunk
       const chunk = array.slice(i, Math.min(i + chunkSize, array.length));
       chunk.forEach(processor);
-      
+
       // Update progress
       const progress = Math.round((i / array.length) * 100);
-      console.log(`Processing: ${progress}%`);
-      
+
       // Allow UI to update
       await DoEvents();
     }
   }
-  
+
   /**
    * Example: Fibonacci calculation with DoEvents
    */
-  async* calculateFibonacci(n: number): AsyncGenerator<number> {
-    let a = 0, b = 1;
-    
+  async *calculateFibonacci(n: number): AsyncGenerator<number> {
+    let a = 0,
+      b = 1;
+
     for (let i = 0; i < n; i++) {
       if (this.cancelled) {
         return;
       }
-      
+
       yield a;
       [a, b] = [b, a + b];
-      
+
       // Process messages every 10 iterations
       if (i % 10 === 0) {
         await DoEvents();
       }
     }
   }
-  
+
   /**
    * Example: File processing with progress
    */
@@ -602,25 +603,25 @@ export class VB6LongOperation {
     onProgress?: (current: number, total: number) => void
   ): Promise<void> {
     const total = files.length;
-    
+
     for (let i = 0; i < total; i++) {
       if (this.cancelled) {
         break;
       }
-      
+
       // Process file
       await processor(files[i]);
-      
+
       // Report progress
       if (onProgress) {
         onProgress(i + 1, total);
       }
-      
+
       // Allow UI updates
       await DoEvents();
     }
   }
-  
+
   cancel(): void {
     this.cancelled = true;
   }
@@ -636,5 +637,5 @@ export const VB6DoEventsAPI = {
   Refresh,
   VB6Timer,
   VB6LongOperation,
-  VB6MessageType
+  VB6MessageType,
 };

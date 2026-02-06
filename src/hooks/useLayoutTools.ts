@@ -4,7 +4,12 @@
 import { useCallback } from 'react';
 import { VB6Control } from '../types/VB6Types';
 import { Control } from '../context/types';
-import { layoutToolsService, AlignmentOptions, DistributionOptions, SpacingOptions } from '../services/LayoutToolsService';
+import {
+  layoutToolsService,
+  AlignmentOptions,
+  DistributionOptions,
+  SpacingOptions,
+} from '../services/LayoutToolsService';
 import { useUndoRedo } from './useUndoRedo';
 
 export interface UseLayoutToolsReturn {
@@ -24,13 +29,20 @@ export interface UseLayoutToolsReturn {
 
   // Espacement
   applySpacing: (controls: Control[], options: SpacingOptions) => Control[];
-  arrangeInGrid: (controls: Control[], columns: number, spacing?: { x: number; y: number }) => Control[];
+  arrangeInGrid: (
+    controls: Control[],
+    columns: number,
+    spacing?: { x: number; y: number }
+  ) => Control[];
 
   // Redimensionnement
-  resizeControls: (controls: Control[], options: {
-    width?: number | 'max' | 'min' | 'average';
-    height?: number | 'max' | 'min' | 'average';
-  }) => Control[];
+  resizeControls: (
+    controls: Control[],
+    options: {
+      width?: number | 'max' | 'min' | 'average';
+      height?: number | 'max' | 'min' | 'average';
+    }
+  ) => Control[];
   makeSameWidth: (controls: Control[]) => Control[];
   makeSameHeight: (controls: Control[]) => Control[];
   makeSameSize: (controls: Control[]) => Control[];
@@ -67,7 +79,7 @@ const controlToVB6Control = (control: Control): VB6Control => ({
   TabIndex: control.tabIndex,
   TabStop: control.tabStop,
   Tag: control.tag,
-  ToolTipText: control.toolTipText
+  ToolTipText: control.toolTipText,
 });
 
 const vb6ControlToControl = (vb6Control: VB6Control, originalControl: Control): Control => ({
@@ -85,132 +97,206 @@ const vb6ControlToControl = (vb6Control: VB6Control, originalControl: Control): 
   tabIndex: vb6Control.TabIndex || originalControl.tabIndex,
   tabStop: vb6Control.TabStop !== undefined ? vb6Control.TabStop : originalControl.tabStop,
   tag: vb6Control.Tag || originalControl.tag,
-  toolTipText: vb6Control.ToolTipText || originalControl.toolTipText
+  toolTipText: vb6Control.ToolTipText || originalControl.toolTipText,
 });
 
 export const useLayoutTools = (): UseLayoutToolsReturn => {
   const { recordLayoutOperation } = useUndoRedo();
 
   // Wrapper pour enregistrer les opérations dans l'historique
-  const withUndoRedo = useCallback(<T extends Control[]>(
-    operation: () => T,
-    operationType: string,
-    controlIds: string[]
-  ): T => {
-    const result = operation();
-    recordLayoutOperation(operationType, controlIds, result);
-    return result;
-  }, [recordLayoutOperation]);
+  const withUndoRedo = useCallback(
+    <T extends Control[]>(operation: () => T, operationType: string, controlIds: string[]): T => {
+      const result = operation();
+      recordLayoutOperation(operationType, controlIds, result);
+      return result;
+    },
+    [recordLayoutOperation]
+  );
 
   // Alignement
-  const alignControls = useCallback((controls: Control[], options: AlignmentOptions): Control[] => {
-    return withUndoRedo(
-      () => {
-        const vb6Controls = controls.map(controlToVB6Control);
-        const updatedVB6Controls = layoutToolsService.alignControls(vb6Controls, options);
-        return updatedVB6Controls.map((vb6Control, index) => 
-          vb6ControlToControl(vb6Control, controls[index])
-        );
-      },
-      `Align ${options.type}`,
-      controls.map(c => c.name)
-    );
-  }, [withUndoRedo]);
+  const alignControls = useCallback(
+    (controls: Control[], options: AlignmentOptions): Control[] => {
+      return withUndoRedo(
+        () => {
+          const vb6Controls = controls.map(controlToVB6Control);
+          const updatedVB6Controls = layoutToolsService.alignControls(vb6Controls, options);
+          return updatedVB6Controls.map((vb6Control, index) =>
+            vb6ControlToControl(vb6Control, controls[index])
+          );
+        },
+        `Align ${options.type}`,
+        controls.map(c => c.name)
+      );
+    },
+    [withUndoRedo]
+  );
 
-  const alignLeft = useCallback((controls: Control[]): Control[] => {
-    return alignControls(controls, { direction: 'horizontal', type: 'left', reference: 'selection' });
-  }, [alignControls]);
+  const alignLeft = useCallback(
+    (controls: Control[]): Control[] => {
+      return alignControls(controls, {
+        direction: 'horizontal',
+        type: 'left',
+        reference: 'selection',
+      });
+    },
+    [alignControls]
+  );
 
-  const alignCenter = useCallback((controls: Control[]): Control[] => {
-    return alignControls(controls, { direction: 'horizontal', type: 'center', reference: 'selection' });
-  }, [alignControls]);
+  const alignCenter = useCallback(
+    (controls: Control[]): Control[] => {
+      return alignControls(controls, {
+        direction: 'horizontal',
+        type: 'center',
+        reference: 'selection',
+      });
+    },
+    [alignControls]
+  );
 
-  const alignRight = useCallback((controls: Control[]): Control[] => {
-    return alignControls(controls, { direction: 'horizontal', type: 'right', reference: 'selection' });
-  }, [alignControls]);
+  const alignRight = useCallback(
+    (controls: Control[]): Control[] => {
+      return alignControls(controls, {
+        direction: 'horizontal',
+        type: 'right',
+        reference: 'selection',
+      });
+    },
+    [alignControls]
+  );
 
-  const alignTop = useCallback((controls: Control[]): Control[] => {
-    return alignControls(controls, { direction: 'vertical', type: 'top', reference: 'selection' });
-  }, [alignControls]);
+  const alignTop = useCallback(
+    (controls: Control[]): Control[] => {
+      return alignControls(controls, {
+        direction: 'vertical',
+        type: 'top',
+        reference: 'selection',
+      });
+    },
+    [alignControls]
+  );
 
-  const alignMiddle = useCallback((controls: Control[]): Control[] => {
-    return alignControls(controls, { direction: 'vertical', type: 'middle', reference: 'selection' });
-  }, [alignControls]);
+  const alignMiddle = useCallback(
+    (controls: Control[]): Control[] => {
+      return alignControls(controls, {
+        direction: 'vertical',
+        type: 'middle',
+        reference: 'selection',
+      });
+    },
+    [alignControls]
+  );
 
-  const alignBottom = useCallback((controls: Control[]): Control[] => {
-    return alignControls(controls, { direction: 'vertical', type: 'bottom', reference: 'selection' });
-  }, [alignControls]);
+  const alignBottom = useCallback(
+    (controls: Control[]): Control[] => {
+      return alignControls(controls, {
+        direction: 'vertical',
+        type: 'bottom',
+        reference: 'selection',
+      });
+    },
+    [alignControls]
+  );
 
   // Distribution
-  const distributeControls = useCallback((controls: Control[], options: DistributionOptions): Control[] => {
-    return withUndoRedo(
-      () => {
-        const vb6Controls = controls.map(controlToVB6Control);
-        const updatedVB6Controls = layoutToolsService.distributeControls(vb6Controls, options);
-        return updatedVB6Controls.map((vb6Control, index) => 
-          vb6ControlToControl(vb6Control, controls[index])
-        );
-      },
-      `Distribute ${options.direction} by ${options.type}`,
-      controls.map(c => c.name)
-    );
-  }, [withUndoRedo]);
+  const distributeControls = useCallback(
+    (controls: Control[], options: DistributionOptions): Control[] => {
+      return withUndoRedo(
+        () => {
+          const vb6Controls = controls.map(controlToVB6Control);
+          const updatedVB6Controls = layoutToolsService.distributeControls(vb6Controls, options);
+          return updatedVB6Controls.map((vb6Control, index) =>
+            vb6ControlToControl(vb6Control, controls[index])
+          );
+        },
+        `Distribute ${options.direction} by ${options.type}`,
+        controls.map(c => c.name)
+      );
+    },
+    [withUndoRedo]
+  );
 
-  const distributeHorizontally = useCallback((controls: Control[], type: DistributionOptions['type'] = 'centers'): Control[] => {
-    return distributeControls(controls, { direction: 'horizontal', type });
-  }, [distributeControls]);
+  const distributeHorizontally = useCallback(
+    (controls: Control[], type: DistributionOptions['type'] = 'centers'): Control[] => {
+      return distributeControls(controls, { direction: 'horizontal', type });
+    },
+    [distributeControls]
+  );
 
-  const distributeVertically = useCallback((controls: Control[], type: DistributionOptions['type'] = 'centers'): Control[] => {
-    return distributeControls(controls, { direction: 'vertical', type });
-  }, [distributeControls]);
+  const distributeVertically = useCallback(
+    (controls: Control[], type: DistributionOptions['type'] = 'centers'): Control[] => {
+      return distributeControls(controls, { direction: 'vertical', type });
+    },
+    [distributeControls]
+  );
 
   // Espacement
-  const applySpacing = useCallback((controls: VB6Control[], options: SpacingOptions): VB6Control[] => {
-    return withUndoRedo(
-      () => layoutToolsService.applySpacing(controls, options),
-      'Apply spacing',
-      controls.map(c => c.Name)
-    );
-  }, [withUndoRedo]);
+  const applySpacing = useCallback(
+    (controls: VB6Control[], options: SpacingOptions): VB6Control[] => {
+      return withUndoRedo(
+        () => layoutToolsService.applySpacing(controls, options),
+        'Apply spacing',
+        controls.map(c => c.Name)
+      );
+    },
+    [withUndoRedo]
+  );
 
-  const arrangeInGrid = useCallback((controls: VB6Control[], columns: number, spacing?: { x: number; y: number }): VB6Control[] => {
-    const suggestedSpacing = layoutToolsService.getSuggestedSpacing(controls);
-    const finalSpacing = spacing || suggestedSpacing.gridSpacing;
-    
-    return withUndoRedo(
-      () => layoutToolsService.arrangeInGrid(controls, columns, finalSpacing),
-      `Arrange in ${columns}-column grid`,
-      controls.map(c => c.Name)
-    );
-  }, [withUndoRedo]);
+  const arrangeInGrid = useCallback(
+    (controls: VB6Control[], columns: number, spacing?: { x: number; y: number }): VB6Control[] => {
+      const suggestedSpacing = layoutToolsService.getSuggestedSpacing(controls);
+      const finalSpacing = spacing || suggestedSpacing.gridSpacing;
+
+      return withUndoRedo(
+        () => layoutToolsService.arrangeInGrid(controls, columns, finalSpacing),
+        `Arrange in ${columns}-column grid`,
+        controls.map(c => c.Name)
+      );
+    },
+    [withUndoRedo]
+  );
 
   // Redimensionnement
-  const resizeControls = useCallback((controls: VB6Control[], options: {
-    width?: number | 'max' | 'min' | 'average';
-    height?: number | 'max' | 'min' | 'average';
-  }): VB6Control[] => {
-    const operationName = [];
-    if (options.width !== undefined) operationName.push(`width to ${options.width}`);
-    if (options.height !== undefined) operationName.push(`height to ${options.height}`);
-    
-    return withUndoRedo(
-      () => layoutToolsService.resizeControls(controls, options),
-      `Resize ${operationName.join(' and ')}`,
-      controls.map(c => c.Name)
-    );
-  }, [withUndoRedo]);
+  const resizeControls = useCallback(
+    (
+      controls: VB6Control[],
+      options: {
+        width?: number | 'max' | 'min' | 'average';
+        height?: number | 'max' | 'min' | 'average';
+      }
+    ): VB6Control[] => {
+      const operationName = [];
+      if (options.width !== undefined) operationName.push(`width to ${options.width}`);
+      if (options.height !== undefined) operationName.push(`height to ${options.height}`);
 
-  const makeSameWidth = useCallback((controls: VB6Control[]): VB6Control[] => {
-    return resizeControls(controls, { width: 'max' });
-  }, [resizeControls]);
+      return withUndoRedo(
+        () => layoutToolsService.resizeControls(controls, options),
+        `Resize ${operationName.join(' and ')}`,
+        controls.map(c => c.Name)
+      );
+    },
+    [withUndoRedo]
+  );
 
-  const makeSameHeight = useCallback((controls: VB6Control[]): VB6Control[] => {
-    return resizeControls(controls, { height: 'max' });
-  }, [resizeControls]);
+  const makeSameWidth = useCallback(
+    (controls: VB6Control[]): VB6Control[] => {
+      return resizeControls(controls, { width: 'max' });
+    },
+    [resizeControls]
+  );
 
-  const makeSameSize = useCallback((controls: VB6Control[]): VB6Control[] => {
-    return resizeControls(controls, { width: 'max', height: 'max' });
-  }, [resizeControls]);
+  const makeSameHeight = useCallback(
+    (controls: VB6Control[]): VB6Control[] => {
+      return resizeControls(controls, { height: 'max' });
+    },
+    [resizeControls]
+  );
+
+  const makeSameSize = useCallback(
+    (controls: VB6Control[]): VB6Control[] => {
+      return resizeControls(controls, { width: 'max', height: 'max' });
+    },
+    [resizeControls]
+  );
 
   // Utilitaires
   const getSuggestedSpacing = useCallback((controls: VB6Control[]) => {
@@ -233,7 +319,7 @@ export const useLayoutTools = (): UseLayoutToolsReturn => {
       right,
       bottom,
       width: right - left,
-      height: bottom - top
+      height: bottom - top,
     };
   }, []);
 
@@ -264,6 +350,6 @@ export const useLayoutTools = (): UseLayoutToolsReturn => {
 
     // Utilitaires
     getSuggestedSpacing,
-    getSelectionBounds
+    getSelectionBounds,
   };
 };

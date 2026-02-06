@@ -1,14 +1,14 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { 
-  Minimize2, 
-  Maximize2, 
-  X, 
-  Move, 
+import {
+  Minimize2,
+  Maximize2,
+  X,
+  Move,
   RotateCcw,
   Copy,
   Layers,
   Settings,
-  Monitor
+  Monitor,
 } from 'lucide-react';
 
 interface VB6Window {
@@ -44,7 +44,7 @@ const VB6WindowManager: React.FC<VB6WindowManagerProps> = ({
   onWindowUpdate,
   onWindowClose,
   onWindowBringToFront,
-  activeWindowId
+  activeWindowId,
 }) => {
   const [dragState, setDragState] = useState<{
     windowId: string;
@@ -70,54 +70,57 @@ const VB6WindowManager: React.FC<VB6WindowManagerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Handle mouse move for dragging and resizing
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (dragState?.isDragging) {
-      const deltaX = e.clientX - dragState.startX;
-      const deltaY = e.clientY - dragState.startY;
-      
-      onWindowUpdate(dragState.windowId, {
-        x: Math.max(0, dragState.startWindowX + deltaX),
-        y: Math.max(0, dragState.startWindowY + deltaY)
-      });
-    }
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (dragState?.isDragging) {
+        const deltaX = e.clientX - dragState.startX;
+        const deltaY = e.clientY - dragState.startY;
 
-    if (resizeState?.isResizing) {
-      const deltaX = e.clientX - resizeState.startX;
-      const deltaY = e.clientY - resizeState.startY;
-      
-      let newWidth = resizeState.startWidth;
-      let newHeight = resizeState.startHeight;
-      let newX = resizeState.startWindowX;
-      let newY = resizeState.startWindowY;
-
-      // Handle different resize directions
-      const { direction } = resizeState;
-      
-      if (direction.includes('e')) {
-        newWidth = Math.max(200, resizeState.startWidth + deltaX);
-      }
-      if (direction.includes('w')) {
-        newWidth = Math.max(200, resizeState.startWidth - deltaX);
-        newX = resizeState.startWindowX + deltaX;
-        if (newWidth === 200) newX = resizeState.startWindowX + resizeState.startWidth - 200;
-      }
-      if (direction.includes('s')) {
-        newHeight = Math.max(150, resizeState.startHeight + deltaY);
-      }
-      if (direction.includes('n')) {
-        newHeight = Math.max(150, resizeState.startHeight - deltaY);
-        newY = resizeState.startWindowY + deltaY;
-        if (newHeight === 150) newY = resizeState.startWindowY + resizeState.startHeight - 150;
+        onWindowUpdate(dragState.windowId, {
+          x: Math.max(0, dragState.startWindowX + deltaX),
+          y: Math.max(0, dragState.startWindowY + deltaY),
+        });
       }
 
-      onWindowUpdate(resizeState.windowId, {
-        width: newWidth,
-        height: newHeight,
-        x: newX,
-        y: newY
-      });
-    }
-  }, [dragState, resizeState, onWindowUpdate]);
+      if (resizeState?.isResizing) {
+        const deltaX = e.clientX - resizeState.startX;
+        const deltaY = e.clientY - resizeState.startY;
+
+        let newWidth = resizeState.startWidth;
+        let newHeight = resizeState.startHeight;
+        let newX = resizeState.startWindowX;
+        let newY = resizeState.startWindowY;
+
+        // Handle different resize directions
+        const { direction } = resizeState;
+
+        if (direction.includes('e')) {
+          newWidth = Math.max(200, resizeState.startWidth + deltaX);
+        }
+        if (direction.includes('w')) {
+          newWidth = Math.max(200, resizeState.startWidth - deltaX);
+          newX = resizeState.startWindowX + deltaX;
+          if (newWidth === 200) newX = resizeState.startWindowX + resizeState.startWidth - 200;
+        }
+        if (direction.includes('s')) {
+          newHeight = Math.max(150, resizeState.startHeight + deltaY);
+        }
+        if (direction.includes('n')) {
+          newHeight = Math.max(150, resizeState.startHeight - deltaY);
+          newY = resizeState.startWindowY + deltaY;
+          if (newHeight === 150) newY = resizeState.startWindowY + resizeState.startHeight - 150;
+        }
+
+        onWindowUpdate(resizeState.windowId, {
+          width: newWidth,
+          height: newHeight,
+          x: newX,
+          y: newY,
+        });
+      }
+    },
+    [dragState, resizeState, onWindowUpdate]
+  );
 
   // Handle mouse up to end dragging/resizing
   const handleMouseUp = useCallback(() => {
@@ -154,7 +157,7 @@ const VB6WindowManager: React.FC<VB6WindowManagerProps> = ({
       startX: e.clientX,
       startY: e.clientY,
       startWindowX: window.x,
-      startWindowY: window.y
+      startWindowY: window.y,
     });
 
     onWindowBringToFront(windowId);
@@ -164,7 +167,7 @@ const VB6WindowManager: React.FC<VB6WindowManagerProps> = ({
   const startResize = (windowId: string, direction: any, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     const window = windows.find(w => w.id === windowId);
     if (!window || !window.resizable) return;
 
@@ -177,7 +180,7 @@ const VB6WindowManager: React.FC<VB6WindowManagerProps> = ({
       startWidth: window.width,
       startHeight: window.height,
       startWindowX: window.x,
-      startWindowY: window.y
+      startWindowY: window.y,
     });
 
     onWindowBringToFront(windowId);
@@ -188,9 +191,9 @@ const VB6WindowManager: React.FC<VB6WindowManagerProps> = ({
     const window = windows.find(w => w.id === windowId);
     if (!window) return;
 
-    onWindowUpdate(windowId, { 
+    onWindowUpdate(windowId, {
       minimized: !window.minimized,
-      maximized: false
+      maximized: false,
     });
 
     window.onMinimize?.();
@@ -208,7 +211,7 @@ const VB6WindowManager: React.FC<VB6WindowManagerProps> = ({
         x: 100,
         y: 100,
         width: 800,
-        height: 600
+        height: 600,
       });
     } else {
       // Maximize to full container
@@ -218,7 +221,7 @@ const VB6WindowManager: React.FC<VB6WindowManagerProps> = ({
         x: 0,
         y: 0,
         width: containerRef.current?.clientWidth || 1200,
-        height: (containerRef.current?.clientHeight || 800) - 40 // Leave space for taskbar
+        height: (containerRef.current?.clientHeight || 800) - 40, // Leave space for taskbar
       });
     }
 
@@ -238,14 +241,14 @@ const VB6WindowManager: React.FC<VB6WindowManagerProps> = ({
   // Get cursor style for resize handles
   const getResizeCursor = (direction: string) => {
     const cursors: { [key: string]: string } = {
-      'n': 'n-resize',
-      'ne': 'ne-resize',
-      'e': 'e-resize',
-      'se': 'se-resize',
-      's': 's-resize',
-      'sw': 'sw-resize',
-      'w': 'w-resize',
-      'nw': 'nw-resize'
+      n: 'n-resize',
+      ne: 'ne-resize',
+      e: 'e-resize',
+      se: 'se-resize',
+      s: 's-resize',
+      sw: 'sw-resize',
+      w: 'w-resize',
+      nw: 'nw-resize',
     };
     return cursors[direction] || 'default';
   };
@@ -261,11 +264,7 @@ const VB6WindowManager: React.FC<VB6WindowManagerProps> = ({
     });
 
   return (
-    <div 
-      ref={containerRef}
-      className="fixed inset-0 pointer-events-none"
-      style={{ zIndex: 1000 }}
-    >
+    <div ref={containerRef} className="fixed inset-0 pointer-events-none" style={{ zIndex: 1000 }}>
       {/* Render windows */}
       {visibleWindows.map((window, index) => (
         <div
@@ -294,22 +293,16 @@ const VB6WindowManager: React.FC<VB6WindowManagerProps> = ({
               bg-gradient-to-r from-blue-600 to-indigo-600 text-white cursor-move select-none
               ${window.id === activeWindowId ? 'from-blue-700 to-indigo-700' : 'from-gray-400 to-gray-500'}
             `}
-            onMouseDown={(e) => startDrag(window.id, e)}
+            onMouseDown={e => startDrag(window.id, e)}
           >
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              {window.icon && (
-                <div className="flex-shrink-0">
-                  {window.icon}
-                </div>
-              )}
-              <span className="text-sm font-medium truncate">
-                {window.title}
-              </span>
+              {window.icon && <div className="flex-shrink-0">{window.icon}</div>}
+              <span className="text-sm font-medium truncate">{window.title}</span>
             </div>
 
             <div className="flex items-center gap-1 flex-shrink-0">
               <button
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   toggleMinimize(window.id);
                 }}
@@ -320,18 +313,18 @@ const VB6WindowManager: React.FC<VB6WindowManagerProps> = ({
               </button>
 
               <button
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   toggleMaximize(window.id);
                 }}
                 className="p-1 hover:bg-white hover:bg-opacity-20 rounded transition-colors"
-                title={window.maximized ? "Restore" : "Maximize"}
+                title={window.maximized ? 'Restore' : 'Maximize'}
               >
                 <Maximize2 size={14} />
               </button>
 
               <button
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   closeWindow(window.id);
                 }}
@@ -344,10 +337,7 @@ const VB6WindowManager: React.FC<VB6WindowManagerProps> = ({
           </div>
 
           {/* Window Content */}
-          <div 
-            className="flex-1 overflow-hidden"
-            style={{ height: window.height - 40 }}
-          >
+          <div className="flex-1 overflow-hidden" style={{ height: window.height - 40 }}>
             {window.content}
           </div>
 
@@ -357,37 +347,37 @@ const VB6WindowManager: React.FC<VB6WindowManagerProps> = ({
               {/* Corner handles */}
               <div
                 className="absolute -top-1 -left-1 w-3 h-3 cursor-nw-resize"
-                onMouseDown={(e) => startResize(window.id, 'nw', e)}
+                onMouseDown={e => startResize(window.id, 'nw', e)}
               />
               <div
                 className="absolute -top-1 -right-1 w-3 h-3 cursor-ne-resize"
-                onMouseDown={(e) => startResize(window.id, 'ne', e)}
+                onMouseDown={e => startResize(window.id, 'ne', e)}
               />
               <div
                 className="absolute -bottom-1 -left-1 w-3 h-3 cursor-sw-resize"
-                onMouseDown={(e) => startResize(window.id, 'sw', e)}
+                onMouseDown={e => startResize(window.id, 'sw', e)}
               />
               <div
                 className="absolute -bottom-1 -right-1 w-3 h-3 cursor-se-resize"
-                onMouseDown={(e) => startResize(window.id, 'se', e)}
+                onMouseDown={e => startResize(window.id, 'se', e)}
               />
 
               {/* Edge handles */}
               <div
                 className="absolute -top-1 left-3 right-3 h-2 cursor-n-resize"
-                onMouseDown={(e) => startResize(window.id, 'n', e)}
+                onMouseDown={e => startResize(window.id, 'n', e)}
               />
               <div
                 className="absolute -bottom-1 left-3 right-3 h-2 cursor-s-resize"
-                onMouseDown={(e) => startResize(window.id, 's', e)}
+                onMouseDown={e => startResize(window.id, 's', e)}
               />
               <div
                 className="absolute -left-1 top-3 bottom-3 w-2 cursor-w-resize"
-                onMouseDown={(e) => startResize(window.id, 'w', e)}
+                onMouseDown={e => startResize(window.id, 'w', e)}
               />
               <div
                 className="absolute -right-1 top-3 bottom-3 w-2 cursor-e-resize"
-                onMouseDown={(e) => startResize(window.id, 'e', e)}
+                onMouseDown={e => startResize(window.id, 'e', e)}
               />
             </>
           )}
@@ -396,21 +386,19 @@ const VB6WindowManager: React.FC<VB6WindowManagerProps> = ({
 
       {/* Taskbar for minimized windows */}
       <div className="absolute bottom-0 left-0 right-0 h-10 bg-gray-200 border-t border-gray-300 flex items-center px-2 gap-1 pointer-events-auto">
-        {windows.filter(w => w.minimized).map(window => (
-          <button
-            key={window.id}
-            onClick={() => toggleMinimize(window.id)}
-            className="flex items-center gap-2 px-3 py-1 bg-gray-100 hover:bg-gray-50 border border-gray-300 rounded text-sm max-w-48"
-            title={window.title}
-          >
-            {window.icon && (
-              <div className="flex-shrink-0">
-                {window.icon}
-              </div>
-            )}
-            <span className="truncate">{window.title}</span>
-          </button>
-        ))}
+        {windows
+          .filter(w => w.minimized)
+          .map(window => (
+            <button
+              key={window.id}
+              onClick={() => toggleMinimize(window.id)}
+              className="flex items-center gap-2 px-3 py-1 bg-gray-100 hover:bg-gray-50 border border-gray-300 rounded text-sm max-w-48"
+              title={window.title}
+            >
+              {window.icon && <div className="flex-shrink-0">{window.icon}</div>}
+              <span className="truncate">{window.title}</span>
+            </button>
+          ))}
       </div>
     </div>
   );

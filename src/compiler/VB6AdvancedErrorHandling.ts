@@ -1,6 +1,6 @@
 /**
  * VB6 Advanced Error Handling - Ultra-Complete Implementation
- * 
+ *
  * Features:
  * - Complete On Error GoTo support with labels
  * - Resume, Resume Next, Resume Label functionality
@@ -45,28 +45,28 @@ export type ErrorMode = 'none' | 'resumeNext' | 'gotoLabel' | 'gotoZero';
 
 export class VB6AdvancedErrorHandler {
   private static instance: VB6AdvancedErrorHandler;
-  
+
   // Error state management
   private errorMode: ErrorMode = 'none';
   private errorLabel: string = '';
   private currentError: VB6ErrorInfo;
   private errorStack: VB6ErrorInfo[] = [];
   private isInErrorHandler = false;
-  
+
   // Execution context
   private contextStack: ErrorContext[] = [];
   private currentContext: ErrorContext | null = null;
   private resumePoint: ResumePoint | null = null;
-  
+
   // Error handler registry
   private errorHandlers = new Map<string, (error: VB6ErrorInfo) => void>();
   private labelHandlers = new Map<string, () => void>();
-  
+
   // Performance tracking
   private errorCount = 0;
   private handledCount = 0;
   private unhandledCount = 0;
-  
+
   // Error constants (matching VB6)
   public static readonly ERROR_CODES = {
     // Runtime errors
@@ -127,19 +127,19 @@ export class VB6AdvancedErrorHandler {
   private initializeJavaScriptErrorHandling(): void {
     // Handle unhandled promise rejections
     if (typeof window !== 'undefined') {
-      window.addEventListener('unhandledrejection', (event) => {
+      window.addEventListener('unhandledrejection', event => {
         this.translateJavaScriptError(event.reason, 'Promise rejection');
       });
 
-      window.addEventListener('error', (event) => {
+      window.addEventListener('error', event => {
         this.translateJavaScriptError(event.error, event.message);
       });
     } else if (typeof process !== 'undefined') {
-      process.on('unhandledRejection', (reason) => {
+      process.on('unhandledRejection', reason => {
         this.translateJavaScriptError(reason, 'Promise rejection');
       });
 
-      process.on('uncaughtException', (error) => {
+      process.on('uncaughtException', error => {
         this.translateJavaScriptError(error, error.message);
       });
     }
@@ -180,7 +180,13 @@ export class VB6AdvancedErrorHandler {
   /**
    * Raise a VB6 error
    */
-  public raise(errorNumber: number, source?: string, description?: string, helpFile?: string, helpContext?: number): never {
+  public raise(
+    errorNumber: number,
+    source?: string,
+    description?: string,
+    helpFile?: string,
+    helpContext?: number
+  ): never {
     const error = this.createError(
       errorNumber,
       description || this.getStandardErrorDescription(errorNumber),
@@ -192,7 +198,7 @@ export class VB6AdvancedErrorHandler {
 
     this.setCurrentError(error);
     this.handleError(error);
-    
+
     throw new VB6RuntimeError(error);
   }
 
@@ -242,8 +248,11 @@ export class VB6AdvancedErrorHandler {
    */
   public resume(target?: string | number): void {
     if (!this.currentError || this.currentError.number === 0) {
-      this.raise(VB6AdvancedErrorHandler.ERROR_CODES.RESUME_WITHOUT_ERROR, 
-        'VB6ErrorHandler', 'Resume without error');
+      this.raise(
+        VB6AdvancedErrorHandler.ERROR_CODES.RESUME_WITHOUT_ERROR,
+        'VB6ErrorHandler',
+        'Resume without error'
+      );
     }
 
     if (target === undefined) {
@@ -266,7 +275,7 @@ export class VB6AdvancedErrorHandler {
    */
   private executeErrorHandler(label: string, error: VB6ErrorInfo): void {
     this.isInErrorHandler = true;
-    
+
     const handler = this.labelHandlers.get(label);
     if (handler) {
       try {
@@ -280,8 +289,11 @@ export class VB6AdvancedErrorHandler {
     } else {
       // Label not found
       this.isInErrorHandler = false;
-      this.raise(VB6AdvancedErrorHandler.ERROR_CODES.SUB_OR_FUNCTION_NOT_DEFINED, 
-        'VB6ErrorHandler', `Label not found: ${label}`);
+      this.raise(
+        VB6AdvancedErrorHandler.ERROR_CODES.SUB_OR_FUNCTION_NOT_DEFINED,
+        'VB6ErrorHandler',
+        `Label not found: ${label}`
+      );
     }
   }
 
@@ -309,7 +321,7 @@ export class VB6AdvancedErrorHandler {
       lineNumber: 0,
       statementIndex: 0,
       variables: new Map(),
-      labels: new Map()
+      labels: new Map(),
     };
 
     this.contextStack.push(context);
@@ -358,7 +370,6 @@ export class VB6AdvancedErrorHandler {
     if (this.currentContext) {
       // Implementation depends on the execution engine
       // This would typically reset the execution pointer
-      console.log(`Resuming at ${this.currentContext.procedureName}:${this.currentContext.lineNumber}`);
     }
   }
 
@@ -368,7 +379,6 @@ export class VB6AdvancedErrorHandler {
   private resumeAtNextStatement(): void {
     if (this.currentContext) {
       this.currentContext.statementIndex++;
-      console.log(`Resuming next at ${this.currentContext.procedureName}:${this.currentContext.lineNumber + 1}`);
     }
   }
 
@@ -380,10 +390,12 @@ export class VB6AdvancedErrorHandler {
       const statementIndex = this.currentContext.labels.get(label);
       if (statementIndex !== undefined) {
         this.currentContext.statementIndex = statementIndex;
-        console.log(`Resuming at label ${label} in ${this.currentContext.procedureName}`);
       } else {
-        this.raise(VB6AdvancedErrorHandler.ERROR_CODES.SUB_OR_FUNCTION_NOT_DEFINED,
-          'VB6ErrorHandler', `Label not found: ${label}`);
+        this.raise(
+          VB6AdvancedErrorHandler.ERROR_CODES.SUB_OR_FUNCTION_NOT_DEFINED,
+          'VB6ErrorHandler',
+          `Label not found: ${label}`
+        );
       }
     }
   }
@@ -432,11 +444,11 @@ export class VB6AdvancedErrorHandler {
    * Create a VB6 error object
    */
   private createError(
-    number: number, 
-    description: string, 
-    source: string, 
-    helpContext: number, 
-    helpFile: string, 
+    number: number,
+    description: string,
+    source: string,
+    helpContext: number,
+    helpFile: string,
     line: number
   ): VB6ErrorInfo {
     return {
@@ -450,7 +462,7 @@ export class VB6AdvancedErrorHandler {
       procedure: this.getCurrentProcedureName(),
       module: this.getCurrentModuleName(),
       timestamp: Date.now(),
-      callStack: this.getCallStack()
+      callStack: this.getCallStack(),
     };
   }
 
@@ -490,10 +502,12 @@ export class VB6AdvancedErrorHandler {
       [VB6AdvancedErrorHandler.ERROR_CODES.USER_INTERRUPT]: 'User interrupt occurred',
       [VB6AdvancedErrorHandler.ERROR_CODES.RESUME_WITHOUT_ERROR]: 'Resume without error',
       [VB6AdvancedErrorHandler.ERROR_CODES.OUT_OF_STACK_SPACE]: 'Out of stack space',
-      [VB6AdvancedErrorHandler.ERROR_CODES.SUB_OR_FUNCTION_NOT_DEFINED]: 'Sub or Function not defined',
+      [VB6AdvancedErrorHandler.ERROR_CODES.SUB_OR_FUNCTION_NOT_DEFINED]:
+        'Sub or Function not defined',
       [VB6AdvancedErrorHandler.ERROR_CODES.INTERNAL_ERROR]: 'Internal error',
       [VB6AdvancedErrorHandler.ERROR_CODES.FILE_NOT_FOUND]: 'File not found',
-      [VB6AdvancedErrorHandler.ERROR_CODES.OBJECT_VARIABLE_OR_WITH_BLOCK_VARIABLE_NOT_SET]: 'Object variable or With block variable not set'
+      [VB6AdvancedErrorHandler.ERROR_CODES.OBJECT_VARIABLE_OR_WITH_BLOCK_VARIABLE_NOT_SET]:
+        'Object variable or With block variable not set',
     };
 
     return descriptions[errorNumber] || `Error ${errorNumber}`;
@@ -524,9 +538,7 @@ export class VB6AdvancedErrorHandler {
    * Get call stack
    */
   private getCallStack(): string[] {
-    return this.contextStack.map(ctx => 
-      `${ctx.moduleName}.${ctx.procedureName}:${ctx.lineNumber}`
-    );
+    return this.contextStack.map(ctx => `${ctx.moduleName}.${ctx.procedureName}:${ctx.lineNumber}`);
   }
 
   /**
@@ -543,8 +555,13 @@ export class VB6AdvancedErrorHandler {
 
       // Methods
       Clear: () => this.clearCurrentError(),
-      Raise: (number: number, source?: string, description?: string, helpFile?: string, helpContext?: number) => 
-        this.raise(number, source, description, helpFile, helpContext)
+      Raise: (
+        number: number,
+        source?: string,
+        description?: string,
+        helpFile?: string,
+        helpContext?: number
+      ) => this.raise(number, source, description, helpFile, helpContext),
     };
   }
 
@@ -559,7 +576,7 @@ export class VB6AdvancedErrorHandler {
       currentMode: this.errorMode,
       currentLabel: this.errorLabel,
       stackDepth: this.contextStack.length,
-      isInErrorHandler: this.isInErrorHandler
+      isInErrorHandler: this.isInErrorHandler,
     };
   }
 
@@ -606,7 +623,13 @@ export interface VB6ErrorInterface {
   HelpFile: string;
   LastDllError: number;
   Clear(): void;
-  Raise(number: number, source?: string, description?: string, helpFile?: string, helpContext?: number): never;
+  Raise(
+    number: number,
+    source?: string,
+    description?: string,
+    helpFile?: string,
+    helpContext?: number
+  ): never;
 }
 
 /**

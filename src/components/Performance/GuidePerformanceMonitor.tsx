@@ -23,7 +23,7 @@ export const GuidePerformanceMonitor: React.FC<GuidePerformanceMonitorProps> = (
   visible,
   onClose,
   position = 'top-right',
-  compact = false
+  compact = false,
 }) => {
   const metrics = useGuidePerformanceMonitor();
   const [alerts, setAlerts] = useState<PerformanceAlert[]>([]);
@@ -34,12 +34,13 @@ export const GuidePerformanceMonitor: React.FC<GuidePerformanceMonitorProps> = (
     const newAlerts: PerformanceAlert[] = [];
 
     // Check calculation time
-    if (metrics.averageCalculationTime > 16) { // >16ms means <60fps
+    if (metrics.averageCalculationTime > 16) {
+      // >16ms means <60fps
       newAlerts.push({
         id: 'calc-time',
         type: 'warning',
         message: `Slow calculations: ${metrics.averageCalculationTime.toFixed(1)}ms avg`,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
 
@@ -49,7 +50,7 @@ export const GuidePerformanceMonitor: React.FC<GuidePerformanceMonitorProps> = (
         id: 'cache-rate',
         type: 'warning',
         message: `Low cache hit rate: ${((metrics.cacheHits / Math.max(metrics.totalCalculations, 1)) * 100).toFixed(1)}%`,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
 
@@ -59,7 +60,7 @@ export const GuidePerformanceMonitor: React.FC<GuidePerformanceMonitorProps> = (
         id: 'memory',
         type: 'error',
         message: `High memory usage: ${metrics.memoryUsage} cached guides`,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
 
@@ -78,7 +79,7 @@ export const GuidePerformanceMonitor: React.FC<GuidePerformanceMonitorProps> = (
     'top-right': 'top-4 right-4',
     'top-left': 'top-4 left-4',
     'bottom-right': 'bottom-4 right-4',
-    'bottom-left': 'bottom-4 left-4'
+    'bottom-left': 'bottom-4 left-4',
   };
 
   const getPerformanceColor = (value: number, thresholds: { good: number; warning: number }) => {
@@ -94,9 +95,11 @@ export const GuidePerformanceMonitor: React.FC<GuidePerformanceMonitorProps> = (
   };
 
   return (
-    <div className={`fixed ${positionClasses[position]} z-[9999] bg-white rounded-lg shadow-2xl border border-gray-200 font-mono text-xs transition-all duration-300 ${
-      expanded ? 'w-80' : 'w-48'
-    }`}>
+    <div
+      className={`fixed ${positionClasses[position]} z-[9999] bg-white rounded-lg shadow-2xl border border-gray-200 font-mono text-xs transition-all duration-300 ${
+        expanded ? 'w-80' : 'w-48'
+      }`}
+    >
       {/* Header */}
       <div className="px-3 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-t-lg flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -125,14 +128,25 @@ export const GuidePerformanceMonitor: React.FC<GuidePerformanceMonitorProps> = (
       {alerts.length > 0 && (
         <div className="px-3 py-2 bg-red-50 border-b border-red-200">
           {alerts.slice(0, 3).map(alert => (
-            <div key={alert.id} className={`flex items-center gap-2 text-xs ${
-              alert.type === 'error' ? 'text-red-600' : 
-              alert.type === 'warning' ? 'text-yellow-600' : 'text-blue-600'
-            }`}>
-              <div className={`w-2 h-2 rounded-full ${
-                alert.type === 'error' ? 'bg-red-500' : 
-                alert.type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
-              }`} />
+            <div
+              key={alert.id}
+              className={`flex items-center gap-2 text-xs ${
+                alert.type === 'error'
+                  ? 'text-red-600'
+                  : alert.type === 'warning'
+                    ? 'text-yellow-600'
+                    : 'text-blue-600'
+              }`}
+            >
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  alert.type === 'error'
+                    ? 'bg-red-500'
+                    : alert.type === 'warning'
+                      ? 'bg-yellow-500'
+                      : 'bg-blue-500'
+                }`}
+              />
               <span className="truncate">{alert.message}</span>
             </div>
           ))}
@@ -148,7 +162,9 @@ export const GuidePerformanceMonitor: React.FC<GuidePerformanceMonitorProps> = (
               <Clock size={10} />
               <span className="text-gray-600">Calc Time</span>
             </div>
-            <div className={`font-bold ${getPerformanceColor(metrics.averageCalculationTime, { good: 8, warning: 16 })}`}>
+            <div
+              className={`font-bold ${getPerformanceColor(metrics.averageCalculationTime, { good: 8, warning: 16 })}`}
+            >
               {metrics.averageCalculationTime.toFixed(1)}ms
             </div>
           </div>
@@ -158,10 +174,12 @@ export const GuidePerformanceMonitor: React.FC<GuidePerformanceMonitorProps> = (
               <Zap size={10} />
               <span className="text-gray-600">Cache Hit</span>
             </div>
-            <div className={`font-bold ${getPerformanceColor(
-              100 - (metrics.cacheHits / Math.max(metrics.totalCalculations, 1)) * 100, 
-              { good: 20, warning: 50 }
-            )}`}>
+            <div
+              className={`font-bold ${getPerformanceColor(
+                100 - (metrics.cacheHits / Math.max(metrics.totalCalculations, 1)) * 100,
+                { good: 20, warning: 50 }
+              )}`}
+            >
               {((metrics.cacheHits / Math.max(metrics.totalCalculations, 1)) * 100).toFixed(0)}%
             </div>
           </div>
@@ -175,15 +193,17 @@ export const GuidePerformanceMonitor: React.FC<GuidePerformanceMonitorProps> = (
                 <span className="text-gray-600">Total Controls:</span>
                 <span className="font-semibold">{formatNumber(metrics.peakControlCount, 0)}</span>
               </div>
-              
+
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Total Calculations:</span>
                 <span className="font-semibold">{formatNumber(metrics.totalCalculations, 0)}</span>
               </div>
-              
+
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Memory Usage:</span>
-                <span className={`font-semibold ${getPerformanceColor(metrics.memoryUsage, { good: 100, warning: 300 })}`}>
+                <span
+                  className={`font-semibold ${getPerformanceColor(metrics.memoryUsage, { good: 100, warning: 300 })}`}
+                >
                   {metrics.memoryUsage} guides
                 </span>
               </div>
@@ -195,11 +215,12 @@ export const GuidePerformanceMonitor: React.FC<GuidePerformanceMonitorProps> = (
                 <Activity size={10} />
                 <span className="text-gray-600">Performance Trend</span>
               </div>
-              
+
               <div className="flex items-end justify-between h-8 bg-gray-100 rounded px-1">
                 {Array.from({ length: 10 }, (_, i) => {
                   const height = Math.random() * 24 + 4; // Simulated performance data
-                  const color = height > 20 ? 'bg-red-400' : height > 12 ? 'bg-yellow-400' : 'bg-green-400';
+                  const color =
+                    height > 20 ? 'bg-red-400' : height > 12 ? 'bg-yellow-400' : 'bg-green-400';
                   return (
                     <div
                       key={i}
@@ -209,7 +230,7 @@ export const GuidePerformanceMonitor: React.FC<GuidePerformanceMonitorProps> = (
                   );
                 })}
               </div>
-              
+
               <div className="flex justify-between text-xs text-gray-500 mt-1">
                 <span>0ms</span>
                 <span>16ms</span>
@@ -223,7 +244,7 @@ export const GuidePerformanceMonitor: React.FC<GuidePerformanceMonitorProps> = (
                 <Eye size={10} />
                 <span className="text-gray-600">Tips</span>
               </div>
-              
+
               <ul className="space-y-1 text-xs text-gray-600">
                 {metrics.averageCalculationTime > 16 && (
                   <li className="flex items-start gap-1">
@@ -231,7 +252,7 @@ export const GuidePerformanceMonitor: React.FC<GuidePerformanceMonitorProps> = (
                     <span>Reduce control count or zoom out</span>
                   </li>
                 )}
-                {(metrics.cacheHits / Math.max(metrics.totalCalculations, 1)) < 0.5 && (
+                {metrics.cacheHits / Math.max(metrics.totalCalculations, 1) < 0.5 && (
                   <li className="flex items-start gap-1">
                     <span className="text-blue-500">•</span>
                     <span>Move controls less frequently</span>
@@ -258,7 +279,7 @@ export const GuidePerformanceMonitor: React.FC<GuidePerformanceMonitorProps> = (
                 onClick={() => {
                   // Clear cache action would go here
                   if (process.env.NODE_ENV === 'development') {
-                    console.log('Clear cache requested');
+                    // noop
                   }
                 }}
                 className="flex-1 bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 transition-colors"
@@ -269,7 +290,7 @@ export const GuidePerformanceMonitor: React.FC<GuidePerformanceMonitorProps> = (
                 onClick={() => {
                   // Reset metrics action would go here
                   if (process.env.NODE_ENV === 'development') {
-                    console.log('Reset metrics requested');
+                    // noop
                   }
                 }}
                 className="flex-1 bg-gray-500 text-white px-2 py-1 rounded text-xs hover:bg-gray-600 transition-colors"

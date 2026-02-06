@@ -1,9 +1,11 @@
 import React from 'react';
 import { useVB6 } from '../../../context/VB6Context';
+import { useWindowStore } from '../../../stores/windowStore';
 import { safeEvaluator } from '../../../utils/safeExpressionEvaluator';
 
 const ImmediateWindow: React.FC = () => {
   const { state, dispatch } = useVB6();
+  const toggleWindow = useWindowStore(state => state.toggleWindow);
 
   const executeImmediateCommand = () => {
     if (!state.immediateCommand) return;
@@ -30,7 +32,11 @@ const ImmediateWindow: React.FC = () => {
   };
 
   return (
-    <div className="h-40 bg-white border-t border-gray-400 flex flex-col">
+    <div
+      className="h-40 bg-white border-t border-gray-400 flex flex-col"
+      role="region"
+      aria-label="Immediate Window"
+    >
       <div className="bg-gray-200 px-2 py-1 text-xs font-bold flex items-center justify-between">
         <span>Immediate</span>
         <div className="flex gap-2">
@@ -38,21 +44,26 @@ const ImmediateWindow: React.FC = () => {
             onClick={() => dispatch({ type: 'CLEAR_CONSOLE' })}
             className="hover:bg-gray-300 px-2"
             title="Clear"
+            aria-label="Clear console output"
           >
             Clear
           </button>
           <button
-            onClick={() =>
-              dispatch({ type: 'TOGGLE_WINDOW', payload: { windowName: 'showImmediateWindow' } })
-            }
+            onClick={() => toggleWindow('showImmediateWindow')}
             className="hover:bg-gray-300 px-1"
+            aria-label="Close Immediate Window"
           >
             ×
           </button>
         </div>
       </div>
 
-      <div className="flex-1 p-1 font-mono text-xs overflow-y-auto bg-white">
+      <div
+        className="flex-1 p-1 font-mono text-xs overflow-y-auto bg-white"
+        role="log"
+        aria-label="Console output"
+        aria-live="polite"
+      >
         {state.consoleOutput.map((line, index) => (
           <div key={index} className="hover:bg-gray-100">
             {line}
@@ -74,6 +85,7 @@ const ImmediateWindow: React.FC = () => {
           }}
           className="w-full font-mono text-xs border border-gray-300 px-1"
           placeholder="? Debug.Print or execute immediate commands..."
+          aria-label="Immediate command input"
         />
       </div>
     </div>

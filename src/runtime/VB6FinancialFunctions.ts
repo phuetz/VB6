@@ -26,18 +26,18 @@ export function PV(
   if (rate === 0) {
     return -(pmt * nper + fv);
   }
-  
+
   const pvif = Math.pow(1 + rate, nper);
   let pv = -fv / pvif;
-  
+
   if (type === 0) {
     // Payments at end of period
-    pv -= pmt * ((pvif - 1) / rate) / pvif;
+    pv -= (pmt * ((pvif - 1) / rate)) / pvif;
   } else {
     // Payments at beginning of period
-    pv -= pmt * ((pvif - 1) / rate) / pvif * (1 + rate);
+    pv -= ((pmt * ((pvif - 1) / rate)) / pvif) * (1 + rate);
   }
-  
+
   return pv;
 }
 
@@ -60,10 +60,10 @@ export function FV(
   if (rate === 0) {
     return -(pv + pmt * nper);
   }
-  
+
   const fvif = Math.pow(1 + rate, nper);
   let fv = -pv * fvif;
-  
+
   if (type === 0) {
     // Payments at end of period
     fv -= pmt * ((fvif - 1) / rate);
@@ -71,7 +71,7 @@ export function FV(
     // Payments at beginning of period
     fv -= pmt * ((fvif - 1) / rate) * (1 + rate);
   }
-  
+
   return fv;
 }
 
@@ -94,15 +94,15 @@ export function PMT(
   if (rate === 0) {
     return -(pv + fv) / nper;
   }
-  
+
   const pvif = Math.pow(1 + rate, nper);
-  let pmt = (pv * pvif + fv) * rate / (pvif - 1);
-  
+  let pmt = ((pv * pvif + fv) * rate) / (pvif - 1);
+
   if (type === 1) {
     // Payments at beginning of period
     pmt = pmt / (1 + rate);
   }
-  
+
   return -pmt;
 }
 
@@ -128,16 +128,16 @@ export function NPer(
     }
     return -(pv + fv) / pmt;
   }
-  
+
   const pmtAdjusted = type === 1 ? pmt * (1 + rate) : pmt;
-  
+
   if (pmtAdjusted === 0) {
     throw new Error('Division by zero');
   }
-  
+
   const num = Math.log((pmtAdjusted - fv * rate) / (pmtAdjusted + pv * rate));
   const den = Math.log(1 + rate);
-  
+
   return num / den;
 }
 
@@ -163,41 +163,45 @@ export function Rate(
   const maxIterations = 100;
   const tolerance = 1e-7;
   let rate = guess;
-  
+
   for (let i = 0; i < maxIterations; i++) {
     let f: number;
     let df: number;
-    
+
     if (Math.abs(rate) < tolerance) {
       // Near zero, use linear approximation
       f = pv + pmt * nper + fv;
-      df = nper * (nper - 1) / 2 * pmt;
+      df = ((nper * (nper - 1)) / 2) * pmt;
     } else {
       const factor = Math.pow(1 + rate, nper);
-      
+
       if (type === 0) {
         // End of period
         f = pv * factor + pmt * ((factor - 1) / rate) + fv;
-        df = pv * nper * Math.pow(1 + rate, nper - 1) +
-             pmt * ((nper * Math.pow(1 + rate, nper - 1) * rate - (factor - 1)) / (rate * rate));
+        df =
+          pv * nper * Math.pow(1 + rate, nper - 1) +
+          pmt * ((nper * Math.pow(1 + rate, nper - 1) * rate - (factor - 1)) / (rate * rate));
       } else {
         // Beginning of period
         f = pv * factor + pmt * ((factor - 1) / rate) * (1 + rate) + fv;
-        df = pv * nper * Math.pow(1 + rate, nper - 1) +
-             pmt * (1 + rate) * ((nper * Math.pow(1 + rate, nper - 1) * rate - (factor - 1)) / (rate * rate)) +
-             pmt * ((factor - 1) / rate);
+        df =
+          pv * nper * Math.pow(1 + rate, nper - 1) +
+          pmt *
+            (1 + rate) *
+            ((nper * Math.pow(1 + rate, nper - 1) * rate - (factor - 1)) / (rate * rate)) +
+          pmt * ((factor - 1) / rate);
       }
     }
-    
+
     const newRate = rate - f / df;
-    
+
     if (Math.abs(newRate - rate) < tolerance) {
       return newRate;
     }
-    
+
     rate = newRate;
   }
-  
+
   // Failed to converge
   throw new Error('Rate calculation did not converge');
 }
@@ -221,16 +225,16 @@ export function IPmt(
   type: number = 0
 ): number {
   const pmt = PMT(rate, nper, pv, fv, type);
-  
+
   if (per === 1 && type === 1) {
     // First payment at beginning of period is all principal
     return 0;
   }
-  
+
   // Calculate remaining balance after per-1 payments
   const adjustedPer = type === 1 ? per - 1 : per;
   const fvPart = FV(rate, adjustedPer - 1, pmt, pv, type);
-  
+
   return -fvPart * rate;
 }
 
@@ -254,7 +258,7 @@ export function PPmt(
 ): number {
   const pmt = PMT(rate, nper, pv, fv, type);
   const ipmt = IPmt(rate, per, nper, pv, fv, type);
-  
+
   return pmt - ipmt;
 }
 
@@ -272,12 +276,12 @@ export function NPV(rate: number, values: number[]): number {
   if (!Array.isArray(values) || values.length === 0) {
     throw new Error('Invalid values array');
   }
-  
+
   let npv = 0;
   for (let i = 0; i < values.length; i++) {
     npv += values[i] / Math.pow(1 + rate, i + 1);
   }
-  
+
   return npv;
 }
 
@@ -291,7 +295,7 @@ export function IRR(values: number[], guess: number = 0.1): number {
   if (!Array.isArray(values) || values.length === 0) {
     throw new Error('Invalid values array');
   }
-  
+
   // Check for at least one positive and one negative value
   let hasPositive = false;
   let hasNegative = false;
@@ -299,34 +303,34 @@ export function IRR(values: number[], guess: number = 0.1): number {
     if (value > 0) hasPositive = true;
     if (value < 0) hasNegative = true;
   }
-  
+
   if (!hasPositive || !hasNegative) {
     throw new Error('IRR requires at least one positive and one negative cash flow');
   }
-  
+
   const maxIterations = 100;
   const tolerance = 1e-7;
   let rate = guess;
-  
+
   for (let iteration = 0; iteration < maxIterations; iteration++) {
     let npv = 0;
     let dnpv = 0;
-    
+
     for (let i = 0; i < values.length; i++) {
       const factor = Math.pow(1 + rate, i);
       npv += values[i] / factor;
-      dnpv -= i * values[i] / Math.pow(1 + rate, i + 1);
+      dnpv -= (i * values[i]) / Math.pow(1 + rate, i + 1);
     }
-    
+
     const newRate = rate - npv / dnpv;
-    
+
     if (Math.abs(newRate - rate) < tolerance) {
       return newRate;
     }
-    
+
     rate = newRate;
   }
-  
+
   throw new Error('IRR calculation did not converge');
 }
 
@@ -337,19 +341,15 @@ export function IRR(values: number[], guess: number = 0.1): number {
  * @param finance_rate Interest rate paid on money used in cash flows
  * @param reinvest_rate Interest rate received on cash flows reinvested
  */
-export function MIRR(
-  values: number[],
-  finance_rate: number,
-  reinvest_rate: number
-): number {
+export function MIRR(values: number[], finance_rate: number, reinvest_rate: number): number {
   if (!Array.isArray(values) || values.length === 0) {
     throw new Error('Invalid values array');
   }
-  
+
   const n = values.length;
   let positive_pv = 0;
   let negative_pv = 0;
-  
+
   for (let i = 0; i < n; i++) {
     if (values[i] > 0) {
       positive_pv += values[i] / Math.pow(1 + reinvest_rate, i);
@@ -357,14 +357,14 @@ export function MIRR(
       negative_pv += values[i] / Math.pow(1 + finance_rate, i);
     }
   }
-  
+
   if (negative_pv === 0 || positive_pv === 0) {
     throw new Error('MIRR requires both positive and negative cash flows');
   }
-  
+
   const fv_positive = positive_pv * Math.pow(1 + reinvest_rate, n - 1);
   const pv_negative = -negative_pv;
-  
+
   return Math.pow(fv_positive / pv_negative, 1 / (n - 1)) - 1;
 }
 
@@ -391,15 +391,15 @@ export function DDB(
   if (cost < 0 || salvage < 0 || life <= 0 || period <= 0 || period > life) {
     throw new Error('Invalid arguments');
   }
-  
+
   const rate = factor / life;
   let depreciation = 0;
   let bookValue = cost;
-  
+
   for (let i = 1; i <= period; i++) {
     depreciation = Math.min(bookValue * rate, bookValue - salvage);
     bookValue -= depreciation;
-    
+
     if (bookValue <= salvage) {
       if (i === period) {
         depreciation = Math.max(0, bookValue - salvage);
@@ -409,7 +409,7 @@ export function DDB(
       break;
     }
   }
-  
+
   return depreciation;
 }
 
@@ -424,7 +424,7 @@ export function SLN(cost: number, salvage: number, life: number): number {
   if (life <= 0) {
     throw new Error('Life must be greater than 0');
   }
-  
+
   return (cost - salvage) / life;
 }
 
@@ -436,19 +436,14 @@ export function SLN(cost: number, salvage: number, life: number): number {
  * @param life Useful life of the asset
  * @param period Period for which to calculate depreciation
  */
-export function SYD(
-  cost: number,
-  salvage: number,
-  life: number,
-  period: number
-): number {
+export function SYD(cost: number, salvage: number, life: number, period: number): number {
   if (life <= 0 || period <= 0 || period > life) {
     throw new Error('Invalid arguments');
   }
-  
+
   const sumYears = (life * (life + 1)) / 2;
   const remainingLife = life - period + 1;
-  
+
   return ((cost - salvage) * remainingLife) / sumYears;
 }
 
@@ -475,18 +470,18 @@ export function VDB(
   if (cost < 0 || salvage < 0 || life <= 0) {
     throw new Error('Invalid arguments');
   }
-  
+
   if (start_period < 0 || end_period > life || start_period >= end_period) {
     throw new Error('Invalid period arguments');
   }
-  
+
   let depreciation = 0;
   let bookValue = cost;
   const rate = factor / life;
-  
+
   for (let period = 1; period <= end_period; period++) {
     let currentDepreciation: number;
-    
+
     if (no_switch) {
       // Always use declining balance
       currentDepreciation = bookValue * rate;
@@ -495,20 +490,20 @@ export function VDB(
       const remainingLife = life - period + 1;
       const straightLine = (bookValue - salvage) / remainingLife;
       const decliningBalance = bookValue * rate;
-      
+
       currentDepreciation = Math.max(straightLine, decliningBalance);
     }
-    
+
     // Don't depreciate below salvage value
     currentDepreciation = Math.min(currentDepreciation, bookValue - salvage);
-    
+
     if (period > start_period) {
       depreciation += currentDepreciation;
     }
-    
+
     bookValue -= currentDepreciation;
   }
-  
+
   return depreciation;
 }
 
@@ -546,27 +541,27 @@ export const VB6FinancialFunctions = {
   Rate,
   IPmt,
   PPmt,
-  
+
   // Net Present Value & IRR
   NPV,
   IRR,
   MIRR,
-  
+
   // Depreciation
   DDB,
   SLN,
   SYD,
   VDB,
-  
+
   // Helpers (not exposed in VB6 but useful)
   compoundInterestFactor,
-  annuityFactor
+  annuityFactor,
 };
 
 // Make functions globally available
 if (typeof window !== 'undefined') {
   const globalAny = window as any;
-  
+
   // Loan & Investment functions
   globalAny.PV = PV;
   globalAny.FV = FV;
@@ -575,19 +570,17 @@ if (typeof window !== 'undefined') {
   globalAny.Rate = Rate;
   globalAny.IPmt = IPmt;
   globalAny.PPmt = PPmt;
-  
+
   // NPV & IRR functions
   globalAny.NPV = NPV;
   globalAny.IRR = IRR;
   globalAny.MIRR = MIRR;
-  
+
   // Depreciation functions
   globalAny.DDB = DDB;
   globalAny.SLN = SLN;
   globalAny.SYD = SYD;
   globalAny.VDB = VDB;
-  
-  console.log('[VB6] Financial functions loaded - Complete financial calculation support');
 }
 
 export default VB6FinancialFunctions;

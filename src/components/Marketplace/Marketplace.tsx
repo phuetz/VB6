@@ -205,10 +205,11 @@ export const Marketplace: React.FC = () => {
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(item =>
-        item.name.toLowerCase().includes(query) ||
-        item.description.toLowerCase().includes(query) ||
-        item.tags.some(tag => tag.toLowerCase().includes(query))
+      filtered = filtered.filter(
+        item =>
+          item.name.toLowerCase().includes(query) ||
+          item.description.toLowerCase().includes(query) ||
+          item.tags.some(tag => tag.toLowerCase().includes(query))
       );
     }
 
@@ -255,7 +256,7 @@ export const Marketplace: React.FC = () => {
 
       // Mark as installed
       setMarketplaceItems(prev =>
-        prev.map(i => i.id === item.id ? { ...i, installed: true } : i)
+        prev.map(i => (i.id === item.id ? { ...i, installed: true } : i))
       );
 
       eventSystem.fire('Marketplace', 'ItemInstalled', { item });
@@ -300,9 +301,7 @@ export const Marketplace: React.FC = () => {
         {[1, 2, 3, 4, 5].map(star => (
           <span
             key={star}
-            className={`text-sm ${
-              star <= rating ? 'text-yellow-500' : 'text-gray-300'
-            }`}
+            className={`text-sm ${star <= rating ? 'text-yellow-500' : 'text-gray-300'}`}
           >
             ★
           </span>
@@ -356,7 +355,7 @@ export const Marketplace: React.FC = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col"
-              onClick={(e) => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}
             >
               {/* Header */}
               <div className="p-6 border-b dark:border-gray-800">
@@ -394,12 +393,12 @@ export const Marketplace: React.FC = () => {
                     type="text"
                     placeholder="Search marketplace..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                     className="flex-1 px-4 py-2 border dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                   <select
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as any)}
+                    onChange={e => setSortBy(e.target.value as any)}
                     className="px-4 py-2 border dark:border-gray-700 rounded-lg"
                   >
                     <option value="popular">Most Popular</option>
@@ -409,7 +408,7 @@ export const Marketplace: React.FC = () => {
                   </select>
                   <select
                     value={priceFilter}
-                    onChange={(e) => setPriceFilter(e.target.value as any)}
+                    onChange={e => setPriceFilter(e.target.value as any)}
                     className="px-4 py-2 border dark:border-gray-700 rounded-lg"
                   >
                     <option value="all">All Prices</option>
@@ -528,7 +527,7 @@ export const Marketplace: React.FC = () => {
                                 <div className="animate-spin rounded-full h-5 w-5 border-2 border-orange-500 border-t-transparent" />
                               ) : (
                                 <button
-                                  onClick={(e) => {
+                                  onClick={e => {
                                     e.stopPropagation();
                                     addToCart(item);
                                   }}
@@ -598,8 +597,7 @@ export const Marketplace: React.FC = () => {
                                 $
                                 {cart
                                   .reduce(
-                                    (sum, item) =>
-                                      sum + (item.price === 'free' ? 0 : item.price),
+                                    (sum, item) => sum + (item.price === 'free' ? 0 : item.price),
                                     0
                                   )
                                   .toFixed(2)}{' '}
@@ -615,9 +613,7 @@ export const Marketplace: React.FC = () => {
                           </div>
                         </>
                       ) : (
-                        <p className="text-gray-500 text-center py-8">
-                          Your cart is empty
-                        </p>
+                        <p className="text-gray-500 text-center py-8">Your cart is empty</p>
                       )}
                     </motion.div>
                   )}
@@ -643,7 +639,7 @@ export const Marketplace: React.FC = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}
             >
               <div className="p-8">
                 {/* Header */}
@@ -655,9 +651,7 @@ export const Marketplace: React.FC = () => {
                         v{selectedItem.version}
                       </span>
                       {renderStars(selectedItem.rating)}
-                      <span className="text-sm text-gray-500">
-                        {selectedItem.reviews} reviews
-                      </span>
+                      <span className="text-sm text-gray-500">{selectedItem.reviews} reviews</span>
                     </div>
                   </div>
                   <button
@@ -673,10 +667,7 @@ export const Marketplace: React.FC = () => {
                   <div className="mb-6">
                     <div className="grid grid-cols-2 gap-4">
                       {selectedItem.screenshots.map((screenshot, index) => (
-                        <div
-                          key={index}
-                          className="h-48 bg-gray-200 dark:bg-gray-800 rounded-lg"
-                        />
+                        <div key={index} className="h-48 bg-gray-200 dark:bg-gray-800 rounded-lg" />
                       ))}
                     </div>
                   </div>
@@ -685,9 +676,7 @@ export const Marketplace: React.FC = () => {
                 {/* Description */}
                 <div className="mb-6">
                   <h3 className="font-semibold text-lg mb-2">Description</h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {selectedItem.description}
-                  </p>
+                  <p className="text-gray-600 dark:text-gray-400">{selectedItem.description}</p>
                 </div>
 
                 {/* Tags */}
@@ -725,9 +714,7 @@ export const Marketplace: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="font-medium mb-2">Size</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {selectedItem.size}
-                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{selectedItem.size}</p>
                   </div>
                   <div>
                     <h4 className="font-medium mb-2">Last Updated</h4>
@@ -750,10 +737,10 @@ export const Marketplace: React.FC = () => {
                     {selectedItem.installed
                       ? '✓ Installed'
                       : installingItems.has(selectedItem.id)
-                      ? 'Installing...'
-                      : selectedItem.price === 'free'
-                      ? 'Install Now'
-                      : `Buy for $${selectedItem.price}`}
+                        ? 'Installing...'
+                        : selectedItem.price === 'free'
+                          ? 'Install Now'
+                          : `Buy for $${selectedItem.price}`}
                   </button>
                   <button className="px-6 py-3 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
                     View Documentation

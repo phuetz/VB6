@@ -14,11 +14,11 @@ if (process.env.REDIS_URL) {
   redisClient = createClient({
     url: process.env.REDIS_URL,
   });
-  
+
   redisClient.on('error', (err: Error) => {
     console.error('Redis Client Error:', err);
   });
-  
+
   redisClient.connect().catch(console.error);
 }
 
@@ -86,16 +86,16 @@ export const reportRateLimiter = rateLimit({
 export const tieredRateLimiter = (req: Request, res: Response, next: NextFunction) => {
   // Get user tier from request (would come from authentication)
   const userTier = (req as any).user?.tier || 'free';
-  
+
   const limits = {
     free: { windowMs: 15 * 60 * 1000, max: 100 },
     basic: { windowMs: 15 * 60 * 1000, max: 500 },
     pro: { windowMs: 15 * 60 * 1000, max: 2000 },
     enterprise: { windowMs: 15 * 60 * 1000, max: 10000 },
   };
-  
+
   const tierLimit = limits[userTier] || limits.free;
-  
+
   const limiter = rateLimit({
     ...tierLimit,
     keyGenerator: (req: Request) => {
@@ -109,7 +109,7 @@ export const tieredRateLimiter = (req: Request, res: Response, next: NextFunctio
       }),
     }),
   });
-  
+
   limiter(req, res, next);
 };
 

@@ -16,7 +16,7 @@ const mockPerformance = {
   clearMarks: vi.fn(),
   clearMeasures: vi.fn(),
   memory: {
-    usedJSHeapSize: 50000000,  // 50MB
+    usedJSHeapSize: 50000000, // 50MB
     totalJSHeapSize: 100000000, // 100MB
     jsHeapSizeLimit: 4000000000, // 4GB
   },
@@ -113,7 +113,7 @@ describe('Performance Monitoring - Metrics Collection', () => {
 
   it('should measure FPS over time window', async () => {
     const fpsSamples = [60, 58, 62, 59, 61, 55, 57, 63];
-    
+
     fpsSamples.forEach(fps => {
       performanceMonitor.recordFPS(fps);
     });
@@ -129,7 +129,7 @@ describe('Performance Monitoring - Metrics Collection', () => {
     const bundleMetrics = {
       total: 2500000, // 2.5MB
       vendor: 800000, // 0.8MB
-      app: 1200000,   // 1.2MB
+      app: 1200000, // 1.2MB
       assets: 500000, // 0.5MB
     };
 
@@ -148,10 +148,12 @@ describe('Performance Monitoring - Metrics Collection', () => {
       domComplete: 1100,
     };
 
-    mockPerformance.getEntriesByType.mockReturnValue([{
-      name: 'navigation',
-      ...navigationTiming,
-    }]);
+    mockPerformance.getEntriesByType.mockReturnValue([
+      {
+        name: 'navigation',
+        ...navigationTiming,
+      },
+    ]);
 
     const loadMetrics = performanceMonitor.getLoadMetrics();
 
@@ -224,7 +226,7 @@ describe('Performance Monitoring - Real-time Tracking', () => {
 
   it('should track performance continuously', () => {
     const metricsHistory: PerformanceMetrics[] = [];
-    
+
     performanceMonitor.onMetricsUpdate((metrics: PerformanceMetrics) => {
       metricsHistory.push(metrics);
     });
@@ -320,7 +322,7 @@ describe('Performance Monitoring - Alert System', () => {
 
   beforeEach(() => {
     alertHistory = [];
-    
+
     performanceMonitor = createPerformanceMonitor({
       memoryThreshold: 50000000, // 50MB
       renderThreshold: 16,
@@ -410,8 +412,8 @@ describe('Performance Monitoring - Alert System', () => {
   it('should prioritize alerts by severity', () => {
     // Generate multiple alerts
     performanceMonitor.checkMemoryUsage(200000000); // Critical
-    performanceMonitor.checkRenderPerformance(50);   // High
-    performanceMonitor.checkFPS(25);                 // Medium
+    performanceMonitor.checkRenderPerformance(50); // High
+    performanceMonitor.checkFPS(25); // Medium
 
     const sortedAlerts = performanceMonitor.getSortedAlerts();
 
@@ -422,9 +424,9 @@ describe('Performance Monitoring - Alert System', () => {
 
   it('should throttle repeated alerts', () => {
     const throttleTime = 5000; // 5 seconds
-    
+
     performanceMonitor.setAlertThrottling(throttleTime);
-    
+
     // Generate same alert multiple times quickly
     performanceMonitor.checkMemoryUsage(80000000);
     performanceMonitor.checkMemoryUsage(80000000);
@@ -614,7 +616,7 @@ describe('Performance Monitoring - Memory Leak Detection', () => {
     const updatedCounts = new Map([
       ['HTMLElement', 1500],
       ['EventListener', 1200], // Significant increase
-      ['Promise', 350],         // Some increase
+      ['Promise', 350], // Some increase
       ['Function', 5000],
     ]);
 
@@ -634,7 +636,7 @@ describe('Performance Monitoring - Memory Leak Detection', () => {
 
   it('should track DOM node leaks', () => {
     const initialNodeCount = document.querySelectorAll('*').length;
-    
+
     // Simulate adding DOM nodes
     for (let i = 0; i < 100; i++) {
       const div = document.createElement('div');
@@ -643,9 +645,9 @@ describe('Performance Monitoring - Memory Leak Detection', () => {
     }
 
     const afterAddNodeCount = document.querySelectorAll('*').length;
-    
+
     performanceMonitor.trackDOMNodes();
-    
+
     const domLeakReport = performanceMonitor.getDOMLeakReport();
 
     expect(afterAddNodeCount).toBeGreaterThan(initialNodeCount);
@@ -657,7 +659,7 @@ describe('Performance Monitoring - Memory Leak Detection', () => {
 
   it('should monitor event listener leaks', () => {
     const eventTracker = performanceMonitor.createEventLeakTracker();
-    
+
     const element = document.createElement('div');
     const handler1 = () => {};
     const handler2 = () => {};
@@ -715,7 +717,8 @@ function createPerformanceMonitor(config: PerformanceConfig) {
       used: mockPerformance.memory.usedJSHeapSize,
       total: mockPerformance.memory.totalJSHeapSize,
       limit: mockPerformance.memory.jsHeapSizeLimit,
-      percentage: (mockPerformance.memory.usedJSHeapSize / mockPerformance.memory.totalJSHeapSize) * 100,
+      percentage:
+        (mockPerformance.memory.usedJSHeapSize / mockPerformance.memory.totalJSHeapSize) * 100,
     }),
 
     recordFPS: (fps: number) => {
@@ -770,7 +773,7 @@ function createPerformanceMonitor(config: PerformanceConfig) {
 
     detectRegressions: (baseline: any, current: any) => {
       const regressions = [];
-      
+
       Object.keys(baseline).forEach(key => {
         if (current[key] > baseline[key]) {
           const degradation = ((current[key] - baseline[key]) / baseline[key]) * 100;
@@ -792,7 +795,7 @@ function createPerformanceMonitor(config: PerformanceConfig) {
         renderTimes: [],
         renderCount: 0,
       };
-      
+
       existing.renderTimes.push(renderTime);
       existing.renderCount++;
       profiles.set(name, existing);
@@ -892,22 +895,22 @@ function createPerformanceMonitor(config: PerformanceConfig) {
     },
 
     profile: (name: string, fn: Function) => {
-      return function(...args: any[]) {
+      return function (...args: any[]) {
         const start = performance.now();
         const result = fn.apply(this, args);
         const time = performance.now() - start;
-        
+
         const existing = profiles.get(name) || {
           callCount: 0,
           totalTime: 0,
           times: [],
         };
-        
+
         existing.callCount++;
         existing.totalTime += time;
         existing.times.push(time);
         profiles.set(name, existing);
-        
+
         return result;
       };
     },
@@ -978,9 +981,15 @@ function createPerformanceMonitor(config: PerformanceConfig) {
       timestamp: Date.now(),
       config,
       metrics: {
-        render: Array(100).fill(0).map(() => Math.random() * 20 + 5),
-        memory: Array(100).fill(0).map(() => Math.random() * 50000000 + 20000000),
-        fps: Array(100).fill(0).map(() => Math.random() * 30 + 30),
+        render: Array(100)
+          .fill(0)
+          .map(() => Math.random() * 20 + 5),
+        memory: Array(100)
+          .fill(0)
+          .map(() => Math.random() * 50000000 + 20000000),
+        fps: Array(100)
+          .fill(0)
+          .map(() => Math.random() * 30 + 30),
       },
       profiles: Array.from(profiles.entries()),
       alerts: [...alerts],
@@ -1021,35 +1030,35 @@ function createPerformanceMonitor(config: PerformanceConfig) {
 
     createEventLeakTracker: () => ({
       listeners: new Map(),
-      
-      addEventListener: function(element: Element, event: string, handler: Function) {
+
+      addEventListener: function (element: Element, event: string, handler: Function) {
         const key = `${element.tagName}-${event}`;
         const existing = this.listeners.get(key) || 0;
         this.listeners.set(key, existing + 1);
       },
-      
-      removeEventListener: function(element: Element, event: string, handler: Function) {
+
+      removeEventListener: function (element: Element, event: string, handler: Function) {
         const key = `${element.tagName}-${event}`;
         const existing = this.listeners.get(key) || 0;
         this.listeners.set(key, Math.max(0, existing - 1));
       },
-      
-      getListenerReport: function() {
+
+      getListenerReport: function () {
         const total = Array.from(this.listeners.values()).reduce((a, b) => a + b, 0);
         const byEvent: Record<string, number> = {};
-        
+
         this.listeners.forEach((count, key) => {
           const eventType = key.split('-')[1];
           byEvent[eventType] = (byEvent[eventType] || 0) + count;
         });
-        
+
         return {
           totalListeners: total,
           byEvent,
         };
       },
-      
-      cleanup: function() {
+
+      cleanup: function () {
         this.listeners.clear();
       },
     }),

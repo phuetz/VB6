@@ -18,7 +18,7 @@ const ScrollBar: React.FC<ScrollBarProps> = ({
   onDoubleClick,
   onMove,
   onResize,
-  orientation
+  orientation,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
@@ -32,7 +32,10 @@ const ScrollBar: React.FC<ScrollBarProps> = ({
   const properties = control.properties || {};
 
   // VB6 ScrollBar Properties
-  const value = Math.max(properties.Min || 0, Math.min(properties.Max || 100, properties.Value || 0));
+  const value = Math.max(
+    properties.Min || 0,
+    Math.min(properties.Max || 100, properties.Value || 0)
+  );
   const min = properties.Min || 0;
   const max = properties.Max || 100;
   const smallChange = properties.SmallChange || 1;
@@ -42,72 +45,93 @@ const ScrollBar: React.FC<ScrollBarProps> = ({
   // Calculate thumb position and size
   const range = max - min;
   const trackSize = orientation === 'horizontal' ? control.width - 32 : control.height - 32; // Subtract arrow buttons
-  const thumbSize = Math.max(20, trackSize * largeChange / (range + largeChange));
+  const thumbSize = Math.max(20, (trackSize * largeChange) / (range + largeChange));
   const thumbPosition = range > 0 ? ((value - min) / range) * (trackSize - thumbSize) : 0;
 
   // Handle thumb drag
-  const handleThumbMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!enabled) return;
-    
-    setIsThumbDragging(true);
-    setThumbStart(orientation === 'horizontal' ? e.clientX : e.clientY);
-  }, [enabled, orientation]);
+  const handleThumbMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (!enabled) return;
+
+      setIsThumbDragging(true);
+      setThumbStart(orientation === 'horizontal' ? e.clientX : e.clientY);
+    },
+    [enabled, orientation]
+  );
 
   // Handle track click
-  const handleTrackClick = useCallback((e: React.MouseEvent) => {
-    if (!enabled || isThumbDragging) return;
+  const handleTrackClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (!enabled || isThumbDragging) return;
 
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
 
-    const clickPos = orientation === 'horizontal' 
-      ? e.clientX - rect.left - 16 // Subtract left arrow button
-      : e.clientY - rect.top - 16;  // Subtract top arrow button
+      const clickPos =
+        orientation === 'horizontal'
+          ? e.clientX - rect.left - 16 // Subtract left arrow button
+          : e.clientY - rect.top - 16; // Subtract top arrow button
 
-    const newValue = clickPos < thumbPosition 
-      ? Math.max(min, value - largeChange)
-      : Math.min(max, value + largeChange);
+      const newValue =
+        clickPos < thumbPosition
+          ? Math.max(min, value - largeChange)
+          : Math.min(max, value + largeChange);
 
-    // Update value
-    if (control.events?.onChange) {
-      control.events.onChange('Value', newValue);
-    }
+      // Update value
+      if (control.events?.onChange) {
+        control.events.onChange('Value', newValue);
+      }
 
-    // Trigger VB6 events
-    if (control.events?.Change) {
-      control.events.Change();
-    }
-  }, [enabled, isThumbDragging, orientation, thumbPosition, value, min, max, largeChange, control.events]);
+      // Trigger VB6 events
+      if (control.events?.Change) {
+        control.events.Change();
+      }
+    },
+    [
+      enabled,
+      isThumbDragging,
+      orientation,
+      thumbPosition,
+      value,
+      min,
+      max,
+      largeChange,
+      control.events,
+    ]
+  );
 
   // Handle arrow button clicks
-  const handleArrowClick = useCallback((direction: 'left' | 'right' | 'up' | 'down') => {
-    if (!enabled) return;
+  const handleArrowClick = useCallback(
+    (direction: 'left' | 'right' | 'up' | 'down') => {
+      if (!enabled) return;
 
-    let newValue = value;
-    switch (direction) {
-      case 'left':
-      case 'up':
-        newValue = Math.max(min, value - smallChange);
-        break;
-      case 'right':
-      case 'down':
-        newValue = Math.min(max, value + smallChange);
-        break;
-    }
+      let newValue = value;
+      switch (direction) {
+        case 'left':
+        case 'up':
+          newValue = Math.max(min, value - smallChange);
+          break;
+        case 'right':
+        case 'down':
+          newValue = Math.min(max, value + smallChange);
+          break;
+      }
 
-    // Update value
-    if (control.events?.onChange) {
-      control.events.onChange('Value', newValue);
-    }
+      // Update value
+      if (control.events?.onChange) {
+        control.events.onChange('Value', newValue);
+      }
 
-    // Trigger VB6 events
-    if (control.events?.Change) {
-      control.events.Change();
-    }
-  }, [enabled, value, min, max, smallChange, control.events]);
+      // Trigger VB6 events
+      if (control.events?.Change) {
+        control.events.Change();
+      }
+    },
+    [enabled, value, min, max, smallChange, control.events]
+  );
 
   // Mouse event handlers for control dragging
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -147,7 +171,7 @@ const ScrollBar: React.FC<ScrollBarProps> = ({
     } else {
       setIsDragging(true);
     }
-    
+
     setDragStart({ x: e.clientX, y: e.clientY });
   };
 
@@ -185,7 +209,7 @@ const ScrollBar: React.FC<ScrollBarProps> = ({
       if (isThumbDragging && control.events?.Scroll) {
         control.events.Scroll();
       }
-      
+
       setIsDragging(false);
       setIsResizing(false);
       setIsThumbDragging(false);
@@ -201,7 +225,24 @@ const ScrollBar: React.FC<ScrollBarProps> = ({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, isThumbDragging, dragStart, thumbStart, thumbPosition, trackSize, thumbSize, range, min, max, orientation, onMove, onResize, resizeCorner, control.events]);
+  }, [
+    isDragging,
+    isResizing,
+    isThumbDragging,
+    dragStart,
+    thumbStart,
+    thumbPosition,
+    trackSize,
+    thumbSize,
+    range,
+    min,
+    max,
+    orientation,
+    onMove,
+    onResize,
+    resizeCorner,
+    control.events,
+  ]);
 
   const containerStyle: React.CSSProperties = {
     position: 'absolute',
@@ -214,7 +255,7 @@ const ScrollBar: React.FC<ScrollBarProps> = ({
     display: 'flex',
     flexDirection: orientation === 'horizontal' ? 'row' : 'column',
     cursor: isDragging ? 'move' : 'default',
-    opacity: enabled ? 1 : 0.5
+    opacity: enabled ? 1 : 0.5,
   };
 
   const arrowButtonStyle: React.CSSProperties = {
@@ -227,14 +268,14 @@ const ScrollBar: React.FC<ScrollBarProps> = ({
     justifyContent: 'center',
     cursor: enabled ? 'pointer' : 'default',
     fontSize: '8px',
-    userSelect: 'none'
+    userSelect: 'none',
   };
 
   const trackStyle: React.CSSProperties = {
     flex: 1,
     backgroundColor: '#808080',
     position: 'relative',
-    cursor: enabled ? 'pointer' : 'default'
+    cursor: enabled ? 'pointer' : 'default',
   };
 
   const thumbStyle: React.CSSProperties = {
@@ -242,17 +283,19 @@ const ScrollBar: React.FC<ScrollBarProps> = ({
     backgroundColor: '#c0c0c0',
     border: '1px outset #c0c0c0',
     cursor: enabled ? (orientation === 'horizontal' ? 'ew-resize' : 'ns-resize') : 'default',
-    ...(orientation === 'horizontal' ? {
-      left: thumbPosition,
-      top: 0,
-      width: thumbSize,
-      height: '100%'
-    } : {
-      left: 0,
-      top: thumbPosition,
-      width: '100%',
-      height: thumbSize
-    })
+    ...(orientation === 'horizontal'
+      ? {
+          left: thumbPosition,
+          top: 0,
+          width: thumbSize,
+          height: '100%',
+        }
+      : {
+          left: 0,
+          top: thumbPosition,
+          width: '100%',
+          height: thumbSize,
+        }),
   };
 
   return (
@@ -265,7 +308,7 @@ const ScrollBar: React.FC<ScrollBarProps> = ({
       {/* First arrow button */}
       <div
         style={arrowButtonStyle}
-        onMouseDown={(e) => {
+        onMouseDown={e => {
           e.stopPropagation();
           handleArrowClick(orientation === 'horizontal' ? 'left' : 'up');
         }}
@@ -274,22 +317,15 @@ const ScrollBar: React.FC<ScrollBarProps> = ({
       </div>
 
       {/* Track */}
-      <div
-        style={trackStyle}
-        onClick={handleTrackClick}
-      >
+      <div style={trackStyle} onClick={handleTrackClick}>
         {/* Thumb */}
-        <div
-          ref={thumbRef}
-          style={thumbStyle}
-          onMouseDown={handleThumbMouseDown}
-        />
+        <div ref={thumbRef} style={thumbStyle} onMouseDown={handleThumbMouseDown} />
       </div>
 
       {/* Second arrow button */}
       <div
         style={arrowButtonStyle}
-        onMouseDown={(e) => {
+        onMouseDown={e => {
           e.stopPropagation();
           handleArrowClick(orientation === 'horizontal' ? 'right' : 'down');
         }}
@@ -300,14 +336,106 @@ const ScrollBar: React.FC<ScrollBarProps> = ({
       {/* Resize handles */}
       {selected && (
         <>
-          <div className="vb6-resize-handle nw" style={{ position: 'absolute', top: -4, left: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'nw-resize' }} />
-          <div className="vb6-resize-handle ne" style={{ position: 'absolute', top: -4, right: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'ne-resize' }} />
-          <div className="vb6-resize-handle sw" style={{ position: 'absolute', bottom: -4, left: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'sw-resize' }} />
-          <div className="vb6-resize-handle se" style={{ position: 'absolute', bottom: -4, right: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'se-resize' }} />
-          <div className="vb6-resize-handle n" style={{ position: 'absolute', top: -4, left: '50%', marginLeft: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'n-resize' }} />
-          <div className="vb6-resize-handle s" style={{ position: 'absolute', bottom: -4, left: '50%', marginLeft: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 's-resize' }} />
-          <div className="vb6-resize-handle w" style={{ position: 'absolute', top: '50%', left: -4, marginTop: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'w-resize' }} />
-          <div className="vb6-resize-handle e" style={{ position: 'absolute', top: '50%', right: -4, marginTop: -4, width: 8, height: 8, backgroundColor: '#0066cc', cursor: 'e-resize' }} />
+          <div
+            className="vb6-resize-handle nw"
+            style={{
+              position: 'absolute',
+              top: -4,
+              left: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'nw-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle ne"
+            style={{
+              position: 'absolute',
+              top: -4,
+              right: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'ne-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle sw"
+            style={{
+              position: 'absolute',
+              bottom: -4,
+              left: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'sw-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle se"
+            style={{
+              position: 'absolute',
+              bottom: -4,
+              right: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'se-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle n"
+            style={{
+              position: 'absolute',
+              top: -4,
+              left: '50%',
+              marginLeft: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'n-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle s"
+            style={{
+              position: 'absolute',
+              bottom: -4,
+              left: '50%',
+              marginLeft: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 's-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle w"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: -4,
+              marginTop: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'w-resize',
+            }}
+          />
+          <div
+            className="vb6-resize-handle e"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              right: -4,
+              marginTop: -4,
+              width: 8,
+              height: 8,
+              backgroundColor: '#0066cc',
+              cursor: 'e-resize',
+            }}
+          />
         </>
       )}
     </div>
@@ -315,12 +443,12 @@ const ScrollBar: React.FC<ScrollBarProps> = ({
 };
 
 // HScrollBar component
-export const HScrollBar: React.FC<Omit<ScrollBarProps, 'orientation'>> = (props) => (
+export const HScrollBar: React.FC<Omit<ScrollBarProps, 'orientation'>> = props => (
   <ScrollBar {...props} orientation="horizontal" />
 );
 
 // VScrollBar component
-export const VScrollBar: React.FC<Omit<ScrollBarProps, 'orientation'>> = (props) => (
+export const VScrollBar: React.FC<Omit<ScrollBarProps, 'orientation'>> = props => (
   <ScrollBar {...props} orientation="vertical" />
 );
 

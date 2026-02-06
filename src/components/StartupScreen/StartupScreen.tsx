@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  FolderOpen, 
-  FileText, 
-  Palette, 
-  Code, 
+import {
+  FolderOpen,
+  FileText,
+  Palette,
+  Code,
   Zap,
   ChevronRight,
   Clock,
@@ -13,7 +13,7 @@ import {
   Settings,
   HelpCircle,
   BookOpen,
-  Sparkles
+  Sparkles,
 } from 'lucide-react';
 
 interface StartupScreenProps {
@@ -48,33 +48,33 @@ const StartupScreen: React.FC<StartupScreenProps> = ({
   onOpenRecent,
   onShowExamples,
   onShowHelp,
-  onClose
+  onClose,
 }) => {
   const [recentProjects] = useState<RecentProject[]>([
     {
       name: 'Calculator',
       path: 'C:\\VB6Projects\\Calculator\\Calculator.vbp',
       lastModified: new Date(Date.now() - 1000 * 60 * 60 * 24),
-      type: 'Standard EXE'
+      type: 'Standard EXE',
     },
     {
       name: 'TextEditor',
       path: 'C:\\VB6Projects\\TextEditor\\TextEditor.vbp',
       lastModified: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
-      type: 'Standard EXE'
+      type: 'Standard EXE',
     },
     {
       name: 'DatabaseApp',
       path: 'C:\\VB6Projects\\DatabaseApp\\DatabaseApp.vbp',
       lastModified: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
-      type: 'Standard EXE'
+      type: 'Standard EXE',
     },
     {
       name: 'GameEngine',
       path: 'C:\\VB6Projects\\GameEngine\\GameEngine.vbp',
       lastModified: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14),
-      type: 'ActiveX DLL'
-    }
+      type: 'ActiveX DLL',
+    },
   ]);
 
   const [projectTemplates] = useState<ProjectTemplate[]>([
@@ -85,7 +85,7 @@ const StartupScreen: React.FC<StartupScreenProps> = ({
       icon: <Code className="text-blue-600" size={24} />,
       category: 'Basic',
       files: ['Form1.frm', 'Module1.bas'],
-      isPopular: true
+      isPopular: true,
     },
     {
       id: 'activex-dll',
@@ -93,7 +93,7 @@ const StartupScreen: React.FC<StartupScreenProps> = ({
       description: 'Create a reusable component library',
       icon: <Zap className="text-green-600" size={24} />,
       category: 'Advanced',
-      files: ['Class1.cls']
+      files: ['Class1.cls'],
     },
     {
       id: 'activex-control',
@@ -101,7 +101,7 @@ const StartupScreen: React.FC<StartupScreenProps> = ({
       description: 'Create a custom control for use in other applications',
       icon: <Palette className="text-purple-600" size={24} />,
       category: 'Advanced',
-      files: ['UserControl1.ctl']
+      files: ['UserControl1.ctl'],
     },
     {
       id: 'data-project',
@@ -110,7 +110,7 @@ const StartupScreen: React.FC<StartupScreenProps> = ({
       icon: <FileText className="text-orange-600" size={24} />,
       category: 'Basic',
       files: ['DataForm1.frm', 'DataModule1.bas'],
-      isPopular: true
+      isPopular: true,
     },
     {
       id: 'dhtml-app',
@@ -118,7 +118,7 @@ const StartupScreen: React.FC<StartupScreenProps> = ({
       description: 'Web-based application using DHTML',
       icon: <BookOpen className="text-indigo-600" size={24} />,
       category: 'Web',
-      files: ['DHtmlPage1.dsr']
+      files: ['DHtmlPage1.dsr'],
     },
     {
       id: 'addin',
@@ -126,8 +126,8 @@ const StartupScreen: React.FC<StartupScreenProps> = ({
       description: 'Extend the VB6 IDE with custom functionality',
       icon: <Settings className="text-gray-600" size={24} />,
       category: 'Advanced',
-      files: ['Connect.cls', 'frmAddIn.frm']
-    }
+      files: ['Connect.cls', 'frmAddIn.frm'],
+    },
   ]);
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -135,15 +135,16 @@ const StartupScreen: React.FC<StartupScreenProps> = ({
 
   const categories = ['All', 'Basic', 'Advanced', 'Web', 'Games', 'Utilities'];
 
-  const filteredTemplates = selectedCategory === 'All' 
-    ? projectTemplates 
-    : projectTemplates.filter(template => template.category === selectedCategory);
+  const filteredTemplates =
+    selectedCategory === 'All'
+      ? projectTemplates
+      : projectTemplates.filter(template => template.category === selectedCategory);
 
   const formatDate = (date: Date) => {
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    
+
     if (days === 0) return 'Today';
     if (days === 1) return 'Yesterday';
     if (days < 7) return `${days} days ago`;
@@ -152,21 +153,21 @@ const StartupScreen: React.FC<StartupScreenProps> = ({
   };
 
   const tips = [
-    "💡 Use Ctrl+Space for IntelliSense completion while coding",
-    "🎨 Drag controls from the Toolbox to your form to build your UI",
-    "🔍 Use the Object Browser (F2) to explore available classes and methods",
-    "⚡ Press F5 to run your project instantly",
-    "📁 Recent projects are automatically saved in your workspace",
-    "🔧 Use the Properties window to customize control behavior",
-    "🎯 Set breakpoints by clicking in the margin next to line numbers",
-    "📊 The Immediate window lets you test expressions during debugging"
+    '💡 Use Ctrl+Space for IntelliSense completion while coding',
+    '🎨 Drag controls from the Toolbox to your form to build your UI',
+    '🔍 Use the Object Browser (F2) to explore available classes and methods',
+    '⚡ Press F5 to run your project instantly',
+    '📁 Recent projects are automatically saved in your workspace',
+    '🔧 Use the Properties window to customize control behavior',
+    '🎯 Set breakpoints by clicking in the margin next to line numbers',
+    '📊 The Immediate window lets you test expressions during debugging',
   ];
 
   const [currentTip, setCurrentTip] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentTip((prev) => (prev + 1) % tips.length);
+      setCurrentTip(prev => (prev + 1) % tips.length);
     }, 5000);
 
     return () => clearInterval(interval);
@@ -270,9 +271,7 @@ const StartupScreen: React.FC<StartupScreenProps> = ({
                 <Sparkles className="text-yellow-500 flex-shrink-0 mt-0.5" size={16} />
                 <div>
                   <div className="text-sm font-medium text-gray-700 mb-1">Pro Tip</div>
-                  <div className="text-xs text-gray-600 leading-relaxed">
-                    {tips[currentTip]}
-                  </div>
+                  <div className="text-xs text-gray-600 leading-relaxed">{tips[currentTip]}</div>
                 </div>
                 <button
                   onClick={() => setShowTip(false)}
@@ -294,10 +293,7 @@ const StartupScreen: React.FC<StartupScreenProps> = ({
                 <h2 className="text-2xl font-bold text-gray-800">Create New Project</h2>
                 <p className="text-gray-600 mt-1">Choose a template to get started quickly</p>
               </div>
-              <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 p-2"
-              >
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-2">
                 ×
               </button>
             </div>
@@ -323,7 +319,7 @@ const StartupScreen: React.FC<StartupScreenProps> = ({
           {/* Templates Grid */}
           <div className="flex-1 p-6 overflow-auto">
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredTemplates.map((template) => (
+              {filteredTemplates.map(template => (
                 <div
                   key={template.id}
                   onClick={onNewProject}
@@ -337,9 +333,7 @@ const StartupScreen: React.FC<StartupScreenProps> = ({
                   )}
 
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0">
-                      {template.icon}
-                    </div>
+                    <div className="flex-shrink-0">{template.icon}</div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-800 group-hover:text-blue-700 transition-colors">
                         {template.name}
@@ -347,7 +341,7 @@ const StartupScreen: React.FC<StartupScreenProps> = ({
                       <p className="text-sm text-gray-600 mt-1 line-clamp-2">
                         {template.description}
                       </p>
-                      
+
                       <div className="mt-3">
                         <div className="text-xs text-gray-500 mb-1">Includes:</div>
                         <div className="flex flex-wrap gap-1">
@@ -380,23 +374,21 @@ const StartupScreen: React.FC<StartupScreenProps> = ({
                 <HelpCircle size={16} />
                 Help & Documentation
               </button>
-              
+
               <div className="w-px h-4 bg-gray-300" />
-              
+
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <Download size={14} />
                 Import Project
               </div>
-              
+
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <Upload size={14} />
                 Export Templates
               </div>
             </div>
 
-            <div className="text-xs text-gray-500">
-              VB6 IDE Clone v2.0 • Ready for Development
-            </div>
+            <div className="text-xs text-gray-500">VB6 IDE Clone v2.0 • Ready for Development</div>
           </div>
         </div>
       </div>

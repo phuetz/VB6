@@ -34,13 +34,13 @@ jobs:
     outputs:
       version: ${{ steps.get-version.outputs.version }}
       changelog: ${{ steps.get-changelog.outputs.changelog }}
-    
+
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: 🏷️ Get version
         id: get-version
         run: |
@@ -51,7 +51,7 @@ jobs:
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
-      
+
       - name: 📋 Get changelog
         id: get-changelog
         run: |
@@ -64,13 +64,13 @@ jobs:
           else
             CHANGELOG="Changelog not available"
           fi
-          
+
           # Save changelog to file for multi-line output
           echo "$CHANGELOG" > changelog.txt
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
           cat changelog.txt >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-      
+
       - name: ✅ Validate version format
         run: |
           VERSION="${{ steps.get-version.outputs.version }}"
@@ -80,29 +80,29 @@ jobs:
             exit 1
           fi
           echo "✅ Version format valid: $VERSION"
-      
+
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-      
+
       - name: 📥 Install dependencies
         run: npm ci
-      
+
       - name: 🧪 Run all tests
         run: |
           npm test
           npm run test:integration || echo "Integration tests not available"
         env:
           CI: true
-      
+
       - name: 📊 Run compatibility validation
         run: |
           npm test -- src/test/compatibility/VB6CompatibilityTests.ts
         env:
           RELEASE_VALIDATION: true
-      
+
       - name: 📈 Run performance benchmarks
         run: |
           npm test -- src/test/benchmarks/VB6NativeBenchmarks.ts
@@ -116,7 +116,7 @@ jobs:
     name: 🏗️ Build Release
     runs-on: ${{ matrix.os }}
     needs: validate-release
-    
+
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -124,63 +124,63 @@ jobs:
           - os: ubuntu-latest
             platform: linux
             arch: x64
-          - os: windows-latest  
+          - os: windows-latest
             platform: win32
             arch: x64
           - os: macos-latest
             platform: darwin
             arch: x64
-    
+
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-      
+
       - name: 📥 Install dependencies
         run: |
           npm ci
           cd server && npm ci
-      
+
       - name: 🏗️ Build application
         run: npm run build
         env:
           NODE_ENV: production
           GENERATE_SOURCEMAP: false
           PUBLIC_VERSION: ${{ needs.validate-release.outputs.version }}
-      
+
       - name: 🏗️ Build server
         run: |
           cd server
           npm run build
         env:
           NODE_ENV: production
-      
+
       - name: 📦 Package application
         run: |
           mkdir -p release/vb6-web-compiler-${{ needs.validate-release.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}
-          
+
           # Copy build artifacts
           cp -r dist/* release/vb6-web-compiler-${{ needs.validate-release.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}/
-          
+
           # Copy server artifacts  
           mkdir -p release/vb6-web-compiler-${{ needs.validate-release.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}/server
           cp -r server/dist/* release/vb6-web-compiler-${{ needs.validate-release.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}/server/ || true
-          
+
           # Copy runtime files
           if [ -d "src/runtime" ]; then
             cp -r src/runtime release/vb6-web-compiler-${{ needs.validate-release.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}/
           fi
-          
+
           # Copy documentation
           cp README.md release/vb6-web-compiler-${{ needs.validate-release.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}/
           cp LICENSE release/vb6-web-compiler-${{ needs.validate-release.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}/ || echo "No LICENSE file"
           cp CHANGELOG.md release/vb6-web-compiler-${{ needs.validate-release.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}/ || echo "No CHANGELOG file"
-          
+
           # Copy package.json (without dev dependencies)
           node -e "
             const pkg = require('./package.json');
@@ -192,7 +192,7 @@ jobs:
               JSON.stringify(pkg, null, 2)
             );
           "
-          
+
           # Create installation script
           cat > release/vb6-web-compiler-${{ needs.validate-release.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}/install.sh << 'EOF'
           #!/bin/bash
@@ -202,7 +202,7 @@ jobs:
           echo "Run 'npm start' to start the application"
           EOF
           chmod +x release/vb6-web-compiler-${{ needs.validate-release.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}/install.sh
-      
+
       - name: 📦 Create archive
         run: |
           cd release
@@ -212,7 +212,7 @@ jobs:
             tar -czf vb6-web-compiler-${{ needs.validate-release.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz vb6-web-compiler-${{ needs.validate-release.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}
           fi
         shell: bash
-      
+
       - name: 🔍 Verify package
         run: |
           cd release
@@ -223,7 +223,7 @@ jobs:
             find vb6-web-compiler-${{ needs.validate-release.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }} -type f | head -20
           fi
         shell: bash
-      
+
       - name: 📤 Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -239,26 +239,26 @@ jobs:
     name: 📦 Build NPM Package
     runs-on: ubuntu-latest
     needs: validate-release
-    
+
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
-      
+
       - name: 📥 Install dependencies
         run: npm ci
-      
+
       - name: 🏗️ Build package
         run: |
           npm run build:npm || npm run build
           npm pack
-      
+
       - name: 📤 Upload NPM package
         uses: actions/upload-artifact@v4
         with:
@@ -273,14 +273,14 @@ jobs:
     name: 🐳 Build Docker Images
     runs-on: ubuntu-latest
     needs: validate-release
-    
+
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: 🐳 Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
-      
+
       - name: 🔑 Login to Docker Hub
         if: env.DOCKER_HUB_USERNAME != ''
         uses: docker/login-action@v3
@@ -289,14 +289,14 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
         env:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-      
+
       - name: 🔑 Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: 📋 Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -311,7 +311,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=raw,value=latest,enable={{is_default_branch}}
-      
+
       - name: 🏗️ Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -334,18 +334,18 @@ jobs:
     name: 🚀 Create GitHub Release
     runs-on: ubuntu-latest
     needs: [validate-release, build-release, build-npm, build-docker]
-    
+
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: 📥 Download all release artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts/
-      
+
       - name: 📋 Generate release notes
         run: |
           echo "# VB6 Web Compiler ${{ needs.validate-release.outputs.version }}" > release_notes.md
@@ -354,7 +354,7 @@ jobs:
           echo "" >> release_notes.md
           echo "## 📦 Downloads" >> release_notes.md
           echo "" >> release_notes.md
-          
+
           # List platform-specific downloads
           for file in artifacts/release-*/vb6-web-compiler-*; do
             if [ -f "$file" ]; then
@@ -362,27 +362,27 @@ jobs:
               echo "- [$basename]($file)" >> release_notes.md
             fi
           done
-          
+
           echo "" >> release_notes.md
           echo "## 🐳 Docker Images" >> release_notes.md
           echo "" >> release_notes.md
           echo "- \`docker pull vb6web/compiler:${{ needs.validate-release.outputs.version }}\`" >> release_notes.md
           echo "- \`docker pull ghcr.io/${{ github.repository }}:${{ needs.validate-release.outputs.version }}\`" >> release_notes.md
-          
+
           echo "" >> release_notes.md
           echo "## 📦 NPM Package" >> release_notes.md
           echo "" >> release_notes.md
           echo "- \`npm install @vb6web/compiler@${{ needs.validate-release.outputs.version }}\`" >> release_notes.md
-          
+
           echo "" >> release_notes.md
           echo "## 🔗 Links" >> release_notes.md
           echo "" >> release_notes.md
           echo "- [Documentation](https://docs.vb6web.com)" >> release_notes.md
           echo "- [API Reference](https://api.vb6web.com)" >> release_notes.md
           echo "- [Migration Guide](https://docs.vb6web.com/migration)" >> release_notes.md
-          
+
           cat release_notes.md
-      
+
       - name: 🚀 Create Release
         uses: actions/create-release@v1
         id: create_release
@@ -394,7 +394,7 @@ jobs:
           body_path: release_notes.md
           draft: ${{ inputs.draft || false }}
           prerelease: ${{ inputs.prerelease || contains(needs.validate-release.outputs.version, '-') }}
-      
+
       - name: 📤 Upload Release Assets
         run: |
           for file in artifacts/release-*/*; do
@@ -410,7 +410,7 @@ jobs:
                 --data-binary @"$file"
             fi
           done
-          
+
           # Upload NPM package
           for file in artifacts/npm-package/*; do
             if [ -f "$file" ]; then
@@ -434,23 +434,23 @@ jobs:
     runs-on: ubuntu-latest
     needs: [validate-release, create-release]
     if: ${{ !inputs.prerelease && !contains(needs.validate-release.outputs.version, '-') }}
-    
+
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: 'https://registry.npmjs.org'
-      
+
       - name: 📥 Install dependencies
         run: npm ci
-      
+
       - name: 🏗️ Build package
         run: npm run build:npm || npm run build
-      
+
       - name: 📦 Publish to NPM
         run: npm publish
         env:
@@ -464,21 +464,21 @@ jobs:
     runs-on: ubuntu-latest
     needs: [validate-release, create-release]
     if: always() && needs.create-release.result == 'success'
-    
+
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: 📢 Update documentation
         run: |
           # Update version in documentation
           if [ -f "docs/README.md" ]; then
             sed -i "s/Version: .*/Version: ${{ needs.validate-release.outputs.version }}/" docs/README.md
           fi
-          
+
           # Update version in package.json examples
           find docs/ -name "*.md" -exec sed -i "s/@vb6web\/compiler@[^\"]*/@vb6web\/compiler@${{ needs.validate-release.outputs.version }}/g" {} \;
-      
+
       - name: 📧 Notify team
         if: env.SLACK_WEBHOOK_URL != ''
         uses: 8398a7/action-slack@v3
@@ -487,19 +487,19 @@ jobs:
           channel: '#releases'
           text: |
             🚀 VB6 Web Compiler ${{ needs.validate-release.outputs.version }} Released!
-            
+
             📦 Available on NPM, Docker Hub, and GitHub Releases
             🔗 Release Notes: ${{ steps.create_release.outputs.html_url }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      
+
       - name: 📝 Create next version milestone
         uses: actions/github-script@v7
         with:
           script: |
             const version = '${{ needs.validate-release.outputs.version }}';
             const versionMatch = version.match(/v(\d+)\.(\d+)\.(\d+)/);
-            
+
             if (versionMatch) {
               const major = parseInt(versionMatch[1]);
               const minor = parseInt(versionMatch[2]);

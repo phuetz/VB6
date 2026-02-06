@@ -16,30 +16,30 @@ export class CacheService {
     sets: 0,
     deletes: 0,
   };
-  
+
   private constructor() {
     this.initializeRedis();
     this.startCleanupInterval();
   }
-  
+
   static getInstance(): CacheService {
     if (!CacheService.instance) {
       CacheService.instance = new CacheService();
     }
     return CacheService.instance;
   }
-  
+
   private async initializeRedis() {
     if (process.env.REDIS_URL) {
       try {
         this.redisClient = createClient({
           url: process.env.REDIS_URL,
         });
-        
-        this.redisClient.on('error', (err) => {
+
+        this.redisClient.on('error', err => {
           logger.error('Redis Client Error:', err);
         });
-        
+
         await this.redisClient.connect();
         logger.info('Redis cache connected');
       } catch (error) {
@@ -48,7 +48,7 @@ export class CacheService {
       }
     }
   }
-  
+
   private startCleanupInterval() {
     // Clean up expired memory cache entries every minute
     setInterval(() => {
@@ -60,7 +60,7 @@ export class CacheService {
       }
     }, 60 * 1000);
   }
-  
+
   async get(key: string): Promise<any> {
     try {
       // Try Redis first
@@ -71,7 +71,7 @@ export class CacheService {
           return JSON.parse(value);
         }
       }
-      
+
       // Fall back to memory cache
       const entry = this.memoryCache.get(key);
       if (entry) {
@@ -82,7 +82,7 @@ export class CacheService {
           this.memoryCache.delete(key);
         }
       }
-      
+
       this.stats.misses++;
       return null;
     } catch (error) {
@@ -90,12 +90,12 @@ export class CacheService {
       return null;
     }
   }
-  
+
   async set(key: string, value: any, ttl?: number): Promise<void> {
     try {
       this.stats.sets++;
       const serialized = JSON.stringify(value);
-      
+
       // Set in Redis if available
       if (this.redisClient) {
         if (ttl) {
@@ -104,48 +104,48 @@ export class CacheService {
           await this.redisClient.set(key, serialized);
         }
       }
-      
+
       // Also set in memory cache
       this.memoryCache.set(key, {
         value,
-        expires: ttl ? Date.now() + (ttl * 1000) : 0,
+        expires: ttl ? Date.now() + ttl * 1000 : 0,
       });
     } catch (error) {
       logger.error('Cache set error:', error);
     }
   }
-  
+
   async delete(key: string): Promise<void> {
     try {
       this.stats.deletes++;
-      
+
       if (this.redisClient) {
         await this.redisClient.del(key);
       }
-      
+
       this.memoryCache.delete(key);
     } catch (error) {
       logger.error('Cache delete error:', error);
     }
   }
-  
+
   async flush(): Promise<void> {
     try {
       if (this.redisClient) {
         await this.redisClient.flushAll();
       }
-      
+
       this.memoryCache.clear();
       logger.info('Cache flushed');
     } catch (error) {
       logger.error('Cache flush error:', error);
     }
   }
-  
+
   async getStats(): Promise<any> {
     const memorySize = this.memoryCache.size;
     let redisSize = 0;
-    
+
     if (this.redisClient) {
       try {
         redisSize = await this.redisClient.dbSize();
@@ -153,7 +153,7 @@ export class CacheService {
         logger.error('Failed to get Redis size:', error);
       }
     }
-    
+
     return {
       ...this.stats,
       hitRate: this.stats.hits / (this.stats.hits + this.stats.misses) || 0,
@@ -162,31 +162,37 @@ export class CacheService {
       redisConnected: !!this.redisClient,
     };
   }
-  
+
   async close(): Promise<void> {
     if (this.redisClient) {
       await this.redisClient.quit();
     }
   }
-  
+
   // Utility methods for specific use cases
-  
-  async cacheQuery(connectionId: string, query: string, params: any[], result: any, ttl: number = 300): Promise<void> {
+
+  async cacheQuery(
+    connectionId: string,
+    query: string,
+    params: any[],
+    result: any,
+    ttl: number = 300
+  ): Promise<void> {
     const key = this.getQueryKey(connectionId, query, params);
     await this.set(key, result, ttl);
   }
-  
+
   async getCachedQuery(connectionId: string, query: string, params: any[]): Promise<any> {
     const key = this.getQueryKey(connectionId, query, params);
     return this.get(key);
   }
-  
+
   async invalidateConnection(connectionId: string): Promise<void> {
     // In a production system, we'd track all keys for a connection
     // For now, we'll just log
     logger.info(`Cache invalidation requested for connection: ${connectionId}`);
   }
-  
+
   private getQueryKey(connectionId: string, query: string, params: any[]): string {
     const normalizedQuery = query.toLowerCase().replace(/\s+/g, ' ').trim();
     const paramsHash = JSON.stringify(params);

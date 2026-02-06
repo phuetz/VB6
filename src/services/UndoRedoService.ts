@@ -5,7 +5,17 @@ import { Control } from '../context/types';
 
 export interface UndoRedoAction {
   id: string;
-  type: 'create' | 'delete' | 'move' | 'resize' | 'property_change' | 'copy' | 'paste' | 'duplicate' | 'align' | 'group';
+  type:
+    | 'create'
+    | 'delete'
+    | 'move'
+    | 'resize'
+    | 'property_change'
+    | 'copy'
+    | 'paste'
+    | 'duplicate'
+    | 'align'
+    | 'group';
   timestamp: number;
   description: string;
   controls: number[]; // Control IDs affected
@@ -13,7 +23,7 @@ export interface UndoRedoAction {
     before?: any;
     after?: any;
     properties?: Record<string, any>;
-    positions?: Array<{ id: number; x: number; y: number; width?: number; height?: number; }>;
+    positions?: Array<{ id: number; x: number; y: number; width?: number; height?: number }>;
     created?: Control[];
     deleted?: Control[];
   };
@@ -38,7 +48,7 @@ export class UndoRedoService {
     isPerformingUndo: false,
     isPerformingRedo: false,
   };
-  
+
   private listeners: Array<(state: UndoRedoState) => void> = [];
   private mergeTimer: NodeJS.Timeout | null = null;
 
@@ -115,8 +125,10 @@ export class UndoRedoService {
     }
 
     // Check if controls match
-    if (lastAction.controls.length !== newAction.controls.length ||
-        !lastAction.controls.every(id => newAction.controls.includes(id))) {
+    if (
+      lastAction.controls.length !== newAction.controls.length ||
+      !lastAction.controls.every(id => newAction.controls.includes(id))
+    ) {
       return false;
     }
 
@@ -185,7 +197,7 @@ export class UndoRedoService {
       type: 'create',
       description: `Create ${controls.length === 1 ? controlNames : `${controls.length} controls`}`,
       controls: controls.map(c => c.id),
-      data: { created: controls }
+      data: { created: controls },
     });
   }
 
@@ -195,14 +207,17 @@ export class UndoRedoService {
       type: 'delete',
       description: `Delete ${controls.length === 1 ? controlNames : `${controls.length} controls`}`,
       controls: controls.map(c => c.id),
-      data: { deleted: controls }
+      data: { deleted: controls },
     });
   }
 
-  recordMove(controls: Control[], beforePositions: Array<{id: number; x: number; y: number}>): void {
+  recordMove(
+    controls: Control[],
+    beforePositions: Array<{ id: number; x: number; y: number }>
+  ): void {
     const afterPositions = controls.map(c => ({ id: c.id, x: c.x, y: c.y }));
     const controlNames = controls.map(c => c.name).join(', ');
-    
+
     this.recordAction({
       type: 'move',
       description: `Move ${controls.length === 1 ? controlNames : `${controls.length} controls`}`,
@@ -210,17 +225,26 @@ export class UndoRedoService {
       data: {
         before: beforePositions,
         after: afterPositions,
-        positions: afterPositions
+        positions: afterPositions,
       },
       canMerge: true,
-      mergeWindow: 500 // 500ms merge window for move operations
+      mergeWindow: 500, // 500ms merge window for move operations
     });
   }
 
-  recordResize(controls: Control[], beforeSizes: Array<{id: number; x: number; y: number; width: number; height: number}>): void {
-    const afterSizes = controls.map(c => ({ id: c.id, x: c.x, y: c.y, width: c.width, height: c.height }));
+  recordResize(
+    controls: Control[],
+    beforeSizes: Array<{ id: number; x: number; y: number; width: number; height: number }>
+  ): void {
+    const afterSizes = controls.map(c => ({
+      id: c.id,
+      x: c.x,
+      y: c.y,
+      width: c.width,
+      height: c.height,
+    }));
     const controlNames = controls.map(c => c.name).join(', ');
-    
+
     this.recordAction({
       type: 'resize',
       description: `Resize ${controls.length === 1 ? controlNames : `${controls.length} controls`}`,
@@ -228,16 +252,21 @@ export class UndoRedoService {
       data: {
         before: beforeSizes,
         after: afterSizes,
-        positions: afterSizes
+        positions: afterSizes,
       },
       canMerge: true,
-      mergeWindow: 500 // 500ms merge window for resize operations
+      mergeWindow: 500, // 500ms merge window for resize operations
     });
   }
 
-  recordPropertyChange(controls: Control[], property: string, beforeValues: any[], afterValues: any[]): void {
+  recordPropertyChange(
+    controls: Control[],
+    property: string,
+    beforeValues: any[],
+    afterValues: any[]
+  ): void {
     const controlNames = controls.map(c => c.name).join(', ');
-    
+
     this.recordAction({
       type: 'property_change',
       description: `Change ${property} of ${controls.length === 1 ? controlNames : `${controls.length} controls`}`,
@@ -245,10 +274,10 @@ export class UndoRedoService {
       data: {
         properties: { [property]: afterValues },
         before: beforeValues,
-        after: afterValues
+        after: afterValues,
       },
       canMerge: property !== 'name', // Don't merge name changes
-      mergeWindow: 2000 // 2s merge window for property changes
+      mergeWindow: 2000, // 2s merge window for property changes
     });
   }
 
@@ -258,7 +287,7 @@ export class UndoRedoService {
       type: 'copy',
       description: `Copy ${controls.length === 1 ? controlNames : `${controls.length} controls`}`,
       controls: controls.map(c => c.id),
-      data: { copied: controls }
+      data: { copied: controls },
     });
   }
 
@@ -268,7 +297,7 @@ export class UndoRedoService {
       type: 'paste',
       description: `Paste ${controls.length === 1 ? controlNames : `${controls.length} controls`}`,
       controls: controls.map(c => c.id),
-      data: { created: controls }
+      data: { created: controls },
     });
   }
 
@@ -277,16 +306,20 @@ export class UndoRedoService {
       type: 'duplicate',
       description: `Duplicate ${originalControls.length === 1 ? originalControls[0].name : `${originalControls.length} controls`}`,
       controls: duplicatedControls.map(c => c.id),
-      data: { 
+      data: {
         original: originalControls,
-        created: duplicatedControls 
-      }
+        created: duplicatedControls,
+      },
     });
   }
 
-  recordAlign(controls: Control[], alignType: string, beforePositions: Array<{id: number; x: number; y: number}>): void {
+  recordAlign(
+    controls: Control[],
+    alignType: string,
+    beforePositions: Array<{ id: number; x: number; y: number }>
+  ): void {
     const afterPositions = controls.map(c => ({ id: c.id, x: c.x, y: c.y }));
-    
+
     this.recordAction({
       type: 'align',
       description: `Align ${controls.length} controls (${alignType})`,
@@ -294,8 +327,8 @@ export class UndoRedoService {
       data: {
         before: beforePositions,
         after: afterPositions,
-        alignType
-      }
+        alignType,
+      },
     });
   }
 
@@ -329,12 +362,12 @@ export class UndoRedoService {
     const action = this.state.actions[this.state.currentIndex];
     this.state.isPerformingUndo = true;
     this.state.currentIndex--;
-    
+
     this.notifyListeners();
-    
+
     // The actual undo logic will be handled by the store/context
     // This service just manages the history state
-    
+
     this.state.isPerformingUndo = false;
     return action;
   }
@@ -345,12 +378,12 @@ export class UndoRedoService {
     this.state.currentIndex++;
     const action = this.state.actions[this.state.currentIndex];
     this.state.isPerformingRedo = true;
-    
+
     this.notifyListeners();
-    
+
     // The actual redo logic will be handled by the store/context
     // This service just manages the history state
-    
+
     this.state.isPerformingRedo = false;
     return action;
   }
@@ -372,14 +405,14 @@ export class UndoRedoService {
 
   setMaxHistorySize(size: number): void {
     this.state.maxHistorySize = Math.max(10, size); // Minimum 10 actions
-    
+
     // Trim history if needed
     if (this.state.actions.length > this.state.maxHistorySize) {
       const excess = this.state.actions.length - this.state.maxHistorySize;
       this.state.actions = this.state.actions.slice(excess);
       this.state.currentIndex = Math.max(-1, this.state.currentIndex - excess);
     }
-    
+
     this.notifyListeners();
   }
 
@@ -387,10 +420,11 @@ export class UndoRedoService {
   getMemoryUsage(): { actionsCount: number; estimatedSize: string } {
     const actionsCount = this.state.actions.length;
     const estimatedBytes = JSON.stringify(this.state.actions).length * 2; // Rough estimate
-    const estimatedSize = estimatedBytes > 1024 * 1024 
-      ? `${(estimatedBytes / (1024 * 1024)).toFixed(1)} MB`
-      : `${(estimatedBytes / 1024).toFixed(1)} KB`;
-    
+    const estimatedSize =
+      estimatedBytes > 1024 * 1024
+        ? `${(estimatedBytes / (1024 * 1024)).toFixed(1)} MB`
+        : `${(estimatedBytes / 1024).toFixed(1)} KB`;
+
     return { actionsCount, estimatedSize };
   }
 }

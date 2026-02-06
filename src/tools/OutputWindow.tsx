@@ -13,7 +13,7 @@ export enum OutputType {
   Compiler = 'Compiler',
   Linker = 'Linker',
   Deploy = 'Deploy',
-  Custom = 'Custom'
+  Custom = 'Custom',
 }
 
 export enum MessageLevel {
@@ -22,7 +22,7 @@ export enum MessageLevel {
   Info = 'Info',
   Success = 'Success',
   Debug = 'Debug',
-  Verbose = 'Verbose'
+  Verbose = 'Verbose',
 }
 
 export interface OutputMessage {
@@ -86,7 +86,7 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
   onNavigateToFile,
   onClearOutput,
   onExportOutput,
-  onMessageClick
+  onMessageClick,
 }) => {
   const [panes, setPanes] = useState<OutputPane[]>([]);
   const [activePane, setActivePane] = useState<OutputPane | null>(null);
@@ -105,12 +105,12 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
     groupSimilarMessages: false,
     highlightErrors: true,
     enableFiltering: true,
-    timestampFormat: 'HH:mm:ss'
+    timestampFormat: 'HH:mm:ss',
   });
   const [showSettings, setShowSettings] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<OutputMessage | null>(null);
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
-  
+
   const eventEmitter = useRef(new EventEmitter());
   const outputRef = useRef<HTMLDivElement>(null);
 
@@ -130,7 +130,7 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
         autoScroll: true,
         wordWrap: false,
         showTimestamps: true,
-        showLineNumbers: false
+        showLineNumbers: false,
       },
       {
         id: 'debug',
@@ -145,7 +145,7 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
         autoScroll: true,
         wordWrap: false,
         showTimestamps: true,
-        showLineNumbers: false
+        showLineNumbers: false,
       },
       {
         id: 'general',
@@ -160,7 +160,7 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
         autoScroll: true,
         wordWrap: false,
         showTimestamps: true,
-        showLineNumbers: false
+        showLineNumbers: false,
       },
       {
         id: 'find',
@@ -175,28 +175,31 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
         autoScroll: true,
         wordWrap: false,
         showTimestamps: false,
-        showLineNumbers: true
-      }
+        showLineNumbers: true,
+      },
     ];
 
     setPanes(defaultPanes);
     setActivePane(defaultPanes[0]);
-    
+
     // Initialize with sample messages
     const sampleMessages = generateSampleMessages();
     const messagesByPane: Record<string, OutputMessage[]> = {};
-    
+
     defaultPanes.forEach(pane => {
-      messagesByPane[pane.id] = sampleMessages.filter(msg => 
-        (pane.type === OutputType.Build && [OutputType.Build, OutputType.Compiler, OutputType.Linker].includes(msg.type)) ||
-        (pane.type === OutputType.Debug && msg.type === OutputType.Debug) ||
-        (pane.type === OutputType.General && [OutputType.General, OutputType.Information].includes(msg.type)) ||
-        (pane.type === OutputType.Find && msg.type === OutputType.Find)
+      messagesByPane[pane.id] = sampleMessages.filter(
+        msg =>
+          (pane.type === OutputType.Build &&
+            [OutputType.Build, OutputType.Compiler, OutputType.Linker].includes(msg.type)) ||
+          (pane.type === OutputType.Debug && msg.type === OutputType.Debug) ||
+          (pane.type === OutputType.General &&
+            [OutputType.General, OutputType.Information].includes(msg.type)) ||
+          (pane.type === OutputType.Find && msg.type === OutputType.Find)
       );
     });
-    
+
     setMessages(messagesByPane);
-    
+
     // Update message counts
     updatePaneCounts(defaultPanes, messagesByPane);
   }, []);
@@ -211,7 +214,7 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
       message: '------ Build started: Project: MyProject, Configuration: Debug ------',
       source: 'Build',
       canNavigate: false,
-      isCollapsible: false
+      isCollapsible: false,
     },
     {
       id: 'msg2',
@@ -222,7 +225,7 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
       source: 'VB6 Compiler',
       fileName: 'Form1.frm',
       canNavigate: true,
-      isCollapsible: false
+      isCollapsible: false,
     },
     {
       id: 'msg3',
@@ -237,7 +240,7 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
       columnNumber: 8,
       errorCode: 'VB40014',
       canNavigate: true,
-      isCollapsible: true
+      isCollapsible: true,
     },
     {
       id: 'msg4',
@@ -245,14 +248,15 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
       level: MessageLevel.Error,
       timestamp: new Date(Date.now() - 45000),
       message: 'Compile error: Variable not defined',
-      details: 'The variable "strUndefinedVar" has not been declared. Add "Dim strUndefinedVar As String" or enable "Option Explicit"',
+      details:
+        'The variable "strUndefinedVar" has not been declared. Add "Dim strUndefinedVar As String" or enable "Option Explicit"',
       source: 'VB6 Compiler',
       fileName: 'Module1.bas',
       lineNumber: 42,
       columnNumber: 12,
       errorCode: 'VB91003',
       canNavigate: true,
-      isCollapsible: true
+      isCollapsible: true,
     },
     {
       id: 'msg5',
@@ -263,7 +267,7 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
       details: '1 error(s), 1 warning(s)',
       source: 'Build',
       canNavigate: false,
-      isCollapsible: false
+      isCollapsible: false,
     },
     {
       id: 'msg6',
@@ -273,7 +277,7 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
       message: 'Debug session started',
       source: 'Debugger',
       canNavigate: false,
-      isCollapsible: false
+      isCollapsible: false,
     },
     {
       id: 'msg7',
@@ -285,7 +289,7 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
       fileName: 'Form1.frm',
       lineNumber: 28,
       canNavigate: true,
-      isCollapsible: false
+      isCollapsible: false,
     },
     {
       id: 'msg8',
@@ -295,7 +299,7 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
       message: 'Ready',
       source: 'IDE',
       canNavigate: false,
-      isCollapsible: false
+      isCollapsible: false,
     },
     {
       id: 'msg9',
@@ -317,7 +321,7 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
           lineNumber: 28,
           source: 'Find',
           canNavigate: true,
-          isCollapsible: false
+          isCollapsible: false,
         },
         {
           id: 'msg9b',
@@ -329,7 +333,7 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
           lineNumber: 45,
           source: 'Find',
           canNavigate: true,
-          isCollapsible: false
+          isCollapsible: false,
         },
         {
           id: 'msg9c',
@@ -341,88 +345,98 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
           lineNumber: 12,
           source: 'Find',
           canNavigate: true,
-          isCollapsible: false
-        }
+          isCollapsible: false,
+        },
       ],
-      expanded: false
-    }
+      expanded: false,
+    },
   ];
 
   // Update pane message counts
-  const updatePaneCounts = useCallback((paneList: OutputPane[], messagesByPane: Record<string, OutputMessage[]>) => {
-    const updatedPanes = paneList.map(pane => {
-      const paneMessages = messagesByPane[pane.id] || [];
-      return {
-        ...pane,
-        messageCount: paneMessages.length,
-        errorCount: paneMessages.filter(m => m.level === MessageLevel.Error).length,
-        warningCount: paneMessages.filter(m => m.level === MessageLevel.Warning).length
-      };
-    });
-    setPanes(updatedPanes);
-  }, []);
+  const updatePaneCounts = useCallback(
+    (paneList: OutputPane[], messagesByPane: Record<string, OutputMessage[]>) => {
+      const updatedPanes = paneList.map(pane => {
+        const paneMessages = messagesByPane[pane.id] || [];
+        return {
+          ...pane,
+          messageCount: paneMessages.length,
+          errorCount: paneMessages.filter(m => m.level === MessageLevel.Error).length,
+          warningCount: paneMessages.filter(m => m.level === MessageLevel.Warning).length,
+        };
+      });
+      setPanes(updatedPanes);
+    },
+    []
+  );
 
   // Add message to pane
-  const addMessage = useCallback((paneId: string, message: OutputMessage) => {
-    setMessages(prev => {
-      const paneMessages = prev[paneId] || [];
-      const newMessages = {
-        ...prev,
-        [paneId]: [...paneMessages.slice(-(settings.maxMessages - 1)), message]
-      };
-      
-      // Update counts
-      updatePaneCounts(panes, newMessages);
-      
-      return newMessages;
-    });
+  const addMessage = useCallback(
+    (paneId: string, message: OutputMessage) => {
+      setMessages(prev => {
+        const paneMessages = prev[paneId] || [];
+        const newMessages = {
+          ...prev,
+          [paneId]: [...paneMessages.slice(-(settings.maxMessages - 1)), message],
+        };
 
-    // Auto-scroll if enabled
-    if (activePane?.id === paneId && settings.autoScroll) {
-      setTimeout(() => {
-        if (outputRef.current) {
-          outputRef.current.scrollTop = outputRef.current.scrollHeight;
-        }
-      }, 10);
-    }
-  }, [settings.maxMessages, settings.autoScroll, activePane, panes, updatePaneCounts]);
+        // Update counts
+        updatePaneCounts(panes, newMessages);
+
+        return newMessages;
+      });
+
+      // Auto-scroll if enabled
+      if (activePane?.id === paneId && settings.autoScroll) {
+        setTimeout(() => {
+          if (outputRef.current) {
+            outputRef.current.scrollTop = outputRef.current.scrollHeight;
+          }
+        }, 10);
+      }
+    },
+    [settings.maxMessages, settings.autoScroll, activePane, panes, updatePaneCounts]
+  );
 
   // Clear pane messages
-  const clearPane = useCallback((paneId: string) => {
-    setMessages(prev => ({
-      ...prev,
-      [paneId]: []
-    }));
-    
-    onClearOutput?.(paneId);
-    
-    // Update counts
-    const newMessages = { ...messages, [paneId]: [] };
-    updatePaneCounts(panes, newMessages);
-  }, [messages, panes, updatePaneCounts, onClearOutput]);
+  const clearPane = useCallback(
+    (paneId: string) => {
+      setMessages(prev => ({
+        ...prev,
+        [paneId]: [],
+      }));
+
+      onClearOutput?.(paneId);
+
+      // Update counts
+      const newMessages = { ...messages, [paneId]: [] };
+      updatePaneCounts(panes, newMessages);
+    },
+    [messages, panes, updatePaneCounts, onClearOutput]
+  );
 
   // Filter messages
   const filteredMessages = useMemo(() => {
     if (!activePane) return [];
-    
+
     let paneMessages = messages[activePane.id] || [];
-    
+
     // Apply level filter
     if (filterLevel !== 'All') {
       paneMessages = paneMessages.filter(msg => msg.level === filterLevel);
     }
-    
+
     // Apply search filter
     if (searchText) {
       const searchLower = searchText.toLowerCase();
-      paneMessages = paneMessages.filter(msg =>
-        msg.message.toLowerCase().includes(searchLower) ||
-        (msg.source && msg.source.toLowerCase().includes(searchLower)) ||
-        (msg.fileName && msg.fileName.toLowerCase().includes(searchLower)) ||
-        (msg.details && msg.details.toLowerCase().includes(searchLower))
+      paneMessages = paneMessages.filter(
+        msg =>
+          msg.message.toLowerCase().includes(searchLower) ||
+          (msg.source && msg.source.toLowerCase().includes(searchLower)) ||
+          (msg.fileName && msg.fileName.toLowerCase().includes(searchLower)) ||
+          (msg.details && msg.details.toLowerCase().includes(searchLower))
       );
     }
-    
+
     return paneMessages;
   }, [activePane, messages, filterLevel, searchText]);
 
@@ -440,11 +454,14 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
   }, []);
 
   // Navigate to file location
-  const navigateToFile = useCallback((message: OutputMessage) => {
-    if (message.canNavigate && message.fileName) {
-      onNavigateToFile?.(message.fileName, message.lineNumber, message.columnNumber);
-    }
-  }, [onNavigateToFile]);
+  const navigateToFile = useCallback(
+    (message: OutputMessage) => {
+      if (message.canNavigate && message.fileName) {
+        onNavigateToFile?.(message.fileName, message.lineNumber, message.columnNumber);
+      }
+    },
+    [onNavigateToFile]
+  );
 
   // Format timestamp
   const formatTimestamp = (date: Date): string => {
@@ -452,8 +469,11 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
       case 'HH:mm:ss':
         return date.toLocaleTimeString('en-US', { hour12: false });
       case 'HH:mm:ss.fff':
-        return date.toLocaleTimeString('en-US', { hour12: false }) + '.' + 
-               date.getMilliseconds().toString().padStart(3, '0');
+        return (
+          date.toLocaleTimeString('en-US', { hour12: false }) +
+          '.' +
+          date.getMilliseconds().toString().padStart(3, '0')
+        );
       case 'yyyy-MM-dd HH:mm:ss':
         return date.toISOString().slice(0, 19).replace('T', ' ');
       default:
@@ -492,10 +512,10 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
           className={`flex items-start py-1 px-2 hover:bg-gray-100 cursor-pointer ${
             isSelected ? 'bg-blue-100' : ''
           } ${settings.highlightErrors && message.level === MessageLevel.Error ? 'bg-red-50' : ''}`}
-          style={{ 
+          style={{
             paddingLeft: `${8 + depth * 16}px`,
             fontSize: `${settings.fontSize}px`,
-            fontFamily: settings.fontFamily
+            fontFamily: settings.fontFamily,
           }}
           onClick={() => {
             setSelectedMessage(message);
@@ -509,7 +529,7 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
           <div className="w-4 flex-shrink-0">
             {message.isCollapsible && (
               <button
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   toggleMessageExpansion(message.id);
                 }}
@@ -532,10 +552,12 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
 
           {/* Message content */}
           <div className="flex-1 min-w-0">
-            <div className={`${levelStyle.color} ${settings.wordWrap ? 'break-words' : 'truncate'}`}>
+            <div
+              className={`${levelStyle.color} ${settings.wordWrap ? 'break-words' : 'truncate'}`}
+            >
               {message.message}
             </div>
-            
+
             {/* Source and location */}
             {(message.source || message.fileName) && (
               <div className="text-xs text-gray-500 mt-1">
@@ -548,12 +570,10 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
                     {message.columnNumber && `:${message.columnNumber}`}
                   </span>
                 )}
-                {message.errorCode && (
-                  <span> | Code: {message.errorCode}</span>
-                )}
+                {message.errorCode && <span> | Code: {message.errorCode}</span>}
               </div>
             )}
-            
+
             {/* Details (when expanded) */}
             {isExpanded && message.details && (
               <div className="mt-2 p-2 bg-gray-50 border-l-2 border-gray-300 text-sm text-gray-600">
@@ -571,9 +591,9 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
         </div>
 
         {/* Render children if expanded */}
-        {isExpanded && message.children && 
-          message.children.map(child => renderMessage(child, depth + 1))
-        }
+        {isExpanded &&
+          message.children &&
+          message.children.map(child => renderMessage(child, depth + 1))}
       </React.Fragment>
     );
   };
@@ -614,21 +634,23 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
             type="text"
             placeholder="Search..."
             value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+            onChange={e => setSearchText(e.target.value)}
             className="px-2 py-1 text-xs border border-gray-300 rounded w-24"
           />
-          
+
           <select
             value={filterLevel}
-            onChange={(e) => setFilterLevel(e.target.value as MessageLevel | 'All')}
+            onChange={e => setFilterLevel(e.target.value as MessageLevel | 'All')}
             className="px-2 py-1 text-xs border border-gray-300 rounded"
           >
             <option value="All">All Levels</option>
             {Object.values(MessageLevel).map(level => (
-              <option key={level} value={level}>{level}</option>
+              <option key={level} value={level}>
+                {level}
+              </option>
             ))}
           </select>
-          
+
           <button
             onClick={() => activePane && clearPane(activePane.id)}
             className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
@@ -636,7 +658,7 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
           >
             🗑️
           </button>
-          
+
           <button
             onClick={() => activePane && onExportOutput?.(activePane.id, filteredMessages)}
             className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -644,7 +666,7 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
           >
             💾
           </button>
-          
+
           <button
             onClick={() => setShowSettings(!showSettings)}
             className="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
@@ -663,34 +685,36 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
               <input
                 type="checkbox"
                 checked={settings.autoScroll}
-                onChange={(e) => setSettings(prev => ({ ...prev, autoScroll: e.target.checked }))}
+                onChange={e => setSettings(prev => ({ ...prev, autoScroll: e.target.checked }))}
               />
               Auto Scroll
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={settings.wordWrap}
-                onChange={(e) => setSettings(prev => ({ ...prev, wordWrap: e.target.checked }))}
+                onChange={e => setSettings(prev => ({ ...prev, wordWrap: e.target.checked }))}
               />
               Word Wrap
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={settings.showTimestamps}
-                onChange={(e) => setSettings(prev => ({ ...prev, showTimestamps: e.target.checked }))}
+                onChange={e => setSettings(prev => ({ ...prev, showTimestamps: e.target.checked }))}
               />
               Timestamps
             </label>
-            
+
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={settings.highlightErrors}
-                onChange={(e) => setSettings(prev => ({ ...prev, highlightErrors: e.target.checked }))}
+                onChange={e =>
+                  setSettings(prev => ({ ...prev, highlightErrors: e.target.checked }))
+                }
               />
               Highlight Errors
             </label>
@@ -699,10 +723,7 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
       )}
 
       {/* Messages area */}
-      <div 
-        ref={outputRef}
-        className="flex-1 overflow-y-auto bg-white"
-      >
+      <div ref={outputRef} className="flex-1 overflow-y-auto bg-white">
         {activePane ? (
           filteredMessages.length > 0 ? (
             filteredMessages.map(message => renderMessage(message))
@@ -714,7 +735,9 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
                 {searchText || filterLevel !== 'All' ? (
                   <p className="text-sm mt-2">Try adjusting filters or search criteria</p>
                 ) : (
-                  <p className="text-sm mt-2">Messages will appear here during build, debug, and other operations</p>
+                  <p className="text-sm mt-2">
+                    Messages will appear here during build, debug, and other operations
+                  </p>
                 )}
               </div>
             </div>
@@ -731,7 +754,9 @@ export const OutputWindow: React.FC<OutputWindowProps> = ({
         <div className="flex items-center gap-4">
           {activePane && (
             <>
-              <span>Messages: {filteredMessages.length}/{activePane.messageCount}</span>
+              <span>
+                Messages: {filteredMessages.length}/{activePane.messageCount}
+              </span>
               <span>Errors: {activePane.errorCount}</span>
               <span>Warnings: {activePane.warningCount}</span>
             </>

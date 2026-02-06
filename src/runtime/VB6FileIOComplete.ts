@@ -15,9 +15,9 @@ import { Spc, Tab, updatePrintPosition, moveToNextPrintZone } from './VB6PrintFo
  * File lock types for Lock/Unlock statements
  */
 export enum VB6LockType {
-  Shared = 1,     // Read lock - multiple readers allowed
-  Exclusive = 2,  // Write lock - exclusive access
-  ReadWrite = 3   // Full lock - no access allowed
+  Shared = 1, // Read lock - multiple readers allowed
+  Exclusive = 2, // Write lock - exclusive access
+  ReadWrite = 3, // Full lock - no access allowed
 }
 
 /**
@@ -38,19 +38,19 @@ class VB6FileLockManager {
   private static instance: VB6FileLockManager;
   private locks: Map<number, FileLockRecord[]> = new Map();
   private processId: string;
-  
+
   constructor() {
     // Generate unique process ID for this session
     this.processId = `PID_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
-  
+
   static getInstance(): VB6FileLockManager {
     if (!VB6FileLockManager.instance) {
       VB6FileLockManager.instance = new VB6FileLockManager();
     }
     return VB6FileLockManager.instance;
   }
-  
+
   /**
    * Lock a file or record range
    * @param fileNumber File number
@@ -58,36 +58,42 @@ class VB6FileLockManager {
    * @param recordEnd Ending record (optional)
    * @param lockType Type of lock
    */
-  lock(fileNumber: number, recordStart?: number, recordEnd?: number, lockType: VB6LockType = VB6LockType.Exclusive): void {
+  lock(
+    fileNumber: number,
+    recordStart?: number,
+    recordEnd?: number,
+    lockType: VB6LockType = VB6LockType.Exclusive
+  ): void {
     if (!this.locks.has(fileNumber)) {
       this.locks.set(fileNumber, []);
     }
-    
+
     const fileLocks = this.locks.get(fileNumber)!;
-    
+
     // Check for conflicts
     for (const lock of fileLocks) {
       if (lock.processId !== this.processId) {
         if (this.hasConflict(lock, recordStart, recordEnd, lockType)) {
-          errorHandler.raiseError(70, 'Permission denied - File or record is locked', 'VB6FileLockManager');
+          errorHandler.raiseError(
+            70,
+            'Permission denied - File or record is locked',
+            'VB6FileLockManager'
+          );
           return;
         }
       }
     }
-    
+
     // Add the lock
     fileLocks.push({
       fileNumber,
       lockType,
       recordStart,
       recordEnd,
-      processId: this.processId
+      processId: this.processId,
     });
-    
-    console.log(`[VB6] Locked file #${fileNumber}` + 
-      (recordStart !== undefined ? ` records ${recordStart}-${recordEnd || recordStart}` : ''));
   }
-  
+
   /**
    * Unlock a file or record range
    * @param fileNumber File number
@@ -98,34 +104,34 @@ class VB6FileLockManager {
     if (!this.locks.has(fileNumber)) {
       return;
     }
-    
+
     const fileLocks = this.locks.get(fileNumber)!;
-    
+
     // Remove matching locks for this process
     const newLocks = fileLocks.filter(lock => {
       if (lock.processId !== this.processId) {
         return true; // Keep locks from other processes
       }
-      
+
       // Check if this is the lock to remove
       if (recordStart === undefined && lock.recordStart === undefined) {
         return false; // Remove file-level lock
       }
-      
-      if (recordStart !== undefined && lock.recordStart === recordStart &&
-          lock.recordEnd === (recordEnd || recordStart)) {
+
+      if (
+        recordStart !== undefined &&
+        lock.recordStart === recordStart &&
+        lock.recordEnd === (recordEnd || recordStart)
+      ) {
         return false; // Remove matching record lock
       }
-      
+
       return true; // Keep non-matching locks
     });
-    
+
     this.locks.set(fileNumber, newLocks);
-    
-    console.log(`[VB6] Unlocked file #${fileNumber}` + 
-      (recordStart !== undefined ? ` records ${recordStart}-${recordEnd || recordStart}` : ''));
   }
-  
+
   /**
    * Check if there's a lock conflict
    */
@@ -139,25 +145,25 @@ class VB6FileLockManager {
     if (existingLock.recordStart === undefined || newStart === undefined) {
       return true;
     }
-    
+
     // Check record range overlap
     const existingEnd = existingLock.recordEnd || existingLock.recordStart;
     const requestedEnd = newEnd || newStart;
-    
+
     const overlaps = !(requestedEnd < existingLock.recordStart || newStart > existingEnd);
-    
+
     if (!overlaps) {
       return false;
     }
-    
+
     // Check lock type compatibility
     if (existingLock.lockType === VB6LockType.Shared && newType === VB6LockType.Shared) {
       return false; // Multiple shared locks are allowed
     }
-    
+
     return true; // Conflict exists
   }
-  
+
   /**
    * Clear all locks for a file
    */
@@ -173,7 +179,7 @@ class VB6FileLockManager {
       }
     }
   }
-  
+
   /**
    * Clear all locks for this process
    */
@@ -203,23 +209,24 @@ const lockManager = VB6FileLockManager.getInstance();
 export function PrintFile(fileNumber: number, ...items: any[]): void {
   const fileSystem = getFileSystem();
   const fileHandle = fileSystem['openFiles'].get(fileNumber);
-  
+
   if (!fileHandle) {
     errorHandler.raiseError(52, 'Bad file name or number', 'PrintFile');
     return;
   }
-  
-  if (fileHandle.mode === 1) { // Input mode
+
+  if (fileHandle.mode === 1) {
+    // Input mode
     errorHandler.raiseError(54, 'Bad file mode', 'PrintFile');
     return;
   }
-  
+
   let output = '';
   let position = 1;
-  
+
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
-    
+
     // Check for separator symbols
     if (item === ';') {
       // Semicolon - no spacing, continue on same position
@@ -231,10 +238,10 @@ export function PrintFile(fileNumber: number, ...items: any[]): void {
       position = nextZone;
       continue;
     }
-    
+
     // Process the item
     let itemStr = '';
-    
+
     if (typeof item === 'string') {
       // Check if it's a Spc or Tab result (they return strings)
       itemStr = item;
@@ -251,17 +258,17 @@ export function PrintFile(fileNumber: number, ...items: any[]): void {
     } else {
       itemStr = String(item);
     }
-    
+
     output += itemStr;
     position += itemStr.length;
   }
-  
+
   // Add newline unless last item was semicolon
   const lastItem = items[items.length - 1];
   if (lastItem !== ';') {
     output += '\r\n';
   }
-  
+
   // Write to file
   fileSystem['writeToFile'](fileNumber, output);
 }
@@ -274,37 +281,40 @@ export function PrintFile(fileNumber: number, ...items: any[]): void {
 export function WriteFile(fileNumber: number, ...items: any[]): void {
   const fileSystem = getFileSystem();
   const fileHandle = fileSystem['openFiles'].get(fileNumber);
-  
+
   if (!fileHandle) {
     errorHandler.raiseError(52, 'Bad file name or number', 'WriteFile');
     return;
   }
-  
-  if (fileHandle.mode === 1) { // Input mode
+
+  if (fileHandle.mode === 1) {
+    // Input mode
     errorHandler.raiseError(54, 'Bad file mode', 'WriteFile');
     return;
   }
-  
-  const output = items.map(item => {
-    if (typeof item === 'string') {
-      // Strings are enclosed in quotes
-      return `"${item.replace(/"/g, '""')}"`;  // Escape quotes
-    } else if (typeof item === 'number') {
-      return String(item);
-    } else if (typeof item === 'boolean') {
-      return item ? '#TRUE#' : '#FALSE#';
-    } else if (item instanceof Date) {
-      // Dates in # delimiters
-      return `#${item.toISOString()}#`;
-    } else if (item === null) {
-      return '#NULL#';
-    } else if (item === undefined) {
-      return '';
-    } else {
-      return String(item);
-    }
-  }).join(',');
-  
+
+  const output = items
+    .map(item => {
+      if (typeof item === 'string') {
+        // Strings are enclosed in quotes
+        return `"${item.replace(/"/g, '""')}"`; // Escape quotes
+      } else if (typeof item === 'number') {
+        return String(item);
+      } else if (typeof item === 'boolean') {
+        return item ? '#TRUE#' : '#FALSE#';
+      } else if (item instanceof Date) {
+        // Dates in # delimiters
+        return `#${item.toISOString()}#`;
+      } else if (item === null) {
+        return '#NULL#';
+      } else if (item === undefined) {
+        return '';
+      } else {
+        return String(item);
+      }
+    })
+    .join(',');
+
   fileSystem['writeLine'](fileNumber, output);
 }
 
@@ -341,20 +351,18 @@ export function Unlock(fileNumber: number, recordStart?: number, recordEnd?: num
  */
 export function Reset(): void {
   const fileSystem = getFileSystem();
-  
+
   // Close all open files
   const openFiles = Array.from(fileSystem['openFiles'].keys());
   for (const fileNumber of openFiles) {
     fileSystem.closeFile(fileNumber);
   }
-  
+
   // Clear all locks
   lockManager.clearAllLocks();
-  
+
   // Reset file number counter
   fileSystem['nextFileNumber'] = 1;
-  
-  console.log('[VB6] Reset - All files closed and buffers cleared');
 }
 
 // ============================================================================
@@ -369,17 +377,18 @@ export function Reset(): void {
 export function InputDollar(count: number, fileNumber: number): string {
   const fileSystem = getFileSystem();
   const fileHandle = fileSystem['openFiles'].get(fileNumber);
-  
+
   if (!fileHandle) {
     errorHandler.raiseError(52, 'Bad file name or number', 'InputDollar');
     return '';
   }
-  
-  if (fileHandle.mode !== 1 && fileHandle.mode !== 5) { // Not Input or Binary mode
+
+  if (fileHandle.mode !== 1 && fileHandle.mode !== 5) {
+    // Not Input or Binary mode
     errorHandler.raiseError(54, 'Bad file mode', 'InputDollar');
     return '';
   }
-  
+
   return fileSystem.readChars(fileNumber, count);
 }
 
@@ -405,25 +414,26 @@ export function BinaryGet(
 ): any {
   const fileSystem = getFileSystem();
   const fileHandle = fileSystem['openFiles'].get(fileNumber);
-  
+
   if (!fileHandle) {
     errorHandler.raiseError(52, 'Bad file name or number', 'BinaryGet');
     return null;
   }
-  
-  if (fileHandle.mode !== 5) { // Not Binary mode
+
+  if (fileHandle.mode !== 5) {
+    // Not Binary mode
     errorHandler.raiseError(54, 'Bad file mode', 'BinaryGet');
     return null;
   }
-  
+
   // Seek to position if specified (VB6 uses 1-based positions)
   if (position !== undefined && position > 0) {
     fileSystem.seekFile(fileNumber, position - 1);
   }
-  
+
   // Determine bytes to read
   let bytesToRead = bytes || 1;
-  
+
   if (variable !== undefined) {
     // Determine size based on variable type
     if (typeof variable === 'number') {
@@ -434,16 +444,18 @@ export function BinaryGet(
       bytesToRead = bytes || variable.length || 255;
     } else if (variable && variable.__typeName) {
       // UDT - calculate size
-      const UDTRegistry = (global as any).UDTRegistry;
+      const UDTRegistry = (globalThis as Record<string, unknown>).UDTRegistry as
+        | { calculateSize: (typeName: string) => number }
+        | undefined;
       if (UDTRegistry) {
         bytesToRead = UDTRegistry.calculateSize(variable.__typeName);
       }
     }
   }
-  
+
   // Read bytes
   const data = fileSystem.readChars(fileNumber, bytesToRead);
-  
+
   // Convert based on variable type
   if (typeof variable === 'number') {
     // Simulate binary to number conversion
@@ -461,32 +473,29 @@ export function BinaryGet(
  * @param position Position in file (1-based)
  * @param data Data to write
  */
-export function BinaryPut(
-  fileNumber: number,
-  position?: number,
-  data?: any
-): void {
+export function BinaryPut(fileNumber: number, position?: number, data?: any): void {
   const fileSystem = getFileSystem();
   const fileHandle = fileSystem['openFiles'].get(fileNumber);
-  
+
   if (!fileHandle) {
     errorHandler.raiseError(52, 'Bad file name or number', 'BinaryPut');
     return;
   }
-  
-  if (fileHandle.mode !== 5) { // Not Binary mode
+
+  if (fileHandle.mode !== 5) {
+    // Not Binary mode
     errorHandler.raiseError(54, 'Bad file mode', 'BinaryPut');
     return;
   }
-  
+
   // Seek to position if specified (VB6 uses 1-based positions)
   if (position !== undefined && position > 0) {
     fileSystem.seekFile(fileNumber, position - 1);
   }
-  
+
   // Convert data to binary representation
   let binaryData = '';
-  
+
   if (typeof data === 'number') {
     // Simulate number to binary
     binaryData = String(data).padEnd(8, '\0');
@@ -500,7 +509,7 @@ export function BinaryPut(
   } else if (data !== null && data !== undefined) {
     binaryData = String(data);
   }
-  
+
   // Write to file
   fileSystem['writeToFile'](fileNumber, binaryData);
 }
@@ -531,27 +540,28 @@ export function LineInputFile(fileNumber: number, varName?: string): string {
 export function InputFile(fileNumber: number, variables: number): any[] {
   const fileSystem = getFileSystem();
   const fileHandle = fileSystem['openFiles'].get(fileNumber);
-  
+
   if (!fileHandle) {
     errorHandler.raiseError(52, 'Bad file name or number', 'InputFile');
     return [];
   }
-  
-  if (fileHandle.mode !== 1) { // Not Input mode
+
+  if (fileHandle.mode !== 1) {
+    // Not Input mode
     errorHandler.raiseError(54, 'Bad file mode', 'InputFile');
     return [];
   }
-  
+
   const line = fileSystem.readLine(fileNumber);
   const values: any[] = [];
-  
+
   // Parse CSV-like format
   let current = '';
   let inQuotes = false;
-  
+
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
-    
+
     if (char === '"') {
       if (inQuotes && line[i + 1] === '"') {
         // Escaped quote
@@ -569,17 +579,17 @@ export function InputFile(fileNumber: number, variables: number): any[] {
       current += char;
     }
   }
-  
+
   // Add last field
   if (current || values.length < variables) {
     values.push(parseValue(current.trim()));
   }
-  
+
   // Fill remaining with empty values if needed
   while (values.length < variables) {
     values.push('');
   }
-  
+
   return values.slice(0, variables);
 }
 
@@ -591,25 +601,25 @@ function parseValue(value: string): any {
   if (value.startsWith('"') && value.endsWith('"')) {
     return value.slice(1, -1).replace(/""/g, '"');
   }
-  
+
   // Check for special values
   if (value === '#TRUE#') return true;
   if (value === '#FALSE#') return false;
   if (value === '#NULL#') return null;
-  
+
   // Check for date
   if (value.startsWith('#') && value.endsWith('#')) {
     const dateStr = value.slice(1, -1);
     const date = new Date(dateStr);
     return isNaN(date.getTime()) ? value : date;
   }
-  
+
   // Check for number
   const num = Number(value);
   if (!isNaN(num) && value !== '') {
     return num;
   }
-  
+
   return value;
 }
 
@@ -620,17 +630,33 @@ function parseValue(value: string): any {
 /**
  * Get the VB6FileSystem instance
  */
-function getFileSystem(): any {
+/** Minimal interface for the VB6 file system used by this module */
+interface VB6FileSystemInstance {
+  openFiles: Map<number, { mode: number }>;
+  closeFile(fileNumber: number): void;
+  readLine(fileNumber: number): string;
+  readChars(fileNumber: number, count: number): string;
+  seekFile(fileNumber: number, position: number): void;
+  writeToFile(fileNumber: number, data: string): void;
+  writeLine(fileNumber: number, data: string): void;
+  nextFileNumber: number;
+}
+
+function getFileSystem(): VB6FileSystemInstance {
   // Import dynamically to avoid circular dependency
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { VB6FileFunctions } = require('./VB6FileFunctions');
+  require('./VB6FileFunctions');
 
   // Access the private instance through the exported functions
-  const fileSystem = (global as any).VB6FileSystem?.getInstance();
+  const globalObj = globalThis as Record<string, unknown>;
+  const VB6FileSystem = globalObj.VB6FileSystem as
+    | { getInstance?: () => VB6FileSystemInstance }
+    | undefined;
+  const fileSystem = VB6FileSystem?.getInstance?.();
   if (!fileSystem) {
     throw new Error('VB6FileSystem not initialized');
   }
-  
+
   return fileSystem;
 }
 
@@ -643,55 +669,52 @@ export const VB6FileIOComplete = {
   Lock,
   Unlock,
   lockManager,
-  
+
   // Enhanced Print/Write
   PrintFile,
   WriteFile,
-  
+
   // Reset statement
   Reset,
-  
+
   // Input$ function
   InputDollar,
   InputStr,
-  
+
   // Binary operations
   BinaryGet,
   BinaryPut,
-  
+
   // Enhanced Input operations
   LineInputFile,
   InputFile,
-  
+
   // Lock types
-  VB6LockType
+  VB6LockType,
 };
 
 // Make functions globally available
 if (typeof window !== 'undefined') {
-  const globalAny = window as any;
-  
+  const vb6Window = window as unknown as Record<string, unknown>;
+
   // File locking
-  globalAny.Lock = Lock;
-  globalAny.Unlock = Unlock;
-  
+  vb6Window.Lock = Lock;
+  vb6Window.Unlock = Unlock;
+
   // Enhanced file I/O (override basic versions)
-  globalAny.Print = PrintFile;
-  globalAny.Write = WriteFile;
-  
+  vb6Window.Print = PrintFile;
+  vb6Window.Write = WriteFile;
+
   // Reset statement
-  globalAny.Reset = Reset;
-  
+  vb6Window.Reset = Reset;
+
   // Input$ function
-  globalAny.InputDollar = InputDollar;
-  globalAny.InputStr = InputStr;
-  
+  vb6Window.InputDollar = InputDollar;
+  vb6Window.InputStr = InputStr;
+
   // Binary operations
-  globalAny.BinaryGet = BinaryGet;
-  globalAny.BinaryPut = BinaryPut;
-  
-  console.log('[VB6] Complete File I/O loaded - Lock/Unlock, Reset, Input$, Enhanced Print/Write');
-  console.log('[VB6] File operations now fully integrated with print formatting (Spc/Tab)');
+  vb6Window.BinaryGet = BinaryGet;
+  vb6Window.BinaryPut = BinaryPut;
 }
 
 export default VB6FileIOComplete;

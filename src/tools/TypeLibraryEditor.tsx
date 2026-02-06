@@ -10,14 +10,14 @@ export enum TypeKind {
   Dispatch = 'Dispatch',
   CoClass = 'CoClass',
   Alias = 'Alias',
-  Union = 'Union'
+  Union = 'Union',
 }
 
 export enum ParameterDirection {
   In = 'In',
   Out = 'Out',
   InOut = 'InOut',
-  RetVal = 'RetVal'
+  RetVal = 'RetVal',
 }
 
 export enum VariantType {
@@ -51,7 +51,7 @@ export enum VariantType {
   CArray = 'VT_CARRAY',
   UserDefined = 'VT_USERDEFINED',
   LPSTR = 'VT_LPSTR',
-  LPWSTR = 'VT_LPWSTR'
+  LPWSTR = 'VT_LPWSTR',
 }
 
 // Type Library Parameter
@@ -210,7 +210,7 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
   typeLibrary: initialTypeLibrary,
   onTypeLibraryChange,
   onSave,
-  onExport
+  onExport,
 }) => {
   const [typeLibrary, setTypeLibrary] = useState<TypeLibrary>(
     initialTypeLibrary || {
@@ -230,12 +230,14 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
         restricted: false,
         control: false,
         hidden: false,
-        hasLicensedComponents: false
-      }
+        hasLicensedComponents: false,
+      },
     }
   );
 
-  const [selectedTab, setSelectedTab] = useState<'browser' | 'interface' | 'properties' | 'code'>('browser');
+  const [selectedTab, setSelectedTab] = useState<'browser' | 'interface' | 'properties' | 'code'>(
+    'browser'
+  );
   const [selectedInterface, setSelectedInterface] = useState<TypeLibInterface | null>(null);
   const [selectedMethod, setSelectedMethod] = useState<TypeLibMethod | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<TypeLibProperty | null>(null);
@@ -263,8 +265,8 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
       nonExtensible: false,
       aggregatable: false,
       replaceable: false,
-      reverseBind: false
-    }
+      reverseBind: false,
+    },
   });
   const [methodForm, setMethodForm] = useState<Partial<TypeLibMethod>>({
     returnType: VariantType.Void,
@@ -279,7 +281,7 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
     propertyPutRef: false,
     restricted: false,
     source: false,
-    varArg: false
+    varArg: false,
   });
   const [propertyForm, setPropertyForm] = useState<Partial<TypeLibProperty>>({
     type: VariantType.Variant,
@@ -291,7 +293,7 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
     defaultBind: false,
     requestEdit: false,
     restricted: false,
-    source: false
+    source: false,
   });
   const [isDirty, setIsDirty] = useState(false);
   const [generatedCode, setGeneratedCode] = useState('');
@@ -305,9 +307,9 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
 
   // Generate GUID
   function generateGUID(): string {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });
   }
@@ -348,7 +350,7 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
                 type: VariantType.BSTR,
                 direction: ParameterDirection.In,
                 optional: false,
-                attributes: ['in']
+                attributes: ['in'],
               },
               {
                 id: 'param_2',
@@ -356,8 +358,8 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
                 type: VariantType.I4,
                 direction: ParameterDirection.Out,
                 optional: false,
-                attributes: ['out', 'retval']
-              }
+                attributes: ['out', 'retval'],
+              },
             ],
             description: 'Performs some operation',
             attributes: ['id(1)'],
@@ -370,8 +372,8 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
             propertyPutRef: false,
             restricted: false,
             source: false,
-            varArg: false
-          }
+            varArg: false,
+          },
         ],
         properties: [
           {
@@ -388,8 +390,8 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
             defaultBind: false,
             requestEdit: false,
             restricted: false,
-            source: false
-          }
+            source: false,
+          },
         ],
         enumValues: [],
         recordFields: [],
@@ -406,8 +408,8 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
           nonExtensible: false,
           aggregatable: false,
           replaceable: false,
-          reverseBind: false
-        }
+          reverseBind: false,
+        },
       },
       {
         id: 'enum_1',
@@ -424,14 +426,14 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
             id: 'enum_val_1',
             name: 'Value1',
             value: 0,
-            description: 'First value'
+            description: 'First value',
           },
           {
             id: 'enum_val_2',
             name: 'Value2',
             value: 1,
-            description: 'Second value'
-          }
+            description: 'Second value',
+          },
         ],
         recordFields: [],
         constants: [],
@@ -446,17 +448,17 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
           nonExtensible: false,
           aggregatable: false,
           replaceable: false,
-          reverseBind: false
-        }
-      }
+          reverseBind: false,
+        },
+      },
     ],
     attributes: ['version(1.0)', 'uuid({12345678-1234-4567-8901-123456789ABC})'],
     flags: {
       restricted: false,
       control: false,
       hidden: false,
-      hasLicensedComponents: false
-    }
+      hasLicensedComponents: false,
+    },
   };
 
   // Initialize with sample data
@@ -498,14 +500,14 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
         nonExtensible: false,
         aggregatable: false,
         replaceable: false,
-        reverseBind: false
-      }
+        reverseBind: false,
+      },
     };
 
     setTypeLibrary(prev => ({
       ...prev,
       interfaces: [...prev.interfaces, newInterface],
-      modified: new Date()
+      modified: new Date(),
     }));
 
     setInterfaceForm({
@@ -528,8 +530,8 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
         nonExtensible: false,
         aggregatable: false,
         replaceable: false,
-        reverseBind: false
-      }
+        reverseBind: false,
+      },
     });
     setShowInterfaceDialog(false);
     setIsDirty(true);
@@ -558,7 +560,7 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
       propertyPutRef: methodForm.propertyPutRef || false,
       restricted: methodForm.restricted || false,
       source: methodForm.source || false,
-      varArg: methodForm.varArg || false
+      varArg: methodForm.varArg || false,
     };
 
     setTypeLibrary(prev => ({
@@ -568,7 +570,7 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
           ? { ...iface, methods: [...iface.methods, newMethod] }
           : iface
       ),
-      modified: new Date()
+      modified: new Date(),
     }));
 
     setMethodForm({
@@ -584,176 +586,187 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
       propertyPutRef: false,
       restricted: false,
       source: false,
-      varArg: false
+      varArg: false,
     });
     setShowMethodDialog(false);
     setIsDirty(true);
   }, [methodForm, selectedInterface, generateId]);
 
   // Generate code
-  const generateCode = useCallback((format: 'IDL' | 'VB6' | 'C++') => {
-    let code = '';
+  const generateCode = useCallback(
+    (format: 'IDL' | 'VB6' | 'C++') => {
+      let code = '';
 
-    if (format === 'VB6') {
-      code += `' Type Library: ${typeLibrary.name}\n`;
-      code += `' GUID: ${typeLibrary.guid}\n`;
-      code += `' Version: ${typeLibrary.version.major}.${typeLibrary.version.minor}\n\n`;
+      if (format === 'VB6') {
+        code += `' Type Library: ${typeLibrary.name}\n`;
+        code += `' GUID: ${typeLibrary.guid}\n`;
+        code += `' Version: ${typeLibrary.version.major}.${typeLibrary.version.minor}\n\n`;
 
-      typeLibrary.interfaces.forEach(iface => {
-        if (iface.kind === TypeKind.Interface) {
-          code += `' Interface: ${iface.name}\n`;
-          code += `' GUID: ${iface.guid}\n\n`;
+        typeLibrary.interfaces.forEach(iface => {
+          if (iface.kind === TypeKind.Interface) {
+            code += `' Interface: ${iface.name}\n`;
+            code += `' GUID: ${iface.guid}\n\n`;
 
-          // Constants
-          if (iface.constants.length > 0) {
-            code += `' Constants\n`;
-            iface.constants.forEach(constant => {
-              code += `Public Const ${constant.name} As ${getVB6Type(constant.type)} = ${constant.value}\n`;
+            // Constants
+            if (iface.constants.length > 0) {
+              code += `' Constants\n`;
+              iface.constants.forEach(constant => {
+                code += `Public Const ${constant.name} As ${getVB6Type(constant.type)} = ${constant.value}\n`;
+              });
+              code += `\n`;
+            }
+
+            // Methods
+            iface.methods.forEach(method => {
+              const params = method.parameters
+                .filter(p => p.direction !== ParameterDirection.RetVal)
+                .map(p => {
+                  const direction = p.direction === ParameterDirection.Out ? 'ByRef' : 'ByVal';
+                  const optional = p.optional ? 'Optional ' : '';
+                  return `${optional}${direction} ${p.name} As ${getVB6Type(p.type)}`;
+                })
+                .join(', ');
+
+              const returnParam = method.parameters.find(
+                p => p.direction === ParameterDirection.RetVal
+              );
+              const returnType = returnParam ? ` As ${getVB6Type(returnParam.type)}` : '';
+
+              code += `${method.description ? `' ${method.description}\n` : ''}`;
+              code += `Function ${method.name}(${params})${returnType}\n`;
+              code += `End Function\n\n`;
             });
-            code += `\n`;
+
+            // Properties
+            iface.properties.forEach(prop => {
+              code += `${prop.description ? `' ${prop.description}\n` : ''}`;
+              if (!prop.writeonly) {
+                code += `Property Get ${prop.name}() As ${getVB6Type(prop.type)}\n`;
+                code += `End Property\n\n`;
+              }
+              if (!prop.readonly) {
+                code += `Property Let ${prop.name}(ByVal value As ${getVB6Type(prop.type)})\n`;
+                code += `End Property\n\n`;
+              }
+            });
+          } else if (iface.kind === TypeKind.Enum) {
+            code += `' Enumeration: ${iface.name}\n`;
+            code += `Public Enum ${iface.name}\n`;
+            iface.enumValues.forEach(enumVal => {
+              code += `    ${enumVal.name} = ${enumVal.value}\n`;
+            });
+            code += `End Enum\n\n`;
           }
+        });
+      } else if (format === 'IDL') {
+        code += `// Type Library: ${typeLibrary.name}\n`;
+        code += `// Generated IDL file\n\n`;
+        code += `[\n`;
+        code += `    uuid(${typeLibrary.guid}),\n`;
+        code += `    version(${typeLibrary.version.major}.${typeLibrary.version.minor}),\n`;
+        code += `    helpstring("${typeLibrary.description || typeLibrary.name}")\n`;
+        code += `]\n`;
+        code += `library ${typeLibrary.name}\n`;
+        code += `{\n`;
+        code += `    importlib("stdole2.tlb");\n\n`;
 
-          // Methods
-          iface.methods.forEach(method => {
-            const params = method.parameters
-              .filter(p => p.direction !== ParameterDirection.RetVal)
-              .map(p => {
-                const direction = p.direction === ParameterDirection.Out ? 'ByRef' : 'ByVal';
-                const optional = p.optional ? 'Optional ' : '';
-                return `${optional}${direction} ${p.name} As ${getVB6Type(p.type)}`;
-              }).join(', ');
+        typeLibrary.interfaces.forEach(iface => {
+          if (iface.kind === TypeKind.Interface) {
+            code += `    [\n`;
+            code += `        object,\n`;
+            code += `        uuid(${iface.guid}),\n`;
+            if (iface.flags.dual) code += `        dual,\n`;
+            if (iface.flags.oleAutomation) code += `        oleautomation,\n`;
+            code += `        helpstring("${iface.description || iface.name}")\n`;
+            code += `    ]\n`;
+            code += `    interface ${iface.name} : ${iface.baseInterface || 'IUnknown'}\n`;
+            code += `    {\n`;
 
-            const returnParam = method.parameters.find(p => p.direction === ParameterDirection.RetVal);
-            const returnType = returnParam ? ` As ${getVB6Type(returnParam.type)}` : '';
+            iface.methods.forEach(method => {
+              const params = method.parameters
+                .map(p => {
+                  const direction = p.direction.toLowerCase();
+                  return `[${direction}] ${getIDLType(p.type)} ${p.name}`;
+                })
+                .join(', ');
 
-            code += `${method.description ? `' ${method.description}\n` : ''}`;
-            code += `Function ${method.name}(${params})${returnType}\n`;
-            code += `End Function\n\n`;
-          });
+              code += `        HRESULT ${method.name}(${params});\n`;
+            });
 
-          // Properties
-          iface.properties.forEach(prop => {
-            code += `${prop.description ? `' ${prop.description}\n` : ''}`;
-            if (!prop.writeonly) {
-              code += `Property Get ${prop.name}() As ${getVB6Type(prop.type)}\n`;
-              code += `End Property\n\n`;
-            }
-            if (!prop.readonly) {
-              code += `Property Let ${prop.name}(ByVal value As ${getVB6Type(prop.type)})\n`;
-              code += `End Property\n\n`;
-            }
-          });
-        } else if (iface.kind === TypeKind.Enum) {
-          code += `' Enumeration: ${iface.name}\n`;
-          code += `Public Enum ${iface.name}\n`;
-          iface.enumValues.forEach(enumVal => {
-            code += `    ${enumVal.name} = ${enumVal.value}\n`;
-          });
-          code += `End Enum\n\n`;
-        }
-      });
-    } else if (format === 'IDL') {
-      code += `// Type Library: ${typeLibrary.name}\n`;
-      code += `// Generated IDL file\n\n`;
-      code += `[\n`;
-      code += `    uuid(${typeLibrary.guid}),\n`;
-      code += `    version(${typeLibrary.version.major}.${typeLibrary.version.minor}),\n`;
-      code += `    helpstring("${typeLibrary.description || typeLibrary.name}")\n`;
-      code += `]\n`;
-      code += `library ${typeLibrary.name}\n`;
-      code += `{\n`;
-      code += `    importlib("stdole2.tlb");\n\n`;
+            iface.properties.forEach(prop => {
+              if (!prop.writeonly) {
+                code += `        [propget] HRESULT ${prop.name}([out, retval] ${getIDLType(prop.type)}* value);\n`;
+              }
+              if (!prop.readonly) {
+                code += `        [propput] HRESULT ${prop.name}([in] ${getIDLType(prop.type)} value);\n`;
+              }
+            });
 
-      typeLibrary.interfaces.forEach(iface => {
-        if (iface.kind === TypeKind.Interface) {
-          code += `    [\n`;
-          code += `        object,\n`;
-          code += `        uuid(${iface.guid}),\n`;
-          if (iface.flags.dual) code += `        dual,\n`;
-          if (iface.flags.oleAutomation) code += `        oleautomation,\n`;
-          code += `        helpstring("${iface.description || iface.name}")\n`;
-          code += `    ]\n`;
-          code += `    interface ${iface.name} : ${iface.baseInterface || 'IUnknown'}\n`;
-          code += `    {\n`;
+            code += `    };\n\n`;
+          } else if (iface.kind === TypeKind.Enum) {
+            code += `    typedef enum ${iface.name}\n`;
+            code += `    {\n`;
+            iface.enumValues.forEach(enumVal => {
+              code += `        ${enumVal.name} = ${enumVal.value},\n`;
+            });
+            code += `    } ${iface.name};\n\n`;
+          }
+        });
 
-          iface.methods.forEach(method => {
-            const params = method.parameters.map(p => {
-              const direction = p.direction.toLowerCase();
-              return `[${direction}] ${getIDLType(p.type)} ${p.name}`;
-            }).join(', ');
+        code += `};\n`;
+      } else if (format === 'C++') {
+        code += `// Type Library: ${typeLibrary.name}\n`;
+        code += `// Generated C++ header file\n\n`;
+        code += `#pragma once\n`;
+        code += `#include <windows.h>\n`;
+        code += `#include <objbase.h>\n\n`;
 
-            code += `        HRESULT ${method.name}(${params});\n`;
-          });
+        typeLibrary.interfaces.forEach(iface => {
+          if (iface.kind === TypeKind.Interface) {
+            code += `// Interface: ${iface.name}\n`;
+            code += `MIDL_INTERFACE("${iface.guid}")\n`;
+            code += `${iface.name} : public ${iface.baseInterface || 'IUnknown'}\n`;
+            code += `{\n`;
+            code += `public:\n`;
 
-          iface.properties.forEach(prop => {
-            if (!prop.writeonly) {
-              code += `        [propget] HRESULT ${prop.name}([out, retval] ${getIDLType(prop.type)}* value);\n`;
-            }
-            if (!prop.readonly) {
-              code += `        [propput] HRESULT ${prop.name}([in] ${getIDLType(prop.type)} value);\n`;
-            }
-          });
+            iface.methods.forEach(method => {
+              const params = method.parameters
+                .map(p => {
+                  const direction =
+                    p.direction === ParameterDirection.Out ? '/* [out] */' : '/* [in] */';
+                  return `${direction} ${getCppType(p.type)} ${p.name}`;
+                })
+                .join(', ');
 
-          code += `    };\n\n`;
-        } else if (iface.kind === TypeKind.Enum) {
-          code += `    typedef enum ${iface.name}\n`;
-          code += `    {\n`;
-          iface.enumValues.forEach(enumVal => {
-            code += `        ${enumVal.name} = ${enumVal.value},\n`;
-          });
-          code += `    } ${iface.name};\n\n`;
-        }
-      });
+              code += `    virtual HRESULT STDMETHODCALLTYPE ${method.name}(${params}) = 0;\n`;
+            });
 
-      code += `};\n`;
-    } else if (format === 'C++') {
-      code += `// Type Library: ${typeLibrary.name}\n`;
-      code += `// Generated C++ header file\n\n`;
-      code += `#pragma once\n`;
-      code += `#include <windows.h>\n`;
-      code += `#include <objbase.h>\n\n`;
+            iface.properties.forEach(prop => {
+              if (!prop.writeonly) {
+                code += `    virtual HRESULT STDMETHODCALLTYPE get_${prop.name}(/* [out, retval] */ ${getCppType(prop.type)}* value) = 0;\n`;
+              }
+              if (!prop.readonly) {
+                code += `    virtual HRESULT STDMETHODCALLTYPE put_${prop.name}(/* [in] */ ${getCppType(prop.type)} value) = 0;\n`;
+              }
+            });
 
-      typeLibrary.interfaces.forEach(iface => {
-        if (iface.kind === TypeKind.Interface) {
-          code += `// Interface: ${iface.name}\n`;
-          code += `MIDL_INTERFACE("${iface.guid}")\n`;
-          code += `${iface.name} : public ${iface.baseInterface || 'IUnknown'}\n`;
-          code += `{\n`;
-          code += `public:\n`;
+            code += `};\n\n`;
+          } else if (iface.kind === TypeKind.Enum) {
+            code += `enum ${iface.name}\n`;
+            code += `{\n`;
+            iface.enumValues.forEach(enumVal => {
+              code += `    ${enumVal.name} = ${enumVal.value},\n`;
+            });
+            code += `};\n\n`;
+          }
+        });
+      }
 
-          iface.methods.forEach(method => {
-            const params = method.parameters.map(p => {
-              const direction = p.direction === ParameterDirection.Out ? '/* [out] */' : '/* [in] */';
-              return `${direction} ${getCppType(p.type)} ${p.name}`;
-            }).join(', ');
-
-            code += `    virtual HRESULT STDMETHODCALLTYPE ${method.name}(${params}) = 0;\n`;
-          });
-
-          iface.properties.forEach(prop => {
-            if (!prop.writeonly) {
-              code += `    virtual HRESULT STDMETHODCALLTYPE get_${prop.name}(/* [out, retval] */ ${getCppType(prop.type)}* value) = 0;\n`;
-            }
-            if (!prop.readonly) {
-              code += `    virtual HRESULT STDMETHODCALLTYPE put_${prop.name}(/* [in] */ ${getCppType(prop.type)} value) = 0;\n`;
-            }
-          });
-
-          code += `};\n\n`;
-        } else if (iface.kind === TypeKind.Enum) {
-          code += `enum ${iface.name}\n`;
-          code += `{\n`;
-          iface.enumValues.forEach(enumVal => {
-            code += `    ${enumVal.name} = ${enumVal.value},\n`;
-          });
-          code += `};\n\n`;
-        }
-      });
-    }
-
-    setGeneratedCode(code);
-    return code;
-  }, [typeLibrary]);
+      setGeneratedCode(code);
+      return code;
+    },
+    [typeLibrary]
+  );
 
   // Helper functions for type conversion
   const getVB6Type = (varType: VariantType | string): string => {
@@ -771,7 +784,7 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
       [VariantType.Decimal]: 'Decimal',
       [VariantType.I1]: 'Byte',
       [VariantType.UI1]: 'Byte',
-      [VariantType.Void]: 'void'
+      [VariantType.Void]: 'void',
     };
     return typeMap[varType] || varType;
   };
@@ -787,7 +800,7 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
       [VariantType.Variant]: 'VARIANT',
       [VariantType.I1]: 'signed char',
       [VariantType.UI1]: 'unsigned char',
-      [VariantType.Void]: 'void'
+      [VariantType.Void]: 'void',
     };
     return typeMap[varType] || varType;
   };
@@ -803,7 +816,7 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
       [VariantType.Variant]: 'VARIANT*',
       [VariantType.I1]: 'signed char',
       [VariantType.UI1]: 'unsigned char',
-      [VariantType.Void]: 'void'
+      [VariantType.Void]: 'void',
     };
     return typeMap[varType] || varType;
   };
@@ -867,7 +880,7 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
             { key: 'browser', label: 'Type Browser', count: typeLibrary.interfaces.length },
             { key: 'interface', label: 'Interface Designer', count: 0 },
             { key: 'properties', label: 'Properties', count: 0 },
-            { key: 'code', label: 'Generated Code', count: 0 }
+            { key: 'code', label: 'Generated Code', count: 0 },
           ].map(tab => (
             <button
               key={tab.key}
@@ -900,15 +913,15 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
                     className="flex items-center gap-2 py-1 px-2 hover:bg-gray-100 cursor-pointer rounded"
                     onClick={() => toggleTreeExpansion('library')}
                   >
-                    <span className="text-xs">
-                      {treeExpanded.has('library') ? '▼' : '▶'}
-                    </span>
+                    <span className="text-xs">{treeExpanded.has('library') ? '▼' : '▶'}</span>
                     <span className="text-sm font-medium">📚 {typeLibrary.name}</span>
                   </div>
                   {treeExpanded.has('library') && (
                     <div className="ml-6 text-xs text-gray-600">
                       <div>GUID: {typeLibrary.guid}</div>
-                      <div>Version: {typeLibrary.version.major}.{typeLibrary.version.minor}</div>
+                      <div>
+                        Version: {typeLibrary.version.major}.{typeLibrary.version.minor}
+                      </div>
                       <div>Interfaces: {typeLibrary.interfaces.length}</div>
                     </div>
                   )}
@@ -920,10 +933,10 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
                     className="flex items-center gap-2 py-1 px-2 hover:bg-gray-100 cursor-pointer rounded"
                     onClick={() => toggleTreeExpansion('interfaces')}
                   >
-                    <span className="text-xs">
-                      {treeExpanded.has('interfaces') ? '▼' : '▶'}
+                    <span className="text-xs">{treeExpanded.has('interfaces') ? '▼' : '▶'}</span>
+                    <span className="text-sm font-medium">
+                      Interfaces ({typeLibrary.interfaces.length})
                     </span>
-                    <span className="text-sm font-medium">Interfaces ({typeLibrary.interfaces.length})</span>
                   </div>
                   {treeExpanded.has('interfaces') && (
                     <div className="ml-4">
@@ -948,7 +961,9 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
                             <div className="ml-6">
                               {iface.methods.length > 0 && (
                                 <div className="mb-1">
-                                  <div className="text-xs font-medium text-gray-600 mb-1">Methods ({iface.methods.length})</div>
+                                  <div className="text-xs font-medium text-gray-600 mb-1">
+                                    Methods ({iface.methods.length})
+                                  </div>
                                   {iface.methods.map(method => (
                                     <div
                                       key={method.id}
@@ -964,7 +979,9 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
                               )}
                               {iface.properties.length > 0 && (
                                 <div className="mb-1">
-                                  <div className="text-xs font-medium text-gray-600 mb-1">Properties ({iface.properties.length})</div>
+                                  <div className="text-xs font-medium text-gray-600 mb-1">
+                                    Properties ({iface.properties.length})
+                                  </div>
                                   {iface.properties.map(prop => (
                                     <div
                                       key={prop.id}
@@ -980,9 +997,14 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
                               )}
                               {iface.enumValues.length > 0 && (
                                 <div className="mb-1">
-                                  <div className="text-xs font-medium text-gray-600 mb-1">Values ({iface.enumValues.length})</div>
+                                  <div className="text-xs font-medium text-gray-600 mb-1">
+                                    Values ({iface.enumValues.length})
+                                  </div>
                                   {iface.enumValues.map(enumVal => (
-                                    <div key={enumVal.id} className="text-xs py-1 px-2 text-gray-600">
+                                    <div
+                                      key={enumVal.id}
+                                      className="text-xs py-1 px-2 text-gray-600"
+                                    >
                                       📝 {enumVal.name} = {enumVal.value}
                                     </div>
                                   ))}
@@ -1030,21 +1052,38 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
                     <div>
                       <h3 className="font-medium mb-2">Interface Information</h3>
                       <div className="space-y-2 text-sm">
-                        <div><strong>GUID:</strong> {selectedInterface.guid}</div>
-                        <div><strong>Version:</strong> {selectedInterface.version.major}.{selectedInterface.version.minor}</div>
-                        <div><strong>Kind:</strong> {selectedInterface.kind}</div>
+                        <div>
+                          <strong>GUID:</strong> {selectedInterface.guid}
+                        </div>
+                        <div>
+                          <strong>Version:</strong> {selectedInterface.version.major}.
+                          {selectedInterface.version.minor}
+                        </div>
+                        <div>
+                          <strong>Kind:</strong> {selectedInterface.kind}
+                        </div>
                         {selectedInterface.baseInterface && (
-                          <div><strong>Base Interface:</strong> {selectedInterface.baseInterface}</div>
+                          <div>
+                            <strong>Base Interface:</strong> {selectedInterface.baseInterface}
+                          </div>
                         )}
                       </div>
                     </div>
                     <div>
                       <h3 className="font-medium mb-2">Statistics</h3>
                       <div className="space-y-2 text-sm">
-                        <div><strong>Methods:</strong> {selectedInterface.methods.length}</div>
-                        <div><strong>Properties:</strong> {selectedInterface.properties.length}</div>
-                        <div><strong>Enum Values:</strong> {selectedInterface.enumValues.length}</div>
-                        <div><strong>Constants:</strong> {selectedInterface.constants.length}</div>
+                        <div>
+                          <strong>Methods:</strong> {selectedInterface.methods.length}
+                        </div>
+                        <div>
+                          <strong>Properties:</strong> {selectedInterface.properties.length}
+                        </div>
+                        <div>
+                          <strong>Enum Values:</strong> {selectedInterface.enumValues.length}
+                        </div>
+                        <div>
+                          <strong>Constants:</strong> {selectedInterface.constants.length}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1055,7 +1094,10 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
                       <h3 className="font-medium mb-3">Methods</h3>
                       <div className="border border-gray-300 rounded">
                         {selectedInterface.methods.map((method, index) => (
-                          <div key={method.id} className="p-3 border-b border-gray-200 last:border-b-0">
+                          <div
+                            key={method.id}
+                            className="p-3 border-b border-gray-200 last:border-b-0"
+                          >
                             <div className="flex items-center justify-between mb-2">
                               <span className="font-mono text-sm">{method.name}</span>
                               <span className="text-xs text-gray-500">ID: {method.dispId}</span>
@@ -1065,9 +1107,10 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
                             </div>
                             {method.parameters.length > 0 && (
                               <div className="text-xs text-gray-600">
-                                Parameters: {method.parameters.map(p => 
-                                  `${p.name}: ${getVB6Type(p.type)} (${p.direction})`
-                                ).join(', ')}
+                                Parameters:{' '}
+                                {method.parameters
+                                  .map(p => `${p.name}: ${getVB6Type(p.type)} (${p.direction})`)
+                                  .join(', ')}
                               </div>
                             )}
                             {method.description && (
@@ -1085,7 +1128,10 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
                       <h3 className="font-medium mb-3">Properties</h3>
                       <div className="border border-gray-300 rounded">
                         {selectedInterface.properties.map((prop, index) => (
-                          <div key={prop.id} className="p-3 border-b border-gray-200 last:border-b-0">
+                          <div
+                            key={prop.id}
+                            className="p-3 border-b border-gray-200 last:border-b-0"
+                          >
                             <div className="flex items-center justify-between mb-2">
                               <span className="font-mono text-sm">{prop.name}</span>
                               <span className="text-xs text-gray-500">ID: {prop.dispId}</span>
@@ -1094,7 +1140,12 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
                               Type: {getVB6Type(prop.type)}
                             </div>
                             <div className="text-xs text-gray-600">
-                              Access: {prop.readonly ? 'Read-only' : prop.writeonly ? 'Write-only' : 'Read/Write'}
+                              Access:{' '}
+                              {prop.readonly
+                                ? 'Read-only'
+                                : prop.writeonly
+                                  ? 'Write-only'
+                                  : 'Read/Write'}
                             </div>
                             {prop.description && (
                               <div className="text-xs text-gray-700 mt-1">{prop.description}</div>
@@ -1109,7 +1160,9 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
                 <div className="text-center py-12 text-gray-500">
                   <div className="text-4xl mb-4">📚</div>
                   <p className="text-lg">Select an interface or type</p>
-                  <p className="text-sm mt-2">Choose an item from the type browser to view its details</p>
+                  <p className="text-sm mt-2">
+                    Choose an item from the type browser to view its details
+                  </p>
                 </div>
               )}
             </div>
@@ -1130,7 +1183,7 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
           <div className="flex-1 p-6">
             <div className="max-w-2xl">
               <h2 className="text-2xl font-bold mb-6">Type Library Properties</h2>
-              
+
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -1138,7 +1191,7 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
                     <input
                       type="text"
                       value={typeLibrary.name}
-                      onChange={(e) => setTypeLibrary(prev => ({ ...prev, name: e.target.value }))}
+                      onChange={e => setTypeLibrary(prev => ({ ...prev, name: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
                   </div>
@@ -1147,55 +1200,69 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
                     <input
                       type="text"
                       value={typeLibrary.filename}
-                      onChange={(e) => setTypeLibrary(prev => ({ ...prev, filename: e.target.value }))}
+                      onChange={e =>
+                        setTypeLibrary(prev => ({ ...prev, filename: e.target.value }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
                   </div>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
                   <textarea
                     value={typeLibrary.description || ''}
-                    onChange={(e) => setTypeLibrary(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={e =>
+                      setTypeLibrary(prev => ({ ...prev, description: e.target.value }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                     rows={3}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Major Version</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Major Version
+                    </label>
                     <input
                       type="number"
                       value={typeLibrary.version.major}
-                      onChange={(e) => setTypeLibrary(prev => ({
-                        ...prev,
-                        version: { ...prev.version, major: Number(e.target.value) }
-                      }))}
+                      onChange={e =>
+                        setTypeLibrary(prev => ({
+                          ...prev,
+                          version: { ...prev.version, major: Number(e.target.value) },
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Minor Version</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Minor Version
+                    </label>
                     <input
                       type="number"
                       value={typeLibrary.version.minor}
-                      onChange={(e) => setTypeLibrary(prev => ({
-                        ...prev,
-                        version: { ...prev.version, minor: Number(e.target.value) }
-                      }))}
+                      onChange={e =>
+                        setTypeLibrary(prev => ({
+                          ...prev,
+                          version: { ...prev.version, minor: Number(e.target.value) },
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">GUID</label>
                   <input
                     type="text"
                     value={typeLibrary.guid}
-                    onChange={(e) => setTypeLibrary(prev => ({ ...prev, guid: e.target.value }))}
+                    onChange={e => setTypeLibrary(prev => ({ ...prev, guid: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded font-mono"
                   />
                 </div>
@@ -1211,7 +1278,7 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
                 <h2 className="text-lg font-medium">Generated Code</h2>
                 <select
                   value={codeFormat}
-                  onChange={(e) => setCodeFormat(e.target.value as 'IDL' | 'VB6' | 'C++')}
+                  onChange={e => setCodeFormat(e.target.value as 'IDL' | 'VB6' | 'C++')}
                   className="px-3 py-1 border border-gray-300 rounded"
                 >
                   <option value="VB6">VB6 Declarations</option>
@@ -1236,54 +1303,64 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[500px]">
             <h3 className="text-lg font-medium mb-4">Add Interface</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                 <input
                   type="text"
                   value={interfaceForm.name || ''}
-                  onChange={(e) => setInterfaceForm(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => setInterfaceForm(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="IMyInterface"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Kind</label>
                 <select
                   value={interfaceForm.kind}
-                  onChange={(e) => setInterfaceForm(prev => ({ ...prev, kind: e.target.value as TypeKind }))}
+                  onChange={e =>
+                    setInterfaceForm(prev => ({ ...prev, kind: e.target.value as TypeKind }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 >
                   {Object.values(TypeKind).map(kind => (
-                    <option key={kind} value={kind}>{kind}</option>
+                    <option key={kind} value={kind}>
+                      {kind}
+                    </option>
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
                   value={interfaceForm.description || ''}
-                  onChange={(e) => setInterfaceForm(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={e =>
+                    setInterfaceForm(prev => ({ ...prev, description: e.target.value }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   rows={2}
                 />
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Base Interface</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Base Interface
+                </label>
                 <input
                   type="text"
                   value={interfaceForm.baseInterface || ''}
-                  onChange={(e) => setInterfaceForm(prev => ({ ...prev, baseInterface: e.target.value }))}
+                  onChange={e =>
+                    setInterfaceForm(prev => ({ ...prev, baseInterface: e.target.value }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   placeholder="IDispatch"
                 />
               </div>
             </div>
-            
+
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => setShowInterfaceDialog(false)}
@@ -1308,7 +1385,7 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[500px]">
             <h3 className="text-lg font-medium mb-4">Add Method to {selectedInterface.name}</h3>
-            
+
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -1316,46 +1393,54 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
                   <input
                     type="text"
                     value={methodForm.name || ''}
-                    onChange={(e) => setMethodForm(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={e => setMethodForm(prev => ({ ...prev, name: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                     placeholder="MethodName"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Dispatch ID</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Dispatch ID
+                  </label>
                   <input
                     type="number"
                     value={methodForm.dispId || ''}
-                    onChange={(e) => setMethodForm(prev => ({ ...prev, dispId: Number(e.target.value) }))}
+                    onChange={e =>
+                      setMethodForm(prev => ({ ...prev, dispId: Number(e.target.value) }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Return Type</label>
                 <select
                   value={methodForm.returnType}
-                  onChange={(e) => setMethodForm(prev => ({ ...prev, returnType: e.target.value as VariantType }))}
+                  onChange={e =>
+                    setMethodForm(prev => ({ ...prev, returnType: e.target.value as VariantType }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                 >
                   {Object.values(VariantType).map(type => (
-                    <option key={type} value={type}>{type}</option>
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
                   value={methodForm.description || ''}
-                  onChange={(e) => setMethodForm(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={e => setMethodForm(prev => ({ ...prev, description: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   rows={2}
                 />
               </div>
             </div>
-            
+
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => setShowMethodDialog(false)}
@@ -1379,15 +1464,24 @@ export const TypeLibraryEditor: React.FC<TypeLibraryEditorProps> = ({
 
   function getInterfaceIcon(kind: TypeKind): string {
     switch (kind) {
-      case TypeKind.Interface: return '🔗';
-      case TypeKind.Dispatch: return '📡';
-      case TypeKind.CoClass: return '🏭';
-      case TypeKind.Enum: return '📋';
-      case TypeKind.Record: return '📊';
-      case TypeKind.Module: return '📦';
-      case TypeKind.Alias: return '🏷️';
-      case TypeKind.Union: return '🔀';
-      default: return '❓';
+      case TypeKind.Interface:
+        return '🔗';
+      case TypeKind.Dispatch:
+        return '📡';
+      case TypeKind.CoClass:
+        return '🏭';
+      case TypeKind.Enum:
+        return '📋';
+      case TypeKind.Record:
+        return '📊';
+      case TypeKind.Module:
+        return '📦';
+      case TypeKind.Alias:
+        return '🏷️';
+      case TypeKind.Union:
+        return '🔀';
+      default:
+        return '❓';
     }
   }
 };

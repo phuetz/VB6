@@ -24,7 +24,7 @@ const AnimatedButton: React.FC<AnimatedButtonProps> = ({
   iconPosition = 'left',
   loading = false,
   ripple = true,
-  className = ''
+  className = '',
 }) => {
   const [isPressed, setIsPressed] = useState(false);
   const [ripples, setRipples] = useState<Array<{ id: number; x: number; y: number }>>([]);
@@ -66,19 +66,19 @@ const AnimatedButton: React.FC<AnimatedButtonProps> = ({
       bg-transparent text-gray-700 border border-transparent
       hover:bg-gray-100 hover:text-gray-900
       focus:ring-gray-500
-    `
+    `,
   };
 
   const sizeClasses = {
     sm: 'px-3 py-1.5 text-sm gap-1.5',
     md: 'px-4 py-2 text-sm gap-2',
-    lg: 'px-6 py-3 text-base gap-2.5'
+    lg: 'px-6 py-3 text-base gap-2.5',
   };
 
   const iconSizes = {
     sm: 14,
     md: 16,
-    lg: 18
+    lg: 18,
   };
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -89,11 +89,11 @@ const AnimatedButton: React.FC<AnimatedButtonProps> = ({
       const rect = buttonRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      
+
       const newRipple = {
         id: Date.now(),
         x,
-        y
+        y,
       };
 
       setRipples(prev => [...prev, newRipple]);
@@ -143,7 +143,7 @@ const AnimatedButton: React.FC<AnimatedButtonProps> = ({
             top: ripple.y - 10,
             width: 20,
             height: 20,
-            animationDuration: '600ms'
+            animationDuration: '600ms',
           }}
         />
       ))}
@@ -158,19 +158,13 @@ const AnimatedButton: React.FC<AnimatedButtonProps> = ({
       {/* Button content */}
       <div className={`flex items-center gap-inherit ${loading ? 'opacity-0' : 'opacity-100'}`}>
         {Icon && iconPosition === 'left' && (
-          <Icon 
-            size={iconSizes[size]} 
-            className="flex-shrink-0" 
-          />
+          <Icon size={iconSizes[size]} className="flex-shrink-0" />
         )}
-        
+
         <span className="flex-shrink-0">{children}</span>
-        
+
         {Icon && iconPosition === 'right' && (
-          <Icon 
-            size={iconSizes[size]} 
-            className="flex-shrink-0" 
-          />
+          <Icon size={iconSizes[size]} className="flex-shrink-0" />
         )}
       </div>
 

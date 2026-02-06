@@ -22,8 +22,8 @@ vi.mock('../../data/VB6CompleteProperties', () => ({
     TabIndex: { type: 'number', default: 0, min: 0 },
     Top: { type: 'number', default: 0 },
     Visible: { type: 'boolean', default: true },
-    Width: { type: 'number', default: 1215, min: 0 }
-  })
+    Width: { type: 'number', default: 1215, min: 0 },
+  }),
 }));
 
 describe('Properties Window Tests', () => {
@@ -46,8 +46,8 @@ describe('Properties Window Tests', () => {
         Visible: true,
         BackColor: '&H8000000F&',
         Font: { name: 'MS Sans Serif', size: 8, bold: false },
-        TabIndex: 0
-      }
+        TabIndex: 0,
+      },
     };
     vi.clearAllMocks();
   });
@@ -59,7 +59,7 @@ describe('Properties Window Tests', () => {
   describe('Properties Window Layout', () => {
     it('should render properties window with all sections', () => {
       render(<PropertiesWindow selectedControl={mockControl} />);
-      
+
       expect(screen.getByTestId('properties-window')).toBeInTheDocument();
       expect(screen.getByTestId('object-selector')).toBeInTheDocument();
       expect(screen.getByTestId('property-grid')).toBeInTheDocument();
@@ -68,7 +68,7 @@ describe('Properties Window Tests', () => {
 
     it('should show selected control information', () => {
       render(<PropertiesWindow selectedControl={mockControl} />);
-      
+
       const objectSelector = screen.getByTestId('object-selector');
       expect(within(objectSelector).getByText('Command1')).toBeInTheDocument();
       expect(within(objectSelector).getByText('CommandButton')).toBeInTheDocument();
@@ -76,21 +76,21 @@ describe('Properties Window Tests', () => {
 
     it('should display message when no control selected', () => {
       render(<PropertiesWindow selectedControl={null} />);
-      
+
       expect(screen.getByText('No object selected')).toBeInTheDocument();
     });
 
     it('should handle multiple control selection', () => {
       const multipleControls = [mockControl, { ...mockControl, id: 'Command2' }];
       render(<PropertiesWindow selectedControls={multipleControls} />);
-      
+
       expect(screen.getByText('Multiple objects (2)')).toBeInTheDocument();
       expect(screen.getByText('CommandButton')).toBeInTheDocument();
     });
 
     it('should categorize properties', () => {
       render(<PropertiesWindow selectedControl={mockControl} categorized={true} />);
-      
+
       expect(screen.getByText('Appearance')).toBeInTheDocument();
       expect(screen.getByText('Behavior')).toBeInTheDocument();
       expect(screen.getByText('Data')).toBeInTheDocument();
@@ -100,13 +100,13 @@ describe('Properties Window Tests', () => {
 
     it('should support alphabetical view', async () => {
       render(<PropertiesWindow selectedControl={mockControl} />);
-      
+
       const alphabeticalButton = screen.getByTestId('alphabetical-view');
       await user.click(alphabeticalButton);
-      
+
       const propertyNames = screen.getAllByTestId(/property-name-/);
       const names = propertyNames.map(el => el.textContent);
-      
+
       // Should be sorted alphabetically
       expect(names).toEqual([...names].sort());
     });
@@ -115,7 +115,7 @@ describe('Properties Window Tests', () => {
   describe('Property Grid Functionality', () => {
     it('should display all properties with values', () => {
       render(<PropertyGrid control={mockControl} />);
-      
+
       expect(screen.getByText('Name')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Command1')).toBeInTheDocument();
       expect(screen.getByText('Caption')).toBeInTheDocument();
@@ -126,37 +126,37 @@ describe('Properties Window Tests', () => {
 
     it('should show property descriptions on selection', async () => {
       render(<PropertyGrid control={mockControl} />);
-      
+
       const captionProperty = screen.getByText('Caption');
       await user.click(captionProperty);
-      
+
       const description = screen.getByTestId('property-description');
       expect(description).toHaveTextContent(
-        'Returns/sets the text displayed in an object\'s title bar or below an object\'s icon.'
+        "Returns/sets the text displayed in an object's title bar or below an object's icon."
       );
     });
 
     it('should handle property editing', async () => {
       const onPropertyChange = vi.fn();
       render(<PropertyGrid control={mockControl} onPropertyChange={onPropertyChange} />);
-      
+
       const captionInput = screen.getByDisplayValue('Click Me');
       await user.clear(captionInput);
       await user.type(captionInput, 'New Caption');
       await user.keyboard('{Enter}');
-      
+
       expect(onPropertyChange).toHaveBeenCalledWith('Caption', 'New Caption');
     });
 
     it('should validate property values', async () => {
       const onPropertyChange = vi.fn();
       render(<PropertyGrid control={mockControl} onPropertyChange={onPropertyChange} />);
-      
+
       const widthInput = screen.getByDisplayValue('1215');
       await user.clear(widthInput);
       await user.type(widthInput, '-10');
       await user.keyboard('{Enter}');
-      
+
       expect(screen.getByText('Value must be greater than or equal to 0')).toBeInTheDocument();
       expect(onPropertyChange).not.toHaveBeenCalled();
     });
@@ -166,12 +166,12 @@ describe('Properties Window Tests', () => {
         ...mockControl,
         properties: {
           ...mockControl.properties,
-          hWnd: { value: '123456', readonly: true }
-        }
+          hWnd: { value: '123456', readonly: true },
+        },
       };
-      
+
       render(<PropertyGrid control={controlWithReadonly} />);
-      
+
       const hWndValue = screen.getByText('123456');
       expect(hWndValue.closest('.property-row')).toHaveClass('readonly');
     });
@@ -182,17 +182,17 @@ describe('Properties Window Tests', () => {
         ...mockControl,
         properties: {
           ...mockControl.properties,
-          Caption: 'Modified Caption'
-        }
+          Caption: 'Modified Caption',
+        },
       };
-      
+
       render(<PropertyGrid control={modifiedControl} onPropertyChange={onPropertyChange} />);
-      
+
       const captionProperty = screen.getByText('Caption');
       fireEvent.contextMenu(captionProperty);
-      
+
       await user.click(screen.getByText('Reset to Default'));
-      
+
       expect(onPropertyChange).toHaveBeenCalledWith('Caption', 'Command1');
     });
   });
@@ -201,19 +201,19 @@ describe('Properties Window Tests', () => {
     describe('String Editor', () => {
       it('should edit string properties inline', async () => {
         render(<PropertyEditors property="Caption" value="Test" type="string" />);
-        
+
         const input = screen.getByRole('textbox');
         expect(input).toHaveValue('Test');
-        
+
         await user.clear(input);
         await user.type(input, 'New Value');
-        
+
         expect(input).toHaveValue('New Value');
       });
 
       it('should handle multiline strings', async () => {
         render(<PropertyEditors property="Text" value="Line 1\nLine 2" type="string" multiline />);
-        
+
         const textarea = screen.getByRole('textbox');
         expect(textarea.tagName).toBe('TEXTAREA');
         expect(textarea).toHaveValue('Line 1\nLine 2');
@@ -222,10 +222,10 @@ describe('Properties Window Tests', () => {
       it('should open text editor for long strings', async () => {
         const longText = 'A'.repeat(1000);
         render(<PropertyEditors property="Text" value={longText} type="string" />);
-        
+
         const expandButton = screen.getByTestId('expand-text-editor');
         await user.click(expandButton);
-        
+
         expect(screen.getByRole('dialog')).toBeInTheDocument();
         expect(screen.getByText('Text Editor')).toBeInTheDocument();
       });
@@ -235,37 +235,37 @@ describe('Properties Window Tests', () => {
       it('should edit numeric properties', async () => {
         const onChange = vi.fn();
         render(<PropertyEditors property="Width" value={100} type="number" onChange={onChange} />);
-        
+
         const input = screen.getByRole('spinbutton');
         await user.clear(input);
         await user.type(input, '200');
-        
+
         expect(onChange).toHaveBeenCalledWith('Width', 200);
       });
 
       it('should respect min/max constraints', async () => {
         render(<PropertyEditors property="Width" value={100} type="number" min={0} max={1000} />);
-        
+
         const input = screen.getByRole('spinbutton');
         await user.clear(input);
         await user.type(input, '2000');
         await user.keyboard('{Enter}');
-        
+
         expect(screen.getByText('Value must be between 0 and 1000')).toBeInTheDocument();
       });
 
       it('should support increment/decrement buttons', async () => {
         const onChange = vi.fn();
         render(<PropertyEditors property="TabIndex" value={5} type="number" onChange={onChange} />);
-        
+
         const incrementButton = screen.getByTestId('increment-button');
         await user.click(incrementButton);
-        
+
         expect(onChange).toHaveBeenCalledWith('TabIndex', 6);
-        
+
         const decrementButton = screen.getByTestId('decrement-button');
         await user.click(decrementButton);
-        
+
         expect(onChange).toHaveBeenCalledWith('TabIndex', 4);
       });
     });
@@ -273,21 +273,23 @@ describe('Properties Window Tests', () => {
     describe('Boolean Editor', () => {
       it('should toggle boolean properties', async () => {
         const onChange = vi.fn();
-        render(<PropertyEditors property="Enabled" value={true} type="boolean" onChange={onChange} />);
-        
+        render(
+          <PropertyEditors property="Enabled" value={true} type="boolean" onChange={onChange} />
+        );
+
         const checkbox = screen.getByRole('checkbox');
         expect(checkbox).toBeChecked();
-        
+
         await user.click(checkbox);
         expect(onChange).toHaveBeenCalledWith('Enabled', false);
       });
 
       it('should use dropdown for boolean properties', async () => {
         render(<PropertyEditors property="Visible" value={true} type="boolean" useDropdown />);
-        
+
         const select = screen.getByRole('combobox');
         expect(select).toHaveValue('True');
-        
+
         await user.selectOptions(select, 'False');
         expect(select).toHaveValue('False');
       });
@@ -296,11 +298,13 @@ describe('Properties Window Tests', () => {
     describe('Enum Editor', () => {
       it('should display enum options', async () => {
         const enumValues = ['0 - Flat', '1 - 3D'];
-        render(<PropertyEditors property="Appearance" value={1} type="enum" enumValues={enumValues} />);
-        
+        render(
+          <PropertyEditors property="Appearance" value={1} type="enum" enumValues={enumValues} />
+        );
+
         const select = screen.getByRole('combobox');
         await user.click(select);
-        
+
         expect(screen.getByText('0 - Flat')).toBeInTheDocument();
         expect(screen.getByText('1 - 3D')).toBeInTheDocument();
       });
@@ -308,17 +312,19 @@ describe('Properties Window Tests', () => {
       it('should handle enum value changes', async () => {
         const onChange = vi.fn();
         const enumValues = ['0 - Flat', '1 - 3D'];
-        render(<PropertyEditors 
-          property="Appearance" 
-          value={1} 
-          type="enum" 
-          enumValues={enumValues}
-          onChange={onChange}
-        />);
-        
+        render(
+          <PropertyEditors
+            property="Appearance"
+            value={1}
+            type="enum"
+            enumValues={enumValues}
+            onChange={onChange}
+          />
+        );
+
         const select = screen.getByRole('combobox');
         await user.selectOptions(select, '0');
-        
+
         expect(onChange).toHaveBeenCalledWith('Appearance', 0);
       });
     });
@@ -326,32 +332,34 @@ describe('Properties Window Tests', () => {
     describe('Color Editor', () => {
       it('should display color picker', async () => {
         render(<PropertyEditors property="BackColor" value="&H8000000F&" type="color" />);
-        
+
         const colorButton = screen.getByTestId('color-button');
         expect(colorButton).toHaveStyle({ backgroundColor: 'rgb(240, 240, 240)' });
-        
+
         await user.click(colorButton);
         expect(screen.getByTestId('color-picker')).toBeInTheDocument();
       });
 
       it('should support system colors', async () => {
         render(<PropertyEditors property="ForeColor" value="&H80000012&" type="color" />);
-        
+
         const colorButton = screen.getByTestId('color-button');
         await user.click(colorButton);
-        
+
         expect(screen.getByText('System Colors')).toBeInTheDocument();
         expect(screen.getByText('Button Text')).toBeInTheDocument();
       });
 
       it('should allow custom color input', async () => {
         const onChange = vi.fn();
-        render(<PropertyEditors property="BackColor" value="#FF0000" type="color" onChange={onChange} />);
-        
+        render(
+          <PropertyEditors property="BackColor" value="#FF0000" type="color" onChange={onChange} />
+        );
+
         const hexInput = screen.getByPlaceholderText('#RRGGBB');
         await user.clear(hexInput);
         await user.type(hexInput, '#00FF00');
-        
+
         expect(onChange).toHaveBeenCalledWith('BackColor', '#00FF00');
       });
     });
@@ -360,10 +368,10 @@ describe('Properties Window Tests', () => {
       it('should display font dialog', async () => {
         const font = { name: 'Arial', size: 10, bold: true, italic: false };
         render(<PropertyEditors property="Font" value={font} type="font" />);
-        
+
         const fontButton = screen.getByTestId('font-button');
         expect(fontButton).toHaveTextContent('Arial, 10pt, Bold');
-        
+
         await user.click(fontButton);
         expect(screen.getByText('Font')).toBeInTheDocument();
         expect(screen.getByDisplayValue('Arial')).toBeInTheDocument();
@@ -373,24 +381,24 @@ describe('Properties Window Tests', () => {
         const onChange = vi.fn();
         const font = { name: 'Times New Roman', size: 12, bold: false, italic: true };
         render(<PropertyEditors property="Font" value={font} type="font" onChange={onChange} />);
-        
+
         const fontButton = screen.getByTestId('font-button');
         await user.click(fontButton);
-        
+
         const fontSelect = screen.getByTestId('font-family-select');
         await user.selectOptions(fontSelect, 'Courier New');
-        
+
         const sizeInput = screen.getByTestId('font-size-input');
         await user.clear(sizeInput);
         await user.type(sizeInput, '14');
-        
+
         await user.click(screen.getByText('OK'));
-        
+
         expect(onChange).toHaveBeenCalledWith('Font', {
           name: 'Courier New',
           size: 14,
           bold: false,
-          italic: true
+          italic: true,
         });
       });
     });
@@ -398,27 +406,34 @@ describe('Properties Window Tests', () => {
     describe('Picture Editor', () => {
       it('should handle image selection', async () => {
         render(<PropertyEditors property="Picture" value={null} type="picture" />);
-        
+
         const browseButton = screen.getByText('Browse...');
         await user.click(browseButton);
-        
+
         expect(screen.getByText('Select Picture')).toBeInTheDocument();
       });
 
       it('should display current picture', () => {
         render(<PropertyEditors property="Icon" value="/icon.ico" type="picture" />);
-        
+
         const preview = screen.getByTestId('picture-preview');
         expect(preview).toHaveAttribute('src', '/icon.ico');
       });
 
       it('should clear picture', async () => {
         const onChange = vi.fn();
-        render(<PropertyEditors property="Picture" value="/image.png" type="picture" onChange={onChange} />);
-        
+        render(
+          <PropertyEditors
+            property="Picture"
+            value="/image.png"
+            type="picture"
+            onChange={onChange}
+          />
+        );
+
         const clearButton = screen.getByText('Clear');
         await user.click(clearButton);
-        
+
         expect(onChange).toHaveBeenCalledWith('Picture', null);
       });
     });
@@ -427,10 +442,10 @@ describe('Properties Window Tests', () => {
       it('should open collection editor', async () => {
         const items = ['Item 1', 'Item 2', 'Item 3'];
         render(<PropertyEditors property="Items" value={items} type="collection" />);
-        
+
         const editButton = screen.getByText('(Collection)');
         await user.click(editButton);
-        
+
         expect(screen.getByText('String Collection Editor')).toBeInTheDocument();
         expect(screen.getByText('Item 1')).toBeInTheDocument();
       });
@@ -438,19 +453,21 @@ describe('Properties Window Tests', () => {
       it('should modify collection items', async () => {
         const onChange = vi.fn();
         const items = ['Item 1', 'Item 2'];
-        render(<PropertyEditors property="Items" value={items} type="collection" onChange={onChange} />);
-        
+        render(
+          <PropertyEditors property="Items" value={items} type="collection" onChange={onChange} />
+        );
+
         const editButton = screen.getByText('(Collection)');
         await user.click(editButton);
-        
+
         const addButton = screen.getByText('Add');
         await user.click(addButton);
-        
+
         const newItemInput = screen.getByDisplayValue('');
         await user.type(newItemInput, 'Item 3');
-        
+
         await user.click(screen.getByText('OK'));
-        
+
         expect(onChange).toHaveBeenCalledWith('Items', ['Item 1', 'Item 2', 'Item 3']);
       });
     });
@@ -459,12 +476,12 @@ describe('Properties Window Tests', () => {
   describe('Advanced Features', () => {
     it('should support property binding', async () => {
       render(<PropertiesWindow selectedControl={mockControl} supportBinding />);
-      
+
       const captionProperty = screen.getByText('Caption');
       fireEvent.contextMenu(captionProperty);
-      
+
       await user.click(screen.getByText('Bind to Data'));
-      
+
       expect(screen.getByText('Data Binding')).toBeInTheDocument();
     });
 
@@ -472,43 +489,45 @@ describe('Properties Window Tests', () => {
       const inheritedControl = {
         ...mockControl,
         baseClass: 'UserControl',
-        inheritedProperties: ['Name', 'Left', 'Top']
+        inheritedProperties: ['Name', 'Left', 'Top'],
       };
-      
+
       render(<PropertiesWindow selectedControl={inheritedControl} />);
-      
+
       const nameProperty = screen.getByText('Name').closest('.property-row');
       expect(nameProperty).toHaveClass('inherited');
     });
 
     it('should support property expressions', async () => {
       render(<PropertiesWindow selectedControl={mockControl} supportExpressions />);
-      
+
       const widthProperty = screen.getByText('Width');
       fireEvent.contextMenu(widthProperty);
-      
+
       await user.click(screen.getByText('Expression...'));
-      
+
       expect(screen.getByText('Property Expression')).toBeInTheDocument();
-      
+
       const expressionInput = screen.getByPlaceholderText('Enter expression...');
       await user.type(expressionInput, 'Parent.Width * 0.5');
-      
+
       await user.click(screen.getByText('OK'));
-      
+
       expect(screen.getByText('fx')).toBeInTheDocument(); // Expression indicator
     });
 
     it('should validate property dependencies', async () => {
       const onPropertyChange = vi.fn();
-      render(<PropertiesWindow selectedControl={mockControl} onPropertyChange={onPropertyChange} />);
-      
+      render(
+        <PropertiesWindow selectedControl={mockControl} onPropertyChange={onPropertyChange} />
+      );
+
       // Disabling control should affect other properties
       const enabledCheckbox = screen.getByLabelText('Enabled');
       await user.click(enabledCheckbox);
-      
+
       expect(onPropertyChange).toHaveBeenCalledWith('Enabled', false);
-      
+
       // Other properties might become readonly
       const tabIndexInput = screen.getByDisplayValue('0');
       expect(tabIndexInput).toBeDisabled();
@@ -516,7 +535,7 @@ describe('Properties Window Tests', () => {
 
     it('should group related properties', () => {
       render(<PropertiesWindow selectedControl={mockControl} groupProperties />);
-      
+
       expect(screen.getByText('Position & Size')).toBeInTheDocument();
       expect(screen.getByText('Appearance & Style')).toBeInTheDocument();
       expect(screen.getByText('Behavior')).toBeInTheDocument();
@@ -524,59 +543,59 @@ describe('Properties Window Tests', () => {
 
     it('should search properties', async () => {
       render(<PropertiesWindow selectedControl={mockControl} />);
-      
+
       const searchInput = screen.getByPlaceholderText('Search properties...');
       await user.type(searchInput, 'cap');
-      
+
       expect(screen.getByText('Caption')).toBeInTheDocument();
       expect(screen.queryByText('Width')).not.toBeInTheDocument();
     });
 
     it('should show property change history', async () => {
       render(<PropertiesWindow selectedControl={mockControl} trackHistory />);
-      
+
       const captionInput = screen.getByDisplayValue('Click Me');
       await user.clear(captionInput);
       await user.type(captionInput, 'New Caption');
       await user.keyboard('{Enter}');
-      
+
       const historyButton = screen.getByTestId('property-history');
       await user.click(historyButton);
-      
+
       expect(screen.getByText('Property History')).toBeInTheDocument();
       expect(screen.getByText('Caption: "Click Me" → "New Caption"')).toBeInTheDocument();
     });
 
     it('should export/import property sets', async () => {
       render(<PropertiesWindow selectedControl={mockControl} />);
-      
+
       const moreButton = screen.getByTestId('properties-menu');
       await user.click(moreButton);
-      
+
       await user.click(screen.getByText('Export Properties'));
-      
+
       expect(screen.getByText('Export Property Set')).toBeInTheDocument();
     });
 
     it('should support custom property editors', () => {
       const customEditors = {
         CustomProperty: ({ value, onChange }: any) => (
-          <button onClick={() => onChange('CustomProperty', 'custom value')}>
-            Custom Editor
-          </button>
-        )
+          <button onClick={() => onChange('CustomProperty', 'custom value')}>Custom Editor</button>
+        ),
       };
-      
+
       const controlWithCustom = {
         ...mockControl,
         properties: {
           ...mockControl.properties,
-          CustomProperty: 'initial value'
-        }
+          CustomProperty: 'initial value',
+        },
       };
-      
-      render(<PropertiesWindow selectedControl={controlWithCustom} customEditors={customEditors} />);
-      
+
+      render(
+        <PropertiesWindow selectedControl={controlWithCustom} customEditors={customEditors} />
+      );
+
       expect(screen.getByText('Custom Editor')).toBeInTheDocument();
     });
   });
@@ -587,29 +606,32 @@ describe('Properties Window Tests', () => {
         ...mockControl,
         properties: Object.fromEntries(
           Array.from({ length: 1000 }, (_, i) => [`Property${i}`, `Value${i}`])
-        )
+        ),
       };
-      
+
       const { container } = render(<PropertiesWindow selectedControl={controlWithManyProps} />);
-      
+
       expect(container.querySelector('.virtual-list')).toBeInTheDocument();
     });
 
     it('should debounce property changes', async () => {
       const onChange = vi.fn();
       render(<PropertyGrid control={mockControl} onPropertyChange={onChange} debounceMs={100} />);
-      
+
       const captionInput = screen.getByDisplayValue('Click Me');
-      
+
       await user.type(captionInput, ' Updated');
-      
+
       // Should not call immediately
       expect(onChange).not.toHaveBeenCalled();
-      
+
       // Should call after debounce
-      await waitFor(() => {
-        expect(onChange).toHaveBeenCalledWith('Caption', 'Click Me Updated');
-      }, { timeout: 200 });
+      await waitFor(
+        () => {
+          expect(onChange).toHaveBeenCalledWith('Caption', 'Click Me Updated');
+        },
+        { timeout: 200 }
+      );
     });
 
     it('should memoize property calculations', () => {
@@ -617,15 +639,15 @@ describe('Properties Window Tests', () => {
         ...mockControl,
         properties: {
           ...mockControl.properties,
-          computedProperty: 'expensive calculation result'
-        }
+          computedProperty: 'expensive calculation result',
+        },
       };
-      
+
       const { rerender } = render(<PropertiesWindow selectedControl={expensiveControl} />);
-      
+
       // Re-render with same control
       rerender(<PropertiesWindow selectedControl={expensiveControl} />);
-      
+
       // Should not recalculate expensive properties
       expect(screen.getByText('expensive calculation result')).toBeInTheDocument();
     });

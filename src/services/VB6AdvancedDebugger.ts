@@ -68,7 +68,7 @@ export class VB6AdvancedDebugger {
   private isPaused: boolean = false;
   private currentLine: number = 0;
   private currentFile: string = '';
-  
+
   // Advanced features
   private conditionalBreakpoints: Map<string, Breakpoint> = new Map();
   private tracepoints: Map<string, Breakpoint> = new Map();
@@ -79,7 +79,7 @@ export class VB6AdvancedDebugger {
   private options: DebuggerOptions;
   private executionHistory: string[] = [];
   private dataBreakpoints: Map<string, DataBreakpoint> = new Map();
-  
+
   constructor(
     private onStateChange: (state: DebugState) => void,
     options?: Partial<DebuggerOptions>
@@ -90,9 +90,9 @@ export class VB6AdvancedDebugger {
       enableJustMyCode: true,
       maxCallStackDepth: 1000,
       evaluationTimeout: 5000,
-      ...options
+      ...options,
     };
-    
+
     this.initializeExceptionBreakpoints();
   }
 
@@ -111,23 +111,18 @@ export class VB6AdvancedDebugger {
       enabled: true,
       condition,
       hitCount,
-      type: 'conditional'
+      type: 'conditional',
     };
-    
+
     this.conditionalBreakpoints.set(id, breakpoint);
     this.breakpoints.set(`${file}:${line}`, breakpoint);
     this.notifyStateChange();
-    
+
     return id;
   }
 
   // Tracepoint management
-  setTracepoint(
-    file: string,
-    line: number,
-    logMessage: string,
-    condition?: string
-  ): string {
+  setTracepoint(file: string, line: number, logMessage: string, condition?: string): string {
     const id = `${file}:${line}:trace:${Date.now()}`;
     const tracepoint: Breakpoint = {
       id,
@@ -136,32 +131,29 @@ export class VB6AdvancedDebugger {
       enabled: true,
       logMessage,
       condition,
-      type: 'tracepoint'
+      type: 'tracepoint',
     };
-    
+
     this.tracepoints.set(id, tracepoint);
     this.notifyStateChange();
-    
+
     return id;
   }
 
   // Data breakpoint (break when variable changes)
-  setDataBreakpoint(
-    variableName: string,
-    accessType: 'read' | 'write' | 'readWrite'
-  ): string {
+  setDataBreakpoint(variableName: string, accessType: 'read' | 'write' | 'readWrite'): string {
     const id = `data:${variableName}:${Date.now()}`;
     const dataBreakpoint: DataBreakpoint = {
       id,
       variableName,
       accessType,
       enabled: true,
-      lastValue: this.getVariableValue(variableName)
+      lastValue: this.getVariableValue(variableName),
     };
-    
+
     this.dataBreakpoints.set(id, dataBreakpoint);
     this.notifyStateChange();
-    
+
     return id;
   }
 
@@ -169,21 +161,21 @@ export class VB6AdvancedDebugger {
   private async shouldBreak(): Promise<boolean> {
     const key = `${this.currentFile}:${this.currentLine}`;
     const breakpoint = this.breakpoints.get(key);
-    
+
     if (!breakpoint || !breakpoint.enabled) {
       return false;
     }
-    
+
     // Check hit count
     if (breakpoint.hitCount !== undefined) {
       const currentHits = (this.hitCounts.get(breakpoint.id) || 0) + 1;
       this.hitCounts.set(breakpoint.id, currentHits);
-      
+
       if (currentHits < breakpoint.hitCount) {
         return false;
       }
     }
-    
+
     // Evaluate condition
     if (breakpoint.condition) {
       try {
@@ -196,19 +188,20 @@ export class VB6AdvancedDebugger {
         return false;
       }
     }
-    
+
     return true;
   }
 
   // Process tracepoints
   private async processTracepoints(): Promise<void> {
     const key = `${this.currentFile}:${this.currentLine}`;
-    
+
     for (const [id, tracepoint] of this.tracepoints) {
-      if (tracepoint.file === this.currentFile && 
-          tracepoint.line === this.currentLine && 
-          tracepoint.enabled) {
-        
+      if (
+        tracepoint.file === this.currentFile &&
+        tracepoint.line === this.currentLine &&
+        tracepoint.enabled
+      ) {
         // Evaluate condition if exists
         if (tracepoint.condition) {
           try {
@@ -218,7 +211,7 @@ export class VB6AdvancedDebugger {
             continue;
           }
         }
-        
+
         // Process log message
         const message = await this.interpolateLogMessage(tracepoint.logMessage!);
         this.logConsole('info', message, 'Tracepoint');
@@ -231,7 +224,7 @@ export class VB6AdvancedDebugger {
     const regex = /\{([^}]+)\}/g;
     let result = message;
     let match;
-    
+
     while ((match = regex.exec(message)) !== null) {
       const expression = match[1];
       try {
@@ -241,7 +234,7 @@ export class VB6AdvancedDebugger {
         result = result.replace(match[0], `<Error: ${error.message}>`);
       }
     }
-    
+
     return result;
   }
 
@@ -282,38 +275,40 @@ export class VB6AdvancedDebugger {
     this.exceptionBreakpoints.set('Error', {
       type: 'Error',
       enabled: true,
-      condition: 'always'
+      condition: 'always',
     });
-    
+
     this.exceptionBreakpoints.set('TypeMismatch', {
       type: 'TypeMismatch',
       enabled: true,
-      condition: 'unhandled'
+      condition: 'unhandled',
     });
-    
+
     this.exceptionBreakpoints.set('Overflow', {
       type: 'Overflow',
       enabled: true,
-      condition: 'unhandled'
+      condition: 'unhandled',
     });
-    
+
     this.exceptionBreakpoints.set('OutOfMemory', {
       type: 'OutOfMemory',
       enabled: true,
-      condition: 'always'
+      condition: 'always',
     });
   }
 
   // Handle exceptions
-  private async handleException(error: Error | { constructor?: { name?: string }; message?: string }): Promise<void> {
+  private async handleException(
+    error: Error | { constructor?: { name?: string }; message?: string }
+  ): Promise<void> {
     const exceptionType = error.constructor?.name || 'Error';
     const exceptionBreakpoint = this.exceptionBreakpoints.get(exceptionType);
-    
+
     if (exceptionBreakpoint && exceptionBreakpoint.enabled) {
-      const shouldBreak = 
+      const shouldBreak =
         exceptionBreakpoint.condition === 'always' ||
         (exceptionBreakpoint.condition === 'unhandled' && !this.isExceptionHandled());
-      
+
       if (shouldBreak) {
         this.isPaused = true;
         this.logConsole('error', `Exception: ${error.message}`, 'Exception');
@@ -325,32 +320,27 @@ export class VB6AdvancedDebugger {
   // Check if current exception is handled
   private isExceptionHandled(): boolean {
     // Check if we're in an error handler
-    return this.callStack.some(frame => 
-      frame.procedure.includes('_Error') || 
-      frame.procedure.includes('ErrorHandler')
+    return this.callStack.some(
+      frame => frame.procedure.includes('_Error') || frame.procedure.includes('ErrorHandler')
     );
   }
 
   // Debug console logging
-  logConsole(
-    type: DebugConsoleMessage['type'],
-    message: string,
-    source?: string
-  ): void {
+  logConsole(type: DebugConsoleMessage['type'], message: string, source?: string): void {
     const consoleMessage: DebugConsoleMessage = {
       type,
       message,
       timestamp: new Date(),
-      source
+      source,
     };
-    
+
     this.debugConsole.push(consoleMessage);
-    
+
     // Limit console history
     if (this.debugConsole.length > 1000) {
       this.debugConsole.shift();
     }
-    
+
     this.notifyStateChange();
   }
 
@@ -363,12 +353,12 @@ export class VB6AdvancedDebugger {
       callStack: [...this.callStack],
       variables: new Map(this.variables),
       breakpoints: Array.from(this.breakpoints.values()),
-      description
+      description,
     };
-    
+
     this.snapshots.set(id, snapshot);
     this.logConsole('info', `Snapshot taken: ${description}`, 'Debugger');
-    
+
     return id;
   }
 
@@ -378,14 +368,14 @@ export class VB6AdvancedDebugger {
     if (!snapshot) {
       return false;
     }
-    
+
     this.callStack = [...snapshot.callStack];
     this.variables = new Map(snapshot.variables);
     this.currentFrame = this.callStack[this.callStack.length - 1] || null;
-    
+
     this.logConsole('info', `Restored snapshot: ${snapshot.description}`, 'Debugger');
     this.notifyStateChange();
-    
+
     return true;
   }
 
@@ -395,13 +385,13 @@ export class VB6AdvancedDebugger {
     if (!variable) {
       return null;
     }
-    
+
     // Add detailed type information
     const detailedVariable: DebugVariable = {
       ...variable,
-      children: this.getVariableChildren(variable)
+      children: this.getVariableChildren(variable),
     };
-    
+
     return detailedVariable;
   }
 
@@ -410,9 +400,9 @@ export class VB6AdvancedDebugger {
     if (typeof variable.value !== 'object' || variable.value === null) {
       return undefined;
     }
-    
+
     const children: DebugVariable[] = [];
-    
+
     if (Array.isArray(variable.value)) {
       variable.value.forEach((item, index) => {
         children.push({
@@ -420,7 +410,7 @@ export class VB6AdvancedDebugger {
           value: item,
           type: this.getVariableType(item),
           scope: variable.scope,
-          canEdit: true
+          canEdit: true,
         });
       });
     } else {
@@ -430,11 +420,11 @@ export class VB6AdvancedDebugger {
           value: value,
           type: this.getVariableType(value),
           scope: variable.scope,
-          canEdit: true
+          canEdit: true,
         });
       });
     }
-    
+
     return children.length > 0 ? children : undefined;
   }
 
@@ -451,7 +441,7 @@ export class VB6AdvancedDebugger {
   // Enhanced stepping with filtering
   async stepWithFilter(filter: StepFilter): Promise<void> {
     if (!this.isPaused) return;
-    
+
     do {
       await this.step();
     } while (!this.matchesFilter(filter) && this.isRunning && !this.isPaused);
@@ -462,23 +452,25 @@ export class VB6AdvancedDebugger {
     if (filter.justMyCode && this.isSystemCode()) {
       return false;
     }
-    
+
     if (filter.modulePattern && !this.currentFile.match(filter.modulePattern)) {
       return false;
     }
-    
+
     if (filter.excludePattern && this.currentFile.match(filter.excludePattern)) {
       return false;
     }
-    
+
     return true;
   }
 
   // Check if current code is system code
   private isSystemCode(): boolean {
-    return this.currentFile.includes('node_modules') ||
-           this.currentFile.includes('system') ||
-           this.currentFile.startsWith('[');
+    return (
+      this.currentFile.includes('node_modules') ||
+      this.currentFile.includes('system') ||
+      this.currentFile.startsWith('[')
+    );
   }
 
   // Get execution history
@@ -490,7 +482,7 @@ export class VB6AdvancedDebugger {
   private recordExecutionStep() {
     const step = `${this.currentFile}:${this.currentLine}`;
     this.executionHistory.push(step);
-    
+
     // Limit history size
     if (this.executionHistory.length > 10000) {
       this.executionHistory = this.executionHistory.slice(-5000);
@@ -503,7 +495,7 @@ export class VB6AdvancedDebugger {
       startTime: Date.now(),
       functionCalls: new Map(),
       lineExecutions: new Map(),
-      memorySnapshots: []
+      memorySnapshots: [],
     };
   }
 
@@ -514,10 +506,10 @@ export class VB6AdvancedDebugger {
         functionCalls: [],
         hotspots: [],
         memoryLeaks: [],
-        performanceBottlenecks: []
+        performanceBottlenecks: [],
       };
     }
-    
+
     const totalTime = Date.now() - this.profilingData.startTime;
     const functionCalls = Array.from(this.profilingData.functionCalls.entries())
       .map(([name, data]) => ({
@@ -526,43 +518,43 @@ export class VB6AdvancedDebugger {
         calls: data.calls,
         averageTime: data.totalTime / data.calls,
         minTime: data.minTime,
-        maxTime: data.maxTime
+        maxTime: data.maxTime,
       }))
       .sort((a, b) => b.duration - a.duration);
-    
+
     const hotspots = this.identifyHotspots();
     const memoryLeaks = this.detectMemoryLeaks();
     const performanceBottlenecks = this.identifyBottlenecks();
-    
+
     return {
       totalTime,
       functionCalls,
       hotspots,
       memoryLeaks,
-      performanceBottlenecks
+      performanceBottlenecks,
     };
   }
 
   // Identify code hotspots
   private identifyHotspots(): Hotspot[] {
     if (!this.profilingData) return [];
-    
+
     const lineExecutions = Array.from(this.profilingData.lineExecutions.entries())
       .map(([line, count]) => ({ line, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
-    
+
     return lineExecutions.map(({ line, count }) => ({
       location: line,
       executionCount: count,
-      percentageOfTotal: (count / this.executionHistory.length) * 100
+      percentageOfTotal: (count / this.executionHistory.length) * 100,
     }));
   }
 
   // Detect potential memory leaks
   private detectMemoryLeaks(): MemoryLeak[] {
     const leaks: MemoryLeak[] = [];
-    
+
     // Check for growing collections
     this.variables.forEach((variable, name) => {
       if (Array.isArray(variable.value) && variable.value.length > 1000) {
@@ -570,31 +562,31 @@ export class VB6AdvancedDebugger {
           variableName: name,
           type: 'GrowingArray',
           size: variable.value.length,
-          recommendation: 'Consider clearing or limiting array size'
+          recommendation: 'Consider clearing or limiting array size',
         });
       }
     });
-    
+
     return leaks;
   }
 
   // Identify performance bottlenecks
   private identifyBottlenecks(): PerformanceBottleneck[] {
     if (!this.profilingData) return [];
-    
+
     const bottlenecks: PerformanceBottleneck[] = [];
-    
+
     this.profilingData.functionCalls.forEach((data, name) => {
       if (data.maxTime > 1000) {
         bottlenecks.push({
           location: name,
           issue: 'SlowFunction',
           impact: 'high',
-          recommendation: `Function ${name} takes ${data.maxTime}ms. Consider optimization.`
+          recommendation: `Function ${name} takes ${data.maxTime}ms. Consider optimization.`,
         });
       }
     });
-    
+
     return bottlenecks;
   }
 
@@ -615,7 +607,7 @@ export class VB6AdvancedDebugger {
       dataBreakpoints: Array.from(this.dataBreakpoints.values()),
       console: [...this.debugConsole],
       snapshots: Array.from(this.snapshots.keys()),
-      executionHistory: this.getExecutionHistory(50)
+      executionHistory: this.getExecutionHistory(50),
     };
   }
 
@@ -623,22 +615,24 @@ export class VB6AdvancedDebugger {
   private async checkDataBreakpoints(): Promise<boolean> {
     for (const [id, dataBreakpoint] of this.dataBreakpoints) {
       if (!dataBreakpoint.enabled) continue;
-      
+
       const currentValue = this.getVariableValue(dataBreakpoint.variableName);
       const changed = currentValue !== dataBreakpoint.lastValue;
-      
-      if (changed && 
-          (dataBreakpoint.accessType === 'write' || 
-           dataBreakpoint.accessType === 'readWrite')) {
+
+      if (
+        changed &&
+        (dataBreakpoint.accessType === 'write' || dataBreakpoint.accessType === 'readWrite')
+      ) {
         dataBreakpoint.lastValue = currentValue;
-        this.logConsole('info', 
+        this.logConsole(
+          'info',
           `Data breakpoint hit: ${dataBreakpoint.variableName} changed to ${currentValue}`,
           'DataBreakpoint'
         );
         return true;
       }
     }
-    
+
     return false;
   }
 
@@ -661,22 +655,26 @@ export class VB6AdvancedDebugger {
       // Check breakpoints
       if (await this.shouldBreak()) {
         this.isPaused = true;
-        this.logConsole('info', `Breakpoint hit at ${this.currentFile}:${this.currentLine}`, 'Breakpoint');
+        this.logConsole(
+          'info',
+          `Breakpoint hit at ${this.currentFile}:${this.currentLine}`,
+          'Breakpoint'
+        );
         break;
       }
-      
+
       // Check data breakpoints
       if (await this.checkDataBreakpoints()) {
         this.isPaused = true;
         break;
       }
-      
+
       // Process tracepoints
       await this.processTracepoints();
-      
+
       // Record execution
       this.recordExecutionStep();
-      
+
       // Execute statement
       await this.executeNextStatement();
 
@@ -694,17 +692,17 @@ export class VB6AdvancedDebugger {
         (this.profilingData.lineExecutions.get(line) || 0) + 1
       );
     }
-    
+
     // Execute statement
     this.currentLine++;
-    
+
     // Check for procedure calls
     if (this.isFunction(this.currentLine)) {
       this.enterFunction();
     } else if (this.isReturn(this.currentLine)) {
       this.exitFunction();
     }
-    
+
     this.evaluateCurrentLine();
   }
 
@@ -720,10 +718,10 @@ export class VB6AdvancedDebugger {
     this.snapshots.clear();
     this.executionHistory = [];
   }
-  
+
   // Private members from base class
   private profilingData?: ProfilingData;
-  
+
   private createEvaluationContext(): EvaluationContext {
     const context: EvaluationContext = {};
 
@@ -762,24 +760,24 @@ export class VB6AdvancedDebugger {
 
     return context;
   }
-  
+
   private notifyStateChange(): void {
     this.onStateChange(this.getCurrentState() as DebugState);
   }
-  
+
   private evaluateCurrentLine(): void {
     // Update watches
     this.updateWatches();
     // Update variables
     this.updateVariables();
   }
-  
+
   private updateWatches(): void {
     this.watchExpressions.forEach(watch => {
       this.evaluateWatch(watch);
     });
   }
-  
+
   private async evaluateWatch(watch: WatchExpression): Promise<void> {
     try {
       watch.value = await this.evaluateExpression(watch.expression);
@@ -790,7 +788,7 @@ export class VB6AdvancedDebugger {
       watch.value = '<Error>';
     }
   }
-  
+
   private updateVariables(): void {
     // Simulate variable updates during execution
     if (this.currentFrame) {
@@ -801,11 +799,11 @@ export class VB6AdvancedDebugger {
         value: this.currentLine,
         type: 'Integer',
         scope: 'local',
-        canEdit: true
+        canEdit: true,
       });
     }
   }
-  
+
   private enterFunction(): void {
     const frame: DebugFrame = {
       procedure: `Procedure${this.currentLine}`,
@@ -816,25 +814,25 @@ export class VB6AdvancedDebugger {
 
     this.callStack.push(frame);
     this.currentFrame = frame;
-    
+
     if (this.profilingData) {
       const funcData = this.profilingData.functionCalls.get(frame.procedure) || {
         calls: 0,
         totalTime: 0,
         minTime: Infinity,
         maxTime: 0,
-        startTime: Date.now()
+        startTime: Date.now(),
       };
       funcData.calls++;
       funcData.startTime = Date.now();
       this.profilingData.functionCalls.set(frame.procedure, funcData);
     }
   }
-  
+
   private exitFunction(): void {
     const frame = this.callStack.pop();
     this.currentFrame = this.callStack[this.callStack.length - 1] || null;
-    
+
     if (frame && this.profilingData) {
       const funcData = this.profilingData.functionCalls.get(frame.procedure);
       if (funcData && funcData.startTime) {
@@ -846,17 +844,17 @@ export class VB6AdvancedDebugger {
       }
     }
   }
-  
+
   private isFunction(line: number): boolean {
     // Simple heuristic - in real implementation, this would parse the code
     return line % 10 === 0;
   }
-  
+
   private isReturn(line: number): boolean {
     // Simple heuristic - in real implementation, this would parse the code
     return line % 15 === 0;
   }
-  
+
   private getVariableValue(name: string): DebugValue {
     const variable = this.variables.get(name);
     if (variable) {
@@ -869,7 +867,7 @@ export class VB6AdvancedDebugger {
 
     return undefined;
   }
-  
+
   // Additional public methods from base class
   setBreakpoint(file: string, line: number): void {
     const key = `${file}:${line}`;
@@ -878,7 +876,7 @@ export class VB6AdvancedDebugger {
       file,
       line,
       enabled: true,
-      type: 'breakpoint'
+      type: 'breakpoint',
     };
     this.breakpoints.set(key, breakpoint);
     this.notifyStateChange();

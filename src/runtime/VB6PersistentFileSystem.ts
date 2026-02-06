@@ -41,7 +41,7 @@ export enum VB6FileAttribute {
   vbVolume = 8,
   vbDirectory = 16,
   vbArchive = 32,
-  vbAlias = 64
+  vbAlias = 64,
 }
 
 /**
@@ -77,7 +77,6 @@ class PersistentVirtualFileSystem {
       if ('indexedDB' in window) {
         this.db = await this.openIndexedDB();
         this.useIndexedDB = true;
-        console.log('[VB6 VFS] IndexedDB initialized successfully');
       } else {
         console.warn('[VB6 VFS] IndexedDB not available, using localStorage fallback');
         this.useIndexedDB = false;
@@ -106,7 +105,7 @@ class PersistentVirtualFileSystem {
         resolve(request.result);
       };
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = event => {
         const db = (event.target as IDBOpenDBRequest).result;
 
         // Create file store if it doesn't exist
@@ -184,11 +183,7 @@ class PersistentVirtualFileSystem {
     if (!component || component.length === 0) return false;
 
     // Reject dangerous characters
-    const dangerousPatterns = [
-      /[<>:"|?*\0]/,
-      /^\.+$/,
-      /^\s*$/,
-    ];
+    const dangerousPatterns = [/[<>:"|?*\0]/, /^\.+$/, /^\s*$/];
 
     if (dangerousPatterns.some(pattern => pattern.test(component))) {
       return false;
@@ -219,7 +214,7 @@ class PersistentVirtualFileSystem {
       size: content.length,
       created: now,
       modified: now,
-      accessed: now
+      accessed: now,
     };
 
     if (this.useIndexedDB && this.db) {
@@ -248,7 +243,7 @@ class PersistentVirtualFileSystem {
       size: 0,
       created: now,
       modified: now,
-      accessed: now
+      accessed: now,
     };
 
     if (this.useIndexedDB && this.db) {
@@ -313,23 +308,22 @@ class PersistentVirtualFileSystem {
   /**
    * Open a file
    */
-  async openFile(
-    path: string,
-    mode: number,
-    recordLength?: number
-  ): Promise<number> {
+  async openFile(path: string, mode: number, recordLength?: number): Promise<number> {
     const normalizedPath = this.normalizePath(path);
 
     // Check if file exists
     let entry = await this.getEntry(normalizedPath);
 
     // Handle different file modes
-    if ((mode === 1 || mode === 32) && !entry) { // Input or Binary mode
+    if ((mode === 1 || mode === 32) && !entry) {
+      // Input or Binary mode
       throw new Error(`File not found: ${path}`);
-    } else if (mode === 2) { // Output mode - create/truncate
+    } else if (mode === 2) {
+      // Output mode - create/truncate
       await this.createFile(normalizedPath, '');
       entry = await this.getEntry(normalizedPath);
-    } else if (mode === 8) { // Append mode
+    } else if (mode === 8) {
+      // Append mode
       if (!entry) {
         await this.createFile(normalizedPath, '');
         entry = await this.getEntry(normalizedPath);
@@ -342,9 +336,9 @@ class PersistentVirtualFileSystem {
       fileNumber,
       path: normalizedPath,
       mode,
-      position: mode === 8 ? (entry?.size || 0) : 0,
+      position: mode === 8 ? entry?.size || 0 : 0,
       recordLength,
-      isOpen: true
+      isOpen: true,
     };
 
     this.openFiles.set(fileNumber, handle);
@@ -380,12 +374,14 @@ class PersistentVirtualFileSystem {
 
     const content = (entry.content as string) || '';
 
-    if (handle.mode === 32) { // Binary mode
-      const bytesToRead = length || (content.length - handle.position);
+    if (handle.mode === 32) {
+      // Binary mode
+      const bytesToRead = length || content.length - handle.position;
       const result = content.substring(handle.position, handle.position + bytesToRead);
       handle.position += result.length;
       return result;
-    } else if (handle.mode === 1) { // Input mode
+    } else if (handle.mode === 1) {
+      // Input mode
       if (length) {
         const result = content.substring(handle.position, handle.position + length);
         handle.position += result.length;
@@ -404,7 +400,8 @@ class PersistentVirtualFileSystem {
           return line.replace(/\r$/, '');
         }
       }
-    } else if (handle.mode === 4) { // Random mode
+    } else if (handle.mode === 4) {
+      // Random mode
       const recordLen = handle.recordLength || 128;
       const result = content.substring(handle.position, handle.position + recordLen);
       handle.position += recordLen;
@@ -435,15 +432,18 @@ class PersistentVirtualFileSystem {
       throw new Error('File is read-only');
     }
 
-    if (handle.mode === 2 || handle.mode === 8) { // Output or Append
+    if (handle.mode === 2 || handle.mode === 8) {
+      // Output or Append
       content = content.substring(0, handle.position) + data;
       handle.position += data.length;
-    } else if (handle.mode === 32) { // Binary
+    } else if (handle.mode === 32) {
+      // Binary
       const before = content.substring(0, handle.position);
       const after = content.substring(handle.position + data.length);
       content = before + data + after;
       handle.position += data.length;
-    } else if (handle.mode === 4) { // Random
+    } else if (handle.mode === 4) {
+      // Random
       const recordLen = handle.recordLength || 128;
       const paddedData = data.padEnd(recordLen, ' ').substring(0, recordLen);
       const before = content.substring(0, handle.position);
@@ -798,7 +798,7 @@ class PersistentVirtualFileSystem {
     return {
       filesCount: entries.filter(e => e.type === 'file').length,
       directoriesCount: entries.filter(e => e.type === 'directory').length,
-      totalSize: entries.reduce((sum, e) => sum + (e.size || 0), 0)
+      totalSize: entries.reduce((sum, e) => sum + (e.size || 0), 0),
     };
   }
 }

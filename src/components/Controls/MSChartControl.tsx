@@ -20,7 +20,7 @@ export enum VtChChartType {
   vtChChartType3dCombination = 8,
   vtChChartType2dCombination = 9,
   vtChChartType2dPie = 14,
-  vtChChartType2dXY = 16
+  vtChChartType2dXY = 16,
 }
 
 export enum VtChLegendLocation {
@@ -28,7 +28,7 @@ export enum VtChLegendLocation {
   vtChLegendLocationBottom = 1,
   vtChLegendLocationTop = 2,
   vtChLegendLocationLeft = 3,
-  vtChLegendLocationRight = 4
+  vtChLegendLocationRight = 4,
 }
 
 export enum VtChTitleLocation {
@@ -36,7 +36,7 @@ export enum VtChTitleLocation {
   vtChTitleLocationTop = 1,
   vtChTitleLocationBottom = 2,
   vtChTitleLocationLeft = 3,
-  vtChTitleLocationRight = 4
+  vtChTitleLocationRight = 4,
 }
 
 export interface ChartData {
@@ -67,36 +67,46 @@ export interface MSChartProps extends VB6ControlPropsEnhanced {
   legendLocation?: VtChLegendLocation;
   titleText?: string;
   titleLocation?: VtChTitleLocation;
-  
+
   // Data properties
   data?: ChartData;
   autoIncrement?: boolean;
   allowSeriesSelection?: boolean;
   allowPointSelection?: boolean;
-  
+
   // Appearance
   chartBackColor?: string;
   plotBackColor?: string;
   gridLineColor?: string;
   showGridLines?: boolean;
   borderStyle?: number;
-  
+
   // 3D properties
   chart3D?: boolean;
   depth?: number;
   rotation?: number;
   elevation?: number;
-  
+
   // Axis properties
   showXAxisLabels?: boolean;
   showYAxisLabels?: boolean;
   xAxisTitle?: string;
   yAxisTitle?: string;
-  
+
   // Events
-  onPointSelected?: (series: number, dataPoint: number, mouseFlags: number, cancel: boolean) => void;
+  onPointSelected?: (
+    series: number,
+    dataPoint: number,
+    mouseFlags: number,
+    cancel: boolean
+  ) => void;
   onSeriesSelected?: (series: number, mouseFlags: number, cancel: boolean) => void;
-  onPointActivated?: (series: number, dataPoint: number, mouseFlags: number, cancel: boolean) => void;
+  onPointActivated?: (
+    series: number,
+    dataPoint: number,
+    mouseFlags: number,
+    cancel: boolean
+  ) => void;
   onChartActivated?: (mouseFlags: number, cancel: boolean) => void;
 }
 
@@ -139,17 +149,19 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
     ...rest
   } = props;
 
-  const [chartData, setChartData] = useState<ChartData>(data || {
-    columnCount: 4,
-    rowCount: 3,
-    values: [
-      [10, 20, 30, 40],
-      [15, 25, 35, 45],
-      [12, 22, 32, 42]
-    ],
-    columnLabels: ['Q1', 'Q2', 'Q3', 'Q4'],
-    rowLabels: ['Series 1', 'Series 2', 'Series 3']
-  });
+  const [chartData, setChartData] = useState<ChartData>(
+    data || {
+      columnCount: 4,
+      rowCount: 3,
+      values: [
+        [10, 20, 30, 40],
+        [15, 25, 35, 45],
+        [12, 22, 32, 42],
+      ],
+      columnLabels: ['Q1', 'Q2', 'Q3', 'Q4'],
+      rowLabels: ['Series 1', 'Series 2', 'Series 3'],
+    }
+  );
 
   const [selectedSeries, setSelectedSeries] = useState(-1);
   const [selectedPoint, setSelectedPoint] = useState({ series: -1, point: -1 });
@@ -166,9 +178,7 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
       if (canvasRef.current) {
         canvasRef.current.toBlob(blob => {
           if (blob) {
-            navigator.clipboard.write([
-              new ClipboardItem({ 'image/png': blob })
-            ]);
+            navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
           }
         });
       }
@@ -229,24 +239,23 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
 
     ShowData: () => {
       // Show data grid (would open a dialog)
-      console.log('Chart Data:', chartData);
     },
 
     TwipsToChartPart: (x: number, y: number) => {
       // Convert coordinates to chart part
       const rect = canvasRef.current?.getBoundingClientRect();
       if (!rect) return { part: 0, series: 0, point: 0 };
-      
+
       const relX = x - rect.left;
       const relY = y - rect.top;
-      
+
       // Simplified hit testing
       return {
         part: relX > 0 && relY > 0 ? 1 : 0, // 1 = chart area
         series: 0,
-        point: 0
+        point: 0,
       };
-    }
+    },
   };
 
   // Draw chart function
@@ -268,13 +277,14 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
     // Calculate chart area
     const margin = 60;
     const titleHeight = titleText ? 30 : 0;
-    const legendHeight = showLegend && legendLocation === VtChLegendLocation.vtChLegendLocationBottom ? 40 : 0;
-    
+    const legendHeight =
+      showLegend && legendLocation === VtChLegendLocation.vtChLegendLocationBottom ? 40 : 0;
+
     const chartArea = {
       x: margin,
       y: margin + titleHeight,
-      width: canvas.width - (margin * 2),
-      height: canvas.height - (margin * 2) - titleHeight - legendHeight
+      width: canvas.width - margin * 2,
+      height: canvas.height - margin * 2 - titleHeight - legendHeight,
     };
 
     // Draw background
@@ -292,7 +302,7 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
     if (showGridLines) {
       ctx.strokeStyle = gridLineColor;
       ctx.lineWidth = 1;
-      
+
       // Vertical grid lines
       for (let i = 1; i < chartData.columnCount; i++) {
         const x = chartArea.x + (chartArea.width / chartData.columnCount) * i;
@@ -301,7 +311,7 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
         ctx.lineTo(x, chartArea.y + chartArea.height);
         ctx.stroke();
       }
-      
+
       // Horizontal grid lines
       const maxValue = Math.max(...chartData.values.flat());
       for (let i = 1; i < 6; i++) {
@@ -355,12 +365,23 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
     if (showLegend) {
       drawLegend(ctx);
     }
-
-  }, [chartData, chartType, width, height, chartBackColor, plotBackColor, gridLineColor, showGridLines, titleText, showLegend]);
+  }, [
+    chartData,
+    chartType,
+    width,
+    height,
+    chartBackColor,
+    plotBackColor,
+    gridLineColor,
+    showGridLines,
+    titleText,
+    showLegend,
+  ]);
 
   const drawBarChart = (ctx: CanvasRenderingContext2D, area: any) => {
     const maxValue = Math.max(...chartData.values.flat());
-    const barWidth = area.width / (chartData.columnCount * chartData.rowCount + chartData.columnCount + 1);
+    const barWidth =
+      area.width / (chartData.columnCount * chartData.rowCount + chartData.columnCount + 1);
     const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'];
 
     chartData.values.forEach((series, seriesIndex) => {
@@ -370,11 +391,12 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
         const y = area.y + area.height - barHeight;
 
         // Highlight selected series/point
-        const isSelected = selectedSeries === seriesIndex || 
-                          (selectedPoint.series === seriesIndex && selectedPoint.point === colIndex);
-        
+        const isSelected =
+          selectedSeries === seriesIndex ||
+          (selectedPoint.series === seriesIndex && selectedPoint.point === colIndex);
+
         ctx.fillStyle = isSelected ? '#FF0000' : colors[seriesIndex % colors.length];
-        
+
         if (chart3D) {
           // Simple 3D effect
           const offset = 5;
@@ -382,9 +404,9 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
           ctx.fillRect(x + offset, y - offset, barWidth - 2, barHeight);
           ctx.fillStyle = isSelected ? '#FF0000' : colors[seriesIndex % colors.length];
         }
-        
+
         ctx.fillRect(x, y, barWidth - 2, barHeight);
-        
+
         // Draw border
         ctx.strokeStyle = '#000000';
         ctx.lineWidth = 1;
@@ -433,7 +455,7 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
       const gradient = ctx.createLinearGradient(0, area.y, 0, area.y + area.height);
       gradient.addColorStop(0, colors[seriesIndex % colors.length] + '80');
       gradient.addColorStop(1, colors[seriesIndex % colors.length] + '20');
-      
+
       ctx.fillStyle = gradient;
       ctx.beginPath();
       ctx.moveTo(area.x, area.y + area.height);
@@ -466,7 +488,7 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
     const centerX = area.x + area.width / 2;
     const centerY = area.y + area.height / 2;
     const radius = Math.min(area.width, area.height) / 3;
-    
+
     // Use first series data
     const data = chartData.values[0] || [];
     const total = data.reduce((sum, value) => sum + value, 0);
@@ -476,7 +498,7 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
 
     data.forEach((value, index) => {
       const sliceAngle = (value / total) * Math.PI * 2;
-      
+
       ctx.fillStyle = colors[index % colors.length];
       ctx.beginPath();
       ctx.moveTo(centerX, centerY);
@@ -493,7 +515,7 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
       const labelAngle = currentAngle + sliceAngle / 2;
       const labelX = centerX + Math.cos(labelAngle) * (radius + 20);
       const labelY = centerY + Math.sin(labelAngle) * (radius + 20);
-      
+
       ctx.fillStyle = '#000000';
       ctx.font = '12px Arial';
       ctx.textAlign = 'center';
@@ -505,8 +527,8 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
 
   const drawXYChart = (ctx: CanvasRenderingContext2D, area: any) => {
     // XY Scatter plot
-    const maxValueX = Math.max(...chartData.values[0] || []);
-    const maxValueY = Math.max(...chartData.values[1] || []);
+    const maxValueX = Math.max(...(chartData.values[0] || []));
+    const maxValueY = Math.max(...(chartData.values[1] || []));
     const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1'];
 
     if (chartData.values.length >= 2) {
@@ -518,7 +540,7 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
         ctx.beginPath();
         ctx.arc(x, y, 5, 0, Math.PI * 2);
         ctx.fill();
-        
+
         ctx.strokeStyle = '#000000';
         ctx.stroke();
       }
@@ -592,7 +614,7 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
 
   // Handle mouse events
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (!enabled || !allowSeriesSelection && !allowPointSelection) return;
+    if (!enabled || (!allowSeriesSelection && !allowPointSelection)) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -606,15 +628,23 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
       x: 60,
       y: 60 + (titleText ? 30 : 0),
       width: canvas.width - 120,
-      height: canvas.height - 120 - (titleText ? 30 : 0) - (showLegend ? 40 : 0)
+      height: canvas.height - 120 - (titleText ? 30 : 0) - (showLegend ? 40 : 0),
     };
 
-    if (x >= chartArea.x && x <= chartArea.x + chartArea.width &&
-        y >= chartArea.y && y <= chartArea.y + chartArea.height) {
-      
-      if (chartType === VtChChartType.vtChChartType2dBar || chartType === VtChChartType.vtChChartType3dBar) {
+    if (
+      x >= chartArea.x &&
+      x <= chartArea.x + chartArea.width &&
+      y >= chartArea.y &&
+      y <= chartArea.y + chartArea.height
+    ) {
+      if (
+        chartType === VtChChartType.vtChChartType2dBar ||
+        chartType === VtChChartType.vtChChartType3dBar
+      ) {
         // Calculate which bar was clicked
-        const barWidth = chartArea.width / (chartData.columnCount * chartData.rowCount + chartData.columnCount + 1);
+        const barWidth =
+          chartArea.width /
+          (chartData.columnCount * chartData.rowCount + chartData.columnCount + 1);
         const clickedIndex = Math.floor((x - chartArea.x) / barWidth);
         const seriesIndex = clickedIndex % chartData.rowCount;
         const pointIndex = Math.floor(clickedIndex / (chartData.rowCount + 1));
@@ -668,7 +698,7 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
         height,
         opacity: enabled ? 1 : 0.5,
         cursor: enabled ? 'pointer' : 'default',
-        border: borderStyle > 0 ? `${borderStyle}px solid #000000` : 'none'
+        border: borderStyle > 0 ? `${borderStyle}px solid #000000` : 'none',
       }}
       {...rest}
     >
@@ -678,7 +708,7 @@ export const MSChartControl = forwardRef<HTMLDivElement, MSChartProps>((props, r
         style={{
           width: '100%',
           height: '100%',
-          display: 'block'
+          display: 'block',
         }}
       />
     </div>

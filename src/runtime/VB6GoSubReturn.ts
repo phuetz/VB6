@@ -18,16 +18,16 @@ export class VB6GoSubHandler {
   private static instance: VB6GoSubHandler;
   private gosubStack: GoSubContext[] = [];
   private maxStackDepth = 1000; // Prevent stack overflow
-  
+
   private constructor() {}
-  
+
   static getInstance(): VB6GoSubHandler {
     if (!VB6GoSubHandler.instance) {
       VB6GoSubHandler.instance = new VB6GoSubHandler();
     }
     return VB6GoSubHandler.instance;
   }
-  
+
   /**
    * GoSub - Jump to a label and remember return point
    * @param targetLabel The label to jump to
@@ -36,8 +36,8 @@ export class VB6GoSubHandler {
    * @param localVars Local variables to preserve
    */
   goSub(
-    targetLabel: string, 
-    returnAddress: number, 
+    targetLabel: string,
+    returnAddress: number,
     procedureName: string = '',
     localVars: Map<string, any> = new Map()
   ): string {
@@ -45,19 +45,19 @@ export class VB6GoSubHandler {
     if (this.gosubStack.length >= this.maxStackDepth) {
       throw new Error('Out of stack space (Error 28)');
     }
-    
+
     // Push return context onto stack
     this.gosubStack.push({
       returnAddress,
       returnLabel: undefined,
       procedureName,
-      localVariables: new Map(localVars) // Copy local variables
+      localVariables: new Map(localVars), // Copy local variables
     });
-    
+
     // Return the target label to jump to
     return targetLabel;
   }
-  
+
   /**
    * Return - Return from GoSub to the saved return point
    * @returns The return address or null if stack is empty
@@ -66,40 +66,38 @@ export class VB6GoSubHandler {
     if (this.gosubStack.length === 0) {
       throw new Error('Return without GoSub (Error 3)');
     }
-    
+
     // Pop and return the context
     return this.gosubStack.pop() || null;
   }
-  
+
   /**
    * Check if currently in a GoSub call
    */
   isInGoSub(): boolean {
     return this.gosubStack.length > 0;
   }
-  
+
   /**
    * Get current stack depth
    */
   getStackDepth(): number {
     return this.gosubStack.length;
   }
-  
+
   /**
    * Clear the GoSub stack (used when exiting a procedure)
    */
   clearStack(): void {
     this.gosubStack = [];
   }
-  
+
   /**
    * Clear stack for a specific procedure
    */
   clearProcedureStack(procedureName: string): void {
     // Remove all GoSub contexts for this procedure
-    this.gosubStack = this.gosubStack.filter(
-      context => context.procedureName !== procedureName
-    );
+    this.gosubStack = this.gosubStack.filter(context => context.procedureName !== procedureName);
   }
 }
 
@@ -118,8 +116,8 @@ export const GoSubHandler = VB6GoSubHandler.getInstance();
  * @param locals Local variables
  */
 export function GoSub(
-  label: string, 
-  returnLine: number, 
+  label: string,
+  returnLine: number,
   procedure?: string,
   locals?: Record<string, any>
 ): string {
@@ -131,18 +129,18 @@ export function GoSub(
  * Execute a Return statement
  * @returns Object with return address and restored variables
  */
-export function Return(): { 
-  line: number; 
-  procedure: string; 
-  variables: Record<string, any> 
+export function Return(): {
+  line: number;
+  procedure: string;
+  variables: Record<string, any>;
 } | null {
   const context = GoSubHandler.return();
   if (!context) return null;
-  
+
   return {
     line: context.returnAddress,
     procedure: context.procedureName,
-    variables: Object.fromEntries(context.localVariables)
+    variables: Object.fromEntries(context.localVariables),
   };
 }
 

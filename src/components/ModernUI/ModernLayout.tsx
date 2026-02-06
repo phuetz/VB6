@@ -165,8 +165,8 @@ export const ModernMenuBar: React.FC = () => {
         { id: 'step-over', title: 'Pas à pas principal', shortcut: 'Shift+F8', icon: '⤴️' },
         { id: 'step-out', title: 'Sortir', shortcut: 'Ctrl+Shift+F8', icon: '⤴️' },
         { id: 'separator' },
-        { id: 'breakpoint', title: 'Basculer le point d\'arrêt', shortcut: 'F9', icon: '🔴' },
-        { id: 'clear-breakpoints', title: 'Supprimer tous les points d\'arrêt', icon: '🗑️' },
+        { id: 'breakpoint', title: "Basculer le point d'arrêt", shortcut: 'F9', icon: '🔴' },
+        { id: 'clear-breakpoints', title: "Supprimer tous les points d'arrêt", icon: '🗑️' },
         { id: 'separator' },
         { id: 'immediate', title: 'Fenêtre immédiate', shortcut: 'Ctrl+G', icon: '⚡' },
         { id: 'watch', title: 'Fenêtre espion', icon: '👁️' },
@@ -191,7 +191,7 @@ export const ModernMenuBar: React.FC = () => {
       title: 'Aide',
       items: [
         { id: 'contents', title: 'Sommaire', shortcut: 'F1', icon: '📖' },
-        { id: 'search', title: 'Rechercher dans l\'aide', icon: '🔍' },
+        { id: 'search', title: "Rechercher dans l'aide", icon: '🔍' },
         { id: 'separator' },
         { id: 'samples', title: 'Exemples', icon: '📚' },
         { id: 'tips', title: 'Conseils du jour', icon: '💡' },
@@ -222,7 +222,7 @@ export const ModernMenuBar: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.1 }}
     >
-      {menus.map((menu) => (
+      {menus.map(menu => (
         <div key={menu.id} className="relative">
           <motion.button
             className={`px-3 py-1 text-sm hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors ${
@@ -257,7 +257,6 @@ export const ModernMenuBar: React.FC = () => {
                         } transition-colors`}
                         whileHover={{ x: 2 }}
                         onClick={() => {
-                          console.log(`Menu action: ${item.id}`);
                           setActiveMenu(null);
                         }}
                       >
@@ -351,11 +350,9 @@ export const ModernToolbar: React.FC = () => {
     >
       {toolGroups.map((group, groupIndex) => (
         <div key={group.name} className="flex items-center">
-          {groupIndex > 0 && (
-            <div className="w-px h-6 bg-slate-300 dark:bg-slate-600 mx-2" />
-          )}
+          {groupIndex > 0 && <div className="w-px h-6 bg-slate-300 dark:bg-slate-600 mx-2" />}
           <div className="flex items-center space-x-1">
-            {group.tools.map((tool) => (
+            {group.tools.map(tool => (
               <motion.button
                 key={tool.id}
                 className={`p-2 rounded-lg hover:${
@@ -394,7 +391,7 @@ export const ModernToolbar: React.FC = () => {
             type="text"
             placeholder="Rechercher..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={e => setSearchTerm(e.target.value)}
             className={`w-64 px-3 py-1 text-sm rounded-lg border ${
               theme === 'dark'
                 ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400'
@@ -445,12 +442,10 @@ export const ModernStatusBar: React.FC = () => {
       transition={{ duration: 0.3, delay: 0.4 }}
     >
       <div className="flex items-center space-x-4">
-        {statusItems.map((item) => (
+        {statusItems.map(item => (
           <motion.div
             key={item.id}
-            className={`flex items-center space-x-1 ${
-              item.active === false ? 'opacity-50' : ''
-            }`}
+            className={`flex items-center space-x-1 ${item.active === false ? 'opacity-50' : ''}`}
             whileHover={{ scale: 1.02 }}
           >
             <span>{item.icon}</span>
@@ -469,17 +464,11 @@ export const ModernStatusBar: React.FC = () => {
           <span>🕐</span>
           <span>{time.toLocaleTimeString()}</span>
         </motion.div>
-        <motion.div
-          className="flex items-center space-x-1"
-          whileHover={{ scale: 1.05 }}
-        >
+        <motion.div className="flex items-center space-x-1" whileHover={{ scale: 1.05 }}>
           <span>💾</span>
           <span>Enregistré</span>
         </motion.div>
-        <motion.div
-          className="flex items-center space-x-1"
-          whileHover={{ scale: 1.05 }}
-        >
+        <motion.div className="flex items-center space-x-1" whileHover={{ scale: 1.05 }}>
           <span>🔌</span>
           <span>Connecté</span>
         </motion.div>
@@ -505,9 +494,7 @@ export const ModernSidebar: React.FC<{ side: 'left' | 'right'; children: React.R
       transition={{ duration: 0.3 }}
     >
       <motion.button
-        className={`absolute ${
-          side === 'left' ? 'right-2' : 'left-2'
-        } top-2 p-1 rounded hover:${
+        className={`absolute ${side === 'left' ? 'right-2' : 'left-2'} top-2 p-1 rounded hover:${
           theme === 'dark' ? 'bg-slate-800' : 'bg-slate-200'
         } transition-colors z-10`}
         whileHover={{ scale: 1.1 }}
@@ -549,9 +536,7 @@ export const ModernMainLayout: React.FC<{ children: React.ReactNode }> = ({ chil
       transition={{ duration: 0.3, delay: 0.1 }}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-900 dark:to-slate-800 opacity-30" />
-      <div className="relative z-10 h-full">
-        {children}
-      </div>
+      <div className="relative z-10 h-full">{children}</div>
     </motion.div>
   );
 };
@@ -624,9 +609,7 @@ export const ModernFloatingPanel: React.FC<{
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-3">
-        {children}
-      </div>
+      <div className="flex-1 overflow-auto p-3">{children}</div>
 
       <div
         className="absolute bottom-0 right-0 w-4 h-4 cursor-nw-resize"

@@ -49,7 +49,7 @@ const DragDropCanvas: React.FC<DragDropCanvasProps> = () => {
     dragPosition,
     draggedControlType,
   } = useVB6Store(
-    (state) => ({
+    state => ({
       controls: state.controls,
       executionMode: state.executionMode,
       snapToGrid: state.snapToGrid,
@@ -62,10 +62,10 @@ const DragDropCanvas: React.FC<DragDropCanvasProps> = () => {
   );
 
   // Actions don't need shallow comparison
-  const createControl = useVB6Store((state) => state.createControl);
-  const updateControl = useVB6Store((state) => state.updateControl);
-  const setDragState = useVB6Store((state) => state.setDragState);
-  const selectControls = useVB6Store((state) => state.selectControls);
+  const createControl = useVB6Store(state => state.createControl);
+  const updateControl = useVB6Store(state => state.updateControl);
+  const setDragState = useVB6Store(state => state.setDragState);
+  const selectControls = useVB6Store(state => state.selectControls);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -235,15 +235,15 @@ const DragDropCanvas: React.FC<DragDropCanvasProps> = () => {
       onDragEnd={handleDragEnd}
     >
       <div
-        ref={(node) => {
+        ref={node => {
           canvasRef.current = node;
           setDroppableRef(node);
         }}
         className={`w-full h-full relative overflow-hidden ${isOver ? 'bg-blue-50' : ''}`}
         onClick={handleCanvasClick}
-        style={{ 
+        style={{
           cursor: executionMode === 'design' ? 'default' : 'default',
-          transition: 'background-color 200ms ease'
+          transition: 'background-color 200ms ease',
         }}
       >
         <Grid />

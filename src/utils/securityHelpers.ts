@@ -6,14 +6,14 @@ export function safeGet<T>(obj: any, path: string, fallback: T): T {
   try {
     const keys = path.split('.');
     let current = obj;
-    
+
     for (const key of keys) {
       if (current == null || typeof current !== 'object') {
         return fallback;
       }
       current = current[key];
     }
-    
+
     return current !== undefined ? current : fallback;
   } catch (e) {
     console.warn('Safe get error:', e);
@@ -170,12 +170,12 @@ export async function safeFetch(
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-    
+
     const response = await fetch(url, {
       ...options,
-      signal: controller.signal
+      signal: controller.signal,
     });
-    
+
     clearTimeout(timeoutId);
     return response;
   } catch (e) {
@@ -191,9 +191,9 @@ export function safeRandomUUID(): string {
       return crypto.randomUUID();
     }
     // Fallback UUID generation
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });
   } catch (e) {
@@ -222,7 +222,7 @@ export function safeMemoryUsage(): { used: number; total: number } {
     if (typeof performance !== 'undefined' && performance.memory) {
       return {
         used: performance.memory.usedJSHeapSize || 0,
-        total: performance.memory.totalJSHeapSize || 0
+        total: performance.memory.totalJSHeapSize || 0,
       };
     }
     return { used: 0, total: 0 };
@@ -297,5 +297,5 @@ export default {
   safeMemoryUsage,
   isValidLength,
   isValidObject,
-  createErrorBoundary
+  createErrorBoundary,
 };

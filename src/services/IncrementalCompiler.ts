@@ -62,7 +62,7 @@ export class IncrementalCompiler {
   private files: Map<string, FileInfo> = new Map();
   private compilationCache: CompilationCache = {
     files: new Map(),
-    lastCompilation: 0
+    lastCompilation: 0,
   };
   private parser: VB6Parser;
   private analyzer: VB6SemanticAnalyzer;
@@ -97,11 +97,11 @@ export class IncrementalCompiler {
       hash,
       lastModified: Date.now(),
       dependencies: new Set(),
-      dependents: new Set()
+      dependents: new Set(),
     };
 
     this.files.set(path, fileInfo);
-    
+
     // Mark file for recompilation
     this.markForRecompilation(path);
 
@@ -152,11 +152,11 @@ export class IncrementalCompiler {
 
       try {
         const result = await this.compileFile(fileInfo);
-        
+
         if (result.errors.length > 0) {
           errors.push(...result.errors);
         }
-        
+
         if (result.warnings.length > 0) {
           warnings.push(...result.warnings);
         }
@@ -167,7 +167,7 @@ export class IncrementalCompiler {
             path,
             output: result.output,
             hash: fileInfo.hash,
-            dependencies: Array.from(fileInfo.dependencies)
+            dependencies: Array.from(fileInfo.dependencies),
           });
         }
       } catch (error) {
@@ -176,7 +176,7 @@ export class IncrementalCompiler {
           line: 0,
           column: 0,
           message: error instanceof Error ? error.message : 'Unknown compilation error',
-          code: 'COMPILATION_ERROR'
+          code: 'COMPILATION_ERROR',
         });
       }
     }
@@ -192,7 +192,7 @@ export class IncrementalCompiler {
       output,
       errors,
       warnings,
-      duration
+      duration,
     };
   }
 
@@ -227,7 +227,7 @@ export class IncrementalCompiler {
   stopWatch(): void {
     this.isWatching = false;
     this.fileWatcher.clear();
-    
+
     if (this.compilationTimeout) {
       clearTimeout(this.compilationTimeout);
       this.compilationTimeout = null;
@@ -267,7 +267,7 @@ export class IncrementalCompiler {
       cachedFiles,
       pendingFiles,
       lastCompilation: this.compilationCache.lastCompilation,
-      cacheHitRate
+      cacheHitRate,
     };
   }
 
@@ -277,7 +277,7 @@ export class IncrementalCompiler {
   clearCache(): void {
     this.compilationCache.files.clear();
     this.compilationCache.lastCompilation = 0;
-    
+
     // Mark all files for recompilation
     for (const path of this.files.keys()) {
       this.pendingCompilation.add(path);
@@ -291,7 +291,7 @@ export class IncrementalCompiler {
     let hash = 0;
     for (let i = 0; i < content.length; i++) {
       const char = content.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return hash.toString(36);
@@ -299,7 +299,7 @@ export class IncrementalCompiler {
 
   private markForRecompilation(path: string): void {
     this.pendingCompilation.add(path);
-    
+
     // Also mark all dependents
     const fileInfo = this.files.get(path);
     if (fileInfo) {
@@ -317,14 +317,14 @@ export class IncrementalCompiler {
 
       // Extract dependencies (imports, references, etc.)
       const dependencies = this.extractDependencies(ast);
-      
+
       // Update dependency graph
       const oldDependencies = new Set(fileInfo.dependencies);
       fileInfo.dependencies.clear();
 
       for (const dep of dependencies) {
         fileInfo.dependencies.add(dep);
-        
+
         // Update dependents in referenced file
         const depFile = this.files.get(dep);
         if (depFile) {
@@ -369,7 +369,11 @@ export class IncrementalCompiler {
 
         // Recursively visit child nodes
         for (const key in node) {
-          if (Object.prototype.hasOwnProperty.call(node, key) && node[key] && typeof node[key] === 'object') {
+          if (
+            Object.prototype.hasOwnProperty.call(node, key) &&
+            node[key] &&
+            typeof node[key] === 'object'
+          ) {
             if (Array.isArray(node[key])) {
               node[key].forEach(visitor);
             } else {
@@ -405,7 +409,7 @@ export class IncrementalCompiler {
             output: cached.output,
             errors: [],
             warnings: [],
-            duration: 0
+            duration: 0,
           };
         }
       }
@@ -417,25 +421,29 @@ export class IncrementalCompiler {
 
       // Semantic analysis
       const analysisResult = this.analyzer.analyze(fileInfo.ast);
-      
+
       if (analysisResult.errors.length > 0) {
-        errors.push(...analysisResult.errors.map(err => ({
-          file: fileInfo.path,
-          line: err.line || 0,
-          column: err.column || 0,
-          message: err.message,
-          code: err.code || 'SEMANTIC_ERROR'
-        })));
+        errors.push(
+          ...analysisResult.errors.map(err => ({
+            file: fileInfo.path,
+            line: err.line || 0,
+            column: err.column || 0,
+            message: err.message,
+            code: err.code || 'SEMANTIC_ERROR',
+          }))
+        );
       }
 
       if (analysisResult.warnings.length > 0) {
-        warnings.push(...analysisResult.warnings.map(warn => ({
-          file: fileInfo.path,
-          line: warn.line || 0,
-          column: warn.column || 0,
-          message: warn.message,
-          code: warn.code || 'WARNING'
-        })));
+        warnings.push(
+          ...analysisResult.warnings.map(warn => ({
+            file: fileInfo.path,
+            line: warn.line || 0,
+            column: warn.column || 0,
+            message: warn.message,
+            code: warn.code || 'WARNING',
+          }))
+        );
       }
 
       // Transpile to JavaScript
@@ -446,20 +454,22 @@ export class IncrementalCompiler {
         output,
         errors,
         warnings,
-        duration: 0
+        duration: 0,
       };
     } catch (error) {
       return {
         success: false,
-        errors: [{
-          file: fileInfo.path,
-          line: 0,
-          column: 0,
-          message: error instanceof Error ? error.message : 'Unknown error',
-          code: 'COMPILATION_ERROR'
-        }],
+        errors: [
+          {
+            file: fileInfo.path,
+            line: 0,
+            column: 0,
+            message: error instanceof Error ? error.message : 'Unknown error',
+            code: 'COMPILATION_ERROR',
+          },
+        ],
         warnings,
-        duration: 0
+        duration: 0,
       };
     }
   }
@@ -471,7 +481,7 @@ export class IncrementalCompiler {
 
     const processFile = (path: string) => {
       if (processed.has(path)) return;
-      
+
       const fileInfo = this.files.get(path);
       if (!fileInfo) return;
 

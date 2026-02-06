@@ -19,7 +19,7 @@ interface MSEEControlProps {
 export enum EquationType {
   Inline = 0,
   Display = 1,
-  Numbered = 2
+  Numbered = 2,
 }
 
 // Symbol categories
@@ -29,7 +29,7 @@ export enum SymbolCategory {
   Greek = 'greek',
   Arrow = 'arrow',
   Delimiter = 'delimiter',
-  Miscellaneous = 'misc'
+  Miscellaneous = 'misc',
 }
 
 // Template types
@@ -48,7 +48,7 @@ export enum TemplateType {
   Brackets = 'brackets',
   Braces = 'braces',
   Vector = 'vector',
-  Binomial = 'binomial'
+  Binomial = 'binomial',
 }
 
 export interface EquationElement {
@@ -81,9 +81,9 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
       color: control.equation?.color || '#000000',
       backgroundColor: control.equation?.backgroundColor || '#FFFFFF',
       type: control.equation?.type || EquationType.Inline,
-      alignment: control.equation?.alignment || 'center'
+      alignment: control.equation?.alignment || 'center',
     });
-    
+
     const [isEditing, setIsEditing] = useState(false);
     const [selectedElement, setSelectedElement] = useState<number | null>(null);
     const [cursorPosition, setCursorPosition] = useState(0);
@@ -103,7 +103,7 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
         { symbol: '⊂', name: 'subset' },
         { symbol: '⊃', name: 'superset' },
         { symbol: '∈', name: 'element of' },
-        { symbol: '∉', name: 'not element of' }
+        { symbol: '∉', name: 'not element of' },
       ],
       operator: [
         { symbol: '+', name: 'plus' },
@@ -117,7 +117,7 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
         { symbol: '⊕', name: 'direct sum' },
         { symbol: '⊗', name: 'tensor product' },
         { symbol: '∧', name: 'wedge' },
-        { symbol: '∨', name: 'vee' }
+        { symbol: '∨', name: 'vee' },
       ],
       greek: [
         { symbol: 'α', name: 'alpha' },
@@ -151,7 +151,7 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
         { symbol: 'Σ', name: 'Sigma' },
         { symbol: 'Φ', name: 'Phi' },
         { symbol: 'Ψ', name: 'Psi' },
-        { symbol: 'Ω', name: 'Omega' }
+        { symbol: 'Ω', name: 'Omega' },
       ],
       arrow: [
         { symbol: '→', name: 'right arrow' },
@@ -162,7 +162,7 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
         { symbol: '⇒', name: 'right double arrow' },
         { symbol: '⇐', name: 'left double arrow' },
         { symbol: '⇔', name: 'left right double arrow' },
-        { symbol: '↦', name: 'maps to' }
+        { symbol: '↦', name: 'maps to' },
       ],
       delimiter: [
         { symbol: '(', name: 'left parenthesis' },
@@ -174,7 +174,7 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
         { symbol: '⟨', name: 'left angle' },
         { symbol: '⟩', name: 'right angle' },
         { symbol: '|', name: 'vertical bar' },
-        { symbol: '‖', name: 'double vertical bar' }
+        { symbol: '‖', name: 'double vertical bar' },
       ],
       misc: [
         { symbol: '∞', name: 'infinity' },
@@ -192,8 +192,8 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
         { symbol: 'ℝ', name: 'real numbers' },
         { symbol: 'ℂ', name: 'complex numbers' },
         { symbol: 'ℕ', name: 'natural numbers' },
-        { symbol: 'ℤ', name: 'integers' }
-      ]
+        { symbol: 'ℤ', name: 'integers' },
+      ],
     };
 
     // Render equation to canvas
@@ -299,9 +299,9 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
     };
 
     const renderElement = (
-      ctx: CanvasRenderingContext2D, 
-      element: EquationElement, 
-      x: number, 
+      ctx: CanvasRenderingContext2D,
+      element: EquationElement,
+      x: number,
       y: number,
       isSelected: boolean
     ): number => {
@@ -318,22 +318,22 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
         case 'symbol':
           ctx.fillText(element.content, x, y);
           return ctx.measureText(element.content).width;
-        
+
         case 'space':
           return parseInt(element.content) || 10;
-        
+
         case 'template':
           return renderTemplate(ctx, element, x, y);
-        
+
         default:
           return 0;
       }
     };
 
     const renderTemplate = (
-      ctx: CanvasRenderingContext2D, 
-      element: EquationElement, 
-      x: number, 
+      ctx: CanvasRenderingContext2D,
+      element: EquationElement,
+      x: number,
       y: number
     ): number => {
       switch (element.templateType) {
@@ -354,27 +354,33 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
     };
 
     const renderFraction = (
-      ctx: CanvasRenderingContext2D, 
-      element: EquationElement, 
-      x: number, 
+      ctx: CanvasRenderingContext2D,
+      element: EquationElement,
+      x: number,
       y: number
     ): number => {
       if (!element.children || element.children.length < 2) return 0;
 
       const numerator = element.children[0];
       const denominator = element.children[1];
-      
+
       const numWidth = getElementWidth(ctx, numerator);
       const denWidth = getElementWidth(ctx, denominator);
       const maxWidth = Math.max(numWidth, denWidth);
-      
+
       // Save current font
       const savedFont = ctx.font;
       ctx.font = `${equation.fontSize * 0.8}px "Cambria Math", "Times New Roman", serif`;
-      
+
       // Render numerator
-      renderElement(ctx, numerator, x + (maxWidth - numWidth) / 2, y - equation.fontSize * 0.4, false);
-      
+      renderElement(
+        ctx,
+        numerator,
+        x + (maxWidth - numWidth) / 2,
+        y - equation.fontSize * 0.4,
+        false
+      );
+
       // Draw fraction line
       ctx.strokeStyle = equation.color;
       ctx.lineWidth = 1;
@@ -382,81 +388,99 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
       ctx.moveTo(x, y);
       ctx.lineTo(x + maxWidth, y);
       ctx.stroke();
-      
+
       // Render denominator
-      renderElement(ctx, denominator, x + (maxWidth - denWidth) / 2, y + equation.fontSize * 0.4, false);
-      
+      renderElement(
+        ctx,
+        denominator,
+        x + (maxWidth - denWidth) / 2,
+        y + equation.fontSize * 0.4,
+        false
+      );
+
       // Restore font
       ctx.font = savedFont;
-      
+
       return maxWidth + 10;
     };
 
     const renderSuperscript = (
-      ctx: CanvasRenderingContext2D, 
-      element: EquationElement, 
-      x: number, 
+      ctx: CanvasRenderingContext2D,
+      element: EquationElement,
+      x: number,
       y: number
     ): number => {
       if (!element.children || element.children.length < 2) return 0;
 
       const base = element.children[0];
       const superscript = element.children[1];
-      
+
       // Render base
       const baseWidth = renderElement(ctx, base, x, y, false);
-      
+
       // Save and modify font for superscript
       const savedFont = ctx.font;
       ctx.font = `${equation.fontSize * 0.7}px "Cambria Math", "Times New Roman", serif`;
-      
+
       // Render superscript
-      const scriptWidth = renderElement(ctx, superscript, x + baseWidth, y - equation.fontSize * 0.3, false);
-      
+      const scriptWidth = renderElement(
+        ctx,
+        superscript,
+        x + baseWidth,
+        y - equation.fontSize * 0.3,
+        false
+      );
+
       // Restore font
       ctx.font = savedFont;
-      
+
       return baseWidth + scriptWidth;
     };
 
     const renderSubscript = (
-      ctx: CanvasRenderingContext2D, 
-      element: EquationElement, 
-      x: number, 
+      ctx: CanvasRenderingContext2D,
+      element: EquationElement,
+      x: number,
       y: number
     ): number => {
       if (!element.children || element.children.length < 2) return 0;
 
       const base = element.children[0];
       const subscript = element.children[1];
-      
+
       // Render base
       const baseWidth = renderElement(ctx, base, x, y, false);
-      
+
       // Save and modify font for subscript
       const savedFont = ctx.font;
       ctx.font = `${equation.fontSize * 0.7}px "Cambria Math", "Times New Roman", serif`;
-      
+
       // Render subscript
-      const scriptWidth = renderElement(ctx, subscript, x + baseWidth, y + equation.fontSize * 0.3, false);
-      
+      const scriptWidth = renderElement(
+        ctx,
+        subscript,
+        x + baseWidth,
+        y + equation.fontSize * 0.3,
+        false
+      );
+
       // Restore font
       ctx.font = savedFont;
-      
+
       return baseWidth + scriptWidth;
     };
 
     const renderRadical = (
-      ctx: CanvasRenderingContext2D, 
-      element: EquationElement, 
-      x: number, 
+      ctx: CanvasRenderingContext2D,
+      element: EquationElement,
+      x: number,
       y: number
     ): number => {
       if (!element.children || element.children.length < 1) return 0;
 
       const content = element.children[0];
       const contentWidth = getElementWidth(ctx, content);
-      
+
       // Draw radical symbol
       ctx.strokeStyle = equation.color;
       ctx.lineWidth = 1;
@@ -466,48 +490,54 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
       ctx.lineTo(x + 10, y - equation.fontSize * 0.5);
       ctx.lineTo(x + 15 + contentWidth, y - equation.fontSize * 0.5);
       ctx.stroke();
-      
+
       // Render content under radical
       renderElement(ctx, content, x + 15, y, false);
-      
+
       return contentWidth + 20;
     };
 
     const renderIntegral = (
-      ctx: CanvasRenderingContext2D, 
-      element: EquationElement, 
-      x: number, 
+      ctx: CanvasRenderingContext2D,
+      element: EquationElement,
+      x: number,
       y: number
     ): number => {
       // Draw integral symbol
       ctx.font = `${equation.fontSize * 1.5}px "Cambria Math", "Times New Roman", serif`;
       ctx.fillText('∫', x, y);
       const integralWidth = ctx.measureText('∫').width;
-      
+
       // Reset font
       ctx.font = `${equation.fontSize}px "Cambria Math", "Times New Roman", serif`;
-      
+
       return integralWidth + 5;
     };
 
     // VB6 Methods implementation
     const vb6Methods = {
       // Properties
-      get Equation() { return equation; },
+      get Equation() {
+        return equation;
+      },
       set Equation(value: EquationDocument) {
         setEquation(value);
         onChange?.({ equation: value });
       },
 
-      get IsEditing() { return isEditing; },
-      set IsEditing(value: boolean) { setIsEditing(value); },
+      get IsEditing() {
+        return isEditing;
+      },
+      set IsEditing(value: boolean) {
+        setIsEditing(value);
+      },
 
       // Methods
       InsertSymbol: (symbol: string, category?: SymbolCategory) => {
         const newElement: EquationElement = {
           type: 'symbol',
           content: symbol,
-          category
+          category,
         };
         insertElement(newElement);
       },
@@ -515,7 +545,7 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
       InsertText: (text: string) => {
         const newElement: EquationElement = {
           type: 'text',
-          content: text
+          content: text,
         };
         insertElement(newElement);
       },
@@ -525,7 +555,7 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
           type: 'template',
           content: '',
           templateType,
-          children: getDefaultTemplateChildren(templateType)
+          children: getDefaultTemplateChildren(templateType),
         };
         insertElement(newElement);
       },
@@ -533,7 +563,7 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
       InsertSpace: (width: number = 10) => {
         const newElement: EquationElement = {
           type: 'space',
-          content: width.toString()
+          content: width.toString(),
         };
         insertElement(newElement);
       },
@@ -578,7 +608,7 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
           return canvasRef.current.toDataURL(`image/${format}`);
         }
         return '';
-      }
+      },
     };
 
     const insertElement = (element: EquationElement) => {
@@ -595,13 +625,13 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
         case TemplateType.Fraction:
           return [
             { type: 'text', content: '' },
-            { type: 'text', content: '' }
+            { type: 'text', content: '' },
           ];
         case TemplateType.Superscript:
         case TemplateType.Subscript:
           return [
             { type: 'text', content: '' },
-            { type: 'text', content: '' }
+            { type: 'text', content: '' },
           ];
         case TemplateType.Radical:
           return [{ type: 'text', content: '' }];
@@ -611,25 +641,27 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
     };
 
     const convertToLaTeX = (elements: EquationElement[]): string => {
-      return elements.map(element => {
-        switch (element.type) {
-          case 'text':
-            return element.content;
-          case 'symbol':
-            return `\\${element.content}`;
-          case 'space':
-            return '\\,';
-          case 'template':
-            return convertTemplateToLaTeX(element);
-          default:
-            return '';
-        }
-      }).join('');
+      return elements
+        .map(element => {
+          switch (element.type) {
+            case 'text':
+              return element.content;
+            case 'symbol':
+              return `\\${element.content}`;
+            case 'space':
+              return '\\,';
+            case 'template':
+              return convertTemplateToLaTeX(element);
+            default:
+              return '';
+          }
+        })
+        .join('');
     };
 
     const convertTemplateToLaTeX = (element: EquationElement): string => {
       if (!element.children) return '';
-      
+
       switch (element.templateType) {
         case TemplateType.Fraction:
           return `\\frac{${convertToLaTeX(element.children[0] ? [element.children[0]] : [])}}{${convertToLaTeX(element.children[1] ? [element.children[1]] : [])}}`;
@@ -646,27 +678,29 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
 
     const convertToMathML = (elements: EquationElement[]): string => {
       // Simplified MathML conversion
-      const content = elements.map(element => {
-        switch (element.type) {
-          case 'text':
-            return `<mi>${element.content}</mi>`;
-          case 'symbol':
-            return `<mo>${element.content}</mo>`;
-          case 'space':
-            return '<mspace width="1em"/>';
-          case 'template':
-            return convertTemplateToMathML(element);
-          default:
-            return '';
-        }
-      }).join('');
-      
+      const content = elements
+        .map(element => {
+          switch (element.type) {
+            case 'text':
+              return `<mi>${element.content}</mi>`;
+            case 'symbol':
+              return `<mo>${element.content}</mo>`;
+            case 'space':
+              return '<mspace width="1em"/>';
+            case 'template':
+              return convertTemplateToMathML(element);
+            default:
+              return '';
+          }
+        })
+        .join('');
+
       return `<math xmlns="http://www.w3.org/1998/Math/MathML">${content}</math>`;
     };
 
     const convertTemplateToMathML = (element: EquationElement): string => {
       if (!element.children) return '';
-      
+
       switch (element.templateType) {
         case TemplateType.Fraction:
           return `<mfrac><mrow>${convertToMathML(element.children[0] ? [element.children[0]] : [])}</mrow><mrow>${convertToMathML(element.children[1] ? [element.children[1]] : [])}</mrow></mfrac>`;
@@ -709,12 +743,15 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
       width: control.width || 400,
       height: control.height || 100,
       backgroundColor: control.backColor || '#FFFFFF',
-      border: control.borderStyle ? `${control.borderWidth || 1}px solid ${control.borderColor || '#000000'}` : '1px solid #808080',
-      boxShadow: control.appearance === '3D' ? 'inset -1px -1px #404040, inset 1px 1px #ffffff' : 'none',
+      border: control.borderStyle
+        ? `${control.borderWidth || 1}px solid ${control.borderColor || '#000000'}`
+        : '1px solid #808080',
+      boxShadow:
+        control.appearance === '3D' ? 'inset -1px -1px #404040, inset 1px 1px #ffffff' : 'none',
       overflow: 'hidden',
       cursor: isEditing ? 'text' : 'default',
       opacity: control.visible !== false ? 1 : 0,
-      zIndex: control.zIndex || 'auto'
+      zIndex: control.zIndex || 'auto',
     };
 
     const handleClick = (e: React.MouseEvent) => {
@@ -728,7 +765,6 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
       if (!isDesignMode) {
         setIsEditing(true);
         // Open equation editor dialog
-        console.log('Opening equation editor...');
       }
       onDoubleClick?.(e);
     };
@@ -743,16 +779,18 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
         data-control-name={control.name}
       >
         {isDesignMode && equation.elements.length === 0 ? (
-          <div style={{
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#808080',
-            fontSize: '14px',
-            fontFamily: 'Arial, sans-serif'
-          }}>
+          <div
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#808080',
+              fontSize: '14px',
+              fontFamily: 'Arial, sans-serif',
+            }}
+          >
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '24px', marginBottom: '4px' }}>∑</div>
               <div>Equation Editor</div>
@@ -763,7 +801,7 @@ export const MSEEControl = forwardRef<HTMLDivElement, MSEEControlProps>(
             ref={canvasRef}
             style={{
               width: '100%',
-              height: '100%'
+              height: '100%',
             }}
           />
         )}

@@ -9,8 +9,8 @@ export interface AnimationConfig {
 
 export interface AnimationTarget {
   id: number; // Control ID
-  from: { x: number; y: number; width?: number; height?: number; opacity?: number; };
-  to: { x: number; y: number; width?: number; height?: number; opacity?: number; };
+  from: { x: number; y: number; width?: number; height?: number; opacity?: number };
+  to: { x: number; y: number; width?: number; height?: number; opacity?: number };
 }
 
 export interface AnimationSequence {
@@ -23,12 +23,15 @@ export interface AnimationSequence {
 
 export class AnimationService {
   private static instance: AnimationService;
-  private activeAnimations = new Map<string, {
-    sequence: AnimationSequence;
-    startTime: number;
-    rafId: number;
-  }>();
-  
+  private activeAnimations = new Map<
+    string,
+    {
+      sequence: AnimationSequence;
+      startTime: number;
+      rafId: number;
+    }
+  >();
+
   private animationCallbacks = new Map<string, (frame: any) => void>();
 
   static getInstance(): AnimationService {
@@ -43,7 +46,7 @@ export class AnimationService {
     linear: (t: number) => t,
     'ease-in': (t: number) => t * t,
     'ease-out': (t: number) => t * (2 - t),
-    'ease-in-out': (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
+    'ease-in-out': (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t),
     bounce: (t: number) => {
       if (t < 1 / 2.75) {
         return 7.5625 * t * t;
@@ -56,8 +59,12 @@ export class AnimationService {
       }
     },
     elastic: (t: number) => {
-      return t === 0 ? 0 : t === 1 ? 1 : -Math.pow(2, 10 * (t - 1)) * Math.sin((t - 1.1) * 5 * Math.PI);
-    }
+      return t === 0
+        ? 0
+        : t === 1
+          ? 1
+          : -Math.pow(2, 10 * (t - 1)) * Math.sin((t - 1.1) * 5 * Math.PI);
+    },
   };
 
   // Start an animation sequence
@@ -66,11 +73,11 @@ export class AnimationService {
     this.stopAnimation(sequence.id);
 
     const startTime = Date.now() + (sequence.config.delay || 0);
-    
+
     const animate = (currentTime: number) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / sequence.config.duration, 1);
-      
+
       if (progress < 0) {
         // Still in delay period
         const rafId = requestAnimationFrame(animate);
@@ -80,23 +87,26 @@ export class AnimationService {
 
       // Apply easing
       const easedProgress = this.easingFunctions[sequence.config.easing](progress);
-      
+
       // Calculate current values for each target
       const currentTargets = sequence.targets.map(target => ({
         ...target,
         current: {
           x: this.interpolate(target.from.x, target.to.x, easedProgress),
           y: this.interpolate(target.from.y, target.to.y, easedProgress),
-          width: target.from.width !== undefined && target.to.width !== undefined 
-            ? this.interpolate(target.from.width, target.to.width, easedProgress)
-            : undefined,
-          height: target.from.height !== undefined && target.to.height !== undefined 
-            ? this.interpolate(target.from.height, target.to.height, easedProgress)
-            : undefined,
-          opacity: target.from.opacity !== undefined && target.to.opacity !== undefined 
-            ? this.interpolate(target.from.opacity, target.to.opacity, easedProgress)
-            : undefined,
-        }
+          width:
+            target.from.width !== undefined && target.to.width !== undefined
+              ? this.interpolate(target.from.width, target.to.width, easedProgress)
+              : undefined,
+          height:
+            target.from.height !== undefined && target.to.height !== undefined
+              ? this.interpolate(target.from.height, target.to.height, easedProgress)
+              : undefined,
+          opacity:
+            target.from.opacity !== undefined && target.to.opacity !== undefined
+              ? this.interpolate(target.from.opacity, target.to.opacity, easedProgress)
+              : undefined,
+        },
       }));
 
       // Call update callback
@@ -157,22 +167,22 @@ export class AnimationService {
 
   // Animate control movement
   animateMove(
-    controlIds: number[], 
-    fromPositions: Array<{id: number; x: number; y: number}>,
-    toPositions: Array<{id: number; x: number; y: number}>,
+    controlIds: number[],
+    fromPositions: Array<{ id: number; x: number; y: number }>,
+    toPositions: Array<{ id: number; x: number; y: number }>,
     config: Partial<AnimationConfig> = {}
   ): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const animationId = `move_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
       const targets: AnimationTarget[] = controlIds.map(id => {
         const fromPos = fromPositions.find(p => p.id === id) || { id, x: 0, y: 0 };
         const toPos = toPositions.find(p => p.id === id) || { id, x: 0, y: 0 };
-        
+
         return {
           id,
           from: { x: fromPos.x, y: fromPos.y },
-          to: { x: toPos.x, y: toPos.y }
+          to: { x: toPos.x, y: toPos.y },
         };
       });
 
@@ -182,13 +192,13 @@ export class AnimationService {
         config: {
           duration: 300,
           easing: 'ease-out',
-          ...config
+          ...config,
         },
         onComplete: resolve,
         onUpdate: (progress, currentTargets) => {
           // Emit update event for UI to handle
           this.emitAnimationUpdate(animationId, 'move', currentTargets);
-        }
+        },
       });
     });
   }
@@ -196,21 +206,21 @@ export class AnimationService {
   // Animate control resizing
   animateResize(
     controlIds: number[],
-    fromSizes: Array<{id: number; x: number; y: number; width: number; height: number}>,
-    toSizes: Array<{id: number; x: number; y: number; width: number; height: number}>,
+    fromSizes: Array<{ id: number; x: number; y: number; width: number; height: number }>,
+    toSizes: Array<{ id: number; x: number; y: number; width: number; height: number }>,
     config: Partial<AnimationConfig> = {}
   ): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const animationId = `resize_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
       const targets: AnimationTarget[] = controlIds.map(id => {
         const from = fromSizes.find(s => s.id === id) || { id, x: 0, y: 0, width: 100, height: 30 };
         const to = toSizes.find(s => s.id === id) || { id, x: 0, y: 0, width: 100, height: 30 };
-        
+
         return {
           id,
           from: { x: from.x, y: from.y, width: from.width, height: from.height },
-          to: { x: to.x, y: to.y, width: to.width, height: to.height }
+          to: { x: to.x, y: to.y, width: to.width, height: to.height },
         };
       });
 
@@ -220,12 +230,12 @@ export class AnimationService {
         config: {
           duration: 250,
           easing: 'ease-out',
-          ...config
+          ...config,
         },
         onComplete: resolve,
         onUpdate: (progress, currentTargets) => {
           this.emitAnimationUpdate(animationId, 'resize', currentTargets);
-        }
+        },
       });
     });
   }
@@ -233,21 +243,21 @@ export class AnimationService {
   // Animate snap-to-grid effect
   animateSnapToGrid(
     controlIds: number[],
-    fromPositions: Array<{id: number; x: number; y: number}>,
-    toPositions: Array<{id: number; x: number; y: number}>,
+    fromPositions: Array<{ id: number; x: number; y: number }>,
+    toPositions: Array<{ id: number; x: number; y: number }>,
     config: Partial<AnimationConfig> = {}
   ): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const animationId = `snap_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
       const targets: AnimationTarget[] = controlIds.map(id => {
         const from = fromPositions.find(p => p.id === id) || { id, x: 0, y: 0 };
         const to = toPositions.find(p => p.id === id) || { id, x: 0, y: 0 };
-        
+
         return {
           id,
           from: { x: from.x, y: from.y },
-          to: { x: to.x, y: to.y }
+          to: { x: to.x, y: to.y },
         };
       });
 
@@ -257,12 +267,12 @@ export class AnimationService {
         config: {
           duration: 150,
           easing: 'ease-out',
-          ...config
+          ...config,
         },
         onComplete: resolve,
         onUpdate: (progress, currentTargets) => {
           this.emitAnimationUpdate(animationId, 'snap', currentTargets);
-        }
+        },
       });
     });
   }
@@ -270,22 +280,22 @@ export class AnimationService {
   // Animate alignment effect
   animateAlignment(
     controlIds: number[],
-    fromPositions: Array<{id: number; x: number; y: number}>,
-    toPositions: Array<{id: number; x: number; y: number}>,
+    fromPositions: Array<{ id: number; x: number; y: number }>,
+    toPositions: Array<{ id: number; x: number; y: number }>,
     alignmentType: string,
     config: Partial<AnimationConfig> = {}
   ): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const animationId = `align_${alignmentType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
       const targets: AnimationTarget[] = controlIds.map(id => {
         const from = fromPositions.find(p => p.id === id) || { id, x: 0, y: 0 };
         const to = toPositions.find(p => p.id === id) || { id, x: 0, y: 0 };
-        
+
         return {
           id,
           from: { x: from.x, y: from.y },
-          to: { x: to.x, y: to.y }
+          to: { x: to.x, y: to.y },
         };
       });
 
@@ -296,12 +306,12 @@ export class AnimationService {
           duration: 400,
           easing: 'elastic',
           delay: 100, // Small delay for visual effect
-          ...config
+          ...config,
         },
         onComplete: resolve,
         onUpdate: (progress, currentTargets) => {
           this.emitAnimationUpdate(animationId, 'align', currentTargets, { alignmentType });
-        }
+        },
       });
     });
   }
@@ -313,13 +323,13 @@ export class AnimationService {
     toOpacity: number,
     config: Partial<AnimationConfig> = {}
   ): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const animationId = `fade_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
       const targets: AnimationTarget[] = controlIds.map(id => ({
         id,
         from: { x: 0, y: 0, opacity: fromOpacity },
-        to: { x: 0, y: 0, opacity: toOpacity }
+        to: { x: 0, y: 0, opacity: toOpacity },
       }));
 
       this.startAnimation({
@@ -328,21 +338,21 @@ export class AnimationService {
         config: {
           duration: 200,
           easing: 'ease-in-out',
-          ...config
+          ...config,
         },
         onComplete: resolve,
         onUpdate: (progress, currentTargets) => {
           this.emitAnimationUpdate(animationId, 'fade', currentTargets);
-        }
+        },
       });
     });
   }
 
   // Event emission for UI updates
   private emitAnimationUpdate(
-    animationId: string, 
-    type: string, 
-    targets: any[], 
+    animationId: string,
+    type: string,
+    targets: any[],
     metadata?: any
   ): void {
     const callback = this.animationCallbacks.get(animationId);
@@ -351,20 +361,22 @@ export class AnimationService {
         animationId,
         type,
         targets,
-        metadata
+        metadata,
       });
     }
 
     // Also emit to global listeners
-    window.dispatchEvent(new CustomEvent('vb6-animation-update', {
-      detail: { animationId, type, targets, metadata }
-    }));
+    window.dispatchEvent(
+      new CustomEvent('vb6-animation-update', {
+        detail: { animationId, type, targets, metadata },
+      })
+    );
   }
 
   // Subscribe to animation updates
   subscribe(animationId: string, callback: (frame: any) => void): () => void {
     this.animationCallbacks.set(animationId, callback);
-    
+
     return () => {
       this.animationCallbacks.delete(animationId);
     };
@@ -379,7 +391,7 @@ export class AnimationService {
     return {
       activeAnimations: this.activeAnimations.size,
       totalAnimationsStarted: 0, // Would need to track this
-      averageFrameRate: 60 // Placeholder - would need to calculate actual
+      averageFrameRate: 60, // Placeholder - would need to calculate actual
     };
   }
 }

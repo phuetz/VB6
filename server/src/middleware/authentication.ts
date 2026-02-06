@@ -67,24 +67,24 @@ export const authentication = async (req: AuthRequest, res: Response, next: Next
     if (publicEndpoints.includes(req.path)) {
       return next();
     }
-    
+
     // Get token from header
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new AppError('No token provided', 401);
     }
-    
+
     const token = authHeader.substring(7);
-    
+
     // Verify token
     const decoded = verifyToken(token);
-    
+
     // Add user to request
     req.user = decoded;
-    
+
     // Log authentication
     logger.info(`Authenticated user: ${decoded.username}`);
-    
+
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
@@ -103,16 +103,16 @@ export const authorize = (...requiredPermissions: string[]) => {
     if (!req.user) {
       return next(new AppError('Not authenticated', 401));
     }
-    
+
     const userPermissions = req.user.permissions || [];
-    const hasPermission = requiredPermissions.some(permission => 
-      userPermissions.includes(permission) || userPermissions.includes('admin')
+    const hasPermission = requiredPermissions.some(
+      permission => userPermissions.includes(permission) || userPermissions.includes('admin')
     );
-    
+
     if (!hasPermission) {
       return next(new AppError('Insufficient permissions', 403));
     }
-    
+
     next();
   };
 };
@@ -121,11 +121,11 @@ export const authorize = (...requiredPermissions: string[]) => {
 export const apiKeyAuth = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const apiKey = req.headers['x-api-key'] as string;
-    
+
     if (!apiKey) {
       return next();
     }
-    
+
     // In production, validate API key against database
     // For now, use a simple check
     if (apiKey === process.env.MASTER_API_KEY) {
@@ -136,7 +136,7 @@ export const apiKeyAuth = async (req: AuthRequest, res: Response, next: NextFunc
         permissions: ['admin'],
       };
     }
-    
+
     next();
   } catch (error) {
     next(error);
@@ -146,11 +146,11 @@ export const apiKeyAuth = async (req: AuthRequest, res: Response, next: NextFunc
 // Combined authentication (JWT or API key)
 export const flexibleAuth = async (req: AuthRequest, res: Response, next: NextFunction) => {
   // Try API key first
-  await apiKeyAuth(req, res, (err) => {
+  await apiKeyAuth(req, res, err => {
     if (err || req.user) {
       return next(err);
     }
-    
+
     // Fall back to JWT authentication
     authentication(req, res, next);
   });
@@ -159,16 +159,16 @@ export const flexibleAuth = async (req: AuthRequest, res: Response, next: NextFu
 // Rate limit by user tier
 export const tierBasedLimits = (req: AuthRequest, res: Response, next: NextFunction) => {
   const tier = req.user?.tier || 'free';
-  
+
   const limits = {
     free: { requests: 1000, connections: 2, databases: 1 },
     basic: { requests: 10000, connections: 10, databases: 5 },
     pro: { requests: 100000, connections: 50, databases: 20 },
     enterprise: { requests: Infinity, connections: Infinity, databases: Infinity },
   };
-  
+
   // Add limits to request for other middleware to use
   (req as any).limits = limits[tier];
-  
+
   next();
 };

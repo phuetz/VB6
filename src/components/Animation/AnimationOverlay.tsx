@@ -29,7 +29,7 @@ interface AnimationOverlayProps {
 export const AnimationOverlay: React.FC<AnimationOverlayProps> = ({
   controls,
   zoom,
-  canvasOffset
+  canvasOffset,
 }) => {
   const [activeAnimations, setActiveAnimations] = useState<Map<string, AnimationFrame>>(new Map());
 
@@ -53,7 +53,10 @@ export const AnimationOverlay: React.FC<AnimationOverlayProps> = ({
 
     return () => {
       window.removeEventListener('vb6-animation-update', handleAnimationUpdate as EventListener);
-      window.removeEventListener('vb6-animation-complete', handleAnimationComplete as EventListener);
+      window.removeEventListener(
+        'vb6-animation-complete',
+        handleAnimationComplete as EventListener
+      );
     };
   }, []);
 

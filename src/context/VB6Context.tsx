@@ -32,24 +32,23 @@ export const useVB6 = () => {
 };
 
 export const VB6Provider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  console.log('🔄 VB6Provider initializing...');
   const [state, dispatch] = useReducer(vb6Reducer, initialState);
-  console.log('✅ VB6Provider initialized with state:', state);
-
   const createControl = useCallback((type: string, x?: number, y?: number) => {
-    console.log('Creating control in context:', type, x, y);
     dispatch({
       type: 'CREATE_CONTROL',
       payload: { type, x: x || 50, y: y || 50 },
     });
   }, []);
 
-  const updateControl = useCallback((controlId: number, property: string, value: ControlPropertyValue) => {
-    dispatch({
-      type: 'UPDATE_CONTROL',
-      payload: { controlId, property, value },
-    });
-  }, []);
+  const updateControl = useCallback(
+    (controlId: number, property: string, value: ControlPropertyValue) => {
+      dispatch({
+        type: 'UPDATE_CONTROL',
+        payload: { controlId, property, value },
+      });
+    },
+    []
+  );
 
   const deleteControls = useCallback((controlIds: number[]) => {
     dispatch({
@@ -115,7 +114,6 @@ export const VB6Provider: React.FC<{ children: React.ReactNode }> = ({ children 
         classModules: state.classModules,
       };
       await FileManager.exportProjectArchive(project as any);
-      console.log('Project saved successfully');
     } catch (error) {
       console.error('Failed to save project:', error);
       throw error; // Re-throw to let caller handle UI feedback
@@ -129,7 +127,6 @@ export const VB6Provider: React.FC<{ children: React.ReactNode }> = ({ children 
         const project = await FileManager.importProjectArchive(file);
         if (project) {
           dispatch({ type: 'SET_PROJECT', payload: { project } });
-          console.log('Archive project loaded successfully');
         } else {
           throw new Error('Failed to extract project from archive');
         }
@@ -138,16 +135,15 @@ export const VB6Provider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (!projectText.trim()) {
           throw new Error('Project file is empty');
         }
-        
+
         let project;
         try {
           project = JSON.parse(projectText);
         } catch (parseError) {
           throw new Error(`Invalid JSON in project file: ${parseError.message}`);
         }
-        
+
         dispatch({ type: 'SET_PROJECT', payload: { project } });
-        console.log('Text project loaded successfully');
       }
     } catch (err) {
       console.error('Failed to load project:', err);

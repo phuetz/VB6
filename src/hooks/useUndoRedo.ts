@@ -2,6 +2,7 @@
 // Provides sophisticated operation tracking and intelligent history management
 
 import { useState, useEffect, useCallback } from 'react';
+import { shallow } from 'zustand/shallow';
 import { undoRedoService, UndoRedoAction, UndoRedoState } from '../services/UndoRedoService';
 import { useVB6Store } from '../stores/vb6Store';
 import { Control } from '../context/types';
@@ -28,27 +29,42 @@ export interface UseUndoRedoReturn {
   currentAction: UndoRedoAction | null;
   nextAction: UndoRedoAction | null;
   historySize: number;
-  
+
   // Actions
   undo: () => Promise<void>;
   redo: () => Promise<void>;
   clear: () => void;
-  
+
   // Recording functions
   recordCreate: (controls: Control[]) => void;
   recordDelete: (controls: Control[]) => void;
-  recordMove: (controls: Control[], beforePositions: Array<{id: number; x: number; y: number}>) => void;
-  recordResize: (controls: Control[], beforeSizes: Array<{id: number; x: number; y: number; width: number; height: number}>) => void;
-  recordPropertyChange: (controls: Control[], property: string, beforeValues: PropertyValue[], afterValues: PropertyValue[]) => void;
+  recordMove: (
+    controls: Control[],
+    beforePositions: Array<{ id: number; x: number; y: number }>
+  ) => void;
+  recordResize: (
+    controls: Control[],
+    beforeSizes: Array<{ id: number; x: number; y: number; width: number; height: number }>
+  ) => void;
+  recordPropertyChange: (
+    controls: Control[],
+    property: string,
+    beforeValues: PropertyValue[],
+    afterValues: PropertyValue[]
+  ) => void;
   recordCopy: (controls: Control[]) => void;
   recordPaste: (controls: Control[]) => void;
   recordDuplicate: (originalControls: Control[], duplicatedControls: Control[]) => void;
-  recordAlign: (controls: Control[], alignType: string, beforePositions: Array<{id: number; x: number; y: number}>) => void;
-  
+  recordAlign: (
+    controls: Control[],
+    alignType: string,
+    beforePositions: Array<{ id: number; x: number; y: number }>
+  ) => void;
+
   // History
   getHistory: () => UndoRedoAction[];
   getMemoryUsage: () => { actionsCount: number; estimatedSize: string };
-  
+
   // Legacy compatibility
   saveState: (action: string) => void;
   getLastAction: () => string;
@@ -65,14 +81,18 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
     isPerformingRedo: false,
   }));
 
-  const {
-    controls,
-    setControls,
-    nextId,
-    setNextId,
-    selectedControls,
-    selectControls,
-  } = useVB6Store();
+  const { controls, setControls, nextId, setNextId, selectedControls, selectControls } =
+    useVB6Store(
+      state => ({
+        controls: state.controls,
+        setControls: state.setControls,
+        nextId: state.nextId,
+        setNextId: state.setNextId,
+        selectedControls: state.selectedControls,
+        selectControls: state.selectControls,
+      }),
+      shallow
+    );
 
   // Subscribe to undo/redo service changes
   useEffect(() => {
@@ -86,7 +106,7 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
     if (!action) return;
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`Undoing: ${action.description}`);
+      // noop
     }
 
     switch (action.type) {
@@ -113,7 +133,9 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
         // Restore previous positions
         if (action.data.before) {
           const updatedControls = controls.map(control => {
-            const beforePos = action.data.before?.find((pos: PositionSnapshot) => pos.id === control.id);
+            const beforePos = action.data.before?.find(
+              (pos: PositionSnapshot) => pos.id === control.id
+            );
             if (beforePos) {
               return { ...control, x: beforePos.x, y: beforePos.y };
             }
@@ -128,14 +150,16 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
         // Restore previous sizes
         if (action.data.before) {
           const updatedControls = controls.map(control => {
-            const beforeSize = action.data.before?.find((size: SizeSnapshot) => size.id === control.id);
+            const beforeSize = action.data.before?.find(
+              (size: SizeSnapshot) => size.id === control.id
+            );
             if (beforeSize) {
               return {
                 ...control,
                 x: beforeSize.x,
                 y: beforeSize.y,
                 width: beforeSize.width,
-                height: beforeSize.height
+                height: beforeSize.height,
               };
             }
             return control;
@@ -153,13 +177,14 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
             if (action.controls.includes(control.id)) {
               const controlIndex = action.controls.indexOf(control.id);
               const updatedControl = { ...control };
-              
+
               propertyNames.forEach(propName => {
                 if (Array.isArray(action.data.before) && controlIndex < action.data.before.length) {
-                  updatedControl[propName] = action.data.before[controlIndex];
+                  (updatedControl as Record<string, unknown>)[propName] =
+                    action.data.before[controlIndex];
                 }
               });
-              
+
               return updatedControl;
             }
             return control;
@@ -183,7 +208,9 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
         // Restore previous positions for alignment
         if (action.data.before) {
           const updatedControls = controls.map(control => {
-            const beforePos = action.data.before?.find((pos: PositionSnapshot) => pos.id === control.id);
+            const beforePos = action.data.before?.find(
+              (pos: PositionSnapshot) => pos.id === control.id
+            );
             if (beforePos) {
               return { ...control, x: beforePos.x, y: beforePos.y };
             }
@@ -202,7 +229,7 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
     if (!action) return;
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`Redoing: ${action.description}`);
+      // noop
     }
 
     switch (action.type) {
@@ -212,7 +239,7 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
           const restoredControls = [...controls, ...action.data.created];
           setControls(restoredControls);
           selectControls(action.controls);
-          
+
           // Update nextId if needed
           const maxId = Math.max(...action.data.created.map(c => c.id));
           if (maxId >= nextId) {
@@ -235,7 +262,9 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
         // Restore forward positions
         if (action.data.after) {
           const updatedControls = controls.map(control => {
-            const afterPos = action.data.after?.find((pos: PositionSnapshot) => pos.id === control.id);
+            const afterPos = action.data.after?.find(
+              (pos: PositionSnapshot) => pos.id === control.id
+            );
             if (afterPos) {
               return { ...control, x: afterPos.x, y: afterPos.y };
             }
@@ -250,14 +279,16 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
         // Restore forward sizes
         if (action.data.after) {
           const updatedControls = controls.map(control => {
-            const afterSize = action.data.after?.find((size: SizeSnapshot) => size.id === control.id);
+            const afterSize = action.data.after?.find(
+              (size: SizeSnapshot) => size.id === control.id
+            );
             if (afterSize) {
               return {
                 ...control,
                 x: afterSize.x,
                 y: afterSize.y,
                 width: afterSize.width,
-                height: afterSize.height
+                height: afterSize.height,
               };
             }
             return control;
@@ -275,13 +306,14 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
             if (action.controls.includes(control.id)) {
               const controlIndex = action.controls.indexOf(control.id);
               const updatedControl = { ...control };
-              
+
               propertyNames.forEach(propName => {
                 if (Array.isArray(action.data.after) && controlIndex < action.data.after.length) {
-                  updatedControl[propName] = action.data.after[controlIndex];
+                  (updatedControl as Record<string, unknown>)[propName] =
+                    action.data.after[controlIndex];
                 }
               });
-              
+
               return updatedControl;
             }
             return control;
@@ -306,7 +338,9 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
         // Restore forward positions for alignment
         if (action.data.after) {
           const updatedControls = controls.map(control => {
-            const afterPos = action.data.after?.find((pos: PositionSnapshot) => pos.id === control.id);
+            const afterPos = action.data.after?.find(
+              (pos: PositionSnapshot) => pos.id === control.id
+            );
             if (afterPos) {
               return { ...control, x: afterPos.x, y: afterPos.y };
             }
@@ -328,17 +362,34 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
     undoRedoService.recordDelete(controls);
   }, []);
 
-  const recordMove = useCallback((controls: Control[], beforePositions: Array<{id: number; x: number; y: number}>) => {
-    undoRedoService.recordMove(controls, beforePositions);
-  }, []);
+  const recordMove = useCallback(
+    (controls: Control[], beforePositions: Array<{ id: number; x: number; y: number }>) => {
+      undoRedoService.recordMove(controls, beforePositions);
+    },
+    []
+  );
 
-  const recordResize = useCallback((controls: Control[], beforeSizes: Array<{id: number; x: number; y: number; width: number; height: number}>) => {
-    undoRedoService.recordResize(controls, beforeSizes);
-  }, []);
+  const recordResize = useCallback(
+    (
+      controls: Control[],
+      beforeSizes: Array<{ id: number; x: number; y: number; width: number; height: number }>
+    ) => {
+      undoRedoService.recordResize(controls, beforeSizes);
+    },
+    []
+  );
 
-  const recordPropertyChange = useCallback((controls: Control[], property: string, beforeValues: PropertyValue[], afterValues: PropertyValue[]) => {
-    undoRedoService.recordPropertyChange(controls, property, beforeValues, afterValues);
-  }, []);
+  const recordPropertyChange = useCallback(
+    (
+      controls: Control[],
+      property: string,
+      beforeValues: PropertyValue[],
+      afterValues: PropertyValue[]
+    ) => {
+      undoRedoService.recordPropertyChange(controls, property, beforeValues, afterValues);
+    },
+    []
+  );
 
   const recordCopy = useCallback((controls: Control[]) => {
     undoRedoService.recordCopy(controls);
@@ -348,13 +399,23 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
     undoRedoService.recordPaste(controls);
   }, []);
 
-  const recordDuplicate = useCallback((originalControls: Control[], duplicatedControls: Control[]) => {
-    undoRedoService.recordDuplicate(originalControls, duplicatedControls);
-  }, []);
+  const recordDuplicate = useCallback(
+    (originalControls: Control[], duplicatedControls: Control[]) => {
+      undoRedoService.recordDuplicate(originalControls, duplicatedControls);
+    },
+    []
+  );
 
-  const recordAlign = useCallback((controls: Control[], alignType: string, beforePositions: Array<{id: number; x: number; y: number}>) => {
-    undoRedoService.recordAlign(controls, alignType, beforePositions);
-  }, []);
+  const recordAlign = useCallback(
+    (
+      controls: Control[],
+      alignType: string,
+      beforePositions: Array<{ id: number; x: number; y: number }>
+    ) => {
+      undoRedoService.recordAlign(controls, alignType, beforePositions);
+    },
+    []
+  );
 
   const clear = useCallback(() => {
     undoRedoService.clear();
@@ -369,18 +430,21 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
   }, []);
 
   // Legacy compatibility functions
-  const saveState = useCallback((action: string) => {
-    // Convert legacy action to new granular system
-    const affectedControls = selectedControls.length > 0 ? selectedControls : controls;
-    if (affectedControls.length === 0) return;
+  const saveState = useCallback(
+    (action: string) => {
+      // Convert legacy action to new granular system
+      const affectedControls = selectedControls.length > 0 ? selectedControls : controls;
+      if (affectedControls.length === 0) return;
 
-    undoRedoService.recordAction({
-      type: 'property_change', // Default type for legacy actions
-      description: action,
-      controls: affectedControls.map(c => c.id),
-      data: { legacy: true }
-    });
-  }, [controls, selectedControls]);
+      undoRedoService.recordAction({
+        type: 'property_change', // Default type for legacy actions
+        description: action,
+        controls: affectedControls.map(c => c.id),
+        data: { legacy: true },
+      });
+    },
+    [controls, selectedControls]
+  );
 
   const getLastAction = useCallback(() => {
     const currentAction = undoRedoService.getCurrentAction();
@@ -398,12 +462,12 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
     currentAction: undoRedoService.getCurrentAction(),
     nextAction: undoRedoService.getNextAction(),
     historySize: undoRedoState.actions.length,
-    
+
     // Actions
     undo,
     redo,
     clear,
-    
+
     // Recording functions
     recordCreate,
     recordDelete,
@@ -414,11 +478,11 @@ export const useUndoRedo = (): UseUndoRedoReturn => {
     recordPaste,
     recordDuplicate,
     recordAlign,
-    
+
     // History
     getHistory,
     getMemoryUsage,
-    
+
     // Legacy compatibility
     saveState,
     getLastAction,

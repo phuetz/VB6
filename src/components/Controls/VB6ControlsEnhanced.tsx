@@ -48,181 +48,230 @@ export interface VB6ControlPropsEnhanced {
 // Fonction utilitaire pour obtenir le curseur de souris
 const getMouseCursor = (mousePointer: number): string => {
   const cursors = [
-    'default', 'pointer', 'crosshair', 'text', 'help', 'move',
-    'ne-resize', 'n-resize', 'nw-resize', 'w-resize', 'not-allowed',
-    'wait', 'no-drop', 'progress', 'help', 'all-scroll', 'custom'
+    'default',
+    'pointer',
+    'crosshair',
+    'text',
+    'help',
+    'move',
+    'ne-resize',
+    'n-resize',
+    'nw-resize',
+    'w-resize',
+    'not-allowed',
+    'wait',
+    'no-drop',
+    'progress',
+    'help',
+    'all-scroll',
+    'custom',
   ];
   return cursors[mousePointer] || 'default';
 };
 
 // CommandButton amélioré avec toutes les propriétés
-export const CommandButtonEnhanced = forwardRef<HTMLButtonElement, VB6ControlPropsEnhanced>((props, ref) => {
-  const {
-    id, name, left, top, width, height, visible, enabled,
-    caption = 'Command1',
-    default: isDefault = false,
-    cancel = false,
-    style = 0, // 0=Standard, 1=Graphical
-    picture = null,
-    disabledPicture = null,
-    downPicture = null,
-    maskColor = '#C0C0C0',
-    useMaskColor = false,
-    backColor = '#8080FF',
-    foreColor = '#000000',
-    font = { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false },
-    appearance = 1, // 0=Flat, 1=3D
-    hWnd = 0,
-    tabStop = true,
-    tabIndex = 0,
-    tag = '',
-    toolTipText = '',
-    mousePointer = 0,
-    mouseIcon = null,
-    dragMode = 0,
-    dragIcon = null,
-    ...rest
-  } = props;
+export const CommandButtonEnhanced = forwardRef<HTMLButtonElement, VB6ControlPropsEnhanced>(
+  (props, ref) => {
+    const {
+      id,
+      name,
+      left,
+      top,
+      width,
+      height,
+      visible,
+      enabled,
+      caption = 'Command1',
+      default: isDefault = false,
+      cancel = false,
+      style = 0, // 0=Standard, 1=Graphical
+      picture = null,
+      disabledPicture = null,
+      downPicture = null,
+      maskColor = '#C0C0C0',
+      useMaskColor = false,
+      backColor = '#8080FF',
+      foreColor = '#000000',
+      font = {
+        name: 'MS Sans Serif',
+        size: 8,
+        bold: false,
+        italic: false,
+        underline: false,
+        strikethrough: false,
+      },
+      appearance = 1, // 0=Flat, 1=3D
+      hWnd = 0,
+      tabStop = true,
+      tabIndex = 0,
+      tag = '',
+      toolTipText = '',
+      mousePointer = 0,
+      mouseIcon = null,
+      dragMode = 0,
+      dragIcon = null,
+      ...rest
+    } = props;
 
-  const [isPressed, setIsPressed] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const { fireEvent, updateControl } = useVB6Store();
-  const buttonRef = useRef<HTMLButtonElement>(null);
+    const [isPressed, setIsPressed] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+    const { fireEvent, updateControl } = useVB6Store();
+    const buttonRef = useRef<HTMLButtonElement>(null);
 
-  // Simuler hWnd
-  useEffect(() => {
-    if (buttonRef.current && hWnd === 0) {
-      updateControl(id, 'hWnd', Math.floor(Math.random() * 1000000));
-    }
-  }, [id, hWnd, updateControl]);
-
-  const handleClick = useCallback(() => {
-    if (enabled) {
-      fireEvent(name, 'Click', { sender: name });
-      updateControl(id, 'value', true);
-      setTimeout(() => updateControl(id, 'value', false), 100);
-    }
-  }, [enabled, fireEvent, name, id, updateControl]);
-
-  const handleMouseEvents = useCallback((eventName: string, e: React.MouseEvent) => {
-    if (enabled) {
-      fireEvent(name, eventName, {
-        button: e.button + 1,
-        shift: (e.shiftKey ? 1 : 0) | (e.ctrlKey ? 2 : 0) | (e.altKey ? 4 : 0),
-        x: e.nativeEvent.offsetX,
-        y: e.nativeEvent.offsetY,
-      });
-    }
-  }, [enabled, fireEvent, name]);
-
-  const handleKeyEvents = useCallback((eventName: string, e: React.KeyboardEvent) => {
-    if (enabled) {
-      const keyCode = e.keyCode || e.which;
-      const shift = (e.shiftKey ? 1 : 0) | (e.ctrlKey ? 2 : 0) | (e.altKey ? 4 : 0);
-      fireEvent(name, eventName, { keyCode, shift });
-      
-      if (eventName === 'KeyPress') {
-        fireEvent(name, 'KeyPress', { keyAscii: e.key.charCodeAt(0) });
+    // Simuler hWnd
+    useEffect(() => {
+      if (buttonRef.current && hWnd === 0) {
+        updateControl(id, 'hWnd', Math.floor(Math.random() * 1000000));
       }
-    }
-  }, [enabled, fireEvent, name]);
+    }, [id, hWnd, updateControl]);
 
-  const handleGotFocus = useCallback(() => {
-    fireEvent(name, 'GotFocus', {});
-  }, [fireEvent, name]);
+    const handleClick = useCallback(() => {
+      if (enabled) {
+        fireEvent(name, 'Click', { sender: name });
+        updateControl(id, 'value', true);
+        setTimeout(() => updateControl(id, 'value', false), 100);
+      }
+    }, [enabled, fireEvent, name, id, updateControl]);
 
-  const handleLostFocus = useCallback(() => {
-    fireEvent(name, 'LostFocus', {});
-    if (props.causesValidation) {
-      fireEvent(name, 'Validate', { cancel: false });
-    }
-  }, [fireEvent, name, props.causesValidation]);
+    const handleMouseEvents = useCallback(
+      (eventName: string, e: React.MouseEvent) => {
+        if (enabled) {
+          fireEvent(name, eventName, {
+            button: e.button + 1,
+            shift: (e.shiftKey ? 1 : 0) | (e.ctrlKey ? 2 : 0) | (e.altKey ? 4 : 0),
+            x: e.nativeEvent.offsetX,
+            y: e.nativeEvent.offsetY,
+          });
+        }
+      },
+      [enabled, fireEvent, name]
+    );
 
-  const getPicture = (): string | null => {
-    if (style === 0) return null; // Standard style doesn't show pictures
-    if (!enabled && disabledPicture) return disabledPicture;
-    if (isPressed && downPicture) return downPicture;
-    return picture;
-  };
+    const handleKeyEvents = useCallback(
+      (eventName: string, e: React.KeyboardEvent) => {
+        if (enabled) {
+          const keyCode = e.keyCode || e.which;
+          const shift = (e.shiftKey ? 1 : 0) | (e.ctrlKey ? 2 : 0) | (e.altKey ? 4 : 0);
+          fireEvent(name, eventName, { keyCode, shift });
 
-  const buttonStyle: CSSProperties = {
-    position: 'absolute',
+          if (eventName === 'KeyPress') {
+            fireEvent(name, 'KeyPress', { keyAscii: e.key.charCodeAt(0) });
+          }
+        }
+      },
+      [enabled, fireEvent, name]
+    );
+
+    const handleGotFocus = useCallback(() => {
+      fireEvent(name, 'GotFocus', {});
+    }, [fireEvent, name]);
+
+    const handleLostFocus = useCallback(() => {
+      fireEvent(name, 'LostFocus', {});
+      if (props.causesValidation) {
+        fireEvent(name, 'Validate', { cancel: false });
+      }
+    }, [fireEvent, name, props.causesValidation]);
+
+    const getPicture = (): string | null => {
+      if (style === 0) return null; // Standard style doesn't show pictures
+      if (!enabled && disabledPicture) return disabledPicture;
+      if (isPressed && downPicture) return downPicture;
+      return picture;
+    };
+
+    const buttonStyle: CSSProperties = {
+      position: 'absolute',
+      left,
+      top,
+      width,
+      height,
+      display: visible ? 'block' : 'none',
+      backgroundColor: style === 1 ? backColor : undefined,
+      color: foreColor,
+      border:
+        appearance === 1
+          ? isPressed
+            ? '2px inset #C0C0C0'
+            : '2px outset #C0C0C0'
+          : '1px solid #808080',
+      cursor: mouseIcon ? `url(${mouseIcon}), auto` : getMouseCursor(mousePointer),
+      opacity: enabled ? 1 : 0.6,
+      fontFamily: font.name,
+      fontSize: `${font.size}pt`,
+      fontWeight: font.bold ? 'bold' : 'normal',
+      fontStyle: font.italic ? 'italic' : 'normal',
+      textDecoration: font.underline ? 'underline' : 'none',
+      backgroundImage: getPicture() ? `url(${getPicture()})` : undefined,
+      backgroundSize: 'contain',
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center',
+      outline: isDefault ? '1px solid #000000' : 'none',
+      outlineOffset: '-3px',
+      padding: '2px 4px',
+      overflow: 'hidden',
+      textAlign: 'center',
+      userSelect: 'none',
+      WebkitUserSelect: 'none',
+      MozUserSelect: 'none',
+      msUserSelect: 'none',
+    };
+
+    return (
+      <button
+        ref={el => {
+          if (ref) {
+            if (typeof ref === 'function') ref(el);
+            else ref.current = el;
+          }
+          buttonRef.current = el;
+        }}
+        style={buttonStyle}
+        onClick={handleClick}
+        onMouseDown={e => {
+          setIsPressed(true);
+          handleMouseEvents('MouseDown', e);
+        }}
+        onMouseUp={e => {
+          setIsPressed(false);
+          handleMouseEvents('MouseUp', e);
+        }}
+        onMouseMove={e => handleMouseEvents('MouseMove', e)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onKeyDown={e => handleKeyEvents('KeyDown', e)}
+        onKeyUp={e => handleKeyEvents('KeyUp', e)}
+        onKeyPress={e => handleKeyEvents('KeyPress', e)}
+        onFocus={handleGotFocus}
+        onBlur={handleLostFocus}
+        disabled={!enabled}
+        tabIndex={tabStop ? tabIndex : -1}
+        title={toolTipText}
+        data-name={name}
+        data-tag={tag}
+        data-dragmode={dragMode}
+        {...rest}
+      >
+        {style === 0 && caption}
+      </button>
+    );
+  }
+);
+
+// TextBox amélioré avec toutes les propriétés
+export const TextBoxEnhanced = forwardRef<
+  HTMLInputElement | HTMLTextAreaElement,
+  VB6ControlPropsEnhanced
+>((props, ref) => {
+  const {
+    id,
+    name,
     left,
     top,
     width,
     height,
-    display: visible ? 'block' : 'none',
-    backgroundColor: style === 1 ? backColor : undefined,
-    color: foreColor,
-    border: appearance === 1 
-      ? (isPressed ? '2px inset #C0C0C0' : '2px outset #C0C0C0')
-      : '1px solid #808080',
-    cursor: mouseIcon ? `url(${mouseIcon}), auto` : getMouseCursor(mousePointer),
-    opacity: enabled ? 1 : 0.6,
-    fontFamily: font.name,
-    fontSize: `${font.size}pt`,
-    fontWeight: font.bold ? 'bold' : 'normal',
-    fontStyle: font.italic ? 'italic' : 'normal',
-    textDecoration: font.underline ? 'underline' : 'none',
-    backgroundImage: getPicture() ? `url(${getPicture()})` : undefined,
-    backgroundSize: 'contain',
-    backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'center',
-    outline: isDefault ? '1px solid #000000' : 'none',
-    outlineOffset: '-3px',
-    padding: '2px 4px',
-    overflow: 'hidden',
-    textAlign: 'center',
-    userSelect: 'none',
-    WebkitUserSelect: 'none',
-    MozUserSelect: 'none',
-    msUserSelect: 'none',
-  };
-
-  return (
-    <button
-      ref={(el) => {
-        if (ref) {
-          if (typeof ref === 'function') ref(el);
-          else ref.current = el;
-        }
-        buttonRef.current = el;
-      }}
-      style={buttonStyle}
-      onClick={handleClick}
-      onMouseDown={(e) => {
-        setIsPressed(true);
-        handleMouseEvents('MouseDown', e);
-      }}
-      onMouseUp={(e) => {
-        setIsPressed(false);
-        handleMouseEvents('MouseUp', e);
-      }}
-      onMouseMove={(e) => handleMouseEvents('MouseMove', e)}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onKeyDown={(e) => handleKeyEvents('KeyDown', e)}
-      onKeyUp={(e) => handleKeyEvents('KeyUp', e)}
-      onKeyPress={(e) => handleKeyEvents('KeyPress', e)}
-      onFocus={handleGotFocus}
-      onBlur={handleLostFocus}
-      disabled={!enabled}
-      tabIndex={tabStop ? tabIndex : -1}
-      title={toolTipText}
-      data-name={name}
-      data-tag={tag}
-      data-dragmode={dragMode}
-      {...rest}
-    >
-      {style === 0 && caption}
-    </button>
-  );
-});
-
-// TextBox amélioré avec toutes les propriétés
-export const TextBoxEnhanced = forwardRef<HTMLInputElement | HTMLTextAreaElement, VB6ControlPropsEnhanced>((props, ref) => {
-  const {
-    id, name, left, top, width, height, visible, enabled,
+    visible,
+    enabled,
     text = '',
     maxLength = 0,
     multiLine = false,
@@ -232,7 +281,14 @@ export const TextBoxEnhanced = forwardRef<HTMLInputElement | HTMLTextAreaElement
     hideSelection = true,
     backColor = '#FFFFFF',
     foreColor = '#000000',
-    font = { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false },
+    font = {
+      name: 'MS Sans Serif',
+      size: 8,
+      bold: false,
+      italic: false,
+      underline: false,
+      strikethrough: false,
+    },
     alignment = 0, // 0=Left, 1=Right, 2=Center
     borderStyle = 1, // 0=None, 1=Fixed Single
     appearance = 1, // 0=Flat, 1=3D
@@ -276,39 +332,48 @@ export const TextBoxEnhanced = forwardRef<HTMLInputElement | HTMLTextAreaElement
     }
   }, [selection, value, id, updateControl]);
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const newValue = e.target.value;
-    if (maxLength === 0 || newValue.length <= maxLength) {
-      setValue(newValue);
-      updateControl(id, 'text', newValue);
-      fireEvent(name, 'Change', { newValue });
-      
-      // Mettre à jour dataChanged si lié à une source de données
-      if (dataSource && dataField) {
-        updateControl(id, 'dataChanged', true);
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const newValue = e.target.value;
+      if (maxLength === 0 || newValue.length <= maxLength) {
+        setValue(newValue);
+        updateControl(id, 'text', newValue);
+        fireEvent(name, 'Change', { newValue });
+
+        // Mettre à jour dataChanged si lié à une source de données
+        if (dataSource && dataField) {
+          updateControl(id, 'dataChanged', true);
+        }
       }
-    }
-  }, [id, maxLength, name, fireEvent, updateControl, dataSource, dataField]);
+    },
+    [id, maxLength, name, fireEvent, updateControl, dataSource, dataField]
+  );
 
-  const handleSelect = useCallback((e: React.SyntheticEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const target = e.target as HTMLInputElement | HTMLTextAreaElement;
-    setSelection({
-      start: target.selectionStart || 0,
-      length: (target.selectionEnd || 0) - (target.selectionStart || 0)
-    });
-    updateControl(id, 'selStart', target.selectionStart || 0);
-    updateControl(id, 'selLength', (target.selectionEnd || 0) - (target.selectionStart || 0));
-  }, [id, updateControl]);
+  const handleSelect = useCallback(
+    (e: React.SyntheticEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const target = e.target as HTMLInputElement | HTMLTextAreaElement;
+      setSelection({
+        start: target.selectionStart || 0,
+        length: (target.selectionEnd || 0) - (target.selectionStart || 0),
+      });
+      updateControl(id, 'selStart', target.selectionStart || 0);
+      updateControl(id, 'selLength', (target.selectionEnd || 0) - (target.selectionStart || 0));
+    },
+    [id, updateControl]
+  );
 
-  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
-    const keyAscii = e.key.charCodeAt(0);
-    fireEvent(name, 'KeyPress', { keyAscii });
-    
-    if (linkMode > 0) {
-      // Gérer les liens DDE si nécessaire
-      fireEvent(name, 'LinkNotify', {});
-    }
-  }, [name, fireEvent, linkMode]);
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent) => {
+      const keyAscii = e.key.charCodeAt(0);
+      fireEvent(name, 'KeyPress', { keyAscii });
+
+      if (linkMode > 0) {
+        // Gérer les liens DDE si nécessaire
+        fireEvent(name, 'LinkNotify', {});
+      }
+    },
+    [name, fireEvent, linkMode]
+  );
 
   const handleValidate = useCallback(() => {
     if (props.causesValidation) {
@@ -350,9 +415,8 @@ export const TextBoxEnhanced = forwardRef<HTMLInputElement | HTMLTextAreaElement
     display: visible ? 'block' : 'none',
     backgroundColor: backColor,
     color: foreColor,
-    border: borderStyle === 1 
-      ? (appearance === 1 ? '2px inset #C0C0C0' : '1px solid #808080')
-      : 'none',
+    border:
+      borderStyle === 1 ? (appearance === 1 ? '2px inset #C0C0C0' : '1px solid #808080') : 'none',
     textAlign: ['left', 'right', 'center'][alignment] as any,
     fontFamily: font.name,
     fontSize: `${font.size}pt`,
@@ -401,14 +465,28 @@ export const TextBoxEnhanced = forwardRef<HTMLInputElement | HTMLTextAreaElement
 // Label amélioré avec toutes les propriétés
 export const LabelEnhanced = forwardRef<HTMLDivElement, VB6ControlPropsEnhanced>((props, ref) => {
   const {
-    id, name, left, top, width, height, visible, enabled,
+    id,
+    name,
+    left,
+    top,
+    width,
+    height,
+    visible,
+    enabled,
     caption = 'Label1',
     autoSize = false,
     wordWrap = false,
     backStyle = 0, // 0=Transparent, 1=Opaque
     backColor = '#8080FF',
     foreColor = '#000000',
-    font = { name: 'MS Sans Serif', size: 8, bold: false, italic: false, underline: false, strikethrough: false },
+    font = {
+      name: 'MS Sans Serif',
+      size: 8,
+      bold: false,
+      italic: false,
+      underline: false,
+      strikethrough: false,
+    },
     alignment = 0, // 0=Left, 1=Right, 2=Center
     borderStyle = 0, // 0=None, 1=Fixed Single
     appearance = 1, // 0=Flat, 1=3D
@@ -435,31 +513,37 @@ export const LabelEnhanced = forwardRef<HTMLDivElement, VB6ControlPropsEnhanced>
     }
   }, [caption, font, autoSize]);
 
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    fireEvent(name, 'Click', {});
-    
-    if (linkMode > 0) {
-      fireEvent(name, 'LinkExecute', { command: caption });
-    }
-  }, [fireEvent, name, linkMode, caption]);
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      fireEvent(name, 'Click', {});
+
+      if (linkMode > 0) {
+        fireEvent(name, 'LinkExecute', { command: caption });
+      }
+    },
+    [fireEvent, name, linkMode, caption]
+  );
 
   const handleDblClick = useCallback(() => {
     fireEvent(name, 'DblClick', {});
   }, [fireEvent, name]);
 
-  const handleMouseEvents = useCallback((eventName: string, e: React.MouseEvent) => {
-    fireEvent(name, eventName, {
-      button: e.button + 1,
-      shift: (e.shiftKey ? 1 : 0) | (e.ctrlKey ? 2 : 0) | (e.altKey ? 4 : 0),
-      x: e.nativeEvent.offsetX,
-      y: e.nativeEvent.offsetY,
-    });
-  }, [fireEvent, name]);
+  const handleMouseEvents = useCallback(
+    (eventName: string, e: React.MouseEvent) => {
+      fireEvent(name, eventName, {
+        button: e.button + 1,
+        shift: (e.shiftKey ? 1 : 0) | (e.ctrlKey ? 2 : 0) | (e.altKey ? 4 : 0),
+        x: e.nativeEvent.offsetX,
+        y: e.nativeEvent.offsetY,
+      });
+    },
+    [fireEvent, name]
+  );
 
   // Traiter les mnémoniques (&) dans le caption
   const processCaption = (text: string): React.ReactNode => {
     if (!useMnemonic || !text.includes('&')) return text;
-    
+
     const parts = text.split('&');
     return parts.map((part, index) => {
       if (index === 0) return part;
@@ -486,9 +570,8 @@ export const LabelEnhanced = forwardRef<HTMLDivElement, VB6ControlPropsEnhanced>
     justifyContent: alignment === 2 ? 'center' : alignment === 1 ? 'flex-end' : 'flex-start',
     backgroundColor: backStyle === 1 ? backColor : 'transparent',
     color: foreColor,
-    border: borderStyle === 1 
-      ? (appearance === 1 ? '2px inset #C0C0C0' : '1px solid #808080')
-      : 'none',
+    border:
+      borderStyle === 1 ? (appearance === 1 ? '2px inset #C0C0C0' : '1px solid #808080') : 'none',
     fontFamily: font.name,
     fontSize: `${font.size}pt`,
     fontWeight: font.bold ? 'bold' : 'normal',
@@ -512,9 +595,9 @@ export const LabelEnhanced = forwardRef<HTMLDivElement, VB6ControlPropsEnhanced>
       style={labelStyle}
       onClick={handleClick}
       onDoubleClick={handleDblClick}
-      onMouseDown={(e) => handleMouseEvents('MouseDown', e)}
-      onMouseUp={(e) => handleMouseEvents('MouseUp', e)}
-      onMouseMove={(e) => handleMouseEvents('MouseMove', e)}
+      onMouseDown={e => handleMouseEvents('MouseDown', e)}
+      onMouseUp={e => handleMouseEvents('MouseUp', e)}
+      onMouseMove={e => handleMouseEvents('MouseMove', e)}
       title={toolTipText}
       data-name={name}
       data-tag={tag}

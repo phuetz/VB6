@@ -1,17 +1,26 @@
+/**
+ * @deprecated Legacy regex-based transpiler. Use VB6JSGenerator (via VB6ASTAdapter)
+ * or VB6UnifiedASTTranspiler for new code. Kept for backward compatibility.
+ */
+
 import { VB6ModuleAST, VB6Procedure } from './vb6Parser';
-import { vb6PropertySystem, VB6PropertyType, VB6PropertyDescriptor } from '../services/VB6PropertySystem';
+import {
+  vb6PropertySystem,
+  VB6PropertyType,
+  VB6PropertyDescriptor,
+} from '../services/VB6PropertySystem';
 
 function transpileProcedure(proc: VB6Procedure, className?: string): string {
   const params = proc.parameters.map(p => p.name).join(', ');
   let header = '';
   let body = proc.body.trimEnd();
-  
+
   switch (proc.type) {
     case 'sub':
     case 'function':
       header = `function ${proc.name}(${params})`;
       break;
-    
+
     case 'propertyGet':
       // Register property with system
       if (className) {
@@ -24,13 +33,13 @@ function transpileProcedure(proc: VB6Procedure, className?: string): string {
             type: p.type || 'Variant',
             isOptional: p.isOptional,
             defaultValue: p.defaultValue,
-            isByRef: p.isByRef
+            isByRef: p.isByRef,
           })),
-          returnType: proc.returnType
+          returnType: proc.returnType,
         };
         vb6PropertySystem.registerProperty(className, propertyDesc);
       }
-      
+
       // Generate getter function
       header = `get ${proc.name}()`;
       if (params) {
@@ -41,7 +50,7 @@ function transpileProcedure(proc: VB6Procedure, className?: string): string {
         body = `// Property Get\nreturn vb6PropertySystem.getProperty(this._vb6InstanceId || 'default', '${proc.name}');`;
       }
       break;
-    
+
     case 'propertyLet': {
       // Register property with system
       if (className) {
@@ -54,14 +63,17 @@ function transpileProcedure(proc: VB6Procedure, className?: string): string {
             type: p.type || 'Variant',
             isOptional: p.isOptional,
             defaultValue: p.defaultValue,
-            isByRef: p.isByRef
-          }))
+            isByRef: p.isByRef,
+          })),
         };
         vb6PropertySystem.registerProperty(className, propertyDesc);
       }
-      
+
       // Generate setter function for value types
-      const letParams = proc.parameters.slice(0, -1).map(p => p.name).join(', ');
+      const letParams = proc.parameters
+        .slice(0, -1)
+        .map(p => p.name)
+        .join(', ');
       const valueParam = proc.parameters[proc.parameters.length - 1]?.name || 'value';
       header = `set ${proc.name}(${valueParam})`;
       if (letParams) {
@@ -72,7 +84,7 @@ function transpileProcedure(proc: VB6Procedure, className?: string): string {
       }
       break;
     }
-    
+
     case 'propertySet': {
       // Register property with system
       if (className) {
@@ -85,14 +97,17 @@ function transpileProcedure(proc: VB6Procedure, className?: string): string {
             type: p.type || 'Variant',
             isOptional: p.isOptional,
             defaultValue: p.defaultValue,
-            isByRef: p.isByRef
-          }))
+            isByRef: p.isByRef,
+          })),
         };
         vb6PropertySystem.registerProperty(className, propertyDesc);
       }
-      
+
       // Generate setter function for object types
-      const setParams = proc.parameters.slice(0, -1).map(p => p.name).join(', ');
+      const setParams = proc.parameters
+        .slice(0, -1)
+        .map(p => p.name)
+        .join(', ');
       const objectParam = proc.parameters[proc.parameters.length - 1]?.name || 'objectRef';
       header = `${proc.name}_Set(${setParams ? setParams + ', ' : ''}${objectParam})`;
       if (setParams) {
@@ -103,7 +118,7 @@ function transpileProcedure(proc: VB6Procedure, className?: string): string {
       break;
     }
   }
-  
+
   return `${header} {\n${body}\n}`;
 }
 
@@ -114,12 +129,12 @@ function transpileProcedure(proc: VB6Procedure, className?: string): string {
 // VB6Transpiler class wrapper for compatibility
 export class VB6Transpiler {
   constructor() {}
-  
+
   transpile(code: string) {
     // For now, return mock result - would need to integrate with parser
     return {
       success: true,
-      errors: []
+      errors: [],
     };
   }
 
@@ -130,10 +145,10 @@ export class VB6Transpiler {
       if (!vb6Code || typeof vb6Code !== 'string') {
         return '// Empty or invalid code';
       }
-      
+
       // Basic VB6 to JavaScript transpilation
       let jsCode = vb6Code;
-      
+
       // Replace common VB6 constructs with JavaScript equivalents
       jsCode = jsCode
         .replace(/Dim\s+(\w+)\s+As\s+\w+/g, 'let $1')
@@ -157,7 +172,7 @@ export class VB6Transpiler {
         .replace(/Loop/g, '}')
         .replace(/\bTrue\b/g, 'true')
         .replace(/\bFalse\b/g, 'false');
-      
+
       return jsCode;
     } catch (error) {
       return `// Transpilation error: ${error instanceof Error ? error.message : 'Unknown error'}`;
@@ -168,7 +183,7 @@ export class VB6Transpiler {
 export function transpileModuleToJS(ast: VB6ModuleAST): string {
   const pieces: string[] = [];
   const className = ast.name || 'VB6Module';
-  
+
   // Add class constructor with VB6 instance management
   pieces.push(`class ${className} {
   constructor() {
@@ -181,12 +196,12 @@ export function transpileModuleToJS(ast: VB6ModuleAST): string {
       this._vb6InstanceId = null;
     }
   }`);
-  
+
   // Transpile procedures
   for (const proc of ast.procedures) {
     pieces.push('  ' + transpileProcedure(proc, className).split('\n').join('\n  '));
   }
-  
+
   // Transpile properties with complete Get/Let/Set support
   for (const prop of ast.properties) {
     if (prop.getter) {
@@ -196,9 +211,9 @@ export function transpileModuleToJS(ast: VB6ModuleAST): string {
       pieces.push('  ' + transpileProcedure(prop.setter, className).split('\n').join('\n  '));
     }
   }
-  
+
   pieces.push('}');
-  
+
   // Add static methods for property system interaction
   pieces.push(`
 // Static methods for ${className}
@@ -217,25 +232,29 @@ ${className}.getPropertyInfo = function(propertyName) {
 ${className}.validatePropertyAssignment = function(propertyName, value, isObjectAssignment) {
   return vb6PropertySystem.validatePropertyAssignment('${className}', propertyName, value, isObjectAssignment);
 };`);
-  
+
   return pieces.join('\n\n');
 }
 
 /**
  * Transpile a single property group (Get/Let/Set) with full VB6 compatibility
  */
-export function transpileProperty(propertyName: string, className: string, 
-                                 getter?: VB6Procedure, setter?: VB6Procedure): string {
+export function transpileProperty(
+  propertyName: string,
+  className: string,
+  getter?: VB6Procedure,
+  setter?: VB6Procedure
+): string {
   const pieces: string[] = [];
-  
+
   if (getter) {
     pieces.push(transpileProcedure(getter, className));
   }
-  
+
   if (setter) {
     pieces.push(transpileProcedure(setter, className));
   }
-  
+
   // Add property descriptor for JavaScript compatibility
   pieces.push(`
 // Property descriptor for ${propertyName}
@@ -253,8 +272,8 @@ Object.defineProperty(${className}.prototype, '${propertyName}', {
   enumerable: true,
   configurable: true
   });
-}`);  // CODE GENERATION BUG FIX: Close the if statement for prototype pollution check
-  
+}`); // CODE GENERATION BUG FIX: Close the if statement for prototype pollution check
+
   return pieces.join('\n\n');
 }
 

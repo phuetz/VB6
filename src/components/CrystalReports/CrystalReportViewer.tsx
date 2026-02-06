@@ -4,10 +4,10 @@
  */
 
 import React, { useState, useEffect, useRef, forwardRef, useCallback } from 'react';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  ChevronsLeft, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
   ChevronsRight,
   ZoomIn,
   ZoomOut,
@@ -19,7 +19,7 @@ import {
   Settings,
   BarChart3,
   Play,
-  Square
+  Square,
 } from 'lucide-react';
 import { useVB6Store } from '../../stores/vb6Store';
 import { VB6ControlPropsEnhanced } from '../Controls/VB6ControlsEnhanced';
@@ -47,7 +47,7 @@ interface CrystalReportProps extends VB6ControlPropsEnhanced {
   destination: 0 | 1 | 2; // 0=crptToWindow, 1=crptToPrinter, 2=crptToFile
   printFileName?: string;
   printFileType?: number;
-  
+
   // Window Properties
   windowTitle?: string;
   windowLeft?: number;
@@ -70,7 +70,7 @@ interface CrystalReportProps extends VB6ControlPropsEnhanced {
   windowShowPrintSetupButton?: boolean;
   windowShowRefreshButton?: boolean;
   windowShowGroupTree?: boolean;
-  
+
   // Data Properties
   selectionFormula?: string;
   groupSelectionFormula?: string;
@@ -81,7 +81,7 @@ interface CrystalReportProps extends VB6ControlPropsEnhanced {
   connect?: string;
   userName?: string;
   password?: string;
-  
+
   // Report Properties
   reportTitle?: string;
   reportSubject?: string;
@@ -94,7 +94,7 @@ interface CrystalReportProps extends VB6ControlPropsEnhanced {
   logonInfo?: any[];
   databaseLogonTimeout?: number;
   discardSavedData?: boolean;
-  
+
   // Printer Properties
   printerName?: string;
   printerDriver?: string;
@@ -107,28 +107,28 @@ interface CrystalReportProps extends VB6ControlPropsEnhanced {
   marginRight?: number;
   marginTop?: number;
   marginBottom?: number;
-  
+
   // Action Property
   action?: number;
   dataFiles?: string[];
   pageZoom?: number | string;
   pageNumber?: number;
   progressDialog?: boolean;
-  
+
   // Status Properties (readonly)
   status?: 0 | 1 | 2 | 3; // 0=Busy, 1=Cancelled, 2=Error, 3=JobCompleted
   recordsPrinted?: number;
   recordsSelected?: number;
   recordsProcessed?: number;
   recordsRead?: number;
-  
+
   // Print Options
   printerDuplex?: 0 | 1 | 2 | 3; // 0=Default, 1=Simplex, 2=Horizontal, 3=Vertical
   printerOrientation?: 0 | 1 | 2; // 0=Default, 1=Portrait, 2=Landscape
   printerPaperSize?: number;
   printerPaperSource?: number;
   printerTray?: string;
-  
+
   // Advanced Properties
   sessionHandle?: number;
   boundReportFooter?: boolean;
@@ -138,7 +138,14 @@ interface CrystalReportProps extends VB6ControlPropsEnhanced {
 
 export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps>((props, ref) => {
   const {
-    id, name, left, top, width, height, visible, enabled,
+    id,
+    name,
+    left,
+    top,
+    width,
+    height,
+    visible,
+    enabled,
     reportFileName = '',
     reportSource = 0,
     destination = 0,
@@ -240,7 +247,8 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
 
   // Load report
   useEffect(() => {
-    if (reportFileName && action === 1) { // crptPrintReport
+    if (reportFileName && action === 1) {
+      // crptPrintReport
       loadReport();
     }
   }, [reportFileName, action]);
@@ -249,10 +257,10 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
     setIsLoading(true);
     setError(null);
     updateControl(id, 'status', 0); // Busy
-    
+
     try {
       fireEvent(name, 'ReadingRecords', { recordsRead: 0 });
-      
+
       const response = await fetch('/api/reports/load', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -282,16 +290,15 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
       setReportData(data);
       setTotalPages(data.totalPages || 1);
       setCurrentPage(1);
-      
+
       updateControl(id, 'recordsRead', data.recordsRead || 0);
       updateControl(id, 'recordsSelected', data.recordsSelected || 0);
       updateControl(id, 'status', 3); // JobCompleted
-      
-      fireEvent(name, 'LoadComplete', { 
+
+      fireEvent(name, 'LoadComplete', {
         recordsRead: data.recordsRead,
         recordsSelected: data.recordsSelected,
       });
-      
     } catch (err) {
       setError(err.message);
       updateControl(id, 'status', 2); // Error
@@ -302,18 +309,21 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
   };
 
   const refreshReport = useCallback(() => {
-    if (action === 6) { // crptRefresh
+    if (action === 6) {
+      // crptRefresh
       loadReport();
     }
   }, [action]);
 
   const printReport = useCallback(async () => {
     if (!reportData) return;
-    
+
     try {
-      if (destination === 0) { // To Window
+      if (destination === 0) {
+        // To Window
         window.print();
-      } else if (destination === 1) { // To Printer
+      } else if (destination === 1) {
+        // To Printer
         const response = await fetch('/api/reports/print', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -334,11 +344,12 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
             margins: { left: marginLeft, right: marginRight, top: marginTop, bottom: marginBottom },
           }),
         });
-        
+
         if (response.ok) {
           fireEvent(name, 'PrintComplete', { pages: printerStopPage - printerStartPage + 1 });
         }
-      } else if (destination === 2) { // To File
+      } else if (destination === 2) {
+        // To File
         exportReport({ format: 'pdf', fileName: printFileName });
       }
     } catch (err) {
@@ -346,76 +357,86 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
     }
   }, [reportData, destination, printerName, copiesToPrinter]);
 
-  const exportReport = useCallback(async (options: ReportExportOptions) => {
-    if (!reportData) return;
-    
-    try {
-      const response = await fetch('/api/reports/export', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reportData,
-          format: options.format,
-          fileName: options.fileName,
-          options,
-        }),
-      });
-      
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${options.fileName}.${options.format}`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-        
-        fireEvent(name, 'ExportComplete', { format: options.format });
-      }
-    } catch (err) {
-      fireEvent(name, 'ExportError', { error: err.message });
-    }
-  }, [reportData, name, fireEvent]);
+  const exportReport = useCallback(
+    async (options: ReportExportOptions) => {
+      if (!reportData) return;
 
-  const navigateToPage = useCallback((page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-      updateControl(id, 'pageNumber', page);
-      fireEvent(name, 'NavigateToPage', { page });
-    }
-  }, [totalPages, id, name, fireEvent, updateControl]);
+      try {
+        const response = await fetch('/api/reports/export', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reportData,
+            format: options.format,
+            fileName: options.fileName,
+            options,
+          }),
+        });
 
-  const handleZoom = useCallback((zoom: number | string) => {
-    if (typeof zoom === 'number') {
-      setZoomLevel(Math.max(25, Math.min(400, zoom)));
-    } else if (zoom === 'FitWidth') {
-      // Calculate zoom to fit width
-      if (viewerRef.current) {
-        const viewerWidth = viewerRef.current.clientWidth;
-        const pageWidth = 816; // Standard page width in pixels
-        setZoomLevel(Math.floor((viewerWidth / pageWidth) * 100));
-      }
-    } else if (zoom === 'FitPage') {
-      // Calculate zoom to fit page
-      if (viewerRef.current) {
-        const viewerHeight = viewerRef.current.clientHeight;
-        const pageHeight = 1056; // Standard page height in pixels
-        setZoomLevel(Math.floor((viewerHeight / pageHeight) * 100));
-      }
-    }
-    updateControl(id, 'pageZoom', zoom);
-  }, [id, updateControl]);
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${options.fileName}.${options.format}`;
+          a.click();
+          window.URL.revokeObjectURL(url);
 
-  const searchInReport = useCallback((text: string) => {
-    setSearchText(text);
-    // Implement search logic
-    fireEvent(name, 'Search', { searchText: text });
-  }, [name, fireEvent]);
+          fireEvent(name, 'ExportComplete', { format: options.format });
+        }
+      } catch (err) {
+        fireEvent(name, 'ExportError', { error: err.message });
+      }
+    },
+    [reportData, name, fireEvent]
+  );
+
+  const navigateToPage = useCallback(
+    (page: number) => {
+      if (page >= 1 && page <= totalPages) {
+        setCurrentPage(page);
+        updateControl(id, 'pageNumber', page);
+        fireEvent(name, 'NavigateToPage', { page });
+      }
+    },
+    [totalPages, id, name, fireEvent, updateControl]
+  );
+
+  const handleZoom = useCallback(
+    (zoom: number | string) => {
+      if (typeof zoom === 'number') {
+        setZoomLevel(Math.max(25, Math.min(400, zoom)));
+      } else if (zoom === 'FitWidth') {
+        // Calculate zoom to fit width
+        if (viewerRef.current) {
+          const viewerWidth = viewerRef.current.clientWidth;
+          const pageWidth = 816; // Standard page width in pixels
+          setZoomLevel(Math.floor((viewerWidth / pageWidth) * 100));
+        }
+      } else if (zoom === 'FitPage') {
+        // Calculate zoom to fit page
+        if (viewerRef.current) {
+          const viewerHeight = viewerRef.current.clientHeight;
+          const pageHeight = 1056; // Standard page height in pixels
+          setZoomLevel(Math.floor((viewerHeight / pageHeight) * 100));
+        }
+      }
+      updateControl(id, 'pageZoom', zoom);
+    },
+    [id, updateControl]
+  );
+
+  const searchInReport = useCallback(
+    (text: string) => {
+      setSearchText(text);
+      // Implement search logic
+      fireEvent(name, 'Search', { searchText: text });
+    },
+    [name, fireEvent]
+  );
 
   const handleParameterChange = (paramName: string, value: any) => {
-    const updatedParams = currentParameters.map(p => 
-      p.name === paramName ? { ...p, value } : p
-    );
+    const updatedParams = currentParameters.map(p => (p.name === paramName ? { ...p, value } : p));
     setCurrentParameters(updatedParams);
   };
 
@@ -449,7 +470,7 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
           <input
             type="number"
             value={currentPage}
-            onChange={(e) => navigateToPage(parseInt(e.target.value) || 1)}
+            onChange={e => navigateToPage(parseInt(e.target.value) || 1)}
             style={pageInputStyle}
             min={1}
             max={totalPages}
@@ -473,10 +494,14 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
           />
         </>
       )}
-      
+
       {windowShowZoomControl && (
         <>
-          <select value={zoomLevel} onChange={(e) => handleZoom(parseInt(e.target.value))} style={selectStyle}>
+          <select
+            value={zoomLevel}
+            onChange={e => handleZoom(parseInt(e.target.value))}
+            style={selectStyle}
+          >
             <option value={25}>25%</option>
             <option value={50}>50%</option>
             <option value={75}>75%</option>
@@ -506,15 +531,15 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
           </AnimatedButton>
         </>
       )}
-      
+
       {windowShowSearchButton && (
         <>
           <input
             type="text"
             placeholder="Search..."
             value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && searchInReport(searchText)}
+            onChange={e => setSearchText(e.target.value)}
+            onKeyPress={e => e.key === 'Enter' && searchInReport(searchText)}
             style={searchInputStyle}
           />
           <AnimatedButton
@@ -526,7 +551,7 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
           />
         </>
       )}
-      
+
       {windowShowPrintButton && (
         <AnimatedButton
           onClick={printReport}
@@ -536,7 +561,7 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
           className="!p-2"
         />
       )}
-      
+
       {windowShowExportButton && (
         <AnimatedButton
           onClick={() => setExportOptions({ ...exportOptions })}
@@ -546,7 +571,7 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
           className="!p-2"
         />
       )}
-      
+
       {windowShowRefreshButton && (
         <AnimatedButton
           onClick={refreshReport}
@@ -556,7 +581,7 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
           className="!p-2"
         />
       )}
-      
+
       {windowShowPrintSetupButton && (
         <AnimatedButton
           onClick={() => fireEvent(name, 'PrintSetup', {})}
@@ -566,7 +591,7 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
           className="!p-2"
         />
       )}
-      
+
       {parameterFields.length > 0 && (
         <AnimatedButton
           onClick={() => setShowParameterDialog(true)}
@@ -586,32 +611,32 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
     <div style={dialogOverlayStyle}>
       <div style={dialogStyle}>
         <h3>Report Parameters</h3>
-        {currentParameters.map((param) => (
+        {currentParameters.map(param => (
           <div key={param.name} style={parameterRowStyle}>
             <label>{param.promptText || param.name}:</label>
             {param.type === 'boolean' ? (
               <input
                 type="checkbox"
                 checked={param.value || false}
-                onChange={(e) => handleParameterChange(param.name, e.target.checked)}
+                onChange={e => handleParameterChange(param.name, e.target.checked)}
               />
             ) : param.type === 'date' ? (
               <input
                 type="date"
                 value={param.value || ''}
-                onChange={(e) => handleParameterChange(param.name, e.target.value)}
+                onChange={e => handleParameterChange(param.name, e.target.value)}
               />
             ) : param.type === 'number' ? (
               <input
                 type="number"
                 value={param.value || 0}
-                onChange={(e) => handleParameterChange(param.name, parseFloat(e.target.value))}
+                onChange={e => handleParameterChange(param.name, parseFloat(e.target.value))}
               />
             ) : (
               <input
                 type="text"
                 value={param.value || ''}
-                onChange={(e) => handleParameterChange(param.name, e.target.value)}
+                onChange={e => handleParameterChange(param.name, e.target.value)}
               />
             )}
           </div>
@@ -620,7 +645,11 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
           <AnimatedButton onClick={applyParameters} variant="primary" size="sm">
             Apply
           </AnimatedButton>
-          <AnimatedButton onClick={() => setShowParameterDialog(false)} variant="secondary" size="sm">
+          <AnimatedButton
+            onClick={() => setShowParameterDialog(false)}
+            variant="secondary"
+            size="sm"
+          >
             Cancel
           </AnimatedButton>
         </div>
@@ -638,7 +667,12 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
     display: visible ? 'flex' : 'none',
     flexDirection: 'column',
     backgroundColor: '#F0F0F0',
-    border: windowBorderStyle === 0 ? 'none' : windowBorderStyle === 1 ? '1px solid #808080' : '2px solid #0078D7',
+    border:
+      windowBorderStyle === 0
+        ? 'none'
+        : windowBorderStyle === 1
+          ? '1px solid #808080'
+          : '2px solid #0078D7',
     overflow: 'hidden',
   };
 
@@ -738,9 +772,16 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
   };
 
   return (
-    <div ref={ref} style={containerStyle} title={toolTipText} data-name={name} data-tag={tag} {...rest}>
+    <div
+      ref={ref}
+      style={containerStyle}
+      title={toolTipText}
+      data-name={name}
+      data-tag={tag}
+      {...rest}
+    >
       {windowControlBox && renderToolbar()}
-      
+
       <div style={contentStyle}>
         {showGroupTree && windowShowGroupTree && (
           <div style={groupTreeStyle}>
@@ -748,30 +789,28 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
             {/* Render group tree here */}
           </div>
         )}
-        
+
         <div ref={viewerRef} style={viewerStyle}>
-          {isLoading && (
-            <div>Loading report...</div>
-          )}
-          
-          {error && (
-            <div style={{ color: 'red' }}>Error: {error}</div>
-          )}
-          
+          {isLoading && <div>Loading report...</div>}
+
+          {error && <div style={{ color: 'red' }}>Error: {error}</div>}
+
           {reportData && !isLoading && !error && (
             <div style={pageStyle}>
               {/* Render report content here */}
               {/* SECURITY: HTML sanitizé via DOMPurify (TASK-004) */}
-              <div dangerouslySetInnerHTML={{
-                __html: sanitizeReport(reportData.pages?.[currentPage - 1] || '')
-              }} />
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeReport(reportData.pages?.[currentPage - 1] || ''),
+                }}
+              />
             </div>
           )}
         </div>
       </div>
-      
+
       {showParameterDialog && renderParameterDialog()}
-      
+
       {progressDialog && isLoading && (
         <div style={dialogOverlayStyle}>
           <div style={{ ...dialogStyle, textAlign: 'center' }}>
@@ -779,9 +818,9 @@ export const CrystalReportViewer = forwardRef<HTMLDivElement, CrystalReportProps
             <p>Records Read: {recordsRead}</p>
             <p>Records Selected: {recordsSelected}</p>
             {windowShowCancelButton && (
-              <AnimatedButton 
-                onClick={() => updateControl(id, 'status', 1)} 
-                variant="danger" 
+              <AnimatedButton
+                onClick={() => updateControl(id, 'status', 1)}
+                variant="danger"
                 size="sm"
                 icon={Square}
               >

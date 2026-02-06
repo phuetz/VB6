@@ -13,7 +13,7 @@ const StatusBar: React.FC = () => {
   const { selectedControls } = useDesignerStore();
   // PERFORMANCE FIX: Use shallow selector
   const { errorList, logs } = useVB6Store(
-    (state) => ({ errorList: state.errorList, logs: state.logs }),
+    state => ({ errorList: state.errorList, logs: state.logs }),
     shallow
   );
 
@@ -27,7 +27,12 @@ const StatusBar: React.FC = () => {
   const lastLog = safeLogs[safeLogs.length - 1];
 
   return (
-    <div className="h-6 bg-gray-200 border-t border-gray-400 flex items-center px-2 text-xs">
+    <div
+      className="h-6 bg-gray-200 border-t border-gray-400 flex items-center px-2 text-xs"
+      role="status"
+      aria-live="polite"
+      aria-label="Application Status"
+    >
       <span>
         {executionMode === 'run'
           ? '▶ Running...'
@@ -58,6 +63,7 @@ const StatusBar: React.FC = () => {
               onClick={() => toggleWindow('showLogPanel')}
               className="flex items-center gap-1 text-xs px-2 py-0.5 rounded hover:bg-gray-300"
               title="Show Debug Logs"
+              aria-label="Show Debug Logs"
             >
               <Bug size={12} className={showLogPanel ? 'text-green-600' : 'text-gray-600'} />
               {errorCount > 0 && <span className="text-red-600">{errorCount} errors</span>}

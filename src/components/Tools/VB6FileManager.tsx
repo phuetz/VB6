@@ -1,5 +1,12 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { VB6FileFormats, VB6FileType, VB6BinaryProperty, VB6ProjectGroup, VB6CacheEntry, VB6PropertyType } from '../../services/VB6FileFormats';
+import {
+  VB6FileFormats,
+  VB6FileType,
+  VB6BinaryProperty,
+  VB6ProjectGroup,
+  VB6CacheEntry,
+  VB6PropertyType,
+} from '../../services/VB6FileFormats';
 
 interface FileEntry {
   name: string;
@@ -15,10 +22,7 @@ interface VB6FileManagerProps {
   onFileError?: (error: string) => void;
 }
 
-export const VB6FileManager: React.FC<VB6FileManagerProps> = ({
-  onFileLoad,
-  onFileError
-}) => {
+export const VB6FileManager: React.FC<VB6FileManagerProps> = ({ onFileLoad, onFileError }) => {
   const [files, setFiles] = useState<FileEntry[]>([]);
   const [selectedFile, setSelectedFile] = useState<FileEntry | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -26,159 +30,171 @@ export const VB6FileManager: React.FC<VB6FileManagerProps> = ({
   const [frxProperties, setFrxProperties] = useState<Map<number, VB6BinaryProperty>>(new Map());
   const [vbgProjects, setVbgProjects] = useState<VB6ProjectGroup[]>([]);
   const [ocaEntries, setOcaEntries] = useState<VB6CacheEntry[]>([]);
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const fileFormats = VB6FileFormats.getInstance();
 
-  const handleFileSelect = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleFileSelect = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    setIsProcessing(true);
-    
-    try {
-      const ext = file.name.toLowerCase().substring(file.name.lastIndexOf('.')) as VB6FileType;
+      setIsProcessing(true);
+
+      try {
+        const ext = file.name.toLowerCase().substring(file.name.lastIndexOf('.')) as VB6FileType;
+        let data: ArrayBuffer | string;
+        let parsed: any;
+
+        // Read file based on type
+        if (ext === VB6FileType.VBG) {
+          data = await file.text();
+          parsed = fileFormats.parseVBGFile(data);
+          setVbgProjects(parsed);
+        } else {
+          data = await file.arrayBuffer();
+
+          switch (ext) {
+            case VB6FileType.FRX:
+              parsed = fileFormats.parseFRXFile(data);
+              setFrxProperties(parsed);
+              break;
+            case VB6FileType.CTX:
+              parsed = fileFormats.parseCTXFile(data);
+              setFrxProperties(parsed);
+              break;
+            case VB6FileType.OCA:
+              parsed = fileFormats.parseOCAFile(data);
+              setOcaEntries(parsed);
+              break;
+          }
+        }
+
+        // Add to file list
+        const fileEntry: FileEntry = {
+          name: file.name,
+          type: ext,
+          size: file.size,
+          modified: new Date(file.lastModified),
+          data,
+          parsed,
+        };
+
+        setFiles(prev => [...prev.filter(f => f.name !== file.name), fileEntry]);
+        setSelectedFile(fileEntry);
+
+        // Switch to appropriate tab
+        switch (ext) {
+          case VB6FileType.FRX:
+          case VB6FileType.CTX:
+            setActiveTab('frx');
+            break;
+          case VB6FileType.VBG:
+            setActiveTab('vbg');
+            break;
+          case VB6FileType.OCA:
+            setActiveTab('oca');
+            break;
+        }
+
+        onFileLoad?.(file.name, parsed);
+      } catch (error) {
+        const errorMsg = `Error loading file: ${error}`;
+        onFileError?.(errorMsg);
+        console.error(errorMsg);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [fileFormats, onFileLoad, onFileError]
+  );
+
+  const handleFileRemove = useCallback(
+    (filename: string) => {
+      setFiles(prev => prev.filter(f => f.name !== filename));
+      if (selectedFile?.name === filename) {
+        setSelectedFile(null);
+      }
+    },
+    [selectedFile]
+  );
+
+  const handleCreateNew = useCallback(
+    (type: VB6FileType) => {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const filename = `New${type.toUpperCase().slice(1)}_${timestamp}${type}`;
+
       let data: ArrayBuffer | string;
       let parsed: any;
 
-      // Read file based on type
-      if (ext === VB6FileType.VBG) {
-        data = await file.text();
-        parsed = fileFormats.parseVBGFile(data);
-        setVbgProjects(parsed);
-      } else {
-        data = await file.arrayBuffer();
-        
-        switch (ext) {
-          case VB6FileType.FRX:
-            parsed = fileFormats.parseFRXFile(data);
-            setFrxProperties(parsed);
-            break;
-          case VB6FileType.CTX:
-            parsed = fileFormats.parseCTXFile(data);
-            setFrxProperties(parsed);
-            break;
-          case VB6FileType.OCA:
-            parsed = fileFormats.parseOCAFile(data);
-            setOcaEntries(parsed);
-            break;
-        }
-      }
-
-      // Add to file list
-      const fileEntry: FileEntry = {
-        name: file.name,
-        type: ext,
-        size: file.size,
-        modified: new Date(file.lastModified),
-        data,
-        parsed
-      };
-
-      setFiles(prev => [...prev.filter(f => f.name !== file.name), fileEntry]);
-      setSelectedFile(fileEntry);
-      
-      // Switch to appropriate tab
-      switch (ext) {
+      switch (type) {
         case VB6FileType.FRX:
-        case VB6FileType.CTX:
+        case VB6FileType.CTX: {
+          const props = new Map<number, VB6BinaryProperty>();
+          data = fileFormats.generateFRXFile(props);
+          parsed = props;
+          setFrxProperties(props);
           setActiveTab('frx');
           break;
-        case VB6FileType.VBG:
+        }
+
+        case VB6FileType.VBG: {
+          const projects: VB6ProjectGroup[] = [];
+          data = fileFormats.generateVBGFile(projects);
+          parsed = projects;
+          setVbgProjects(projects);
           setActiveTab('vbg');
           break;
-        case VB6FileType.OCA:
+        }
+
+        case VB6FileType.OCA: {
+          const entries: VB6CacheEntry[] = [];
+          data = fileFormats.generateOCAFile(entries);
+          parsed = entries;
+          setOcaEntries(entries);
           setActiveTab('oca');
           break;
+        }
+
+        default:
+          return;
       }
 
-      onFileLoad?.(file.name, parsed);
-    } catch (error) {
-      const errorMsg = `Error loading file: ${error}`;
-      onFileError?.(errorMsg);
-      console.error(errorMsg);
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [fileFormats, onFileLoad, onFileError]);
+      const fileEntry: FileEntry = {
+        name: filename,
+        type,
+        size: typeof data === 'string' ? data.length : data.byteLength,
+        modified: new Date(),
+        data,
+        parsed,
+      };
 
-  const handleFileRemove = useCallback((filename: string) => {
-    setFiles(prev => prev.filter(f => f.name !== filename));
-    if (selectedFile?.name === filename) {
-      setSelectedFile(null);
-    }
-  }, [selectedFile]);
+      setFiles(prev => [...prev, fileEntry]);
+      setSelectedFile(fileEntry);
+    },
+    [fileFormats]
+  );
 
-  const handleCreateNew = useCallback((type: VB6FileType) => {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `New${type.toUpperCase().slice(1)}_${timestamp}${type}`;
-    
-    let data: ArrayBuffer | string;
-    let parsed: any;
+  const handleSaveFile = useCallback(
+    (fileEntry: FileEntry) => {
+      try {
+        const blob = fileFormats.saveFile(fileEntry.name, fileEntry.data!);
+        const url = URL.createObjectURL(blob);
 
-    switch (type) {
-      case VB6FileType.FRX:
-      case VB6FileType.CTX: {
-        const props = new Map<number, VB6BinaryProperty>();
-        data = fileFormats.generateFRXFile(props);
-        parsed = props;
-        setFrxProperties(props);
-        setActiveTab('frx');
-        break;
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileEntry.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        URL.revokeObjectURL(url);
+      } catch (error) {
+        onFileError?.(` Error saving file: ${error}`);
       }
-        
-      case VB6FileType.VBG: {
-        const projects: VB6ProjectGroup[] = [];
-        data = fileFormats.generateVBGFile(projects);
-        parsed = projects;
-        setVbgProjects(projects);
-        setActiveTab('vbg');
-        break;
-      }
-        
-      case VB6FileType.OCA: {
-        const entries: VB6CacheEntry[] = [];
-        data = fileFormats.generateOCAFile(entries);
-        parsed = entries;
-        setOcaEntries(entries);
-        setActiveTab('oca');
-        break;
-      }
-        
-      default:
-        return;
-    }
-
-    const fileEntry: FileEntry = {
-      name: filename,
-      type,
-      size: typeof data === 'string' ? data.length : data.byteLength,
-      modified: new Date(),
-      data,
-      parsed
-    };
-
-    setFiles(prev => [...prev, fileEntry]);
-    setSelectedFile(fileEntry);
-  }, [fileFormats]);
-
-  const handleSaveFile = useCallback((fileEntry: FileEntry) => {
-    try {
-      const blob = fileFormats.saveFile(fileEntry.name, fileEntry.data!);
-      const url = URL.createObjectURL(blob);
-      
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileEntry.name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      onFileError?.(` Error saving file: ${error}`);
-    }
-  }, [fileFormats, onFileError]);
+    },
+    [fileFormats, onFileError]
+  );
 
   const renderPropertyValue = (prop: VB6BinaryProperty): string => {
     switch (prop.type) {
@@ -203,7 +219,7 @@ export const VB6FileManager: React.FC<VB6FileManagerProps> = ({
     const newProps = new Map(frxProperties);
     newProps.set(index, newProp);
     setFrxProperties(newProps);
-    
+
     // Update selected file
     if (selectedFile) {
       const updatedData = fileFormats.generateFRXFile(newProps);
@@ -211,7 +227,7 @@ export const VB6FileManager: React.FC<VB6FileManagerProps> = ({
         ...selectedFile,
         data: updatedData,
         parsed: newProps,
-        size: updatedData.byteLength
+        size: updatedData.byteLength,
       });
     }
   };
@@ -222,12 +238,12 @@ export const VB6FileManager: React.FC<VB6FileManagerProps> = ({
       reference: '',
       project: 'NewProject.vbp',
       package: 'NewProject.exe',
-      startMode: 0
+      startMode: 0,
     };
-    
+
     const newProjects = [...vbgProjects, newProject];
     setVbgProjects(newProjects);
-    
+
     // Update selected file
     if (selectedFile) {
       const updatedData = fileFormats.generateVBGFile(newProjects);
@@ -235,7 +251,7 @@ export const VB6FileManager: React.FC<VB6FileManagerProps> = ({
         ...selectedFile,
         data: updatedData,
         parsed: newProjects,
-        size: updatedData.length
+        size: updatedData.length,
       });
     }
   };
@@ -248,12 +264,12 @@ export const VB6FileManager: React.FC<VB6FileManagerProps> = ({
       description: 'New Type Library',
       helpFile: '',
       helpContext: 0,
-      flags: 0
+      flags: 0,
     };
-    
+
     const newEntries = [...ocaEntries, newEntry];
     setOcaEntries(newEntries);
-    
+
     // Update selected file
     if (selectedFile) {
       const updatedData = fileFormats.generateOCAFile(newEntries);
@@ -261,7 +277,7 @@ export const VB6FileManager: React.FC<VB6FileManagerProps> = ({
         ...selectedFile,
         data: updatedData,
         parsed: newEntries,
-        size: updatedData.byteLength
+        size: updatedData.byteLength,
       });
     }
   };
@@ -289,11 +305,13 @@ export const VB6FileManager: React.FC<VB6FileManagerProps> = ({
             </button>
             <div className="relative">
               <select
-                onChange={(e) => handleCreateNew(e.target.value as VB6FileType)}
+                onChange={e => handleCreateNew(e.target.value as VB6FileType)}
                 className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 appearance-none pr-8"
                 value=""
               >
-                <option value="" disabled>New File</option>
+                <option value="" disabled>
+                  New File
+                </option>
                 <option value={VB6FileType.FRX}>FRX (Form Binary)</option>
                 <option value={VB6FileType.CTX}>CTX (Control Binary)</option>
                 <option value={VB6FileType.VBG}>VBG (Project Group)</option>
@@ -311,7 +329,7 @@ export const VB6FileManager: React.FC<VB6FileManagerProps> = ({
             <h3 className="font-medium text-gray-700">Files ({files.length})</h3>
           </div>
           <div className="flex-1 overflow-y-auto">
-            {files.map((file) => (
+            {files.map(file => (
               <div
                 key={file.name}
                 className={`p-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${
@@ -321,19 +339,15 @@ export const VB6FileManager: React.FC<VB6FileManagerProps> = ({
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm text-gray-900 truncate">
-                      {file.name}
-                    </div>
+                    <div className="font-medium text-sm text-gray-900 truncate">{file.name}</div>
                     <div className="text-xs text-gray-500">
                       {file.type} • {(file.size / 1024).toFixed(1)} KB
                     </div>
-                    <div className="text-xs text-gray-400">
-                      {file.modified.toLocaleString()}
-                    </div>
+                    <div className="text-xs text-gray-400">{file.modified.toLocaleString()}</div>
                   </div>
                   <div className="flex gap-1 ml-2">
                     <button
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation();
                         handleSaveFile(file);
                       }}
@@ -343,7 +357,7 @@ export const VB6FileManager: React.FC<VB6FileManagerProps> = ({
                       💾
                     </button>
                     <button
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation();
                         handleFileRemove(file.name);
                       }}
@@ -380,7 +394,8 @@ export const VB6FileManager: React.FC<VB6FileManagerProps> = ({
                 >
                   File Info
                 </button>
-                {(selectedFile.type === VB6FileType.FRX || selectedFile.type === VB6FileType.CTX) && (
+                {(selectedFile.type === VB6FileType.FRX ||
+                  selectedFile.type === VB6FileType.CTX) && (
                   <button
                     onClick={() => setActiveTab('frx')}
                     className={`px-4 py-2 font-medium text-sm ${
@@ -497,20 +512,30 @@ export const VB6FileManager: React.FC<VB6FileManagerProps> = ({
                         <div key={index} className="border border-gray-200 rounded p-3">
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Project</label>
+                              <label className="block text-sm font-medium text-gray-700">
+                                Project
+                              </label>
                               <div className="mt-1 text-sm text-gray-900">{project.project}</div>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Package</label>
+                              <label className="block text-sm font-medium text-gray-700">
+                                Package
+                              </label>
                               <div className="mt-1 text-sm text-gray-900">{project.package}</div>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Start Mode</label>
+                              <label className="block text-sm font-medium text-gray-700">
+                                Start Mode
+                              </label>
                               <div className="mt-1 text-sm text-gray-900">{project.startMode}</div>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Reference</label>
-                              <div className="mt-1 text-sm text-gray-900">{project.reference || 'None'}</div>
+                              <label className="block text-sm font-medium text-gray-700">
+                                Reference
+                              </label>
+                              <div className="mt-1 text-sm text-gray-900">
+                                {project.reference || 'None'}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -540,19 +565,29 @@ export const VB6FileManager: React.FC<VB6FileManagerProps> = ({
                         <div key={index} className="border border-gray-200 rounded p-3">
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Type Library GUID</label>
-                              <div className="mt-1 text-sm text-gray-900 font-mono">{entry.typeLibGuid}</div>
+                              <label className="block text-sm font-medium text-gray-700">
+                                Type Library GUID
+                              </label>
+                              <div className="mt-1 text-sm text-gray-900 font-mono">
+                                {entry.typeLibGuid}
+                              </div>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Version</label>
+                              <label className="block text-sm font-medium text-gray-700">
+                                Version
+                              </label>
                               <div className="mt-1 text-sm text-gray-900">{entry.version}</div>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Description</label>
+                              <label className="block text-sm font-medium text-gray-700">
+                                Description
+                              </label>
                               <div className="mt-1 text-sm text-gray-900">{entry.description}</div>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">LCID</label>
+                              <label className="block text-sm font-medium text-gray-700">
+                                LCID
+                              </label>
                               <div className="mt-1 text-sm text-gray-900">{entry.lcid}</div>
                             </div>
                           </div>

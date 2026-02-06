@@ -27,7 +27,7 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
 }) => {
   const { state, dispatch, updateControl, copyControls, pasteControls } = useVB6();
   const canvasRef = useRef<HTMLDivElement>(null);
-  
+
   // Ultra-Think: Performance monitoring and viewport state
   const [showPerformanceMonitor, setShowPerformanceMonitor] = useState(false);
   const [viewport, setViewport] = useState<ViewportBounds>({
@@ -37,9 +37,9 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
     bottom: height,
     width,
     height,
-    zoom: 1
+    zoom: 1,
   });
-  
+
   // Update viewport when canvas dimensions change
   useEffect(() => {
     setViewport(prev => ({
@@ -47,7 +47,7 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
       right: prev.left + width,
       bottom: prev.top + height,
       width,
-      height
+      height,
     }));
   }, [width, height]);
 
@@ -93,8 +93,8 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
   );
 
   // Ultra-Think: Virtualized guides for maximum performance
-  const selectedControlNames = useMemo(() => 
-    state.selectedControls.map(c => c.name), 
+  const selectedControlNames = useMemo(
+    () => state.selectedControls.map(c => c.name),
     [state.selectedControls]
   );
 
@@ -105,38 +105,40 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
     updateViewport,
     invalidateCache,
     isCalculating,
-    isEnabled: guidesEnabled
-  } = useVirtualizedGuides(
-    state.controls,
-    selectedControlNames,
-    {
-      enabled: state.showAlignmentGuides && state.controls.length > 10, // Only for complex scenarios
-      debounceMs: 16,
-      maxGuides: 30,
-      minStrength: 0.15,
-      showPerformanceMetrics: showPerformanceMonitor
-    }
-  );
+    isEnabled: guidesEnabled,
+  } = useVirtualizedGuides(state.controls, selectedControlNames, {
+    enabled: state.showAlignmentGuides && state.controls.length > 10, // Only for complex scenarios
+    debounceMs: 16,
+    maxGuides: 30,
+    minStrength: 0.15,
+    showPerformanceMetrics: showPerformanceMonitor,
+  });
 
   // Viewport update handler for scroll/zoom events
-  const handleViewportChange = useCallback((newViewport: Partial<ViewportBounds>) => {
-    setViewport(prev => {
-      const updated = { ...prev, ...newViewport };
-      updateViewport(updated);
-      return updated;
-    });
-  }, [updateViewport]);
+  const handleViewportChange = useCallback(
+    (newViewport: Partial<ViewportBounds>) => {
+      setViewport(prev => {
+        const updated = { ...prev, ...newViewport };
+        updateViewport(updated);
+        return updated;
+      });
+    },
+    [updateViewport]
+  );
 
   // Performance: Update viewport on scroll/zoom
-  const handleCanvasScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const target = e.currentTarget;
-    handleViewportChange({
-      left: target.scrollLeft,
-      top: target.scrollTop,
-      right: target.scrollLeft + target.clientWidth,
-      bottom: target.scrollTop + target.clientHeight
-    });
-  }, [handleViewportChange]);
+  const handleCanvasScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const target = e.currentTarget;
+      handleViewportChange({
+        left: target.scrollLeft,
+        top: target.scrollTop,
+        right: target.scrollLeft + target.clientWidth,
+        bottom: target.scrollTop + target.clientHeight,
+      });
+    },
+    [handleViewportChange]
+  );
 
   // Global event listeners for drag and resize operations
   useEffect(() => {
@@ -154,7 +156,7 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
       // Add global event listeners
       document.addEventListener('mousemove', handleGlobalMouseMove);
       document.addEventListener('mouseup', handleGlobalMouseUp);
-      
+
       // Disable text selection during drag/resize
       document.body.style.userSelect = 'none';
       document.body.style.cursor = dragState.isResizing ? 'resize' : 'move';
@@ -204,8 +206,8 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
   }, [state.executionMode, handleKeyboardMove, handleKeyboardResize, invalidateCache]);
 
   // PERFORMANCE FIX: Memoize selected control IDs for O(1) lookup
-  const selectedControlIds = useMemo(() => 
-    new Set(state.selectedControls.map(c => c.id)), 
+  const selectedControlIds = useMemo(
+    () => new Set(state.selectedControls.map(c => c.id)),
     [state.selectedControls]
   );
 
@@ -337,7 +339,10 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
     (control: Control, property: string, value: any) => {
       if (property.includes('.')) {
         const [top, sub] = property.split('.');
-        const updated = { ...(control as any)[top], [sub]: value };
+        const updated = {
+          ...((control as Record<string, unknown>)[top] as Record<string, unknown>),
+          [sub]: value,
+        };
         updateControl(control.id, top, updated);
       } else {
         updateControl(control.id, property, value);
@@ -382,12 +387,12 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
       {/* Canvas Container */}
       <div className="flex-1 flex overflow-hidden">
         {/* Main Canvas */}
-        <div 
-          className="flex-1 p-4 overflow-auto bg-gray-300"
-          onScroll={handleCanvasScroll}
-        >
+        <div className="flex-1 p-4 overflow-auto bg-gray-300" onScroll={handleCanvasScroll}>
           <div
             ref={canvasRef}
+            role="application"
+            aria-label="Form Designer Canvas"
+            aria-roledescription="design surface"
             className="relative shadow-lg mx-auto"
             style={{
               width,
@@ -410,21 +415,23 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
             )}
 
             {/* Legacy alignment guides (fallback for small control sets) */}
-            {!guidesEnabled && state.showAlignmentGuides && alignmentGuides.map((guide, index) => (
-              <div
-                key={index}
-                className="absolute pointer-events-none"
-                style={{
-                  left: guide.type === 'vertical' ? guide.position : 0,
-                  top: guide.type === 'horizontal' ? guide.position : 0,
-                  width: guide.type === 'vertical' ? '1px' : '100%',
-                  height: guide.type === 'horizontal' ? '1px' : '100%',
-                  backgroundColor: '#ff6b6b',
-                  borderStyle: 'dashed',
-                  zIndex: 5,
-                }}
-              />
-            ))}
+            {!guidesEnabled &&
+              state.showAlignmentGuides &&
+              alignmentGuides.map((guide, index) => (
+                <div
+                  key={index}
+                  className="absolute pointer-events-none"
+                  style={{
+                    left: guide.type === 'vertical' ? guide.position : 0,
+                    top: guide.type === 'horizontal' ? guide.position : 0,
+                    width: guide.type === 'vertical' ? '1px' : '100%',
+                    height: guide.type === 'horizontal' ? '1px' : '100%',
+                    backgroundColor: '#ff6b6b',
+                    borderStyle: 'dashed',
+                    zIndex: 5,
+                  }}
+                />
+              ))}
             {/* Grid */}
             <GridManager
               show={state.showGrid && state.executionMode === 'design'}
@@ -461,8 +468,8 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
                 gridSize={state.gridSize}
                 showAlignmentGuides={state.showAlignmentGuides}
               >
-                <ControlRenderer 
-                  control={control} 
+                <ControlRenderer
+                  control={control}
                   onStartDrag={startDrag}
                   onStartResize={startResize}
                   dragState={dragState}
@@ -512,7 +519,7 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
           Optimizing guides...
         </div>
       )}
-      
+
       {/* Debug info overlay (Ctrl+Shift+P to toggle) */}
       {showPerformanceMonitor && (
         <div className="fixed top-20 left-4 z-40 bg-black bg-opacity-75 text-white p-2 rounded text-xs font-mono">

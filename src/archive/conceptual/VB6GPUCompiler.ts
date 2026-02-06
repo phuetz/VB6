@@ -1,6 +1,6 @@
 /**
  * VB6 GPU-Accelerated Compiler
- * 
+ *
  * Hardware-accelerated compilation using WebGPU:
  * - Massively parallel AST transformation
  * - GPU-based optimization algorithms
@@ -40,20 +40,20 @@ export class VB6GPUCompiler {
   private device: GPUDevice | null = null;
   private context: GPUCanvasContext | null = null;
   private commandEncoder: GPUCommandEncoder | null = null;
-  
+
   // Compilation kernels
   private kernels: Map<string, GPUComputePipeline> = new Map();
   private buffers: Map<string, GPUBuffer> = new Map();
-  
+
   // Optimization passes
   private optimizationPasses: GPUOptimizationPass[] = [];
-  
+
   constructor() {
     this.initializeWebGPU();
     this.loadKernels();
     this.setupOptimizationPasses();
   }
-  
+
   /**
    * Initialize WebGPU
    */
@@ -62,32 +62,30 @@ export class VB6GPUCompiler {
       console.warn('WebGPU not supported, falling back to CPU compilation');
       return;
     }
-    
+
     const adapter = await navigator.gpu.requestAdapter({
       powerPreference: 'high-performance',
-      forceFallbackAdapter: false
+      forceFallbackAdapter: false,
     });
-    
+
     if (!adapter) {
       console.warn('No WebGPU adapter found');
       return;
     }
-    
+
     this.device = await adapter.requestDevice({
       requiredFeatures: ['shader-f16', 'timestamp-query'],
       requiredLimits: {
         maxStorageBufferBindingSize: 1073741824, // 1GB
-        maxComputeWorkgroupStorageSize: 49152,   // 48KB
+        maxComputeWorkgroupStorageSize: 49152, // 48KB
         maxComputeInvocationsPerWorkgroup: 1024,
         maxComputeWorkgroupSizeX: 1024,
         maxComputeWorkgroupSizeY: 1024,
-        maxComputeWorkgroupSizeZ: 64
-      }
+        maxComputeWorkgroupSizeZ: 64,
+      },
     });
-    
-    console.log('🎮 WebGPU initialized for GPU-accelerated compilation');
   }
-  
+
   /**
    * Compile using GPU acceleration
    */
@@ -95,31 +93,28 @@ export class VB6GPUCompiler {
     if (!this.device) {
       throw new Error('WebGPU not initialized');
     }
-    
-    console.log('🚀 GPU-Accelerated Compilation Started...');
-    
+
     // Phase 1: Convert AST to GPU representation
     const gpuAST = await this.convertASTToGPU(ast);
-    
+
     // Phase 2: Upload to GPU memory
     await this.uploadToGPU(gpuAST);
-    
+
     // Phase 3: Run optimization passes
     const optimizedGPUAST = await this.runGPUOptimizations(gpuAST);
-    
+
     // Phase 4: Pattern matching and transformation
     const transformedGPUAST = await this.runGPUTransformations(optimizedGPUAST);
-    
+
     // Phase 5: Code generation on GPU
     const generatedCode = await this.generateCodeGPU(transformedGPUAST);
-    
+
     // Phase 6: Download results
     const optimizedAST = await this.downloadFromGPU(transformedGPUAST);
-    
-    console.log('✨ GPU compilation completed');
+
     return optimizedAST;
   }
-  
+
   /**
    * Load GPU compute kernels
    */
@@ -175,10 +170,10 @@ export class VB6GPUCompiler {
       buffers: [
         { name: 'input', size: 0, usage: GPUBufferUsage.STORAGE },
         { name: 'output', size: 0, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC },
-        { name: 'params', size: 16, usage: GPUBufferUsage.UNIFORM }
-      ]
+        { name: 'params', size: 16, usage: GPUBufferUsage.UNIFORM },
+      ],
     });
-    
+
     // Dependency analysis kernel
     this.registerKernel({
       name: 'dependencyAnalysis',
@@ -219,10 +214,14 @@ export class VB6GPUCompiler {
       buffers: [
         { name: 'edges', size: 0, usage: GPUBufferUsage.STORAGE },
         { name: 'matrix', size: 4194304, usage: GPUBufferUsage.STORAGE },
-        { name: 'transitiveClosure', size: 4194304, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC }
-      ]
+        {
+          name: 'transitiveClosure',
+          size: 4194304,
+          usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+        },
+      ],
     });
-    
+
     // Pattern matching kernel
     this.registerKernel({
       name: 'patternMatching',
@@ -267,10 +266,10 @@ export class VB6GPUCompiler {
         { name: 'nodes', size: 0, usage: GPUBufferUsage.STORAGE },
         { name: 'patterns', size: 0, usage: GPUBufferUsage.STORAGE },
         { name: 'matches', size: 0, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC },
-        { name: 'matchCount', size: 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC }
-      ]
+        { name: 'matchCount', size: 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC },
+      ],
     });
-    
+
     // Code generation kernel
     this.registerKernel({
       name: 'codeGeneration',
@@ -317,33 +316,37 @@ export class VB6GPUCompiler {
       buffers: [
         { name: 'optimizedNodes', size: 0, usage: GPUBufferUsage.STORAGE },
         { name: 'instructions', size: 0, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC },
-        { name: 'instructionCount', size: 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC }
-      ]
+        {
+          name: 'instructionCount',
+          size: 4,
+          usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+        },
+      ],
     });
   }
-  
+
   /**
    * Register a GPU kernel
    */
   private registerKernel(kernel: GPUCompilationKernel): void {
     if (!this.device) return;
-    
+
     const shaderModule = this.device.createShaderModule({
       code: kernel.source,
-      label: kernel.name
+      label: kernel.name,
     });
-    
+
     const pipeline = this.device.createComputePipeline({
       layout: 'auto',
       compute: {
         module: shaderModule,
-        entryPoint: 'main'
-      }
+        entryPoint: 'main',
+      },
     });
-    
+
     this.kernels.set(kernel.name, pipeline);
   }
-  
+
   /**
    * Setup optimization passes
    */
@@ -354,34 +357,34 @@ export class VB6GPUCompiler {
           name: 'constantPropagation',
           source: this.getConstantPropagationKernel(),
           workgroupSize: [64, 1, 1],
-          buffers: []
+          buffers: [],
         },
         iterations: 5,
-        convergenceThreshold: 0.001
+        convergenceThreshold: 0.001,
       },
       {
         kernel: {
           name: 'loopOptimization',
           source: this.getLoopOptimizationKernel(),
           workgroupSize: [32, 1, 1],
-          buffers: []
+          buffers: [],
         },
         iterations: 3,
-        convergenceThreshold: 0.01
+        convergenceThreshold: 0.01,
       },
       {
         kernel: {
           name: 'vectorization',
           source: this.getVectorizationKernel(),
           workgroupSize: [128, 1, 1],
-          buffers: []
+          buffers: [],
         },
         iterations: 2,
-        convergenceThreshold: 0.05
-      }
+        convergenceThreshold: 0.05,
+      },
     ];
   }
-  
+
   /**
    * Convert AST to GPU representation
    */
@@ -390,27 +393,27 @@ export class VB6GPUCompiler {
     const edges: any[] = [];
     let nodeIndex = 0;
     const nodeMap = new Map<any, number>();
-    
+
     // Flatten AST into GPU-friendly format
     const traverse = (node: any, parentIdx: number = -1) => {
       const idx = nodeIndex++;
       nodeMap.set(node, idx);
-      
+
       nodes.push({
         type: this.getNodeType(node),
         data: this.getNodeData(node),
-        metadata: this.getNodeMetadata(node)
+        metadata: this.getNodeMetadata(node),
       });
-      
+
       if (parentIdx >= 0) {
         edges.push({
           from: parentIdx,
           to: idx,
           type: 0, // Parent-child edge
-          weight: 1.0
+          weight: 1.0,
         });
       }
-      
+
       // Traverse children
       for (const key in node) {
         if (node[key] && typeof node[key] === 'object') {
@@ -422,144 +425,141 @@ export class VB6GPUCompiler {
         }
       }
     };
-    
+
     traverse(ast);
-    
+
     // Convert to typed arrays
     const nodeTypes = new Uint32Array(nodes.map(n => n.type));
     const nodeData = new Float32Array(nodes.flatMap(n => n.data));
     const edgeArray = new Uint32Array(edges.flatMap(e => [e.from, e.to, e.type]));
     const metadata = new Float32Array(nodes.flatMap(n => n.metadata));
-    
+
     return {
       nodeTypes,
       nodeData,
       edges: edgeArray,
-      metadata
+      metadata,
     };
   }
-  
+
   /**
    * Upload AST to GPU memory
    */
   private async uploadToGPU(gpuAST: ASTGPURepresentation): Promise<void> {
     if (!this.device) return;
-    
+
     // Create buffers
     const nodeTypeBuffer = this.device.createBuffer({
       size: gpuAST.nodeTypes.byteLength,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-      mappedAtCreation: true
+      mappedAtCreation: true,
     });
     new Uint32Array(nodeTypeBuffer.getMappedRange()).set(gpuAST.nodeTypes);
     nodeTypeBuffer.unmap();
-    
+
     const nodeDataBuffer = this.device.createBuffer({
       size: gpuAST.nodeData.byteLength,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-      mappedAtCreation: true
+      mappedAtCreation: true,
     });
     new Float32Array(nodeDataBuffer.getMappedRange()).set(gpuAST.nodeData);
     nodeDataBuffer.unmap();
-    
+
     const edgeBuffer = this.device.createBuffer({
       size: gpuAST.edges.byteLength,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-      mappedAtCreation: true
+      mappedAtCreation: true,
     });
     new Uint32Array(edgeBuffer.getMappedRange()).set(gpuAST.edges);
     edgeBuffer.unmap();
-    
+
     // Store buffers
     this.buffers.set('nodeTypes', nodeTypeBuffer);
     this.buffers.set('nodeData', nodeDataBuffer);
     this.buffers.set('edges', edgeBuffer);
   }
-  
+
   /**
    * Run GPU optimizations
    */
   private async runGPUOptimizations(gpuAST: ASTGPURepresentation): Promise<ASTGPURepresentation> {
     if (!this.device) return gpuAST;
-    
+
     for (const pass of this.optimizationPasses) {
-      console.log(`Running GPU optimization: ${pass.kernel.name}`);
-      
       let previousCost = Infinity;
-      
+
       for (let i = 0; i < pass.iterations; i++) {
         // Run optimization kernel
         await this.dispatchKernel(pass.kernel.name, {
-          workgroups: Math.ceil(gpuAST.nodeTypes.length / pass.kernel.workgroupSize[0])
+          workgroups: Math.ceil(gpuAST.nodeTypes.length / pass.kernel.workgroupSize[0]),
         });
-        
+
         // Check convergence
         const currentCost = await this.computeOptimizationCost();
         if (Math.abs(previousCost - currentCost) < pass.convergenceThreshold) {
-          console.log(`  Converged after ${i + 1} iterations`);
           break;
         }
         previousCost = currentCost;
       }
     }
-    
+
     return gpuAST;
   }
-  
+
   /**
    * Run GPU transformations
    */
   private async runGPUTransformations(gpuAST: ASTGPURepresentation): Promise<ASTGPURepresentation> {
     if (!this.device) return gpuAST;
-    
+
     // Pattern matching
     await this.dispatchKernel('patternMatching', {
-      workgroups: Math.ceil(gpuAST.nodeTypes.length / 256)
+      workgroups: Math.ceil(gpuAST.nodeTypes.length / 256),
     });
-    
+
     // Apply transformations based on matches
     await this.applyGPUTransformations();
-    
+
     return gpuAST;
   }
-  
+
   /**
    * Generate code on GPU
    */
   private async generateCodeGPU(gpuAST: ASTGPURepresentation): Promise<ArrayBuffer> {
     if (!this.device) return new ArrayBuffer(0);
-    
+
     // Allocate instruction buffer
     const maxInstructions = gpuAST.nodeTypes.length * 10;
     const instructionBuffer = this.device.createBuffer({
       size: maxInstructions * 16, // 16 bytes per instruction
-      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
     });
-    
+
     this.buffers.set('instructions', instructionBuffer);
-    
+
     // Run code generation kernel
     await this.dispatchKernel('codeGeneration', {
-      workgroups: Math.ceil(gpuAST.nodeTypes.length / 128)
+      workgroups: Math.ceil(gpuAST.nodeTypes.length / 128),
     });
-    
+
     // Read back generated code
     const readBuffer = this.device.createBuffer({
       size: instructionBuffer.size,
-      usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
+      usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
     });
-    
+
     const commandEncoder = this.device.createCommandEncoder();
     commandEncoder.copyBufferToBuffer(instructionBuffer, 0, readBuffer, 0, instructionBuffer.size);
     this.device.queue.submit([commandEncoder.finish()]);
-    
+
     await readBuffer.mapAsync(GPUMapMode.READ);
     const result = readBuffer.getMappedRange().slice(0);
     readBuffer.unmap();
-    
+
     return result;
   }
-  
+
   /**
    * Download results from GPU
    */
@@ -570,42 +570,42 @@ export class VB6GPUCompiler {
       type: 'Program',
       body: [],
       optimized: true,
-      gpuAccelerated: true
+      gpuAccelerated: true,
     };
   }
-  
+
   /**
    * Dispatch a kernel
    */
   private async dispatchKernel(kernelName: string, params: any): Promise<void> {
     if (!this.device) return;
-    
+
     const pipeline = this.kernels.get(kernelName);
     if (!pipeline) return;
-    
+
     const commandEncoder = this.device.createCommandEncoder();
     const passEncoder = commandEncoder.beginComputePass();
-    
+
     passEncoder.setPipeline(pipeline);
-    
+
     // Set bind groups based on kernel requirements
     // This is simplified - actual implementation would be more complex
     const bindGroup = this.device.createBindGroup({
       layout: pipeline.getBindGroupLayout(0),
       entries: [
         { binding: 0, resource: { buffer: this.buffers.get('nodeTypes')! } },
-        { binding: 1, resource: { buffer: this.buffers.get('nodeData')! } }
-      ]
+        { binding: 1, resource: { buffer: this.buffers.get('nodeData')! } },
+      ],
     });
-    
+
     passEncoder.setBindGroup(0, bindGroup);
     passEncoder.dispatchWorkgroups(params.workgroups);
     passEncoder.end();
-    
+
     this.device.queue.submit([commandEncoder.finish()]);
     await this.device.queue.onSubmittedWorkDone();
   }
-  
+
   /**
    * Apply GPU transformations
    */
@@ -613,7 +613,7 @@ export class VB6GPUCompiler {
     // Apply matched transformations
     // This would read the matches buffer and apply transformations
   }
-  
+
   /**
    * Compute optimization cost
    */
@@ -621,9 +621,9 @@ export class VB6GPUCompiler {
     // Compute cost metric for current optimization state
     return Math.random(); // Placeholder
   }
-  
+
   // Helper methods for kernels
-  
+
   private getConstantPropagationKernel(): string {
     return `
       @group(0) @binding(0) var<storage, read_write> nodes: array<Node>;
@@ -648,7 +648,7 @@ export class VB6GPUCompiler {
       }
     `;
   }
-  
+
   private getLoopOptimizationKernel(): string {
     return `
       @group(0) @binding(0) var<storage, read_write> loops: array<LoopNode>;
@@ -687,7 +687,7 @@ export class VB6GPUCompiler {
       }
     `;
   }
-  
+
   private getVectorizationKernel(): string {
     return `
       @group(0) @binding(0) var<storage, read_write> operations: array<Operation>;
@@ -719,42 +719,37 @@ export class VB6GPUCompiler {
       }
     `;
   }
-  
+
   // Helper methods
-  
+
   private getNodeType(node: any): number {
     const typeMap: { [key: string]: number } = {
-      'Literal': 0,
-      'BinaryExpression': 1,
-      'IfStatement': 2,
-      'ForStatement': 3,
-      'WhileStatement': 4,
-      'FunctionDeclaration': 5,
-      'CallExpression': 6,
-      'Identifier': 10,
-      'Assignment': 11
+      Literal: 0,
+      BinaryExpression: 1,
+      IfStatement: 2,
+      ForStatement: 3,
+      WhileStatement: 4,
+      FunctionDeclaration: 5,
+      CallExpression: 6,
+      Identifier: 10,
+      Assignment: 11,
     };
-    
+
     return typeMap[node.type] || 99;
   }
-  
+
   private getNodeData(node: any): number[] {
     const data = [0, 0, 0, 0];
-    
+
     if (node.type === 'Literal' && typeof node.value === 'number') {
       data[0] = node.value;
     }
-    
+
     return data;
   }
-  
+
   private getNodeMetadata(node: any): number[] {
-    return [
-      node.line || 0,
-      node.column || 0,
-      node.cost || 0,
-      node.frequency || 0
-    ];
+    return [node.line || 0, node.column || 0, node.cost || 0, node.frequency || 0];
   }
 }
 
@@ -766,28 +761,28 @@ class GPUMemoryManager {
   private allocations: Map<string, GPUBuffer> = new Map();
   private totalAllocated: number = 0;
   private maxMemory: number = 4 * 1024 * 1024 * 1024; // 4GB
-  
+
   constructor(device: GPUDevice) {
     this.device = device;
   }
-  
+
   allocate(name: string, size: number, usage: GPUBufferUsageFlags): GPUBuffer {
     if (this.totalAllocated + size > this.maxMemory) {
       this.compact();
     }
-    
+
     const buffer = this.device.createBuffer({
       size,
       usage,
-      label: name
+      label: name,
     });
-    
+
     this.allocations.set(name, buffer);
     this.totalAllocated += size;
-    
+
     return buffer;
   }
-  
+
   free(name: string): void {
     const buffer = this.allocations.get(name);
     if (buffer) {
@@ -796,11 +791,10 @@ class GPUMemoryManager {
       // Note: actual size tracking would be more complex
     }
   }
-  
+
   compact(): void {
     // GPU memory compaction
-    console.log('Compacting GPU memory...');
-    
+
     // Free unused buffers
     for (const [name, buffer] of this.allocations) {
       // Check if buffer is still in use
@@ -817,53 +811,52 @@ class GPUPerformanceMonitor {
   private querySet: GPUQuerySet;
   private resolveBuffer: GPUBuffer;
   private resultBuffer: GPUBuffer;
-  
+
   constructor(device: GPUDevice) {
     this.device = device;
-    
+
     // Create timestamp query set
     this.querySet = device.createQuerySet({
       type: 'timestamp',
-      count: 16
+      count: 16,
     });
-    
+
     // Create buffers for reading timestamps
     this.resolveBuffer = device.createBuffer({
       size: 16 * 8, // 16 timestamps * 8 bytes each
-      usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC
+      usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
     });
-    
+
     this.resultBuffer = device.createBuffer({
       size: 16 * 8,
-      usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
+      usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
     });
   }
-  
+
   async measureKernel(kernelName: string, fn: () => Promise<void>): Promise<number> {
     const commandEncoder = this.device.createCommandEncoder();
-    
+
     // Write timestamp before
     commandEncoder.writeTimestamp(this.querySet, 0);
-    
+
     // Execute kernel
     await fn();
-    
+
     // Write timestamp after
     commandEncoder.writeTimestamp(this.querySet, 1);
-    
+
     // Resolve timestamps
     commandEncoder.resolveQuerySet(this.querySet, 0, 2, this.resolveBuffer, 0);
     commandEncoder.copyBufferToBuffer(this.resolveBuffer, 0, this.resultBuffer, 0, 16);
-    
+
     this.device.queue.submit([commandEncoder.finish()]);
-    
+
     // Read results
     await this.resultBuffer.mapAsync(GPUMapMode.READ);
     const timestamps = new BigUint64Array(this.resultBuffer.getMappedRange());
     const duration = Number(timestamps[1] - timestamps[0]) / 1_000_000; // Convert to ms
     this.resultBuffer.unmap();
-    
-    console.log(`GPU Kernel "${kernelName}" took ${duration.toFixed(2)}ms`);
+
     return duration;
   }
 }

@@ -1,6 +1,6 @@
 /**
  * VB6 Enum Support Implementation
- * 
+ *
  * Provides full support for VB6 Enum declarations and usage
  */
 
@@ -28,7 +28,7 @@ export class VB6EnumProcessor {
 
   /**
    * Parse VB6 Enum declaration
-   * Example: 
+   * Example:
    * Enum ErrorTypes
    *     errNone = 0
    *     errFile = 1
@@ -38,7 +38,7 @@ export class VB6EnumProcessor {
   parseEnumDeclaration(code: string, line: number): VB6EnumDeclaration | null {
     const enumRegex = /^(Public\s+|Private\s+)?Enum\s+(\w+)\s*$/i;
     const match = code.match(enumRegex);
-    
+
     if (!match) return null;
 
     const isPublic = match[1] ? match[1].toLowerCase().includes('public') : false;
@@ -49,7 +49,7 @@ export class VB6EnumProcessor {
       members: [],
       public: isPublic,
       module: this.currentModule,
-      line: line
+      line: line,
     };
   }
 
@@ -63,15 +63,15 @@ export class VB6EnumProcessor {
   parseEnumMember(code: string): VB6EnumMember | null {
     const memberRegex = /^\s*(\w+)(?:\s*=\s*(.+))?\s*$/;
     const match = code.match(memberRegex);
-    
+
     if (!match) return null;
 
     const name = match[1];
     const valueStr = match[2];
-    
+
     let value: number | string = 0;
     let explicitValue = false;
-    
+
     if (valueStr) {
       explicitValue = true;
       value = this.parseEnumValue(valueStr.trim());
@@ -80,7 +80,7 @@ export class VB6EnumProcessor {
     return {
       name,
       value,
-      explicitValue
+      explicitValue,
     };
   }
 
@@ -92,23 +92,23 @@ export class VB6EnumProcessor {
     if (valueStr.toLowerCase().startsWith('&h')) {
       return parseInt(valueStr.substring(2), 16);
     }
-    
+
     // Octal values (&O prefix)
     if (valueStr.toLowerCase().startsWith('&o')) {
       return parseInt(valueStr.substring(2), 8);
     }
-    
+
     // Binary values (&B prefix - VB6 extension)
     if (valueStr.toLowerCase().startsWith('&b')) {
       return parseInt(valueStr.substring(2), 2);
     }
-    
+
     // Simple numeric value
     const numValue = parseInt(valueStr);
     if (!isNaN(numValue)) {
       return numValue;
     }
-    
+
     // Expression evaluation (simplified)
     try {
       // Handle basic arithmetic expressions
@@ -124,22 +124,22 @@ export class VB6EnumProcessor {
    */
   processEnum(enumDecl: VB6EnumDeclaration, memberLines: string[]): VB6EnumDeclaration {
     let currentValue = 0;
-    
+
     for (const line of memberLines) {
       const member = this.parseEnumMember(line);
       if (member) {
         if (!member.explicitValue) {
           member.value = currentValue;
         }
-        
+
         if (typeof member.value === 'number') {
           currentValue = member.value + 1;
         }
-        
+
         enumDecl.members.push(member);
       }
     }
-    
+
     return enumDecl;
   }
 
@@ -149,13 +149,13 @@ export class VB6EnumProcessor {
   registerEnum(enumDecl: VB6EnumDeclaration) {
     const fullName = enumDecl.public ? enumDecl.name : `${this.currentModule}.${enumDecl.name}`;
     this.enums.set(fullName, enumDecl);
-    
+
     // Also register individual members for global access
     for (const member of enumDecl.members) {
       const memberKey = enumDecl.public ? member.name : `${this.currentModule}.${member.name}`;
       this.enums.set(memberKey, {
         ...enumDecl,
-        members: [member]
+        members: [member],
       });
     }
   }
@@ -173,7 +173,7 @@ export class VB6EnumProcessor {
   getEnumValue(enumName: string, memberName: string): number | undefined {
     const enumDecl = this.getEnum(enumName);
     if (!enumDecl) return undefined;
-    
+
     const member = enumDecl.members.find(m => m.name === memberName);
     return typeof member?.value === 'number' ? member.value : undefined;
   }
@@ -191,29 +191,29 @@ export class VB6EnumProcessor {
   generateJavaScript(enumDecl: VB6EnumDeclaration): string {
     const enumName = enumDecl.name;
     const members = enumDecl.members;
-    
+
     let jsCode = `// Enum ${enumName}\n`;
     jsCode += `const ${enumName} = {\n`;
-    
+
     for (const member of members) {
       jsCode += `  ${member.name}: ${member.value},\n`;
     }
-    
+
     jsCode += `};\n\n`;
-    
+
     // Create reverse mapping (value to name)
     jsCode += `${enumName}._names = {\n`;
     for (const member of members) {
       jsCode += `  ${member.value}: "${member.name}",\n`;
     }
     jsCode += `};\n\n`;
-    
+
     // Helper methods
     jsCode += `${enumName}.getName = function(value) { return this._names[value] || "Unknown"; };\n`;
     jsCode += `${enumName}.hasValue = function(value) { return value in this._names; };\n`;
     jsCode += `${enumName}.values = function() { return Object.values(this).filter(v => typeof v === 'number'); };\n`;
     jsCode += `${enumName}.names = function() { return Object.keys(this).filter(k => k !== '_names' && typeof this[k] === 'number'); };\n\n`;
-    
+
     return jsCode;
   }
 
@@ -223,9 +223,9 @@ export class VB6EnumProcessor {
   generateTypeScript(enumDecl: VB6EnumDeclaration): string {
     const enumName = enumDecl.name;
     const members = enumDecl.members;
-    
+
     let tsCode = `enum ${enumName} {\n`;
-    
+
     for (const member of members) {
       if (member.explicitValue) {
         tsCode += `  ${member.name} = ${member.value},\n`;
@@ -233,9 +233,9 @@ export class VB6EnumProcessor {
         tsCode += `  ${member.name},\n`;
       }
     }
-    
+
     tsCode += `}\n\n`;
-    
+
     return tsCode;
   }
 
@@ -243,8 +243,7 @@ export class VB6EnumProcessor {
    * Get all enums in current module
    */
   getModuleEnums(): VB6EnumDeclaration[] {
-    return Array.from(this.enums.values())
-      .filter(e => e.module === this.currentModule);
+    return Array.from(this.enums.values()).filter(e => e.module === this.currentModule);
   }
 
   /**
@@ -288,11 +287,11 @@ export const VB6BuiltinEnums = {
       { name: 'vbRetry', value: 4, explicitValue: true },
       { name: 'vbIgnore', value: 5, explicitValue: true },
       { name: 'vbYes', value: 6, explicitValue: true },
-      { name: 'vbNo', value: 7, explicitValue: true }
+      { name: 'vbNo', value: 7, explicitValue: true },
     ],
     public: true,
     module: 'VBA',
-    line: 0
+    line: 0,
   },
 
   // VbMsgBoxStyle
@@ -308,11 +307,11 @@ export const VB6BuiltinEnums = {
       { name: 'vbCritical', value: 16, explicitValue: true },
       { name: 'vbQuestion', value: 32, explicitValue: true },
       { name: 'vbExclamation', value: 48, explicitValue: true },
-      { name: 'vbInformation', value: 64, explicitValue: true }
+      { name: 'vbInformation', value: 64, explicitValue: true },
     ],
     public: true,
     module: 'VBA',
-    line: 0
+    line: 0,
   },
 
   // VbVarType
@@ -332,12 +331,12 @@ export const VB6BuiltinEnums = {
       { name: 'vbError', value: 10, explicitValue: true },
       { name: 'vbBoolean', value: 11, explicitValue: true },
       { name: 'vbVariant', value: 12, explicitValue: true },
-      { name: 'vbArray', value: 8192, explicitValue: true }
+      { name: 'vbArray', value: 8192, explicitValue: true },
     ],
     public: true,
     module: 'VBA',
-    line: 0
-  }
+    line: 0,
+  },
 };
 
 // Global enum processor instance

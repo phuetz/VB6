@@ -27,7 +27,7 @@ describe('VB6 Language Features Compatibility', () => {
       generateTypeScript: false,
       generateSourceMaps: false,
       optimize: false,
-      runtimeTarget: 'es2015'
+      runtimeTarget: 'es2015',
     });
   });
 
@@ -493,9 +493,7 @@ End Sub
 
       expect(result.success).toBe(true);
       expect(result.errors.length).toBe(0);
-      expect(
-        result.javascript.includes('let') || result.javascript.includes('var')
-      ).toBe(true);
+      expect(result.javascript.includes('let') || result.javascript.includes('var')).toBe(true);
     });
 
     it('should compile multiple declarations on one line', () => {

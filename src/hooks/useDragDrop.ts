@@ -3,7 +3,10 @@ import { useCallback, useRef, useState } from 'react';
 // Generic type for drag/drop items
 type DragDropItem = Record<string, unknown>;
 
-interface DragDropOptions<TItem extends DragDropItem = DragDropItem, TTarget extends DragDropItem = DragDropItem> {
+interface DragDropOptions<
+  TItem extends DragDropItem = DragDropItem,
+  TTarget extends DragDropItem = DragDropItem,
+> {
   onDragStart?: (e: DragEvent, item: TItem) => void;
   onDragEnd?: (e: DragEvent, item: TItem) => void;
   onDrop?: (e: DragEvent, item: TItem, target: TTarget) => void;
@@ -14,7 +17,10 @@ interface DragDropOptions<TItem extends DragDropItem = DragDropItem, TTarget ext
   transferData?: Record<string, unknown>;
 }
 
-export const useDragDrop = <TItem extends DragDropItem = DragDropItem, TTarget extends DragDropItem = DragDropItem>(
+export const useDragDrop = <
+  TItem extends DragDropItem = DragDropItem,
+  TTarget extends DragDropItem = DragDropItem,
+>(
   options: DragDropOptions<TItem, TTarget> = {}
 ) => {
   const [isDragging, setIsDragging] = useState(false);

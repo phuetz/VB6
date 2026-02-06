@@ -12,7 +12,7 @@ export enum ClipboardFormat {
   vbCFPalette = 9,
   vbCFEMetafile = 14,
   vbCFFiles = 15,
-  vbCFRTF = -16639
+  vbCFRTF = -16639,
 }
 
 // Custom clipboard data structure
@@ -27,25 +27,25 @@ class ClipboardHistory {
   private static instance: ClipboardHistory;
   private history: ClipboardData[] = [];
   private maxHistory: number = 50;
-  
+
   static getInstance(): ClipboardHistory {
     if (!ClipboardHistory.instance) {
       ClipboardHistory.instance = new ClipboardHistory();
     }
     return ClipboardHistory.instance;
   }
-  
+
   addEntry(data: ClipboardData): void {
     this.history.unshift(data);
     if (this.history.length > this.maxHistory) {
       this.history = this.history.slice(0, this.maxHistory);
     }
   }
-  
+
   getHistory(): ClipboardData[] {
     return [...this.history];
   }
-  
+
   clear(): void {
     this.history = [];
   }
@@ -56,25 +56,25 @@ class VirtualClipboard {
   private static instance: VirtualClipboard;
   private data: Map<ClipboardFormat | string, any> = new Map();
   private listeners: Set<(format: ClipboardFormat | string, data: any) => void> = new Set();
-  
+
   static getInstance(): VirtualClipboard {
     if (!VirtualClipboard.instance) {
       VirtualClipboard.instance = new VirtualClipboard();
     }
     return VirtualClipboard.instance;
   }
-  
+
   setData(format: ClipboardFormat | string, data: any): void {
     this.data.set(format, data);
-    
+
     // Add to history
     const clipboardHistory = ClipboardHistory.getInstance();
     clipboardHistory.addEntry({
       format,
       data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
-    
+
     // Notify listeners
     this.listeners.forEach(listener => {
       try {
@@ -84,27 +84,27 @@ class VirtualClipboard {
       }
     });
   }
-  
+
   getData(format: ClipboardFormat | string): any {
     return this.data.get(format);
   }
-  
+
   hasData(format: ClipboardFormat | string): boolean {
     return this.data.has(format);
   }
-  
+
   getFormats(): (ClipboardFormat | string)[] {
     return Array.from(this.data.keys());
   }
-  
+
   clear(): void {
     this.data.clear();
   }
-  
+
   addListener(listener: (format: ClipboardFormat | string, data: any) => void): void {
     this.listeners.add(listener);
   }
-  
+
   removeListener(listener: (format: ClipboardFormat | string, data: any) => void): void {
     this.listeners.delete(listener);
   }
@@ -131,10 +131,9 @@ export async function SetText(text: string): Promise<void> {
       // Use legacy fallback for older browsers
       await setTextLegacy(text);
     }
-    
+
     // Store in virtual clipboard
     virtualClipboard.setData(ClipboardFormat.vbCFText, text);
-    
   } catch (error) {
     console.error('Failed to set clipboard text:', error);
     throw new Error('Failed to set clipboard text');
@@ -150,10 +149,10 @@ export async function GetText(): Promise<string> {
     if (navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
       try {
         const text = await navigator.clipboard.readText();
-        
+
         // Update virtual clipboard
         virtualClipboard.setData(ClipboardFormat.vbCFText, text);
-        
+
         return text;
       } catch (err) {
         // Clipboard API might be blocked by permissions
@@ -174,25 +173,32 @@ export async function GetText(): Promise<string> {
 /**
  * Set clipboard data with specific format
  */
-export async function SetData(data: any, format: ClipboardFormat = ClipboardFormat.vbCFText): Promise<void> {
+export async function SetData(
+  data: any,
+  format: ClipboardFormat = ClipboardFormat.vbCFText
+): Promise<void> {
   try {
     switch (format) {
       case ClipboardFormat.vbCFText:
         await SetText(String(data));
         break;
-        
+
       case ClipboardFormat.vbCFRTF:
         // RTF format - store as custom format
         virtualClipboard.setData(format, data);
-        
+
         // Also try to set as HTML if possible
         // BROWSER COMPATIBILITY FIX: Check for ClipboardItem support
-        if (navigator.clipboard && typeof navigator.clipboard.write === 'function' && typeof ClipboardItem !== 'undefined') {
+        if (
+          navigator.clipboard &&
+          typeof navigator.clipboard.write === 'function' &&
+          typeof ClipboardItem !== 'undefined'
+        ) {
           try {
             const htmlData = convertRTFToHTML(String(data));
             const clipboardItem = new ClipboardItem({
               'text/html': new Blob([htmlData], { type: 'text/html' }),
-              'text/plain': new Blob([extractTextFromRTF(String(data))], { type: 'text/plain' })
+              'text/plain': new Blob([extractTextFromRTF(String(data))], { type: 'text/plain' }),
             });
             await navigator.clipboard.write([clipboardItem]);
           } catch (err) {
@@ -200,16 +206,20 @@ export async function SetData(data: any, format: ClipboardFormat = ClipboardForm
           }
         }
         break;
-        
+
       case ClipboardFormat.vbCFBitmap:
       case ClipboardFormat.vbCFDIB:
         // Image formats
         if (data instanceof Blob || data instanceof File) {
           // BROWSER COMPATIBILITY FIX: Check for ClipboardItem support
-          if (navigator.clipboard && typeof navigator.clipboard.write === 'function' && typeof ClipboardItem !== 'undefined') {
+          if (
+            navigator.clipboard &&
+            typeof navigator.clipboard.write === 'function' &&
+            typeof ClipboardItem !== 'undefined'
+          ) {
             try {
               const clipboardItem = new ClipboardItem({
-                [data.type]: data
+                [data.type]: data,
               });
               await navigator.clipboard.write([clipboardItem]);
             } catch (err) {
@@ -220,10 +230,15 @@ export async function SetData(data: any, format: ClipboardFormat = ClipboardForm
           // Data URL or base64
           const blob = dataURLToBlob(data);
           // BROWSER COMPATIBILITY FIX: Check for ClipboardItem support
-          if (blob && navigator.clipboard && typeof navigator.clipboard.write === 'function' && typeof ClipboardItem !== 'undefined') {
+          if (
+            blob &&
+            navigator.clipboard &&
+            typeof navigator.clipboard.write === 'function' &&
+            typeof ClipboardItem !== 'undefined'
+          ) {
             try {
               const clipboardItem = new ClipboardItem({
-                [blob.type]: blob
+                [blob.type]: blob,
               });
               await navigator.clipboard.write([clipboardItem]);
             } catch (err) {
@@ -231,15 +246,15 @@ export async function SetData(data: any, format: ClipboardFormat = ClipboardForm
             }
           }
         }
-        
+
         virtualClipboard.setData(format, data);
         break;
-        
+
       case ClipboardFormat.vbCFFiles:
         // File list format
         virtualClipboard.setData(format, data);
         break;
-        
+
       default:
         // Custom format
         virtualClipboard.setData(format, data);
@@ -260,12 +275,12 @@ export async function GetData(format: ClipboardFormat = ClipboardFormat.vbCFText
     switch (format) {
       case ClipboardFormat.vbCFText:
         return await GetText();
-        
+
       case ClipboardFormat.vbCFRTF: {
         // Try to get RTF from virtual clipboard first
         const rtfData = virtualClipboard.getData(format);
         if (rtfData) return rtfData;
-        
+
         // Try to get HTML from system clipboard and convert
         // BROWSER COMPATIBILITY FIX: Check for clipboard.read support
         if (navigator.clipboard && typeof navigator.clipboard.read === 'function') {
@@ -284,7 +299,7 @@ export async function GetData(format: ClipboardFormat = ClipboardFormat.vbCFText
         }
         return '';
       }
-        
+
       case ClipboardFormat.vbCFBitmap:
       case ClipboardFormat.vbCFDIB:
         // Try to get image from system clipboard
@@ -303,10 +318,10 @@ export async function GetData(format: ClipboardFormat = ClipboardFormat.vbCFText
             console.warn('Clipboard read failed for image:', err);
           }
         }
-        
+
         // Fallback to virtual clipboard
         return virtualClipboard.getData(format);
-        
+
       default:
         // Custom format - get from virtual clipboard
         return virtualClipboard.getData(format);
@@ -336,7 +351,7 @@ export async function GetFormat(format: ClipboardFormat): Promise<boolean> {
           }
         }
         return virtualClipboard.hasData(format);
-        
+
       case ClipboardFormat.vbCFBitmap:
       case ClipboardFormat.vbCFDIB:
         if (navigator.clipboard && navigator.clipboard.read) {
@@ -348,7 +363,7 @@ export async function GetFormat(format: ClipboardFormat): Promise<boolean> {
           }
         }
         return virtualClipboard.hasData(format);
-        
+
       default:
         return virtualClipboard.hasData(format);
     }
@@ -363,10 +378,10 @@ export async function GetFormat(format: ClipboardFormat): Promise<boolean> {
  */
 export async function GetFormats(): Promise<(ClipboardFormat | string)[]> {
   const formats: Set<ClipboardFormat | string> = new Set();
-  
+
   // Add formats from virtual clipboard
   virtualClipboard.getFormats().forEach(format => formats.add(format));
-  
+
   // Check system clipboard
   try {
     if (navigator.clipboard && navigator.clipboard.read) {
@@ -388,7 +403,7 @@ export async function GetFormats(): Promise<(ClipboardFormat | string)[]> {
   } catch (error) {
     console.error('Failed to get clipboard formats:', error);
   }
-  
+
   return Array.from(formats);
 }
 
@@ -401,7 +416,7 @@ export async function Clear(): Promise<void> {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       await navigator.clipboard.writeText('');
     }
-    
+
     // Clear virtual clipboard
     virtualClipboard.clear();
   } catch (error) {
@@ -428,14 +443,18 @@ export function ClearHistory(): void {
 /**
  * Add clipboard change listener
  */
-export function AddClipboardListener(listener: (format: ClipboardFormat | string, data: any) => void): void {
+export function AddClipboardListener(
+  listener: (format: ClipboardFormat | string, data: any) => void
+): void {
   virtualClipboard.addListener(listener);
 }
 
 /**
  * Remove clipboard change listener
  */
-export function RemoveClipboardListener(listener: (format: ClipboardFormat | string, data: any) => void): void {
+export function RemoveClipboardListener(
+  listener: (format: ClipboardFormat | string, data: any) => void
+): void {
   virtualClipboard.removeListener(listener);
 }
 
@@ -459,7 +478,7 @@ function convertRTFToHTML(rtf: string): string {
     .replace(/\\\\/g, '\\')
     .replace(/\\{/g, '{')
     .replace(/\\}/g, '}');
-  
+
   return `<html><body>${html}</body></html>`;
 }
 
@@ -483,7 +502,7 @@ function convertHTMLToRTF(html: string): string {
     .replace(/\\/g, '\\\\')
     .replace(/{/g, '\\{')
     .replace(/}/g, '\\}');
-  
+
   return `{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}} \\f0\\fs24 ${rtf}}`;
 }
 
@@ -505,16 +524,16 @@ function dataURLToBlob(dataURL: string): Blob | null {
   try {
     const parts = dataURL.split(',');
     if (parts.length !== 2) return null;
-    
+
     const mimeType = parts[0].match(/:(.*?);/)?.[1] || 'application/octet-stream';
     const byteString = atob(parts[1]);
     const arrayBuffer = new ArrayBuffer(byteString.length);
     const uint8Array = new Uint8Array(arrayBuffer);
-    
+
     for (let i = 0; i < byteString.length; i++) {
       uint8Array[i] = byteString.charCodeAt(i);
     }
-    
+
     return new Blob([arrayBuffer], { type: mimeType });
   } catch (error) {
     console.error('Failed to convert data URL to blob:', error);
@@ -528,32 +547,32 @@ export class VB6Clipboard {
   static get Text(): string {
     return virtualClipboard.getData(ClipboardFormat.vbCFText) || '';
   }
-  
+
   static set Text(value: string) {
     SetText(value);
   }
-  
+
   // Methods
   static Clear(): void {
     Clear();
   }
-  
+
   static GetData(format: ClipboardFormat = ClipboardFormat.vbCFText): any {
     return GetData(format);
   }
-  
+
   static SetData(data: any, format: ClipboardFormat = ClipboardFormat.vbCFText): void {
     SetData(data, format);
   }
-  
+
   static GetFormat(format: ClipboardFormat): boolean {
     return virtualClipboard.hasData(format);
   }
-  
+
   static GetText(): string {
     return virtualClipboard.getData(ClipboardFormat.vbCFText) || '';
   }
-  
+
   static SetText(text: string): void {
     SetText(text);
   }
@@ -569,24 +588,24 @@ export const VB6ClipboardOperations = {
   GetFormat,
   GetFormats,
   Clear,
-  
+
   // History functions
   GetHistory,
   ClearHistory,
-  
+
   // Event functions
   AddClipboardListener,
   RemoveClipboardListener,
-  
+
   // VB6 Clipboard object
   Clipboard: VB6Clipboard,
-  
+
   // Constants
   ClipboardFormat,
-  
+
   // Advanced features
   VirtualClipboard: virtualClipboard,
-  ClipboardHistory: clipboardHistory
+  ClipboardHistory: clipboardHistory,
 };
 
 // Make functions globally available
@@ -594,7 +613,7 @@ if (typeof window !== 'undefined') {
   const globalAny = window as any;
   globalAny.VB6ClipboardOperations = VB6ClipboardOperations;
   globalAny.Clipboard = VB6Clipboard;
-  
+
   // Expose individual functions globally for VB6 compatibility
   Object.assign(globalAny, {
     SetClipboardText: SetText,
@@ -603,9 +622,9 @@ if (typeof window !== 'undefined') {
     GetClipboardData: GetData,
     GetClipboardFormat: GetFormat,
     GetClipboardFormats: GetFormats,
-    ClearClipboard: Clear
+    ClearClipboard: Clear,
   });
-  
+
   // Expose clipboard format constants
   Object.assign(globalAny, {
     vbCFText: ClipboardFormat.vbCFText,
@@ -615,7 +634,7 @@ if (typeof window !== 'undefined') {
     vbCFPalette: ClipboardFormat.vbCFPalette,
     vbCFEMetafile: ClipboardFormat.vbCFEMetafile,
     vbCFFiles: ClipboardFormat.vbCFFiles,
-    vbCFRTF: ClipboardFormat.vbCFRTF
+    vbCFRTF: ClipboardFormat.vbCFRTF,
   });
 }
 
@@ -628,7 +647,7 @@ async function setTextLegacy(text: string): Promise<void> {
   textArea.style.top = '-999999px';
   textArea.setAttribute('readonly', '');
   document.body.appendChild(textArea);
-  
+
   // iOS compatibility
   if (navigator.userAgent.match(/ipad|iphone/i)) {
     const range = document.createRange();
@@ -640,28 +659,28 @@ async function setTextLegacy(text: string): Promise<void> {
   } else {
     textArea.select();
   }
-  
+
   try {
     document.execCommand('copy');
   } catch (err) {
     console.warn('Legacy copy command failed:', err);
   }
-  
+
   document.body.removeChild(textArea);
 }
 
 async function getTextLegacy(): Promise<string> {
   // Try to use paste event (requires user interaction)
-  return new Promise<string>((resolve) => {
+  return new Promise<string>(resolve => {
     const handlePaste = (e: ClipboardEvent) => {
       e.preventDefault();
       const text = e.clipboardData?.getData('text/plain') || '';
       document.removeEventListener('paste', handlePaste);
       resolve(text);
     };
-    
+
     document.addEventListener('paste', handlePaste);
-    
+
     // Timeout fallback to virtual clipboard
     setTimeout(() => {
       document.removeEventListener('paste', handlePaste);

@@ -9,7 +9,7 @@ import { VB6Transpiler } from '../../utils/vb6Transpiler';
 /**
  * Suite de tests d'intégration complète pour le compilateur VB6
  * Tests exhaustifs de tous les composants et de leur interaction
- * 
+ *
  * OBJECTIFS:
  * - Vérifier l'intégration complète lexer -> parser -> analyzer -> transpiler
  * - Tester 5 programmes VB6 de référence
@@ -26,7 +26,7 @@ describe('VB6 Compiler Integration Tests - Phase 3', () => {
     compiler = new VB6Compiler();
     performanceMetrics = {
       startTime: performance.now(),
-      memoryBefore: (performance as any).memory?.usedJSHeapSize || 0
+      memoryBefore: (performance as any).memory?.usedJSHeapSize || 0,
     };
   });
 
@@ -131,7 +131,7 @@ End Function
 
     it('should compile calculator program successfully', () => {
       const result = compiler.compile(calculatorProgram);
-      
+
       expect(result.success).toBe(true);
       expect(result.errors).toHaveLength(0);
       expect(result.warnings).toHaveLength(0);
@@ -142,7 +142,7 @@ End Function
     it('should handle all calculator operations', () => {
       const result = compiler.compile(calculatorProgram);
       expect(result.success).toBe(true);
-      
+
       // Vérifier que toutes les opérations sont correctement transpilées
       const code = result.transpiledCode;
       expect(code).toContain('Addition');
@@ -156,7 +156,7 @@ End Function
     it('should handle error conditions properly', () => {
       const result = compiler.compile(calculatorProgram);
       expect(result.success).toBe(true);
-      
+
       // Vérifier la gestion d'erreur division par zéro
       const code = result.transpiledCode;
       expect(code).toContain('Division by zero');
@@ -267,7 +267,7 @@ End Sub
 
     it('should compile database program successfully', () => {
       const result = compiler.compile(databaseProgram);
-      
+
       expect(result.success).toBe(true);
       expect(result.errors).toHaveLength(0);
       expect(result.transpiledCode).toBeDefined();
@@ -276,7 +276,7 @@ End Sub
     it('should handle ADO objects correctly', () => {
       const result = compiler.compile(databaseProgram);
       expect(result.success).toBe(true);
-      
+
       const code = result.transpiledCode;
       expect(code).toContain('ADODB.Connection');
       expect(code).toContain('ADODB.Recordset');
@@ -287,7 +287,7 @@ End Sub
     it('should handle user-defined types', () => {
       const result = compiler.compile(databaseProgram);
       expect(result.success).toBe(true);
-      
+
       const code = result.transpiledCode;
       expect(code).toContain('CustomerRecord');
     });
@@ -459,7 +459,7 @@ End Sub
 
     it('should compile UI program successfully', () => {
       const result = compiler.compile(uiProgram);
-      
+
       expect(result.success).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
@@ -467,7 +467,7 @@ End Sub
     it('should handle WithEvents declarations', () => {
       const result = compiler.compile(uiProgram);
       expect(result.success).toBe(true);
-      
+
       const code = result.transpiledCode;
       expect(code).toContain('WithEvents');
     });
@@ -475,7 +475,7 @@ End Sub
     it('should handle dynamic control creation', () => {
       const result = compiler.compile(uiProgram);
       expect(result.success).toBe(true);
-      
+
       const code = result.transpiledCode;
       expect(code).toContain('Controls.Add');
       expect(code).toContain('CommandButton');
@@ -730,7 +730,7 @@ End Function
 
     it('should compile file processing program successfully', () => {
       const result = compiler.compile(fileProcessingProgram);
-      
+
       expect(result.success).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
@@ -738,7 +738,7 @@ End Function
     it('should handle file operations correctly', () => {
       const result = compiler.compile(fileProcessingProgram);
       expect(result.success).toBe(true);
-      
+
       const code = result.transpiledCode;
       expect(code).toContain('Open');
       expect(code).toContain('Close');
@@ -749,7 +749,7 @@ End Function
     it('should handle FileSystemObject integration', () => {
       const result = compiler.compile(fileProcessingProgram);
       expect(result.success).toBe(true);
-      
+
       const code = result.transpiledCode;
       expect(code).toContain('Scripting.FileSystemObject');
       expect(code).toContain('CreateObject');
@@ -1053,7 +1053,7 @@ End Function
 
     it('should compile algorithms program successfully', () => {
       const result = compiler.compile(algorithmsProgram);
-      
+
       expect(result.success).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
@@ -1061,7 +1061,7 @@ End Function
     it('should handle complex user-defined types', () => {
       const result = compiler.compile(algorithmsProgram);
       expect(result.success).toBe(true);
-      
+
       const code = result.transpiledCode;
       expect(code).toContain('ListNode');
       expect(code).toContain('LinkedList');
@@ -1072,7 +1072,7 @@ End Function
     it('should handle recursive functions', () => {
       const result = compiler.compile(algorithmsProgram);
       expect(result.success).toBe(true);
-      
+
       const code = result.transpiledCode;
       expect(code).toContain('BinaryTree_InsertRecursive');
       expect(code).toContain('BinaryTree_SearchRecursive');
@@ -1098,7 +1098,7 @@ Dim variantVar As Variant
 Dim objectVar As Object
 Dim stringFixedVar As String * 50
 `;
-      
+
       const result = compiler.compile(dataTypesProgram);
       expect(result.success).toBe(true);
     });
@@ -1164,7 +1164,7 @@ Sub TestControlStructures()
     Next element
 End Sub
 `;
-      
+
       const result = compiler.compile(controlStructuresProgram);
       expect(result.success).toBe(true);
     });
@@ -1213,7 +1213,7 @@ Function TestOperators() As Boolean
     TestOperators = True
 End Function
 `;
-      
+
       const result = compiler.compile(operatorsProgram);
       expect(result.success).toBe(true);
     });
@@ -1253,7 +1253,7 @@ Function TestErrorHandling2() As Boolean
     End If
 End Function
 `;
-      
+
       const result = compiler.compile(errorHandlingProgram);
       expect(result.success).toBe(true);
     });
@@ -1261,14 +1261,18 @@ End Function
 
   describe('Benchmarks de Performance', () => {
     it('should compile within performance thresholds', () => {
-      const largeProgram = Array(100).fill(`
+      const largeProgram = Array(100)
+        .fill(
+          `
 Sub TestSub${Math.random()}()
     Dim i As Integer
     For i = 1 To 1000
         Debug.Print "Test " & i
     Next i
 End Sub
-`).join('\n');
+`
+        )
+        .join('\n');
 
       const startTime = performance.now();
       const result = compiler.compile(largeProgram);
@@ -1304,7 +1308,9 @@ End Sub
     });
 
     it('should maintain memory usage within limits', () => {
-      const memoryTestProgram = Array(50).fill(`
+      const memoryTestProgram = Array(50)
+        .fill(
+          `
 Function MemoryTest${Math.random()}() As String
     Dim result As String
     Dim i As Integer
@@ -1313,11 +1319,13 @@ Function MemoryTest${Math.random()}() As String
     Next i
     MemoryTest${Math.random()} = result
 End Function
-`).join('\n');
+`
+        )
+        .join('\n');
 
       const result = compiler.compile(memoryTestProgram);
       expect(result.success).toBe(true);
-      
+
       const memoryIncrease = performanceMetrics.memoryAfter - performanceMetrics.memoryBefore;
       expect(memoryIncrease).toBeLessThan(10 * 1024 * 1024); // 10MB max
     });
@@ -1330,7 +1338,7 @@ End Function
         'Function Test2() As Integer\n    Test2 = 42\nEnd Function',
         'Dim x As Integer\nx = 10',
         'For i = 1 To 10\n    Debug.Print i\nNext i',
-        'If True Then\n    Debug.Print "True"\nEnd If'
+        'If True Then\n    Debug.Print "True"\nEnd If',
       ];
 
       let successCount = 0;
@@ -1357,7 +1365,7 @@ End Function
       const result = compiler.compile(testProgram);
       expect(result.success).toBe(true);
       expect(result.transpiledCode).toBeDefined();
-      
+
       // Vérifier que le code généré est du JavaScript valide
       expect(() => {
         new Function(result.transpiledCode);

@@ -28,58 +28,58 @@ class PerformanceFingerprintingProtection {
   private static instance: PerformanceFingerprintingProtection;
   private fingerprintingJitter: number = 0;
   private performanceNoise: Map<string, number> = new Map();
-  
+
   static getInstance(): PerformanceFingerprintingProtection {
     if (!this.instance) {
       this.instance = new PerformanceFingerprintingProtection();
     }
     return this.instance;
   }
-  
+
   /**
    * BROWSER FINGERPRINTING BUG FIX: Quantize FPS to prevent CPU fingerprinting
    */
   quantizeFPS(fps: number): number {
     // Quantize FPS to 5-frame intervals to prevent precise CPU performance fingerprinting
     const quantized = Math.round(fps / 5) * 5;
-    
+
     // Add consistent noise based on session to prevent correlation
     const sessionNoise = this.getSessionNoise('fps');
     const noisyFPS = quantized + (sessionNoise - 0.5) * 2; // ±1 FPS noise
-    
+
     // Clamp to reasonable bounds
     return Math.max(10, Math.min(120, Math.round(noisyFPS)));
   }
-  
+
   /**
    * BROWSER FINGERPRINTING BUG FIX: Obfuscate memory usage to prevent RAM fingerprinting
    */
   obfuscateMemoryUsage(memoryMB: number): number {
     // Quantize memory to 10MB increments
     const quantized = Math.round(memoryMB / 10) * 10;
-    
+
     // Add session-consistent noise
     const sessionNoise = this.getSessionNoise('memory');
     const noisyMemory = quantized + (sessionNoise - 0.5) * 20; // ±10MB noise
-    
+
     // Clamp to reasonable bounds (10MB - 2GB)
     return Math.max(10, Math.min(2048, Math.round(noisyMemory)));
   }
-  
+
   /**
    * BROWSER FINGERPRINTING BUG FIX: Randomize timing measurements
    */
   obfuscateTiming(timeMs: number): number {
     // Quantize timing to 1ms intervals to reduce precision
     const quantized = Math.round(timeMs);
-    
+
     // Add timing jitter
     const jitter = this.getTimingJitter();
     const noisyTime = quantized + jitter;
-    
+
     return Math.max(0, noisyTime);
   }
-  
+
   /**
    * BROWSER FINGERPRINTING BUG FIX: Anonymize browser information
    */
@@ -89,7 +89,7 @@ class PerformanceFingerprintingProtection {
     const sessionIndex = this.getSessionNoise('browser') * genericBrowsers.length;
     return genericBrowsers[Math.floor(sessionIndex)];
   }
-  
+
   /**
    * BROWSER FINGERPRINTING BUG FIX: Get session-consistent noise
    */
@@ -100,14 +100,14 @@ class PerformanceFingerprintingProtection {
       const sessionKey = key + (sessionStorage.getItem('vb6_session') || 'default');
       for (let i = 0; i < sessionKey.length; i++) {
         const char = sessionKey.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
+        hash = (hash << 5) - hash + char;
         hash = hash & hash; // Convert to 32-bit integer
       }
       this.performanceNoise.set(key, Math.abs(hash % 1000) / 1000);
     }
     return this.performanceNoise.get(key)!;
   }
-  
+
   /**
    * BROWSER FINGERPRINTING BUG FIX: Generate timing jitter
    */
@@ -116,7 +116,7 @@ class PerformanceFingerprintingProtection {
     if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
       const array = new Uint32Array(1);
       crypto.getRandomValues(array);
-      return (array[0] / 0xFFFFFFFF - 0.5) * 4; // ±2ms
+      return (array[0] / 0xffffffff - 0.5) * 4; // ±2ms
     } else {
       // Fallback with multiple entropy sources
       const r1 = Math.random();
@@ -124,7 +124,7 @@ class PerformanceFingerprintingProtection {
       return ((r1 + r2) / 2 - 0.5) * 4;
     }
   }
-  
+
   /**
    * BROWSER FINGERPRINTING BUG FIX: Add canvas fingerprinting protection
    */
@@ -132,7 +132,7 @@ class PerformanceFingerprintingProtection {
     // Add subtle noise to canvas to prevent fingerprinting
     const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
     const data = imageData.data;
-    
+
     // Add minimal noise to random pixels (invisible to human eye)
     const noiseCount = Math.floor(data.length / 1000); // 0.1% of pixels
     for (let i = 0; i < noiseCount; i++) {
@@ -140,11 +140,17 @@ class PerformanceFingerprintingProtection {
       if (pixelIndex < data.length - 3) {
         // Add ±1 value noise to RGB channels (imperceptible)
         data[pixelIndex] = Math.max(0, Math.min(255, data[pixelIndex] + (Math.random() - 0.5) * 2));
-        data[pixelIndex + 1] = Math.max(0, Math.min(255, data[pixelIndex + 1] + (Math.random() - 0.5) * 2));
-        data[pixelIndex + 2] = Math.max(0, Math.min(255, data[pixelIndex + 2] + (Math.random() - 0.5) * 2));
+        data[pixelIndex + 1] = Math.max(
+          0,
+          Math.min(255, data[pixelIndex + 1] + (Math.random() - 0.5) * 2)
+        );
+        data[pixelIndex + 2] = Math.max(
+          0,
+          Math.min(255, data[pixelIndex + 2] + (Math.random() - 0.5) * 2)
+        );
       }
     }
-    
+
     ctx.putImageData(imageData, 0, 0);
   }
 }
@@ -208,7 +214,9 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
         const newMetrics: PerformanceMetrics = {
           fps,
           // BROWSER FINGERPRINTING BUG FIX: Obfuscate memory usage to prevent RAM fingerprinting
-          memoryUsage: protection.obfuscateMemoryUsage((performance as any).memory?.usedJSHeapSize / 1024 / 1024 || 0),
+          memoryUsage: protection.obfuscateMemoryUsage(
+            (performance as any).memory?.usedJSHeapSize / 1024 / 1024 || 0
+          ),
           cpuUsage: Math.random() * 30 + 10, // Simulated CPU usage
           // BROWSER FINGERPRINTING BUG FIX: Obfuscate render timing
           renderTime: protection.obfuscateTiming(Math.random() * 5 + 1),
@@ -298,7 +306,7 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
     });
 
     ctx.stroke();
-    
+
     // BROWSER FINGERPRINTING BUG FIX: Add canvas fingerprinting protection
     PerformanceFingerprintingProtection.getInstance().addCanvasNoise(ctx);
 
@@ -484,7 +492,9 @@ export const PerformanceMonitor: React.FC<{ visible: boolean; onClose: () => voi
                 <div className="flex justify-between">
                   <span>Browser:</span>
                   {/* BROWSER FINGERPRINTING BUG FIX: Use generic browser info */}
-                  <span className="font-mono">{PerformanceFingerprintingProtection.getInstance().anonymizeBrowserInfo()}</span>
+                  <span className="font-mono">
+                    {PerformanceFingerprintingProtection.getInstance().anonymizeBrowserInfo()}
+                  </span>
                 </div>
               </div>
             </div>

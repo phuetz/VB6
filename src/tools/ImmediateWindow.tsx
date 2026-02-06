@@ -7,7 +7,7 @@ export enum CommandType {
   Assignment = 'Assignment',
   Print = 'Print',
   Call = 'Call',
-  Debug = 'Debug'
+  Debug = 'Debug',
 }
 
 export enum OutputType {
@@ -15,7 +15,7 @@ export enum OutputType {
   Error = 'Error',
   Debug = 'Debug',
   Warning = 'Warning',
-  Info = 'Info'
+  Info = 'Info',
 }
 
 export interface ImmediateCommand {
@@ -82,7 +82,7 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
   onExecuteCommand,
   onVariableChange,
   onShowHelp,
-  onOpenFile
+  onOpenFile,
 }) => {
   const [output, setOutput] = useState<ImmediateOutput[]>([]);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
@@ -99,7 +99,7 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
   const [searchText, setSearchText] = useState('');
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
-  
+
   const eventEmitter = useRef(new EventEmitter());
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
@@ -108,24 +108,143 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
   // Built-in VB6 functions and objects for autocomplete
   const builtInItems = [
     // Common functions
-    'Abs', 'Asc', 'Atn', 'CBool', 'CByte', 'CCur', 'CDate', 'CDbl', 'Chr', 'CInt', 'CLng', 'CSng', 'CStr', 'CVar',
-    'Date', 'DateAdd', 'DateDiff', 'DatePart', 'DateSerial', 'DateValue', 'Day', 'Dir', 'Eof', 'Exp', 'FileDateTime',
-    'FileLen', 'Fix', 'Format', 'FreeFile', 'GetAttr', 'Hex', 'Hour', 'IIf', 'InStr', 'Int', 'IsArray', 'IsDate',
-    'IsEmpty', 'IsError', 'IsMissing', 'IsNull', 'IsNumeric', 'IsObject', 'LBound', 'LCase', 'Left', 'Len', 'LoadPicture',
-    'Loc', 'LOF', 'Log', 'LTrim', 'Mid', 'Minute', 'Month', 'MsgBox', 'Now', 'Oct', 'QBColor', 'RGB', 'Right', 'Rnd',
-    'Round', 'RTrim', 'Second', 'Sgn', 'Sin', 'Space', 'Sqr', 'Str', 'StrComp', 'String', 'Tan', 'Time', 'Timer',
-    'TimeSerial', 'TimeValue', 'Trim', 'TypeName', 'UBound', 'UCase', 'Val', 'VarType', 'WeekDay', 'Year',
-    
+    'Abs',
+    'Asc',
+    'Atn',
+    'CBool',
+    'CByte',
+    'CCur',
+    'CDate',
+    'CDbl',
+    'Chr',
+    'CInt',
+    'CLng',
+    'CSng',
+    'CStr',
+    'CVar',
+    'Date',
+    'DateAdd',
+    'DateDiff',
+    'DatePart',
+    'DateSerial',
+    'DateValue',
+    'Day',
+    'Dir',
+    'Eof',
+    'Exp',
+    'FileDateTime',
+    'FileLen',
+    'Fix',
+    'Format',
+    'FreeFile',
+    'GetAttr',
+    'Hex',
+    'Hour',
+    'IIf',
+    'InStr',
+    'Int',
+    'IsArray',
+    'IsDate',
+    'IsEmpty',
+    'IsError',
+    'IsMissing',
+    'IsNull',
+    'IsNumeric',
+    'IsObject',
+    'LBound',
+    'LCase',
+    'Left',
+    'Len',
+    'LoadPicture',
+    'Loc',
+    'LOF',
+    'Log',
+    'LTrim',
+    'Mid',
+    'Minute',
+    'Month',
+    'MsgBox',
+    'Now',
+    'Oct',
+    'QBColor',
+    'RGB',
+    'Right',
+    'Rnd',
+    'Round',
+    'RTrim',
+    'Second',
+    'Sgn',
+    'Sin',
+    'Space',
+    'Sqr',
+    'Str',
+    'StrComp',
+    'String',
+    'Tan',
+    'Time',
+    'Timer',
+    'TimeSerial',
+    'TimeValue',
+    'Trim',
+    'TypeName',
+    'UBound',
+    'UCase',
+    'Val',
+    'VarType',
+    'WeekDay',
+    'Year',
+
     // Objects and collections
-    'App', 'Clipboard', 'Debug', 'Err', 'Forms', 'Printer', 'Screen',
-    
+    'App',
+    'Clipboard',
+    'Debug',
+    'Err',
+    'Forms',
+    'Printer',
+    'Screen',
+
     // Debug object methods
-    'Debug.Print', 'Debug.Assert',
-    
+    'Debug.Print',
+    'Debug.Assert',
+
     // Keywords
-    'Call', 'Dim', 'Set', 'Let', 'If', 'Then', 'Else', 'ElseIf', 'End', 'For', 'Next', 'Do', 'Loop', 'While', 'Wend',
-    'Select', 'Case', 'Function', 'Sub', 'Private', 'Public', 'Static', 'Const', 'Type', 'Enum', 'With', 'Exit',
-    'Return', 'GoTo', 'Resume', 'On', 'Error', 'True', 'False', 'Nothing', 'Null', 'Empty'
+    'Call',
+    'Dim',
+    'Set',
+    'Let',
+    'If',
+    'Then',
+    'Else',
+    'ElseIf',
+    'End',
+    'For',
+    'Next',
+    'Do',
+    'Loop',
+    'While',
+    'Wend',
+    'Select',
+    'Case',
+    'Function',
+    'Sub',
+    'Private',
+    'Public',
+    'Static',
+    'Const',
+    'Type',
+    'Enum',
+    'With',
+    'Exit',
+    'Return',
+    'GoTo',
+    'Resume',
+    'On',
+    'Error',
+    'True',
+    'False',
+    'Nothing',
+    'Null',
+    'Empty',
   ];
 
   // Initialize with welcome message
@@ -143,7 +262,7 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
       content,
       type,
       timestamp: new Date(),
-      command
+      command,
     };
 
     setOutput(prev => [...prev, newOutput]);
@@ -157,85 +276,87 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
   }, []);
 
   // Execute immediate command
-  const executeCommand = useCallback(async (command: string) => {
-    if (!command.trim()) return;
+  const executeCommand = useCallback(
+    async (command: string) => {
+      if (!command.trim()) return;
 
-    setIsExecuting(true);
-    const startTime = performance.now();
-    
-    try {
-      // Add command to output
-      addOutput(command, OutputType.Info, command);
-      
-      // Add to history
-      setCommandHistory(prev => {
-        const newHistory = [command, ...prev.filter(cmd => cmd !== command)];
-        return newHistory.slice(0, 50); // Keep last 50 commands
-      });
+      setIsExecuting(true);
+      const startTime = performance.now();
 
-      // Parse and execute command
-      const result = await executeVBCommand(command);
-      
-      if (result !== undefined) {
-        const output = typeof result === 'string' ? result : JSON.stringify(result);
-        addOutput(output, OutputType.Result, command);
-      }
+      try {
+        // Add command to output
+        addOutput(command, OutputType.Info, command);
 
-      const executionTime = performance.now() - startTime;
-      
-      // Call external handler if provided
-      if (onExecuteCommand) {
-        try {
-          const externalResult = await onExecuteCommand(command);
-          if (externalResult !== undefined) {
-            addOutput(String(externalResult), OutputType.Result, command);
-          }
-        } catch (error) {
-          addOutput(`Error: ${error}`, OutputType.Error, command);
+        // Add to history
+        setCommandHistory(prev => {
+          const newHistory = [command, ...prev.filter(cmd => cmd !== command)];
+          return newHistory.slice(0, 50); // Keep last 50 commands
+        });
+
+        // Parse and execute command
+        const result = await executeVBCommand(command);
+
+        if (result !== undefined) {
+          const output = typeof result === 'string' ? result : JSON.stringify(result);
+          addOutput(output, OutputType.Result, command);
         }
-      }
 
-    } catch (error) {
-      addOutput(`Error: ${error}`, OutputType.Error, command);
-    } finally {
-      setIsExecuting(false);
-    }
-  }, [addOutput, onExecuteCommand]);
+        const executionTime = performance.now() - startTime;
+
+        // Call external handler if provided
+        if (onExecuteCommand) {
+          try {
+            const externalResult = await onExecuteCommand(command);
+            if (externalResult !== undefined) {
+              addOutput(String(externalResult), OutputType.Result, command);
+            }
+          } catch (error) {
+            addOutput(`Error: ${error}`, OutputType.Error, command);
+          }
+        }
+      } catch (error) {
+        addOutput(`Error: ${error}`, OutputType.Error, command);
+      } finally {
+        setIsExecuting(false);
+      }
+    },
+    [addOutput, onExecuteCommand]
+  );
 
   // Execute VB command (simplified parser/interpreter)
   const executeVBCommand = async (command: string): Promise<any> => {
     const trimmedCommand = command.trim();
-    
+
     // Handle print statements (? expression)
     if (trimmedCommand.startsWith('?')) {
       const expression = trimmedCommand.substring(1).trim();
       return evaluateExpression(expression);
     }
-    
+
     // Handle Debug.Print statements
     if (trimmedCommand.toLowerCase().startsWith('debug.print')) {
       const expression = trimmedCommand.substring(11).trim();
       return evaluateExpression(expression);
     }
-    
+
     // Handle variable assignments
     if (trimmedCommand.includes('=') && !trimmedCommand.includes('==')) {
       const [variable, value] = trimmedCommand.split('=').map(s => s.trim());
       const evaluatedValue = evaluateExpression(value);
-      
+
       // Update variable in debug context
       if (onVariableChange) {
         onVariableChange(variable, evaluatedValue);
       }
-      
+
       return `${variable} = ${evaluatedValue}`;
     }
-    
+
     // Handle function calls
     if (trimmedCommand.includes('(') && trimmedCommand.includes(')')) {
       return evaluateFunction(trimmedCommand);
     }
-    
+
     // Handle simple expressions
     return evaluateExpression(trimmedCommand);
   };
@@ -243,48 +364,51 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
   // Evaluate VB expression (simplified)
   const evaluateExpression = (expression: string): any => {
     const expr = expression.trim();
-    
+
     // Handle string literals
-    if ((expr.startsWith('"') && expr.endsWith('"')) || (expr.startsWith("'") && expr.endsWith("'"))) {
+    if (
+      (expr.startsWith('"') && expr.endsWith('"')) ||
+      (expr.startsWith("'") && expr.endsWith("'"))
+    ) {
       return expr.slice(1, -1);
     }
-    
+
     // Handle numbers
     if (/^-?\d+(\.\d+)?$/.test(expr)) {
       return parseFloat(expr);
     }
-    
+
     // Handle boolean values
     if (expr.toLowerCase() === 'true') return true;
     if (expr.toLowerCase() === 'false') return false;
     if (expr.toLowerCase() === 'null') return null;
     if (expr.toLowerCase() === 'nothing') return null;
-    
+
     // Handle Now function
     if (expr.toLowerCase() === 'now') {
       return new Date().toLocaleString();
     }
-    
+
     // Handle Date function
     if (expr.toLowerCase() === 'date') {
       return new Date().toLocaleDateString();
     }
-    
+
     // Handle Time function
     if (expr.toLowerCase() === 'time') {
       return new Date().toLocaleTimeString();
     }
-    
+
     // Handle variable references
     if (debugContext?.variables) {
-      const variable = debugContext.variables.find(v => 
-        v.name.toLowerCase() === expr.toLowerCase()
+      const variable = debugContext.variables.find(
+        v => v.name.toLowerCase() === expr.toLowerCase()
       );
       if (variable) {
         return `${variable.name} = ${variable.value} (${variable.type})`;
       }
     }
-    
+
     // Handle string concatenation
     if (expr.includes('&') || expr.includes('+')) {
       try {
@@ -295,7 +419,7 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
         return `Cannot evaluate: ${expr}`;
       }
     }
-    
+
     // Handle math expressions safely without eval()
     if (/^[\d\s+\-*/().-]+$/.test(expr)) {
       try {
@@ -304,7 +428,7 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
         return `Invalid expression: ${expr}`;
       }
     }
-    
+
     return `Unknown identifier: ${expr}`;
   };
 
@@ -312,10 +436,10 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
   const evaluateFunction = (call: string): any => {
     const funcMatch = call.match(/(\w+)\s*\((.*)\)/);
     if (!funcMatch) return `Invalid function call: ${call}`;
-    
+
     const [, funcName, args] = funcMatch;
     const argList = args ? args.split(',').map(a => a.trim()) : [];
-    
+
     switch (funcName.toLowerCase()) {
       case 'len':
         if (argList.length === 1) {
@@ -323,21 +447,21 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
           return typeof str === 'string' ? str.length : String(str).length;
         }
         break;
-        
+
       case 'ucase':
         if (argList.length === 1) {
           const str = evaluateExpression(argList[0]);
           return String(str).toUpperCase();
         }
         break;
-        
+
       case 'lcase':
         if (argList.length === 1) {
           const str = evaluateExpression(argList[0]);
           return String(str).toLowerCase();
         }
         break;
-        
+
       case 'left':
         if (argList.length === 2) {
           const str = String(evaluateExpression(argList[0]));
@@ -345,7 +469,7 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
           return str.substring(0, length);
         }
         break;
-        
+
       case 'right':
         if (argList.length === 2) {
           const str = String(evaluateExpression(argList[0]));
@@ -353,7 +477,7 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
           return str.substring(str.length - length);
         }
         break;
-        
+
       case 'mid':
         if (argList.length >= 2) {
           const str = String(evaluateExpression(argList[0]));
@@ -362,7 +486,7 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
           return str.substring(start, start + length);
         }
         break;
-        
+
       case 'msgbox':
         if (argList.length >= 1) {
           const message = String(evaluateExpression(argList[0]));
@@ -370,127 +494,150 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
           return `MsgBox: "${message}"`;
         }
         break;
-        
+
       case 'typename':
         if (argList.length === 1) {
           const value = evaluateExpression(argList[0]);
           return typeof value;
         }
         break;
-        
+
       default:
         return `Unknown function: ${funcName}`;
     }
-    
+
     return `Invalid arguments for ${funcName}`;
   };
 
   // Get autocomplete suggestions
-  const getAutoCompleteSuggestions = useCallback((text: string, cursorPos: number): string[] => {
-    const beforeCursor = text.substring(0, cursorPos);
-    const lastWord = beforeCursor.split(/[\s()[\],=&+-*/]/).pop() || '';
-    
-    if (lastWord.length < 1) return [];
-    
-    const suggestions = [];
-    
-    // Add built-in items
-    suggestions.push(...builtInItems.filter(item => 
-      item.toLowerCase().startsWith(lastWord.toLowerCase())
-    ));
-    
-    // Add variables from debug context
-    if (debugContext?.variables) {
-      suggestions.push(...debugContext.variables
-        .filter(v => v.name.toLowerCase().startsWith(lastWord.toLowerCase()))
-        .map(v => v.name)
+  const getAutoCompleteSuggestions = useCallback(
+    (text: string, cursorPos: number): string[] => {
+      const beforeCursor = text.substring(0, cursorPos);
+      const lastWord = beforeCursor.split(/[\s()[\],=&+-*/]/).pop() || '';
+
+      if (lastWord.length < 1) return [];
+
+      const suggestions = [];
+
+      // Add built-in items
+      suggestions.push(
+        ...builtInItems.filter(item => item.toLowerCase().startsWith(lastWord.toLowerCase()))
       );
-    }
-    
-    // Add command history items
-    suggestions.push(...commandHistory
-      .filter(cmd => cmd.toLowerCase().includes(lastWord.toLowerCase()))
-      .slice(0, 5)
-    );
-    
-    return [...new Set(suggestions)].slice(0, 10);
-  }, [builtInItems, debugContext, commandHistory]);
+
+      // Add variables from debug context
+      if (debugContext?.variables) {
+        suggestions.push(
+          ...debugContext.variables
+            .filter(v => v.name.toLowerCase().startsWith(lastWord.toLowerCase()))
+            .map(v => v.name)
+        );
+      }
+
+      // Add command history items
+      suggestions.push(
+        ...commandHistory
+          .filter(cmd => cmd.toLowerCase().includes(lastWord.toLowerCase()))
+          .slice(0, 5)
+      );
+
+      return [...new Set(suggestions)].slice(0, 10);
+    },
+    [builtInItems, debugContext, commandHistory]
+  );
 
   // Handle key press in input
-  const handleKeyPress = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
-    const textarea = e.currentTarget;
-    
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (currentCommand.trim()) {
-        executeCommand(currentCommand);
-        setCurrentCommand('');
-        setHistoryIndex(-1);
-      }
-      setShowAutoComplete(false);
-    } else if (e.key === 'ArrowUp' && !showAutoComplete) {
-      e.preventDefault();
-      if (historyIndex < commandHistory.length - 1) {
-        const newIndex = historyIndex + 1;
-        setHistoryIndex(newIndex);
-        setCurrentCommand(commandHistory[newIndex]);
-      }
-    } else if (e.key === 'ArrowDown' && !showAutoComplete) {
-      e.preventDefault();
-      if (historyIndex > 0) {
-        const newIndex = historyIndex - 1;
-        setHistoryIndex(newIndex);
-        setCurrentCommand(commandHistory[newIndex]);
-      } else if (historyIndex === 0) {
-        setHistoryIndex(-1);
-        setCurrentCommand('');
-      }
-    } else if (e.key === 'Tab') {
-      e.preventDefault();
-      if (showAutoComplete && autoComplete.length > 0) {
-        const selected = autoComplete[autoCompleteIndex];
-        const beforeCursor = currentCommand.substring(0, cursorPosition.current);
-        const afterCursor = currentCommand.substring(cursorPosition.current);
-        const lastWordStart = beforeCursor.split(/[\s()[\],=&+-*/]/).slice(0, -1).join(' ');
-        const newCommand = (lastWordStart ? lastWordStart + ' ' : '') + selected + afterCursor;
-        setCurrentCommand(newCommand);
+  const handleKeyPress = useCallback(
+    (e: KeyboardEvent<HTMLTextAreaElement>) => {
+      const textarea = e.currentTarget;
+
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (currentCommand.trim()) {
+          executeCommand(currentCommand);
+          setCurrentCommand('');
+          setHistoryIndex(-1);
+        }
         setShowAutoComplete(false);
-      }
-    } else if (e.key === 'Escape') {
-      setShowAutoComplete(false);
-    } else if (showAutoComplete) {
-      if (e.key === 'ArrowUp') {
+      } else if (e.key === 'ArrowUp' && !showAutoComplete) {
         e.preventDefault();
-        setAutoCompleteIndex(prev => prev > 0 ? prev - 1 : autoComplete.length - 1);
-      } else if (e.key === 'ArrowDown') {
+        if (historyIndex < commandHistory.length - 1) {
+          const newIndex = historyIndex + 1;
+          setHistoryIndex(newIndex);
+          setCurrentCommand(commandHistory[newIndex]);
+        }
+      } else if (e.key === 'ArrowDown' && !showAutoComplete) {
         e.preventDefault();
-        setAutoCompleteIndex(prev => prev < autoComplete.length - 1 ? prev + 1 : 0);
+        if (historyIndex > 0) {
+          const newIndex = historyIndex - 1;
+          setHistoryIndex(newIndex);
+          setCurrentCommand(commandHistory[newIndex]);
+        } else if (historyIndex === 0) {
+          setHistoryIndex(-1);
+          setCurrentCommand('');
+        }
+      } else if (e.key === 'Tab') {
+        e.preventDefault();
+        if (showAutoComplete && autoComplete.length > 0) {
+          const selected = autoComplete[autoCompleteIndex];
+          const beforeCursor = currentCommand.substring(0, cursorPosition.current);
+          const afterCursor = currentCommand.substring(cursorPosition.current);
+          const lastWordStart = beforeCursor
+            .split(/[\s()[\],=&+-*/]/)
+            .slice(0, -1)
+            .join(' ');
+          const newCommand = (lastWordStart ? lastWordStart + ' ' : '') + selected + afterCursor;
+          setCurrentCommand(newCommand);
+          setShowAutoComplete(false);
+        }
+      } else if (e.key === 'Escape') {
+        setShowAutoComplete(false);
+      } else if (showAutoComplete) {
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          setAutoCompleteIndex(prev => (prev > 0 ? prev - 1 : autoComplete.length - 1));
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          setAutoCompleteIndex(prev => (prev < autoComplete.length - 1 ? prev + 1 : 0));
+        }
       }
-    }
-  }, [currentCommand, historyIndex, commandHistory, showAutoComplete, autoComplete, autoCompleteIndex, executeCommand]);
+    },
+    [
+      currentCommand,
+      historyIndex,
+      commandHistory,
+      showAutoComplete,
+      autoComplete,
+      autoCompleteIndex,
+      executeCommand,
+    ]
+  );
 
   // Handle input change
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
-    const cursorPos = e.target.selectionStart;
-    
-    setCurrentCommand(value);
-    cursorPosition.current = cursorPos;
-    
-    // Update autocomplete
-    const suggestions = getAutoCompleteSuggestions(value, cursorPos);
-    setAutoComplete(suggestions);
-    setShowAutoComplete(suggestions.length > 0);
-    setAutoCompleteIndex(0);
-  }, [getAutoCompleteSuggestions]);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const value = e.target.value;
+      const cursorPos = e.target.selectionStart;
+
+      setCurrentCommand(value);
+      cursorPosition.current = cursorPos;
+
+      // Update autocomplete
+      const suggestions = getAutoCompleteSuggestions(value, cursorPos);
+      setAutoComplete(suggestions);
+      setShowAutoComplete(suggestions.length > 0);
+      setAutoCompleteIndex(0);
+    },
+    [getAutoCompleteSuggestions]
+  );
 
   // Filter output based on type
   const getFilteredOutput = (): ImmediateOutput[] => {
     if (filterOutput.length === 0 && !searchText) return output;
-    
+
     return output.filter(item => {
       const typeMatch = filterOutput.length === 0 || filterOutput.includes(item.type);
-      const textMatch = !searchText || item.content.toLowerCase().includes(searchText.toLowerCase());
+      const textMatch =
+        !searchText || item.content.toLowerCase().includes(searchText.toLowerCase());
       return typeMatch && textMatch;
     });
   };
@@ -521,13 +668,16 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
   // Context menu items
   const contextMenuItems = [
     { label: 'Copy', action: () => navigator.clipboard.writeText(currentCommand) },
-    { label: 'Paste', action: async () => {
-      const text = await navigator.clipboard.readText();
-      setCurrentCommand(prev => prev + text);
-    }},
+    {
+      label: 'Paste',
+      action: async () => {
+        const text = await navigator.clipboard.readText();
+        setCurrentCommand(prev => prev + text);
+      },
+    },
     { label: 'Select All', action: () => inputRef.current?.select() },
     { label: 'Clear', action: () => setCurrentCommand('') },
-    { label: 'Clear All Output', action: clearOutput }
+    { label: 'Clear All Output', action: clearOutput },
   ];
 
   return (
@@ -542,19 +692,19 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
             </span>
           )}
         </div>
-        
+
         <div className="flex items-center gap-1">
           <input
             type="text"
             placeholder="Search..."
             value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+            onChange={e => setSearchText(e.target.value)}
             className="px-2 py-1 text-xs border border-gray-300 rounded w-24"
           />
-          
+
           <select
             value={fontSize}
-            onChange={(e) => setFontSize(Number(e.target.value))}
+            onChange={e => setFontSize(Number(e.target.value))}
             className="px-1 py-1 text-xs border border-gray-300 rounded"
           >
             <option value={8}>8pt</option>
@@ -565,7 +715,7 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
             <option value={14}>14pt</option>
             <option value={16}>16pt</option>
           </select>
-          
+
           <button
             onClick={clearOutput}
             className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded"
@@ -584,7 +734,7 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
             <input
               type="checkbox"
               checked={filterOutput.length === 0 || filterOutput.includes(type)}
-              onChange={(e) => {
+              onChange={e => {
                 if (e.target.checked) {
                   setFilterOutput(prev => prev.filter(t => t !== type));
                 } else {
@@ -599,23 +749,19 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
       </div>
 
       {/* Output Area */}
-      <div 
+      <div
         ref={outputRef}
         className="flex-1 overflow-y-auto p-2 font-mono bg-white"
         style={{ fontSize: `${fontSize}px` }}
       >
         {getFilteredOutput().map(item => (
-          <div
-            key={item.id}
-            className="mb-1 leading-tight"
-            style={getOutputTypeStyle(item.type)}
-          >
+          <div key={item.id} className="mb-1 leading-tight" style={getOutputTypeStyle(item.type)}>
             {showLineNumbers && (
               <span className="text-gray-400 mr-2 select-none">
                 {item.timestamp.toLocaleTimeString()}
               </span>
             )}
-            <span 
+            <span
               className={wordWrap ? 'break-words' : 'whitespace-nowrap'}
               style={{ wordBreak: wordWrap ? 'break-all' : 'normal' }}
             >
@@ -623,12 +769,8 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
             </span>
           </div>
         ))}
-        
-        {isExecuting && (
-          <div className="text-blue-600 animate-pulse">
-            Executing...
-          </div>
-        )}
+
+        {isExecuting && <div className="text-blue-600 animate-pulse">Executing...</div>}
       </div>
 
       {/* Input Area */}
@@ -638,21 +780,21 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
           value={currentCommand}
           onChange={handleInputChange}
           onKeyDown={handleKeyPress}
-          onContextMenu={(e) => {
+          onContextMenu={e => {
             e.preventDefault();
             setContextMenuPosition({ x: e.clientX, y: e.clientY });
             setIsContextMenuOpen(true);
           }}
           placeholder="Type VB expression or statement..."
           className="w-full p-2 font-mono border-none resize-none focus:outline-none"
-          style={{ 
+          style={{
             fontSize: `${fontSize}px`,
             minHeight: '60px',
-            maxHeight: '150px'
+            maxHeight: '150px',
           }}
           disabled={isExecuting}
         />
-        
+
         {/* Autocomplete Dropdown */}
         {showAutoComplete && autoComplete.length > 0 && (
           <div className="absolute bottom-full left-2 right-2 bg-white border border-gray-300 shadow-lg max-h-32 overflow-y-auto z-10">
@@ -665,8 +807,12 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
                 onClick={() => {
                   const beforeCursor = currentCommand.substring(0, cursorPosition.current);
                   const afterCursor = currentCommand.substring(cursorPosition.current);
-                  const lastWordStart = beforeCursor.split(/[\s()[\],=&+-*/]/).slice(0, -1).join(' ');
-                  const newCommand = (lastWordStart ? lastWordStart + ' ' : '') + suggestion + afterCursor;
+                  const lastWordStart = beforeCursor
+                    .split(/[\s()[\],=&+-*/]/)
+                    .slice(0, -1)
+                    .join(' ');
+                  const newCommand =
+                    (lastWordStart ? lastWordStart + ' ' : '') + suggestion + afterCursor;
                   setCurrentCommand(newCommand);
                   setShowAutoComplete(false);
                   inputRef.current?.focus();
@@ -685,7 +831,7 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
           className="fixed bg-white border border-gray-300 shadow-lg z-50 py-1"
           style={{
             left: contextMenuPosition.x,
-            top: contextMenuPosition.y
+            top: contextMenuPosition.y,
           }}
           onBlur={() => setIsContextMenuOpen(false)}
         >
@@ -711,26 +857,27 @@ export const ImmediateWindow: React.FC<ImmediateWindowProps> = ({
           <span>Output Lines: {output.length}</span>
           {debugContext && (
             <span>
-              Context: {debugContext.currentModule}.{debugContext.currentProcedure}:{debugContext.currentLine}
+              Context: {debugContext.currentModule}.{debugContext.currentProcedure}:
+              {debugContext.currentLine}
             </span>
           )}
         </div>
-        
+
         <div className="flex items-center gap-2">
           <label className="flex items-center gap-1">
             <input
               type="checkbox"
               checked={wordWrap}
-              onChange={(e) => setWordWrap(e.target.checked)}
+              onChange={e => setWordWrap(e.target.checked)}
             />
             Word Wrap
           </label>
-          
+
           <label className="flex items-center gap-1">
             <input
               type="checkbox"
               checked={showLineNumbers}
-              onChange={(e) => setShowLineNumbers(e.target.checked)}
+              onChange={e => setShowLineNumbers(e.target.checked)}
             />
             Timestamps
           </label>

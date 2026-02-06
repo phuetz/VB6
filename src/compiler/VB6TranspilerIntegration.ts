@@ -1,9 +1,9 @@
 /**
  * Intégration du Parser Récursif avec le Transpiler VB6 - Phase 1 Critique
- * 
+ *
  * Ce fichier assure l'intégration du nouveau parser récursif descendant
  * avec le transpiler existant, en maintenant la compatibilité totale.
- * 
+ *
  * Fonctionnalités:
  * - Adaptateur AST entre ancien et nouveau format
  * - Intégration transparente avec le transpiler existant
@@ -17,11 +17,18 @@ import {
   VB6ProcedureNode,
   VB6DeclarationNode,
   VB6ParameterNode,
-  parseVB6Code
+  parseVB6Code,
 } from './VB6RecursiveDescentParser';
 
 import { tokenizeVB6 } from './VB6AdvancedLexer';
-import { VB6ModuleAST, VB6Procedure, VB6Variable, VB6Event, VB6Property, VB6Parameter } from '../utils/vb6Parser';
+import {
+  VB6ModuleAST,
+  VB6Procedure,
+  VB6Variable,
+  VB6Event,
+  VB6Property,
+  VB6Parameter,
+} from '../utils/vb6Parser';
 
 /**
  * Configuration de l'intégration
@@ -63,7 +70,7 @@ export class VB6ASTAdapter {
       variables: this.adaptVariables(newAST.declarations),
       procedures: this.adaptProcedures(regularProcedures),
       properties: this.adaptProperties(newAST.procedures),
-      events: this.adaptEvents(newAST.declarations)
+      events: this.adaptEvents(newAST.declarations),
     };
 
     return adaptedAST;
@@ -77,7 +84,7 @@ export class VB6ASTAdapter {
       .filter(decl => decl.declarationType === 'Variable')
       .map(decl => ({
         name: decl.name,
-        varType: decl.dataType?.typeName || 'Variant'
+        varType: decl.dataType?.typeName || 'Variant',
       }));
   }
 
@@ -93,25 +100,33 @@ export class VB6ASTAdapter {
         type: param.dataType?.typeName || 'Variant',
         isOptional: param.parameterType === 'Optional',
         isByRef: param.parameterType === 'ByRef',
-        defaultValue: param.defaultValue ? this.extractLiteralValue(param.defaultValue) : undefined
+        defaultValue: param.defaultValue ? this.extractLiteralValue(param.defaultValue) : undefined,
       })),
       returnType: proc.returnType?.typeName || null,
-      visibility: proc.visibility?.toLowerCase() as any || 'public',
-      body: this.extractProcedureBody(proc)
+      visibility: (proc.visibility?.toLowerCase() as any) || 'public',
+      body: this.extractProcedureBody(proc),
     }));
   }
 
   /**
    * Mapper les types de procédures
    */
-  private static mapProcedureType(procedureType: string): 'sub' | 'function' | 'propertyGet' | 'propertyLet' | 'propertySet' {
+  private static mapProcedureType(
+    procedureType: string
+  ): 'sub' | 'function' | 'propertyGet' | 'propertyLet' | 'propertySet' {
     switch (procedureType) {
-      case 'Sub': return 'sub';
-      case 'Function': return 'function';
-      case 'PropertyGet': return 'propertyGet';
-      case 'PropertyLet': return 'propertyLet';
-      case 'PropertySet': return 'propertySet';
-      default: return 'sub';
+      case 'Sub':
+        return 'sub';
+      case 'Function':
+        return 'function';
+      case 'PropertyGet':
+        return 'propertyGet';
+      case 'PropertyLet':
+        return 'propertyLet';
+      case 'PropertySet':
+        return 'propertySet';
+      default:
+        return 'sub';
     }
   }
 
@@ -134,49 +149,67 @@ export class VB6ASTAdapter {
 
     switch (stmt.statementType) {
       case 'Assignment':
-        return indent + `${this.generateExpression(stmt.target)} = ${this.generateExpression(stmt.value)};\n`;
+        return (
+          indent +
+          `${this.generateExpression(stmt.target)} = ${this.generateExpression(stmt.value)};\n`
+        );
 
       case 'Call':
-        const args = (stmt.arguments || []).map((arg: any) =>
-          this.generateExpression(arg.value || arg)
-        ).join(', ');
+        const args = (stmt.arguments || [])
+          .map((arg: any) => this.generateExpression(arg.value || arg))
+          .join(', ');
         const callTarget = stmt.procedureName || stmt.name || this.generateExpression(stmt.target);
         return indent + `${callTarget}(${args});\n`;
 
       case 'If':
         let ifCode = indent + `if (${this.generateExpression(stmt.condition)}) {\n`;
-        ifCode += (stmt.thenStatements || []).map((s: any) => this.generateStatement(s, indentLevel + 1)).join('');
+        ifCode += (stmt.thenStatements || [])
+          .map((s: any) => this.generateStatement(s, indentLevel + 1))
+          .join('');
         ifCode += indent + '}';
         for (const elseIf of stmt.elseIfClauses || []) {
           ifCode += ` else if (${this.generateExpression(elseIf.condition)}) {\n`;
-          ifCode += (elseIf.statements || []).map((s: any) => this.generateStatement(s, indentLevel + 1)).join('');
+          ifCode += (elseIf.statements || [])
+            .map((s: any) => this.generateStatement(s, indentLevel + 1))
+            .join('');
           ifCode += indent + '}';
         }
         if (stmt.elseStatements && stmt.elseStatements.length > 0) {
           ifCode += ` else {\n`;
-          ifCode += stmt.elseStatements.map((s: any) => this.generateStatement(s, indentLevel + 1)).join('');
+          ifCode += stmt.elseStatements
+            .map((s: any) => this.generateStatement(s, indentLevel + 1))
+            .join('');
           ifCode += indent + '}';
         }
         return ifCode + '\n';
 
       case 'For':
         const step = stmt.stepValue ? this.generateExpression(stmt.stepValue) : '1';
-        let forCode = indent + `for (let ${stmt.variable} = ${this.generateExpression(stmt.startValue)}; `;
+        let forCode =
+          indent + `for (let ${stmt.variable} = ${this.generateExpression(stmt.startValue)}; `;
         forCode += `${stmt.variable} <= ${this.generateExpression(stmt.endValue)}; `;
         forCode += `${stmt.variable} += ${step}) {\n`;
-        forCode += (stmt.body || []).map((s: any) => this.generateStatement(s, indentLevel + 1)).join('');
+        forCode += (stmt.body || [])
+          .map((s: any) => this.generateStatement(s, indentLevel + 1))
+          .join('');
         forCode += indent + '}\n';
         return forCode;
 
       case 'ForEach':
-        let forEachCode = indent + `for (const ${stmt.variable} of ${this.generateExpression(stmt.collection)}) {\n`;
-        forEachCode += (stmt.body || []).map((s: any) => this.generateStatement(s, indentLevel + 1)).join('');
+        let forEachCode =
+          indent +
+          `for (const ${stmt.variable} of ${this.generateExpression(stmt.collection)}) {\n`;
+        forEachCode += (stmt.body || [])
+          .map((s: any) => this.generateStatement(s, indentLevel + 1))
+          .join('');
         forEachCode += indent + '}\n';
         return forEachCode;
 
       case 'While':
         let whileCode = indent + `while (${this.generateExpression(stmt.condition)}) {\n`;
-        whileCode += (stmt.body || []).map((s: any) => this.generateStatement(s, indentLevel + 1)).join('');
+        whileCode += (stmt.body || [])
+          .map((s: any) => this.generateStatement(s, indentLevel + 1))
+          .join('');
         whileCode += indent + '}\n';
         return whileCode;
 
@@ -197,10 +230,15 @@ export class VB6ASTAdapter {
         return indent + 'return;\n';
 
       case 'Set':
-        return indent + `${this.generateExpression(stmt.target)} = ${this.generateExpression(stmt.value)};\n`;
+        return (
+          indent +
+          `${this.generateExpression(stmt.target)} = ${this.generateExpression(stmt.value)};\n`
+        );
 
       case 'LocalVariable':
-        const varValue = stmt.initialValue ? ` = ${this.generateExpression(stmt.initialValue)}` : '';
+        const varValue = stmt.initialValue
+          ? ` = ${this.generateExpression(stmt.initialValue)}`
+          : '';
         return indent + `let ${stmt.name}${varValue};\n`;
 
       case 'ReDim':
@@ -209,11 +247,15 @@ export class VB6ASTAdapter {
         return indent + `${stmt.variable} = ${preserve}(${stmt.variable}, [${dims}]);\n`;
 
       case 'Debug':
-        const debugArgs = (stmt.arguments || []).map((a: any) => this.generateExpression(a)).join(', ');
+        const debugArgs = (stmt.arguments || [])
+          .map((a: any) => this.generateExpression(a))
+          .join(', ');
         return indent + `console.log(${debugArgs});\n`;
 
       case 'Print':
-        const printArgs = (stmt.expressions || stmt.items || []).map((a: any) => this.generateExpression(a)).join(', ');
+        const printArgs = (stmt.expressions || stmt.items || [])
+          .map((a: any) => this.generateExpression(a))
+          .join(', ');
         if (stmt.fileNumber) {
           return indent + `VB6.print(${this.generateExpression(stmt.fileNumber)}, ${printArgs});\n`;
         }
@@ -231,7 +273,9 @@ export class VB6ASTAdapter {
 
       case 'With':
         let withCode = indent + `{ const __with__ = ${this.generateExpression(stmt.expression)};\n`;
-        withCode += (stmt.body || []).map((s: any) => this.generateStatement(s, indentLevel + 1)).join('');
+        withCode += (stmt.body || [])
+          .map((s: any) => this.generateStatement(s, indentLevel + 1))
+          .join('');
         withCode += indent + '}\n';
         return withCode;
 
@@ -253,7 +297,9 @@ export class VB6ASTAdapter {
 
     if (stmt.conditionAtEnd) {
       code += indent + 'do {\n';
-      code += (stmt.body || []).map((s: any) => this.generateStatement(s, indentLevel + 1)).join('');
+      code += (stmt.body || [])
+        .map((s: any) => this.generateStatement(s, indentLevel + 1))
+        .join('');
       if (condType === 'while' && stmt.condition) {
         code += indent + `} while (${this.generateExpression(stmt.condition)});\n`;
       } else if (condType === 'until' && stmt.condition) {
@@ -269,7 +315,9 @@ export class VB6ASTAdapter {
       } else {
         code += indent + 'while (true) {\n';
       }
-      code += (stmt.body || []).map((s: any) => this.generateStatement(s, indentLevel + 1)).join('');
+      code += (stmt.body || [])
+        .map((s: any) => this.generateStatement(s, indentLevel + 1))
+        .join('');
       code += indent + '}\n';
     }
 
@@ -291,7 +339,9 @@ export class VB6ASTAdapter {
           code += indent + `  case ${this.generateExpression(value)}:\n`;
         }
       }
-      code += (caseClause.statements || []).map((s: any) => this.generateStatement(s, indentLevel + 2)).join('');
+      code += (caseClause.statements || [])
+        .map((s: any) => this.generateStatement(s, indentLevel + 2))
+        .join('');
       code += indent + '    break;\n';
     }
 
@@ -322,13 +372,15 @@ export class VB6ASTAdapter {
         return `${this.generateExpression(expr.object)}.${expr.member || expr.property}`;
 
       case 'ArrayAccess':
-        const indices = (expr.indices || []).map((idx: any) => `[${this.generateExpression(idx)}]`).join('');
+        const indices = (expr.indices || [])
+          .map((idx: any) => `[${this.generateExpression(idx)}]`)
+          .join('');
         return `${this.generateExpression(expr.array)}${indices}`;
 
       case 'FunctionCall':
-        const funcArgs = (expr.arguments || []).map((arg: any) =>
-          this.generateExpression(arg.value || arg)
-        ).join(', ');
+        const funcArgs = (expr.arguments || [])
+          .map((arg: any) => this.generateExpression(arg.value || arg))
+          .join(', ');
         return `${expr.name}(${funcArgs})`;
 
       case 'BinaryOp':
@@ -370,15 +422,15 @@ export class VB6ASTAdapter {
    */
   private static mapOperator(op: string): string {
     const operators: Record<string, string> = {
-      'and': '&&',
-      'or': '||',
-      'not': '!',
-      'mod': '%',
+      and: '&&',
+      or: '||',
+      not: '!',
+      mod: '%',
       '=': '===',
       '<>': '!==',
       '&': '+',
-      'like': '.match', // simplified
-      'is': '===',
+      like: '.match', // simplified
+      is: '===',
       '\\': 'Math.floor(/) ', // integer division
     };
     return operators[op.toLowerCase()] || op;
@@ -403,7 +455,7 @@ export class VB6ASTAdapter {
       .map(decl => ({
         name: decl.name,
         parameters: this.adaptParameters(decl.parameters || []),
-        visibility: (decl.visibility?.toLowerCase() as 'public' | 'private') || 'public'
+        visibility: (decl.visibility?.toLowerCase() as 'public' | 'private') || 'public',
       }));
   }
 
@@ -422,7 +474,7 @@ export class VB6ASTAdapter {
           visibility: (proc.visibility?.toLowerCase() as 'public' | 'private') || 'public',
           parameters: [],
           getter: undefined,
-          setter: undefined
+          setter: undefined,
         };
 
         const adaptedProc: VB6Procedure = {
@@ -433,11 +485,13 @@ export class VB6ASTAdapter {
             type: param.dataType?.typeName || 'Variant',
             isOptional: param.parameterType === 'Optional',
             isByRef: param.parameterType === 'ByRef',
-            defaultValue: param.defaultValue ? this.extractLiteralValue(param.defaultValue) : undefined
+            defaultValue: param.defaultValue
+              ? this.extractLiteralValue(param.defaultValue)
+              : undefined,
           })),
           returnType: proc.returnType?.typeName || null,
           visibility: (proc.visibility?.toLowerCase() as 'public' | 'private') || 'public',
-          body: this.extractProcedureBody(proc)
+          body: this.extractProcedureBody(proc),
         };
 
         if (proc.procedureType === 'PropertyGet') {
@@ -465,7 +519,7 @@ export class VB6ASTAdapter {
   private static adaptParameters(params: VB6ParameterNode[]): VB6Parameter[] {
     return params.map(param => ({
       name: param.name,
-      type: param.dataType?.typeName || null
+      type: param.dataType?.typeName || null,
     }));
   }
 }
@@ -475,14 +529,14 @@ export class VB6ASTAdapter {
  */
 export class VB6TranspilerIntegration {
   private config: TranspilerIntegrationConfig;
-  
+
   constructor(config?: Partial<TranspilerIntegrationConfig>) {
     this.config = {
       useNewParser: true,
       enableFallback: true,
       validateResults: true,
       debugMode: false,
-      ...config
+      ...config,
     };
   }
 
@@ -497,7 +551,7 @@ export class VB6TranspilerIntegration {
       errors: [],
       warnings: [],
       parserUsed: 'legacy',
-      processingTime: 0
+      processingTime: 0,
     };
 
     try {
@@ -514,10 +568,9 @@ export class VB6TranspilerIntegration {
       }
 
       return result;
-
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      
+
       if (this.config.enableFallback && this.config.useNewParser) {
         console.warn('Recursive parser failed, falling back to legacy:', errorMessage);
         return this.parseWithLegacyParser(code, fileName);
@@ -532,11 +585,14 @@ export class VB6TranspilerIntegration {
   /**
    * Parser avec le nouveau parser récursif
    */
-  private async parseWithRecursiveParser(code: string, fileName?: string): Promise<TranspilerResult> {
+  private async parseWithRecursiveParser(
+    code: string,
+    fileName?: string
+  ): Promise<TranspilerResult> {
     try {
       // Étape 1: Tokenisation
       const tokens = tokenizeVB6(code);
-      
+
       // Étape 2: Parsing récursif
       const parser = new VB6RecursiveDescentParser(tokens);
       const { ast: newAST, errors } = parser.parseModule();
@@ -559,9 +615,8 @@ export class VB6TranspilerIntegration {
         errors: errors.map(e => e.message),
         warnings: errors.length > 0 ? ['Parse errors detected but processing continued'] : [],
         parserUsed: 'recursive',
-        processingTime: 0 // Will be set by caller
+        processingTime: 0, // Will be set by caller
       };
-
     } catch (error) {
       throw new Error(`Recursive parser error: ${error instanceof Error ? error.message : error}`);
     }
@@ -582,9 +637,8 @@ export class VB6TranspilerIntegration {
         errors: [],
         warnings: this.config.useNewParser ? ['Used legacy parser as fallback'] : [],
         parserUsed: 'legacy',
-        processingTime: 0 // Will be set by caller
+        processingTime: 0, // Will be set by caller
       };
-
     } catch (error) {
       throw new Error(`Legacy parser error: ${error instanceof Error ? error.message : error}`);
     }
@@ -633,31 +687,16 @@ export class VB6TranspilerIntegration {
    * Logger le résultat du parsing
    */
   private logParsingResult(result: TranspilerResult): void {
-    console.log('🔍 VB6 Parser Integration Debug:');
-    console.log(`  ✅ Success: ${result.success}`);
-    console.log(`  🔧 Parser Used: ${result.parserUsed}`);
-    console.log(`  ⏱️  Processing Time: ${result.processingTime.toFixed(2)}ms`);
-    console.log(`  ❌ Errors: ${result.errors.length}`);
-    console.log(`  ⚠️  Warnings: ${result.warnings.length}`);
-    
     if (result.ast) {
-      console.log(`  📄 Module: ${result.ast.name}`);
-      console.log(`  🔢 Variables: ${result.ast.variables.length}`);
-      console.log(`  ⚙️  Procedures: ${result.ast.procedures.length}`);
+      // noop
     }
 
     if (result.errors.length > 0) {
-      console.log('  🔴 Errors:');
-      result.errors.forEach((error, index) => {
-        console.log(`    ${index + 1}. ${error}`);
-      });
+      result.errors.forEach((error, index) => {});
     }
 
     if (result.warnings.length > 0) {
-      console.log('  🟡 Warnings:');
-      result.warnings.forEach((warning, index) => {
-        console.log(`    ${index + 1}. ${warning}`);
-      });
+      result.warnings.forEach((warning, index) => {});
     }
   }
 
@@ -675,7 +714,7 @@ export class VB6TranspilerIntegration {
       recursiveParserCalls: 0,
       legacyParserCalls: 0,
       successfulParses: 0,
-      failedParses: 0
+      failedParses: 0,
     };
   }
 
@@ -703,18 +742,18 @@ export const vb6TranspilerIntegration = new VB6TranspilerIntegration();
  * Fonction de convenance pour parser du code VB6
  */
 export async function parseVB6WithIntegration(
-  code: string, 
+  code: string,
   fileName?: string,
   config?: Partial<TranspilerIntegrationConfig>
 ): Promise<VB6ModuleAST | null> {
   const integration = config ? new VB6TranspilerIntegration(config) : vb6TranspilerIntegration;
   const result = await integration.parseCode(code, fileName);
-  
+
   if (!result.success) {
     console.error('Failed to parse VB6 code:', result.errors);
     return null;
   }
-  
+
   return result.ast;
 }
 
@@ -726,7 +765,7 @@ export function createTranspilerAdapter(useNewParser: boolean = true) {
     useNewParser,
     enableFallback: true,
     validateResults: true,
-    debugMode: false
+    debugMode: false,
   });
 }
 

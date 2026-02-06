@@ -7,17 +7,17 @@
 import { EventEmitter } from 'events';
 
 // DESIGN PATTERN FIX: Import extracted types and managers
-import { 
-  VB6DataType, 
-  VB6Variable, 
-  VB6Procedure, 
-  VB6Module, 
+import {
+  VB6DataType,
+  VB6Variable,
+  VB6Procedure,
+  VB6Module,
   VB6Parameter,
   VB6Project,
   VB6Reference,
   VB6Component,
   VB6VersionInfo,
-  VB6CompileOptions
+  VB6CompileOptions,
 } from './types/VB6Types';
 import { VB6VariableManager } from './managers/VB6VariableManager';
 import { VB6ProcedureManager } from './managers/VB6ProcedureManager';
@@ -46,24 +46,22 @@ export class VB6JITCompiler extends EventEmitter {
   }
 
   compile(code: string, moduleName: string, options: VB6CompileOptions): (...args: any[]) => any {
-    console.log(`Compiling ${moduleName} with JIT optimizations...`);
-    
     try {
       // Analyse du code
       const ast = this.parseVB6Code(code);
-      
+
       // Optimisations IA
       const optimizedAST = this.aiOptimizer.optimize(ast);
-      
+
       // Génération de code JavaScript optimisé
       const jsCode = this.generateJavaScript(optimizedAST, options);
-      
+
       // Compilation native
       const compiledFunction = this.compileToNative(jsCode, moduleName);
-      
+
       this.compiledCode.set(moduleName, compiledFunction);
       this.emit('compiled', { module: moduleName, success: true });
-      
+
       return compiledFunction;
     } catch (error) {
       this.emit('compiled', { module: moduleName, success: false, error });
@@ -81,54 +79,177 @@ export class VB6JITCompiler extends EventEmitter {
   private tokenize(code: string): any[] {
     const tokens: any[] = [];
     const lines = code.split('\n');
-    
+
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       if (line && !line.startsWith("'")) {
         tokens.push(...this.tokenizeLine(line, i + 1));
       }
     }
-    
+
     return tokens;
   }
 
   private tokenizeLine(line: string, lineNumber: number): any[] {
     const tokens: any[] = [];
     const keywords = [
-      'Dim', 'As', 'Public', 'Private', 'Static', 'Const', 'Global',
-      'Sub', 'Function', 'End', 'If', 'Then', 'Else', 'ElseIf',
-      'For', 'To', 'Step', 'Next', 'While', 'Wend', 'Do', 'Loop',
-      'Until', 'Select', 'Case', 'Exit', 'Return', 'Call', 'Set',
-      'Let', 'Get', 'Property', 'Type', 'Enum', 'With', 'New',
-      'Nothing', 'Me', 'MyBase', 'MyClass', 'True', 'False', 'Null',
-      'Empty', 'And', 'Or', 'Not', 'Xor', 'Eqv', 'Imp', 'Like',
-      'Is', 'Mod', 'In', 'ByRef', 'ByVal', 'Optional', 'ParamArray',
-      'Preserve', 'ReDim', 'Erase', 'GoTo', 'GoSub', 'On', 'Error',
-      'Resume', 'Stop', 'End', 'Exit', 'Declare', 'Lib', 'Alias',
-      'Class', 'Implements', 'Interface', 'Inherits', 'MustInherit',
-      'MustOverride', 'NotInheritable', 'NotOverridable', 'Overridable',
-      'Overrides', 'Shadows', 'Shared', 'Protected', 'Friend',
-      'ReadOnly', 'WriteOnly', 'WithEvents', 'Handles', 'RaiseEvent',
-      'AddHandler', 'RemoveHandler', 'Event', 'Delegate', 'Namespace',
-      'Module', 'Structure', 'Interface', 'Operator', 'DirectCast',
-      'CType', 'TryCast', 'TypeOf', 'GetType', 'AddressOf', 'SyncLock',
-      'Using', 'Finally', 'Catch', 'Try', 'Throw', 'Continue', 'DirectCast'
+      'Dim',
+      'As',
+      'Public',
+      'Private',
+      'Static',
+      'Const',
+      'Global',
+      'Sub',
+      'Function',
+      'End',
+      'If',
+      'Then',
+      'Else',
+      'ElseIf',
+      'For',
+      'To',
+      'Step',
+      'Next',
+      'While',
+      'Wend',
+      'Do',
+      'Loop',
+      'Until',
+      'Select',
+      'Case',
+      'Exit',
+      'Return',
+      'Call',
+      'Set',
+      'Let',
+      'Get',
+      'Property',
+      'Type',
+      'Enum',
+      'With',
+      'New',
+      'Nothing',
+      'Me',
+      'MyBase',
+      'MyClass',
+      'True',
+      'False',
+      'Null',
+      'Empty',
+      'And',
+      'Or',
+      'Not',
+      'Xor',
+      'Eqv',
+      'Imp',
+      'Like',
+      'Is',
+      'Mod',
+      'In',
+      'ByRef',
+      'ByVal',
+      'Optional',
+      'ParamArray',
+      'Preserve',
+      'ReDim',
+      'Erase',
+      'GoTo',
+      'GoSub',
+      'On',
+      'Error',
+      'Resume',
+      'Stop',
+      'End',
+      'Exit',
+      'Declare',
+      'Lib',
+      'Alias',
+      'Class',
+      'Implements',
+      'Interface',
+      'Inherits',
+      'MustInherit',
+      'MustOverride',
+      'NotInheritable',
+      'NotOverridable',
+      'Overridable',
+      'Overrides',
+      'Shadows',
+      'Shared',
+      'Protected',
+      'Friend',
+      'ReadOnly',
+      'WriteOnly',
+      'WithEvents',
+      'Handles',
+      'RaiseEvent',
+      'AddHandler',
+      'RemoveHandler',
+      'Event',
+      'Delegate',
+      'Namespace',
+      'Module',
+      'Structure',
+      'Interface',
+      'Operator',
+      'DirectCast',
+      'CType',
+      'TryCast',
+      'TypeOf',
+      'GetType',
+      'AddressOf',
+      'SyncLock',
+      'Using',
+      'Finally',
+      'Catch',
+      'Try',
+      'Throw',
+      'Continue',
+      'DirectCast',
     ];
-    
+
     const operators = [
-      '=', '<>', '<', '>', '<=', '>=', '+', '-', '*', '/', '\\', '^', '&',
-      '(', ')', '[', ']', '{', '}', '.', ',', ':', ';', '!', '?', '@', '#', '$', '%'
+      '=',
+      '<>',
+      '<',
+      '>',
+      '<=',
+      '>=',
+      '+',
+      '-',
+      '*',
+      '/',
+      '\\',
+      '^',
+      '&',
+      '(',
+      ')',
+      '[',
+      ']',
+      '{',
+      '}',
+      '.',
+      ',',
+      ':',
+      ';',
+      '!',
+      '?',
+      '@',
+      '#',
+      '$',
+      '%',
     ];
-    
+
     let i = 0;
     while (i < line.length) {
       const char = line[i];
-      
+
       if (char === ' ' || char === '\t') {
         i++;
         continue;
       }
-      
+
       if (char === '"') {
         // Chaîne de caractères
         let str = '';
@@ -145,7 +266,7 @@ export class VB6JITCompiler extends EventEmitter {
       } else if (char >= '0' && char <= '9') {
         // Nombre
         let num = '';
-        while (i < line.length && (line[i] >= '0' && line[i] <= '9' || line[i] === '.')) {
+        while (i < line.length && ((line[i] >= '0' && line[i] <= '9') || line[i] === '.')) {
           num += line[i];
           i++;
         }
@@ -162,7 +283,7 @@ export class VB6JITCompiler extends EventEmitter {
       } else {
         // Identificateur ou mot-clé
         let id = '';
-        while (i < line.length && (line[i].match(/[a-zA-Z0-9_]/))) {
+        while (i < line.length && line[i].match(/[a-zA-Z0-9_]/)) {
           id += line[i];
           i++;
         }
@@ -170,7 +291,7 @@ export class VB6JITCompiler extends EventEmitter {
         tokens.push({ type, value: id, line: lineNumber });
       }
     }
-    
+
     return tokens;
   }
 
@@ -178,14 +299,14 @@ export class VB6JITCompiler extends EventEmitter {
     return {
       type: 'Program',
       body: this.parseStatements(tokens),
-      optimized: false
+      optimized: false,
     };
   }
 
   private parseStatements(tokens: any[]): any[] {
     const statements: any[] = [];
     let i = 0;
-    
+
     while (i < tokens.length) {
       const statement = this.parseStatement(tokens, i);
       if (statement) {
@@ -195,14 +316,17 @@ export class VB6JITCompiler extends EventEmitter {
         i++;
       }
     }
-    
+
     return statements;
   }
 
-  private parseStatement(tokens: any[], startIndex: number): { node: any; nextIndex: number } | null {
+  private parseStatement(
+    tokens: any[],
+    startIndex: number
+  ): { node: any; nextIndex: number } | null {
     const token = tokens[startIndex];
     if (!token) return null;
-    
+
     switch (token.value) {
       case 'Dim':
         return this.parseDimStatement(tokens, startIndex);
@@ -228,18 +352,18 @@ export class VB6JITCompiler extends EventEmitter {
   private parseDimStatement(tokens: any[], startIndex: number): { node: any; nextIndex: number } {
     let i = startIndex + 1; // Skip 'Dim'
     const variables: any[] = [];
-    
+
     while (i < tokens.length && tokens[i].value !== '\n') {
       const variable = {
         type: 'VariableDeclaration',
         name: tokens[i].value,
         dataType: 'Variant',
         isArray: false,
-        dimensions: []
+        dimensions: [],
       };
-      
+
       i++; // Skip variable name
-      
+
       if (i < tokens.length && tokens[i].value === '(') {
         // Array declaration
         variable.isArray = true;
@@ -252,7 +376,7 @@ export class VB6JITCompiler extends EventEmitter {
         }
         i++; // Skip ')'
       }
-      
+
       if (i < tokens.length && tokens[i].value === 'As') {
         i++; // Skip 'As'
         if (i < tokens.length) {
@@ -260,20 +384,20 @@ export class VB6JITCompiler extends EventEmitter {
           i++;
         }
       }
-      
+
       variables.push(variable);
-      
+
       if (i < tokens.length && tokens[i].value === ',') {
         i++; // Skip ','
       }
     }
-    
+
     return {
       node: {
         type: 'DimStatement',
-        variables
+        variables,
       },
-      nextIndex: i
+      nextIndex: i,
     };
   }
 
@@ -281,7 +405,7 @@ export class VB6JITCompiler extends EventEmitter {
     let i = startIndex + 1; // Skip 'Sub'
     const subName = tokens[i].value;
     i++; // Skip sub name
-    
+
     const parameters: any[] = [];
     if (i < tokens.length && tokens[i].value === '(') {
       i++; // Skip '('
@@ -291,9 +415,9 @@ export class VB6JITCompiler extends EventEmitter {
             name: tokens[i].value,
             type: 'Variant',
             byRef: false,
-            optional: false
+            optional: false,
           };
-          
+
           i++;
           if (i < tokens.length && tokens[i].value === 'As') {
             i++; // Skip 'As'
@@ -302,17 +426,17 @@ export class VB6JITCompiler extends EventEmitter {
               i++;
             }
           }
-          
+
           parameters.push(param);
         }
-        
+
         if (i < tokens.length && tokens[i].value === ',') {
           i++; // Skip ','
         }
       }
       i++; // Skip ')'
     }
-    
+
     // Parse body until 'End Sub'
     const body: any[] = [];
     while (i < tokens.length && !(tokens[i].value === 'End' && tokens[i + 1]?.value === 'Sub')) {
@@ -324,27 +448,30 @@ export class VB6JITCompiler extends EventEmitter {
         i++;
       }
     }
-    
+
     if (i < tokens.length && tokens[i].value === 'End') {
       i += 2; // Skip 'End Sub'
     }
-    
+
     return {
       node: {
         type: 'SubStatement',
         name: subName,
         parameters,
-        body
+        body,
       },
-      nextIndex: i
+      nextIndex: i,
     };
   }
 
-  private parseFunctionStatement(tokens: any[], startIndex: number): { node: any; nextIndex: number } {
+  private parseFunctionStatement(
+    tokens: any[],
+    startIndex: number
+  ): { node: any; nextIndex: number } {
     let i = startIndex + 1; // Skip 'Function'
     const functionName = tokens[i].value;
     i++; // Skip function name
-    
+
     const parameters: any[] = [];
     if (i < tokens.length && tokens[i].value === '(') {
       i++; // Skip '('
@@ -354,9 +481,9 @@ export class VB6JITCompiler extends EventEmitter {
             name: tokens[i].value,
             type: 'Variant',
             byRef: false,
-            optional: false
+            optional: false,
           };
-          
+
           i++;
           if (i < tokens.length && tokens[i].value === 'As') {
             i++; // Skip 'As'
@@ -365,17 +492,17 @@ export class VB6JITCompiler extends EventEmitter {
               i++;
             }
           }
-          
+
           parameters.push(param);
         }
-        
+
         if (i < tokens.length && tokens[i].value === ',') {
           i++; // Skip ','
         }
       }
       i++; // Skip ')'
     }
-    
+
     let returnType = 'Variant';
     if (i < tokens.length && tokens[i].value === 'As') {
       i++; // Skip 'As'
@@ -384,10 +511,13 @@ export class VB6JITCompiler extends EventEmitter {
         i++;
       }
     }
-    
+
     // Parse body until 'End Function'
     const body: any[] = [];
-    while (i < tokens.length && !(tokens[i].value === 'End' && tokens[i + 1]?.value === 'Function')) {
+    while (
+      i < tokens.length &&
+      !(tokens[i].value === 'End' && tokens[i + 1]?.value === 'Function')
+    ) {
       const statement = this.parseStatement(tokens, i);
       if (statement) {
         body.push(statement.node);
@@ -396,37 +526,42 @@ export class VB6JITCompiler extends EventEmitter {
         i++;
       }
     }
-    
+
     if (i < tokens.length && tokens[i].value === 'End') {
       i += 2; // Skip 'End Function'
     }
-    
+
     return {
       node: {
         type: 'FunctionStatement',
         name: functionName,
         parameters,
         returnType,
-        body
+        body,
       },
-      nextIndex: i
+      nextIndex: i,
     };
   }
 
   private parseIfStatement(tokens: any[], startIndex: number): { node: any; nextIndex: number } {
     let i = startIndex + 1; // Skip 'If'
-    
+
     // Parse condition
     const condition = this.parseExpression(tokens, i);
     i = condition.nextIndex;
-    
+
     if (i < tokens.length && tokens[i].value === 'Then') {
       i++; // Skip 'Then'
     }
-    
+
     // Parse then body
     const thenBody: any[] = [];
-    while (i < tokens.length && tokens[i].value !== 'Else' && tokens[i].value !== 'ElseIf' && tokens[i].value !== 'End') {
+    while (
+      i < tokens.length &&
+      tokens[i].value !== 'Else' &&
+      tokens[i].value !== 'ElseIf' &&
+      tokens[i].value !== 'End'
+    ) {
       const statement = this.parseStatement(tokens, i);
       if (statement) {
         thenBody.push(statement.node);
@@ -435,7 +570,7 @@ export class VB6JITCompiler extends EventEmitter {
         i++;
       }
     }
-    
+
     const elseBody: any[] = [];
     if (i < tokens.length && tokens[i].value === 'Else') {
       i++; // Skip 'Else'
@@ -449,49 +584,49 @@ export class VB6JITCompiler extends EventEmitter {
         }
       }
     }
-    
+
     if (i < tokens.length && tokens[i].value === 'End') {
       i += 2; // Skip 'End If'
     }
-    
+
     return {
       node: {
         type: 'IfStatement',
         condition: condition.node,
         thenBody,
-        elseBody
+        elseBody,
       },
-      nextIndex: i
+      nextIndex: i,
     };
   }
 
   private parseForStatement(tokens: any[], startIndex: number): { node: any; nextIndex: number } {
     let i = startIndex + 1; // Skip 'For'
-    
+
     const variable = tokens[i].value;
     i++; // Skip variable
-    
+
     if (i < tokens.length && tokens[i].value === '=') {
       i++; // Skip '='
     }
-    
+
     const start = this.parseExpression(tokens, i);
     i = start.nextIndex;
-    
+
     if (i < tokens.length && tokens[i].value === 'To') {
       i++; // Skip 'To'
     }
-    
+
     const end = this.parseExpression(tokens, i);
     i = end.nextIndex;
-    
+
     let step = { type: 'Literal', value: 1 };
     if (i < tokens.length && tokens[i].value === 'Step') {
       i++; // Skip 'Step'
       step = this.parseExpression(tokens, i).node;
       i = this.parseExpression(tokens, i).nextIndex;
     }
-    
+
     // Parse body until 'Next'
     const body: any[] = [];
     while (i < tokens.length && tokens[i].value !== 'Next') {
@@ -503,14 +638,14 @@ export class VB6JITCompiler extends EventEmitter {
         i++;
       }
     }
-    
+
     if (i < tokens.length && tokens[i].value === 'Next') {
       i++; // Skip 'Next'
       if (i < tokens.length && tokens[i].value === variable) {
         i++; // Skip variable name
       }
     }
-    
+
     return {
       node: {
         type: 'ForStatement',
@@ -518,18 +653,18 @@ export class VB6JITCompiler extends EventEmitter {
         start: start.node,
         end: end.node,
         step,
-        body
+        body,
       },
-      nextIndex: i
+      nextIndex: i,
     };
   }
 
   private parseWhileStatement(tokens: any[], startIndex: number): { node: any; nextIndex: number } {
     let i = startIndex + 1; // Skip 'While'
-    
+
     const condition = this.parseExpression(tokens, i);
     i = condition.nextIndex;
-    
+
     // Parse body until 'Wend'
     const body: any[] = [];
     while (i < tokens.length && tokens[i].value !== 'Wend') {
@@ -541,34 +676,34 @@ export class VB6JITCompiler extends EventEmitter {
         i++;
       }
     }
-    
+
     if (i < tokens.length && tokens[i].value === 'Wend') {
       i++; // Skip 'Wend'
     }
-    
+
     return {
       node: {
         type: 'WhileStatement',
         condition: condition.node,
-        body
+        body,
       },
-      nextIndex: i
+      nextIndex: i,
     };
   }
 
   private parseDoStatement(tokens: any[], startIndex: number): { node: any; nextIndex: number } {
     let i = startIndex + 1; // Skip 'Do'
-    
+
     let condition = null;
     let conditionType = 'none';
-    
+
     if (i < tokens.length && (tokens[i].value === 'While' || tokens[i].value === 'Until')) {
       conditionType = tokens[i].value;
       i++; // Skip 'While' or 'Until'
       condition = this.parseExpression(tokens, i);
       i = condition.nextIndex;
     }
-    
+
     // Parse body until 'Loop'
     const body: any[] = [];
     while (i < tokens.length && tokens[i].value !== 'Loop') {
@@ -580,51 +715,58 @@ export class VB6JITCompiler extends EventEmitter {
         i++;
       }
     }
-    
+
     if (i < tokens.length && tokens[i].value === 'Loop') {
       i++; // Skip 'Loop'
-      
-      if (conditionType === 'none' && i < tokens.length && (tokens[i].value === 'While' || tokens[i].value === 'Until')) {
+
+      if (
+        conditionType === 'none' &&
+        i < tokens.length &&
+        (tokens[i].value === 'While' || tokens[i].value === 'Until')
+      ) {
         conditionType = tokens[i].value;
         i++; // Skip 'While' or 'Until'
         condition = this.parseExpression(tokens, i);
         i = condition.nextIndex;
       }
     }
-    
+
     return {
       node: {
         type: 'DoStatement',
         condition: condition?.node,
         conditionType,
-        body
+        body,
       },
-      nextIndex: i
+      nextIndex: i,
     };
   }
 
-  private parseSelectStatement(tokens: any[], startIndex: number): { node: any; nextIndex: number } {
+  private parseSelectStatement(
+    tokens: any[],
+    startIndex: number
+  ): { node: any; nextIndex: number } {
     let i = startIndex + 1; // Skip 'Select'
-    
+
     if (i < tokens.length && tokens[i].value === 'Case') {
       i++; // Skip 'Case'
     }
-    
+
     const expression = this.parseExpression(tokens, i);
     i = expression.nextIndex;
-    
+
     const cases: any[] = [];
-    
+
     while (i < tokens.length && tokens[i].value !== 'End') {
       if (tokens[i].value === 'Case') {
         i++; // Skip 'Case'
-        
+
         let caseValue = null;
         if (i < tokens.length && tokens[i].value !== 'Else') {
           caseValue = this.parseExpression(tokens, i);
           i = caseValue.nextIndex;
         }
-        
+
         // Parse case body
         const caseBody: any[] = [];
         while (i < tokens.length && tokens[i].value !== 'Case' && tokens[i].value !== 'End') {
@@ -636,39 +778,42 @@ export class VB6JITCompiler extends EventEmitter {
             i++;
           }
         }
-        
+
         cases.push({
           value: caseValue?.node,
-          body: caseBody
+          body: caseBody,
         });
       } else {
         i++;
       }
     }
-    
+
     if (i < tokens.length && tokens[i].value === 'End') {
       i += 2; // Skip 'End Select'
     }
-    
+
     return {
       node: {
         type: 'SelectStatement',
         expression: expression.node,
-        cases
+        cases,
       },
-      nextIndex: i
+      nextIndex: i,
     };
   }
 
-  private parseExpressionStatement(tokens: any[], startIndex: number): { node: any; nextIndex: number } {
+  private parseExpressionStatement(
+    tokens: any[],
+    startIndex: number
+  ): { node: any; nextIndex: number } {
     const expression = this.parseExpression(tokens, startIndex);
-    
+
     return {
       node: {
         type: 'ExpressionStatement',
-        expression: expression.node
+        expression: expression.node,
       },
-      nextIndex: expression.nextIndex
+      nextIndex: expression.nextIndex,
     };
   }
 
@@ -676,302 +821,331 @@ export class VB6JITCompiler extends EventEmitter {
     return this.parseAssignmentExpression(tokens, startIndex);
   }
 
-  private parseAssignmentExpression(tokens: any[], startIndex: number): { node: any; nextIndex: number } {
+  private parseAssignmentExpression(
+    tokens: any[],
+    startIndex: number
+  ): { node: any; nextIndex: number } {
     const left = this.parseLogicalExpression(tokens, startIndex);
-    
+
     if (left.nextIndex < tokens.length && tokens[left.nextIndex].value === '=') {
       const operator = tokens[left.nextIndex];
       const right = this.parseAssignmentExpression(tokens, left.nextIndex + 1);
-      
+
       return {
         node: {
           type: 'AssignmentExpression',
           operator: operator.value,
           left: left.node,
-          right: right.node
+          right: right.node,
         },
-        nextIndex: right.nextIndex
+        nextIndex: right.nextIndex,
       };
     }
-    
+
     return left;
   }
 
-  private parseLogicalExpression(tokens: any[], startIndex: number): { node: any; nextIndex: number } {
+  private parseLogicalExpression(
+    tokens: any[],
+    startIndex: number
+  ): { node: any; nextIndex: number } {
     let left = this.parseComparisonExpression(tokens, startIndex);
-    
-    while (left.nextIndex < tokens.length && 
-           ['And', 'Or', 'Xor', 'Eqv', 'Imp'].includes(tokens[left.nextIndex].value)) {
+
+    while (
+      left.nextIndex < tokens.length &&
+      ['And', 'Or', 'Xor', 'Eqv', 'Imp'].includes(tokens[left.nextIndex].value)
+    ) {
       const operator = tokens[left.nextIndex];
       const right = this.parseComparisonExpression(tokens, left.nextIndex + 1);
-      
+
       left = {
         node: {
           type: 'BinaryExpression',
           operator: operator.value,
           left: left.node,
-          right: right.node
+          right: right.node,
         },
-        nextIndex: right.nextIndex
+        nextIndex: right.nextIndex,
       };
     }
-    
+
     return left;
   }
 
-  private parseComparisonExpression(tokens: any[], startIndex: number): { node: any; nextIndex: number } {
+  private parseComparisonExpression(
+    tokens: any[],
+    startIndex: number
+  ): { node: any; nextIndex: number } {
     let left = this.parseArithmeticExpression(tokens, startIndex);
-    
-    while (left.nextIndex < tokens.length && 
-           ['=', '<>', '<', '>', '<=', '>=', 'Like', 'Is'].includes(tokens[left.nextIndex].value)) {
+
+    while (
+      left.nextIndex < tokens.length &&
+      ['=', '<>', '<', '>', '<=', '>=', 'Like', 'Is'].includes(tokens[left.nextIndex].value)
+    ) {
       const operator = tokens[left.nextIndex];
       const right = this.parseArithmeticExpression(tokens, left.nextIndex + 1);
-      
+
       left = {
         node: {
           type: 'BinaryExpression',
           operator: operator.value,
           left: left.node,
-          right: right.node
+          right: right.node,
         },
-        nextIndex: right.nextIndex
+        nextIndex: right.nextIndex,
       };
     }
-    
+
     return left;
   }
 
-  private parseArithmeticExpression(tokens: any[], startIndex: number): { node: any; nextIndex: number } {
+  private parseArithmeticExpression(
+    tokens: any[],
+    startIndex: number
+  ): { node: any; nextIndex: number } {
     let left = this.parseTermExpression(tokens, startIndex);
-    
-    while (left.nextIndex < tokens.length && 
-           ['+', '-', '&'].includes(tokens[left.nextIndex].value)) {
+
+    while (
+      left.nextIndex < tokens.length &&
+      ['+', '-', '&'].includes(tokens[left.nextIndex].value)
+    ) {
       const operator = tokens[left.nextIndex];
       const right = this.parseTermExpression(tokens, left.nextIndex + 1);
-      
+
       left = {
         node: {
           type: 'BinaryExpression',
           operator: operator.value,
           left: left.node,
-          right: right.node
+          right: right.node,
         },
-        nextIndex: right.nextIndex
+        nextIndex: right.nextIndex,
       };
     }
-    
+
     return left;
   }
 
   private parseTermExpression(tokens: any[], startIndex: number): { node: any; nextIndex: number } {
     let left = this.parsePowerExpression(tokens, startIndex);
-    
-    while (left.nextIndex < tokens.length && 
-           ['*', '/', '\\', 'Mod'].includes(tokens[left.nextIndex].value)) {
+
+    while (
+      left.nextIndex < tokens.length &&
+      ['*', '/', '\\', 'Mod'].includes(tokens[left.nextIndex].value)
+    ) {
       const operator = tokens[left.nextIndex];
       const right = this.parsePowerExpression(tokens, left.nextIndex + 1);
-      
+
       left = {
         node: {
           type: 'BinaryExpression',
           operator: operator.value,
           left: left.node,
-          right: right.node
+          right: right.node,
         },
-        nextIndex: right.nextIndex
+        nextIndex: right.nextIndex,
       };
     }
-    
+
     return left;
   }
 
-  private parsePowerExpression(tokens: any[], startIndex: number): { node: any; nextIndex: number } {
+  private parsePowerExpression(
+    tokens: any[],
+    startIndex: number
+  ): { node: any; nextIndex: number } {
     let left = this.parseUnaryExpression(tokens, startIndex);
-    
+
     while (left.nextIndex < tokens.length && tokens[left.nextIndex].value === '^') {
       const operator = tokens[left.nextIndex];
       const right = this.parseUnaryExpression(tokens, left.nextIndex + 1);
-      
+
       left = {
         node: {
           type: 'BinaryExpression',
           operator: operator.value,
           left: left.node,
-          right: right.node
+          right: right.node,
         },
-        nextIndex: right.nextIndex
+        nextIndex: right.nextIndex,
       };
     }
-    
+
     return left;
   }
 
-  private parseUnaryExpression(tokens: any[], startIndex: number): { node: any; nextIndex: number } {
+  private parseUnaryExpression(
+    tokens: any[],
+    startIndex: number
+  ): { node: any; nextIndex: number } {
     if (startIndex < tokens.length && ['+', '-', 'Not'].includes(tokens[startIndex].value)) {
       const operator = tokens[startIndex];
       const operand = this.parseUnaryExpression(tokens, startIndex + 1);
-      
+
       return {
         node: {
           type: 'UnaryExpression',
           operator: operator.value,
-          operand: operand.node
+          operand: operand.node,
         },
-        nextIndex: operand.nextIndex
+        nextIndex: operand.nextIndex,
       };
     }
-    
+
     return this.parsePrimaryExpression(tokens, startIndex);
   }
 
-  private parsePrimaryExpression(tokens: any[], startIndex: number): { node: any; nextIndex: number } {
+  private parsePrimaryExpression(
+    tokens: any[],
+    startIndex: number
+  ): { node: any; nextIndex: number } {
     if (startIndex >= tokens.length) {
       return { node: null, nextIndex: startIndex };
     }
-    
+
     const token = tokens[startIndex];
-    
+
     if (token.type === 'NUMBER') {
       return {
         node: {
           type: 'Literal',
           value: token.value,
-          dataType: 'Number'
+          dataType: 'Number',
         },
-        nextIndex: startIndex + 1
+        nextIndex: startIndex + 1,
       };
     }
-    
+
     if (token.type === 'STRING') {
       return {
         node: {
           type: 'Literal',
           value: token.value,
-          dataType: 'String'
+          dataType: 'String',
         },
-        nextIndex: startIndex + 1
+        nextIndex: startIndex + 1,
       };
     }
-    
+
     if (token.type === 'IDENTIFIER') {
       let nextIndex = startIndex + 1;
-      
+
       // Check for function call
       if (nextIndex < tokens.length && tokens[nextIndex].value === '(') {
         nextIndex++; // Skip '('
         const args: any[] = [];
-        
+
         while (nextIndex < tokens.length && tokens[nextIndex].value !== ')') {
           const arg = this.parseExpression(tokens, nextIndex);
           args.push(arg.node);
           nextIndex = arg.nextIndex;
-          
+
           if (nextIndex < tokens.length && tokens[nextIndex].value === ',') {
             nextIndex++; // Skip ','
           }
         }
-        
+
         if (nextIndex < tokens.length && tokens[nextIndex].value === ')') {
           nextIndex++; // Skip ')'
         }
-        
+
         return {
           node: {
             type: 'CallExpression',
             callee: {
               type: 'Identifier',
-              name: token.value
+              name: token.value,
             },
-            arguments: args
+            arguments: args,
           },
-          nextIndex
+          nextIndex,
         };
       }
-      
+
       // Check for array access
       if (nextIndex < tokens.length && tokens[nextIndex].value === '(') {
         nextIndex++; // Skip '('
         const indices: any[] = [];
-        
+
         while (nextIndex < tokens.length && tokens[nextIndex].value !== ')') {
           const index = this.parseExpression(tokens, nextIndex);
           indices.push(index.node);
           nextIndex = index.nextIndex;
-          
+
           if (nextIndex < tokens.length && tokens[nextIndex].value === ',') {
             nextIndex++; // Skip ','
           }
         }
-        
+
         if (nextIndex < tokens.length && tokens[nextIndex].value === ')') {
           nextIndex++; // Skip ')'
         }
-        
+
         return {
           node: {
             type: 'ArrayAccess',
             array: {
               type: 'Identifier',
-              name: token.value
+              name: token.value,
             },
-            indices
+            indices,
           },
-          nextIndex
+          nextIndex,
         };
       }
-      
+
       // Check for member access
       if (nextIndex < tokens.length && tokens[nextIndex].value === '.') {
         nextIndex++; // Skip '.'
         const member = tokens[nextIndex];
         nextIndex++; // Skip member name
-        
+
         return {
           node: {
             type: 'MemberExpression',
             object: {
               type: 'Identifier',
-              name: token.value
+              name: token.value,
             },
             property: {
               type: 'Identifier',
-              name: member.value
-            }
+              name: member.value,
+            },
           },
-          nextIndex
+          nextIndex,
         };
       }
-      
+
       // Simple identifier
       return {
         node: {
           type: 'Identifier',
-          name: token.value
+          name: token.value,
         },
-        nextIndex
+        nextIndex,
       };
     }
-    
+
     if (token.value === '(') {
       const expression = this.parseExpression(tokens, startIndex + 1);
       let nextIndex = expression.nextIndex;
-      
+
       if (nextIndex < tokens.length && tokens[nextIndex].value === ')') {
         nextIndex++; // Skip ')'
       }
-      
+
       return {
         node: expression.node,
-        nextIndex
+        nextIndex,
       };
     }
-    
+
     return {
       node: {
         type: 'Literal',
-        value: null
+        value: null,
       },
-      nextIndex: startIndex + 1
+      nextIndex: startIndex + 1,
     };
   }
 
@@ -982,34 +1156,34 @@ export class VB6JITCompiler extends EventEmitter {
 
   private performOptimizations(node: any): any {
     if (!node) return node;
-    
+
     switch (node.type) {
       case 'Program':
         return {
           ...node,
-          body: node.body.map((stmt: any) => this.performOptimizations(stmt))
+          body: node.body.map((stmt: any) => this.performOptimizations(stmt)),
         };
-      
+
       case 'BinaryExpression': {
         const left = this.performOptimizations(node.left);
         const right = this.performOptimizations(node.right);
-        
+
         // Optimisation des constantes
         if (left.type === 'Literal' && right.type === 'Literal') {
           return this.evaluateConstantExpression(node.operator, left.value, right.value);
         }
-        
+
         return { ...node, left, right };
       }
-      
+
       case 'ForStatement':
         // Optimisation des boucles
         return this.optimizeForLoop(node);
-      
+
       case 'IfStatement':
         // Optimisation des conditions
         return this.optimizeIfStatement(node);
-      
+
       default:
         return node;
     }
@@ -1052,24 +1226,33 @@ export class VB6JITCompiler extends EventEmitter {
       case 'Not':
         return { type: 'Literal', value: !right };
       default:
-        return { type: 'BinaryExpression', operator, left: { type: 'Literal', value: left }, right: { type: 'Literal', value: right } };
+        return {
+          type: 'BinaryExpression',
+          operator,
+          left: { type: 'Literal', value: left },
+          right: { type: 'Literal', value: right },
+        };
     }
   }
 
   private optimizeForLoop(node: any): any {
     // Optimisation des boucles For
-    if (node.start.type === 'Literal' && node.end.type === 'Literal' && node.step.type === 'Literal') {
+    if (
+      node.start.type === 'Literal' &&
+      node.end.type === 'Literal' &&
+      node.step.type === 'Literal'
+    ) {
       const start = node.start.value;
       const end = node.end.value;
       const step = node.step.value;
-      
+
       // Détection des boucles infinies
       if (step === 0 || (step > 0 && start > end) || (step < 0 && start < end)) {
         return {
-          type: 'EmptyStatement'
+          type: 'EmptyStatement',
         };
       }
-      
+
       // Optimisation des petites boucles
       const iterations = Math.abs(Math.floor((end - start) / step)) + 1;
       if (iterations <= 10) {
@@ -1079,11 +1262,11 @@ export class VB6JITCompiler extends EventEmitter {
           body: node.body,
           variable: node.variable,
           start,
-          step
+          step,
         };
       }
     }
-    
+
     return node;
   }
 
@@ -1093,16 +1276,16 @@ export class VB6JITCompiler extends EventEmitter {
       if (node.condition.value) {
         return {
           type: 'BlockStatement',
-          body: node.thenBody
+          body: node.thenBody,
         };
       } else {
         return {
           type: 'BlockStatement',
-          body: node.elseBody
+          body: node.elseBody,
         };
       }
     }
-    
+
     return node;
   }
 
@@ -1112,41 +1295,47 @@ export class VB6JITCompiler extends EventEmitter {
 
   private generateCode(node: any, options: VB6CompileOptions): string {
     if (!node) return '';
-    
+
     switch (node.type) {
       case 'Program':
         return node.body.map((stmt: any) => this.generateCode(stmt, options)).join('\n');
-      
+
       case 'DimStatement':
-        return node.variables.map((variable: any) => {
-          let code = `let ${variable.name}`;
-          if (variable.isArray) {
-            code += ` = new Array(${variable.dimensions.join(', ')})`;
-          } else {
-            code += ` = ${this.getDefaultValue(variable.dataType)}`;
-          }
-          return code + ';';
-        }).join('\n');
-      
+        return node.variables
+          .map((variable: any) => {
+            let code = `let ${variable.name}`;
+            if (variable.isArray) {
+              code += ` = new Array(${variable.dimensions.join(', ')})`;
+            } else {
+              code += ` = ${this.getDefaultValue(variable.dataType)}`;
+            }
+            return code + ';';
+          })
+          .join('\n');
+
       case 'SubStatement': {
         const params = node.parameters.map((param: any) => param.name).join(', ');
         const body = node.body.map((stmt: any) => this.generateCode(stmt, options)).join('\n');
         return `function ${node.name}(${params}) {\n${body}\n}`;
       }
-      
+
       case 'FunctionStatement': {
         const funcParams = node.parameters.map((param: any) => param.name).join(', ');
         const funcBody = node.body.map((stmt: any) => this.generateCode(stmt, options)).join('\n');
         return `function ${node.name}(${funcParams}) {\n${funcBody}\n}`;
       }
-      
+
       case 'IfStatement': {
         const condition = this.generateCode(node.condition, options);
-        const thenBody = node.thenBody.map((stmt: any) => this.generateCode(stmt, options)).join('\n');
-        const elseBody = node.elseBody.map((stmt: any) => this.generateCode(stmt, options)).join('\n');
+        const thenBody = node.thenBody
+          .map((stmt: any) => this.generateCode(stmt, options))
+          .join('\n');
+        const elseBody = node.elseBody
+          .map((stmt: any) => this.generateCode(stmt, options))
+          .join('\n');
         return `if (${condition}) {\n${thenBody}\n}${elseBody ? ` else {\n${elseBody}\n}` : ''}`;
       }
-      
+
       case 'ForStatement': {
         const variable = node.variable;
         const start = this.generateCode(node.start, options);
@@ -1155,13 +1344,13 @@ export class VB6JITCompiler extends EventEmitter {
         const forBody = node.body.map((stmt: any) => this.generateCode(stmt, options)).join('\n');
         return `for (let ${variable} = ${start}; ${variable} <= ${end}; ${variable} += ${step}) {\n${forBody}\n}`;
       }
-      
+
       case 'WhileStatement': {
         const whileCondition = this.generateCode(node.condition, options);
         const whileBody = node.body.map((stmt: any) => this.generateCode(stmt, options)).join('\n');
         return `while (${whileCondition}) {\n${whileBody}\n}`;
       }
-      
+
       case 'DoStatement': {
         const doBody = node.body.map((stmt: any) => this.generateCode(stmt, options)).join('\n');
         if (node.condition) {
@@ -1175,11 +1364,11 @@ export class VB6JITCompiler extends EventEmitter {
           return `while (true) {\n${doBody}\n}`;
         }
       }
-      
+
       case 'SelectStatement': {
         const selectExpression = this.generateCode(node.expression, options);
         let switchCode = `switch (${selectExpression}) {\n`;
-        
+
         node.cases.forEach((caseNode: any) => {
           if (caseNode.value) {
             const caseValue = this.generateCode(caseNode.value, options);
@@ -1187,67 +1376,69 @@ export class VB6JITCompiler extends EventEmitter {
           } else {
             switchCode += `default:\n`;
           }
-          
+
           caseNode.body.forEach((stmt: any) => {
             switchCode += `  ${this.generateCode(stmt, options)}\n`;
           });
-          
+
           switchCode += `  break;\n`;
         });
-        
+
         switchCode += `}`;
         return switchCode;
       }
-      
+
       case 'ExpressionStatement':
         return this.generateCode(node.expression, options) + ';';
-      
+
       case 'AssignmentExpression': {
         const assignLeft = this.generateCode(node.left, options);
         const assignRight = this.generateCode(node.right, options);
         return `${assignLeft} = ${assignRight}`;
       }
-      
+
       case 'BinaryExpression': {
         const binLeft = this.generateCode(node.left, options);
         const binRight = this.generateCode(node.right, options);
         const operator = this.convertOperator(node.operator);
         return `(${binLeft} ${operator} ${binRight})`;
       }
-      
+
       case 'UnaryExpression': {
         const unaryOperand = this.generateCode(node.operand, options);
         const unaryOperator = this.convertOperator(node.operator);
         return `${unaryOperator}(${unaryOperand})`;
       }
-      
+
       case 'CallExpression': {
         const callee = this.generateCode(node.callee, options);
         const args = node.arguments.map((arg: any) => this.generateCode(arg, options)).join(', ');
         return `${callee}(${args})`;
       }
-      
+
       case 'ArrayAccess': {
         const array = this.generateCode(node.array, options);
-        const indices = node.indices.map((index: any) => this.generateCode(index, options)).join('][');
+        const indices = node.indices
+          .map((index: any) => this.generateCode(index, options))
+          .join('][');
         return `${array}[${indices}]`;
       }
-      
+
       case 'MemberExpression': {
         const object = this.generateCode(node.object, options);
         const property = this.generateCode(node.property, options);
         return `${object}.${property}`;
       }
-      
+
       case 'Identifier':
         return node.name;
-      
+
       case 'Literal':
         if (typeof node.value === 'string') {
           return `"${node.value}"`;
         }
         return String(node.value);
-      
+
       case 'UnrolledLoop': {
         let unrolledCode = '';
         for (let i = 0; i < node.iterations; i++) {
@@ -1258,13 +1449,13 @@ export class VB6JITCompiler extends EventEmitter {
         }
         return unrolledCode;
       }
-      
+
       case 'BlockStatement':
         return node.body.map((stmt: any) => this.generateCode(stmt, options)).join('\n');
-      
+
       case 'EmptyStatement':
         return '';
-      
+
       default:
         return `// Unsupported node type: ${node.type}`;
     }
@@ -1272,18 +1463,30 @@ export class VB6JITCompiler extends EventEmitter {
 
   private convertOperator(operator: string): string {
     switch (operator) {
-      case '<>': return '!==';
-      case '=': return '===';
-      case '\\': return 'Math.floor(';
-      case '^': return 'Math.pow(';
-      case 'Mod': return '%';
-      case '&': return '+';
-      case 'And': return '&&';
-      case 'Or': return '||';
-      case 'Not': return '!';
-      case 'Like': return 'VB6Runtime.Like';
-      case 'Is': return '===';
-      default: return operator;
+      case '<>':
+        return '!==';
+      case '=':
+        return '===';
+      case '\\':
+        return 'Math.floor(';
+      case '^':
+        return 'Math.pow(';
+      case 'Mod':
+        return '%';
+      case '&':
+        return '+';
+      case 'And':
+        return '&&';
+      case 'Or':
+        return '||';
+      case 'Not':
+        return '!';
+      case 'Like':
+        return 'VB6Runtime.Like';
+      case 'Is':
+        return '===';
+      default:
+        return operator;
     }
   }
 
@@ -1314,15 +1517,15 @@ export class VB6JITCompiler extends EventEmitter {
     try {
       // Création d'un contexte d'exécution sécurisé
       const context = this.createSecureContext();
-      
+
       // Compilation du code JavaScript
       const compiledFunction = new Function('VB6Runtime', 'context', jsCode);
-      
+
       // Optimisation JIT
       if (this.hotspots.has(moduleName)) {
         const count = this.hotspots.get(moduleName)! + 1;
         this.hotspots.set(moduleName, count);
-        
+
         if (count > 10) {
           // Optimisation JIT agressive
           return this.performJITOptimization(compiledFunction, moduleName);
@@ -1330,7 +1533,7 @@ export class VB6JITCompiler extends EventEmitter {
       } else {
         this.hotspots.set(moduleName, 1);
       }
-      
+
       return compiledFunction;
     } catch (error) {
       throw new Error(`Compilation failed for ${moduleName}: ${error.message}`);
@@ -1359,29 +1562,38 @@ export class VB6JITCompiler extends EventEmitter {
     };
   }
 
-  private performJITOptimization(func: (...args: any[]) => any, moduleName: string): (...args: any[]) => any {
+  private performJITOptimization(
+    func: (...args: any[]) => any,
+    moduleName: string
+  ): (...args: any[]) => any {
     // Optimisation JIT basée sur les profils d'exécution
     const profile = this.performanceMonitor.getProfile(moduleName);
-    
+
     if (profile.hotLoops.length > 0) {
       // Optimisation des boucles chaudes
       return this.optimizeHotLoops(func, profile.hotLoops);
     }
-    
+
     if (profile.frequentCallees.length > 0) {
       // Inlining des appels fréquents
       return this.inlineFrequentCalls(func, profile.frequentCallees);
     }
-    
+
     return func;
   }
 
-  private optimizeHotLoops(func: (...args: any[]) => any, hotLoops: any[]): (...args: any[]) => any {
+  private optimizeHotLoops(
+    func: (...args: any[]) => any,
+    hotLoops: any[]
+  ): (...args: any[]) => any {
     // Optimisation des boucles chaudes avec vectorisation
     return func;
   }
 
-  private inlineFrequentCalls(func: (...args: any[]) => any, frequentCalls: any[]): (...args: any[]) => any {
+  private inlineFrequentCalls(
+    func: (...args: any[]) => any,
+    frequentCalls: any[]
+  ): (...args: any[]) => any {
     // Inlining des appels fréquents
     return func;
   }
@@ -1394,36 +1606,36 @@ class VB6AIOptimizer {
 
   optimize(ast: any): any {
     if (!this.learning) return ast;
-    
+
     // Analyse des motifs pour optimisation
     const patterns = this.analyzePatterns(ast);
-    
+
     // Application des optimisations IA
     return this.applyAIOptimizations(ast, patterns);
   }
 
   private analyzePatterns(node: any): any[] {
     const patterns: any[] = [];
-    
+
     this.traverseAST(node, (n: any) => {
       const pattern = this.identifyPattern(n);
       if (pattern) {
         patterns.push(pattern);
       }
     });
-    
+
     return patterns;
   }
 
   private traverseAST(node: any, callback: (node: any) => void): void {
     if (!node) return;
-    
+
     callback(node);
-    
+
     if (node.body) {
       node.body.forEach((child: any) => this.traverseAST(child, callback));
     }
-    
+
     if (node.left) this.traverseAST(node.left, callback);
     if (node.right) this.traverseAST(node.right, callback);
     if (node.condition) this.traverseAST(node.condition, callback);
@@ -1456,7 +1668,7 @@ class VB6AIOptimizer {
       subtype: 'for',
       complexity: this.calculateComplexity(node.body),
       vectorizable: this.isVectorizable(node),
-      unrollable: this.isUnrollable(node)
+      unrollable: this.isUnrollable(node),
     };
   }
 
@@ -1466,7 +1678,7 @@ class VB6AIOptimizer {
       type: 'condition',
       complexity: this.calculateComplexity(node.condition),
       predictable: this.isPredictable(node.condition),
-      branchProbability: this.estimateBranchProbability(node)
+      branchProbability: this.estimateBranchProbability(node),
     };
   }
 
@@ -1476,15 +1688,15 @@ class VB6AIOptimizer {
       type: 'expression',
       operator: node.operator,
       optimizable: this.isOptimizable(node),
-      constant: this.isConstant(node)
+      constant: this.isConstant(node),
     };
   }
 
   private calculateComplexity(node: any): number {
     if (!node) return 0;
-    
+
     let complexity = 1;
-    
+
     if (Array.isArray(node)) {
       complexity += node.reduce((sum, child) => sum + this.calculateComplexity(child), 0);
     } else if (typeof node === 'object') {
@@ -1492,30 +1704,33 @@ class VB6AIOptimizer {
         complexity += this.calculateComplexity(node[key]);
       });
     }
-    
+
     return complexity;
   }
 
   private isVectorizable(node: any): boolean {
     // Détermine si une boucle peut être vectorisée
     return node.body.every((stmt: any) => {
-      return stmt.type === 'ExpressionStatement' && 
-             stmt.expression.type === 'AssignmentExpression';
+      return stmt.type === 'ExpressionStatement' && stmt.expression.type === 'AssignmentExpression';
     });
   }
 
   private isUnrollable(node: any): boolean {
     // Détermine si une boucle peut être déroulée
-    return node.start.type === 'Literal' && 
-           node.end.type === 'Literal' && 
-           node.step.type === 'Literal' &&
-           Math.abs(node.end.value - node.start.value) / node.step.value <= 20;
+    return (
+      node.start.type === 'Literal' &&
+      node.end.type === 'Literal' &&
+      node.step.type === 'Literal' &&
+      Math.abs(node.end.value - node.start.value) / node.step.value <= 20
+    );
   }
 
   private isPredictable(node: any): boolean {
     // Détermine si une condition est prévisible
-    return node.type === 'BinaryExpression' && 
-           (node.left.type === 'Literal' || node.right.type === 'Literal');
+    return (
+      node.type === 'BinaryExpression' &&
+      (node.left.type === 'Literal' || node.right.type === 'Literal')
+    );
   }
 
   private estimateBranchProbability(node: any): number {
@@ -1523,7 +1738,7 @@ class VB6AIOptimizer {
     if (node.condition.type === 'Literal') {
       return node.condition.value ? 1.0 : 0.0;
     }
-    
+
     // Estimation basée sur des heuristiques
     return 0.5;
   }
@@ -1541,7 +1756,7 @@ class VB6AIOptimizer {
   private applyAIOptimizations(ast: any, patterns: any[]): any {
     // Application des optimisations basées sur l'IA
     let optimizedAST = ast;
-    
+
     patterns.forEach(pattern => {
       switch (pattern.type) {
         case 'loop':
@@ -1555,7 +1770,7 @@ class VB6AIOptimizer {
           break;
       }
     });
-    
+
     return optimizedAST;
   }
 
@@ -1564,11 +1779,11 @@ class VB6AIOptimizer {
     if (pattern.vectorizable) {
       return this.vectorizeLoop(ast, pattern);
     }
-    
+
     if (pattern.unrollable) {
       return this.unrollLoop(ast, pattern);
     }
-    
+
     return ast;
   }
 
@@ -1577,7 +1792,7 @@ class VB6AIOptimizer {
     if (pattern.predictable) {
       return this.optimizePredictableBranch(ast, pattern);
     }
-    
+
     return ast;
   }
 
@@ -1586,7 +1801,7 @@ class VB6AIOptimizer {
     if (pattern.constant) {
       return this.foldConstants(ast, pattern);
     }
-    
+
     return ast;
   }
 
@@ -1617,12 +1832,14 @@ class VB6PerformanceMonitor {
   private metrics: Map<string, any> = new Map();
 
   getProfile(moduleName: string): any {
-    return this.profiles.get(moduleName) || {
-      hotLoops: [],
-      frequentCallees: [],
-      executionTime: 0,
-      memoryUsage: 0
-    };
+    return (
+      this.profiles.get(moduleName) || {
+        hotLoops: [],
+        frequentCallees: [],
+        executionTime: 0,
+        memoryUsage: 0,
+      }
+    );
   }
 
   recordExecution(moduleName: string, executionTime: number, memoryUsage: number): void {
@@ -1634,13 +1851,14 @@ class VB6PerformanceMonitor {
 
   identifyHotspots(): string[] {
     const hotspots: string[] = [];
-    
+
     this.profiles.forEach((profile, moduleName) => {
-      if (profile.executionTime > 1000) { // 1 seconde
+      if (profile.executionTime > 1000) {
+        // 1 seconde
         hotspots.push(moduleName);
       }
     });
-    
+
     return hotspots;
   }
 
@@ -1649,7 +1867,7 @@ class VB6PerformanceMonitor {
       totalModules: this.profiles.size,
       hotspots: this.identifyHotspots(),
       averageExecutionTime: this.calculateAverageExecutionTime(),
-      totalMemoryUsage: this.calculateTotalMemoryUsage()
+      totalMemoryUsage: this.calculateTotalMemoryUsage(),
     };
   }
 
@@ -1659,8 +1877,10 @@ class VB6PerformanceMonitor {
   }
 
   private calculateTotalMemoryUsage(): number {
-    return Array.from(this.profiles.values())
-      .reduce((sum, profile) => sum + profile.memoryUsage, 0);
+    return Array.from(this.profiles.values()).reduce(
+      (sum, profile) => sum + profile.memoryUsage,
+      0
+    );
   }
 }
 
@@ -1686,7 +1906,7 @@ export class VB6UltraRuntime extends EventEmitter {
     this.eventSystem = new VB6EventSystem();
     this.memoryManager = new VB6MemoryManager();
     this.debugger = new VB6Debugger();
-    
+
     this.initializeBuiltInFunctions();
     this.initializeBuiltInConstants();
   }
@@ -1714,19 +1934,24 @@ export class VB6UltraRuntime extends EventEmitter {
     // Fonctions de chaînes
     this.registerBuiltInFunction('Asc', (str: string) => str.charCodeAt(0));
     this.registerBuiltInFunction('Chr', (code: number) => String.fromCharCode(code));
-    this.registerBuiltInFunction('InStr', (start: number | string, string1?: string, string2?: string) => {
-      if (typeof start === 'string' && string1 && !string2) {
-        return start.indexOf(string1) + 1;
+    this.registerBuiltInFunction(
+      'InStr',
+      (start: number | string, string1?: string, string2?: string) => {
+        if (typeof start === 'string' && string1 && !string2) {
+          return start.indexOf(string1) + 1;
+        }
+        if (typeof start === 'number' && string1 && string2) {
+          return string1.indexOf(string2, start - 1) + 1;
+        }
+        return 0;
       }
-      if (typeof start === 'number' && string1 && string2) {
-        return string1.indexOf(string2, start - 1) + 1;
-      }
-      return 0;
-    });
+    );
     this.registerBuiltInFunction('LCase', (str: string) => str.toLowerCase());
     this.registerBuiltInFunction('UCase', (str: string) => str.toUpperCase());
     this.registerBuiltInFunction('Left', (str: string, length: number) => str.substring(0, length));
-    this.registerBuiltInFunction('Right', (str: string, length: number) => str.substring(str.length - length));
+    this.registerBuiltInFunction('Right', (str: string, length: number) =>
+      str.substring(str.length - length)
+    );
     this.registerBuiltInFunction('Mid', (str: string, start: number, length?: number) => {
       if (length === undefined) {
         return str.substring(start - 1);
@@ -1740,8 +1965,9 @@ export class VB6UltraRuntime extends EventEmitter {
     this.registerBuiltInFunction('Space', (num: number) => ' '.repeat(num));
     this.registerBuiltInFunction('String', (num: number, char: string) => char.repeat(num));
     this.registerBuiltInFunction('StrReverse', (str: string) => str.split('').reverse().join(''));
-    this.registerBuiltInFunction('Replace', (str: string, find: string, replace: string) => 
-      str.replace(new RegExp(find, 'g'), replace));
+    this.registerBuiltInFunction('Replace', (str: string, find: string, replace: string) =>
+      str.replace(new RegExp(find, 'g'), replace)
+    );
 
     // Fonctions de dates
     this.registerBuiltInFunction('Now', () => new Date());
@@ -1758,19 +1984,33 @@ export class VB6UltraRuntime extends EventEmitter {
     this.registerBuiltInFunction('DateAdd', (interval: string, number: number, date: Date) => {
       const newDate = new Date(date);
       switch (interval) {
-        case 'yyyy': newDate.setFullYear(newDate.getFullYear() + number); break;
-        case 'm': newDate.setMonth(newDate.getMonth() + number); break;
-        case 'd': newDate.setDate(newDate.getDate() + number); break;
-        case 'h': newDate.setHours(newDate.getHours() + number); break;
-        case 'n': newDate.setMinutes(newDate.getMinutes() + number); break;
-        case 's': newDate.setSeconds(newDate.getSeconds() + number); break;
+        case 'yyyy':
+          newDate.setFullYear(newDate.getFullYear() + number);
+          break;
+        case 'm':
+          newDate.setMonth(newDate.getMonth() + number);
+          break;
+        case 'd':
+          newDate.setDate(newDate.getDate() + number);
+          break;
+        case 'h':
+          newDate.setHours(newDate.getHours() + number);
+          break;
+        case 'n':
+          newDate.setMinutes(newDate.getMinutes() + number);
+          break;
+        case 's':
+          newDate.setSeconds(newDate.getSeconds() + number);
+          break;
       }
       return newDate;
     });
 
     // Fonctions de conversion
     this.registerBuiltInFunction('CBool', (value: any) => Boolean(value));
-    this.registerBuiltInFunction('CByte', (value: any) => Math.max(0, Math.min(255, Math.round(Number(value)))));
+    this.registerBuiltInFunction('CByte', (value: any) =>
+      Math.max(0, Math.min(255, Math.round(Number(value))))
+    );
     this.registerBuiltInFunction('CCur', (value: any) => Number(value));
     this.registerBuiltInFunction('CDate', (value: any) => new Date(value));
     this.registerBuiltInFunction('CDbl', (value: any) => Number(value));
@@ -1791,31 +2031,32 @@ export class VB6UltraRuntime extends EventEmitter {
     this.registerBuiltInFunction('IsEmpty', (value: any) => value === undefined || value === null);
     this.registerBuiltInFunction('IsNull', (value: any) => value === null);
     this.registerBuiltInFunction('IsNumeric', (value: any) => !isNaN(Number(value)));
-    this.registerBuiltInFunction('IsObject', (value: any) => typeof value === 'object' && value !== null);
+    this.registerBuiltInFunction(
+      'IsObject',
+      (value: any) => typeof value === 'object' && value !== null
+    );
 
     // Fonctions de formatage
     this.registerBuiltInFunction('Format', (value: any, format?: string) => {
       if (!format) return String(value);
-      
+
       if (value instanceof Date) {
         return this.formatDate(value, format);
       } else if (typeof value === 'number') {
         return this.formatNumber(value, format);
       }
-      
+
       return String(value);
     });
 
     // Fonctions de couleurs
     this.registerBuiltInFunction('RGB', (r: number, g: number, b: number) => {
-      return (r & 0xFF) | ((g & 0xFF) << 8) | ((b & 0xFF) << 16);
+      return (r & 0xff) | ((g & 0xff) << 8) | ((b & 0xff) << 16);
     });
     this.registerBuiltInFunction('QBColor', (color: number) => {
       const colors = [
-        0x000000, 0x800000, 0x008000, 0x808000,
-        0x000080, 0x800080, 0x008080, 0xC0C0C0,
-        0x808080, 0xFF0000, 0x00FF00, 0xFFFF00,
-        0x0000FF, 0xFF00FF, 0x00FFFF, 0xFFFFFF
+        0x000000, 0x800000, 0x008000, 0x808000, 0x000080, 0x800080, 0x008080, 0xc0c0c0, 0x808080,
+        0xff0000, 0x00ff00, 0xffff00, 0x0000ff, 0xff00ff, 0x00ffff, 0xffffff,
       ];
       return colors[color % colors.length];
     });
@@ -1839,9 +2080,12 @@ export class VB6UltraRuntime extends EventEmitter {
       alert(prompt);
       return 1; // vbOK
     });
-    this.registerBuiltInFunction('InputBox', (prompt: string, title?: string, defaultResponse?: string) => {
-      return window.prompt(prompt, defaultResponse || '') || '';
-    });
+    this.registerBuiltInFunction(
+      'InputBox',
+      (prompt: string, title?: string, defaultResponse?: string) => {
+        return window.prompt(prompt, defaultResponse || '') || '';
+      }
+    );
   }
 
   // Initialisation des constantes intégrées
@@ -1875,13 +2119,13 @@ export class VB6UltraRuntime extends EventEmitter {
 
     // Constantes de couleurs
     this.registerConstant('vbBlack', 0x000000);
-    this.registerConstant('vbRed', 0xFF0000);
-    this.registerConstant('vbGreen', 0x00FF00);
-    this.registerConstant('vbYellow', 0xFFFF00);
-    this.registerConstant('vbBlue', 0x0000FF);
-    this.registerConstant('vbMagenta', 0xFF00FF);
-    this.registerConstant('vbCyan', 0x00FFFF);
-    this.registerConstant('vbWhite', 0xFFFFFF);
+    this.registerConstant('vbRed', 0xff0000);
+    this.registerConstant('vbGreen', 0x00ff00);
+    this.registerConstant('vbYellow', 0xffff00);
+    this.registerConstant('vbBlue', 0x0000ff);
+    this.registerConstant('vbMagenta', 0xff00ff);
+    this.registerConstant('vbCyan', 0x00ffff);
+    this.registerConstant('vbWhite', 0xffffff);
 
     // Constantes de fichiers
     this.registerConstant('vbNormal', 0);
@@ -1932,20 +2176,24 @@ export class VB6UltraRuntime extends EventEmitter {
       isPublic: true,
       isPrivate: false,
       isStatic: false,
-      scope: 'global'
+      scope: 'global',
     };
-    
+
     this.procedures.set(name, procedure);
-    (globalThis as any)[name] = func;
+    (globalThis as Record<string, unknown>)[name] = func;
   }
 
   private registerConstant(name: string, value: any): void {
     const variable: VB6Variable = {
       name,
-      type: typeof value === 'number' ? VB6DataType.vbLong : 
-            typeof value === 'string' ? VB6DataType.vbString :
-            typeof value === 'boolean' ? VB6DataType.vbBoolean :
-            VB6DataType.vbVariant,
+      type:
+        typeof value === 'number'
+          ? VB6DataType.vbLong
+          : typeof value === 'string'
+            ? VB6DataType.vbString
+            : typeof value === 'boolean'
+              ? VB6DataType.vbBoolean
+              : VB6DataType.vbVariant,
       value,
       isArray: false,
       isPublic: true,
@@ -1953,29 +2201,29 @@ export class VB6UltraRuntime extends EventEmitter {
       isStatic: false,
       isDim: false,
       isConst: true,
-      scope: 'global'
+      scope: 'global',
     };
-    
+
     this.variables.set(name, variable);
-    (globalThis as any)[name] = value;
+    (globalThis as Record<string, unknown>)[name] = value;
   }
 
   private formatDate(date: Date, format: string): string {
     // Implémentation simplifiée du formatage de dates VB6
     const formatMap: { [key: string]: string } = {
-      'yyyy': date.getFullYear().toString(),
-      'mm': (date.getMonth() + 1).toString().padStart(2, '0'),
-      'dd': date.getDate().toString().padStart(2, '0'),
-      'hh': date.getHours().toString().padStart(2, '0'),
-      'nn': date.getMinutes().toString().padStart(2, '0'),
-      'ss': date.getSeconds().toString().padStart(2, '0')
+      yyyy: date.getFullYear().toString(),
+      mm: (date.getMonth() + 1).toString().padStart(2, '0'),
+      dd: date.getDate().toString().padStart(2, '0'),
+      hh: date.getHours().toString().padStart(2, '0'),
+      nn: date.getMinutes().toString().padStart(2, '0'),
+      ss: date.getSeconds().toString().padStart(2, '0'),
     };
-    
+
     let result = format;
     Object.keys(formatMap).forEach(key => {
       result = result.replace(new RegExp(key, 'g'), formatMap[key]);
     });
-    
+
     return result;
   }
 
@@ -2026,7 +2274,7 @@ export class VB6UltraRuntime extends EventEmitter {
         originalFilename: name + '.exe',
         privateBuild: '',
         specialBuild: '',
-        autoIncrement: false
+        autoIncrement: false,
       },
       compileOptions: {
         optimizeCode: true,
@@ -2051,7 +2299,7 @@ export class VB6UltraRuntime extends EventEmitter {
         validateParameters: true,
         validateVariables: true,
         jitOptimization: true,
-        aiOptimization: true
+        aiOptimization: true,
       },
       startup: '',
       iconFile: '',
@@ -2061,30 +2309,27 @@ export class VB6UltraRuntime extends EventEmitter {
       retained: false,
       apartment: false,
       optimized: false,
-      compiled: false
+      compiled: false,
     };
 
     this.projects.set(name, project);
     this.currentProject = project;
     this.emit('projectCreated', project);
-    
+
     return project;
   }
 
   compileProject(project: VB6Project): boolean {
     try {
-      console.log(`Compiling project: ${project.name}`);
-      
       // Compilation de tous les modules
       for (const [moduleName, module] of project.modules) {
         const compiled = this.compiler.compile(module.code, moduleName, project.compileOptions);
         module.compiled = true;
-        console.log(`Module ${moduleName} compiled successfully`);
       }
-      
+
       project.compiled = true;
       project.optimized = project.compileOptions.aiOptimization;
-      
+
       this.emit('projectCompiled', project);
       return true;
     } catch (error) {
@@ -2099,15 +2344,13 @@ export class VB6UltraRuntime extends EventEmitter {
       if (!project.compiled) {
         throw new Error('Project must be compiled before execution');
       }
-      
-      console.log(`Executing project: ${project.name}`);
-      
+
       // Exécution du module de démarrage
       const startupModule = project.modules.get(project.startup);
       if (startupModule) {
         this.executeModule(startupModule);
       }
-      
+
       this.emit('projectExecuted', project);
       return true;
     } catch (error) {
@@ -2141,26 +2384,30 @@ export class VB6UltraRuntime extends EventEmitter {
       validateParameters: true,
       validateVariables: true,
       jitOptimization: true,
-      aiOptimization: true
+      aiOptimization: true,
     });
-    
+
     // Exécution du module compilé
     const startTime = performance.now();
     const memoryBefore = this.memoryManager.getUsedMemory();
-    
+
     try {
       compiledFunction(this, this.createExecutionContext());
-      
+
       const executionTime = performance.now() - startTime;
       const memoryAfter = this.memoryManager.getUsedMemory();
-      
+
       this.compiler['performanceMonitor'].recordExecution(
         module.name,
         executionTime,
         memoryAfter - memoryBefore
       );
-      
-      this.emit('moduleExecuted', { module, executionTime, memoryUsage: memoryAfter - memoryBefore });
+
+      this.emit('moduleExecuted', {
+        module,
+        executionTime,
+        memoryUsage: memoryAfter - memoryBefore,
+      });
     } catch (error) {
       this.errorHandler.handleError(error, module.name);
     }
@@ -2176,7 +2423,7 @@ export class VB6UltraRuntime extends EventEmitter {
       debugger: this.debugger,
       memoryManager: this.memoryManager,
       eventSystem: this.eventSystem,
-      console: console
+      console: console,
     };
   }
 
@@ -2232,7 +2479,6 @@ export class VB6UltraRuntime extends EventEmitter {
   optimizeHotspots(): void {
     const hotspots = this.compiler['performanceMonitor'].identifyHotspots();
     hotspots.forEach(hotspot => {
-      console.log(`Optimizing hotspot: ${hotspot}`);
       // Recompilation avec optimisations agressives
     });
   }
@@ -2267,7 +2513,7 @@ class VB6ErrorHandler {
     this.errors.set(13, 'Type mismatch');
     this.errors.set(14, 'Out of string space');
     this.errors.set(16, 'Expression too complex');
-    this.errors.set(17, 'Can\'t perform requested operation');
+    this.errors.set(17, "Can't perform requested operation");
     this.errors.set(18, 'User interrupt occurred');
     this.errors.set(20, 'Resume without error');
     this.errors.set(28, 'Out of stack space');
@@ -2289,22 +2535,25 @@ class VB6ErrorHandler {
     this.errors.set(68, 'Device unavailable');
     this.errors.set(70, 'Permission denied');
     this.errors.set(71, 'Disk not ready');
-    this.errors.set(74, 'Can\'t rename with different drive');
+    this.errors.set(74, "Can't rename with different drive");
     this.errors.set(75, 'Path/File access error');
     this.errors.set(76, 'Path not found');
     this.errors.set(91, 'Object variable or With block variable not set');
     this.errors.set(92, 'For loop not initialized');
     this.errors.set(93, 'Invalid pattern string');
     this.errors.set(94, 'Invalid use of Null');
-    this.errors.set(438, 'Object doesn\'t support this property or method');
+    this.errors.set(438, "Object doesn't support this property or method");
     this.errors.set(440, 'Automation error');
-    this.errors.set(445, 'Object doesn\'t support this action');
-    this.errors.set(446, 'Object doesn\'t support named arguments');
-    this.errors.set(447, 'Object doesn\'t support current locale setting');
+    this.errors.set(445, "Object doesn't support this action");
+    this.errors.set(446, "Object doesn't support named arguments");
+    this.errors.set(447, "Object doesn't support current locale setting");
     this.errors.set(448, 'Named argument not found');
     this.errors.set(449, 'Argument not optional');
     this.errors.set(450, 'Wrong number of arguments or invalid property assignment');
-    this.errors.set(451, 'Property let procedure not defined and property get procedure did not return an object');
+    this.errors.set(
+      451,
+      'Property let procedure not defined and property get procedure did not return an object'
+    );
     this.errors.set(452, 'Invalid ordinal');
     this.errors.set(453, 'Specified DLL function not found');
     this.errors.set(454, 'Code resource not found');
@@ -2320,26 +2569,27 @@ class VB6ErrorHandler {
 
   raiseError(number: number, description?: string, source?: string): void {
     const errorDescription = description || this.errors.get(number) || 'Unknown error';
-    
+
     this.currentError = {
       number,
       description: errorDescription,
       source: source || 'VB6 Runtime',
       helpFile: '',
       helpContext: 0,
-      lastDllError: 0
+      lastDllError: 0,
     };
 
-    const error = new Error(errorDescription);
-    (error as any).number = number;
-    (error as any).source = source;
-    
+    const error: Error & { number: number; source: string | undefined } = Object.assign(
+      new Error(errorDescription),
+      { number, source }
+    );
+
     throw error;
   }
 
   handleError(error: any, module?: string): void {
     console.error(`Runtime Error in ${module || 'Unknown'}:`, error);
-    
+
     // Gestion des erreurs selon le contexte
     if (error.number) {
       this.currentError = {
@@ -2348,7 +2598,7 @@ class VB6ErrorHandler {
         source: error.source || module || 'VB6 Runtime',
         helpFile: '',
         helpContext: 0,
-        lastDllError: 0
+        lastDllError: 0,
       };
     }
   }
@@ -2379,7 +2629,7 @@ class VB6EventSystem extends EventEmitter {
         });
       }
     }
-    
+
     // Émettre l'événement global
     this.emit(`${source}.${eventName}`, args);
   }
@@ -2388,12 +2638,12 @@ class VB6EventSystem extends EventEmitter {
     if (!this.eventHandlers.has(source)) {
       this.eventHandlers.set(source, new Map());
     }
-    
+
     const sourceHandlers = this.eventHandlers.get(source)!;
     if (!sourceHandlers.has(eventName)) {
       sourceHandlers.set(eventName, []);
     }
-    
+
     sourceHandlers.get(eventName)!.push(handler);
   }
 
@@ -2425,11 +2675,11 @@ class VB6MemoryManager {
     if (this.totalAllocated + size > this.maxMemory) {
       throw new Error('Out of memory');
     }
-    
+
     const ptr = {};
     this.allocatedMemory.set(ptr, size);
     this.totalAllocated += size;
-    
+
     return ptr;
   }
 
@@ -2456,7 +2706,6 @@ class VB6MemoryManager {
 
   defragment(): void {
     // Simulation de la défragmentation
-    console.log('Memory defragmentation completed');
   }
 }
 
@@ -2473,34 +2722,29 @@ class VB6Debugger {
     if (!this.breakpoints.has(module)) {
       this.breakpoints.set(module, new Set());
     }
-    
+
     this.breakpoints.get(module)!.add(line);
-    console.log(`Breakpoint set at ${module}:${line}`);
   }
 
   removeBreakpoint(module: string, line: number): void {
     const moduleBreakpoints = this.breakpoints.get(module);
     if (moduleBreakpoints) {
       moduleBreakpoints.delete(line);
-      console.log(`Breakpoint removed from ${module}:${line}`);
     }
   }
 
   step(): void {
     this.stepping = true;
-    console.log('Stepping...');
   }
 
   continue(): void {
     this.stepping = false;
     this.running = true;
-    console.log('Continuing execution...');
   }
 
   stop(): void {
     this.running = false;
     this.stepping = false;
-    console.log('Debugging stopped');
   }
 
   addWatch(variable: string, value: any): void {
@@ -2524,7 +2768,7 @@ class VB6Debugger {
       module,
       procedure,
       line,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 

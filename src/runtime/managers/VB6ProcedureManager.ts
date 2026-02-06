@@ -30,10 +30,10 @@ export class VB6ProcedureManager extends EventEmitter {
    */
   registerProcedure(procedure: VB6Procedure): void {
     const key = `${procedure.module}.${procedure.name}`;
-    
+
     // DESIGN PATTERN FIX: Validate procedure before registration
     this.validateProcedure(procedure);
-    
+
     if (this.procedures.has(key)) {
       if (!this.canOverrideProcedure(procedure)) {
         throw new Error(`Procedure '${key}' already exists and cannot be overridden`);
@@ -53,10 +53,9 @@ export class VB6ProcedureManager extends EventEmitter {
     parameters: any[] = [],
     context?: any
   ): Promise<any> {
-    
     const key = `${moduleName}.${procedureName}`;
     const procedure = this.procedures.get(key);
-    
+
     if (!procedure) {
       throw new Error(`Procedure '${key}' not found`);
     }
@@ -75,7 +74,7 @@ export class VB6ProcedureManager extends EventEmitter {
       parameters: validatedParams,
       locals: {},
       lineNumber: 0,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     this.callStack.push(frame);
@@ -84,10 +83,10 @@ export class VB6ProcedureManager extends EventEmitter {
     try {
       // Execute the procedure
       const result = await this.executeProcedure(procedure, validatedParams, context);
-      
+
       frame.returnValue = result;
       this.emit('procedureExit', frame);
-      
+
       return result;
     } catch (error) {
       this.emit('procedureError', { frame, error });
@@ -169,9 +168,8 @@ export class VB6ProcedureManager extends EventEmitter {
     expectedParams: VB6Parameter[],
     actualParams: any[]
   ): Record<string, any> {
-    
     const result: Record<string, any> = {};
-    
+
     for (let i = 0; i < expectedParams.length; i++) {
       const expected = expectedParams[i];
       const actual = actualParams[i];
@@ -230,13 +228,12 @@ export class VB6ProcedureManager extends EventEmitter {
     parameters: Record<string, any>,
     context?: any
   ): Promise<any> {
-    
     // This would implement the actual VB6 code execution
     // For now, this is a placeholder that would integrate with
     // the VB6 interpreter/compiler
-    
+
     this.emit('procedureExecuting', { procedure, parameters });
-    
+
     // Simulate procedure execution
     // In a real implementation, this would parse and execute the procedure.body
     return procedure.type === 'function' ? null : undefined;

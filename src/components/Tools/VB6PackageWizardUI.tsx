@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
+import {
   VB6PackageWizardInstance,
   PackageProject,
   PackageFile,
@@ -18,7 +18,7 @@ import {
   DistributionMedia,
   ComponentType,
   InstallLocation,
-  RegistryRoot
+  RegistryRoot,
 } from '../../services/VB6PackageWizard';
 
 interface PackageWizardUIProps {
@@ -27,10 +27,14 @@ interface PackageWizardUIProps {
 
 export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) => {
   // State management
-  const [activeTab, setActiveTab] = useState<'projects' | 'files' | 'dependencies' | 'registry' | 'shortcuts' | 'build' | 'deploy'>('projects');
+  const [activeTab, setActiveTab] = useState<
+    'projects' | 'files' | 'dependencies' | 'registry' | 'shortcuts' | 'build' | 'deploy'
+  >('projects');
   const [projects, setProjects] = useState<PackageProject[]>([]);
   const [currentProject, setCurrentProject] = useState<PackageProject | null>(null);
-  const [templates, setTemplates] = useState<Array<{ id: string; name: string; template: any }>>([]);
+  const [templates, setTemplates] = useState<Array<{ id: string; name: string; template: any }>>(
+    []
+  );
   const [deploymentTargets, setDeploymentTargets] = useState<DeploymentTarget[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +60,7 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
     applicationVersion: '1.0.0',
     companyName: '',
     copyrightInfo: '',
-    productName: ''
+    productName: '',
   });
 
   const [newFileData, setNewFileData] = useState({
@@ -67,7 +71,7 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
     shared: false,
     register: false,
     compress: true,
-    customPath: ''
+    customPath: '',
   });
 
   const [newRegistryData, setNewRegistryData] = useState({
@@ -79,7 +83,7 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
     createKey: true,
     overwriteValue: true,
     removeOnUninstall: true,
-    description: ''
+    description: '',
   });
 
   const [newShortcutData, setNewShortcutData] = useState({
@@ -91,7 +95,7 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
     location: 'start_menu' as 'desktop' | 'start_menu' | 'programs' | 'startup' | 'custom',
     customPath: '',
     runMinimized: false,
-    runMaximized: false
+    runMaximized: false,
   });
 
   const [newDeploymentData, setNewDeploymentData] = useState({
@@ -103,7 +107,7 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
     remotePath: '',
     testConnection: true,
     overwriteExisting: true,
-    createBackup: false
+    createBackup: false,
   });
 
   // Load initial data
@@ -126,11 +130,11 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
         newProjectData.name,
         selectedTemplate || undefined
       );
-      
+
       // Update project with form data
       Object.assign(project, newProjectData);
       project.modified = new Date();
-      
+
       setShowNewProjectForm(false);
       setNewProjectData({
         name: '',
@@ -141,7 +145,7 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
         applicationVersion: '1.0.0',
         companyName: '',
         copyrightInfo: '',
-        productName: ''
+        productName: '',
       });
       setSelectedTemplate('');
       refreshData();
@@ -180,9 +184,10 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
       setLoading(true);
       VB6PackageWizardInstance.addFile({
         sourcePath: newFileData.sourcePath,
-        targetPath: newFileData.location === InstallLocation.CUSTOM_PATH 
-          ? newFileData.customPath 
-          : `[${newFileData.location.toUpperCase()}]\\${newFileData.fileName}`,
+        targetPath:
+          newFileData.location === InstallLocation.CUSTOM_PATH
+            ? newFileData.customPath
+            : `[${newFileData.location.toUpperCase()}]\\${newFileData.fileName}`,
         fileName: newFileData.fileName,
         fileSize: Math.floor(Math.random() * 1000000) + 1024, // Simulate file size
         type: newFileData.type,
@@ -196,9 +201,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
         register: newFileData.register,
         checkVersion: true,
         versionConflict: 'newer',
-        dependencies: []
+        dependencies: [],
       });
-      
+
       setShowNewFileForm(false);
       setNewFileData({
         sourcePath: '',
@@ -208,7 +213,7 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
         shared: false,
         register: false,
         compress: true,
-        customPath: ''
+        customPath: '',
       });
       refreshData();
     } catch (err) {
@@ -265,7 +270,7 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
         createKey: true,
         overwriteValue: true,
         removeOnUninstall: true,
-        description: ''
+        description: '',
       });
       refreshData();
     } catch (err) {
@@ -292,7 +297,7 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
         location: 'start_menu',
         customPath: '',
         runMinimized: false,
-        runMaximized: false
+        runMaximized: false,
       });
       refreshData();
     } catch (err) {
@@ -334,7 +339,7 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
         remotePath: '',
         testConnection: true,
         overwriteExisting: true,
-        createBackup: false
+        createBackup: false,
       });
       refreshData();
     } catch (err) {
@@ -394,8 +399,11 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
             </tr>
           </thead>
           <tbody>
-            {projects.map((project) => (
-              <tr key={project.id} className={project.id === currentProject?.id ? 'bg-blue-50' : ''}>
+            {projects.map(project => (
+              <tr
+                key={project.id}
+                className={project.id === currentProject?.id ? 'bg-blue-50' : ''}
+              >
                 <td className="px-4 py-2 font-medium">{project.name}</td>
                 <td className="px-4 py-2">{project.packageType.replace('_', ' ').toUpperCase()}</td>
                 <td className="px-4 py-2">{project.version}</td>
@@ -436,12 +444,26 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
         <div className="border rounded-lg p-4 bg-gray-50">
           <h4 className="font-semibold mb-2">Project: {currentProject.displayName}</h4>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div><strong>Application:</strong> {currentProject.applicationName}</div>
-            <div><strong>Version:</strong> {currentProject.applicationVersion}</div>
-            <div><strong>Company:</strong> {currentProject.companyName}</div>
-            <div><strong>Package Type:</strong> {currentProject.packageType.replace('_', ' ').toUpperCase()}</div>
-            <div><strong>Install Location:</strong> {currentProject.installLocation.replace('_', ' ').toUpperCase()}</div>
-            <div><strong>Required Space:</strong> {(currentProject.requiredSpace / 1024).toFixed(1)} MB</div>
+            <div>
+              <strong>Application:</strong> {currentProject.applicationName}
+            </div>
+            <div>
+              <strong>Version:</strong> {currentProject.applicationVersion}
+            </div>
+            <div>
+              <strong>Company:</strong> {currentProject.companyName}
+            </div>
+            <div>
+              <strong>Package Type:</strong>{' '}
+              {currentProject.packageType.replace('_', ' ').toUpperCase()}
+            </div>
+            <div>
+              <strong>Install Location:</strong>{' '}
+              {currentProject.installLocation.replace('_', ' ').toUpperCase()}
+            </div>
+            <div>
+              <strong>Required Space:</strong> {(currentProject.requiredSpace / 1024).toFixed(1)} MB
+            </div>
           </div>
           {currentProject.description && (
             <div className="mt-2">
@@ -461,12 +483,14 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                 <label className="block text-sm font-medium mb-1">Template:</label>
                 <select
                   value={selectedTemplate}
-                  onChange={(e) => setSelectedTemplate(e.target.value)}
+                  onChange={e => setSelectedTemplate(e.target.value)}
                   className="w-full border rounded px-3 py-2"
                 >
                   <option value="">No Template</option>
-                  {templates.map((template) => (
-                    <option key={template.id} value={template.id}>{template.name}</option>
+                  {templates.map(template => (
+                    <option key={template.id} value={template.id}>
+                      {template.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -476,7 +500,7 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <input
                     type="text"
                     value={newProjectData.name}
-                    onChange={(e) => setNewProjectData(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={e => setNewProjectData(prev => ({ ...prev, name: e.target.value }))}
                     className="w-full border rounded px-3 py-2"
                     placeholder="Project name"
                   />
@@ -486,7 +510,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <input
                     type="text"
                     value={newProjectData.applicationName}
-                    onChange={(e) => setNewProjectData(prev => ({ ...prev, applicationName: e.target.value }))}
+                    onChange={e =>
+                      setNewProjectData(prev => ({ ...prev, applicationName: e.target.value }))
+                    }
                     className="w-full border rounded px-3 py-2"
                     placeholder="Application name"
                   />
@@ -498,7 +524,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <input
                     type="text"
                     value={newProjectData.applicationVersion}
-                    onChange={(e) => setNewProjectData(prev => ({ ...prev, applicationVersion: e.target.value }))}
+                    onChange={e =>
+                      setNewProjectData(prev => ({ ...prev, applicationVersion: e.target.value }))
+                    }
                     className="w-full border rounded px-3 py-2"
                     placeholder="1.0.0"
                   />
@@ -508,7 +536,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <input
                     type="text"
                     value={newProjectData.companyName}
-                    onChange={(e) => setNewProjectData(prev => ({ ...prev, companyName: e.target.value }))}
+                    onChange={e =>
+                      setNewProjectData(prev => ({ ...prev, companyName: e.target.value }))
+                    }
                     className="w-full border rounded px-3 py-2"
                     placeholder="Company name"
                   />
@@ -519,7 +549,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                 <input
                   type="text"
                   value={newProjectData.sourceProject}
-                  onChange={(e) => setNewProjectData(prev => ({ ...prev, sourceProject: e.target.value }))}
+                  onChange={e =>
+                    setNewProjectData(prev => ({ ...prev, sourceProject: e.target.value }))
+                  }
                   className="w-full border rounded px-3 py-2"
                   placeholder="C:\\VB6Projects\\MyApp\\MyApp.vbp"
                 />
@@ -529,7 +561,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                 <input
                   type="text"
                   value={newProjectData.outputFolder}
-                  onChange={(e) => setNewProjectData(prev => ({ ...prev, outputFolder: e.target.value }))}
+                  onChange={e =>
+                    setNewProjectData(prev => ({ ...prev, outputFolder: e.target.value }))
+                  }
                   className="w-full border rounded px-3 py-2"
                   placeholder="C:\\VB6Projects\\MyApp\\Package"
                 />
@@ -538,7 +572,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                 <label className="block text-sm font-medium mb-1">Description:</label>
                 <textarea
                   value={newProjectData.description}
-                  onChange={(e) => setNewProjectData(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={e =>
+                    setNewProjectData(prev => ({ ...prev, description: e.target.value }))
+                  }
                   className="w-full border rounded px-3 py-2"
                   rows={3}
                   placeholder="Project description"
@@ -603,7 +639,7 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
               </tr>
             </thead>
             <tbody>
-              {currentProject.files.map((file) => (
+              {currentProject.files.map(file => (
                 <tr key={file.id}>
                   <td className="px-4 py-2 font-medium">{file.fileName}</td>
                   <td className="px-4 py-2">{file.type.replace('_', ' ').toUpperCase()}</td>
@@ -611,9 +647,15 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <td className="px-4 py-2">{(file.fileSize / 1024).toFixed(1)} KB</td>
                   <td className="px-4 py-2">
                     <div className="flex gap-1 text-xs">
-                      {file.compress && <span className="bg-blue-100 text-blue-800 px-1 rounded">Compress</span>}
-                      {file.register && <span className="bg-green-100 text-green-800 px-1 rounded">Register</span>}
-                      {file.shared && <span className="bg-yellow-100 text-yellow-800 px-1 rounded">Shared</span>}
+                      {file.compress && (
+                        <span className="bg-blue-100 text-blue-800 px-1 rounded">Compress</span>
+                      )}
+                      {file.register && (
+                        <span className="bg-green-100 text-green-800 px-1 rounded">Register</span>
+                      )}
+                      {file.shared && (
+                        <span className="bg-yellow-100 text-yellow-800 px-1 rounded">Shared</span>
+                      )}
                     </div>
                   </td>
                   <td className="px-4 py-2">
@@ -641,7 +683,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <input
                     type="text"
                     value={newFileData.sourcePath}
-                    onChange={(e) => setNewFileData(prev => ({ ...prev, sourcePath: e.target.value }))}
+                    onChange={e =>
+                      setNewFileData(prev => ({ ...prev, sourcePath: e.target.value }))
+                    }
                     className="w-full border rounded px-3 py-2"
                     placeholder="C:\\Path\\To\\File.exe"
                   />
@@ -651,7 +695,7 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <input
                     type="text"
                     value={newFileData.fileName}
-                    onChange={(e) => setNewFileData(prev => ({ ...prev, fileName: e.target.value }))}
+                    onChange={e => setNewFileData(prev => ({ ...prev, fileName: e.target.value }))}
                     className="w-full border rounded px-3 py-2"
                     placeholder="File.exe"
                   />
@@ -660,11 +704,15 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <label className="block text-sm font-medium mb-1">File Type:</label>
                   <select
                     value={newFileData.type}
-                    onChange={(e) => setNewFileData(prev => ({ ...prev, type: e.target.value as ComponentType }))}
+                    onChange={e =>
+                      setNewFileData(prev => ({ ...prev, type: e.target.value as ComponentType }))
+                    }
                     className="w-full border rounded px-3 py-2"
                   >
                     {Object.values(ComponentType).map(type => (
-                      <option key={type} value={type}>{type.replace('_', ' ').toUpperCase()}</option>
+                      <option key={type} value={type}>
+                        {type.replace('_', ' ').toUpperCase()}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -672,11 +720,18 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <label className="block text-sm font-medium mb-1">Install Location:</label>
                   <select
                     value={newFileData.location}
-                    onChange={(e) => setNewFileData(prev => ({ ...prev, location: e.target.value as InstallLocation }))}
+                    onChange={e =>
+                      setNewFileData(prev => ({
+                        ...prev,
+                        location: e.target.value as InstallLocation,
+                      }))
+                    }
                     className="w-full border rounded px-3 py-2"
                   >
                     {Object.values(InstallLocation).map(location => (
-                      <option key={location} value={location}>{location.replace('_', ' ').toUpperCase()}</option>
+                      <option key={location} value={location}>
+                        {location.replace('_', ' ').toUpperCase()}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -686,7 +741,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                     <input
                       type="text"
                       value={newFileData.customPath}
-                      onChange={(e) => setNewFileData(prev => ({ ...prev, customPath: e.target.value }))}
+                      onChange={e =>
+                        setNewFileData(prev => ({ ...prev, customPath: e.target.value }))
+                      }
                       className="w-full border rounded px-3 py-2"
                       placeholder="Custom install path"
                     />
@@ -698,30 +755,42 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                       type="checkbox"
                       id="compress"
                       checked={newFileData.compress}
-                      onChange={(e) => setNewFileData(prev => ({ ...prev, compress: e.target.checked }))}
+                      onChange={e =>
+                        setNewFileData(prev => ({ ...prev, compress: e.target.checked }))
+                      }
                       className="mr-2"
                     />
-                    <label htmlFor="compress" className="text-sm">Compress File</label>
+                    <label htmlFor="compress" className="text-sm">
+                      Compress File
+                    </label>
                   </div>
                   <div className="flex items-center">
                     <input
                       type="checkbox"
                       id="register"
                       checked={newFileData.register}
-                      onChange={(e) => setNewFileData(prev => ({ ...prev, register: e.target.checked }))}
+                      onChange={e =>
+                        setNewFileData(prev => ({ ...prev, register: e.target.checked }))
+                      }
                       className="mr-2"
                     />
-                    <label htmlFor="register" className="text-sm">Register Component</label>
+                    <label htmlFor="register" className="text-sm">
+                      Register Component
+                    </label>
                   </div>
                   <div className="flex items-center">
                     <input
                       type="checkbox"
                       id="shared"
                       checked={newFileData.shared}
-                      onChange={(e) => setNewFileData(prev => ({ ...prev, shared: e.target.checked }))}
+                      onChange={e =>
+                        setNewFileData(prev => ({ ...prev, shared: e.target.checked }))
+                      }
                       className="mr-2"
                     />
-                    <label htmlFor="shared" className="text-sm">Shared File</label>
+                    <label htmlFor="shared" className="text-sm">
+                      Shared File
+                    </label>
                   </div>
                 </div>
               </div>
@@ -784,18 +853,23 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
               </tr>
             </thead>
             <tbody>
-              {currentProject.dependencies.map((dep) => (
+              {currentProject.dependencies.map(dep => (
                 <tr key={dep.id}>
                   <td className="px-4 py-2 font-medium">{dep.name}</td>
                   <td className="px-4 py-2">{dep.type.replace('_', ' ').toUpperCase()}</td>
                   <td className="px-4 py-2">{dep.version || 'Unknown'}</td>
                   <td className="px-4 py-2">
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      dep.status === 'found' ? 'bg-green-100 text-green-800' :
-                      dep.status === 'missing' ? 'bg-red-100 text-red-800' :
-                      dep.status === 'outdated' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded text-xs ${
+                        dep.status === 'found'
+                          ? 'bg-green-100 text-green-800'
+                          : dep.status === 'missing'
+                            ? 'bg-red-100 text-red-800'
+                            : dep.status === 'outdated'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
                       {dep.status.toUpperCase()}
                     </span>
                   </td>
@@ -867,17 +941,23 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
               </tr>
             </thead>
             <tbody>
-              {currentProject.registryEntries.map((entry) => (
+              {currentProject.registryEntries.map(entry => (
                 <tr key={entry.id}>
                   <td className="px-4 py-2 font-medium">{entry.root.split('_')[1]}</td>
-                  <td className="px-4 py-2 truncate max-w-xs" title={entry.keyPath}>{entry.keyPath}</td>
+                  <td className="px-4 py-2 truncate max-w-xs" title={entry.keyPath}>
+                    {entry.keyPath}
+                  </td>
                   <td className="px-4 py-2">{entry.valueName}</td>
-                  <td className="px-4 py-2 truncate max-w-xs" title={entry.valueData}>{entry.valueData}</td>
+                  <td className="px-4 py-2 truncate max-w-xs" title={entry.valueData}>
+                    {entry.valueData}
+                  </td>
                   <td className="px-4 py-2">{entry.valueType.toUpperCase()}</td>
                   <td className="px-4 py-2">
                     <button
                       onClick={() => {
-                        const entryIndex = currentProject.registryEntries.findIndex(e => e.id === entry.id);
+                        const entryIndex = currentProject.registryEntries.findIndex(
+                          e => e.id === entry.id
+                        );
                         if (entryIndex >= 0) {
                           currentProject.registryEntries.splice(entryIndex, 1);
                           refreshData();
@@ -904,11 +984,18 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <label className="block text-sm font-medium mb-1">Root Key:</label>
                   <select
                     value={newRegistryData.root}
-                    onChange={(e) => setNewRegistryData(prev => ({ ...prev, root: e.target.value as RegistryRoot }))}
+                    onChange={e =>
+                      setNewRegistryData(prev => ({
+                        ...prev,
+                        root: e.target.value as RegistryRoot,
+                      }))
+                    }
                     className="w-full border rounded px-3 py-2"
                   >
                     {Object.values(RegistryRoot).map(root => (
-                      <option key={root} value={root}>{root}</option>
+                      <option key={root} value={root}>
+                        {root}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -917,7 +1004,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <input
                     type="text"
                     value={newRegistryData.keyPath}
-                    onChange={(e) => setNewRegistryData(prev => ({ ...prev, keyPath: e.target.value }))}
+                    onChange={e =>
+                      setNewRegistryData(prev => ({ ...prev, keyPath: e.target.value }))
+                    }
                     className="w-full border rounded px-3 py-2"
                     placeholder="SOFTWARE\\Company\\Application"
                   />
@@ -927,7 +1016,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <input
                     type="text"
                     value={newRegistryData.valueName}
-                    onChange={(e) => setNewRegistryData(prev => ({ ...prev, valueName: e.target.value }))}
+                    onChange={e =>
+                      setNewRegistryData(prev => ({ ...prev, valueName: e.target.value }))
+                    }
                     className="w-full border rounded px-3 py-2"
                     placeholder="InstallPath"
                   />
@@ -937,7 +1028,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <input
                     type="text"
                     value={newRegistryData.valueData}
-                    onChange={(e) => setNewRegistryData(prev => ({ ...prev, valueData: e.target.value }))}
+                    onChange={e =>
+                      setNewRegistryData(prev => ({ ...prev, valueData: e.target.value }))
+                    }
                     className="w-full border rounded px-3 py-2"
                     placeholder="C:\\Program Files\\MyApp"
                   />
@@ -946,7 +1039,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <label className="block text-sm font-medium mb-1">Value Type:</label>
                   <select
                     value={newRegistryData.valueType}
-                    onChange={(e) => setNewRegistryData(prev => ({ ...prev, valueType: e.target.value as any }))}
+                    onChange={e =>
+                      setNewRegistryData(prev => ({ ...prev, valueType: e.target.value as any }))
+                    }
                     className="w-full border rounded px-3 py-2"
                   >
                     <option value="string">String</option>
@@ -960,7 +1055,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <input
                     type="text"
                     value={newRegistryData.description}
-                    onChange={(e) => setNewRegistryData(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={e =>
+                      setNewRegistryData(prev => ({ ...prev, description: e.target.value }))
+                    }
                     className="w-full border rounded px-3 py-2"
                     placeholder="Registry entry description"
                   />
@@ -971,30 +1068,45 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                       type="checkbox"
                       id="createKey"
                       checked={newRegistryData.createKey}
-                      onChange={(e) => setNewRegistryData(prev => ({ ...prev, createKey: e.target.checked }))}
+                      onChange={e =>
+                        setNewRegistryData(prev => ({ ...prev, createKey: e.target.checked }))
+                      }
                       className="mr-2"
                     />
-                    <label htmlFor="createKey" className="text-sm">Create Key if Missing</label>
+                    <label htmlFor="createKey" className="text-sm">
+                      Create Key if Missing
+                    </label>
                   </div>
                   <div className="flex items-center">
                     <input
                       type="checkbox"
                       id="overwriteValue"
                       checked={newRegistryData.overwriteValue}
-                      onChange={(e) => setNewRegistryData(prev => ({ ...prev, overwriteValue: e.target.checked }))}
+                      onChange={e =>
+                        setNewRegistryData(prev => ({ ...prev, overwriteValue: e.target.checked }))
+                      }
                       className="mr-2"
                     />
-                    <label htmlFor="overwriteValue" className="text-sm">Overwrite Existing Value</label>
+                    <label htmlFor="overwriteValue" className="text-sm">
+                      Overwrite Existing Value
+                    </label>
                   </div>
                   <div className="flex items-center">
                     <input
                       type="checkbox"
                       id="removeOnUninstall"
                       checked={newRegistryData.removeOnUninstall}
-                      onChange={(e) => setNewRegistryData(prev => ({ ...prev, removeOnUninstall: e.target.checked }))}
+                      onChange={e =>
+                        setNewRegistryData(prev => ({
+                          ...prev,
+                          removeOnUninstall: e.target.checked,
+                        }))
+                      }
                       className="mr-2"
                     />
-                    <label htmlFor="removeOnUninstall" className="text-sm">Remove on Uninstall</label>
+                    <label htmlFor="removeOnUninstall" className="text-sm">
+                      Remove on Uninstall
+                    </label>
                   </div>
                 </div>
               </div>
@@ -1055,16 +1167,20 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
               </tr>
             </thead>
             <tbody>
-              {currentProject.shortcuts.map((shortcut) => (
+              {currentProject.shortcuts.map(shortcut => (
                 <tr key={shortcut.id}>
                   <td className="px-4 py-2 font-medium">{shortcut.name}</td>
-                  <td className="px-4 py-2 truncate max-w-xs" title={shortcut.targetPath}>{shortcut.targetPath}</td>
+                  <td className="px-4 py-2 truncate max-w-xs" title={shortcut.targetPath}>
+                    {shortcut.targetPath}
+                  </td>
                   <td className="px-4 py-2">{shortcut.location.replace('_', ' ').toUpperCase()}</td>
                   <td className="px-4 py-2">{shortcut.arguments || '-'}</td>
                   <td className="px-4 py-2">
                     <button
                       onClick={() => {
-                        const shortcutIndex = currentProject.shortcuts.findIndex(s => s.id === shortcut.id);
+                        const shortcutIndex = currentProject.shortcuts.findIndex(
+                          s => s.id === shortcut.id
+                        );
                         if (shortcutIndex >= 0) {
                           currentProject.shortcuts.splice(shortcutIndex, 1);
                           refreshData();
@@ -1092,7 +1208,7 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <input
                     type="text"
                     value={newShortcutData.name}
-                    onChange={(e) => setNewShortcutData(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={e => setNewShortcutData(prev => ({ ...prev, name: e.target.value }))}
                     className="w-full border rounded px-3 py-2"
                     placeholder="My Application"
                   />
@@ -1102,7 +1218,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <input
                     type="text"
                     value={newShortcutData.targetPath}
-                    onChange={(e) => setNewShortcutData(prev => ({ ...prev, targetPath: e.target.value }))}
+                    onChange={e =>
+                      setNewShortcutData(prev => ({ ...prev, targetPath: e.target.value }))
+                    }
                     className="w-full border rounded px-3 py-2"
                     placeholder="[APPDIR]\\MyApp.exe"
                   />
@@ -1111,7 +1229,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <label className="block text-sm font-medium mb-1">Location:</label>
                   <select
                     value={newShortcutData.location}
-                    onChange={(e) => setNewShortcutData(prev => ({ ...prev, location: e.target.value as any }))}
+                    onChange={e =>
+                      setNewShortcutData(prev => ({ ...prev, location: e.target.value as any }))
+                    }
                     className="w-full border rounded px-3 py-2"
                   >
                     <option value="desktop">Desktop</option>
@@ -1127,7 +1247,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                     <input
                       type="text"
                       value={newShortcutData.customPath}
-                      onChange={(e) => setNewShortcutData(prev => ({ ...prev, customPath: e.target.value }))}
+                      onChange={e =>
+                        setNewShortcutData(prev => ({ ...prev, customPath: e.target.value }))
+                      }
                       className="w-full border rounded px-3 py-2"
                       placeholder="Custom shortcut path"
                     />
@@ -1138,7 +1260,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <input
                     type="text"
                     value={newShortcutData.arguments}
-                    onChange={(e) => setNewShortcutData(prev => ({ ...prev, arguments: e.target.value }))}
+                    onChange={e =>
+                      setNewShortcutData(prev => ({ ...prev, arguments: e.target.value }))
+                    }
                     className="w-full border rounded px-3 py-2"
                     placeholder="Command line arguments (optional)"
                   />
@@ -1148,7 +1272,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                   <input
                     type="text"
                     value={newShortcutData.description}
-                    onChange={(e) => setNewShortcutData(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={e =>
+                      setNewShortcutData(prev => ({ ...prev, description: e.target.value }))
+                    }
                     className="w-full border rounded px-3 py-2"
                     placeholder="Shortcut description"
                   />
@@ -1159,20 +1285,28 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                       type="checkbox"
                       id="runMinimized"
                       checked={newShortcutData.runMinimized}
-                      onChange={(e) => setNewShortcutData(prev => ({ ...prev, runMinimized: e.target.checked }))}
+                      onChange={e =>
+                        setNewShortcutData(prev => ({ ...prev, runMinimized: e.target.checked }))
+                      }
                       className="mr-2"
                     />
-                    <label htmlFor="runMinimized" className="text-sm">Run Minimized</label>
+                    <label htmlFor="runMinimized" className="text-sm">
+                      Run Minimized
+                    </label>
                   </div>
                   <div className="flex items-center">
                     <input
                       type="checkbox"
                       id="runMaximized"
                       checked={newShortcutData.runMaximized}
-                      onChange={(e) => setNewShortcutData(prev => ({ ...prev, runMaximized: e.target.checked }))}
+                      onChange={e =>
+                        setNewShortcutData(prev => ({ ...prev, runMaximized: e.target.checked }))
+                      }
                       className="mr-2"
                     />
-                    <label htmlFor="runMaximized" className="text-sm">Run Maximized</label>
+                    <label htmlFor="runMaximized" className="text-sm">
+                      Run Maximized
+                    </label>
                   </div>
                 </div>
               </div>
@@ -1240,9 +1374,11 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                 </ul>
               </div>
             )}
-            {validation.valid && validation.errors.length === 0 && validation.warnings.length === 0 && (
-              <div className="text-green-600">✓ Project is ready for building</div>
-            )}
+            {validation.valid &&
+              validation.errors.length === 0 &&
+              validation.warnings.length === 0 && (
+                <div className="text-green-600">✓ Project is ready for building</div>
+              )}
           </div>
         )}
 
@@ -1250,12 +1386,26 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
         <div className="border rounded-lg p-4">
           <h4 className="font-semibold mb-2">Build Options</h4>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div><strong>Package Type:</strong> {currentProject.packageType.replace('_', ' ').toUpperCase()}</div>
-            <div><strong>Distribution:</strong> {currentProject.distributionMedia.replace('_', ' ').toUpperCase()}</div>
-            <div><strong>Compression:</strong> Level {currentProject.compressionLevel}</div>
-            <div><strong>Output Folder:</strong> {currentProject.outputFolder}</div>
-            <div><strong>Create Uninstaller:</strong> {currentProject.createUninstaller ? 'Yes' : 'No'}</div>
-            <div><strong>Required Space:</strong> {(currentProject.requiredSpace / 1024).toFixed(1)} MB</div>
+            <div>
+              <strong>Package Type:</strong>{' '}
+              {currentProject.packageType.replace('_', ' ').toUpperCase()}
+            </div>
+            <div>
+              <strong>Distribution:</strong>{' '}
+              {currentProject.distributionMedia.replace('_', ' ').toUpperCase()}
+            </div>
+            <div>
+              <strong>Compression:</strong> Level {currentProject.compressionLevel}
+            </div>
+            <div>
+              <strong>Output Folder:</strong> {currentProject.outputFolder}
+            </div>
+            <div>
+              <strong>Create Uninstaller:</strong> {currentProject.createUninstaller ? 'Yes' : 'No'}
+            </div>
+            <div>
+              <strong>Required Space:</strong> {(currentProject.requiredSpace / 1024).toFixed(1)} MB
+            </div>
           </div>
         </div>
 
@@ -1274,7 +1424,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
         {buildResult && (
           <div className="border rounded-lg p-4">
             <h4 className="font-semibold mb-2">Build Results</h4>
-            <div className={`p-3 rounded ${buildResult.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            <div
+              className={`p-3 rounded ${buildResult.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+            >
               <div className="font-medium">
                 {buildResult.success ? '✓ Build Successful' : '✗ Build Failed'}
               </div>
@@ -1282,13 +1434,24 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                 <div className="text-sm mt-1">Package created: {buildResult.packagePath}</div>
               )}
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
-              <div><strong>Build Time:</strong> {buildResult.buildTime}ms</div>
-              <div><strong>Package Size:</strong> {(buildResult.setupSize / 1024).toFixed(1)} KB</div>
-              <div><strong>Files Included:</strong> {buildResult.filesIncluded}</div>
-              <div><strong>Dependencies Resolved:</strong> {buildResult.dependenciesResolved}</div>
-              <div><strong>Compression Ratio:</strong> {(buildResult.compressionRatio * 100).toFixed(1)}%</div>
+              <div>
+                <strong>Build Time:</strong> {buildResult.buildTime}ms
+              </div>
+              <div>
+                <strong>Package Size:</strong> {(buildResult.setupSize / 1024).toFixed(1)} KB
+              </div>
+              <div>
+                <strong>Files Included:</strong> {buildResult.filesIncluded}
+              </div>
+              <div>
+                <strong>Dependencies Resolved:</strong> {buildResult.dependenciesResolved}
+              </div>
+              <div>
+                <strong>Compression Ratio:</strong>{' '}
+                {(buildResult.compressionRatio * 100).toFixed(1)}%
+              </div>
             </div>
 
             {buildResult.errors.length > 0 && (
@@ -1344,16 +1507,20 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
             </tr>
           </thead>
           <tbody>
-            {deploymentTargets.map((target) => (
+            {deploymentTargets.map(target => (
               <tr key={target.id}>
                 <td className="px-4 py-2 font-medium">{target.name}</td>
                 <td className="px-4 py-2">{target.type.toUpperCase()}</td>
                 <td className="px-4 py-2">{target.serverUrl || target.remotePath || '-'}</td>
-                <td className="px-4 py-2">{target.lastDeployed?.toLocaleDateString() || 'Never'}</td>
+                <td className="px-4 py-2">
+                  {target.lastDeployed?.toLocaleDateString() || 'Never'}
+                </td>
                 <td className="px-4 py-2">{target.deployCount}</td>
                 <td className="px-4 py-2">
                   <button
-                    onClick={() => buildResult?.packagePath && handleDeploy(buildResult.packagePath, target.id)}
+                    onClick={() =>
+                      buildResult?.packagePath && handleDeploy(buildResult.packagePath, target.id)
+                    }
                     className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
                     disabled={!buildResult?.success || loading}
                   >
@@ -1383,7 +1550,7 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                 <input
                   type="text"
                   value={newDeploymentData.name}
-                  onChange={(e) => setNewDeploymentData(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => setNewDeploymentData(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full border rounded px-3 py-2"
                   placeholder="Production Server"
                 />
@@ -1392,7 +1559,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                 <label className="block text-sm font-medium mb-1">Deployment Type:</label>
                 <select
                   value={newDeploymentData.type}
-                  onChange={(e) => setNewDeploymentData(prev => ({ ...prev, type: e.target.value as any }))}
+                  onChange={e =>
+                    setNewDeploymentData(prev => ({ ...prev, type: e.target.value as any }))
+                  }
                   className="w-full border rounded px-3 py-2"
                 >
                   <option value="ftp">FTP Server</option>
@@ -1409,7 +1578,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                     <input
                       type="text"
                       value={newDeploymentData.serverUrl}
-                      onChange={(e) => setNewDeploymentData(prev => ({ ...prev, serverUrl: e.target.value }))}
+                      onChange={e =>
+                        setNewDeploymentData(prev => ({ ...prev, serverUrl: e.target.value }))
+                      }
                       className="w-full border rounded px-3 py-2"
                       placeholder="ftp://server.com or http://server.com"
                     />
@@ -1419,7 +1590,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                     <input
                       type="text"
                       value={newDeploymentData.username}
-                      onChange={(e) => setNewDeploymentData(prev => ({ ...prev, username: e.target.value }))}
+                      onChange={e =>
+                        setNewDeploymentData(prev => ({ ...prev, username: e.target.value }))
+                      }
                       className="w-full border rounded px-3 py-2"
                     />
                   </div>
@@ -1428,7 +1601,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                     <input
                       type="password"
                       value={newDeploymentData.password}
-                      onChange={(e) => setNewDeploymentData(prev => ({ ...prev, password: e.target.value }))}
+                      onChange={e =>
+                        setNewDeploymentData(prev => ({ ...prev, password: e.target.value }))
+                      }
                       className="w-full border rounded px-3 py-2"
                     />
                   </div>
@@ -1439,7 +1614,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                 <input
                   type="text"
                   value={newDeploymentData.remotePath}
-                  onChange={(e) => setNewDeploymentData(prev => ({ ...prev, remotePath: e.target.value }))}
+                  onChange={e =>
+                    setNewDeploymentData(prev => ({ ...prev, remotePath: e.target.value }))
+                  }
                   className="w-full border rounded px-3 py-2"
                   placeholder="/public_html/downloads"
                 />
@@ -1450,30 +1627,45 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
                     type="checkbox"
                     id="testConnection"
                     checked={newDeploymentData.testConnection}
-                    onChange={(e) => setNewDeploymentData(prev => ({ ...prev, testConnection: e.target.checked }))}
+                    onChange={e =>
+                      setNewDeploymentData(prev => ({ ...prev, testConnection: e.target.checked }))
+                    }
                     className="mr-2"
                   />
-                  <label htmlFor="testConnection" className="text-sm">Test Connection Before Deploy</label>
+                  <label htmlFor="testConnection" className="text-sm">
+                    Test Connection Before Deploy
+                  </label>
                 </div>
                 <div className="flex items-center">
                   <input
                     type="checkbox"
                     id="overwriteExisting"
                     checked={newDeploymentData.overwriteExisting}
-                    onChange={(e) => setNewDeploymentData(prev => ({ ...prev, overwriteExisting: e.target.checked }))}
+                    onChange={e =>
+                      setNewDeploymentData(prev => ({
+                        ...prev,
+                        overwriteExisting: e.target.checked,
+                      }))
+                    }
                     className="mr-2"
                   />
-                  <label htmlFor="overwriteExisting" className="text-sm">Overwrite Existing Files</label>
+                  <label htmlFor="overwriteExisting" className="text-sm">
+                    Overwrite Existing Files
+                  </label>
                 </div>
                 <div className="flex items-center">
                   <input
                     type="checkbox"
                     id="createBackup"
                     checked={newDeploymentData.createBackup}
-                    onChange={(e) => setNewDeploymentData(prev => ({ ...prev, createBackup: e.target.checked }))}
+                    onChange={e =>
+                      setNewDeploymentData(prev => ({ ...prev, createBackup: e.target.checked }))
+                    }
                     className="mr-2"
                   />
-                  <label htmlFor="createBackup" className="text-sm">Create Backup</label>
+                  <label htmlFor="createBackup" className="text-sm">
+                    Create Backup
+                  </label>
                 </div>
               </div>
             </div>
@@ -1500,7 +1692,7 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
 
   const renderStatistics = () => {
     const stats = VB6PackageWizardInstance.getPackageStats();
-    
+
     return (
       <div className="mt-6 p-4 bg-gray-50 rounded-lg">
         <h4 className="font-semibold mb-2">Package & Deployment Statistics</h4>
@@ -1515,7 +1707,9 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
           </div>
           <div>
             <div className="font-medium">Avg Package Size</div>
-            <div className="text-lg text-purple-600">{(stats.averagePackageSize / 1024).toFixed(1)} KB</div>
+            <div className="text-lg text-purple-600">
+              {(stats.averagePackageSize / 1024).toFixed(1)} KB
+            </div>
           </div>
           <div>
             <div className="font-medium">Dependencies</div>
@@ -1539,13 +1733,12 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
       <div className="flex justify-between items-center p-4 border-b bg-gray-50">
         <div>
           <h2 className="text-xl font-bold">VB6 Package & Deployment Wizard</h2>
-          <p className="text-sm text-gray-600">Create installation packages and deploy applications</p>
+          <p className="text-sm text-gray-600">
+            Create installation packages and deploy applications
+          </p>
         </div>
         {onClose && (
-          <button
-            onClick={onClose}
-            className="px-3 py-1 border rounded hover:bg-gray-100"
-          >
+          <button onClick={onClose} className="px-3 py-1 border rounded hover:bg-gray-100">
             Close
           </button>
         )}
@@ -1556,10 +1749,7 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
         <div className="mx-4 mt-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded">
           <div className="flex justify-between items-center">
             <span>{error}</span>
-            <button
-              onClick={() => setError(null)}
-              className="text-red-500 hover:text-red-700 ml-2"
-            >
+            <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700 ml-2">
               ×
             </button>
           </div>
@@ -1575,8 +1765,8 @@ export const VB6PackageWizardUI: React.FC<PackageWizardUIProps> = ({ onClose }) 
           { id: 'registry', label: 'Registry', icon: '🗃️' },
           { id: 'shortcuts', label: 'Shortcuts', icon: '🔗' },
           { id: 'build', label: 'Build', icon: '🔧' },
-          { id: 'deploy', label: 'Deploy', icon: '🚀' }
-        ].map((tab) => (
+          { id: 'deploy', label: 'Deploy', icon: '🚀' },
+        ].map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}

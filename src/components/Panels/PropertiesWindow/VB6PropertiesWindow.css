@@ -364,12 +364,12 @@
     background-color: #ffffff;
     color: #000000;
   }
-  
+
   .vb6-property-name {
     background-color: #ffffff;
     border-right: 2px solid #000000;
   }
-  
+
   .vb6-property-row.selected {
     background-color: #000000;
     color: #ffffff;
@@ -382,11 +382,11 @@
   .vb6-search-box {
     display: none;
   }
-  
+
   .vb6-properties-list {
     overflow: visible;
   }
-  
+
   .vb6-property-row {
     break-inside: avoid;
   }

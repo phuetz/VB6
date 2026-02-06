@@ -1,19 +1,42 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { 
-  X, Save, Play, Eye, Grid, ZoomIn, ZoomOut, Undo, Redo, 
-  Copy, Clipboard, Trash2, Settings, Database, FileText, 
-  Type, Hash, Calendar, Image, BarChart, Minus, Square,
-  Plus, Move, MousePointer, Layers, Ruler
+import {
+  X,
+  Save,
+  Play,
+  Eye,
+  Grid,
+  ZoomIn,
+  ZoomOut,
+  Undo,
+  Redo,
+  Copy,
+  Clipboard,
+  Trash2,
+  Settings,
+  Database,
+  FileText,
+  Type,
+  Hash,
+  Calendar,
+  Image,
+  BarChart,
+  Minus,
+  Square,
+  Plus,
+  Move,
+  MousePointer,
+  Layers,
+  Ruler,
 } from 'lucide-react';
-import { 
-  vb6ReportEngine, 
-  ReportDefinition, 
-  ReportSection, 
-  ReportField, 
-  ReportFieldType, 
-  ReportSectionType, 
-  TextAlignment, 
-  BorderStyle 
+import {
+  vb6ReportEngine,
+  ReportDefinition,
+  ReportSection,
+  ReportField,
+  ReportFieldType,
+  ReportSectionType,
+  TextAlignment,
+  BorderStyle,
 } from '../../services/VB6ReportEngine';
 
 interface ReportDesignerProps {
@@ -46,14 +69,14 @@ const FIELD_TOOLS = [
   { id: 'image', icon: Image, label: 'Image Field', type: ReportFieldType.Image },
   { id: 'barcode', icon: BarChart, label: 'Barcode Field', type: ReportFieldType.Barcode },
   { id: 'line', icon: Minus, label: 'Line', type: ReportFieldType.Line },
-  { id: 'box', icon: Square, label: 'Box', type: ReportFieldType.Box }
+  { id: 'box', icon: Square, label: 'Box', type: ReportFieldType.Box },
 ];
 
 export const ReportDesigner: React.FC<ReportDesignerProps> = ({
   visible,
   onClose,
   reportId,
-  onSave
+  onSave,
 }) => {
   const [report, setReport] = useState<ReportDefinition | null>(null);
   const [designerState, setDesignerState] = useState<DesignerState>({
@@ -67,7 +90,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
     snapToGrid: true,
     gridSize: 10,
     isDragging: false,
-    dragOffset: { x: 0, y: 0 }
+    dragOffset: { x: 0, y: 0 },
   });
   const [activeSection, setActiveSection] = useState<string>('details');
   const [showPreview, setShowPreview] = useState(false);
@@ -94,49 +117,55 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
   }, [visible, reportId]);
 
   // Add field to section
-  const addField = useCallback((sectionId: string, x: number, y: number, type: ReportFieldType) => {
-    if (!report) return;
+  const addField = useCallback(
+    (sectionId: string, x: number, y: number, type: ReportFieldType) => {
+      if (!report) return;
 
-    const section = report.sections.find(s => s.id === sectionId);
-    if (!section) return;
+      const section = report.sections.find(s => s.id === sectionId);
+      if (!section) return;
 
-    const field = vb6ReportEngine.createField(type, x, y);
-    section.fields.push(field);
+      const field = vb6ReportEngine.createField(type, x, y);
+      section.fields.push(field);
 
-    // Save to undo stack
-    const newReport = { ...report };
-    setDesignerState(prev => ({
-      ...prev,
-      undoStack: [...prev.undoStack, report],
-      redoStack: []
-    }));
+      // Save to undo stack
+      const newReport = { ...report };
+      setDesignerState(prev => ({
+        ...prev,
+        undoStack: [...prev.undoStack, report],
+        redoStack: [],
+      }));
 
-    setReport(newReport);
-    setSelectedField(field);
-    setDesignerState(prev => ({ ...prev, selectedElements: [field.id] }));
-  }, [report]);
+      setReport(newReport);
+      setSelectedField(field);
+      setDesignerState(prev => ({ ...prev, selectedElements: [field.id] }));
+    },
+    [report]
+  );
 
   // Handle canvas click
-  const handleCanvasClick = useCallback((e: React.MouseEvent, sectionId: string) => {
-    if (!report || designerState.selectedTool === 'select') return;
+  const handleCanvasClick = useCallback(
+    (e: React.MouseEvent, sectionId: string) => {
+      if (!report || designerState.selectedTool === 'select') return;
 
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / (designerState.zoom / 100);
-    const y = (e.clientY - rect.top) / (designerState.zoom / 100);
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / (designerState.zoom / 100);
+      const y = (e.clientY - rect.top) / (designerState.zoom / 100);
 
-    // Snap to grid if enabled
-    const snappedX = designerState.snapToGrid 
-      ? Math.round(x / designerState.gridSize) * designerState.gridSize 
-      : x;
-    const snappedY = designerState.snapToGrid 
-      ? Math.round(y / designerState.gridSize) * designerState.gridSize 
-      : y;
+      // Snap to grid if enabled
+      const snappedX = designerState.snapToGrid
+        ? Math.round(x / designerState.gridSize) * designerState.gridSize
+        : x;
+      const snappedY = designerState.snapToGrid
+        ? Math.round(y / designerState.gridSize) * designerState.gridSize
+        : y;
 
-    const tool = FIELD_TOOLS.find(t => t.id === designerState.selectedTool);
-    if (tool?.type) {
-      addField(sectionId, snappedX, snappedY, tool.type);
-    }
-  }, [report, designerState, addField]);
+      const tool = FIELD_TOOLS.find(t => t.id === designerState.selectedTool);
+      if (tool?.type) {
+        addField(sectionId, snappedX, snappedY, tool.type);
+      }
+    },
+    [report, designerState, addField]
+  );
 
   // Select field
   const selectField = useCallback((field: ReportField) => {
@@ -145,27 +174,30 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
   }, []);
 
   // Update field property
-  const updateField = useCallback((fieldId: string, updates: Partial<ReportField>) => {
-    if (!report) return;
+  const updateField = useCallback(
+    (fieldId: string, updates: Partial<ReportField>) => {
+      if (!report) return;
 
-    const newReport = { ...report };
-    let fieldFound = false;
+      const newReport = { ...report };
+      let fieldFound = false;
 
-    newReport.sections.forEach(section => {
-      const fieldIndex = section.fields.findIndex(f => f.id === fieldId);
-      if (fieldIndex >= 0) {
-        section.fields[fieldIndex] = { ...section.fields[fieldIndex], ...updates };
-        fieldFound = true;
+      newReport.sections.forEach(section => {
+        const fieldIndex = section.fields.findIndex(f => f.id === fieldId);
+        if (fieldIndex >= 0) {
+          section.fields[fieldIndex] = { ...section.fields[fieldIndex], ...updates };
+          fieldFound = true;
+        }
+      });
+
+      if (fieldFound) {
+        setReport(newReport);
+        if (selectedField?.id === fieldId) {
+          setSelectedField({ ...selectedField, ...updates });
+        }
       }
-    });
-
-    if (fieldFound) {
-      setReport(newReport);
-      if (selectedField?.id === fieldId) {
-        setSelectedField({ ...selectedField, ...updates });
-      }
-    }
-  }, [report, selectedField]);
+    },
+    [report, selectedField]
+  );
 
   // Delete selected field
   const deleteSelectedField = useCallback(() => {
@@ -200,7 +232,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
       ...fieldToCopy,
       id: `field_${Date.now()}_${Math.random()}`,
       x: fieldToCopy.x + 10,
-      y: fieldToCopy.y + 10
+      y: fieldToCopy.y + 10,
     };
 
     section.fields.push(newField);
@@ -223,15 +255,17 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
   }, [report]);
 
   // Zoom functions
-  const zoomIn = () => setDesignerState(prev => ({ 
-    ...prev, 
-    zoom: Math.min(prev.zoom + 25, 400) 
-  }));
-  
-  const zoomOut = () => setDesignerState(prev => ({ 
-    ...prev, 
-    zoom: Math.max(prev.zoom - 25, 25) 
-  }));
+  const zoomIn = () =>
+    setDesignerState(prev => ({
+      ...prev,
+      zoom: Math.min(prev.zoom + 25, 400),
+    }));
+
+  const zoomOut = () =>
+    setDesignerState(prev => ({
+      ...prev,
+      zoom: Math.max(prev.zoom - 25, 25),
+    }));
 
   // Render section
   const renderSection = (section: ReportSection) => (
@@ -240,14 +274,15 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
       className={`relative border-b border-gray-300 ${
         activeSection === section.id ? 'bg-blue-50' : 'bg-white'
       }`}
-      style={{ 
+      style={{
         height: `${section.height * (designerState.zoom / 100)}px`,
-        backgroundColor: section.backgroundColor !== 'transparent' ? section.backgroundColor : undefined
+        backgroundColor:
+          section.backgroundColor !== 'transparent' ? section.backgroundColor : undefined,
       }}
-      onClick={(e) => handleCanvasClick(e, section.id)}
+      onClick={e => handleCanvasClick(e, section.id)}
     >
       {/* Section Header */}
-      <div 
+      <div
         className="absolute -left-32 top-0 w-32 h-full bg-gray-100 border-r border-gray-300 flex items-center justify-center cursor-pointer"
         onClick={() => setActiveSection(section.id)}
       >
@@ -258,14 +293,14 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
 
       {/* Grid */}
       {designerState.showGrid && (
-        <div 
+        <div
           className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage: `
               linear-gradient(to right, #e5e5e5 1px, transparent 1px),
               linear-gradient(to bottom, #e5e5e5 1px, transparent 1px)
             `,
-            backgroundSize: `${designerState.gridSize * (designerState.zoom / 100)}px ${designerState.gridSize * (designerState.zoom / 100)}px`
+            backgroundSize: `${designerState.gridSize * (designerState.zoom / 100)}px ${designerState.gridSize * (designerState.zoom / 100)}px`,
           }}
         />
       )}
@@ -275,8 +310,8 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
         <div
           key={field.id}
           className={`absolute border cursor-pointer ${
-            selectedField?.id === field.id 
-              ? 'border-blue-500 bg-blue-50' 
+            selectedField?.id === field.id
+              ? 'border-blue-500 bg-blue-50'
               : 'border-gray-400 hover:border-gray-600'
           }`}
           style={{
@@ -290,16 +325,17 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
             fontStyle: field.formatting.fontStyle,
             textDecoration: field.formatting.textDecoration,
             color: field.formatting.color,
-            backgroundColor: field.formatting.backgroundColor !== 'transparent' 
-              ? field.formatting.backgroundColor 
-              : undefined,
+            backgroundColor:
+              field.formatting.backgroundColor !== 'transparent'
+                ? field.formatting.backgroundColor
+                : undefined,
             textAlign: field.formatting.alignment,
             borderStyle: field.formatting.borderStyle,
             borderColor: field.formatting.borderColor,
             borderWidth: field.formatting.borderWidth,
-            padding: field.formatting.padding
+            padding: field.formatting.padding,
           }}
-          onClick={(e) => {
+          onClick={e => {
             e.stopPropagation();
             selectField(field);
           }}
@@ -307,7 +343,8 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
           <div className="truncate">
             {field.type === ReportFieldType.Text && (field.value || 'Text Field')}
             {field.type === ReportFieldType.Number && (field.value || '0')}
-            {field.type === ReportFieldType.Date && (field.value || new Date().toLocaleDateString())}
+            {field.type === ReportFieldType.Date &&
+              (field.value || new Date().toLocaleDateString())}
             {field.type === ReportFieldType.Formula && (field.formula || '{Formula}')}
             {field.type === ReportFieldType.Image && '[Image]'}
             {field.type === ReportFieldType.Barcode && '[Barcode]'}
@@ -333,7 +370,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
   const renderPropertiesPanel = () => (
     <div className="w-64 bg-white border-l border-gray-200 p-4 overflow-y-auto">
       <h3 className="text-sm font-semibold text-gray-800 mb-4">Properties</h3>
-      
+
       {selectedField ? (
         <div className="space-y-4">
           <div>
@@ -341,7 +378,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
             <input
               type="text"
               value={selectedField.name}
-              onChange={(e) => updateField(selectedField.id, { name: e.target.value })}
+              onChange={e => updateField(selectedField.id, { name: e.target.value })}
               className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
             />
           </div>
@@ -351,7 +388,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
             <input
               type="text"
               value={String(selectedField.value || '')}
-              onChange={(e) => updateField(selectedField.id, { value: e.target.value })}
+              onChange={e => updateField(selectedField.id, { value: e.target.value })}
               className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
             />
           </div>
@@ -362,7 +399,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
               <input
                 type="number"
                 value={selectedField.x}
-                onChange={(e) => updateField(selectedField.id, { x: Number(e.target.value) })}
+                onChange={e => updateField(selectedField.id, { x: Number(e.target.value) })}
                 className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
               />
             </div>
@@ -371,7 +408,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
               <input
                 type="number"
                 value={selectedField.y}
-                onChange={(e) => updateField(selectedField.id, { y: Number(e.target.value) })}
+                onChange={e => updateField(selectedField.id, { y: Number(e.target.value) })}
                 className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
               />
             </div>
@@ -383,7 +420,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
               <input
                 type="number"
                 value={selectedField.width}
-                onChange={(e) => updateField(selectedField.id, { width: Number(e.target.value) })}
+                onChange={e => updateField(selectedField.id, { width: Number(e.target.value) })}
                 className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
               />
             </div>
@@ -392,7 +429,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
               <input
                 type="number"
                 value={selectedField.height}
-                onChange={(e) => updateField(selectedField.id, { height: Number(e.target.value) })}
+                onChange={e => updateField(selectedField.id, { height: Number(e.target.value) })}
                 className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
               />
             </div>
@@ -402,9 +439,11 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
             <label className="block text-xs font-medium text-gray-700 mb-1">Font Family</label>
             <select
               value={selectedField.formatting.fontFamily}
-              onChange={(e) => updateField(selectedField.id, { 
-                formatting: { ...selectedField.formatting, fontFamily: e.target.value }
-              })}
+              onChange={e =>
+                updateField(selectedField.id, {
+                  formatting: { ...selectedField.formatting, fontFamily: e.target.value },
+                })
+              }
               className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
             >
               <option value="Arial">Arial</option>
@@ -419,9 +458,11 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
             <input
               type="number"
               value={selectedField.formatting.fontSize}
-              onChange={(e) => updateField(selectedField.id, { 
-                formatting: { ...selectedField.formatting, fontSize: Number(e.target.value) }
-              })}
+              onChange={e =>
+                updateField(selectedField.id, {
+                  formatting: { ...selectedField.formatting, fontSize: Number(e.target.value) },
+                })
+              }
               className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
             />
           </div>
@@ -431,9 +472,11 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
             <input
               type="color"
               value={selectedField.formatting.color}
-              onChange={(e) => updateField(selectedField.id, { 
-                formatting: { ...selectedField.formatting, color: e.target.value }
-              })}
+              onChange={e =>
+                updateField(selectedField.id, {
+                  formatting: { ...selectedField.formatting, color: e.target.value },
+                })
+              }
               className="w-full h-8 border border-gray-300 rounded"
             />
           </div>
@@ -442,9 +485,14 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
             <label className="block text-xs font-medium text-gray-700 mb-1">Alignment</label>
             <select
               value={selectedField.formatting.alignment}
-              onChange={(e) => updateField(selectedField.id, { 
-                formatting: { ...selectedField.formatting, alignment: e.target.value as TextAlignment }
-              })}
+              onChange={e =>
+                updateField(selectedField.id, {
+                  formatting: {
+                    ...selectedField.formatting,
+                    alignment: e.target.value as TextAlignment,
+                  },
+                })
+              }
               className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
             >
               <option value={TextAlignment.Left}>Left</option>
@@ -458,12 +506,14 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
             <input
               type="checkbox"
               checked={selectedField.formatting.fontWeight === 'bold'}
-              onChange={(e) => updateField(selectedField.id, { 
-                formatting: { 
-                  ...selectedField.formatting, 
-                  fontWeight: e.target.checked ? 'bold' : 'normal' 
-                }
-              })}
+              onChange={e =>
+                updateField(selectedField.id, {
+                  formatting: {
+                    ...selectedField.formatting,
+                    fontWeight: e.target.checked ? 'bold' : 'normal',
+                  },
+                })
+              }
               className="rounded"
             />
             <label className="text-xs text-gray-700">Bold</label>
@@ -473,21 +523,21 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
             <input
               type="checkbox"
               checked={selectedField.formatting.fontStyle === 'italic'}
-              onChange={(e) => updateField(selectedField.id, { 
-                formatting: { 
-                  ...selectedField.formatting, 
-                  fontStyle: e.target.checked ? 'italic' : 'normal' 
-                }
-              })}
+              onChange={e =>
+                updateField(selectedField.id, {
+                  formatting: {
+                    ...selectedField.formatting,
+                    fontStyle: e.target.checked ? 'italic' : 'normal',
+                  },
+                })
+              }
               className="rounded"
             />
             <label className="text-xs text-gray-700">Italic</label>
           </div>
         </div>
       ) : (
-        <div className="text-xs text-gray-500">
-          Select a field to edit properties
-        </div>
+        <div className="text-xs text-gray-500">Select a field to edit properties</div>
       )}
     </div>
   );
@@ -557,26 +607,18 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Toolbar */}
             <div className="h-12 bg-gray-50 border-b border-gray-200 flex items-center px-4 gap-2">
-              <button
-                onClick={zoomOut}
-                className="p-1 hover:bg-gray-200 rounded"
-                title="Zoom Out"
-              >
+              <button onClick={zoomOut} className="p-1 hover:bg-gray-200 rounded" title="Zoom Out">
                 <ZoomOut size={16} />
               </button>
               <span className="text-sm text-gray-600 min-w-[60px] text-center">
                 {designerState.zoom}%
               </span>
-              <button
-                onClick={zoomIn}
-                className="p-1 hover:bg-gray-200 rounded"
-                title="Zoom In"
-              >
+              <button onClick={zoomIn} className="p-1 hover:bg-gray-200 rounded" title="Zoom In">
                 <ZoomIn size={16} />
               </button>
-              
+
               <div className="w-px h-6 bg-gray-300 mx-2" />
-              
+
               <button
                 onClick={() => setDesignerState(prev => ({ ...prev, showGrid: !prev.showGrid }))}
                 className={`p-1 rounded ${designerState.showGrid ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-200'}`}
@@ -630,10 +672,10 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
                       <div
                         key={i}
                         className="absolute border-l border-gray-400"
-                        style={{ 
+                        style={{
                           left: `${i * 10 * (designerState.zoom / 100)}px`,
                           height: i % 5 === 0 ? '100%' : '50%',
-                          borderColor: i % 10 === 0 ? '#666' : '#999'
+                          borderColor: i % 10 === 0 ? '#666' : '#999',
                         }}
                       />
                     ))}

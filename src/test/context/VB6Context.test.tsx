@@ -47,14 +47,14 @@ interface VB6ContextState {
   gridSize: number;
   snapToGrid: boolean;
   showGrid: boolean;
-  
+
   // Project state
   project: {
     name: string;
     path: string;
     modified: boolean;
   } | null;
-  
+
   // IDE state
   activeTab: string | null;
   panels: {
@@ -63,17 +63,17 @@ interface VB6ContextState {
     projectExplorer: boolean;
     codeEditor: boolean;
   };
-  
+
   // Undo/Redo
   history: VB6ContextState[];
   historyIndex: number;
-  
+
   // Loading states
   isLoading: boolean;
   error: string | null;
 }
 
-type VB6Action = 
+type VB6Action =
   | { type: 'SET_CURRENT_FORM'; payload: VB6Form | null }
   | { type: 'ADD_FORM'; payload: VB6Form }
   | { type: 'UPDATE_FORM'; payload: { id: string; updates: Partial<VB6Form> } }
@@ -105,13 +105,13 @@ type VB6Action =
 interface VB6ContextValue {
   state: VB6ContextState;
   dispatch: React.Dispatch<VB6Action>;
-  
+
   // Computed values
   selectedControlsData: VB6Control[];
   canUndo: boolean;
   canRedo: boolean;
   hasUnsavedChanges: boolean;
-  
+
   // Helper functions
   getControlById: (id: string) => VB6Control | undefined;
   getFormById: (id: string) => VB6Form | undefined;
@@ -200,7 +200,7 @@ describe('VB6 Context - Reducer State Management', () => {
     };
 
     const control = createTestControl('ctrl1');
-    
+
     initialState.forms = [form];
     initialState.currentForm = form;
     initialState.controls.set('ctrl1', control);
@@ -276,7 +276,7 @@ describe('VB6 Context - Reducer State Management', () => {
 
   it('should handle SELECT_CONTROLS action', () => {
     const controlIds = ['ctrl1', 'ctrl2'];
-    
+
     const action: VB6Action = { type: 'SELECT_CONTROLS', payload: controlIds };
     const newState = vb6Reducer(initialState, action);
 
@@ -330,8 +330,9 @@ describe('VB6 Context - Reducer State Management', () => {
     const action: VB6Action = { type: 'PASTE_CONTROLS', payload: { x: 200, y: 150 } };
     const newState = vb6Reducer(initialState, action);
 
-    const pastedControls = Array.from(newState.controls.values())
-      .filter(c => c.left === 200 && c.top === 150);
+    const pastedControls = Array.from(newState.controls.values()).filter(
+      c => c.left === 200 && c.top === 150
+    );
 
     expect(pastedControls).toHaveLength(1);
     expect(pastedControls[0].type).toBe('TextBox');
@@ -480,25 +481,24 @@ describe('VB6 Context - Provider Integration', () => {
   it('should provide context value to children', () => {
     const VB6Provider: React.FC<{ children: ReactNode }> = ({ children }) => {
       const [state, dispatch] = React.useReducer(vb6Reducer, createInitialState());
-      
-      const value: VB6ContextValue = React.useMemo(() => ({
-        state,
-        dispatch,
-        selectedControlsData: getSelectedControls(state),
-        canUndo: state.historyIndex > 0,
-        canRedo: state.historyIndex < state.history.length - 1,
-        hasUnsavedChanges: state.project?.modified || false,
-        getControlById: (id: string) => state.controls.get(id),
-        getFormById: (id: string) => state.forms.find(f => f.id === id),
-        generateControlName: (type: string) => generateControlName(state, type),
-        isControlSelected: (id: string) => state.selectedControls.includes(id),
-      }), [state]);
 
-      return (
-        <VB6Context.Provider value={value}>
-          {children}
-        </VB6Context.Provider>
+      const value: VB6ContextValue = React.useMemo(
+        () => ({
+          state,
+          dispatch,
+          selectedControlsData: getSelectedControls(state),
+          canUndo: state.historyIndex > 0,
+          canRedo: state.historyIndex < state.history.length - 1,
+          hasUnsavedChanges: state.project?.modified || false,
+          getControlById: (id: string) => state.controls.get(id),
+          getFormById: (id: string) => state.forms.find(f => f.id === id),
+          generateControlName: (type: string) => generateControlName(state, type),
+          isControlSelected: (id: string) => state.selectedControls.includes(id),
+        }),
+        [state]
       );
+
+      return <VB6Context.Provider value={value}>{children}</VB6Context.Provider>;
     };
 
     render(
@@ -516,30 +516,29 @@ describe('VB6 Context - Provider Integration', () => {
   it('should update context when actions are dispatched', () => {
     const VB6Provider: React.FC<{ children: ReactNode }> = ({ children }) => {
       const [state, dispatch] = React.useReducer(vb6Reducer, createInitialState());
-      
-      const value: VB6ContextValue = React.useMemo(() => ({
-        state,
-        dispatch,
-        selectedControlsData: getSelectedControls(state),
-        canUndo: state.historyIndex > 0,
-        canRedo: state.historyIndex < state.history.length - 1,
-        hasUnsavedChanges: state.project?.modified || false,
-        getControlById: (id: string) => state.controls.get(id),
-        getFormById: (id: string) => state.forms.find(f => f.id === id),
-        generateControlName: (type: string) => generateControlName(state, type),
-        isControlSelected: (id: string) => state.selectedControls.includes(id),
-      }), [state]);
 
-      return (
-        <VB6Context.Provider value={value}>
-          {children}
-        </VB6Context.Provider>
+      const value: VB6ContextValue = React.useMemo(
+        () => ({
+          state,
+          dispatch,
+          selectedControlsData: getSelectedControls(state),
+          canUndo: state.historyIndex > 0,
+          canRedo: state.historyIndex < state.history.length - 1,
+          hasUnsavedChanges: state.project?.modified || false,
+          getControlById: (id: string) => state.controls.get(id),
+          getFormById: (id: string) => state.forms.find(f => f.id === id),
+          generateControlName: (type: string) => generateControlName(state, type),
+          isControlSelected: (id: string) => state.selectedControls.includes(id),
+        }),
+        [state]
       );
+
+      return <VB6Context.Provider value={value}>{children}</VB6Context.Provider>;
     };
 
     const TestControlComponent: React.FC = () => {
       const context = useContext(VB6Context);
-      
+
       const addControl = () => {
         if (context) {
           context.dispatch({
@@ -554,9 +553,7 @@ describe('VB6 Context - Provider Integration', () => {
           <button onClick={addControl} data-testid="add-control">
             Add Control
           </button>
-          <div data-testid="control-count">
-            {context?.state.controls.size || 0}
-          </div>
+          <div data-testid="control-count">{context?.state.controls.size || 0}</div>
         </div>
       );
     };
@@ -583,35 +580,32 @@ describe('VB6 Context - Provider Integration', () => {
         initialState.selectedControls = ['ctrl1'];
         return initialState;
       });
-      
-      const value: VB6ContextValue = React.useMemo(() => ({
-        state,
-        dispatch,
-        selectedControlsData: getSelectedControls(state),
-        canUndo: state.historyIndex > 0,
-        canRedo: state.historyIndex < state.history.length - 1,
-        hasUnsavedChanges: state.project?.modified || false,
-        getControlById: (id: string) => state.controls.get(id),
-        getFormById: (id: string) => state.forms.find(f => f.id === id),
-        generateControlName: (type: string) => generateControlName(state, type),
-        isControlSelected: (id: string) => state.selectedControls.includes(id),
-      }), [state]);
 
-      return (
-        <VB6Context.Provider value={value}>
-          {children}
-        </VB6Context.Provider>
+      const value: VB6ContextValue = React.useMemo(
+        () => ({
+          state,
+          dispatch,
+          selectedControlsData: getSelectedControls(state),
+          canUndo: state.historyIndex > 0,
+          canRedo: state.historyIndex < state.history.length - 1,
+          hasUnsavedChanges: state.project?.modified || false,
+          getControlById: (id: string) => state.controls.get(id),
+          getFormById: (id: string) => state.forms.find(f => f.id === id),
+          generateControlName: (type: string) => generateControlName(state, type),
+          isControlSelected: (id: string) => state.selectedControls.includes(id),
+        }),
+        [state]
       );
+
+      return <VB6Context.Provider value={value}>{children}</VB6Context.Provider>;
     };
 
     const TestComputedComponent: React.FC = () => {
       const context = useContext(VB6Context);
-      
+
       return (
         <div>
-          <div data-testid="selected-count">
-            {context?.selectedControlsData.length || 0}
-          </div>
+          <div data-testid="selected-count">{context?.selectedControlsData.length || 0}</div>
           <div data-testid="ctrl1-selected">
             {context?.isControlSelected('ctrl1') ? 'true' : 'false'}
           </div>
@@ -636,11 +630,7 @@ describe('VB6 Context - Provider Integration', () => {
   it('should handle context without provider', () => {
     const TestComponentWithoutProvider: React.FC = () => {
       const context = useContext(VB6Context);
-      return (
-        <div data-testid="no-provider">
-          {context ? 'Has Context' : 'No Context'}
-        </div>
-      );
+      return <div data-testid="no-provider">{context ? 'Has Context' : 'No Context'}</div>;
     };
 
     render(<TestComponentWithoutProvider />);
@@ -745,25 +735,25 @@ describe('VB6 Context - Complex State Transitions', () => {
     expect(state.currentForm?.controls).toHaveLength(3);
 
     // Select multiple controls
-    state = vb6Reducer(state, { 
-      type: 'SELECT_CONTROLS', 
-      payload: ['ctrl1', 'ctrl3'] 
+    state = vb6Reducer(state, {
+      type: 'SELECT_CONTROLS',
+      payload: ['ctrl1', 'ctrl3'],
     });
 
     expect(state.selectedControls).toEqual(['ctrl1', 'ctrl3']);
 
     // Copy selected controls
-    state = vb6Reducer(state, { 
-      type: 'COPY_CONTROLS', 
-      payload: ['ctrl1', 'ctrl3'] 
+    state = vb6Reducer(state, {
+      type: 'COPY_CONTROLS',
+      payload: ['ctrl1', 'ctrl3'],
     });
 
     expect(state.clipboard).toHaveLength(2);
 
     // Paste controls
-    state = vb6Reducer(state, { 
-      type: 'PASTE_CONTROLS', 
-      payload: { x: 300, y: 200 } 
+    state = vb6Reducer(state, {
+      type: 'PASTE_CONTROLS',
+      payload: { x: 300, y: 200 },
     });
 
     expect(state.controls.size).toBe(5); // Original 3 + pasted 2
@@ -861,9 +851,10 @@ describe('VB6 Context - Complex State Transitions', () => {
     expect(state.selectedControls).toHaveLength(2); // From paste operation
 
     // Verify control positions
-    const pastedControls = Array.from(state.controls.values())
-      .filter(c => c.left === 400 && c.top === 300);
-    
+    const pastedControls = Array.from(state.controls.values()).filter(
+      c => c.left === 400 && c.top === 300
+    );
+
     expect(pastedControls).toHaveLength(1); // First pasted control
   });
 });
@@ -932,24 +923,23 @@ function vb6Reducer(state: VB6ContextState, action: VB6Action): VB6ContextState 
 
     case 'UPDATE_FORM': {
       const updatedForms = state.forms.map(form =>
-        form.id === action.payload.id
-          ? { ...form, ...action.payload.updates }
-          : form
+        form.id === action.payload.id ? { ...form, ...action.payload.updates } : form
       );
 
       return {
         ...state,
         forms: updatedForms,
-        currentForm: state.currentForm?.id === action.payload.id
-          ? { ...state.currentForm, ...action.payload.updates }
-          : state.currentForm,
+        currentForm:
+          state.currentForm?.id === action.payload.id
+            ? { ...state.currentForm, ...action.payload.updates }
+            : state.currentForm,
       };
     }
 
     case 'DELETE_FORM': {
       const formToDelete = state.forms.find(f => f.id === action.payload);
       const updatedForms = state.forms.filter(f => f.id !== action.payload);
-      
+
       // Delete associated controls
       const newControls = new Map(state.controls);
       if (formToDelete) {
@@ -989,7 +979,7 @@ function vb6Reducer(state: VB6ContextState, action: VB6Action): VB6ContextState 
     case 'UPDATE_CONTROL': {
       const newControls = new Map(state.controls);
       const existingControl = newControls.get(action.payload.id);
-      
+
       if (existingControl) {
         newControls.set(action.payload.id, {
           ...existingControl,
@@ -1064,10 +1054,10 @@ function vb6Reducer(state: VB6ContextState, action: VB6Action): VB6ContextState 
         const newControl: VB6Control = {
           ...clipboardControl,
           id: newId,
-          left: action.payload.x + (index * 20),
-          top: action.payload.y + (index * 20),
+          left: action.payload.x + index * 20,
+          top: action.payload.y + index * 20,
         };
-        
+
         newControls.set(newId, newControl);
         pastedIds.push(newId);
       });
@@ -1132,7 +1122,7 @@ function vb6Reducer(state: VB6ContextState, action: VB6Action): VB6ContextState 
 
     case 'SAVE_TO_HISTORY': {
       const newHistory = [...state.history.slice(0, state.historyIndex + 1), { ...state }];
-      
+
       // Limit history size
       if (newHistory.length > 10) {
         newHistory.shift();
@@ -1182,9 +1172,7 @@ function vb6Reducer(state: VB6ContextState, action: VB6Action): VB6ContextState 
 }
 
 function getSelectedControls(state: VB6ContextState): VB6Control[] {
-  return state.selectedControls
-    .map(id => state.controls.get(id))
-    .filter(Boolean) as VB6Control[];
+  return state.selectedControls.map(id => state.controls.get(id)).filter(Boolean) as VB6Control[];
 }
 
 function generateControlName(state: VB6ContextState, type: string): string {

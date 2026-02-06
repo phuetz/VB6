@@ -50,12 +50,14 @@ export interface UseHotReloadOptions {
   onRollback?: (reason: string) => void;
 }
 
-export const useHotReload = (options: UseHotReloadOptions = {}): [HotReloadStatus, HotReloadActions] => {
+export const useHotReload = (
+  options: UseHotReloadOptions = {}
+): [HotReloadStatus, HotReloadActions] => {
   const { state, dispatch } = useVB6();
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const codeHistoryRef = useRef<string[]>([]);
   const lastCodeRef = useRef<string>('');
-  
+
   // Hot-reload status state
   const [status, setStatus] = useState<HotReloadStatus>({
     enabled: options.enabled ?? true,
@@ -66,7 +68,7 @@ export const useHotReload = (options: UseHotReloadOptions = {}): [HotReloadStatu
     rollbackCount: 0,
     averageReloadTime: 0,
     isReloading: false,
-    lastError: null
+    lastError: null,
   });
 
   // 🔥 Initialize hot-reload engine
@@ -74,7 +76,7 @@ export const useHotReload = (options: UseHotReloadOptions = {}): [HotReloadStatu
     if (!status.enabled) return;
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('🚀 Initializing Hot-Reload system...');
+      // noop
     }
 
     // Configure engine
@@ -83,7 +85,7 @@ export const useHotReload = (options: UseHotReloadOptions = {}): [HotReloadStatu
       watchFiles: options.autoWatch ?? true,
       preserveState: options.preserveState ?? true,
       debounceMs: options.debounceMs ?? 300,
-      verboseLogging: true
+      verboseLogging: true,
     });
 
     // Set up event listeners
@@ -99,14 +101,14 @@ export const useHotReload = (options: UseHotReloadOptions = {}): [HotReloadStatu
         active: true,
         lastReload: new Date(),
         patchCount: prev.patchCount + 1,
-        averageReloadTime: data.metrics.averageReloadTime
+        averageReloadTime: data.metrics.averageReloadTime,
       }));
-      
+
       // Update VB6 context if form changes detected
       if (data.patch.changes.some(change => change.affects.some(area => area.type === 'form'))) {
         dispatch({ type: 'FORCE_REFRESH' });
       }
-      
+
       options.onReloadComplete?.(data.patch);
     };
 
@@ -115,7 +117,7 @@ export const useHotReload = (options: UseHotReloadOptions = {}): [HotReloadStatu
         ...prev,
         isReloading: false,
         errorCount: prev.errorCount + 1,
-        lastError: data.error.message || 'Hot-reload failed'
+        lastError: data.error.message || 'Hot-reload failed',
       }));
       options.onReloadError?.(data.error);
     };
@@ -124,7 +126,7 @@ export const useHotReload = (options: UseHotReloadOptions = {}): [HotReloadStatu
       setStatus(prev => ({
         ...prev,
         rollbackCount: prev.rollbackCount + 1,
-        lastError: `Rolled back due to: ${data.reason.message}`
+        lastError: `Rolled back due to: ${data.reason.message}`,
       }));
       options.onRollback?.(data.reason.message);
     };
@@ -146,24 +148,24 @@ export const useHotReload = (options: UseHotReloadOptions = {}): [HotReloadStatu
   // 🔄 Watch for code changes in VB6 context
   useEffect(() => {
     if (!status.enabled || !options.autoWatch) return;
-    
+
     // Generate current code from VB6 state
     const currentCode = generateCodeFromState(state);
-    
+
     // Check if code has changed
     if (currentCode !== lastCodeRef.current && lastCodeRef.current !== '') {
       // Debounce hot-reload trigger
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
-      
+
       debounceTimerRef.current = setTimeout(() => {
         performHotReload(currentCode);
       }, options.debounceMs ?? 300);
     }
-    
+
     lastCodeRef.current = currentCode;
-    
+
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
@@ -172,27 +174,30 @@ export const useHotReload = (options: UseHotReloadOptions = {}): [HotReloadStatu
   }, [state, status.enabled, options.autoWatch, options.debounceMs]);
 
   // 🚀 Perform hot-reload
-  const performHotReload = useCallback(async (code: string): Promise<boolean> => {
-    if (!status.enabled) return false;
-    
-    try {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🔥 Triggering hot-reload...', code.length, 'characters');
+  const performHotReload = useCallback(
+    async (code: string): Promise<boolean> => {
+      if (!status.enabled) return false;
+
+      try {
+        if (process.env.NODE_ENV === 'development') {
+          // noop
+        }
+
+        // Add to history
+        codeHistoryRef.current.push(code);
+        if (codeHistoryRef.current.length > 50) {
+          codeHistoryRef.current.shift();
+        }
+
+        const patch = await hotReloadEngine.performHotReload(code);
+        return patch !== null;
+      } catch (error) {
+        console.error('Hot-reload failed:', error);
+        return false;
       }
-      
-      // Add to history
-      codeHistoryRef.current.push(code);
-      if (codeHistoryRef.current.length > 50) {
-        codeHistoryRef.current.shift();
-      }
-      
-      const patch = await hotReloadEngine.performHotReload(code);
-      return patch !== null;
-    } catch (error) {
-      console.error('Hot-reload failed:', error);
-      return false;
-    }
-  }, [status.enabled]);
+    },
+    [status.enabled]
+  );
 
   // 🎛️ Hot-reload actions
   const actions: HotReloadActions = {
@@ -204,15 +209,17 @@ export const useHotReload = (options: UseHotReloadOptions = {}): [HotReloadStatu
       });
     }, []),
 
-    performManualReload: useCallback(async (code?: string): Promise<boolean> => {
-      const codeToReload = code || generateCodeFromState(state);
-      return await performHotReload(codeToReload);
-    }, [state, performHotReload]),
+    performManualReload: useCallback(
+      async (code?: string): Promise<boolean> => {
+        const codeToReload = code || generateCodeFromState(state);
+        return await performHotReload(codeToReload);
+      },
+      [state, performHotReload]
+    ),
 
     rollbackLastPatch: useCallback(async (): Promise<boolean> => {
       try {
         // This would need to be implemented in the engine
-        console.log('🔄 Rolling back last patch...');
         setStatus(prev => ({ ...prev, rollbackCount: prev.rollbackCount + 1 }));
         return true;
       } catch (error) {
@@ -231,7 +238,7 @@ export const useHotReload = (options: UseHotReloadOptions = {}): [HotReloadStatu
         rollbackCount: 0,
         lastReload: null,
         active: false,
-        lastError: null
+        lastError: null,
       }));
     }, []),
 
@@ -240,25 +247,18 @@ export const useHotReload = (options: UseHotReloadOptions = {}): [HotReloadStatu
     }, []),
 
     testHotReload: useCallback(async (): Promise<boolean> => {
-      console.log('🧪 Testing hot-reload system...');
-      
       try {
         // Generate test code with small change
         const testCode = generateTestCode();
         const success = await performHotReload(testCode);
-        
-        if (success) {
-          console.log('✅ Hot-reload test passed');
-        } else {
-          console.log('❌ Hot-reload test failed');
-        }
-        
+        // Hot reload result handled by caller
+
         return success;
       } catch (error) {
         console.error('Hot-reload test error:', error);
         return false;
       }
-    }, [performHotReload])
+    }, [performHotReload]),
   };
 
   return [status, actions];
@@ -317,9 +317,9 @@ function generateCodeFromState(state: VB6AppState): string {
     }
     code += `\n`;
   });
-  
+
   code += `End Sub\n\n`;
-  
+
   // Add event handlers
   state.controls?.forEach((control: VB6ControlState) => {
     if (control.type === 'CommandButton') {
@@ -328,7 +328,7 @@ function generateCodeFromState(state: VB6AppState): string {
       code += `End Sub\n\n`;
     }
   });
-  
+
   return code;
 }
 
@@ -358,7 +358,7 @@ export const useHotReloadMetrics = () => {
     averageReloadTime: 0,
     successRate: 0,
     cacheHitRate: 0,
-    memoryUsage: 0
+    memoryUsage: 0,
   });
 
   useEffect(() => {
@@ -367,11 +367,14 @@ export const useHotReloadMetrics = () => {
       setMetrics({
         totalReloads: engineMetrics.totalReloads,
         averageReloadTime: engineMetrics.averageReloadTime,
-        successRate: engineMetrics.totalReloads > 0 
-          ? ((engineMetrics.totalReloads - engineMetrics.errorCount) / engineMetrics.totalReloads) * 100 
-          : 0,
+        successRate:
+          engineMetrics.totalReloads > 0
+            ? ((engineMetrics.totalReloads - engineMetrics.errorCount) /
+                engineMetrics.totalReloads) *
+              100
+            : 0,
         cacheHitRate: 75, // Would be calculated from actual cache statistics
-        memoryUsage: performance.memory ? performance.memory.usedJSHeapSize / 1024 / 1024 : 0
+        memoryUsage: performance.memory ? performance.memory.usedJSHeapSize / 1024 / 1024 : 0,
       });
     };
 

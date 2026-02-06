@@ -19,7 +19,7 @@ interface ScriptControlProps {
 export enum ScriptLanguage {
   VBScript = 'VBScript',
   JScript = 'JScript',
-  JavaScript = 'JavaScript'
+  JavaScript = 'JavaScript',
 }
 
 // Script control states
@@ -28,7 +28,7 @@ export enum ScriptState {
   Started = 1,
   Connected = 2,
   Disconnected = 3,
-  Closed = 4
+  Closed = 4,
 }
 
 // Error object interface
@@ -67,7 +67,7 @@ export const ScriptControl = forwardRef<HTMLDivElement, ScriptControlProps>(
     const [timeout, setTimeout] = useState(control.timeout || 10000);
     const [allowUI, setAllowUI] = useState(control.allowUI !== false);
     const [useSafeSubset, setUseSafeSubset] = useState(control.useSafeSubset === true);
-    
+
     const globalScopeRef = useRef<Record<string, any>>({});
     const modulesRef = useRef<Map<string, ScriptModule>>(new Map());
     const proceduresRef = useRef<Map<string, (...args: any[]) => any>>(new Map());
@@ -107,17 +107,17 @@ export const ScriptControl = forwardRef<HTMLDivElement, ScriptControlProps>(
         Right: (str: string, length: number) => str?.substring(str.length - length) || '',
         Mid: (str: string, start: number, length?: number) => {
           const startIdx = Math.max(0, start - 1); // VB uses 1-based indexing
-          return length !== undefined 
+          return length !== undefined
             ? str?.substring(startIdx, startIdx + length) || ''
             : str?.substring(startIdx) || '';
         },
         InStr: (start: number | string, str1?: string, str2?: string) => {
           if (typeof start === 'string') {
-            return (start.indexOf(str1 || '') + 1) || 0;
+            return start.indexOf(str1 || '') + 1 || 0;
           }
-          return ((str1?.indexOf(str2 || '', start - 1) || -1) + 1) || 0;
+          return (str1?.indexOf(str2 || '', start - 1) || -1) + 1 || 0;
         },
-        Replace: (str: string, find: string, replace: string) => 
+        Replace: (str: string, find: string, replace: string) =>
           str?.replace(new RegExp(find, 'g'), replace) || '',
         UCase: (str: string) => str?.toUpperCase() || '',
         LCase: (str: string) => str?.toLowerCase() || '',
@@ -126,7 +126,7 @@ export const ScriptControl = forwardRef<HTMLDivElement, ScriptControlProps>(
         RTrim: (str: string) => str?.trimEnd() || '',
         Space: (count: number) => ' '.repeat(count),
         String: (count: number, char: string) => char.charAt(0).repeat(count),
-        
+
         // Numeric functions
         Abs: Math.abs,
         Atn: Math.atan,
@@ -138,11 +138,11 @@ export const ScriptControl = forwardRef<HTMLDivElement, ScriptControlProps>(
           const factor = Math.pow(10, decimals);
           return Math.round(num * factor) / factor;
         },
-        Sgn: (num: number) => num > 0 ? 1 : num < 0 ? -1 : 0,
+        Sgn: (num: number) => (num > 0 ? 1 : num < 0 ? -1 : 0),
         Sin: Math.sin,
         Sqr: Math.sqrt,
         Tan: Math.tan,
-        
+
         // Date/Time functions
         Now: () => new Date(),
         Date: () => new Date().toLocaleDateString(),
@@ -150,32 +150,56 @@ export const ScriptControl = forwardRef<HTMLDivElement, ScriptControlProps>(
         DateAdd: (interval: string, number: number, date: Date) => {
           const result = new Date(date);
           switch (interval.toLowerCase()) {
-            case 'yyyy': result.setFullYear(result.getFullYear() + number); break;
-            case 'q': result.setMonth(result.getMonth() + (number * 3)); break;
-            case 'm': result.setMonth(result.getMonth() + number); break;
+            case 'yyyy':
+              result.setFullYear(result.getFullYear() + number);
+              break;
+            case 'q':
+              result.setMonth(result.getMonth() + number * 3);
+              break;
+            case 'm':
+              result.setMonth(result.getMonth() + number);
+              break;
             case 'y':
-            case 'd': result.setDate(result.getDate() + number); break;
-            case 'w': result.setDate(result.getDate() + (number * 7)); break;
-            case 'h': result.setHours(result.getHours() + number); break;
-            case 'n': result.setMinutes(result.getMinutes() + number); break;
-            case 's': result.setSeconds(result.getSeconds() + number); break;
+            case 'd':
+              result.setDate(result.getDate() + number);
+              break;
+            case 'w':
+              result.setDate(result.getDate() + number * 7);
+              break;
+            case 'h':
+              result.setHours(result.getHours() + number);
+              break;
+            case 'n':
+              result.setMinutes(result.getMinutes() + number);
+              break;
+            case 's':
+              result.setSeconds(result.getSeconds() + number);
+              break;
           }
           return result;
         },
         DateDiff: (interval: string, date1: Date, date2: Date) => {
           const diff = date2.getTime() - date1.getTime();
           switch (interval.toLowerCase()) {
-            case 'yyyy': return Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
-            case 'q': return Math.floor(diff / (3 * 30 * 24 * 60 * 60 * 1000));
-            case 'm': return Math.floor(diff / (30 * 24 * 60 * 60 * 1000));
-            case 'd': return Math.floor(diff / (24 * 60 * 60 * 1000));
-            case 'h': return Math.floor(diff / (60 * 60 * 1000));
-            case 'n': return Math.floor(diff / (60 * 1000));
-            case 's': return Math.floor(diff / 1000);
-            default: return 0;
+            case 'yyyy':
+              return Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
+            case 'q':
+              return Math.floor(diff / (3 * 30 * 24 * 60 * 60 * 1000));
+            case 'm':
+              return Math.floor(diff / (30 * 24 * 60 * 60 * 1000));
+            case 'd':
+              return Math.floor(diff / (24 * 60 * 60 * 1000));
+            case 'h':
+              return Math.floor(diff / (60 * 60 * 1000));
+            case 'n':
+              return Math.floor(diff / (60 * 1000));
+            case 's':
+              return Math.floor(diff / 1000);
+            default:
+              return 0;
           }
         },
-        
+
         // Type conversion
         CBool: (val: any) => Boolean(val),
         CByte: (val: any) => Math.max(0, Math.min(255, parseInt(val) || 0)),
@@ -186,14 +210,14 @@ export const ScriptControl = forwardRef<HTMLDivElement, ScriptControlProps>(
         CLng: (val: any) => parseInt(val) || 0,
         CSng: (val: any) => parseFloat(val) || 0,
         CStr: (val: any) => String(val),
-        
+
         // Array functions
         Array: (...args: any[]) => args,
         UBound: (arr: any[]) => arr.length - 1,
         LBound: (arr: any[]) => 0,
         Split: (str: string, delimiter: string = ' ') => str.split(delimiter),
         Join: (arr: any[], delimiter: string = ' ') => arr.join(delimiter),
-        
+
         // Utility functions
         IsArray: Array.isArray,
         IsDate: (val: any) => val instanceof Date,
@@ -209,7 +233,7 @@ export const ScriptControl = forwardRef<HTMLDivElement, ScriptControlProps>(
           const type = typeof val;
           return type.charAt(0).toUpperCase() + type.slice(1);
         },
-        
+
         // I/O functions (limited in browser)
         MsgBox: (prompt: string, buttons: number = 0, title: string = '') => {
           if (allowUI) {
@@ -222,7 +246,7 @@ export const ScriptControl = forwardRef<HTMLDivElement, ScriptControlProps>(
             return window.prompt(`${title}\n\n${prompt}`, defaultValue) || '';
           }
           return defaultValue;
-        }
+        },
       };
 
       Object.assign(globalScopeRef.current, vbBuiltins);
@@ -243,7 +267,7 @@ export const ScriptControl = forwardRef<HTMLDivElement, ScriptControlProps>(
             return window.prompt(prompt, defaultValue) || '';
           }
           return defaultValue;
-        }
+        },
       };
 
       Object.assign(globalScopeRef.current, jsBuiltins);
@@ -260,24 +284,42 @@ export const ScriptControl = forwardRef<HTMLDivElement, ScriptControlProps>(
     // VB6 Methods implementation
     const vb6Methods = {
       // Properties
-      get Language() { return language; },
+      get Language() {
+        return language;
+      },
       set Language(value: ScriptLanguage) {
         setLanguage(value);
         initializeScriptEngine();
       },
 
-      get State() { return state; },
-      
-      get Error() { return error; },
-      
-      get Timeout() { return timeout; },
-      set Timeout(value: number) { setTimeout(value); },
-      
-      get AllowUI() { return allowUI; },
-      set AllowUI(value: boolean) { setAllowUI(value); },
-      
-      get UseSafeSubset() { return useSafeSubset; },
-      set UseSafeSubset(value: boolean) { setUseSafeSubset(value); },
+      get State() {
+        return state;
+      },
+
+      get Error() {
+        return error;
+      },
+
+      get Timeout() {
+        return timeout;
+      },
+      set Timeout(value: number) {
+        setTimeout(value);
+      },
+
+      get AllowUI() {
+        return allowUI;
+      },
+      set AllowUI(value: boolean) {
+        setAllowUI(value);
+      },
+
+      get UseSafeSubset() {
+        return useSafeSubset;
+      },
+      set UseSafeSubset(value: boolean) {
+        setUseSafeSubset(value);
+      },
 
       // Methods
       AddCode: (code: string) => {
@@ -358,8 +400,10 @@ export const ScriptControl = forwardRef<HTMLDivElement, ScriptControlProps>(
 
       // Module management
       Modules: {
-        get Count() { return modulesRef.current.size; },
-        
+        get Count() {
+          return modulesRef.current.size;
+        },
+
         Item: (index: number | string) => {
           if (typeof index === 'number') {
             return Array.from(modulesRef.current.values())[index];
@@ -367,33 +411,35 @@ export const ScriptControl = forwardRef<HTMLDivElement, ScriptControlProps>(
             return modulesRef.current.get(index);
           }
         },
-        
+
         Add: (name: string) => {
           const module: ScriptModule = {
             name,
             procedures: [],
-            codeObject: {}
+            codeObject: {},
           };
           modulesRef.current.set(name, module);
           return module;
-        }
+        },
       },
 
       // Procedure management
       Procedures: {
-        get Count() { return proceduresRef.current.size; },
-        
+        get Count() {
+          return proceduresRef.current.size;
+        },
+
         Item: (index: number | string) => {
           if (typeof index === 'number') {
             return Array.from(proceduresRef.current.keys())[index];
           } else {
             return proceduresRef.current.get(index);
           }
-        }
+        },
       },
 
       // Code object access
-      CodeObject: globalScopeRef.current
+      CodeObject: globalScopeRef.current,
     };
 
     // Script execution functions
@@ -404,13 +450,13 @@ export const ScriptControl = forwardRef<HTMLDivElement, ScriptControlProps>(
       for (const line of lines) {
         const trimmed = line.trim();
         if (!trimmed || trimmed.startsWith("'")) continue; // Skip empty lines and comments
-        
+
         // Handle function/sub declarations
         if (trimmed.match(/^(Function|Sub)\s+(\w+)/i)) {
           parseVBScriptProcedure(code);
           return;
         }
-        
+
         // Execute statement
         executeVBScriptStatement(trimmed);
       }
@@ -447,14 +493,16 @@ export const ScriptControl = forwardRef<HTMLDivElement, ScriptControlProps>(
         globalScopeRef.current[varName] = evaluateVBScriptExpression(value);
         return;
       }
-      
+
       // Handle procedure calls
       const callMatch = statement.match(/^(\w+)(?:\s+(.+))?$/);
       if (callMatch) {
         const [, procName, args] = callMatch;
         const proc = globalScopeRef.current[procName] || proceduresRef.current.get(procName);
         if (typeof proc === 'function') {
-          const argList = args ? args.split(',').map(arg => evaluateVBScriptExpression(arg.trim())) : [];
+          const argList = args
+            ? args.split(',').map(arg => evaluateVBScriptExpression(arg.trim()))
+            : [];
           proc(...argList);
         }
       }
@@ -470,12 +518,18 @@ export const ScriptControl = forwardRef<HTMLDivElement, ScriptControlProps>(
       const match = code.match(/^(Function|Sub)\s+(\w+)\s*\(([^)]*)\)/im);
       if (match) {
         const [, type, name, params] = match;
-        const paramList = params.split(',').map(p => p.trim()).filter(p => p);
-        
+        const paramList = params
+          .split(',')
+          .map(p => p.trim())
+          .filter(p => p);
+
         // Create procedure
-        const procFunc = new Function(...paramList, ...Object.keys(globalScopeRef.current), 
-          code.substring(code.indexOf('\n') + 1, code.lastIndexOf('\n')));
-        
+        const procFunc = new Function(
+          ...paramList,
+          ...Object.keys(globalScopeRef.current),
+          code.substring(code.indexOf('\n') + 1, code.lastIndexOf('\n'))
+        );
+
         proceduresRef.current.set(name, procFunc);
         globalScopeRef.current[name] = procFunc;
       }
@@ -490,7 +544,7 @@ export const ScriptControl = forwardRef<HTMLDivElement, ScriptControlProps>(
         helpContext: 0,
         text: err.stack || '',
         line: err.line || 0,
-        column: err.column || 0
+        column: err.column || 0,
       };
       setError(scriptError);
       onChange?.({ error: scriptError });
@@ -517,7 +571,7 @@ export const ScriptControl = forwardRef<HTMLDivElement, ScriptControlProps>(
       cursor: 'default',
       fontSize: '20px',
       opacity: control.visible !== false ? 1 : 0,
-      zIndex: control.zIndex || 'auto'
+      zIndex: control.zIndex || 'auto',
     };
 
     // Script Control is invisible at runtime

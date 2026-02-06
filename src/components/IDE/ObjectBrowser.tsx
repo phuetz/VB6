@@ -56,13 +56,15 @@ export interface ObjectBrowserProps {
 export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
   isVisible,
   onClose,
-  onMemberSelect
+  onMemberSelect,
 }) => {
   const [selectedLibrary, setSelectedLibrary] = useState<string>('VB6');
   const [selectedObject, setSelectedObject] = useState<VB6ObjectInfo | null>(null);
   const [selectedMember, setSelectedMember] = useState<VB6MemberInfo | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'All' | 'Properties' | 'Methods' | 'Events' | 'Constants'>('All');
+  const [viewMode, setViewMode] = useState<
+    'All' | 'Properties' | 'Methods' | 'Events' | 'Constants'
+  >('All');
   const [showHidden, setShowHidden] = useState<boolean>(false);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
@@ -83,7 +85,7 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
         description: 'Visual Basic 6.0 Objects and Procedures',
         guid: '{EA544A21-C82D-11D1-A3E0-0000F8756001}',
         fileName: 'VB6.OLB',
-        objects: createVB6Objects()
+        objects: createVB6Objects(),
       },
       {
         name: 'VBA',
@@ -91,7 +93,7 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
         description: 'Visual Basic for Applications',
         guid: '{000204EF-0000-0000-C000-000000000046}',
         fileName: 'VBA6.DLL',
-        objects: createVBAObjects()
+        objects: createVBAObjects(),
       },
       {
         name: 'MSForms',
@@ -99,7 +101,7 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
         description: 'Microsoft Forms 2.0 Object Library',
         guid: '{0D452EE1-E08F-101A-852E-02608C4D0BB4}',
         fileName: 'MSForms.EXE',
-        objects: createMSFormsObjects()
+        objects: createMSFormsObjects(),
       },
       {
         name: 'ADODB',
@@ -107,7 +109,7 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
         description: 'Microsoft ActiveX Data Objects 2.8 Library',
         guid: '{2A75196C-D9EB-4129-B803-931327F72D5C}',
         fileName: 'ADODB.DLL',
-        objects: createADODBObjects()
+        objects: createADODBObjects(),
       },
       {
         name: 'Scripting',
@@ -115,8 +117,8 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
         description: 'Microsoft Scripting Runtime',
         guid: '{420B2830-E718-11CF-893D-00A0C9054228}',
         fileName: 'SCRRUN.DLL',
-        objects: createScriptingObjects()
-      }
+        objects: createScriptingObjects(),
+      },
     ];
   }
 
@@ -130,12 +132,33 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
       type: 'Class',
       description: 'Provides access to application-specific information',
       members: [
-        { name: 'EXEName', type: 'Property', memberType: 'String', description: 'Returns the name of the executable file', readOnly: true },
-        { name: 'Path', type: 'Property', memberType: 'String', description: 'Returns the path where the application started', readOnly: true },
-        { name: 'Title', type: 'Property', memberType: 'String', description: 'Sets or returns the title of the application' },
-        { name: 'StartLogging', type: 'Method', description: 'Starts logging to the specified file' },
-        { name: 'StopLogging', type: 'Method', description: 'Stops logging' }
-      ]
+        {
+          name: 'EXEName',
+          type: 'Property',
+          memberType: 'String',
+          description: 'Returns the name of the executable file',
+          readOnly: true,
+        },
+        {
+          name: 'Path',
+          type: 'Property',
+          memberType: 'String',
+          description: 'Returns the path where the application started',
+          readOnly: true,
+        },
+        {
+          name: 'Title',
+          type: 'Property',
+          memberType: 'String',
+          description: 'Sets or returns the title of the application',
+        },
+        {
+          name: 'StartLogging',
+          type: 'Method',
+          description: 'Starts logging to the specified file',
+        },
+        { name: 'StopLogging', type: 'Method', description: 'Stops logging' },
+      ],
     });
 
     objects.push({
@@ -143,13 +166,49 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
       type: 'Class',
       description: 'Provides information about the screen and active controls',
       members: [
-        { name: 'Width', type: 'Property', memberType: 'Single', description: 'Width of the screen in twips', readOnly: true },
-        { name: 'Height', type: 'Property', memberType: 'Single', description: 'Height of the screen in twips', readOnly: true },
-        { name: 'TwipsPerPixelX', type: 'Property', memberType: 'Single', description: 'Horizontal twips per pixel', readOnly: true },
-        { name: 'TwipsPerPixelY', type: 'Property', memberType: 'Single', description: 'Vertical twips per pixel', readOnly: true },
-        { name: 'ActiveControl', type: 'Property', memberType: 'Control', description: 'Returns the control that has focus', readOnly: true },
-        { name: 'ActiveForm', type: 'Property', memberType: 'Form', description: 'Returns the active form', readOnly: true }
-      ]
+        {
+          name: 'Width',
+          type: 'Property',
+          memberType: 'Single',
+          description: 'Width of the screen in twips',
+          readOnly: true,
+        },
+        {
+          name: 'Height',
+          type: 'Property',
+          memberType: 'Single',
+          description: 'Height of the screen in twips',
+          readOnly: true,
+        },
+        {
+          name: 'TwipsPerPixelX',
+          type: 'Property',
+          memberType: 'Single',
+          description: 'Horizontal twips per pixel',
+          readOnly: true,
+        },
+        {
+          name: 'TwipsPerPixelY',
+          type: 'Property',
+          memberType: 'Single',
+          description: 'Vertical twips per pixel',
+          readOnly: true,
+        },
+        {
+          name: 'ActiveControl',
+          type: 'Property',
+          memberType: 'Control',
+          description: 'Returns the control that has focus',
+          readOnly: true,
+        },
+        {
+          name: 'ActiveForm',
+          type: 'Property',
+          memberType: 'Form',
+          description: 'Returns the active form',
+          readOnly: true,
+        },
+      ],
     });
 
     objects.push({
@@ -157,9 +216,19 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
       type: 'Class',
       description: 'Provides methods for debugging',
       members: [
-        { name: 'Print', type: 'Method', description: 'Prints text to the debug window', parameters: [{ name: 'text', type: 'String' }] },
-        { name: 'Assert', type: 'Method', description: 'Tests a condition and breaks if false', parameters: [{ name: 'condition', type: 'Boolean' }] }
-      ]
+        {
+          name: 'Print',
+          type: 'Method',
+          description: 'Prints text to the debug window',
+          parameters: [{ name: 'text', type: 'String' }],
+        },
+        {
+          name: 'Assert',
+          type: 'Method',
+          description: 'Tests a condition and breaks if false',
+          parameters: [{ name: 'condition', type: 'Boolean' }],
+        },
+      ],
     });
 
     objects.push({
@@ -168,11 +237,21 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
       description: 'Contains information about run-time errors',
       members: [
         { name: 'Number', type: 'Property', memberType: 'Long', description: 'Error number' },
-        { name: 'Description', type: 'Property', memberType: 'String', description: 'Error description' },
+        {
+          name: 'Description',
+          type: 'Property',
+          memberType: 'String',
+          description: 'Error description',
+        },
         { name: 'Source', type: 'Property', memberType: 'String', description: 'Error source' },
         { name: 'Clear', type: 'Method', description: 'Clears the current error' },
-        { name: 'Raise', type: 'Method', description: 'Raises an error', parameters: [{ name: 'number', type: 'Long' }] }
-      ]
+        {
+          name: 'Raise',
+          type: 'Method',
+          description: 'Raises an error',
+          parameters: [{ name: 'number', type: 'Long' }],
+        },
+      ],
     });
 
     // Ajouter tous les contrôles VB6
@@ -186,17 +265,22 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
         description: prop.description,
         readOnly: prop.readOnly,
         default: prop.defaultValue,
-        category: prop.category
+        category: prop.category,
       }));
 
       // Ajouter des méthodes communes pour les contrôles
       members.push(
-        { name: 'Move', type: 'Method', description: 'Moves the control', parameters: [
-          { name: 'Left', type: 'Single', optional: true },
-          { name: 'Top', type: 'Single', optional: true },
-          { name: 'Width', type: 'Single', optional: true },
-          { name: 'Height', type: 'Single', optional: true }
-        ]},
+        {
+          name: 'Move',
+          type: 'Method',
+          description: 'Moves the control',
+          parameters: [
+            { name: 'Left', type: 'Single', optional: true },
+            { name: 'Top', type: 'Single', optional: true },
+            { name: 'Width', type: 'Single', optional: true },
+            { name: 'Height', type: 'Single', optional: true },
+          ],
+        },
         { name: 'SetFocus', type: 'Method', description: 'Sets focus to the control' },
         { name: 'Refresh', type: 'Method', description: 'Repaints the control' }
       );
@@ -204,17 +288,33 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
       // Ajouter des événements communes
       members.push(
         { name: 'Click', type: 'Event', description: 'Occurs when the user clicks the control' },
-        { name: 'DblClick', type: 'Event', description: 'Occurs when the user double-clicks the control' },
-        { name: 'MouseDown', type: 'Event', description: 'Occurs when the user presses a mouse button' },
-        { name: 'MouseMove', type: 'Event', description: 'Occurs when the user moves the mouse over the control' },
-        { name: 'MouseUp', type: 'Event', description: 'Occurs when the user releases a mouse button' }
+        {
+          name: 'DblClick',
+          type: 'Event',
+          description: 'Occurs when the user double-clicks the control',
+        },
+        {
+          name: 'MouseDown',
+          type: 'Event',
+          description: 'Occurs when the user presses a mouse button',
+        },
+        {
+          name: 'MouseMove',
+          type: 'Event',
+          description: 'Occurs when the user moves the mouse over the control',
+        },
+        {
+          name: 'MouseUp',
+          type: 'Event',
+          description: 'Occurs when the user releases a mouse button',
+        }
       );
 
       objects.push({
         name: controlType,
         type: 'Class',
         description: `${controlType} control`,
-        members
+        members,
       });
     });
 
@@ -231,10 +331,21 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
         members: [
           { name: 'Add', type: 'Method', description: 'Adds an item to the collection' },
           { name: 'Remove', type: 'Method', description: 'Removes an item from the collection' },
-          { name: 'Count', type: 'Property', memberType: 'Long', description: 'Number of items in collection', readOnly: true },
-          { name: 'Item', type: 'Property', memberType: 'Variant', description: 'Gets an item from the collection' }
-        ]
-      }
+          {
+            name: 'Count',
+            type: 'Property',
+            memberType: 'Long',
+            description: 'Number of items in collection',
+            readOnly: true,
+          },
+          {
+            name: 'Item',
+            type: 'Property',
+            memberType: 'Variant',
+            description: 'Gets an item from the collection',
+          },
+        ],
+      },
     ];
   }
 
@@ -247,9 +358,9 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
         members: [
           { name: 'Show', type: 'Method', description: 'Shows the form' },
           { name: 'Hide', type: 'Method', description: 'Hides the form' },
-          { name: 'Caption', type: 'Property', memberType: 'String', description: 'Form caption' }
-        ]
-      }
+          { name: 'Caption', type: 'Property', memberType: 'String', description: 'Form caption' },
+        ],
+      },
     ];
   }
 
@@ -262,8 +373,13 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
         members: [
           { name: 'Open', type: 'Method', description: 'Opens a connection' },
           { name: 'Close', type: 'Method', description: 'Closes the connection' },
-          { name: 'ConnectionString', type: 'Property', memberType: 'String', description: 'Connection string' }
-        ]
+          {
+            name: 'ConnectionString',
+            type: 'Property',
+            memberType: 'String',
+            description: 'Connection string',
+          },
+        ],
       },
       {
         name: 'Recordset',
@@ -273,9 +389,15 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
           { name: 'Open', type: 'Method', description: 'Opens a recordset' },
           { name: 'Close', type: 'Method', description: 'Closes the recordset' },
           { name: 'MoveNext', type: 'Method', description: 'Moves to the next record' },
-          { name: 'EOF', type: 'Property', memberType: 'Boolean', description: 'End of file indicator', readOnly: true }
-        ]
-      }
+          {
+            name: 'EOF',
+            type: 'Property',
+            memberType: 'Boolean',
+            description: 'End of file indicator',
+            readOnly: true,
+          },
+        ],
+      },
     ];
   }
 
@@ -288,9 +410,9 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
         members: [
           { name: 'CreateTextFile', type: 'Method', description: 'Creates a text file' },
           { name: 'OpenTextFile', type: 'Method', description: 'Opens a text file' },
-          { name: 'FileExists', type: 'Method', description: 'Checks if file exists' }
-        ]
-      }
+          { name: 'FileExists', type: 'Method', description: 'Checks if file exists' },
+        ],
+      },
     ];
   }
 
@@ -299,9 +421,10 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
     const library = libraries.find(lib => lib.name === selectedLibrary);
     if (!library) return [];
 
-    return library.objects.filter(obj => 
-      obj.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      obj.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    return library.objects.filter(
+      obj =>
+        obj.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        obj.description?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [libraries, selectedLibrary, searchTerm]);
 
@@ -315,20 +438,26 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
     if (viewMode !== 'All') {
       members = members.filter(member => {
         switch (viewMode) {
-          case 'Properties': return member.type === 'Property';
-          case 'Methods': return member.type === 'Method';
-          case 'Events': return member.type === 'Event';
-          case 'Constants': return member.type === 'Constant';
-          default: return true;
+          case 'Properties':
+            return member.type === 'Property';
+          case 'Methods':
+            return member.type === 'Method';
+          case 'Events':
+            return member.type === 'Event';
+          case 'Constants':
+            return member.type === 'Constant';
+          default:
+            return true;
         }
       });
     }
 
     // Filtrer par recherche
     if (searchTerm) {
-      members = members.filter(member =>
-        member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      members = members.filter(
+        member =>
+          member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          member.description?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -338,16 +467,26 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
   // Rendu des icônes selon le type
   const getIcon = (type: string): string => {
     switch (type) {
-      case 'Library': return '📚';
-      case 'Class': return '🏛️';
-      case 'Module': return '📄';
-      case 'Interface': return '🔌';
-      case 'Property': return '🏷️';
-      case 'Method': return '⚡';
-      case 'Event': return '📡';
-      case 'Constant': return '🔒';
-      case 'Enum': return '📋';
-      default: return '📄';
+      case 'Library':
+        return '📚';
+      case 'Class':
+        return '🏛️';
+      case 'Module':
+        return '📄';
+      case 'Interface':
+        return '🔌';
+      case 'Property':
+        return '🏷️';
+      case 'Method':
+        return '⚡';
+      case 'Event':
+        return '📡';
+      case 'Constant':
+        return '🔒';
+      case 'Enum':
+        return '📋';
+      default:
+        return '📄';
     }
   };
 
@@ -363,7 +502,7 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
     flexDirection: 'column',
     fontFamily: 'MS Sans Serif, sans-serif',
     fontSize: '8pt',
-    zIndex: 10000
+    zIndex: 10000,
   };
 
   const titleBarStyle: React.CSSProperties = {
@@ -374,7 +513,7 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: '0 8px',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   };
 
   const toolbarStyle: React.CSSProperties = {
@@ -384,12 +523,12 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
     display: 'flex',
     alignItems: 'center',
     padding: '0 8px',
-    gap: '8px'
+    gap: '8px',
   };
 
   const mainAreaStyle: React.CSSProperties = {
     flex: 1,
-    display: 'flex'
+    display: 'flex',
   };
 
   const panelStyle: React.CSSProperties = {
@@ -397,7 +536,7 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
     border: '1px inset #C0C0C0',
     margin: '4px',
     overflow: 'auto',
-    backgroundColor: '#FFFFFF'
+    backgroundColor: '#FFFFFF',
   };
 
   const listItemStyle: React.CSSProperties = {
@@ -406,13 +545,13 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
     borderBottom: '1px solid #F0F0F0',
     display: 'flex',
     alignItems: 'center',
-    gap: '4px'
+    gap: '4px',
   };
 
   const selectedItemStyle: React.CSSProperties = {
     ...listItemStyle,
     backgroundColor: '#0078D4',
-    color: '#FFFFFF'
+    color: '#FFFFFF',
   };
 
   if (!isVisible) return null;
@@ -429,7 +568,7 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
             border: 'none',
             color: '#FFFFFF',
             fontSize: '16px',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
         >
           ✕
@@ -440,7 +579,7 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
       <div style={toolbarStyle}>
         <select
           value={selectedLibrary}
-          onChange={(e) => setSelectedLibrary(e.target.value)}
+          onChange={e => setSelectedLibrary(e.target.value)}
           style={{ padding: '2px' }}
         >
           {libraries.map(lib => (
@@ -454,13 +593,13 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
           type="text"
           placeholder="Search..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={e => setSearchTerm(e.target.value)}
           style={{ padding: '2px', width: '200px' }}
         />
 
         <select
           value={viewMode}
-          onChange={(e) => setViewMode(e.target.value as any)}
+          onChange={e => setViewMode(e.target.value as any)}
           style={{ padding: '2px' }}
         >
           <option value="All">All Members</option>
@@ -474,7 +613,7 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
           <input
             type="checkbox"
             checked={showHidden}
-            onChange={(e) => setShowHidden(e.target.checked)}
+            onChange={e => setShowHidden(e.target.checked)}
           />
           Show Hidden
         </label>
@@ -540,22 +679,20 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
           </div>
           {selectedMember && (
             <div style={{ padding: '8px' }}>
-              <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
-                {selectedMember.name}
-              </div>
-              
+              <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>{selectedMember.name}</div>
+
               {selectedMember.memberType && (
                 <div style={{ marginBottom: '4px' }}>
                   <strong>Type:</strong> {selectedMember.memberType}
                 </div>
               )}
-              
+
               {selectedMember.description && (
                 <div style={{ marginBottom: '8px', fontSize: '7pt' }}>
                   {selectedMember.description}
                 </div>
               )}
-              
+
               {selectedMember.parameters && selectedMember.parameters.length > 0 && (
                 <div style={{ marginBottom: '8px' }}>
                   <strong>Parameters:</strong>
@@ -570,13 +707,13 @@ export const ObjectBrowser: React.FC<ObjectBrowserProps> = ({
                   </ul>
                 </div>
               )}
-              
+
               {selectedMember.default !== undefined && (
                 <div style={{ marginBottom: '4px', fontSize: '7pt' }}>
                   <strong>Default:</strong> {String(selectedMember.default)}
                 </div>
               )}
-              
+
               {selectedMember.category && (
                 <div style={{ fontSize: '7pt', color: '#666' }}>
                   Category: {selectedMember.category}

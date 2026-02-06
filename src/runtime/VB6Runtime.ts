@@ -4,8 +4,22 @@
  */
 
 import { EventEmitter } from 'events';
-import { VB6Collection, VB6Dictionary, CreateCollection, CreateDictionary, CreateCollectionObject } from './VB6CollectionObjects';
-import { VB6AdvancedErrorHandler, Err, OnErrorGoTo, OnErrorResumeNext, OnErrorGoToZero, Resume, ResumeNext } from './VB6AdvancedErrorHandling';
+import {
+  VB6Collection,
+  VB6Dictionary,
+  CreateCollection,
+  CreateDictionary,
+  CreateCollectionObject,
+} from './VB6CollectionObjects';
+import {
+  VB6AdvancedErrorHandler,
+  Err,
+  OnErrorGoTo,
+  OnErrorResumeNext,
+  OnErrorGoToZero,
+  Resume,
+  ResumeNext,
+} from './VB6AdvancedErrorHandling';
 import { VB6AdvancedStringFunctions } from './VB6AdvancedStringFunctions';
 import { VB6FileSystemAPI } from './VB6FileSystem';
 import { VB6DatabaseObjects } from './VB6DatabaseObjects';
@@ -38,6 +52,32 @@ export interface VB6FormBase {
 
 export type VB6Variant = string | number | boolean | null | undefined | Date | object | unknown[];
 
+// TYPE SAFETY FIX: Define interfaces for array metadata
+export interface VB6ArrayMetadata {
+  __lbound?: number;
+  __ubound?: number;
+  __bounds?: [number, number][];
+  __dimensions?: number;
+}
+
+export type VB6Array<T = unknown> = T[] & VB6ArrayMetadata;
+
+// TYPE SAFETY FIX: Performance memory interface
+export interface PerformanceMemory {
+  usedJSHeapSize: number;
+  totalJSHeapSize: number;
+  jsHeapSizeLimit: number;
+}
+
+export interface PerformanceWithMemory extends Performance {
+  memory?: PerformanceMemory;
+}
+
+// TYPE SAFETY FIX: WebKit AudioContext
+export interface WindowWithWebkit extends Window {
+  webkitAudioContext?: typeof AudioContext;
+}
+
 // VB6 Runtime Constants
 export enum VbAppWinStyle {
   vbHide = 0,
@@ -45,13 +85,13 @@ export enum VbAppWinStyle {
   vbMinimizedFocus = 2,
   vbMaximizedFocus = 3,
   vbNormalNoFocus = 4,
-  vbMinimizedNoFocus = 6
+  vbMinimizedNoFocus = 6,
 }
 
 export enum VbTriState {
   vbUseDefault = -2,
   vbTrue = -1,
-  vbFalse = 0
+  vbFalse = 0,
 }
 
 export enum VbVarType {
@@ -72,7 +112,7 @@ export enum VbVarType {
   vbDecimal = 14,
   vbByte = 17,
   vbUserDefinedType = 36,
-  vbArray = 8192
+  vbArray = 8192,
 }
 
 export enum VbMsgBoxStyle {
@@ -96,7 +136,7 @@ export enum VbMsgBoxStyle {
   vbMsgBoxHelpButton = 16384,
   vbMsgBoxSetForeground = 65536,
   vbMsgBoxRight = 524288,
-  vbMsgBoxRtlReading = 1048576
+  vbMsgBoxRtlReading = 1048576,
 }
 
 export enum VbMsgBoxResult {
@@ -106,7 +146,7 @@ export enum VbMsgBoxResult {
   vbRetry = 4,
   vbIgnore = 5,
   vbYes = 6,
-  vbNo = 7
+  vbNo = 7,
 }
 
 // VB6 Collection is now imported from VB6CollectionObjects.ts
@@ -138,68 +178,118 @@ export class VB6App extends EventEmitter {
 
   constructor() {
     super();
-    
+
     // Initialize from browser environment
     if (typeof document !== 'undefined') {
       this._title = document.title || this._title;
-      this._path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) || '/';
+      this._path =
+        window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) || '/';
     }
   }
 
   // Properties
-  get Title(): string { return this._title; }
-  set Title(value: string) { 
+  get Title(): string {
+    return this._title;
+  }
+  set Title(value: string) {
     this._title = value;
     if (typeof document !== 'undefined') {
       document.title = value;
     }
   }
 
-  get ProductName(): string { return this._productName; }
-  get CompanyName(): string { return this._companyName; }
-  get FileDescription(): string { return this._fileDescription; }
-  get LegalCopyright(): string { return this._legalCopyright; }
-  get LegalTrademarks(): string { return this._legalTrademarks; }
-  get ProductVersion(): string { return this._productVersion; }
-  get FileVersion(): string { return this._fileVersion; }
-  get Revision(): number { return this._revision; }
-  get Major(): number { return this._major; }
-  get Minor(): number { return this._minor; }
-  get HelpFile(): string { return this._helpFile; }
-  set HelpFile(value: string) { this._helpFile = value; }
-  get EXEName(): string { return this._exeName; }
-  get Path(): string { return this._path; }
-  get StartMode(): number { return this._startMode; }
-  get TaskVisible(): boolean { return this._taskVisible; }
-  set TaskVisible(value: boolean) { this._taskVisible = value; }
-  get ThreadID(): number { return this._threadID; }
-  get hInstance(): number { return this._hInstance; }
-  get PrevInstance(): number { return this._prevInstance; }
-  get LogMode(): number { return this._logMode; }
-  set LogMode(value: number) { this._logMode = value; }
-  get LogPath(): string { return this._logPath; }
-  set LogPath(value: string) { this._logPath = value; }
-  get Comments(): string { return this._comments; }
+  get ProductName(): string {
+    return this._productName;
+  }
+  get CompanyName(): string {
+    return this._companyName;
+  }
+  get FileDescription(): string {
+    return this._fileDescription;
+  }
+  get LegalCopyright(): string {
+    return this._legalCopyright;
+  }
+  get LegalTrademarks(): string {
+    return this._legalTrademarks;
+  }
+  get ProductVersion(): string {
+    return this._productVersion;
+  }
+  get FileVersion(): string {
+    return this._fileVersion;
+  }
+  get Revision(): number {
+    return this._revision;
+  }
+  get Major(): number {
+    return this._major;
+  }
+  get Minor(): number {
+    return this._minor;
+  }
+  get HelpFile(): string {
+    return this._helpFile;
+  }
+  set HelpFile(value: string) {
+    this._helpFile = value;
+  }
+  get EXEName(): string {
+    return this._exeName;
+  }
+  get Path(): string {
+    return this._path;
+  }
+  get StartMode(): number {
+    return this._startMode;
+  }
+  get TaskVisible(): boolean {
+    return this._taskVisible;
+  }
+  set TaskVisible(value: boolean) {
+    this._taskVisible = value;
+  }
+  get ThreadID(): number {
+    return this._threadID;
+  }
+  get hInstance(): number {
+    return this._hInstance;
+  }
+  get PrevInstance(): number {
+    return this._prevInstance;
+  }
+  get LogMode(): number {
+    return this._logMode;
+  }
+  set LogMode(value: number) {
+    this._logMode = value;
+  }
+  get LogPath(): string {
+    return this._logPath;
+  }
+  set LogPath(value: string) {
+    this._logPath = value;
+  }
+  get Comments(): string {
+    return this._comments;
+  }
 
   // Methods
   StartLogging(logTarget: string, logMode: number): void {
     this._logPath = logTarget;
     this._logMode = logMode;
-    console.log(`Logging started: ${logTarget}, mode: ${logMode}`);
   }
 
   StopLogging(): void {
     this._logMode = 0;
     this._logPath = '';
-    console.log('Logging stopped');
   }
 
   LogEvent(logText: string, eventType: number = 0): void {
     if (this._logMode > 0) {
       const timestamp = new Date().toISOString();
       const logEntry = `[${timestamp}] ${logText}`;
-      console.log(logEntry);
-      
+
       // In a real implementation, this would write to the log file
       // For browser environment, we use console and localStorage
       try {
@@ -235,7 +325,7 @@ export class VB6App extends EventEmitter {
       'Short Date': date.toLocaleDateString(),
       'Long Time': date.toTimeString(),
       'Medium Time': date.toLocaleTimeString(),
-      'Short Time': date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      'Short Time': date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
     return patterns[format] || date.toString();
@@ -249,14 +339,16 @@ export class VB6App extends EventEmitter {
     // VB6 number format patterns
     const patterns: { [key: string]: string } = {
       'General Number': number.toString(),
-      'Currency': new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(number),
-      'Fixed': number.toFixed(2),
-      'Standard': number.toLocaleString(),
-      'Percent': (number * 100).toFixed(2) + '%',
-      'Scientific': number.toExponential(),
+      Currency: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+        number
+      ),
+      Fixed: number.toFixed(2),
+      Standard: number.toLocaleString(),
+      Percent: (number * 100).toFixed(2) + '%',
+      Scientific: number.toExponential(),
       'Yes/No': number !== 0 ? 'Yes' : 'No',
       'True/False': number !== 0 ? 'True' : 'False',
-      'On/Off': number !== 0 ? 'On' : 'Off'
+      'On/Off': number !== 0 ? 'On' : 'Off',
     };
 
     return patterns[format] || number.toString();
@@ -274,18 +366,18 @@ export class VB6Screen extends EventEmitter {
 
   constructor() {
     super();
-    
+
     // EVENT HANDLING BUG FIX: Track window listeners for cleanup
     this.windowListeners = new Map();
-    
+
     // Listen for window focus changes with cleanup tracking
     if (typeof window !== 'undefined') {
       const focusHandler = () => this.emit('GotFocus');
       const blurHandler = () => this.emit('LostFocus');
-      
+
       window.addEventListener('focus', focusHandler);
       window.addEventListener('blur', blurHandler);
-      
+
       // Track for cleanup
       this.windowListeners.set('focus', focusHandler);
       this.windowListeners.set('blur', blurHandler);
@@ -360,30 +452,30 @@ export class VB6Screen extends EventEmitter {
    */
   private isValidCursorURL(url: string): boolean {
     if (typeof url !== 'string' || url.length === 0) return false;
-    
+
     try {
       const urlObj = new URL(url, window.location.origin);
-      
+
       // Only allow safe protocols
       if (!['http:', 'https:', 'blob:'].includes(urlObj.protocol)) {
         return false;
       }
-      
+
       // Check for common cursor file extensions
       const validExtensions = ['.cur', '.ico', '.png', '.gif', '.jpg', '.jpeg', '.svg'];
-      const hasValidExtension = validExtensions.some(ext => 
+      const hasValidExtension = validExtensions.some(ext =>
         urlObj.pathname.toLowerCase().endsWith(ext)
       );
-      
+
       if (!hasValidExtension) {
         return false;
       }
-      
+
       // Basic length check
       if (url.length > 500) {
         return false;
       }
-      
+
       return true;
     } catch (e) {
       return false;
@@ -412,7 +504,7 @@ export class VB6Screen extends EventEmitter {
       'Trebuchet MS',
       'Verdana',
       'MS Sans Serif',
-      'MS Serif'
+      'MS Serif',
     ];
   }
 
@@ -421,23 +513,23 @@ export class VB6Screen extends EventEmitter {
     if (typeof document === 'undefined') return;
 
     const cursors = [
-      'default',      // 0 - vbDefault
-      'default',      // 1 - vbArrow
-      'crosshair',    // 2 - vbCrosshair
-      'text',         // 3 - vbIbeam
-      'default',      // 4 - vbIcon (no direct equivalent)
-      'move',         // 5 - vbSizePointer
-      'ns-resize',    // 6 - vbSizeNS
-      'ew-resize',    // 7 - vbSizeWE
-      'nw-resize',    // 8 - vbSizeNWSE
-      'ne-resize',    // 9 - vbSizeNESW
-      'move',         // 10 - vbSizeAll
-      'not-allowed',  // 11 - vbUpArrow
-      'default',      // 12 - vbHourglass (no direct equivalent)
-      'not-allowed',  // 13 - vbNoDrop
-      'default',      // 14 - vbArrowHourglass (no direct equivalent)
-      'default',      // 15 - vbArrowQuestion (no direct equivalent)
-      'auto'          // 99 - vbCustom
+      'default', // 0 - vbDefault
+      'default', // 1 - vbArrow
+      'crosshair', // 2 - vbCrosshair
+      'text', // 3 - vbIbeam
+      'default', // 4 - vbIcon (no direct equivalent)
+      'move', // 5 - vbSizePointer
+      'ns-resize', // 6 - vbSizeNS
+      'ew-resize', // 7 - vbSizeWE
+      'nw-resize', // 8 - vbSizeNWSE
+      'ne-resize', // 9 - vbSizeNESW
+      'move', // 10 - vbSizeAll
+      'not-allowed', // 11 - vbUpArrow
+      'default', // 12 - vbHourglass (no direct equivalent)
+      'not-allowed', // 13 - vbNoDrop
+      'default', // 14 - vbArrowHourglass (no direct equivalent)
+      'default', // 15 - vbArrowQuestion (no direct equivalent)
+      'auto', // 99 - vbCustom
     ];
 
     document.body.style.cursor = cursors[pointer] || 'default';
@@ -484,7 +576,11 @@ export class VB6Printer extends EventEmitter {
   private _currentX: number = 0;
   private _currentY: number = 0;
 
-  constructor(deviceName: string = 'Default Printer', driverName: string = 'winspool', port: string = 'LPT1:') {
+  constructor(
+    deviceName: string = 'Default Printer',
+    driverName: string = 'winspool',
+    port: string = 'LPT1:'
+  ) {
     super();
     this._deviceName = deviceName;
     this._driverName = driverName;
@@ -492,41 +588,111 @@ export class VB6Printer extends EventEmitter {
   }
 
   // Properties
-  get DeviceName(): string { return this._deviceName; }
-  get DriverName(): string { return this._driverName; }
-  get Port(): string { return this._port; }
-  get Orientation(): number { return this._orientation; }
-  set Orientation(value: number) { this._orientation = value; }
-  get PaperBin(): number { return this._paperBin; }
-  set PaperBin(value: number) { this._paperBin = value; }
-  get PaperSize(): number { return this._paperSize; }
-  set PaperSize(value: number) { this._paperSize = value; }
-  get PrintQuality(): number { return this._printQuality; }
-  set PrintQuality(value: number) { this._printQuality = value; }
-  get Copies(): number { return this._copies; }
-  set Copies(value: number) { this._copies = value; }
-  get ColorMode(): number { return this._colorMode; }
-  set ColorMode(value: number) { this._colorMode = value; }
-  get Duplex(): number { return this._duplex; }
-  set Duplex(value: number) { this._duplex = value; }
-  get FontSize(): number { return this._fontSize; }
-  set FontSize(value: number) { this._fontSize = value; }
-  get FontName(): string { return this._fontName; }
-  set FontName(value: string) { this._fontName = value; }
-  get FontBold(): boolean { return this._fontBold; }
-  set FontBold(value: boolean) { this._fontBold = value; }
-  get FontItalic(): boolean { return this._fontItalic; }
-  set FontItalic(value: boolean) { this._fontItalic = value; }
-  get FontUnderline(): boolean { return this._fontUnderline; }
-  set FontUnderline(value: boolean) { this._fontUnderline = value; }
-  get ScaleMode(): number { return this._scaleMode; }
-  set ScaleMode(value: number) { this._scaleMode = value; }
-  get Width(): number { return this._width; }
-  get Height(): number { return this._height; }
-  get CurrentX(): number { return this._currentX; }
-  set CurrentX(value: number) { this._currentX = value; }
-  get CurrentY(): number { return this._currentY; }
-  set CurrentY(value: number) { this._currentY = value; }
+  get DeviceName(): string {
+    return this._deviceName;
+  }
+  get DriverName(): string {
+    return this._driverName;
+  }
+  get Port(): string {
+    return this._port;
+  }
+  get Orientation(): number {
+    return this._orientation;
+  }
+  set Orientation(value: number) {
+    this._orientation = value;
+  }
+  get PaperBin(): number {
+    return this._paperBin;
+  }
+  set PaperBin(value: number) {
+    this._paperBin = value;
+  }
+  get PaperSize(): number {
+    return this._paperSize;
+  }
+  set PaperSize(value: number) {
+    this._paperSize = value;
+  }
+  get PrintQuality(): number {
+    return this._printQuality;
+  }
+  set PrintQuality(value: number) {
+    this._printQuality = value;
+  }
+  get Copies(): number {
+    return this._copies;
+  }
+  set Copies(value: number) {
+    this._copies = value;
+  }
+  get ColorMode(): number {
+    return this._colorMode;
+  }
+  set ColorMode(value: number) {
+    this._colorMode = value;
+  }
+  get Duplex(): number {
+    return this._duplex;
+  }
+  set Duplex(value: number) {
+    this._duplex = value;
+  }
+  get FontSize(): number {
+    return this._fontSize;
+  }
+  set FontSize(value: number) {
+    this._fontSize = value;
+  }
+  get FontName(): string {
+    return this._fontName;
+  }
+  set FontName(value: string) {
+    this._fontName = value;
+  }
+  get FontBold(): boolean {
+    return this._fontBold;
+  }
+  set FontBold(value: boolean) {
+    this._fontBold = value;
+  }
+  get FontItalic(): boolean {
+    return this._fontItalic;
+  }
+  set FontItalic(value: boolean) {
+    this._fontItalic = value;
+  }
+  get FontUnderline(): boolean {
+    return this._fontUnderline;
+  }
+  set FontUnderline(value: boolean) {
+    this._fontUnderline = value;
+  }
+  get ScaleMode(): number {
+    return this._scaleMode;
+  }
+  set ScaleMode(value: number) {
+    this._scaleMode = value;
+  }
+  get Width(): number {
+    return this._width;
+  }
+  get Height(): number {
+    return this._height;
+  }
+  get CurrentX(): number {
+    return this._currentX;
+  }
+  set CurrentX(value: number) {
+    this._currentX = value;
+  }
+  get CurrentY(): number {
+    return this._currentY;
+  }
+  set CurrentY(value: number) {
+    this._currentY = value;
+  }
 
   // Methods
   Print(text: string): void {
@@ -569,7 +735,15 @@ export class VB6Printer extends EventEmitter {
     this.emit('KillDoc');
   }
 
-  Circle(x: number, y: number, radius: number, color?: number, start?: number, end?: number, aspect?: number): void {
+  Circle(
+    x: number,
+    y: number,
+    radius: number,
+    color?: number,
+    start?: number,
+    end?: number,
+    aspect?: number
+  ): void {
     // Drawing method (would need canvas implementation)
     this.emit('Circle', { x, y, radius, color, start, end, aspect });
   }
@@ -589,10 +763,10 @@ export class VB6Printer extends EventEmitter {
 export class VB6Printers extends VB6Collection {
   constructor() {
     super();
-    
+
     // Add default printer
     this.Add(new VB6Printer('Default Printer', 'winspool', 'LPT1:'), 'Default');
-    
+
     // Add simulated printers
     this.Add(new VB6Printer('Microsoft Print to PDF', 'winspool', 'PORTPROMPT:'), 'PDF');
     this.Add(new VB6Printer('Microsoft XPS Document Writer', 'winspool', 'PORTPROMPT:'), 'XPS');
@@ -612,7 +786,7 @@ export class VB6Forms extends VB6Collection {
   // Override Add to handle form-specific logic
   Add(form: any, key?: string | number): void {
     super.Add(form, key);
-    
+
     // Auto-show form if visible property is true
     if (form.Visible) {
       form.Show();
@@ -628,7 +802,7 @@ export class VB6Forms extends VB6Collection {
         break;
       }
     }
-    
+
     // Call form's unload
     if (typeof form.Unload === 'function') {
       form.Unload();
@@ -652,14 +826,14 @@ export class VB6Runtime {
   private constructor() {
     // ULTRA-THINK FIX: Initialize all critical properties first
     this.windowListeners = new Map();
-    
+
     this.App = new VB6App();
     this.Screen = new VB6Screen();
     this.Printers = new VB6Printers();
     this.Forms = new VB6Forms();
     this.ErrorHandler = VB6AdvancedErrorHandler.getInstance();
     this.Err = Err;
-    
+
     // Initialize runtime environment
     this.initializeRuntime();
   }
@@ -684,7 +858,7 @@ export class VB6Runtime {
 
       window.addEventListener('error', errorHandler);
       window.addEventListener('unhandledrejection', rejectionHandler);
-      
+
       // Track for cleanup - ensure windowListeners is initialized
       if (!this.windowListeners) {
         this.windowListeners = new Map();
@@ -701,8 +875,9 @@ export class VB6Runtime {
     // Monitor memory usage (if available)
     if (typeof performance !== 'undefined' && 'memory' in performance) {
       setInterval(() => {
-        const memory = (performance as any).memory;
-        if (memory.usedJSHeapSize > memory.jsHeapSizeLimit * 0.9) {
+        const perfWithMemory = performance as PerformanceWithMemory;
+        const memory = perfWithMemory.memory;
+        if (memory && memory.usedJSHeapSize > memory.jsHeapSizeLimit * 0.9) {
           this.App.LogEvent('Warning: High memory usage detected', 2);
         }
       }, 30000); // Check every 30 seconds
@@ -722,9 +897,12 @@ export class VB6Runtime {
     } else if (buttons & VbMsgBoxStyle.vbYesNoCancel) {
       const result = prompt(`${finalTitle}\n\n${prompt}\n\nEnter 'yes', 'no', or 'cancel':`);
       switch (result?.toLowerCase()) {
-        case 'yes': return VbMsgBoxResult.vbYes;
-        case 'no': return VbMsgBoxResult.vbNo;
-        default: return VbMsgBoxResult.vbCancel;
+        case 'yes':
+          return VbMsgBoxResult.vbYes;
+        case 'no':
+          return VbMsgBoxResult.vbNo;
+        default:
+          return VbMsgBoxResult.vbCancel;
       }
     } else if (buttons & VbMsgBoxStyle.vbYesNo) {
       return confirm(`${finalTitle}\n\n${prompt}`) ? VbMsgBoxResult.vbYes : VbMsgBoxResult.vbNo;
@@ -748,16 +926,13 @@ export class VB6Runtime {
     return result || '';
   }
 
-  public Shell(
-    pathname: string,
-    windowStyle: VbAppWinStyle = VbAppWinStyle.vbNormalFocus
-  ): number {
+  public Shell(pathname: string, windowStyle: VbAppWinStyle = VbAppWinStyle.vbNormalFocus): number {
     // Use browser capabilities to open URLs
     if (pathname.startsWith('http') || pathname.startsWith('mailto:')) {
       window.open(pathname, '_blank');
       return Math.floor(Math.random() * 10000) + 1000; // Return simulated process ID
     }
-    
+
     // For other commands, log and return 0
     this.App.LogEvent(`Shell command not supported in browser: ${pathname}`, 2);
     return 0;
@@ -767,13 +942,12 @@ export class VB6Runtime {
     // Check for Collection and Dictionary objects first
     const collectionObject = CreateCollectionObject(className);
     if (collectionObject) {
-      console.log(`[VB6 Runtime] Created ${className} object`);
       return collectionObject;
     }
 
     // Limited object creation in browser environment for other objects
     this.App.LogEvent(`CreateObject not fully supported in browser: ${className}`, 2);
-    
+
     // Return mock object for common VB6 objects
     const mockObjects: { [key: string]: any } = {
       'Excel.Application': { Visible: false, Workbooks: { Add: () => ({}) } },
@@ -781,13 +955,13 @@ export class VB6Runtime {
       'Scripting.FileSystemObject': {
         GetFile: () => ({}),
         GetFolder: () => ({}),
-        CreateTextFile: () => ({ WriteLine: () => {}, Close: () => {} })
+        CreateTextFile: () => ({ WriteLine: () => {}, Close: () => {} }),
       },
       'WScript.Shell': {
         Run: (cmd: string) => this.Shell(cmd),
         RegRead: () => '',
-        RegWrite: () => {}
-      }
+        RegWrite: () => {},
+      },
     };
 
     return mockObjects[className] || {};
@@ -855,9 +1029,9 @@ export class VB6Runtime {
       .replace(/\|/g, '\\|')
       .replace(/\{/g, '\\{')
       .replace(/\}/g, '\\}')
-      .replace(/\*/g, '.*')      // * matches any number of characters
-      .replace(/\?/g, '.')        // ? matches any single character
-      .replace(/#/g, '[0-9]');    // # matches any single digit
+      .replace(/\*/g, '.*') // * matches any number of characters
+      .replace(/\?/g, '.') // ? matches any single character
+      .replace(/#/g, '[0-9]'); // # matches any single digit
 
     // Handle [!charlist] - matches any character NOT in the list
     regexPattern = regexPattern.replace(/\[!/g, '[^');
@@ -877,7 +1051,6 @@ export class VB6Runtime {
   public printToFile(fileNumber: number, ...items: any[]): void {
     // Format items and log to console (or write to virtual file system)
     const output = items.map(item => String(item)).join('');
-    console.log(`[File #${fileNumber}] ${output}`);
   }
 
   /**
@@ -912,13 +1085,18 @@ export class VB6Runtime {
   /**
    * Open file
    */
-  public open(fileName: string, fileNumber: number, mode: string = 'Input', access?: string, lock?: string): void {
+  public open(
+    fileName: string,
+    fileNumber: number,
+    mode: string = 'Input',
+    access?: string,
+    lock?: string
+  ): void {
     this.files.set(fileNumber, {
       content: '',
       position: 0,
-      mode: mode
+      mode: mode,
     });
-    console.log(`[VB6] Opened file "${fileName}" as #${fileNumber} (${mode})`);
   }
 
   /**
@@ -928,7 +1106,6 @@ export class VB6Runtime {
     for (const num of fileNumbers) {
       if (this.files.has(num)) {
         this.files.delete(num);
-        console.log(`[VB6] Closed file #${num}`);
       }
     }
   }
@@ -938,7 +1115,6 @@ export class VB6Runtime {
    */
   public closeAll(): void {
     this.files.clear();
-    console.log('[VB6] Closed all files');
   }
 
   /**
@@ -1012,10 +1188,12 @@ export class VB6Runtime {
     const file = this.files.get(fileNumber);
     if (!file) return;
 
-    const formatted = items.map(item => {
-      if (typeof item === 'string') return `"${item}"`;
-      return String(item);
-    }).join(',');
+    const formatted = items
+      .map(item => {
+        if (typeof item === 'string') return `"${item}"`;
+        return String(item);
+      })
+      .join(',');
 
     file.content += formatted + '\n';
   }
@@ -1066,7 +1244,7 @@ export class VB6Runtime {
       [VbVarType.vbObject]: 'Object',
       [VbVarType.vbBoolean]: 'Boolean',
       [VbVarType.vbVariant]: 'Variant',
-      [VbVarType.vbArray]: 'Array'
+      [VbVarType.vbArray]: 'Array',
     };
 
     return typeNames[this.VarType(varname)] || 'Unknown';
@@ -1080,12 +1258,16 @@ export class VB6Runtime {
    * Create 1D array with custom bounds (supports VB6 "Dim arr(1 To 10)")
    * Returns an array with __lbound and __ubound metadata
    */
-  public createArray(lowerBound: number, upperBound: number, defaultFactory: () => any): any[] {
+  public createArray<T>(
+    lowerBound: number,
+    upperBound: number,
+    defaultFactory: () => T
+  ): VB6Array<T> {
     const size = upperBound - lowerBound + 1;
-    const arr: any[] = new Array(size).fill(null).map(() => defaultFactory());
+    const arr = new Array(size).fill(null).map(() => defaultFactory()) as VB6Array<T>;
     // Store bounds metadata on array
-    (arr as any).__lbound = lowerBound;
-    (arr as any).__ubound = upperBound;
+    arr.__lbound = lowerBound;
+    arr.__ubound = upperBound;
     return arr;
   }
 
@@ -1094,31 +1276,36 @@ export class VB6Runtime {
    * VB6: Dim arr(1 To 5, 1 To 10, 0 To 3)
    * bounds = [[1, 5], [1, 10], [0, 3]]
    */
-  public createMultiArray(bounds: [number, number][], defaultFactory: () => any): any {
-    if (bounds.length === 0) return [];
+  public createMultiArray<T>(
+    bounds: [number, number][],
+    defaultFactory: () => T
+  ): VB6Array<unknown> {
+    if (bounds.length === 0) return [] as VB6Array<unknown>;
 
-    const createDimension = (dimIndex: number): any => {
+    const createDimension = (dimIndex: number): VB6Array<unknown> => {
       const [lower, upper] = bounds[dimIndex];
       const size = upper - lower + 1;
 
       if (dimIndex === bounds.length - 1) {
         // Innermost dimension
-        const arr = new Array(size).fill(null).map(() => defaultFactory());
-        (arr as any).__lbound = lower;
-        (arr as any).__ubound = upper;
+        const arr = new Array(size).fill(null).map(() => defaultFactory()) as VB6Array<unknown>;
+        arr.__lbound = lower;
+        arr.__ubound = upper;
         return arr;
       }
 
       // Create nested arrays
-      const arr: any[] = new Array(size).fill(null).map(() => createDimension(dimIndex + 1));
-      (arr as any).__lbound = lower;
-      (arr as any).__ubound = upper;
+      const arr = new Array(size)
+        .fill(null)
+        .map(() => createDimension(dimIndex + 1)) as VB6Array<unknown>;
+      arr.__lbound = lower;
+      arr.__ubound = upper;
       return arr;
     };
 
     const result = createDimension(0);
-    (result as any).__bounds = bounds;
-    (result as any).__dimensions = bounds.length;
+    result.__bounds = bounds;
+    result.__dimensions = bounds.length;
     return result;
   }
 
@@ -1126,7 +1313,11 @@ export class VB6Runtime {
    * ReDim Preserve for multi-dimensional arrays
    * In VB6, only the last dimension can be resized with Preserve
    */
-  public reDimPreserve(oldArray: any[], newSizes: number[], defaultFactory: () => any): any[] {
+  public reDimPreserve<T>(
+    oldArray: VB6Array<T>,
+    newSizes: number[],
+    defaultFactory: () => T
+  ): VB6Array<T> {
     if (!oldArray || newSizes.length === 0) {
       return this.createNestedArray(newSizes, 0, defaultFactory);
     }
@@ -1134,66 +1325,71 @@ export class VB6Runtime {
     if (newSizes.length === 1) {
       // Simple 1D case
       const newSize = newSizes[0] + 1;
-      const newArr = new Array(newSize).fill(null).map((_, i) =>
-        i < oldArray.length ? oldArray[i] : defaultFactory()
-      );
+      const newArr = new Array(newSize)
+        .fill(null)
+        .map((_, i) => (i < oldArray.length ? oldArray[i] : defaultFactory())) as VB6Array<T>;
       // Preserve bounds if they exist
-      if ((oldArray as any).__lbound !== undefined) {
-        (newArr as any).__lbound = (oldArray as any).__lbound;
+      if (oldArray.__lbound !== undefined) {
+        newArr.__lbound = oldArray.__lbound;
       }
-      (newArr as any).__ubound = newSizes[0];
+      newArr.__ubound = newSizes[0];
       return newArr;
     }
 
     // Multi-dimensional: Only resize last dimension (VB6 rule)
-    const copyDimension = (oldArr: any[], sizes: number[], dimIndex: number): any[] => {
+    const copyDimension = (oldArr: unknown[], sizes: number[], dimIndex: number): unknown[] => {
       const newSize = sizes[dimIndex] + 1;
 
       if (dimIndex === sizes.length - 1) {
         // Last dimension - resize it
-        return new Array(newSize).fill(null).map((_, i) =>
-          oldArr && i < oldArr.length ? oldArr[i] : defaultFactory()
-        );
+        return new Array(newSize)
+          .fill(null)
+          .map((_, i) => (oldArr && i < oldArr.length ? oldArr[i] : defaultFactory()));
       }
 
       // Not last dimension - copy structure
       return new Array(newSize).fill(null).map((_, i) => {
         if (oldArr && i < oldArr.length) {
-          return copyDimension(oldArr[i], sizes, dimIndex + 1);
+          return copyDimension(oldArr[i] as unknown[], sizes, dimIndex + 1);
         }
         return this.createNestedArray(sizes.slice(dimIndex + 1), 0, defaultFactory);
       });
     };
 
-    return copyDimension(oldArray, newSizes, 0);
+    return copyDimension(oldArray, newSizes, 0) as VB6Array<T>;
   }
 
   /**
    * Create nested array without bounds (simple multi-dimensional)
    */
-  private createNestedArray(sizes: number[], dimIndex: number, defaultFactory: () => any): any[] {
+  private createNestedArray<T>(
+    sizes: number[],
+    dimIndex: number,
+    defaultFactory: () => T
+  ): unknown[] {
     const size = sizes[dimIndex] + 1;
     if (dimIndex === sizes.length - 1) {
       return new Array(size).fill(null).map(() => defaultFactory());
     }
-    return new Array(size).fill(null).map(() =>
-      this.createNestedArray(sizes, dimIndex + 1, defaultFactory)
-    );
+    return new Array(size)
+      .fill(null)
+      .map(() => this.createNestedArray(sizes, dimIndex + 1, defaultFactory));
   }
 
   /**
    * LBound - Get lower bound of array dimension
    * VB6: LBound(arr) or LBound(arr, 2) for multi-dimensional
    */
-  public lbound(arr: any, dimension: number = 1): number {
+  public lbound(arr: unknown, dimension: number = 1): number {
     if (!arr || !Array.isArray(arr)) return 0;
 
+    const vb6Arr = arr as VB6Array<unknown>;
     if (dimension === 1) {
-      return (arr as any).__lbound ?? 0;
+      return vb6Arr.__lbound ?? 0;
     }
 
     // Navigate to the specified dimension
-    let current: any = arr;
+    let current: unknown = arr;
     for (let i = 1; i < dimension; i++) {
       if (Array.isArray(current) && current.length > 0) {
         current = current[0];
@@ -1202,25 +1398,26 @@ export class VB6Runtime {
       }
     }
 
-    return (current as any)?.__lbound ?? 0;
+    return (current as VB6Array<unknown>).__lbound ?? 0;
   }
 
   /**
    * UBound - Get upper bound of array dimension
    * VB6: UBound(arr) or UBound(arr, 2) for multi-dimensional
    */
-  public ubound(arr: any, dimension: number = 1): number {
+  public ubound(arr: unknown, dimension: number = 1): number {
     if (!arr || !Array.isArray(arr)) return -1;
 
+    const vb6Arr = arr as VB6Array<unknown>;
     if (dimension === 1) {
-      if ((arr as any).__ubound !== undefined) {
-        return (arr as any).__ubound;
+      if (vb6Arr.__ubound !== undefined) {
+        return vb6Arr.__ubound;
       }
       return arr.length - 1;
     }
 
     // Navigate to the specified dimension
-    let current: any = arr;
+    let current: unknown = arr;
     for (let i = 1; i < dimension; i++) {
       if (Array.isArray(current) && current.length > 0) {
         current = current[0];
@@ -1229,8 +1426,9 @@ export class VB6Runtime {
       }
     }
 
-    if ((current as any)?.__ubound !== undefined) {
-      return (current as any).__ubound;
+    const currentVb6 = current as VB6Array<unknown>;
+    if (currentVb6.__ubound !== undefined) {
+      return currentVb6.__ubound;
     }
     return Array.isArray(current) ? current.length - 1 : -1;
   }
@@ -1239,17 +1437,17 @@ export class VB6Runtime {
    * Array function - Create array from arguments
    * VB6: arr = Array(1, 2, 3, 4, 5)
    */
-  public array(...items: any[]): any[] {
-    const arr = [...items];
-    (arr as any).__lbound = 0;
-    (arr as any).__ubound = items.length - 1;
+  public array<T>(...items: T[]): VB6Array<T> {
+    const arr = [...items] as VB6Array<T>;
+    arr.__lbound = 0;
+    arr.__ubound = items.length - 1;
     return arr;
   }
 
   /**
    * IsArray - Check if variable is an array
    */
-  public isArray(value: any): boolean {
+  public isArray(value: unknown): boolean {
     return Array.isArray(value);
   }
 
@@ -1257,12 +1455,14 @@ export class VB6Runtime {
    * Split - Split string into array
    * VB6: arr = Split(str, ",")
    */
-  public split(expression: string, delimiter: string = ' ', limit: number = -1): string[] {
-    if (expression === null || expression === undefined) return [];
+  public split(expression: string, delimiter: string = ' ', limit: number = -1): VB6Array<string> {
+    if (expression === null || expression === undefined) return [] as VB6Array<string>;
     const str = String(expression);
-    const arr = limit === -1 ? str.split(delimiter) : str.split(delimiter, limit);
-    (arr as any).__lbound = 0;
-    (arr as any).__ubound = arr.length - 1;
+    const arr = (
+      limit === -1 ? str.split(delimiter) : str.split(delimiter, limit)
+    ) as VB6Array<string>;
+    arr.__lbound = 0;
+    arr.__ubound = arr.length - 1;
     return arr;
   }
 
@@ -1270,7 +1470,7 @@ export class VB6Runtime {
    * Join - Join array into string
    * VB6: str = Join(arr, ",")
    */
-  public join(sourceArray: any[], delimiter: string = ' '): string {
+  public join(sourceArray: unknown[], delimiter: string = ' '): string {
     if (!Array.isArray(sourceArray)) return '';
     return sourceArray.join(delimiter);
   }
@@ -1279,20 +1479,26 @@ export class VB6Runtime {
    * Filter - Filter array elements
    * VB6: arr = Filter(sourceArray, match, include)
    */
-  public filter(sourceArray: string[], match: string, include: boolean = true, compare: number = 0): string[] {
-    if (!Array.isArray(sourceArray)) return [];
+  public filter(
+    sourceArray: string[],
+    match: string,
+    include: boolean = true,
+    compare: number = 0
+  ): VB6Array<string> {
+    if (!Array.isArray(sourceArray)) return [] as VB6Array<string>;
 
     const result = sourceArray.filter(item => {
       const itemStr = String(item);
       const matchStr = String(match);
-      const found = compare === 0
-        ? itemStr.includes(matchStr)  // Binary (case-sensitive)
-        : itemStr.toLowerCase().includes(matchStr.toLowerCase());  // Text (case-insensitive)
+      const found =
+        compare === 0
+          ? itemStr.includes(matchStr) // Binary (case-sensitive)
+          : itemStr.toLowerCase().includes(matchStr.toLowerCase()); // Text (case-insensitive)
       return include ? found : !found;
-    });
+    }) as VB6Array<string>;
 
-    (result as any).__lbound = 0;
-    (result as any).__ubound = result.length - 1;
+    result.__lbound = 0;
+    result.__ubound = result.length - 1;
     return result;
   }
 
@@ -1304,7 +1510,7 @@ export class VB6Runtime {
    * TypeOf...Is - Check if object is of a specific type
    * VB6: If TypeOf obj Is Form Then
    */
-  public isTypeOf(obj: any, typeName: string): boolean {
+  public isTypeOf(obj: unknown, typeName: string): boolean {
     if (obj === null || obj === undefined) return false;
 
     const typeNameLower = typeName.toLowerCase();
@@ -1330,30 +1536,47 @@ export class VB6Runtime {
       case 'array':
         return Array.isArray(obj);
       case 'collection':
-        return obj && typeof obj.Add === 'function' && typeof obj.Item === 'function';
+        return (
+          obj &&
+          typeof obj === 'object' &&
+          'Add' in obj &&
+          typeof (obj as Record<string, unknown>).Add === 'function' &&
+          'Item' in obj &&
+          typeof (obj as Record<string, unknown>).Item === 'function'
+        );
       case 'dictionary':
-        return obj && typeof obj.Add === 'function' && typeof obj.Exists === 'function';
+        return (
+          obj &&
+          typeof obj === 'object' &&
+          'Add' in obj &&
+          typeof (obj as Record<string, unknown>).Add === 'function' &&
+          'Exists' in obj &&
+          typeof (obj as Record<string, unknown>).Exists === 'function'
+        );
     }
 
     // Check constructor name
-    if (obj.constructor?.name === typeName) return true;
+    if (typeof obj === 'object' && obj !== null && obj.constructor?.name === typeName) return true;
 
     // Check prototype chain
     if (typeof obj === 'object' && obj !== null) {
+      const objWithImplements = obj as Record<string, unknown>;
+
       // Check __implements array for interface checking
-      if (obj.__implements && Array.isArray(obj.__implements)) {
-        if (obj.__implements.includes(typeName)) return true;
+      if (objWithImplements.__implements && Array.isArray(objWithImplements.__implements)) {
+        if (objWithImplements.__implements.includes(typeName)) return true;
       }
 
       // Check if object has implements method
-      if (typeof obj.implements === 'function') {
-        return obj.implements(typeName);
+      if (typeof objWithImplements.implements === 'function') {
+        return objWithImplements.implements(typeName);
       }
 
       // Check instanceof for class types
       try {
-        const constructor = (globalThis as any)[typeName];
-        if (constructor && obj instanceof constructor) return true;
+        const globalObj = globalThis as Record<string, unknown>;
+        const constructor = globalObj[typeName];
+        if (typeof constructor === 'function' && obj instanceof (constructor as new (...args: unknown[]) => unknown)) return true;
       } catch {
         // Constructor not found
       }
@@ -1370,15 +1593,15 @@ export class VB6Runtime {
    * Debug.Print - Output to debug window (console)
    */
   public debugPrint(...args: any[]): void {
-    const output = args.map(arg => {
-      if (arg === null) return 'Null';
-      if (arg === undefined) return 'Empty';
-      if (typeof arg === 'boolean') return arg ? 'True' : 'False';
-      if (arg instanceof Date) return this.formatDateForDebug(arg);
-      return String(arg);
-    }).join(' ');
-
-    console.log(`[Debug] ${output}`);
+    const output = args
+      .map(arg => {
+        if (arg === null) return 'Null';
+        if (arg === undefined) return 'Empty';
+        if (typeof arg === 'boolean') return arg ? 'True' : 'False';
+        if (arg instanceof Date) return this.formatDateForDebug(arg);
+        return String(arg);
+      })
+      .join(' ');
   }
 
   /**
@@ -1445,19 +1668,19 @@ export class VB6Runtime {
    */
   public getSystemMetric(index: number): number {
     switch (index) {
-      case 0:  // SM_CXSCREEN
+      case 0: // SM_CXSCREEN
         return window.screen.width;
-      case 1:  // SM_CYSCREEN
+      case 1: // SM_CYSCREEN
         return window.screen.height;
-      case 2:  // SM_CXVSCROLL
+      case 2: // SM_CXVSCROLL
         return 17;
-      case 3:  // SM_CYHSCROLL
+      case 3: // SM_CYHSCROLL
         return 17;
-      case 4:  // SM_CYCAPTION
+      case 4: // SM_CYCAPTION
         return 23;
-      case 5:  // SM_CXBORDER
+      case 5: // SM_CXBORDER
         return 1;
-      case 6:  // SM_CYBORDER
+      case 6: // SM_CYBORDER
         return 1;
       case 16: // SM_CXFULLSCREEN
         return window.innerWidth;
@@ -1481,7 +1704,11 @@ export class VB6Runtime {
    */
   public beep(frequency: number = 440, duration: number = 200): void {
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const win = window as WindowWithWebkit;
+      const AudioContextCtor = win.AudioContext || win.webkitAudioContext;
+      if (!AudioContextCtor) return;
+
+      const audioContext = new AudioContextCtor();
       const oscillator = audioContext.createOscillator();
       oscillator.frequency.value = frequency;
       oscillator.connect(audioContext.destination);
@@ -1491,7 +1718,7 @@ export class VB6Runtime {
         audioContext.close();
       }, duration);
     } catch (e) {
-      console.log('[VB6] Beep');
+      // Audio API may not be available in all environments
     }
   }
 
@@ -1503,7 +1730,7 @@ export class VB6Runtime {
       const audio = new Audio(soundFile);
       audio.play();
     } catch (e) {
-      console.log(`[VB6] PlaySound: ${soundFile}`);
+      // Audio playback may fail silently
     }
   }
 
@@ -1511,7 +1738,6 @@ export class VB6Runtime {
    * MCI send string (multimedia control)
    */
   public mciSendString(command: string): number {
-    console.log(`[VB6 MCI] ${command}`);
     return 0;
   }
 
@@ -1531,27 +1757,27 @@ export class VB6Runtime {
       case 'yyyy': // Year
         result.setFullYear(result.getFullYear() + number);
         break;
-      case 'q':    // Quarter
-        result.setMonth(result.getMonth() + (number * 3));
+      case 'q': // Quarter
+        result.setMonth(result.getMonth() + number * 3);
         break;
-      case 'm':    // Month
+      case 'm': // Month
         result.setMonth(result.getMonth() + number);
         break;
-      case 'y':    // Day of year
-      case 'd':    // Day
-      case 'w':    // Weekday
+      case 'y': // Day of year
+      case 'd': // Day
+      case 'w': // Weekday
         result.setDate(result.getDate() + number);
         break;
-      case 'ww':   // Week
-        result.setDate(result.getDate() + (number * 7));
+      case 'ww': // Week
+        result.setDate(result.getDate() + number * 7);
         break;
-      case 'h':    // Hour
+      case 'h': // Hour
         result.setHours(result.getHours() + number);
         break;
-      case 'n':    // Minute
+      case 'n': // Minute
         result.setMinutes(result.getMinutes() + number);
         break;
-      case 's':    // Second
+      case 's': // Second
         result.setSeconds(result.getSeconds() + number);
         break;
     }
@@ -1563,7 +1789,13 @@ export class VB6Runtime {
    * DateDiff - Get difference between dates
    * VB6: DateDiff("d", date1, date2)
    */
-  public dateDiff(interval: string, date1: Date, date2: Date, firstDayOfWeek: number = 1, firstWeekOfYear: number = 1): number {
+  public dateDiff(
+    interval: string,
+    date1: Date,
+    date2: Date,
+    firstDayOfWeek: number = 1,
+    firstWeekOfYear: number = 1
+  ): number {
     const d1 = new Date(date1).getTime();
     const d2 = new Date(date2).getTime();
     const diff = d2 - d1;
@@ -1572,26 +1804,26 @@ export class VB6Runtime {
     switch (intervalLower) {
       case 'yyyy': // Year
         return new Date(date2).getFullYear() - new Date(date1).getFullYear();
-      case 'q':    // Quarter
+      case 'q': // Quarter
         const q1 = Math.floor(new Date(date1).getMonth() / 3);
         const q2 = Math.floor(new Date(date2).getMonth() / 3);
         const yearDiff = new Date(date2).getFullYear() - new Date(date1).getFullYear();
-        return (yearDiff * 4) + (q2 - q1);
-      case 'm':    // Month
+        return yearDiff * 4 + (q2 - q1);
+      case 'm': // Month
         const months1 = new Date(date1).getFullYear() * 12 + new Date(date1).getMonth();
         const months2 = new Date(date2).getFullYear() * 12 + new Date(date2).getMonth();
         return months2 - months1;
-      case 'y':    // Day of year
-      case 'd':    // Day
-      case 'w':    // Weekday
+      case 'y': // Day of year
+      case 'd': // Day
+      case 'w': // Weekday
         return Math.floor(diff / (1000 * 60 * 60 * 24));
-      case 'ww':   // Week
+      case 'ww': // Week
         return Math.floor(diff / (1000 * 60 * 60 * 24 * 7));
-      case 'h':    // Hour
+      case 'h': // Hour
         return Math.floor(diff / (1000 * 60 * 60));
-      case 'n':    // Minute
+      case 'n': // Minute
         return Math.floor(diff / (1000 * 60));
-      case 's':    // Second
+      case 's': // Second
         return Math.floor(diff / 1000);
       default:
         return 0;
@@ -1602,34 +1834,39 @@ export class VB6Runtime {
    * DatePart - Get part of date
    * VB6: DatePart("m", date)
    */
-  public datePart(interval: string, date: Date, firstDayOfWeek: number = 1, firstWeekOfYear: number = 1): number {
+  public datePart(
+    interval: string,
+    date: Date,
+    firstDayOfWeek: number = 1,
+    firstWeekOfYear: number = 1
+  ): number {
     const d = new Date(date);
     const intervalLower = interval.toLowerCase();
 
     switch (intervalLower) {
       case 'yyyy': // Year
         return d.getFullYear();
-      case 'q':    // Quarter
+      case 'q': // Quarter
         return Math.floor(d.getMonth() / 3) + 1;
-      case 'm':    // Month
+      case 'm': // Month
         return d.getMonth() + 1;
-      case 'y':    // Day of year
+      case 'y': // Day of year
         const start = new Date(d.getFullYear(), 0, 0);
         const diff = d.getTime() - start.getTime();
         return Math.floor(diff / (1000 * 60 * 60 * 24));
-      case 'd':    // Day
+      case 'd': // Day
         return d.getDate();
-      case 'w':    // Weekday (1 = Sunday in VB6 default)
+      case 'w': // Weekday (1 = Sunday in VB6 default)
         return d.getDay() + 1;
-      case 'ww':   // Week of year
+      case 'ww': // Week of year
         const startOfYear = new Date(d.getFullYear(), 0, 1);
         const days = Math.floor((d.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
         return Math.ceil((days + startOfYear.getDay() + 1) / 7);
-      case 'h':    // Hour
+      case 'h': // Hour
         return d.getHours();
-      case 'n':    // Minute
+      case 'n': // Minute
         return d.getMinutes();
-      case 's':    // Second
+      case 's': // Second
         return d.getSeconds();
       default:
         return 0;
@@ -1688,10 +1925,33 @@ export class VB6Runtime {
    */
   public monthName(month: number, abbreviate: boolean = false): string {
     const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
-    const abbrev = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const abbrev = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
 
     if (month < 1 || month > 12) return '';
     return abbreviate ? abbrev[month - 1] : months[month - 1];
@@ -1700,7 +1960,11 @@ export class VB6Runtime {
   /**
    * WeekdayName - Get name of weekday
    */
-  public weekdayName(weekday: number, abbreviate: boolean = false, firstDayOfWeek: number = 1): string {
+  public weekdayName(
+    weekday: number,
+    abbreviate: boolean = false,
+    firstDayOfWeek: number = 1
+  ): string {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const abbrev = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -1715,7 +1979,12 @@ export class VB6Runtime {
    */
   public timer(): number {
     const now = new Date();
-    return now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + now.getMilliseconds() / 1000;
+    return (
+      now.getHours() * 3600 +
+      now.getMinutes() * 60 +
+      now.getSeconds() +
+      now.getMilliseconds() / 1000
+    );
   }
 
   /**
@@ -1729,10 +1998,10 @@ export class VB6Runtime {
         window.removeEventListener(eventType, handler);
       });
     }
-    
+
     // Clear the listeners map
     this.windowListeners.clear();
-    
+
     // Remove all EventEmitter listeners
     this.removeAllListeners();
   }
@@ -1751,7 +2020,7 @@ export {
   OnErrorResumeNext,
   OnErrorGoToZero,
   Resume,
-  ResumeNext
+  ResumeNext,
 };
 
 // Export all advanced APIs

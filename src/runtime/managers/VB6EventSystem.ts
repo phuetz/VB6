@@ -42,10 +42,10 @@ export class VB6EventSystem extends EventEmitter {
    */
   registerEvent(event: VB6Event): void {
     const key = `${event.module}.${event.name}`;
-    
+
     // DESIGN PATTERN FIX: Validate event before registration
     this.validateEvent(event);
-    
+
     if (this.events.has(key)) {
       console.warn(`Event '${key}' already exists, overriding...`);
     }
@@ -67,14 +67,13 @@ export class VB6EventSystem extends EventEmitter {
       module?: string;
     } = {}
   ): void {
-    
     const subscription: EventSubscription = {
       event: eventName,
       handler,
       context: options.context,
       once: options.once || false,
       priority: options.priority || 0,
-      module: options.module
+      module: options.module,
     };
 
     if (!this.subscriptions.has(eventName)) {
@@ -83,7 +82,7 @@ export class VB6EventSystem extends EventEmitter {
 
     const eventSubs = this.subscriptions.get(eventName)!;
     eventSubs.push(subscription);
-    
+
     // DESIGN PATTERN FIX: Sort by priority (higher priority first)
     eventSubs.sort((a, b) => b.priority - a.priority);
 
@@ -93,7 +92,10 @@ export class VB6EventSystem extends EventEmitter {
   /**
    * DESIGN PATTERN FIX: Unsubscribe from events
    */
-  unsubscribeFromEvent(eventName: string, handler?: (...args: any[]) => void | Promise<void>): void {
+  unsubscribeFromEvent(
+    eventName: string,
+    handler?: (...args: any[]) => void | Promise<void>
+  ): void {
     const eventSubs = this.subscriptions.get(eventName);
     if (!eventSubs) return;
 
@@ -121,7 +123,7 @@ export class VB6EventSystem extends EventEmitter {
    */
   async fireEvent(eventName: string, ...args: any[]): Promise<void> {
     const event = this.getEvent(eventName);
-    
+
     if (event && !event.enabled) {
       return; // Event is disabled
     }
@@ -135,7 +137,7 @@ export class VB6EventSystem extends EventEmitter {
     this.eventQueue.push({
       event: eventName,
       args,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     // Limit queue size to prevent memory issues
@@ -152,9 +154,9 @@ export class VB6EventSystem extends EventEmitter {
    */
   private async processEventQueue(): Promise<void> {
     if (this.processing) return;
-    
+
     this.processing = true;
-    
+
     try {
       while (this.eventQueue.length > 0) {
         const { event, args } = this.eventQueue.shift()!;
@@ -187,13 +189,12 @@ export class VB6EventSystem extends EventEmitter {
         if (subscription.once) {
           toRemove.push(subscription);
         }
-
       } catch (error) {
         this.emit('eventHandlerError', {
           event: eventName,
           subscription,
           error,
-          args
+          args,
         });
       }
     }
@@ -259,7 +260,7 @@ export class VB6EventSystem extends EventEmitter {
       registeredEvents: this.events.size,
       totalSubscriptions,
       queueLength: this.eventQueue.length,
-      processing: this.processing
+      processing: this.processing,
     };
   }
 
@@ -314,7 +315,7 @@ export class VB6EventSystem extends EventEmitter {
    */
   private validateEventParameters(event: VB6Event, args: any[]): void {
     const required = event.parameters.filter(p => !p.isOptional);
-    
+
     if (args.length < required.length) {
       throw new Error(
         `Event '${event.name}' expects at least ${required.length} parameters, got ${args.length}`
@@ -345,7 +346,7 @@ export class VB6EventSystem extends EventEmitter {
    */
   private isTypeCompatible(value: any, targetType: VB6DataType): boolean {
     if (targetType === VB6DataType.vbVariant) return true;
-    
+
     switch (targetType) {
       case VB6DataType.vbInteger:
       case VB6DataType.vbLong:

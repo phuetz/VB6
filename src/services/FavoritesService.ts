@@ -41,7 +41,7 @@ export class FavoritesService {
         this.favorites = parsed.map((fav: any) => ({
           ...fav,
           dateAdded: new Date(fav.dateAdded),
-          lastAccessed: fav.lastAccessed ? new Date(fav.lastAccessed) : undefined
+          lastAccessed: fav.lastAccessed ? new Date(fav.lastAccessed) : undefined,
         }));
       }
     } catch (error) {
@@ -80,7 +80,7 @@ export class FavoritesService {
       path,
       name: finalName,
       dateAdded: new Date(),
-      projectType: projectType || 'vb6'
+      projectType: projectType || 'vb6',
     };
 
     this.favorites.unshift(newFavorite);
@@ -98,7 +98,7 @@ export class FavoritesService {
   removeFavorite(path: string): boolean {
     const initialLength = this.favorites.length;
     this.favorites = this.favorites.filter(fav => fav.path !== path);
-    
+
     if (this.favorites.length < initialLength) {
       this.saveFavorites();
       return true;
@@ -155,14 +155,17 @@ export class FavoritesService {
     if (index === -1) return false;
 
     const newIndex = direction === 'up' ? index - 1 : index + 1;
-    
+
     if (newIndex < 0 || newIndex >= this.favorites.length) {
       return false;
     }
 
     // Échanger les positions
-    [this.favorites[index], this.favorites[newIndex]] = [this.favorites[newIndex], this.favorites[index]];
-    
+    [this.favorites[index], this.favorites[newIndex]] = [
+      this.favorites[newIndex],
+      this.favorites[index],
+    ];
+
     this.saveFavorites();
     return true;
   }
@@ -171,19 +174,19 @@ export class FavoritesService {
   cleanupFavorites(): number {
     const originalLength = this.favorites.length;
     const seen = new Set<string>();
-    
+
     this.favorites = this.favorites.filter(fav => {
       // Supprimer les doublons
       if (seen.has(fav.path)) {
         return false;
       }
       seen.add(fav.path);
-      
+
       // Supprimer les entrées invalides
       if (!fav.path || !fav.name) {
         return false;
       }
-      
+
       return true;
     });
 
@@ -191,7 +194,7 @@ export class FavoritesService {
     if (cleaned > 0) {
       this.saveFavorites();
     }
-    
+
     return cleaned;
   }
 
@@ -206,32 +209,35 @@ export class FavoritesService {
       const imported = JSON.parse(jsonData);
       if (Array.isArray(imported)) {
         // Valider la structure
-        const validFavorites = imported.filter(fav => 
-          fav.path && fav.name && typeof fav.path === 'string' && typeof fav.name === 'string'
-        ).map(fav => ({
-          ...fav,
-          id: fav.id || `fav_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          dateAdded: fav.dateAdded ? new Date(fav.dateAdded) : new Date(),
-          lastAccessed: fav.lastAccessed ? new Date(fav.lastAccessed) : undefined,
-          projectType: fav.projectType || 'vb6'
-        }));
+        const validFavorites = imported
+          .filter(
+            fav =>
+              fav.path && fav.name && typeof fav.path === 'string' && typeof fav.name === 'string'
+          )
+          .map(fav => ({
+            ...fav,
+            id: fav.id || `fav_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            dateAdded: fav.dateAdded ? new Date(fav.dateAdded) : new Date(),
+            lastAccessed: fav.lastAccessed ? new Date(fav.lastAccessed) : undefined,
+            projectType: fav.projectType || 'vb6',
+          }));
 
         // Fusionner avec les favoris existants (éviter les doublons)
         const existingPaths = new Set(this.favorites.map(fav => fav.path));
         const newFavorites = validFavorites.filter(fav => !existingPaths.has(fav.path));
-        
+
         this.favorites = [...this.favorites, ...newFavorites];
-        
+
         // Respecter la limite
         if (this.favorites.length > this.MAX_FAVORITES) {
           this.favorites = this.favorites.slice(0, this.MAX_FAVORITES);
         }
-        
+
         this.saveFavorites();
         return true;
       }
     } catch (error) {
-      logger.error('Erreur lors de l\'importation des favoris:', error);
+      logger.error("Erreur lors de l'importation des favoris:", error);
     }
     return false;
   }
@@ -239,7 +245,7 @@ export class FavoritesService {
   // Écouter les changements de favoris
   subscribe(listener: (favorites: FavoriteDirectory[]) => void): () => void {
     this.listeners.push(listener);
-    
+
     // Retourner une fonction de désabonnement
     return () => {
       const index = this.listeners.indexOf(listener);
@@ -259,15 +265,17 @@ export class FavoritesService {
   } {
     const vb6Count = this.favorites.filter(fav => fav.projectType === 'vb6').length;
     const recentCount = this.favorites.filter(fav => fav.lastAccessed).length;
-    
-    const dates = this.favorites.map(fav => fav.dateAdded).sort((a, b) => a.getTime() - b.getTime());
-    
+
+    const dates = this.favorites
+      .map(fav => fav.dateAdded)
+      .sort((a, b) => a.getTime() - b.getTime());
+
     return {
       totalFavorites: this.favorites.length,
       vb6Projects: vb6Count,
       recentlyAccessed: recentCount,
       oldestFavorite: dates.length > 0 ? dates[0] : null,
-      newestFavorite: dates.length > 0 ? dates[dates.length - 1] : null
+      newestFavorite: dates.length > 0 ? dates[dates.length - 1] : null,
     };
   }
 

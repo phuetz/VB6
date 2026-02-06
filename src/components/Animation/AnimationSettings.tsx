@@ -23,21 +23,21 @@ export const AnimationSettings: React.FC<AnimationSettingsProps> = ({
   visible,
   onClose,
   settings,
-  onUpdateSettings
+  onUpdateSettings,
 }) => {
   if (!visible) return null;
 
   const handleToggle = (key: string) => {
     onUpdateSettings({
       ...settings,
-      [key]: !settings[key as keyof typeof settings]
+      [key]: !settings[key as keyof typeof settings],
     });
   };
 
   const handleSpeedChange = (speed: 'slow' | 'normal' | 'fast') => {
     onUpdateSettings({
       ...settings,
-      animationSpeed: speed
+      animationSpeed: speed,
     });
   };
 
@@ -48,14 +48,9 @@ export const AnimationSettings: React.FC<AnimationSettingsProps> = ({
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Zap className="text-purple-500" size={24} />
-            <h2 className="text-xl font-semibold text-gray-800">
-              Animation Settings
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-800">Animation Settings</h2>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
             ×
           </button>
         </div>
@@ -113,7 +108,7 @@ export const AnimationSettings: React.FC<AnimationSettingsProps> = ({
           {/* Animation Types */}
           <div className="space-y-4">
             <h3 className="font-semibold text-gray-800 mb-3">Animation Types</h3>
-            
+
             {/* Show Animation Overlay */}
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-3">
@@ -227,8 +222,8 @@ export const AnimationSettings: React.FC<AnimationSettingsProps> = ({
               <div>
                 <h4 className="font-medium text-yellow-800">Performance Note</h4>
                 <p className="text-sm text-yellow-700 mt-1">
-                  Animations may impact performance with many controls. 
-                  Disable animations if you experience slowdowns during complex operations.
+                  Animations may impact performance with many controls. Disable animations if you
+                  experience slowdowns during complex operations.
                 </p>
               </div>
             </div>
@@ -238,29 +233,33 @@ export const AnimationSettings: React.FC<AnimationSettingsProps> = ({
         {/* Footer */}
         <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
           <button
-            onClick={() => onUpdateSettings({
-              enableAnimations: false,
-              animationSpeed: 'normal',
-              showAnimationOverlay: false,
-              enableSnapAnimations: false,
-              enableAlignmentAnimations: false,
-              enableResizeAnimations: false,
-              enableFadeAnimations: false,
-            })}
+            onClick={() =>
+              onUpdateSettings({
+                enableAnimations: false,
+                animationSpeed: 'normal',
+                showAnimationOverlay: false,
+                enableSnapAnimations: false,
+                enableAlignmentAnimations: false,
+                enableResizeAnimations: false,
+                enableFadeAnimations: false,
+              })
+            }
             className="px-4 py-2 text-gray-700 border border-gray-300 rounded hover:bg-gray-50"
           >
             Disable All
           </button>
           <button
-            onClick={() => onUpdateSettings({
-              enableAnimations: true,
-              animationSpeed: 'normal',
-              showAnimationOverlay: true,
-              enableSnapAnimations: true,
-              enableAlignmentAnimations: true,
-              enableResizeAnimations: true,
-              enableFadeAnimations: true,
-            })}
+            onClick={() =>
+              onUpdateSettings({
+                enableAnimations: true,
+                animationSpeed: 'normal',
+                showAnimationOverlay: true,
+                enableSnapAnimations: true,
+                enableAlignmentAnimations: true,
+                enableResizeAnimations: true,
+                enableFadeAnimations: true,
+              })
+            }
             className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
           >
             Enable All

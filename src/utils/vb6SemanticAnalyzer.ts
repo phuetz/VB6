@@ -51,7 +51,7 @@ const BUILTINS = new Set([
 // VB6SemanticAnalyzer class wrapper for compatibility
 export class VB6SemanticAnalyzer {
   constructor() {}
-  
+
   analyze(code: string): SemanticIssue[] {
     return analyzeVBSemantics(code);
   }
@@ -65,19 +65,19 @@ export function analyzeVBSemantics(code: string): SemanticIssue[] {
   if (code.length > 1000000) {
     return [{ line: 0, message: 'Code too large to analyze', code: 'SEM_ERR' }];
   }
-  
+
   let ast;
   try {
     ast = parseVB6Module(code, 'Module1');
   } catch (error) {
     return [{ line: 0, message: `Parse error: ${error}`, code: 'SEM_PARSE' }];
   }
-  
+
   // PARSER EDGE CASE FIX: Validate AST structure
   if (!ast || !ast.variables || !ast.procedures) {
     return [{ line: 0, message: 'Invalid AST structure', code: 'SEM_AST' }];
   }
-  
+
   const issues: SemanticIssue[] = [];
   const moduleVars = new Set(ast.variables.map(v => v.name.toLowerCase()));
 
@@ -123,13 +123,13 @@ export function analyzeVBSemantics(code: string): SemanticIssue[] {
           }
         }
       });
-      
+
       // PARSER EDGE CASE FIX: Limit total issues to prevent memory exhaustion
       if (issues.length >= 10000) {
         issues.push({
           line: 0,
           message: 'Too many issues found, analysis stopped',
-          code: 'SEM_LIMIT'
+          code: 'SEM_LIMIT',
         });
         return issues;
       }

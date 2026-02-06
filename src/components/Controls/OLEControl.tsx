@@ -7,10 +7,10 @@ interface OLEControlProps {
   onPropertyChange?: (property: string, value: any) => void;
 }
 
-export const OLEControl: React.FC<OLEControlProps> = ({ 
-  control, 
+export const OLEControl: React.FC<OLEControlProps> = ({
+  control,
   isDesignMode = false,
-  onPropertyChange 
+  onPropertyChange,
 }) => {
   // VB6 OLE control properties
   const {
@@ -49,15 +49,14 @@ export const OLEControl: React.FC<OLEControlProps> = ({
     'Word.Document': { icon: '📄', name: 'Microsoft Word Document' },
     'PowerPoint.Slide': { icon: '📊', name: 'Microsoft PowerPoint Slide' },
     'Paint.Picture': { icon: '🎨', name: 'Bitmap Image' },
-    'Package': { icon: '📦', name: 'Package' },
+    Package: { icon: '📦', name: 'Package' },
   };
 
   // Initialize OLE object
   useEffect(() => {
     if (oleClass && !isDesignMode) {
-      console.log(`OLE: Creating object of class ${oleClass}`);
       setObjectType(oleClass);
-      
+
       // Simulate object creation
       if (oleType === 0 && sourceDoc) {
         // Linked object
@@ -66,7 +65,7 @@ export const OLEControl: React.FC<OLEControlProps> = ({
         // Embedded object
         setObjectData({ type: 'embedded', class: oleClass });
       }
-      
+
       // Fire VB6 events
       if (window.VB6Runtime?.fireEvent) {
         window.VB6Runtime.fireEvent(control.name, 'ObjectMove');
@@ -77,56 +76,62 @@ export const OLEControl: React.FC<OLEControlProps> = ({
   // Handle activation
   const handleActivation = useCallback(() => {
     if (!enabled || isDesignMode) return;
-    
+
     setIsActivated(true);
     onPropertyChange?.('activated', true);
-    
+
     // Fire VB6 events
     if (window.VB6Runtime?.fireEvent) {
       window.VB6Runtime.fireEvent(control.name, 'GotFocus');
       window.VB6Runtime.fireEvent(control.name, 'Updated');
     }
-    
+
     // Simulate in-place activation
-    console.log(`OLE: Activating ${objectType || 'object'}`);
   }, [control.name, enabled, isDesignMode, objectType, onPropertyChange]);
 
   // Handle different activation modes
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    if (autoActivate === 1 || autoActivate === 3) {
-      // GetFocus or Automatic
-      handleActivation();
-    }
-    
-    if (window.VB6Runtime?.fireEvent) {
-      window.VB6Runtime.fireEvent(control.name, 'Click');
-    }
-  }, [autoActivate, control.name, handleActivation]);
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
 
-  const handleDoubleClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    if (autoActivate === 2 || autoActivate === 3) {
-      // DoubleClick or Automatic
-      handleActivation();
-    }
-    
-    if (window.VB6Runtime?.fireEvent) {
-      window.VB6Runtime.fireEvent(control.name, 'DblClick');
-    }
-  }, [autoActivate, control.name, handleActivation]);
+      if (autoActivate === 1 || autoActivate === 3) {
+        // GetFocus or Automatic
+        handleActivation();
+      }
+
+      if (window.VB6Runtime?.fireEvent) {
+        window.VB6Runtime.fireEvent(control.name, 'Click');
+      }
+    },
+    [autoActivate, control.name, handleActivation]
+  );
+
+  const handleDoubleClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+
+      if (autoActivate === 2 || autoActivate === 3) {
+        // DoubleClick or Automatic
+        handleActivation();
+      }
+
+      if (window.VB6Runtime?.fireEvent) {
+        window.VB6Runtime.fireEvent(control.name, 'DblClick');
+      }
+    },
+    [autoActivate, control.name, handleActivation]
+  );
 
   // Handle context menu for OLE verbs
-  const handleContextMenu = useCallback((e: React.MouseEvent) => {
-    if (!autoVerbMenu || isDesignMode) return;
-    
-    e.preventDefault();
-    console.log('OLE: Showing verb menu');
-    
-    // In a real implementation, this would show OLE verbs like Edit, Open, etc.
-  }, [autoVerbMenu, isDesignMode]);
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent) => {
+      if (!autoVerbMenu || isDesignMode) return;
+
+      e.preventDefault();
+      // In a real implementation, this would show OLE verbs like Edit, Open, etc.
+    },
+    [autoVerbMenu, isDesignMode]
+  );
 
   if (!visible) return null;
 
@@ -171,15 +176,13 @@ export const OLEControl: React.FC<OLEControlProps> = ({
         </div>
       );
     }
-    
+
     if (displayType === 1 || !objectData) {
       // Icon display or no object
       const oleInfo = oleObjects[objectType as keyof typeof oleObjects];
       return (
         <div style={contentStyle}>
-          <div style={{ fontSize: '48px', marginBottom: '8px' }}>
-            {oleInfo?.icon || '📄'}
-          </div>
+          <div style={{ fontSize: '48px', marginBottom: '8px' }}>{oleInfo?.icon || '📄'}</div>
           <div style={{ fontSize: '12px', color: '#333' }}>
             {oleInfo?.name || objectType || 'Insert Object'}
           </div>
@@ -194,17 +197,19 @@ export const OLEControl: React.FC<OLEControlProps> = ({
       // Content display (simulated)
       return (
         <div style={contentStyle}>
-          <div style={{ 
-            width: '100%', 
-            height: '100%', 
-            backgroundColor: '#FFFFFF',
-            border: '1px solid #E0E0E0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '14px',
-            color: '#666',
-          }}>
+          <div
+            style={{
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E0E0E0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
+              color: '#666',
+            }}
+          >
             {objectType} Content
           </div>
         </div>
@@ -229,7 +234,7 @@ export const OLEControl: React.FC<OLEControlProps> = ({
       >
         {renderContent()}
       </div>
-      
+
       {/* Design mode indicator */}
       {isDesignMode && (
         <div
@@ -286,23 +291,23 @@ export const OLEConstants = {
   vbOLELinked: 0,
   vbOLEEmbedded: 1,
   vbOLENone: 3,
-  
+
   // Auto Activate
   vbOLEActivateManual: 0,
   vbOLEActivateGetFocus: 1,
   vbOLEActivateDoubleclick: 2,
   vbOLEActivateAuto: 3,
-  
+
   // Display Type
   vbOLEDisplayContent: 0,
   vbOLEDisplayIcon: 1,
-  
+
   // Size Mode
   vbOLESizeClip: 0,
   vbOLESizeStretch: 1,
   vbOLESizeAutoSize: 2,
   vbOLESizeZoom: 3,
-  
+
   // Update Options
   vbOLEAutomatic: 0,
   vbOLEFrozen: 1,

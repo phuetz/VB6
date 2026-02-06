@@ -8,6 +8,7 @@ interface ErrorBoundaryProps {
   onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
   showDetails?: boolean; // Whether to show technical details
   allowRetry?: boolean; // Whether to show retry button
+  resetKeys?: unknown[]; // Auto-reset when these values change
 }
 
 interface ErrorBoundaryState {
@@ -20,13 +21,12 @@ interface ErrorBoundaryState {
 
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   private readonly maxRetries = 3;
-  
+
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    console.log(`🛡️ ErrorBoundary[${props.name || 'unnamed'}] initializing...`);
-    this.state = { 
-      hasError: false, 
-      retryCount: 0 
+    this.state = {
+      hasError: false,
+      retryCount: 0,
     };
   }
 
@@ -39,7 +39,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     return {
       hasError: true,
       error: storedError,
-      errorId
+      errorId,
     };
   }
 
@@ -55,7 +55,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       // componentStack is safe to store
     };
     this.setState({ errorInfo: cleanErrorInfo });
-    
+
     // Enhanced error logging
     console.group(`🚨 Error Boundary: ${name}`);
     console.error('Error ID:', errorId);
@@ -63,7 +63,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     console.error('Component Stack:', errorInfo.componentStack);
     console.error('Error Boundary:', name);
     console.groupEnd();
-    
+
     // Fire error event through event system
     try {
       eventSystem.fire('ErrorBoundary', 'ComponentError', {
@@ -81,7 +81,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     } catch (eventError) {
       console.error('Failed to fire error event:', eventError);
     }
-    
+
     // Call custom error handler if provided
     if (onError) {
       try {
@@ -90,7 +90,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
         console.error('Error in custom error handler:', handlerError);
       }
     }
-    
+
     // Report to external error tracking service if available
     if (typeof window !== 'undefined' && (window as any).errorReporter) {
       try {
@@ -110,20 +110,28 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     }
   }
 
+  componentDidUpdate(prevProps: ErrorBoundaryProps) {
+    if (this.state.hasError && this.props.resetKeys) {
+      const prevKeys = prevProps.resetKeys || [];
+      const nextKeys = this.props.resetKeys;
+      if (nextKeys.some((key, i) => key !== prevKeys[i])) {
+        this.setState({ hasError: false, error: undefined, errorInfo: undefined, retryCount: 0 });
+      }
+    }
+  }
+
   handleRetry = () => {
     // ERROR HANDLING FIX: Implement retry logic with backoff
     const { retryCount } = this.state;
-    
+
     if (retryCount < this.maxRetries) {
-      console.log(`Retrying component (attempt ${retryCount + 1}/${this.maxRetries})`);
-      
       this.setState({
         hasError: false,
         error: undefined,
         errorInfo: undefined,
         retryCount: retryCount + 1,
       });
-      
+
       // Fire retry event
       try {
         eventSystem.fire('ErrorBoundary', 'ComponentRetry', {
@@ -147,7 +155,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     } catch (eventError) {
       console.error('Failed to fire reload event:', eventError);
     }
-    
+
     window.location.reload();
   };
 
@@ -169,12 +177,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
   render() {
     if (this.state.hasError) {
-      const {
-        fallback,
-        name = 'Component',
-        showDetails = true,
-        allowRetry = true
-      } = this.props;
+      const { fallback, name = 'Component', showDetails = true, allowRetry = true } = this.props;
       const { error, errorInfo, retryCount, errorId } = this.state;
 
       if (fallback) {
@@ -193,16 +196,22 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
         >
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
-              <svg className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.732 8.5c-.77.833-.192 2.5 1.732 2.5z" />
+              <svg
+                className="h-6 w-6 text-red-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.732 8.5c-.77.833-.192 2.5 1.732 2.5z"
+                />
               </svg>
             </div>
             <div className="flex-1">
-              <h3
-                className="text-lg font-medium text-red-800 mb-2"
-                role="heading"
-                aria-level={2}
-              >
+              <h3 className="text-lg font-medium text-red-800 mb-2" role="heading" aria-level={2}>
                 Something went wrong
               </h3>
               <div className="text-red-700 mb-4">
@@ -212,9 +221,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                     <p className="font-medium text-sm" aria-label={`Error: ${errorMessage}`}>
                       Error: {errorMessage}
                     </p>
-                    {errorId && (
-                      <p className="text-xs text-red-600 mt-1">Error ID: {errorId}</p>
-                    )}
+                    {errorId && <p className="text-xs text-red-600 mt-1">Error ID: {errorId}</p>}
                   </div>
                 )}
               </div>
@@ -294,8 +301,8 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
 // ERROR HANDLING FIX: Specialized error boundaries for different contexts
 export const PluginErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <ErrorBoundary 
-    name="Plugin System" 
+  <ErrorBoundary
+    name="Plugin System"
     showDetails={true}
     allowRetry={true}
     onError={(error, errorInfo) => {
@@ -308,14 +315,16 @@ export const PluginErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ c
 );
 
 export const EditorErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <ErrorBoundary 
-    name="Code Editor" 
+  <ErrorBoundary
+    name="Code Editor"
     showDetails={false}
     allowRetry={true}
     fallback={
       <div className="p-4 bg-yellow-50 border border-yellow-200 rounded">
         <h3 className="text-yellow-800 font-medium mb-2">Editor Temporarily Unavailable</h3>
-        <p className="text-yellow-700">The code editor encountered an error. Please try refreshing the page.</p>
+        <p className="text-yellow-700">
+          The code editor encountered an error. Please try refreshing the page.
+        </p>
       </div>
     }
   >
@@ -324,14 +333,64 @@ export const EditorErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ c
 );
 
 export const DesignerErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <ErrorBoundary 
-    name="Form Designer" 
+  <ErrorBoundary
+    name="Form Designer"
     showDetails={false}
     allowRetry={true}
     fallback={
       <div className="p-4 bg-blue-50 border border-blue-200 rounded">
         <h3 className="text-blue-800 font-medium mb-2">Designer Temporarily Unavailable</h3>
-        <p className="text-blue-700">The form designer encountered an error. Your work has been saved.</p>
+        <p className="text-blue-700">
+          The form designer encountered an error. Your work has been saved.
+        </p>
+      </div>
+    }
+  >
+    {children}
+  </ErrorBoundary>
+);
+
+export const ToolboxErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <ErrorBoundary
+    name="Toolbox"
+    showDetails={false}
+    allowRetry={true}
+    fallback={
+      <div className="p-2 bg-gray-100 border border-gray-300 rounded text-center">
+        <p className="text-gray-600 text-sm">Toolbox unavailable</p>
+      </div>
+    }
+  >
+    {children}
+  </ErrorBoundary>
+);
+
+export const DebugErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <ErrorBoundary
+    name="Debug Panel"
+    showDetails={false}
+    allowRetry={true}
+    fallback={
+      <div className="p-2 bg-orange-50 border border-orange-200 rounded text-center">
+        <p className="text-orange-700 text-sm">Debug panel encountered an error</p>
+      </div>
+    }
+  >
+    {children}
+  </ErrorBoundary>
+);
+
+export const PanelErrorBoundary: React.FC<{
+  children: React.ReactNode;
+  panelName: string;
+}> = ({ children, panelName }) => (
+  <ErrorBoundary
+    name={panelName}
+    showDetails={false}
+    allowRetry={true}
+    fallback={
+      <div className="p-2 bg-gray-50 border border-gray-200 rounded text-center">
+        <p className="text-gray-600 text-sm">{panelName} unavailable</p>
       </div>
     }
   >

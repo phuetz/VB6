@@ -22,7 +22,7 @@ import {
   Minimize2,
   Maximize2,
   Eye,
-  EyeOff
+  EyeOff,
 } from 'lucide-react';
 import { useHotReload, useHotReloadMetrics } from '../../hooks/useHotReload';
 import { HotReloadConfig } from '../../services/HotReloadEngine';
@@ -38,15 +38,15 @@ export const HotReloadDashboard: React.FC<HotReloadDashboardProps> = ({
   visible,
   onClose,
   compact = false,
-  position = 'bottom-right'
+  position = 'bottom-right',
 }) => {
   const [status, actions] = useHotReload({
     enabled: true,
     autoWatch: true,
     preserveState: true,
-    debounceMs: 300
+    debounceMs: 300,
   });
-  
+
   const metrics = useHotReloadMetrics();
   const [activeTab, setActiveTab] = useState<'status' | 'metrics' | 'config' | 'debug'>('status');
   const [isCompact, setIsCompact] = useState(compact);
@@ -57,7 +57,7 @@ export const HotReloadDashboard: React.FC<HotReloadDashboardProps> = ({
     incrementalCompilation: true,
     debounceMs: 300,
     errorRecovery: true,
-    verboseLogging: false
+    verboseLogging: false,
   });
 
   // Auto-hide after inactivity
@@ -74,7 +74,7 @@ export const HotReloadDashboard: React.FC<HotReloadDashboardProps> = ({
     'top-left': 'top-4 left-4',
     'top-right': 'top-4 right-4',
     'bottom-left': 'bottom-4 left-4',
-    'bottom-right': 'bottom-4 right-4'
+    'bottom-right': 'bottom-4 right-4',
   };
 
   const handleConfigUpdate = (key: string, value: any) => {
@@ -88,24 +88,24 @@ export const HotReloadDashboard: React.FC<HotReloadDashboardProps> = ({
 
   return (
     <div className={`fixed z-[10000] ${positionClasses[position]}`}>
-      <div className={`bg-white rounded-lg shadow-2xl border border-gray-200 transition-all duration-300 ${
-        isCompact ? 'w-80' : 'w-96'
-      }`}>
+      <div
+        className={`bg-white rounded-lg shadow-2xl border border-gray-200 transition-all duration-300 ${
+          isCompact ? 'w-80' : 'w-96'
+        }`}
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-t-lg">
           <div className="flex items-center gap-2">
             <Zap size={16} className="animate-pulse" />
             <h3 className="font-semibold text-sm">Hot-Reload Dashboard</h3>
-            {status.active && (
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            )}
+            {status.active && <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />}
           </div>
-          
+
           <div className="flex items-center gap-1">
             <button
               onClick={() => setIsCompact(!isCompact)}
               className="hover:bg-white hover:bg-opacity-20 p-1 rounded transition-colors"
-              title={isCompact ? "Expand" : "Compact"}
+              title={isCompact ? 'Expand' : 'Compact'}
             >
               {isCompact ? <Maximize2 size={14} /> : <Minimize2 size={14} />}
             </button>
@@ -134,7 +134,7 @@ export const HotReloadDashboard: React.FC<HotReloadDashboardProps> = ({
                   {status.enabled ? <Play size={12} /> : <Pause size={12} />}
                   {status.enabled ? 'ON' : 'OFF'}
                 </button>
-                
+
                 {status.isReloading && (
                   <div className="flex items-center gap-1 text-orange-600">
                     <RefreshCw size={12} className="animate-spin" />
@@ -142,14 +142,14 @@ export const HotReloadDashboard: React.FC<HotReloadDashboardProps> = ({
                   </div>
                 )}
               </div>
-              
+
               <div className="flex items-center gap-2 text-xs text-gray-600">
                 <span>{status.patchCount} patches</span>
                 <span>{Math.round(metrics.successRate)}% success</span>
                 <span>{Math.round(status.averageReloadTime)}ms avg</span>
               </div>
             </div>
-            
+
             {status.lastError && (
               <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
                 <div className="flex items-center gap-1">
@@ -167,7 +167,7 @@ export const HotReloadDashboard: React.FC<HotReloadDashboardProps> = ({
                 { id: 'status', label: 'Status', icon: Activity },
                 { id: 'metrics', label: 'Metrics', icon: TrendingUp },
                 { id: 'config', label: 'Config', icon: Settings },
-                { id: 'debug', label: 'Debug', icon: Code }
+                { id: 'debug', label: 'Debug', icon: Code },
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -207,7 +207,7 @@ export const HotReloadDashboard: React.FC<HotReloadDashboardProps> = ({
                       {status.enabled ? <Play size={16} /> : <Pause size={16} />}
                       {status.enabled ? 'Enabled' : 'Disabled'}
                     </button>
-                    
+
                     <button
                       onClick={() => {
                         actions.performManualReload();
@@ -225,29 +225,30 @@ export const HotReloadDashboard: React.FC<HotReloadDashboardProps> = ({
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-gray-50 rounded p-2">
                       <div className="text-xs text-gray-600">Status</div>
-                      <div className={`font-semibold flex items-center gap-1 ${
-                        status.active ? 'text-green-600' : 'text-gray-600'
-                      }`}>
+                      <div
+                        className={`font-semibold flex items-center gap-1 ${
+                          status.active ? 'text-green-600' : 'text-gray-600'
+                        }`}
+                      >
                         {status.active ? <CheckCircle size={14} /> : <AlertTriangle size={14} />}
                         {status.active ? 'Active' : 'Inactive'}
                       </div>
                     </div>
-                    
+
                     <div className="bg-gray-50 rounded p-2">
                       <div className="text-xs text-gray-600">Last Reload</div>
                       <div className="font-semibold text-sm">
-                        {status.lastReload 
+                        {status.lastReload
                           ? new Date(status.lastReload).toLocaleTimeString()
-                          : 'Never'
-                        }
+                          : 'Never'}
                       </div>
                     </div>
-                    
+
                     <div className="bg-gray-50 rounded p-2">
                       <div className="text-xs text-gray-600">Patches Applied</div>
                       <div className="font-semibold text-lg">{status.patchCount}</div>
                     </div>
-                    
+
                     <div className="bg-gray-50 rounded p-2">
                       <div className="text-xs text-gray-600">Avg Reload Time</div>
                       <div className="font-semibold text-lg">
@@ -314,7 +315,7 @@ export const HotReloadDashboard: React.FC<HotReloadDashboardProps> = ({
                         {Math.round(metrics.successRate)}%
                       </div>
                     </div>
-                    
+
                     <div className="bg-green-50 rounded p-3">
                       <div className="flex items-center gap-2 text-green-700">
                         <Clock size={16} />
@@ -324,7 +325,7 @@ export const HotReloadDashboard: React.FC<HotReloadDashboardProps> = ({
                         {Math.round(metrics.averageReloadTime)}ms
                       </div>
                     </div>
-                    
+
                     <div className="bg-purple-50 rounded p-3">
                       <div className="flex items-center gap-2 text-purple-700">
                         <Cpu size={16} />
@@ -334,7 +335,7 @@ export const HotReloadDashboard: React.FC<HotReloadDashboardProps> = ({
                         {Math.round(metrics.cacheHitRate)}%
                       </div>
                     </div>
-                    
+
                     <div className="bg-orange-50 rounded p-3">
                       <div className="flex items-center gap-2 text-orange-700">
                         <MemoryStick size={16} />
@@ -372,52 +373,54 @@ export const HotReloadDashboard: React.FC<HotReloadDashboardProps> = ({
                       <input
                         type="checkbox"
                         checked={config.watchFiles}
-                        onChange={(e) => handleConfigUpdate('watchFiles', e.target.checked)}
+                        onChange={e => handleConfigUpdate('watchFiles', e.target.checked)}
                         className="rounded"
                       />
                     </label>
-                    
+
                     <label className="flex items-center justify-between">
                       <span className="text-sm text-gray-700">Preserve State</span>
                       <input
                         type="checkbox"
                         checked={config.preserveState}
-                        onChange={(e) => handleConfigUpdate('preserveState', e.target.checked)}
+                        onChange={e => handleConfigUpdate('preserveState', e.target.checked)}
                         className="rounded"
                       />
                     </label>
-                    
+
                     <label className="flex items-center justify-between">
                       <span className="text-sm text-gray-700">Incremental Compilation</span>
                       <input
                         type="checkbox"
                         checked={config.incrementalCompilation}
-                        onChange={(e) => handleConfigUpdate('incrementalCompilation', e.target.checked)}
+                        onChange={e =>
+                          handleConfigUpdate('incrementalCompilation', e.target.checked)
+                        }
                         className="rounded"
                       />
                     </label>
-                    
+
                     <label className="flex items-center justify-between">
                       <span className="text-sm text-gray-700">Error Recovery</span>
                       <input
                         type="checkbox"
                         checked={config.errorRecovery}
-                        onChange={(e) => handleConfigUpdate('errorRecovery', e.target.checked)}
+                        onChange={e => handleConfigUpdate('errorRecovery', e.target.checked)}
                         className="rounded"
                       />
                     </label>
-                    
+
                     <label className="flex items-center justify-between">
                       <span className="text-sm text-gray-700">Verbose Logging</span>
                       <input
                         type="checkbox"
                         checked={config.verboseLogging}
-                        onChange={(e) => handleConfigUpdate('verboseLogging', e.target.checked)}
+                        onChange={e => handleConfigUpdate('verboseLogging', e.target.checked)}
                         className="rounded"
                       />
                     </label>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="block">
                       <span className="text-sm text-gray-700">Debounce Delay (ms)</span>
@@ -427,7 +430,7 @@ export const HotReloadDashboard: React.FC<HotReloadDashboardProps> = ({
                         max="2000"
                         step="100"
                         value={config.debounceMs}
-                        onChange={(e) => handleConfigUpdate('debounceMs', parseInt(e.target.value))}
+                        onChange={e => handleConfigUpdate('debounceMs', parseInt(e.target.value))}
                         className="w-full mt-1"
                       />
                       <div className="text-xs text-gray-500 text-center">{config.debounceMs}ms</div>
@@ -450,11 +453,10 @@ export const HotReloadDashboard: React.FC<HotReloadDashboardProps> = ({
                     <div>Cache Hit Rate: {Math.round(metrics.cacheHitRate)}%</div>
                     <div>Last Activity: {new Date(lastActivity).toLocaleTimeString()}</div>
                   </div>
-                  
+
                   <div className="flex gap-2">
                     <button
                       onClick={() => {
-                        console.log('Hot-Reload Debug Info:', { status, metrics, config });
                         setLastActivity(Date.now());
                       }}
                       className="flex-1 text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded hover:bg-gray-200"
@@ -467,7 +469,7 @@ export const HotReloadDashboard: React.FC<HotReloadDashboardProps> = ({
                         setLastActivity(Date.now());
                       }}
                       className={`flex-1 text-xs px-2 py-1 rounded transition-colors ${
-                        autoHide 
+                        autoHide
                           ? 'bg-orange-100 text-orange-700 hover:bg-orange-200'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}

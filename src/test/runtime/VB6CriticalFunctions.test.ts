@@ -11,12 +11,9 @@ import {
   Environ,
   Command,
   CreateObject,
-  GetObject
+  GetObject,
 } from '../../runtime/VB6FinalRuntimeFunctions';
-import {
-  LoadPicture,
-  SavePicture
-} from '../../runtime/VB6Picture';
+import { LoadPicture, SavePicture } from '../../runtime/VB6Picture';
 
 describe('VB6 Critical Runtime Functions', () => {
   // ============================================================================
@@ -363,7 +360,8 @@ describe('VB6 Critical Runtime Functions', () => {
     });
 
     it('should recognize data URLs', async () => {
-      const dataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      const dataUrl =
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
       expect(async () => {
         await LoadPicture(dataUrl);
       }).rejects.toThrow();
@@ -426,17 +424,7 @@ describe('VB6 Critical Runtime Functions', () => {
     });
 
     it('VarType should handle all primitive types', () => {
-      const types = [
-        undefined,
-        null,
-        true,
-        42,
-        3.14,
-        'string',
-        new Date(),
-        [],
-        {}
-      ];
+      const types = [undefined, null, true, 42, 3.14, 'string', new Date(), [], {}];
 
       types.forEach(val => {
         expect(() => VarType(val)).not.toThrow();

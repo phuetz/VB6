@@ -34,7 +34,7 @@ describe('Browser Polyfills', () => {
       const buffer = new Uint8Array(5);
       const arrayBuffer = new ArrayBuffer(5);
       const regularArray = [1, 2, 3];
-      
+
       expect(globalThis.Buffer.isBuffer(buffer)).toBe(true);
       expect(globalThis.Buffer.isBuffer(arrayBuffer)).toBe(false); // ArrayBuffer is not Uint8Array
       expect(globalThis.Buffer.isBuffer(regularArray)).toBe(false);
@@ -53,12 +53,12 @@ describe('Browser Polyfills', () => {
 
     it('should provide nextTick function', async () => {
       expect(typeof globalThis.process.nextTick).toBe('function');
-      
+
       let called = false;
       globalThis.process.nextTick(() => {
         called = true;
       });
-      
+
       // Wait for next tick
       await new Promise(resolve => setTimeout(resolve, 0));
       expect(called).toBe(true);
@@ -107,7 +107,7 @@ describe('Browser Polyfills', () => {
       await import('../polyfills');
       expect(globalThis.performance).toBeDefined();
       expect(typeof globalThis.performance.now).toBe('function');
-      
+
       const start = globalThis.performance.now();
       expect(typeof start).toBe('number');
       expect(start).toBeGreaterThan(0);
@@ -126,13 +126,13 @@ describe('Browser Polyfills', () => {
     it('should provide safe JSON parsing', async () => {
       await import('../polyfills');
       expect(typeof globalThis.safeJSONParse).toBe('function');
-      
+
       const validJson = '{"test": "value"}';
       const invalidJson = '{invalid json}';
-      
+
       const result1 = globalThis.safeJSONParse(validJson);
       expect(result1).toEqual({ test: 'value' });
-      
+
       const result2 = globalThis.safeJSONParse(invalidJson, 'fallback');
       expect(result2).toBe('fallback');
     });
@@ -140,11 +140,11 @@ describe('Browser Polyfills', () => {
     it('should provide safe JSON stringifying', async () => {
       await import('../polyfills');
       expect(typeof globalThis.safeJSONStringify).toBe('function');
-      
+
       const validObj = { test: 'value' };
       const result1 = globalThis.safeJSONStringify(validObj);
       expect(result1).toBe('{"test":"value"}');
-      
+
       // Test circular reference
       const circularObj: any = { name: 'test' };
       circularObj.self = circularObj;
@@ -157,21 +157,21 @@ describe('Browser Polyfills', () => {
     it('should provide safe property access function', async () => {
       await import('../polyfills');
       expect(typeof globalThis.safeAccess).toBe('function');
-      
+
       const obj = {
         level1: {
           level2: {
-            value: 'found'
-          }
-        }
+            value: 'found',
+          },
+        },
       };
-      
+
       const result1 = globalThis.safeAccess(obj, 'level1.level2.value');
       expect(result1).toBe('found');
-      
+
       const result2 = globalThis.safeAccess(obj, 'level1.nonexistent.value', 'default');
       expect(result2).toBe('default');
-      
+
       const result3 = globalThis.safeAccess(null, 'any.path', 'fallback');
       expect(result3).toBe('fallback');
     });
@@ -180,9 +180,20 @@ describe('Browser Polyfills', () => {
   describe('Console Enhancements', () => {
     it('should ensure all console methods exist', async () => {
       await import('../polyfills');
-      
-      const requiredMethods = ['debug', 'info', 'warn', 'error', 'trace', 'table', 'group', 'groupEnd', 'time', 'timeEnd'];
-      
+
+      const requiredMethods = [
+        'debug',
+        'info',
+        'warn',
+        'error',
+        'trace',
+        'table',
+        'group',
+        'groupEnd',
+        'time',
+        'timeEnd',
+      ];
+
       for (const method of requiredMethods) {
         expect(typeof console[method as keyof Console]).toBe('function');
       }
@@ -192,10 +203,10 @@ describe('Browser Polyfills', () => {
   describe('Array Method Safety', () => {
     it('should handle array methods safely on invalid objects', async () => {
       await import('../polyfills');
-      
+
       // Test with invalid array-like object
       const invalidArray = { length: 'invalid' };
-      
+
       // Ces méthodes devraient gérer les objets invalides
       expect(() => {
         try {
@@ -216,13 +227,13 @@ describe('Browser Polyfills', () => {
   describe('Event Listener Safety', () => {
     it('should provide safe event listener addition', async () => {
       await import('../polyfills');
-      
+
       const mockElement = {
         addEventListener: vi.fn(() => {
           throw new Error('Event listener error');
-        })
+        }),
       };
-      
+
       // Should not throw
       expect(() => {
         globalThis.addEventListener.call(mockElement, 'click', () => {}, {});

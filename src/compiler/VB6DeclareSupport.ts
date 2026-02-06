@@ -1,6 +1,6 @@
 /**
  * VB6 Declare Function/Sub Support Implementation
- * 
+ *
  * Complete support for VB6 external API declarations
  */
 
@@ -56,9 +56,10 @@ export class VB6DeclareProcessor {
    * Declare Function GetPrivateProfileString Lib "kernel32" Alias "GetPrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As String, ByVal lpDefault As String, ByVal lpReturnedString As String, ByVal nSize As Long, ByVal lpFileName As String) As Long
    */
   parseDeclareStatement(code: string, line: number): VB6DeclareFunction | null {
-    const declareRegex = /^(Public\s+|Private\s+)?Declare\s+(Function|Sub)\s+(\w+)\s+Lib\s+"([^"]+)"(?:\s+Alias\s+"([^"]+)")?(?:\s+\(([^)]*)\))?(?:\s+As\s+(.+))?$/i;
+    const declareRegex =
+      /^(Public\s+|Private\s+)?Declare\s+(Function|Sub)\s+(\w+)\s+Lib\s+"([^"]+)"(?:\s+Alias\s+"([^"]+)")?(?:\s+\(([^)]*)\))?(?:\s+As\s+(.+))?$/i;
     const match = code.match(declareRegex);
-    
+
     if (!match) return null;
 
     const scope = match[1] ? match[1].trim().toLowerCase() : 'public';
@@ -89,7 +90,7 @@ export class VB6DeclareProcessor {
       isFunction,
       public: scope === 'public',
       module: this.currentModule,
-      line
+      line,
     };
   }
 
@@ -106,7 +107,8 @@ export class VB6DeclareProcessor {
       const trimmed = param.trim();
       if (!trimmed) continue;
 
-      const paramRegex = /^(Optional\s+)?(ByRef\s+|ByVal\s+)?(\w+)(?:\s+As\s+(.+?))?(?:\s*=\s*(.+))?$/i;
+      const paramRegex =
+        /^(Optional\s+)?(ByRef\s+|ByVal\s+)?(\w+)(?:\s+As\s+(.+?))?(?:\s*=\s*(.+))?$/i;
       const match = trimmed.match(paramRegex);
 
       if (match) {
@@ -122,7 +124,7 @@ export class VB6DeclareProcessor {
           byRef,
           optional: isOptional,
           defaultValue: defaultValue ? this.parseDefaultValue(defaultValue) : undefined,
-          asString: paramType.toLowerCase() === 'string'
+          asString: paramType.toLowerCase() === 'string',
         });
       }
     }
@@ -141,11 +143,11 @@ export class VB6DeclareProcessor {
 
     for (let i = 0; i < parameterList.length; i++) {
       const char = parameterList[i];
-      
+
       if (char === '"' && (i === 0 || parameterList[i - 1] !== '\\')) {
         inQuotes = !inQuotes;
       }
-      
+
       if (!inQuotes) {
         if (char === '(') parenCount++;
         else if (char === ')') parenCount--;
@@ -155,14 +157,14 @@ export class VB6DeclareProcessor {
           continue;
         }
       }
-      
+
       current += char;
     }
-    
+
     if (current.trim()) {
       params.push(current.trim());
     }
-    
+
     return params;
   }
 
@@ -171,19 +173,19 @@ export class VB6DeclareProcessor {
    */
   private parseDefaultValue(value: string): any {
     const trimmed = value.trim();
-    
+
     if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
       return trimmed.substring(1, trimmed.length - 1);
     }
-    
+
     if (!isNaN(Number(trimmed))) {
       return Number(trimmed);
     }
-    
+
     if (trimmed.toLowerCase() === 'true') return true;
     if (trimmed.toLowerCase() === 'false') return false;
     if (trimmed.toLowerCase() === 'nothing') return null;
-    
+
     return trimmed;
   }
 
@@ -193,7 +195,7 @@ export class VB6DeclareProcessor {
   registerDeclareFunction(declareFunc: VB6DeclareFunction) {
     const key = declareFunc.public ? declareFunc.name : `${this.currentModule}.${declareFunc.name}`;
     this.declaredFunctions.set(key, declareFunc);
-    
+
     // Generate shim function if needed
     this.generateShimFunction(declareFunc);
   }
@@ -202,7 +204,10 @@ export class VB6DeclareProcessor {
    * Get declared function
    */
   getDeclaredFunction(name: string): VB6DeclareFunction | undefined {
-    return this.declaredFunctions.get(name) || this.declaredFunctions.get(`${this.currentModule}.${name}`);
+    return (
+      this.declaredFunctions.get(name) ||
+      this.declaredFunctions.get(`${this.currentModule}.${name}`)
+    );
   }
 
   /**
@@ -210,7 +215,7 @@ export class VB6DeclareProcessor {
    */
   private generateShimFunction(declareFunc: VB6DeclareFunction) {
     const library = this.getLibraryMapping(declareFunc.library);
-    
+
     if (library?.shimFunction) {
       // Use predefined shim
       this.shimFunctions.set(declareFunc.name, library.shimFunction);
@@ -220,11 +225,11 @@ export class VB6DeclareProcessor {
     // Generate generic shim
     let shimCode = `// Declare ${declareFunc.isFunction ? 'Function' : 'Sub'}: ${declareFunc.name}\n`;
     shimCode += `function ${declareFunc.name}(`;
-    
+
     const paramNames = declareFunc.parameters.map(p => p.name);
     shimCode += paramNames.join(', ');
     shimCode += `) {\n`;
-    
+
     // Add parameter validation
     for (const param of declareFunc.parameters) {
       if (!param.optional) {
@@ -233,13 +238,13 @@ export class VB6DeclareProcessor {
         shimCode += `  }\n`;
       }
     }
-    
+
     // Library-specific handling
     shimCode += `  // Library: ${declareFunc.library}\n`;
-    
+
     if (this.isUnsupportedLibrary(declareFunc.library)) {
       shimCode += `  console.warn('${declareFunc.library} not supported in web environment');\n`;
-      
+
       if (declareFunc.isFunction) {
         const defaultReturn = this.getDefaultReturnValue(declareFunc.returnType || 'Long');
         shimCode += `  return ${this.valueToJS(defaultReturn)}; // Default return value\n`;
@@ -249,9 +254,9 @@ export class VB6DeclareProcessor {
       const webImpl = this.generateWebImplementation(declareFunc);
       shimCode += webImpl;
     }
-    
+
     shimCode += `}\n`;
-    
+
     this.shimFunctions.set(declareFunc.name, shimCode);
   }
 
@@ -261,7 +266,7 @@ export class VB6DeclareProcessor {
   private generateWebImplementation(declareFunc: VB6DeclareFunction): string {
     const funcName = declareFunc.aliasName || declareFunc.name;
     const library = declareFunc.library.toLowerCase();
-    
+
     // Common Windows API implementations
     if (library.includes('kernel32')) {
       return this.generateKernel32Implementation(funcName, declareFunc);
@@ -279,39 +284,47 @@ export class VB6DeclareProcessor {
   /**
    * Generate Kernel32 API implementations
    */
-  private generateKernel32Implementation(funcName: string, declareFunc: VB6DeclareFunction): string {
+  private generateKernel32Implementation(
+    funcName: string,
+    declareFunc: VB6DeclareFunction
+  ): string {
     const lowerName = funcName.toLowerCase();
-    
+
     if (lowerName.includes('getwindowsdirectory')) {
-      return `  // GetWindowsDirectory simulation\n` +
-             `  const winDir = "C:\\\\Windows";\n` +
-             `  if (lpBuffer && nSize > winDir.length) {\n` +
-             `    // In real implementation, would copy to buffer\n` +
-             `    console.log('GetWindowsDirectory called:', winDir);\n` +
-             `    return winDir.length;\n` +
-             `  }\n` +
-             `  return 0;\n`;
+      return (
+        `  // GetWindowsDirectory simulation\n` +
+        `  const winDir = "C:\\\\Windows";\n` +
+        `  if (lpBuffer && nSize > winDir.length) {\n` +
+        `    // In real implementation, would copy to buffer\n` +
+        `    console.log('GetWindowsDirectory called:', winDir);\n` +
+        `    return winDir.length;\n` +
+        `  }\n` +
+        `  return 0;\n`
+      );
     }
-    
+
     if (lowerName === 'sleep') {
-      return `  // Sleep simulation with setTimeout\n` +
-             `  return new Promise(resolve => {\n` +
-             `    setTimeout(resolve, dwMilliseconds);\n` +
-             `  });\n`;
+      return (
+        `  // Sleep simulation with setTimeout\n` +
+        `  return new Promise(resolve => {\n` +
+        `    setTimeout(resolve, dwMilliseconds);\n` +
+        `  });\n`
+      );
     }
-    
+
     if (lowerName.includes('gettickcount')) {
-      return `  // GetTickCount simulation\n` +
-             `  return Math.floor(performance.now());\n`;
+      return `  // GetTickCount simulation\n` + `  return Math.floor(performance.now());\n`;
     }
-    
+
     if (lowerName.includes('getprivateprofilestring')) {
-      return `  // GetPrivateProfileString simulation\n` +
-             `  console.log('GetPrivateProfileString:', lpApplicationName, lpKeyName, lpFileName);\n` +
-             `  // Return default value\n` +
-             `  return lpDefault ? lpDefault.length : 0;\n`;
+      return (
+        `  // GetPrivateProfileString simulation\n` +
+        `  console.log('GetPrivateProfileString:', lpApplicationName, lpKeyName, lpFileName);\n` +
+        `  // Return default value\n` +
+        `  return lpDefault ? lpDefault.length : 0;\n`
+      );
     }
-    
+
     return this.generateGenericImplementation(declareFunc);
   }
 
@@ -320,41 +333,52 @@ export class VB6DeclareProcessor {
    */
   private generateUser32Implementation(funcName: string, declareFunc: VB6DeclareFunction): string {
     const lowerName = funcName.toLowerCase();
-    
+
     if (lowerName.includes('messagebox')) {
-      return `  // MessageBox simulation\n` +
-             `  const result = window.confirm(lpText + '\\n\\n' + lpCaption);\n` +
-             `  return result ? 1 : 2; // IDOK : IDCANCEL\n`;
+      return (
+        `  // MessageBox simulation\n` +
+        `  const result = window.confirm(lpText + '\\n\\n' + lpCaption);\n` +
+        `  return result ? 1 : 2; // IDOK : IDCANCEL\n`
+      );
     }
-    
+
     if (lowerName.includes('findwindow')) {
-      return `  // FindWindow simulation\n` +
-             `  console.log('FindWindow called:', lpClassName, lpWindowName);\n` +
-             `  return 0; // No window found in web environment\n`;
+      return (
+        `  // FindWindow simulation\n` +
+        `  console.log('FindWindow called:', lpClassName, lpWindowName);\n` +
+        `  return 0; // No window found in web environment\n`
+      );
     }
-    
+
     if (lowerName.includes('getcursorpos')) {
-      return `  // GetCursorPos simulation\n` +
-             `  // Note: Limited in web environment due to security\n` +
-             `  console.log('GetCursorPos called');\n` +
-             `  return 0;\n`;
+      return (
+        `  // GetCursorPos simulation\n` +
+        `  // Note: Limited in web environment due to security\n` +
+        `  console.log('GetCursorPos called');\n` +
+        `  return 0;\n`
+      );
     }
-    
+
     return this.generateGenericImplementation(declareFunc);
   }
 
   /**
    * Generate Advapi32 API implementations
    */
-  private generateAdvapi32Implementation(funcName: string, declareFunc: VB6DeclareFunction): string {
+  private generateAdvapi32Implementation(
+    funcName: string,
+    declareFunc: VB6DeclareFunction
+  ): string {
     const lowerName = funcName.toLowerCase();
-    
+
     if (lowerName.includes('regopen') || lowerName.includes('regquery')) {
-      return `  // Registry access simulation\n` +
-             `  console.warn('Registry access not available in web environment');\n` +
-             `  return 2; // ERROR_FILE_NOT_FOUND\n`;
+      return (
+        `  // Registry access simulation\n` +
+        `  console.warn('Registry access not available in web environment');\n` +
+        `  return 2; // ERROR_FILE_NOT_FOUND\n`
+      );
     }
-    
+
     return this.generateGenericImplementation(declareFunc);
   }
 
@@ -363,18 +387,20 @@ export class VB6DeclareProcessor {
    */
   private generateShell32Implementation(funcName: string, declareFunc: VB6DeclareFunction): string {
     const lowerName = funcName.toLowerCase();
-    
+
     if (lowerName.includes('shellexecute')) {
-      return `  // ShellExecute simulation\n` +
-             `  console.log('ShellExecute:', lpFile, lpParameters);\n` +
-             `  if (lpFile.startsWith('http://') || lpFile.startsWith('https://')) {\n` +
-             `    window.open(lpFile, '_blank');\n` +
-             `    return 42; // Success\n` +
-             `  }\n` +
-             `  console.warn('File execution not supported in web environment');\n` +
-             `  return 2; // File not found\n`;
+      return (
+        `  // ShellExecute simulation\n` +
+        `  console.log('ShellExecute:', lpFile, lpParameters);\n` +
+        `  if (lpFile.startsWith('http://') || lpFile.startsWith('https://')) {\n` +
+        `    window.open(lpFile, '_blank');\n` +
+        `    return 42; // Success\n` +
+        `  }\n` +
+        `  console.warn('File execution not supported in web environment');\n` +
+        `  return 2; // File not found\n`
+      );
     }
-    
+
     return this.generateGenericImplementation(declareFunc);
   }
 
@@ -385,12 +411,12 @@ export class VB6DeclareProcessor {
     let impl = `  // Generic implementation for ${declareFunc.name}\n`;
     impl += `  console.log('API call: ${declareFunc.name}', arguments);\n`;
     impl += `  console.warn('${declareFunc.library} API not fully supported in web environment');\n`;
-    
+
     if (declareFunc.isFunction) {
       const defaultReturn = this.getDefaultReturnValue(declareFunc.returnType || 'Long');
       impl += `  return ${this.valueToJS(defaultReturn)};\n`;
     }
-    
+
     return impl;
   }
 
@@ -423,10 +449,18 @@ export class VB6DeclareProcessor {
    */
   private isUnsupportedLibrary(library: string): boolean {
     const unsupported = [
-      'kernel32', 'user32', 'advapi32', 'shell32', 'gdi32',
-      'comdlg32', 'winmm', 'ole32', 'oleaut32', 'version'
+      'kernel32',
+      'user32',
+      'advapi32',
+      'shell32',
+      'gdi32',
+      'comdlg32',
+      'winmm',
+      'ole32',
+      'oleaut32',
+      'version',
     ];
-    
+
     return unsupported.some(lib => library.toLowerCase().includes(lib));
   }
 
@@ -445,34 +479,34 @@ export class VB6DeclareProcessor {
       {
         originalName: 'kernel32',
         available: false,
-        description: 'Windows Kernel API - Limited simulation available'
+        description: 'Windows Kernel API - Limited simulation available',
       },
       {
         originalName: 'user32',
         available: false,
-        description: 'Windows User Interface API - Limited simulation available'
+        description: 'Windows User Interface API - Limited simulation available',
       },
       {
         originalName: 'advapi32',
         available: false,
-        description: 'Advanced Windows API - Not available in web environment'
+        description: 'Advanced Windows API - Not available in web environment',
       },
       {
         originalName: 'shell32',
         available: false,
-        description: 'Windows Shell API - Limited simulation available'
+        description: 'Windows Shell API - Limited simulation available',
       },
       {
         originalName: 'gdi32',
         available: false,
-        description: 'Graphics Device Interface - Not available in web environment'
+        description: 'Graphics Device Interface - Not available in web environment',
       },
       {
         originalName: 'wininet',
         webEquivalent: 'fetch',
         available: true,
-        description: 'Internet functions - Use fetch API instead'
-      }
+        description: 'Internet functions - Use fetch API instead',
+      },
     ];
 
     for (const lib of libraries) {
@@ -486,14 +520,14 @@ export class VB6DeclareProcessor {
   generateAllShims(): string {
     let allShims = `// VB6 Declare Function/Sub Shims\n`;
     allShims += `// Generated automatically - do not edit\n\n`;
-    
+
     for (const [funcName, shimCode] of this.shimFunctions.entries()) {
       allShims += shimCode + '\n';
     }
-    
+
     // Add utility functions
     allShims += this.generateUtilityFunctions();
-    
+
     return allShims;
   }
 
@@ -547,34 +581,38 @@ const IDNO = 7;
     if (typeof value === 'string') return `"${value.replace(/"/g, '\\"')}"`;
     if (typeof value === 'boolean') return value.toString();
     if (typeof value === 'number') return value.toString();
-    
+
     return '""';
   }
 
   /**
    * Validate declare function call
    */
-  validateDeclareCall(functionName: string, args: any[]): { valid: boolean, errors: string[] } {
+  validateDeclareCall(functionName: string, args: any[]): { valid: boolean; errors: string[] } {
     const declareFunc = this.getDeclaredFunction(functionName);
     if (!declareFunc) {
       return { valid: false, errors: [`Function ${functionName} is not declared`] };
     }
 
     const errors: string[] = [];
-    
+
     // Check argument count
     const requiredParams = declareFunc.parameters.filter(p => !p.optional).length;
     if (args.length < requiredParams) {
-      errors.push(`Function ${functionName} requires at least ${requiredParams} arguments, got ${args.length}`);
+      errors.push(
+        `Function ${functionName} requires at least ${requiredParams} arguments, got ${args.length}`
+      );
     }
-    
+
     if (args.length > declareFunc.parameters.length) {
-      errors.push(`Function ${functionName} accepts at most ${declareFunc.parameters.length} arguments, got ${args.length}`);
+      errors.push(
+        `Function ${functionName} accepts at most ${declareFunc.parameters.length} arguments, got ${args.length}`
+      );
     }
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -583,30 +621,30 @@ const IDNO = 7;
    */
   generateTypeScriptDefinitions(): string {
     let tsCode = `// VB6 Declare Function/Sub TypeScript Definitions\n\n`;
-    
+
     for (const [name, declareFunc] of this.declaredFunctions.entries()) {
       tsCode += `// Declared in: ${declareFunc.module} (${declareFunc.library})\n`;
       tsCode += `declare function ${declareFunc.name}(`;
-      
+
       const paramSignatures = declareFunc.parameters.map(param => {
         const tsType = this.mapVB6TypeToTypeScript(param.type);
         const optional = param.optional ? '?' : '';
         return `${param.name}${optional}: ${tsType}`;
       });
-      
+
       tsCode += paramSignatures.join(', ');
       tsCode += ')';
-      
+
       if (declareFunc.isFunction && declareFunc.returnType) {
         const returnType = this.mapVB6TypeToTypeScript(declareFunc.returnType);
         tsCode += `: ${returnType}`;
       } else {
         tsCode += ': void';
       }
-      
+
       tsCode += ';\n\n';
     }
-    
+
     return tsCode;
   }
 
@@ -648,39 +686,43 @@ const IDNO = 7;
    * Get all declared functions in current module
    */
   getModuleDeclaredFunctions(): VB6DeclareFunction[] {
-    return Array.from(this.declaredFunctions.values())
-      .filter(func => func.module === this.currentModule);
+    return Array.from(this.declaredFunctions.values()).filter(
+      func => func.module === this.currentModule
+    );
   }
 
   /**
    * Export declare data for serialization
    */
-  export(): { functions: { [key: string]: VB6DeclareFunction }, shims: { [key: string]: string } } {
+  export(): { functions: { [key: string]: VB6DeclareFunction }; shims: { [key: string]: string } } {
     const functions: { [key: string]: VB6DeclareFunction } = {};
     const shims: { [key: string]: string } = {};
-    
+
     for (const [key, value] of this.declaredFunctions.entries()) {
       functions[key] = value;
     }
-    
+
     for (const [key, value] of this.shimFunctions.entries()) {
       shims[key] = value;
     }
-    
+
     return { functions, shims };
   }
 
   /**
    * Import declare data from serialization
    */
-  import(data: { functions: { [key: string]: VB6DeclareFunction }, shims: { [key: string]: string } }) {
+  import(data: {
+    functions: { [key: string]: VB6DeclareFunction };
+    shims: { [key: string]: string };
+  }) {
     this.declaredFunctions.clear();
     this.shimFunctions.clear();
-    
+
     for (const [key, value] of Object.entries(data.functions)) {
       this.declaredFunctions.set(key, value);
     }
-    
+
     for (const [key, value] of Object.entries(data.shims)) {
       this.shimFunctions.set(key, value);
     }
@@ -716,7 +758,7 @@ Declare Function GetTickCount Lib "kernel32" () As Long
 
   FindWindow: `
 Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
-`
+`,
 };
 
 // Global declare processor instance
