@@ -208,6 +208,46 @@ src/test/
 - Lazy load Monaco and heavy components
 - Capture undo/redo snapshots only before major operations
 
+## Boucle de feedback
+
+Après chaque modification, exécuter automatiquement :
+
+```bash
+# 1. Vérification TypeScript
+npm run type-check
+
+# 2. Lint
+npm run lint
+
+# 3. Tests
+npm run test:run
+
+# 4. Build (optionnel)
+npm run build
+```
+
+**Workflow complet :**
+1. Modifier le code
+2. `npm run format` - Formater avec Prettier
+3. `npm run lint` - Vérifier ESLint
+4. `npm run type-check` - Vérifier TypeScript
+5. `npm run test:run` - Lancer les tests Vitest
+6. Si erreur → corriger et recommencer
+7. Si tout passe → valider
+
+**Tests spécifiques :**
+```bash
+npm test -- src/test/compiler/vb6Lexer.test.ts   # Lexer
+npm test -- src/test/compiler/vb6Parser.test.ts  # Parser
+npm test -- src/test/runtime/                     # Runtime VB6
+npm run test:startup                              # Tests critiques
+```
+
+**Couverture :**
+```bash
+npm run test:coverage  # Seuil : 70%
+```
+
 ## VB6 Compatibility Notes
 
 - **70% overall compatibility** - sufficient for most VB6 applications
